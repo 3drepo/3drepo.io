@@ -41,12 +41,12 @@ import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 
-export function* fetchTickets({ teamspace, projectId, modelId, isFederation, filters }: FetchTicketsAction) {
+export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
 		const fetchModelTickets = isFederation
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, filters);
+		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { propertiesToInclude });
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -102,7 +102,7 @@ export function* fetchTemplates({ teamspace, projectId, modelId, isFederation, g
 		const fetchModelTemplates = isFederation
 			? API.Tickets.fetchFederationTemplates
 			: API.Tickets.fetchContainerTemplates;
-		const templates = yield fetchModelTemplates(teamspace, projectId, modelId, getDetails);
+		const templates = yield fetchModelTemplates(teamspace, projectId, modelId, getDetails, true);
 
 		yield put(TicketsActions.fetchTemplatesSuccess(modelId, templates));
 	} catch (error) {

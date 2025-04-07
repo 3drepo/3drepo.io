@@ -49,13 +49,13 @@ const auditActions = [
 ].sort((a) => a.timestamp);
 
 const setupData = async () => {
+	await ServiceHelper.db.createUser(tsAdmin);
 	await Promise.all(teamspaces.map(
 		({ name }) => ServiceHelper.db.createTeamspace(name, [tsAdmin.user]),
 	));
 
 	await Promise.all([
 		...auditActions.map((action) => ServiceHelper.db.createAuditAction(teamspace.name, action)),
-		ServiceHelper.db.createUser(tsAdmin, [...teamspaces.map(({ name }) => name)]),
 		ServiceHelper.db.createUser(normalUser, [teamspace.name]),
 		ServiceHelper.db.createUser(nobody, []),
 	]);

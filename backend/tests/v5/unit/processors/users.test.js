@@ -15,18 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { templates: emailTemplates } = require('../../../../src/v5/services/mailer/mailer.constants');
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 const { src } = require('../../helper/path');
 
 const Users = require(`${src}/processors/users`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 jest.mock('../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
-
-jest.mock('../../../../src/v5/services/mailer');
-const Mailer = require(`${src}/services/mailer`);
 
 jest.mock('../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
@@ -40,12 +40,10 @@ const Notifications = require(`${src}/models/notifications`);
 jest.mock('../../../../src/v5/services/intercom');
 const Intercom = require(`${src}/services/intercom`);
 
-const { generateRandomString } = require('../../helper/services');
+jest.mock('../../../../src/v5/services/sso/frontegg');
+const FronteggService = require(`${src}/services/sso/frontegg`);
 
-jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
-const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
-
-const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
 const user = {
 	user: generateRandomString(),
@@ -78,25 +76,7 @@ UsersModel.getUserByUsername.mockImplementation((username) => {
 	throw templates.userNotFound;
 });
 
-const verifyMock = UsersModel.verify.mockImplementation(() => user.customData);
-
-const testLogin = () => {
-	describe('Login', () => {
-		test('should login with username', async () => {
-			UsersModel.authenticate.mockResolvedValueOnce(user.user);
-			const res = await Users.login(user.user);
-			expect(res).toEqual(user.user);
-		});
-
-		test('should return whatever failure authentication returns', async () => {
-			const err = new Error(generateRandomString());
-			UsersModel.authenticate.mockRejectedValueOnce(err);
-			await expect(Users.login(user.user)).rejects.toEqual(err);
-		});
-	});
-};
-
-const formatUser = (userProfile, hasAvatar, hash, sso) => ({
+const formatUser = (userProfile, hasAvatar, hash) => ({
 	username: userProfile.user,
 	firstName: userProfile.customData.firstName,
 	lastName: userProfile.customData.lastName,
@@ -106,7 +86,6 @@ const formatUser = (userProfile, hasAvatar, hash, sso) => ({
 	countryCode: userProfile.customData.billing.billingInfo.countryCode,
 	company: userProfile.customData.billing.billingInfo.company,
 	...(hash ? { intercomRef: hash } : {}),
-	...(sso ? { sso } : {}),
 });
 
 const tesGetProfileByUsername = () => {
@@ -119,7 +98,6 @@ const tesGetProfileByUsername = () => {
 			'customData.apiKey': 1,
 			'customData.billing.billingInfo.countryCode': 1,
 			'customData.billing.billingInfo.company': 1,
-			'customData.sso': 1,
 		};
 
 		test('should return user profile', async () => {
@@ -155,14 +133,11 @@ const tesGetProfileByUsername = () => {
 		});
 
 		test('should return user profile with SSO user', async () => {
-			const ssoType = generateRandomString();
-			UsersModel.getUserByUsername.mockResolvedValueOnce({
-				...user, customData: { ...user.customData, sso: { id: generateRandomString(), type: ssoType } },
-			});
+			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
 			FilesManager.fileExists.mockResolvedValueOnce(true);
 
 			const res = await Users.getProfileByUsername(user.user);
-			expect(res).toEqual(formatUser(user, true, undefined, ssoType));
+			expect(res).toEqual(formatUser(user, true));
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
 		});
@@ -176,123 +151,6 @@ const tesUpdateProfile = () => {
 			await Users.updateProfile(user.user, updatedProfile);
 			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
 			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updatedProfile);
-		});
-
-		test('should update user profile and password', async () => {
-			const updatedProfile = { firstName: 'Nick', oldPassword: 'oldPass', newPassword: 'newPass' };
-			await Users.updateProfile(user.user, updatedProfile);
-			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
-			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual({ firstName: 'Nick' });
-			expect(UsersModel.updatePassword.mock.calls.length).toBe(1);
-			expect(UsersModel.updatePassword.mock.calls[0][1]).toEqual('newPass');
-		});
-
-		test('should update password', async () => {
-			const updatedProfile = { oldPassword: 'oldPass', newPassword: 'newPass' };
-			await Users.updateProfile(user.user, updatedProfile);
-			expect(UsersModel.updateProfile.mock.calls.length).toBe(0);
-			expect(UsersModel.updatePassword.mock.calls.length).toBe(1);
-			expect(UsersModel.updatePassword.mock.calls[0][1]).toEqual('newPass');
-		});
-	});
-};
-
-const testGenerateResetPasswordToken = () => {
-	describe('Reset password token', () => {
-		test('should reset password token', async () => {
-			await Users.generateResetPasswordToken(user.user);
-			expect(UsersModel.updateResetPasswordToken).toHaveBeenCalledTimes(1);
-			expect(UsersModel.updateResetPasswordToken.mock.calls[0][1]).toHaveProperty('expiredAt');
-			const { expiredAt } = UsersModel.updateResetPasswordToken.mock.calls[0][1];
-			expect(UsersModel.updateResetPasswordToken)
-				.toHaveBeenCalledWith(user.user, { token: expect.any(String), expiredAt });
-			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.FORGOT_PASSWORD.name, user.customData.email,
-				{
-					token: expect.any(String),
-					email: user.customData.email,
-					username: user.user,
-					firstName: user.customData.firstName,
-				});
-		});
-
-		test('should reset password token', async () => {
-			await expect(Users.generateResetPasswordToken('user2'))
-				.rejects.toEqual(templates.userNotFound);
-		});
-	});
-};
-
-const testSignUp = () => {
-	describe('Sign up a user', () => {
-		const newUserData = {
-			username: generateRandomString(),
-			email: generateRandomString(),
-			password: generateRandomString(),
-			firstName: generateRandomString(),
-			lastName: generateRandomString(),
-			company: generateRandomString(),
-			mailListOptOut: true,
-		};
-
-		test('should sign a user up and send verification email (non SSO user)', async () => {
-			await Users.signUp(newUserData);
-			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
-			expect(UsersModel.addUser).toHaveBeenCalledWith({ ...newUserData, token: expect.any(String) });
-			expect(Mailer.sendEmail).toHaveBeenCalledTimes(1);
-			expect(Mailer.sendEmail).toHaveBeenCalledWith(emailTemplates.VERIFY_USER.name, newUserData.email, {
-				token: expect.any(String),
-				email: newUserData.email,
-				firstName: newUserData.firstName,
-				username: newUserData.username,
-			});
-			expect(EventsManager.publish).not.toHaveBeenCalled();
-		});
-
-		test('should generate a password sign a user up and fire VERIFY_USER event (SSO user)', async () => {
-			jest.useFakeTimers('modern');
-			jest.setSystemTime(new Date(2020, 3, 1));
-
-			const sso = { id: generateRandomString() };
-			await Users.signUp({ ...newUserData, sso });
-			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
-			expect(UsersModel.addUser).toHaveBeenCalledWith({
-				...newUserData,
-				password: expect.any(String),
-				sso,
-			});
-			expect(Mailer.sendEmail).not.toHaveBeenCalled();
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_VERIFIED, {
-				username: newUserData.username,
-				email: newUserData.email,
-				fullName: `${newUserData.firstName} ${newUserData.lastName}`,
-				company: newUserData.company,
-				mailListOptOut: newUserData.mailListOptOut,
-				createdAt: new Date(),
-			});
-
-			jest.useRealTimers();
-		});
-	});
-};
-
-const testVerify = () => {
-	describe('Verify a user', () => {
-		test('should verify a user', async () => {
-			const token = generateRandomString();
-			await Users.verify(user.user, token);
-			expect(verifyMock).toHaveBeenCalledTimes(1);
-			expect(verifyMock).toHaveBeenCalledWith(user.user, token);
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_VERIFIED, {
-				username: user.user,
-				email: user.customData.email,
-				fullName: `${user.customData.firstName} ${user.customData.lastName}`,
-				company: user.customData.billing.billingInfo.company,
-				mailListOptOut: user.customData.mailListOptOut,
-				createdAt: user.customData.createdAt,
-			});
 		});
 	});
 };
@@ -344,14 +202,146 @@ const testRemoveUser = () => {
 	});
 };
 
-describe('processors/users', () => {
-	testLogin();
+const testCreateNewUserRecord = () => {
+	describe('Create new user record', () => {
+		test(`Should create a new user record and trigger the ${events.USER_CREATED} event`, async () => {
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const userData = {
+				id: generateRandomString(),
+				name: `${firstName} ${lastName}`,
+				createdAt: Date.now(),
+				email: generateRandomString(),
+			};
+
+			await expect(Users.createNewUserRecord(userData)).resolves.toEqual(userData.id);
+
+			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.addUser).toHaveBeenCalledWith({
+				username: userData.id,
+				password: expect.any(String),
+				firstName,
+				lastName,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				userId: userData.id,
+			});
+
+			const eventData = {
+				username: userData.id,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				fullName: userData.name,
+			};
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_CREATED, eventData);
+		});
+
+		test('Should generate a name if none is provided', async () => {
+			const userData = {
+				id: generateRandomString(),
+				createdAt: Date.now(),
+				email: generateRandomString(),
+			};
+			const firstName = 'Anonymous';
+			const lastName = 'User';
+
+			await expect(Users.createNewUserRecord(userData)).resolves.toEqual(userData.id);
+
+			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.addUser).toHaveBeenCalledWith({
+				username: userData.id,
+				password: expect.any(String),
+				firstName,
+				lastName,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				userId: userData.id,
+			});
+
+			const eventData = {
+				username: userData.id,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				fullName: `${firstName} ${lastName}`,
+			};
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_CREATED, eventData);
+		});
+
+		test('Should work if only a first name is provided', async () => {
+			const firstName = generateRandomString();
+			const userData = {
+				id: generateRandomString(),
+				createdAt: Date.now(),
+				email: generateRandomString(),
+				name: firstName,
+			};
+
+			await expect(Users.createNewUserRecord(userData)).resolves.toEqual(userData.id);
+
+			expect(UsersModel.addUser).toHaveBeenCalledTimes(1);
+			expect(UsersModel.addUser).toHaveBeenCalledWith({
+				username: userData.id,
+				password: expect.any(String),
+				firstName,
+				lastName: '',
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				userId: userData.id,
+			});
+
+			const eventData = {
+				username: userData.id,
+				email: userData.email,
+				createdAt: new Date(userData.createdAt),
+				fullName: `${firstName} `,
+			};
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.USER_CREATED, eventData);
+		});
+	});
+};
+
+const testResetPassword = () => {
+	describe('Reset password', () => {
+		test('Should get the email from the database then trigger a password reset', async () => {
+			const username = generateRandomString();
+			const email = generateRandomString();
+			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { email } });
+
+			await Users.resetPassword(username);
+
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, { 'customData.email': 1 });
+
+			expect(FronteggService.triggerPasswordReset).toHaveBeenCalledTimes(1);
+			expect(FronteggService.triggerPasswordReset).toHaveBeenCalledWith(email);
+		});
+
+		test(`Should throw with ${templates.unknown.code} if it failed`, async () => {
+			const username = generateRandomString();
+			UsersModel.getUserByUsername.mockRejectedValueOnce({ message: generateRandomString() });
+
+			await expect(Users.resetPassword(username)).rejects.toEqual(templates.unknown);
+
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, { 'customData.email': 1 });
+
+			expect(FronteggService.triggerPasswordReset).not.toHaveBeenCalled();
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	tesGetProfileByUsername();
 	tesUpdateProfile();
-	testGenerateResetPasswordToken();
-	testSignUp();
-	testVerify();
 	testGetAvatarStream();
 	testUploadAvatar();
 	testRemoveUser();
+	testCreateNewUserRecord();
+	testResetPassword();
 });

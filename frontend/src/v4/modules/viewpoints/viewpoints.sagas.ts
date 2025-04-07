@@ -43,7 +43,7 @@ import { ViewerGuiActions } from '../viewerGui';
 import { ChatActions } from '../chat/chat.redux';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
-import { isViewpointLoaded, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
+import { isViewpointReady, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 
 export const getThumbnailUrl = (thumbnail) => getAPIUrl(thumbnail);
 
@@ -194,8 +194,8 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		let viewpointsGroups = yield select(selectViewpointsGroups);
 
-		while (!isViewpointLoaded(viewpoint, viewpointsGroups)) {
-			yield take(ViewpointsTypes.FETCH_GROUP_SUCCESS);
+		while (!isViewpointReady(viewpoint)) {
+			yield take(ViewpointsTypes.VIEWPOINT_READY);
 			viewpointsGroups = yield select(selectViewpointsGroups);
 		}
 
@@ -220,8 +220,9 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 export function* fetchViewpointGroups({teamspace, modelId, view}) {
 	try  {
-		const groupsObject = getViewpointWithGroups({teamspace, modelId, view});
+		const groupsObject = yield getViewpointWithGroups({teamspace, modelId, view});
 		mergeGroupsDataFromViewpoint(view.viewpoint, groupsObject);
+		yield put(ViewpointsActions.viewpointReady());
 	} catch {
 		// groups doesnt exists, still continue
 	}

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToContainer, hasReadAccessToDrawing, hasWriteAccessToContainer, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
+const { hasReadAccessToContainer, hasReadAccessToDrawing, hasWriteAccessToContainer, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { serialiseRevision, serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');

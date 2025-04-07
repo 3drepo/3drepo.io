@@ -1,6 +1,6 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "5.14.1",
+	"version": "5.16.0",
 	"description": "The frontend for 3drepo.io",
 	"engines": {
 		"node": "18.x.x"
@@ -53,7 +53,7 @@
 		"@popperjs/core": "2.6.0",
 		"@types/three": "0.167.1",
 		"@webscopeio/react-textarea-autocomplete": "4.9.0",
-		"axios": "1.7.4",
+		"axios": "1.8.3",
 		"babel-jest": "29.7.0",
 		"bezier-easing": "2.1.0",
 		"byte-size": "8.1.0",
@@ -71,6 +71,7 @@
 		"history": "4.9.0",
 		"idb": "6.0.0",
 		"immer": "9.0.15",
+		"jest-fixed-jsdom": "0.0.9",
 		"konva": "7.2.5",
 		"lodash": "4.17.21",
 		"markdown-linkify": "1.0.3",

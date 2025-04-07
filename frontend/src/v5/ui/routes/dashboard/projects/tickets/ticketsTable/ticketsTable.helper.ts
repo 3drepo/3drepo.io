@@ -22,6 +22,7 @@ import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/ch
 import { IStatusConfig, ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
 
 export const NONE_OPTION = 'None';
 
@@ -74,7 +75,16 @@ const groupByDate = (tickets: ITicket[]) => {
 	return groups;
 };
 
-const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[]) => {
+const groupHasDefaultValue = (groupBy, templateId) => {
+	const template = selectCurrentProjectTemplateById(getState(), templateId);
+	const property = [
+		...template.properties,
+		...(template.modules.find(({ type }) => type === 'safetibase')?.properties || []),
+	].find(({ name }) => name === groupBy);
+	return _.has(property, 'default');
+};
+
+const groupByList = (tickets: ITicket[], groupBy: string, groupValues: string[]) => {
 	const groups = {};
 	let remainingTickets = tickets;
 	let currentTickets = [];
@@ -82,23 +92,27 @@ const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[
 	groupValues.forEach((groupValue) => {
 		[currentTickets, remainingTickets] = _.partition(
 			remainingTickets,
-			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
+			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupBy] === groupValue,
 		);
 		groups[groupValue] = currentTickets;
 	});
-	groups[UNSET] = remainingTickets;
+	if (!groupHasDefaultValue(groupBy, tickets[0].type)) {
+		groups[UNSET] = remainingTickets;
+	}
 	return groups;
 };
-const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
+
+const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
+export const getAssignees = (t) => _.get(t, ASSIGNEES_PATH);
+
+export const sortAssignees = (ticket: ITicket) => {
+	const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
+	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
+};
 const groupByAssignees = (tickets: ITicket[]) => {
 	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
 
-	const ticketsWithSortedAssignees = ticketsWithAssignees.map((ticket) => {
-		const ticketWithSortedAssignees = _.cloneDeep(ticket);
-		const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
-		ticketWithSortedAssignees.properties[IssueProperties.ASSIGNEES] = sortedAssignees;
-		return ticketWithSortedAssignees;
-	});
+	const ticketsWithSortedAssignees = ticketsWithAssignees.map(sortAssignees);
 
 	const ticketsSortedByAssignees = _.orderBy(
 		ticketsWithSortedAssignees,

@@ -22,6 +22,7 @@ import { CardContent, PanelsContainer, ModuleTitle } from './ticketsForm.styles'
 import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 import { PropertiesList } from './propertiesList.component';
 import { CommentsPanel } from './commentsPanel/commentsPanel.component';
+import { TextOverflow } from '@controls/textOverflow/textOverflow.component';
 
 const SCROLLBAR_ID = 'cardScrollbar';
 interface ModulePanelProps {
@@ -38,7 +39,7 @@ const ModulePanel = ({ module, scrollPanelIntoView, defaultExpanded, ...rest }: 
 			{...accordionProps}
 			onChange={scrollPanelIntoView}
 			defaultExpanded={defaultExpanded}
-			title={<ModuleTitle required={required}>{title}</ModuleTitle>}
+			title={<ModuleTitle required={required}><TextOverflow lines={2}>{title}</TextOverflow></ModuleTitle>}
 		>
 			<PropertiesList module={`modules.${module.name || module.type}`} properties={module.properties || []} {...rest} />
 		</Accordion>

@@ -29,7 +29,6 @@ import { CommentButtons } from '../basicComment/basicComment.styles';
 import { uploadImages } from '@controls/fileUploader/uploadImages';
 
 export type CurrentUserCommentProps = ITicketComment & {
-	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
 	isFirstOfBlock: boolean;
 	onDelete: (commentId) => void;

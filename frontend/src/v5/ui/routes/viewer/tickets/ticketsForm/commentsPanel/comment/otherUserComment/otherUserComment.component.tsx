@@ -25,7 +25,6 @@ import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/bas
 import { getDefaultUserNotFound } from '@/v5/store/users/users.helpers';
 
 type OtherUserCommentProps = ITicketComment & {
-	commentAge: string;
 	isFirstOfBlock: boolean;
 	metadata?: TicketCommentReplyMetadata;
 	onReply: (commentId) => void;

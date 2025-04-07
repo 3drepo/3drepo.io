@@ -20,7 +20,6 @@ import TabPanelBase from '@mui/lab/TabPanel';
 import TabListBase from '@mui/lab/TabList';
 import { Truncate } from '@/v4/routes/components/truncate/truncate.component';
 import { FormModalNoButtons } from '@controls/formModal/formModalNoButtons/formModalNoButtons.component';
-import { MicrosoftTitleText as MicrosoftTitleTextBase } from '@components/shared/sso/microsoftText.styles';
 
 export const FormModal = styled(FormModalNoButtons)`
 	.MuiDialogContent-root {
@@ -69,8 +68,4 @@ export const TabContent = styled.div`
 	& > :first-child {
 		margin-top: 0;
 	}
-`;
-
-export const MicrosoftTitleText = styled(MicrosoftTitleTextBase)`
-	${({ theme }) => theme.typography.h3}
 `;

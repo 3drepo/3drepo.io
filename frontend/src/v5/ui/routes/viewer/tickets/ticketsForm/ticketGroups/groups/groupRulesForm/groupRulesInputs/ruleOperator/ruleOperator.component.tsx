@@ -21,12 +21,14 @@ import { MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
 import { OPERATION_DISPLAY_NAMES } from '../../groupRulesForm.helpers';
 import { ListSubheader } from '../groupRulesInputs.styles';
+import { Operator } from '@/v5/store/tickets/tickets.types';
 
 export const RuleOperator = ({ disabled }) => (
 	<FormSelect
 		name="operator"
 		label={formatMessage({ id: 'tickets.groups.value.label', defaultMessage: 'Value' })}
 		disabled={disabled}
+		renderValue={(value: Operator) => OPERATION_DISPLAY_NAMES[value]}
 	>
 		{/* Field */}
 		<ListSubheader>

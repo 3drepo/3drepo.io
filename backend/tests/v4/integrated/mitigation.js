@@ -17,7 +17,7 @@
 
 "use strict";
 
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const chai = require("chai");
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
