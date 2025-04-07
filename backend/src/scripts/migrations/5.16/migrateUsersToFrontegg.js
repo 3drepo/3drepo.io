@@ -24,6 +24,7 @@ const { getTeamspaceByAccount, addUserToAccount, createAccount, getAllUsersInAcc
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { updateUserId } = require(`${v5Path}/models/users`);
+const { splitArrayIntoChunks } = require(`${v5Path}/utils/helper/arrays`);
 const processTeamspace = async (ts, userMapping) => {
 	let refId = await getTeamspaceRefId(ts);
 
@@ -53,21 +54,38 @@ const processTeamspace = async (ts, userMapping) => {
 		emailToUserId[email] = id;
 	});
 
-	await Promise.all(membersInTs.map(async ({ user, customData: { email, userId, firstName, lastName } }) => {
-		if (!emailToUserId[email]) {
-			logger.logInfo(`\tAdding ${user} to frontegg account...`);
-			// eslint-disable-next-line no-param-reassign
-			userMapping[user] = await addUserToAccount(refId, email, [firstName, lastName].join(' '));
-		} else {
-			// eslint-disable-next-line no-param-reassign
-			userMapping[user] = emailToUserId[email];
-		}
+	const memberChunks = splitArrayIntoChunks(membersInTs, 10);
 
-		if (userId !== userMapping[user]) {
-			logger.logInfo(`\tUpdating ${user}'s user ID...`);
-			await updateUserId(user, userMapping[user]);
+	for (const memberSubList of memberChunks) {
+		let retryCount = 0;
+		try {
+		// eslint-disable-next-line no-await-in-loop
+			await Promise.all(memberSubList.map(async ({
+				user, customData: { email, userId, firstName, lastName } }) => {
+				if (!emailToUserId[email]) {
+					logger.logInfo(`\tAdding ${user} to frontegg account...`);
+					// eslint-disable-next-line no-param-reassign
+					userMapping[user] = await addUserToAccount(refId, email, [firstName, lastName].join(' '));
+				} else {
+					// eslint-disable-next-line no-param-reassign
+					userMapping[user] = emailToUserId[email];
+				}
+
+				if (userId !== userMapping[user]) {
+					logger.logInfo(`\tUpdating ${user}'s user ID...`);
+					await updateUserId(user, userMapping[user]);
+				}
+			}));
+		} catch (err) {
+			if (err.message.includes('429')) {
+				if (retryCount > 3) { throw err; }
+				logger.logInfo('Rate limit reached with frontegg... retrying in 60s..');
+				// eslint-disable-next-line no-await-in-loop
+				await new Promise((r) => setTimeout(r, 60000));
+				++retryCount;
+			}
 		}
-	}));
+	}
 };
 
 const run = async () => {

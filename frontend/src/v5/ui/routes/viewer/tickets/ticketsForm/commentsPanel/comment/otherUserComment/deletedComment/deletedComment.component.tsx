@@ -16,17 +16,19 @@
  */
 
 import { deletedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
-import { formatMessage } from '@/v5/services/intl';
 import { Comment } from './deletedComment.styles';
+import { CommentAge, CommentMessage } from '../../basicComment/basicComment.styles';
+import { FormattedMessage } from 'react-intl';
 
 export const DeletedComment = ({ user, author, isFirstOfBlock }) => (
-	<Comment
-		author={author}
-		isFirstOfBlock={isFirstOfBlock}
-		message={deletedCommentMessage}
-		commentAge={formatMessage({
-			id: 'customTicket.otherUser.comment.time.deleted',
-			defaultMessage: '{name} deleted this message',
-		}, { name: user.firstName })}
-	/>
+	<Comment author={author} isFirstOfBlock={isFirstOfBlock}>
+		<CommentMessage>{deletedCommentMessage}</CommentMessage>
+		<CommentAge>
+			<FormattedMessage
+				id="customTicket.otherUser.comment.time.deleted"
+				defaultMessage="{name} deleted this message"
+				values={{ name: user.firstName }}
+			/>
+		</CommentAge>
+	</Comment>
 );

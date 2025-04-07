@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 const { destroySession, isSessionValid } = require('../utils/sessions');
 const { USER_AGENT_HEADER } = require('../utils/sessions.constants');
 const { logger } = require('../utils/logger');
@@ -25,8 +24,7 @@ const { validateMany } = require('./common');
 const AuthMiddleware = {};
 
 const destroySessionIfExists = (req, res) => new Promise((resolve) => {
-	if (req.session && !req.session.user?.isAPIKey) destroySession(req.session, res, () => resolve());
-	else resolve();
+	destroySession(req.session, res, () => resolve());
 });
 
 const validSessionDetails = async (req, res, next) => {
@@ -57,7 +55,6 @@ const validSession = async (req, res, next) => {
 	if (await checkValidSession(req)) {
 		await next();
 	} else {
-		await destroySessionIfExists(req, res);
 		respond(req, res, templates.notLoggedIn);
 	}
 };
@@ -66,7 +63,6 @@ AuthMiddleware.isLoggedIn = async (req, res, next) => {
 	if (await checkValidSession(req, true)) {
 		await next();
 	} else {
-		await destroySessionIfExists(req, res);
 		respond(req, res, templates.notLoggedIn);
 	}
 };

@@ -34,17 +34,17 @@ export const DashboardFooter = ({ variant = 'light' }: IDashboardFooter): JSX.El
 				</Link>
 			</FooterItem>
 			<FooterItem>
-				<Link to="/v5/terms">
+				<Link to="/v5/terms" target="_blank">
 					<FormattedMessage id="dashboardFooter.terms" defaultMessage="Terms" />
 				</Link>
 			</FooterItem>
 			<FooterItem>
-				<Link to="/v5/cookies">
+				<Link to="/v5/cookies" target="_blank">
 					<FormattedMessage id="dashboardFooter.cookies" defaultMessage="Cookies" />
 				</Link>
 			</FooterItem>
 			<FooterItem>
-				<a href="https://3drepo.com/pricing">
+				<a href="https://3drepo.com/pricing" target="_blank">
 					<FormattedMessage
 						id="dashboardFooter.pricing"
 						defaultMessage="Pricing"

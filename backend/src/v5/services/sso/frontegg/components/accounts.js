@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require('../frontegg.constants');
+const { HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, membershipStatus } = require('../frontegg.constants');
 const { get, delete: httpDelete, post } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const { errCodes } = require('../frontegg.constants');
@@ -99,6 +99,44 @@ Accounts.getAllUsersInAccount = async (accountId) => {
 		return entries;
 	} catch (err) {
 		throw new Error(`Failed to get users from account(${accountId}) from Accounts: ${err.message}`);
+	}
+};
+
+Accounts.getUserStatusInAccount = async (accountId, userId) => {
+	try {
+		const config = await getConfig();
+
+		const { data } = await get(`${config.vendorDomain}/identity/resources/tenants/users/v1/statuses?userIds=${userId}`, await getBearerHeader());
+
+		if (!data?.length) return membershipStatus.NOT_MEMBER;
+
+		const tenantStatus = data[0]?.tenantsStatuses?.find(({ tenantId }) => tenantId === accountId);
+
+		if (tenantStatus) {
+			switch (tenantStatus.status) {
+			case 'PendingInvitation':
+				return membershipStatus.PENDING_INVITE;
+			case 'PendingLogin':
+				return membershipStatus.PENDING_LOGIN;
+			case 'Activated':
+				return membershipStatus.ACTIVE;
+			case 'NotActivated':
+				return membershipStatus.INACTIVE;
+			default:
+				logger.logError(`Unrecognised membership status: ${tenantStatus.status}`);
+				return membershipStatus.NOT_MEMBER;
+			}
+		}
+
+		return membershipStatus.NOT_MEMBER;
+	} catch (err) {
+		const errCode = err?.response?.data?.errorCode;
+
+		if (errCode === errCodes.USER_NOT_FOUND) {
+			return membershipStatus.NOT_MEMBER;
+		}
+		logger.logError(`Failed to get user status: ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to get user status  ${userId}: ${err.message}`);
 	}
 };
 

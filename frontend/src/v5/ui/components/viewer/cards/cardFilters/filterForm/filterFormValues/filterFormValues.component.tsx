@@ -20,7 +20,7 @@ import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
 import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField, FormJobsAndUsersSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -31,7 +31,7 @@ import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
-import { Value } from './filterFormValues.styles';
+import { ArrayFields, Value } from './filterFormValues.styles';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -62,6 +62,9 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const selectOptions = type === 'template' ?
 		TicketsCardHooksSelectors.selectCurrentTemplates().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
 		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property) : [];
+
+	const arrayFieldsRef = useRef(null);
+	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
 
 	useEffect(() => {
 		if (!isEmpty(dirtyFields)) {
@@ -110,23 +113,23 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 		if (isRangeOp && isArray(fields[0]?.value)) {
 			const RangeInput = isDateType(type) ? DateRangeInput : NumberRangeInput;
 			return (
-				<>
+				<ArrayFields ref={arrayFieldsRef} maxHeight={arrayFieldsMaxHeight}>
 					{fields.map((field, i) => (
 						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
 							<RangeInput name={`${name}.${i}.value`} formError={error?.[i]?.value} />
 						</ArrayFieldContainer>
 					))}
-				</>
+				</ ArrayFields>
 			);
 		}
 		return (
-			<>
+			<ArrayFields ref={arrayFieldsRef} maxHeight={arrayFieldsMaxHeight}>
 				{fields.map((field, i) => (
 					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
 						<InputField name={`${name}.${i}.value`} formError={error?.[i]?.value} />
 					</ArrayFieldContainer>
 				))}
-			</>
+			</ ArrayFields>
 		);
 	}
 

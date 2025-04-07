@@ -21,7 +21,7 @@ const {
 	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToDrawing,
 	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToDrawing, hasWriteAccessToFederation,
 } = require('./components/models');
-const { isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
+const { isActiveTeamspaceMember, isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
 const { isProjectAdmin } = require('./components/projects');
 const { modelTypes } = require('../../models/modelSettings.constants');
 const { respond } = require('../../utils/responder');
@@ -44,8 +44,11 @@ const isCookieAuthenticatedAgainstTS = async (req, res, next) => {
 	}
 };
 
-// Use this one when you don't care if the user is authenticated against the teamspace
+// Use this one when you don't care if the user is authenticated against the teamspace and whether
+// their membership is active
 Permissions.isMemberOfTeamspace = validateMany([convertAllUUIDs, validSession, isTeamspaceMember]);
+// Use this one when you don't care if the user is authenticated against the teamspace but membership has to be active
+Permissions.isActiveMemberOfTeamspace = validateMany([convertAllUUIDs, validSession, isActiveTeamspaceMember]);
 // Use this one when you want to make sure the user session is authenticated against the teamspace
 Permissions.hasAccessToTeamspace = validateMany([
 	Permissions.isMemberOfTeamspace, isCookieAuthenticatedAgainstTS]);

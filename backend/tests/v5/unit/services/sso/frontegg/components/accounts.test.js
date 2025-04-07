@@ -27,7 +27,7 @@ jest.mock('../../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
 
 const Accounts = require(`${src}/services/sso/frontegg/components/accounts`);
-const { errCodes, HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require(`${src}/services/sso/frontegg/frontegg.constants`);
+const { errCodes, membershipStatus, HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
 const postOptions = { headers: bearerHeader };
@@ -441,6 +441,70 @@ const testRemoveAccount = () => {
 	});
 };
 
+const testGetUserStatusInAccount = () => {
+	describe('Get user status in account', () => {
+		const accountId = generateRandomString();
+		const userId = generateRandomString();
+		test(`should return membership enum ${membershipStatus.NOT_MEMBER} if the user is not found`, async () => {
+			WebRequests.get.mockRejectedValueOnce({ message: generateRandomString(),
+				response: { status: 404, data: { errorCode: errCodes.USER_NOT_FOUND } } });
+
+			await expect(Accounts.getUserStatusInAccount(accountId, userId))
+				.resolves.toEqual(membershipStatus.NOT_MEMBER);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+
+		test('should throw if get request failed for any other reaons', async () => {
+			WebRequests.get.mockRejectedValueOnce({ message: generateRandomString(),
+				response: { status: 404, data: { errorCode: 123 } } });
+
+			await expect(Accounts.getUserStatusInAccount(accountId, userId))
+				.rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+
+		describe.each([
+			['data is empty', [], membershipStatus.NOT_MEMBER],
+			['user is not associated with any tenants', [{ userId, tenantsStatuses: [] }], membershipStatus.NOT_MEMBER],
+			['user is not associated with the tenant', [{ userId, tenantsStatuses: [{ tenantId: generateRandomString(), status: 'activated' }] }], membershipStatus.NOT_MEMBER],
+			['user membership is not active', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'NotActivated' }] }], membershipStatus.INACTIVE],
+			['user membership is active', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'Activated' }] }], membershipStatus.ACTIVE],
+			['user membership is pending login', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'PendingLogin' }] }], membershipStatus.PENDING_LOGIN],
+			['user membership is pending invite acceptance', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: 'PendingInvitation' }] }], membershipStatus.PENDING_INVITE],
+			['user membership is in an unknown state', [{ userId, tenantsStatuses: [{ tenantId: accountId, status: generateRandomString() }] }], membershipStatus.NOT_MEMBER],
+		])('', (desc, data, memStatus) => {
+			test(`should return membership enum ${memStatus} if ${desc}`, async () => {
+				WebRequests.get.mockResolvedValueOnce({ data });
+
+				await expect(Accounts.getUserStatusInAccount(accountId, userId))
+					.resolves.toEqual(memStatus);
+
+				expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+				expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+				expect(WebRequests.get).toHaveBeenCalledTimes(1);
+				expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+				expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+			});
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceByAccount();
 	testCreateAccount();
@@ -448,4 +512,5 @@ describe(determineTestGroup(__filename), () => {
 	testAddUserToAccount();
 	testRemoveUserFromAccount();
 	testRemoveAccount();
+	testGetUserStatusInAccount();
 });

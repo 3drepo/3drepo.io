@@ -118,9 +118,9 @@ config.public_port = config.public_port || config.port;
 
 config.timeout = coalesce(config.timeout, 30 * 60); // Timeout in seconds
 
-const threeHours = (1000 * 60) * (60 * 3);
+const thirtyMins = (1000 * 60) * 30 ;
 config.cookie = coalesce(config.cookie, {});
-config.cookie.maxAge = coalesce(config.cookie.maxAge, threeHours);
+config.cookie.maxAge = coalesce(config.cookie.maxAge, thirtyMins);
 config.cookie.secret = coalesce(config.cookie.secret, config.default_cookie_secret);
 config.cookie.parser_secret = coalesce(config.cookie.parser_secret, config.default_cookie_parser_secret);
 config.cookie_domain = coalesce(config.cookie.domain, config.host);
