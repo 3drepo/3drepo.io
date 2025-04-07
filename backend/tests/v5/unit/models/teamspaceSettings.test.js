@@ -794,6 +794,33 @@ const testGetTeamspaceSetting = () => {
 	});
 };
 
+const testGetMemberInfoFromId = () => {
+	describe('Get member info from ID', () => {
+		test('Should return the user object based on the ID provided', async () => {
+			const mockData = { user: 'A', customData: { firstName: 'a', lastName: 'b', billing: { billingInfo: { company: 'companyA' } } } };
+			const expectedData = { user: 'A', firstName: 'a', lastName: 'b', company: 'companyA' };
+			const ts = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(mockData);
+			const res = await Teamspace.getMemberInfoFromId(ts);
+			expect(res).toEqual(expectedData);
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ 'customData.userId': ts });
+		});
+		test('Should return the user object based on the ID provided - missing billing info', async () => {
+			const mockData = { user: 'A', customData: { firstName: 'a', lastName: 'b', billing: {} } };
+			const expectedData = { user: 'A', firstName: 'a', lastName: 'b' };
+			const ts = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(mockData);
+			const res = await Teamspace.getMemberInfoFromId(ts);
+			expect(res).toEqual(expectedData);
+
+			expect(fn.mock.calls.length).toBe(1);
+			expect(fn.mock.calls[0][2]).toEqual({ 'customData.userId': ts });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
@@ -817,4 +844,5 @@ describe(determineTestGroup(__filename), () => {
 	testSetTeamspaceRefId();
 	testGetTeamspaceRefId();
 	testGetTeamspaceSetting();
+	testGetMemberInfoFromId();
 });
