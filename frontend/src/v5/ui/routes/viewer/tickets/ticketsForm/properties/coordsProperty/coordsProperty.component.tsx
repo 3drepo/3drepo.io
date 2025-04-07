@@ -32,7 +32,7 @@ import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { PaddedCrossIcon } from '@controls/chip/chip.styles';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { isEqual } from 'lodash';
+import { get, isEqual, set } from 'lodash';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 import { Pin } from '../../../pin';
@@ -47,16 +47,18 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 
-	const colourPropPath = getColorTriggerPropName(name, template);
-	useWatch({ name:colourPropPath });
+	const colorTriggerPropPath = getColorTriggerPropName(name, template);
+	const colorTriggerPropValue = useWatch({ name: colorTriggerPropPath }) ?? get(ticket, colorTriggerPropPath);
 
 	const isNewTicket = !ticket?._id;
 	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
+	const minimumPinTicket = set({ _id: ticketId }, colorTriggerPropPath, colorTriggerPropValue) as ITicket;
+	
 	const pinId = getPinId(name, ticket);
 	const editMode = pinToDrop === pinId;
 	const isSelected = selectedPin === pinId;
 	const hasPin = !!value;
-	const colorHex = getPinColorHexForProperty(name, template, ticket);
+	const colorHex = getPinColorHexForProperty(name, template, minimumPinTicket);
 	const pinIcon = getPinIconForProperty(name, template);
 
 	const cancelEdit = () => {
@@ -105,7 +107,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 		}
 
 		if (hasPin) {
-			ViewerService.showPin(toPin(name, template, ticket, false, value));
+			ViewerService.showPin(toPin(name, template, minimumPinTicket, false, value));
 		}
 
 		if (isSelected) ViewerService.setSelectionPin({ id: pinId, isSelected });
