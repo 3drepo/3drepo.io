@@ -27,12 +27,21 @@ import { StatusValue } from '@/v5/store/tickets/tickets.types';
 import { TicketStatusDefaultValues, TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const DefaultTicketFiltersSetter = () => {
-	const { containerOrFederation } = useParams<ViewerParams>();
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const isFed = modelIsFederation(containerOrFederation);
+	
+	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
+
+	useEffect(() => {
+		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
+	}, [tickets, cardFilters]);
 
 	const getTicketFiltersFromURL = (values): CardFilter[] => [{
 		module: '',

@@ -35,11 +35,11 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const isFed = modelIsFederation(containerOrFederation);
 	
+	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	useEffect(() => {
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
 	}, [tickets, filters]);
