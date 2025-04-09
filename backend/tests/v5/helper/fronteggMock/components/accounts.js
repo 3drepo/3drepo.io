@@ -35,7 +35,12 @@ Accounts.createAccount = (name) => {
 	return Promise.resolve(accountId);
 };
 
-Accounts.getAllUsersInAccount = (accountId) => Promise.resolve(usersInAccount[accountId] ?? []);
+Accounts.getAllUsersInAccount = (accountId) => {
+	if (usersInAccount[accountId]) {
+		return Promise.resolve(usersInAccount[accountId].map((id) => ({ id, email: id })));
+	}
+	return Promise.resolve([]);
+};
 
 Accounts.addUserToAccount = (accountId, email) => {
 	const id = emailToUser[email] ?? generateUUIDString();

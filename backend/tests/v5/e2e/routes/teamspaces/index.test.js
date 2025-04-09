@@ -43,7 +43,6 @@ const testGetTeamspaceList = () => {
 			await Promise.all([
 				...teamspacesWithAdmin.map((ts) => ServiceHelper.db.createTeamspace(ts, [testUser.user])),
 				...times(5, () => ServiceHelper.db.createTeamspace(ServiceHelper.generateRandomString())),
-
 			]);
 		});
 		test('should fail without a valid session', async () => {
@@ -425,8 +424,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	testGetTeamspaceList();
 	testGetTeamspaceMembers();
+	testGetTeamspaceList();
 	testGetAvatar();
 	testGetQuotaInfo();
 	testRemoveTeamspaceMember();
