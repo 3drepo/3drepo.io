@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-type Item<T extends Function> = { promise: Promise<T>, resolve, reject, args, resolved: boolean, count: number };
+type Item<T> = { promise: Promise<T>, resolve, reject, args, resolved: boolean, count: number };
 
 export enum ExecutionStrategy {
 	Lifo,
