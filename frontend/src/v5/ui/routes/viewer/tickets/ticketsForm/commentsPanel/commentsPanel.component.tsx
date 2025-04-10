@@ -28,7 +28,7 @@ import {
 	enableRealtimeFederationUpdateTicketComment,
 } from '@/v5/services/realtime/ticketComments.events';
 import { FormattedMessage } from 'react-intl';
-import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
+import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { useContext, useEffect, useState } from 'react';
 import { Gap } from '@controls/gap';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
@@ -42,7 +42,7 @@ type CommentsPanelProps = {
 	scrollPanelIntoView: (event, isExpanding) => void,
 };
 export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
-	const [commentReply, setCommentReply] = useState<ITicketComment>(null);
+	const [commentReply, setCommentReply] = useState<TicketCommentReplyMetadata>(null);
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -141,7 +141,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 					</EmptyCommentsBox>
 				)}
 			</Comments>
-			{!readOnly && <CreateCommentBox metadata={commentReply} />}
+			{!readOnly && <CreateCommentBox commentReply={commentReply} setCommentReply={setCommentReply} />}
 		</Accordion>
 	);
 };

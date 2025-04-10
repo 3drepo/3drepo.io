@@ -74,18 +74,18 @@ type ImageToUpload = {
 type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'view'> & {
 	onCancelEdit?: () => void;
 	commentId?: string;
-	metadata?: TicketCommentReplyMetadata | null;
+	commentReply?: TicketCommentReplyMetadata | null;
+	setCommentReply: (val: TicketCommentReplyMetadata) => void
 	className?: string;
 };
 
-export const CommentBox = ({ commentId, message = '', images = [], view: existingView, metadata, onCancelEdit, className }: CommentBoxProps) => {
+export const CommentBox = ({ commentId, message = '', images = [], view: existingView, commentReply, setCommentReply, onCancelEdit, className }: CommentBoxProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const currentUser = CurrentUserHooksSelectors.selectCurrentUser();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const [commentReply, setReply] = useState(metadata);
 
 	const [isSubmittingMessage, setIsSubmittingMessage] = useState(false);
 	const [isDraggingFile, setIsDraggingFile] = useState(false);
@@ -115,17 +115,14 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 	const viewIsUnchanged = isEqual(existingView, viewpoint);
 	const messageIsUnchanged = message === newMessage
 		&& isEqual(images, imagesToUpload.map(({ src }) => src))
-		&& commentReply?._id === metadata?._id
 		&& viewIsUnchanged;
 	const erroredImages = imagesToUpload.filter(({ error }) => error);
-	const disableSendMessage = (!newMessage?.trim()?.length && !imagesToUpload.length && !viewpoint)
-		|| charsLimitIsReached
-		|| erroredImages.length > 0
-		|| messageIsUnchanged;
+	const messageIsEmpty = !newMessage?.trim()?.length && !imagesToUpload.length && !viewpoint;
+	const disableSendMessage = messageIsEmpty || charsLimitIsReached || erroredImages.length > 0 || messageIsUnchanged;
 
 	const resetCommentBox = () => {
 		reset();
-		setReply(null);
+		setCommentReply(null);
 		setIsSubmittingMessage(false);
 		setImagesToUpload([]);
 		setViewpoint(null);
@@ -246,11 +243,11 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 	}, [ticketId, isEditMode]);
 
 	useEffect(() => {
-		if (metadata?.message || metadata?.images?.length) {
-			setReply(metadata);
+		if (commentReply?.message || commentReply?.images?.length) {
+			setCommentReply(commentReply);
 			inputRef.current.focus();
 		}
-	}, [metadata?._id]);
+	}, [commentReply?._id]);
 
 	return (
 		<Container
@@ -263,7 +260,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 			{commentReply?._id && (
 				<CommentReplyContainer>
 					<CommentReply {...commentReply} shortMessage />
-					<DeleteButton onClick={() => setReply(null)}>
+					<DeleteButton onClick={() => setCommentReply(null)}>
 						<DeleteIcon />
 					</DeleteButton>
 				</CommentReplyContainer>

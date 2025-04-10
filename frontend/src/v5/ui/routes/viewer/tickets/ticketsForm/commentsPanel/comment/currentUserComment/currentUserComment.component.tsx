@@ -49,6 +49,7 @@ export const CurrentUserComment = ({
 }: CurrentUserCommentProps) => {
 	const [isEditMode, setIsEditMode] = useState(false);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
+	const [commentReply, setCommentReply] = useState(metadata);
 
 	if (deleted) return (<DeletedComment author={author} />);
 
@@ -58,9 +59,13 @@ export const CurrentUserComment = ({
 				commentId={_id}
 				message={desanitiseMessage(message)}
 				images={images}
-				metadata={metadata}
+				commentReply={commentReply}
+				setCommentReply={setCommentReply}
 				view={view}
-				onCancel={() => setIsEditMode(false)}
+				onCancelEdit={() => {
+					setIsEditMode(false);
+					setCommentReply(metadata);
+				}}
 			/>
 		);
 	}
