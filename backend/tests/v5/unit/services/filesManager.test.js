@@ -704,7 +704,8 @@ const testGetMD5FileHash = () => {
 			FileRefs.getRefEntry.mockImplementation(() => mockRefEntry);
 			FSHandler.getFile.mockResolvedValueOnce(mockId);
 
-			await expect(FilesManager.getMD5FileHash('teamspace', 'container', 'filename')).resolves.toEqual({ hash: CryptoJS.MD5(mockId).toString(), size: 100 });
+			const wordArray = CryptoJS.lib.WordArray.create(mockId);
+			await expect(FilesManager.getMD5FileHash('teamspace', 'container', 'filename')).resolves.toEqual({ hash: CryptoJS.MD5(wordArray).toString(), size: 100 });
 
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(2);
 			expect(FSHandler.getFile).toHaveBeenCalledTimes(1);
