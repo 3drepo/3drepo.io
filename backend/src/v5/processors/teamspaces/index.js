@@ -17,14 +17,16 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, getAllUsersInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
 	createTeamspaceSettings,
 	getAddOns,
+	getMemberInfoFromId,
 	getMembersInfo,
 	getTeamspaceRefId,
+	getTeamspaceSetting,
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
@@ -99,10 +101,10 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 };
 
 Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
-	const [membersList, jobsList] = await Promise.all([
-		getMembersInfo(teamspace),
-		getJobsToUsers(teamspace),
-	]);
+	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
+	const frontEggUsers = await getAllUsersInAccount(tenantId);
+	const membersList = await Promise.all(frontEggUsers.map((user) => getMemberInfoFromId(user.id)));
+	const jobsList = await getJobsToUsers(teamspace);
 
 	const usersToJob = {};
 	jobsList.forEach(({ _id, users }) => {

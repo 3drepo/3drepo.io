@@ -90,19 +90,37 @@ const testGetTeamspaceMembersInfo = () => {
 		const tsWithUsers = 'withUsers';
 		const tsWithoutUsers = 'withoutUsers';
 		const tsWithoutJobs = 'noJobs';
+		const tsTenantId = generateRandomString();
+		const tsTenantWithoutUsers = generateRandomString();
 		const goldenData = [
-			{ user: 'abc', firstName: 'ab', lastName: 'c', company: 'yy', job: 'jobA' },
-			{ user: 'abcd', firstName: 'ab', lastName: 'cd', job: 'jobB' },
-			{ user: 'abcd2', firstName: 'ab', lastName: 'cd2', job: 'jobB', company: 'dxfd' },
-			{ user: 'abcde', firstName: 'ab', lastName: 'cde', company: 'dsfs' },
+			{ user: 'abc', firstName: 'ab', lastName: 'c', company: 'yy', job: 'jobA', userId: generateRandomString() },
+			{ user: 'abcd', firstName: 'ab', lastName: 'cd', job: 'jobB', userId: generateRandomString() },
+			{ user: 'abcd2', firstName: 'ab', lastName: 'cd2', job: 'jobB', company: 'dxfd', userId: generateRandomString() },
+			{ user: 'abcde', firstName: 'ab', lastName: 'cde', company: 'dsfs', userId: generateRandomString() },
 		];
 		const jobList = [
 			{ _id: 'jobA', users: ['abc'] },
 			{ _id: 'jobB', users: ['abcd', 'abcd2'] },
 		];
-		TeamspacesModel.getMembersInfo.mockImplementation((ts) => {
-			if (tsWithoutUsers === ts) return Promise.resolve([]);
-			return Promise.resolve(goldenData.map((data) => _.omit(data, 'job')));
+		const frontEggData = goldenData.map((data) => ({ email: `${data.user}@email.com`, id: data.userId }));
+
+		TeamspacesModel.getTeamspaceSetting.mockImplementation((ts) => {
+			if (tsWithoutUsers === ts) return Promise.resolve({ refId: tsTenantWithoutUsers });
+			return Promise.resolve({ refId: tsTenantId });
+		});
+
+		FronteggService.getAllUsersInAccount.mockImplementation((tenantId) => {
+			if (tsTenantWithoutUsers === tenantId) return Promise.resolve([]);
+			return Promise.resolve(frontEggData);
+		});
+
+		TeamspacesModel.getMemberInfoFromId.mockImplementation((ts) => {
+			const userInfo = { ...goldenData.find((element) => element.userId === ts) };
+
+			delete userInfo.job;
+			delete userInfo.userId;
+
+			return Promise.resolve(userInfo);
 		});
 
 		JobsModel.getJobsToUsers.mockImplementation((ts) => {
@@ -112,7 +130,7 @@ const testGetTeamspaceMembersInfo = () => {
 
 		test('should give the list of members within the given teamspace with their details', async () => {
 			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithUsers);
-			expect(res).toEqual(goldenData);
+			expect(res).toEqual(goldenData.map((data) => _.omit(data, 'userId')));
 		});
 
 		test('should return empty array if the teamspace had no memebrs', async () => {
@@ -122,7 +140,7 @@ const testGetTeamspaceMembersInfo = () => {
 
 		test('should return the list of members with details if the teamspace had no jobs', async () => {
 			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithoutJobs);
-			expect(res).toEqual(goldenData.map((data) => _.omit(data, 'job')));
+			expect(res).toEqual(goldenData.map((data) => _.omit(data, ['job', 'userId'])));
 		});
 	});
 };

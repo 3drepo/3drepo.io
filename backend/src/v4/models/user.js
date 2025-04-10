@@ -45,6 +45,9 @@ const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
 const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces`);
+const {USERS_DB_NAME} = require(`${v5Path}/models/users.constants`);
+const {getTeamspaceSetting} = require(`${v5Path}/models/teamspaceSettings`);
+const {getAllUsersInAccount} = require(`${v5Path}/services/sso/frontegg/components/accounts`);
 
 const COLL_NAME = "system.users";
 
@@ -590,12 +593,11 @@ User.hasReachedLicenceLimitCheck = hasReachedLicenceLimit;
 User.getMembers = async function (teamspace) {
 	const promises = [];
 
-	const getTeamspaceMembers = User.findUsersInTeamspace(teamspace, {
-		user: 1,
-		customData: 1
-	});
-	const getJobInfo = usersWithJob(teamspace);
+	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
+	const frontEggUsers = await getAllUsersInAccount(tenantId);
 
+	const getTeamspaceMembers =		Promise.all(frontEggUsers.map(user => User.findUsersInTeamspaceById(user.id)));
+	const getJobInfo = usersWithJob(teamspace);
 	const getTeamspacePermissions = TeamspaceSettings.getTeamspaceSettings(teamspace).then(({permissions}) => permissions);
 
 	promises.push(
@@ -628,6 +630,12 @@ User.getAllUsersInTeamspace = async function (teamspace) {
 User.findUsersInTeamspace =  async function (teamspace, fields) {
 	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
 	return await db.find("admin", COLL_NAME, query, fields);
+};
+
+User.findUsersInTeamspaceById =  async function (userId) {
+	const query = { "customData.userId": userId };
+	const projection = { user: 1, "customData.firstName": 1, "customData.lastName": 1, "customData.billing.billingInfo.company": 1 };
+	return await db.findOne(USERS_DB_NAME, "system.users", query, projection);
 };
 
 User.teamspaceMemberCheck = async function (user, teamspace) {
