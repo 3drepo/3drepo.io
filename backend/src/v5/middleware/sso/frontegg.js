@@ -16,15 +16,18 @@
  */
 
 const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
-const { fromBase64, toBase64 } = require('../../utils/helper/strings');
 const {
+	destroyAllSessions,
 	generateAuthenticationCodeUrl,
 	generateToken,
+	getClaimedDomains,
 	getTeamspaceByAccount,
 	getUserById,
 	getUserInfoFromToken,
 } = require('../../services/sso/frontegg');
-const { getUserByEmail, updateUserId } = require('../../models/users');
+const { fromBase64, toBase64 } = require('../../utils/helper/strings');
+
+const { getUserByEmail, getUserByUsername, updateUserId } = require('../../models/users');
 const { redirectWithError, setSessionInfo } = require('.');
 const { addPkceProtection } = require('./pkce');
 const { createNewUserRecord } = require('../../processors/users');
@@ -132,6 +135,7 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 				redirectUri: req.query.redirectUri,
 			})),
 			codeChallenge: req.session.pkceCodes.challenge,
+			email: req.query.email,
 		};
 
 		const link = await generateAuthenticationCodeUrl(authParams, accountId);
@@ -139,6 +143,32 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 	} catch (err) {
 		respond(req, res, err);
 	}
+};
+
+const removeFronteggSessionIfNeeded = async (req, res, next) => {
+	const teamspace = req.params;
+	const { authenticatedTeamspace, userId } = req.session.user.auth;
+	if (teamspace !== authenticatedTeamspace) {
+		// we want to wipe the frontegg session and force the user to relogin over there if
+		// the user is trying to authenticate against a teamspace with SSO connections
+		// and the user email is one of the claimed domains
+
+		const accountId = await getTeamspaceRefId(req.params.teamspace);
+		const { username } = req.session.user;
+		const [domains, { customData: { email } }] = await Promise.all([
+			getClaimedDomains(accountId),
+			getUserByUsername(username, { 'customData.email': 1 }),
+		]);
+
+		const emailDomain = email.split('@')[1];
+
+		req.query.email = email;
+
+		if (domains.includes(emailDomain)) {
+			await destroyAllSessions(userId);
+		}
+	}
+	await next();
 };
 
 AuthSSO.redirectToStateURL = (req, res) => {
@@ -153,7 +183,8 @@ AuthSSO.redirectToStateURL = (req, res) => {
 AuthSSO.generateLinkToAuthenticator = (redirectURL) => validateMany([addPkceProtection, setSessionInfo,
 	redirectForAuth(redirectURL)]);
 
-AuthSSO.generateLinkToTeamspaceAuthenticator = (redirectURL) => redirectForAuth(redirectURL);
+AuthSSO.generateLinkToTeamspaceAuthenticator = (redirectURL) => validateMany(
+	[removeFronteggSessionIfNeeded, redirectForAuth(redirectURL)]);
 
 AuthSSO.generateToken = (redirectURLUsed) => validateMany([checkStateIsValid, getToken(redirectURLUsed),
 	getUserDetails]);

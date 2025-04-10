@@ -179,6 +179,25 @@ Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 	}
 };
 
+Accounts.getClaimedDomains = async (accountId) => {
+	try {
+		const config = await getConfig();
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		const { data } = await get(`${config.vendorDomain}/team/resources/sso/v1/configurations`, headers);
+		return data.flatMap(({ enabled, domains }) => {
+			if (!enabled) return [];
+			return domains.map(({ domain }) => domain);
+		});
+	} catch (err) {
+		logger.logError(`Failed to get claimed domains within an account: ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to get claimed domains within an account(${accountId}): ${err.message}`);
+	}
+};
+
 Accounts.removeUserFromAccount = async (accountId, userId) => {
 	try {
 		const config = await getConfig();
