@@ -275,19 +275,24 @@ const testGetFederationMD5Hash = () => {
 			key: users.tsAdmin.apiKey,
 			response: { revisions: [] },
 		};
+
+		const revWordArray = CryptoJs.lib.WordArray.create(conRevisions.rFile[0]);
+		const hash = CryptoJs.MD5(Buffer.from(revWordArray)).toString();
+
 		const viewerResponse = { revisions: [{
 			container: containers[0]._id,
 			tag: conRevisions.tag,
 			timestamp: new Date(conRevisions.timestamp).getTime(),
-			hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
+			hash,
 			filename: conRevisions.rFile[0],
 			size: 20,
 		}] };
+
 		const adminResponse = { revisions: containers.map((model) => ({
 			container: model._id,
 			tag: conRevisions.tag,
 			timestamp: new Date(conRevisions.timestamp).getTime(),
-			hash: CryptoJs.MD5(Buffer.from(conRevisions.rFile[0])).toString(),
+			hash,
 			filename: conRevisions.rFile[0],
 			size: 20,
 		})) };
