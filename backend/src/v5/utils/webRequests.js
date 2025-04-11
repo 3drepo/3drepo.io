@@ -39,6 +39,7 @@ WebRequests.delete = (uri, headers) => {
 	return axios.delete(uri, options);
 };
 
-WebRequests.post = (uri, data, config) => axios.post(uri, data, config);
+WebRequests.post = axios.post;
+WebRequests.put = axios.put;
 
 module.exports = WebRequests;

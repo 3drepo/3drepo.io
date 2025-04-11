@@ -35,6 +35,7 @@ const { createNewUserRecord } = require('../../processors/users');
 const { destroySession } = require('../../utils/sessions');
 const { types: { strings: { email: emailSchema } } } = require('../../utils/helper/yup');
 const { errorCodes } = require('../../services/sso/sso.constants');
+const { generateUUIDString } = require('../../utils/helper/uuids');
 const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
@@ -136,6 +137,10 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 			if (userId) {
 				const userData = await getUserById(userId);
 				accountId = userData.tenantId ?? userData.tennantIds[0];
+			} else {
+				// generate a fake accountId to ensure the response doesn't reveal whether
+				// the email is a user
+				accountId = generateUUIDString();
 			}
 		}
 

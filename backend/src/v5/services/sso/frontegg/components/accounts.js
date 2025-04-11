@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, membershipStatus } = require('../frontegg.constants');
-const { get, delete: httpDelete, post } = require('../../../../utils/webRequests');
+const { HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, membershipStatus, mfaPolicy } = require('../frontegg.constants');
+const { get, delete: httpDelete, post, put } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const { errCodes } = require('../frontegg.constants');
 const { generateUUIDString } = require('../../../../utils/helper/uuids');
@@ -39,6 +39,27 @@ Accounts.getTeamspaceByAccount = async (accountId) => {
 	}
 };
 
+Accounts.setMFAPolicy = async (accountId, policySetting) => {
+	try {
+		if (!Object.values(mfaPolicy).includes(policySetting)) throw new Error(`Unrecognised policy setting: ${policySetting}`);
+
+		const config = await getConfig();
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		const payload = {
+			enforceMFAType: policySetting,
+		};
+
+		await put(`${config.vendorDomain}/identity/resources/configurations/v1/mfa-policy`, payload, { headers });
+	} catch (err) {
+		logger.logError(`Failed to create account: ${err?.response?.data} `);
+		throw new Error(`Failed to create account on Accounts: ${err.message}`);
+	}
+};
+
 Accounts.createAccount = async (name) => {
 	try {
 		const config = await getConfig();
@@ -57,6 +78,7 @@ Accounts.createAccount = async (name) => {
 		await Promise.all([
 			post(`${config.vendorDomain}/tenants/resources/tenants/v1/${tenantId}/metadata`, metadataPayload, { headers }),
 			post(`${config.vendorDomain}/applications/resources/applications/tenant-assignments/v1/${config.appId}`, { tenantId }, { headers }),
+			Accounts.setMFAPolicy(tenantId, mfaPolicy.ENABLED),
 		]);
 
 		return tenantId;
