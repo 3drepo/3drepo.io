@@ -23,11 +23,13 @@ import PinIcon from '@assets/icons/filled/pin_ticket-filled.svg';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ActionMenu } from '@controls/actionMenu';
-import { SwitchContainer } from './filterEllipsisMenu.styles';
+import { SwitchContainer } from './ticketsEllipsisMenu.styles';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
+import { SortingPropertyMenu } from './sortingPropertyMenu/sortingPropertyMenu.component';
+import { SortingOrderMenu } from './sortingOrderMenu/sortingOrderMenu.component';
 
-export const FilterEllipsisMenu = () => {
+export const TicketsEllipsisMenu = () => {
 	const isShowingPins = TicketsCardHooksSelectors.selectIsShowingPins();
 	const onClickShowPins = () => TicketsCardActionsDispatchers.setIsShowingPins(!isShowingPins);
 
@@ -52,6 +54,8 @@ export const FilterEllipsisMenu = () => {
 						</SwitchContainer>
 					}
 				/>
+				<SortingPropertyMenu />
+				<SortingOrderMenu />
 			</MenuList>
 		</ActionMenu>
 	);
