@@ -14,15 +14,15 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-type Item<T> = { promise: Promise<T>, resolve, reject, args, resolved: boolean, count: number };
+type FunctionCall<T> = { promise: Promise<T>, resolve, reject, args, resolved: boolean, count: number };
 
 export enum ExecutionStrategy {
 	Lifo,
 	Fifo,
 }
 
-export class AsyncExecutor<T> {
-	private functionCalls: Array<Item<T>> = [] ;
+export class AsyncFunctionExecutor<T> {
+	private calls: Array<FunctionCall<T>> = [] ;
 
 	private dict = {};
 
@@ -36,36 +36,36 @@ export class AsyncExecutor<T> {
 
 	private func: (...args) => Promise<T>;
 
-	private createPromise(args) {
-		const prom = {} as Item<T>;
-		prom.promise = new Promise((resolve, reject) => {
-			prom.resolve = resolve;
-			prom.reject = reject;
+	private createCall(args) {
+		const call = {} as FunctionCall<T>;
+		call.promise = new Promise((resolve, reject) => {
+			call.resolve = resolve;
+			call.reject = reject;
 		});
-		prom.args = args;
-		prom.resolved = false;
-		return prom;
+		call.args = args;
+		call.resolved = false;
+		return call;
 	}
 
-	private getPromise(args): Item<T> {
-		if (!this.reuseCall) return this.createPromise(args);
+	private getCall(args): FunctionCall<T> {
+		if (!this.reuseCall) return this.createCall(args);
 	
-		let prom = this.dict[JSON.stringify(args)];
-		if (!prom) {
-			prom = this.createPromise(args);
-			this.dict[JSON.stringify(args)] = prom;
+		let call = this.dict[JSON.stringify(args)];
+		if (!call) {
+			call = this.createCall(args);
+			this.dict[JSON.stringify(args)] = call;
 		}
 		
-		return prom;
+		return call;
 	}
 
 	private async start() {
 		this.running = true;
-		while (this.functionCalls.length) {
-			const start = this.strategy === ExecutionStrategy.Lifo ? Math.max(this.functionCalls.length - this.batchSize, 0) : 0;
-			const deleteCount = Math.min(this.batchSize, this.functionCalls.length);
+		while (this.calls.length) {
+			const start = this.strategy === ExecutionStrategy.Lifo ? Math.max(this.calls.length - this.batchSize, 0) : 0;
+			const deleteCount = Math.min(this.batchSize, this.calls.length);
 
-			const batch =  this.functionCalls.splice(start, deleteCount);
+			const batch =  this.calls.splice(start, deleteCount);
 			await Promise.all(batch.reverse().map(async (p) => {
 				if (p.resolved) {
 					return p.promise;
@@ -85,10 +85,10 @@ export class AsyncExecutor<T> {
 	}
 
 	public addCall(...args): Promise<T> {
-		const prom = this.getPromise(args);
-		this.functionCalls.push(prom);
+		const prom = this.getCall(args);
+		this.calls.push(prom);
 
-		if (this.functionCalls.length && !this.running) {
+		if (this.calls.length && !this.running) {
 			this.start();
 		}
 
@@ -96,7 +96,7 @@ export class AsyncExecutor<T> {
 	}
 
 	public reset() {
-		this.functionCalls = [];
+		this.calls = [];
 		this.dict = {};
 		this.running = false;
 	}

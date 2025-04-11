@@ -42,9 +42,9 @@ import { selectContainerById, selectContainers, selectIsListPending } from './co
 import { compByColum } from '../store.helpers';
 import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { AsyncExecutor } from '@/v5/helpers/functions.helpers';
+import { AsyncFunctionExecutor } from '@/v5/helpers/functions.helpers';
 
-const statsStack = new AsyncExecutor<ContainerStats>(API.Containers.fetchContainerStats, 30);
+const statsStack = new AsyncFunctionExecutor<ContainerStats>(API.Containers.fetchContainerStats, 30);
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {

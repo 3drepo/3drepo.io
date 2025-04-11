@@ -20,14 +20,14 @@ import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateD
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
-import { AsyncExecutor } from '@/v5/helpers/functions.helpers';
+import { AsyncFunctionExecutor } from '@/v5/helpers/functions.helpers';
 import { CalibrationStatus, DrawingStats, IDrawing } from './drawings.types';
 import { selectDrawings, selectIsListPending } from './drawings.selectors';
 import { isEqualWith, unionBy } from 'lodash';
 import { selectLatestActiveRevision } from './revisions/drawingRevisions.selectors';
 import { compByColum } from '../store.helpers';
 
-const statsStack = new AsyncExecutor<DrawingStats>(API.Drawings.fetchDrawingsStats, 30);
+const statsStack = new AsyncFunctionExecutor<DrawingStats>(API.Drawings.fetchDrawingsStats, 30);
 
 export function* addFavourites({ teamspace, projectId, drawingId }: AddFavouriteAction) {
 	try {

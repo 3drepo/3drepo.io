@@ -19,7 +19,7 @@ import { difference, differenceBy, isEqual } from 'lodash';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
-import { AsyncExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
+import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 import { dispatch } from '@/v5/helpers/redux.helpers';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { useViewerCalibrationSetup } from '@/v5/ui/routes/dashboard/projects/calibration/useViewerCalibrationSetup';
@@ -72,7 +72,7 @@ interface IProps {
 
 export class Viewer3DBase extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
-	public state = { updatesQueue: new AsyncExecutor((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, ExecutionStrategy.Fifo, false) };
+	public state = { updatesQueue: new AsyncFunctionExecutor((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, ExecutionStrategy.Fifo, false) };
 
 	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
 		let errorType = '3D Repo Error';
