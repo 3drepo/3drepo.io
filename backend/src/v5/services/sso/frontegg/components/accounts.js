@@ -51,6 +51,7 @@ Accounts.setMFAPolicy = async (accountId, policySetting) => {
 
 		const payload = {
 			enforceMFAType: policySetting,
+			allowRememberMyDevice: false,
 		};
 
 		await put(`${config.vendorDomain}/identity/resources/configurations/v1/mfa-policy`, payload, { headers });
