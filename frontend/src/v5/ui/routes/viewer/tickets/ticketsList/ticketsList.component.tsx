@@ -17,10 +17,8 @@
 import { useEffect } from 'react';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List } from './ticketsList.styles';
 
@@ -30,10 +28,6 @@ export const TicketsList = () => {
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);
-
-		const unselectTicket = () => TicketsCardActionsDispatchers.setSelectedTicket(null);
-		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
-		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
 	}, []);
 
 	return (

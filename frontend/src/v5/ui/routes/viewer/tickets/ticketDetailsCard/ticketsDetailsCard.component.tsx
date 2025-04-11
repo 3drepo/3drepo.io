@@ -142,6 +142,7 @@ export const TicketDetailsCard = () => {
 		setDetailViewAndProps(TicketDetailsView.Form);
 		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation, revision);
 		setTicketId(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTemplate(ticket.type);
 	}, [ticket?._id]);
 
 	useEffect(() => {
