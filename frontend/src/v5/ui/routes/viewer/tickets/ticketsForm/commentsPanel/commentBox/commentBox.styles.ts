@@ -104,7 +104,7 @@ export const Images = styled.div`
 	&:before {
 		top: -10px;
 	}
-	 &:after {
+	&:after {
 		bottom: 0;
 	}
 `;
