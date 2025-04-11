@@ -24,7 +24,7 @@ import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
-import { DefaultTicketFiltersSetter } from './defaultTicketFiltersSetter/defaultTicketFiltersSetter.component';
+import { TicketFiltersSetter } from './ticketFiltersSetter/ticketFiltersSetter.component';
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
@@ -112,7 +112,7 @@ export const Viewer = () => {
 
 	return (
 		<>
-			<DefaultTicketFiltersSetter />
+			<TicketFiltersSetter />
 			<OpenDrawingFromUrl />
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />

@@ -18,32 +18,21 @@
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
-import { ViewerParams } from '../../../routes.constants';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { FilterEllipsisMenu } from '@components/viewer/cards/cardFilters/filterEllipsisMenu/filterEllipsisMenu.component';
-import { useEffect } from 'react';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 
 export const TicketsListCard = () => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
-	const isFed = modelIsFederation(containerOrFederation);
+	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	
-	useEffect(() => {
-		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
-	}, [tickets, filters]);
-
 	return (
 		<CardContainer>
 			<CardHeader

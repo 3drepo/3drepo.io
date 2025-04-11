@@ -83,6 +83,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 
 export const setSelectedTicket = (state: ITicketsCardState, { ticketId }: SetSelectedTicketAction) => {
 	state.selectedTicketId = ticketId;
+	state.selectedTicketPinId = ticketId;
 };
 
 export const setSelectedTemplate = (state: ITicketsCardState, { templateId }: SetSelectedTemplateAction) => {
