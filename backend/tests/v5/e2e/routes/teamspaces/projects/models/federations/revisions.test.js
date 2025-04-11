@@ -272,7 +272,6 @@ const testGetFederationMD5Hash = () => {
 			ts: teamspace,
 			projectId: project.id,
 			modelId: models[0]._id,
-			revisionId: ServiceHelper.generateUUIDString(),
 			key: users.tsAdmin.apiKey,
 			response: { revisions: [] },
 		};
@@ -307,7 +306,7 @@ const testGetFederationMD5Hash = () => {
 	};
 
 	const runTest = (description, parameters, success, error) => {
-		const route = ({ ts, projectId, modelId, revisionId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/federations/${modelId}/revisions/${revisionId}/files/original/info${key ? `?key=${key}` : ''}`;
+		const route = ({ ts, projectId, modelId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/federations/${modelId}/revisions/files/original/info${key ? `?key=${key}` : ''}`;
 
 		test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${description}`, async () => {
 			const expectedStatus = success ? templates.ok.status : error.status;
