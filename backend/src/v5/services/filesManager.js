@@ -224,7 +224,8 @@ FilesManager.getMD5FileHash = async (teamspace, collection, filename) => {
 	}
 
 	const file = await FilesManager.getFile(teamspace, collection, filename);
-	const newHash = CryptoJs.MD5(file).toString();
+	const wordArray = CryptoJs.lib.WordArray.create(file);
+	const newHash = CryptoJs.MD5(wordArray).toString();
 
 	await updateRef(teamspace, collection, { _id: filename }, { $set: { md5Hash: hash } });
 
