@@ -22,11 +22,11 @@ import DeleteIcon from '@assets/icons/outlined/delete-outlined.svg';
 import { TicketCommentReplyMetadata, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
-import { Comment, CommentWithButtonsContainer } from './currentUserComment.styles';
-import { EditComment } from './editComment/editComment.component';
+import { Comment, CommentWithButtonsContainer, EditComment } from './currentUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons } from '../basicComment/basicComment.styles';
-import { uploadImages } from '@controls/fileUploader/uploadImages';
+import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
+
 
 export type CurrentUserCommentProps = ITicketComment & {
 	commentAge: string;
@@ -34,7 +34,6 @@ export type CurrentUserCommentProps = ITicketComment & {
 	isFirstOfBlock: boolean;
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
-	onEdit: (commentId, newMessage, newImages) => void;
 };
 export const CurrentUserComment = ({
 	_id,
@@ -43,38 +42,30 @@ export const CurrentUserComment = ({
 	message,
 	metadata,
 	images,
+	view,
 	onDelete,
 	onReply,
-	onEdit,
 	...props
 }: CurrentUserCommentProps) => {
 	const [isEditMode, setIsEditMode] = useState(false);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
-
-	const onEditImage = (img, index) => {
-		const newImages = [...images];
-		newImages[index] = img;
-		onEdit(_id, message, newImages);
-	};
-
-	// @ts-ignore
-	const onDeleteImage = (index) => onEdit(_id, message, images.toSpliced(index, 1));
-
-	const onUploadImages = async () => uploadImages((imagesToUpload) => onEdit(_id, message, images.concat(imagesToUpload)));
-	const imagesEditingFunctions = { onDeleteImage, onUploadImages, onEditImage };
+	const [commentReply, setCommentReply] = useState(metadata);
 
 	if (deleted) return (<DeletedComment author={author} />);
 
 	if (isEditMode) {
 		return (
 			<EditComment
-				message={message}
+				commentId={_id}
+				message={desanitiseMessage(message)}
 				images={images}
-				author={author}
-				metadata={metadata}
-				onEditMessage={(newMessage) => onEdit(_id, newMessage, images)}
-				{...imagesEditingFunctions}
-				onClose={() => setIsEditMode(false)}
+				commentReply={commentReply}
+				setCommentReply={setCommentReply}
+				view={view}
+				onCancelEdit={() => {
+					setIsEditMode(false);
+					setCommentReply(metadata);
+				}}
 			/>
 		);
 	}
@@ -95,10 +86,11 @@ export const CurrentUserComment = ({
 				</CommentButtons>
 			)}
 			<Comment
+				commentId={_id}
 				message={message}
 				images={images}
 				metadata={metadata}
-				{...(!readOnly ? imagesEditingFunctions : {})}
+				view={view}
 				{...props}
 			/>
 		</CommentWithButtonsContainer>
