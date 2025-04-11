@@ -93,6 +93,20 @@ export const Images = styled.div`
 	&:not(:empty) {
 		min-height: 59px;
 	}
+
+	&:before, &:after {
+		content: '';
+		width: 100%;
+		box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
+		z-index: 12;
+		position: sticky;
+	}
+	&:before {
+		top: -10px;
+	}
+	 &:after {
+		bottom: 0;
+	}
 `;
 
 export const ImageContainer = styled.div`
