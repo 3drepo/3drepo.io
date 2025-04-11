@@ -276,23 +276,21 @@ const testGetFederationMD5Hash = () => {
 			response: { revisions: [] },
 		};
 
-		const revWordArray = CryptoJs.lib.WordArray.create(conRevisions.rFile[0]);
-		const hash = CryptoJs.MD5(Buffer.from(revWordArray)).toString();
+		const wordArray = CryptoJs.lib.WordArray.create(Buffer.from(conRevisions.rFile[0]));
 
 		const viewerResponse = { revisions: [{
 			container: containers[0]._id,
 			tag: conRevisions.tag,
 			timestamp: new Date(conRevisions.timestamp).getTime(),
-			hash,
+			hash: CryptoJs.MD5(wordArray).toString(),
 			filename: conRevisions.rFile[0],
 			size: 20,
 		}] };
-
 		const adminResponse = { revisions: containers.map((model) => ({
 			container: model._id,
 			tag: conRevisions.tag,
 			timestamp: new Date(conRevisions.timestamp).getTime(),
-			hash,
+			hash: CryptoJs.MD5(wordArray).toString(),
 			filename: conRevisions.rFile[0],
 			size: 20,
 		})) };
