@@ -27,9 +27,10 @@ import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContain
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
+import { TICKETS_TABLE_COLUMNS_LABEL, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { orderBy } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -99,41 +100,44 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 							{!tickets.length
 								? (<PlaceholderForStickyFunctionality />)
 								: (
-									<Headers>
-										<SortingTableHeader name="id" disableSorting>
-											<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
-										</SortingTableHeader>
-										<SortingTableHeader name={BaseProperties.TITLE}>
-											<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
-										</SortingTableHeader>
-										<SortingTableHeader name="modelName">
-											<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`}>
-											<FormattedMessage id="ticketTable.column.header.createdAt" defaultMessage="created at" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`}> 
-											<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${BaseProperties.OWNER}`}>
-											<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`}>
-											<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`}>
-											<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${BaseProperties.STATUS}`}>
-											<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
-											<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
-											<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
-										</SortingTableHeader>
-									</Headers>
+									<>
+										<Headers>
+											<SortingTableHeader name="id" disableSorting>
+												<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
+											</SortingTableHeader>
+											<SortingTableHeader name={BaseProperties.TITLE}>
+												{TICKETS_TABLE_COLUMNS_LABEL[BaseProperties.TITLE]}
+											</SortingTableHeader>
+											<SortingTableHeader name="modelName">
+												{TICKETS_TABLE_COLUMNS_LABEL.modelName}
+											</SortingTableHeader>
+											<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`}>
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${BaseProperties.CREATED_AT}`]}
+											</SortingTableHeader>
+											<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`}> 
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${IssueProperties.ASSIGNEES}`]}
+											</SortingTableHeader>
+											<SortingTableHeader name={`properties.${BaseProperties.OWNER}`}>
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${BaseProperties.OWNER}`]}
+											</SortingTableHeader>
+											<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`}>
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${IssueProperties.DUE_DATE}`]}
+											</SortingTableHeader>
+											<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`}>
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${IssueProperties.PRIORITY}`]}
+											</SortingTableHeader>
+											<SortingTableHeader name={`properties.${BaseProperties.STATUS}`}>
+												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${BaseProperties.STATUS}`]}
+											</SortingTableHeader>
+											<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
+												{TICKETS_TABLE_COLUMNS_LABEL[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]}
+											</SortingTableHeader>
+											<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
+												{TICKETS_TABLE_COLUMNS_LABEL[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]}
+											</SortingTableHeader>
+											<ColumnsVisibilitySettings />
+										</Headers>
+									</>
 								)}
 							<Group $empty={!sortedItems?.length}>
 								{sortedItems.map(({ modelId, ...ticket }) => (
