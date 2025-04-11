@@ -20,7 +20,7 @@ import { BasicComment } from '../basicComment/basicComment.component';
 import { CommentWithButtonsContainer as CommentWithButtonsContainerBase } from '../basicComment/basicComment.styles';
 import { QuotedMessage, secondaryQuotedMessageStyles } from '../quotedMessage/quotedMessage.styles';
 import { CommentBox } from '../../commentBox/commentBox.component';
-import { Controls } from '../../commentBox/commentBox.styles';
+import { MessageAndImages } from '../../commentBox/commentBox.styles';
 
 export const CommentWithButtonsContainer = styled(CommentWithButtonsContainerBase)`
 	justify-content: flex-end;
@@ -42,7 +42,10 @@ export const Comment = styled(BasicComment)<{ isFirstOfBlock: boolean }>`
 export const EditComment = styled(CommentBox)`
 	width: 260px;
 	align-self: end;
-	${Controls} {
-		border-top: 1px solid ${({ theme }) => theme.palette.primary.main};
+
+	${MessageAndImages} {
+		border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
+		border-bottom-color: ${({ theme }) => theme.palette.primary.main};
+		margin-top: 10px;
 	}
 `;

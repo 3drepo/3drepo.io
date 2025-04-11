@@ -36,9 +36,6 @@ export type CommentNonMessageContentProps = Partial<Omit<ITicketComment, 'histor
 	commentId?: string;
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
-	onUploadImages?: () => void;
-	onDeleteImage?: (index) => void;
-	onEditImage?: (img, index) => void;
 	hasMessage: boolean;
 };
 export const CommentNonMessageContent = ({

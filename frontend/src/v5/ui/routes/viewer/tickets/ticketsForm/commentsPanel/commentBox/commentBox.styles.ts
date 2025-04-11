@@ -35,6 +35,8 @@ export const Container = styled.section`
 	border-radius: 0 0 8px 8px;
 `;
 
+export const MessageAndImages = styled.div``;
+
 export const CommentReplyContainer = styled.div`
 	position: relative;
 	margin: 11px 15px 0;
@@ -86,11 +88,10 @@ export const Images = styled.div`
 	gap: 10px;
 	padding: 10px 15px 0;
 	position: relative;
-	box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
 	overflow-y: overlay;
 
 	&:not(:empty) {
-		min-height: 54px;
+		min-height: 59px;
 	}
 `;
 
@@ -123,13 +124,22 @@ export const ErroredImageMessages = styled.div`
 `;
 
 export const MessageInput = styled(FormTextAreaFixedSize)`
-	padding: 8px 15px 6px;
+	padding: 8px 15px 0;
+	overflow: hidden;
+
+	:after {
+		content: '';
+		box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
+		z-index: 1;
+	}
+
 	.MuiInputBase-multiline {
 		padding: 0;
 		line-height: 16px;
 	}
 
 	${TextAreaContainer} {
+		overflow-y: scroll;
 		border: none;
 		box-shadow: none;
 	}
@@ -141,7 +151,6 @@ export const Controls = styled.div`
 	align-items: center;
 	justify-content: flex-start;
 	box-sizing: border-box;
-	box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
 	position: relative;
 	padding: 6px 15px 0;
 `;

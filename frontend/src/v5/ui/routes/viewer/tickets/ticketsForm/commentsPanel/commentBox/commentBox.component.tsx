@@ -52,6 +52,7 @@ import {
 	ErroredImageMessages,
 	ActionIcon,
 	EditCommentButtons,
+	MessageAndImages,
 } from './commentBox.styles';
 import { CommentReply } from '../comment/commentReply/commentReply.component';
 import { ActionMenu } from '../../../ticketsList/ticketsList.styles';
@@ -257,58 +258,60 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 			ref={containerRef}
 			className={className}
 		>
-			{commentReply?._id && (
-				<CommentReplyContainer>
-					<CommentReply {...commentReply} shortMessage />
-					<DeleteButton onClick={() => setCommentReply(null)}>
-						<DeleteIcon />
-					</DeleteButton>
-				</CommentReplyContainer>
-			)}
-			<MessageInput
-				name="message"
-				placeholder={formatMessage({
-					id: 'customTicket.comments.leaveAComment',
-					defaultMessage: 'Leave a comment',
-				})}
-				control={control}
-				inputProps={{
-					maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
-				}}
-				ref={inputRef}
-			/>
-			<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>
-				<FormattedMessage
-					id="customTicket.comments.dropFiles"
-					defaultMessage="Drop your files here"
+			<MessageAndImages>
+				{commentReply?._id && (
+					<CommentReplyContainer>
+						<CommentReply {...commentReply} shortMessage />
+						<DeleteButton onClick={() => setCommentReply(null)}>
+							<DeleteIcon />
+						</DeleteButton>
+					</CommentReplyContainer>
+				)}
+				<MessageInput
+					name="message"
+					placeholder={formatMessage({
+						id: 'customTicket.comments.leaveAComment',
+						defaultMessage: 'Leave a comment',
+					})}
+					control={control}
+					inputProps={{
+						maxLength: Math.max(MAX_MESSAGE_LENGTH - commentReplyLength, 0),
+					}}
+					ref={inputRef}
 				/>
-			</DragAndDrop>
-			{imagesToUpload.length > 0 && (
-				<Images>
-					{imagesToDisplay.map(({ src, id, error }, index) => (
-						<ImageContainer key={id}>
-							<Image src={src} $error={error} onClick={() => openImagesDialog(index)} draggable={false} />
-							<DeleteButton onClick={() => deleteImage(index)} error={error}>
-								<DeleteIcon />
-							</DeleteButton>
-						</ImageContainer>
-					))}
-				</Images>
-			)}
-			{erroredImages.length > 0 && (
-				<ErroredImageMessages>
-					{erroredImages.map(({ name }) => (
-						<>
-							<strong>{name} </strong>
-							<FormattedMessage
-								id="customTicket.comments.images.error"
-								defaultMessage="is too big. {value} limit."
-								values={{ value: IMAGE_MAX_SIZE_MESSAGE }}
-							/>
-						</>
-					))}
-				</ErroredImageMessages>
-			)}
+				<DragAndDrop accept={getSupportedImageExtensions()} onDrop={handleDropFiles} hidden={!isDraggingFile}>
+					<FormattedMessage
+						id="customTicket.comments.dropFiles"
+						defaultMessage="Drop your files here"
+					/>
+				</DragAndDrop>
+				{imagesToUpload.length > 0 && (
+					<Images>
+						{imagesToDisplay.map(({ src, id, error }, index) => (
+							<ImageContainer key={id}>
+								<Image src={src} $error={error} onClick={() => openImagesDialog(index)} draggable={false} />
+								<DeleteButton onClick={() => deleteImage(index)} error={error}>
+									<DeleteIcon />
+								</DeleteButton>
+							</ImageContainer>
+						))}
+					</Images>
+				)}
+				{erroredImages.length > 0 && (
+					<ErroredImageMessages>
+						{erroredImages.map(({ name }) => (
+							<>
+								<strong>{name} </strong>
+								<FormattedMessage
+									id="customTicket.comments.images.error"
+									defaultMessage="is too big. {value} limit."
+									values={{ value: IMAGE_MAX_SIZE_MESSAGE }}
+								/>
+							</>
+						))}
+					</ErroredImageMessages>
+				)}
+			</MessageAndImages>
 			<Controls>
 				<ActionMenu TriggerButton={<ActionIcon><FileIcon /></ActionIcon>}>
 					<ActionMenuItem>
