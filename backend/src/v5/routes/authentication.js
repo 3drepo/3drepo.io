@@ -41,6 +41,11 @@ const establishRoutes = () => {
 	*         schema:
 	*           type: string
 	*         description: a URI to redirect to when authentication finished
+	*       - in: query
+	*         name: email
+	*         schema:
+	*           type: string
+	*         description: Email of the user trying to authenticate
 	*     responses:
 	*       200:
 	*         description: Returns a link to 3DR's authentication page and then redirects to a URI provided upon success. The process works like the standard SSO protocol.

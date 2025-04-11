@@ -18,6 +18,7 @@
 const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
 const {
 	destroyAllSessions,
+	doesUserExist,
 	generateAuthenticationCodeUrl,
 	generateToken,
 	getClaimedDomains,
@@ -32,6 +33,7 @@ const { redirectWithError, setSessionInfo } = require('.');
 const { addPkceProtection } = require('./pkce');
 const { createNewUserRecord } = require('../../processors/users');
 const { destroySession } = require('../../utils/sessions');
+const { types: { strings: { email: emailSchema } } } = require('../../utils/helper/yup');
 const { errorCodes } = require('../../services/sso/sso.constants');
 const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
 const { logger } = require('../../utils/logger');
@@ -126,6 +128,15 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 		if (req.params.teamspace) {
 			accountId = await getTeamspaceRefId(req.params.teamspace);
 			req.session.reAuth = true;
+		} else if (req.query.email) {
+			await emailSchema.validate(req.query.email).catch(() => {
+				throw createResponseCode(templates.invalidArguments, 'Email is not valid');
+			});
+			const userId = await doesUserExist(req.query.email);
+			if (userId) {
+				const userData = await getUserById(userId);
+				accountId = userData.tenantId ?? userData.tennantIds[0];
+			}
 		}
 
 		const authParams = {
