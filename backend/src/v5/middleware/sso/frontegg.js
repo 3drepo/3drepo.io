@@ -127,7 +127,7 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 
 		let accountId;
 		if (req.params.teamspace) {
-			accountId = await getTeamspaceRefId(req.params.teamspace);
+			accountId = req.params.accountId ?? await getTeamspaceRefId(req.params.teamspace);
 			req.session.reAuth = true;
 		} else if (req.query.email) {
 			await emailSchema.validate(req.query.email).catch(() => {
@@ -136,7 +136,7 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 			const userId = await doesUserExist(req.query.email);
 			if (userId) {
 				const userData = await getUserById(userId);
-				accountId = userData.tenantId ?? userData.tennantIds[0];
+				accountId = userData.tenantId ?? userData.tenantIds[0];
 			} else {
 				// generate a fake accountId to ensure the response doesn't reveal whether
 				// the email is a user
@@ -162,7 +162,7 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 };
 
 const removeFronteggSessionIfNeeded = async (req, res, next) => {
-	const teamspace = req.params;
+	const { teamspace } = req.params;
 	const { authenticatedTeamspace, userId } = req.session.user.auth;
 	if (teamspace !== authenticatedTeamspace) {
 		// we want to wipe the frontegg session and force the user to relogin over there if
@@ -178,6 +178,7 @@ const removeFronteggSessionIfNeeded = async (req, res, next) => {
 
 		const emailDomain = email.split('@')[1];
 
+		req.params.accountId = accountId;
 		req.query.email = email;
 
 		if (domains.includes(emailDomain)) {

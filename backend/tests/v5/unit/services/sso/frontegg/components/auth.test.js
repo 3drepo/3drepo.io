@@ -135,14 +135,15 @@ const testGenerateAuthenticationCodeUrl = () => {
 			const redirectURL = generateRandomString();
 			const codeChallenge = generateRandomString();
 			const appUrl = generateRandomString();
+			const email = generateRandomString();
 
 			Connections.getConfig.mockResolvedValueOnce({
 				appUrl,
 			});
 
-			const expectedUrl = `${appUrl}/oauth/authorize?response_type=code&scope=openId&state=${state}&redirect_uri=${redirectURL}&code_challenge=${codeChallenge}&tenantId=${accountId}`;
+			const expectedUrl = `${appUrl}/oauth/authorize?response_type=code&scope=openId&state=${state}&redirect_uri=${redirectURL}&code_challenge=${codeChallenge}&tenantId=${accountId}&login_hint=${email}`;
 
-			await expect(Auth.generateAuthenticationCodeUrl({ state, redirectURL, codeChallenge }, accountId))
+			await expect(Auth.generateAuthenticationCodeUrl({ state, redirectURL, codeChallenge, email }, accountId))
 				.resolves.toEqual(expectedUrl);
 		});
 

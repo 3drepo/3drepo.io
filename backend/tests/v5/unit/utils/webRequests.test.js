@@ -100,8 +100,29 @@ const testPostRequest = () => {
 	});
 };
 
+const testPutRequest = () => {
+	describe('Put request', () => {
+		test('Should make a put request with body params', async () => {
+			const data = { someData: generateRandomString() };
+			const uri = generateRandomString();
+			await WebRequests.put(uri, data);
+			expect(axios.put).toHaveBeenCalledTimes(1);
+			expect(axios.put).toHaveBeenCalledWith(uri, data, undefined);
+		});
+
+		test('Should make a put request with query params', async () => {
+			const config = { params: { someData: generateRandomString() } };
+			const uri = generateRandomString();
+			await WebRequests.put(uri, undefined, config);
+			expect(axios.put).toHaveBeenCalledTimes(1);
+			expect(axios.put).toHaveBeenCalledWith(uri, undefined, config);
+		});
+	});
+};
+
 describe('utils/webRequests', () => {
 	testGetRequest();
 	testPostRequest();
+	testPutRequest();
 	testDeleteRequest();
 });
