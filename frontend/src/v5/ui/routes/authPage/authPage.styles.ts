@@ -18,10 +18,9 @@
 import styled from 'styled-components';
 import { Typography } from '@controls/typography';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
-import { Button as ButtonBase } from '@controls/button';
 import { Link as LinkBase } from 'react-router-dom';
 
-export const Container = styled.div`
+export const Form = styled.form`
 	border-radius: 20px;
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	padding: 60px;
@@ -31,7 +30,7 @@ export const Container = styled.div`
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
-	gap: 41px;
+	gap: 10px;
 `;
 
 export const Heading = styled(Typography).attrs({
@@ -40,13 +39,6 @@ export const Heading = styled(Typography).attrs({
 	color: ${({ theme }) => theme.palette.secondary.main};
 	user-select: none;
 	font-weight: ${FONT_WEIGHT.BOLDER};
-`;
-
-export const Button = styled(ButtonBase).attrs({
-	color: 'primary',
-	variant: 'contained',
-})`
-	width: 300px;
 `;
 
 export const Footer = styled(Typography).attrs({
