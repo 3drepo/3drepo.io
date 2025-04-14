@@ -12,6 +12,12 @@ e.g.
 -->
 
 
-#### Test cases
-<!-- Test cases that this pull request expect to pass -->
+#### Acceptance Criteria
+<!-- Copy and paste the acceptance criteria here from the product issue and verify that they all passed 
+e.g.
+- [x] As a Commenter+, I want to be able to delete images in image preview before I leave the comment.
+- [x] As a Commenter+, I want to be able to delete images after I leave the comment.
+
+If you cannot find Acceptance criteria for your issue, check with a member of the QA team
+-->
 
