@@ -87,7 +87,7 @@ const testPostRequest = () => {
 			const uri = generateRandomString();
 			await WebRequests.post(uri, data);
 			expect(axios.post).toHaveBeenCalledTimes(1);
-			expect(axios.post).toHaveBeenCalledWith(uri, data, undefined);
+			expect(axios.post).toHaveBeenCalledWith(uri, data);
 		});
 
 		test('Should make a post request with query params', async () => {
@@ -107,7 +107,7 @@ const testPutRequest = () => {
 			const uri = generateRandomString();
 			await WebRequests.put(uri, data);
 			expect(axios.put).toHaveBeenCalledTimes(1);
-			expect(axios.put).toHaveBeenCalledWith(uri, data, undefined);
+			expect(axios.put).toHaveBeenCalledWith(uri, data);
 		});
 
 		test('Should make a put request with query params', async () => {
