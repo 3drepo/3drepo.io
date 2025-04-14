@@ -14,21 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect } from 'react';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List } from './ticketsList.styles';
 
 export const TicketsList = () => {
-	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
-
-	useEffect(() => {
-		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);
-	}, []);
 
 	return (
 		<>
