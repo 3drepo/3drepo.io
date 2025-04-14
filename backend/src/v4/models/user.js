@@ -47,7 +47,7 @@ const UserProcessorV5 = require(`${v5Path}/processors/users`);
 const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces`);
 const {USERS_DB_NAME} = require(`${v5Path}/models/users.constants`);
 const {getTeamspaceSetting} = require(`${v5Path}/models/teamspaceSettings`);
-const {getAllUsersInAccount} = require(`${v5Path}/services/sso/frontegg/components/accounts`);
+const {getAllUsersInAccount} = require(`${v5Path}/services/sso/frontegg`);
 
 const COLL_NAME = "system.users";
 
