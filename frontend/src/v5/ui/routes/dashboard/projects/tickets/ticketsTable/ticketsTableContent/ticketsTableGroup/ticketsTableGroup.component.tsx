@@ -21,13 +21,13 @@ import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
 import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer, PlaceholderForStickyFunctionality } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { TICKETS_TABLE_COLUMNS_LABEL, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
+import { getColumnLabel, getAssignees, SetTicketValue, sortAssignees, getAvailableColumnsForTemplate } from '../../ticketsTable.helper';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
@@ -77,6 +77,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const { getRowWidth } = useContext(ResizableTableContext);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
+	const columns = getAvailableColumnsForTemplate(template);
 
 	const assigneesSort = (items: ITicket[], order) => orderBy(
 		items.map(sortAssignees),
@@ -102,39 +103,11 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 								: (
 									<>
 										<Headers>
-											<SortingTableHeader name="id" disableSorting>
-												<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
-											</SortingTableHeader>
-											<SortingTableHeader name={BaseProperties.TITLE}>
-												{TICKETS_TABLE_COLUMNS_LABEL[BaseProperties.TITLE]}
-											</SortingTableHeader>
-											<SortingTableHeader name="modelName">
-												{TICKETS_TABLE_COLUMNS_LABEL.modelName}
-											</SortingTableHeader>
-											<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`}>
-												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${BaseProperties.CREATED_AT}`]}
-											</SortingTableHeader>
-											<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`}> 
-												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${IssueProperties.ASSIGNEES}`]}
-											</SortingTableHeader>
-											<SortingTableHeader name={`properties.${BaseProperties.OWNER}`}>
-												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${BaseProperties.OWNER}`]}
-											</SortingTableHeader>
-											<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`}>
-												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${IssueProperties.DUE_DATE}`]}
-											</SortingTableHeader>
-											<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`}>
-												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${IssueProperties.PRIORITY}`]}
-											</SortingTableHeader>
-											<SortingTableHeader name={`properties.${BaseProperties.STATUS}`}>
-												{TICKETS_TABLE_COLUMNS_LABEL[`properties.${BaseProperties.STATUS}`]}
-											</SortingTableHeader>
-											<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
-												{TICKETS_TABLE_COLUMNS_LABEL[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]}
-											</SortingTableHeader>
-											<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
-												{TICKETS_TABLE_COLUMNS_LABEL[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]}
-											</SortingTableHeader>
+											{columns.map(({ name }) => (
+												<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
+													{getColumnLabel(name)}
+												</SortingTableHeader>
+											))}
 											<ColumnsVisibilitySettings />
 										</Headers>
 									</>

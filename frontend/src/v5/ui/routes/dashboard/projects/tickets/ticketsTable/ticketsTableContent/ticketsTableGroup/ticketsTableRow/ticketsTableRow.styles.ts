@@ -44,13 +44,6 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	}
 `;
 
-export const OverflowContainer = styled.div`
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	display: inline-block;
-`;
-
 export const CellOwner = styled(Cell)`
 	.MuiAvatar-root {
 		width: 24px;

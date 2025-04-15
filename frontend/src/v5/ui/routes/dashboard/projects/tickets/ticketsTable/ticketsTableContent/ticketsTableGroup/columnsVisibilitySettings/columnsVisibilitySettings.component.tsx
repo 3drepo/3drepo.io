@@ -18,7 +18,7 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { TICKETS_TABLE_COLUMNS_LABEL, getAvailableColumnsForTemplate } from '../../../ticketsTable.helper';
+import { getColumnLabel, getAvailableColumnsForTemplate } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
@@ -35,13 +35,13 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 	const { hiddenColumns } = useContext(ResizableTableContext);
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const columns = getAvailableColumnsForTemplate(template);
+	const columns = getAvailableColumnsForTemplate(template).map(({ name }) => name);
 	const newVisibleColumnsCount = columns.filter((c) => !newHiddenColumns.includes(c)).length;
 
 	const onChange = (columnName) => setNewHiddenColumns(xor(newHiddenColumns, [columnName]));
 	const isVisible = (columnName) => !newHiddenColumns.includes(columnName);
 	const filteringFunction = (cols, query) => (
-		cols.filter((col) => matchesQuery(TICKETS_TABLE_COLUMNS_LABEL[col], query))
+		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
 	);
 
 	useEffect(() => {
@@ -63,7 +63,7 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 							disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
 							onChange={() => onChange(columnName)}
 							value={isVisible(columnName)}
-							label={TICKETS_TABLE_COLUMNS_LABEL[columnName]}
+							label={getColumnLabel(columnName)}
 						/>
 					</MenuItem>
 				))}

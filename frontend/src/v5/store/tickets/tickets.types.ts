@@ -19,7 +19,7 @@ import { RgbArray } from '@/v5/helpers/colors.helper';
 import { CardFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { TicketStatusTypes } from '@controls/chip/chip.types';
 
-export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'imageList' | 'coords' | 'measurements';
+export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'imageList';
 
 export interface PropertyDefinition {
 	name: string;
