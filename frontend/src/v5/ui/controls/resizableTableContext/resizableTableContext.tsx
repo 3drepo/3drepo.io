@@ -16,7 +16,7 @@
  */
 
 import { sum } from 'lodash';
-import { createContext, useRef, useState } from 'react';
+import { createContext, useEffect, useRef, useState } from 'react';
 import { RefHolder } from './resizableTableContext.styles';
 
 export type TableColumn = { name: string, minWidth?: number, width: number, stretch?: boolean };
@@ -38,7 +38,6 @@ export interface ResizableTableType {
 	columnGap: number,
 	getRowWidth: () => number,
 	stretchTable: () => void,
-	resetColumns: (columns: TableColumn[]) => void,
 }
 
 const defaultValue: ResizableTableType = {
@@ -62,7 +61,6 @@ const defaultValue: ResizableTableType = {
 	columnGap: 0,
 	getRowWidth: () => 0,
 	stretchTable: () => {},
-	resetColumns: () => {},
 };
 export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
@@ -116,8 +114,8 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		setColumns([ ...columns ]);
 	};
 
-	const resetColumns = (cols) => {
-		const newColumns = [...cols];
+	useEffect(() => {
+		const newColumns = [...inputColumns];
 		columns.forEach(({ name, width }) => {
 			const col = newColumns.find((newCol) => newCol.name === name);
 			if (col) {
@@ -125,7 +123,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			}
 		});
 		setColumns(newColumns);
-	};
+	}, [inputColumns]);
 
 	return (
 		<ResizableTableContext.Provider value={{
@@ -145,7 +143,6 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			getRowWidth,
 			columnGap,
 			stretchTable,
-			resetColumns,
 		}}>
 			{children}
 			<RefHolder ref={ref} />

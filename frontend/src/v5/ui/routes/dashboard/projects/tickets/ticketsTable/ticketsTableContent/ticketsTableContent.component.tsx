@@ -26,14 +26,12 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
-import { getAvailableColumnsForTemplate } from '../ticketsTable.helper';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { setHiddenColumns, hiddenColumns, unavailableColumns, getVisibleColumnsNames, stretchTable, resetColumns } = useContext(ResizableTableContext);
-	const columns = getAvailableColumnsForTemplate(template);
+	const { setHiddenColumns, hiddenColumns, unavailableColumns, getVisibleColumnsNames, stretchTable } = useContext(ResizableTableContext);
 
 	useEffect(() => {
 		if (templateAlreadyFetched(template) && !getVisibleColumnsNames().length) {
@@ -42,11 +40,8 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 	}, [unavailableColumns.length, template]);
 
 	useEffect(() => {
-		if (templateAlreadyFetched(template)) {
-			resetColumns(columns);
-		} else {
-			stretchTable();
-		}
+		if (templateAlreadyFetched(template)) return;
+		stretchTable();
 	}, [template]);
 
 	if (!templateAlreadyFetched(template)) {
