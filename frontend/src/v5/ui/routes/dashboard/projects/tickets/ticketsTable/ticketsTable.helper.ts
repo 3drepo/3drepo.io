@@ -218,8 +218,8 @@ const getTableColumnData = ({ name, type }): TableColumn => {
 export const getTemplatePropertiesAttributes = (template: ITemplate) => {
 	if (!template.properties) return [];
 	return [
-		...template.properties?.map(({ name, ...rest }) => ({ name: `properties.${name}`, ...rest })),
-		...template.modules?.flatMap((module) => module.properties.map((property) => ({ name: `modules.${module.type || module.name}.${property.name}`, ...property }))),
+		...template.properties?.map((property) => ({ ...property, name: `properties.${property.name}` })),
+		...template.modules?.flatMap((module) => module.properties.map((property) => ({  ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
 	];
 };
 

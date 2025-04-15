@@ -124,7 +124,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 				col.width = width;
 			}
 		});
-		setColumns(columns);
+		setColumns(newColumns);
 	};
 
 	return (

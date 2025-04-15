@@ -29,7 +29,6 @@ import { TicketsTableResizableContent, TicketsTableResizableContentProps } from 
 import { getAvailableColumnsForTemplate } from '../ticketsTable.helper';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
-import { flushSync } from 'react-dom';
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
@@ -43,9 +42,11 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 	}, [unavailableColumns.length, template]);
 
 	useEffect(() => {
-		if (templateAlreadyFetched(template)) return;
-		flushSync(() => resetColumns(columns));
-		stretchTable();
+		if (templateAlreadyFetched(template)) {
+			resetColumns(columns);
+		} else {
+			stretchTable();
+		}
 	}, [template]);
 
 	if (!templateAlreadyFetched(template)) {
@@ -73,7 +74,6 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const columns = getAvailableColumnsForTemplate(template);
 
 	return (
 		<TicketsTableContextComponent template={template}>
