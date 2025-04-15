@@ -212,7 +212,7 @@ const TABLE_COLUMNS_TYPE_TO_WIDTHS: Partial<Record<PropertyTypeDefinition, { wid
 const getTableColumnData = ({ name, type }): TableColumn => {
 	if (TABLE_COLUMNS_INVALID_PROPERTIES.includes(type)) return;
 	const widths = TABLE_COLUMNS_DEFAULT_WIDTHS[name] ?? TABLE_COLUMNS_TYPE_TO_WIDTHS[type];
-	return { name, ...widths, stretch: name === BaseProperties.TITLE };
+	return { name, ...widths };
 };
 
 export const getTemplatePropertiesAttributes = (template: ITemplate) => {

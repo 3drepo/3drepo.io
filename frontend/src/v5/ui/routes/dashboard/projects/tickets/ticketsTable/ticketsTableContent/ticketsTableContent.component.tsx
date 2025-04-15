@@ -28,6 +28,7 @@ import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
@@ -41,7 +42,7 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 
 	useEffect(() => {
 		if (templateAlreadyFetched(template)) return;
-		stretchTable();
+		stretchTable([BaseProperties.TITLE]);
 	}, [template]);
 
 	if (!templateAlreadyFetched(template)) {
