@@ -29,10 +29,12 @@ import { TicketsTableResizableContent, TicketsTableResizableContentProps } from 
 import { getAvailableColumnsForTemplate } from '../ticketsTable.helper';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
+import { flushSync } from 'react-dom';
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { setHiddenColumns, hiddenColumns, unavailableColumns, getVisibleColumnsNames, stretchTable } = useContext(ResizableTableContext);
+	const { setHiddenColumns, hiddenColumns, unavailableColumns, getVisibleColumnsNames, stretchTable, resetColumns } = useContext(ResizableTableContext);
+	const columns = getAvailableColumnsForTemplate(template);
 
 	useEffect(() => {
 		if (templateAlreadyFetched(template) && !getVisibleColumnsNames().length) {
@@ -42,6 +44,7 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 
 	useEffect(() => {
 		if (templateAlreadyFetched(template)) return;
+		flushSync(() => resetColumns(columns));
 		stretchTable();
 	}, [template]);
 
@@ -75,7 +78,7 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 	return (
 		<TicketsTableContextComponent template={template}>
 			<ResizableTableContextComponent
-				columns={columns}
+				columns={[]}
 				unavailableColumns={[]}
 				columnGap={1}
 			>

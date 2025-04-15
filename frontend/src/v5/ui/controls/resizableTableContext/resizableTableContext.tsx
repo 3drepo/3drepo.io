@@ -38,6 +38,7 @@ export interface ResizableTableType {
 	columnGap: number,
 	getRowWidth: () => number,
 	stretchTable: () => void,
+	resetColumns: (columns: TableColumn[]) => void,
 }
 
 const defaultValue: ResizableTableType = {
@@ -61,6 +62,7 @@ const defaultValue: ResizableTableType = {
 	columnGap: 0,
 	getRowWidth: () => 0,
 	stretchTable: () => {},
+	resetColumns: () => {},
 };
 export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
@@ -114,6 +116,17 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		setColumns([ ...columns ]);
 	};
 
+	const resetColumns = (cols) => {
+		const newColumns = [...cols];
+		columns.forEach(({ name, width }) => {
+			const col = newColumns.find((newCol) => newCol.name === name);
+			if (col) {
+				col.width = width;
+			}
+		});
+		setColumns(columns);
+	};
+
 	return (
 		<ResizableTableContext.Provider value={{
 			getVisibleColumnsWidths,
@@ -132,6 +145,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			getRowWidth,
 			columnGap,
 			stretchTable,
+			resetColumns,
 		}}>
 			{children}
 			<RefHolder ref={ref} />
