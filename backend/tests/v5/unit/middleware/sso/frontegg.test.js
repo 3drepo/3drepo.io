@@ -105,7 +105,7 @@ const testGenerateLinkToAuthenticator = () => {
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required'));
+				expect.objectContaining({ code: templates.invalidArguments.code }));
 		});
 
 		test('Should fail with whatever error catch if the catch function is triggered', async () => {
@@ -146,7 +146,7 @@ const testGenerateLinkToAuthenticator = () => {
 			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledWith(authParams, undefined);
 		});
 
-		test(`Should respond ${templates.invalidArguments.code} if the email is invalid`, async () => {
+		test(`Should respond with ${templates.invalidArguments.code} if the email is invalid`, async () => {
 			const req = cloneDeep(reqSample);
 			const res = {};
 
@@ -158,7 +158,7 @@ const testGenerateLinkToAuthenticator = () => {
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, 'Email is not valid'));
+				expect.objectContaining({ code: templates.invalidArguments.code }));
 
 			expect(req.session.reAuth).not.toBeTruthy();
 
@@ -365,6 +365,36 @@ const testGenerateLinkToTeamspaceAuthenticator = () => {
 				expect(PKCEMiddleware.addPkceProtection).not.toHaveBeenCalled();
 				expect(SSOMiddleware.setSessionInfo).not.toHaveBeenCalled();
 			});
+		});
+
+		test(`Should respond with ${templates.unknown.code} if something went wrong`, async () => {
+			const teamspace = generateRandomString();
+			const accountId = generateRandomString();
+			const email = `${generateRandomString()}@${generateRandomString()}.com`;
+
+			const req = {
+				...cloneDeep(baseReq),
+				params: { teamspace },
+			};
+			const res = {};
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValue(accountId);
+			FronteggService.getClaimedDomains.mockRejectedValueOnce({ message: generateRandomString() });
+			UserModel.getUserByUsername.mockResolvedValueOnce({ customData: { email } });
+
+			await Frontegg.generateLinkToTeamspaceAuthenticator(ssoPostRedirect)(req, res);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.unknown);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(FronteggService.generateAuthenticationCodeUrl).not.toHaveBeenCalled();
+
+			expect(FronteggService.destroyAllSessions).not.toHaveBeenCalled();
+
+			expect(PKCEMiddleware.addPkceProtection).not.toHaveBeenCalled();
+			expect(SSOMiddleware.setSessionInfo).not.toHaveBeenCalled();
 		});
 	});
 };
