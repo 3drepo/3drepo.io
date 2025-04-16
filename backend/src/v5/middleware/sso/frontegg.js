@@ -159,7 +159,7 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 			});
 			const userId = await doesUserExist(req.query.email);
 			if (userId) {
-				const { tenantId, tenantIds } = await getUserById(userId);
+				const { tenantId, tenantIds = [] } = await getUserById(userId);
 				accountId = await determineAuthAccount(req.query.email, tenantIds, tenantId ?? tenantIds[0]);
 			} else {
 				// generate a fake accountId to ensure the response doesn't reveal whether
