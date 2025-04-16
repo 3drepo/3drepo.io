@@ -18,25 +18,20 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { getColumnLabel, getAvailableColumnsForTemplate } from '../../../ticketsTable.helper';
+import { getColumnLabel } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
 import { xor } from 'lodash';
 import { useContext, useEffect, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { useParams } from 'react-router';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
 
 export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenColumns }) => {
-	const { hiddenColumns } = useContext(ResizableTableContext);
-	const { template: templateId } = useParams<DashboardTicketsParams>();
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const columns = getAvailableColumnsForTemplate(template).map(({ name }) => name);
-	const newVisibleColumnsCount = columns.filter((c) => !newHiddenColumns.includes(c)).length;
+	const { hiddenColumns, getAllColumnsNames } = useContext(ResizableTableContext);
+	const columnsNames = getAllColumnsNames();
+	const newVisibleColumnsCount = columnsNames.filter((c) => !newHiddenColumns.includes(c)).length;
 
 	const onChange = (columnName) => setNewHiddenColumns(xor(newHiddenColumns, [columnName]));
 	const isVisible = (columnName) => !newHiddenColumns.includes(columnName);
@@ -49,7 +44,7 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 	}, []);
 
 	return (
-		<SearchContextComponent items={columns} filteringFunction={filteringFunction}>
+		<SearchContextComponent items={columnsNames} filteringFunction={filteringFunction}>
 			<SearchInputContainer>
 				<SearchInput
 					placeholder={formatMessage({ id: 'ticketsTable.columnsVisibilitySettings.search.placeholder', defaultMessage: 'Search...' })}

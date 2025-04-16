@@ -24,6 +24,7 @@ export type TableColumn = { name: string, minWidth?: number, width: number };
 export interface ResizableTableType {
 	getVisibleColumnsWidths: () => number[];
 	getVisibleColumnsNames: () => string[];
+	getAllColumnsNames: () => string[];
 	getWidth: (name: string) => number;
 	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
@@ -43,6 +44,7 @@ export interface ResizableTableType {
 const defaultValue: ResizableTableType = {
 	getVisibleColumnsWidths: () => [],
 	getVisibleColumnsNames: () => [],
+	getAllColumnsNames: () => [],
 	getWidth: () => 0,
 	getMinWidth: () => 0,
 	setWidth: () => {},
@@ -87,6 +89,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 	const getVisibleColumns = () => columns.filter((c) => !isHidden(c.name));
 	const getVisibleColumnsWidths = () => getVisibleColumns().map((c) => c.width);
 	const getVisibleColumnsNames = () => getVisibleColumns().map((c) => c.name);
+	const getAllColumnsNames = () => columns.map((c) => c.name);
 	const getRowWidth = () => {
 		const visibleColumnswidths = getVisibleColumnsWidths();
 		const gaps = (visibleColumnswidths.length - 1) * columnGap;
@@ -131,6 +134,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		<ResizableTableContext.Provider value={{
 			getVisibleColumnsWidths,
 			getVisibleColumnsNames,
+			getAllColumnsNames,
 			getWidth,
 			setWidth,
 			getMinWidth,
