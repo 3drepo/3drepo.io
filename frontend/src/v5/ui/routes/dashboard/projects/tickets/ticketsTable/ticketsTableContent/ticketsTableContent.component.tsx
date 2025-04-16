@@ -32,10 +32,6 @@ import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTa
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
-	useEffect(() => {
-		if (templateAlreadyFetched(template)) return;
-		stretchTable([BaseProperties.TITLE]);
-	}, [template]);
 
 	if (!templateAlreadyFetched(template)) {
 		return (
