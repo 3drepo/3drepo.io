@@ -15,22 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Highlight } from '@controls/highlight';
-import { SearchContext } from '@controls/search/searchContext';
 import { TextOverflow } from '@controls/textOverflow';
-import { useContext } from 'react';
-import { Cell } from './textCell.styles';
+import { Cell, SmallFont } from './cells.styles';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
-export const TextCell = ({ name, value }) => {
-	const { query } = useContext(SearchContext);
+export const TextCell = ({ name, value }) => (
+	<Cell name={name}>
+		<TextOverflow tooltipText={value}>
+			{value}
+		</TextOverflow>
+	</Cell>
+);
 
-	return (
-		<Cell name={name}>
-			<TextOverflow tooltipText={value}>
-				<Highlight search={query}>
-					{value}
-				</Highlight>
-			</TextOverflow>
-		</Cell>
-	);
-};
+export const DateCell = ({ name, value }) => (
+	<Cell name={name}>
+		<SmallFont>
+			{formatDateTime(value)}
+		</SmallFont>
+	</Cell>
+);
+
+export const BooleanCell = ({ name, value }) => (
+	<Cell name={name}>
+		{!!value ? TRUE_LABEL : FALSE_LABEL}
+	</Cell>
+);

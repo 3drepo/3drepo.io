@@ -18,19 +18,7 @@
 import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
 import styled from 'styled-components';
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
-import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
-
-export const Cell = styled(ResizableTableCell)`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	height: 100%;
-	padding: 0 10px;
-	display: flex;
-	align-items: center;
-	justify-content: flex-start;
-	font-weight: 500;
-	overflow: hidden;
-	box-sizing: border-box;
-`;
+import { Cell } from './ticketsTableCell/cells/cells.styles';
 
 // TODO - fix when new palette is released
 export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
@@ -55,9 +43,4 @@ export const CellDate = styled(Cell)`
 	${DueDateContainer} {
 		height: unset;
 	}
-`;
-
-export const SmallFont = styled.span`
-	color: ${({ theme }) => theme.palette.base.main};
-	font-size: 10px;
 `;

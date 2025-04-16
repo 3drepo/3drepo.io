@@ -19,9 +19,8 @@ import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelec
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
-import { TextCell } from '../textCell/textCell.component';
-import { Cell, CellDate, CellOwner, SmallFont } from '../ticketsTableRow.styles';
-import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { BooleanCell, DateCell, TextCell } from './cells/cells.component';
+import { CellDate, CellOwner } from '../ticketsTableRow.styles';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { DueDate } from '@controls/dueDate/dueDate.component';
@@ -31,20 +30,7 @@ import { get } from 'lodash';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useContext } from 'react';
 import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
-
-const DateCell = ({ name, value }) => (
-	<Cell name={name}>
-		<SmallFont>
-			{formatDateTime(value)}
-		</SmallFont>
-	</Cell>
-);
-
-const BooleanCell = ({ name, value }) => (
-	<Cell name={name}>
-		{Boolean(value) ? 'True' : 'False'}
-	</Cell>
-);
+import { Cell } from './cells/cells.styles';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 const SAFETIBASE_NAME_PREFIX = 'modules.safetibase';
