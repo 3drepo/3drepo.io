@@ -32,7 +32,7 @@ import { addReply, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, de
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';
@@ -110,13 +110,14 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 	const isEditMode = !!commentId;
 	const newMessage = watch('message');
 
+	const initialCommentReply = useMemo(() => commentReply, [commentId]);
 	const commentReplyLength = commentReply ? addReply(commentReply, '').length : 0;
 	const charsCount = (newMessage?.length || 0) + commentReplyLength;
 	const charsLimitIsReached = charsCount > MAX_MESSAGE_LENGTH;
+	const imagesAreUnchanged = isEqual(images, imagesToUpload.map(({ src }) => src));
 	const viewIsUnchanged = isEqual(existingView, viewpoint);
-	const messageIsUnchanged = message === newMessage
-		&& isEqual(images, imagesToUpload.map(({ src }) => src))
-		&& viewIsUnchanged;
+	const replyIsUnchanged = isEqual(initialCommentReply, commentReply);
+	const messageIsUnchanged = message === newMessage && imagesAreUnchanged && viewIsUnchanged && replyIsUnchanged;
 	const erroredImages = imagesToUpload.filter(({ error }) => error);
 	const messageIsEmpty = !newMessage?.trim()?.length && !imagesToUpload.length && !viewpoint;
 	const disableSendMessage = messageIsEmpty || charsLimitIsReached || erroredImages.length > 0 || messageIsUnchanged;
