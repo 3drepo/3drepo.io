@@ -23,11 +23,12 @@ type ResizableTableCellProps = {
 	children: any;
 	name: string;
 	className?: string;
+	onClick?: () => void;
 };
-export const ResizableTableCell = ({ name, children, className }: ResizableTableCellProps) => {
+export const ResizableTableCell = ({ name, children, ...props }: ResizableTableCellProps) => {
 	const { isHidden } = useContext(ResizableTableContext);
 
 	if (isHidden(name)) return null;
 
-	return (<Item className={className}>{children}</Item>);
+	return (<Item {...props}>{children}</Item>);
 };

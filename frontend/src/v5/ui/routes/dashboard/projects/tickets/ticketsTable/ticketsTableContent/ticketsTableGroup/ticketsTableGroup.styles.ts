@@ -19,6 +19,7 @@ import { ResizableTableRow } from '@controls/resizableTableContext/resizableTabl
 import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { Row } from './ticketsTableRow/ticketsTableRow.styles';
+import { TextOverflow } from '@controls/textOverflow';
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
@@ -37,16 +38,13 @@ export const IconContainer = styled.div<{ $flip?: boolean }>`
 	`}
 `;
 
-export const Header = styled.div<{ $selectable?: boolean }>`
+export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 	padding: 2px 0 8px 10px;
 	text-align: start;
 	box-sizing: border-box;
 	user-select: none;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 
 	${({ $selectable }) => $selectable && css`
 		cursor: pointer;
