@@ -84,4 +84,8 @@ export const ViewpointIcon = styled(CameraIcon)<{ disabled?: boolean; }>`
 	cursor: ${({ disabled }) => disabled ? 'auto' : 'pointer'};
 	opacity: ${({ disabled }) => disabled ? 0.3 : 1};
 	margin: 0 0 -3px 8px;
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
 `;
