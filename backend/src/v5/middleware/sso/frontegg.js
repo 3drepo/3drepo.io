@@ -122,7 +122,7 @@ const getToken = (urlUsed) => async (req, res, next) => {
 const determineAuthAccount = async (email, accounts, preferredAccount) => {
 	/*
 	 * Frontegg doesn't allow password authentication if the user is subscribed to a SSO configured
-	 * account, it will result in an error. so we want the priortisation is:
+	 * account, it will result in an error. so we want the prioritisation is:
 	 * 1. the active teamspace if it is SSO configured and domain matches
 	 * 2. any SSO configured account if domain matches
 	 * 3. the active teamspace
