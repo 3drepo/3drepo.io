@@ -59,10 +59,8 @@ const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
-	console.log('purging queues...');
 	const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
 	const conn = await amqp.connect(host);
-	console.log('connected');
 
 	const purgeQueue = async (queueName) => {
 		try {
@@ -78,11 +76,10 @@ queue.purgeQueues = async () => {
 	};
 
 	await Promise.all([
-		purgeQueue(worker_queue).then(() => console.log('worker queue done')),
-		purgeQueue(model_queue).then(() => console.log('model queue done')),
-		purgeQueue(callback_queue).then(() => console.log('callback queue done')),
+		purgeQueue(worker_queue),
+		purgeQueue(model_queue),
+		purgeQueue(callback_queue),
 	]);
-	console.log('queues purged');
 
 	await conn.close();
 };

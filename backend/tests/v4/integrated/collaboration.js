@@ -74,11 +74,8 @@ describe('Sharing/Unsharing a model', () => {
 	});
 
 	after((done) => {
-		console.log("!!! on after...");
 		purgeQueues().then(() => {
-			console.log("!!!Queues are purged...");
 			server.close(() => {
-				console.log("!!!Server is closed");
 				console.log('API test server is closed');
 				done();
 			});
