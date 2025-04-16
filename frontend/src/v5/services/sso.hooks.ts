@@ -18,7 +18,7 @@
 import { isNull, omitBy, values } from 'lodash';
 import { useHistory } from 'react-router-dom';
 import { getParams } from '../helpers/url.helper';
-import { errorMessages, postActions, ssoAuth } from './api/sso';
+import { errorMessages, postActions, ssoLogin } from './api/sso';
 import { formatMessage } from './intl';
 
 export const useSSOParams = () => {
@@ -40,7 +40,7 @@ export const useSSOParams = () => {
 	[{ searchParams: string, error: string | null, action: string | null }, () => void ];
 };
 
-export const useSSOAuth = () => {
+export const useSSOLogin = () => {
 	const [{ error }] = useSSOParams();
 
 	const errorMessage = error
@@ -51,9 +51,9 @@ export const useSSOAuth = () => {
 		{ errorMessage: errorMessages[error] }) : null;
 
 	return [
-		(redirectUri) => ssoAuth(redirectUri).then(({ data }) => {
+		(redirectUri, email) => ssoLogin(redirectUri, email).then(({ data }) => {
 			window.location.href = data.link;
 		}),
 		errorMessage,
-	] as [(redirectUri: string) => void, string | null];
+	] as [(redirectUri: string, email: string) => void, string | null];
 };
