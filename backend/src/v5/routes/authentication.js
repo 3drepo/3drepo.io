@@ -19,7 +19,7 @@ const { generateLinkToAuthenticator, generateLinkToTeamspaceAuthenticator, gener
 const { isLoggedIn, notLoggedIn } = require('../middleware/auth');
 const { Router } = require('express');
 const { createEndpointURL } = require('../utils/config');
-const { isMemberOfTeamspace } = require('../middleware/permissions');
+const { isActiveMemberOfTeamspace } = require('../middleware/permissions');
 const { updateSession } = require('../middleware/sessions');
 
 const AUTH_POST = '/authenticate-post';
@@ -88,7 +88,7 @@ const establishRoutes = () => {
 	*                   description: link to 3D Repo's authenticator
 	*
 	*/
-	router.get('/authenticate/:teamspace', isLoggedIn, isMemberOfTeamspace, generateLinkToTeamspaceAuthenticator(authenticateRedirectUrl));
+	router.get('/authenticate/:teamspace', isLoggedIn, isActiveMemberOfTeamspace, generateLinkToTeamspaceAuthenticator(authenticateRedirectUrl));
 
 	// This endpoint is not exposed in swagger as it is not designed to be called by clients
 	router.get(AUTH_POST, generateToken(authenticateRedirectUrl), updateSession, redirectToStateURL);

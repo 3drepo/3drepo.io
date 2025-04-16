@@ -84,7 +84,7 @@ const testMemberExists = () => {
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser, true);
 		});
 
 		test('should respond with error if hasAccess throws an error', async () => {
@@ -96,7 +96,7 @@ const testMemberExists = () => {
 			await Teamspaces.memberExists(req, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser, true);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, err);
 		});
@@ -108,7 +108,7 @@ const testMemberExists = () => {
 			await Teamspaces.memberExists(req, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, nonTsMemberUser);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, nonTsMemberUser, true);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.userNotFound);
 		});

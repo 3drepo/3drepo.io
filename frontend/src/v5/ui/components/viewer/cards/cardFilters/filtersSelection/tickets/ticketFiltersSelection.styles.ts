@@ -43,9 +43,7 @@ export const TicketsFiltersModalItem = styled.div<{ $visible: boolean }>`
 	transition: max-height .6s;
 	height: 100%;
 	width: 100%;
-	${({ $visible }) => $visible ? css`
-		max-height: 604px;
-	` : css`
+	${({ $visible }) => !$visible && css`
 		max-height: 0;
 		overflow-y: hidden;
 	`};

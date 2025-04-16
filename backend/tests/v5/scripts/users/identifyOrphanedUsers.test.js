@@ -22,6 +22,7 @@ const {
 	generateUserCredentials,
 	fileExists,
 	generateRandomNumber,
+	outOfOrderArrayEqual,
 } = require('../../helper/services');
 
 const { times } = require('lodash');
@@ -98,8 +99,7 @@ const runTest = () => {
 				return { user, email, firstName, lastName, company: billing.billingInfo.company ?? '', lastLogin: formatDate(lastLogin) };
 			});
 
-			expect(res.length).toBe(expectedResult.length);
-			expect(res).toEqual(expectedResult);
+			outOfOrderArrayEqual(res, expectedResult);
 		});
 	});
 };

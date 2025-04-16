@@ -18,6 +18,7 @@
 const { src } = require('../../path');
 
 const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
+const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
 const Accounts = {};
 
@@ -43,6 +44,8 @@ Accounts.addUserToAccount = (accountId, email) => {
 	usersInAccount[accountId].push(id);
 	return id;
 };
+
+Accounts.getUserStatusInAccount = () => Promise.resolve(membershipStatus.ACTIVE);
 
 Accounts.removeUserFromAccount = (accountId, userId) => {
 	usersInAccount[accountId] = usersInAccount[accountId] ?? [];

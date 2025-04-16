@@ -479,7 +479,7 @@ async function getModelPermission(username, setting, account) {
 		const template = await findPermissionByUser(account, setting._id, username);
 
 		if(template) {
-			const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
+			const permissionTemplate = PermissionTemplates.findById(template.permission);
 
 			if(permissionTemplate && permissionTemplate.permissions) {
 				permissions = permissions.concat(flattenPermissions(permissionTemplate.permissions, true));

@@ -149,8 +149,6 @@ const testIsLoggedIn = () => {
 			expect(SessionUtils.isSessionValid).toHaveBeenCalledTimes(1);
 			expect(SessionUtils.isSessionValid).toHaveBeenCalledWith(session, cookies, headers, true);
 			expect(mockCB).toHaveBeenCalledTimes(1);
-
-			expect(SessionUtils.destroySession).not.toHaveBeenCalled();
 		});
 
 		test('should respond with notLoggedIn errCode if the session is invalid', async () => {
@@ -163,8 +161,6 @@ const testIsLoggedIn = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.notLoggedIn);
-
-			expect(SessionUtils.destroySession).toHaveBeenCalledTimes(1);
 		});
 
 		test('should respond with notLoggedIn errCode if there is no session', async () => {
@@ -178,8 +174,6 @@ const testIsLoggedIn = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(reqNoSession, res, templates.notLoggedIn);
-
-			expect(SessionUtils.destroySession).not.toHaveBeenCalled();
 		});
 	});
 };

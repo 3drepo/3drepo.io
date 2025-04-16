@@ -22,6 +22,7 @@ const {
 	generateUserCredentials,
 	fileExists,
 	generateRandomNumber,
+	outOfOrderArrayEqual,
 } = require('../../helper/services');
 
 const { times } = require('lodash');
@@ -117,9 +118,7 @@ const runTest = () => {
 				return [];
 			});
 
-			expect(res.length).toBe(expectedResult.length);
-			expect(res.sort((a, b) => a.user.localeCompare(b.user)))
-				.toEqual(expectedResult.sort((a, b) => a.user.localeCompare(b.user)));
+			outOfOrderArrayEqual(res, expectedResult);
 		});
 	});
 };
