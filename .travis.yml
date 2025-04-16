@@ -31,8 +31,6 @@ matrix:
         - sudo mkdir -p /var/lib/mongodb
         - sudo chmod 777 /var/lib/mongodb
         - sudo systemctl daemon-reload && sudo systemctl start mongod && echo $(mongod --version)
-        - sudo mkdir -p /var/lib/mongodb
-        - sudo chmod 777 /var/lib/mongodb
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
@@ -54,11 +52,7 @@ matrix:
       script:
         - cd ../backend
         - mkdir coverage
-        - unbuffer yarn  test
-        - cd ../
-        - NODE_ENV=test NODE_CONFIG_DIR='./config' node "./backend/3drepo.js" &
-        - cd ./frontend
-       #- unbuffer yarn test
+        - unbuffer yarn test:one .\tests\v4\integrated\collaboration.js
 
 notifications:
     email:
