@@ -27,6 +27,7 @@ import { useContext, useEffect, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
+import { Divider } from '@mui/material';
 
 export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenColumns }) => {
 	const { hiddenColumns, getAllColumnsNames } = useContext(ResizableTableContext);
@@ -38,6 +39,14 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
 	);
+
+	const modulePrefixRE = /modules\.([\w ]+\.)/;
+	const getModule = (property = '') => modulePrefixRE.exec(property)?.[1];
+
+	const shouldRenderDivider = (previousProperty, currentProperty) => {
+		if (!previousProperty) return false;
+		return getModule(currentProperty) !== getModule(previousProperty);
+	};
 
 	useEffect(() => {
 		setNewHiddenColumns(hiddenColumns);
@@ -52,15 +61,18 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 				/>
 			</SearchInputContainer>
 			<SearchContext.Consumer>
-				{({ filteredItems }) => filteredItems.map((columnName) => (
-					<MenuItem key={columnName}>
-						<Checkbox
-							disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
-							onChange={() => onChange(columnName)}
-							value={isVisible(columnName)}
-							label={getColumnLabel(columnName)}
-						/>
-					</MenuItem>
+				{({ filteredItems }) => filteredItems.map((columnName, i) => (
+					<>
+						{shouldRenderDivider(filteredItems[i - 1], columnName) && (<Divider />)}
+						<MenuItem key={columnName}>
+							<Checkbox
+								disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
+								onChange={() => onChange(columnName)}
+								value={isVisible(columnName)}
+								label={getColumnLabel(columnName)}
+							/>
+						</MenuItem>
+					</>
 				))}
 			</SearchContext.Consumer>
 		</SearchContextComponent>

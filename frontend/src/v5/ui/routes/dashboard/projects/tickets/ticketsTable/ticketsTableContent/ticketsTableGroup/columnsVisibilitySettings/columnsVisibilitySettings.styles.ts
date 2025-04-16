@@ -36,6 +36,8 @@ export const SearchInput = styled(SearchInputBase)`
 
 export const MenuItem = styled(MenuItemBase)`
 	padding: 0;
+	padding-right: 10px;
+	max-width: 600px;
 
 	label {
 		margin: 0;
