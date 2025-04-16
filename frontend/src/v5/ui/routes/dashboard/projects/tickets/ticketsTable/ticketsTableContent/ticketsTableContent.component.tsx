@@ -16,31 +16,22 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
-import { ResizableTableContext, ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
-import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { setHiddenColumns, hiddenColumns, unavailableColumns, getVisibleColumnsNames, stretchTable } = useContext(ResizableTableContext);
-
-	useEffect(() => {
-		if (templateAlreadyFetched(template) && !getVisibleColumnsNames().length) {
-			setHiddenColumns(hiddenColumns.filter((col) => col !== 'id'));
-		}
-	}, [unavailableColumns.length, template]);
-
 	useEffect(() => {
 		if (templateAlreadyFetched(template)) return;
 		stretchTable([BaseProperties.TITLE]);
@@ -75,11 +66,7 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 
 	return (
 		<TicketsTableContextComponent template={template}>
-			<ResizableTableContextComponent
-				columns={columns}
-				unavailableColumns={[]}
-				columnGap={1}
-			>
+			<ResizableTableContextComponent columns={columns} columnGap={1} >
 				<TableContent {...props} template={template} />
 			</ResizableTableContextComponent>
 		</TicketsTableContextComponent>
