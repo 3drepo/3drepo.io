@@ -55,13 +55,13 @@ type TicketsTableCellProps = {
 };
 export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProps) => {
 	const { title, properties, number, type: templateId, modules } = ticket;
-	const { getDefaultValue, getPropertyType } = useContext(TicketsTableContext);
+	const { getPropertyDefaultValue, getPropertyType } = useContext(TicketsTableContext);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
 	const container = ContainersHooksSelectors.selectContainerById(modelId);
 	const federation = FederationsHooksSelectors.selectFederationById(modelId);
 	const { name: modelName } = container || federation || {};
-	const value = get(ticket, name) ?? getDefaultValue(name);
+	const value = get(ticket, name) ?? getPropertyDefaultValue(name);
 	
 	const {
 		owner,

@@ -17,16 +17,16 @@
 
 import { createContext } from 'react';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
-import { getPropertiesDefinition } from './ticketsTableContext.helpers';
+import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 import { get } from 'lodash';
 
 export interface TicketsTableType {
-	getDefaultValue: (name: string) => unknown;
+	getPropertyDefaultValue: (name: string) => unknown;
 	getPropertyType: (name: string) => string;
 }
 
 const defaultValue: TicketsTableType = {
-	getDefaultValue: () => null,
+	getPropertyDefaultValue: () => null,
 	getPropertyType: () => null,
 };
 export const TicketsTableContext = createContext(defaultValue);
@@ -37,14 +37,14 @@ interface Props {
 	template: ITemplate;
 }
 export const TicketsTableContextComponent = ({ children, template }: Props) => {
-	const definitions = getPropertiesDefinition(template);
+	const definitions = getTemplatePropertiesDefinitions(template);
 
-	const getDefaultValue = (name: string) => get(definitions, name)?.default;
+	const getPropertyDefaultValue = (name: string) => get(definitions, name)?.default;
 	const getPropertyType = (name: string) => get(definitions, name)?.type;
 
 	return (
 		<TicketsTableContext.Provider value={{
-			getDefaultValue,
+			getPropertyDefaultValue,
 			getPropertyType,
 		}}>
 			{children}
