@@ -17,12 +17,17 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { memo, useContext } from 'react';
+import { memo, useContext, useEffect } from 'react';
 import { Row } from './ticketsTableRow.styles';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isEqual } from 'lodash';
 import { TicketsTableCell } from './ticketsTableCell/ticketsTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useParams } from 'react-router';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -33,10 +38,12 @@ type TicketsTableRowProps = {
 
 
 export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: TicketsTableRowProps) => {
+	const { teamspace, project } = useParams<DashboardParams>();
 	const { _id: id, properties, type } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 	const { getVisibleColumnsNames } = useContext(ResizableTableContext);
 	const columnsNames = getVisibleColumnsNames();
+	const isFed = modelIsFederation(modelId);
 
 	if (!properties || !template?.code) return null;
 
@@ -44,6 +51,12 @@ export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: Tic
 		e.preventDefault();
 		onClick(modelId, ticket._id);
 	};
+
+	useEffect(() => {
+		if (!ticket.properties[BaseProperties.UPDATED_AT]) {
+			TicketsActionsDispatchers.fetchTicket(teamspace, project, modelId, ticket._id, isFed);
+		}
+	}, [ticket]);
 
 	return (
 		<TicketContextComponent containerOrFederation={modelId}>
