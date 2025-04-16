@@ -118,6 +118,30 @@ const getToken = (urlUsed) => async (req, res, next) => {
 	}
 };
 
+const determineAuthAccount = async (email, accounts, preferredAccount) => {
+	/*
+	 * Frontegg doesn't allow password authentication if the user is subscribed to a SSO configured
+	 * account, it will result in an error. so we want the priortisation is:
+	 * 1. the active teamspace if it is SSO configured and domain matches
+	 * 2. any SSO configured account if domain matches
+	 * 3. the active teamspace
+	 */
+
+	const emailDomain = email.split('@')[1];
+
+	// check preferredAccount first so it take precedence
+	const accountsToCheck = [preferredAccount, ...accounts];
+
+	for (const account of accountsToCheck) {
+		// eslint-disable-next-line no-await-in-loop
+		const domains = await getClaimedDomains(account);
+		if (domains.includes(emailDomain)) {
+			return account;
+		}
+	}
+	return preferredAccount;
+};
+
 const redirectForAuth = (redirectURL) => async (req, res) => {
 	try {
 		if (!req.query.redirectUri) {
@@ -135,8 +159,8 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 			});
 			const userId = await doesUserExist(req.query.email);
 			if (userId) {
-				const userData = await getUserById(userId);
-				accountId = userData.tenantId ?? userData.tenantIds[0];
+				const { tenantId, tenantIds } = await getUserById(userId);
+				accountId = await determineAuthAccount(req.query.email, tenantIds, tenantId ?? tenantIds[0]);
 			} else {
 				// generate a fake accountId to ensure the response doesn't reveal whether
 				// the email is a user
