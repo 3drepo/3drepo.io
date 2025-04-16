@@ -27,7 +27,8 @@ import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContain
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { getColumnLabel, getAssignees, SetTicketValue, sortAssignees, getAvailableColumnsForTemplate } from '../../ticketsTable.helper';
+import { getColumnLabel, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
+import { getAvailableColumnsForTemplate } from '../../ticketsTableContext/ticketsTableContext.helpers';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';

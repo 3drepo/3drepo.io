@@ -19,11 +19,10 @@ import { BaseProperties, IssueProperties, SafetibaseProperties, SequencingProper
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
-import { IStatusConfig, ITemplate, ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
+import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
-import { TableColumn } from '@controls/resizableTableContext/resizableTableContext';
 
 export const NONE_OPTION = 'None';
 
@@ -175,6 +174,7 @@ const TICKET_PROPERTIES_LABEL = {
 	[`modules.sequencing.${SequencingProperties.START_TIME}`]: formatMessage({ id: 'modules.sequencing.label.startTime', defaultMessage: 'Sequencing : Start Time' }),
 	[`modules.sequencing.${SequencingProperties.END_TIME}`]: formatMessage({ id: 'modules.sequencing.label.endTime', defaultMessage: 'Sequencing : End Time' }),
 } as const;
+
 export const getColumnLabel = (name) => {
 	const defaultName = TICKET_PROPERTIES_LABEL[name];
 	if (defaultName) return defaultName;
