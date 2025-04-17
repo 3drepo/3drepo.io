@@ -16,12 +16,12 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
-import { ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableTableContext, ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
@@ -32,8 +32,17 @@ import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTa
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
+	const { getVisibleColumnsNames, setHiddenColumns } = useContext(ResizableTableContext);
+	const templateWasFetched = templateAlreadyFetched(template);
+	const hasVisibleColumns = getVisibleColumnsNames().length > 0;
 
-	if (!templateAlreadyFetched(template)) {
+	useEffect(() => {
+		if (templateWasFetched && !hasVisibleColumns) {
+			setHiddenColumns((hiddenColumns) => hiddenColumns.filter((col) => col !== 'id'));
+		}
+	}, [hasVisibleColumns, templateWasFetched]);
+
+	if (!templateWasFetched) {
 		return (
 			<EmptyPageView>
 				<Spinner />
@@ -63,7 +72,7 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 
 	return (
 		<TicketsTableContextComponent template={template}>
-			<ResizableTableContextComponent columns={columns} columnGap={1} >
+			<ResizableTableContextComponent columns={columns} columnGap={1}>
 				<TableContent {...props} template={template} />
 			</ResizableTableContextComponent>
 		</TicketsTableContextComponent>
