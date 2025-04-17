@@ -53,8 +53,8 @@ const SortingTableHeader = ({ name, children, disableSorting = false, ...props }
 	);
 
 	return (
-		<ResizableTableCell name={name}>
-			<Header {...props} onClick={() => onColumnClick(name)} $selectable>
+		<ResizableTableCell name={name} onClick={() => onColumnClick(name)}>
+			<Header {...props} $selectable>
 				{isSelected && (
 					<IconContainer $flip={isDescendingOrder}>
 						<ArrowIcon />
