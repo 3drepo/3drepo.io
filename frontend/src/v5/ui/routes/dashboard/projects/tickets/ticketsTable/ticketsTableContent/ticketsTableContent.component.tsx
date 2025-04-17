@@ -58,7 +58,8 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const columns = getAvailableColumnsForTemplate(template);
+	const templatHasBeenFetched = templateAlreadyFetched(template);
+	const columns = templatHasBeenFetched ? getAvailableColumnsForTemplate(template) : [];
 
 	return (
 		<TicketsTableContextComponent template={template}>
