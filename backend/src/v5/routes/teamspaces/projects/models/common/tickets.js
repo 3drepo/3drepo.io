@@ -38,7 +38,7 @@ const {
 	hasCommenterAccessToFederation,
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
-} = require('../../../../../middleware/permissions/permissions');
+} = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { serialiseFullTicketTemplate, serialiseTemplatesList, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templateExists, validateImportTickets, validateNewTicket, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');

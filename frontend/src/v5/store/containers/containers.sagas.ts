@@ -42,9 +42,9 @@ import { selectContainerById, selectContainers, selectIsListPending } from './co
 import { compByColum } from '../store.helpers';
 import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { LifoQueue } from '@/v5/helpers/functions.helpers';
+import { AsyncFunctionExecutor } from '@/v5/helpers/functions.helpers';
 
-const statsQueue = new LifoQueue<ContainerStats>(API.Containers.fetchContainerStats, 30);
+const statsStack = new AsyncFunctionExecutor<ContainerStats>(API.Containers.fetchContainerStats, 30);
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -75,7 +75,7 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
 		const container: IContainer = yield select(selectContainerById, containerId);
-		const stats = yield statsQueue.enqueue(teamspace, projectId, containerId);
+		const stats = yield statsStack.addCall(teamspace, projectId, containerId);
 		
 		const basicDataEqual = compByColum(['unit', 'type'])(container, stats);
 		// eslint-disable-next-line max-len
@@ -106,7 +106,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
 		}
 
-		statsQueue.resetQueue();
+		statsStack.reset();
 
 		yield all(
 			containers.sort(getSortingFunction({ column: ['name'], direction:[SortingDirection.DESCENDING] })).map(
@@ -235,7 +235,7 @@ export function* deleteContainer({ teamspace, projectId, containerId, onSuccess,
 }
 
 export function* resetContainerStatsQueue() {
-	statsQueue.resetQueue();
+	statsStack.reset();
 }
 
 export default function* ContainersSaga() {

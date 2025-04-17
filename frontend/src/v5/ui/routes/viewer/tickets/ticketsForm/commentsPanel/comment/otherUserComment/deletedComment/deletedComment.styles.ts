@@ -16,10 +16,12 @@
  */
 
 import styled from 'styled-components';
-import { CommentMessage } from '../../basicComment/basicComment.styles';
+import { CommentContainer, CommentMessage } from '../../basicComment/basicComment.styles';
 import { Comment as CommentBase } from '../otherUserComment.styles';
 
-export const Comment = styled(CommentBase)`
+export const Comment = styled(CommentBase).attrs({
+	as: CommentContainer,
+})`
 	${CommentMessage} {
 		color: ${({ theme }) => theme.palette.base.light};
 	}

@@ -20,6 +20,7 @@ import linkify from 'markdown-linkify';
 import { getAPIUrl } from '../services/api/default';
 import { getRiskConsequenceName, getRiskLikelihoodName } from './risks';
 import { sortByDate } from './sorting';
+import { getUserFullName } from './user.helpers';
 
 export const INTERNAL_IMAGE_PATH_PREFIX = `API/`;
 export const INTERNAL_VIEWPOINT_ID_REGEX = new RegExp('#SS-[\\w-]+', 'gi');
@@ -74,7 +75,7 @@ export const prepareComments = (comments = []) => {
 	return sortByDate(preparedComments, { order: 'desc' });
 };
 
-export const prepareComment = (comment) => {
+const prepareComment = (comment) => {
 	if (comment.action) {
 		comment.comment = convertActionCommentToText(comment);
 	}
@@ -88,15 +89,16 @@ export const prepareComment = (comment) => {
 };
 
 const convertActionCommentToText = (comment: IComment) => {
+	const author = getUserFullName(comment.owner)
 	let text = '';
 
 	if (comment) {
 		switch (comment.action.property) {
 			case 'resource':
 				if (comment.action.to) {
-					text = `Resource ${comment.action.to} attached by ${comment.owner}`;
+					text = `Resource ${comment.action.to} attached by ${author}`;
 				} else {
-					text = `Resource ${comment.action.from} removed by ${comment.owner}`;
+					text = `Resource ${comment.action.from} removed by ${author}`;
 				}
 				break;
 			case 'associated_activity':
@@ -131,7 +133,7 @@ const convertActionCommentToText = (comment: IComment) => {
 				break;
 			case 'mitigation_desc':
 				comment.action.propertyText = 'Treatment description';
-				text = comment.action.propertyText + ' updated by ' + comment.owner;
+				text = comment.action.propertyText + ' updated by ' + author;
 				break;
 			case 'mitigation_detail':
 				comment.action.propertyText = 'Treatment detail';
@@ -170,7 +172,7 @@ const convertActionCommentToText = (comment: IComment) => {
 				break;
 			case 'residual_risk':
 				comment.action.propertyText = 'Residual risk';
-				text = comment.action.propertyText + ' updated by ' + comment.owner;
+				text = comment.action.propertyText + ' updated by ' + author;
 				break;
 			case 'risk_factor':
 				comment.action.propertyText = 'Risk factor';
@@ -199,7 +201,7 @@ const convertActionCommentToText = (comment: IComment) => {
 				break;
 			case 'desc':
 				comment.action.propertyText = 'Description';
-				text = comment.action.propertyText + ' updated by ' + comment.owner;
+				text = comment.action.propertyText + ' updated by ' + author;
 				break;
 			case 'due_date':
 				comment.action.propertyText = 'Due Date';
@@ -211,12 +213,12 @@ const convertActionCommentToText = (comment: IComment) => {
 				} else {
 					text = comment.action.propertyText + ' set to ' +
 						comment.action.to + ' by ' +
-						comment.owner;
+						author;
 				}
 				break;
 			case 'bcf_import':
 				comment.action.propertyText = 'BCF import';
-				text = comment.action.propertyText + ' by ' + comment.owner;
+				text = comment.action.propertyText + ' by ' + author;
 				break;
 			case 'position':
 				// In this case is not needed to be specific of the value that changed
@@ -236,32 +238,32 @@ const convertActionCommentToText = (comment: IComment) => {
 
 			case 'issue_referenced':
 				comment.action.propertyText = 'Referenced';
-				text = 'Issue referenced in #' + comment.action.to + ' by ' + comment.owner;
+				text = 'Issue referenced in #' + comment.action.to + ' by ' + author;
 				break;
 
 			case 'name':
 				comment.action.propertyText = 'Title';
-				text = comment.action.propertyText + ' updated by ' + comment.owner;
+				text = comment.action.propertyText + ' updated by ' + author;
 				break;
 			case 'sequence_start':
 				comment.action.propertyText = 'Sequence start';
-				text = comment.action.propertyText + ' updated by ' + comment.owner;
+				text = comment.action.propertyText + ' updated by ' + author;
 				break;
 			case 'sequence_end':
 				comment.action.propertyText = 'Sequence end';
-				text = comment.action.propertyText + ' updated by ' + comment.owner;
+				text = comment.action.propertyText + ' updated by ' + author;
 				break;
 		}
 	}
 
 	if (0 === text.length) {
 		if (!comment.action.from || !comment.action.to) {
-			text = comment.action.propertyText + ' updated by ' + comment.owner;
+			text = comment.action.propertyText + ' updated by ' + author;
 		} else {
 			text = comment.action.propertyText + ' updated from ' +
 				comment.action.from + ' to ' +
 				comment.action.to + ' by ' +
-				comment.owner;
+				author;
 		}
 	}
 

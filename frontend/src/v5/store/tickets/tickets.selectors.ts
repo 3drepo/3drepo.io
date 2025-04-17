@@ -23,6 +23,9 @@ import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
+import { selectFederationById } from '../federations/federations.selectors';
+import { selectContainerById } from '../containers/containers.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -79,8 +82,8 @@ export const selectTickets = createSelector(
 	selectTicketsRaw,
 	selectTicketsGroups,
 	(state, modelId) => modelId,
-	(state) => state,
-	(ticketsList, groups, modelId, storeState): ITicket[] => {
+	(ticketsList, groups, modelId): ITicket[] => {
+		const storeState = getState();
 		const tickets = ticketsList.map((ticket) => {
 			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
 			return ticketWithGroups(({ ...ticketWithStatus, modelId }), groups);
@@ -111,7 +114,11 @@ export const selectTicketsByContainersAndFederations = createSelector(
 	(state) => state,
 	(state, modelsIds: string[]) => modelsIds,
 	(storeState, modelsIds) => {
-		const tickets = modelsIds.flatMap((modelId) => selectTickets(storeState, modelId));
+		const tickets = modelsIds.flatMap((modelId) => {
+			const modelTickets = selectTickets(storeState, modelId);
+			const modelName = (selectFederationById(storeState, modelId) || selectContainerById(storeState, modelId))?.name;
+			return modelTickets.map((t) => ({ ...t, modelName })); // modelName is added for column sorting
+		});
 		return sortTicketsByCreationDate(tickets);
 	},
 );

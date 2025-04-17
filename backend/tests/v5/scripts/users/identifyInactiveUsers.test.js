@@ -22,6 +22,7 @@ const {
 	generateUserCredentials,
 	fileExists,
 	generateRandomNumber,
+	outOfOrderArrayEqual,
 } = require('../../helper/services');
 
 const { times } = require('lodash');
@@ -49,13 +50,11 @@ const setupData = async () => {
 	const users = times(20, () => generateUserCredentials());
 	delete users[1].basicData.billing.billingInfo.company;
 
-	await Promise.all([
-		createTeamspace(teamspace, [], undefined, false),
-		createTeamspace(teamspace2, [], undefined, false),
-	]);
+	const userList = [];
 
 	await Promise.all(users.map(async (user, index) => {
-		await createUser(user, [teamspace, teamspace2]);
+		userList.push(user.user);
+		await createUser(user);
 
 		if (index % 2 === 0) {
 			const loginRecords = times(5, () => generateLoginRecord(user.user));
@@ -72,6 +71,11 @@ const setupData = async () => {
 			user.invalidUser = true;
 		}
 	}));
+
+	await Promise.all([
+		createTeamspace(teamspace, userList, undefined, false),
+		createTeamspace(teamspace2, userList, undefined, false),
+	]);
 
 	return users;
 };
@@ -114,9 +118,7 @@ const runTest = () => {
 				return [];
 			});
 
-			expect(res.length).toBe(expectedResult.length);
-			expect(res.sort((a, b) => a.user.localeCompare(b.user)))
-				.toEqual(expectedResult.sort((a, b) => a.user.localeCompare(b.user)));
+			outOfOrderArrayEqual(res, expectedResult);
 		});
 	});
 };

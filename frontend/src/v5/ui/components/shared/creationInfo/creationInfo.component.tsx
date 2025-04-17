@@ -40,9 +40,9 @@ export const CreationInfo = ({
 	const ownerDetails = UsersHooksSelectors.selectUser(teamspace, owner);
 	const hasUpdateInfo = updatedAt && updatedAt !== createdAt;
 
-	const Username = () => (
+	const UserFullName = () => (
 		<ShrinkValue>
-			<HoverPopover anchor={(props) => <span {...props}>{owner}</span>}>
+			<HoverPopover anchor={(props) => <span {...props}>{ownerDetails.firstName} {ownerDetails.lastName}</span>}>
 				<UserPopover user={ownerDetails} />
 			</HoverPopover>
 		</ShrinkValue>
@@ -65,7 +65,7 @@ export const CreationInfo = ({
 	return (
 		<CreationInfoContainer className={className}>
 			<NoShrinkLabel><FormattedMessage id="creationInfo.createdBy" defaultMessage="Created by" /></NoShrinkLabel>
-			<Username />
+			<UserFullName />
 			<NoShrinkLabel><FormattedMessage id="creationInfo.on" defaultMessage="on" /></NoShrinkLabel>
 			<CreationDate />
 			{hasUpdateInfo && (

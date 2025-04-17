@@ -24,8 +24,8 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../../src/v5/models/teamspaceSettings');
 const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
 
-jest.mock('../../../../../../../src/v5/utils/permissions/permissions');
-const PermissionsUtils = require(`${src}/utils/permissions/permissions`);
+jest.mock('../../../../../../../src/v5/utils/permissions');
+const PermissionsUtils = require(`${src}/utils/permissions`);
 
 const Teamspaces = require(`${src}/middleware/dataConverter/inputs/teamspaces`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -84,7 +84,7 @@ const testMemberExists = () => {
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).not.toHaveBeenCalled();
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser, true);
 		});
 
 		test('should respond with error if hasAccess throws an error', async () => {
@@ -96,7 +96,7 @@ const testMemberExists = () => {
 			await Teamspaces.memberExists(req, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser, true);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, err);
 		});
@@ -108,7 +108,7 @@ const testMemberExists = () => {
 			await Teamspaces.memberExists(req, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, nonTsMemberUser);
+			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, nonTsMemberUser, true);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.userNotFound);
 		});

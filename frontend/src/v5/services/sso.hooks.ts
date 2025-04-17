@@ -17,10 +17,9 @@
 
 import { isNull, omitBy, values } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import { addParams, getParams } from '../helpers/url.helper';
-import { errorMessages, postActions, signin } from './api/sso';
+import { getParams } from '../helpers/url.helper';
+import { errorMessages, postActions, ssoLogin } from './api/sso';
 import { formatMessage } from './intl';
-import { AuthHooksSelectors } from './selectorsHooks';
 
 export const useSSOParams = () => {
 	const history = useHistory();
@@ -44,8 +43,6 @@ export const useSSOParams = () => {
 export const useSSOLogin = () => {
 	const [{ error }] = useSSOParams();
 
-	const returnUrl = AuthHooksSelectors.selectReturnUrl();
-
 	const errorMessage = error
 		? formatMessage({
 			id: 'auth.ssoerror',
@@ -53,9 +50,10 @@ export const useSSOLogin = () => {
 		},
 		{ errorMessage: errorMessages[error] }) : null;
 
-	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
-
-	return [errorMessage, () => signin(redirectUri).then(({ data }) => {
-		window.location.href = data.link;
-	})] as [ string | null, ()=> void];
+	return [
+		(redirectUri, email) => ssoLogin(redirectUri, email).then(({ data }) => {
+			window.location.href = data.link;
+		}),
+		errorMessage,
+	] as [(redirectUri: string, email: string) => void, string | null];
 };

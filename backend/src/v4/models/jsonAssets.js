@@ -285,26 +285,23 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 };
 
 const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
-
+	modelsToProcess = modelsToProcess.filter(Boolean); // Remove any falsy values so they'll be ignored when building the array
 	for(let i = 0; i < modelsToProcess.length; ++i) {
 		const entry = modelsToProcess[i];
-		if(entry) {
+		let assetList = await DB.findOne(
+			entry.account, `${entry.model}.stash.repobundles`, {_id: entry.rev}, {jsonFiles: 1});
 
-			let assetList = await DB.findOne(
-				entry.account, `${entry.model}.stash.repobundles`, {_id: entry.rev}, {jsonFiles: 1});
+		if(!assetList) {
+			assetList = await DB.findOne(
+				entry.account, `${entry.model}.stash.unity3d`, {_id: entry.rev}, {jsonFiles: 1});
+		}
 
-			if(!assetList) {
-				assetList = await DB.findOne(
-					entry.account, `${entry.model}.stash.unity3d`, {_id: entry.rev}, {jsonFiles: 1});
-			}
+		if(assetList) {
+			await addSuperMeshMappingsToStream(entry.account, entry.model, entry.rev, assetList.jsonFiles, outStream);
+		}
 
-			if(assetList) {
-				await addSuperMeshMappingsToStream(entry.account, entry.model, entry.rev, assetList.jsonFiles, outStream);
-			}
-
-			if(i !== modelsToProcess.length - 1) {
-				outStream.write(",");
-			}
+		if(i !== modelsToProcess.length - 1) {
+			outStream.write(",");
 		}
 	}
 };
