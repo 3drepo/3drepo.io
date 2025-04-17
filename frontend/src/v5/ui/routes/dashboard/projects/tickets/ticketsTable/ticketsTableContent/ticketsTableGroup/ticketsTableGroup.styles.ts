@@ -18,7 +18,7 @@
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
-import { Row } from './ticketsTableRow/ticketsTableRow.styles';
+import { LoadingRow, Row } from './ticketsTableRow/ticketsTableRow.styles';
 import { TextOverflow } from '@controls/textOverflow';
 
 export const Headers = styled(ResizableTableRow)`
@@ -92,7 +92,8 @@ export const Group = styled.div<{ $empty: boolean }>`
 	background-color: transparent;
 
 	${({ $empty }) => !$empty && css`
-		& > ${/* sc-selector */Row}:first-child {
+		& > ${/* sc-selector */Row}:first-child,
+		& > ${/* sc-selector */LoadingRow}:first-child {
 			${roundBorderTop}
 			overflow: hidden;
 		}

@@ -30,6 +30,25 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	${Cell} {
 		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
 	}
+
+	&:first-child {
+		border-top-left-radius: 10px;
+		border-top-right-radius: 10px;
+		overflow: hidden;
+	}
+`;
+
+export const LoadingRow = styled.div<{ $width: number }>`
+	width: ${({ $width }) => $width}px;
+	height: 37px;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	padding-left: min(50%, 46vw);
+
+	& > * {
+		flex-direction: unset;
+		width: fit-content;
+		height: 100%;
+	}
 `;
 
 export const CellOwner = styled(Cell)`
