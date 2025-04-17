@@ -17,8 +17,8 @@
 
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { PRIORITY_LEVELS_MAP, RISK_LEVELS_MAP, TREATMENT_LEVELS_MAP } from '@controls/chip/chip.types';
+import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { BooleanCell, DateCell, TextCell } from './cells/cells.component';
 import { CellDate, CellOwner } from '../ticketsTableRow.styles';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
@@ -33,14 +33,13 @@ import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTabl
 import { Cell } from './cells/cells.styles';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
-const SAFETIBASE_NAME_PREFIX = 'modules.safetibase';
 type TicketsTableCellProps = {
 	name: string,
 	modelId: string,
 	ticket: ITicket,
 };
 export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProps) => {
-	const { title, properties, number, type: templateId, modules } = ticket;
+	const { title, properties, number, type: templateId } = ticket;
 	const { getPropertyDefaultValue, getPropertyType } = useContext(TicketsTableContext);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
@@ -93,27 +92,6 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 				return (
 					<Cell name={name}>
 						<Chip {...getChipPropsFromConfig(statusConfig, status)} />
-					</Cell>
-				);
-		}
-	}
-
-	if (name.startsWith(SAFETIBASE_NAME_PREFIX)) {
-		const {
-			treatmentStatus,
-			levelOfRisk,
-		} = getPropertiesInCamelCase(modules?.safetibase || {});
-		switch (name.replace(SAFETIBASE_NAME_PREFIX, '')) {
-			case SafetibaseProperties.LEVEL_OF_RISK:
-				return (
-					<Cell name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
-						<Chip {...RISK_LEVELS_MAP[levelOfRisk]} variant="filled" />
-					</Cell>
-				);
-			case SafetibaseProperties.TREATMENT_STATUS:
-				return (
-					<Cell name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
-						<Chip {...TREATMENT_LEVELS_MAP[treatmentStatus]} variant="filled" />
 					</Cell>
 				);
 		}
