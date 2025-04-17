@@ -28,6 +28,10 @@ const emailToUser = {};
 
 Accounts.getTeamspaceByAccount = (accountId) => teamspaceByAccount[accountId];
 
+Accounts.setMFAPolicy = () => Promise.resolve();
+
+Accounts.getClaimedDomains = () => Promise.resolve([]);
+
 Accounts.createAccount = (name) => {
 	const accountId = generateUUIDString();
 	teamspaceByAccount[accountId] = name;

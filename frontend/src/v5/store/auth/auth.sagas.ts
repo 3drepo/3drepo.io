@@ -25,14 +25,14 @@ import { cookies } from '@/v5/helpers/cookie.helper';
 import axios from 'axios';
 import { setPermissionModalSuppressed } from '@components/shared/updatePermissionModal/updatePermissionModal.helpers';
 import { authBroadcastChannel } from './authBrodcastChannel';
-import { ssoAuth } from '@/v5/services/api/sso';
+import { ssoAuthTeamspace } from '@/v5/services/api/sso';
 
 const CSRF_TOKEN = 'csrf_token';
 const TOKEN_HEADER = 'X-CSRF-TOKEN';
 
 function* authenticateTeamspace({ redirectUri, teamspace, onError }: AuthenticateTeamspaceAction) {
 	try {
-		const { data } = yield ssoAuth(redirectUri, teamspace);
+		const { data } = yield ssoAuthTeamspace(redirectUri, teamspace);
 		window.location.replace(data.link);
 	} catch (error) {
 		onError?.(error);

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, membershipStatus } = require('../frontegg.constants');
-const { get, delete: httpDelete, post } = require('../../../../utils/webRequests');
+const { HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, membershipStatus, mfaPolicy } = require('../frontegg.constants');
+const { get, delete: httpDelete, post, put } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const { errCodes } = require('../frontegg.constants');
 const { generateUUIDString } = require('../../../../utils/helper/uuids');
@@ -39,6 +39,28 @@ Accounts.getTeamspaceByAccount = async (accountId) => {
 	}
 };
 
+Accounts.setMFAPolicy = async (accountId, policySetting) => {
+	try {
+		if (!Object.values(mfaPolicy).includes(policySetting)) throw new Error(`Unrecognised policy setting: ${policySetting}`);
+
+		const config = await getConfig();
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		const payload = {
+			enforceMFAType: policySetting,
+			allowRememberMyDevice: false,
+		};
+
+		await put(`${config.vendorDomain}/identity/resources/configurations/v1/mfa-policy`, payload, { headers });
+	} catch (err) {
+		logger.logError(`Failed to create account: ${err?.response?.data} `);
+		throw new Error(`Failed to create account on Accounts: ${err.message}`);
+	}
+};
+
 Accounts.createAccount = async (name) => {
 	try {
 		const config = await getConfig();
@@ -57,6 +79,7 @@ Accounts.createAccount = async (name) => {
 		await Promise.all([
 			post(`${config.vendorDomain}/tenants/resources/tenants/v1/${tenantId}/metadata`, metadataPayload, { headers }),
 			post(`${config.vendorDomain}/applications/resources/applications/tenant-assignments/v1/${config.appId}`, { tenantId }, { headers }),
+			Accounts.setMFAPolicy(tenantId, mfaPolicy.ENABLED),
 		]);
 
 		return tenantId;
@@ -176,6 +199,25 @@ Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 
 		logger.logError(`Failed to add user to account: ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to add user to ${accountId} on Accounts: ${err.message}`);
+	}
+};
+
+Accounts.getClaimedDomains = async (accountId) => {
+	try {
+		const config = await getConfig();
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		const { data } = await get(`${config.vendorDomain}/team/resources/sso/v1/configurations`, headers);
+		return data.flatMap(({ enabled, domains }) => {
+			if (!enabled) return [];
+			return domains.map(({ domain }) => domain);
+		});
+	} catch (err) {
+		logger.logError(`Failed to get claimed domains within an account: ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to get claimed domains within an account(${accountId}): ${err.message}`);
 	}
 };
 
