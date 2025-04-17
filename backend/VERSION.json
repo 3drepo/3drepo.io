@@ -4,16 +4,16 @@
 	"supported": []
   },
   "civil" :{
-	"current" : "5.16.0",
-	"supported": []
+	"current" : "5.16.1",
+	"supported": ["5.16.0"]
   },
   "navis" :{
-	"current" : "5.16.0",
-	"supported": []
+	"current" : "5.16.1",
+	"supported": ["5.16.0"]
   },
    "revit" :{
-	"current" : "5.16.0",
-	"supported": []
+	"current" : "5.16.1",
+	"supported": ["5.16.0"]
   },
   "unitydll" : {
 	"current": "5.4.0",
