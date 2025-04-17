@@ -18,7 +18,6 @@
 import { createContext } from 'react';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
-import { get } from 'lodash';
 
 export interface TicketsTableType {
 	getPropertyDefaultValue: (name: string) => unknown;
@@ -37,10 +36,14 @@ interface Props {
 	template: ITemplate;
 }
 export const TicketsTableContextComponent = ({ children, template }: Props) => {
-	const definitions = getTemplatePropertiesDefinitions(template);
+	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
+	const definitionsAsObject = definitionsAsArray.reduce(
+		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
+		{},
+	);
 
-	const getPropertyDefaultValue = (name: string) => get(definitions, name)?.default;
-	const getPropertyType = (name: string) => get(definitions, name)?.type;
+	const getPropertyDefaultValue = (name: string) => definitionsAsObject[name]?.default;
+	const getPropertyType = (name: string) => definitionsAsObject[name]?.type;
 
 	return (
 		<TicketsTableContext.Provider value={{
