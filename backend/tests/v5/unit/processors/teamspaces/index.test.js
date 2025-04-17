@@ -114,7 +114,7 @@ const testGetTeamspaceMembersInfo = () => {
 			return Promise.resolve(frontEggData);
 		});
 
-		TeamspacesModel.getMemberInfoFromId.mockImplementation((ts) => {
+		UsersModel.getMemberInfoFromId.mockImplementation((ts) => {
 			const userInfo = { ...goldenData.find((element) => element.userId === ts) };
 
 			delete userInfo.job;
@@ -392,26 +392,27 @@ const testRemoveTeamspace = () => {
 		test('Should remove the teamspace and all the relevant data', async () => {
 			const teamspaceId = generateRandomString();
 			TeamspacesModel.getTeamspaceRefId.mockResolvedValue(teamspaceId);
+			TeamspacesModel.getTeamspaceSetting.mockResolvedValue({ refId: teamspaceId });
 
-			const users = [
-				{ user: generateRandomString() },
-				{ user: generateRandomString() },
-			];
-			TeamspacesModel.getMembersInfo.mockResolvedValueOnce(users);
+			const frontEggUsers = _.times(2, { id: generateRandomString(), user: generateRandomString() });
+
+			FronteggService.getAllUsersInAccount.mockResolvedValueOnce(frontEggUsers.map((user) => ({ id: user.id })));
+			UsersModel.getMemberInfoFromId.mockImplementation(
+				(id) => ({ user: frontEggUsers.find((item) => item.id === id).user }));
 
 			const teamspace = generateRandomString();
 
 			await Teamspaces.removeTeamspace(teamspace);
 
-			expect(TeamspacesModel.getMembersInfo).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.getMembersInfo).toHaveBeenCalledWith(teamspace);
+			expect(FronteggService.getAllUsersInAccount).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getAllUsersInAccount).toHaveBeenCalledWith(teamspaceId);
 
-			expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledTimes(users.length);
-			expect(UsersModel.deleteFavourites).toHaveBeenCalledTimes(users.length);
+			expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledTimes(frontEggUsers.length);
+			expect(UsersModel.deleteFavourites).toHaveBeenCalledTimes(frontEggUsers.length);
 
-			users.forEach(({ user }) => {
-				expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledWith(teamspace, user);
-				expect(UsersModel.deleteFavourites).toHaveBeenCalledWith(user, teamspace);
+			frontEggUsers.forEach((user) => {
+				expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledWith(teamspace, user.user);
+				expect(UsersModel.deleteFavourites).toHaveBeenCalledWith(user.user, teamspace);
 			});
 
 			expect(FilesManager.removeAllFilesFromTeamspace).toHaveBeenCalledTimes(1);

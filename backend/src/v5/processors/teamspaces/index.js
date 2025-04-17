@@ -23,14 +23,12 @@ const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revo
 const {
 	createTeamspaceSettings,
 	getAddOns,
-	getMemberInfoFromId,
-	getMembersInfo,
 	getTeamspaceRefId,
 	getTeamspaceSetting,
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
-const { deleteFavourites, getAccessibleTeamspaces, getUserByUsername, getUserId, updateUserId } = require('../../models/users');
+const { deleteFavourites, getAccessibleTeamspaces, getMemberInfoFromId, getUserByUsername, getUserId, updateUserId } = require('../../models/users');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { COL_NAME } = require('../../models/projectSettings.constants');
@@ -45,9 +43,11 @@ const { removeUserFromAllProjects } = require('../../models/projectSettings');
 const Teamspaces = {};
 
 const removeAllUsersFromTS = async (teamspace) => {
-	const members = await getMembersInfo(teamspace);
+	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
+	const frontEggUsers = await getAllUsersInAccount(tenantId);
+	const membersList = await Promise.all(frontEggUsers.map((user) => getMemberInfoFromId(user.id)));
 	await Promise.all(
-		members.map(async ({ user }) => {
+		membersList.map(async ({ user }) => {
 			await Promise.all([
 				revokeTeamspaceRoleFromUser(teamspace, user),
 				deleteFavourites(user, teamspace),

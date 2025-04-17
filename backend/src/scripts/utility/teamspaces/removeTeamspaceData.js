@@ -20,7 +20,9 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { removeSubscription, removeAddOns, getMembersInfo } = require(`${v5Path}/models/teamspaceSettings`);
+const { getAllUsersInAccount } = require(`${v5Path}/services/sso/frontegg`);
+const { getMemberInfoFromId } = require(`${v5Path}/models/users`);
+const { removeSubscription, removeAddOns, getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 const { revokeTeamspaceRoleFromUser } = require(`${v5Path}/models/roles`);
 const { deleteProject } = require(`${v5Path}/processors/teamspaces/projects`);
 const { getProjectList } = require(`${v5Path}/models/projectSettings`);
@@ -31,9 +33,11 @@ const removeAllProjects = async (teamspace) => {
 };
 
 const removeAllUsersFromTS = async (teamspace) => {
-	const members = await getMembersInfo(teamspace);
+	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
+	const frontEggUsers = await getAllUsersInAccount(tenantId);
+	const membersList = await Promise.all(frontEggUsers.map((user) => getMemberInfoFromId(user.id)));
 	return Promise.all(
-		members.map(({ user }) => ((user !== teamspace)
+		membersList.map(({ user }) => ((user !== teamspace)
 			? revokeTeamspaceRoleFromUser(teamspace, user) : Promise.resolve())),
 	);
 };

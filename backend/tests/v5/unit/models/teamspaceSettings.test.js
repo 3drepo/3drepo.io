@@ -22,6 +22,7 @@ const { src } = require('../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
+const Users = require(`${src}/models/users`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 const db = require(`${src}/handler/db`);
@@ -825,7 +826,7 @@ const testGetMemberInfoFromId = () => {
 			const expectedData = { user: 'A', firstName: 'a', lastName: 'b', company: 'companyA' };
 			const ts = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(mockData);
-			const res = await Teamspace.getMemberInfoFromId(ts);
+			const res = await Users.getMemberInfoFromId(ts);
 			expect(res).toEqual(expectedData);
 
 			expect(fn.mock.calls.length).toBe(1);
@@ -836,7 +837,7 @@ const testGetMemberInfoFromId = () => {
 			const expectedData = { user: 'A', firstName: 'a', lastName: 'b' };
 			const ts = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(mockData);
-			const res = await Teamspace.getMemberInfoFromId(ts);
+			const res = await Users.getMemberInfoFromId(ts);
 			expect(res).toEqual(expectedData);
 
 			expect(fn.mock.calls.length).toBe(1);
