@@ -20,7 +20,6 @@ import { useEffect, useRef } from 'react';
 import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip, DueDate } from './ticketItem.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { ControlledAssigneesSelect as Assignees } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
@@ -62,7 +61,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const selectTicket = (event) => {
 		event.stopPropagation();
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
-		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
 

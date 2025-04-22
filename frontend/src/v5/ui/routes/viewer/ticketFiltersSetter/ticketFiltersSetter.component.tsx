@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { uniq } from 'lodash';
 import { useParams } from 'react-router-dom';
@@ -27,19 +27,29 @@ import { StatusValue } from '@/v5/store/tickets/tickets.types';
 import { TicketStatusDefaultValues, TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
-export const DefaultTicketFiltersSetter = () => {
-	const { containerOrFederation } = useParams<ViewerParams>();
+export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const isFed = modelIsFederation(containerOrFederation);
+	
+	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
 
-	const getTicketFiltersFromURL = (values): CardFilter[] => [{
+	useEffect(() => {
+		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
+	}, [tickets, cardFilters]);
+
+	const getTicketFiltersFromCodes = (values): CardFilter[] => [{
 		module: '',
 		property: 'Ticket ID',
 		type: 'ticketCode',
 		filter: {
-			operator: 'eq',
+			operator: 'is',
 			values,
 		},
 	}];
@@ -94,8 +104,13 @@ export const DefaultTicketFiltersSetter = () => {
 	useEffect(() => {
 		if (templates.length) {
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
-			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromURL(ticketCodes) : getNonCompletedTicketFilters();
+			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : getNonCompletedTicketFilters();
 			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
+
+			if (ticketCodes.length) {
+				ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
+			}
+
 			setTicketSearchParam();
 		}
 	}, [templates.length]); 
