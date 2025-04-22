@@ -28,6 +28,7 @@ import { ResizableTableContext } from '@controls/resizableTableContext/resizable
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Divider } from '@mui/material';
+import { TextOverflow } from '@controls/textOverflow';
 
 export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenColumns }) => {
 	const { hiddenColumns, getAllColumnsNames } = useContext(ResizableTableContext);
@@ -69,7 +70,7 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 								disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
 								onChange={() => onChange(columnName)}
 								value={isVisible(columnName)}
-								label={getColumnLabel(columnName)}
+								label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
 							/>
 						</MenuItem>
 					</>

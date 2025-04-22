@@ -26,9 +26,10 @@ interface ITextOverflow {
 	tooltipText?: string;
 	children: ReactNode;
 	className?: string;
+	onClick?: () => void;
 }
 
-export const TextOverflow = ({ children, className, tooltipText, lines }: ITextOverflow): JSX.Element => {
+export const TextOverflow = ({ children, className, tooltipText, lines, onClick }: ITextOverflow): JSX.Element => {
 	const ref = useRef(null);
 	const [isTruncated, setIsTruncated] = useState(false);
 
@@ -56,10 +57,10 @@ export const TextOverflow = ({ children, className, tooltipText, lines }: ITextO
 		<>
 			<Tooltip
 				title={tooltipText || onlyText(children)}
-				style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
+				style={{ pointerEvents: (isTruncated || !onClick) ? 'all' : 'none' }}
 				placement="bottom"
 			>
-				<Container ref={ref} lines={lines} className={className}>
+				<Container ref={ref} lines={lines} className={className} onClick={onClick}>
 					{children}
 				</Container>
 			</Tooltip>
