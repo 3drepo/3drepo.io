@@ -20,7 +20,7 @@ const ServiceHelper = require('../../helper/services');
 const { src } = require('../../helper/path');
 const SessionTracker = require('../../helper/sessionTracker');
 
-const { templates, createResponseCode } = require(`${src}/utils/responseCodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 let server;
 let agent;
@@ -41,7 +41,7 @@ const testAuthenticate = () => {
 
 		describe.each([
 			['the user is not logged in', false, generateURL(), true],
-			['redirectURL is not provided', false, generateURL(false), false, createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required')],
+			['redirectURL is not provided', false, generateURL(false), false, templates.invalidArguments],
 			['the user already logged in', true, generateURL(), false, templates.alreadyLoggedIn],
 		])('', (desc, useSessionedAgent, url, success, err = templates.ok) => {
 			test(`Should ${success ? 'respond with the link' : `fail with ${err.code}`} if ${desc}`, async () => {
@@ -50,7 +50,9 @@ const testAuthenticate = () => {
 				if (success) {
 					expect(res.body).toEqual({ link: expect.any(String) });
 				} else {
-					expect(res.body).toEqual(expect.objectContaining(err));
+					// omit the message as some of them has bespoke messages from things like yup
+					const { message, ...expectedErr } = err;
+					expect(res.body).toEqual(expect.objectContaining(expectedErr));
 				}
 			});
 		});
@@ -77,7 +79,7 @@ const testAuthenticateAgainstTeamspace = () => {
 
 		describe.each([
 			['the user is not logged in', undefined, generateURL(), false, templates.notLoggedIn],
-			['redirectURL is not provided', tsUser, generateURL(teamspace, false), false, createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required')],
+			['redirectURL is not provided', tsUser, generateURL(teamspace, false), false, templates.invalidArguments],
 			['teamspace is not found', tsUser, generateURL(ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
 			['the user is not a member of the teamspace', noAccessUser, generateURL(), false, templates.teamspaceNotFound],
 			['the user is a member of the teamspace', tsUser, generateURL(), true],
@@ -91,7 +93,9 @@ const testAuthenticateAgainstTeamspace = () => {
 				if (success) {
 					expect(res.body).toEqual({ link: expect.any(String) });
 				} else {
-					expect(res.body).toEqual(expect.objectContaining(err));
+					// omit the message as some of them has bespoke messages from things like yup
+					const { message, ...expectedErr } = err;
+					expect(res.body).toEqual(expect.objectContaining(expectedErr));
 				}
 			});
 		});
