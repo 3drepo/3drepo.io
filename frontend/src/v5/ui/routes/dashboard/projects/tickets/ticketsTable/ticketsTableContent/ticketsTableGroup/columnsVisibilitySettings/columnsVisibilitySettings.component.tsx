@@ -23,20 +23,20 @@ import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles
 import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
 import { xor } from 'lodash';
-import { useContext, useEffect, useState } from 'react';
+import { useContext } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Divider } from '@mui/material';
 import { TextOverflow } from '@controls/textOverflow';
 
-export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenColumns }) => {
-	const { hiddenColumns, getAllColumnsNames } = useContext(ResizableTableContext);
+export const ColumnsVisibilitySettings = () => {
+	const { hiddenColumns, getAllColumnsNames, setHiddenColumns } = useContext(ResizableTableContext);
 	const columnsNames = getAllColumnsNames();
-	const newVisibleColumnsCount = columnsNames.filter((c) => !newHiddenColumns.includes(c)).length;
+	const newVisibleColumnsCount = columnsNames.length - hiddenColumns.length;
 
-	const onChange = (columnName) => setNewHiddenColumns(xor(newHiddenColumns, [columnName]));
-	const isVisible = (columnName) => !newHiddenColumns.includes(columnName);
+	const onChange = (columnName) => setHiddenColumns(xor(hiddenColumns, [columnName]));
+	const isVisible = (columnName) => !hiddenColumns.includes(columnName);
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
 	);
@@ -53,58 +53,6 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 		return groups;
 	};
 
-	useEffect(() => {
-		setNewHiddenColumns(hiddenColumns);
-	}, []);
-
-	return (
-		<SearchContextComponent items={columnsNames} filteringFunction={filteringFunction}>
-			<SearchInputContainer>
-				<SearchInput
-					placeholder={formatMessage({ id: 'ticketsTable.columnsVisibilitySettings.search.placeholder', defaultMessage: 'Search...' })}
-				
-				/>
-			</SearchInputContainer>
-			<SearchContext.Consumer>
-				{({ filteredItems }) => {
-					const groupedItems = groupBySelected(filteredItems);
-					return (
-						<>
-							{groupedItems.selected.map((columnName) => (
-								<MenuItem key={columnName}>
-									<Checkbox
-										disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
-										onChange={() => onChange(columnName)}
-										value={true}
-										label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
-									/>
-								</MenuItem>
-							))}
-							{groupedItems.unselected.length > 0 && <Divider />}
-							{groupedItems.unselected.map((columnName) => (
-								<MenuItem key={columnName}>
-									<Checkbox
-										disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
-										onChange={() => onChange(columnName)}
-										value={false}
-										label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
-									/>
-								</MenuItem>
-							))}
-						</>
-					);
-				}}
-			</SearchContext.Consumer>
-		</SearchContextComponent>
-	);
-};
-
-export const ColumnsVisibilitySettings = () => {
-	const { setHiddenColumns } = useContext(ResizableTableContext);
-	const [newHiddenColumns, setNewHiddenColumns] = useState([]);
-
-	const onClose = () => setHiddenColumns(newHiddenColumns);
-
 	return (
 		<ActionMenu
 			TriggerButton={(
@@ -118,9 +66,45 @@ export const ColumnsVisibilitySettings = () => {
 					horizontal: 'left',
 				},
 			}}
-			onClose={onClose}
+			useMousePosition
 		>
-			<ColumnsVisibilitySettingsMenu newHiddenColumns={newHiddenColumns} setNewHiddenColumns={setNewHiddenColumns} />
+			<SearchContextComponent items={columnsNames} filteringFunction={filteringFunction}>
+				<SearchInputContainer>
+					<SearchInput
+						placeholder={formatMessage({ id: 'ticketsTable.columnsVisibilitySettings.search.placeholder', defaultMessage: 'Search...' })}
+					/>
+				</SearchInputContainer>
+				<SearchContext.Consumer>
+					{({ filteredItems }) => {
+						const groupedItems = groupBySelected(filteredItems);
+						return (
+							<>
+								{groupedItems.selected.map((columnName) => (
+									<MenuItem key={columnName}>
+										<Checkbox
+											disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
+											onChange={() => onChange(columnName)}
+											value={true}
+											label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
+										/>
+									</MenuItem>
+								))}
+								{groupedItems.unselected.length > 0 && <Divider />}
+								{groupedItems.unselected.map((columnName) => (
+									<MenuItem key={columnName}>
+										<Checkbox
+											disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
+											onChange={() => onChange(columnName)}
+											value={false}
+											label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
+										/>
+									</MenuItem>
+								))}
+							</>
+						);
+					}}
+				</SearchContext.Consumer>
+			</SearchContextComponent>
 		</ActionMenu>
 	);
 };
