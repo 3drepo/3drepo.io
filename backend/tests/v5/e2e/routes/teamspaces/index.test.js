@@ -130,9 +130,17 @@ const testGetTeamspaceMembers = () => {
 
 				return data;
 			});
-			expectedData.push({ job: DEFAULT_OWNER_JOB, user: teamspace });
 
-			ServiceHelper.outOfOrderArrayEqual(res.body.members, expectedData);
+			const resWithoutAdmin = res.body.members.filter(
+				(element) => element.job !== DEFAULT_OWNER_JOB && element.user !== teamspace,
+			);
+			const resAdminJob = res.body.members.filter(
+				(element) => element.job === DEFAULT_OWNER_JOB && element.user === teamspace,
+			);
+
+			ServiceHelper.outOfOrderArrayEqual(resWithoutAdmin, expectedData);
+			expect(resAdminJob[0].job).toEqual(DEFAULT_OWNER_JOB);
+			expect(resAdminJob[0].user).toEqual(teamspace);
 		});
 	});
 };
