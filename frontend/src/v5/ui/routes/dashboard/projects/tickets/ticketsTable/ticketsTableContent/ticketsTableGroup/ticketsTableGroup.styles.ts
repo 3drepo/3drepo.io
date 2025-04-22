@@ -98,23 +98,32 @@ const roundBorderTop = css`
 	border-top-right-radius: 10px;
 `;
 
-export const Group = styled.div<{ $empty: boolean }>`
+const roundBorderBottom = css`
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+`;
+
+export const Group = styled.div<{ $empty: boolean, $hideNewticketButton: boolean }>`
 	display: grid;
 	gap: 1px;
 	width: fit-content;
 	background-color: transparent;
 
-	${({ $empty }) => !$empty && css`
-		& > ${/* sc-selector */Row}:first-child,
-		& > ${/* sc-selector */LoadingRow}:first-child {
-			${roundBorderTop}
+	& > :is(${/* sc-selector */Row}, ${/* sc-selector */LoadingRow}):first-child {
+		${roundBorderTop}
+		overflow: hidden;
+	}
+
+	${({ $hideNewticketButton }) => $hideNewticketButton && css`
+		& > ${/* sc-selector */Row}:last-child,
+		& > ${/* sc-selector */LoadingRow}:last-child {
+			${roundBorderBottom}
 			overflow: hidden;
 		}
 	`}
 
 	${NewTicketRow} {
-		border-bottom-left-radius: 10px;
-		border-bottom-right-radius: 10px;
+		${roundBorderBottom};
 		${({ $empty }) => $empty && roundBorderTop}
 	}
 `;

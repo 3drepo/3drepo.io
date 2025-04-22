@@ -79,6 +79,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 	const columns = getAvailableColumnsForTemplate(template);
+	const hideNewticketButton = template.deprecated;
 
 	const assigneesSort = (items: ITicket[], order) => orderBy(
 		items.map(sortAssignees),
@@ -113,7 +114,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										</Headers>
 									</>
 								)}
-							<Group $empty={!sortedItems?.length}>
+							<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
 								{sortedItems.map(({ modelId, ...ticket }) => (
 									<TicketsTableRow
 										key={ticket._id}
@@ -123,7 +124,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										selected={selectedTicketId === ticket._id}
 									/>
 								))}
-								{!template.deprecated &&
+								{!hideNewticketButton &&
 									<NewTicketMenu
 										disabled={newTicketButtonIsDisabled}
 										TriggerButton={(
