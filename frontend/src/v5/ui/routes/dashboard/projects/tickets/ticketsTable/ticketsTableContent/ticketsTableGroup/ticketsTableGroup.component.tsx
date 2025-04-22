@@ -23,7 +23,7 @@ import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
-import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer, PlaceholderForStickyFunctionality } from './ticketsTableGroup.styles';
+import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer, PlaceholderForStickyFunctionality, NewTicketTextContainer } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
@@ -124,22 +124,24 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 									/>
 								))}
 								{!template.deprecated &&
-								<NewTicketMenu
-									disabled={newTicketButtonIsDisabled}
-									TriggerButton={(
-										<NewTicketRow
-											disabled={newTicketButtonIsDisabled}
-											style={{ width: getRowWidth() }}
-										>
-											<NewTicketText>
-												<AddCircleIcon />
-												<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
-											</NewTicketText>
-										</NewTicketRow>
-									)}
-									useMousePosition
-									onContainerOrFederationClick={onNewTicket}
-								/>
+									<NewTicketMenu
+										disabled={newTicketButtonIsDisabled}
+										TriggerButton={(
+											<NewTicketRow
+												disabled={newTicketButtonIsDisabled}
+												style={{ width: getRowWidth() }}
+											>
+												<NewTicketTextContainer>
+													<AddCircleIcon />
+													<NewTicketText>
+														<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
+													</NewTicketText>
+												</NewTicketTextContainer>
+											</NewTicketRow>
+										)}
+										useMousePosition
+										onContainerOrFederationClick={onNewTicket}
+									/>
 								}
 							</Group>
 						</>

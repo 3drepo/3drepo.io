@@ -68,16 +68,29 @@ export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	`}
 `;
 
-export const NewTicketText = styled.div`
-	font-weight: 600;
-	${({ theme }) => theme.typography.body1}
-
+export const NewTicketTextContainer = styled.div`
+	position: sticky;
+	margin-left: 15px;
+	left: 15px;
+	max-width: calc(100% - 15px);
+	width: fit-content;
+	overflow: hidden;
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	position: sticky;
-	left: 15px;
-	width: fit-content;
+
+	svg {
+		min-width: 15px;
+	}
+`;
+
+export const NewTicketText = styled.span`
+	font-weight: 600;
+	${({ theme }) => theme.typography.body1}
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 100%;
 `;
 
 const roundBorderTop = css`
