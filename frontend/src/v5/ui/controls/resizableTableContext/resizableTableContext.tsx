@@ -16,7 +16,7 @@
  */
 
 import { sum } from 'lodash';
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useRef, useState } from 'react';
 import { RefHolder } from './resizableTableContext.styles';
 
 export type TableColumn = { name: string, minWidth?: number, width: number };
@@ -66,8 +66,8 @@ interface Props {
 	columns: TableColumn[];
 	columnGap?: number;
 }
-export const ResizableTableContextComponent = ({ children, columns: inputColumns, columnGap = 0 }: Props) => {
-	const [columns, setColumns] = useState([...inputColumns]);
+export const ResizableTableContextComponent = ({ children, columns, columnGap = 0 }: Props) => {
+	const [columnsWidths, setColumnsWidths] = useState<Record<string, number>>({});
 	const [hiddenColumns, setHiddenColumns] = useState([]);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
@@ -77,10 +77,15 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 
 	const isHidden = (name: string) => hiddenColumns.includes(name);
 	const getMinWidth = (name: string) => getElementByName(name)?.minWidth ?? 0;
-	const getWidth = (name: string) => (!isHidden(name) && getElementByName(name)?.width) ?? 0;
+	const getColumnWidth = (column: TableColumn) => columnsWidths[column.name] ?? column.width;
+	const getWidth = (name: string) => {
+		const element = getElementByName(name);
+		if (isHidden(name) || !element) return 0;
+		return getColumnWidth(element);
+	};
 
 	const getVisibleColumns = () => columns.filter((c) => !isHidden(c.name));
-	const getVisibleColumnsWidths = () => getVisibleColumns().map((c) => c.width);
+	const getVisibleColumnsWidths = () => getVisibleColumns().map(getColumnWidth);
 	const getVisibleColumnsNames = () => getVisibleColumns().map((c) => c.name);
 	const getAllColumnsNames = () => columns.map((c) => c.name);
 	const getRowWidth = () => {
@@ -89,10 +94,10 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		return sum(visibleColumnswidths) + gaps;
 	};
 
-	const setWidth = (name: string, width: number) => {
-		getElementByName(name).width = Math.max(getMinWidth(name), width);
-		setColumns([ ...columns ]);
-	};
+	const setWidth = (name: string, width: number) => setColumnsWidths({
+		...columnsWidths,
+		[name]: Math.max(getMinWidth(name), width),
+	});
 
 	const stretchTable = (names: string[] = []) => {
 		const visibleColumns = getVisibleColumns();
@@ -107,21 +112,10 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		const gap = parentWidth - tableWidth;
 		const gapFraction = gap / stretchableColumns.length;
 		stretchableColumns.forEach((c) => {
-			getElementByName(c.name).width += gapFraction;
+			columnsWidths[c.name] = getColumnWidth(getElementByName(c.name)) + gapFraction;
 		});
-		setColumns([ ...columns ]);
+		setColumnsWidths({ ...columnsWidths });
 	};
-
-	useEffect(() => {
-		const newColumns = [...inputColumns];
-		columns.forEach(({ name, width }) => {
-			const col = newColumns.find((newCol) => newCol.name === name);
-			if (col) {
-				col.width = width;
-			}
-		});
-		setColumns(newColumns);
-	}, [inputColumns]);
 
 	return (
 		<ResizableTableContext.Provider value={{
