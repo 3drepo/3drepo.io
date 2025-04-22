@@ -41,12 +41,16 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
 	);
 
-	const modulePrefixRE = /modules\.([\w ]+\.)/;
-	const getModule = (property = '') => modulePrefixRE.exec(property)?.[1];
-
-	const shouldRenderDivider = (previousProperty, currentProperty) => {
-		if (!previousProperty) return false;
-		return getModule(currentProperty) !== getModule(previousProperty);
+	const groupBySelected = (items: string[]) => {
+		const groups = { selected: [], unselected: [] };
+		items.forEach((item) => {
+			if (isVisible(item)) {
+				groups.selected.push(item);
+			} else {
+				groups.unselected.push(item);
+			}
+		});
+		return groups;
 	};
 
 	useEffect(() => {
@@ -62,19 +66,34 @@ export const ColumnsVisibilitySettingsMenu = ({ newHiddenColumns, setNewHiddenCo
 				/>
 			</SearchInputContainer>
 			<SearchContext.Consumer>
-				{({ filteredItems }) => filteredItems.map((columnName, i) => (
-					<>
-						{shouldRenderDivider(filteredItems[i - 1], columnName) && (<Divider />)}
-						<MenuItem key={columnName}>
-							<Checkbox
-								disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
-								onChange={() => onChange(columnName)}
-								value={isVisible(columnName)}
-								label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
-							/>
-						</MenuItem>
-					</>
-				))}
+				{({ filteredItems }) => {
+					const groupedItems = groupBySelected(filteredItems);
+					return (
+						<>
+							{groupedItems.selected.map((columnName) => (
+								<MenuItem key={columnName}>
+									<Checkbox
+										disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
+										onChange={() => onChange(columnName)}
+										value={true}
+										label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
+									/>
+								</MenuItem>
+							))}
+							{groupedItems.unselected.length > 0 && <Divider />}
+							{groupedItems.unselected.map((columnName) => (
+								<MenuItem key={columnName}>
+									<Checkbox
+										disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
+										onChange={() => onChange(columnName)}
+										value={false}
+										label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
+									/>
+								</MenuItem>
+							))}
+						</>
+					);
+				}}
 			</SearchContext.Consumer>
 		</SearchContextComponent>
 	);
