@@ -16,10 +16,11 @@
  */
 
 const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
-const { createNewUserRecord, getUserById } = require('../services/sso/frontegg');
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
+const { createNewUserRecord } = require('../processors/users');
 const db = require('../handler/db');
+const { getUserById } = require('../services/sso/frontegg');
 const { logger } = require('../utils/logger');
 
 const User = {};

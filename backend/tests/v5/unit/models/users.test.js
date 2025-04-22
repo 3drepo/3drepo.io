@@ -19,10 +19,17 @@ const { src } = require('../../helper/path');
 
 const { cloneDeep, times } = require('lodash');
 
+jest.mock('../../../../src/v5/processors/users');
+const UserProcessor = require(`${src}/processors/users`);
+
+jest.mock('../../../../src/v5/services/sso/frontegg');
+const FronteggService = require(`${src}/services/sso/frontegg`);
+
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, determineTestGroup } = require('../../helper/services');
+const { generateRandomString, determineTestGroup, generateUserCredentials } = require('../../helper/services');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
@@ -502,6 +509,76 @@ const testEnsureIndicesExist = () => {
 	});
 };
 
+const testGetMemberInfoFromId = () => {
+	describe('Get member information from Id', () => {
+		test('Should retrieve member information if it exists in the database', async () => {
+			const userEntryMock = { user: 'user', customData: { firstName: generateRandomString(), lastName: generateRandomString(), billing: {} } };
+			const userId = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(userEntryMock);
+			const res = await User.getMemberInfoFromId(userId);
+			expect(res).toEqual(
+				{
+					user: userEntryMock.user,
+					firstName: userEntryMock.customData.firstName,
+					lastName: userEntryMock.customData.lastName,
+				},
+			);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': userId }, { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 }, undefined);
+		});
+		test('Should retrieve member information if it exists in the database (company information present)', async () => {
+			const userEntryMock = {
+				user: 'user',
+				customData: { firstName: generateRandomString(),
+					lastName: generateRandomString(),
+					billing: {
+						billingInfo: {
+							company: generateRandomString(),
+						},
+					},
+				},
+			};
+			const userId = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(userEntryMock);
+			const res = await User.getMemberInfoFromId(userId);
+			expect(res).toEqual(
+				{
+					user: userEntryMock.user,
+					firstName: userEntryMock.customData.firstName,
+					lastName: userEntryMock.customData.lastName,
+					company: userEntryMock.customData.billing.billingInfo.company,
+				},
+			);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': userId }, { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 }, undefined);
+		});
+		test('Should throw an error if it is anything but userNotFound code', async () => {
+			const userId = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockRejectedValue(templates.unknown);
+
+			await expect(User.getMemberInfoFromId(userId)).rejects.toEqual(templates.unknown);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': userId }, { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 }, undefined);
+		});
+		test('Should throw an error if it is anything but userNotFound code', async () => {
+			const userData = generateUserCredentials();
+			const userId = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockRejectedValue(templates.userNotFound);
+			FronteggService.getUserById.mockResolvedValueOnce(userData);
+			UserProcessor.createNewUserRecord.mockResolvedValueOnce(userId);
+			const res = await User.getMemberInfoFromId(userId);
+
+			await expect(res).toEqual(userId);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': userId }, { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 }, undefined);
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(userId);
+			expect(UserProcessor.createNewUserRecord).toHaveBeenCalledTimes(1);
+			expect(UserProcessor.createNewUserRecord).toHaveBeenCalledWith(userData);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -519,4 +596,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetUserId();
 	testUpdateUserId();
 	testEnsureIndicesExist();
+	testGetMemberInfoFromId();
 });
