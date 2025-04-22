@@ -28,7 +28,7 @@ const {
 	hasCommenterAccessToFederation,
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
-} = require('../../../../../middleware/permissions/permissions');
+} = require('../../../../../middleware/permissions');
 
 const { Router } = require('express');
 const { checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');

@@ -41,6 +41,7 @@ const preventPropagation = (e) => {
 };
 type AssigneesSelectMenuProps = SelectProps & {
 	isInvalid: (val: string) => boolean;
+	excludeJobs?: boolean;
 };
 export const AssigneesSelectMenu = ({
 	open,
@@ -48,6 +49,7 @@ export const AssigneesSelectMenu = ({
 	onClick,
 	multiple,
 	isInvalid,
+	excludeJobs,
 	...props
 }: AssigneesSelectMenuProps) => {
 	const { filteredItems } = useContext(SearchContext);
@@ -89,11 +91,12 @@ export const AssigneesSelectMenu = ({
 				/>
 			))}
 			{notFound.length > 0 && (<HorizontalRule />)}
-
-			<ListSubheader>
-				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
-			</ListSubheader>
-			{jobs.length > 0 && jobs.map(({ _id }) => (
+			{!excludeJobs && (
+				<ListSubheader>
+					<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
+				</ListSubheader>
+			)}
+			{!excludeJobs && jobs.length > 0 && jobs.map(({ _id }) => (
 				<AssigneesSelectMenuItem
 					key={_id}
 					assignee={_id}
@@ -103,9 +106,10 @@ export const AssigneesSelectMenu = ({
 					error={isInvalid(_id)}
 				/>
 			))}
-			{!jobs.length && (<NoResultsMessage />)}
-
-			<HorizontalRule />
+			{!excludeJobs && !jobs.length && (<NoResultsMessage />)}
+			{!excludeJobs && (
+				<HorizontalRule />
+			)}
 
 			<ListSubheader>
 				<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />

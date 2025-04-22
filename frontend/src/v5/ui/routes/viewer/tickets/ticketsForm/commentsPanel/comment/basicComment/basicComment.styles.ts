@@ -37,6 +37,11 @@ export const CommentAge = styled(CommentSmallText)`
 	text-align: right;
 `;
 
+export const CommentAgeContent = styled.div`
+	user-select: none;
+	display: inline-block;
+`;
+
 export const CommentContainer = styled.div`
 	max-width: 236px;
 	width: fit-content;

@@ -15,12 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getRelativeTime } from '@/v5/helpers/intl.helper';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import { stripMetadata, extractMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { Gap } from '@controls/gap';
-import { useEffect, useState } from 'react';
 import { CurrentUserComment } from './currentUserComment/currentUserComment.component';
 import { OtherUserComment } from './otherUserComment/otherUserComment.component';
 
@@ -41,19 +39,9 @@ export const Comment = ({
 	isFirstOfBlock,
 	...props
 }: CommentProps) => {
-	const [commentAge, setCommentAge] = useState('');
-
 	const isCurrentUser = !!originalAuthor ? false : CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(message);
 	const noMetadataMessage = !deleted ? stripMetadata(message) : message;
-
-	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
-
-	useEffect(() => {
-		updateMessageAge();
-		const intervalId = window.setInterval(updateMessageAge, 10_000);
-		return () => clearInterval(intervalId);
-	}, [updatedAt]);
 
 	const UserComment = isCurrentUser ? CurrentUserComment : OtherUserComment;
 	return (
@@ -65,7 +53,6 @@ export const Comment = ({
 				createdAt={createdAt}
 				author={author}
 				originalAuthor={originalAuthor}
-				commentAge={commentAge}
 				metadata={metadata}
 				message={noMetadataMessage}
 				deleted={deleted}

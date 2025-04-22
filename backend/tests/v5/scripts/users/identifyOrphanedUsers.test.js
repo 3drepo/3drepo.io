@@ -22,6 +22,7 @@ const {
 	generateUserCredentials,
 	fileExists,
 	generateRandomNumber,
+	outOfOrderArrayEqual,
 } = require('../../helper/services');
 
 const { times } = require('lodash');
@@ -45,9 +46,14 @@ const setupData = async () => {
 	const orphanedUsers = times(10, () => generateUserCredentials());
 	delete orphanedUsers[0].basicData.billing.billingInfo.company;
 
-	await createTeamspace(teamspace, [], undefined, false);
+	const tsUsers = [];
 
-	await Promise.all(normalUsers.map((user) => createUser(user, [teamspace])));
+	await Promise.all(normalUsers.map(async (user) => {
+		await createUser(user);
+		tsUsers.push(user.user);
+	}));
+
+	await createTeamspace(teamspace, tsUsers, undefined, false);
 
 	await Promise.all(orphanedUsers.map(async (user, index) => {
 		await createUser(user, []);
@@ -93,8 +99,7 @@ const runTest = () => {
 				return { user, email, firstName, lastName, company: billing.billingInfo.company ?? '', lastLogin: formatDate(lastLogin) };
 			});
 
-			expect(res.length).toBe(expectedResult.length);
-			expect(res).toEqual(expectedResult);
+			outOfOrderArrayEqual(res, expectedResult);
 		});
 	});
 };

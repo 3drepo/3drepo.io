@@ -36,6 +36,8 @@ export type InputControllerProps<T,> = T & FormInputProps & {
 	defaultValue?: any,
 	onChange?: (event) => void,
 	onBlur?: () => void,
+	transformInputValue?: (val) => any,
+	transformOutputValue?: (val) => any,
 	children?: any,
 };
 
@@ -43,7 +45,7 @@ type Props<T> = InputControllerProps<T> & {
 	Input: (props: T) => JSX.Element,
 };
 
-type InputControllerType = <T>(Component: Props<T>, ref) => JSX.Element;
+export type InputControllerType = <T>(Component: Props<T>, ref) => JSX.Element;
 // eslint-disable-next-line @typescript-eslint/comma-dangle
 export const InputController: InputControllerType = forwardRef(<T,>({
 	Input,
@@ -53,6 +55,8 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 	defaultValue,
 	onChange,
 	onBlur,
+	transformInputValue = (val) => val,
+	transformOutputValue = (val) => val,
 	...props
 }: Props<T>, ref) => {
 	const ctx = useFormContext();
@@ -68,10 +72,10 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 				<Input
 					{...field}
 					{...props}
-					value={field.value ?? ''}
+					value={transformInputValue(field.value) ?? ''}
 					onChange={(event) => {
-						field.onChange(event);
-						onChange?.(event);
+						field.onChange(transformOutputValue(event));
+						onChange?.(transformOutputValue(event));
 					}}
 					onBlur={() => {
 						field.onBlur();

@@ -98,20 +98,6 @@ class ImportQueue {
 	}
 
 	/** *****************************************************************************
-	 * Dispatch work to import toy model
-	 * @param {string} corID - correlation ID for this request
-	 * @param {string} database - database name
-	 * @param {string} model - model id
-	 * @param {string} modeDirName - the dir name of the model database dump staying in
-	 *******************************************************************************/
-	importToyModel(corID, database, model, options) {
-		const skip = options.skip && JSON.stringify(options.skip) || "";
-		const msg = `importToy ${database} ${model} ${options.modelDirName} ${skip}`;
-
-		return this._dispatchWork(corID, msg);
-	}
-
-	/** *****************************************************************************
 	 * Move a specified file to shared storage (area shared by queue workers)
 	 * move the file to shared storage space, put it in a corID/newFileName
 	 * note: using move(in fs.extra) instead of rename(in fs) as rename doesn"t allow cross device

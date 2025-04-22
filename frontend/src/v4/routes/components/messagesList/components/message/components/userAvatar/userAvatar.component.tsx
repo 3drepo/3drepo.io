@@ -18,6 +18,7 @@
 import { useState, useEffect } from 'react';
 
 import { isEmpty, memoize } from 'lodash';
+import { getUserFullName } from '@/v4/helpers/user.helpers';
 import { renderWhenTrueOtherwise } from '../../../../../../../helpers/rendering';
 import { getCheckedAvatarUrl } from '../../../../../../../services/api';
 import { Avatar } from './userAvatar.styles';
@@ -36,6 +37,8 @@ interface IProps {
 export const UserAvatar = ({ name, currentUser }: IProps) => {
 	const [url, setUrl] = useState(null);
 
+	const initials = getInitials(getUserFullName(currentUser?.username || name));
+
 	useEffect(() => {
 		(async () => {
 			const avatarCheckedUrl = await avatarUrl(name);
@@ -45,10 +48,10 @@ export const UserAvatar = ({ name, currentUser }: IProps) => {
 
 	return (
 		<>
-			{!currentUser && <Avatar>{getInitials(name)}</Avatar>}
+			{!currentUser && <Avatar>{initials}</Avatar>}
 			{currentUser && renderWhenTrueOtherwise(
 				() => <Avatar src={url} color={currentUser.job && currentUser.job.color} />,
-				() => <Avatar color={currentUser.job && currentUser.job.color}>{getInitials(name)}</Avatar>
+				() => <Avatar color={currentUser.job && currentUser.job.color}>{initials}</Avatar>
 			)(!isEmpty(url))}
 		</>
 	);

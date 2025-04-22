@@ -192,7 +192,7 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			treePath: {}
 		};
 		dataToProcessed.mainTree.name = modelSettings.name;
-		dataToProcessed.mainTree.children = dataToProcessed.mainTree.children.filter(({ name }) => !modelsLackingPermissions.includes(name.split(':').at(-1)));
+		dataToProcessed.mainTree.children = dataToProcessed.mainTree.children.filter(({ name }) => !name || !modelsLackingPermissions.includes(name.split(':').at(-1)));
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
 		dataToProcessed.subTrees = subTrees.filter(({ nodes: { project } }) => !modelsLackingPermissions.includes(project))
 		dataToProcessed.subModels = modelSettings.subModels.filter(({ model }) => !modelsLackingPermissions.includes(model))

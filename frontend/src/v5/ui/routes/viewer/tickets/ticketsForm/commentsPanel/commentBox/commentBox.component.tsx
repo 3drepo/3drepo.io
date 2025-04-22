@@ -179,7 +179,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 
 	const editImage = async (image, index) => {
 		imagesToUpload[index].src = image;
-		setImagesToUpload(imagesToUpload);
+		setImagesToUpload([...imagesToUpload]);
 	};
 
 	// @ts-ignore

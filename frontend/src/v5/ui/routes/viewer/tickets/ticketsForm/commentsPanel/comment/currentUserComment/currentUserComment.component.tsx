@@ -29,7 +29,6 @@ import { desanitiseMessage } from '@/v5/store/tickets/comments/ticketComments.he
 
 
 export type CurrentUserCommentProps = ITicketComment & {
-	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
 	isFirstOfBlock: boolean;
 	onDelete: (commentId) => void;

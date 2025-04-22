@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { init: initFrontegg } = require('./sso/frontegg');
 const { initialise: initInvites } = require('../models/invitations');
 const { init: initJournalingService } = require('./journaling');
 const { initialise: initLoginRecs } = require('../models/loginRecords');
@@ -27,6 +28,7 @@ Initialiser.initialiseSystem = () => Promise.all([
 	initInvites(),
 	initJournalingService(),
 	initNotificationService(),
+	initFrontegg(),
 ]);
 
 module.exports = Initialiser;

@@ -352,19 +352,18 @@
 
 			usersToRemove = _.difference(project.permissions.map(p => p.user), data.permissions.map(p => p.user));
 
-			check = User.findByUserName(account).then(teamspace => {
-				return User.getAllUsersInTeamspace(teamspace.user).then(members => {
-					const someUserNotAssignedWithLicence = data.permissions.some(
-						perm => {
-							return !members.includes(perm.user);
-						}
-					);
-
-					if (someUserNotAssignedWithLicence) {
-						return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+			check = User.getAllUsersInTeamspace(account).then(members => {
+				const someUserNotAssignedWithLicence = data.permissions.some(
+					perm => {
+						return !members.includes(perm.user);
 					}
-				});
+				);
+
+				if (someUserNotAssignedWithLicence) {
+					return Promise.reject(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
+				}
 			});
+
 		}
 
 		if (data["name"]) {
