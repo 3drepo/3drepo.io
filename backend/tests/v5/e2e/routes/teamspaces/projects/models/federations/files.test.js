@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -109,17 +109,8 @@ const models = [
 			subModels: [],
 		},
 	},
-	{
-		_id: ServiceHelper.generateUUIDString(),
-		name: ServiceHelper.generateRandomString(),
-		properties: {
-			...ServiceHelper.generateRandomModelProperties(),
-		},
-	},
 ];
 
-const container = models[3];
-const anotherFed = models[1];
 const conRevisions = ServiceHelper.generateRevisionEntry();
 
 const setupData = async () => {
@@ -175,95 +166,65 @@ const setupData = async () => {
 	]);
 };
 
-const testNewRevision = () => {
-	const route = (
-		ts = teamspace,
-		projectId = project.id,
-		model = models[0]._id,
-	) => `/v5/teamspaces/${ts}/projects/${projectId}/federations/${model}/revisions`;
-	describe('New federation upload', () => {
-		test('should fail without a valid session', async () => {
-			const res = await agent.post(route()).expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
+const testGetFederationMD5Hash = () => {
+	const generateTestData = () => {
+		const parameters = {
+			ts: teamspace,
+			projectId: project.id,
+			modelId: models[0]._id,
+			key: users.tsAdmin.apiKey,
+			response: { revisions: [] },
+		};
 
-		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.post(`${route()}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-		test('should fail if the user does not have access to the project', async () => {
-			const res = await agent.post(`${route()}?key=${users.noProjectAccess.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
+		const revBuffer = Buffer.from(conRevisions.refData);
 
-		test('should fail if the user is a viewer', async () => {
-			const res = await agent.post(`${route()}?key=${users.viewer.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
+		const viewerResponse = { revisions: [{
+			container: containers[0]._id,
+			tag: conRevisions.tag,
+			timestamp: new Date(conRevisions.timestamp).getTime(),
+			hash: CryptoJs.MD5(CryptoJs.lib.WordArray.create(revBuffer)).toString(),
+			filename: conRevisions.rFile[0],
+			size: 20,
+		}] };
+		const adminResponse = { revisions: containers.map((model) => ({
+			container: model._id,
+			tag: conRevisions.tag,
+			timestamp: new Date(conRevisions.timestamp).getTime(),
+			hash: CryptoJs.MD5(CryptoJs.lib.WordArray.create(revBuffer)).toString(),
+			filename: conRevisions.rFile[0],
+			size: 20,
+		})) };
 
-		test('should fail if the user is a commenter', async () => {
-			const res = await agent.post(`${route()}?key=${users.commenter.apiKey}`).expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
+		return [
+			['there is no valid session key.', { ...parameters, key: null }, false, templates.notLoggedIn],
+			['the user is not a member of the teamspace.', { ...parameters, key: nobody.apiKey }, false, templates.teamspaceNotFound],
+			['the user does not have access to the project.', { ...parameters, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+			['the teamspace does not exist.', { ...parameters, ts: ServiceHelper.generateUUIDString() }, false, templates.teamspaceNotFound],
+			['the federation does not exist.', { ...parameters, modelId: ServiceHelper.generateUUIDString() }, false, templates.federationNotFound],
+			['the viewer access it and return just that information.', { ...parameters, key: users.viewer.apiKey, response: viewerResponse }, true],
+			['the admin access it and return all the information.', { ...parameters, response: adminResponse }, true],
+			['the admin access it but the federation is empty.', { ...parameters, modelId: models[2]._id }, true],
+			['the admin access it but the containers in federation have no revisions.', { ...parameters, modelId: models[1]._id }, true],
+		];
+	};
 
-		test('should fail if the project does not exist', async () => {
-			const res = await agent.post(`${route(teamspace, 'nelskfjdlsf')}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.projectNotFound.status);
-			expect(res.body.code).toEqual(templates.projectNotFound.code);
-		});
+	const runTest = (description, parameters, success, error) => {
+		const route = ({ ts, projectId, modelId, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/federations/${modelId}/files/original/info${key ? `?key=${key}` : ''}`;
 
-		test('should fail if the federation does not exist', async () => {
-			const res = await agent.post(`${route(teamspace, project.id, 'sdlfkds')}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
-		});
+		test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${description}`, async () => {
+			const expectedStatus = success ? templates.ok.status : error.status;
+			const res = await agent.get(`${route(parameters)}`).expect(expectedStatus);
 
-		test('should fail if the federation is actually a container', async () => {
-			const res = await agent.post(`${route(teamspace, project.id, container._id)}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.federationNotFound.status);
-			expect(res.body.code).toEqual(templates.federationNotFound.code);
+			if (success) {
+				const result = JSON.parse(res.text);
+				outOfOrderArrayEqual(result.revisions, parameters.response.revisions);
+			} else {
+				expect(res.body.code).toEqual(error.code);
+			}
 		});
-		test('should succeed if correct parameters are sent', async () => {
-			await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
-				.send({ containers: [container._id] })
-				.expect(templates.ok.status);
-		});
+	};
 
-		test('should fail if containers array is empty', async () => {
-			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
-				.send({ containers: [] })
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if containers is not the right type', async () => {
-			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
-				.send({ containers: true })
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if container ids does not exist in the project', async () => {
-			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
-				.send({ containers: [ServiceHelper.generateUUIDString()] })
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if container id provided is a federation', async () => {
-			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
-				.send({ containers: [container._id, anotherFed._id] })
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if containers field is missing', async () => {
-			const res = await agent.post(`${route()}?key=${users.tsAdmin.apiKey}`)
-				.send({ tag: 'abc' })
-				.expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-	});
+	describe.each(generateTestData())('Get Federation MD5 Files', runTest);
 };
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
@@ -277,5 +238,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		ServiceHelper.closeApp(server),
 	]));
 
-	testNewRevision();
+	testGetFederationMD5Hash();
 });
