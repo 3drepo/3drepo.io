@@ -18,8 +18,6 @@
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
-const CryptoJs = require('crypto-js');
-const { outOfOrderArrayEqual } = require('../../../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
