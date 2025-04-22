@@ -17,7 +17,7 @@
 
 import { put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
-import { BaseProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { AdditionalProperties, BaseProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
 import { FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes, UpsertFilterAction } from './ticketsCard.redux';
 import { TicketsActions, TicketsTypes } from '../tickets.redux';
@@ -46,7 +46,7 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 			const { property: { module, name } } = configColor;
 			const path = module ? `${module}.${name}` : name;
 			return [...acc, path];
-		}, [BaseProperties.DESCRIPTION]);
+		}, [BaseProperties.DESCRIPTION,  AdditionalProperties.DEFAULT_IMAGE]);
 		yield put(TicketsActions.fetchTickets(teamspace, projectId, modelId, isFederation, propertiesToInclude));
 
 	} catch (error) {
