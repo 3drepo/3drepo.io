@@ -19,9 +19,12 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List } from './ticketsList.styles';
+import { ViewerParams } from '../../../routes.constants';
+import { useParams } from 'react-router';
 
 export const TicketsList = () => {
-	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const { containerOrFederation } = useParams<ViewerParams>();
+	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets([containerOrFederation]);
 
 	return (
 		<>

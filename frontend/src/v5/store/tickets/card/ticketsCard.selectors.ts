@@ -18,7 +18,7 @@
 import { selectCurrentModel } from '@/v4/modules/model';
 import { SequencingProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
-import { selectRiskCategories, selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
+import { selectRiskCategories, selectTemplateById, selectTemplates, selectTicketById, selectTickets, selectTicketsByContainersAndFederations } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getTicketPins, toPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
@@ -134,26 +134,32 @@ const selectFilteredTicketIds = createSelector(
 
 export const selectFilteredTickets = createSelector(
 	selectCardFilters,
-	selectCurrentTickets,
+	selectTicketsByContainersAndFederations,
 	selectFilteredTicketIds,
 	(filters, tickets, ids) => {
 		if (!filters.length) return tickets;
-		return tickets.filter((t) => ids.includes(t._id));
+		return tickets.filter(({ _id }) => ids.includes(_id));
 	},
 );
 
 export const selectAvailableTemplatesFilters = createSelector(
 	selectFilters,
-	selectCurrentTemplates,
-	(usedFilters, allFilters) => templatesToFilters(allFilters).filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
+	(state, templates) => templates,
+	(usedFilters, templates) => templatesToFilters(templates).filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
 );
 
 export const selectIsShowingPins = createSelector(
 	selectTicketsCardDomain, (state) => state.isShowingPins,
 );
 
+export const selectCurrentModelFilteredTickets = createSelector(
+	(state) => state,
+	selectCurrentModel,
+	(state, model) => selectFilteredTickets(state, [model]),
+);
+
 export const selectTicketPins = createSelector(
-	selectFilteredTickets,
+	selectCurrentModelFilteredTickets,
 	selectCurrentTemplates,
 	selectView,
 	selectSelectedTicketPinId,

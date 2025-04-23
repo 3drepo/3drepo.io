@@ -27,12 +27,22 @@ import { formatMessage } from '@/v5/services/intl';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { FilterEllipsisMenu } from '@components/viewer/cards/cardFilters/filterEllipsisMenu/filterEllipsisMenu.component';
+import { useEffect } from 'react';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
+import { useParams } from 'react-router';
+import { ViewerParams } from '../../../routes.constants';
 
 export const TicketsListCard = () => {
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	const filters = TicketsCardHooksSelectors.selectFilters();
+	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	
+	useEffect(() => {
+		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederation]);
+	}, [tickets, filters]);
+
 	return (
 		<CardContainer>
 			<CardHeader
@@ -41,7 +51,7 @@ export const TicketsListCard = () => {
 				actions={(
 					<>
 						{!readOnly && (<NewTicketMenu />)}
-						<FilterSelection />
+						<FilterSelection templates={templates} />
 						<FilterEllipsisMenu />
 					</>
 				)}

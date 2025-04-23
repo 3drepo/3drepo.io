@@ -21,7 +21,7 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { EditableTicket, OverridesDicts, TicketFilterKey } from '../tickets.types';
-import { TeamspaceProjectAndModel } from '../../store.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndModel } from '../../store.types';
 import { BaseFilter, CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
@@ -35,7 +35,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	resetFilters: [],
 	setPinToDrop: ['pinToDrop'],
 	fetchTicketsList: ['teamspace', 'projectId', 'modelId', 'isFederation'],
-	fetchFilteredTickets: ['teamspace', 'projectId', 'modelId', 'isFederation'],
+	fetchFilteredTickets: ['teamspace', 'projectId', 'modelIds'],
 	setCardView: ['view', 'props'],
 	openTicket: ['ticketId'],
 	setReadOnly: ['readOnly'],
@@ -178,7 +178,7 @@ export type UpsertFilterAction = Action<'UPSERT_FILTER'> & { filter: CardFilter 
 export type DeleteFilterAction = Action<'DELETE_FILTER'> & { filter: CardFilter };
 export type ResetFiltersAction = Action<'RESET_FILTERS'>;
 export type FetchTicketsListAction = Action<'FETCH_TICKETS_LIST'> & TeamspaceProjectAndModel & { isFederation: boolean };
-export type FetchFilteredTicketsAction = Action<'FETCH_FILTERED_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean };
+export type FetchFilteredTicketsAction = Action<'FETCH_FILTERED_TICKETS'> & TeamspaceAndProjectId & { modelIds: string[] };
 export type SetCardViewAction = Action<'SET_CARD_VIEW'> & { view: TicketsCardViews, props?:any };
 export type OpenTicketAction = Action<'OPEN_TICKET'> & { ticketId: string };
 export type SetReadOnlyAction = Action<'SET_READ_ONLY'> & { readOnly: boolean };
@@ -208,8 +208,7 @@ export interface ITicketsCardActionCreators {
 	fetchFilteredTickets: (
 		teamspace: string,
 		projectId: string,
-		modelId: string,
-		isFederation: boolean,
+		modelIds: string[],
 	) => FetchFilteredTicketsAction;
 	setCardView: (view: TicketsCardViews, props?: any) => SetCardViewAction,
 	openTicket: (ticketId: string) => OpenTicketAction,

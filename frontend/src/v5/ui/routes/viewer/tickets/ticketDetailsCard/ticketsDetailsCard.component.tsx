@@ -50,7 +50,7 @@ export const TicketDetailsCard = () => {
 
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets([containerOrFederation]);
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
