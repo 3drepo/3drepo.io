@@ -32,7 +32,7 @@ import { addReply, imageIsTooBig, IMAGE_MAX_SIZE_MESSAGE, MAX_MESSAGE_LENGTH, de
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import DeleteIcon from '@assets/icons/outlined/close-outlined.svg';
 import { FormattedMessage } from 'react-intl';
-import { memo, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '@mui/material';

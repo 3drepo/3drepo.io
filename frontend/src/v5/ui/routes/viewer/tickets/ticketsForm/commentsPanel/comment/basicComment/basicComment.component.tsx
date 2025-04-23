@@ -30,8 +30,6 @@ import { getRelativeTime } from '@/v5/helpers/intl.helper';
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
 	className?: string;
-	commentId?: string;
-	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
 	onDeleteImage?: (index) => void;
