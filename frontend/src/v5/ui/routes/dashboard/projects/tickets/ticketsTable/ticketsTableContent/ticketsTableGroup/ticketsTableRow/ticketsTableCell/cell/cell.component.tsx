@@ -15,8 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { CellContainer } from './cell.styles';
+import { TextOverflow } from '@controls/textOverflow';
 
-export const Item = styled.div`
-	width: 100%;
-`;
+type CellProps = { name: string, children: any, className?: string };
+export const Cell = ({ name, children, className }: CellProps) => (
+	<CellContainer name={name} className={className}>
+		<TextOverflow disableUnderline>
+			{children}
+		</TextOverflow>
+	</CellContainer>
+);

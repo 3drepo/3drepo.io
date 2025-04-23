@@ -27,9 +27,10 @@ interface ITextOverflow {
 	children: ReactNode;
 	className?: string;
 	onClick?: () => void;
+	disableUnderline?: boolean
 }
 
-export const TextOverflow = ({ children, className, tooltipText, lines, onClick }: ITextOverflow): JSX.Element => {
+export const TextOverflow = ({ children, className, tooltipText, lines, onClick, disableUnderline }: ITextOverflow): JSX.Element => {
 	const ref = useRef(null);
 	const [isTruncated, setIsTruncated] = useState(false);
 
@@ -60,7 +61,7 @@ export const TextOverflow = ({ children, className, tooltipText, lines, onClick 
 				style={{ pointerEvents: (isTruncated || !onClick) ? 'all' : 'none' }}
 				placement="bottom"
 			>
-				<Container ref={ref} lines={lines} className={className} onClick={onClick}>
+				<Container ref={ref} lines={lines} className={className} onClick={onClick} $disableUnderline={disableUnderline}>
 					{children}
 				</Container>
 			</Tooltip>

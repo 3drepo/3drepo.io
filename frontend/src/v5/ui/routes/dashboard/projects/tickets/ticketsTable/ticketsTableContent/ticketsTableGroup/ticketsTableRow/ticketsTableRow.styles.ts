@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
 import styled from 'styled-components';
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
-import { Cell } from './ticketsTableCell/cells/cells.styles';
+import { CellContainer } from './ticketsTableCell/cell/cell.styles';
 
 // TODO - fix when new palette is released
 export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
@@ -27,7 +26,7 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	cursor: pointer;
 	width: fit-content;
 
-	${Cell} {
+	${CellContainer} {
 		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
 	}
 
@@ -48,18 +47,5 @@ export const LoadingRow = styled.div<{ $width: number }>`
 		flex-direction: unset;
 		width: fit-content;
 		height: 100%;
-	}
-`;
-
-export const CellOwner = styled(Cell)`
-	.MuiAvatar-root {
-		width: 24px;
-		height: 24px;
-	}
-`;
-
-export const CellDate = styled(Cell)`
-	${DueDateContainer} {
-		height: unset;
 	}
 `;

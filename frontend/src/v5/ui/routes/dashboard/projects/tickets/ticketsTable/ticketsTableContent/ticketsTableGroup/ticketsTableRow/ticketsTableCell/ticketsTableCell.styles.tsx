@@ -15,29 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TextOverflow } from '@controls/textOverflow';
-import { Cell, SmallFont } from './cells.styles';
-import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
+import styled from 'styled-components';
+import { CellContainer } from './cell/cell.styles';
+import { CalendarIcon, DueDateContainer } from '@controls/dueDate/dueDate.styles';
 
-export const TextCell = ({ name, value }) => (
-	<Cell name={name}>
-		<TextOverflow tooltipText={value}>
-			{value}
-		</TextOverflow>
-	</Cell>
-);
+export const CellOwner = styled(CellContainer)`
+	.MuiAvatar-root {
+		width: 24px;
+		height: 24px;
+	}
+`;
 
-export const DateCell = ({ name, value }) => (
-	<Cell name={name}>
-		<SmallFont>
-			{formatDateTime(value)}
-		</SmallFont>
-	</Cell>
-);
+export const CellDate = styled.div`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
 
-export const BooleanCell = ({ name, value }) => (
-	<Cell name={name}>
-		{!!value ? TRUE_LABEL : FALSE_LABEL}
-	</Cell>
-);
+	${DueDateContainer} {
+		height: unset;
+	}
+
+	${CalendarIcon} {
+		min-width: 11px;
+	}
+`;

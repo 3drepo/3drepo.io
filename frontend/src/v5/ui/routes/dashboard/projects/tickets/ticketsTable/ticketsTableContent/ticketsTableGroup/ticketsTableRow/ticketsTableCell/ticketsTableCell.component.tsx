@@ -19,8 +19,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelec
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
-import { BooleanCell, DateCell, TextCell } from './cells/cells.component';
-import { CellDate, CellOwner } from '../ticketsTableRow.styles';
+import { Cell } from './cell/cell.component';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { DueDate } from '@controls/dueDate/dueDate.component';
@@ -30,7 +29,9 @@ import { get } from 'lodash';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useContext } from 'react';
 import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
-import { Cell } from './cells/cells.styles';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
+import { CellDate, CellOwner } from './ticketsTableCell.styles';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -58,9 +59,21 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const ownerAsUser = UsersHooksSelectors.selectUser(teamspace, owner);
 
-	if (name === 'id') return <TextCell name={name} value={`${template.code}:${number}`} />;
-	if (name === BaseProperties.TITLE) return <TextCell name={name} value={title} />;
-	if (name === 'modelName') return <TextCell name={name} value={modelName} />;
+	if (name === 'id') return (
+		<Cell name={name}>
+			{`${template.code}:${number}`}
+		</Cell>
+	);
+	if (name === BaseProperties.TITLE) return (
+		<Cell name={name}>
+			{title}
+		</Cell>
+	);
+	if (name === 'modelName') return (
+		<Cell name={name}>
+			{modelName}
+		</Cell>
+	);
 
 	if (name.startsWith(PROPERTIES_NAME_PREFIX)) {
 		switch (name.replace(PROPERTIES_NAME_PREFIX, '')) {
@@ -78,8 +91,12 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 				);
 			case IssueProperties.DUE_DATE:
 				return (
-					<CellDate name={name}>
-						{!!dueDate && (<DueDate value={dueDate} disabled />)}
+					<CellDate>
+						<Cell name={name}>
+							{!!dueDate && (
+								<DueDate value={dueDate} disabled />
+							)}
+						</Cell>
 					</CellDate>
 				);
 			case IssueProperties.PRIORITY:
@@ -99,11 +116,21 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 
 	switch (getPropertyType(name)) {
 		case 'boolean':
-			return <BooleanCell name={name} value={value} />;
+			return (
+				<Cell name={name}>
+					{!!value ? TRUE_LABEL : FALSE_LABEL}
+				</Cell>
+			);
 		case 'date':
 		case 'pastDate':
-			return <DateCell name={name} value={value} />;
+			return (
+				<CellDate>
+					<Cell name={name}>
+						{formatDateTime(value)}
+					</Cell>
+				</CellDate>
+			);
 		default:
-			return <TextCell name={name} value={value} />;
+			return <Cell name={name}>{value}</Cell>;
 	}
 };

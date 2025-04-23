@@ -19,7 +19,7 @@ import { Container as TextOverflowContainer } from '@controls/textOverflow/textO
 import styled from 'styled-components';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 
-export const Cell = styled(ResizableTableCell)`
+export const CellContainer = styled(ResizableTableCell)`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 100%;
 	padding: 0 10px;
@@ -29,12 +29,8 @@ export const Cell = styled(ResizableTableCell)`
 	font-weight: 500;
 	overflow: hidden;
 	box-sizing: border-box;
+
 	${TextOverflowContainer} {
 		height: unset;
 	}
-`;
-
-export const SmallFont = styled.span`
-	color: ${({ theme }) => theme.palette.base.main};
-	font-size: 10px;
 `;
