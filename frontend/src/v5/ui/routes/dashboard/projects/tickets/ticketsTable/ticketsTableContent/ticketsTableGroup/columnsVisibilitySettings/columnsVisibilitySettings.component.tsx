@@ -22,7 +22,6 @@ import { getColumnLabel } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
-import { xor } from 'lodash';
 import { useContext } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
@@ -31,11 +30,10 @@ import { Divider } from '@mui/material';
 import { TextOverflow } from '@controls/textOverflow';
 
 export const ColumnsVisibilitySettings = () => {
-	const { hiddenColumns, getAllColumnsNames, setHiddenColumns } = useContext(ResizableTableContext);
+	const { hiddenColumns, getAllColumnsNames, showColumn, hideColumn } = useContext(ResizableTableContext);
 	const columnsNames = getAllColumnsNames();
 	const newVisibleColumnsCount = columnsNames.length - hiddenColumns.length;
 
-	const onChange = (columnName) => setHiddenColumns(xor(hiddenColumns, [columnName]));
 	const isVisible = (columnName) => !hiddenColumns.includes(columnName);
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
@@ -83,7 +81,7 @@ export const ColumnsVisibilitySettings = () => {
 									<MenuItem key={columnName}>
 										<Checkbox
 											disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
-											onChange={() => onChange(columnName)}
+											onChange={() => hideColumn(columnName)}
 											value={true}
 											label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
 										/>
@@ -94,7 +92,7 @@ export const ColumnsVisibilitySettings = () => {
 									<MenuItem key={columnName}>
 										<Checkbox
 											disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
-											onChange={() => onChange(columnName)}
+											onChange={() => showColumn(columnName)}
 											value={false}
 											label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
 										/>
