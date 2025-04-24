@@ -41,6 +41,9 @@ ResponseCodes.templates = {
 
 	// Teamspace related error
 	teamspaceNotFound: { message: 'Teamspace not found.', status: 404 },
+
+	membershipInactive: { message: 'Your membership to this teamspace is currently inactive, please contact a teamspace admin.', status: 403 },
+	pendingInviteAcceptance: { message: 'You have not responded to the invitation email, please accept before proceeding.', status: 403 },
 	ssoRestricted: { message: 'This teamspace only accepts Single Signed On users. Please link your account with an authority.', status: 401 },
 	domainRestricted: { message: 'Your email does not belong in a domain that is accepted by this teamspace. Please contact your teamspace administrator.', status: 401 },
 	moduleUnavailable: { message: 'This module is not available in this teamspace.', status: 400 },

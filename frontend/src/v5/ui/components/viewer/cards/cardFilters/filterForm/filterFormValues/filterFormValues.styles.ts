@@ -22,3 +22,11 @@ export const Value = styled(TextOverflow)`
 	height: fit-content;
 	max-width: 299px;
 `;
+
+export const ArrayFields = styled.div<{ maxHeight: number }>`
+	max-height: ${({ maxHeight }) => maxHeight ? `${maxHeight}px` : 'unset'};
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	overflow-y: scroll;
+`;

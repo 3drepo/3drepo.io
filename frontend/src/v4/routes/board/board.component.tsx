@@ -499,7 +499,7 @@ export function Board(props: IProps) {
 				<NoDataMessage>
 					{(!modelId && areModels) && chooseMessage}
 					{(!modelId && !project) && `${messagePrefix} project and model to show board.`}
-					{project && !areModels && `There is no models in ${project} project. Try another one, or add new model.`}
+					{project && !areModels && 'No federation/container found.'}
 				</NoDataMessage>
 			</LoaderContainer>
 		);
