@@ -31,7 +31,6 @@ import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTabl
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 import { CellDate, CellOwner } from './ticketsTableCell.styles';
-import { UserPopover } from '@components/shared/popoverCircles/userPopoverCircle/userPopover/userPopover.component';
 import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
