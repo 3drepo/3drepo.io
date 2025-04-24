@@ -17,21 +17,34 @@
 
 import { FormattedMessage } from 'react-intl';
 import { AuthTemplate } from '@components/authTemplate/authTemplate.component';
-import { Button, Footer, Container, Heading, Link } from './authPage.styles';
+import { Footer, Form, Heading, Link } from './authPage.styles';
 import { COOKIES_ROUTE, PRIVACY_ROUTE, RELEASE_NOTES_ROUTE, TERMS_ROUTE } from '../routes.constants';
-import { useSSOAuth } from '@/v5/services/sso.hooks';
+import { useSSOLogin } from '@/v5/services/sso.hooks';
 import { Redirect, useRouteMatch } from 'react-router';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { addParams } from '@/v5/helpers/url.helper';
+import { formatMessage } from '@/v5/services/intl';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
+import { FormTextField } from '@controls/inputs/formInputs.component';
+import { SubmitButton } from '@controls/submitButton';
 
 const APP_VERSION = ClientConfig.VERSION;
 
 export const AuthPage = () => {
-	const [login] = useSSOAuth();
+	const [login] = useSSOLogin();
 	const { url } = useRouteMatch();
 	const returnUrl = AuthHooksSelectors.selectReturnUrl();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
+
+	const { control, formState: { isValid, errors }, handleSubmit } = useForm({
+		mode: 'onChange',
+		resolver: yupResolver(LoginSchema),
+	});
+
+	const onSubmit = ({ email }) => login(redirectUri, email);
 
 	if (isAuthenticated) {
 		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
@@ -45,13 +58,20 @@ export const AuthPage = () => {
 				</a>
 			)}
 		>
-			<Container>
+			<Form onSubmit={handleSubmit(onSubmit)}>
 				<Heading>
 					<FormattedMessage id="authPage.heading" defaultMessage="Welcome to 3D Repo" />
 				</Heading>
-				<Button onClick={() => login(redirectUri)}>
+				<FormTextField
+					required
+					name="email"
+					label={formatMessage({ defaultMessage: 'Email', id: 'authPage.email' })}
+					control={control}
+					formError={errors.email}
+				/>
+				<SubmitButton disabled={!isValid}>
 					<FormattedMessage id="authPage.button" defaultMessage="Log in" />
-				</Button>
+				</SubmitButton>
 				<Footer>
 					<FormattedMessage
 						id="authPage.footer"
@@ -66,7 +86,7 @@ export const AuthPage = () => {
 						}}
 					/>
 				</Footer>
-			</Container>
+			</Form>
 		</AuthTemplate>
 	);
 };
