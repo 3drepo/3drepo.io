@@ -33,7 +33,7 @@ import {
 	AvatarContainer,
 	AvatarSection,
 	UserFullName,
-	UserUserName,
+	UserEmail,
 	SignOutButton,
 	EditProfileButton,
 	TruncatableName,
@@ -80,7 +80,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 								&nbsp;
 							<TruncatableName>{user.lastName}</TruncatableName>
 						</UserFullName>
-						<UserUserName>{user.username}</UserUserName>
+						<UserEmail>{user.email}</UserEmail>
 						<ActionMenuItem>
 							<EditProfileButton onClick={onClickEditProfile}>
 								<FormattedMessage

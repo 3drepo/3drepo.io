@@ -24,18 +24,32 @@ export const selectIsAuthenticated = createSelector(
 	selectAuthDomain, (state) => !!state.isAuthenticated,
 );
 
+export const selectAuthenticatedTeamspace = createSelector(
+	selectAuthDomain, (state) => state.authenticatedTeamspace,
+);
+
+export const selectSessionAuthenticatedTeamspace = createSelector(
+	selectAuthDomain, (state) => state.sessionAuthenticatedTeamspace,
+);
+
 export const selectAuthenticationFetched = createSelector(
 	selectAuthDomain, (state) => !(state.isAuthenticated === null),
 );
 
-export const selectIsPending = createSelector(
-	selectAuthDomain, (state) => state.isPending,
-);
-
-export const selectLoginError = createSelector(
-	selectAuthDomain, (state) => state.errorMessage,
+export const selectIsAuthenticationPending = createSelector(
+	selectAuthDomain, (state) => state.isAuthenticationPending,
 );
 
 export const selectReturnUrl = createSelector(
 	selectAuthDomain, (state) => state.returnUrl || ({ pathname: DASHBOARD_ROUTE, search: '' }),
+);
+
+export const selectAuthedTeamspaceMatchesSessionOne = createSelector(
+	selectAuthenticatedTeamspace,
+	selectSessionAuthenticatedTeamspace,
+	(authedTeamspace, sessionAuthedTeamspace) => (
+		authedTeamspace
+		&& sessionAuthedTeamspace
+		&& sessionAuthedTeamspace === authedTeamspace
+	),
 );

@@ -20,15 +20,13 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { initTeamspace } = require(`${v5Path}/processors/teamspaces/teamspaces`);
-const { isAccountActive } = require(`${v5Path}/models/users`);
+const { initTeamspace } = require(`${v5Path}/processors/teamspaces`);
+const { getUserByUsername } = require(`${v5Path}/models/users`);
 const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 
-const run = async (teamspace) => {
-	logger.logInfo(`Checking ${teamspace} is an active user...`);
-	if (!(await isAccountActive(teamspace))) {
-		throw new Error('There is no matching user account or the user is not verified');
-	}
+const run = async (teamspace, user) => {
+	logger.logInfo(`Checking ${user} exists...`);
+	await getUserByUsername(user);
 
 	logger.logInfo(`Checking if teamspace ${teamspace} already exists...`);
 	const teamspaceExists = await getTeamspaceSetting(teamspace, { _id: 1 }).catch(() => false);
@@ -37,7 +35,7 @@ const run = async (teamspace) => {
 		throw new Error('Teamspace already exists');
 	}
 
-	await initTeamspace(teamspace);
+	await initTeamspace(teamspace, user);
 	logger.logInfo(`Teamspace ${teamspace} created.`);
 };
 
@@ -48,11 +46,16 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 			describe: 'name of the teamspace',
 			type: 'string',
 			demandOption: true,
+		}).option('user',
+		{
+			describe: 'a user to be assigned to be an admin of this teamspace',
+			type: 'string',
+			demandOption: true,
 		});
 	return yargs.command(commandName,
-		'Create a teamspace of the name provided and gives the user of the same name admin privileges',
+		'Create a teamspace of the name provided and gives the user specified admin privileges',
 		argsSpec,
-		(argv) => run(argv.teamspace));
+		({ teamspace, user }) => run(teamspace, user));
 };
 
 module.exports = {

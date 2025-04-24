@@ -22,7 +22,6 @@ const express = require("express");
 const router = express.Router({ mergeParams: true });
 const User = require("../models/user");
 const responseCodes = require("../response_codes.js");
-const config = require("../config");
 const utils = require("../utils");
 const UserBilling = require("../models/userBilling");
 
@@ -83,11 +82,6 @@ function updateSubscription(req, res, next) {
 			const resData = {
 				url: agreement.url
 			};
-
-			if (config.paypal.debug && config.paypal.debug.showFullAgreement) {
-				resData.agreement = agreement.agreement;
-			}
-
 			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, resData);
 
 		})

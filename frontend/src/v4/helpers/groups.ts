@@ -76,7 +76,6 @@ export function* prepareGroupWithCount(group) {
 
 export const normalizeGroup = (group) => {
 	const color = hexToRgb(group.color);
-	color[3] = (color[3] ?? 1) * 255;
 	const normalizedGroup = {
 		color,
 		...pick(group, ['name', 'author']),

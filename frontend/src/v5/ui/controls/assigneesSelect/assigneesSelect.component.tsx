@@ -33,6 +33,7 @@ export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps &
 	showEmptyText?: boolean;
 	onBlur?: () => void;
 	excludeViewers?: boolean;
+	excludeJobs?: boolean;
 };
 
 export const AssigneesSelect = ({
@@ -45,6 +46,7 @@ export const AssigneesSelect = ({
 	onBlur,
 	className,
 	excludeViewers = false,
+	helperText,
 	onChange,
 	...props
 }: AssigneesSelectProps) => {
@@ -96,7 +98,6 @@ export const AssigneesSelect = ({
 					value={value}
 					onClose={handleClose}
 					onOpen={handleOpen}
-					disabled={disabled}
 					multiple={multiple}
 					isInvalid={(v) => invalidValues.includes(v)}
 					onChange={handleChange}

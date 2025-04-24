@@ -32,7 +32,7 @@ const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessTo
 const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 
 const { validSession } = require(`${v5Path}/middleware/auth`);
-const { hasAccessToTeamspace } = require(`${v5Path}/middleware/permissions/permissions`);
+const { hasAccessToTeamspace } = require(`${v5Path}/middleware/permissions`);
 
 const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -88,6 +88,10 @@ function isTeamspaceMember(req, res, next) {
 	return hasAccessToTeamspace(req, res, next);
 }
 
+const checkTeamspaceAccess = (nextMiddleware) => (req, res, next) => {
+	isTeamspaceMember(req, res, () => nextMiddleware(req, res, next));
+};
+
 function hasCollaboratorQuota(req, res, next) {
 
 	let limits;
@@ -138,15 +142,6 @@ function isHereEnabled(req, res, next) {
 	} else {
 		responseCodes.respond("Check Here enabled middleware", req, res, next, responseCodes.MISSING_HERE_CONFIG , null, {});
 	}
-}
-
-function isAccountAdminOrSameUser(req, res, next) {
-	if (req.params.user ===  req.session.user.username) {
-		next();
-		return;
-	}
-
-	checkPermissions([C.PERM_TEAMSPACE_ADMIN])(req, res, next);
 }
 
 function flagAsV4Request(req, res, next) {
@@ -205,20 +200,19 @@ const middlewares = {
 	isHereEnabled: isHereEnabled,
 
 	// models
-	canCreateModel: canCreateModel,
-	hasReadAccessToModel: checkPermissions(readAccessToModel),
-	hasCommenterAccessToModel: checkPermissions([C.PERM_CREATE_ISSUE]),
-	hasViewIssueAccessToModel: checkPermissions([C.PERM_VIEW_ISSUE]),
-	hasUploadAccessToModel: checkPermissions([C.PERM_UPLOAD_FILES]),
-	hasWriteAccessToModelSettings: checkPermissions([C.PERM_CHANGE_MODEL_SETTINGS]),
-	hasDeleteAccessToModel: checkPermissions([C.PERM_DELETE_MODEL]),
-	hasDownloadAccessToModel: checkPermissions([C.PERM_DOWNLOAD_MODEL]),
-	hasEditAccessToFedModel: checkPermissions([C.PERM_EDIT_FEDERATION]),
-	hasDeleteAccessToFedModel: checkPermissions([C.PERM_DELETE_FEDERATION]),
-	hasEditPermissionsAccessToModel: checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
-	hasEditPermissionsAccessToMulitpleModels: checkMultiplePermissions([C.PERM_MANAGE_MODEL_PERMISSION]),
-	isAccountAdmin: checkPermissions([C.PERM_TEAMSPACE_ADMIN]),
-	isAccountAdminOrSameUser,
+	canCreateModel: checkTeamspaceAccess(canCreateModel),
+	hasReadAccessToModel: checkTeamspaceAccess(checkPermissions(readAccessToModel)),
+	hasCommenterAccessToModel: checkTeamspaceAccess(checkPermissions([C.PERM_CREATE_ISSUE])),
+	hasViewIssueAccessToModel: checkTeamspaceAccess(checkPermissions([C.PERM_VIEW_ISSUE])),
+	hasUploadAccessToModel: checkTeamspaceAccess(checkPermissions([C.PERM_UPLOAD_FILES])),
+	hasWriteAccessToModelSettings: checkTeamspaceAccess(checkPermissions([C.PERM_CHANGE_MODEL_SETTINGS])),
+	hasDeleteAccessToModel: checkTeamspaceAccess(checkPermissions([C.PERM_DELETE_MODEL])),
+	hasDownloadAccessToModel: checkTeamspaceAccess(checkPermissions([C.PERM_DOWNLOAD_MODEL])),
+	hasEditAccessToFedModel: checkTeamspaceAccess(checkPermissions([C.PERM_EDIT_FEDERATION])),
+	hasDeleteAccessToFedModel: checkTeamspaceAccess(checkPermissions([C.PERM_DELETE_FEDERATION])),
+	hasEditPermissionsAccessToModel: checkTeamspaceAccess(checkPermissions([C.PERM_MANAGE_MODEL_PERMISSION])),
+	hasEditPermissionsAccessToMulitpleModels: checkTeamspaceAccess(checkMultiplePermissions([C.PERM_MANAGE_MODEL_PERMISSION])),
+	isAccountAdmin: checkTeamspaceAccess(checkPermissions([C.PERM_TEAMSPACE_ADMIN])),
 	hasCollaboratorQuota: [loggedIn, hasCollaboratorQuota],
 	isTeamspaceMember,
 	loggedIn,

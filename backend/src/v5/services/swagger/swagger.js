@@ -17,10 +17,7 @@
 const Schemas = require('./swagger.schemas');
 
 const { VERSION } = require('../../../../VERSION.json');
-const { v4Path } = require('../../../interop');
-// FIXME: can remove the disable once we migrated config
-// eslint-disable-next-line
-const { apiUrls } = require(`${v4Path}/config`);
+const { createEndpointURL } = require('../../utils/config');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -32,7 +29,7 @@ const options = {
 			version: VERSION,
 		},
 		servers: [
-			{ url: `${apiUrls.all[0]}/v5` },
+			{ url: createEndpointURL() },
 		],
 		security: [
 			{ keyAuth: [] },

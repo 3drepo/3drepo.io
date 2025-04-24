@@ -20,14 +20,14 @@ import { AddFavouriteAction, DeleteDrawingAction, RemoveFavouriteAction, CreateD
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
-import { LifoQueue } from '@/v5/helpers/functions.helpers';
+import { AsyncFunctionExecutor } from '@/v5/helpers/functions.helpers';
 import { CalibrationStatus, DrawingStats, IDrawing } from './drawings.types';
 import { selectDrawings, selectIsListPending } from './drawings.selectors';
 import { isEqualWith, unionBy } from 'lodash';
 import { selectLatestActiveRevision } from './revisions/drawingRevisions.selectors';
 import { compByColum } from '../store.helpers';
 
-const statsQueue = new LifoQueue<DrawingStats>(API.Drawings.fetchDrawingsStats, 30);
+const statsStack = new AsyncFunctionExecutor<DrawingStats>(API.Drawings.fetchDrawingsStats, 30);
 
 export function* addFavourites({ teamspace, projectId, drawingId }: AddFavouriteAction) {
 	try {
@@ -136,7 +136,7 @@ export function* approveCalibration({ teamspace, projectId, drawingId }: Approve
 
 export function* fetchDrawingStats({ teamspace, projectId, drawingId }: FetchDrawingStatsAction) {
 	try {
-		const { calibration: calibrationStatus, ...stats } = yield statsQueue.enqueue(teamspace, projectId, drawingId);
+		const { calibration: calibrationStatus, ...stats } = yield statsStack.addCall(teamspace, projectId, drawingId);
 		yield put(DrawingsActions.fetchDrawingStatsSuccess(projectId, drawingId, { calibrationStatus, ...stats }));
 
 	} catch (error) {
@@ -193,7 +193,7 @@ export function* updateDrawing({ teamspace, projectId, drawingId, drawing, onSuc
 }
 
 export function* resetDrawingStatsQueue() {
-	statsQueue.resetQueue();
+	statsStack.reset();
 }
 
 export default function* DrawingsSaga() {

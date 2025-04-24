@@ -320,9 +320,9 @@ DBHandler.storeFileInGridFS = async (database, collection, filename, buffer) => 
 	});
 };
 
-DBHandler.createIndex = async (database, colName, indexDef, { runInBackground: background } = {}) => {
+DBHandler.createIndex = async (database, colName, indexDef, { runInBackground: background, unique } = {}) => {
 	const collection = await getCollection(database, colName);
-	const options = deleteIfUndefined({ background });
+	const options = deleteIfUndefined({ background, unique });
 	await collection.createIndex(indexDef, options);
 };
 

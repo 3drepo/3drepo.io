@@ -16,19 +16,14 @@
  */
 
 import { produceAll } from '@/v5/helpers/reducers.helper';
-import { getErrorCode, isPathNotFound } from '@/v5/validation/errors.helpers';
+import { errorNeedsRedirecting, getErrorCode, isNotAuthed, isRequestAborted } from '@/v5/validation/errors.helpers';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
 
 import { Constants } from '../../helpers/actions.helper';
-import React from 'react';
-import { AlertModalProps } from '@components/shared/modalsDispatcher/templates/alertModal/alertModal.types';
-import { InfoModalProps } from '@components/shared/modalsDispatcher/templates/infoModal/infoModal.types';
-import { WarningModalProps } from '@components/shared/modalsDispatcher/templates/warningModal/warningModal.types';
-import { DeleteModalProps } from '@components/shared/modalsDispatcher/templates/deleteModal/deleteModal.types';
-import { ShareModalProps } from '@components/shared/modalsDispatcher/templates/shareModal/shareModal.types';
-import { ImagesModalProps } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.types';
+import { AuthenticatingModal } from '@components/shared/modalsDispatcher/templates/infoModal/authenticatingModal/authenticatingModal.component';
+import { ExtractModalProps, FunctionComponent, IDialogState, ModalType } from './dialogs.types';
 
 export const INITIAL_STATE: IDialogState = {
 	dialogs: [],
@@ -37,14 +32,23 @@ export const INITIAL_STATE: IDialogState = {
 export const { Types: DialogsTypes, Creators: DialogsActions } = createActions({
 	open: ['modalType', 'props', 'syncProps'],
 	close: ['dialogId'],
+	closeAll: [],
 }, { prefix: 'MODALS/' }) as { Types: Constants<IDialogsActionCreators>; Creators: IDialogsActionCreators };
 
 export const openHandler = (state, { modalType, props, syncProps }: OpenAction) => {
-	// avoid opening 2+ redirect modals
-	if (getErrorCode(props?.error)) {
-		const currentErrorIsPathNotFound = isPathNotFound(props?.error);
-		const pathNotFoundErrorAlreadyExists = state.dialogs.find((dialog) => isPathNotFound(dialog.props?.error));
-		if (currentErrorIsPathNotFound && pathNotFoundErrorAlreadyExists) return;
+	const errorCode = getErrorCode(props?.error);
+	if (errorCode || isRequestAborted(props?.error)) {
+		// avoid other modals when authenticating
+		const authModalIsAlreadyOpen = state.dialogs.find((dialog) => (
+			dialog.modalType === AuthenticatingModal || isNotAuthed(dialog.props?.error)
+		));
+		if (authModalIsAlreadyOpen) return;
+	}
+	if (errorCode) {
+		// avoid opening 2+ redirect modals
+		const needsRedirecting = errorNeedsRedirecting(props?.error);
+		const redirectModalIsAlreadyOpen = state.dialogs.find((dialog) => errorNeedsRedirecting(dialog.props?.error));
+		if (needsRedirecting && redirectModalIsAlreadyOpen) return;
 	}
 
 	const dialog = {
@@ -61,9 +65,14 @@ const closeHandler = (state, { dialogId }: CloseAction) => {
 	state.dialogs = state.dialogs.filter(({ id }) => (id !== dialogId));
 };
 
+const closeAll = (state) => {
+	state.dialogs = [];
+};
+
 export const dialogsReducer = createReducer(INITIAL_STATE, produceAll({
 	[DialogsTypes.OPEN]: openHandler,
 	[DialogsTypes.CLOSE]: closeHandler,
+	[DialogsTypes.CLOSE_ALL]: closeAll,
 }));
 
 /**
@@ -71,36 +80,11 @@ export const dialogsReducer = createReducer(INITIAL_STATE, produceAll({
  */
 type OpenAction = Action<'OPEN'> & { modalType: string | ((any) => JSX.Element), props: any, syncProps: any };
 type CloseAction = Action<'CLOSE'> & { dialogId: string };
-
-type FunctionComponent = ((props) => JSX.Element);
-
-export type ModalType = 'alert' | 'warning' | 'delete' | 'info' | 'share' | 'images' ;
-
-type ModalProps = {
-	['alert']: AlertModalProps,
-	['warning']: WarningModalProps,
-	['delete']: DeleteModalProps,
-	['info']: InfoModalProps,
-	['share']: ShareModalProps,
-	['images']: ImagesModalProps,
-};
-
-
-type ExtractModalProps<T> = T extends ModalType ? ModalProps[T] :  T extends React.FC ? React.ComponentProps<T> : any;
+type CloseAllAction = Action<'CLOSE_ALL'>;
 
 export interface IDialogsActionCreators {
 	open: <T extends ModalType | FunctionComponent>
 	(modalType?: T, props?: ExtractModalProps<T> | undefined, syncProps?: any | undefined) => OpenAction;
 	close: (id: string) => CloseAction;
-}
-
-export interface IDialogConfig {
-	id: string;
-	modalType?: ModalType | FunctionComponent;
-	props: any;
-	syncProps: any,
-}
-
-export interface IDialogState {
-	dialogs: IDialogConfig[];
+	closeAll: () => CloseAllAction;
 }
