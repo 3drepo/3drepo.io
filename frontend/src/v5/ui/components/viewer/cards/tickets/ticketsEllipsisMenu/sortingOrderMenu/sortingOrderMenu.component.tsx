@@ -18,7 +18,6 @@ import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsSortingOrder } from '@/v5/store/tickets/card/ticketsCard.types';
-import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { ExpandingMenu } from '@controls/ellipsisMenu/expandingMenu/expandingMenu.component';
 import { ExpandingMenuItem } from '@controls/ellipsisMenu/expandingMenu/expandingMenuItem/expandingMenuItem.component';
 
@@ -29,12 +28,8 @@ const Item = ({ order, title }: { order: TicketsSortingOrder, title: string }) =
 	return (
 		<ExpandingMenuItem
 			onClick={handleClick}
-			title={
-				<>
-					{title}
-					{sorting.order === order && <TickIcon />}
-				</>
-			}
+			title={title}
+			selected={sorting.order === order}
 		/>
 	);
 };

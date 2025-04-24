@@ -17,9 +17,20 @@
 
 import { ActionMenuItem } from '@controls/actionMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
+import { EllipsisMenuItemProps } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 
-export const ExpandingMenuItem = (props) => (
+type ExpandingMenuItemProps = EllipsisMenuItemProps & { selected?: boolean };
+export const ExpandingMenuItem = ({ title, selected, ...props }: ExpandingMenuItemProps) => (
 	<ActionMenuItem>
-		<EllipsisMenuItem {...props} />
+		<EllipsisMenuItem
+			{...props}
+			title={
+				<>
+					{title}
+					{selected && <TickIcon />}
+				</>
+			}
+		/>
 	</ActionMenuItem>
 );
