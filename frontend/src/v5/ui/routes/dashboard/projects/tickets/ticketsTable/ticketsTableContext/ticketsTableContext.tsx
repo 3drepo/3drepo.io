@@ -22,14 +22,16 @@ import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers'
 export interface TicketsTableType {
 	getPropertyDefaultValue: (name: string) => unknown;
 	getPropertyType: (name: string) => string;
+	isJobAndUsersType: (name: string) => boolean;
 }
 
 const defaultValue: TicketsTableType = {
 	getPropertyDefaultValue: () => null,
 	getPropertyType: () => null,
+	isJobAndUsersType: () => false,
 };
 export const TicketsTableContext = createContext(defaultValue);
-TicketsTableContext.displayName = 'ResizeableColumns';
+TicketsTableContext.displayName = 'TicketsTableContext';
 
 interface Props {
 	children: any;
@@ -44,11 +46,16 @@ export const TicketsTableContextComponent = ({ children, template }: Props) => {
 
 	const getPropertyDefaultValue = (name: string) => definitionsAsObject[name]?.default;
 	const getPropertyType = (name: string) => definitionsAsObject[name]?.type;
+	const isJobAndUsersType = (name: string) => (
+		definitionsAsObject[name]?.values === 'jobsAndUsers'
+		|| ['properties.Owner', 'properties.Assignees'].includes(name)
+	);
 
 	return (
 		<TicketsTableContext.Provider value={{
 			getPropertyDefaultValue,
 			getPropertyType,
+			isJobAndUsersType,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>

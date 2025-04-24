@@ -21,7 +21,6 @@ import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/t
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { Cell } from './cell/cell.component';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
-import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { Chip } from '@controls/chip/chip.component';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
@@ -32,6 +31,8 @@ import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTabl
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 import { CellDate, CellOwner } from './ticketsTableCell.styles';
+import { UserPopover } from '@components/shared/popoverCircles/userPopoverCircle/userPopover/userPopover.component';
+import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -41,7 +42,7 @@ type TicketsTableCellProps = {
 };
 export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProps) => {
 	const { title, properties, number, type: templateId } = ticket;
-	const { getPropertyDefaultValue, getPropertyType } = useContext(TicketsTableContext);
+	const { getPropertyDefaultValue, getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
 	const container = ContainersHooksSelectors.selectContainerById(modelId);
@@ -51,13 +52,13 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	
 	const {
 		owner,
-		assignees,
 		priority,
 		status,
 		dueDate,
 	} = getPropertiesInCamelCase(properties);
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const ownerAsUser = UsersHooksSelectors.selectUser(teamspace, owner);
+	const propertyType = getPropertyType(name);
 
 	if (name === 'id') return (
 		<Cell name={name}>
@@ -77,12 +78,6 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 
 	if (name.startsWith(PROPERTIES_NAME_PREFIX)) {
 		switch (name.replace(PROPERTIES_NAME_PREFIX, '')) {
-			case IssueProperties.ASSIGNEES:
-				return (
-					<Cell name={name}>
-						{!!assignees?.length && (<AssigneesSelect value={assignees} multiple disabled />)}
-					</Cell>
-				);
 			case BaseProperties.OWNER:
 				return (
 					<CellOwner name={name}>
@@ -114,7 +109,22 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 		}
 	}
 
+	if (['oneOf', 'manyOf'].includes(propertyType) && isJobAndUsersType(name)) {
+		const multiple = propertyType === 'manyOf';
+		return (
+			<Cell name={name}>
+				{value?.length && (<AssigneesSelect value={multiple ? value : [value]} multiple={multiple} disabled />)}
+			</Cell>
+		);
+	}
+
 	switch (getPropertyType(name)) {
+		case 'manyOf':
+			return (
+				<Cell name={name}>
+					{value?.join(', ')}
+				</Cell>
+			);
 		case 'boolean':
 			return (
 				<Cell name={name}>
