@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
@@ -30,8 +30,7 @@ import { useContext } from 'react';
 import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
-import { CellDate, CellOwner } from './ticketsTableCell.styles';
-import { UserPopoverCircle } from '@components/shared/popoverCircles/userPopoverCircle/userPopoverCircle.component';
+import { CellDate } from './ticketsTableCell.styles';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -55,8 +54,6 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 		status,
 		dueDate,
 	} = getPropertiesInCamelCase(properties);
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const ownerAsUser = UsersHooksSelectors.selectUser(teamspace, owner);
 	const propertyType = getPropertyType(name);
 
 	if (name === 'id') return (
@@ -79,9 +76,9 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 		switch (name.replace(PROPERTIES_NAME_PREFIX, '')) {
 			case BaseProperties.OWNER:
 				return (
-					<CellOwner name={name}>
-						<UserPopoverCircle user={ownerAsUser} />
-					</CellOwner>
+					<Cell name={name}>
+						<AssigneesSelect value={owner} disabled />
+					</Cell>
 				);
 			case IssueProperties.DUE_DATE:
 				return (
@@ -112,7 +109,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 		const multiple = propertyType === 'manyOf';
 		return (
 			<Cell name={name}>
-				{value?.length && (<AssigneesSelect value={multiple ? value : [value]} multiple={multiple} disabled />)}
+				{value?.length && (<AssigneesSelect value={value} multiple={multiple} disabled />)}
 			</Cell>
 		);
 	}

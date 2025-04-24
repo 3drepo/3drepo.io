@@ -16,15 +16,7 @@
  */
 
 import styled from 'styled-components';
-import { CellContainer } from './cell/cell.styles';
 import { CalendarIcon, DueDateContainer } from '@controls/dueDate/dueDate.styles';
-
-export const CellOwner = styled(CellContainer)`
-	.MuiAvatar-root {
-		width: 24px;
-		height: 24px;
-	}
-`;
 
 export const CellDate = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
