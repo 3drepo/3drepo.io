@@ -36,9 +36,10 @@ export const FlexColumn = styled(FlexRow)`
 export const Title = styled(TextOverflow)`
 	color: ${({ theme }) => theme.palette.base.main};
 	${({ theme }) => theme.typography.body1};
-	line-height: 1em;
-	height: 1em;
-	min-height: 1em;
+	line-height: 18px;
+	height: 18px;
+	min-height: 18px;
+	margin-top: -3px;
 	font-weight: 600;
 `;
 

@@ -1,3 +1,4 @@
 --exit
 --recursive
 --timeout 10000
+--require ./setup.js

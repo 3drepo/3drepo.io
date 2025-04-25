@@ -24,36 +24,27 @@ import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayo
 import { Route } from '@/v5/services/routing/route.component';
 import { AuthenticatedRoute } from '@/v5/services/routing/authenticatedRoute.component';
 import { discardSlash } from '@/v5/helpers/url.helper';
-import { PasswordForgot } from '../login/passwordForgot';
-import { PasswordChange } from '../login/passwordChange';
 import { TeamspaceSelection } from '../teamspaceSelection';
 import { TeamspaceContent } from './teamspaces/teamspaceContent/teamspaceContent.component';
 import { ProjectContent } from './projects/projectContent/projectContent';
-import { Login } from '../login';
+import { AuthPage } from '../authPage/authPage.component';
 import { Viewer } from '../viewer/viewer';
 import {
 	DASHBOARD_ROUTE,
-	LOGIN_PATH,
-	PASSWORD_CHANGE_PATH,
-	PASSWORD_FORGOT_PATH,
+	AUTH_PATH,
 	PROJECT_ROUTE_BASE,
 	PROJECT_ROUTE_BASE_TAB,
-	REGISTER_VERIFY_PATH,
-	SIGN_UP_PATH,
-	SIGN_UP_SSO_PATH,
 	TEAMSPACE_ROUTE_BASE,
 	TEAMSPACE_ROUTE_BASE_TAB,
 	VIEWER_ROUTE,
 } from '../routes.constants';
 import { LegalRoutes } from '../legal';
-import { UserSignup } from '../userSignup/userSignup.component';
-import { UserVerification } from '../userVerification/userVerification.component';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
-import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.component';
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CalibrationContextComponent } from './projects/calibration/calibrationContext';
+import { authBroadcastChannel } from '@/v5/store/auth/authBrodcastChannel';
 
 export const MainRoute = () => {
 	const { path } = useRouteMatch();
@@ -63,6 +54,8 @@ export const MainRoute = () => {
 	useEffect(() => {
 		if (!authenticationFetched) {
 			AuthActionsDispatchers.authenticate();
+		} else {
+			authBroadcastChannel.onmessage = (ev) => AuthActionsDispatchers.setSessionAuthenticatedTeamspaceSuccess(ev.data);
 		}
 	}, [authenticationFetched]);
 
@@ -70,23 +63,8 @@ export const MainRoute = () => {
 		<CalibrationContextComponent>
 			<GlobalStyle />
 			<Switch>
-				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={LOGIN_PATH}>
-					<Login />
-				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={SIGN_UP_PATH}>
-					<UserSignup />
-				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={SIGN_UP_SSO_PATH}>
-					<UserSignupSSO />
-				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.userVerification', defaultMessage: 'Verify Email' })} exact path={REGISTER_VERIFY_PATH}>
-					<UserVerification />
-				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.passwordForgot', defaultMessage: 'Forgotten Password' })} exact path={PASSWORD_FORGOT_PATH}>
-					<PasswordForgot />
-				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.passwordChange', defaultMessage: 'Change Password' })} exact path={PASSWORD_CHANGE_PATH}>
-					<PasswordChange />
+				<Route title={formatMessage({ id: 'pageTitle.auth', defaultMessage: 'Authenticate' })} exact path={AUTH_PATH}>
+					<AuthPage />
 				</Route>
 				<Route exact path={`${path}/(terms|privacy|cookies)`}>
 					<LegalRoutes path={path} />

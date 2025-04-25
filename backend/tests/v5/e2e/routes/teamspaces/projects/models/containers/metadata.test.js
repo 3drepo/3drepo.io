@@ -66,9 +66,12 @@ const customMetadata = metadata.metadata[1];
 const metadataToDelete = metadata.metadata[2];
 
 const setupData = async () => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+	const { tsAdmin, ...otherUsers } = users;
 
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace]));
+	await ServiceHelper.db.createUser(tsAdmin);
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+
+	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], [teamspace]));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
 		teamspace,
 		model._id,

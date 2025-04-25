@@ -765,6 +765,22 @@ const testIndices = () => {
 			const array = res.map(({ key }) => key);
 			expect(array).toEqual(expect.arrayContaining([{ _id: 1 }, ...newIndex.map(({ key }) => key)]));
 		});
+
+		test('Should be able to create unique index', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+
+			await DB.insertMany(database, col, [{ n: 2 }, { a: 1 }]);
+
+			const newIndex = { n: 1 };
+			await expect(DB.createIndex(database, col, newIndex, { unique: true })).resolves.toBeUndefined();
+
+			await DB.insertOne(database, col, newIndex);
+			// Unique index means we shouldn't be able to insert another one with the same value.
+			await expect(DB.insertOne(database, col, newIndex)).rejects.not.toBeUndefined();
+			// Unique index means we shouldn't be able to insert another one that is empty
+			await expect(DB.insertOne(database, col, { b: 1 })).rejects.not.toBeUndefined();
+		});
 	});
 };
 

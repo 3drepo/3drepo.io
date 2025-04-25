@@ -33,6 +33,7 @@ export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps &
 	onBlur?: () => void;
 	excludeViewers?: boolean;
 	emptyListMessage?: string;
+	excludeJobs?: boolean;
 };
 
 export const AssigneesSelect = ({
@@ -41,6 +42,7 @@ export const AssigneesSelect = ({
 	multiple,
 	className,
 	excludeViewers = false,
+	helperText,
 	onChange,
 	onBlur,
 	canClear = false,
@@ -83,12 +85,6 @@ export const AssigneesSelect = ({
 	return (
 		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay}>
 			<AssigneesListContainer className={className}>
-				<AssigneesValuesDisplay
-					value={valueAsArray}
-					maxItems={maxItems}
-					onClear={canClear && !disabled && valueAsArray?.length ? handleClear : undefined}
-					emptyListMessage={emptyListMessage}
-				/>
 				<AssigneesSelectMenu
 					value={value}
 					multiple={multiple}
@@ -97,6 +93,12 @@ export const AssigneesSelect = ({
 					onBlur={onBlur}
 					disabled={disabled}
 					{...props}
+				/>
+				<AssigneesValuesDisplay
+					value={valueAsArray}
+					maxItems={maxItems}
+					onClear={canClear && !disabled && valueAsArray?.length ? handleClear : undefined}
+					emptyListMessage={emptyListMessage}
 				/>
 			</AssigneesListContainer>
 		</SearchContextComponent>

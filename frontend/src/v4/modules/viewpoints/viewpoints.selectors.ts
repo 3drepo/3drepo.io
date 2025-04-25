@@ -23,9 +23,11 @@ import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
 
-export const groupsOfViewpoint = function*(viewpoint) {
+export const getGroupsIDsOfViewpoint = function (viewpoint) {
 	const groupsProperties = ['override_group_ids', 'transformation_group_ids',
 	'highlighted_group_id', 'hidden_group_id', 'shown_group_id'];
+
+	const ids = new Set<string>()
 
 	// This part discriminates which groups hasnt been loaded yet and add their ids to
 	// the groupsToFetch array
@@ -35,24 +37,48 @@ export const groupsOfViewpoint = function*(viewpoint) {
 			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
 				const groupsIds: string[] = viewpoint[prop];
 				for (let j = 0; j < groupsIds.length; j++ ) {
-					yield groupsIds[j];
+					ids.add(groupsIds[j]);
 				}
 			} else {// if the property is just a groupId
-				yield viewpoint[prop];
+				ids.add(viewpoint[prop]);
 			}
 		}
 	}
+
+	return ids;
 };
 
-export const isViewpointLoaded = (viewpoint, groups) => {
-	let areGroupsLoaded = true;
+export const getLoadedGroupsIds = function (viewpoint) {
+	const groupsProperties = ['highlighted_group', 'hidden_group', 'shown_group', 'override_groups', 'transformation_groups'];
 
-	for (const id of groupsOfViewpoint(viewpoint)) {
-		if (!groups[id]) {
-			areGroupsLoaded = false;
-			break;
+	const ids = new Set<string>();
+
+	// This part discriminates which groups hasnt been loaded yet and add their ids to
+	// the groupsToFetch array
+	for (let i = 0; i < groupsProperties.length ; i++) {
+		const prop = groupsProperties[i];
+		if (viewpoint[prop]) {
+			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+				const groupsIds = viewpoint[prop];
+				for (let j = 0; j < groupsIds.length; j++ ) {
+					ids.add(groupsIds[j]._id);
+				}
+			} else {// if the property is just a groupId
+				ids.add(viewpoint[prop]._id);
+			}
 		}
 	}
+
+	return ids;
+};
+
+export const isViewpointReady = (viewpoint) => {
+	const loadedGroupsIds = getLoadedGroupsIds(viewpoint);
+	let areGroupsLoaded = true;
+
+	getGroupsIDsOfViewpoint(viewpoint).forEach((id) => {
+		areGroupsLoaded =  areGroupsLoaded && loadedGroupsIds.has(id);
+	});
 
 	return areGroupsLoaded;
 };
