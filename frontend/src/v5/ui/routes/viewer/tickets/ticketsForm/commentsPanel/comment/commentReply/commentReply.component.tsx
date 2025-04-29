@@ -22,7 +22,7 @@ import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CommentMarkDown, CommentImage, OriginalMessage, CameraIcon } from './commentReply.styles';
+import { CommentMarkDown, CommentImage, OriginalMessage } from './commentReply.styles';
 import { CommentAuthor } from '../commentNonMessageContent/commentNonMessageContent.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
@@ -81,7 +81,6 @@ export const CommentReply = ({
 					</CommentAuthor>
 				)}
 				<OriginalMessage>
-					{images.length > 0 && (<CameraIcon />)}
 					<CommentMarkDown>
 						{message}
 					</CommentMarkDown>
