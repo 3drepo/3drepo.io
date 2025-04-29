@@ -29,13 +29,28 @@ import { TicketsTableResizableContent, TicketsTableResizableContentProps } from 
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
 import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
-import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
+const INITIAL_COLUMNS = [
+	'id',
+	BaseProperties.TITLE,
+	'modelName',
+	`properties.${BaseProperties.CREATED_AT}`,
+	`properties.${IssueProperties.ASSIGNEES}`, 
+	`properties.${BaseProperties.OWNER}`,
+	`properties.${IssueProperties.DUE_DATE}`,
+	`properties.${IssueProperties.PRIORITY}`,
+	`properties.${BaseProperties.STATUS}`,
+	`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
+	`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
+];
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { stretchTable, visibleColumnsNames, showColumn } = useContext(ResizableTableContext);
+	const { stretchTable, visibleColumnsNames, getAllColumnsNames, setVisibleColumnsNames } = useContext(ResizableTableContext);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const hasVisibleColumns = visibleColumnsNames.length > 0;
+	const initialVisibleColumns = getAllColumnsNames().filter((name) => INITIAL_COLUMNS.includes(name));
+
 	
 	useEffect(() => {
 		if (templateWasFetched && hasVisibleColumns) {
@@ -44,10 +59,8 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 	}, [template, templateWasFetched, hasVisibleColumns]);
 
 	useEffect(() => {
-		if (templateWasFetched && !hasVisibleColumns) {
-			showColumn('id');
-		}
-	}, [hasVisibleColumns, templateWasFetched]);
+		setVisibleColumnsNames(initialVisibleColumns);
+	}, [template]);
 
 	if (!templateWasFetched) {
 		return (
@@ -79,7 +92,7 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 
 	return (
 		<TicketsTableContextComponent template={template}>
-			<ResizableTableContextComponent columns={columns} columnGap={1}>
+			<ResizableTableContextComponent columns={columns} columnGap={1} key={template._id}>
 				<TableContent {...props} template={template} />
 			</ResizableTableContextComponent>
 		</TicketsTableContextComponent>
