@@ -41,6 +41,7 @@ export const CommentReply = ({
 	variant = 'primary',
 	images = [],
 	originalAuthor,
+	view,
 	...props
 }: CommentReplyProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
@@ -69,7 +70,7 @@ export const CommentReply = ({
 
 	const openImagesModal = () => DialogsActionsDispatchers.open('images', { images: imagesSrcs });
 
-	if (!message && images.length === 0) return (<></>);
+	if (!message && images.length === 0 && !view) return (<></>);
 
 	return (
 		<QuotedMessage variant={variant} {...props}>
