@@ -82,7 +82,11 @@ export const CommentNonMessageContent = ({
 	// @ts-ignore
 	const onDeleteImage = (index) => onEdit(images.toSpliced(index, 1));
 	const onUploadImages = async () => uploadImages((imagesToUpload) => setImages(images.concat(imagesToUpload)));
-	const imagesEditingFunctions = readOnly ? {} : { onDeleteImage, onUploadImages, onEditImage };
+	const imagesEditingFunctions = !readOnly ? { 
+		onUpload: onUploadImages,
+		onDelete: onDeleteImage,
+		onAddMarkup: onEditImage,
+	} : {};
 	const syncProps = useSyncProps({
 		images: imgsSrcs,
 		disabledDeleteMessage: disabledDeleteMessage,
