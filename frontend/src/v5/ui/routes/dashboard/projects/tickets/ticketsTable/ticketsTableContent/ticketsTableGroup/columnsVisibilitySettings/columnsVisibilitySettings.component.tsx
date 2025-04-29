@@ -30,11 +30,9 @@ import { Divider } from '@mui/material';
 import { TextOverflow } from '@controls/textOverflow';
 
 export const ColumnsVisibilitySettings = () => {
-	const { hiddenColumns, getAllColumnsNames, showColumn, hideColumn } = useContext(ResizableTableContext);
+	const { visibleColumnsNames, getAllColumnsNames, showColumn, hideColumn, isVisible } = useContext(ResizableTableContext);
 	const columnsNames = getAllColumnsNames();
-	const newVisibleColumnsCount = columnsNames.length - hiddenColumns.length;
 
-	const isVisible = (columnName) => !hiddenColumns.includes(columnName);
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
 	);
@@ -80,7 +78,7 @@ export const ColumnsVisibilitySettings = () => {
 								{groupedItems.selected.map((columnName) => (
 									<MenuItem key={columnName}>
 										<Checkbox
-											disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
+											disabled={visibleColumnsNames.length === 1}
 											onChange={() => hideColumn(columnName)}
 											value={true}
 											label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
@@ -91,7 +89,6 @@ export const ColumnsVisibilitySettings = () => {
 								{groupedItems.unselected.map((columnName) => (
 									<MenuItem key={columnName}>
 										<Checkbox
-											disabled={newVisibleColumnsCount === 1 && isVisible(columnName)}
 											onChange={() => showColumn(columnName)}
 											value={false}
 											label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}

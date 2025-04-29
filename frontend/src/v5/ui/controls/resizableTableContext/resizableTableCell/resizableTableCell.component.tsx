@@ -26,9 +26,9 @@ type ResizableTableCellProps = {
 	onClick?: () => void;
 };
 export const ResizableTableCell = ({ name, children, ...props }: ResizableTableCellProps) => {
-	const { isHidden } = useContext(ResizableTableContext);
+	const { isVisible } = useContext(ResizableTableContext);
 
-	if (isHidden(name)) return null;
+	if (!isVisible(name)) return null;
 
 	return (<Item {...props}>{children}</Item>);
 };

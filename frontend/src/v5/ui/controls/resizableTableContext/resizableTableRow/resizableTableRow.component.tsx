@@ -20,8 +20,8 @@ import { ResizableTableContext } from '../resizableTableContext';
 import { Row } from './resizableTableRow.styles';
 
 export const ResizableTableRow = (props) => {
-	const { getVisibleColumnsWidths, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumnsWidths().map((w) => `${w}px`).join(' ');
+	const { visibleColumnsNames, getWidth, columnGap } = useContext(ResizableTableContext);
+	const gridTemplateColumns = visibleColumnsNames.map((column) => `${getWidth(column)}px`).join(' ');
 	
 	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
 };

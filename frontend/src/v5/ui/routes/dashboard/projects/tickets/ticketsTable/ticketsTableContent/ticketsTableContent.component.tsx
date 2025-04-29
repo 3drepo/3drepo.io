@@ -33,9 +33,9 @@ import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants'
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { stretchTable, getVisibleColumnsNames, showColumn } = useContext(ResizableTableContext);
+	const { stretchTable, visibleColumnsNames, showColumn } = useContext(ResizableTableContext);
 	const templateWasFetched = templateAlreadyFetched(template);
-	const hasVisibleColumns = getVisibleColumnsNames().length > 0;
+	const hasVisibleColumns = visibleColumnsNames.length > 0;
 	
 	useEffect(() => {
 		if (templateWasFetched && hasVisibleColumns) {

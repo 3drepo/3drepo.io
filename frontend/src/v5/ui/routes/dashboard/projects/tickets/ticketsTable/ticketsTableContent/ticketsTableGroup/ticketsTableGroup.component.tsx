@@ -28,7 +28,6 @@ import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { getColumnLabel, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
-import { getAvailableColumnsForTemplate } from '../../ticketsTableContext/ticketsTableContext.helpers';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
@@ -39,10 +38,7 @@ import { useParams } from 'react-router';
 
 const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
-	const { isHidden } = useContext(ResizableTableContext);
 	const isSelected = name === sortingColumn;
-
-	if (isHidden(name)) return (null);
 
 	if (disableSorting) return (
 		<ResizableTableCell name={name}>
@@ -75,10 +71,9 @@ type TicketsTableGroupProps = {
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const { getRowWidth } = useContext(ResizableTableContext);
+	const { getRowWidth, visibleColumnsNames } = useContext(ResizableTableContext);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
-	const columns = getAvailableColumnsForTemplate(template);
 	const hideNewticketButton = template.deprecated;
 
 	const assigneesSort = (items: ITicket[], order) => orderBy(
@@ -105,7 +100,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 								: (
 									<>
 										<Headers>
-											{columns.map(({ name }) => (
+											{visibleColumnsNames.map((name) => (
 												<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
 													{getColumnLabel(name)}
 												</SortingTableHeader>
