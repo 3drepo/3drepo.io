@@ -329,7 +329,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 						</MenuItem>
 					</ActionMenuItem>
 				</ActionMenu>
-				{isViewer && (
+				{(isViewer || viewpoint) && ( // user can delete existing viewpoints in tabular view
 					<ViewpointActionMenu viewpoint={viewpoint} setViewpoint={setViewpoint} />
 				)}
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>

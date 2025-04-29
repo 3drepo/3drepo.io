@@ -26,8 +26,12 @@ import { FormattedMessage } from 'react-intl';
 import { ActionIcon } from '../commentBox.styles';
 import { ViewpointIcon } from './viewpointActionMenu.styles';
 import { getViewerState } from '@/v5/helpers/viewpoint.helpers';
+import { useContext } from 'react';
+import { TicketContext } from '../../../../ticket.context';
 
 export const ViewpointActionMenu = ({ viewpoint, setViewpoint }) => {
+	const { isViewer } = useContext(TicketContext);
+	
 	const updateViewpoint = async () => {
 		const state = await getViewerState();
 		const cameraAndClipping = await ViewerService.getViewpoint();
@@ -52,6 +56,7 @@ export const ViewpointActionMenu = ({ viewpoint, setViewpoint }) => {
 		>
 			<MenuList>
 				<EllipsisMenuItem
+					disabled={!isViewer}
 					title={<FormattedMessage id="customTicket.comments.action.replaceViewpoint" defaultMessage="Replace Viewpoint" />}
 					onClick={updateViewpoint}
 				/>
