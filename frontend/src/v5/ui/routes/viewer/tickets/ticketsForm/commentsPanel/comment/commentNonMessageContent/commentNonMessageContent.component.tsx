@@ -63,7 +63,7 @@ export const CommentNonMessageContent = ({
 		return getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, img, isFederation);
 	});
 
-	const onEdit = (imgs: string[]) => TicketCommentsActionsDispatchers.updateComment(
+	const setImages = (imgs: string[]) => TicketCommentsActionsDispatchers.updateComment(
 		teamspace,
 		project,
 		containerOrFederation,
@@ -75,12 +75,12 @@ export const CommentNonMessageContent = ({
 	const onEditImage = (img, index) => {
 		const newImages = [...images];
 		newImages[index] = img;
-		onEdit(newImages);
+		setImages(newImages);
 	};
 
 	// @ts-ignore
 	const onDeleteImage = (index) => onEdit(images.toSpliced(index, 1));
-	const onUploadImages = async () => uploadImages((imagesToUpload) => onEdit(images.concat(imagesToUpload)));
+	const onUploadImages = async () => uploadImages((imagesToUpload) => setImages(images.concat(imagesToUpload)));
 	const imagesEditingFunctions = readOnly ? {} : { onDeleteImage, onUploadImages, onEditImage };
 	const syncProps = useSyncProps({
 		images: imgsSrcs,
