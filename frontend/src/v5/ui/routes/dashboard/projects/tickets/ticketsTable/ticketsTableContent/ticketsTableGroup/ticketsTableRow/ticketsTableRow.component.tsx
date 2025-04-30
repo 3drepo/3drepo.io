@@ -41,8 +41,8 @@ export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: Tic
 	const { teamspace, project } = useParams<DashboardParams>();
 	const { _id: id, properties, type } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
-	const { visibleColumnsNames, getWidth, columnGap } = useContext(ResizableTableContext);
-	const columnsWidths = visibleColumnsNames.map(getWidth);
+	const { visibleSortedColumnsNames, getWidth, columnGap } = useContext(ResizableTableContext);
+	const columnsWidths = visibleSortedColumnsNames.map(getWidth);
 	const isFed = modelIsFederation(modelId);
 	const ticketIsFetched = !!ticket.properties[BaseProperties.UPDATED_AT];
 
@@ -67,7 +67,7 @@ export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: Tic
 				</LoadingRow>
 			) : (
 				<Row key={id} onClickCapture={handleClick} $selected={selected}>
-					{visibleColumnsNames.map((name) => (
+					{visibleSortedColumnsNames.map((name) => (
 						<TicketsTableCell
 							name={name}
 							ticket={ticket}

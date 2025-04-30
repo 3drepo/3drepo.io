@@ -71,7 +71,7 @@ type TicketsTableGroupProps = {
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const { getRowWidth, visibleColumnsNames } = useContext(ResizableTableContext);
+	const { getRowWidth, visibleSortedColumnsNames } = useContext(ResizableTableContext);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 	const hideNewticketButton = template.deprecated;
@@ -100,7 +100,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 								: (
 									<>
 										<Headers>
-											{visibleColumnsNames.map((name) => (
+											{visibleSortedColumnsNames.map((name) => (
 												<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
 													{getColumnLabel(name)}
 												</SortingTableHeader>
