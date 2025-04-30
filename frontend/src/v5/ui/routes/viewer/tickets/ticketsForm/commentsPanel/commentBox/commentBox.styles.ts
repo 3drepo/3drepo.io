@@ -35,7 +35,13 @@ export const Container = styled.section`
 	border-radius: 0 0 8px 8px;
 `;
 
-export const MessageAndImages = styled.div``;
+export const MessageAndImages = styled.div<{ $isEditMode: boolean; }>`
+	${({ theme, $isEditMode }) => $isEditMode && css`
+		border: 1px solid ${theme.palette.secondary.lightest};
+		border-bottom-color: ${theme.palette.primary.main};
+		margin-top: 10px;
+	`}
+`;
 
 export const CommentReplyContainer = styled.div`
 	position: relative;

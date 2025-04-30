@@ -259,7 +259,7 @@ export const CommentBox = ({ commentId, message = '', images = [], view: existin
 			ref={containerRef}
 			className={className}
 		>
-			<MessageAndImages>
+			<MessageAndImages $isEditMode={isEditMode}>
 				{commentReply?._id && (
 					<CommentReplyContainer>
 						<CommentReply {...commentReply} shortMessage />
