@@ -129,7 +129,7 @@ export const CreateCommentBox = ({ commentReply, deleteCommentReply }: CreateCom
 
 	const editImage = async (image, index) => {
 		imagesToUpload[index].src = image;
-		setImagesToUpload(imagesToUpload);
+		setImagesToUpload([...imagesToUpload]);
 	};
 
 	// @ts-ignore

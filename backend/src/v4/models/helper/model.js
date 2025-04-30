@@ -25,28 +25,23 @@ const {
 	findPermissionByUser,
 	getModelsData,
 	isModelNameExists,
-	setModelImportFail,
-	setModelImportSuccess,
 	setModelStatus,
 	createCorrelationId
 } = require("../modelSetting");
 const responseCodes = require("../../response_codes");
 const importQueue = require("../../services/queue");
 const C = require("../../constants");
-const Mailer = require("../../mailer/mailer");
 const systemLogger = require("../../logger.js").systemLogger;
 const History = require("../history");
 const { getRefNodes } = require("../ref");
 const { findNodesByType, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
-const fs = require("fs");
 const ChatEvent = require("../chatEvent");
-const { addModelToProject, createProject, findOneProject } = require("../project");
+const { addModelToProject, findOneProject } = require("../project");
 const { getTeamspaceSettings } = require("../teamspaceSetting");
 const _ = require("lodash");
 const FileRef = require("../fileRef");
-const notifications = require("../notification");
 const CombinedStream = require("combined-stream");
 const stringToStream = require("string-to-stream");
 const { BinToFaceStringStream, BinToVector3dStringStream } = require("./binary");
@@ -109,155 +104,6 @@ async function _getModels(teamspace, ids, permissions) {
 
 function _makeAccountObject(name) {
 	return { account: name, models: [], fedModels: [], projects: [], permissions: [], isAdmin: false };
-}
-
-/** *****************************************************************************
- * Converts error code from repobouncerclient to a response error object.
- * Uncaught error codes that are valid responseCodes will be returned,
- * otherwise FILE_IMPORT_UNKNOWN_ERR is returned.
- * @param {errCode} - error code referenced in error_codes.h
- *******************************************************************************/
-function translateBouncerErrCode(bouncerErrorCode) {
-	// These error codes correspond to the error messages to 3drepobouncer
-	// refer to bouncer/repo/error_codes.h for what they are.
-
-	const bouncerErrToWebErr = [
-		{ res: responseCodes.OK, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.NOT_AUTHORIZED, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_STASH_GEN_FAILED, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_MISSING_TEXTURES, softFail: true, userErr: true},
-		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.REPOERR_FED_GEN_FAIL, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_MISSING_NODES, softFail: true, userErr: true},
-		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_BUNDLE_GEN_FAILED, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_LOAD_SCENE_INVALID_MESHES, softFail: true, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_NO_MESHES, softFail: false, userErr: true},
-		{ res: responseCodes.FILE_IMPORT_BAD_EXT, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_BIM, softFail: false, userErr: true},
-		{ res: responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION_FBX, softFail: false, userErr: true},
-		{ res: responseCodes.FILE_IMPORT_UNSUPPORTED_VERSION, softFail: false, userErr: true},
-		{ res: responseCodes.FILE_IMPORT_MAX_NODES_EXCEEDED, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_ODA_NOT_SUPPORTED, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_NO_3D_VIEW, softFail: false, userErr: true},
-		{ res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_TIMED_OUT, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_SYNCHRO_NOT_SUPPORTED, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_MAX_NODE_EXCEEDED, softFail: false, userErr: true},
-		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_PROCESS_ERR, softFail: false, userErr: false},
-		{ res: responseCodes.FILE_IMPORT_GEOMETRY_ERR, softFail: false, userErr: false} // 34
-	];
-
-	const errObj =  bouncerErrToWebErr.length > bouncerErrorCode ?
-		bouncerErrToWebErr[bouncerErrorCode] : { res: responseCodes.FILE_IMPORT_UNKNOWN_ERR, userErr: false};
-	errObj.res.bouncerErrorCode = bouncerErrorCode;
-	return errObj;
-}
-
-function insertModelUpdatedNotificationsLatestReview(account, model) {
-	History.findLatest(account, model,{tag:1}).then(h => {
-		const revision = (!h || !h.tag) ? "" : h.tag;
-		return notifications.upsertModelUpdatedNotifications(account, model, revision);
-	}).then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
-}
-
-async function importSuccess(account, model, sharedSpacePath, user) {
-	try {
-		const [setting, nRevisions] = await Promise.all([
-			setStatus(account, model, "ok", user),
-			History.revisionCount(account, model)
-		]);
-
-		if (setting) {
-			systemLogger.logDebug(`Model status changed to ${setting.status} and correlation ID reset`);
-
-			const updatedSetting = await setModelImportSuccess(account, model, setting.type === "toy" || setting.type === "sample");
-
-			// hack to add the user field to send to the user
-			const data = {user, nRevisions ,...JSON.parse(JSON.stringify(updatedSetting))};
-			ChatEvent.modelStatusChanged(null, account, model, data);
-
-			// Creates model updated notification.
-			insertModelUpdatedNotificationsLatestReview(account, model);
-		}
-	} catch (err) {
-		systemLogger.logError("Failed to invoke importSuccess:" +  err);
-	}
-}
-
-/**
- * Sets failed status, error code, chat event, and E-mail upon import failure
- * @param {account} acount - User account
- * @param {model} model - Model
- * @param {user} - user who initiated the request
- * @param {sharedSpacePath} - path to sharedspace
- * @param {errCode} errCode - Defined bouncer error code or IO response code
- * @param {errMsg} errMsg - Verbose error message (errCode.message will be used if undefined)
- */
-function importFail(account, model, sharedSpacePath, user, errCode, errMsg) {
-	const translatedError = translateBouncerErrCode(errCode);
-
-	setModelImportFail(account, model, translatedError.res).then(setting => {
-		// hack to add the user field to send to the user
-		const data = Object.assign({user}, JSON.parse(JSON.stringify(setting)));
-		ChatEvent.modelStatusChanged(null, account, model, data);
-
-		if (!errMsg) {
-			errMsg = setting.errorReason.message;
-		}
-		if (!translatedError.userErr) {
-
-			const attachments = [];
-			if(setting.corID && sharedSpacePath) {
-				const path = require("path");
-				const sharedDir = path.join(sharedSpacePath, setting.corID);
-				const files = fs.readdirSync(sharedDir);
-				files.forEach((file) => {
-					if(file.endsWith(".log")) {
-						attachments.push({
-							filename: file,
-							path: path.join(sharedDir, file)
-						});
-					}
-				});
-
-			}
-
-			Mailer.sendImportError({
-				account,
-				model,
-				username: user,
-				err: errMsg,
-				corID: setting.corID,
-				bouncerErr: errCode,
-				attachments
-			}).catch(err => systemLogger.logError(err));
-		}
-
-		// Creates model updated failed notification.
-		notifications.insertModelUpdatedFailedNotifications(account, model, user, errMsg)
-			.then(n => n.forEach(ChatEvent.upsertedNotification.bind(null,null)));
-
-		// In case the error was actually a warning,
-		// the model was imported so we still need to send the model_updated notifications
-		if (translatedError.softFail) {
-			insertModelUpdatedNotificationsLatestReview(account, model);
-		}
-
-	}).catch(err => {
-		systemLogger.logError("Failed to invoke importFail:" +  err);
-	});
 }
 
 /**
@@ -324,94 +170,6 @@ function createNewFederation(teamspace, modelName, username, data, toyFed) {
 		return createFederatedModel(teamspace, modelInfo.settings._id, username, data.subModels, modelInfo.settings, toyFed).then(() => {
 			return modelInfo;
 		});
-	});
-}
-
-function importToyProject(account, username) {
-
-	// create a project named Sample_Project
-	return createProject(username, "Sample_Project", username, [C.PERM_TEAMSPACE_ADMIN]).then(project => {
-
-		return Promise.all([
-
-			importToyModel(account, username, "Lego_House_Architecture", "9f101b80-b4c6-11ec-8b15-4f0e6dbe2114", project.name),
-			importToyModel(account, username, "Lego_House_Landscape", "9f117b10-b4c6-11ec-8b15-4f0e6dbe2114", project.name),
-			importToyModel(account, username, "Lego_House_Structure", "9f11f040-b4c6-11ec-8b15-4f0e6dbe2114", project.name)
-
-		]).then(models => {
-
-			// skip some steps when importing fed models
-			const skip = { tree: 1 };
-
-			const subModels = models.map(m => {
-				importSuccess(account, m._id);
-
-				return {
-					model: m._id,
-					database: account
-				};
-			});
-
-			return importToyModel(account, username, "Lego_House_Federation", "9f252a20-b4c6-11ec-8b15-4f0e6dbe2114", project.name, subModels, skip);
-		});
-
-	}).catch(err => {
-
-		Mailer.sendImportError({
-			account,
-			username,
-			err: err.message
-		});
-
-		return Promise.reject(err);
-	});
-}
-
-function importToyModel(account, username, modelName, modelDirName, project, subModels, skip) {
-
-	const data = {
-		desc : "",
-		type : "sample",
-		project,
-		unit: "mm",
-		subModels,
-		surveyPoints: [
-			{
-				latLong: [48.92454, 2.02831],
-				position: [0, 0, 0]
-			}
-		],
-		angleFromNorth: 145
-	};
-
-	let createModelPromise;
-
-	const isFed = subModels && subModels.length;
-	if(isFed) {
-		createModelPromise = createNewFederation(account, modelName, username, data, modelDirName);
-	} else {
-		createModelPromise = createNewModel(account, modelName, data);
-	}
-
-	return createModelPromise.then((modelInfo) => {
-		if(isFed) {
-			return modelInfo.settings;
-		} else {
-			return importModel(account, modelInfo.settings._id, username, modelInfo.settings, {type: "toy", modelDirName, skip });
-		}
-
-	}).catch(err => {
-
-		Mailer.sendImportError({
-			account,
-			modelName,
-			username,
-			err: err.message,
-			corID: err.corID,
-			appId: err.appId
-		});
-
-		return Promise.reject(err);
 	});
 }
 
@@ -636,12 +394,6 @@ function importModel(account, model, username, modelSetting, source, data) {
 			if (source.type === "upload") {
 				return _handleUpload(correlationId, account, model, username, source.file, data);
 
-			} else if (source.type === "toy") {
-
-				return importQueue.importToyModel(correlationId, account, model, source).then(() => {
-					systemLogger.logInfo(`Job ${modelSetting.corID} imported without error`,{account, model, username});
-					return modelSetting;
-				});
 			}
 
 		});
@@ -727,7 +479,7 @@ async function getModelPermission(username, setting, account) {
 		const template = await findPermissionByUser(account, setting._id, username);
 
 		if(template) {
-			const permissionTemplate = PermissionTemplates.findById(dbUser, template.permission);
+			const permissionTemplate = PermissionTemplates.findById(template.permission);
 
 			if(permissionTemplate && permissionTemplate.permissions) {
 				permissions = permissions.concat(flattenPermissions(permissionTemplate.permissions, true));
@@ -879,8 +631,6 @@ module.exports = {
 	_makeAccountObject,
 	createNewModel,
 	createNewFederation,
-	importToyModel,
-	importToyProject,
 	createFederatedModel,
 	listSubModels,
 	searchTree,
@@ -890,8 +640,6 @@ module.exports = {
 	getModelPermission,
 	getSubModelRevisions,
 	setStatus,
-	importSuccess,
-	importFail,
 	getMeshById,
 	getModelSetting,
 	flattenPermissions

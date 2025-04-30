@@ -34,15 +34,10 @@ const BLACK_LIST = [
 	"* /apikey",
 	"* /login",
 	"* /logout",
-	"PUT /*",
 	"PUT /*/password",
 	"POS /*/verify",
 	"POST /forgot-password",
-	"POST /*/avatar",
-	"GET /*/invoices",
-	"GET /*/invoices/*",
-	"* /*/subscriptions",
-	"GET /*/quota"
+	"POST /*/avatar"
 ];
 
 async function apiKeyCheck(req, res, next) {

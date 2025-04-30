@@ -26,15 +26,11 @@ ResponseCodes.templates = {
 	// Auth
 	notLoggedIn: { message: 'You are not logged in.', status: 401 },
 	alreadyLoggedIn: { message: 'You are already logged in.', status: 401 },
-	notAuthorized: { message: 'You do not have sufficient access rights for this action.', status: 401 },
-	licenceExpired: { message: 'Licence expired.', status: 401 },
-	tooManyLoginAttempts: { message: 'Too many unsuccessful login attempts! Account locked.', status: 400 },
-	userNotVerified: { message: 'Account not yet verified. Please check your email.', status: 400 },
+	notAuthenticatedAgainstTeamspace: { message: 'You are not authenticated against this teamspace.', status: 401 },
+	notAuthorized: { message: 'You do not have sufficient access rights for this action.', status: 403 },
+	licenceExpired: { message: 'Licence expired.', status: 403 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password.', status: 400 },
 	incorrectPassword: { message: 'Incorrect password.', status: 400 },
-	ssoNotAvailable: { message: 'Single sign on provider not available.', status: 500 },
-	nonSsoUser: { message: 'Single sign on is not enabled for this user.', status: 400 },
-	ssoUser: { message: 'Single sign on is already enabled for this user.', status: 400 },
 
 	// Fail safe
 	pageNotFound: { message: 'Page not found.', status: 404 },
@@ -45,6 +41,9 @@ ResponseCodes.templates = {
 
 	// Teamspace related error
 	teamspaceNotFound: { message: 'Teamspace not found.', status: 404 },
+
+	membershipInactive: { message: 'Your membership to this teamspace is currently inactive, please contact a teamspace admin.', status: 403 },
+	pendingInviteAcceptance: { message: 'You have not responded to the invitation email, please accept before proceeding.', status: 403 },
 	ssoRestricted: { message: 'This teamspace only accepts Single Signed On users. Please link your account with an authority.', status: 401 },
 	domainRestricted: { message: 'Your email does not belong in a domain that is accepted by this teamspace. Please contact your teamspace administrator.', status: 401 },
 	moduleUnavailable: { message: 'This module is not available in this teamspace.', status: 400 },
@@ -93,6 +92,9 @@ ResponseCodes.templates = {
 
 	// Legend related error
 	legendNotFound: { message: 'Legend not found.', status: 404 },
+
+	// endpoint decommissioned
+	endpointDecommissioned: { message: 'Endpoint no longer available.', status: 410 },
 
 	// Invalid Arguments
 	invalidArguments: { message: 'The arguments provided are not valid.', status: 400 },

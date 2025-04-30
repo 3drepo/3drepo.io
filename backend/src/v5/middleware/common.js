@@ -31,17 +31,15 @@ Common.validateMany = (validators) => {
 	return validateAll;
 };
 
-Common.httpVerbs = {
-	GET: 'GET',
-	POST: 'POST',
-	PATCH: 'PATCH',
-	PUT: 'PUT',
-	DELETE: 'DELETE',
-};
+Common.routeDecommissioned = (verb, newEndpoint) => (req, res) => {
+	let response = templates.endpointDecommissioned;
 
-Common.routeDeprecated = (httpVerb, newEndpoint) => (req, res) => {
-	const errorMessage = `This route is deprecated${newEndpoint ? `, please use ${httpVerb}: ${newEndpoint} instead.` : '.'}`;
-	respond(req, res, createResponseCode(templates.endpointDecomissioned, errorMessage));
+	if (verb && newEndpoint) {
+		const errorMessage = `This endpoint is no longer available. Please use ${verb} ${newEndpoint} instead.`;
+		response = createResponseCode(templates.endpointDecommissioned, errorMessage);
+	}
+
+	respond(req, res, response);
 };
 
 module.exports = Common;

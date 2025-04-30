@@ -70,6 +70,28 @@ const testGetUserAgentInfo = () => {
 			matchHelper(UserAgentHelper.getUserAgentInfo, browserUserAgent, expectedUserAgentInfo);
 		});
 
+		test('Should return user agent info object from smartphone', () => {
+			const browserUserAgent = 'Mozilla/5.0 (iPhone; U; CPU iPhone OS 5_1_1 like Mac OS X; en) AppleWebKit/534.46.0 (KHTML, like Gecko) CriOS/19.0.1084.60 Mobile/9B206 Safari/7534.48.3';
+			const expectedUserAgentInfo = {
+				application: {
+					major: '19',
+					name: 'Chrome',
+					type: 'browser',
+					version: '19.0.1084.60',
+				},
+				engine: {
+					name: 'WebKit',
+					version: '534.46.0',
+				},
+				os: {
+					name: 'iOS',
+					version: '5.1.1',
+				},
+				device: 'smartphone',
+			};
+			matchHelper(UserAgentHelper.getUserAgentInfo, browserUserAgent, expectedUserAgentInfo);
+		});
+
 		test('Should return user agent info with unknown fields if user agent is present but not recognizable', () => {
 			const browserUserAgent = ServiceHelper.generateRandomString();
 			const expectedUserAgentInfo = {
@@ -84,7 +106,7 @@ const testGetUserAgentInfo = () => {
 					name: undefined,
 					version: undefined,
 				},
-				device: 'phone',
+				device: '',
 			};
 			matchHelper(UserAgentHelper.getUserAgentInfo, browserUserAgent, expectedUserAgentInfo);
 		});

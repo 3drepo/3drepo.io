@@ -120,9 +120,12 @@ const generateBasicData = () => {
 };
 
 const setupData = async ({ users, teamspace, project, models, drawRevisions, conRevisions, calibration }) => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+	const { tsAdmin, ...otherUsers } = users;
 
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
+	await ServiceHelper.db.createUser(tsAdmin);
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+
+	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 
 	const modelProms = Object.keys(models).map((key) => ServiceHelper.db.createModel(
 		teamspace,
@@ -512,12 +515,13 @@ const testGetRevisionMD5Hash = () => {
 			const model = models.conWithRev;
 			const revision = conRevisions.nonVoidRevision;
 			const { voidRevision } = conRevisions;
+			const revBuffer = Buffer.from(revision.refData);
 
 			const MD5HashResponseExpectation = {
 				container: model._id,
 				tag: revision.tag,
 				timestamp: new Date(revision.timestamp).getTime(),
-				hash: CryptoJs.MD5(Buffer.from(revision.rFile[0])).toString(),
+				hash: CryptoJs.MD5(CryptoJs.lib.WordArray.create(revBuffer)).toString(),
 				filename: revision.rFile[0],
 				size: 20,
 			};

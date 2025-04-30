@@ -42,7 +42,7 @@ PermissionTemplates.get = function() {
 	];
 };
 
-PermissionTemplates.findById = function(user, id) {
+PermissionTemplates.findById = function(id) {
 	return this.get().find(({_id}) => _id === id);
 };
 

@@ -20,7 +20,6 @@ const { fileExtensionFromBuffer, isString, isUUID, isUUIDString } = require('./t
 const Yup = require('yup');
 const { fileUploads } = require('../config');
 const tz = require('countries-and-timezones');
-const zxcvbn = require('zxcvbn');
 
 const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
 
@@ -98,17 +97,6 @@ YupHelper.types.surveyPoints = Yup.array()
 
 YupHelper.types.strings.unit = Yup.string()
 	.oneOf(['mm', 'cm', 'dm', 'm', 'ft']);
-
-YupHelper.types.strings.password = Yup.string().max(65)
-	.test('checkPasswordStrength', 'Password is too weak',
-		(value) => {
-			if (value) {
-				if (value.length < 8) return false;
-				const passwordScore = zxcvbn(value).score;
-				return passwordScore >= 2;
-			}
-			return true;
-		});
 
 YupHelper.types.strings.email = Yup.string().email();
 

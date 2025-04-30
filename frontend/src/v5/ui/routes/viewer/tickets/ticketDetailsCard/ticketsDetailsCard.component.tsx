@@ -50,7 +50,7 @@ export const TicketDetailsCard = () => {
 
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const filteredTickets = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied() as any;
+	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
@@ -142,6 +142,7 @@ export const TicketDetailsCard = () => {
 		setDetailViewAndProps(TicketDetailsView.Form);
 		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation, revision);
 		setTicketId(ticket._id);
+		TicketsCardActionsDispatchers.setSelectedTemplate(ticket.type);
 	}, [ticket?._id]);
 
 	useEffect(() => {

@@ -15,32 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
-import { ViewerParams } from '../../../routes.constants';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { formatMessage } from '@/v5/services/intl';
-import PinIcon from '@assets/icons/filled/ticket_pin-filled.svg';
-import { EllipsisMenuItemSwitch } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItemSwitch.component';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
+import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
+import { FilterEllipsisMenu } from '@components/viewer/cards/cardFilters/filterEllipsisMenu/filterEllipsisMenu.component';
+import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 
 export const TicketsListCard = () => {
-	const { containerOrFederation } = useParams<ViewerParams>();
-	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
-	const isShowingPins = TicketsCardHooksSelectors.selectIsShowingPins();
-
-	const onClickShowPins = () => {
-		TicketsCardActionsDispatchers.setIsShowingPins(!isShowingPins);
-	};
-
+	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	
 	return (
 		<CardContainer>
 			<CardHeader
@@ -49,20 +41,15 @@ export const TicketsListCard = () => {
 				actions={(
 					<>
 						{!readOnly && (<NewTicketMenu />)}
-						<EllipsisMenu>
-							<EllipsisMenuItemSwitch
-								icon={<PinIcon />}
-								title={formatMessage({ id: 'foobarbaz', defaultMessage: 'Show Pins' })}
-								active={isShowingPins}
-								onClick={onClickShowPins}
-							/>
-						</ EllipsisMenu>
+						<FilterSelection />
+						<FilterEllipsisMenu />
 					</>
 				)}
 			/>
 			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
+				<CardFilters />
 				{tickets.length ? (
-					<TicketsList tickets={tickets} />
+					<TicketsList />
 				) : (
 					<EmptyListMessage>
 						<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />

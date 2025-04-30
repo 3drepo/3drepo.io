@@ -17,7 +17,6 @@
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { getSupportedImageExtensions, convertFileToImageSrc } from '@controls/fileUploader/imageFile.helper';
 import { uploadFile } from '@controls/fileUploader/uploadFile';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Actions, Content } from './ticketImageContent.styles';
 import { TicketImageDisplayer } from './ticketImageDisplayer/ticketImageDisplayer.component';
 
@@ -38,13 +37,12 @@ export const TicketImageContent = ({
 		const imgSrc = await convertFileToImageSrc(file);
 		onChange?.(imgSrc);
 	};
-	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	return (
 		<Content>
 			<TicketImageDisplayer
 				imgSrc={value}
-				disabled={disabled || !isProjectAdmin}
+				disabled={disabled}
 				onEmptyImageClick={uploadImage}
 				onImageClick={onImageClick}
 			/>

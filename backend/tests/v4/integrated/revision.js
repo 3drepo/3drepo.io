@@ -19,14 +19,13 @@
  */
 
 const request = require("supertest");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const expect = require("chai").expect;
 const app = require("../../../src/v4/services/api.js").createApp();
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const { templates } = require("../../../src/v5/utils/responseCodes");
-const helpers = require("../helpers/signUp");
 const C = require("../../../src/v4/constants");
 const async = require("async");
 const User = require("../../../src/v4/models/user");
@@ -224,46 +223,11 @@ describe("Revision", function () {
 			});
 	});
 
-	it("upload with exisitng tag name should fail", function(done) {
-
+	it("should not be able to reach the endpoint to upload a new revision - endpoint decommissioned", function(done) {
 		agent.post(`/${username}/${model}/upload`)
 			.field("tag", testTag)
 			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
-			.expect(400, function(err, res) {
-				expect(res.body.code).to.equal(templates.invalidArguments.code);
-				done(err);
-			});
-
-	});
-
-	it("upload with invalid tag name should fail", function(done) {
-		agent.post(`/${username}/${model}/upload`)
-			.field("tag", "a!b")
-			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
-			.expect(400, function(err, res) {
-				expect(res.body.code).to.equal(templates.invalidArguments.code);
-				done(err);
-			});
-	});
-
-	it("upload while model state is queued should fail", function(done) {
-		agent.post(`/${username}/${queuedModel}/upload`)
-			.field("tag", "abc")
-			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
-			.expect(400, function(err, res) {
-				expect(res.body.code).to.equal(templates.invalidArguments.code);
-				done(err);
-			});
-	});
-
-	it("upload while model state is processing should fail", function(done) {
-		agent.post(`/${username}/${processingModel}/upload`)
-			.field("tag", "abc")
-			.attach("file", __dirname + "/../statics/3dmodels/8000cubes.obj")
-			.expect(400, function(err, res) {
-				expect(res.body.code).to.equal(templates.invalidArguments.code);
-				done(err);
-			});
+			.expect(410, (err, res) => done());
 	});
 
 	it("update revision", async () => {

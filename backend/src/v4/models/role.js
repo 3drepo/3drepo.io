@@ -17,74 +17,17 @@
 
 "use strict";
 
-const db = require("../handler/db");
-const { v5Path } = require("../../interop");
-const responseCodes = require("../response_codes.js");
-const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids.js`);
+const {v5Path} = require("../../interop");
+const {addTeamspaceMember, removeTeamspaceMember} = require(`${v5Path}/processors/teamspaces`);
 
 const Role = {};
 
-const ROLES_COLLECTION_NAME = "roles";
-
-Role.addUserToRole = async function(teamspace, roleId, user) {
-	// Check if user is member of teamspace
-	const User = require("./user");
-	await User.teamspaceMemberCheck(user, teamspace);
-
-	const role = await Role.findByRole(teamspace, roleId);
-
-	if (!role) {
-		return Promise.reject(responseCodes.ROLE_NOT_FOUND);
-	}
-
-	if(!role.users.includes(user)) {
-		role.users.push(user);
-
-		await db.updateOne(teamspace, ROLES_COLLECTION_NAME, {_id: role._id}, {$set: {users: role.users}});
-	}
+Role.grantTeamSpaceRoleToUser = async function (username, account, invitedBy) {
+	return addTeamspaceMember(account, username, invitedBy);
 };
 
-Role.findByRole = async function(teamspace, roleId) {
-	const foundRole = await db.findOne(teamspace, ROLES_COLLECTION_NAME,  { _id: stringToUUID(roleId) });
-
-	if (foundRole && !foundRole.users) {
-		foundRole.users = [];
-	}
-
-	return foundRole;
-};
-
-Role.findRoleByUser = async function(teamspace, user) {
-	const foundRole = await db.findOne(teamspace, ROLES_COLLECTION_NAME, {users: user});
-
-	if (foundRole && !foundRole.users) {
-		foundRole.users = [];
-	}
-
-	return foundRole;
-};
-
-Role.findUsersWithRoles = async function(teamspace, roleIds) {
-	const foundRoles = await db.find(teamspace, ROLES_COLLECTION_NAME, { _id: { $in: roleIds.map(stringToUUID) } });
-
-	return foundRoles.reduce((users, roleItem) => users.concat(roleItem.users), []);
-};
-
-Role.removeUserFromAnyRole = (teamspace, userToRemove) => db.updateMany(teamspace, ROLES_COLLECTION_NAME, { users: userToRemove }, { $pull: { users: userToRemove } });
-
-Role.usersWithRole = async function(teamspace) {
-	const foundRoles = await db.find(teamspace, ROLES_COLLECTION_NAME, {}, {_id: 1, users : 1});
-	const userToRole = {};
-
-	foundRoles.forEach(role => {
-		if (role.users) {
-			role.users.forEach(user => {
-				userToRole[user] = UUIDToString(role._id);
-			});
-		}
-	});
-
-	return userToRole;
+Role.revokeTeamSpaceRoleFromUser = async function(username, account) {
+	return removeTeamspaceMember(account, username);
 };
 
 module.exports = Role;

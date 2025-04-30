@@ -28,12 +28,12 @@ const utils = require("../utils");
 const User = require("../models/user");
 const UsersV5 = require(`${v5Path}/processors/users`);
 const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
+const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 const FileType = require("file-type");
 
 const multer = require("multer");
 const { fileExists } = require("../models/fileRef");
-const { isSsoUser } = require("../../v5/models/users");
 
 /**
  * @api {get} /version Application version
@@ -286,110 +286,9 @@ router.get("/:account/avatar", middlewares.loggedIn, getAvatar);
  */
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 
-/**
- * @api {put} /:user Update user account
- * @apiName updateUser
- * @apiGroup Account
- * @apiDescription Update account information.
- *
- * @apiParam {String} user Account username
- * @apiParam (Request body) {String} email Valid e-mail address
- * @apiParam (Request body) {String} firstName First name
- * @apiParam (Request body) {String} lastName Surname
- * @apiSuccess (200) account Account username
- *
- * @apiExample {post} Example usage:
- * PUT /alice HTTP/1.1
- * {
- * 	"email":"alice@3drepo.org",
- * 	"firstName":"Alice",
- * 	"lastName":"Anderson"
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- * 	"account":"alice"
- * }
- */
-router.put("/:account", middlewares.isAccountAdmin, updateUser);
+router.put("/:account", routeDecommissioned("PUT", "/v5/user"));
 
-/**
- * @api {put} /:user/password Reset password
- * @apiName resetPassword
- * @apiGroup Account
- * @apiDescription Reset user account password.
- * New password must be different.
- *
- * @apiParam {String} user User account
- * @apiParam (Request body) {String} oldPassword Old password
- * @apiParam (Request body) {String} newPassword New password
- * @apiParam (Request body) {String} token Password reset token
- * @apiSuccess (200) account Account username
- * @apiError TOKEN_INVALID Token is invalid or has expired
- *
- * @apiExample {post} Example usage (with old password):
- * PUT /alice/password HTTP/1.1
- * {
- * 	"oldPassword":"AW96B6",
- * 	"newPassword":"TrustNo1"
- * }
- *
- * @apiExample {post} Example usage (with token):
- * PUT /alice/password HTTP/1.1
- * {
- * 	"token":"1234567890",
- * 	"newPassword":"TrustNo1"
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- * 	"account":"alice"
- * }
- *
- * @apiErrorExample {json} Error-Response
- * HTTP/1.1 400 Bad Request
- * {
- * 	"message":"Token is invalid or expired",
- * 	"status":400,
- * 	"code":"TOKEN_INVALID",
- * 	"value":59,
- * 	"place": "PUT /alice/password"
- * }
- */
-router.put("/:account/password", resetPassword);
-
-async function updateUser(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-
-	if (await isSsoUser(req.params.account)) {
-		return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
-
-	if (req.body.oldPassword) {
-		if (Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
-			Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
-			// Update password
-			User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-			}).catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-			});
-		} else {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-		}
-
-	} else {
-		// Update user info
-		User.updateInfo(req.params[C.REPO_REST_API_ACCOUNT], req.body).then(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
-		});
-	}
-
-}
+router.put("/:account/password", routeDecommissioned("POST", "/v5/user/password/reset"));
 
 function getAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
@@ -451,21 +350,6 @@ function uploadAvatar(req, res, next) {
 			});
 		}
 	});
-}
-
-function resetPassword(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-
-	if (Object.prototype.toString.call(req.body.token) === "[object String]" &&
-		Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
-		User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-		});
-	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
 }
 
 async function listUserInfo(req, res, next) {

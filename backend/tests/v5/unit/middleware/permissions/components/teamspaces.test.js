@@ -20,8 +20,8 @@ const { generateRandomString } = require('../../../../helper/services');
 
 jest.mock('../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-jest.mock('../../../../../../src/v5/utils/permissions/permissions');
-const Permissions = require(`${src}/utils/permissions/permissions`);
+jest.mock('../../../../../../src/v5/utils/permissions');
+const Permissions = require(`${src}/utils/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/utils/sessions');
@@ -55,7 +55,55 @@ const testIsTeamspaceMember = () => {
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, username);
+			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, username, true);
+		});
+
+		test('should respond with teamspace not found if the user has no access', async () => {
+			const mockCB = jest.fn(() => {});
+			Permissions.hasAccessToTeamspace.mockResolvedValueOnce(false);
+			await TSMiddlewares.isTeamspaceMember(
+				request,
+				{},
+				mockCB,
+			);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(request, {}, templates.teamspaceNotFound);
+		});
+
+		test('should respond with error if hasAccessToTeamspace did not resolve', async () => {
+			const mockCB = jest.fn(() => {});
+			Permissions.hasAccessToTeamspace.mockRejectedValueOnce(templates.userNotFound);
+			await TSMiddlewares.isTeamspaceMember(
+				request,
+				{},
+				mockCB,
+			);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(request, {}, templates.userNotFound);
+		});
+	});
+};
+
+const testIsActiveTeamspaceMember = () => {
+	describe('isActiveTeamspaceMember', () => {
+		const teamspace = generateRandomString();
+		const username = generateRandomString();
+		const request = {
+			params: { teamspace }, session: { user: { username } },
+		};
+		test('next() should be called if the user has access', async () => {
+			const mockCB = jest.fn(() => {});
+			Permissions.hasAccessToTeamspace.mockResolvedValueOnce(true);
+			await TSMiddlewares.isTeamspaceMember(
+				request,
+				{},
+				mockCB,
+			);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
+			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, username, true);
 		});
 
 		test('should respond with teamspace not found if the user has no access', async () => {
@@ -154,6 +202,7 @@ const testIsAddOnModuleEnabled = () => {
 
 describe('middleware/permissions/components/teamspaces', () => {
 	testIsTeamspaceMember();
+	testIsActiveTeamspaceMember();
 	testIsTeamspaceAdmin();
 	testIsAddOnModuleEnabled();
 });

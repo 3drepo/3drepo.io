@@ -26,7 +26,7 @@ const {
 	hasReadAccessToDrawing,
 	hasReadAccessToFederation,
 	isAdminToProject,
-} = require('../../../../../middleware/permissions/permissions');
+} = require('../../../../../middleware/permissions');
 const { httpVerbs, routeDeprecated } = require('../../../../../middleware/common');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');

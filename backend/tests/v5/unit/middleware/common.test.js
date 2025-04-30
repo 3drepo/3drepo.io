@@ -19,11 +19,10 @@ const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
-
-const Common = require(`${src}/middleware/common`);
-
 jest.mock('../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+
+const Common = require(`${src}/middleware/common`);
 
 const testValidateMany = () => {
 	const mockValidatorTruthy = jest.fn((req, res, next) => { next(); });
@@ -67,30 +66,33 @@ const testValidateMany = () => {
 			expect(mockValidatorFalsey.mock.calls.length).toBe(1);
 		});
 	});
+};
 
-	describe('Route Deprecated', () => {
-		test('with no newEndpoint suggestion should respond with endpointDecomissioned', async () => {
-			Responder.respond.mockResolvedValueOnce(undefined);
-
-			await Common.routeDeprecated()({}, {});
+const testRouteDecommissioned = () => {
+	describe('Route Decommissioned', () => {
+		const req = {};
+		const res = {};
+		test('with no newEndpoint suggestion should respond with standard message', async () => {
+			await Common.routeDecommissioned()(req, res);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.endpointDecomissioned.code);
-			expect(Responder.respond.mock.calls[0][2].message).toEqual('This route is deprecated.');
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.endpointDecommissioned);
 		});
 
-		test('with newEndpoint suggestion should respond with endpointDecomissioned and custom message', async () => {
-			Responder.respond.mockResolvedValueOnce(undefined);
-			const httpVerb = generateRandomString();
+		test('with newEndpoint suggestion should respond with endpointDecommissioned and custom message', async () => {
 			const newEndpoint = generateRandomString();
+			const verb = generateRandomString();
 
-			await Common.routeDeprecated(httpVerb, newEndpoint)({}, {});
+			await Common.routeDecommissioned(verb, newEndpoint)(req, res);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.calls[0][2].code).toEqual(templates.endpointDecomissioned.code);
-			expect(Responder.respond.mock.calls[0][2].message).toEqual(`This route is deprecated, please use ${httpVerb}: ${newEndpoint} instead.`);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, expect.objectContaining({
+				code: templates.endpointDecommissioned.code,
+				message: `This endpoint is no longer available. Please use ${verb} ${newEndpoint} instead.`,
+			}));
 		});
 	});
 };
 
 describe('middleware/common', () => {
 	testValidateMany();
+	testRouteDecommissioned();
 });

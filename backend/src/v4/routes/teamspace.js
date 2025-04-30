@@ -326,7 +326,7 @@
 	 *    user: "viewerTeamspace1Model1RoleB",
 	 * }
 	 */
-	router.delete("/members/:user", middlewares.isAccountAdminOrSameUser , removeTeamMember);
+	router.delete("/members/:user", middlewares.isAccountAdmin , removeTeamMember);
 
 	/**
 	 *
@@ -496,13 +496,9 @@
 
 	function removeTeamMember(req, res, next) {
 		const responsePlace = utils.APIInfo(req);
-		User.findByUserName(req.params.account)
-			.then(dbUser => {
-				return User.removeTeamMember(dbUser, req.params.user, req.query.cascadeRemove, req.session.user.username);
-			})
-			.then(() => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
-			})
+		User.removeTeamMember(req.params.account, req.params.user, req.query.cascadeRemove, req.session.user.username).then(() => {
+			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, {user: req.params.user});
+		})
 			.catch(err => {
 				responseCodes.respond(responsePlace, req, res, next,
 					err.resCode || utils.mongoErrorToResCode(err), err.resCode ? err.info : err);

@@ -17,12 +17,10 @@
 
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { useEffect, useState } from 'react';
-import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
-import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
 import { range } from 'lodash';
-import { ValueIconContainer, ValuesContainer } from '../groupRulesInputs.styles';
 import { IFormRule } from '../../groupRulesForm.helpers';
 import { FieldValueInput } from './fieldValueInput/fieldValueInput.component';
+import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 
 export const RuleFieldValues = ({ disabled }) => {
 	const name = 'field.values';
@@ -56,15 +54,19 @@ export const RuleFieldValues = ({ disabled }) => {
 		return (
 			<>
 				{fields.map((field, i) => (
-					<ValuesContainer key={field.id}>
-						<FieldValueInput name={`field.values.${i}.value`} autoFocus={autoFocus} disabled={disabled} />
-						<ValueIconContainer onClick={() => remove(i)} disabled={disabled || fields.length === 1}>
-							<RemoveValueIcon />
-						</ValueIconContainer>
-						<ValueIconContainer onClick={appendEmptyValue} disabled={disabled || i !== (fields.length - 1)}>
-							<AddValueIcon />
-						</ValueIconContainer>
-					</ValuesContainer>
+					<ArrayFieldContainer
+						key={field.id}
+						onRemove={() => remove(i)}
+						disableRemove={disabled || fields.length === 1}
+						onAdd={appendEmptyValue}
+						disableAdd={disabled || i !== (fields.length - 1)}
+					>
+						<FieldValueInput
+							name={`field.values.${i}.value`}
+							autoFocus={autoFocus}
+							disabled={disabled}
+						/>
+					</ArrayFieldContainer>
 				))}
 			</>
 		);

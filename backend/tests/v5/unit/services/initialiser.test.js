@@ -17,6 +17,8 @@
 
 const { src } = require('../../helper/path');
 
+const { determineTestGroup } = require('../../helper/services');
+
 jest.mock('../../../../src/v5/models/loginRecords');
 const LoginRecords = require(`${src}/models/loginRecords`);
 
@@ -25,6 +27,9 @@ const JournalingService = require(`${src}/services/journaling`);
 
 jest.mock('../../../../src/v5/services/notifications');
 const NotificationService = require(`${src}/services/notifications`);
+
+jest.mock('../../../../src/v5/services/sso/frontegg');
+const FronteggService = require(`${src}/services/sso/frontegg`);
 
 jest.mock('../../../../src/v5/models/invitations');
 const Invitations = require(`${src}/models/invitations`);
@@ -40,10 +45,11 @@ const testInitialiseSystem = () => {
 			expect(Invitations.initialise).toHaveBeenCalledTimes(1);
 			expect(JournalingService.init).toHaveBeenCalledTimes(1);
 			expect(NotificationService.init).toHaveBeenCalledTimes(1);
+			expect(FronteggService.init).toHaveBeenCalledTimes(1);
 		});
 	});
 };
 
-describe('services/initialiser', () => {
+describe(determineTestGroup(__filename), () => {
 	testInitialiseSystem();
 });

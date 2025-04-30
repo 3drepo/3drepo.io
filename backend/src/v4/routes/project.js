@@ -17,14 +17,14 @@
 
 "use strict";
 (function() {
-
-	const _ = require("lodash");
+	const { v5Path } = require("../../interop");
 	const express = require("express");
 	const router = express.Router({mergeParams: true});
 	const responseCodes = require("../response_codes");
 	const middlewares = require("../middlewares/middlewares");
 	const Project = require("../models/project");
 	const utils = require("../utils");
+	const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 	/**
 	 * @api {post} /:teamspace/projects Create project
@@ -206,132 +206,7 @@
 	 */
 	router.patch("/projects/:project", middlewares.project.canUpdate, updateProject);
 
-	/**
-	 * @api {get} /:teamspace/projects/:project/models List models of the project
-	 * @apiName listModels
-	 * @apiGroup Project
-	 *
-	 * @apiDescription It returns a list of models .
-	 *
-	 * @apiPermission canListProjects
-	 *
-	 * @apiParam {String} teamspace Name of the teamspace
-	 * @apiParam {String} project The name of the project to list models
-	 *
-	 * @apiParam (Query) {String} [name] Filters models by name
-	 *
-	 *
-	 * @apiExample {get} Example usage:
-	 * GET /teamSpace1/projects/Bim%20Logo/models?name=log HTTP/1.1
-	 *
-	 * @apiSuccessExample {json} Success:
-	 * [
-	 *   {
-	 *     "_id": "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
-	 *     "federate": true,
-	 *     "desc": "",
-	 *     "name": "Full Logo",
-	 *     "__v": 17,
-	 *     "timestamp": "2019-05-02T16:17:37.902Z",
-	 *     "type": "Federation",
-	 *     "subModels": [
-	 *       {
-	 *         "database": "teamSpace1",
-	 *         "model": "b1fceab8-b0e9-4e45-850b-b9888efd6521",
-	 *         "name": "block"
-	 *       },
-	 *       {
-	 *         "database": "teamSpace1",
-	 *         "model": "7cf61b4f-acdf-4295-b2d0-9b45f9f27418",
-	 *         "name": "letters"
-	 *       },
-	 *       {
-	 *         "database": "teamSpace1",
-	 *         "model": "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
-	 *         "name": "pipes"
-	 *       }
-	 *     ],
-	 *     "surveyPoints": [
-	 *       {
-	 *         "position": [
-	 *           0,
-	 *           0,
-	 *           0
-	 *         ],
-	 *         "latLong": [
-	 *           -34.459127,
-	 *           0
-	 *         ]
-	 *       }
-	 *     ],
-	 *     "properties": {
-	 *       "unit": "mm",
-	 *       "topicTypes": [
-	 *         {
-	 *           "label": "Clash",
-	 *           "value": "clash"
-	 *         },
-	 *         {
-	 *           "label": "Diff",
-	 *           "value": "diff"
-	 *         },
-	 *         {
-	 *           "label": "RFI",
-	 *           "value": "rfi"
-	 *         },
-	 *         {
-	 *           "label": "Risk",
-	 *           "value": "risk"
-	 *         },
-	 *         {
-	 *           "label": "H&S",
-	 *           "value": "hs"
-	 *         },
-	 *         {
-	 *           "label": "Design",
-	 *           "value": "design"
-	 *         },
-	 *         {
-	 *           "label": "Constructibility",
-	 *           "value": "constructibility"
-	 *         },
-	 *         {
-	 *           "label": "GIS",
-	 *           "value": "gis"
-	 *         },
-	 *         {
-	 *           "label": "For information",
-	 *           "value": "for_information"
-	 *         },
-	 *         {
-	 *           "label": "VR",
-	 *           "value": "vr"
-	 *         }
-	 *       ]
-	 *     },
-	 *     "permissions": [
-	 *       "change_model_settings",
-	 *       "upload_files",
-	 *       "create_issue",
-	 *       "comment_issue",
-	 *       "view_issue",
-	 *       "view_model",
-	 *       "download_model",
-	 *       "edit_federation",
-	 *       "delete_federation",
-	 *       "delete_model",
-	 *       "manage_model_permission"
-	 *     ],
-	 *     "status": "ok",
-	 *     "id": "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
-	 *     "model": "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
-	 *     "account": "teamSpace1",
-	 *     "headRevisions": {
-	 *     }
-	 *   }
-	 * ]	 *
-	 */
-	router.get("/projects/:project/models", middlewares.project.canList, listModels);
+	router.get("/projects/:project/models", routeDecommissioned("GET", "/v5/teamspaces/{teamspace}/projects/{project}/{modelType}"));
 
 	/**
 	 * @api {get} /:teamspace/projects List projects
@@ -569,16 +444,6 @@
 	function listProject(req, res, next) {
 		Project.getProjectUserPermissions(req.params.account, req.params.project).then(project => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, project);
-		}).catch(err => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		});
-	}
-
-	function listModels(req, res, next) {
-		const filters = _.pick(req.query, "name");
-		const username = req.session.user.username;
-		Project.listModels(req.params.account, req.params.project, username, filters).then(models => {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, models);
 		}).catch(err => {
 			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 		});

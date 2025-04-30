@@ -50,7 +50,7 @@ const testGetUsersWithPermissions = () => {
 			const usersWithModelPriv = times(5, () => generateRandomString());
 
 			const tsMembers = [...tsAdmins, ...projAdmins, ...usersWithModelPriv];
-			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers);
+			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers.map((user) => ({ user })));
 
 			TeamspaceSettings.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
 			ProjectSettings.getProjectAdmins.mockResolvedValueOnce(projAdmins);
@@ -80,7 +80,7 @@ const testGetUsersWithPermissions = () => {
 			const usersWithModelPriv = times(5, () => generateRandomString());
 
 			const tsMembers = [...tsAdmins, ...usersWithModelPriv];
-			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers);
+			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers.map((user) => ({ user })));
 
 			TeamspaceSettings.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
 			ProjectSettings.getProjectAdmins.mockResolvedValueOnce(projAdmins);
@@ -115,7 +115,7 @@ const testGetRolesWithAccess = () => {
 			const roles = times(5, () => generateRandomString());
 
 			const tsMembers = [...tsAdmins, ...projAdmins, ...usersWithModelPriv];
-			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers);
+			TeamspaceSettings.getAllUsersInTeamspace.mockResolvedValueOnce(tsMembers.map((user) => ({ user })));
 
 			TeamspaceSettings.getTeamspaceAdmins.mockResolvedValueOnce(tsAdmins);
 			ProjectSettings.getProjectAdmins.mockResolvedValueOnce(projAdmins);

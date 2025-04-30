@@ -15,8 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { IUser } from '../users/users.redux';
+
 export type IJob = {
 	_id: string;
 	color: string;
 	isViewer?: boolean;
 };
+
+export type IJobOrUserList = Partial<IJob & IUser>[];

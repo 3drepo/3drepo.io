@@ -16,7 +16,7 @@
  */
 import { Link } from 'react-router-dom';
 import { AuthHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DASHBOARD_ROUTE, LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
+import { AUTH_PATH, DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { UserMenu } from '../userMenu';
 import { AppBarContainer, Items, LogoIcon } from './appBar.styles';
 import { BreadcrumbsRouting } from '../breadcrumbsRouting/breadcrumbsRouting.component';
@@ -30,7 +30,7 @@ export const AppBar = (): JSX.Element => {
 	return (
 		<AppBarContainer>
 			<Items>
-				<Link to={isAuthenticated ? DASHBOARD_ROUTE : LOGIN_PATH}>
+				<Link to={isAuthenticated ? DASHBOARD_ROUTE : AUTH_PATH}>
 					<LogoIcon />
 				</Link>
 				{ isAuthenticated && (

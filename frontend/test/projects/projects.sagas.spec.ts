@@ -359,7 +359,7 @@ describe('Teamspaces: sagas', () => {
 		describe('fetchTemplates', () => {
 			it('should call fetchTemplates endpoint', async () => {
 				mockServer
-					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?getDetails=false`)
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?showDeprecated=true`)
 					.reply(200, { templates: [mockTemplate] });
 	
 				await waitForActions(() => {
@@ -372,7 +372,7 @@ describe('Teamspaces: sagas', () => {
 	
 			it('should call fetchTemplates endpoint with 404', async () => {
 				mockServer
-					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?getDetails=false`)
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?showDeprecated=true`)
 					.reply(404);
 	
 				await waitForActions(() => {
