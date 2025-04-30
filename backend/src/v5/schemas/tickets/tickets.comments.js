@@ -63,6 +63,8 @@ Comments.importCommentSchema = generateCommentSchema(undefined, true);
 Comments.validateComment = (newData, existingComment) => generateCommentSchema(existingComment).validate(newData);
 
 Comments.serialiseComment = (comment) => {
+	const commentSchema = generateCommentSchema(comment);
+
 	const caster = Yup.object({
 		_id: uuidString,
 		ticket: uuidString,
@@ -70,9 +72,11 @@ Comments.serialiseComment = (comment) => {
 		updatedAt: types.timestamp,
 		importedAt: types.timestamp,
 		images: Yup.array().of(uuidString),
+		view: commentSchema.fields.view,
 		history: Yup.array().of(Yup.object({
 			timestamp: types.timestamp,
 			images: Yup.array().of(uuidString),
+			view: commentSchema.fields.view,
 		})),
 	});
 	return caster.cast(comment);

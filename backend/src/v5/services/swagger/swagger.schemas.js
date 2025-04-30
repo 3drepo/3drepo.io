@@ -479,4 +479,111 @@ Schemas.schemas.modelSettings = {
 	},
 };
 
+Schemas.schemas.commentView = {
+	description: 'Storing spacial coordinates representing what the commenter is seeing',
+	type: 'object',
+	properties: {
+		camera: {
+			description: 'Details about the 3D camera\'s position, orientation and projection',
+			type: 'object',
+			properties: {
+				position: {
+					type: 'array',
+					items: {
+						type: 'number',
+					},
+					minItems: 3,
+					maxItems: 3,
+				},
+				up: {
+					type: 'array',
+					items: {
+						type: 'number',
+					},
+					minItems: 3,
+					maxItems: 3,
+				},
+				forward: {
+					type: 'array',
+					items: {
+						type: 'number',
+					},
+					minItems: 3,
+					maxItems: 3,
+				},
+				type: {
+					type: 'string',
+					enum: ['orthographic ', 'perspective'],
+				},
+			},
+		},
+		clippingPlanes: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					normal: {
+						type: 'array',
+						items: {
+							type: 'number',
+						},
+						maxItems: 3,
+					},
+					distance: {
+						type: 'number',
+					},
+					clipDirection: {
+						type: 'number',
+						minimum: -1,
+						maximum: 1,
+					},
+				},
+				minItems: 0,
+			},
+		},
+		state: {
+			description: 'Details about the position and type of view',
+			type: 'object',
+			properties: {
+				showHidden: {
+					type: 'boolean',
+				},
+				colored: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							color: {
+								type: 'array',
+								items: {
+									type: 'number',
+									minimum: 0,
+									maximum: 255,
+								},
+								minItems: 3,
+								maxItems: 3,
+							},
+							opacity: {
+								type: 'number',
+								minimum: 0,
+								maximum: 1,
+							},
+							group: Schemas.schemas.ticketGroup,
+						},
+					},
+				},
+			},
+		},
+		hidden: {
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					group: Schemas.schemas.ticketGroup,
+				},
+			},
+		},
+	},
+};
+
 module.exports = Schemas;

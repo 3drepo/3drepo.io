@@ -72,19 +72,17 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 		}),
 	).default(undefined), true);
 
-	let validator = Yup.object({
+	const schema = {
 		state,
 		camera: !isUpdate && required ? camera.required() : camera,
 		clippingPlanes,
-	}).default(undefined);
+	};
 
 	if (!isComment) {
-		validator = validator.concat(Yup.object({
-			screenshot: types.embeddedImage(isUpdate),
-		}));
+		schema.screenshot = types.embeddedImage(isUpdate);
 	}
 
-	return imposeNullableRule(validator);
+	return imposeNullableRule(Yup.object(schema).default(undefined));
 };
 
 Validators.propTypesToValidator = (propType, isUpdate, required) => {

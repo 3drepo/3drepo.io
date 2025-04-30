@@ -16,12 +16,14 @@
  */
 
 const { addComment, deleteComment, getCommentById, getCommentsByTicket, importComments, updateComment } = require('../../../../../models/tickets.comments');
+const { calculateRemoveGroups, processCommentGroups, processExternalData, processGroupsUpdate } = require('../../../../../utils/ticketGroups');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { storeFiles } = require('../../../../../services/filesManager');
+const { viewGroups } = require('../../../../../schemas/tickets/templates.constants');
 
 const Comments = {};
 
@@ -45,29 +47,70 @@ const processCommentImages = (teamspace, project, model, ticket, images = []) =>
 
 Comments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
 	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, commentData.images);
-	const res = await addComment(teamspace, project, model, ticket, commentData, author);
-	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+	const externalDataDelta = processCommentGroups(commentData.view);
 
-	publish(events.NEW_COMMENT, { teamspace,
+	const res = await addComment(teamspace, project, model, ticket, commentData, author);
+
+	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+	await processExternalData(teamspace, project, model, [res._id], [externalDataDelta]);
+
+	publish(events.NEW_COMMENT, {
+		teamspace,
 		project,
 		model,
-		data: res });
+		data: res,
+	});
 
 	return res._id;
 };
 
 Comments.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
 	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, updateData.images);
+	const externalDataDelta = processCommentGroups(updateData.view, oldComment.view);
+
 	await updateComment(teamspace, project, model, ticket, oldComment, updateData);
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+	await processExternalData(teamspace, project, model, [oldComment._id], [externalDataDelta]);
 };
 
 Comments.importComments = async (teamspace, project, model, commentsByTickets, author) => {
 	const refsAndBinaries = commentsByTickets.flatMap(({ ticket, comments }) => comments.flatMap(
 		({ images }) => processCommentImages(teamspace, project, model, ticket, images)));
 
+	const externalDataDelta = commentsByTickets.map(({ comments }) => {
+		const externalReferences = {
+			binaries: {
+				toRemove: [],
+				toAdd: [],
+			},
+			groups: {
+				toAdd: [],
+				old: new Set(),
+				stillUsed: new Set(),
+			},
+		};
+
+		comments.forEach((comment) => {
+			processGroupsUpdate(
+				undefined,
+				comment.view,
+				Object.values(viewGroups).map((groupName) => `state.${groupName}`),
+				externalReferences.groups,
+			);
+		});
+
+		return calculateRemoveGroups(externalReferences);
+	},
+	);
+
 	const res = await importComments(teamspace, project, model, commentsByTickets, author);
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+	await processExternalData(
+		teamspace,
+		project,
+		model,
+		commentsByTickets.map(({ comments }) => comments._id),
+		externalDataDelta);
 
 	return res.map((data) => {
 		publish(events.NEW_COMMENT, {
