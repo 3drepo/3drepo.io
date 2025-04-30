@@ -65,22 +65,25 @@ import { Viewpoint } from '@/v5/store/tickets/tickets.types';
 import { ViewpointActionMenu } from './viewpointActionMenu/viewpointActionMenu.component';
 import { isEqual } from 'lodash';
 
+type AllOrNone<T> = Required<T> | Partial<Record<keyof T, undefined>>;
 type ImageToUpload = {
 	id: string,
 	name?: string,
 	src: string,
 	error?: boolean,
 };
+interface EditCommentBoxProps {
+	onCancelEdit: () => void,
+	commentId: string,
+}
 
-type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'view'> & {
-	onCancelEdit?: () => void;
-	commentId?: string;
-	commentReply?: TicketCommentReplyMetadata | null;
-	setCommentReply: (val: TicketCommentReplyMetadata) => void
-	className?: string;
+type CommentBoxProps = Pick<ITicketComment, 'message' | 'images' | 'view'> & AllOrNone<EditCommentBoxProps> & {
+	commentReply?: TicketCommentReplyMetadata | null,
+	setCommentReply: (val: TicketCommentReplyMetadata) => void,
+	className?: string,
 };
 
-export const CommentBox = ({ commentId, message = '', images = [], view: existingView, commentReply, setCommentReply, onCancelEdit, className }: CommentBoxProps) => {
+export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [], view: existingView, commentReply, setCommentReply, className }: CommentBoxProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const { is2DOpen } = useContext(ViewerCanvasesContext);
