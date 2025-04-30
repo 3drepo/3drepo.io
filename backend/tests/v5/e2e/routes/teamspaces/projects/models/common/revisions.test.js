@@ -515,12 +515,13 @@ const testGetRevisionMD5Hash = () => {
 			const model = models.conWithRev;
 			const revision = conRevisions.nonVoidRevision;
 			const { voidRevision } = conRevisions;
+			const revBuffer = Buffer.from(revision.refData);
 
 			const MD5HashResponseExpectation = {
 				container: model._id,
 				tag: revision.tag,
 				timestamp: new Date(revision.timestamp).getTime(),
-				hash: CryptoJs.MD5(Buffer.from(revision.rFile[0])).toString(),
+				hash: CryptoJs.MD5(CryptoJs.lib.WordArray.create(revBuffer)).toString(),
 				filename: revision.rFile[0],
 				size: 20,
 			};
