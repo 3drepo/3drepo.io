@@ -23,8 +23,8 @@ jest.mock('../../../../../src/v5/utils/permissions');
 const Permissions = require(`${src}/utils/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-jest.mock('../../../../../src/v5/utils/sessions');
-const Sessions = require(`${src}/utils/sessions`);
+jest.mock('../../../../../src/v5/middleware/auth');
+const Sessions = require(`${src}/middleware/auth`);
 const PermMiddlewares = require(`${src}/middleware/permissions`);
 const { determineTestGroup, generateRandomString } = require('../../../helper/services');
 
@@ -34,8 +34,10 @@ const authenticatedTeamspace = generateRandomString();
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 Permissions.hasAccessToTeamspace.mockImplementation((teamspace) => teamspace === authenticatedTeamspace);
 Permissions.hasReadAccessToContainer.mockImplementation((teamspace, project) => project === 'ok');
-Sessions.isSessionValid.mockImplementation((session) => !!session);
-Sessions.getUserFromSession.mockImplementation(() => 'hi');
+Sessions.validSession.mockImplementation(async (req, res, next) => {
+	if (req.session) await next();
+	else Responder.respond(req, res, templates.notLoggedIn);
+});
 
 const testHasAccessToTeamspace = () => {
 	const ipAddress = generateRandomString();
@@ -55,6 +57,7 @@ const testHasAccessToTeamspace = () => {
 				{},
 				mockCB,
 			);
+
 			if (success) expect(mockCB).toHaveBeenCalledTimes(1);
 			else {
 				expect(mockCB).not.toHaveBeenCalled();

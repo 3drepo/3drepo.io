@@ -51,12 +51,16 @@ const testValidSession = () => {
 		test('next() should be called if the session is valid', async () => {
 			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
 			const mockCB = jest.fn(() => {});
+			const res = {};
 			await AuthMiddlewares.validSession(
 				{ ips: [ipAddress], headers, session, cookies },
-				{},
+				res,
 				mockCB,
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
+
+			expect(SessionUtils.setCSRFCookie).toHaveBeenCalledTimes(1);
+			expect(SessionUtils.setCSRFCookie).toHaveBeenCalledWith(token, res);
 		});
 
 		test('next() should be called if there is an apiKey session', async () => {
@@ -68,6 +72,7 @@ const testValidSession = () => {
 				mockCB,
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(SessionUtils.setCSRFCookie).not.toHaveBeenCalled();
 		});
 
 		test('should respond with notLoggedIn errCode if the ip address mismatched', async () => {
@@ -86,6 +91,7 @@ const testValidSession = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+			expect(SessionUtils.setCSRFCookie).not.toHaveBeenCalled();
 		});
 
 		test('should respond with notLoggedIn errCode if the user agent mismatched', async () => {
@@ -106,16 +112,17 @@ const testValidSession = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
+			expect(SessionUtils.setCSRFCookie).not.toHaveBeenCalled();
 		});
 	});
 };
 
 const testNotLoggedIn = () => {
 	describe('Not logged in middleware', () => {
-		const req = {};
 		const res = {};
 		test('next() should be called if the session is invalid', async () => {
 			SessionUtils.isSessionValid.mockResolvedValueOnce(false);
+			const req = {};
 			const mockCB = jest.fn(() => {});
 			await AuthMiddlewares.notLoggedIn(
 				req, res, mockCB,
@@ -127,6 +134,8 @@ const testNotLoggedIn = () => {
 		test('should respond with alreadyLoggedIn errCode if the session is valid', async () => {
 			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
 			const mockCB = jest.fn(() => {});
+
+			const req = { ips: [ipAddress], headers, session, cookies };
 			await AuthMiddlewares.notLoggedIn(
 				req, res, mockCB,
 			);
