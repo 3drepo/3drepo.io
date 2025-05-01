@@ -46,6 +46,7 @@ export const extractMetadata = (message: string): TicketCommentReplyMetadata => 
 	originalAuthor: extractMetadataValue(message, 'originalAuthor'),
 	message: extractMetadataValue(message, 'message'),
 	images: extractMetadataImages(message),
+	view: extractMetadataValue(message, 'view') === 'true',
 });
 
 export const stripMetadata = (message: string = '') => message.replaceAll(/\[[_a-zA-Z]*\]:- "([^"]*)"(\n)+/g, '');
@@ -56,13 +57,14 @@ const createMetadataValue = (metadataName: keyof TicketCommentReplyMetadata, met
 	`[${metadataName}]:- "${metadataValue}"\n`
 );
 
-const stringifyMetadata = ({ originalAuthor = '', author, _id, message, images = [] }: TicketCommentReplyMetadata) => {
+const stringifyMetadata = ({ originalAuthor = '', author, _id, message, images = [], view = false }: TicketCommentReplyMetadata) => {
 	const metadata = [
 		createMetadataValue('_id', _id),
 		createMetadataValue('originalAuthor', originalAuthor),
 		createMetadataValue('author', author),
 		createMetadataValue('message', stripMetadata(message)),
 		createMetadataValue('images', images.join(',')),
+		createMetadataValue('view', `${!!view}`), // reduces metadata size. For comment replies only need to know if a view exists
 	];
 	return metadata.join('');
 };

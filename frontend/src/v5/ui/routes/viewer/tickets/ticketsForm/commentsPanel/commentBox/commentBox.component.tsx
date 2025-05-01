@@ -248,7 +248,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	}, [ticketId, isEditMode]);
 
 	useEffect(() => {
-		if (commentReply?.message || commentReply?.images?.length) {
+		if (commentReply?.message || commentReply?.images?.length || commentReply?.view) {
 			setCommentReply(commentReply);
 			inputRef.current.focus();
 		}
