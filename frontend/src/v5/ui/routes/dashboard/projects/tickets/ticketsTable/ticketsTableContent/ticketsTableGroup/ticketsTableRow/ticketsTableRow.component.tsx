@@ -17,18 +17,12 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { memo, useContext, useEffect } from 'react';
-import { LoadingRow, Row } from './ticketsTableRow.styles';
+import { memo, useContext } from 'react';
+import { Row } from './ticketsTableRow.styles';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
-import { isEqual, sum } from 'lodash';
+import { isEqual } from 'lodash';
 import { TicketsTableCell } from './ticketsTableCell/ticketsTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { Loader } from '@/v4/routes/components/loader/loader.component';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -38,13 +32,9 @@ type TicketsTableRowProps = {
 };
 
 export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: TicketsTableRowProps) => {
-	const { teamspace, project } = useParams<DashboardParams>();
 	const { _id: id, properties, type } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
-	const { visibleSortedColumnsNames, getWidth, columnGap } = useContext(ResizableTableContext);
-	const columnsWidths = visibleSortedColumnsNames.map(getWidth);
-	const isFed = modelIsFederation(modelId);
-	const ticketIsFetched = !!ticket.properties[BaseProperties.UPDATED_AT];
+	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
 
 	if (!properties || !template?.code) return null;
 
@@ -53,30 +43,18 @@ export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: Tic
 		onClick(modelId, ticket._id);
 	};
 
-	useEffect(() => {
-		if (!ticketIsFetched) {
-			TicketsActionsDispatchers.fetchTicket(teamspace, project, modelId, ticket._id, isFed);
-		}
-	}, [ticket]);
-
 	return (
 		<TicketContextComponent containerOrFederation={modelId}>
-			{!ticketIsFetched ? (
-				<LoadingRow $width={sum(columnsWidths) + ((columnsWidths.length - 1) * columnGap)}>
-					<Loader size={19} />
-				</LoadingRow>
-			) : (
-				<Row key={id} onClickCapture={handleClick} $selected={selected}>
-					{visibleSortedColumnsNames.map((name) => (
-						<TicketsTableCell
-							name={name}
-							ticket={ticket}
-							modelId={modelId}
-							key={name}
-						/>
-					))}
-				</Row>
-			)}
+			<Row key={id} onClickCapture={handleClick} $selected={selected}>
+				{visibleSortedColumnsNames.map((name) => (
+					<TicketsTableCell
+						name={name}
+						ticket={ticket}
+						modelId={modelId}
+						key={name}
+					/>
+				))}
+			</Row>
 		</TicketContextComponent>
 	);
 }, isEqual);

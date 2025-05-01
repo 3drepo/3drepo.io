@@ -18,7 +18,7 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { getColumnLabel } from '../../../ticketsTable.helper';
+import { getColumnLabel, INITIAL_COLUMNS } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
@@ -28,10 +28,19 @@ import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Divider } from '@mui/material';
 import { TextOverflow } from '@controls/textOverflow';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { useParams } from 'react-router';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const ColumnsVisibilitySettings = () => {
+	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY);
+	const { teamspace, project, template } = useParams<DashboardParams>();
+	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn, hideColumn, isVisible } = useContext(ResizableTableContext);
 	const columnsNames = getAllColumnsNames();
+	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
@@ -47,6 +56,20 @@ export const ColumnsVisibilitySettings = () => {
 			}
 		});
 		return groups;
+	};
+
+	const nameToExtraPropertyToFetch = (name) => name
+		.replace(/properties\./, '')
+		.replace(/modules\./, '');
+
+	const onShowColumn = (name) => {
+		if (!INITIAL_COLUMNS.includes(name)) {
+			containersAndFederations.forEach((modelId) => {
+				const isFederation = isFed(modelId);
+				TicketsActionsDispatchers.fetchTicketsProperties(teamspace, project, modelId, templateCode, isFederation, [nameToExtraPropertyToFetch(name)] );
+			});
+		}
+		showColumn(name);
 	};
 
 	return (
@@ -89,7 +112,7 @@ export const ColumnsVisibilitySettings = () => {
 								{groupedItems.unselected.map((columnName) => (
 									<MenuItem key={columnName}>
 										<Checkbox
-											onChange={() => showColumn(columnName)}
+											onChange={() => onShowColumn(columnName)}
 											value={false}
 											label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
 										/>

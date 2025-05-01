@@ -186,3 +186,17 @@ export const getColumnLabel = (name) => {
 		.map(_.startCase)
 		.join(' : ');
 };
+
+export const INITIAL_COLUMNS = [
+	'id',
+	BaseProperties.TITLE,
+	'modelName',
+	`properties.${BaseProperties.CREATED_AT}`,
+	`properties.${IssueProperties.ASSIGNEES}`, 
+	`properties.${BaseProperties.OWNER}`,
+	`properties.${IssueProperties.DUE_DATE}`,
+	`properties.${IssueProperties.PRIORITY}`,
+	`properties.${BaseProperties.STATUS}`,
+	`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
+	`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
+];

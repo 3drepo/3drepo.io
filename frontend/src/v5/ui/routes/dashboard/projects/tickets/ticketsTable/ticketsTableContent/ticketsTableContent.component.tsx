@@ -29,21 +29,9 @@ import { TicketsTableResizableContent, TicketsTableResizableContentProps } from 
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
 import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 
-const INITIAL_COLUMNS = [
-	'id',
-	BaseProperties.TITLE,
-	'modelName',
-	`properties.${BaseProperties.CREATED_AT}`,
-	`properties.${IssueProperties.ASSIGNEES}`, 
-	`properties.${BaseProperties.OWNER}`,
-	`properties.${IssueProperties.DUE_DATE}`,
-	`properties.${IssueProperties.PRIORITY}`,
-	`properties.${BaseProperties.STATUS}`,
-	`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
-	`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
-];
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
 	const { stretchTable, visibleSortedColumnsNames, getAllColumnsNames, setVisibleSortedColumnsNames } = useContext(ResizableTableContext);

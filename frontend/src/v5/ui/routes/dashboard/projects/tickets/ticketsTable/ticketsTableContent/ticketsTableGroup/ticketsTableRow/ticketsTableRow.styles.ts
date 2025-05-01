@@ -36,16 +36,3 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 		overflow: hidden;
 	}
 `;
-
-export const LoadingRow = styled.div<{ $width: number }>`
-	width: ${({ $width }) => $width}px;
-	height: 37px;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	padding-left: min(50%, 46vw);
-
-	& > * {
-		flex-direction: unset;
-		width: fit-content;
-		height: 100%;
-	}
-`;
