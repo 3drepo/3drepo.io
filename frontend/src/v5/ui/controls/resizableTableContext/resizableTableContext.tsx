@@ -24,7 +24,6 @@ export type TableColumn = { name: string, minWidth?: number, width: number };
 export interface ResizableTableType {
 	getAllColumnsNames: () => string[];
 	getWidth: (name: string) => number;
-	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
 	setResizerName: (name: string) => void,
 	resizerName: string,
@@ -43,7 +42,6 @@ export interface ResizableTableType {
 const defaultValue: ResizableTableType = {
 	getAllColumnsNames: () => [],
 	getWidth: () => 0,
-	getMinWidth: () => 0,
 	setWidth: () => {},
 	setResizerName: () => {},
 	resizerName: '',
@@ -121,7 +119,6 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 			getAllColumnsNames,
 			getWidth,
 			setWidth,
-			getMinWidth,
 			setResizerName,
 			resizerName,
 			setIsResizing,
