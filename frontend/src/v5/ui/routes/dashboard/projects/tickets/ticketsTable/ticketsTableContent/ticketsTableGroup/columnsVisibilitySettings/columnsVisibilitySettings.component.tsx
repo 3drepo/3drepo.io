@@ -22,25 +22,28 @@ import { getColumnLabel, INITIAL_COLUMNS } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Divider } from '@mui/material';
 import { TextOverflow } from '@controls/textOverflow';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useParams } from 'react-router';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
 
 export const ColumnsVisibilitySettings = () => {
-	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY);
+	const alreadyFetchedTicketIdAndProperty = useRef({});
 	const { teamspace, project, template } = useParams<DashboardParams>();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn, hideColumn, isVisible } = useContext(ResizableTableContext);
+	const { sortedItems: tickets } = useContext(SortedTableContext);
 	const columnsNames = getAllColumnsNames();
 	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+
+	const nonInitiallyVisibleColumns = visibleSortedColumnsNames.filter((name) => !INITIAL_COLUMNS.includes(name));
 
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
@@ -62,15 +65,33 @@ export const ColumnsVisibilitySettings = () => {
 		.replace(/properties\./, '')
 		.replace(/modules\./, '');
 
+	const fetchColumn = (name) => tickets.forEach(({ modelId, _id: ticketId }) => {
+		const ticketIdAndProperty = `${ticketId}${name}`;
+		if (alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty]) return;
+		alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty] = ticketIdAndProperty;
+			
+		const isFederation = isFed(modelId);
+		TicketsActionsDispatchers.fetchTicketProperties(
+			teamspace,
+			project,
+			modelId,
+			ticketId,
+			templateCode,
+			isFederation,
+			[nameToExtraPropertyToFetch(name)],
+		);
+	});
+
 	const onShowColumn = (name) => {
 		if (!INITIAL_COLUMNS.includes(name)) {
-			containersAndFederations.forEach((modelId) => {
-				const isFederation = isFed(modelId);
-				TicketsActionsDispatchers.fetchTicketsProperties(teamspace, project, modelId, templateCode, isFederation, [nameToExtraPropertyToFetch(name)] );
-			});
+			fetchColumn(name);
 		}
 		showColumn(name);
 	};
+
+	useEffect(() => {
+		nonInitiallyVisibleColumns.forEach(fetchColumn);
+	}, [nonInitiallyVisibleColumns, tickets]);
 
 	return (
 		<ActionMenu
