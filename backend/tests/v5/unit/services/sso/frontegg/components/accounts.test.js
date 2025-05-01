@@ -27,7 +27,7 @@ jest.mock('../../../../../../../src/v5/utils/webRequests');
 const WebRequests = require(`${src}/utils/webRequests`);
 
 const Accounts = require(`${src}/services/sso/frontegg/components/accounts`);
-const { errCodes, membershipStatus, HEADER_TENANT_ID, META_LABEL_TEAMSPACE } = require(`${src}/services/sso/frontegg/frontegg.constants`);
+const { errCodes, membershipStatus, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, mfaPolicy } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
 const bearerHeader = { [generateRandomString()]: generateRandomString() };
 const postOptions = { headers: bearerHeader };
@@ -87,8 +87,9 @@ const testCreateAccount = () => {
 
 			const returnedId = await Accounts.createAccount(teamspace);
 
-			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
-			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+			// first for this call, another one for MFA
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(2);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(2);
 
 			expect(WebRequests.post).toHaveBeenCalledTimes(3);
 
@@ -107,6 +108,15 @@ const testCreateAccount = () => {
 			// to add application to the account
 			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String),
 				{ tenantId }, postOptions);
+
+			// call to set MFA policy
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(expect.any(String),
+				{
+					enforceMFAType: mfaPolicy.ENABLED,
+					allowRememberMyDevice: false,
+				}, { headers: { ...bearerHeader,
+					[HEADER_TENANT_ID]: tenantId } });
 		});
 
 		test('Should throw if something went wrong', async () => {
@@ -505,6 +515,94 @@ const testGetUserStatusInAccount = () => {
 	});
 };
 
+const testSetMFAPolicy = () => {
+	describe('Set MFA policy', () => {
+		test('Should succeed if policy setting is valid', async () => {
+			const accountId = generateRandomString();
+
+			const expectedHeader = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+
+			};
+
+			const enforceMFAType = mfaPolicy.ENABLED;
+			await Accounts.setMFAPolicy(accountId, enforceMFAType);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const expectedPayload = {
+				enforceMFAType,
+				allowRememberMyDevice: false,
+			};
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(expect.any(String),
+				expectedPayload, { headers: expectedHeader });
+		});
+
+		test('Should error if policy setting is invalid', async () => {
+			const accountId = generateRandomString();
+
+			const enforceMFAType = generateRandomString();
+			await expect(Accounts.setMFAPolicy(accountId, enforceMFAType)).rejects.toEqual(expect.objectContaining({
+				message: `Failed to create account on Accounts: Unrecognised policy setting: ${enforceMFAType}`,
+			}));
+
+			expect(WebRequests.put).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testGetClaimedDomains = () => {
+	const activeConfig1Domains = times(2, () => generateRandomString());
+	const activeConfig1 = {
+		enabled: true,
+		domains: activeConfig1Domains.map((domain) => ({ domain })),
+	};
+
+	const activeConfig2Domains = times(2, () => generateRandomString());
+	const activeConfig2 = {
+		enabled: true,
+		domains: activeConfig2Domains.map((domain) => ({ domain })),
+	};
+
+	const inActiveConfig = {
+		enabled: false,
+		domains: times(2, () => ({ domain: generateRandomString() })),
+	};
+
+	describe.each([
+		['the tenant contains an active SSO configuration', [activeConfig1], activeConfig1Domains],
+		['the tenant contains multiple active configurations', [activeConfig1, activeConfig2], [...activeConfig1Domains, ...activeConfig2Domains]],
+		['the tenant contains an inactive configuration', [inActiveConfig], []],
+		['the tenant contains both an active and inactive configuration', [activeConfig1, inActiveConfig], activeConfig1Domains],
+		['the tenant contains no configuration', [], []],
+		['the function returned with failures'],
+	])('Get Claimed domains', (desc, getRes, domains) => {
+		test(`Should ${domains !== undefined ? 'return expected domains' : 'fail with error'} if ${desc}`, async () => {
+			const accountId = generateRandomString();
+
+			const expectedHeader = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+
+			};
+
+			WebRequests.get.mockResolvedValueOnce({ data: getRes });
+
+			if (domains) await expect(Accounts.getClaimedDomains(accountId)).resolves.toEqual(domains);
+			else await expect(Accounts.getClaimedDomains(accountId)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), expectedHeader);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceByAccount();
 	testCreateAccount();
@@ -513,4 +611,6 @@ describe(determineTestGroup(__filename), () => {
 	testRemoveUserFromAccount();
 	testRemoveAccount();
 	testGetUserStatusInAccount();
+	testSetMFAPolicy();
+	testGetClaimedDomains();
 });

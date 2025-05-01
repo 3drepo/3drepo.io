@@ -105,7 +105,7 @@ const testGenerateLinkToAuthenticator = () => {
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required'));
+				expect.objectContaining({ code: templates.invalidArguments.code }));
 		});
 
 		test('Should fail with whatever error catch if the catch function is triggered', async () => {
@@ -145,23 +145,142 @@ const testGenerateLinkToAuthenticator = () => {
 			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledTimes(1);
 			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledWith(authParams, undefined);
 		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if the email is invalid`, async () => {
+			const req = cloneDeep(reqSample);
+			const res = {};
+
+			const email = generateRandomString();
+
+			req.query.email = email;
+
+			await Frontegg.generateLinkToAuthenticator(ssoPostRedirect)(req, res);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res,
+				expect.objectContaining({ code: templates.invalidArguments.code }));
+
+			expect(req.session.reAuth).not.toBeTruthy();
+
+			expect(FronteggService.generateAuthenticationCodeUrl).not.toHaveBeenCalled();
+		});
+
+		test('Should respond with a link with a random account Id if an email is provided but the user does not exist', async () => {
+			const req = cloneDeep(reqSample);
+			const res = {};
+
+			const email = `${generateRandomString()}@${generateRandomString()}.com`;
+
+			req.query.email = email;
+
+			FronteggService.doesUserExist.mockResolvedValueOnce(false);
+
+			await Frontegg.generateLinkToAuthenticator(ssoPostRedirect)(req, res);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, { link: expect.any(String) });
+
+			expect(req.session.reAuth).not.toBeTruthy();
+
+			const authParams = {
+				redirectURL: ssoPostRedirect,
+				state: toBase64(JSON.stringify({
+					csrfToken: req.session.csrfToken,
+					redirectUri: req.query.redirectUri,
+				})),
+				codeChallenge: req.session.pkceCodes.challenge,
+				email,
+			};
+			expect(FronteggService.doesUserExist).toHaveBeenCalledTimes(1);
+			expect(FronteggService.doesUserExist).toHaveBeenCalledWith(email);
+			expect(FronteggService.getUserById).not.toHaveBeenCalled();
+
+			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledTimes(1);
+			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledWith(authParams, expect.any(String));
+		});
+
+		const tenantId = generateRandomString();
+		const domain = `${generateRandomString()}.com`;
+		const email = `${generateRandomString()}@${domain}`;
+
+		describe.each([
+			['Should return last active tenant if there are no SSO configuration', { tenantId }, [[]]],
+			['Should return the first tenant if there are no SSO configuration and no active tenant', { tenantIds: [tenantId, generateRandomString()] }, [[], [], []]],
+			['Should return the tenant with SSO configuration', { tenantId: generateRandomString(), tenantIds: [generateRandomString(), tenantId] }, [[], [], [domain]]],
+			['Should return active tenant if there is sso configuration but the user is not in the domain', { tenantId, tenantIds: [generateRandomString(), generateRandomString()] }, [[], [], [generateRandomString()]]],
+		])('Selected account logic', (desc, userData, claimedMockedData) => {
+			test(desc, async () => {
+				const req = cloneDeep(reqSample);
+				const res = {};
+
+				req.query.email = email;
+
+				const userId = generateRandomString();
+
+				FronteggService.doesUserExist.mockResolvedValueOnce(userId);
+				FronteggService.getUserById.mockResolvedValueOnce(userData);
+				claimedMockedData.forEach(FronteggService.getClaimedDomains.mockResolvedValueOnce);
+
+				await Frontegg.generateLinkToAuthenticator(ssoPostRedirect)(req, res);
+
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, { link: expect.any(String) });
+
+				expect(req.session.reAuth).not.toBeTruthy();
+
+				const authParams = {
+					redirectURL: ssoPostRedirect,
+					state: toBase64(JSON.stringify({
+						csrfToken: req.session.csrfToken,
+						redirectUri: req.query.redirectUri,
+					})),
+					codeChallenge: req.session.pkceCodes.challenge,
+					email,
+				};
+
+				expect(FronteggService.doesUserExist).toHaveBeenCalledTimes(1);
+				expect(FronteggService.doesUserExist).toHaveBeenCalledWith(email);
+
+				expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+				expect(FronteggService.getUserById).toHaveBeenCalledWith(userId);
+
+				expect(FronteggService.getClaimedDomains).toHaveBeenCalledTimes(claimedMockedData.length);
+				expect(FronteggService.getClaimedDomains).toHaveBeenCalledWith(tenantId);
+
+				expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledTimes(1);
+				expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledWith(authParams, tenantId);
+			});
+		});
 	});
 };
 
 const testGenerateLinkToTeamspaceAuthenticator = () => {
 	describe('Generate link to authenticate against a teamspace', () => {
 		const ssoPostRedirect = generateRandomString();
-		test('Should flag reAuth if teamspace is provided', async () => {
-			const teamspace = generateRandomString();
-			const accountId = generateRandomString();
-			const redirectUri = generateRandomString();
-			const req = {
-				query: { redirectUri },
-				session: {
-					pkceCodes: { challenge: generateRandomString() },
-					csrfToken: generateRandomString(),
+		const authenticatedTeamspace = generateRandomString();
+		const redirectUri = generateRandomString();
+		const userId = generateRandomString();
+		const baseReq = {
+			query: { redirectUri },
+			session: {
+				pkceCodes: { challenge: generateRandomString() },
+				csrfToken: generateRandomString(),
+				user: {
+					auth: {
+						authenticatedTeamspace,
+						userId,
+					},
 				},
-				params: { teamspace } };
+			},
+		};
+		test('Should provide like and not remove the session if the user is already authenticated against the teamspace', async () => {
+			const teamspace = authenticatedTeamspace;
+			const accountId = generateRandomString();
+
+			const req = {
+				...cloneDeep(baseReq),
+				params: { teamspace },
+			};
 			const res = {};
 
 			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(accountId);
@@ -187,6 +306,92 @@ const testGenerateLinkToTeamspaceAuthenticator = () => {
 
 			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledTimes(1);
 			expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledWith(authParams, accountId);
+
+			expect(FronteggService.destroyAllSessions).not.toHaveBeenCalled();
+
+			expect(PKCEMiddleware.addPkceProtection).not.toHaveBeenCalled();
+			expect(SSOMiddleware.setSessionInfo).not.toHaveBeenCalled();
+		});
+
+		describe.each([
+			['There are no claims in the account', false, [], 'a@b.com'],
+			['The user is within one of the claimed domains', true, ['b.com', 'c.com'], 'a@b.com'],
+			['The user is not within one of the claimed domains', false, ['b.com', 'c.com'], 'a@ba.com'],
+		])('Session deletion', (desc, sessionDeleted, claimedDomains, email) => {
+			test(`Should ${sessionDeleted ? '' : 'NOT'} destroy the frontegg session if ${desc}`, async () => {
+				const teamspace = generateRandomString();
+				const accountId = generateRandomString();
+
+				const req = {
+					...cloneDeep(baseReq),
+					params: { teamspace },
+				};
+				const res = {};
+
+				TeamspaceModel.getTeamspaceRefId.mockResolvedValue(accountId);
+				FronteggService.getClaimedDomains.mockResolvedValueOnce(claimedDomains);
+				UserModel.getUserByUsername.mockResolvedValueOnce({ customData: { email } });
+
+				await Frontegg.generateLinkToTeamspaceAuthenticator(ssoPostRedirect)(req, res);
+
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, { link: expect.any(String) });
+
+				expect(req.session.reAuth).toBeTruthy();
+
+				const authParams = {
+					redirectURL: ssoPostRedirect,
+					state: toBase64(JSON.stringify({
+						csrfToken: req.session.csrfToken,
+						redirectUri: req.query.redirectUri,
+					})),
+					codeChallenge: req.session.pkceCodes.challenge,
+					email,
+				};
+
+				expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+				expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+				expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledTimes(1);
+				expect(FronteggService.generateAuthenticationCodeUrl).toHaveBeenCalledWith(authParams, accountId);
+
+				if (sessionDeleted) {
+					expect(FronteggService.destroyAllSessions).toHaveBeenCalledTimes(1);
+					expect(FronteggService.destroyAllSessions).toHaveBeenCalledWith(userId);
+				} else {
+					expect(FronteggService.destroyAllSessions).not.toHaveBeenCalled();
+				}
+
+				expect(PKCEMiddleware.addPkceProtection).not.toHaveBeenCalled();
+				expect(SSOMiddleware.setSessionInfo).not.toHaveBeenCalled();
+			});
+		});
+
+		test(`Should respond with ${templates.unknown.code} if something went wrong`, async () => {
+			const teamspace = generateRandomString();
+			const accountId = generateRandomString();
+			const email = `${generateRandomString()}@${generateRandomString()}.com`;
+
+			const req = {
+				...cloneDeep(baseReq),
+				params: { teamspace },
+			};
+			const res = {};
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValue(accountId);
+			FronteggService.getClaimedDomains.mockRejectedValueOnce({ message: generateRandomString() });
+			UserModel.getUserByUsername.mockResolvedValueOnce({ customData: { email } });
+
+			await Frontegg.generateLinkToTeamspaceAuthenticator(ssoPostRedirect)(req, res);
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.unknown);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(FronteggService.generateAuthenticationCodeUrl).not.toHaveBeenCalled();
+
+			expect(FronteggService.destroyAllSessions).not.toHaveBeenCalled();
 
 			expect(PKCEMiddleware.addPkceProtection).not.toHaveBeenCalled();
 			expect(SSOMiddleware.setSessionInfo).not.toHaveBeenCalled();

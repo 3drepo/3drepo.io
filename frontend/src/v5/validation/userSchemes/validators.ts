@@ -60,3 +60,21 @@ export const avatarFile = Yup.mixed()
 		getMaxFileSizeMessage(AVATAR_MAX_SIZE_MESSAGE),
 		(file) => !avatarFileIsTooBig(file),
 	);
+
+export const email = trimmedString
+	.email(
+		formatMessage({
+			id: 'validation.email.error.invalid',
+			defaultMessage: 'Invalid email address',
+		}),
+	)
+	.max(254, formatMessage({
+		id: 'validation.email.error.max',
+		defaultMessage: 'Email is limited to 254 characters',
+	}))
+	.required(
+		formatMessage({
+			id: 'validation.email.error.required',
+			defaultMessage: 'Email is a required field',
+		}),
+	);

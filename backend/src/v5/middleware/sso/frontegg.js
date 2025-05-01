@@ -16,20 +16,27 @@
  */
 
 const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
-const { fromBase64, toBase64 } = require('../../utils/helper/strings');
 const {
+	destroyAllSessions,
+	doesUserExist,
 	generateAuthenticationCodeUrl,
 	generateToken,
+	getClaimedDomains,
 	getTeamspaceByAccount,
 	getUserById,
 	getUserInfoFromToken,
 } = require('../../services/sso/frontegg');
-const { getUserByEmail, updateUserId } = require('../../models/users');
+const { fromBase64, toBase64 } = require('../../utils/helper/strings');
+
+const { getUserByEmail, getUserByUsername, updateUserId } = require('../../models/users');
 const { redirectWithError, setSessionInfo } = require('.');
+const Yup = require('yup');
 const { addPkceProtection } = require('./pkce');
 const { createNewUserRecord } = require('../../processors/users');
 const { destroySession } = require('../../utils/sessions');
+const { types: { strings: { email: emailSchema } } } = require('../../utils/helper/yup');
 const { errorCodes } = require('../../services/sso/sso.constants');
+const { generateUUIDString } = require('../../utils/helper/uuids');
 const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
 const { logger } = require('../../utils/logger');
 const { respond } = require('../../utils/responder');
@@ -112,17 +119,55 @@ const getToken = (urlUsed) => async (req, res, next) => {
 	}
 };
 
+const determineAuthAccount = async (email, accounts, preferredAccount) => {
+	/*
+	 * Frontegg doesn't allow password authentication if the user is subscribed to a SSO configured
+	 * account, it will result in an error. so we want the prioritisation is:
+	 * 1. the active teamspace if it is SSO configured and domain matches
+	 * 2. any SSO configured account if domain matches
+	 * 3. the active teamspace
+	 */
+
+	const emailDomain = email.split('@')[1];
+
+	// check preferredAccount first so it take precedence
+	const accountsToCheck = [preferredAccount, ...accounts];
+
+	for (const account of accountsToCheck) {
+		// eslint-disable-next-line no-await-in-loop
+		const domains = await getClaimedDomains(account);
+		if (domains.includes(emailDomain)) {
+			return account;
+		}
+	}
+	return preferredAccount;
+};
+
 const redirectForAuth = (redirectURL) => async (req, res) => {
 	try {
-		if (!req.query.redirectUri) {
-			respond(req, res, createResponseCode(templates.invalidArguments, 'redirectUri(query string) is required'));
-			return;
-		}
+		const queryValidator = Yup.object({
+			redirectUri: Yup.string().min(1).required(),
+			email: emailSchema,
+		}).required();
+
+		await queryValidator.validate(req.query, { strict: true }).catch(({ message }) => {
+			throw createResponseCode(templates.invalidArguments, message);
+		});
 
 		let accountId;
 		if (req.params.teamspace) {
-			accountId = await getTeamspaceRefId(req.params.teamspace);
+			accountId = req.params.accountId ?? await getTeamspaceRefId(req.params.teamspace);
 			req.session.reAuth = true;
+		} else if (req.query.email) {
+			const userId = await doesUserExist(req.query.email);
+			if (userId) {
+				const { tenantId, tenantIds = [] } = await getUserById(userId);
+				accountId = await determineAuthAccount(req.query.email, tenantIds, tenantId ?? tenantIds[0]);
+			} else {
+				// generate a fake accountId to ensure the response doesn't reveal whether
+				// the email is a user
+				accountId = generateUUIDString();
+			}
 		}
 
 		const authParams = {
@@ -132,12 +177,45 @@ const redirectForAuth = (redirectURL) => async (req, res) => {
 				redirectUri: req.query.redirectUri,
 			})),
 			codeChallenge: req.session.pkceCodes.challenge,
+			email: req.query.email,
 		};
 
 		const link = await generateAuthenticationCodeUrl(authParams, accountId);
 		respond(req, res, templates.ok, { link });
 	} catch (err) {
 		respond(req, res, err);
+	}
+};
+
+const removeFronteggSessionIfNeeded = async (req, res, next) => {
+	const { teamspace } = req.params;
+	const { authenticatedTeamspace, userId } = req.session.user.auth;
+	try {
+		if (teamspace !== authenticatedTeamspace) {
+		// we want to wipe the frontegg session and force the user to relogin over there if
+		// the user is trying to authenticate against a teamspace with SSO connections
+		// and the user email is one of the claimed domains
+
+			const accountId = await getTeamspaceRefId(req.params.teamspace);
+			const { username } = req.session.user;
+			const [domains, { customData: { email } }] = await Promise.all([
+				getClaimedDomains(accountId),
+				getUserByUsername(username, { 'customData.email': 1 }),
+			]);
+
+			const emailDomain = email.split('@')[1];
+
+			req.params.accountId = accountId;
+			req.query.email = email;
+
+			if (domains.includes(emailDomain)) {
+				await destroyAllSessions(userId);
+			}
+		}
+		await next();
+	} catch (err) {
+		logger.logError(`Could not detect SSO configuration: ${err.message}`);
+		respond(req, res, templates.unknown);
 	}
 };
 
@@ -153,7 +231,8 @@ AuthSSO.redirectToStateURL = (req, res) => {
 AuthSSO.generateLinkToAuthenticator = (redirectURL) => validateMany([addPkceProtection, setSessionInfo,
 	redirectForAuth(redirectURL)]);
 
-AuthSSO.generateLinkToTeamspaceAuthenticator = (redirectURL) => redirectForAuth(redirectURL);
+AuthSSO.generateLinkToTeamspaceAuthenticator = (redirectURL) => validateMany(
+	[removeFronteggSessionIfNeeded, redirectForAuth(redirectURL)]);
 
 AuthSSO.generateToken = (redirectURLUsed) => validateMany([checkStateIsValid, getToken(redirectURLUsed),
 	getUserDetails]);

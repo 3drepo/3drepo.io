@@ -31,6 +31,13 @@ FronteggConstants.membershipStatus = {
 	INACTIVE: 4,
 };
 
+// https://developers.frontegg.com/api/identity/mfa-settings/securitypolicycontroller_upsertsecuritypolicy
+FronteggConstants.mfaPolicy = {
+	DISABLED: 'DontForce',
+	ENABLED: 'Force',
+	ENABLED_EXCEPT_SSO: 'ForceExceptSAML',
+};
+
 FronteggConstants.HEADER_USER_ID = 'frontegg-user-id';
 FronteggConstants.META_LABEL_TEAMSPACE = '3DR_Teamspace';
 FronteggConstants.HEADER_TENANT_ID = 'frontegg-tenant-id';
