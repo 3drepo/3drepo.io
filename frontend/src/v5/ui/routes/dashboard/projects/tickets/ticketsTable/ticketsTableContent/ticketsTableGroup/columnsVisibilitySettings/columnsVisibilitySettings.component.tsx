@@ -43,8 +43,6 @@ export const ColumnsVisibilitySettings = () => {
 	const columnsNames = getAllColumnsNames();
 	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 
-	const nonInitiallyVisibleColumns = visibleSortedColumnsNames.filter((name) => !INITIAL_COLUMNS.includes(name));
-
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
 	);
@@ -58,6 +56,7 @@ export const ColumnsVisibilitySettings = () => {
 				groups.unselected.push(item);
 			}
 		});
+		groups.selected = visibleSortedColumnsNames.filter((name) => groups.selected.includes(name));
 		return groups;
 	};
 
@@ -90,8 +89,10 @@ export const ColumnsVisibilitySettings = () => {
 	};
 
 	useEffect(() => {
-		nonInitiallyVisibleColumns.forEach(fetchColumn);
-	}, [nonInitiallyVisibleColumns, tickets]);
+		visibleSortedColumnsNames
+			.filter((name) => !INITIAL_COLUMNS.includes(name))
+			.forEach(fetchColumn);
+	}, [visibleSortedColumnsNames, tickets]);
 
 	return (
 		<ActionMenu
