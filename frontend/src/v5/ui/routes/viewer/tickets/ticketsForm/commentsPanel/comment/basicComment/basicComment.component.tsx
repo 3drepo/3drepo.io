@@ -32,6 +32,7 @@ export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>>
 	className?: string;
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
+	commentId: string;
 	onDeleteImage?: (index) => void;
 	onUploadImages?: () => void;
 	onEditImage?: (img, index) => void;

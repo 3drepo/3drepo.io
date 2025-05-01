@@ -85,6 +85,7 @@ export const CurrentUserComment = ({
 				</CommentButtons>
 			)}
 			<Comment
+				commentId={_id}
 				message={message}
 				images={images}
 				metadata={metadata}

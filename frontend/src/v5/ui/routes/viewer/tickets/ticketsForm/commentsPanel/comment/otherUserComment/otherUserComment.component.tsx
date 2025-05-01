@@ -69,6 +69,7 @@ export const OtherUserComment = ({
 			) : (
 				<>
 					<Comment
+						commentId={_id}
 						author={authorDisplayName}
 						isCurrentUserComment={false}
 						isFirstOfBlock={isFirstOfBlock}
