@@ -18,7 +18,7 @@
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
-import { LoadingRow, Row } from './ticketsTableRow/ticketsTableRow.styles';
+import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 import { TextOverflow } from '@controls/textOverflow';
 
 export const Headers = styled(ResizableTableRow)`
@@ -109,14 +109,8 @@ export const Group = styled.div<{ $empty: boolean, $hideNewticketButton: boolean
 	width: fit-content;
 	background-color: transparent;
 
-	& > :is(${/* sc-selector */Row}, ${/* sc-selector */LoadingRow}):first-child {
-		${roundBorderTop}
-		overflow: hidden;
-	}
-
 	${({ $hideNewticketButton }) => $hideNewticketButton && css`
-		& > ${/* sc-selector */Row}:last-child,
-		& > ${/* sc-selector */LoadingRow}:last-child {
+		& > ${/* sc-selector */Row}:last-child{
 			${roundBorderBottom}
 			overflow: hidden;
 		}
