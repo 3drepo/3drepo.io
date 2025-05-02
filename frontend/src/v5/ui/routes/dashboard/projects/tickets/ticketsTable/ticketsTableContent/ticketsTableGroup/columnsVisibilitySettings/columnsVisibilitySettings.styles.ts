@@ -24,10 +24,11 @@ export const IconContainer = styled.div`
 	color: ${({ theme }) => theme.palette.base.main};
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	position: absolute;
-	right: 0;
+	right: -1px;
 	top: 0;
 	width: fit-content;
 	padding-left: 4px;
+	z-index: 11;
 `;
 
 export const SearchInput = styled(SearchInputBase)`
