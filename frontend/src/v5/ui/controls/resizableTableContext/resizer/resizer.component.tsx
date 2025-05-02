@@ -76,7 +76,7 @@ export const Resizer = ({ name }: ResizerProps) => {
 			onMouseOver={handleMouseOver}
 			onMouseOut={handleMouseOut}
 			$highlight={resizerName === name}
-			$isResizing={isResizing}
+			$isResizing={isResizing && resizerName === name}
 			$columnGap={columnGap}
 		>
 			<ResizerElement onMouseDown={onMouseDown} />
