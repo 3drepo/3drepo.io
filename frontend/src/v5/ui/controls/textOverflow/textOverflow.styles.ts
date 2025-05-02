@@ -21,7 +21,7 @@ export const Tooltip = styled(TooltipComponent)`
 	max-width: 600px;
 `;
 
-export const Container = styled.div<{ lines: number, $disableUnderline: boolean }>`
+export const Container = styled.div<{ lines: number }>`
 	position: relative;
 	overflow: hidden;
 	white-space: nowrap;
@@ -38,12 +38,6 @@ export const Container = styled.div<{ lines: number, $disableUnderline: boolean 
 			display: -webkit-box;
 			-webkit-line-clamp: ${lines};
 			-webkit-box-orient: vertical;
-		}
-	`}
-
-	${({ $disableUnderline }) => !$disableUnderline && css`
-		&:hover > * {
-			text-decoration: underline;
 		}
 	`}
 `;

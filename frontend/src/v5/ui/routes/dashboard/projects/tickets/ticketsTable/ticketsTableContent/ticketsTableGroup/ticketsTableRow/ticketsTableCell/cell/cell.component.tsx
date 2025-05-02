@@ -21,7 +21,7 @@ import { TextOverflow } from '@controls/textOverflow';
 type CellProps = { name: string, children: any, className?: string };
 export const Cell = ({ name, children, className }: CellProps) => (
 	<CellContainer name={name} className={className}>
-		<TextOverflow disableUnderline>
+		<TextOverflow>
 			{children}
 		</TextOverflow>
 	</CellContainer>
