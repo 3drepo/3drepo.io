@@ -54,3 +54,7 @@ export const MenuItem = styled(MenuItemBase)`
 	}
 `;
 
+export const EmptyListMessageContainer = styled.div`
+	padding: 0 15px 15px;
+`;
+

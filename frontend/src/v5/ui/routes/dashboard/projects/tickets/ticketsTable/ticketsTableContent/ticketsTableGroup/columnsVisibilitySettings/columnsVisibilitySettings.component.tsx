@@ -20,7 +20,7 @@ import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
 import { getColumnLabel, INITIAL_COLUMNS } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
-import { MenuItem, IconContainer, SearchInput } from './columnsVisibilitySettings.styles';
+import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
 import { useContext, useEffect, useRef } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
@@ -33,23 +33,17 @@ import { useParams } from 'react-router';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { FormattedMessage } from 'react-intl';
+import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
 
-export const ColumnsVisibilitySettings = () => {
-	const alreadyFetchedTicketIdAndProperty = useRef({});
-	const { teamspace, project, template } = useParams<DashboardParams>();
-	const isFed = FederationsHooksSelectors.selectIsFederation();
-	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn, hideColumn, isVisible } = useContext(ResizableTableContext);
-	const { sortedItems: tickets } = useContext(SortedTableContext);
-	const columnsNames = getAllColumnsNames();
-	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+const List = ({ onShowColumn }) => {
+	const { filteredItems, query } = useContext(SearchContext);
+	const { visibleSortedColumnsNames, hideColumn, isVisible } = useContext(ResizableTableContext);
 
-	const filteringFunction = (cols, query) => (
-		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
-	);
-
-	const groupBySelected = (items: string[]) => {
+	const groupBySelected = () => {
 		const groups = { selected: [], unselected: [] };
-		items.forEach((item) => {
+		filteredItems.forEach((item) => {
 			if (isVisible(item)) {
 				groups.selected.push(item);
 			} else {
@@ -59,6 +53,61 @@ export const ColumnsVisibilitySettings = () => {
 		groups.selected = visibleSortedColumnsNames.filter((name) => groups.selected.includes(name));
 		return groups;
 	};
+
+	const groupedItems = groupBySelected();
+
+	if (!filteredItems.length) return (
+		<EmptyListMessageContainer>
+			<EmptyListMessage>
+				<FormattedMessage
+					id="viewer.card.tickets.columns.emptyList"
+					defaultMessage="We couldn't find a match for {query}. Please try another search."
+					values={{
+						query: <SearchWord>&quot;{query}&quot;</SearchWord>,
+					}}
+				/>
+			</EmptyListMessage>
+		</EmptyListMessageContainer>
+	);
+
+	return (
+		<>
+			{groupedItems.selected.map((columnName) => (
+				<MenuItem key={columnName}>
+					<Checkbox
+						disabled={visibleSortedColumnsNames.length === 1}
+						onChange={() => hideColumn(columnName)}
+						value={true}
+						label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
+					/>
+				</MenuItem>
+			))}
+			{groupedItems.unselected.length > 0 && <Divider />}
+			{groupedItems.unselected.map((columnName) => (
+				<MenuItem key={columnName}>
+					<Checkbox
+						onChange={() => onShowColumn(columnName)}
+						value={false}
+						label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
+					/>
+				</MenuItem>
+			))}
+		</>
+	);
+};
+
+export const ColumnsVisibilitySettings = () => {
+	const alreadyFetchedTicketIdAndProperty = useRef({});
+	const { teamspace, project, template } = useParams<DashboardParams>();
+	const isFed = FederationsHooksSelectors.selectIsFederation();
+	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn } = useContext(ResizableTableContext);
+	const { sortedItems: tickets } = useContext(SortedTableContext);
+	const columnsNames = getAllColumnsNames();
+	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+
+	const filteringFunction = (cols, query) => (
+		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
+	);
 
 	const nameToExtraPropertyToFetch = (name) => name
 		.replace(/properties\./, '')
@@ -115,35 +164,7 @@ export const ColumnsVisibilitySettings = () => {
 						placeholder={formatMessage({ id: 'ticketsTable.columnsVisibilitySettings.search.placeholder', defaultMessage: 'Search...' })}
 					/>
 				</SearchInputContainer>
-				<SearchContext.Consumer>
-					{({ filteredItems }) => {
-						const groupedItems = groupBySelected(filteredItems);
-						return (
-							<>
-								{groupedItems.selected.map((columnName) => (
-									<MenuItem key={columnName}>
-										<Checkbox
-											disabled={visibleSortedColumnsNames.length === 1}
-											onChange={() => hideColumn(columnName)}
-											value={true}
-											label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
-										/>
-									</MenuItem>
-								))}
-								{groupedItems.unselected.length > 0 && <Divider />}
-								{groupedItems.unselected.map((columnName) => (
-									<MenuItem key={columnName}>
-										<Checkbox
-											onChange={() => onShowColumn(columnName)}
-											value={false}
-											label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
-										/>
-									</MenuItem>
-								))}
-							</>
-						);
-					}}
-				</SearchContext.Consumer>
+				<List onShowColumn={onShowColumn} />
 			</SearchContextComponent>
 		</ActionMenu>
 	);
