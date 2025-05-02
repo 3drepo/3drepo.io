@@ -36,15 +36,15 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 	const { filteredItems } = useContext(SearchContext);
 	const { stretchTable, visibleSortedColumnsNames, getAllColumnsNames, setVisibleSortedColumnsNames } = useContext(ResizableTableContext);
 	const templateWasFetched = templateAlreadyFetched(template);
-	const hasVisibleColumns = visibleSortedColumnsNames.length > 0;
+	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
 	const allColumns = getAllColumnsNames();
 	const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
 
 	useEffect(() => {
-		if (templateWasFetched && hasVisibleColumns) {
-			stretchTable([BaseProperties.TITLE]);
+		if (templateWasFetched && tableHasCompletedRendering) {
+			stretchTable(BaseProperties.TITLE);
 		}
-	}, [template, templateWasFetched, hasVisibleColumns]);
+	}, [template, templateWasFetched, tableHasCompletedRendering]);
 
 	useEffect(() => {
 		setVisibleSortedColumnsNames(initialVisibleColumns);

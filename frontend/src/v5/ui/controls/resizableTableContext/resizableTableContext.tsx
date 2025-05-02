@@ -36,7 +36,7 @@ export interface ResizableTableType {
 	setVisibleSortedColumnsNames: (names: string[]) => void,
 	columnGap: number,
 	getRowWidth: () => number,
-	stretchTable: (names?: string[]) => void,
+	stretchTable: (name: string) => void,
 }
 
 const defaultValue: ResizableTableType = {
@@ -94,20 +94,13 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 		[name]: Math.max(getMinWidth(name), width),
 	});
 
-	const stretchTable = (names: string[] = []) => {
-		if (!visibleSortedColumnsNames.length) return;
-	
-		const visibleStretchingColumnsNames = names.filter(isVisible);
-		const stretchableColumns = visibleStretchingColumnsNames.length ? visibleStretchingColumnsNames : visibleSortedColumnsNames;
+	const stretchTable = (name: string) => {
 		const parentWidth = +getComputedStyle(ref.current).width.replace('px', '');
 		const tableWidth = getRowWidth();
 		if (tableWidth >= parentWidth) return;
 
 		const gap = parentWidth - tableWidth;
-		const gapFraction = gap / stretchableColumns.length;
-		stretchableColumns.forEach((name) => {
-			columnsWidths[name] = getColumnWidth(getColumnByName(name)) + gapFraction;
-		});
+		columnsWidths[name] = getColumnWidth(getColumnByName(name)) + gap;
 		setColumnsWidths({ ...columnsWidths });
 	};
 
