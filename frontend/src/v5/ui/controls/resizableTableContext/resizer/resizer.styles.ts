@@ -38,7 +38,7 @@ export const ResizerElement = styled.div`
 `;
 
 const LINE_WIDTH = 2;
-export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $highlight: boolean, $columnGap }>`
+export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $highlight: boolean }>`
 	position: relative;
 	z-index: 10;
 	width: ${LINE_WIDTH}px;
