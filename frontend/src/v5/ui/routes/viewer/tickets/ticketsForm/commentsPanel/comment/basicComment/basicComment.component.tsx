@@ -18,18 +18,21 @@
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown.component';
-import { CommentContainer, CommentAge, EditedCommentLabel, CommentAgeContent } from './basicComment.styles';
+import { CommentContainer, CommentAge, EditedCommentLabel, ViewpointIcon, CommentAgeContent } from './basicComment.styles';
 import { CommentNonMessageContent } from '../commentNonMessageContent/commentNonMessageContent.component';
-import { getRelativeTime } from '@/v5/helpers/intl.helper';
-import { useState, useEffect } from 'react';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { Tooltip } from '@mui/material';
-import { formatDate } from '@/v5/services/intl';
+import { formatMessage, formatDate } from '@/v5/services/intl';
+import { TicketContext } from '../../../../ticket.context';
+import { useContext, useState, useEffect } from 'react';
+import { getRelativeTime } from '@/v5/helpers/intl.helper';
 
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
 	className?: string;
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
+	commentId?: string;
 	onDeleteImage?: (index) => void;
 	onUploadImages?: () => void;
 	onEditImage?: (img, index) => void;
@@ -41,8 +44,10 @@ export const BasicComment = ({
 	updatedAt,
 	className,
 	originalAuthor,
+	view,
 	...props
 }: BasicCommentProps) => {
+	const { isViewer } = useContext(TicketContext);
 	const isEdited = updatedAt && (createdAt !== updatedAt);
 	const [commentAge, setCommentAge] = useState('');
 	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
@@ -62,6 +67,13 @@ export const BasicComment = ({
 				<Tooltip title={formatDate(updatedAt || createdAt)}>
 					<CommentAgeContent>{commentAge}</CommentAgeContent>
 				</Tooltip>
+				{!!view && (
+					<Tooltip title={isViewer && formatMessage({ id: 'basicComment.viewpoint', defaultMessage: 'Go to viewpoint' })} placement="top" arrow>
+						<span>
+							<ViewpointIcon disabled={!isViewer} onClick={() => goToView(view)} />
+						</span>
+					</Tooltip>
+				)}
 			</CommentAge>
 		</CommentContainer>
 	);

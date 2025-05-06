@@ -27,14 +27,20 @@ import { DashedContainer } from '@controls/dragAndDrop/dragAndDrop.styles';
 export const Container = styled.section`
 	display: flex;
 	flex-direction: column;
-	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
-	border-top-width: 1px;
 	padding: 0 0 11px;
 	overflow-x: hidden;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	position: sticky;
 	bottom: 0;
 	border-radius: 0 0 8px 8px;
+`;
+
+export const MessageAndImages = styled.div<{ $isEditMode: boolean; }>`
+	${({ theme, $isEditMode }) => $isEditMode && css`
+		border: 1px solid ${theme.palette.secondary.lightest};
+		border-bottom-color: ${theme.palette.primary.main};
+		margin-top: 10px;
+	`}
 `;
 
 export const CommentReplyContainer = styled.div`
@@ -88,11 +94,24 @@ export const Images = styled.div`
 	gap: 10px;
 	padding: 10px 15px 0;
 	position: relative;
-	box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
 	overflow-y: overlay;
 
 	&:not(:empty) {
-		min-height: 54px;
+		min-height: 59px;
+	}
+
+	&:before, &:after {
+		content: '';
+		width: 100%;
+		box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
+		z-index: 12;
+		position: sticky;
+	}
+	&:before {
+		top: -10px;
+	}
+	&:after {
+		bottom: 0;
 	}
 `;
 
@@ -125,12 +144,22 @@ export const ErroredImageMessages = styled.div`
 `;
 
 export const MessageInput = styled(FormTextAreaFixedSize)`
+	padding: 8px 15px 0;
+	overflow: hidden;
+
+	:after {
+		content: '';
+		box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
+		z-index: 1;
+	}
+
 	.MuiInputBase-multiline {
-		padding: 8px 15px 6px;
+		padding: 0;
 		line-height: 16px;
 	}
 
 	${TextAreaContainer} {
+		overflow-y: scroll;
 		border: none;
 		box-shadow: none;
 	}
@@ -141,10 +170,9 @@ export const Controls = styled.div`
 	display: flex;
 	align-items: center;
 	justify-content: flex-start;
-	padding-top: 6px;
 	box-sizing: border-box;
-	box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
 	position: relative;
+	padding: 6px 15px 0;
 `;
 
 export const CharsCounter = styled(Typography).attrs({
@@ -155,12 +183,16 @@ export const CharsCounter = styled(Typography).attrs({
 	color: ${({ theme: { palette }, $error }) => ($error ? palette.error.main : palette.base.lighter)};
 `;
 
-export const FileIconInput = styled.div`
+export const ActionIcon = styled.div`
 	cursor: pointer;
 	display: flex;
 	padding: 4px;
 	color: ${({ theme }) => theme.palette.secondary.main};
-	margin-left: 15px;
+	height: 24px;
+	svg {
+		height: 100%;
+		width: 100%;
+	}
 `;
 
 export const SendButton = styled(SubmitButton).attrs({
@@ -173,4 +205,10 @@ export const SendButton = styled(SubmitButton).attrs({
 	min-width: unset;
 	width: 34px;
 	height: 34px;
+`;
+
+export const EditCommentButtons = styled.div`
+	margin: 4px 5px 0 auto;
+	display: flex;
+	flex-direction: row;
 `;

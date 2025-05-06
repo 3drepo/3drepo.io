@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,28 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Viewpoint } from '../tickets.types';
+import CameraIcon from '@assets/icons/outlined/camera_side-outlined.svg';
+import styled from 'styled-components';
 
-export type TicketCommentHistoryBlock = {
-	message: string,
-	images: string[],
-	timestamp: Date,
-	view: Viewpoint,
-};
-
-export type ITicketComment = {
-	_id: string,
-	message?: string,
-	images?: string[],
-	view?: Viewpoint,
-	author: string,
-	createdAt: Date,
-	updatedAt: Date,
-	deleted: boolean,
-	history?: TicketCommentHistoryBlock[],
-	// imported tickets
-	originalAuthor?: string,
-	importedAt?: Date,
-};
-
-export type TicketCommentReplyMetadata = Pick<ITicketComment, '_id' | 'message' | 'author' | 'originalAuthor' | 'images'> & { view?: boolean | Viewpoint };
+export const ViewpointIcon = styled(CameraIcon)`
+	margin-top: -1px;
+	color: ${({ theme }) => theme.palette.success.main};
+`;
