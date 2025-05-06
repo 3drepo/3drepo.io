@@ -20,6 +20,7 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
+import { ThreeJsViewer } from './threejs-viewer';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -68,7 +69,7 @@ export class UnityUtil {
 	};
 
 	/** @hidden */
-	public static unityInstance;
+	public static instance;
 
 	/** @hidden */
 	public static externalWebRequestHandler;
@@ -271,18 +272,18 @@ export class UnityUtil {
 	/**
 	 * Launch the Unity Game.
  	 * @category Configurations
-	 * @param canvas - the html dom of the unity canvas
+	 * @param container - the html dom of the unity canvas
 	 * @param host - host server URL (e.g. https://www.3drepo.io)
 	 * @return returns a promise which resolves when the game is loaded.
 	 *
 	 */
-	public static loadUnity(canvas: any, host): Promise<void> {
-		let canvasDom = canvas;
+	public static loadUnity(container: any, host): Promise<void> {
+		let canvasDom = container;
 		let domainURL = host;
-		if (Object.prototype.toString.call(canvas) === '[object String]') {
+		if (Object.prototype.toString.call(container) === '[object String]') {
 			// The user is calling it like Unity 2019. Convert it to a dom an create a canvas
 			console.warn('[DEPRECATED WARNING] loadUnity() no longer takes in a string and a URL to the unity config. Please check the API documentation and update your function.');
-			const divDom = document.getElementById(canvas);
+			const divDom = document.getElementById(container);
 			canvasDom = document.createElement('canvas');
 			canvasDom.id = 'unity';
 			divDom.appendChild(canvasDom);
@@ -299,7 +300,7 @@ export class UnityUtil {
 	}
 
 	/** @hidden */
-	public static _loadUnity(canvas: any, domainURL): Promise<void> {
+	public static _loadUnity(container: any, domainURL): Promise<void> {
 		if (!window.Module) {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
@@ -320,28 +321,12 @@ export class UnityUtil {
 			this.externalWebRequestHandler = new ExternalWebRequestHandler(new IndexedDbCache(this.unityDomain)); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
 		}
 
-		const buildUrl = new URL(UnityUtil.unityBuildSubdirectory, UnityUtil.unityDomain);
+		UnityUtil.onReady();
+		UnityUtil.onLoaded();
 
-		const config = {
-			dataUrl: `${buildUrl}/unity.data.unityweb`,
-			frameworkUrl: `${buildUrl}/unity.framework.js.unityweb`,
-			codeUrl: `${buildUrl}/unity.wasm.unityweb`,
-			streamingAssetsUrl: 'StreamingAssets',
-			companyName: '3D Repo Ltd',
-			productName: '3D Repo Unity',
-			productVersion: '1.0',
-			errorHandler: (e) => {
-				// This member is not part of the documented API, but the current version of loader.js checks for it
-				UnityUtil.onUnityError(e);
-				return true; // Returning true suppresses loader.js' alert call
-			},
-		};
+		UnityUtil.instance = new ThreeJsViewer(container);
 
-		createUnityInstance(canvas, config, (progress) => {
-			this.onProgress(progress);
-		}).then((unityInstance) => {
-			UnityUtil.unityInstance = unityInstance;
-		}).catch(UnityUtil.onUnityError);
+		UnityUtil.ready();
 
 		return UnityUtil.onReady();
 	}
@@ -356,7 +341,7 @@ export class UnityUtil {
 		UnityUtil.progressCallback = null;
 		UnityUtil.modelLoaderProgressCallback = null;
 		UnityUtil.readyPromise = null;
-		UnityUtil.unityInstance.Quit();
+		UnityUtil.instance.Quit();
 	}
 
 	/**
@@ -499,8 +484,8 @@ export class UnityUtil {
 		if (requireStatus === UnityUtil.LoadingState.MODEL_LOADED) {
 			// Requires model to be loaded
 			UnityUtil.onLoaded().then(() => {
-				if (UnityUtil.unityInstance) {
-					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				if (UnityUtil.instance) {
+					UnityUtil.instance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
 				}
 			}).catch((error) => {
 				if (error !== 'cancel') {
@@ -511,8 +496,8 @@ export class UnityUtil {
 		} else if (requireStatus === UnityUtil.LoadingState.MODEL_LOADING) {
 			// Requires model to be loading
 			UnityUtil.onLoading().then(() => {
-				if (UnityUtil.unityInstance) {
-					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				if (UnityUtil.instance) {
+					UnityUtil.instance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
 				}
 			}).catch((error) => {
 				if (error !== 'cancel') {
@@ -522,8 +507,8 @@ export class UnityUtil {
 			});
 		} else {
 			UnityUtil.onReady().then(() => {
-				if (UnityUtil.unityInstance) {
-					UnityUtil.unityInstance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
+				if (UnityUtil.instance) {
+					UnityUtil.instance.SendMessage(UnityUtil.UNITY_GAME_OBJECT, methodName, params);
 				}
 			}).catch((error) => {
 				if (error !== 'cancel') {
@@ -1714,7 +1699,7 @@ export class UnityUtil {
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @return returns a promise that resolves when the model start loading.
 	 */
-	public static loadModel(
+	public static async loadModel(
 		account: string,
 		model: string,
 		// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -1742,9 +1727,10 @@ export class UnityUtil {
 		UnityUtil.onLoaded();
 		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model: `, params);
-		UnityUtil.toUnity('LoadModel', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(params));
 
-		return UnityUtil.onLoading();
+		const bbox = await UnityUtil.instance.loadModel(account, model);
+
+		return Promise.resolve(bbox);
 	}
 
 	/**
@@ -1929,7 +1915,7 @@ export class UnityUtil {
 	 * @category Navigations
 	 */
 	public static resetCamera() {
-		UnityUtil.toUnity('ResetCamera', UnityUtil.LoadingState.VIEWER_READY, undefined);
+		UnityUtil.instance.resetCamera();
 	}
 
 	/**
@@ -2661,6 +2647,6 @@ export class UnityUtil {
 	 * @hidden
 	 */
 	public static createWebRequestHandler(gameObjectName: string) {
-		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
+		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.instance, gameObjectName);
 	}
 }

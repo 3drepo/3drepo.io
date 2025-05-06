@@ -30,7 +30,11 @@ module.exports = (options) => ({
 			loaders.CSSLoader,
 			loaders.FontLoader,
 			loaders.ImageLoader,
-			loaders.HTMLLoader
+			loaders.HTMLLoader,
+			{
+				test: /\.(glsl)$/,
+				loader: 'ts-shader-loader'
+			}
 		],
 	},
 	plugins: [

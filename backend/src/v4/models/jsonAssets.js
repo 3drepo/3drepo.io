@@ -166,8 +166,7 @@ function getHelperJSONFile(account, model, branch, rev, username, filename, pref
 }
 
 JSONAssets.getSuperMeshMapping = function(account, model, id) {
-	const name = `${id}.json.mpc`;
-	return FileRef.getJSONFile(account, model, name);
+	return FileRef.getJSONFile(account, model, id);
 };
 
 const splitEntriesToGroups = (entries, maxParallelFiles = 100) => {

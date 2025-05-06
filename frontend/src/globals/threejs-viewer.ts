@@ -1,0 +1,276 @@
+/**
+ *  Copyright (C) 2025 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import * as THREE from 'three';
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+
+import StandardVertexShader from './standard_vertex.glsl';
+import StandardFragmentShader from './standard_fragment.glsl';
+
+class VertexAttribute {
+
+	size: number;
+
+	name: string;
+
+	constructor(name, size) {
+		this.name = name;
+		this.size = size;
+	}
+}
+
+export class ThreeJsViewer {
+
+	sceneBounds: THREE.Box3;
+
+	sceneCorners: THREE.Vector3[];
+
+	camera: THREE.Camera;
+
+	scene: THREE.Scene;
+
+	material: THREE.ShaderMaterial;
+
+	constructor(container: HTMLElement) {
+		this.renderer = new THREE.WebGLRenderer();
+		this.renderer.setSize(container.clientWidth, container.clientHeight);
+		container.appendChild(this.renderer.domElement);
+
+		this.scene = new THREE.Scene();
+		this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight);
+
+		const geometry = new THREE.BoxGeometry( 1, 1, 1 );
+		const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+		const cube = new THREE.Mesh( geometry, material );
+
+		this.scene.add( cube );
+		this.camera.position.z = 5;
+		this.camera.far = 500000;
+		this.camera.near = 0;
+
+		const controls = new OrbitControls( this.camera, this.renderer.domElement );
+
+		this.renderer.setAnimationLoop(this.animate.bind(this));
+
+		this.sceneBounds = new THREE.Box3();
+
+		this.sceneCorners = [
+			new THREE.Vector3(),
+			new THREE.Vector3(),
+			new THREE.Vector3(),
+			new THREE.Vector3(),
+			new THREE.Vector3(),
+			new THREE.Vector3(),
+			new THREE.Vector3(),
+			new THREE.Vector3(),
+		];
+
+		this.loadShaders();
+	}
+
+	animate() {
+		this.updateNearFarPlanes();
+		this.renderer.render(this.scene, this.camera);
+	}
+
+	fetch(uri: string) {
+		const cookies = document?.cookie;
+		const headers = {};
+		if (cookies) {
+			const tokenMatch = cookies.match(/(^| )csrf_token=([^;]+)/);
+			if (tokenMatch) {
+				headers['X-CSRF-TOKEN'] = tokenMatch[2];
+			}
+		}
+		return fetch('/api/' + uri, { headers });
+	}
+
+	async loadModel(account: string, model: string): Promise<void> {
+		const assetList = await this.fetch(account + '/' + model + '/revision/master/head/repoAssets.json');
+		const body = await assetList.json();
+		const models = body.models;
+
+		for (var i = 0; i < models.length; i++) {
+			const assets = models[i].assets;
+			for (var j = 0; j < assets.length; j++) {
+				this.loadRepoBundle(account, model, assets[j]);
+			}
+		}
+
+		return Promise.resolve(null);
+	}
+
+	async loadRepoBundle(teamspace, container, uuid) {
+
+		const HEADER_LENGTH_START = 16;
+		const HEDAER_DATA_START = 20;
+
+		const bundle = await this.fetch(teamspace + '/' + container + '/' + uuid + '.repobundle');
+		const mapping = await this.fetch(teamspace + '/' + container + '/' + uuid + '.json.mpc');
+		const metadata = await mapping.json();
+		const bytes = await bundle.bytes();
+		const dataView = new DataView(bytes.buffer);
+		const headerLength = dataView.getInt32(HEADER_LENGTH_START, true);
+		const textDecoder = new TextDecoder('utf-8');
+		const headerJson = textDecoder.decode(new DataView(bytes.buffer, HEDAER_DATA_START, headerLength));
+		const header = JSON.parse(headerJson);
+		const bodyStart = HEDAER_DATA_START + headerLength;
+		const name = header.name;
+
+		const ATTRIBUTES = [
+			new VertexAttribute('position', 3),
+			new VertexAttribute('normal', 3),
+			new VertexAttribute('colour', 4),
+			new VertexAttribute('tangent', 2),
+			new VertexAttribute('uv0', 2),
+			new VertexAttribute('uv1', 2),
+		];
+
+		// Maps
+
+		const width = metadata.mapping.length;
+		const height = 1;
+
+		const data = new Uint8Array(width * 4);
+		for (var i = 0; i < metadata.mapping.length; i++) {
+			const m = metadata.mapping[i];
+			const material = metadata.materials[m.material];
+			data[(i * 4) + 0] = material.albedoColor.r * 255;
+			data[(i * 4) + 1] = material.albedoColor.g * 255;
+			data[(i * 4) + 2] = material.albedoColor.b * 255;
+			data[(i * 4) + 3] = material.albedoColor.a * 255;
+		}
+
+		const texture = new THREE.DataTexture(data, width, height);
+		texture.needsUpdate = true;
+
+		for (var i = 0; i < header.meshes.length; i++) {
+			const m = header.meshes[i];
+
+			if (m.type != 3) {
+				continue;
+			}
+
+			var vertexStride = 0;
+			for (var a = 0; a < m.vertexLayout.length; a++) {
+				vertexStride += ATTRIBUTES[m.vertexLayout[a]].size;
+			}
+
+			const vertexDataCopy = bytes.slice(bodyStart + m.vertexBuffer.start, bodyStart + m.vertexBuffer.start + m.vertexBuffer.length);
+
+			const floats = new Float32Array(vertexDataCopy.buffer);
+			const buffer = new THREE.InterleavedBuffer(floats, vertexStride);
+			const geometry = new THREE.BufferGeometry();
+
+			var offset = 0;
+			for (var a = 0; a < m.vertexLayout.length; a++) {
+				const d = ATTRIBUTES[m.vertexLayout[a]];
+				const attribute = new THREE.InterleavedBufferAttribute(buffer, d.size, offset);
+				offset += d.size;
+				geometry.setAttribute(d.name, attribute);
+			}
+
+			const indexDataCopy = bytes.slice(bodyStart + m.indexBuffer.start, bodyStart + m.indexBuffer.start +  m.indexBuffer.length);
+			const indices = Array.from(new Int16Array(indexDataCopy.buffer));
+			const indexBuffer = new THREE.BufferAttribute(indexDataCopy, 2);
+			indexBuffer.gpuType = THREE.IntType;
+
+			geometry.setIndex(indices);
+
+			// eslint-disable-next-line max-len
+			const min = new THREE.Vector3(m.bounds.min.x, m.bounds.min.y, m.bounds.min.z);
+			const max = new THREE.Vector3(m.bounds.max.x, m.bounds.max.y, m.bounds.max.z);
+			geometry.boundingBox = new THREE.Box3(min, max);
+			geometry.boundingSphere = new THREE.Sphere(min, max.sub(min).length() );
+
+			this.sceneBounds.expandByPoint(m.bounds.min);
+			this.sceneBounds.expandByPoint(m.bounds.max);
+
+			const material = this.material.clone();
+			material.uniforms = {
+				'color_map': texture,
+			};
+
+			const mesh = new THREE.Mesh( geometry, material );
+
+			this.scene.add(mesh);
+		}
+	}
+
+	SendMessage(go, method, params) {
+		console.log('Receieved ' + method + ' ' + params);
+	}
+
+	addSceneBoundingBox() {
+		const helper = new THREE.Box3Helper(this.sceneBounds, 0xffff00);
+		this.scene.add(helper);
+	}
+
+	updateNearFarPlanes() {
+		this.getBoxCorners(this.sceneBounds, this.sceneCorners);
+		const forward = new THREE.Vector3();
+		const position = new THREE.Vector3();
+		this.camera.getWorldDirection(forward);
+		this.camera.getWorldPosition(position);
+		const p = new THREE.Vector3();
+		var near = Number.POSITIVE_INFINITY;
+		var far = Number.NEGATIVE_INFINITY;
+		for (var i = 0; i < this.sceneCorners.length; i++) {
+			p.subVectors(this.sceneCorners[i], position);
+			const d = p.dot(forward);
+			near = Math.min(near, d);
+			far = Math.max(far, d);
+		}
+		near = Math.max(near, 1);
+		far = Math.min(far, 1000000);
+		this.camera.near = near;
+		this.camera.far = far;
+		this.camera.updateProjectionMatrix();
+	}
+
+	getBoxCorners(box: THREE.Box3, corners: THREE.Vector3[]) {
+		const min = box.min;
+		const max = box.max;
+		corners[0].set(min.x, min.y, min.z);
+		corners[1].set(min.x, min.y, max.z);
+		corners[2].set(min.x, max.y, min.z);
+		corners[3].set(min.x, max.y, max.z);
+		corners[4].set(max.x, min.y, min.z);
+		corners[5].set(max.x, min.y, max.z);
+		corners[6].set(max.x, max.y, min.z);
+		corners[7].set(max.x, max.y, max.z);
+	}
+
+	resetCamera() {
+		const v = new THREE.Vector3();
+		this.sceneBounds.getCenter(v);
+
+		this.camera.position.set(this.sceneBounds.max.x, this.sceneBounds.max.y, this.sceneBounds.max.z);
+		this.camera.lookAt(v);
+
+		const s = new THREE.Vector3();
+		this.sceneBounds.getSize(s);
+		//this.camera.translateZ(-s.length() / Math.tan(60 / 2) * 2);
+	}
+
+	loadShaders() {
+		this.material = new THREE.ShaderMaterial({
+			vertexShader: StandardVertexShader,
+			fragmentShader: StandardFragmentShader,
+		});
+	}
+}

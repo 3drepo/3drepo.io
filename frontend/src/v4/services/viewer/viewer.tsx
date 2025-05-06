@@ -106,7 +106,7 @@ export class ViewerService {
 		UnityUtil.init(onError, this.onUnityProgress, this.onModelProgress);
 		UnityUtil.hideProgressBar();
 
-		const unityHolder = document.createElement('canvas');
+		const unityHolder = document.createElement('div');
 		unityHolder.className = 'emscripten';
 		unityHolder.setAttribute('id', this.divId);
 		unityHolder.removeAttribute('style');

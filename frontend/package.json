@@ -126,6 +126,7 @@
 		"socket.io-client": "4.8.1",
 		"styled-components": "5.3.9",
 		"three": "0.167.1",
+		"ts-shader-loader": "^2.0.2",
 		"type-fest": "2.3.2",
 		"ua-parser-js": "1.0.37",
 		"uuidv4": "5.0.1",

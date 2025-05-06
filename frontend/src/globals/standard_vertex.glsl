@@ -1,0 +1,8 @@
+varying vec2 id;
+
+attribute vec2 uv1;
+
+void main() {
+  gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+  id = uv1;
+}
