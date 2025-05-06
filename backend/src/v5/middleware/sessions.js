@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CSRF_COOKIE } = require('../utils/sessions.constants');
 const { SOCKET_HEADER } = require('../services/chat/chat.constants');
 const config = require('../utils/config');
 const { deleteIfUndefined } = require('../utils/helper/objects');
@@ -26,6 +25,7 @@ const { session: initSession } = require('../services/sessions');
 const { isFromWebBrowser } = require('../utils/helper/userAgent');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { respond } = require('../utils/responder');
+const { setCSRFCookie } = require('../utils/sessions');
 const { templates } = require('../utils/responseCodes');
 
 const Sessions = {};
@@ -58,9 +58,8 @@ Sessions.destroySession = (req, res) => {
 
 Sessions.appendCSRFToken = async (req, res, next) => {
 	if (!req.session.reAuth) {
-		const { domain, maxAge } = config.cookie;
 		const token = generateUUIDString();
-		res.cookie(CSRF_COOKIE, token, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
+		setCSRFCookie(token, res);
 		req.token = token;
 	}
 	await next();
