@@ -15,25 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { IJob } from '@/v5/store/jobs/jobs.types';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { IUser } from '@/v5/store/users/users.redux';
 import { groupBy } from 'lodash';
 
-export const getModelJobsAndUsers = (containerOrFederation) => {
-	const isFed = modelIsFederation(containerOrFederation);
-	
-	const users = isFed
-		? FederationsHooksSelectors.selectFederationUsers(containerOrFederation)
-		: ContainersHooksSelectors.selectContainerUsers(containerOrFederation);
-	
-	const jobs = isFed
-		? FederationsHooksSelectors.selectFederationJobs(containerOrFederation)
-		: ContainersHooksSelectors.selectContainerJobs(containerOrFederation);
-
-	return { users, jobs };
-};
 
 export const jobOrUserToString = (ju): string | null => (ju._id || ju.user);
 

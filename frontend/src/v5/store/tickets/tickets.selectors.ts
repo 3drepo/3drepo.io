@@ -22,7 +22,7 @@ import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
-import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
+import { selectCurrentProjectTemplateById, selectCurrentProjectTemplates } from '../projects/projects.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -65,6 +65,13 @@ export const selectTemplateById = createSelector(
 	selectTemplates,
 	(state, modelId, templateId) => templateId,
 	(state, templates, templateId) => templates.find(({ _id }) => _id === templateId) || null,
+);
+
+export const selectTemplatesByIds = createSelector(
+	selectTicketsDomain,
+	selectCurrentProjectTemplates,
+	(state, templateIds) => templateIds,
+	(state, templates, templateIds) => templates.filter(({ _id }) => templateIds.includes(_id)),
 );
 
 export const selectTicketsGroups = createSelector(

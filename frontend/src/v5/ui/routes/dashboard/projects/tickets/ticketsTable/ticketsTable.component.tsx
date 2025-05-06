@@ -203,7 +203,11 @@ export const TicketsTable = () => {
 	}, [templateId]);
 
 	return (
-		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
+		<TicketContextComponent
+			isViewer={false}
+			containerOrFederation={containerOrFederation}
+			availableTemplateIds={[templateId]}
+		>
 			<FiltersContainer>
 				<FlexContainer>
 					<SelectorsContainer>
@@ -259,20 +263,18 @@ export const TicketsTable = () => {
 					</CircleButton>
 				</SlidePanelHeader>
 				<MuiThemeProvider theme={theme}>
-					<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
-						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
-						{isNewTicket && (
-							<NewTicketSlide
-								preselectedValue={{ [groupBy]: groupByValue }}
-								template={selectedTemplate}
-								containerOrFederation={containerOrFederation}
-								onSave={onSaveTicket}
-								onDirtyStateChange={setIsNewTicketDirty}
-							/>
-						)}
-					</TicketContextComponent>
+					{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
+					{isNewTicket && (
+						<NewTicketSlide
+							preselectedValue={{ [groupBy]: groupByValue }}
+							template={selectedTemplate}
+							containerOrFederation={containerOrFederation}
+							onSave={onSaveTicket}
+							onDirtyStateChange={setIsNewTicketDirty}
+						/>
+					)}
 				</MuiThemeProvider>
 			</SidePanel>
-		</SearchContextComponent>
+		</TicketContextComponent>
 	);
 };
