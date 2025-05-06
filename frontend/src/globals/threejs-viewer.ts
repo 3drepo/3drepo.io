@@ -45,6 +45,10 @@ export class ThreeJsViewer {
 
 	material: THREE.ShaderMaterial;
 
+	material_textured: THREE.ShaderMaterial;
+
+	renderer = THREE.WebGLRenderer;
+
 	constructor(container: HTMLElement) {
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize(container.clientWidth, container.clientHeight);
@@ -135,9 +139,11 @@ export class ThreeJsViewer {
 			new VertexAttribute('position', 3),
 			new VertexAttribute('normal', 3),
 			new VertexAttribute('colour', 4),
-			new VertexAttribute('tangent', 2),
+			new VertexAttribute('tangent', 3),
 			new VertexAttribute('uv0', 2),
 			new VertexAttribute('uv1', 2),
+			new VertexAttribute('uv2', 2),
+			new VertexAttribute('uv3', 2),
 		];
 
 		// Maps
@@ -155,8 +161,33 @@ export class ThreeJsViewer {
 			data[(i * 4) + 3] = material.albedoColor.a * 255;
 		}
 
-		const texture = new THREE.DataTexture(data, width, height);
+		const texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
 		texture.needsUpdate = true;
+
+		var material = this.material.clone();
+
+		if (metadata.albedoMap) {
+			material = this.material_textured.clone();
+
+			const texture = await this.fetch(teamspace + '/' + container + '/' + metadata.albedoMap + '.texture');
+			const blob = await texture.blob();
+			const url = URL.createObjectURL(blob);
+			new THREE.TextureLoader().load(
+				url,
+				(arg) => {
+					arg.wrapS = THREE.RepeatWrapping;
+					arg.wrapT = THREE.RepeatWrapping;
+					material.uniforms.color_tex = { value: arg };
+				},
+				undefined,
+				console.error,
+			);
+		}
+
+		material.uniforms = {
+			'color_map': { value: texture },
+			'maps_width': { value: width },
+		};
 
 		for (var i = 0; i < header.meshes.length; i++) {
 			const m = header.meshes[i];
@@ -199,11 +230,6 @@ export class ThreeJsViewer {
 
 			this.sceneBounds.expandByPoint(m.bounds.min);
 			this.sceneBounds.expandByPoint(m.bounds.max);
-
-			const material = this.material.clone();
-			material.uniforms = {
-				'color_map': texture,
-			};
 
 			const mesh = new THREE.Mesh( geometry, material );
 
@@ -271,6 +297,13 @@ export class ThreeJsViewer {
 		this.material = new THREE.ShaderMaterial({
 			vertexShader: StandardVertexShader,
 			fragmentShader: StandardFragmentShader,
+		});
+		this.material_textured = new THREE.ShaderMaterial({
+			vertexShader: StandardVertexShader,
+			fragmentShader: StandardFragmentShader,
+			defines: {
+				USE_COLOR_TEX: true,
+			},
 		});
 	}
 }
