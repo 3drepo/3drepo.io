@@ -17,10 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { CardAction } from '../../../cardAction/cardAction.styles';
-import { useState } from 'react';
-import FunnelIcon from '@assets/icons/filters/funnel.svg';
-import { Tooltip } from '@mui/material';
+import { ReactElement, useState } from 'react';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
 import { SearchInput, TicketsFiltersModal, TicketsFiltersModalItem } from './ticketFiltersSelection.styles';
 import { CardFilter } from '../../cardFilters.types';
@@ -32,9 +29,10 @@ import { ITemplate } from '@/v5/store/tickets/tickets.types';
 
 type IFilterSelection = {
 	templates: ITemplate[],
+	TriggerButton: (props) => ReactElement,
 };
 
-export const FilterSelection = ({ templates }: IFilterSelection) => {
+export const FilterSelection = ({ templates, TriggerButton }: IFilterSelection) => {
 	const [selectedFilter, setSelectedFilter] = useState<CardFilter>(null);
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(templates);
 	const showFiltersList = !selectedFilter?.property;
@@ -44,13 +42,7 @@ export const FilterSelection = ({ templates }: IFilterSelection) => {
 
 	return (
 		<CardFilterActionMenu
-			TriggerButton={(
-				<Tooltip title={disabled ? '' : formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
-					<CardAction disabled={disabled}>
-						<FunnelIcon />
-					</CardAction>
-				</Tooltip>
-			)}
+			TriggerButton={<TriggerButton disabled={disabled} />}
 			onClose={clearFilter}
 			disabled={disabled}
 		>

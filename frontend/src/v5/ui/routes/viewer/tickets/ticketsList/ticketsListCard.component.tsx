@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FunnelIcon from '@assets/icons/filters/funnel.svg';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
@@ -31,6 +32,8 @@ import { useEffect } from 'react';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
+import { Tooltip } from '@mui/material';
+import { CardAction } from '@components/viewer/cards/cardAction/cardAction.styles';
 
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
@@ -51,7 +54,16 @@ export const TicketsListCard = () => {
 				actions={(
 					<>
 						{!readOnly && (<NewTicketMenu />)}
-						<FilterSelection templates={templates} />
+						<FilterSelection
+							templates={templates}
+							TriggerButton={(props) => (
+								<Tooltip title={props.disabled ? '' : formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
+									<CardAction {...props}>
+										<FunnelIcon />
+									</CardAction>
+								</Tooltip>
+							)}
+						/>
 						<FilterEllipsisMenu />
 					</>
 				)}

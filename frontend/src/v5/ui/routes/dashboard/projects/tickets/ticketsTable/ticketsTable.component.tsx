@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FunnelIcon from '@assets/icons/filters/funnel.svg';
 import { ContainersActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -45,6 +46,7 @@ import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
+import { Button } from '@controls/button';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -197,7 +199,6 @@ export const TicketsTable = () => {
 			availableTemplateIds={[templateId]}
 		>
 			<SearchContextComponent items={ticketsFilteredByTemplate} >
-
 				<FiltersContainer>
 					<FlexContainer>
 						<SelectorsContainer>
@@ -216,6 +217,18 @@ export const TicketsTable = () => {
 						</SelectorsContainer>
 					</FlexContainer>
 					<FlexContainer>
+						<FilterSelection
+							templates={[selectedTemplate]}
+							TriggerButton={(props) => (
+								<Button {...props}
+									startIcon={<FunnelIcon />}
+									variant="outlined"
+									color="secondary"
+								>
+									<FormattedMessage id="ticketsTable.button.newFilter" defaultMessage="Add filter" />
+								</Button>
+							)}
+						/>
 						{!selectedTemplate.deprecated 
 						&&
 						<NewTicketMenu
@@ -232,7 +245,6 @@ export const TicketsTable = () => {
 						/>}
 					</FlexContainer>
 				</FiltersContainer>
-				<FilterSelection templates={[selectedTemplate]}/>
 				<CardFilters />
 				<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} groupBy={groupBy}/>
 				<SidePanel open={!!ticketId && !!models.length && !!containerOrFederation}>
