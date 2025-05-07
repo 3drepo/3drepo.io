@@ -23,50 +23,32 @@ import { TableVirtuoso } from 'react-virtuoso';
 
 export const TicketsList = () => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
-
 	const shouldShowLoader = filteredTickets.length >= 10;
 
-
 	return (
-		<ListContainer >
-			{shouldShowLoader && <Loader />}
-			<TableVirtuoso
-				data={filteredTickets}
-				followOutput={() => true}
-				components={{
-					Table: List,
-				}}
-				overscan={1000}
-				increaseViewportBy={1000}
-				style={{ position: 'relative', top: (shouldShowLoader ? '-100%' : 0) }}
-				itemContent={(index, ticket) => (
-					<TicketItem ticket={ticket} key={ticket._id} />
-	 		)}
-	 	/>
-		</ListContainer>);
-	// return (
-	// 	<TableVirtuoso
-	// 		data={filteredTickets}
-	// 		followOutput={() => true}
-	// 		overscan={100}
-	// 		itemContent={(index, ticket) => (
-	// 			<TicketItem ticket={ticket} key={ticket._id} />
-	// 		)}
-	// 	/>
-	// );
-
-
-	// return (
-	// 	<>
-	// 		{filteredTickets.length ? (
-	// 			<List>
-	// 				{filteredTickets.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}
-	// 			</List>
-	// 		) : (
-	// 			<EmptyListMessage>
-	// 				<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
-	// 			</EmptyListMessage>
-	// 		)}
-	// 	</>
-	// );
+		<>
+			{filteredTickets.length ? (
+				<ListContainer >
+					{shouldShowLoader && <Loader />}
+					<TableVirtuoso
+						data={filteredTickets}
+						followOutput={() => true}
+						components={{
+							Table: List,
+						}}
+						overscan={1000}
+						increaseViewportBy={1000}
+						style={{ position: 'relative', top: (shouldShowLoader ? '-100%' : 0) }}
+						itemContent={(index, ticket) => (
+							<TicketItem ticket={ticket} key={ticket._id} />
+						)}
+					/>
+				</ListContainer>
+			) : (
+				<EmptyListMessage>
+					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+				</EmptyListMessage>
+			)}
+		</>
+	);
 };

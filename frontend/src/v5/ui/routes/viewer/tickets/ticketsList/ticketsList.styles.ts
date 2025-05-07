@@ -24,6 +24,8 @@ import { Loader as UnstyledLoader } from '@/v4/routes/components/loader/loader.c
 
 export const Loader = styled(UnstyledLoader)`
 	height: 100%;
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	width: calc(100% - 12px);
 `;
 
 export const ListContainer = styled.div`
