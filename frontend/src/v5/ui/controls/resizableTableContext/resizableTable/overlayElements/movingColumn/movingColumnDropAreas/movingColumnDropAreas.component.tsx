@@ -92,7 +92,7 @@ export const MovingColumnDropAreas = () => {
 			<TableCorner ref={onRender} />
 			{/* The drag over is to fix a bug in firefox where dragging the column
 				gets stuck with a "no-drop" cursor and the column can't be dropped */}
-			<Container onMouseUp={dropColumn} onDragOver={blockEvent}>
+			<Container onMouseUp={dropColumn}>
 				<DropAreas $offset={tableOffset} onMouseLeave={onMouseLeaveDropArea}>
 					{getDropAreasWidths().map((width, index) => (
 						<Area key={index} $width={width} onMouseEnter={(e) => setDropColumnIndex(e, index)} />

@@ -18,11 +18,17 @@
 import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
 import { ResizableTableCell } from '../resizableTableCell/resizableTableCell.component';
+import { blockEvent } from '@/v5/helpers/events.helpers';
 
 export const ResizableTableHeader = ({ name, children, ...props }) => {
 	const { setMovingColumn } = useContext(ResizableTableContext);
 
-	const onDragStart = () => setMovingColumn(name);
+	const onDragStart = (e) => {
+		// The blockEvent is to fix a bug in firefox where the dragging the
+		// dragged column is not dropped on mouseUp, but requires a further click
+		blockEvent(e);
+		setMovingColumn(name);
+	};
 
 	return (
 		<ResizableTableCell draggable onDragStart={onDragStart} name={name} {...props}>
