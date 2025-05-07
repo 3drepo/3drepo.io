@@ -19,7 +19,7 @@ import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
-import { isString } from 'lodash';
+import _, { isString } from 'lodash';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -40,6 +40,7 @@ import { ITicket, ViewpointState } from './tickets.types';
 import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -146,6 +147,8 @@ export function* updateTicketGroup({ teamspace, projectId, modelId, ticketId, gr
 	}
 }
 
+const addUpdatedAtTime = (ticket) => _.set(ticket, `properties.${BaseProperties.UPDATED_AT}`, +new Date());
+
 export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket, isFederation, onError }: UpdateTicketAction) {
 	try {
 		const updateModelTicket = isFederation
@@ -153,6 +156,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 			: API.Tickets.updateContainerTicket;
 
 		yield updateModelTicket(teamspace, projectId, modelId, ticketId, ticket);
+		addUpdatedAtTime(ticket);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
 		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateTicket.updated', defaultMessage: 'Ticket updated' })));
 	} catch (error) {
@@ -243,6 +247,7 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId, re
 }
 
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket, revision }: UpsertTicketAndFetchGroupsAction) {
+	addUpdatedAtTime(ticket);
 	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision));
 }
