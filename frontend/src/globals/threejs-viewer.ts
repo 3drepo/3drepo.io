@@ -87,6 +87,10 @@ export class ThreeJsViewer {
 
 		this.controls = new OrbitControls( this.camera, this.renderer.domElement );
 		
+		// Use this if you only want to render when the controls change the perspective
+		//this.controls.addEventListener('change', this.animate.bind(this));
+
+		// Use this if you want to render every frame again.
 		this.renderer.setAnimationLoop(this.animate.bind(this));
 
 		this.sceneBounds = new THREE.Box3();
@@ -103,6 +107,9 @@ export class ThreeJsViewer {
 		];
 
 		this.loadShaders();
+
+		// Initial render
+		this.animate();
 	}
 
 	animate() {
