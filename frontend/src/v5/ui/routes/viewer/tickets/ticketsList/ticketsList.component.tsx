@@ -20,10 +20,23 @@ import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer, Loader } from './ticketsList.styles';
 import { TableVirtuoso } from 'react-virtuoso';
+import { useEffect, useRef } from 'react';
 
 export const TicketsList = () => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
 	const shouldShowLoader = filteredTickets.length >= 10;
+	const virtuosoRef = useRef<any>();
+	
+	useEffect(() => {
+		virtuosoRef.current.scrollToIndex({
+			behavior: 'instant',
+			block: 'nearest',
+			align: 'start',
+			index: selectedIndex,
+		});
+	}, [selectedIndex]);
 
 	return (
 		<>
@@ -31,6 +44,7 @@ export const TicketsList = () => {
 				<ListContainer >
 					{shouldShowLoader && <Loader />}
 					<TableVirtuoso
+						ref={virtuosoRef}
 						data={filteredTickets}
 						followOutput={() => true}
 						components={{
