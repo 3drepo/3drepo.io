@@ -48,6 +48,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	updateTicketGroupSuccess: ['group'],
 	clearGroups: [],
 	setSorting: ['property', 'order'],
+	resetSorting: [],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -115,6 +116,10 @@ export const setSorting = (state: ITicketsState, { property, order }: SetSorting
 	state.sorting = { property, order };
 };
 
+export const resetSorting = (state: ITicketsState) => {
+	state.sorting = { ...DEFAULT_TICKETS_SORTING };
+};
+
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
@@ -125,6 +130,7 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.UPDATE_TICKET_GROUP_SUCCESS]: updateTicketGroupSuccess,
 	[TicketsTypes.CLEAR_GROUPS]: clearGroups,
 	[TicketsTypes.SET_SORTING]: setSorting,
+	[TicketsTypes.RESET_SORTING]: resetSorting,
 }));
 
 export interface ITicketsState {
@@ -154,6 +160,7 @@ export type UpdateTicketGroupAction = Action<'UPDATE_TICKET_GROUP'> & TeamspaceP
 export type UpdateTicketGroupSuccessAction = Action<'UPDATE_TICKET_GROUP_SUCCESS'> & { group: Group };
 export type ClearGroupsAction = Action<'CLEAR_GROUPS'>;
 export type SetSortingAction = Action<'SET_SORTING'> & TicketsSorting;
+export type ResetSortingAction = Action<'RESET_SORTING'>;
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -242,4 +249,5 @@ export interface ITicketsActionCreators {
 	) => UpdateTicketGroupSuccessAction;
 	clearGroups: () => ClearGroupsAction;
 	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
+	resetSorting: () => ResetSortingAction,
 }
