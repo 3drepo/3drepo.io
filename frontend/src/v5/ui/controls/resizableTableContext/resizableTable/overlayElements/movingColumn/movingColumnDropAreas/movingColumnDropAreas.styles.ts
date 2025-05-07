@@ -34,6 +34,7 @@ export const DropAreas = styled.div<{ $offset: number }>`
 	margin-left: ${({ $offset }) => $offset}px;
 	width: fit-content;
 	height: 100%;
+	display: flex;
 `;
 
 export const Area = styled.div<{ $width: number }>`
