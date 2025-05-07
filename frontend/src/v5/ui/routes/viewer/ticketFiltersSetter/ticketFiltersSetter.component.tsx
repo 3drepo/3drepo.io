@@ -16,11 +16,9 @@
  */
 
 import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { uniq } from 'lodash';
-import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ViewerParams } from '../../routes.constants';
 import { Transformers, useSearchParam } from '../../useSearchParam';
 import { CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { StatusValue } from '@/v5/store/tickets/tickets.types';
@@ -32,15 +30,7 @@ import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
-	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	
-	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
-
-	useEffect(() => {
-		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederation]);
-	}, [tickets, cardFilters, containerOrFederation]);
+	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const getTicketFiltersFromCodes = (values): CardFilter[] => [{
 		module: '',
@@ -54,7 +44,7 @@ export const TicketFiltersSetter = () => {
 	
 	const getNonCompletedTicketFiltersByStatus = (): CardFilter => {
 		const isCompletedValue = ({ type }: StatusValue) => [TicketStatusTypes.DONE, TicketStatusTypes.VOID].includes(type);
-		const getValuesByTemplate = ({ _id }) => selectStatusConfigByTemplateId(getState(), containerOrFederation, _id).values;
+		const getValuesByTemplate = ({ _id }) => selectStatusConfigByTemplateId(getState(), _id).values;
 
 		const completedValueNames = templates
 			.flatMap(getValuesByTemplate)

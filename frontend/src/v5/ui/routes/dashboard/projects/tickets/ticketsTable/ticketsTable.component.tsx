@@ -47,6 +47,7 @@ import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSel
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { Button } from '@controls/button';
+import { TicketFiltersSetter } from '@/v5/ui/routes/viewer/ticketFiltersSetter/ticketFiltersSetter.component';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -100,7 +101,6 @@ export const TicketsTable = () => {
 
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const tickets = TicketsCardHooksSelectors.selectFilteredTickets(containersAndFederations);
-	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
@@ -141,7 +141,6 @@ export const TicketsTable = () => {
 			if (ticketHasBeenFetched(modelId)) return;
 			const isFederation = isFed(modelId);
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFederation);
-			TicketsActionsDispatchers.fetchTemplates(teamspace, project, modelId, isFederation, true);
 			if (isFederation) {
 				FederationsActionsDispatchers.fetchFederationUsers(teamspace, project, modelId);
 				FederationsActionsDispatchers.fetchFederationJobs(teamspace, project, modelId);
@@ -169,7 +168,7 @@ export const TicketsTable = () => {
 	useEffect(() => {
 		if (!models.length) return;
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
-	}, [filters]);
+	}, [filters, containersAndFederations]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
@@ -179,11 +178,6 @@ export const TicketsTable = () => {
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 	}, [readOnly]);
-
-	useEffect(() => {
-		if (templates.length) return;
-		ProjectsActionsDispatchers.fetchTemplates(teamspace, project, true);
-	}, []);
 
 	useEffect(() => {
 		if (prevTemplate.current && ticketId) clearTicketId();
@@ -198,6 +192,7 @@ export const TicketsTable = () => {
 			containerOrFederation={containerOrFederation}
 			availableTemplateIds={[templateId]}
 		>
+			<TicketFiltersSetter />
 			<SearchContextComponent items={ticketsFilteredByTemplate} >
 				<FiltersContainer>
 					<FlexContainer>

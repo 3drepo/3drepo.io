@@ -45,7 +45,7 @@ export const TicketsContent = () => {
 
 	useEffect(() => {
 		if (isLoadingModels || templates.length) return;
-		ProjectsActionsDispatchers.fetchTemplates(teamspace, project);
+		ProjectsActionsDispatchers.fetchTemplates(teamspace, project, true);
 	}, [isLoadingModels]);
 
 	if (isLoadingModels || templatesArePending) return (<Loader />);
