@@ -18,17 +18,18 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List, ListContainer } from './ticketsList.styles';
+import { List, ListContainer, Loader } from './ticketsList.styles';
 import { TableVirtuoso } from 'react-virtuoso';
-import { Loader } from '@/v4/routes/components/loader/loader.component';
 
 export const TicketsList = () => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 
+	const shouldShowLoader = filteredTickets.length >= 10;
+
 
 	return (
-		<ListContainer>
-			<Loader />
+		<ListContainer >
+			{shouldShowLoader && <Loader />}
 			<TableVirtuoso
 				data={filteredTickets}
 				followOutput={() => true}
@@ -37,7 +38,7 @@ export const TicketsList = () => {
 				}}
 				overscan={1000}
 				increaseViewportBy={1000}
-				style={{ position: 'relative', top: '-100%' }}
+				style={{ position: 'relative', top: (shouldShowLoader ? '-100%' : 0) }}
 				itemContent={(index, ticket) => (
 					<TicketItem ticket={ticket} key={ticket._id} />
 	 		)}

@@ -20,18 +20,15 @@ import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
 import { TicketItemContainer } from './ticketItem/ticketItem.styles';
-import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { Loader as UnstyledLoader } from '@/v4/routes/components/loader/loader.component';
 
+export const Loader = styled(UnstyledLoader)`
+	height: 100%;
+`;
 
 export const ListContainer = styled.div`
 	flex-grow: 1;
-	margin-right: '-12px';
-
-	${Loader as any} {
-		top: '50%';
-		position: 'relative';
-		height: '100%';
-	}
+	margin-right: -12px;
 `;
 
 export const List = styled.table`
