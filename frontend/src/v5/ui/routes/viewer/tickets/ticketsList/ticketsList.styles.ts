@@ -20,13 +20,25 @@ import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
 import { TicketItemContainer } from './ticketItem/ticketItem.styles';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
 
-export const List = styled.div`
+
+export const ListContainer = styled.div`
+	flex-grow: 1;
+	margin-right: '-12px';
+
+	${Loader as any} {
+		top: '50%';
+		position: 'relative';
+		height: '100%';
+	}
+`;
+
+export const List = styled.table`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	overflow: hidden;
-	display: inline-block;
-	width: 100%;
+	width: 350px;
 	margin-bottom: 0;
 	${/* sc-selector */ TicketItemContainer}:not(:last-child) {
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};

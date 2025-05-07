@@ -130,7 +130,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 						data={comments}
 						initialTopMostItemIndex={commentsLength - 1}
 						followOutput={() => true}
-						overscan={800}
+						overscan={4000}
 						components={{
 							Table,
 							// @ts-ignore
@@ -138,6 +138,8 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 							TableRow,
 							FillerRow,
 						}}
+
+
 						itemContent={(index, comment: ITicketComment) => (
 							<>
 								<Comment

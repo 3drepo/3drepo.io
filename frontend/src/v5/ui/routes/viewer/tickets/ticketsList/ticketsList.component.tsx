@@ -18,22 +18,54 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List } from './ticketsList.styles';
+import { List, ListContainer } from './ticketsList.styles';
+import { TableVirtuoso } from 'react-virtuoso';
+import { Loader } from '@/v4/routes/components/loader/loader.component';
 
 export const TicketsList = () => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 
+
 	return (
-		<>
-			{filteredTickets.length ? (
-				<List>
-					{filteredTickets.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}
-				</List>
-			) : (
-				<EmptyListMessage>
-					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
-				</EmptyListMessage>
-			)}
-		</>
-	);
+		<ListContainer>
+			<Loader />
+			<TableVirtuoso
+				data={filteredTickets}
+				followOutput={() => true}
+				components={{
+					Table: List,
+				}}
+				overscan={1000}
+				increaseViewportBy={1000}
+				style={{ position: 'relative', top: '-100%' }}
+				itemContent={(index, ticket) => (
+					<TicketItem ticket={ticket} key={ticket._id} />
+	 		)}
+	 	/>
+		</ListContainer>);
+	// return (
+	// 	<TableVirtuoso
+	// 		data={filteredTickets}
+	// 		followOutput={() => true}
+	// 		overscan={100}
+	// 		itemContent={(index, ticket) => (
+	// 			<TicketItem ticket={ticket} key={ticket._id} />
+	// 		)}
+	// 	/>
+	// );
+
+
+	// return (
+	// 	<>
+	// 		{filteredTickets.length ? (
+	// 			<List>
+	// 				{filteredTickets.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}
+	// 			</List>
+	// 		) : (
+	// 			<EmptyListMessage>
+	// 				<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+	// 			</EmptyListMessage>
+	// 		)}
+	// 	</>
+	// );
 };
