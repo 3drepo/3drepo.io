@@ -420,4 +420,33 @@ export class ThreeJsViewer {
 		this.camera.position.set(this.lastStoredView.camPos.x, this.lastStoredView.camPos.y, this.lastStoredView.camPos.z);
 		this.camera.lookAt(this.controls.target);
 	}
+
+
+	takeScreenshot(){
+		try{
+			let mime = "image/jpeg";
+			let downloadMime = "image/octet-stream";
+
+			this.animate(); // Render right before taking the screenshot
+			let imgData = this.renderer.domElement.toDataURL(mime);
+			
+			imgData = imgData.replace(mime, downloadMime);
+
+			// Automatically download it.
+			let link = document.createElement('a');
+			if(typeof link.download === 'string'){
+				document.body.appendChild(link);
+				link.download = 'screenshot.jpg';
+				link.href = imgData;
+				link.click();
+				document.body.removeChild(link);
+			} else {
+				location.replace(uri);
+			}
+
+		} catch (e) {
+			console.log(e);
+			return;
+		}
+	}
 }
