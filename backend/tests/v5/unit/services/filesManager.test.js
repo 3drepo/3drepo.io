@@ -707,11 +707,12 @@ const testGetMD5FileHash = () => {
 		test('it should create the MD5 hash if it has not been chached', async () => {
 			FileRefs.getRefEntry.mockImplementation(() => mockRefEntry);
 			FSHandler.getFile.mockResolvedValueOnce(mockId);
+			const wordArray = CryptoJS.lib.WordArray.create(mockId);
+			const md5Hash = CryptoJS.MD5(wordArray).toString();
 
 			await expect(FilesManager.getMD5FileHash(teamspace, collection, filename))
-				.resolves.toEqual({ hash: CryptoJS.MD5(mockId).toString(), size: 100 });
+				.resolves.toEqual({ hash: md5Hash, size: 100 });
 
-			const md5Hash = CryptoJS.MD5(mockId).toString();
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(2);
 			expect(FSHandler.getFile).toHaveBeenCalledTimes(1);
 			expect(FSHandler.getFile).toHaveBeenCalledWith(mockRefEntry.link);
