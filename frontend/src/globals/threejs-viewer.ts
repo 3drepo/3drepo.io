@@ -41,6 +41,11 @@ export class ThreeJsViewer {
 
 	camera: THREE.Camera;
 
+	orthoCam: THREE.OrthographicCamera;
+	perspCam: THREE.PerspectiveCamera;
+
+	controls: OrbitControls;
+
 	scene: THREE.Scene;
 
 	material: THREE.ShaderMaterial;
@@ -55,7 +60,10 @@ export class ThreeJsViewer {
 		container.appendChild(this.renderer.domElement);
 
 		this.scene = new THREE.Scene();
-		this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight);
+		const aspect = container.clientWidth / container.clientHeight;
+		this.perspCam = new THREE.PerspectiveCamera(60, aspect);
+		this.orthoCam = new THREE.OrthographicCamera(); // Default values. Proper values will be calculated on first activation
+		this.camera = this.perspCam;
 
 		const geometry = new THREE.BoxGeometry( 1, 1, 1 );
 		const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
@@ -66,8 +74,8 @@ export class ThreeJsViewer {
 		this.camera.far = 500000;
 		this.camera.near = 0;
 
-		const controls = new OrbitControls( this.camera, this.renderer.domElement );
-
+		this.controls = new OrbitControls( this.camera, this.renderer.domElement );
+		
 		this.renderer.setAnimationLoop(this.animate.bind(this));
 
 		this.sceneBounds = new THREE.Box3();
@@ -291,6 +299,50 @@ export class ThreeJsViewer {
 		const s = new THREE.Vector3();
 		this.sceneBounds.getSize(s);
 		//this.camera.translateZ(-s.length() / Math.tan(60 / 2) * 2);
+	}
+
+
+	// Easy conversion from Perspective to Ortho and back courtesy of nickyvanurk
+	// https://gist.github.com/nickyvanurk/9ac33a6aff7dd7bd5cd5b8a20d4db0dc
+
+	frustumHeightAtDistance(camera: THREE.PerspectiveCamera, distance: number) {
+		const vFov = (camera.fov * Math.PI) / 180;
+		return Math.tan(vFov / 2) * distance * 2;
+	  }
+	  
+	  frustumWidthAtDistance(camera: THREE.PerspectiveCamera, distance: number) {
+		return this.frustumHeightAtDistance(camera, distance) * camera.aspect;
+	  }
+
+	switchToOrthographicCamera(){
+		console.log("Switching to ortho cam");
+
+		this.orthoCam.position.copy(this.perspCam.position);
+		const distance = this.perspCam.position.distanceTo(this.controls.target);
+		const halfWidth = this.frustumWidthAtDistance(this.perspCam, distance) / 2;
+		const halfHeight = this.frustumHeightAtDistance(this.perspCam, distance) / 2;
+		this.orthoCam.top = halfHeight;
+		this.orthoCam.bottom = -halfHeight;
+		this.orthoCam.left = -halfWidth;
+		this.orthoCam.right = halfWidth;
+		this.orthoCam.zoom = 1;
+		this.orthoCam.lookAt(this.controls.target);
+		this.orthoCam.updateProjectionMatrix();
+		this.camera = this.orthoCam;
+		this.controls.object = this.orthoCam;
+
+		this.camera = this.orthoCam;		
+		this.controls.object = this.camera;
+	}
+
+	switchToPerspectiveCamera(){
+		console.log("Switching to perspective cam");
+		const oldY = this.perspCam.position.y;
+		this.perspCam.position.copy(this.orthoCam.position);
+		this.perspCam.position.y = oldY / this.orthoCam.zoom;
+		this.perspCam.updateProjectionMatrix();
+		this.camera = this.perspCam;
+		this.controls.object = this.perspCam;
 	}
 
 	loadShaders() {
