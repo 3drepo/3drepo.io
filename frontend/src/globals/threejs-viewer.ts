@@ -20,6 +20,7 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 
 import StandardVertexShader from './standard_vertex.glsl';
 import StandardFragmentShader from './standard_fragment.glsl';
+import PickFragmentShader from './pick_fragment.glsl';
 
 class VertexAttribute {
 
@@ -30,6 +31,46 @@ class VertexAttribute {
 	constructor(name, size) {
 		this.name = name;
 		this.size = size;
+	}
+}
+
+class PickHandler {
+	constructor(domElement: HTMLElement) {
+		domElement.addEventListener('pointerdown', this.onPointerDown.bind(this));
+		domElement.addEventListener('pointermove', this.onPointerMove.bind(this));
+	}
+
+	getPosition(ev: PointerEvent) {
+		const r = ev.currentTarget.getBoundingClientRect();
+		return {
+			x: ev.clientX - r.left,
+			y: r.bottom - ev.clientY, // The coordinate system of GL is 0,0 bottom-left, whereas the DOM is top-left.
+		  };
+	}
+
+	onPointerDown(ev: PointerEvent) {
+		this.position = this.getPosition(ev);
+		this.clicked = true;
+	}
+
+	onPointerMove(ev: PointerEvent) {
+		this.position = this.getPosition(ev);
+		//console.log(this.position);
+	}
+}
+
+class PickManager {
+	counter: number;
+
+	uniqueIds: string[];
+
+	sharedIds: string[];
+
+	constructor() {
+		this.counter = 1;
+		this.uniqueIds = [];
+		this.sharedIds = [];
+		this.colorMaps = {};
 	}
 }
 
@@ -47,7 +88,23 @@ export class ThreeJsViewer {
 
 	material_textured: THREE.ShaderMaterial;
 
+	material_pick: THREE.ShaderMaterial;
+
 	renderer = THREE.WebGLRenderer;
+
+	utilsScene: THREE.Scene;
+
+	pickBuffer : THREE.WebGLRenderTarget;
+
+	width: number;
+
+	height: number;
+
+	pickCpuBuffer: Uint32Array;
+
+	pickHandler: PickHandler;
+
+	pickManager: PickManager;
 
 	constructor(container: HTMLElement) {
 		this.renderer = new THREE.WebGLRenderer();
@@ -55,7 +112,13 @@ export class ThreeJsViewer {
 		container.appendChild(this.renderer.domElement);
 
 		this.scene = new THREE.Scene();
+		this.utilsScene = new THREE.Scene();
 		this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight);
+
+		this.width = container.clientWidth;
+		this.height = container.clientHeight;
+
+		this.pickCpuBuffer = new Uint32Array(1);
 
 		const geometry = new THREE.BoxGeometry( 1, 1, 1 );
 		const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
@@ -66,7 +129,8 @@ export class ThreeJsViewer {
 		this.camera.far = 500000;
 		this.camera.near = 0;
 
-		const controls = new OrbitControls( this.camera, this.renderer.domElement );
+		new OrbitControls( this.camera, this.renderer.domElement );
+		this.pickHandler = new PickHandler(this.renderer.domElement);
 
 		this.renderer.setAnimationLoop(this.animate.bind(this));
 
@@ -84,10 +148,32 @@ export class ThreeJsViewer {
 		];
 
 		this.loadShaders();
+
+		this.pickManager = new PickManager();
+
+		this.pickBuffer = new THREE.WebGLRenderTarget(container.clientWidth, container.clientHeight);
 	}
 
 	animate() {
 		this.updateNearFarPlanes();
+
+		this.renderer.setClearAlpha(0);
+
+		this.renderer.setRenderTarget(this.pickBuffer);
+		this.renderer.render(this.utilsScene, this.camera);
+
+		this.readUtilityBuffers(this.pickHandler.position);
+
+		if (this.pickHandler.clicked) {
+			this.pickHandler.clicked = false;
+			const lid = this.pickCpuBuffer[0];
+			if (lid > 0) {
+				const uuid = this.pickManager.uniqueIds[lid];
+				this.highlightMesh(uuid);
+			}
+		}
+
+		this.renderer.setRenderTarget(null);
 		this.renderer.render(this.scene, this.camera);
 	}
 
@@ -151,18 +237,35 @@ export class ThreeJsViewer {
 		const width = metadata.mapping.length;
 		const height = 1;
 
-		const data = new Uint8Array(width * 4);
+		const colorMapData = new Uint8Array(width * 4);
 		for (var i = 0; i < metadata.mapping.length; i++) {
 			const m = metadata.mapping[i];
 			const material = metadata.materials[m.material];
-			data[(i * 4) + 0] = material.albedoColor.r * 255;
-			data[(i * 4) + 1] = material.albedoColor.g * 255;
-			data[(i * 4) + 2] = material.albedoColor.b * 255;
-			data[(i * 4) + 3] = material.albedoColor.a * 255;
+			colorMapData[(i * 4) + 0] = material.albedoColor.r * 255;
+			colorMapData[(i * 4) + 1] = material.albedoColor.g * 255;
+			colorMapData[(i * 4) + 2] = material.albedoColor.b * 255;
+			colorMapData[(i * 4) + 3] = material.albedoColor.a * 255;
 		}
 
-		const texture = new THREE.DataTexture(data, width, height, THREE.RGBAFormat);
-		texture.needsUpdate = true;
+		const colorMapTexture = new THREE.DataTexture(colorMapData, width, height, THREE.RGBAFormat);
+		colorMapTexture.needsUpdate = true;
+
+		const pickMapData = new Uint32Array(width);
+		for (var i = 0; i < metadata.mapping.length; i++) {
+			const m = metadata.mapping[i];
+			const lid = this.pickManager.counter;
+			pickMapData[i] = lid;
+			this.pickManager.uniqueIds[lid] = m.name;
+			this.pickManager.sharedIds[lid] = m.sharedID;
+			this.pickManager.colorMaps[m.name] = {
+				map: colorMapTexture,
+				index: i,
+			};
+			this.pickManager.counter++;
+		}
+
+		const pickMapTexture = new THREE.DataTexture(new Uint8Array(pickMapData.buffer), width, height, THREE.RGBAFormat);
+		pickMapTexture.needsUpdate = true;
 
 		var material = this.material.clone();
 
@@ -185,7 +288,13 @@ export class ThreeJsViewer {
 		}
 
 		material.uniforms = {
-			'color_map': { value: texture },
+			'color_map': { value: colorMapTexture },
+			'maps_width': { value: width },
+		};
+
+		var pickMaterial = this.material_pick.clone();
+		pickMaterial.uniforms = {
+			'pick_map': { value: pickMapTexture },
 			'maps_width': { value: width },
 		};
 
@@ -231,9 +340,8 @@ export class ThreeJsViewer {
 			this.sceneBounds.expandByPoint(m.bounds.min);
 			this.sceneBounds.expandByPoint(m.bounds.max);
 
-			const mesh = new THREE.Mesh( geometry, material );
-
-			this.scene.add(mesh);
+			this.scene.add(new THREE.Mesh( geometry, material ));
+			this.utilsScene.add(new THREE.Mesh( geometry, pickMaterial ));
 		}
 	}
 
@@ -287,10 +395,6 @@ export class ThreeJsViewer {
 
 		this.camera.position.set(this.sceneBounds.max.x, this.sceneBounds.max.y, this.sceneBounds.max.z);
 		this.camera.lookAt(v);
-
-		const s = new THREE.Vector3();
-		this.sceneBounds.getSize(s);
-		//this.camera.translateZ(-s.length() / Math.tan(60 / 2) * 2);
 	}
 
 	loadShaders() {
@@ -305,5 +409,24 @@ export class ThreeJsViewer {
 				USE_COLOR_TEX: true,
 			},
 		});
+		this.material_pick = new THREE.ShaderMaterial({
+			vertexShader: StandardVertexShader,
+			fragmentShader: PickFragmentShader,
+			blending: THREE.NoBlending,
+		});
+	}
+
+	readUtilityBuffers(position) {
+		if (position) {
+			this.renderer.readRenderTargetPixels(this.pickBuffer, position.x, position.y, 1, 1, new Uint8Array(this.pickCpuBuffer.buffer));
+		}
+	}
+
+	highlightMesh(uniqueId: string) {
+		const mapping = this.pickManager.colorMaps[uniqueId];
+		mapping.map.image.data[(mapping.index * 4) + 0] = 255;
+		mapping.map.image.data[(mapping.index * 4) + 1] = 0;
+		mapping.map.image.data[(mapping.index * 4) + 2] = 0;
+		mapping.map.needsUpdate = true;
 	}
 }
