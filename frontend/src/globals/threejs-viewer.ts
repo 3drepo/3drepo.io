@@ -33,6 +33,15 @@ class VertexAttribute {
 	}
 }
 
+type View = {
+	isPerspective: boolean;
+	
+	camPos: THREE.Vector3;
+	targetPos: THREE.Vector3;
+
+	orthoZoom: number;
+}
+
 export class ThreeJsViewer {
 
 	sceneBounds: THREE.Box3;
@@ -51,6 +60,8 @@ export class ThreeJsViewer {
 	material: THREE.ShaderMaterial;
 
 	material_textured: THREE.ShaderMaterial;
+
+	lastStoredView: View;
 
 	renderer = THREE.WebGLRenderer;
 
@@ -357,5 +368,56 @@ export class ThreeJsViewer {
 				USE_COLOR_TEX: true,
 			},
 		});
+	}
+
+	storeCurrentView() {
+
+		let isPerspective;	
+		let orthoZoom;	
+		if(this.camera.type === 'OrthographicCamera'){
+			isPerspective = false;
+			orthoZoom = this.orthoCam.zoom;			
+		}
+		else{
+			isPerspective = true;
+			orthoZoom = 1;
+		}		
+
+		const camPos = this.camera.position.clone();
+		const targetPos = this.controls.target.clone();
+
+		this.lastStoredView = {
+			isPerspective: isPerspective,
+			camPos: camPos,
+			targetPos: targetPos,
+			orthoZoom: orthoZoom
+		};
+
+		console.log("Stored View");
+		console.log(this.lastStoredView);
+	}
+
+	restoreLastStoredView() {
+		console.log(this.lastStoredView);
+
+		if(this.lastStoredView === undefined){
+			console.log("No view stored");
+			return;
+		}
+
+		const isCamPerspective = (this.camera.type === 'PerspectiveCamera');
+
+		if(this.lastStoredView.isPerspective != isCamPerspective){
+			if(this.lastStoredView.isPerspective)
+				this.switchToPerspectiveCamera();
+			else
+				this.switchToOrthographicCamera();
+				this.orthoCam.zoom = this.lastStoredView.orthoZoom;
+		}
+
+		this.controls.target.copy(this.lastStoredView.targetPos);
+		
+		this.camera.position.set(this.lastStoredView.camPos.x, this.lastStoredView.camPos.y, this.lastStoredView.camPos.z);
+		this.camera.lookAt(this.controls.target);
 	}
 }
