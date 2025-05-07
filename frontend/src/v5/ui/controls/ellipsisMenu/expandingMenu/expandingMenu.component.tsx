@@ -14,25 +14,20 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { MenuList } from '@mui/material';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
-import { ExpandIconContainer } from './expandingMenu.styles';
+import { ExpandIconContainer, MenuItem } from './expandingMenu.styles';
 import { PopoverHoveringContent } from '@controls/hoverPopover/popoverHoveringContent.component';
 
 export const ExpandingMenu = ({ children, title }) => (
 	<PopoverHoveringContent
 		anchor={() => (
-			<EllipsisMenuItem
-				title={
-					<>
-						{title}
-						<ExpandIconContainer>
-							<ChevronIcon />
-						</ExpandIconContainer>
-					</>
-				}
-			/>
+			<MenuItem>
+				{title}
+				<ExpandIconContainer>
+					<ChevronIcon />
+				</ExpandIconContainer>
+			</MenuItem>
 		)}
 	>
 		<MenuList>

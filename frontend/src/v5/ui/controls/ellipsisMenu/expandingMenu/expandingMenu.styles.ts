@@ -16,6 +16,7 @@
  */
 
 import styled from 'styled-components';
+import { MenuItem as MenuItemBase } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenuItem.styles';
 
 export const ExpandIconContainer = styled.div`
 	transform: rotate(-90deg);
@@ -23,3 +24,5 @@ export const ExpandIconContainer = styled.div`
 	margin-left: auto;
 	color: ${({ theme }) => theme.palette.base.main};
 `;
+
+export const MenuItem = styled(MenuItemBase)<any>``;
