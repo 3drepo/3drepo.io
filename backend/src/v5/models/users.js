@@ -165,4 +165,18 @@ User.ensureIndicesExist = async () => {
 	}
 };
 
+User.getUserInfoFromId = async (userId) => {
+	const query = { 'customData.userId': userId };
+	const projection = { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 };
+	const { user, customData } = await userQuery(query, projection);
+
+	const { firstName, lastName, billing } = customData;
+	const res = { user, firstName, lastName };
+	if (billing?.billingInfo?.company) {
+		res.company = billing.billingInfo.company;
+	}
+
+	return res;
+};
+
 module.exports = User;
