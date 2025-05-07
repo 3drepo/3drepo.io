@@ -15,14 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const Line = styled.div<{ $offset: number }>`
+const LINE_WIDTH = 2;
+export const DelimiterLine = styled.div<{ $offset: number, $style: 'dashed' | 'solid' | 'none' }>`
 	position: relative;
 	z-index: 10;
-	width: 0;
+	width: ${LINE_WIDTH}px;
 	height: 100%;
-	margin-left: ${({ $offset }) => $offset}px;
+	margin-left: ${({ $offset }) => $offset - (LINE_WIDTH / 2)}px;
 	pointer-events: all;
-	border: solid 1px ${({ theme }) => theme.palette.primary.main};
+
+	${({ $style, theme }) => {
+		if ($style === 'dashed') return css`
+			background-repeat: repeat-y;
+			background-image: linear-gradient(${theme.palette.primary.main} 50%, transparent 50%);
+			background-size: 2px 7px;
+		`;
+		if ($style === 'solid') return css`
+			background-color: ${theme.palette.primary.main};
+		`;
+	}}
 `;

@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 import { Backdrop } from '@mui/material';
-import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.component';
+import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.styles';
 
 export const TableCorner = styled.div`
 	position: absolute;

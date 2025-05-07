@@ -99,7 +99,7 @@ export const MovingColumnDropAreas = () => {
 					))}
 				</DropAreas>
 			</Container>
-			{isDropIndexValid && <DropLine offset={offset} />}
+			{isDropIndexValid && <DropLine $offset={offset} $style="solid" />}
 		</>
 	);
 };

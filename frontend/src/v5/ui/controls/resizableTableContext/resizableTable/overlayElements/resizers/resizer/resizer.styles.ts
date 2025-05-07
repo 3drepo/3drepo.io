@@ -16,7 +16,6 @@
  */
 
 import styled from 'styled-components';
-import { DelimiterLine } from '../../../../delimiterLine/delimiterLine.component';
 
 // This is not to interfere with other components and to keep the cursor as
 // "col-resize" while resizing even when moving the mouse outside the table
@@ -30,15 +29,10 @@ export const overlayStyles = `
 	top: 0;
 `;
 
-export const ResizerLine = styled(DelimiterLine)<{ $highlight: boolean, $isResizing?: boolean }>`
-	border-color: ${({ $highlight, theme }) => $highlight ? theme.palette.primary.main : 'transparent'};
-	border-style: ${({ $isResizing }) => $isResizing ? 'solid' : 'dashed'};
-`;
-
 export const ResizerElement = styled.div`
 	height: 100%;
 	position: relative;
 	cursor: col-resize;
 	width: 7px;
-	left: -3px;
+	left: -3.5px;
 `;
