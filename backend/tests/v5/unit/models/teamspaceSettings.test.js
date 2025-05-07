@@ -826,7 +826,7 @@ const testGetMemberInfoFromId = () => {
 			const expectedData = { user: 'A', firstName: 'a', lastName: 'b', company: 'companyA' };
 			const ts = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(mockData);
-			const res = await Users.getMemberInfoFromId(ts);
+			const res = await Users.getUserInfoFromId(ts);
 			expect(res).toEqual(expectedData);
 
 			expect(fn.mock.calls.length).toBe(1);
@@ -837,7 +837,7 @@ const testGetMemberInfoFromId = () => {
 			const expectedData = { user: 'A', firstName: 'a', lastName: 'b' };
 			const ts = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(mockData);
-			const res = await Users.getMemberInfoFromId(ts);
+			const res = await Users.getUserInfoFromId(ts);
 			expect(res).toEqual(expectedData);
 
 			expect(fn.mock.calls.length).toBe(1);

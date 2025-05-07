@@ -39,18 +39,13 @@ Accounts.createAccount = (name) => {
 	return Promise.resolve(accountId);
 };
 
-Accounts.getAllUsersInAccount = (accountId) => {
-	if (usersInAccount[accountId]) {
-		return Promise.resolve(usersInAccount[accountId].map((id) => ({ id, email: id })));
-	}
-	return Promise.resolve([]);
-};
+Accounts.getAllUsersInAccount = (accountId) => Promise.resolve(usersInAccount[accountId] ?? []);
 
 Accounts.addUserToAccount = (accountId, email) => {
 	const id = emailToUser[email] ?? generateUUIDString();
 	emailToUser[email] = id;
 	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
-	usersInAccount[accountId].push(id);
+	usersInAccount[accountId].push({ id, email });
 	return id;
 };
 
@@ -58,7 +53,7 @@ Accounts.getUserStatusInAccount = () => Promise.resolve(membershipStatus.ACTIVE)
 
 Accounts.removeUserFromAccount = (accountId, userId) => {
 	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
-	usersInAccount[accountId] = usersInAccount[accountId].filter((u) => u !== userId);
+	usersInAccount[accountId] = usersInAccount[accountId].filter((u) => u.id !== userId);
 };
 
 Accounts.removeAccount = (accountId) => {

@@ -28,24 +28,25 @@ const {
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
-const { deleteFavourites, getAccessibleTeamspaces, getMemberInfoFromId, getUserByUsername, getUserId, updateUserId } = require('../../models/users');
+const { deleteFavourites, getAccessibleTeamspaces, getUserByUsername, getUserId, getUserInfoFromId, updateUserId } = require('../../models/users');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { COL_NAME } = require('../../models/projectSettings.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
+const { createNewUserRecord } = require('../users');
+const { getUserById } = require('../../services/sso/frontegg');
 const { isTeamspaceAdmin } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
 const { removeUserFromAllModels } = require('../../models/modelSettings');
 const { removeUserFromAllProjects } = require('../../models/projectSettings');
+const { templates } = require('../../utils/responseCodes');
 
 const Teamspaces = {};
 
 const removeAllUsersFromTS = async (teamspace) => {
-	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
-	const frontEggUsers = await getAllUsersInAccount(tenantId);
-	const membersList = await Promise.all(frontEggUsers.map((user) => getMemberInfoFromId(user.id)));
+	const membersList = await Teamspaces.getAllMembersInTeamspace(teamspace);
 	await Promise.all(
 		membersList.map(async ({ user }) => {
 			await Promise.all([
@@ -100,12 +101,31 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
 };
 
-Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
+Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
 	const frontEggUsers = await getAllUsersInAccount(tenantId);
-	const membersList = await Promise.all(frontEggUsers.map((user) => getMemberInfoFromId(user.id)));
-	const jobsList = await getJobsToUsers(teamspace);
+	const membersList = await Promise.all(frontEggUsers.map(async (user) => {
+		try {
+			return getUserInfoFromId(user.id);
+		} catch (error) {
+			if (error.code !== templates.userNotFound.code) {
+				throw error;
+			}
+			logger.logDebug(`User not found: ${user.id}, creating user based on info from IDP...`);
 
+			const userData = await getUserById(user.id);
+			const userId = await createNewUserRecord(userData);
+
+			return getUserInfoFromId(userId);
+		}
+	}));
+
+	return membersList;
+};
+
+Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
+	const membersList = await Teamspaces.getAllMembersInTeamspace(teamspace);
+	const jobsList = await getJobsToUsers(teamspace);
 	const usersToJob = {};
 	jobsList.forEach(({ _id, users }) => {
 		users.forEach((user) => {

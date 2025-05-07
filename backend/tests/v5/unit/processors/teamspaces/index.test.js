@@ -27,6 +27,9 @@ const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 
 const Teamspaces = require(`${src}/processors/teamspaces`);
 
+jest.mock('../../../../../src/v5/processors/users');
+const Users = require(`${src}/processors/users`);
+
 jest.mock('../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
 
@@ -90,8 +93,10 @@ const testGetTeamspaceMembersInfo = () => {
 		const tsWithUsers = 'withUsers';
 		const tsWithoutUsers = 'withoutUsers';
 		const tsWithoutJobs = 'noJobs';
+		const tsWithExtraUser = 'extraUser';
 		const tsTenantId = generateRandomString();
 		const tsTenantWithoutUsers = generateRandomString();
+		const tsTennatnWithExtraUser = generateRandomString();
 		const goldenData = [
 			{ user: 'abc', firstName: 'ab', lastName: 'c', company: 'yy', job: 'jobA', userId: generateRandomString() },
 			{ user: 'abcd', firstName: 'ab', lastName: 'cd', job: 'jobB', userId: generateRandomString() },
@@ -102,45 +107,107 @@ const testGetTeamspaceMembersInfo = () => {
 			{ _id: 'jobA', users: ['abc'] },
 			{ _id: 'jobB', users: ['abcd', 'abcd2'] },
 		];
+		const extraFrontEggUser = { email: generateRandomString(), id: generateRandomString() };
 		const frontEggData = goldenData.map((data) => ({ email: `${data.user}@email.com`, id: data.userId }));
 
-		TeamspacesModel.getTeamspaceSetting.mockImplementation((ts) => {
-			if (tsWithoutUsers === ts) return Promise.resolve({ refId: tsTenantWithoutUsers });
-			return Promise.resolve({ refId: tsTenantId });
-		});
-
-		FronteggService.getAllUsersInAccount.mockImplementation((tenantId) => {
-			if (tsTenantWithoutUsers === tenantId) return Promise.resolve([]);
-			return Promise.resolve(frontEggData);
-		});
-
-		UsersModel.getMemberInfoFromId.mockImplementation((ts) => {
-			const userInfo = { ...goldenData.find((element) => element.userId === ts) };
-
-			delete userInfo.job;
-			delete userInfo.userId;
-
-			return Promise.resolve(userInfo);
-		});
-
-		JobsModel.getJobsToUsers.mockImplementation((ts) => {
-			if (tsWithoutJobs === ts) return Promise.resolve([]);
-			return Promise.resolve(jobList);
-		});
-
 		test('should give the list of members within the given teamspace with their details', async () => {
+			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce({ refId: tsTennatnWithExtraUser });
+			FronteggService.getAllUsersInAccount.mockResolvedValueOnce(frontEggData);
+			UsersModel.getUserInfoFromId.mockImplementation((user) => {
+				const userInfo = { ...goldenData.find((element) => element.userId === user) };
+
+				delete userInfo.job;
+				delete userInfo.userId;
+
+				return Promise.resolve(userInfo);
+			});
+			JobsModel.getJobsToUsers.mockResolvedValueOnce(jobList);
+
 			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithUsers);
+
 			expect(res).toEqual(goldenData.map((data) => _.omit(data, 'userId')));
 		});
 
 		test('should return empty array if the teamspace had no memebrs', async () => {
+			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce({ refId: tsTenantWithoutUsers });
+			FronteggService.getAllUsersInAccount.mockResolvedValueOnce([]);
+			UsersModel.getUserInfoFromId.mockImplementation((user) => {
+				const userInfo = { ...goldenData.find((element) => element.userId === user) };
+
+				delete userInfo.job;
+				delete userInfo.userId;
+
+				return Promise.resolve(userInfo);
+			});
+			JobsModel.getJobsToUsers.mockResolvedValueOnce([]);
+
 			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithoutUsers);
+
 			expect(res).toEqual([]);
 		});
 
 		test('should return the list of members with details if the teamspace had no jobs', async () => {
+			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce({ refId: tsTenantId });
+			FronteggService.getAllUsersInAccount.mockResolvedValueOnce(frontEggData);
+			UsersModel.getUserInfoFromId.mockImplementation((user) => {
+				const userInfo = { ...goldenData.find((element) => element.userId === user) };
+
+				delete userInfo.job;
+				delete userInfo.userId;
+
+				return Promise.resolve(userInfo);
+			});
+			JobsModel.getJobsToUsers.mockResolvedValueOnce([]);
+
 			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithoutJobs);
+
 			expect(res).toEqual(goldenData.map((data) => _.omit(data, ['job', 'userId'])));
+		});
+
+		test('should create a user record if the user does not exist in Mongo', async () => {
+			const newGoldenData = goldenData;
+			let thrownError = false;
+			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce({ refId: tsTenantId });
+			FronteggService.getAllUsersInAccount.mockResolvedValueOnce([...frontEggData, extraFrontEggUser]);
+			UsersModel.getUserInfoFromId
+				.mockImplementation((user) => {
+					if (user === extraFrontEggUser.id && !thrownError) {
+						thrownError = true;
+						throw templates.userNotFound;
+					}
+
+					const userInfo = { ...newGoldenData.find((element) => element.userId === user) };
+
+					delete userInfo.job;
+					delete userInfo.userId;
+
+					return Promise.resolve(userInfo);
+				});
+			FronteggService.getUserById.mockResolvedValueOnce(true);
+			Users.createNewUserRecord.mockImplementationOnce(() => {
+				newGoldenData.push({
+					user: extraFrontEggUser.id,
+					firstName: 'ab',
+					lastName: 'cd3',
+					company: 'ccc',
+					userId: extraFrontEggUser.id,
+				});
+				return extraFrontEggUser.id;
+			});
+			JobsModel.getJobsToUsers.mockResolvedValueOnce(jobList);
+
+			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithExtraUser);
+
+			expect(res).toEqual(newGoldenData.map((data) => _.omit(data, 'userId')));
+		});
+
+		test('should throw error', async () => {
+			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce({ refId: tsTenantId });
+			FronteggService.getAllUsersInAccount.mockResolvedValueOnce([...frontEggData, extraFrontEggUser]);
+			UsersModel.getUserInfoFromId
+				.mockImplementation(() => { throw templates.unknown; });
+
+			await expect(Teamspaces.getTeamspaceMembersInfo(tsWithExtraUser)).rejects.toEqual(templates.unknown);
 		});
 	});
 };
@@ -397,7 +464,7 @@ const testRemoveTeamspace = () => {
 			const frontEggUsers = _.times(2, { id: generateRandomString(), user: generateRandomString() });
 
 			FronteggService.getAllUsersInAccount.mockResolvedValueOnce(frontEggUsers.map((user) => ({ id: user.id })));
-			UsersModel.getMemberInfoFromId.mockImplementation(
+			UsersModel.getUserInfoFromId.mockImplementation(
 				(id) => ({ user: frontEggUsers.find((item) => item.id === id).user }));
 
 			const teamspace = generateRandomString();

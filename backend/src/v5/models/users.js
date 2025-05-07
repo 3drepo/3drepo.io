@@ -18,9 +18,7 @@
 const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
-const { createNewUserRecord } = require('../processors/users');
 const db = require('../handler/db');
-const { getUserById } = require('../services/sso/frontegg');
 const { logger } = require('../utils/logger');
 
 const User = {};
@@ -167,30 +165,18 @@ User.ensureIndicesExist = async () => {
 	}
 };
 
-User.getMemberInfoFromId = async (userId) => {
+User.getUserInfoFromId = async (userId) => {
 	const query = { 'customData.userId': userId };
 	const projection = { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 };
+	const { user, customData } = await userQuery(query, projection);
 
-	try {
-		const { user, customData } = await userQuery(query, projection);
-
-		const { firstName, lastName, billing } = customData;
-		const res = { user, firstName, lastName };
-		if (billing?.billingInfo?.company) {
-			res.company = billing.billingInfo.company;
-		}
-
-		return res;
-	} catch (error) {
-		if (error.code !== templates.userNotFound.code) {
-			throw error;
-		}
-
-		logger.logDebug(`User not found: ${userId}, creating user based on info from IDP...`);
-		const userData = await getUserById(userId);
-
-		return createNewUserRecord(userData);
+	const { firstName, lastName, billing } = customData;
+	const res = { user, firstName, lastName };
+	if (billing?.billingInfo?.company) {
+		res.company = billing.billingInfo.company;
 	}
+
+	return res;
 };
 
 module.exports = User;

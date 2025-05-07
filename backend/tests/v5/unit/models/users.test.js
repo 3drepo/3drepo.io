@@ -515,7 +515,7 @@ const testGetMemberInfoFromId = () => {
 			const userEntryMock = { user: 'user', customData: { firstName: generateRandomString(), lastName: generateRandomString(), billing: {} } };
 			const userId = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(userEntryMock);
-			const res = await User.getMemberInfoFromId(userId);
+			const res = await User.getUserInfoFromId(userId);
 			expect(res).toEqual(
 				{
 					user: userEntryMock.user,
@@ -540,7 +540,7 @@ const testGetMemberInfoFromId = () => {
 			};
 			const userId = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(userEntryMock);
-			const res = await User.getMemberInfoFromId(userId);
+			const res = await User.getUserInfoFromId(userId);
 			expect(res).toEqual(
 				{
 					user: userEntryMock.user,
@@ -556,25 +556,20 @@ const testGetMemberInfoFromId = () => {
 			const userId = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockRejectedValue(templates.unknown);
 
-			await expect(User.getMemberInfoFromId(userId)).rejects.toEqual(templates.unknown);
+			await expect(User.getUserInfoFromId(userId)).rejects.toEqual(templates.unknown);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': userId }, { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 }, undefined);
 		});
-		test('Should throw an error if it is anything but userNotFound code', async () => {
+		test('Should throw a userNotFound error if the user is not found', async () => {
 			const userData = generateUserCredentials();
 			const userId = generateRandomString();
 			const fn = jest.spyOn(db, 'findOne').mockRejectedValue(templates.userNotFound);
 			FronteggService.getUserById.mockResolvedValueOnce(userData);
 			UserProcessor.createNewUserRecord.mockResolvedValueOnce(userId);
-			const res = await User.getMemberInfoFromId(userId);
 
-			await expect(res).toEqual(userId);
+			await expect(User.getUserInfoFromId(userId)).rejects.toEqual(templates.userNotFound);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(USERS_DB_NAME, USERS_COL, { 'customData.userId': userId }, { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 }, undefined);
-			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
-			expect(FronteggService.getUserById).toHaveBeenCalledWith(userId);
-			expect(UserProcessor.createNewUserRecord).toHaveBeenCalledTimes(1);
-			expect(UserProcessor.createNewUserRecord).toHaveBeenCalledWith(userData);
 		});
 	});
 };

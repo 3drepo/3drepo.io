@@ -131,6 +131,7 @@ const testGetTeamspaceMembers = () => {
 				return data;
 			});
 
+			// when the default user for the teamspace is created the details are randomly generated
 			const resWithoutAdmin = res.body.members.filter(
 				(element) => element.job !== DEFAULT_OWNER_JOB && element.user !== teamspace,
 			);
@@ -138,7 +139,9 @@ const testGetTeamspaceMembers = () => {
 				(element) => element.job === DEFAULT_OWNER_JOB && element.user === teamspace,
 			);
 
+			// check that the rest of the data matches
 			ServiceHelper.outOfOrderArrayEqual(resWithoutAdmin, expectedData);
+			// ensure the default owner exists
 			expect(resAdminJob[0].job).toEqual(DEFAULT_OWNER_JOB);
 			expect(resAdminJob[0].user).toEqual(teamspace);
 		});
