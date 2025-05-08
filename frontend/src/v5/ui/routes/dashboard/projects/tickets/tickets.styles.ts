@@ -19,7 +19,6 @@ import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import styled, { css } from 'styled-components';
 import { Drawer } from '@mui/material';
 import { Link as LinkBase } from 'react-router-dom';
-import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
 
 export const Link = styled(LinkBase)<{ disabled?: boolean }>`
 	${({ disabled }) => disabled && css`
@@ -28,13 +27,13 @@ export const Link = styled(LinkBase)<{ disabled?: boolean }>`
 	`}
 `;
 
-export const FiltersContainer = styled.div`
+export const ControlsContainer = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: flex-end;
-	margin-bottom: 28px;
+	margin-bottom: 2px;
 `;
 
 export const FlexContainer = styled.div`
@@ -57,6 +56,13 @@ export const SelectorsContainer = styled(FlexContainer)`
 
 export const SearchInput = styled(SearchInputBase)`
 	width: 244px;
+`;
+
+export const NewFilterButton = styled(Button).attrs({
+	variant: 'outlined',
+	color: 'secondary',
+})`
+	margin-right: 0;
 `;
 
 export const NewTicketButton = styled(Button).attrs({
@@ -102,23 +108,4 @@ export const SlidePanelHeader = styled.div`
 	top: 0;
 	z-index: 5;
 	background: ${({ theme }) => theme.palette.primary.contrast};
-`;
-
-export const CompletedChip = styled(FilterChip).attrs(({ selected, theme }: any) => ({
-	color: theme.palette.success.main,
-	variant: selected ? 'filled' : 'outlined',
-}))<{ selected: boolean }>`
-	.MuiChip-root {
-		align-self: flex-end;
-		margin: 0 0 18px 15px;
-
-		&, &:hover {
-			color: ${({ theme }) => theme.palette.success.main};
-			border: 1px solid ${({ theme }) => theme.palette.success.main};
-			${({ selected, theme: { palette } }) => selected && css`
-				color: ${palette.primary.contrast};
-				background-color: ${palette.success.main};
-			`}
-		}
-	}
 `;

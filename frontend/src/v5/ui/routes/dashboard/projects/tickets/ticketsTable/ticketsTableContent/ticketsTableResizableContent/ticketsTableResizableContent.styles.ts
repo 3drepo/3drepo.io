@@ -19,7 +19,7 @@ import styled from 'styled-components';
 import { CollapsedItemContainer, ControlsContainer as GroupCollapseHeader, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
 export const ScrollableContainer = styled.div`
-	margin-bottom: -30px;
+	margin: 10px 0 -30px;
 	overflow: scroll;
 	position: relative;
 	height: calc(100vh - 287px);

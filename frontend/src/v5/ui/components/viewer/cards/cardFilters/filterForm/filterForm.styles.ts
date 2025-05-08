@@ -22,7 +22,6 @@ import styled from 'styled-components';
 
 export const CardFilterActionMenu = styled(ActionMenu)`
 	.MuiPaper-root {
-		left: 88px !important;
 		width: 365px;
 	}
 `;
@@ -33,6 +32,10 @@ export const Container = styled.div`
 	flex-direction: column;
 	gap: 10px;
 	max-width: 365px;
+
+	.MuiFormControl-root { /* for tabular view */
+		margin: 0;
+	}
 `;
 
 export const TitleContainer = styled(TextOverflow)`
