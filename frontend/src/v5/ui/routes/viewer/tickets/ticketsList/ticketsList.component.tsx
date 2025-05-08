@@ -28,41 +28,50 @@ export const TicketsList = () => {
 	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
 	const shouldShowLoader = filteredTickets.length >= 10;
 	const virtuosoRef = useRef<any>();
+	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
 	
 	useEffect(() => {
-		virtuosoRef.current.scrollToIndex({
+		virtuosoRef.current?.scrollToIndex?.({
 			behavior: 'instant',
 			block: 'nearest',
 			align: 'start',
-			index: selectedIndex,
+			index: selectedIndex === -1 ? 0 : selectedIndex,
 		});
-	}, [selectedIndex]);
+	}, [selectedIndex, filteredTickets, isFiltering]);
+
+	if (isFiltering) {
+		return (
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.tickets.searching" defaultMessage="Searching..." />
+			</EmptyListMessage>
+		);
+	}
+
+
+	if (!filteredTickets.length) {
+		return (
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+			</EmptyListMessage>
+		);
+	}
 
 	return (
-		<>
-			{filteredTickets.length ? (
-				<ListContainer >
-					{shouldShowLoader && <Loader />}
-					<TableVirtuoso
-						ref={virtuosoRef}
-						data={filteredTickets}
-						followOutput={() => true}
-						components={{
-							Table: List,
-						}}
-						overscan={1000}
-						increaseViewportBy={1000}
-						style={{ position: 'relative', top: (shouldShowLoader ? '-100%' : 0) }}
-						itemContent={(index, ticket) => (
-							<TicketItem ticket={ticket} key={ticket._id} />
-						)}
-					/>
-				</ListContainer>
-			) : (
-				<EmptyListMessage>
-					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
-				</EmptyListMessage>
-			)}
-		</>
+		<ListContainer >
+			{shouldShowLoader && <Loader />}
+			<TableVirtuoso
+				ref={virtuosoRef}
+				data={filteredTickets}
+				followOutput={() => true}
+				components={{
+					Table: List,
+				}}
+				increaseViewportBy={400}
+				style={{ position: 'relative', top: (shouldShowLoader ? '-100%' : 0) }}
+				itemContent={(index, ticket) => (
+					<TicketItem ticket={ticket} key={ticket._id} />
+				)}
+			/>
+		</ListContainer>
 	);
 };
