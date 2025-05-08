@@ -21,6 +21,9 @@ import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import StandardVertexShader from './standard_vertex.glsl';
 import StandardFragmentShader from './standard_fragment.glsl';
 import PickFragmentShader from './pick_fragment.glsl';
+import DepthFragmentShader from './depth_fragment.glsl';
+import { PostSubmitSuccessfulMessage } from '@controls/successMessage/successMessage.styles';
+
 
 class VertexAttribute {
 
@@ -34,7 +37,7 @@ class VertexAttribute {
 	}
 }
 
-class PickHandler {
+class PickOperator {
 	constructor(domElement: HTMLElement) {
 		domElement.addEventListener('pointerdown', this.onPointerDown.bind(this));
 		domElement.addEventListener('pointermove', this.onPointerMove.bind(this));
@@ -54,8 +57,7 @@ class PickHandler {
 	}
 
 	onPointerMove(ev: PointerEvent) {
-		this.position = this.getPosition(ev);
-		//console.log(this.position);
+		//this.position = this.getPosition(ev);
 	}
 }
 
@@ -71,6 +73,43 @@ class PickManager {
 		this.uniqueIds = [];
 		this.sharedIds = [];
 		this.colorMaps = {};
+	}
+}
+
+class Pin {
+	position: THREE.Vector3;
+
+	elem: HTMLElement;
+
+	constructor(elem: HTMLElement, position: THREE.Vector3) {
+		this.position = position;
+		this.elem = elem;
+	}
+}
+
+class PinManager {
+
+	container: HTMLElement;
+
+	pins: Pin[];
+
+	constructor(markup: HTMLElement) {
+		this.container = markup;
+		this.pins = [];
+	}
+
+	addElement() {
+		const elem = document.createElement('div');
+		elem.style.width = '10px';
+		elem.style.height = '10px';
+		elem.style.position = 'absolute';
+		elem.style.background = 'blue';
+		this.container.appendChild(elem);
+		return elem;
+	}
+
+	dropPin(position: THREE.Vector3) {
+		this.pins.push(new Pin(this.addElement(), position));
 	}
 }
 
@@ -92,9 +131,17 @@ export class ThreeJsViewer {
 
 	renderer = THREE.WebGLRenderer;
 
-	utilsScene: THREE.Scene;
+	pickScene: THREE.Scene;
 
 	pickBuffer : THREE.WebGLRenderTarget;
+
+	depthBuffer: THREE.WebGLRenderTarget;
+
+	depthScene: THREE.Scene;
+
+	material_depth: THREE.ShaderMaterial;
+
+	depthCpuBuffer: Float32Array;
 
 	width: number;
 
@@ -102,23 +149,43 @@ export class ThreeJsViewer {
 
 	pickCpuBuffer: Uint32Array;
 
-	pickHandler: PickHandler;
+	pickOperator: PickOperator;
 
 	pickManager: PickManager;
 
+	markupContainer: HTMLElement;
+
+	pinManager: PinManager;
+
+	cursor: HTMLElement;
+
 	constructor(container: HTMLElement) {
+
+		this.markupContainer = document.createElement('div');
+		container.appendChild(this.markupContainer);
+		this.markupContainer.style.width = '100%';
+		this.markupContainer.style.height = '100%';
+		this.markupContainer.style.position = 'absolute';
+		this.markupContainer.style.pointerEvents = 'none';
+
+		this.pinManager = new PinManager(this.markupContainer);
+
+		this.cursor = this.pinManager.addElement();
+
 		this.renderer = new THREE.WebGLRenderer();
 		this.renderer.setSize(container.clientWidth, container.clientHeight);
 		container.appendChild(this.renderer.domElement);
 
 		this.scene = new THREE.Scene();
-		this.utilsScene = new THREE.Scene();
+		this.pickScene = new THREE.Scene();
+		this.depthScene = new THREE.Scene();
 		this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight);
 
 		this.width = container.clientWidth;
 		this.height = container.clientHeight;
 
 		this.pickCpuBuffer = new Uint32Array(1);
+		this.depthCpuBuffer = new Float32Array(4);
 
 		const geometry = new THREE.BoxGeometry( 1, 1, 1 );
 		const material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
@@ -126,11 +193,9 @@ export class ThreeJsViewer {
 
 		this.scene.add( cube );
 		this.camera.position.z = 5;
-		this.camera.far = 500000;
-		this.camera.near = 0;
 
 		new OrbitControls( this.camera, this.renderer.domElement );
-		this.pickHandler = new PickHandler(this.renderer.domElement);
+		this.pickOperator = new PickOperator(this.renderer.domElement);
 
 		this.renderer.setAnimationLoop(this.animate.bind(this));
 
@@ -152,6 +217,11 @@ export class ThreeJsViewer {
 		this.pickManager = new PickManager();
 
 		this.pickBuffer = new THREE.WebGLRenderTarget(container.clientWidth, container.clientHeight);
+
+		this.depthBuffer = new THREE.WebGLRenderTarget(container.clientWidth, container.clientHeight, {
+			type: THREE.FloatType,
+			format: THREE.RGBAFormat,
+		});
 	}
 
 	animate() {
@@ -160,21 +230,34 @@ export class ThreeJsViewer {
 		this.renderer.setClearAlpha(0);
 
 		this.renderer.setRenderTarget(this.pickBuffer);
-		this.renderer.render(this.utilsScene, this.camera);
+		this.renderer.render(this.pickScene, this.camera);
 
-		this.readUtilityBuffers(this.pickHandler.position);
+		this.renderer.setRenderTarget(this.depthBuffer);
+		this.renderer.render(this.depthScene, this.camera);
 
-		if (this.pickHandler.clicked) {
-			this.pickHandler.clicked = false;
+		this.readUtilityBuffers(this.pickOperator.position);
+
+		if (this.pickOperator.clicked) {
+			this.pickOperator.clicked = false;
 			const lid = this.pickCpuBuffer[0];
 			if (lid > 0) {
 				const uuid = this.pickManager.uniqueIds[lid];
 				this.highlightMesh(uuid);
+
+				const pinPosition = this.screenToWorld(this.pickOperator.position, this.depthCpuBuffer[3]);
+				this.pinManager.dropPin(pinPosition);
 			}
 		}
 
 		this.renderer.setRenderTarget(null);
 		this.renderer.render(this.scene, this.camera);
+
+		for (var i = 0; i < this.pinManager.pins.length; i++) {
+			const pin = this.pinManager.pins[i];
+			const p = this.worldToCanvas(pin.position);
+			pin.elem.style.left = p.x + 'px';
+			pin.elem.style.top = p.y + 'px';
+		}
 	}
 
 	fetch(uri: string) {
@@ -237,6 +320,8 @@ export class ThreeJsViewer {
 		const width = metadata.mapping.length;
 		const height = 1;
 
+		var transparent = false;
+
 		const colorMapData = new Uint8Array(width * 4);
 		for (var i = 0; i < metadata.mapping.length; i++) {
 			const m = metadata.mapping[i];
@@ -245,6 +330,10 @@ export class ThreeJsViewer {
 			colorMapData[(i * 4) + 1] = material.albedoColor.g * 255;
 			colorMapData[(i * 4) + 2] = material.albedoColor.b * 255;
 			colorMapData[(i * 4) + 3] = material.albedoColor.a * 255;
+
+			if (material.albedoColor.a < 1) {
+				transparent = true;
+			}
 		}
 
 		const colorMapTexture = new THREE.DataTexture(colorMapData, width, height, THREE.RGBAFormat);
@@ -292,8 +381,19 @@ export class ThreeJsViewer {
 			'maps_width': { value: width },
 		};
 
+		if (transparent) {
+			material.transparent = true;
+			material.depthWrite = false;
+		}
+
 		var pickMaterial = this.material_pick.clone();
 		pickMaterial.uniforms = {
+			'pick_map': { value: pickMapTexture },
+			'maps_width': { value: width },
+		};
+
+		var depthMaterial = this.material_depth.clone();
+		depthMaterial.uniforms = {
 			'pick_map': { value: pickMapTexture },
 			'maps_width': { value: width },
 		};
@@ -341,7 +441,8 @@ export class ThreeJsViewer {
 			this.sceneBounds.expandByPoint(m.bounds.max);
 
 			this.scene.add(new THREE.Mesh( geometry, material ));
-			this.utilsScene.add(new THREE.Mesh( geometry, pickMaterial ));
+			this.pickScene.add(new THREE.Mesh( geometry, pickMaterial ));
+			this.depthScene.add(new THREE.Mesh( geometry, depthMaterial ));
 		}
 	}
 
@@ -401,10 +502,12 @@ export class ThreeJsViewer {
 		this.material = new THREE.ShaderMaterial({
 			vertexShader: StandardVertexShader,
 			fragmentShader: StandardFragmentShader,
+			side: THREE.DoubleSide,
 		});
 		this.material_textured = new THREE.ShaderMaterial({
 			vertexShader: StandardVertexShader,
 			fragmentShader: StandardFragmentShader,
+			side: THREE.DoubleSide,
 			defines: {
 				USE_COLOR_TEX: true,
 			},
@@ -413,12 +516,20 @@ export class ThreeJsViewer {
 			vertexShader: StandardVertexShader,
 			fragmentShader: PickFragmentShader,
 			blending: THREE.NoBlending,
+			side: THREE.DoubleSide,
+		});
+		this.material_depth = new THREE.ShaderMaterial({
+			vertexShader: StandardVertexShader,
+			fragmentShader: DepthFragmentShader,
+			blending: THREE.NoBlending,
+			side: THREE.DoubleSide,
 		});
 	}
 
 	readUtilityBuffers(position) {
 		if (position) {
 			this.renderer.readRenderTargetPixels(this.pickBuffer, position.x, position.y, 1, 1, new Uint8Array(this.pickCpuBuffer.buffer));
+			this.renderer.readRenderTargetPixels(this.depthBuffer, position.x, position.y, 1, 1, this.depthCpuBuffer);
 		}
 	}
 
@@ -428,5 +539,39 @@ export class ThreeJsViewer {
 		mapping.map.image.data[(mapping.index * 4) + 1] = 0;
 		mapping.map.image.data[(mapping.index * 4) + 2] = 0;
 		mapping.map.needsUpdate = true;
+	}
+
+	screenToWorld(position: THREE.Vector2Like, z: number): THREE.Vector3 {
+		// In order to go apply the inverse of the projection matrix, we need
+		// the four projected components the forward transformation would
+		// produce.
+		// x & y we get from screen space; for z and w, we apply the
+		// forward transformations to the known z-view component.
+
+		const A = this.camera.projectionMatrix.elements[10];
+		const B = this.camera.projectionMatrix.elements[14];
+		const zp = A * z + B;
+		const wp = -z;
+		const xp = (((position.x / this.width) * 2) - 1) * wp;
+		const yp = (((position.y / this.height) * 2) - 1) * wp;
+
+		const projected = new THREE.Vector4(xp, yp, zp, wp);
+		projected.applyMatrix4(this.camera.projectionMatrixInverse);
+		this.camera.localToWorld(projected);
+
+		// Todo; test if we get better precision with the ray-cast approach
+
+		return new THREE.Vector3(projected.x, projected.y, projected.z);
+	}
+
+	worldToCanvas(position: THREE.Vector3): THREE.Vector2 {
+		const projected = new THREE.Vector4(position.x, position.y, position.z, 1);
+		this.camera.worldToLocal(projected);
+		projected.applyMatrix4(this.camera.projectionMatrix);
+		projected.x /= projected.w;
+		projected.y /= projected.w;
+		projected.x = ((projected.x + 1) / 2) * this.width;
+		projected.y = ((projected.y + 1) / 2) * this.height;
+		return new THREE.Vector2(projected.x, this.height - projected.y);
 	}
 }
