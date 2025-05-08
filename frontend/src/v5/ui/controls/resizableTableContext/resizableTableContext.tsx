@@ -29,7 +29,7 @@ export interface ResizableTableType {
 	isHidden: (name: string) => boolean,
 	columnGap: number,
 	getRowWidth: () => number,
-	getOffset: (name: string) => number,
+	getColumnOffsetLeft: (name: string) => number,
 	getIndex: (name: string) => number,
 
 	// resizing
@@ -55,7 +55,7 @@ const defaultValue: ResizableTableType = {
 	isHidden: () => true,
 	columnGap: 0,
 	getRowWidth: () => 0,
-	getOffset: () => 0,
+	getColumnOffsetLeft: () => 0,
 	getIndex: () => -1,
 
 	// resizing
@@ -109,7 +109,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		setColumns([ ...columns ]);
 	};
 
-	const getOffset = (name: string) => {
+	const getColumnOffsetLeft = (name: string) => {
 		let offset = 0;
 		for (const col of getVisibleColumns()) {
 			if (col.name === name) {
@@ -163,7 +163,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			setWidth,
 			getMinWidth,
 			setResizerName,
-			getOffset,
+			getColumnOffsetLeft,
 			getIndex,
 			resizerName,
 			setIsResizing,

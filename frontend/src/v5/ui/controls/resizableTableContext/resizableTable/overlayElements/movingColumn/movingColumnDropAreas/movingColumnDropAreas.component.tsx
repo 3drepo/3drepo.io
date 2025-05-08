@@ -24,13 +24,13 @@ export const MovingColumnDropAreas = () => {
 	const {
 		setMovingColumn, movingColumn, moveColumn,
 		movingColumnDropIndex, setMovingColumnDropIndex,
-		columnGap, getIndex, getOffset, getRowWidth, getVisibleColumns,
+		columnGap, getIndex, getColumnOffsetLeft, getRowWidth, getVisibleColumns,
 	} = useContext(ResizableTableContext);
 	const [tableOffset, setTableOffset] = useState(0);
 	
 	const columns = getVisibleColumns();
 	const movingColumnIndex = getIndex(movingColumn);
-	const offset = getOffset(columns[movingColumnDropIndex]?.name) ?? getRowWidth();
+	const offset = getColumnOffsetLeft(columns[movingColumnDropIndex]?.name) ?? getRowWidth();
 	const isDropIndexValid = (
 		movingColumnDropIndex >= 0
 		&& movingColumnIndex !== movingColumnDropIndex
