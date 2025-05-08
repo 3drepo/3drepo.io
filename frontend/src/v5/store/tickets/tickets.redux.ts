@@ -46,6 +46,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	updateTicketGroup: ['teamspace', 'projectId', 'modelId', 'ticketId', 'group', 'isFederation'],
 	updateTicketGroupSuccess: ['group'],
 	clearGroups: [],
+	setAreInitialFiltersPending: ['isPending'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -53,6 +54,7 @@ export const INITIAL_STATE: ITicketsState = {
 	templatesByModelId: {},
 	groupsByGroupId: {},
 	riskCategories: [],
+	areInitialFiltersPending: true,
 };
 
 export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: FetchTicketsSuccessAction) => {
@@ -108,6 +110,11 @@ export const clearGroups = (state: ITicketsState) => {
 	state.groupsByGroupId = {};
 };
 
+export const setAreInitialFiltersPending = (state: ITicketsState, { isPending }: SetAreInitialFiltersPendingAction) => {
+	console.log('@@ REDUX set pending', isPending);
+	state.areInitialFiltersPending = isPending;
+};
+
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
@@ -117,6 +124,7 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKET_GROUPS_SUCCESS]: fetchTicketGroupsSuccess,
 	[TicketsTypes.UPDATE_TICKET_GROUP_SUCCESS]: updateTicketGroupSuccess,
 	[TicketsTypes.CLEAR_GROUPS]: clearGroups,
+	[TicketsTypes.SET_ARE_INITIAL_FILTERS_PENDING]: setAreInitialFiltersPending,
 }));
 
 export interface ITicketsState {
@@ -124,6 +132,7 @@ export interface ITicketsState {
 	templatesByModelId: Record<string, ITemplate[]>,
 	riskCategories: string[],
 	groupsByGroupId: Record<string, Group>,
+	areInitialFiltersPending: boolean,
 }
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[] };
@@ -144,6 +153,7 @@ export type FetchTicketGroupsSuccessAction = Action<'FETCH_TICKET_GROUPS_SUCCESS
 export type UpdateTicketGroupAction = Action<'UPDATE_TICKET_GROUP'> & TeamspaceProjectAndModel & { ticketId: string, group: Group, isFederation: boolean };
 export type UpdateTicketGroupSuccessAction = Action<'UPDATE_TICKET_GROUP_SUCCESS'> & { group: Group };
 export type ClearGroupsAction = Action<'CLEAR_GROUPS'>;
+export type SetAreInitialFiltersPendingAction = Action<'SET_ARE_INITIALL_FILTERS_PENDING'> & { isPending: boolean };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -231,4 +241,5 @@ export interface ITicketsActionCreators {
 		group: Group,
 	) => UpdateTicketGroupSuccessAction;
 	clearGroups: () => ClearGroupsAction;
+	setAreInitialFiltersPending: (isPending: boolean) => SetAreInitialFiltersPendingAction,
 }

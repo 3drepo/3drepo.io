@@ -141,3 +141,8 @@ export const selectStatusConfigByTemplateId = createSelector(
 	(state, ...args) => selectCurrentProjectTemplateById(state, args.at(-1)),
 	(ticketTemplate, projectTemplate) => ticketTemplate?.config?.status || projectTemplate?.config?.status || DEFAULT_STATUS_CONFIG,
 );
+
+export const selectAreInitialFiltersPending = createSelector(
+	selectTicketsDomain,
+	(state) => state.areInitialFiltersPending,
+);

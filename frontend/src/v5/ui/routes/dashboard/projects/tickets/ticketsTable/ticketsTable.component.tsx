@@ -101,7 +101,7 @@ export const TicketsTable = () => {
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const tickets = TicketsCardHooksSelectors.selectFilteredTickets(containersAndFederations);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	
+	const areFiltersPending = TicketsHooksSelectors.selectAreInitialFiltersPending();
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 	
 	const isFed = FederationsHooksSelectors.selectIsFederation();
@@ -165,9 +165,9 @@ export const TicketsTable = () => {
 	}, [!models.length, containersAndFederations]);
 
 	useEffect(() => {
-		if (!models.length) return;
+		if (!models.length || areFiltersPending) return;
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
-	}, [filters, containersAndFederations]);
+	}, [filters, containersAndFederations, areFiltersPending]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);

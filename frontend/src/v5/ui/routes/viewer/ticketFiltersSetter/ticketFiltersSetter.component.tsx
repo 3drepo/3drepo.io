@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { uniq } from 'lodash';
 import { useEffect } from 'react';
@@ -89,12 +89,16 @@ export const TicketFiltersSetter = () => {
 		return filters;
 	};
 
+	const upsertFilters = async (filters) => {
+		await Promise.all(filters.map(TicketsCardActionsDispatchers.upsertFilter));
+		TicketsActionsDispatchers.setAreInitialFiltersPending(false);
+	};
+
 	useEffect(() => {
 		if (templates.length) {
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
 			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : getNonCompletedTicketFilters();
-			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
-
+			upsertFilters(filters);
 			if (ticketCodes.length) {
 				ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 			}
