@@ -37,12 +37,11 @@ export const TicketFiltersSetter = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFed = modelIsFederation(containerOrFederation);
 	
-	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
-	}, [tickets, cardFilters]);
+	}, [cardFilters]);
 
 	const getTicketFiltersFromCodes = (values): CardFilter[] => [{
 		module: '',

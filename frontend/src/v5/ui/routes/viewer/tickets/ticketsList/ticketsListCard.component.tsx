@@ -46,7 +46,7 @@ export const TicketsListCard = () => {
 					</>
 				)}
 			/>
-			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
+			<CardContent onClick={TicketsCardActionsDispatchers.resetState} style={{ display:'flex', flexDirection:'column' }}>
 				<CardFilters />
 				{tickets.length ? (
 					<TicketsList />
