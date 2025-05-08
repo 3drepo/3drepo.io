@@ -17,13 +17,14 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass';
 
 import StandardVertexShader from './standard_vertex.glsl';
 import StandardFragmentShader from './standard_fragment.glsl';
 import PickFragmentShader from './pick_fragment.glsl';
 import DepthFragmentShader from './depth_fragment.glsl';
-import { PostSubmitSuccessfulMessage } from '@controls/successMessage/successMessage.styles';
-
+import PostProcessingFragmentShader from './postprocessing_fragment.glsl';
+import PostProcessingVertexShader from './postprocessing_vertex.glsl';
 
 class VertexAttribute {
 
@@ -141,6 +142,8 @@ export class ThreeJsViewer {
 
 	material_depth: THREE.ShaderMaterial;
 
+	material_postprocessing: THREE.ShaderMaterial;
+
 	depthCpuBuffer: Float32Array;
 
 	width: number;
@@ -158,6 +161,10 @@ export class ThreeJsViewer {
 	pinManager: PinManager;
 
 	cursor: HTMLElement;
+
+	postprocessing_quad: FullScreenQuad;
+
+	materialInstances: THREE.ShaderMaterial[];
 
 	constructor(container: HTMLElement) {
 
@@ -222,6 +229,14 @@ export class ThreeJsViewer {
 			type: THREE.FloatType,
 			format: THREE.RGBAFormat,
 		});
+
+		this.postprocessing_quad = new FullScreenQuad(this.material_postprocessing);
+		this.material_postprocessing.uniforms = {
+			depthNormals: { value: this.depthBuffer.texture },
+			pick: { value: this.pickBuffer.texture },
+		};
+
+		this.materialInstances = [];
 	}
 
 	animate() {
@@ -258,6 +273,9 @@ export class ThreeJsViewer {
 			pin.elem.style.left = p.x + 'px';
 			pin.elem.style.top = p.y + 'px';
 		}
+
+		// Uncomment to demonstrate post processing
+		//this.postprocessing_quad.render(this.renderer);
 	}
 
 	fetch(uri: string) {
@@ -379,6 +397,7 @@ export class ThreeJsViewer {
 		material.uniforms = {
 			'color_map': { value: colorMapTexture },
 			'maps_width': { value: width },
+			'plane': { value: new THREE.Vector4(1, 0, 0, 0) },
 		};
 
 		if (transparent) {
@@ -397,6 +416,8 @@ export class ThreeJsViewer {
 			'pick_map': { value: pickMapTexture },
 			'maps_width': { value: width },
 		};
+
+		this.materialInstances.push(material);
 
 		for (var i = 0; i < header.meshes.length; i++) {
 			const m = header.meshes[i];
@@ -524,6 +545,11 @@ export class ThreeJsViewer {
 			blending: THREE.NoBlending,
 			side: THREE.DoubleSide,
 		});
+		this.material_postprocessing = new THREE.ShaderMaterial({
+			vertexShader: PostProcessingVertexShader,
+			fragmentShader: PostProcessingFragmentShader,
+			blending: THREE.NoBlending,
+		});
 	}
 
 	readUtilityBuffers(position) {
@@ -573,5 +599,12 @@ export class ThreeJsViewer {
 		projected.x = ((projected.x + 1) / 2) * this.width;
 		projected.y = ((projected.y + 1) / 2) * this.height;
 		return new THREE.Vector2(projected.x, this.height - projected.y);
+	}
+
+	updateClipPlane(x: number) {
+		for (var i = 0; i < this.materialInstances.length; i++) {
+			this.materialInstances[i].uniforms.plane.value = new THREE.Vector4(1, 0, 0, x);
+			this.materialInstances[i].uniformsNeedUpdate = true;
+		}
 	}
 }
