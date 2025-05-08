@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,31 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { MenuList } from '@mui/material';
+import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import { ExpandIconContainer, MenuItem } from './expandingMenu.styles';
+import { PopoverHoveringContent } from '@controls/hoverPopover/popoverHoveringContent.component';
 
-import { Popover } from '@mui/material';
-import styled from 'styled-components';
-
-export const PopoverContainer = styled(Popover).attrs({
-	disableRestoreFocus: true,
-	anchorOrigin: {
-		vertical: 'bottom',
-		horizontal: 'center',
-	},
-	transformOrigin: {
-		vertical: 'top',
-		horizontal: 'left',
-	},
-})`
-	pointer-events: none;
-`;
-
-export const PopoverHoveringContentContainer = styled(PopoverContainer).attrs({
-	anchorOrigin: {
-		vertical: 'top',
-		horizontal: 'right',
-	},
-})`
-	.MuiPopover-paper {
-		pointer-events: auto;
-	}
-`;
+export const ExpandingMenu = ({ children, title }) => (
+	<PopoverHoveringContent
+		anchor={() => (
+			<MenuItem>
+				{title}
+				<ExpandIconContainer>
+					<ChevronIcon />
+				</ExpandIconContainer>
+			</MenuItem>
+		)}
+	>
+		<MenuList>
+			{children}
+		</MenuList>
+	</PopoverHoveringContent>
+);

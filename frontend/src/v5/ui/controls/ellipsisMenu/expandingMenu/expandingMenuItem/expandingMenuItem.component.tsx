@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Popover } from '@mui/material';
-import styled from 'styled-components';
+import { ActionMenuItem } from '@controls/actionMenu';
+import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
+import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
+import { EllipsisMenuItemProps } from '@controls/ellipsisMenu/ellipsisMenuItem/ellipsisMenutItem.component';
 
-export const PopoverContainer = styled(Popover).attrs({
-	disableRestoreFocus: true,
-	anchorOrigin: {
-		vertical: 'bottom',
-		horizontal: 'center',
-	},
-	transformOrigin: {
-		vertical: 'top',
-		horizontal: 'left',
-	},
-})`
-	pointer-events: none;
-`;
-
-export const PopoverHoveringContentContainer = styled(PopoverContainer).attrs({
-	anchorOrigin: {
-		vertical: 'top',
-		horizontal: 'right',
-	},
-})`
-	.MuiPopover-paper {
-		pointer-events: auto;
-	}
-`;
+type ExpandingMenuItemProps = EllipsisMenuItemProps & { selected?: boolean };
+export const ExpandingMenuItem = ({ title, selected, ...props }: ExpandingMenuItemProps) => (
+	<ActionMenuItem>
+		<EllipsisMenuItem
+			{...props}
+			title={
+				<>
+					{title}
+					{selected && <TickIcon />}
+				</>
+			}
+		/>
+	</ActionMenuItem>
+);
