@@ -35,6 +35,7 @@ export const QuotedMessage = styled.div<{ variant?: 'primary' | 'secondary', sho
 	justify-content: space-between;
 	align-items: flex-start;
 	min-width: 199px;
+	gap: 10px;
 
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	color: ${({ theme }) => theme.palette.secondary.main};
