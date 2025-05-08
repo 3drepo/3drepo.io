@@ -17,6 +17,7 @@
 
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
 
 import StandardVertexShader from './standard_vertex.glsl';
 import StandardFragmentShader from './standard_fragment.glsl';
@@ -63,7 +64,15 @@ export class ThreeJsViewer {
 
 	lastStoredView: View;
 
+	raycaster: THREE.Raycaster;
+	clientDimensions: THREE.Vector2;
+	clientOffsets: THREE.Vector2;
+
+	pointerDownListener = this.onPointerDown.bind(this);
+
 	renderer = THREE.WebGLRenderer;
+
+	labelRenderer = CSS2DRenderer;
 
 	constructor(container: HTMLElement) {
 		this.renderer = new THREE.WebGLRenderer();
@@ -85,7 +94,27 @@ export class ThreeJsViewer {
 		this.camera.far = 500000;
 		this.camera.near = 0;
 
-		this.controls = new OrbitControls( this.camera, this.renderer.domElement );
+		
+		// Create Renderer for labels
+		this.labelRenderer = new CSS2DRenderer();
+		this.labelRenderer.setSize(container.clientWidth, container.clientHeight);
+		this.labelRenderer.domElement.style.position = 'absolute';
+		this.labelRenderer.domElement.style.top = '0px';
+		container.appendChild(this.labelRenderer.domElement);
+		
+		// Create circle style for the marker
+		// (probably not the right way to do this, but it works)
+		var style = document.createElement('style');
+		style.innerHTML = '.circle { height: 10px; width: 10px; background-color: cyan; border-radius: 50%;}';
+		document.getElementsByTagName('head')[0].appendChild(style);
+		
+		// Store some information we will later need for the raycasting
+		this.raycaster = new THREE.Raycaster();
+		this.clientDimensions = new THREE.Vector2(container.clientWidth, container.clientHeight);
+		var rect = container.getBoundingClientRect();
+		this.clientOffsets = new THREE.Vector2(rect.left, rect.top);	
+
+		this.controls = new OrbitControls( this.camera, this.labelRenderer.domElement );
 		
 		// Use this if you only want to render when the controls change the perspective
 		//this.controls.addEventListener('change', this.animate.bind(this));
@@ -115,6 +144,7 @@ export class ThreeJsViewer {
 	animate() {
 		this.updateNearFarPlanes();
 		this.renderer.render(this.scene, this.camera);
+		this.labelRenderer.render(this.scene, this.camera);
 	}
 
 	fetch(uri: string) {
@@ -454,6 +484,39 @@ export class ThreeJsViewer {
 		} catch (e) {
 			console.log(e);
 			return;
+		}
+	}
+
+	enableMeasuring(){
+
+		window.addEventListener('pointerdown', this.pointerDownListener);	
+	}
+
+	disableMeasuring(){
+		window.removeEventListener('pointerdown', this.pointerDownListener);	
+	}
+
+	onPointerDown(event){
+		
+		const pointer = new THREE.Vector2();
+		pointer.x = ((event.clientX - this.clientOffsets.x) / this.clientDimensions.x) * 2 - 1;
+		pointer.y = - ((event.clientY - this.clientOffsets.y) / this.clientDimensions.y) * 2 + 1;
+		
+		this.raycaster.setFromCamera(pointer, this.camera);
+		const intersects = this.raycaster.intersectObjects(this.scene.children, false);
+
+		// Create marker at clicked location
+		if(intersects.length > 0)
+		{
+			const markerPos = intersects[0].point.clone();
+	
+			const newMarkerDiv = document.createElement('div');
+			newMarkerDiv.className = 'circle';
+	
+			const marker = new CSS2DObject(newMarkerDiv);
+			marker.position.set(markerPos.x, markerPos.y, markerPos.z);
+			marker.center.set(0,1);
+			this.scene.add(marker);		
 		}
 	}
 }
