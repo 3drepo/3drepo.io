@@ -39,6 +39,15 @@ export const LEVELS = {
 	VERY_HIGH: 4
 };
 
+export const LEVELS_RENDER_VALUE = {
+	[LEVELS.UNSET]: 'Unset',
+	[LEVELS.VERY_LOW]: 'Very Low',
+	[LEVELS.LOW]: 'Low',
+	[LEVELS.MODERATE]: 'Moderate',
+	[LEVELS.HIGH]: 'High',
+	[LEVELS.VERY_HIGH]: 'Very High'
+};
+
 export const LEVELS_LIST = [
 	{ value: LEVELS.UNSET, name: 'Unset'},
 	{ value: LEVELS.VERY_LOW, name: 'Very Low' },
