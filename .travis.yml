@@ -23,7 +23,7 @@ matrix:
       before_install:
         - sudo apt-get -y install gnupg curl expect
         - curl -s https://packagecloud.io/install/repositories/cloudamqp/rabbitmq/script.deb.sh?any=true | sudo bash
-        - sudo apt-get -y install rabbitmq-server=4.0.8-1
+        - sudo apt-get -y --allow-downgrades install rabbitmq-server=4.0.8-1
         - sudo systemctl start rabbitmq-server
         - sudo apt remove mongodb && sudo apt purge mongodb && sudo apt autoremove && sudo rm -rf /var/lib/mongodb
         - curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor
