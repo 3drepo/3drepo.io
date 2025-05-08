@@ -34,23 +34,25 @@ export const ResizerElement = styled.div`
 	position: relative;
 	cursor: col-resize;
 	width: 7px;
-	left: -3px;
+	left: -3.5px;
 `;
 
-export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $highlight: boolean, $columnGap }>`
+const LINE_WIDTH = 2;
+export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $highlight: boolean }>`
 	position: relative;
 	z-index: 10;
-	width: 0;
+	width: ${LINE_WIDTH}px;
 	height: 100%;
-	margin-left: ${({ $offset, $columnGap }) => $offset - 1 + $columnGap / 2}px;
-	border: dashed 1px transparent;
+	margin-left: ${({ $offset }) => $offset - (LINE_WIDTH / 2)}px;
 	pointer-events: all;
 
 	${({ $highlight, theme }) => $highlight && css`
-		border-color: ${theme.palette.primary.main};
+		background-repeat: repeat-y;
+		background-image: linear-gradient(${theme.palette.primary.main} 50%, transparent 50%);
+		background-size: 2px 7px;
 	`}
 
-	${({ $isResizing }) => $isResizing && css`
-		border-style: solid;
+	${({ $isResizing, theme }) => $isResizing && css`
+		background-color: ${theme.palette.primary.main};
 	`}
 `;

@@ -35,7 +35,7 @@ export const AssigneesValuesDisplay = ({
 	maxItems = 3,
 	showEmptyText = false,
 	disabled,
-}) => {
+}: AssigneesValuesDisplayProps) => {
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
 	// since the overflowing assignee could just be displayed instead
