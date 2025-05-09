@@ -1151,14 +1151,14 @@ const testUpdateManyTickets = () => {
 				/* eslint-disable no-param-reassign */
 				await Promise.all([...tickets, ...ticketsCommentTest1, ...ticketsCommentTest2, depTemTicket].map(
 					async (ticketToAdd) => {
-						console.log('ticket route');
-						console.log(addTicketRoute(model._id));
-						console.log('ticket to add');
-						console.dir(ticketToAdd, { depth: 20 });
+						console.log('ticket route'); // eslint-disable-line
+						console.log(addTicketRoute(model._id));// eslint-disable-line
+						console.log('ticket to add'); // eslint-disable-line
+						console.dir(ticketToAdd, { depth: 20 }); // eslint-disable-line
 						const res = await agent.post(addTicketRoute(model._id)).send(ticketToAdd);
 
-						console.log('res');
-						console.log(res);
+						console.log('res');// eslint-disable-line
+						console.log(res);// eslint-disable-line
 
 						if (!res.body._id) {
 							throw new Error(`Could not add a new ticket: ${res.body.message}`);
