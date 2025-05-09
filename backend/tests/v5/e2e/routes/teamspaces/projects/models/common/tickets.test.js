@@ -1139,8 +1139,8 @@ const testUpdateManyTickets = () => {
 		});
 
 		beforeAll(async () => {
-			console.log('deprecatedTemplate'); // eslint-disable-line
-			console.dir(deprecatedTemplate, {depth: 20});// eslint-disable-line
+			// console.log('deprecatedTemplate'); // eslint-disable-line
+			// console.dir(deprecatedTemplate, {depth: 20});// eslint-disable-line
 			await setupBasicData(
 				users, teamspace, project, [con, fed], [template, deprecatedTemplate, duplicateTemplate],
 			);
@@ -1153,28 +1153,30 @@ const testUpdateManyTickets = () => {
 				/* eslint-disable no-param-reassign */
 				await Promise.all([...tickets, ...ticketsCommentTest1, ...ticketsCommentTest2, depTemTicket].map(
 					async (ticketToAdd) => {
-						console.log('ticket route'); // eslint-disable-line
-						console.log(addTicketRoute(model._id));// eslint-disable-line
-						console.log('ticket to add'); // eslint-disable-line
-						console.dir(ticketToAdd, { depth: 20 }); // eslint-disable-line
+						// console.log('ticket route'); // eslint-disable-line
+						// console.log(addTicketRoute(model._id));// eslint-disable-line
+						// console.log('ticket to add'); // eslint-disable-line
+						// console.dir(ticketToAdd, { depth: 20 }); // eslint-disable-line
 						const res = await agent.post(addTicketRoute(model._id)).send(ticketToAdd);
 
-						console.log('res');// eslint-disable-line
-						console.log(res);// eslint-disable-line
+						// console.log('res');// eslint-disable-line
+						// console.log(res);// eslint-disable-line
 
 						console.log('res body'); // eslint-disable-line
 						console.log(res.body); // eslint-disable-line
 
-						console.log('res body id?'); // eslint-disable-line
-						console.log(res.body._id); // eslint-disable-line
+						// console.log('res body id?'); // eslint-disable-line
+						// console.log(res.body._id); // eslint-disable-line
 
-						console.log('res body id?'); // eslint-disable-line
-						console.log(res.body._id??'oh no, no body id'); // eslint-disable-line
+						// console.log('res body id?'); // eslint-disable-line
+						// console.log(res.body._id??'oh no, no body id'); // eslint-disable-line
 
-						console.log('res body id?'); // eslint-disable-line
-						console.log(!res.body._id?'oh no, no body id but with the tests for error': 'body id confirmed '); // eslint-disable-line
+						// console.log('res body id?'); // eslint-disable-line
+						// console.log(!res.body._id?'oh no, no body id but with the tests for error': 'body id confirmed '); // eslint-disable-line
 
 						if (!res.body._id) {
+							console.log('res body after the tests passed to throw an error'); // eslint-disable-line
+							console.log(res.body); // eslint-disable-line
 							throw new Error(`Could not add a new ticket: ${res.body.message}`);
 						}
 						ticketToAdd._id = res.body._id;
