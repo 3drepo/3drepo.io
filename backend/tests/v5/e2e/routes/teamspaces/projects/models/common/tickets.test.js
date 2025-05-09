@@ -1151,7 +1151,15 @@ const testUpdateManyTickets = () => {
 				/* eslint-disable no-param-reassign */
 				await Promise.all([...tickets, ...ticketsCommentTest1, ...ticketsCommentTest2, depTemTicket].map(
 					async (ticketToAdd) => {
+						console.log('ticket route');
+						console.log(addTicketRoute(model._id));
+						console.log('ticket to add');
+						console.dir(ticketToAdd, { depth: 20 });
 						const res = await agent.post(addTicketRoute(model._id)).send(ticketToAdd);
+
+						console.log('res');
+						console.log(res);
+
 						if (!res.body._id) {
 							throw new Error(`Could not add a new ticket: ${res.body.message}`);
 						}
