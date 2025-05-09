@@ -1139,6 +1139,8 @@ const testUpdateManyTickets = () => {
 		});
 
 		beforeAll(async () => {
+			console.log('deprecatedTemplate'); // eslint-disable-line
+			console.log(addTicketRoute(deprecatedTemplate));// eslint-disable-line
 			await setupBasicData(
 				users, teamspace, project, [con, fed], [template, deprecatedTemplate, duplicateTemplate],
 			);
