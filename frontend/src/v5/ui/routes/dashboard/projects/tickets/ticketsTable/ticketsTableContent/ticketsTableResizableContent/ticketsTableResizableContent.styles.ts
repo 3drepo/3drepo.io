@@ -20,7 +20,7 @@ import { CollapsedItemContainer, ControlsContainer as GroupCollapseHeader, Conta
 
 export const ScrollableContainer = styled.div`
 	margin-bottom: -30px;
-	overflow: scroll;
+	overflow: auto;
 	position: relative;
 	height: calc(100vh - 287px);
 	width: 100vw;

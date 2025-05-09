@@ -19,6 +19,16 @@ import { useContext, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
 import { blockEvent } from '@/v5/helpers/events.helpers';
+import { useEdgeScrolling } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/useEdgeScrolling';
+	
+const getScrollParent = (node) => {
+	const isElement = node instanceof HTMLElement;
+	const overflowX = isElement && window.getComputedStyle(node).overflowY;
+	const isScrollable = overflowX !== 'visible' && overflowX !== 'hidden';
+	
+	if (isScrollable && node.scrollWidth >= node.clientWidth) return node;
+	return getScrollParent(node.parentNode);
+};
 
 export const MovingColumnDropAreas = () => {
 	const {
@@ -27,6 +37,7 @@ export const MovingColumnDropAreas = () => {
 		columnGap, getIndex, getColumnOffsetLeft, getRowWidth, getVisibleColumns,
 	} = useContext(ResizableTableContext);
 	const [tableOffset, setTableOffset] = useState(0);
+	const edgeScrolling = useEdgeScrolling();
 	
 	const columns = getVisibleColumns();
 	const movingColumnIndex = getIndex(movingColumn);
@@ -51,6 +62,14 @@ export const MovingColumnDropAreas = () => {
 	const onRender = (el) => {
 		if (!el) return;
 		setTableOffset(getTableOffset(el));
+		if (!edgeScrolling.isRunning()) {
+			const scrollParent = getScrollParent(el);
+			const scrollParentIsOverflowing = scrollParent.scrollWidth > scrollParent.clientWidth;
+			if (scrollParentIsOverflowing) {
+				edgeScrolling.listen(scrollParent);
+			}
+		}
+
 	};
 	
 	const getDropAreasWidths = () => {
@@ -85,13 +104,12 @@ export const MovingColumnDropAreas = () => {
 		setMovingColumn(null);
 		setMovingColumnDropIndex(-1);
 		moveColumn(movingColumn, movingColumnDropIndex);
+		edgeScrolling.stop();
 	};
 
 	return (
 		<>
 			<TableCorner ref={onRender} />
-			{/* The drag over is to fix a bug in firefox where dragging the column
-				gets stuck with a "no-drop" cursor and the column can't be dropped */}
 			<Container onMouseUp={dropColumn}>
 				<DropAreas $offset={tableOffset} onMouseLeave={onMouseLeaveDropArea}>
 					{getDropAreasWidths().map((width, index) => (
