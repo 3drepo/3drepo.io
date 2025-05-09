@@ -16,7 +16,7 @@
  */
 
 import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { uniq } from 'lodash';
 import { useEffect } from 'react';
 import { Transformers, useSearchParam } from '../../useSearchParam';
@@ -26,11 +26,16 @@ import { TicketStatusDefaultValues, TicketStatusTypes, TreatmentStatuses } from 
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { useParams } from 'react-router-dom';
+import { DashboardTicketsParams } from '../../routes.constants';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
-	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
+	const templatesFromStore = ProjectsHooksSelectors.selectCurrentProjectTemplates();
+	const { template: templateIdFromURL } = useParams<DashboardTicketsParams>();
+	const templatesFromURL = TicketsHooksSelectors.selectTemplatesByIds([templateIdFromURL]);
+	const templates = templatesFromURL.length ? templatesFromURL : templatesFromStore;
 
 	const getTicketFiltersFromCodes = (values): CardFilter[] => [{
 		module: '',
