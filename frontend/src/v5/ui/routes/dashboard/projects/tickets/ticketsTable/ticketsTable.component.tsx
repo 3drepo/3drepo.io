@@ -212,7 +212,7 @@ export const TicketsTable = () => {
 					</FlexContainer>
 					<FlexContainer>
 						<FilterSelection
-							templates={[selectedTemplate]}
+							templateIds={[templateId]}
 							TriggerButton={(props) => (
 								<NewFilterButton {...props}
 									startIcon={<FunnelIcon />}

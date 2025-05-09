@@ -144,7 +144,7 @@ export const selectFilteredTickets = createSelector(
 
 export const selectAvailableTemplatesFilters = createSelector(
 	selectFilters,
-	(state, templates) => templates,
+	selectTemplatesByIds,
 	(usedFilters, templates) => templatesToFilters(templates).filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
 );
 

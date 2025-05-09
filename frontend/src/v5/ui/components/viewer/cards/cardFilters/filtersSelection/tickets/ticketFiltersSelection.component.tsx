@@ -28,11 +28,11 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 
 type IFilterSelection = {
-	templates: ITemplate[],
+	templateIds: string[],
 	TriggerButton: (props) => ReactElement,
 };
 
-export const FilterSelection = ({ templates, TriggerButton }: IFilterSelection) => {
+export const FilterSelection = ({ templateIds, TriggerButton }: IFilterSelection) => {
 	const [selectedFilter, setSelectedFilter] = useState<CardFilter>(null);
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(templates);
 	const showFiltersList = !selectedFilter?.property;
