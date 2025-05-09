@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { ReactElement, useState } from 'react';
+import { ReactElement, useContext, useState } from 'react';
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
 import { SearchInput, TicketsFiltersModal, TicketsFiltersModalItem } from './ticketFiltersSelection.styles';
 import { CardFilter } from '../../cardFilters.types';
@@ -25,7 +25,7 @@ import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 
 type IFilterSelection = {
 	templateIds: string[],
@@ -33,8 +33,10 @@ type IFilterSelection = {
 };
 
 export const FilterSelection = ({ templateIds, TriggerButton }: IFilterSelection) => {
+	const { isViewer } = useContext(TicketContext);
 	const [selectedFilter, setSelectedFilter] = useState<CardFilter>(null);
-	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(templates);
+	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(templateIds)
+		.filter(({ type }) => type !== 'template' || isViewer);
 	const showFiltersList = !selectedFilter?.property;
 	const disabled = !unusedFilters.length;
 
