@@ -1162,6 +1162,18 @@ const testUpdateManyTickets = () => {
 						console.log('res');// eslint-disable-line
 						console.log(res);// eslint-disable-line
 
+						console.log('res body'); // eslint-disable-line
+						console.log(res.body); // eslint-disable-line
+
+						console.log('res body id?'); // eslint-disable-line
+						console.log(res.body._id); // eslint-disable-line
+
+						console.log('res body id?'); // eslint-disable-line
+						console.log(res.body._id??'oh no, no body id'); // eslint-disable-line
+
+						console.log('res body id?'); // eslint-disable-line
+						console.log(!res.body._id?'oh no, no body id but with the tests for error': 'body id confirmed '); // eslint-disable-line
+
 						if (!res.body._id) {
 							throw new Error(`Could not add a new ticket: ${res.body.message}`);
 						}
