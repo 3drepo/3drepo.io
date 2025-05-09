@@ -45,6 +45,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setTransformations: ['transformations'],
 	setEditingGroups: ['isEditing'],
 	setIsShowingPins: ['isShowing'],
+	setAreInitialFiltersPending: ['isPending'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
@@ -62,6 +63,7 @@ export interface ITicketsCardState {
 	transformations: any,
 	isEditingGroups: boolean,
 	isShowingPins: boolean,
+	areInitialFiltersPending: boolean,
 }
 
 export const INITIAL_STATE: ITicketsCardState = {
@@ -79,6 +81,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 	unsavedTicket: null,
 	isEditingGroups: false,
 	isShowingPins: true,
+	areInitialFiltersPending: true,
 };
 
 export const setSelectedTicket = (state: ITicketsCardState, { ticketId }: SetSelectedTicketAction) => {
@@ -150,6 +153,10 @@ export const setIsShowingPins = (state: ITicketsCardState, { isShowing }: SetIsS
 	state.isShowingPins = isShowing;
 };
 
+export const setAreInitialFiltersPending = (state: ITicketsCardState, { isPending }: SetAreInitialFiltersPendingAction) => {
+	state.areInitialFiltersPending = isPending;
+};
+
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TICKET]: setSelectedTicket,
 	[TicketsCardTypes.SET_SELECTED_TEMPLATE]: setSelectedTemplate,
@@ -166,6 +173,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_UNSAVED_TICKET]: setUnsavedTicket,
 	[TicketsCardTypes.SET_EDITING_GROUPS]: setEditingGroups,
 	[TicketsCardTypes.SET_IS_SHOWING_PINS]: setIsShowingPins,
+	[TicketsCardTypes.SET_ARE_INITIAL_FILTERS_PENDING]: setAreInitialFiltersPending,
 }));
 
 export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
@@ -186,8 +194,8 @@ export type ResetStateAction = Action<'RESET_STATE'>;
 export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: OverridesDicts | null };
 export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
 export type SetEditingGroupsAction = Action<'SET_EDITING_GROUPS'> & { isEditing: boolean } ;
-export type SetIsShowingPinsAction = Action<'SET_IS_SHOWING_PINS'> & { isShowing: boolean } ;
-
+export type SetIsShowingPinsAction = Action<'SET_IS_SHOWING_PINS'> & { isShowing: boolean };
+export type SetAreInitialFiltersPendingAction = Action<'SET_ARE_INITIAL_FILTERS_PENDING'> & { isPending: boolean };
 
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
@@ -218,4 +226,5 @@ export interface ITicketsCardActionCreators {
 	setUnsavedTicket: (ticket: EditableTicket) => SetUnsavedTicketAction,
 	setEditingGroups: (isEditing: boolean) => SetEditingGroupsAction,
 	setIsShowingPins: (isShowing: boolean) => SetIsShowingPinsAction,
+	setAreInitialFiltersPending: (isPending: boolean) => SetAreInitialFiltersPendingAction,
 }

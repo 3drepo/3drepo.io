@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers, TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { uniq } from 'lodash';
 import { useEffect } from 'react';
@@ -91,7 +91,7 @@ export const TicketFiltersSetter = () => {
 
 	const upsertFilters = async (filters) => {
 		await Promise.all(filters.map(TicketsCardActionsDispatchers.upsertFilter));
-		TicketsActionsDispatchers.setAreInitialFiltersPending(false);
+		TicketsCardActionsDispatchers.setAreInitialFiltersPending(false);
 	};
 
 	useEffect(() => {

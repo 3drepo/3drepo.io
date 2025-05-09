@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
@@ -27,7 +27,7 @@ import { CentredContainer } from '@controls/centredContainer';
 export const TicketsList = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets([containerOrFederation]);
-	const areFiltersPending = TicketsHooksSelectors.selectAreInitialFiltersPending();
+	const areFiltersPending = TicketsCardHooksSelectors.selectAreInitialFiltersPending();
 
 	if (areFiltersPending) return (<CentredContainer><Spinner /></CentredContainer>);
 	return (

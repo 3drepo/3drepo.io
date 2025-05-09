@@ -101,7 +101,7 @@ export const TicketsTable = () => {
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const tickets = TicketsCardHooksSelectors.selectFilteredTickets(containersAndFederations);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const areFiltersPending = TicketsHooksSelectors.selectAreInitialFiltersPending();
+	const areFiltersPending = TicketsCardHooksSelectors.selectAreInitialFiltersPending();
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 	
 	const isFed = FederationsHooksSelectors.selectIsFederation();
