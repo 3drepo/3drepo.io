@@ -126,7 +126,6 @@ type View = {
 	targetPos: THREE.Vector3;
 
 	orthoZoom: number;
-	orthoSize: number;
 };
 
 class LineMeasurement {
