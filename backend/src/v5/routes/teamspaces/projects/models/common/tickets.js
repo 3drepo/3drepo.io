@@ -54,10 +54,17 @@ const createTicket = (isFed) => async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	try {
 		const addTicket = isFed ? addFedTicket : addConTicket;
+		console.log('pre adding ticket'); // eslint-disable-line
 		const _id = await addTicket(teamspace, project, model, req.templateData, req.body);
+		console.log('post adding ticket'); // eslint-disable-line
+		console.log('the _id:'); // eslint-disable-line
+		console.log(_id); // eslint-disable-line
 
 		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
 	} catch (err) {
+		console.log('the error: '); // eslint-disable-line
+		console.log(error); // eslint-disable-line
+
 		// istanbul ignore next
 		respond(req, res, err);
 	}
