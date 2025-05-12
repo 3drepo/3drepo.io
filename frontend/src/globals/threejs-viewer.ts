@@ -126,6 +126,7 @@ type View = {
 	targetPos: THREE.Vector3;
 
 	orthoZoom: number;
+	orthoSize: number;
 };
 
 class LineMeasurement {
@@ -967,6 +968,81 @@ export class ThreeJsViewer {
 		this.camera.lookAt(this.controls.target);
 	}
 
+	// Demo method for loading a view created with the old viewer
+	restoreDemoViewCar() {
+		var position = new THREE.Vector3(-25194.008606305666,
+                6232.031199113353,
+                -742.4361472298187);
+
+		var lookAt = new THREE.Vector3(-48621.729309430666,
+                -45855.65239463665,
+                85679.82947777018);
+
+		const up = new THREE.Vector3(-0.13156041502952576,
+                0.8643866777420044,
+                0.4853117763996124);
+		
+		const offset = new THREE.Vector3(
+			-52593.076965680666,
+			-8317.375050886647,
+			74187.11072777018
+		);
+
+		position = position.sub(offset);
+		lookAt = lookAt.sub(offset);
+
+		this.controls.target.copy(lookAt);
+
+		this.camera.position.set(position.x, position.y, position.z);
+		this.camera.up.set(up.x, up.y, up.z);
+		this.camera.lookAt(lookAt);		
+	}
+
+	// Demo method for loading a view created with the old viewer (orthographic)
+	restoreDemoViewCarOrtho() {
+
+		this.switchToOrthographicCamera();
+
+		var position = new THREE.Vector3(
+			-28463.235168805666,
+			12996.480417863353,
+			-13611.826772229819);
+
+		var lookAt = new THREE.Vector3(
+			-22785.887512555666,
+			-36414.84770713665,
+			77256.65760277018);
+
+		const up = new THREE.Vector3(
+			0.029743509367108345,
+			0.8789079189300537,
+			0.47606319189071655);
+
+		
+		const offset = new THREE.Vector3(
+			-52593.076965680666,
+			-8317.375050886647,
+			74187.11072777018
+		);
+
+		const orthoSize = 3200.95751953125;
+
+		position = position.sub(offset);
+		lookAt = lookAt.sub(offset);
+
+		
+		this.camera.position.set(position.x, position.y, position.z);
+		this.camera.up.set(up.x, up.y, up.z);
+		this.controls.target.copy(lookAt);
+		this.camera.lookAt(lookAt);		
+
+		const aspect = this.orthoCam.right / this.orthoCam.top;
+
+		this.orthoCam.top = orthoSize;
+		this.orthoCam.bottom = -orthoSize;
+		this.orthoCam.left = -(aspect * orthoSize);
+		this.orthoCam.right = aspect * orthoSize
+	}
 
 	takeScreenshot() {
 		try {
