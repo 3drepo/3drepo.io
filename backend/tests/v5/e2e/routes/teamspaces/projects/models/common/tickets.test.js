@@ -1151,7 +1151,7 @@ const testUpdateManyTickets = () => {
 
 				const { tickets, ticketsCommentTest1, ticketsCommentTest2, depTemTicket } = model;
 				/* eslint-disable no-param-reassign */
-				await Promise.all([...tickets, ...ticketsCommentTest1, ...ticketsCommentTest2, depTemTicket].map(
+				await Promise.all([depTemTicket].map(
 					async (ticketToAdd) => {
 						// console.log('ticket route'); // eslint-disable-line
 						// console.log(addTicketRoute(model._id));// eslint-disable-line
