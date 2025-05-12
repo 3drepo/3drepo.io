@@ -18,6 +18,9 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { Line2 } from 'three/examples/jsm/lines/Line2.js'
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js'
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js'
 
 import StandardVertexShader from './standard_vertex.glsl';
 import StandardFragmentShader from './standard_fragment.glsl';
@@ -41,6 +44,66 @@ type View = {
 	targetPos: THREE.Vector3;
 
 	orthoZoom: number;
+}
+
+class LineMeasurement {
+
+	scene: THREE.Scene
+	lines: Line2[];
+	positions: number[];	
+
+	constructor (scene: THREE.Scene){	
+		this.lines = [];	
+		this.positions = [];
+		this.scene = scene;
+	}
+
+	addPoint(newPoint: THREE.Vector3){
+		this.positions.push(newPoint.x, newPoint.y, newPoint.z);
+
+		if(this.positions.length >= 6){
+
+			const lastTwoPos = this.positions.slice(-6, this.positions.length);
+
+			// Create new line segment
+			const lineMaterial = new LineMaterial({color: 'cyan', linewidth: 5});
+			lineMaterial.depthTest = false;
+			lineMaterial.depthWrite = false;
+	
+			const lineGeom = new LineGeometry();
+			lineGeom.setPositions(lastTwoPos);
+			
+			const line = new Line2( lineGeom, lineMaterial );
+			line.layers.disableAll();
+			line.layers.enable(1); // Layers purely used for organisation. Switching off the depth test still necessary to prevent geometry intersection.
+
+			this.scene.add(line);
+
+			this.lines.push(line);
+
+			// Create label
+			const pos0 = new THREE.Vector3(lastTwoPos[0], lastTwoPos[1], lastTwoPos[2]);
+			const pos1 = new THREE.Vector3(lastTwoPos[3], lastTwoPos[4], lastTwoPos[5]);
+			const dirVec = pos1.sub(pos0);
+			const labelPos = pos0.add(dirVec.multiplyScalar(0.5));
+
+			const dist = dirVec.length();
+
+			const distMarkerDiv = document.createElement('div');
+			distMarkerDiv.textContent = `${dist}`;
+			distMarkerDiv.style.backgroundColor = 'white';
+			distMarkerDiv.style.color = 'black';
+			distMarkerDiv.style.borderStyle = 'solid';
+			distMarkerDiv.style.borderWidth = '3px';
+			distMarkerDiv.style.borderColor = 'cyan';
+	
+			const marker = new CSS2DObject(distMarkerDiv);
+			marker.position.set(labelPos.x, labelPos.y, labelPos.z);
+			marker.center.set(0.5,0.5);
+			this.scene.add(marker);	
+		}
+	}
+
 }
 
 export class ThreeJsViewer {
@@ -70,6 +133,8 @@ export class ThreeJsViewer {
 
 	pointerDownListener = this.onPointerDown.bind(this);
 
+	lineMeasurements: LineMeasurement[];
+
 	renderer = THREE.WebGLRenderer;
 
 	labelRenderer = CSS2DRenderer;
@@ -82,7 +147,9 @@ export class ThreeJsViewer {
 		this.scene = new THREE.Scene();
 		const aspect = container.clientWidth / container.clientHeight;
 		this.perspCam = new THREE.PerspectiveCamera(60, aspect);
+		this.perspCam.layers.enable(1);
 		this.orthoCam = new THREE.OrthographicCamera(); // Default values. Proper values will be calculated on first activation
+		this.orthoCam.layers.enable(1);
 		this.camera = this.perspCam;
 
 		const geometry = new THREE.BoxGeometry( 1, 1, 1 );
@@ -94,6 +161,15 @@ export class ThreeJsViewer {
 		this.camera.far = 500000;
 		this.camera.near = 0;
 
+
+		// Prepare measurements
+		this.lineMeasurements = [];
+
+		const testMes = new LineMeasurement(this.scene);
+		testMes.addPoint(new THREE.Vector3( - 10, 0, 0 ) );
+		testMes.addPoint( new THREE.Vector3( 0, 10, 0 ) );
+		testMes.addPoint( new THREE.Vector3( 10, 0, 0 ) );
+		testMes.addPoint(new THREE.Vector3( - 10, 0, 0 ) );
 		
 		// Create Renderer for labels
 		this.labelRenderer = new CSS2DRenderer();
@@ -490,6 +566,9 @@ export class ThreeJsViewer {
 	enableMeasuring(){
 
 		window.addEventListener('pointerdown', this.pointerDownListener);	
+
+		const newMeasurement = new LineMeasurement(this.scene);
+		this.lineMeasurements.push(newMeasurement);
 	}
 
 	disableMeasuring(){
@@ -515,8 +594,12 @@ export class ThreeJsViewer {
 	
 			const marker = new CSS2DObject(newMarkerDiv);
 			marker.position.set(markerPos.x, markerPos.y, markerPos.z);
-			marker.center.set(0,1);
-			this.scene.add(marker);		
+			marker.center.set(0.5,0.5);
+			this.scene.add(marker);	
+			
+			// Update current line measurement
+			const measurement = this.lineMeasurements[this.lineMeasurements.length - 1];
+			measurement.addPoint(markerPos);
 		}
 	}
 }
