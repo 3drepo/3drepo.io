@@ -19,7 +19,7 @@ import { useContext, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
 import { blockEvent } from '@/v5/helpers/events.helpers';
-import { useEdgeScrolling } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/useEdgeScrolling';
+import { useEdgeScrolling } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/edgeScrolling';
 	
 const getScrollParent = (node) => {
 	const isElement = node instanceof HTMLElement;
@@ -62,11 +62,12 @@ export const MovingColumnDropAreas = () => {
 	const onRender = (el) => {
 		if (!el) return;
 		setTableOffset(getTableOffset(el));
-		if (!edgeScrolling.isRunning()) {
+
+		if (!edgeScrolling.isRunning) {
 			const scrollParent = getScrollParent(el);
 			const scrollParentIsOverflowing = scrollParent.scrollWidth > scrollParent.clientWidth;
 			if (scrollParentIsOverflowing) {
-				edgeScrolling.listen(scrollParent);
+				edgeScrolling.start(scrollParent);
 			}
 		}
 
