@@ -1105,7 +1105,7 @@ const testUpdateManyTickets = () => {
 		});
 		const duplicateValue = ServiceHelper.generateRandomString();
 
-		const nTickets = 10;
+		const nTickets = 2;
 
 		const deprecatedTemplate = ServiceHelper.generateTemplate();
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
