@@ -27,5 +27,5 @@ void main() {
     vec4 c2 = texture2D(color_tex, tuv);
     c1 = c1 * c2;
     #endif
-    gl_FragColor = vec4(plane.rgb, 1.0);
+    gl_FragColor = c1;
 }

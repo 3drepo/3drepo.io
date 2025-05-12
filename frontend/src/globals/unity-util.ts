@@ -2467,14 +2467,7 @@ export class UnityUtil {
 	 * @return returns a promise which will resolve after Unity has invoked its moveMeshes function
 	 */
 	public static moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
-		return UnityUtil.multipleCallInChunks(meshes.length, (start, end) => {
-			const param: any = {
-				nameSpace: `${teamspace}.${modelId}`,
-				meshes: meshes.slice(start, end),
-				matrix,
-			};
-			UnityUtil.toUnity('MoveMeshes', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(param));
-		});
+		UnityUtil.instance.moveMeshes(teamspace, modelId, meshes, matrix);
 	}
 
 	/**
@@ -2600,21 +2593,7 @@ export class UnityUtil {
 	 * @category Calibration
 	 */
 	public static setCalibrationToolDrawing(image: DrawingImageSource, rect: number[]) {
-		let index = -1;
-		let dimensions = [0, 0];
-
-		if (image !== null) {
-			index = this.domTextureReferenceCounter++;
-			this.domTextureReferences[index] = image; // Store a reference to the image, as the viewer will request it momentarily
-			dimensions = [image.width, image.height];
-		}
-
-		var parms = {
-			worldRect: rect, //[bottomLeftX, bottomLeftY, bottomRightX, bottomRightY, topLeftX, topLeftY]
-			domId: index,
-			dimensions,
-		};
-		UnityUtil.toUnity('SetCalibrationToolDrawing', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+		UnityUtil.instance.createTexturedPlane(image);
 	}
 
 	/**

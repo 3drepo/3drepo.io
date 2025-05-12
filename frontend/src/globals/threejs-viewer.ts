@@ -166,6 +166,8 @@ export class ThreeJsViewer {
 
 	materialInstances: THREE.ShaderMaterial[];
 
+	transformManager: any;
+
 	constructor(container: HTMLElement) {
 
 		this.markupContainer = document.createElement('div');
@@ -237,6 +239,8 @@ export class ThreeJsViewer {
 		};
 
 		this.materialInstances = [];
+
+		this.transformManager = {};
 	}
 
 	animate() {
@@ -259,8 +263,8 @@ export class ThreeJsViewer {
 				const uuid = this.pickManager.uniqueIds[lid];
 				this.highlightMesh(uuid);
 
-				const pinPosition = this.screenToWorld(this.pickOperator.position, this.depthCpuBuffer[3]);
-				this.pinManager.dropPin(pinPosition);
+				// Uncomment to drop pins directly in the viewer
+				//this.pinManager.dropPin(this.screenToWorld(this.pickOperator.position, this.depthCpuBuffer[3]));
 			}
 		}
 
@@ -357,6 +361,10 @@ export class ThreeJsViewer {
 		const colorMapTexture = new THREE.DataTexture(colorMapData, width, height, THREE.RGBAFormat);
 		colorMapTexture.needsUpdate = true;
 
+		const transformObject = {
+			meshes: [],
+		};
+
 		const pickMapData = new Uint32Array(width);
 		for (var i = 0; i < metadata.mapping.length; i++) {
 			const m = metadata.mapping[i];
@@ -369,6 +377,8 @@ export class ThreeJsViewer {
 				index: i,
 			};
 			this.pickManager.counter++;
+
+			this.transformManager[m.name] = transformObject;
 		}
 
 		const pickMapTexture = new THREE.DataTexture(new Uint8Array(pickMapData.buffer), width, height, THREE.RGBAFormat);
@@ -461,9 +471,17 @@ export class ThreeJsViewer {
 			this.sceneBounds.expandByPoint(m.bounds.min);
 			this.sceneBounds.expandByPoint(m.bounds.max);
 
-			this.scene.add(new THREE.Mesh( geometry, material ));
-			this.pickScene.add(new THREE.Mesh( geometry, pickMaterial ));
-			this.depthScene.add(new THREE.Mesh( geometry, depthMaterial ));
+			const m1 = new THREE.Mesh( geometry, material );
+			const m2 = new THREE.Mesh( geometry, pickMaterial );
+			const m3 = new THREE.Mesh( geometry, depthMaterial );
+
+			this.scene.add(m1);
+			this.pickScene.add(m2);
+			this.depthScene.add(m3);
+
+			transformObject.meshes.push(m1);
+			transformObject.meshes.push(m2);
+			transformObject.meshes.push(m3);
 		}
 	}
 
@@ -607,4 +625,40 @@ export class ThreeJsViewer {
 			this.materialInstances[i].uniformsNeedUpdate = true;
 		}
 	}
+
+	createTexturedPlane(image: HTMLImageElement) {
+		new THREE.TextureLoader().load(
+			image.src,
+			(arg) => {
+				arg.wrapS = THREE.RepeatWrapping;
+				arg.wrapT = THREE.RepeatWrapping;
+
+				const geometry = new THREE.PlaneGeometry( 40000, 40000 );
+				const material = new THREE.MeshBasicMaterial( { color: 0xffff00, side: THREE.DoubleSide, map: arg, transparent: true } );
+				const plane = new THREE.Mesh( geometry, material );
+				this.scene.add( plane );
+			},
+			undefined,
+			console.error,
+		);
+	}
+
+	moveMeshes(teamspace: string, modelId: string, meshes: string[], matrix: number[]) {
+
+		const m = new THREE.Matrix4();
+		//m.setPosition(new THREE.Vector3(0, 1000, 0));
+		m.fromArray(matrix);
+		m.transpose();
+
+		for (var i = 0; i < meshes.length; i++) {
+			const helper = this.transformManager[meshes[i]];
+			for (var j = 0; j < helper.meshes.length; j++) {
+				const g = helper.meshes[j];
+				g.matrixAutoUpdate = false;
+				g.matrix.fromArray(m.elements);
+			}
+		}
+	}
+
+
 }
