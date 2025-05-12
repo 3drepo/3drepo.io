@@ -1139,8 +1139,6 @@ const testUpdateManyTickets = () => {
 		});
 
 		beforeAll(async () => {
-			// console.log('deprecatedTemplate'); // eslint-disable-line
-			// console.dir(deprecatedTemplate, {depth: 20});// eslint-disable-line
 			await setupBasicData(
 				users, teamspace, project, [con, fed], [template, deprecatedTemplate, duplicateTemplate],
 			);
@@ -1153,10 +1151,6 @@ const testUpdateManyTickets = () => {
 				/* eslint-disable no-param-reassign */
 				await Promise.all([...tickets, ...ticketsCommentTest1, ...ticketsCommentTest2, depTemTicket].map(
 					async (ticketToAdd) => {
-						// console.log('ticket route'); // eslint-disable-line
-						// console.log(addTicketRoute(model._id));// eslint-disable-line
-						// console.log('ticket to add'); // eslint-disable-line
-						// console.dir(ticketToAdd, { depth: 20 }); // eslint-disable-line
 						const res = await agent.post(addTicketRoute(model._id)).send(ticketToAdd);
 						if (!res.body._id) {
 							throw new Error(`Could not add a new ticket: ${res.body.message}`);
@@ -1289,13 +1283,13 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	// testGetAllTemplates();
-	// testGetTemplateDetails();
-	// testAddTicket();
-	// testImportTickets();
-	// testGetTicketResource();
-	// testGetTicket();
-	// testGetTicketList();
-	// testUpdateTicket();
 	testUpdateManyTickets();
+	testGetAllTemplates();
+	testGetTemplateDetails();
+	testAddTicket();
+	testImportTickets();
+	testGetTicketResource();
+	testGetTicket();
+	testGetTicketList();
+	testUpdateTicket();
 });
