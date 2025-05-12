@@ -1107,7 +1107,7 @@ const testUpdateManyTickets = () => {
 
 		const nTickets = 10;
 
-		const deprecatedTemplate = ServiceHelper.generateTemplate();
+		const deprecatedTemplate = ServiceHelper.generateTemplate(true);
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 		fed.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 
@@ -1149,9 +1149,9 @@ const testUpdateManyTickets = () => {
 				const modelType = fed === model ? 'federation' : 'container';
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
 
-				const { tickets, ticketsCommentTest1, ticketsCommentTest2 } = model;
+				const { tickets, ticketsCommentTest1, ticketsCommentTest2, depTemTicket } = model;
 				/* eslint-disable no-param-reassign */
-				await Promise.all([...tickets, ...ticketsCommentTest1, ...ticketsCommentTest2].map(
+				await Promise.all([...tickets, ...ticketsCommentTest1, ...ticketsCommentTest2, depTemTicket].map(
 					async (ticketToAdd) => {
 						// console.log('ticket route'); // eslint-disable-line
 						// console.log(addTicketRoute(model._id));// eslint-disable-line
