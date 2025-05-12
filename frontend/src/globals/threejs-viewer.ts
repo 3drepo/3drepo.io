@@ -103,7 +103,66 @@ class LineMeasurement {
 			this.scene.add(marker);	
 		}
 	}
+}
 
+class TriangleMeasurement {
+
+	scene: THREE.Scene
+	mesh: THREE.Mesh;
+	positions: THREE.Vector3[];	
+
+	isComplete = false;
+
+	constructor (scene: THREE.Scene){			
+		this.positions = [];
+		this.scene = scene;
+	}
+
+	addPoint(newPoint: THREE.Vector3){
+		this.positions.push(newPoint);
+
+		if(this.positions.length === 3){
+
+			// Create the triangle
+			const triMaterial = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );			
+			triMaterial.depthTest = false;
+			triMaterial.depthWrite = false;
+			triMaterial.side = THREE.DoubleSide;
+	
+			const triGeom = new THREE.BufferGeometry();
+			triGeom.setFromPoints(this.positions);
+			
+			const tri = new THREE.Mesh(triGeom, triMaterial);
+			tri.layers.disableAll();
+			tri.layers.enable(1); // Layers purely used for organisation. Switching off the depth test still necessary to prevent geometry intersection.
+
+			this.scene.add(tri);
+
+			this.mesh = tri;
+
+			// Create label
+			const pos0 = this.positions[0];
+			const pos1 = this.positions[1];
+			const pos2 = this.positions[2];
+						
+			const labelPos = pos0.add(pos1.add(pos2)).divideScalar(3.0);
+			
+			const areaMarkerDiv = document.createElement('div');
+			areaMarkerDiv.textContent = `Area goes here`;
+			areaMarkerDiv.style.backgroundColor = 'white';
+			areaMarkerDiv.style.color = 'black';
+			areaMarkerDiv.style.borderStyle = 'solid';
+			areaMarkerDiv.style.borderWidth = '3px';
+			areaMarkerDiv.style.borderColor = 'black';
+	
+			const marker = new CSS2DObject(areaMarkerDiv);
+			marker.position.set(labelPos.x, labelPos.y, labelPos.z);
+			marker.center.set(0.5,0.5);
+			this.scene.add(marker);	
+
+			this.isComplete = true;
+		}
+	}
 }
 
 export class ThreeJsViewer {
@@ -131,9 +190,15 @@ export class ThreeJsViewer {
 	clientDimensions: THREE.Vector2;
 	clientOffsets: THREE.Vector2;
 
-	pointerDownListener = this.onPointerDown.bind(this);
+	pointerDownLineListener = this.onPointerDownLine.bind(this);
+	pointerDownAreaListener = this.onPointerDownArea.bind(this);
 
+
+	lineMeasuringEnabled: boolean;
 	lineMeasurements: LineMeasurement[];
+
+	areaMeasuringEnabled: boolean;
+	areaMeasurements: TriangleMeasurement[];
 
 	renderer = THREE.WebGLRenderer;
 
@@ -163,13 +228,11 @@ export class ThreeJsViewer {
 
 
 		// Prepare measurements
+		this.lineMeasuringEnabled = false;
 		this.lineMeasurements = [];
 
-		const testMes = new LineMeasurement(this.scene);
-		testMes.addPoint(new THREE.Vector3( - 10, 0, 0 ) );
-		testMes.addPoint( new THREE.Vector3( 0, 10, 0 ) );
-		testMes.addPoint( new THREE.Vector3( 10, 0, 0 ) );
-		testMes.addPoint(new THREE.Vector3( - 10, 0, 0 ) );
+		this.areaMeasuringEnabled = false;
+		this.areaMeasurements = [];
 		
 		// Create Renderer for labels
 		this.labelRenderer = new CSS2DRenderer();
@@ -181,7 +244,7 @@ export class ThreeJsViewer {
 		// Create circle style for the marker
 		// (probably not the right way to do this, but it works)
 		var style = document.createElement('style');
-		style.innerHTML = '.circle { height: 10px; width: 10px; background-color: cyan; border-radius: 50%;}';
+		style.innerHTML = '.circle { height: 10px; width: 10px; border-radius: 50%;}';
 		document.getElementsByTagName('head')[0].appendChild(style);
 		
 		// Store some information we will later need for the raycasting
@@ -563,19 +626,28 @@ export class ThreeJsViewer {
 		}
 	}
 
-	enableMeasuring(){
+	enableLineMeasuring(){		
+		// Disable area measurement if active
+		if(this.areaMeasuringEnabled){
+					window.removeEventListener('pointerdown', this.pointerDownAreaListener);
+					this.areaMeasuringEnabled = false;
+		}
 
-		window.addEventListener('pointerdown', this.pointerDownListener);	
+		// Enable Line Measurement
+		window.addEventListener('pointerdown', this.pointerDownLineListener);	
 
 		const newMeasurement = new LineMeasurement(this.scene);
 		this.lineMeasurements.push(newMeasurement);
+
+		this.lineMeasuringEnabled = true;
 	}
 
-	disableMeasuring(){
-		window.removeEventListener('pointerdown', this.pointerDownListener);	
+	disableLineMeasuring(){
+		window.removeEventListener('pointerdown', this.pointerDownLineListener);	
+		this.lineMeasuringEnabled = false;
 	}
 
-	onPointerDown(event){
+	onPointerDownLine(event){
 		
 		const pointer = new THREE.Vector2();
 		pointer.x = ((event.clientX - this.clientOffsets.x) / this.clientDimensions.x) * 2 - 1;
@@ -591,6 +663,7 @@ export class ThreeJsViewer {
 	
 			const newMarkerDiv = document.createElement('div');
 			newMarkerDiv.className = 'circle';
+			newMarkerDiv.style.backgroundColor = 'cyan';
 	
 			const marker = new CSS2DObject(newMarkerDiv);
 			marker.position.set(markerPos.x, markerPos.y, markerPos.z);
@@ -600,6 +673,63 @@ export class ThreeJsViewer {
 			// Update current line measurement
 			const measurement = this.lineMeasurements[this.lineMeasurements.length - 1];
 			measurement.addPoint(markerPos);
+		}
+	}
+
+	enableAreaMeasuring(){		
+		// Disable line measurement if active
+		if(this.lineMeasuringEnabled){
+					window.removeEventListener('pointerdown', this.pointerDownLineListener);
+					this.lineMeasuringEnabled = false;
+		}
+
+		// Enable Area Measurement
+		window.addEventListener('pointerdown', this.pointerDownAreaListener);	
+
+		const newMeasurement = new TriangleMeasurement(this.scene);
+		this.areaMeasurements.push(newMeasurement);
+
+		this.areaMeasuringEnabled = true;
+	}
+
+	disableAreaMeasuring(){
+		window.removeEventListener('pointerdown', this.pointerDownAreaListener);	
+		this.areaMeasuringEnabled = false;
+	}
+
+	onPointerDownArea(event){
+		
+		const pointer = new THREE.Vector2();
+		pointer.x = ((event.clientX - this.clientOffsets.x) / this.clientDimensions.x) * 2 - 1;
+		pointer.y = - ((event.clientY - this.clientOffsets.y) / this.clientDimensions.y) * 2 + 1;
+		
+		this.raycaster.setFromCamera(pointer, this.camera);
+		const intersects = this.raycaster.intersectObjects(this.scene.children, false);
+
+		// Create marker at clicked location
+		if(intersects.length > 0)
+		{
+			const markerPos = intersects[0].point.clone();
+	
+			const newMarkerDiv = document.createElement('div');
+			newMarkerDiv.className = 'circle';
+			newMarkerDiv.style.backgroundColor = '#00ff00';
+	
+			const marker = new CSS2DObject(newMarkerDiv);
+			marker.position.set(markerPos.x, markerPos.y, markerPos.z);
+			marker.center.set(0.5,0.5);
+			this.scene.add(marker);	
+			
+			// Update current area measurement
+			const measurement = this.areaMeasurements[this.areaMeasurements.length - 1];
+			measurement.addPoint(markerPos);
+
+			// Check if the triangle is complete
+			if (measurement.isComplete){
+				// Create new one if that's the case
+				const newMeasurement = new TriangleMeasurement(this.scene);
+				this.areaMeasurements.push(newMeasurement);
+			}
 		}
 	}
 }
