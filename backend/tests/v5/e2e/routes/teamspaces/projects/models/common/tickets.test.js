@@ -1153,7 +1153,7 @@ const testUpdateManyTickets = () => {
 					async (ticketToAdd) => {
 						const res = await agent.post(addTicketRoute(model._id)).send(ticketToAdd);
 						console.log('the res: '); // eslint-disable-line
-						console.log(res); // eslint-disable-line
+						console.log(res.body); // eslint-disable-line
 						if (!res.body._id) {
 							throw new Error(`Could not add a new ticket: ${res.body.message}`);
 						}
