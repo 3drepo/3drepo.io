@@ -2085,7 +2085,8 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static useOrthographicProjection() {
-		UnityUtil.toUnity('UseOrthographicProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		console.log("Unity Utils use Ortho");
+		UnityUtil.instance.switchToOrthographicCamera();		
 	}
 
 	/**
@@ -2093,7 +2094,8 @@ export class UnityUtil {
 	 * @category Configurations
 	 */
 	public static usePerspectiveProjection() {
-		UnityUtil.toUnity('UsePerspectiveProjection', UnityUtil.LoadingState.MODEL_LOADING, undefined);
+		console.log("Unity Utils use Persp");
+		UnityUtil.instance.switchToPerspectiveCamera();		
 	}
 
 	/**

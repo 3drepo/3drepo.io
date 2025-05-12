@@ -18,6 +18,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass';
+import { CSS2DRenderer, CSS2DObject } from 'three/examples/jsm/renderers/CSS2DRenderer.js';
+import { Line2 } from 'three/examples/jsm/lines/Line2.js';
+import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
+import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 
 import StandardVertexShader from './standard_vertex.glsl';
 import StandardFragmentShader from './standard_fragment.glsl';
@@ -111,6 +115,139 @@ class PinManager {
 
 	dropPin(position: THREE.Vector3) {
 		this.pins.push(new Pin(this.addElement(), position));
+
+	}
+}
+
+type View = {
+	isPerspective: boolean;
+
+	camPos: THREE.Vector3;
+	targetPos: THREE.Vector3;
+
+	orthoZoom: number;
+};
+
+class LineMeasurement {
+
+	scene: THREE.Scene;
+
+	lines: Line2[];
+
+	positions: number[];
+
+	constructor(scene: THREE.Scene) {
+		this.lines = [];
+		this.positions = [];
+		this.scene = scene;
+	}
+
+	addPoint(newPoint: THREE.Vector3) {
+		this.positions.push(newPoint.x, newPoint.y, newPoint.z);
+
+		if (this.positions.length >= 6) {
+
+			const lastTwoPos = this.positions.slice(-6, this.positions.length);
+
+			// Create new line segment
+			const lineMaterial = new LineMaterial({ color: 'cyan', linewidth: 5 });
+			lineMaterial.depthTest = false;
+			lineMaterial.depthWrite = false;
+
+			const lineGeom = new LineGeometry();
+			lineGeom.setPositions(lastTwoPos);
+
+			const line = new Line2( lineGeom, lineMaterial );
+			line.layers.disableAll();
+			line.layers.enable(1); // Layers purely used for organisation. Switching off the depth test still necessary to prevent geometry intersection.
+
+			this.scene.add(line);
+
+			this.lines.push(line);
+
+			// Create label
+			const pos0 = new THREE.Vector3(lastTwoPos[0], lastTwoPos[1], lastTwoPos[2]);
+			const pos1 = new THREE.Vector3(lastTwoPos[3], lastTwoPos[4], lastTwoPos[5]);
+			const dirVec = pos1.sub(pos0);
+			const labelPos = pos0.add(dirVec.multiplyScalar(0.5));
+
+			const dist = dirVec.length();
+
+			const distMarkerDiv = document.createElement('div');
+			distMarkerDiv.textContent = `${dist}`;
+			distMarkerDiv.style.backgroundColor = 'white';
+			distMarkerDiv.style.color = 'black';
+			distMarkerDiv.style.borderStyle = 'solid';
+			distMarkerDiv.style.borderWidth = '3px';
+			distMarkerDiv.style.borderColor = 'cyan';
+
+			const marker = new CSS2DObject(distMarkerDiv);
+			marker.position.set(labelPos.x, labelPos.y, labelPos.z);
+			marker.center.set(0.5, 0.5);
+			this.scene.add(marker);
+		}
+	}
+}
+
+class TriangleMeasurement {
+
+	scene: THREE.Scene;
+
+	mesh: THREE.Mesh;
+
+	positions: THREE.Vector3[];
+
+	isComplete = false;
+
+	constructor(scene: THREE.Scene) {
+		this.positions = [];
+		this.scene = scene;
+	}
+
+	addPoint(newPoint: THREE.Vector3) {
+		this.positions.push(newPoint);
+
+		if (this.positions.length === 3) {
+
+			// Create the triangle
+			const triMaterial = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+			triMaterial.depthTest = false;
+			triMaterial.depthWrite = false;
+			triMaterial.side = THREE.DoubleSide;
+
+			const triGeom = new THREE.BufferGeometry();
+			triGeom.setFromPoints(this.positions);
+
+			const tri = new THREE.Mesh(triGeom, triMaterial);
+			tri.layers.disableAll();
+			tri.layers.enable(1); // Layers purely used for organisation. Switching off the depth test still necessary to prevent geometry intersection.
+
+			this.scene.add(tri);
+
+			this.mesh = tri;
+
+			// Create label
+			const pos0 = this.positions[0];
+			const pos1 = this.positions[1];
+			const pos2 = this.positions[2];
+
+			const labelPos = pos0.add(pos1.add(pos2)).divideScalar(3.0);
+
+			const areaMarkerDiv = document.createElement('div');
+			areaMarkerDiv.textContent = 'Area goes here';
+			areaMarkerDiv.style.backgroundColor = 'white';
+			areaMarkerDiv.style.color = 'black';
+			areaMarkerDiv.style.borderStyle = 'solid';
+			areaMarkerDiv.style.borderWidth = '3px';
+			areaMarkerDiv.style.borderColor = 'black';
+
+			const marker = new CSS2DObject(areaMarkerDiv);
+			marker.position.set(labelPos.x, labelPos.y, labelPos.z);
+			marker.center.set(0.5, 0.5);
+			this.scene.add(marker);
+
+			this.isComplete = true;
+		}
 	}
 }
 
@@ -121,6 +258,12 @@ export class ThreeJsViewer {
 	sceneCorners: THREE.Vector3[];
 
 	camera: THREE.Camera;
+
+	orthoCam: THREE.OrthographicCamera;
+
+	perspCam: THREE.PerspectiveCamera;
+
+	controls: OrbitControls;
 
 	scene: THREE.Scene;
 
@@ -168,6 +311,30 @@ export class ThreeJsViewer {
 
 	transformManager: any;
 
+	lastStoredView: View;
+
+	raycaster: THREE.Raycaster;
+
+	clientDimensions: THREE.Vector2;
+
+	clientOffsets: THREE.Vector2;
+
+	pointerDownLineListener = this.onPointerDownLine.bind(this);
+
+	pointerDownAreaListener = this.onPointerDownArea.bind(this);
+
+	lineMeasuringEnabled: boolean;
+
+	lineMeasurements: LineMeasurement[];
+
+	areaMeasuringEnabled: boolean;
+
+	areaMeasurements: TriangleMeasurement[];
+
+	renderer = THREE.WebGLRenderer;
+
+	labelRenderer = CSS2DRenderer;
+
 	constructor(container: HTMLElement) {
 
 		this.markupContainer = document.createElement('div');
@@ -186,9 +353,17 @@ export class ThreeJsViewer {
 		container.appendChild(this.renderer.domElement);
 
 		this.scene = new THREE.Scene();
+
 		this.pickScene = new THREE.Scene();
 		this.depthScene = new THREE.Scene();
 		this.camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight);
+
+		const aspect = container.clientWidth / container.clientHeight;
+		this.perspCam = new THREE.PerspectiveCamera(60, aspect);
+		this.perspCam.layers.enable(1);
+		this.orthoCam = new THREE.OrthographicCamera(); // Default values. Proper values will be calculated on first activation
+		this.orthoCam.layers.enable(1);
+		this.camera = this.perspCam;
 
 		this.width = container.clientWidth;
 		this.height = container.clientHeight;
@@ -203,9 +378,42 @@ export class ThreeJsViewer {
 		this.scene.add( cube );
 		this.camera.position.z = 5;
 
+
 		new OrbitControls( this.camera, this.renderer.domElement );
 		this.pickOperator = new PickOperator(this.renderer.domElement);
 
+		// Prepare measurements
+		this.lineMeasuringEnabled = false;
+		this.lineMeasurements = [];
+
+		this.areaMeasuringEnabled = false;
+		this.areaMeasurements = [];
+
+		// Create Renderer for labels
+		this.labelRenderer = new CSS2DRenderer();
+		this.labelRenderer.setSize(container.clientWidth, container.clientHeight);
+		this.labelRenderer.domElement.style.position = 'absolute';
+		this.labelRenderer.domElement.style.top = '0px';
+		container.appendChild(this.labelRenderer.domElement);
+
+		// Create circle style for the marker
+		// (probably not the right way to do this, but it works)
+		var style = document.createElement('style');
+		style.innerHTML = '.circle { height: 10px; width: 10px; border-radius: 50%;}';
+		document.getElementsByTagName('head')[0].appendChild(style);
+
+		// Store some information we will later need for the raycasting
+		this.raycaster = new THREE.Raycaster();
+		this.clientDimensions = new THREE.Vector2(container.clientWidth, container.clientHeight);
+		var rect = container.getBoundingClientRect();
+		this.clientOffsets = new THREE.Vector2(rect.left, rect.top);
+
+		this.controls = new OrbitControls( this.camera, this.labelRenderer.domElement );
+
+		// Use this if you only want to render when the controls change the perspective
+		//this.controls.addEventListener('change', this.animate.bind(this));
+
+		// Use this if you want to render every frame again.
 		this.renderer.setAnimationLoop(this.animate.bind(this));
 
 		this.sceneBounds = new THREE.Box3();
@@ -241,6 +449,9 @@ export class ThreeJsViewer {
 		this.materialInstances = [];
 
 		this.transformManager = {};
+
+		// Initial render
+		this.animate();
 	}
 
 	animate() {
@@ -280,6 +491,8 @@ export class ThreeJsViewer {
 
 		// Uncomment to demonstrate post processing
 		//this.postprocessing_quad.render(this.renderer);
+
+		this.labelRenderer.render(this.scene, this.camera);
 	}
 
 	fetch(uri: string) {
@@ -537,6 +750,50 @@ export class ThreeJsViewer {
 		this.camera.lookAt(v);
 	}
 
+
+	// Easy conversion from Perspective to Ortho and back courtesy of nickyvanurk
+	// https://gist.github.com/nickyvanurk/9ac33a6aff7dd7bd5cd5b8a20d4db0dc
+
+	frustumHeightAtDistance(camera: THREE.PerspectiveCamera, distance: number) {
+		const vFov = (camera.fov * Math.PI) / 180;
+		return Math.tan(vFov / 2) * distance * 2;
+	  }
+
+	  frustumWidthAtDistance(camera: THREE.PerspectiveCamera, distance: number) {
+		return this.frustumHeightAtDistance(camera, distance) * camera.aspect;
+	  }
+
+	switchToOrthographicCamera() {
+		console.log('Switching to ortho cam');
+
+		this.orthoCam.position.copy(this.perspCam.position);
+		const distance = this.perspCam.position.distanceTo(this.controls.target);
+		const halfWidth = this.frustumWidthAtDistance(this.perspCam, distance) / 2;
+		const halfHeight = this.frustumHeightAtDistance(this.perspCam, distance) / 2;
+		this.orthoCam.top = halfHeight;
+		this.orthoCam.bottom = -halfHeight;
+		this.orthoCam.left = -halfWidth;
+		this.orthoCam.right = halfWidth;
+		this.orthoCam.zoom = 1;
+		this.orthoCam.lookAt(this.controls.target);
+		this.orthoCam.updateProjectionMatrix();
+		this.camera = this.orthoCam;
+		this.controls.object = this.orthoCam;
+
+		this.camera = this.orthoCam;
+		this.controls.object = this.camera;
+	}
+
+	switchToPerspectiveCamera() {
+		console.log('Switching to perspective cam');
+		const oldY = this.perspCam.position.y;
+		this.perspCam.position.copy(this.orthoCam.position);
+		this.perspCam.position.y = oldY / this.orthoCam.zoom;
+		this.perspCam.updateProjectionMatrix();
+		this.camera = this.perspCam;
+		this.controls.object = this.perspCam;
+	}
+
 	loadShaders() {
 		this.material = new THREE.ShaderMaterial({
 			vertexShader: StandardVertexShader,
@@ -660,5 +917,187 @@ export class ThreeJsViewer {
 		}
 	}
 
+	storeCurrentView() {
 
+		let isPerspective;
+		let orthoZoom;
+		if (this.camera.type === 'OrthographicCamera') {
+			isPerspective = false;
+			orthoZoom = this.orthoCam.zoom;
+		} else {
+			isPerspective = true;
+			orthoZoom = 1;
+		}
+
+		const camPos = this.camera.position.clone();
+		const targetPos = this.controls.target.clone();
+
+		this.lastStoredView = {
+			isPerspective: isPerspective,
+			camPos: camPos,
+			targetPos: targetPos,
+			orthoZoom: orthoZoom,
+		};
+
+		console.log('Stored View');
+		console.log(this.lastStoredView);
+	}
+
+	restoreLastStoredView() {
+		console.log(this.lastStoredView);
+
+		if (this.lastStoredView === undefined) {
+			console.log('No view stored');
+			return;
+		}
+
+		const isCamPerspective = (this.camera.type === 'PerspectiveCamera');
+
+		if (this.lastStoredView.isPerspective != isCamPerspective) {
+			if (this.lastStoredView.isPerspective)
+				this.switchToPerspectiveCamera();
+			else
+				this.switchToOrthographicCamera();
+			this.orthoCam.zoom = this.lastStoredView.orthoZoom;
+		}
+
+		this.controls.target.copy(this.lastStoredView.targetPos);
+
+		this.camera.position.set(this.lastStoredView.camPos.x, this.lastStoredView.camPos.y, this.lastStoredView.camPos.z);
+		this.camera.lookAt(this.controls.target);
+	}
+
+
+	takeScreenshot() {
+		try {
+			let mime = 'image/jpeg';
+			let downloadMime = 'image/octet-stream';
+
+			this.animate(); // Render right before taking the screenshot
+			let imgData = this.renderer.domElement.toDataURL(mime);
+
+			imgData = imgData.replace(mime, downloadMime);
+
+			// Automatically download it.
+			let link = document.createElement('a');
+			if (typeof link.download === 'string') {
+				document.body.appendChild(link);
+				link.download = 'screenshot.jpg';
+				link.href = imgData;
+				link.click();
+				document.body.removeChild(link);
+			} else {
+				location.replace(uri);
+			}
+
+		} catch (e) {
+			console.log(e);
+			return;
+		}
+	}
+
+	enableLineMeasuring() {
+		// Disable area measurement if active
+		if (this.areaMeasuringEnabled) {
+			window.removeEventListener('pointerdown', this.pointerDownAreaListener);
+			this.areaMeasuringEnabled = false;
+		}
+
+		// Enable Line Measurement
+		window.addEventListener('pointerdown', this.pointerDownLineListener);
+
+		const newMeasurement = new LineMeasurement(this.scene);
+		this.lineMeasurements.push(newMeasurement);
+
+		this.lineMeasuringEnabled = true;
+	}
+
+	disableLineMeasuring() {
+		window.removeEventListener('pointerdown', this.pointerDownLineListener);
+		this.lineMeasuringEnabled = false;
+	}
+
+	onPointerDownLine(event) {
+
+		const pointer = new THREE.Vector2();
+		pointer.x = ((event.clientX - this.clientOffsets.x) / this.clientDimensions.x) * 2 - 1;
+		pointer.y = - ((event.clientY - this.clientOffsets.y) / this.clientDimensions.y) * 2 + 1;
+
+		this.raycaster.setFromCamera(pointer, this.camera);
+		const intersects = this.raycaster.intersectObjects(this.scene.children, false);
+
+		// Create marker at clicked location
+		if (intersects.length > 0) {
+			const markerPos = intersects[0].point.clone();
+
+			const newMarkerDiv = document.createElement('div');
+			newMarkerDiv.className = 'circle';
+			newMarkerDiv.style.backgroundColor = 'cyan';
+
+			const marker = new CSS2DObject(newMarkerDiv);
+			marker.position.set(markerPos.x, markerPos.y, markerPos.z);
+			marker.center.set(0.5, 0.5);
+			this.scene.add(marker);
+
+			// Update current line measurement
+			const measurement = this.lineMeasurements[this.lineMeasurements.length - 1];
+			measurement.addPoint(markerPos);
+		}
+	}
+
+	enableAreaMeasuring() {
+		// Disable line measurement if active
+		if (this.lineMeasuringEnabled) {
+			window.removeEventListener('pointerdown', this.pointerDownLineListener);
+			this.lineMeasuringEnabled = false;
+		}
+
+		// Enable Area Measurement
+		window.addEventListener('pointerdown', this.pointerDownAreaListener);
+
+		const newMeasurement = new TriangleMeasurement(this.scene);
+		this.areaMeasurements.push(newMeasurement);
+
+		this.areaMeasuringEnabled = true;
+	}
+
+	disableAreaMeasuring() {
+		window.removeEventListener('pointerdown', this.pointerDownAreaListener);
+		this.areaMeasuringEnabled = false;
+	}
+
+	onPointerDownArea(event) {
+
+		const pointer = new THREE.Vector2();
+		pointer.x = ((event.clientX - this.clientOffsets.x) / this.clientDimensions.x) * 2 - 1;
+		pointer.y = - ((event.clientY - this.clientOffsets.y) / this.clientDimensions.y) * 2 + 1;
+
+		this.raycaster.setFromCamera(pointer, this.camera);
+		const intersects = this.raycaster.intersectObjects(this.scene.children, false);
+
+		// Create marker at clicked location
+		if (intersects.length > 0) {
+			const markerPos = intersects[0].point.clone();
+
+			const newMarkerDiv = document.createElement('div');
+			newMarkerDiv.className = 'circle';
+			newMarkerDiv.style.backgroundColor = '#00ff00';
+
+			const marker = new CSS2DObject(newMarkerDiv);
+			marker.position.set(markerPos.x, markerPos.y, markerPos.z);
+			marker.center.set(0.5, 0.5);
+			this.scene.add(marker);
+
+			// Update current area measurement
+			const measurement = this.areaMeasurements[this.areaMeasurements.length - 1];
+			measurement.addPoint(markerPos);
+
+			// Check if the triangle is complete
+			if (measurement.isComplete) {
+				// Create new one if that's the case
+				const newMeasurement = new TriangleMeasurement(this.scene);
+				this.areaMeasurements.push(newMeasurement);
+			}
+		}
+	}
 }
