@@ -1107,7 +1107,7 @@ const testUpdateManyTickets = () => {
 
 		const nTickets = 2;
 
-		const deprecatedTemplate = ServiceHelper.generateTemplate();
+		const deprecatedTemplate = ServiceHelper.generateTemplate(false);
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 		fed.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
 
@@ -1152,8 +1152,6 @@ const testUpdateManyTickets = () => {
 				await Promise.all([...tickets, ...ticketsCommentTest1, ...ticketsCommentTest2, depTemTicket].map(
 					async (ticketToAdd) => {
 						const res = await agent.post(addTicketRoute(model._id)).send(ticketToAdd);
-						console.log('the res: '); // eslint-disable-line
-						console.log(res.body); // eslint-disable-line
 						if (!res.body._id) {
 							throw new Error(`Could not add a new ticket: ${res.body.message}`);
 						}
@@ -1285,13 +1283,13 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	// testGetAllTemplates();
-	// testGetTemplateDetails();
-	// testAddTicket();
-	// testImportTickets();
-	// testGetTicketResource();
-	// testGetTicket();
-	// testGetTicketList();
-	// testUpdateTicket();
+	testGetAllTemplates();
+	testGetTemplateDetails();
+	testAddTicket();
+	testImportTickets();
+	testGetTicketResource();
+	testGetTicket();
+	testGetTicketList();
+	testUpdateTicket();
 	testUpdateManyTickets();
 });
