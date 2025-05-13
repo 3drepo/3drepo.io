@@ -16,7 +16,7 @@
  */
 
 import { compact, sum } from 'lodash';
-import { createContext, useEffect, useRef, useState } from 'react';
+import { createContext, useRef, useState } from 'react';
 import { RefHolder } from './resizableTableContext.styles';
 
 export type TableColumn = { name: string, minWidth?: number, width: number, stretch?: boolean };
@@ -31,6 +31,7 @@ export interface ResizableTableType {
 	getRowWidth: () => number,
 	getColumnOffsetLeft: (name: string) => number,
 	getIndex: (name: string) => number,
+	resetColumnsOrderAndVisibility: () => void,
 
 	// resizing
 	setResizerName: (name: string) => void,
@@ -57,6 +58,7 @@ const defaultValue: ResizableTableType = {
 	getRowWidth: () => 0,
 	getColumnOffsetLeft: () => 0,
 	getIndex: () => -1,
+	resetColumnsOrderAndVisibility: () => {},
 
 	// resizing
 	setResizerName: () => {},
@@ -145,16 +147,10 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 		setVisibleSortedColumns(compact(visibleSortedColumns));
 	};
 
-	useEffect(() => {
+	const resetColumnsOrderAndVisibility = () => {
 		const inputColumnsNames = inputColumns.map(({ name }) => name);
-		const newVisibleColumns = visibleSortedColumns.filter((name) => inputColumnsNames.includes(name));
-		inputColumnsNames.forEach((name) => {
-			if (!newVisibleColumns.includes(name)) {
-				newVisibleColumns.push(name);
-			}
-		});
-		setVisibleSortedColumns(newVisibleColumns.filter((name) => !hiddenColumns.includes(name)));
-	}, [inputColumns, hiddenColumns]);
+		setVisibleSortedColumns(inputColumnsNames.filter((name) => !hiddenColumns.includes(name)));
+	};
 
 	return (
 		<ResizableTableContext.Provider value={{
@@ -169,6 +165,7 @@ export const ResizableTableContextComponent = ({ children, columns: inputColumns
 			setIsResizing,
 			isResizing,
 			isHidden,
+			resetColumnsOrderAndVisibility,
 			getRowWidth,
 			columnGap,
 			stretchTable,

@@ -48,10 +48,11 @@ const COLUMNS: TableColumn[] = [
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { stretchTable, movingColumn } = useContext(ResizableTableContext);
+	const { stretchTable, movingColumn, resetColumnsOrderAndVisibility } = useContext(ResizableTableContext);
 	const edgeScrolling = useEdgeScrolling({ throttleTime: 20 });
 
 	useEffect(() => {
+		resetColumnsOrderAndVisibility();
 		if (templateAlreadyFetched(template)) return;
 		stretchTable();
 	}, [template]);
