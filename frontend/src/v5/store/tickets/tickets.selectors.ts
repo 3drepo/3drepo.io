@@ -118,12 +118,14 @@ export const selectRiskCategories = createSelector(
 );
 
 export const selectTicketsByContainersAndFederations = createSelector(
-	(state) => state,
+	(state) => (modelId) => selectTickets(state, modelId),
+	(state) => (modelId) => selectFederationById(state, modelId),
+	(state) => (modelId) => selectContainerById(state, modelId),
 	(state, modelsIds: string[]) => modelsIds,
-	(storeState, modelsIds) => {
+	(selectTicketsById, selectFederation, selectContainer, modelsIds) => {
 		const tickets = modelsIds.flatMap((modelId) => {
-			const modelTickets = selectTickets(storeState, modelId);
-			const modelName = (selectFederationById(storeState, modelId) || selectContainerById(storeState, modelId))?.name;
+			const modelTickets = selectTicketsById(modelId);
+			const modelName = (selectFederation(modelId) || selectContainer(modelId))?.name;
 			return modelTickets.map((t) => ({ ...t, modelName })); // modelName is added for column sorting
 		});
 		return sortTicketsByCreationDate(tickets);

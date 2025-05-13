@@ -158,9 +158,9 @@ export const selectAreInitialFiltersPending = createSelector(
 );
 
 export const selectCurrentModelFilteredTickets = createSelector(
-	(state) => state,
-	selectCurrentModel,
-	(state, model) => selectFilteredTickets(state, [model]),
+	selectCurrentTickets,
+	selectFilteredTicketIds,
+	(tickets, ids) => tickets.filter(({ _id }) => ids.includes(_id)),
 );
 
 export const selectTicketPins = createSelector(
