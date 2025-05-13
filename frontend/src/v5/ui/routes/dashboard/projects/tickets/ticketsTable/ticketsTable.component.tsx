@@ -41,7 +41,6 @@ import { NEW_TICKET_ID, NONE_OPTION } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
-import { useSelectedModels } from './newTicketMenu/useSelectedModels';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
@@ -64,7 +63,6 @@ export const TicketsTable = () => {
 	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
 	const [groupByValue,, setGroupByValue] = useSearchParam('groupByValue');
 	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
-	const models = useSelectedModels();
 
 	const setGroupBy = (val) => {
 		// this is for clearing also the groupByValue when groupBy so we dont have an inconsistent groupByValue
@@ -116,8 +114,8 @@ export const TicketsTable = () => {
 	}, [templateId, tickets]);
 	
 	const newTicketButtonIsDisabled = useMemo(() => 
-		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
-	[models, containerOrFederation]);
+		!containersAndFederations.length || containersAndFederations.filter(({ role }) => isCommenterRole(role)).length === 0,
+	[containersAndFederations, containerOrFederation]);
 
 	const onSaveTicket = (_id: string) => {
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
@@ -137,7 +135,7 @@ export const TicketsTable = () => {
 
 
 	useEffect(() => {
-		if (!models.length ) return;
+		if (!containersAndFederations.length ) return;
 
 		containersAndFederations.forEach((modelId) => {
 			if (ticketHasBeenFetched(modelId)) return;
@@ -165,10 +163,10 @@ export const TicketsTable = () => {
 			];
 		});
 		return combineSubscriptions(...subscriptions);
-	}, [!models.length, containersAndFederations]);
+	}, [!containersAndFederations.length, containersAndFederations]);
 
 	useEffect(() => {
-		if (!models.length || areFiltersPending) return;
+		if (!containersAndFederations.length || areFiltersPending) return;
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
 	}, [filters, containersAndFederations, areFiltersPending]);
 
@@ -244,7 +242,7 @@ export const TicketsTable = () => {
 				</ControlsContainer>
 				<CardFilters />
 				<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} groupBy={groupBy}/>
-				<SidePanel open={!!ticketId && !!models.length && !!containerOrFederation}>
+				<SidePanel open={!!ticketId && !!containersAndFederations.length && !!containerOrFederation}>
 					<SlidePanelHeader>
 						<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
 							<OpenInViewerButton disabled={isNewTicket}>
