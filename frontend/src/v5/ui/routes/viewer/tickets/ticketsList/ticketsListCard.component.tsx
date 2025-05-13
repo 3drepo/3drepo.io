@@ -28,25 +28,17 @@ import { formatMessage } from '@/v5/services/intl';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { FilterEllipsisMenu } from '@components/viewer/cards/cardFilters/filterEllipsisMenu/filterEllipsisMenu.component';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
-import { useParams } from 'react-router';
-import { ViewerParams } from '../../../routes.constants';
 import { Tooltip } from '@mui/material';
 import { CardAction } from '@components/viewer/cards/cardAction/cardAction.styles';
 import { TicketContext } from '../ticket.context';
 
 export const TicketsListCard = () => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const filters = TicketsCardHooksSelectors.selectFilters();
 	const { availableTemplateIds } = useContext(TicketContext);
 	
-	useEffect(() => {
-		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederation]);
-	}, [tickets, filters]);
-
 	return (
 		<CardContainer>
 			<CardHeader

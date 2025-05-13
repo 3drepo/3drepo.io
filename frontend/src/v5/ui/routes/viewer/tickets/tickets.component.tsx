@@ -43,6 +43,9 @@ export const Tickets = () => {
 	const view = TicketsCardHooksSelectors.selectView();
 	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();
 	const templateIds = TicketsCardHooksSelectors.selectCurrentTemplates().map(({ _id }) => _id);
+	const filters = TicketsCardHooksSelectors.selectFilters();
+	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	const areFiltersPending = TicketsCardHooksSelectors.selectAreInitialFiltersPending();
 
 	const readOnly = isFederation
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -77,6 +80,11 @@ export const Tickets = () => {
 			newTicketPins.forEach(({ id }) => Viewer.removePin(id));
 		}
 	}, [view]);
+
+	useEffect(() => {
+		if (areFiltersPending) return;
+		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederation]);
+	}, [tickets, filters, areFiltersPending]);
 
 	return (
 		<TicketContextComponent isViewer containerOrFederation={containerOrFederation} availableTemplateIds={templateIds}>
