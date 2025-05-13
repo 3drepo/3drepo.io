@@ -119,7 +119,10 @@ export const TicketsTable = () => {
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
 	[models, containerOrFederation]);
 
-	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
+	const onSaveTicket = (_id: string) => {
+		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
+		setTicketValue(containerOrFederation, _id, null, true);
+	};
 
 	const getOpenInViewerLink = () => {
 		if (!containerOrFederation) return '';
