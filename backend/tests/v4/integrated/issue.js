@@ -3171,10 +3171,9 @@ describe('Issues', () => {
 			it('if model does not exist should fail', async () => {
 				const res = await bcfAgent.post(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
 					.attach('file', __dirname + bcf.path)
-					.expect(404)
+					.expect(404);
 
-					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
-					});
+				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 			});
 
 			it('if teamspace does not exist should fail', async () => {
