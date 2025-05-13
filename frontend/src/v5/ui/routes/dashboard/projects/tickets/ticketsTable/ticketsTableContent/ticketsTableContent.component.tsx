@@ -29,6 +29,7 @@ import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { Container } from './ticketsTableContent.styles';
 
 const COLUMNS: TableColumn[] = [
 	{ name: 'id', width: 80, minWidth: 25 },
@@ -111,7 +112,9 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 			hiddenColumns={getHiddenColumns()}
 			columnGap={1}
 		>
-			<TableContent {...props} template={template} />
+			<Container>
+				<TableContent {...props} template={template} />
+			</Container>
 		</ResizableTableContextComponent>
 	);
 };

@@ -24,7 +24,7 @@ import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
 import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../../ticketsTable.helper';
-import { Container, ScrollableContainer, Title } from './ticketsTableResizableContent.styles';
+import { Container, Title } from './ticketsTableResizableContent.styles';
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -40,14 +40,12 @@ export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selected
 
 	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
-			<ScrollableContainer>
-				<TicketsTableGroup
-					tickets={filteredItems}
-					onNewTicket={onGroupNewTicket('')}
-					onEditTicket={setTicketValue}
-					selectedTicketId={selectedTicketId}
-				/>
-			</ScrollableContainer>
+			<TicketsTableGroup
+				tickets={filteredItems}
+				onNewTicket={onGroupNewTicket('')}
+				onEditTicket={setTicketValue}
+				selectedTicketId={selectedTicketId}
+			/>
 		);
 	}
 

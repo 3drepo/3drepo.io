@@ -16,38 +16,22 @@
  */
 
 import styled from 'styled-components';
-import { CollapsedItemContainer, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
+import { ControlsContainer as GroupCollapseHeader } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
 export const Container = styled.div`
-	${DashboardList} {
-		width: fit-content;
-		position: relative;
-		padding-right: 64px;
+	margin-bottom: -30px;
+	overflow: auto;
+	position: relative;
+	height: calc(100vh - 287px);
+	width: 100vw;
+	margin-left: -75px;
+	padding: 0 64px 30px 75px;
 
-		&:not(:first-of-type) {
-			padding-top: 17px;
-		}
-		
-		&:not(:last-of-type)::after {
-			content: '';
-			display: block;
-			position: sticky;
-			left: 0;
-			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-			height: 17px;
-			width: calc(100vw - 161px);
-		}
-
-		${CollapsedItemContainer} {
-			margin-top: 28px;
-		}
+	${GroupCollapseHeader} {
+		position: sticky;
+		left: 0;
+		overflow: unset;
+		width: calc(100vw - 161px);
+		margin-right: 0;
 	}
-`;
-
-export const Title = styled.div`
-	display: inline;
-	max-width: calc(100% - 30px);
-	text-overflow: ellipsis;
-	overflow: hidden;
-	margin-right: 5px;
 `;
