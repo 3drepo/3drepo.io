@@ -43,7 +43,7 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const prevValue = useRef(undefined);
 	const { getValues } = useFormContext();
 	const ticket = getValues() as ITicket;
-	const selectedTemplateId = ticket?.type ?? TicketsCardHooksSelectors.selectSelectedTemplateId();
+	const selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId() ?? ticket?.type;
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 
