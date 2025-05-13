@@ -21,16 +21,18 @@ import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColum
 import { blockEvent } from '@/v5/helpers/events.helpers';
 import { useEdgeScrolling } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/edgeScrolling';
 import { throttle } from 'lodash';
-	
+
 const getScrollParent = (node) => {
-	const isElement = node instanceof HTMLElement;
-	const overflowX = isElement && window.getComputedStyle(node).overflowY;
-	const isScrollable = overflowX !== 'visible' && overflowX !== 'hidden';
-	
+	let isScrollable = true;
+	if (node instanceof HTMLElement) {
+		const { overflowX } = window.getComputedStyle(node);
+		isScrollable = overflowX !== 'visible' && overflowX !== 'hidden';
+	}
 	if (isScrollable && node.scrollWidth >= node.clientWidth) return node;
 	return getScrollParent(node.parentNode);
 };
 
+const THROTTLE_TIME = 20;
 export const MovingColumnDropAreas = () => {
 	const {
 		setMovingColumn, movingColumn, moveColumn,
@@ -39,7 +41,7 @@ export const MovingColumnDropAreas = () => {
 	} = useContext(ResizableTableContext);
 	const [tableOffset, setTableOffset] = useState(0);
 	const ref = useRef(null);
-	const edgeScrolling = useEdgeScrolling();
+	const edgeScrolling = useEdgeScrolling({ throttleTime: THROTTLE_TIME });
 	
 	const columns = getVisibleColumns();
 	const movingColumnIndex = getIndex(movingColumn);
@@ -101,8 +103,15 @@ export const MovingColumnDropAreas = () => {
 	useEffect(() => {
 		edgeScrolling.start(getScrollParent(ref.current));
 		
-		const updateTableOffset = () => setTableOffset(getTableOffset());
-		const throttledRepaint = throttle(updateTableOffset, 20, { leading: true, trailing: true });
+		const updateTableOffset = () => {
+			if (!ref.current) return;
+			setTableOffset(getTableOffset());
+		};
+		const throttledRepaint = throttle(
+			updateTableOffset,
+			THROTTLE_TIME,
+			{ leading: true, trailing: true },
+		);
 	
 		const repaint = () => {
 			if (!ref.current) return;
