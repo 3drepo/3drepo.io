@@ -457,7 +457,7 @@ export class ThreeJsViewer {
 	animate() {
 		this.updateNearFarPlanes();
 
-		this.renderer.setClearAlpha(0);
+		this.renderer.setClearColor('white', 1);
 
 		this.renderer.setRenderTarget(this.pickBuffer);
 		this.renderer.render(this.pickScene, this.camera);
