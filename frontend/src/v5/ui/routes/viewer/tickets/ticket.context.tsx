@@ -24,7 +24,7 @@ export enum TicketDetailsView {
 export interface TicketContextType {
 	isViewer?: boolean;
 	containerOrFederation: string;
-	availableTemplateIds: string[];
+	availableTemplateIds?: string[];
 	detailsView: TicketDetailsView;
 	detailsViewProps?: any;
 	setDetailViewAndProps: (view: TicketDetailsView, props?: any) => void;
