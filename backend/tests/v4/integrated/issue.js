@@ -3172,7 +3172,8 @@ describe('Issues', () => {
 				bcfAgent.post(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
 					.attach('file', __dirname + bcf.path)
 					.expect(404, (err, res) => {
-						expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+						const { body } = res;
+						expect(body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
 						done(err);
 					});
 			});
