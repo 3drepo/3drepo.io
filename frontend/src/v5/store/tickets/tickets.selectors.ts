@@ -24,6 +24,7 @@ import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { reduceProperties } from './tickets.helpers';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -50,7 +51,12 @@ export const selectTicketsHaveBeenFetched = createSelector(
 export const selectTemplates = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
-	(state, modelId) => state.templatesByModelId[modelId] || [],
+	(state, modelId) => (state.templatesByModelId[modelId] || []).map((template) => {
+		return reduceProperties(template, (prop) => {
+			if (prop.deprecated) return;
+			return prop;
+		});
+	}),
 );
 
 export const selectActiveTemplates = createSelector(

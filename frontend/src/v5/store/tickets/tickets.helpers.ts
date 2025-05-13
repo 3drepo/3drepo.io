@@ -27,7 +27,7 @@ import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
 import { TicketBaseKeys, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
+import { EditableTicket, Group, GroupOverride, ITemplate, PropertyDefinition, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
@@ -35,16 +35,28 @@ import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
-export const getEditableProperties = (template) => {
-	const propertyIsEditable = ({ readOnly }) => !readOnly;
+export const reduceProperties = (template: ITemplate, map: (prop: PropertyDefinition) => Object | void ) => {
+	const reduceProps = (current, item) => {
+		const prop = map(item);
+		if (prop) {
+			current.push(prop);
+		}
+		return current;
+	};
 
 	return {
-		properties: (template.properties || []).filter(propertyIsEditable),
+		...template,
+		properties: (template.properties || []).reduce(reduceProps, []),
 		modules: (template.modules || []).map((module) => ({
 			...module,
-			properties: module.properties.filter(propertyIsEditable),
+			properties: (module.properties || []).reduce(reduceProps, []),
 		})),
 	};
+};
+
+export const getEditableProperties = (template) => {
+	const propertyIsEditable = (prop: PropertyDefinition) => prop.readOnly ? undefined : prop;
+	return reduceProperties(template, propertyIsEditable);
 };
 
 const templatePropertiesToTicketProperties = (properties = []) => (
