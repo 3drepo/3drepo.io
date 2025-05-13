@@ -1105,7 +1105,7 @@ const testUpdateManyTickets = () => {
 		});
 		const duplicateValue = ServiceHelper.generateRandomString();
 
-		const nTickets = 2;
+		const nTickets = 10;
 
 		const deprecatedTemplate = ServiceHelper.generateTemplate(false);
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
@@ -1158,9 +1158,8 @@ const testUpdateManyTickets = () => {
 						ticketToAdd._id = res.body._id;
 						ticketToAdd.properties[basePropertyLabels.UPDATED_AT] = new Date();
 					}));
-
-				await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
 			}));
+			await updateOne(teamspace, 'templates', { _id: stringToUUID(deprecatedTemplate._id) }, { $set: { deprecated: true } });
 		});
 
 		const checkTicketLogByDate = async (updatedDate) => {
