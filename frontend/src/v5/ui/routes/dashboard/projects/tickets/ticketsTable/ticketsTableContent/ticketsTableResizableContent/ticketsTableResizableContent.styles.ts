@@ -24,7 +24,7 @@ export const ScrollableContainer = styled.div`
 	position: relative;
 	height: calc(100vh - 287px);
 	width: 100vw;
-	left: -75px;
+	margin-left: -75px;
 	padding: 0 64px 30px 75px;
 
 	${GroupCollapseHeader} {
