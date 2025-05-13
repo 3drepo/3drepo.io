@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useState } from 'react';
+import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
 import { blockEvent } from '@/v5/helpers/events.helpers';
 import { useEdgeScrolling } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/edgeScrolling';
+import { throttle } from 'lodash';
 	
 const getScrollParent = (node) => {
 	const isElement = node instanceof HTMLElement;
@@ -37,6 +38,7 @@ export const MovingColumnDropAreas = () => {
 		columnGap, getIndex, getColumnOffsetLeft, getRowWidth, getVisibleColumns,
 	} = useContext(ResizableTableContext);
 	const [tableOffset, setTableOffset] = useState(0);
+	const ref = useRef(null);
 	const edgeScrolling = useEdgeScrolling();
 	
 	const columns = getVisibleColumns();
@@ -48,8 +50,10 @@ export const MovingColumnDropAreas = () => {
 		&& movingColumnIndex !== movingColumnDropIndex - 1
 	);
 
-	const getTableOffset = (el) => {
-		const box = el.getBoundingClientRect();
+	const getTableOffset = () => {
+		if (!ref.current) return 0;
+
+		const box = ref.current.getBoundingClientRect();
 		const { body, documentElement } = document;
 	
 		const scrollLeft = documentElement.scrollLeft || body.scrollLeft;
@@ -58,22 +62,8 @@ export const MovingColumnDropAreas = () => {
 	
 		return Math.round(left);
 	};
-
-	const onRender = (el) => {
-		if (!el) return;
-		setTableOffset(getTableOffset(el));
-
-		if (!edgeScrolling.isRunning) {
-			const scrollParent = getScrollParent(el);
-			const scrollParentIsOverflowing = scrollParent.scrollWidth > scrollParent.clientWidth;
-			if (scrollParentIsOverflowing) {
-				edgeScrolling.start(scrollParent);
-			}
-		}
-
-	};
 	
-	const getDropAreasWidths = () => {
+	const getDropAreasWidths = useCallback(() => {
 		let previousColHalfWidth = 0;
 		return columns.map(({ width }) => {
 			const colHalfWidth = width / 2;
@@ -81,7 +71,7 @@ export const MovingColumnDropAreas = () => {
 			previousColHalfWidth = colHalfWidth;
 			return areaWidth;
 		});
-	};
+	}, []);
 
 	const setDropColumnIndex = (e, index) => {
 		blockEvent(e);
@@ -108,9 +98,24 @@ export const MovingColumnDropAreas = () => {
 		edgeScrolling.stop();
 	};
 
+	useEffect(() => {
+		edgeScrolling.start(getScrollParent(ref.current));
+		
+		const updateTableOffset = () => setTableOffset(getTableOffset());
+		const throttledRepaint = throttle(updateTableOffset, 20, { leading: true, trailing: true });
+	
+		const repaint = () => {
+			if (!ref.current) return;
+			throttledRepaint();
+			requestAnimationFrame(repaint);
+		};
+
+		repaint();
+	}, []);
+
 	return (
 		<>
-			<TableCorner ref={onRender} />
+			<TableCorner ref={ref} />
 			<Container onMouseUp={dropColumn}>
 				<DropAreas $offset={tableOffset} onMouseLeave={onMouseLeaveDropArea}>
 					{getDropAreasWidths().map((width, index) => (
