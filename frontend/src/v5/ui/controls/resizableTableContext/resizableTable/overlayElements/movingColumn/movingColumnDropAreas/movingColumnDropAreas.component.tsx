@@ -19,18 +19,8 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
 import { blockEvent } from '@/v5/helpers/events.helpers';
-import { useEdgeScrolling } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/edgeScrolling';
 import { throttle } from 'lodash';
 
-const getScrollParent = (node) => {
-	let isScrollable = true;
-	if (node instanceof HTMLElement) {
-		const { overflowX } = window.getComputedStyle(node);
-		isScrollable = overflowX !== 'visible' && overflowX !== 'hidden';
-	}
-	if (isScrollable && node.scrollWidth >= node.clientWidth) return node;
-	return getScrollParent(node.parentNode);
-};
 
 const THROTTLE_TIME = 20;
 export const MovingColumnDropAreas = () => {
@@ -41,7 +31,6 @@ export const MovingColumnDropAreas = () => {
 	} = useContext(ResizableTableContext);
 	const [tableOffset, setTableOffset] = useState(0);
 	const ref = useRef(null);
-	const edgeScrolling = useEdgeScrolling({ throttleTime: THROTTLE_TIME });
 	
 	const columns = getVisibleColumns();
 	const movingColumnIndex = getIndex(movingColumn);
@@ -97,12 +86,9 @@ export const MovingColumnDropAreas = () => {
 		setMovingColumn(null);
 		setMovingColumnDropIndex(-1);
 		moveColumn(movingColumn, movingColumnDropIndex);
-		edgeScrolling.stop();
 	};
 
 	useEffect(() => {
-		edgeScrolling.start(getScrollParent(ref.current));
-		
 		const updateTableOffset = () => {
 			if (!ref.current) return;
 			setTableOffset(getTableOffset());

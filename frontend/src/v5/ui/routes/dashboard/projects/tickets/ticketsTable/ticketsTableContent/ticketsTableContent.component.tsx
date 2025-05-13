@@ -16,7 +16,7 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -30,6 +30,7 @@ import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { Container } from './ticketsTableContent.styles';
+import { useEdgeScrolling } from '../edgeScrolling';
 
 const COLUMNS: TableColumn[] = [
 	{ name: 'id', width: 80, minWidth: 25 },
@@ -45,14 +46,22 @@ const COLUMNS: TableColumn[] = [
 	{ name: `modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`, width: 134, minWidth: 25 },
 ];
 
-const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
+const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const { filteredItems } = useContext(SearchContext);
-	const { stretchTable } = useContext(ResizableTableContext);
+	const { stretchTable, movingColumn } = useContext(ResizableTableContext);
+	const edgeScrolling = useEdgeScrolling({ throttleTime: 20 });
 
 	useEffect(() => {
 		if (templateAlreadyFetched(template)) return;
 		stretchTable();
 	}, [template]);
+
+	useEffect(() => {
+		if (movingColumn) {
+			edgeScrolling.start(tableRef.current);
+			return edgeScrolling.stop;
+		}
+	}, [movingColumn]);
 
 	if (!templateAlreadyFetched(template)) {
 		return (
@@ -78,6 +87,7 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
+	const tableRef = useRef(null);
 
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const { config, modules } = template;
@@ -112,8 +122,8 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 			hiddenColumns={getHiddenColumns()}
 			columnGap={1}
 		>
-			<Container>
-				<TableContent {...props} template={template} />
+			<Container ref={tableRef}>
+				<TableContent {...props} tableRef={tableRef} template={template} />
 			</Container>
 		</ResizableTableContextComponent>
 	);
