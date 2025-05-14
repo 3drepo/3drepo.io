@@ -63,6 +63,11 @@ SessionUtils.isSessionValid = async (session, cookies, headers, ignoreApiKey = f
 	return false;
 };
 
+SessionUtils.setCSRFCookie = (token, res) => {
+	const { domain, maxAge } = cookie;
+	res.cookie(CSRF_COOKIE, token, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
+};
+
 SessionUtils.getUserFromSession = ({ user } = {}) => (user ? user.username : undefined);
 
 SessionUtils.destroySession = (session, res, callback, elective) => {
