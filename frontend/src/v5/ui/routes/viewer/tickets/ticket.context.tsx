@@ -41,7 +41,7 @@ export const TicketContext = createContext(defaultValue);
 TicketContext.displayName = 'TicketContext';
 
 export const TicketContextComponent = ({
-	children, isViewer = false, containerOrFederation, availableTemplateIds }) => {
+	children, isViewer = false, containerOrFederation, availableTemplateIds = [] }) => {
 	const [detailsView, setView] = useState(TicketDetailsView.Form);
 	const [detailsViewProps, setViewProps] = useState();
 
