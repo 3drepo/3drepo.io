@@ -18,10 +18,11 @@
 import { TicketCommentsActions } from '@/v5/store/tickets/comments/ticketComments.redux';
 import Mockdate from 'mockdate';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
-import { selectComments } from '@/v5/store/tickets/comments/ticketComments.selectors';
+import { selectCommentById, selectComments } from '@/v5/store/tickets/comments/ticketComments.selectors';
 import { mockServer } from '../../../internals/testing/mockServer';
-import { commentHistoryMockFactory, commentMockFactory } from './ticketComments.fixture';
+import { commentMockFactory } from './ticketComments.fixture';
 import { createTestStore } from '../../test.helpers';
+import { pick } from 'lodash';
 
 describe('Ticket Comments: sagas', () => {
 	let dispatch; let getState; let
@@ -43,6 +44,16 @@ describe('Ticket Comments: sagas', () => {
 		onError = jest.fn();
 		({ dispatch, getState, waitForActions } = createTestStore());
 	});
+
+	const getNewHistory = () => {
+		const oldComment = selectCommentById(getState(), ticketId, comment._id)
+		return (oldComment.history || []).concat({
+			message: oldComment.message,
+			images: oldComment.images,
+			view: oldComment.view,
+			timestamp: new Date(),
+		});
+	}
 
 	describe('comments', () => {
 		// Containers
@@ -72,12 +83,8 @@ describe('Ticket Comments: sagas', () => {
 		});
 
 		it('should call create container ticket\'s comment endpoint', async () => {
-			const commentToBeCreated = commentMockFactory({ deleted: false });
-			const inputComment = {
-				message: commentToBeCreated.message,
-				author: commentToBeCreated.author,
-				images: commentToBeCreated.images,
-			};
+			const commentToBeCreated = commentMockFactory({ history: [], deleted: false });
+			const inputComment = pick(commentToBeCreated, ['message', 'author', 'images', 'view'])
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments`, () => true)
 				.reply(200, { _id: commentToBeCreated._id })
@@ -86,7 +93,7 @@ describe('Ticket Comments: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(TicketCommentsActions.createComment(teamspace, projectId, modelId, ticketId, false, inputComment, onSuccess, onError));
-			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: commentToBeCreated._id, ...commentToBeCreated })]);
+			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, commentToBeCreated)]);
 
 			expect(onSuccess).toHaveBeenCalled();
 			expect(onError).not.toHaveBeenCalled();
@@ -111,15 +118,18 @@ describe('Ticket Comments: sagas', () => {
 
 		it('should call container\'s update ticket comment endpoint', async () => {
 			Mockdate.set(new Date());
+			populateStore();
 			mockServer
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(200);
 
-			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()], updatedAt: new Date() };
-
+			const commentUpdate = { message: 'updatedMessage', updatedAt: new Date() };
+			const history = getNewHistory();
 			await waitForActions(() => {
 				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, false, comment._id, commentUpdate));
-			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, ...commentUpdate })]);
+			}, [
+				TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, history, ...commentUpdate })
+			]);
 			Mockdate.reset();
 		});
 
@@ -129,7 +139,7 @@ describe('Ticket Comments: sagas', () => {
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(404);
 
-			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
+			const commentUpdate = { message: 'updatedMessage' };
 
 			await waitForActions(() => {
 				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, false, comment._id, commentUpdate));
@@ -190,12 +200,8 @@ describe('Ticket Comments: sagas', () => {
 		});
 
 		it('should call create federation ticket\'s comment endpoint', async () => {
-			const commentToBeCreated = commentMockFactory({ deleted: false });
-			const inputComment = {
-				message: commentToBeCreated.message,
-				author: commentToBeCreated.author,
-				images: commentToBeCreated.images,
-			};
+			const commentToBeCreated = commentMockFactory({ history: [], deleted: false });
+			const inputComment = pick(commentToBeCreated, ['message', 'author', 'images', 'view'])
 			mockServer
 				.post(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments`, () => true)
 				.reply(200, { _id: commentToBeCreated._id })
@@ -229,15 +235,17 @@ describe('Ticket Comments: sagas', () => {
 
 		it('should call federation\'s update ticket comment endpoint', async () => {
 			Mockdate.set(new Date());
+			populateStore();
 			mockServer
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(200);
 
-			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()], updatedAt: new Date() };
+			const commentUpdate = { message: 'updatedMessage', updatedAt: new Date() };
+			const history = getNewHistory();
 
 			await waitForActions(() => {
 				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, true, comment._id, commentUpdate));
-			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, ...commentUpdate })]);
+			}, [TicketCommentsActions.upsertCommentSuccess(ticketId, { _id: comment._id, history, ...commentUpdate })]);
 
 			Mockdate.reset();
 		});
@@ -248,7 +256,7 @@ describe('Ticket Comments: sagas', () => {
 				.put(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/${ticketId}/comments/${comment._id}`, () => true)
 				.reply(404);
 
-			const commentUpdate = { message: 'updatedMessage', history: [commentHistoryMockFactory()] };
+			const commentUpdate = { message: 'updatedMessage' };
 
 			await waitForActions(() => {
 				dispatch(TicketCommentsActions.updateComment(teamspace, projectId, modelId, ticketId, true, comment._id, commentUpdate));
