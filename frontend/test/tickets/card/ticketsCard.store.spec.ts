@@ -1,5 +1,5 @@
 import { TicketsCardActions } from "@/v5/store/tickets/card/ticketsCard.redux";
-import { selectAvailableTemplatesFilters, selectFilters, selectCardFilters, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
+import { selectAvailableTemplatesFilters, selectFilters, selectCardFilters, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView, selectAreInitialFiltersPending } from "@/v5/store/tickets/card/ticketsCard.selectors";
 import { TicketsCardViews } from "@/v5/ui/routes/viewer/tickets/tickets.constants";
 import { createTestStore } from "../../test.helpers";
 import { BaseFilter, CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
@@ -64,7 +64,6 @@ describe('Tickets: store', () => {
 		});
 
 		describe('filters', () => {
-			// const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = DEFAULT_FILTERS;
 			const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = templatesToFilters([]);
 			const baseFilter: BaseFilter = {
 				operator: 'is',
@@ -98,10 +97,16 @@ describe('Tickets: store', () => {
 					const filtersInStore = selectCardFilters(getState());
 					expect(filtersInStore).toEqual([]);
 				});
+
+				it('should set pending state for initial filters', () => {
+					expect(selectAreInitialFiltersPending(getState())).toBeTruthy();
+					dispatch(TicketsCardActions.setAreInitialFiltersPending(false));
+					expect(selectAreInitialFiltersPending(getState())).toBeFalsy();
+				})
 			})
 
 			describe('available template filters', () => {
-				const getAvailableFilters = () => selectAvailableTemplatesFilters(getState());
+				const getAvailableFilters = () => selectAvailableTemplatesFilters(getState(), [templateId]);
 				const getAvailableFiltersNames = () => getAvailableFilters().map((value) => value.property);
 			
 				it('all the default filters should be available originally', () => {

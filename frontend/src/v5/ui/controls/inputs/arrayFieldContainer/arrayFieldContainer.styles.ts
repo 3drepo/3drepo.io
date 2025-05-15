@@ -44,7 +44,7 @@ export const IconContainer = styled.button.attrs({
 	display: inline-block;
 	padding: 0;
 	height: 18px;
-	margin-top: 4px;
 	border: none;
 	background: transparent;
+	align-self: center;
 `;

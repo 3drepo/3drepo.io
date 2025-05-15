@@ -16,33 +16,26 @@
  */
 
 import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { uniq } from 'lodash';
-import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
-import { ViewerParams } from '../../routes.constants';
 import { Transformers, useSearchParam } from '../../useSearchParam';
 import { CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { StatusValue } from '@/v5/store/tickets/tickets.types';
 import { TicketStatusDefaultValues, TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
-import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { useParams } from 'react-router-dom';
+import { DashboardTicketsParams } from '../../routes.constants';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
-	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const isFed = modelIsFederation(containerOrFederation);
-	
-	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
-
-	useEffect(() => {
-		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
-	}, [tickets, cardFilters]);
+	const templatesFromStore = ProjectsHooksSelectors.selectCurrentProjectTemplates();
+	const { template: templateIdFromURL } = useParams<DashboardTicketsParams>();
+	const templatesFromURL = TicketsHooksSelectors.selectTemplatesByIds([templateIdFromURL]);
+	const templates = templatesFromURL.length ? templatesFromURL : templatesFromStore;
 
 	const getTicketFiltersFromCodes = (values): CardFilter[] => [{
 		module: '',
@@ -56,7 +49,7 @@ export const TicketFiltersSetter = () => {
 	
 	const getNonCompletedTicketFiltersByStatus = (): CardFilter => {
 		const isCompletedValue = ({ type }: StatusValue) => [TicketStatusTypes.DONE, TicketStatusTypes.VOID].includes(type);
-		const getValuesByTemplate = ({ _id }) => selectStatusConfigByTemplateId(getState(), containerOrFederation, _id).values;
+		const getValuesByTemplate = ({ _id }) => selectStatusConfigByTemplateId(getState(), _id).values;
 
 		const completedValueNames = templates
 			.flatMap(getValuesByTemplate)
@@ -101,12 +94,16 @@ export const TicketFiltersSetter = () => {
 		return filters;
 	};
 
+	const upsertFilters = async (filters) => {
+		await Promise.all(filters.map(TicketsCardActionsDispatchers.upsertFilter));
+		TicketsCardActionsDispatchers.setAreInitialFiltersPending(false);
+	};
+
 	useEffect(() => {
 		if (templates.length) {
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
 			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : getNonCompletedTicketFilters();
-			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
-
+			upsertFilters(filters);
 			if (ticketCodes.length) {
 				ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 			}

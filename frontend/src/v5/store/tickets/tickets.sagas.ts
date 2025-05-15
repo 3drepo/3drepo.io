@@ -250,7 +250,7 @@ export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, tic
 export default function* ticketsSaga() {
 	yield takeEvery(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeEvery(TicketsTypes.FETCH_TICKET, fetchTicket);
-	yield takeLatest(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
+	yield takeEvery(TicketsTypes.FETCH_TEMPLATES, fetchTemplates);
 	yield takeEvery(TicketsTypes.FETCH_TEMPLATE, fetchTemplate);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET, updateTicket);
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
