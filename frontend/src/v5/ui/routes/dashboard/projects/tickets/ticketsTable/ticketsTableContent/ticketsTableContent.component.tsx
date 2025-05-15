@@ -31,9 +31,11 @@ import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTabl
 import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
 	const { filteredItems } = useContext(SearchContext);
+	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 	const { stretchTable, visibleSortedColumnsNames, getAllColumnsNames, setVisibleSortedColumnsNames } = useContext(ResizableTableContext);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
@@ -47,7 +49,11 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 	}, [template, templateWasFetched, tableHasCompletedRendering]);
 
 	useEffect(() => {
-		setVisibleSortedColumnsNames(initialVisibleColumns);
+		let newVisibleColumns = [...initialVisibleColumns];
+		if (modelsIds.length <= 1) {
+			newVisibleColumns = newVisibleColumns.filter((name) => name !== 'modelName');
+		}
+		setVisibleSortedColumnsNames(newVisibleColumns);
 	}, [template]);
 
 	if (!templateWasFetched) {
