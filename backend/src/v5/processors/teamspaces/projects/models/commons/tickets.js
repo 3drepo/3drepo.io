@@ -24,7 +24,7 @@ const {
 } = require('../../../../../schemas/tickets/templates.constants');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
-const { processExternalData, processSpecialProperties } = require('../../../../../utils/ticketGroups');
+const { processExternalData, processSpecialProperties } = require('./tickets.groups');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');

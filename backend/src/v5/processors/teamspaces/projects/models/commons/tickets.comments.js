@@ -16,7 +16,7 @@
  */
 
 const { addComment, deleteComment, getCommentById, getCommentsByTicket, importComments, updateComment } = require('../../../../../models/tickets.comments');
-const { calculateRemoveGroups, processCommentGroups, processExternalData, processGroupsUpdate } = require('../../../../../utils/ticketGroups');
+const { calculateRemoveGroups, processCommentGroups, processExternalData, processGroupsUpdate } = require('./tickets.groups');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');

@@ -479,7 +479,7 @@ Schemas.schemas.modelSettings = {
 	},
 };
 
-Schemas.schemas.commentView = {
+Schemas.schemas.ticketCommentView = {
 	description: 'Storing spacial coordinates representing what the commenter is seeing',
 	type: 'object',
 	properties: {
