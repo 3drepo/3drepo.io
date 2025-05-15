@@ -109,7 +109,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 		const multiple = propertyType === 'manyOf';
 		return (
 			<Cell name={name}>
-				{value?.length && (<AssigneesSelect value={value} multiple={multiple} disabled />)}
+				{!!value?.length && (<AssigneesSelect value={value} multiple={multiple} disabled />)}
 			</Cell>
 		);
 	}
