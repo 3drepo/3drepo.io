@@ -15,13 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import styled from 'styled-components';
 
-export const ResizableTableRow = (props) => {
-	const { getVisibleColumns, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumns().map(({ width }) => `${width}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
-};
+// This is not to interfere with other components and to keep the cursor as
+// "col-resize" while resizing even when moving the mouse outside the table
+export const overlayStyles = `
+	height: 100vh;
+	width: 100vw;
+	cursor: col-resize;
+	pointer-events: all;
+	position: absolute;
+	z-index: 100;
+	top: 0;
+`;
+
+export const ResizerElement = styled.div`
+	height: 100%;
+	position: relative;
+	cursor: col-resize;
+	width: 7px;
+	left: -3.5px;
+`;

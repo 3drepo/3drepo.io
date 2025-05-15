@@ -16,7 +16,7 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import _ from 'lodash';
@@ -24,8 +24,7 @@ import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
 import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../../ticketsTable.helper';
-import { Container, ScrollableContainer, Title } from './ticketsTableResizableContent.styles';
-import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { Container, Title } from './ticketsTableResizableContent.styles';
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -35,25 +34,18 @@ export type TicketsTableResizableContentProps = {
 export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selectedTicketId }: TicketsTableResizableContentProps) => {
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
-	const { stretchTable } = useContext(ResizableTableContext);
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
-	
-	useEffect(() => {
-		stretchTable();
-	}, [template]);
 
 	if (groupBy === NONE_OPTION || !groupBy) {
 		return (
-			<ScrollableContainer>
-				<TicketsTableGroup
-					tickets={filteredItems}
-					onNewTicket={onGroupNewTicket('')}
-					onEditTicket={setTicketValue}
-					selectedTicketId={selectedTicketId}
-				/>
-			</ScrollableContainer>
+			<TicketsTableGroup
+				tickets={filteredItems}
+				onNewTicket={onGroupNewTicket('')}
+				onEditTicket={setTicketValue}
+				selectedTicketId={selectedTicketId}
+			/>
 		);
 	}
 

@@ -16,12 +16,13 @@
  */
 
 import { useContext, useRef } from 'react';
-import { overlayStyles, ResizerElement, ResizerLine } from './resizer.styles';
-import { ResizableTableContext } from '../resizableTableContext';
+import { overlayStyles, ResizerElement } from './resizer.styles';
+import { ResizableTableContext } from '../../../../resizableTableContext';
+import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.styles';
 
 type ResizerProps = { name: string };
 export const Resizer = ({ name }: ResizerProps) => {
-	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName, isHidden, columnGap } = useContext(ResizableTableContext);
+	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName, isHidden } = useContext(ResizableTableContext);
 	const width = getWidth(name);
 	const hidden = isHidden(name);
 	const initialPosition = useRef(null);
@@ -73,16 +74,20 @@ export const Resizer = ({ name }: ResizerProps) => {
 	
 	if (hidden) return null;
 
+	const getStyle = () => {
+		if (resizerName !== name) return 'none';
+		if (isResizing) return 'solid';
+		return 'dashed';
+	};
+
 	return (
-		<ResizerLine
-			$offset={width}
+		<DelimiterLine
 			onMouseOver={handleMouseOver}
 			onMouseOut={handleMouseOut}
-			$highlight={resizerName === name}
-			$isResizing={isResizing}
-			$columnGap={columnGap}
+			$offset={getWidth(name)}
+			$style={getStyle()}
 		>
 			<ResizerElement onMouseDown={onMouseDown} />
-		</ResizerLine>
+		</DelimiterLine>
 	);
 };
