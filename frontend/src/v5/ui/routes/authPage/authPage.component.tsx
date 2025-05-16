@@ -30,7 +30,6 @@ import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { SubmitButton } from '@controls/submitButton';
 import { useState } from 'react';
-import { CircularProgress } from '@mui/material';
 import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 
 const APP_VERSION = ClientConfig.VERSION;
@@ -85,9 +84,8 @@ export const AuthPage = () => {
 					disabled={loading}
 				/>
 				{error && (<UnhandledError error={error} />)}
-				<SubmitButton disabled={!isValid || loading}>
-					{loading && <CircularProgress size={20} />}
-					{!loading && <FormattedMessage id="authPage.button" defaultMessage="Log in" />}
+				<SubmitButton isPending={loading} disabled={!isValid}>
+					<FormattedMessage id="authPage.button" defaultMessage="Log in" />
 				</SubmitButton>
 				<Footer>
 					<FormattedMessage
