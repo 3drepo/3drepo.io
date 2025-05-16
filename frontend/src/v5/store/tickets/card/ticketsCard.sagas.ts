@@ -59,13 +59,17 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 
 export function* fetchFilteredTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsListAction) {
 	try {
+		yield put(TicketsCardActions.setFiltering(true));
+
 		const filters = yield select(selectCardFilters);
 		const fetchModelTickets = isFederation
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { filters: filtersToQuery(filters) });
 		const ticketIds = tickets.map((t) => t._id);
+
 		yield put(TicketsCardActions.setFilteredTicketIds(ticketIds));
+		yield put(TicketsCardActions.setFiltering(false));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'tickets.fetchFilteredTickets.error', defaultMessage: 'trying to fetch the filtered tickets' }),

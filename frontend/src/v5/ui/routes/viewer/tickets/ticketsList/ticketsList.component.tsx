@@ -18,22 +18,60 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List } from './ticketsList.styles';
+import { List, ListContainer, Loader } from './ticketsList.styles';
+import { TableVirtuoso } from 'react-virtuoso';
+import { useEffect, useRef } from 'react';
 
 export const TicketsList = () => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
+	const shouldShowLoader = filteredTickets.length >= 10;
+	const virtuosoRef = useRef<any>();
+	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
+	
+	useEffect(() => {
+		virtuosoRef.current?.scrollToIndex?.({
+			behavior: 'instant',
+			block: 'nearest',
+			align: 'start',
+			index: selectedIndex === -1 ? 0 : selectedIndex,
+		});
+	}, [selectedIndex, filteredTickets, isFiltering]);
+
+	if (isFiltering) {
+		return (
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.tickets.searching" defaultMessage="Searching..." />
+			</EmptyListMessage>
+		);
+	}
+
+
+	if (!filteredTickets.length) {
+		return (
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+			</EmptyListMessage>
+		);
+	}
 
 	return (
-		<>
-			{filteredTickets.length ? (
-				<List>
-					{filteredTickets.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}
-				</List>
-			) : (
-				<EmptyListMessage>
-					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
-				</EmptyListMessage>
-			)}
-		</>
+		<ListContainer >
+			{shouldShowLoader && <Loader />}
+			<TableVirtuoso
+				ref={virtuosoRef}
+				data={filteredTickets}
+				followOutput={() => true}
+				components={{
+					Table: List,
+				}}
+				increaseViewportBy={400}
+				style={{ position: 'relative', top: (shouldShowLoader ? '-100%' : 0) }}
+				itemContent={(index, ticket) => (
+					<TicketItem ticket={ticket} key={ticket._id} />
+				)}
+			/>
+		</ListContainer>
 	);
 };
