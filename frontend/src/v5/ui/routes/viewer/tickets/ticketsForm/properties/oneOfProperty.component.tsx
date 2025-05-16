@@ -29,21 +29,22 @@ type OneOfPropertyProps = FormInputProps & {
 	onBlur: () => void,
 	immutable?: boolean;
 };
-export const OneOfProperty = ({ values, value, immutable, ...props }: OneOfPropertyProps) => {
+export const OneOfProperty = ({ values, value, onBlur, immutable, ...props }: OneOfPropertyProps) => {
 	const canClear = !props.required && !props.disabled && !!value && !immutable;
 	const onClear = () => {
 		props.onChange('');
-		props.onBlur();
+		onBlur?.();
 	};
 	
 	if (values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty value={value} canClear={canClear} {...props} />);
+		return (<JobsAndUsersProperty value={value} canClear={canClear} onBlur={onBlur} {...props} />);
 	}
 	
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
 	return (
 		<Select
 			{...props}
+			onClose={onBlur}
 			value={value ?? ''}
 			endAdornment={canClear && (
 				<ClearIconContainer onClick={onClear}>
