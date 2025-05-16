@@ -51,9 +51,10 @@ export const useSSOLogin = () => {
 		{ errorMessage: errorMessages[error] }) : null;
 
 	return [
-		(redirectUri, email) => ssoLogin(redirectUri, email).then(({ data }) => {
+		async (redirectUri, email) => {
+			const { data } = await ssoLogin(redirectUri, email);
 			window.location.href = data.link;
-		}),
+		},
 		errorMessage,
 	] as [(redirectUri: string, email: string) => void, string | null];
 };
