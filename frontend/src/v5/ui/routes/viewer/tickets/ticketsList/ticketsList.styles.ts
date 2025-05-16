@@ -26,6 +26,7 @@ export const Loader = styled(UnstyledLoader)`
 	height: 100%;
 	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
 	width: calc(100% - 12px);
+	border-radius: 8px;
 `;
 
 export const ListContainer = styled.div`
