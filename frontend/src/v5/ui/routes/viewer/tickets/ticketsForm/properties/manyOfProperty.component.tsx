@@ -28,12 +28,13 @@ type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
 	values: PropertyDefinition['values'];
 	value: any;
+	immutable?: boolean;
 	onOpen: () => void;
 	onBlur: () => void;
 };
 
-export const ManyOfProperty = ({ values, onBlur, ...props }: ManyOfPropertyProps) => {
-	const canClear = !props.required && !props.disabled && !!props.value?.length;
+export const ManyOfProperty = ({ values, onBlur, immutable, ...props }: ManyOfPropertyProps) => {
+	const canClear = !props.required && !props.disabled && !!props.value?.length && !immutable;
 
 	const onClear = () => {
 		props.onChange([]);

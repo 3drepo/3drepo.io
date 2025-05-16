@@ -24,9 +24,13 @@ import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import { ClearIconContainer } from './selectProperty.styles';
 
-type OneOfPropertyProps = FormInputProps & { values: PropertyDefinition['values']; onBlur: () => void };
-export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) => {
-	const canClear = !props.required && !props.disabled && !!value;
+type OneOfPropertyProps = FormInputProps & {
+	values: PropertyDefinition['values'];
+	onBlur: () => void,
+	immutable?: boolean;
+};
+export const OneOfProperty = ({ values, value, immutable, ...props }: OneOfPropertyProps) => {
+	const canClear = !props.required && !props.disabled && !!value && !immutable;
 	const onClear = () => {
 		props.onChange('');
 		props.onBlur();
