@@ -195,7 +195,7 @@ export type SetOverridesAction = Action<'SET_OVERRIDES'> & { overrides: Override
 export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: EditableTicket };
 export type SetEditingGroupsAction = Action<'SET_EDITING_GROUPS'> & { isEditing: boolean } ;
 export type SetIsShowingPinsAction = Action<'SET_IS_SHOWING_PINS'> & { isShowing: boolean } ;
-export type SetFilteringAction = Action<'SET_IS_SHOWING_PINS'> & { isFiltering: boolean } ;
+export type SetFilteringAction = Action<'SET_FILTERING'> & { isFiltering: boolean } ;
 
 
 export interface ITicketsCardActionCreators {
