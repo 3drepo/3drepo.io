@@ -32,6 +32,8 @@ export const TextOverflow = ({ children, className, tooltipText, lines }: ITextO
 	const ref = useRef(null);
 	const [isTruncated, setIsTruncated] = useState(false);
 
+	const tooltipTitle = isTruncated ? tooltipText || onlyText(children) : '';
+
 	const checkIfTruncated = useCallback(() => {
 		if (!ref.current) return false;
 
@@ -54,12 +56,12 @@ export const TextOverflow = ({ children, className, tooltipText, lines }: ITextO
 
 	return (
 		<>
-			<Tooltip
-				title={tooltipText || onlyText(children)}
-				style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
-				placement="bottom"
-			>
-				<Container ref={ref} lines={lines} className={className}>
+			<Tooltip title={tooltipTitle} placement="bottom">
+				<Container
+					ref={ref}
+					lines={lines}
+					className={className}
+				>
 					{children}
 				</Container>
 			</Tooltip>

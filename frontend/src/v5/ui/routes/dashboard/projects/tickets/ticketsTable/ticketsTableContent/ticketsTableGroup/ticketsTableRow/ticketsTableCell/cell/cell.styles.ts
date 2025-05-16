@@ -15,20 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
+import { Container as TextOverflowContainer } from '@controls/textOverflow/textOverflow.styles';
+import styled from 'styled-components';
+import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 
-type ResizableTableCellProps = {
-	children: any;
-	name: string;
-	className?: string;
-	onClick?: () => void;
-};
-export const ResizableTableCell = ({ name, children, ...props }: ResizableTableCellProps) => {
-	const { isVisible } = useContext(ResizableTableContext);
+export const CellContainer = styled(ResizableTableCell)`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	height: 100%;
+	padding: 0 10px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	font-weight: 500;
+	overflow: hidden;
+	box-sizing: border-box;
 
-	if (!isVisible(name)) return null;
-
-	return (<Item {...props}>{children}</Item>);
-};
+	${TextOverflowContainer} {
+		height: unset;
+	}
+`;

@@ -19,5 +19,4 @@ import styled from 'styled-components';
 
 export const Item = styled.div`
 	width: 100%;
-	overflow: hidden;
 `;

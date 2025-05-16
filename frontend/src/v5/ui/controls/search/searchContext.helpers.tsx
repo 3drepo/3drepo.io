@@ -15,20 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
-
-type ResizableTableCellProps = {
-	children: any;
-	name: string;
-	className?: string;
-	onClick?: () => void;
-};
-export const ResizableTableCell = ({ name, children, ...props }: ResizableTableCellProps) => {
-	const { isVisible } = useContext(ResizableTableContext);
-
-	if (!isVisible(name)) return null;
-
-	return (<Item {...props}>{children}</Item>);
-};
+export const matchesQuery = (item, query) => item.toLowerCase().includes(query.toLowerCase());
