@@ -19,7 +19,7 @@ import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
-import _, { isString } from 'lodash';
+import { isString } from 'lodash';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -40,7 +40,7 @@ import { ITicket, ViewpointState } from './tickets.types';
 import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
-import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { addUpdatedAtTime } from './tickets.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -146,8 +146,6 @@ export function* updateTicketGroup({ teamspace, projectId, modelId, ticketId, gr
 		}));
 	}
 }
-
-const addUpdatedAtTime = (ticket) => _.set(ticket, `properties.${BaseProperties.UPDATED_AT}`, +new Date());
 
 export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket, isFederation, onError }: UpdateTicketAction) {
 	try {
