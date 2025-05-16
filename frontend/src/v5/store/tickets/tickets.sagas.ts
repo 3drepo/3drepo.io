@@ -40,6 +40,7 @@ import { ITicket, ViewpointState } from './tickets.types';
 import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
+import { addUpdatedAtTime } from './tickets.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -153,6 +154,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 			: API.Tickets.updateContainerTicket;
 
 		yield updateModelTicket(teamspace, projectId, modelId, ticketId, ticket);
+		addUpdatedAtTime(ticket);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
 		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateTicket.updated', defaultMessage: 'Ticket updated' })));
 	} catch (error) {
@@ -243,6 +245,7 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId, re
 }
 
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket, revision }: UpsertTicketAndFetchGroupsAction) {
+	addUpdatedAtTime(ticket);
 	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision));
 }
