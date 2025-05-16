@@ -32,27 +32,9 @@ import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { reduceProperties } from './tickets.types.helpers';
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
-
-export const reduceProperties = (template: ITemplate, map: (prop: PropertyDefinition) => Object | void ) => {
-	const reduceProps = (current, item) => {
-		const prop = map(item);
-		if (prop) {
-			current.push(prop);
-		}
-		return current;
-	};
-
-	return {
-		...template,
-		properties: (template.properties || []).reduce(reduceProps, []),
-		modules: (template.modules || []).map((module) => ({
-			...module,
-			properties: (module.properties || []).reduce(reduceProps, []),
-		})),
-	};
-};
 
 export const getEditableProperties = (template) => {
 	const propertyIsEditable = (prop: PropertyDefinition) => prop.readOnly ? undefined : prop;

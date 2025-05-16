@@ -24,7 +24,7 @@ import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
-import { reduceProperties } from './tickets.helpers';
+import { reduceProperties } from './tickets.types.helpers';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
