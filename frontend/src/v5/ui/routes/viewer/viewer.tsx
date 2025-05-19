@@ -16,7 +16,7 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCardActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext, useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
@@ -53,6 +53,7 @@ export const Viewer = () => {
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
 
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const handlePinClick = ({ id }) => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(id);
@@ -112,7 +113,7 @@ export const Viewer = () => {
 
 	return (
 		<>
-			<TicketFiltersSetter />
+			<TicketFiltersSetter templates={templates}/>
 			<OpenDrawingFromUrl />
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />

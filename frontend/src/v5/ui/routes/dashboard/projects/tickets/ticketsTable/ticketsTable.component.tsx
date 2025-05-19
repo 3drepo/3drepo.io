@@ -192,7 +192,7 @@ export const TicketsTable = () => {
 			containerOrFederation={containerOrFederation}
 			availableTemplateIds={[templateId]}
 		>
-			<TicketFiltersSetter />
+			<TicketFiltersSetter templates={[selectedTemplate]}/>
 			<SearchContextComponent items={ticketsFilteredByTemplate}>
 				<ControlsContainer>
 					<FlexContainer>
