@@ -63,11 +63,18 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
-	const selectOptions = type === 'template' ?
-		TicketsCardHooksSelectors.selectCurrentTemplates().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
-		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(
-			availableTemplateIds, containerOrFederation ? [containerOrFederation] : containersAndFederations, module, property) : [];
+	let selectOptions = [];
 
+	if (type === 'template') {
+		selectOptions = TicketsCardHooksSelectors.selectCurrentTemplates().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }));
+	} else if (isSelectType(type)) {
+		selectOptions = TicketsCardHooksSelectors.selectPropertyOptions(
+			availableTemplateIds,
+			containerOrFederation ? [containerOrFederation] : containersAndFederations,
+			module,
+			property,
+		);
+	}
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
 
