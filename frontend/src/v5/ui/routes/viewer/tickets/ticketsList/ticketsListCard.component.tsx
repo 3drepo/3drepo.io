@@ -38,6 +38,7 @@ export const TicketsListCard = () => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const { availableTemplateIds } = useContext(TicketContext);
+	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(availableTemplateIds);
 	
 	return (
 		<CardContainer>
@@ -48,7 +49,7 @@ export const TicketsListCard = () => {
 					<>
 						{!readOnly && (<NewTicketMenu />)}
 						<FilterSelection
-							templateIds={availableTemplateIds}
+							unusedFilters={unusedFilters}
 							TriggerButton={(props) => (
 								<Tooltip title={props.disabled ? '' : formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
 									<CardAction {...props}>

@@ -100,6 +100,7 @@ export const TicketsTable = () => {
 	const tickets = TicketsCardHooksSelectors.selectFilteredTickets(containersAndFederations);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const areFiltersPending = TicketsCardHooksSelectors.selectAreInitialFiltersPending();
+	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(templateId).filter(({ type }) => type !== 'template');
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 	
 	const isFed = FederationsHooksSelectors.selectIsFederation();
@@ -213,7 +214,7 @@ export const TicketsTable = () => {
 					</FlexContainer>
 					<FlexContainer>
 						<FilterSelection
-							templateIds={[templateId]}
+							unusedFilters={unusedFilters}
 							TriggerButton={(props) => (
 								<NewFilterButton {...props}
 									startIcon={<FunnelIcon />}
