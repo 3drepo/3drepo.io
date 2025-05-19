@@ -27,19 +27,27 @@ import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
 import { TicketBaseKeys, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { EditableTicket, Group, GroupOverride, ITemplate, PropertyDefinition, ITicket, Viewpoint } from './tickets.types';
+import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { reduceProperties } from './tickets.types.helpers';
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
 export const getEditableProperties = (template) => {
-	const propertyIsEditable = (prop: PropertyDefinition) => prop.readOnly ? undefined : prop;
-	return reduceProperties(template, propertyIsEditable);
+	const propertyIsEditable = ({ readOnly }) => !readOnly;
+
+	// Doesnt return the config or anything else; this is used in the new ticket form in order to not show the comments.
+	return {
+		properties: (template.properties || []).filter(propertyIsEditable),
+		modules: (template.modules || []).map((module) => ({
+			...module,
+			properties: module.properties.filter(propertyIsEditable),
+		})),
+	};
 };
+
 
 const templatePropertiesToTicketProperties = (properties = []) => (
 	properties.reduce(
