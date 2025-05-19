@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { filterEmptyTicketValues, getDefaultTicket, getEditableProperties, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { ITemplate, ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
@@ -31,7 +31,7 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from './newTicketSlide.styles';
 import { hasRequiredViewerProperties } from '../../ticketsTable/ticketsTable.helper';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, IssueProperties, SafetibaseProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 type NewTicketSlideProps = {
 	template: ITemplate,
@@ -118,8 +118,9 @@ export const NewTicketSlide = ({ template, containerOrFederation, preselectedVal
 		onDirtyStateChange(!isEmpty(dirtyFields));
 	}, [isEmpty(dirtyFields)]);
 
-	useEffect(() => () => {
-		onDirtyStateChange(false);
+	useEffect(() => {
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.New);
+		return () => onDirtyStateChange(false);
 	}, []);
 
 	if (isLoading) return (<Loader />);

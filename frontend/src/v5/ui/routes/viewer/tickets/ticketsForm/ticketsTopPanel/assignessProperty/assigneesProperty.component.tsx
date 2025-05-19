@@ -39,10 +39,10 @@ export const AssigneesProperty = ({ onBlur, readOnly }) => (
 				onBlur={onBlur}
 				key={IssueProperties.ASSIGNEES}
 				disabled={readOnly}
-				showAddButton
 				multiple
 				excludeViewers
 				maxItems={17}
+				canClear
 			/>
 		</InputContainer>
 	</>
