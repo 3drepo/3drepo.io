@@ -16,19 +16,33 @@
  */
 
 import styled from 'styled-components';
+import { Backdrop } from '@mui/material';
+import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.styles';
 
-export const Table = styled.div`
-	width: 100%;
-	overflow-x: scroll;
-	position: relative;
+export const TableCorner = styled.div`
+	position: absolute;
 `;
 
-export const OverlayElements = styled.div`
-	position: absolute;
-	top: 0;
-	width: 100%;
+export const Container = styled(Backdrop).attrs({ open: true })`
+	cursor: grabbing;
+	z-index: 1000;
+	pointer-events: all;
+	display: block;
+`;
+
+export const DropAreas = styled.div<{ $offset: number }>`
+	margin-left: ${({ $offset }) => $offset}px;
+	width: fit-content;
 	height: 100%;
-	pointer-events: none;
 	display: flex;
-	flex-direction: row;
+`;
+
+export const Area = styled.div<{ $width: number }>`
+	width: ${({ $width }) => $width}px;
+	height: 100%;
+	display: inline-block;
+`;
+
+export const DropLine = styled(DelimiterLine)`
+	position: absolute;
 `;

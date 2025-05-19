@@ -17,11 +17,22 @@
 
 import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import { ResizableTableCell } from '../resizableTableCell/resizableTableCell.component';
+import { blockEvent } from '@/v5/helpers/events.helpers';
 
-export const ResizableTableRow = (props) => {
-	const { getVisibleColumns, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumns().map(({ width }) => `${width}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
+export const ResizableTableHeader = ({ name, children, ...props }) => {
+	const { setMovingColumn } = useContext(ResizableTableContext);
+
+	const onDragStart = (e) => {
+		// The blockEvent is to fix a bug in firefox where the dragging the
+		// dragged column is not dropped on mouseUp, but requires a further click
+		blockEvent(e);
+		setMovingColumn(name);
+	};
+
+	return (
+		<ResizableTableCell draggable onDragStart={onDragStart} name={name} {...props}>
+			{children}
+		</ResizableTableCell>
+	);
 };

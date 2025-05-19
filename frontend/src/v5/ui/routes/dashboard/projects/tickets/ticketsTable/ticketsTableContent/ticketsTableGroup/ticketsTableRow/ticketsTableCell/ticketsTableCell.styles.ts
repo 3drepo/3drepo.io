@@ -16,14 +16,27 @@
  */
 
 import styled, { css } from 'styled-components';
+import { Item as Cell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.styles';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
+export const Container = styled.div<{ $isMoving?: boolean }>`
+	display: contents;
+
+	${Cell} {
+		color: ${({ theme }) => theme.palette.secondary.main};
+		height: 100%;
+		padding: 0 10px;
+		display: flex;
+		align-items: center;
+		justify-content: flex-start;
+		font-weight: 500;
+		overflow: hidden;
+		box-sizing: border-box;
+		background-color: ${({ $isMoving, theme }) => $isMoving ? theme.palette.primary.lightest : theme.palette.primary.contrast};
+	}
 
 	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
+		&&& ${Cell} {
+			background-color: ${theme.palette.primary.lightest};
+		}
+	`}
 `;
