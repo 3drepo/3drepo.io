@@ -88,12 +88,19 @@ export const selectTicketsRaw = createSelector(
 export const selectTickets = createSelector(
 	selectTicketsRaw,
 	selectTicketsGroups,
+	selectFederationById,
+	selectContainerById,
 	(state, modelId) => modelId,
-	(ticketsList, groups, modelId): ITicket[] => {
+	(ticketsList, groups, federation, container, modelId): ITicket[] => {
 		const storeState = getState();
 		const tickets = ticketsList.map((ticket) => {
 			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
-			return ticketWithGroups(({ ...ticketWithStatus, modelId }), groups);
+			const ticketWithStatusAndModelInfo = {
+				...ticketWithStatus,
+				modelId,
+				modelName: (federation || container)?.name,
+			} as ITicket;
+			return ticketWithGroups(ticketWithStatusAndModelInfo, groups);
 		});
 
 		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
@@ -118,16 +125,10 @@ export const selectRiskCategories = createSelector(
 );
 
 export const selectTicketsByContainersAndFederations = createSelector(
-	(state) => (modelId) => selectTickets(state, modelId),
-	(state) => (modelId) => selectFederationById(state, modelId),
-	(state) => (modelId) => selectContainerById(state, modelId),
+	selectTicketsDomain,
 	(state, modelsIds: string[]) => modelsIds,
-	(selectTicketsById, selectFederation, selectContainer, modelsIds) => {
-		const tickets = modelsIds.flatMap((modelId) => {
-			const modelTickets = selectTicketsById(modelId);
-			const modelName = (selectFederation(modelId) || selectContainer(modelId))?.name;
-			return modelTickets.map((t) => ({ ...t, modelName })); // modelName is added for column sorting
-		});
+	(state, modelsIds) => {
+		const tickets = modelsIds.flatMap((modelId) => selectTickets(getState(), modelId));
 		return sortTicketsByCreationDate(tickets);
 	},
 );
