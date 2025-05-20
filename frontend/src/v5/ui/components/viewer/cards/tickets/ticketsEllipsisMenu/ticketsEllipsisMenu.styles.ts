@@ -23,9 +23,10 @@ export const SwitchContainer = styled.span`
 	align-content: center;
 	text-align: left;
 	display: grid;
-	grid-template-columns: 26px auto 16px;
+	grid-template-columns: auto 15px;
+
 	svg {
-		height: 16px;
-		width: 16px;
+		height: 15px;
+		width: 15px;
 	}
 `;
