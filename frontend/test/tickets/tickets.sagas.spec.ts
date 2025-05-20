@@ -30,6 +30,7 @@ import { createTestStore } from '../test.helpers';
 import { mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
 import { mockServer } from '../../internals/testing/mockServer';
 import Mockdate from 'mockdate';
+import { addUpdatedAtTime } from '@/v5/store/tickets/tickets.helpers';
 
 describe('Tickets: sagas', () => {
 	let onSuccess;
@@ -115,6 +116,7 @@ describe('Tickets: sagas', () => {
 		});
 
 		it('should call updateContainerTicket endpoint', async () => {
+			Mockdate.set(new Date());
 			populateTicketsStore();
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
@@ -124,9 +126,10 @@ describe('Tickets: sagas', () => {
 			await waitForActions(() => {
 				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false, onError));
 			}, [
-				TicketsActions.upsertTicketSuccess(modelId, { _id: ticket._id, ...updateProp }),
+				TicketsActions.upsertTicketSuccess(modelId, { _id: ticket._id, ...addUpdatedAtTime(updateProp) }),
 			]);
 			expect(onError).not.toHaveBeenCalled();
+			Mockdate.reset();
 		});
 		it('should call updateContainerTicket with a 404', async () => {
 			populateTicketsStore();
