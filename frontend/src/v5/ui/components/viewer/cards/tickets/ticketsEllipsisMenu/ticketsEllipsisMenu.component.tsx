@@ -19,7 +19,6 @@ import EllipsisIcon from '@assets/icons/outlined/ellipsis-outlined.svg';
 import { CardAction } from '../../cardAction/cardAction.styles';
 import { MenuList, Tooltip } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
-import PinIcon from '@assets/icons/filled/pin_ticket-filled.svg';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ActionMenu } from '@controls/actionMenu';
@@ -48,7 +47,6 @@ export const TicketsEllipsisMenu = () => {
 					onClick={onClickShowPins}
 					title={
 						<SwitchContainer>
-							<PinIcon />
 							{formatMessage({ id: 'viewer.cards.tickets.showPins', defaultMessage: 'Show Pins' })}
 							{isShowingPins && <TickIcon />}
 						</SwitchContainer>
