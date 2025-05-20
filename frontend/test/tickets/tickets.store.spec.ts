@@ -124,6 +124,17 @@ describe('Tickets: store', () => {
 							}
 						],
 					},
+					{ 
+						name: 'a deprecated module',
+						deprecated: true,
+						properties: [
+							{
+								name:'A deprecated Modules Prop',
+								type:'text',
+							}
+						],
+					},
+
 				]
 			});
 			
@@ -155,6 +166,8 @@ describe('Tickets: store', () => {
 			expect(templatesFromState[0]).toEqual(templateWithoutDeprecated);	
 		});
 	});
+
+
 
 	describe('settings', () => {
 		const riskCategories = mockRiskCategories();
