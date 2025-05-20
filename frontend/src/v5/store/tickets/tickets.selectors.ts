@@ -47,10 +47,29 @@ export const selectTicketsHaveBeenFetched = createSelector(
 	(state): (modelId) => boolean => (modelId) => modelId in state.ticketsByModelId,
 );
 
+
+const removeDeprecated = (template: ITemplate): ITemplate => {
+	const removeDeDeprecatedItems = (properties: any[])  => properties.filter((prop) => !prop.deprecated);
+
+	return {
+		...template,
+		properties: removeDeDeprecatedItems(template.properties ?? []),
+		modules: removeDeDeprecatedItems(template.modules ?? [])
+			.map((module) => (
+				{
+					...module, 
+					properties: removeDeDeprecatedItems(module.properties ?? []),
+				}
+			)),
+	};
+};
+
+
+
 export const selectTemplates = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
-	(state, modelId) => state.templatesByModelId[modelId] || [],
+	(state, modelId) => (state.templatesByModelId[modelId] || []).map(removeDeprecated),
 );
 
 export const selectActiveTemplates = createSelector(

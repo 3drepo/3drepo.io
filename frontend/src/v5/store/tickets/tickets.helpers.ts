@@ -38,6 +38,7 @@ export const modelIsFederation = (modelId: string) => !!FederationsHooksSelector
 export const getEditableProperties = (template) => {
 	const propertyIsEditable = ({ readOnly }) => !readOnly;
 
+	// Doesnt return the config or anything else; this is used in the new ticket form in order to not show the comments.
 	return {
 		properties: (template.properties || []).filter(propertyIsEditable),
 		modules: (template.modules || []).map((module) => ({
@@ -46,6 +47,7 @@ export const getEditableProperties = (template) => {
 		})),
 	};
 };
+
 
 const templatePropertiesToTicketProperties = (properties = []) => (
 	properties.reduce(
