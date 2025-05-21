@@ -24,8 +24,6 @@ import { useContext, useEffect, useRef } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
@@ -33,7 +31,7 @@ import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
-import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { useSelectedModelsIds } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/newTicketMenu/useSelectedModels';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -50,8 +48,7 @@ const getInputField = (type: CardFilterType) => {
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
 	const { availableTemplateIds } = useContext(TicketContext);
-	const { containerOrFederation } = useParams<ViewerParams>();
-	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
+	const containersAndFederations = useSelectedModelsIds();
 	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -70,7 +67,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	} else if (isSelectType(type)) {
 		selectOptions = TicketsCardHooksSelectors.selectPropertyOptions(
 			availableTemplateIds,
-			containerOrFederation ? [containerOrFederation] : containersAndFederations,
+			containersAndFederations,
 			module,
 			property,
 		);
