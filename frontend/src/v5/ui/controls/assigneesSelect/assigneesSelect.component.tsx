@@ -16,17 +16,16 @@
  */
 
 import { TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useCallback, useContext, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { AssigneesListContainer } from './assigneesSelect.styles';
 import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
-import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
 import { getInvalidValues, getValidValues, groupJobsAndUsers } from './assignees.helpers';
-import { Transformers, useSearchParam } from '../../routes/useSearchParam';
+import { useSelectedModelsIds } from '../../routes/dashboard/projects/tickets/ticketsTable/newTicketMenu/useSelectedModels';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
@@ -53,10 +52,9 @@ export const AssigneesSelect = ({
 }: AssigneesSelectProps) => {
 	const [open, setOpen] = useState(false);
 	
-	const { containerOrFederation } = useContext(TicketContext);
-	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
+	const containersAndFederations = useSelectedModelsIds();
 
-	const jobsAndUsers = TicketsCardHooksSelectors.selectJobsAndUsersByModelIds(containerOrFederation ? [containerOrFederation] : containersAndFederations);
+	const jobsAndUsers = TicketsCardHooksSelectors.selectJobsAndUsersByModelIds(containersAndFederations);
 	const { jobs, users } = groupJobsAndUsers(jobsAndUsers);
 
 	const emptyValue = multiple ? [] : '';

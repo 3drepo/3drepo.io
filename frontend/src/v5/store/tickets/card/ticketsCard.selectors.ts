@@ -234,7 +234,7 @@ export const selectJobsAndUsersByModelIds = createSelector(
 	// this is to recompute the selector when the store jobs or users change
 	selectJobsAndUsersByModelId,
 	(modelIds) => {
-		const jobsAndUsers: IJobOrUserList = modelIds.reduce((acc, modelId) => [...acc, ...selectJobsAndUsersByModelId(getState(), modelId)], []);
+		const jobsAndUsers: IJobOrUserList = (modelIds || []).reduce((acc, modelId) => [...acc, ...selectJobsAndUsersByModelId(getState(), modelId)], []);
 		return uniqBy(jobsAndUsers, (jU) => jU._id || jU.user);
 	},
 );

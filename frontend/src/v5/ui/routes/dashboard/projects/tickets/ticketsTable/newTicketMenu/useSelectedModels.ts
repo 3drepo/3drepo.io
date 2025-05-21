@@ -17,11 +17,19 @@
 
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import {  useMemo } from 'react';
+import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
+import {  useContext, useMemo } from 'react';
 
+export const useSelectedModelsIds = () => {
+	const { isViewer, containerOrFederation } = useContext(TicketContext);
+	const [containerAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY);
+
+	if (isViewer) return [containerOrFederation];
+	return containerAndFederations;
+};
 
 export const useSelectedModels = () => {
-	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
+	const modelsIds = useSelectedModelsIds();
 	
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
