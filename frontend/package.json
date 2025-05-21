@@ -3,7 +3,7 @@
 	"version": "5.17.0",
 	"description": "The frontend for 3drepo.io",
 	"engines": {
-		"node": "18.x.x"
+		"node": "22.x.x"
 	},
 	"main": "index.js",
 	"directories": {
