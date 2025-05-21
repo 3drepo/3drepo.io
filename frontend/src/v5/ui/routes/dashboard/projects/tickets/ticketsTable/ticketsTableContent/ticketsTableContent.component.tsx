@@ -27,7 +27,6 @@ import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
-import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
 import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
@@ -79,10 +78,8 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 	const columns = templatHasBeenFetched ? getAvailableColumnsForTemplate(template) : [];
 
 	return (
-		<TicketsTableContextComponent template={template}>
-			<ResizableTableContextComponent columns={columns} columnGap={1} key={template._id}>
-				<TableContent {...props} template={template} />
-			</ResizableTableContextComponent>
-		</TicketsTableContextComponent>
+		<ResizableTableContextComponent columns={columns} columnGap={1} key={template._id}>
+			<TableContent {...props} template={template} />
+		</ResizableTableContextComponent>
 	);
 };

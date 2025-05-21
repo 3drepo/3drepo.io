@@ -16,9 +16,11 @@
  */
 
 import { createContext } from 'react';
-import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 import { IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { useParams } from 'react-router';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export interface TicketsTableType {
 	getPropertyDefaultValue: (name: string) => unknown;
@@ -38,9 +40,10 @@ TicketsTableContext.displayName = 'TicketsTableContext';
 
 interface Props {
 	children: any;
-	template: ITemplate;
 }
-export const TicketsTableContextComponent = ({ children, template }: Props) => {
+export const TicketsTableContextComponent = ({ children }: Props) => {
+	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
