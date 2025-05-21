@@ -53,6 +53,8 @@ export const Description = styled(TextOverflow).attrs({
 
 export const TicketItemContainer = styled(CardListItem)<{ $selected?: boolean }>`
 	cursor: pointer;
+	display: block;
+	width: 350px;
 	box-sizing: border-box;
 	padding: 12px;
 	min-height: 65px;
