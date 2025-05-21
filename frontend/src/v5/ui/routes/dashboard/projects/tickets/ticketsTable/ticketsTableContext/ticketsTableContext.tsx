@@ -18,17 +18,20 @@
 import { createContext } from 'react';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
+import { IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 export interface TicketsTableType {
 	getPropertyDefaultValue: (name: string) => unknown;
 	getPropertyType: (name: string) => string;
 	isJobAndUsersType: (name: string) => boolean;
+	groupByProperties: string[],
 }
 
 const defaultValue: TicketsTableType = {
 	getPropertyDefaultValue: () => null,
 	getPropertyType: () => null,
 	isJobAndUsersType: () => false,
+	groupByProperties: [],
 };
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
@@ -51,11 +54,16 @@ export const TicketsTableContextComponent = ({ children, template }: Props) => {
 		|| ['properties.Owner', 'properties.Assignees'].includes(name)
 	);
 
+	const groupByProperties = definitionsAsArray
+		.filter((definition) => ['manyOf', 'oneOf'].includes(definition.type) || definition.name === `properties.${IssueProperties.DUE_DATE}`)
+		.map((definition) => definition.name);
+	
 	return (
 		<TicketsTableContext.Provider value={{
 			getPropertyDefaultValue,
 			getPropertyType,
 			isJobAndUsersType,
+			groupByProperties,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>
