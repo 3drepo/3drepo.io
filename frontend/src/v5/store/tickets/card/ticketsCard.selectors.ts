@@ -132,10 +132,10 @@ export const selectCardFilters = createSelector(
 	(filters) => toTicketCardFilter(filters) || [],
 );
 
-const selectFilteredTicketIds = createSelector(
+export const selectFilteredTicketIds = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.filteredTicketIds || [],
-);
+	(ticketCardState) => ticketCardState.filteredTicketIds || new Set(),
+) as (state) => Set<string>;
 
 export const selectFilteredTickets = createSelector(
 	selectCardFilters,
@@ -143,7 +143,7 @@ export const selectFilteredTickets = createSelector(
 	selectFilteredTicketIds,
 	(filters, tickets, ids) => {
 		if (!filters.length) return tickets;
-		return tickets.filter((t) => ids.includes(t._id));
+		return tickets.filter((t) => ids.has(t._id));
 	},
 );
 
