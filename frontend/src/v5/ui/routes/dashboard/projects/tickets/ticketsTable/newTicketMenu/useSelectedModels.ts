@@ -22,10 +22,10 @@ import {  useContext, useMemo } from 'react';
 
 export const useSelectedModelsIds = () => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
-	const [containerAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY);
+	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY);
 
 	if (isViewer) return [containerOrFederation];
-	return containerAndFederations;
+	return containersAndFederations;
 };
 
 export const useSelectedModels = () => {

@@ -86,8 +86,12 @@ export const Tickets = () => {
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederation]);
 	}, [tickets, filters, areFiltersPending]);
 
+	useEffect(() => {
+		TicketsActionsDispatchers.setAvailableTemplatesIds(templateIds);
+	}, [templateIds]);
+
 	return (
-		<TicketContextComponent isViewer containerOrFederation={containerOrFederation} availableTemplateIds={templateIds}>
+		<TicketContextComponent isViewer containerOrFederation={containerOrFederation}>
 			{view === TicketsCardViews.List && <TicketsListCard />}
 			{view === TicketsCardViews.Details && <TicketDetailsCard />}
 			{view === TicketsCardViews.New && <NewTicketCard />}

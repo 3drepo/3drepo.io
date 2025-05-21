@@ -20,17 +20,16 @@ import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
 import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField, FormJobsAndUsersSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
-import { useContext, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
-import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { useSelectedModelsIds } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/newTicketMenu/useSelectedModels';
 
 type FilterFormValuesProps = {
@@ -47,7 +46,7 @@ const getInputField = (type: CardFilterType) => {
 
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
-	const { availableTemplateIds } = useContext(TicketContext);
+	const availableTemplateIds = TicketsHooksSelectors.selectAvailableTemplatesIds();
 	const containersAndFederations = useSelectedModelsIds();
 	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({

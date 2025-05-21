@@ -180,18 +180,15 @@ export const TicketsTable = () => {
 
 	useEffect(() => {
 		if (prevTemplate.current && ticketId) clearTicketId();
+		TicketsActionsDispatchers.setAvailableTemplatesIds([templateId]);
 		prevTemplate.current = templateId;
 		if (templateAlreadyFetched(selectedTemplate)) return;
 		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, templateId);
 	}, [templateId]);
 
 	return (
-		<TicketContextComponent
-			isViewer={false}
-			containerOrFederation={containerOrFederation}
-			availableTemplateIds={[templateId]}
-		>
-			<TicketFiltersSetter templates={[selectedTemplate]}/>
+		<>
+			<TicketFiltersSetter templates={[selectedTemplate]} />
 			<SearchContextComponent items={filteredTickets}>
 				<ControlsContainer>
 					<FlexContainer>
@@ -256,19 +253,21 @@ export const TicketsTable = () => {
 						</CircleButton>
 					</SlidePanelHeader>
 					<MuiThemeProvider theme={theme}>
-						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
-						{isNewTicket && (
-							<NewTicketSlide
-								preselectedValue={{ [groupBy]: groupByValue }}
-								template={selectedTemplate}
-								containerOrFederation={containerOrFederation}
-								onSave={onSaveTicket}
-								onDirtyStateChange={setIsNewTicketDirty}
-							/>
-						)}
+						<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
+							{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
+							{isNewTicket && (
+								<NewTicketSlide
+									preselectedValue={{ [groupBy]: groupByValue }}
+									template={selectedTemplate}
+									containerOrFederation={containerOrFederation}
+									onSave={onSaveTicket}
+									onDirtyStateChange={setIsNewTicketDirty}
+								/>
+							)}
+						</TicketContextComponent>
 					</MuiThemeProvider>
 				</SidePanel>
 			</SearchContextComponent>
-		</TicketContextComponent>
+		</>
 	);
 };

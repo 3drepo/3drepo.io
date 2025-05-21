@@ -35,6 +35,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
 	replaceTemplateSuccess: ['modelId', 'template'],
 	fetchTemplatesSuccess: ['modelId', 'templates'],
+	setAvailableTemplatesIds: ['templatesIds'],
 	updateTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'ticket', 'isFederation', 'onError'],
 	createTicket: ['teamspace', 'projectId', 'modelId', 'ticket', 'isFederation', 'onSuccess', 'onError'],
 	upsertTicketSuccess: ['modelId', 'ticket'],
@@ -51,6 +52,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 export const INITIAL_STATE: ITicketsState = {
 	ticketsByModelId: {},
 	templatesByModelId: {},
+	availableTemplatesIds: [],
 	groupsByGroupId: {},
 	riskCategories: [],
 };
@@ -84,6 +86,10 @@ export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template
 	}
 };
 
+export const setAvailableTemplatesIds = (state: ITicketsState, { templatesIds }: SetAvailableTemplatesIdsAction) => {
+	state.availableTemplatesIds = templatesIds;
+};
+
 export const fetchTicketGroupsSuccess = (state: ITicketsState, { groups }: FetchTicketGroupsSuccessAction) => {
 	groups.forEach((group) => {
 		state.groupsByGroupId[group._id] = group;
@@ -113,6 +119,7 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
 	[TicketsTypes.UPSERT_TICKET_SUCCESS]: upsertTicketSuccess,
 	[TicketsTypes.REPLACE_TEMPLATE_SUCCESS]: replaceTemplateSuccess,
+	[TicketsTypes.SET_AVAILABLE_TEMPLATES_IDS]: setAvailableTemplatesIds,
 	[TicketsTypes.FETCH_RISK_CATEGORIES_SUCCESS]: fetchRiskCategoriesSuccess,
 	[TicketsTypes.FETCH_TICKET_GROUPS_SUCCESS]: fetchTicketGroupsSuccess,
 	[TicketsTypes.UPDATE_TICKET_GROUP_SUCCESS]: updateTicketGroupSuccess,
@@ -122,6 +129,7 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 export interface ITicketsState {
 	ticketsByModelId: Record<string, ITicket[]>,
 	templatesByModelId: Record<string, ITemplate[]>,
+	availableTemplatesIds: string[],
 	riskCategories: string[],
 	groupsByGroupId: Record<string, Group>,
 }
@@ -137,6 +145,7 @@ export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & 
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceProjectAndModel & { isFederation: boolean, getDetails?: boolean };
 export type FetchTemplateAction = Action<'FETCH_TEMPLATES'> & TeamspaceProjectAndModel & { templateId: string, isFederation: boolean };
 export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & ModelId & { templates: ITemplate[] };
+export type SetAvailableTemplatesIdsAction = Action<'SET_AVAILABLE_TEMPLATES_IDS'>  & { templatesIds: string[] };
 export type FetchRiskCategoriesAction = Action<'FETCH_RISK_CATEGORIES'> & TeamspaceId;
 export type FetchRiskCategoriesSuccessAction = Action<'FETCH_RISK_CATEGORIES_SUCCESS'> & { riskCategories: string[] };
 export type FetchTicketGroupsAction = Action<'FETCH_TICKET_GROUPS'> & TeamspaceProjectAndModel & { ticketId: string, groupId: string, revision?: string };
@@ -198,6 +207,7 @@ export interface ITicketsActionCreators {
 		templateId: string,
 		isFederation: boolean,
 	) => FetchTemplateAction;
+	setAvailableTemplatesIds: (templatesIds: string[]) => SetAvailableTemplatesIdsAction;
 	upsertTicketSuccess: (modelId: string, ticket: Partial<ITicket>) => UpsertTicketSuccessAction;
 	upsertTicketAndFetchGroups: (
 		teamspace: string,

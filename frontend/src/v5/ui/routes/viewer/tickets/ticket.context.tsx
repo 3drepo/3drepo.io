@@ -24,7 +24,6 @@ export enum TicketDetailsView {
 export interface TicketContextType {
 	isViewer?: boolean;
 	containerOrFederation: string;
-	availableTemplateIds?: string[];
 	detailsView: TicketDetailsView;
 	detailsViewProps?: any;
 	setDetailViewAndProps: (view: TicketDetailsView, props?: any) => void;
@@ -34,14 +33,13 @@ const defaultValue: TicketContextType = {
 	isViewer: false,
 	detailsView: TicketDetailsView.Form,
 	containerOrFederation: '',
-	availableTemplateIds: [],
 	setDetailViewAndProps: () => {},
 };
 export const TicketContext = createContext(defaultValue);
 TicketContext.displayName = 'TicketContext';
 
 export const TicketContextComponent = ({
-	children, isViewer = false, containerOrFederation, availableTemplateIds = [] }) => {
+	children, isViewer = false, containerOrFederation }) => {
 	const [detailsView, setView] = useState(TicketDetailsView.Form);
 	const [detailsViewProps, setViewProps] = useState();
 
@@ -53,7 +51,7 @@ export const TicketContextComponent = ({
 	};
 
 	return (
-		<TicketContext.Provider value={{ isViewer, detailsView, detailsViewProps, containerOrFederation, availableTemplateIds, setDetailViewAndProps }}>
+		<TicketContext.Provider value={{ isViewer, detailsView, detailsViewProps, containerOrFederation, setDetailViewAndProps }}>
 			{children}
 		</TicketContext.Provider>
 	);
