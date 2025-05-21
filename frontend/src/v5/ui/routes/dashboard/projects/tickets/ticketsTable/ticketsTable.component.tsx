@@ -52,7 +52,6 @@ const paramToInputProps = (value, setter) => ({
 	onChange: (ev: SelectChangeEvent<unknown>) =>  setter((ev.target as HTMLInputElement).value),
 });
 
-
 export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
@@ -97,7 +96,9 @@ export const TicketsTable = () => {
 	const clearTicketId = () => setTicketValue();
 
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
-	const tickets = TicketsCardHooksSelectors.selectFilteredTickets(containersAndFederations);
+	const allTickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
+	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets(containersAndFederations)
+		.filter(({ type }) => type === templateId);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const areFiltersPending = TicketsCardHooksSelectors.selectAreInitialFiltersPending();
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(templateId).filter(({ type }) => type !== 'template');
@@ -110,9 +111,6 @@ export const TicketsTable = () => {
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 	
-	const ticketsFilteredByTemplate = useMemo(() => {
-		return tickets.filter(({ type }) => type === templateId);
-	}, [templateId, tickets]);
 	
 	const newTicketButtonIsDisabled = useMemo(() => 
 		!containersAndFederations.length || containersAndFederations.filter(({ role }) => isCommenterRole(role)).length === 0,
@@ -164,12 +162,12 @@ export const TicketsTable = () => {
 			];
 		});
 		return combineSubscriptions(...subscriptions);
-	}, [!containersAndFederations.length, containersAndFederations]);
+	}, [containersAndFederations]);
 
 	useEffect(() => {
 		if (!containersAndFederations.length || areFiltersPending) return;
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
-	}, [filters, containersAndFederations, areFiltersPending]);
+	}, [allTickets, filters, containersAndFederations, areFiltersPending]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
@@ -194,7 +192,7 @@ export const TicketsTable = () => {
 			availableTemplateIds={[templateId]}
 		>
 			<TicketFiltersSetter templates={[selectedTemplate]}/>
-			<SearchContextComponent items={ticketsFilteredByTemplate}>
+			<SearchContextComponent items={filteredTickets}>
 				<ControlsContainer>
 					<FlexContainer>
 						<SelectorsContainer>

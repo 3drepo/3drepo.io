@@ -70,7 +70,6 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 		if (isEmpty(validVals)) return;
 		const onError = () => formData.reset(ticket);
 		TicketsActionsDispatchers.updateTicket(teamspace, project, containerOrFederation, ticketId, validVals, isFederation, onError);
-		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
 	};
 
 	useEffect(() => {
