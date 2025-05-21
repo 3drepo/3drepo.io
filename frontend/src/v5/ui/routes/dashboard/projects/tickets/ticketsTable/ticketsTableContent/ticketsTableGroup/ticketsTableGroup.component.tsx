@@ -27,7 +27,7 @@ import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContain
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { getColumnLabel, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
+import { getPropertyLabel, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
@@ -102,7 +102,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										<Headers>
 											{visibleSortedColumnsNames.map((name) => (
 												<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
-													{getColumnLabel(name)}
+													{getPropertyLabel(name)}
 												</SortingTableHeader>
 											))}
 											<ColumnsVisibilitySettings />

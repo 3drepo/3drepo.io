@@ -18,7 +18,7 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { getColumnLabel, INITIAL_COLUMNS } from '../../../ticketsTable.helper';
+import { getPropertyLabel, INITIAL_COLUMNS } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
@@ -78,7 +78,7 @@ const List = ({ onShowColumn }) => {
 						disabled={visibleSortedColumnsNames.length === 1}
 						onChange={() => hideColumn(columnName)}
 						value={true}
-						label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
+						label={<TextOverflow>{getPropertyLabel(columnName)}</TextOverflow>}
 					/>
 				</MenuItem>
 			))}
@@ -88,7 +88,7 @@ const List = ({ onShowColumn }) => {
 					<Checkbox
 						onChange={() => onShowColumn(columnName)}
 						value={false}
-						label={<TextOverflow>{getColumnLabel(columnName)}</TextOverflow>}
+						label={<TextOverflow>{getPropertyLabel(columnName)}</TextOverflow>}
 					/>
 				</MenuItem>
 			))}
@@ -106,7 +106,7 @@ export const ColumnsVisibilitySettings = () => {
 	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 
 	const filteringFunction = (cols, query) => (
-		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
+		cols.filter((col) => matchesQuery(getPropertyLabel(col), query))
 	);
 
 	const nameToExtraPropertyToFetch = (name) => name

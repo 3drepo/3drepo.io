@@ -175,7 +175,7 @@ const TICKET_PROPERTIES_LABEL = {
 	[`modules.sequencing.${SequencingProperties.END_TIME}`]: formatMessage({ id: 'modules.sequencing.label.endTime', defaultMessage: 'Sequencing : End Time' }),
 } as const;
 
-export const getColumnLabel = (name) => {
+export const getPropertyLabel = (name) => {
 	const defaultName = TICKET_PROPERTIES_LABEL[name];
 	if (defaultName) return defaultName;
 	
