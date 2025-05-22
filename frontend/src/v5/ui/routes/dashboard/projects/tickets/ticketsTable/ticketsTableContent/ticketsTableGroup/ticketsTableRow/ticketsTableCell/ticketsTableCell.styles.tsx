@@ -15,20 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
+import styled from 'styled-components';
+import { CalendarIcon, DueDateContainer } from '@controls/dueDate/dueDate.styles';
 
-type ResizableTableCellProps = {
-	children: any;
-	name: string;
-	className?: string;
-	onClick?: () => void;
-};
-export const ResizableTableCell = ({ name, children, ...props }: ResizableTableCellProps) => {
-	const { isVisible } = useContext(ResizableTableContext);
+export const CellDate = styled.div`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
 
-	if (!isVisible(name)) return null;
+	${DueDateContainer} {
+		height: unset;
+	}
 
-	return (<Item {...props}>{children}</Item>);
-};
+	${CalendarIcon} {
+		min-width: 11px;
+	}
+`;
