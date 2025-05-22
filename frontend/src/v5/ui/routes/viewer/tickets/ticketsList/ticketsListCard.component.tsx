@@ -35,7 +35,7 @@ import { CardAction } from '@components/viewer/cards/cardAction/cardAction.style
 export const TicketsListCard = () => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const availableTemplateIds = TicketsHooksSelectors.selectAvailableTemplatesIds();
+	const availableTemplateIds = TicketsHooksSelectors.selectFilterableTemplatesIds();
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(availableTemplateIds);
 	
 	return (

@@ -74,9 +74,9 @@ export const selectTemplatesByIds = createSelector(
 	(state, templates, templateIds) => templates.filter(({ _id }) => templateIds.includes(_id)),
 );
 
-export const selectAvailableTemplatesIds = createSelector(
+export const selectFilterableTemplatesIds = createSelector(
 	selectTicketsDomain,
-	(state) => state.availableTemplatesIds,
+	(state) => state.filterableTemplatesIds,
 );
 
 export const selectTicketsGroups = createSelector(

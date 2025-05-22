@@ -180,7 +180,7 @@ export const TicketsTable = () => {
 
 	useEffect(() => {
 		if (prevTemplate.current && ticketId) clearTicketId();
-		TicketsActionsDispatchers.setAvailableTemplatesIds([templateId]);
+		TicketsActionsDispatchers.setFilterableTemplatesIds([templateId]);
 		prevTemplate.current = templateId;
 		if (templateAlreadyFetched(selectedTemplate)) return;
 		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, templateId);

@@ -46,7 +46,7 @@ const getInputField = (type: CardFilterType) => {
 
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
-	const availableTemplateIds = TicketsHooksSelectors.selectAvailableTemplatesIds();
+	const availableTemplateIds = TicketsHooksSelectors.selectFilterableTemplatesIds();
 	const containersAndFederations = useSelectedModelsIds();
 	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
@@ -62,7 +62,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	let selectOptions = [];
 
 	if (type === 'template') {
-		selectOptions = TicketsCardHooksSelectors.selectCurrentTemplates().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }));
+		selectOptions = TicketsHooksSelectors.selectTemplatesByIds(availableTemplateIds).map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }));
 	} else if (isSelectType(type)) {
 		selectOptions = TicketsCardHooksSelectors.selectPropertyOptions(
 			availableTemplateIds,

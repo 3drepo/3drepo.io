@@ -36,16 +36,16 @@ import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
 import { TicketContextComponent } from './ticket.context';
 import { Viewer } from '@/v4/services/viewer/viewer';
+import { uniq } from 'lodash';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();
-	const templateIds = TicketsCardHooksSelectors.selectCurrentTemplates().map(({ _id }) => _id);
 	const filters = TicketsCardHooksSelectors.selectFilters();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const areFiltersPending = TicketsCardHooksSelectors.selectAreInitialFiltersPending();
+	const templateIdsInUse = uniq(tickets.map(({ type }) => type));
 
 	const readOnly = isFederation
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -87,8 +87,8 @@ export const Tickets = () => {
 	}, [tickets, filters, areFiltersPending]);
 
 	useEffect(() => {
-		TicketsActionsDispatchers.setAvailableTemplatesIds(templateIds);
-	}, [templateIds]);
+		TicketsActionsDispatchers.setFilterableTemplatesIds(templateIdsInUse);
+	}, [templateIdsInUse.length]);
 
 	return (
 		<TicketContextComponent isViewer containerOrFederation={containerOrFederation}>
