@@ -19,14 +19,10 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List } from './ticketsList.styles';
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
-import { CentredContainer } from '@controls/centredContainer';
 
 export const TicketsList = () => {
 	const filteredTickets = TicketsCardHooksSelectors.selectCurrentModelFilteredTickets();
-	const areFiltersPending = TicketsCardHooksSelectors.selectAreInitialFiltersPending();
 
-	if (areFiltersPending) return (<CentredContainer><Spinner /></CentredContainer>);
 	return (
 		<>
 			{filteredTickets.length ? (

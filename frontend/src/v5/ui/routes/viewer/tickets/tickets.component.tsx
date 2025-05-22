@@ -82,9 +82,8 @@ export const Tickets = () => {
 	}, [view]);
 
 	useEffect(() => {
-		if (areFiltersPending) return;
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederation]);
-	}, [tickets, filters, areFiltersPending]);
+	}, [tickets, filters]);
 
 	useEffect(() => {
 		TicketsActionsDispatchers.setFilterableTemplatesIds(templateIdsInUse);

@@ -91,16 +91,11 @@ export const TicketFiltersSetter = ({ templates }: ITicketFiltersSetter) => {
 		return filters;
 	};
 
-	const upsertFilters = async (filters) => {
-		await Promise.all(filters.map(TicketsCardActionsDispatchers.upsertFilter));
-		TicketsCardActionsDispatchers.setAreInitialFiltersPending(false);
-	};
-
 	useEffect(() => {
 		if (templates.length) {
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
 			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : getNonCompletedTicketFilters();
-			upsertFilters(filters);
+			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
 			if (ticketCodes.length) {
 				ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 			}

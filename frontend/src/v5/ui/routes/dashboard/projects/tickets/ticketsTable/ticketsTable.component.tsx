@@ -100,7 +100,6 @@ export const TicketsTable = () => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets(containersAndFederations)
 		.filter(({ type }) => type === templateId);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const areFiltersPending = TicketsCardHooksSelectors.selectAreInitialFiltersPending();
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(templateId).filter(({ type }) => type !== 'template');
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 	
@@ -117,7 +116,6 @@ export const TicketsTable = () => {
 	[containersAndFederations, containerOrFederation]);
 
 	const onSaveTicket = (_id: string) => {
-		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
 		setTicketValue(containerOrFederation, _id, null, true);
 	};
 
@@ -165,9 +163,9 @@ export const TicketsTable = () => {
 	}, [containersAndFederations]);
 
 	useEffect(() => {
-		if (!containersAndFederations.length || areFiltersPending) return;
+		if (!containersAndFederations.length) return;
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
-	}, [allTickets, filters, containersAndFederations, areFiltersPending]);
+	}, [allTickets, filters, containersAndFederations]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);

@@ -153,11 +153,6 @@ export const selectIsShowingPins = createSelector(
 	selectTicketsCardDomain, (state) => state.isShowingPins,
 );
 
-export const selectAreInitialFiltersPending = createSelector(
-	selectTicketsCardDomain,
-	(state) => state.areInitialFiltersPending,
-);
-
 export const selectCurrentModelFilteredTickets = createSelector(
 	selectCurrentTickets,
 	selectFilteredTicketIds,
