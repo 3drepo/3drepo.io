@@ -33,6 +33,9 @@ export const Loader = styled(UnstyledLoader)`
 export const ListContainer = styled.div`
 	flex-grow: 1;
 	margin-right: -12px;
+	& > div {
+		overflow-x: hidden;
+	}
 `;
 
 export const List = styled.table`
@@ -42,6 +45,7 @@ export const List = styled.table`
 	width: 350px;
 	margin-bottom: 0;
 	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	box-sizing: border-box;
 	tr:not(:last-child) ${/* sc-selector */ TicketItemContainer}{
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
