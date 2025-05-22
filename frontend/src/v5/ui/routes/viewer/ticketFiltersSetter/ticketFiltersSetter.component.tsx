@@ -39,11 +39,10 @@ export const TicketFiltersSetter = () => {
 	const isFed = modelIsFederation(containerOrFederation);
 	
 	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
-	const cardView = TicketsCardHooksSelectors.selectView();
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
-	}, [cardFilters, cardView]);
+	}, [cardFilters]);
 
 	useEffect(() => 
 		enableRealtimeTickets(teamspace, project, containerOrFederation, isFed, revision)

@@ -20,12 +20,14 @@ import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
 import { Loader as UnstyledLoader } from '@/v4/routes/components/loader/loader.component';
+import { TicketItemContainer } from './ticketItem/ticketItem.styles';
 
 export const Loader = styled(UnstyledLoader)`
 	height: 100%;
 	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
 	width: calc(100% - 12px);
 	border-radius: 10px;
+	border: 0;
 `;
 
 export const ListContainer = styled.div`
@@ -39,6 +41,10 @@ export const List = styled.table`
 	overflow: hidden;
 	width: 350px;
 	margin-bottom: 0;
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	tr:not(:last-child) ${/* sc-selector */ TicketItemContainer}{
+		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	}
 `;
 
 export const NewTicketButton = styled(Button).attrs({

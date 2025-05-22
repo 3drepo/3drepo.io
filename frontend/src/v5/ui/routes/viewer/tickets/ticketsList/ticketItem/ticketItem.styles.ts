@@ -56,10 +56,9 @@ export const TicketItemContainer = styled(CardListItem)<{ $selected?: boolean }>
 	display: block;
 	width: 350px;
 	box-sizing: border-box;
-	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	padding: 12px;
 	min-height: 65px;
-	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	background-color: transparent;
 	${({ theme, $selected }) => $selected && css`
 		background-color: ${theme.palette.primary.lightest};
 		${Title} {
