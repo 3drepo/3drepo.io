@@ -17,8 +17,8 @@
 
 import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
-import { selectTickets, selectTemplates, selectTicketById, selectTemplateById, selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
-import { cloneDeep } from 'lodash';
+import { selectTickets, selectTemplates, selectTicketById, selectTemplateById, selectRiskCategories, selectFilterableTemplatesIds } from '@/v5/store/tickets/tickets.selectors';
+import { cloneDeep, times } from 'lodash';
 import { createTestStore } from '../test.helpers';
 import { mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
 
@@ -89,6 +89,13 @@ describe('Tickets: store', () => {
 			const ticketFromStore = selectTemplateById(getState(), modelId, template._id);
 
 			expect(ticketFromStore).toEqual(newTemplate);
+		});
+		
+		it('should set and fetch filterable template ids', () => {
+			const filterableTemplateIds = times(3, () => templateMockFactory()._id)
+			dispatch(TicketsActions.setFilterableTemplatesIds(filterableTemplateIds));
+			const filterableTemplatesFromStore = selectFilterableTemplatesIds(getState());
+			expect(filterableTemplatesFromStore).toEqual(filterableTemplateIds);
 		});
 	});
 
