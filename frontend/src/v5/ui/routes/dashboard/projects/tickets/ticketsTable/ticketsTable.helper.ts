@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, IssueProperties, SafetibaseProperties, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
@@ -155,3 +155,48 @@ export const hasRequiredViewerProperties = (template) => {
 	const properties = modules.concat(template.properties || []);
 	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
 };
+
+const TICKET_PROPERTIES_LABEL = {
+	id: formatMessage({ id: 'properties.label.id', defaultMessage: '#Id' }),
+	modelName: formatMessage({ id: 'properties.label.federationContainer', defaultMessage: 'Federation / Container' }),
+	[BaseProperties.TITLE]: formatMessage({ id: 'properties.label.title', defaultMessage: 'Title' }),
+	[`properties.${BaseProperties.UPDATED_AT}`]: formatMessage({ id: 'properties.label.updatedAt', defaultMessage: 'Updated At' }),
+	[`properties.${BaseProperties.DESCRIPTION}`]: formatMessage({ id: 'properties.label.description', defaultMessage: 'Description' }),
+	[`properties.${BaseProperties.CREATED_AT}`]: formatMessage({ id: 'properties.label.createdAt', defaultMessage: 'Created At' }),
+	[`properties.${BaseProperties.OWNER}`]: formatMessage({ id: 'properties.label.owner', defaultMessage: 'Owner' }),
+	[`properties.${BaseProperties.STATUS}`]: formatMessage({ id: 'properties.label.status', defaultMessage: 'Status' }),
+	[`properties.${IssueProperties.DUE_DATE}`]: formatMessage({ id: 'properties.label.dueDate', defaultMessage: 'Due Date' }),
+	[`properties.${IssueProperties.PRIORITY}`]: formatMessage({ id: 'properties.label.priority', defaultMessage: 'Priority' }),
+	[`properties.${IssueProperties.ASSIGNEES}`]: formatMessage({ id: 'properties.label.assignees', defaultMessage: 'Assignees' }),
+	[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]: formatMessage({ id: 'modules.safetibase.label.levelOfRisk', defaultMessage: 'Safetibase : Level of Risk' }),
+	[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: formatMessage({ id: 'modules.safetibase.label.treatmentStatus', defaultMessage: 'Safetibase : Treatment Status' }),
+	[`modules.safetibase.${SafetibaseProperties.TREATED_LEVEL_OF_RISK}`]: formatMessage({ id: 'modules.safetibase.label.treatedLevelOfRisk', defaultMessage: 'Safetibase : Treated Level of Risk' }),
+	[`modules.sequencing.${SequencingProperties.START_TIME}`]: formatMessage({ id: 'modules.sequencing.label.startTime', defaultMessage: 'Sequencing : Start Time' }),
+	[`modules.sequencing.${SequencingProperties.END_TIME}`]: formatMessage({ id: 'modules.sequencing.label.endTime', defaultMessage: 'Sequencing : End Time' }),
+} as const;
+
+export const getColumnLabel = (name) => {
+	const defaultName = TICKET_PROPERTIES_LABEL[name];
+	if (defaultName) return defaultName;
+	
+	return name
+		.replace('properties.', '')
+		.replace('modules.', '')
+		.split('.')
+		.map(_.startCase)
+		.join(' : ');
+};
+
+export const INITIAL_COLUMNS = [
+	'id',
+	BaseProperties.TITLE,
+	'modelName',
+	`properties.${BaseProperties.CREATED_AT}`,
+	`properties.${IssueProperties.ASSIGNEES}`, 
+	`properties.${BaseProperties.OWNER}`,
+	`properties.${IssueProperties.DUE_DATE}`,
+	`properties.${IssueProperties.PRIORITY}`,
+	`properties.${BaseProperties.STATUS}`,
+	`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
+	`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
+];

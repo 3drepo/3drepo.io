@@ -15,20 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
+import { CellContainer } from './cell.styles';
+import { TextOverflow } from '@controls/textOverflow';
 
-type ResizableTableCellProps = {
-	children: any;
-	name: string;
-	className?: string;
-	onClick?: () => void;
-};
-export const ResizableTableCell = ({ name, children, ...props }: ResizableTableCellProps) => {
-	const { isVisible } = useContext(ResizableTableContext);
-
-	if (!isVisible(name)) return null;
-
-	return (<Item {...props}>{children}</Item>);
-};
+type CellProps = { name: string, children: any, className?: string };
+export const Cell = ({ name, children, className }: CellProps) => (
+	<CellContainer name={name} className={className}>
+		<TextOverflow>
+			{children}
+		</TextOverflow>
+	</CellContainer>
+);
