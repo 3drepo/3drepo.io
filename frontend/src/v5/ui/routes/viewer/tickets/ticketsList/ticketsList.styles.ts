@@ -19,14 +19,13 @@ import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
-import { TicketItemContainer } from './ticketItem/ticketItem.styles';
 import { Loader as UnstyledLoader } from '@/v4/routes/components/loader/loader.component';
 
 export const Loader = styled(UnstyledLoader)`
 	height: 100%;
 	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
 	width: calc(100% - 12px);
-	border-radius: 8px;
+	border-radius: 10px;
 `;
 
 export const ListContainer = styled.div`
@@ -40,9 +39,6 @@ export const List = styled.table`
 	overflow: hidden;
 	width: 350px;
 	margin-bottom: 0;
-	${/* sc-selector */ TicketItemContainer}:not(:last-child) {
-		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	}
 `;
 
 export const NewTicketButton = styled(Button).attrs({
