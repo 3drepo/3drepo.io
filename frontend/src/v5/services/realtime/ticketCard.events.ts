@@ -43,9 +43,9 @@ export const enableRealtimeNewTicketFilter = (teamspace: string, project: string
 
 export const enableRealtimeTickets = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean, revision) => 
 	combineSubscriptions(
-		enableRealtimeUpdateTicketFilter(teamspace, project, containerOrFederation, isFederation),
-		enableRealtimeNewTicketFilter(teamspace, project, containerOrFederation, isFederation),
 		enableRealtimeNewTicket(teamspace, project, containerOrFederation, isFederation, revision),
 		enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation, revision),
 		enableRealtimeUpdateTicketGroup(teamspace, project, containerOrFederation, isFederation, revision),
+		enableRealtimeUpdateTicketFilter(teamspace, project, containerOrFederation, isFederation),
+		enableRealtimeNewTicketFilter(teamspace, project, containerOrFederation, isFederation),
 	);

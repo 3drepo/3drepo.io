@@ -107,8 +107,14 @@ export function* upsertFilter({ filter }: UpsertFilterAction) {
 }
 
 export function* applyFilterForTicket({ teamspace, projectId, modelId, isFederation, ticketId }: ApplyFilterForTicketAction) {
+	let ticket =  yield select(selectTicketByIdRaw, modelId, ticketId);
+
+	while (!ticket) { // If new ticket message wasnt attended yet wait until the ticket gets defined
+		yield take(TicketsTypes.UPSERT_TICKET_SUCCESS);
+		ticket =  yield select(selectTicketByIdRaw, modelId, ticketId);
+	}
 	
-	const { number, type } = yield select(selectTicketByIdRaw, modelId, ticketId);
+	const { number, type } = ticket;
 	const { code } = yield select(selectTemplateById, modelId, type);
 	const ticketCode = code + ':' + number;
 	
