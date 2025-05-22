@@ -28,6 +28,9 @@ import { selectCardFilters, selectFilteredTicketIds } from './ticketsCard.select
 import * as API from '@/v5/services/api';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { isEqual, pick } from 'lodash';
+import { enableMapSet } from 'immer';
+
+enableMapSet();
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(TicketsCardActions.setSelectedTicket(ticketId));
