@@ -101,14 +101,14 @@ const testAuditEvents = () => {
 			const teamspace = generateRandomString();
 			const executor = generateRandomString();
 			const email = generateRandomString();
-			const job = generateRandomString();
+			const role = generateRandomString();
 			const permissions = generateRandomString();
-			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, job, permissions });
+			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, role, permissions });
 			await waitOnEvent;
 
 			expect(Audits.logUserInvited).toHaveBeenCalledTimes(1);
 			expect(Audits.logUserInvited).toHaveBeenCalledWith(teamspace, executor,
-				email, job, permissions);
+				email, role, permissions);
 		});
 
 		test(`Should fail gracefully on error if there is an ${events.INVITATION_ADDED} event`, async () => {
@@ -116,16 +116,16 @@ const testAuditEvents = () => {
 			const teamspace = generateRandomString();
 			const executor = generateRandomString();
 			const email = generateRandomString();
-			const job = generateRandomString();
+			const role = generateRandomString();
 			const permissions = generateRandomString();
 
 			Audits.logUserInvited.mockRejectedValueOnce(generateRandomString());
-			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, job, permissions });
+			EventsManager.publish(events.INVITATION_ADDED, { teamspace, executor, email, role, permissions });
 			await waitOnEvent;
 
 			expect(Audits.logUserInvited).toHaveBeenCalledTimes(1);
 			expect(Audits.logUserInvited).toHaveBeenCalledWith(teamspace, executor,
-				email, job, permissions);
+				email, role, permissions);
 		});
 
 		test(`Should trigger invitationRevoked if there is an ${events.INVITATION_REVOKED} event`, async () => {
@@ -133,14 +133,14 @@ const testAuditEvents = () => {
 			const teamspace = generateRandomString();
 			const executor = generateRandomString();
 			const email = generateRandomString();
-			const job = generateRandomString();
+			const role = generateRandomString();
 			const permissions = generateRandomString();
-			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, job, permissions });
+			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, role, permissions });
 			await waitOnEvent;
 
 			expect(Audits.logUserUninvited).toHaveBeenCalledTimes(1);
 			expect(Audits.logUserUninvited).toHaveBeenCalledWith(teamspace, executor,
-				email, job, permissions);
+				email, role, permissions);
 		});
 
 		test(`Should fail gracefully on error if there is an ${events.INVITATION_REVOKED} event`, async () => {
@@ -148,16 +148,16 @@ const testAuditEvents = () => {
 			const teamspace = generateRandomString();
 			const executor = generateRandomString();
 			const email = generateRandomString();
-			const job = generateRandomString();
+			const role = generateRandomString();
 			const permissions = generateRandomString();
 
 			Audits.logUserUninvited.mockRejectedValueOnce(generateRandomString());
-			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, job, permissions });
+			EventsManager.publish(events.INVITATION_REVOKED, { teamspace, executor, email, role, permissions });
 			await waitOnEvent;
 
 			expect(Audits.logUserUninvited).toHaveBeenCalledTimes(1);
 			expect(Audits.logUserUninvited).toHaveBeenCalledWith(teamspace, executor,
-				email, job, permissions);
+				email, role, permissions);
 		});
 
 		test(`Should trigger teamspacePermissionsUpdated if there is a ${events.TEAMSPACE_PERMISSIONS_UPDATED} event and it is a teamspace permissions update`, async () => {

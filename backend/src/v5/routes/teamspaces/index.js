@@ -191,10 +191,13 @@ const establishRoutes = () => {
 	 *                         type: string
 	 *                         description: Name of the company
 	 *                         example: 3D Repo Ltd
-	 *                       job:
-	 *                         type: string
-	 *                         description: Job within the teamspace
-	 *                         example: Project Manager
+	 *                       roles:
+	 *                         type: array
+	 *                         items:
+	 *                           type: string
+	 *                           format: uuid
+	 *                           description: Roles the user is assigned to
+	 *                           example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 *
 	 */
 	router.get('/:teamspace/members', hasAccessToTeamspace, getTeamspaceMembers);

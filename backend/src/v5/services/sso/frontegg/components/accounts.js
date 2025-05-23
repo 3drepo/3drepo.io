@@ -89,6 +89,72 @@ Accounts.createAccount = async (name) => {
 	}
 };
 
+Accounts.addUsersToGroup = async (accountId, groupId, userIds) => {
+	if (!userIds?.length) return;
+	try {
+		const config = await getConfig();
+
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		const payload = {
+			userIds,
+		};
+
+		await post(`${config.vendorDomain}/identity/resources/groups/v1/${groupId}/users`, payload, { headers });
+	} catch (err) {
+		logger.logError(`Failed to add user to group in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to add user to  group in account: ${err.message}`);
+	}
+};
+
+Accounts.getGroups = async (accountId) => {
+	try {
+		const config = await getConfig();
+
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		const { data: { groups } } = await get(`${config.vendorDomain}/identity/resources/groups/v1/`, { headers });
+		return groups;
+	} catch (err) {
+		logger.logError(`Failed to get groups in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to get groups in account: ${err.message}`);
+	}
+};
+
+Accounts.createGroup = async (accountId, name, color, users) => {
+	try {
+		const config = await getConfig();
+
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		// add teamspace name as a metadata
+		const payload = {
+			name,
+			color,
+		};
+
+		const { data: { id } } = await post(`${config.vendorDomain}/identity/resources/groups/v1`, payload, { headers });
+
+		if (users?.length) {
+			await Accounts.addUsersToGroup(accountId, id, users);
+		}
+
+		return id;
+	} catch (err) {
+		logger.logError(`Failed to create group in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to create group in account: ${err.message}`);
+	}
+};
+
 Accounts.getAllUsersInAccount = async (accountId) => {
 	try {
 		const config = await getConfig();

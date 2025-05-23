@@ -31,11 +31,12 @@ const FederationRevisionRoutes = require('./teamspaces/projects/models/federatio
 const MetadataRoutes = require('./teamspaces/projects/models/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
 const SsoRoutes = require('./sso');
-const TeamspaceJobRoutes = require('./teamspaces/jobs');
+const TeamspaceRoleRoutes = require('./teamspaces/roles');
 const TeamspaceRoutes = require('./teamspaces');
 const TeamspaceSettingsRoutes = require('./teamspaces/settings');
 const UserRoutes = require('./users');
 const { modelTypes } = require('../models/modelSettings.constants');
+const { routeDeprecated } = require('../middleware/common');
 
 RoutesManager.init = (app) => {
 	// Auth
@@ -48,7 +49,8 @@ RoutesManager.init = (app) => {
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes);
 	app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);
-	app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
+	app.use('/v5/teamspaces/:teamspace/jobs', (req, res) => routeDeprecated()(req, res));
+	app.use('/v5/teamspaces/:teamspace/roles', TeamspaceRoleRoutes);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes);
 
 	// Containers

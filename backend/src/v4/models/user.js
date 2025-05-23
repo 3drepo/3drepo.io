@@ -21,7 +21,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
 const utils = require("../utils");
-const { findJobByUser, usersWithJob, addUserToJob } = require("./job");
+const { findRoleByUser, usersWithRole, addUserToRole } = require("./role");
 
 const TeamspaceSettings = require("./teamspaceSetting");
 
@@ -37,6 +37,8 @@ const {
 const PermissionTemplates = require("./permissionTemplates");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects.js`);
+const { UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 const { types: { strings } } = require(`${v5Path}/utils/helper/yup.js`);
 const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings.js`);
 const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
@@ -522,10 +524,9 @@ User.listAccounts = async function(user) {
 User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, executor) {
 	await removeTeamspaceMember(teamspace, userToRemove);
 	publish(events.USER_REMOVED, { teamspace, executor, user: userToRemove});
-
 };
 
-User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor) {
+User.addTeamMember = async function(teamspace, userToAdd, role, permissions, executor) {
 	await hasReachedLicenceLimit(teamspace);
 
 	let userEntry = null;
@@ -539,10 +540,6 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 		throw (responseCodes.USER_NOT_FOUND);
 	}
 
-	if (!job) {
-		throw (responseCodes.USER_NOT_ASSIGNED_JOB);
-	}
-
 	if (isMemberOfTeamspace(userEntry, teamspace)) {
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
@@ -551,7 +548,10 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];
-	promises.push(addUserToJob(teamspace, job, userEntry.user));
+
+	if(role) {
+		promises.push(addUserToRole(teamspace, role, userEntry.user));
+	}
 
 	const teamspaceSettings = await TeamspaceSettings.getTeamspaceSettings(teamspace);
 
@@ -561,7 +561,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 
 	await Promise.all(promises);
 
-	return  { job, permissions, ... User.getBasicDetails(userEntry) };
+	return  deleteIfUndefined({ role, permissions, ... User.getBasicDetails(userEntry) });
 };
 
 User.getBasicDetails = function(userObj) {
@@ -594,17 +594,17 @@ User.getMembers = async function (teamspace) {
 		user: 1,
 		customData: 1
 	});
-	const getJobInfo = usersWithJob(teamspace);
+	const getRoleInfo = usersWithRole(teamspace);
 
 	const getTeamspacePermissions = TeamspaceSettings.getTeamspaceSettings(teamspace).then(({permissions}) => permissions);
 
 	promises.push(
 		getTeamspaceMembers,
 		getTeamspacePermissions,
-		getJobInfo
+		getRoleInfo
 	);
 
-	const [members = [], teamspacePermissions, memToJob = {}] = await Promise.all(promises);
+	const [members = [], teamspacePermissions, memToRole = {}] = await Promise.all(promises);
 
 	return members.map(({user, customData}) => {
 		const permissions = _.find(teamspacePermissions, {user});
@@ -615,7 +615,7 @@ User.getMembers = async function (teamspace) {
 			lastName: customData.lastName,
 			company: _.get(customData, "billing.billingInfo.company", null),
 			permissions: _.get(permissions, "permissions", []),
-			job: _.get(memToJob, user)
+			role: _.get(memToRole, user)
 		};
 	});
 };
@@ -647,7 +647,7 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 	if(!userEntry || !isMemberOfTeamspace(userEntry,teamspace)) {
 		throw responseCodes.USER_NOT_FOUND;
 	} else {
-		const job = await findJobByUser(teamspace, user);
+		const role = await findRoleByUser(teamspace, user);
 		const result = {
 			user,
 			firstName: userEntry.customData.firstName,
@@ -655,8 +655,8 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 			company: _.get(userEntry.customData, "billing.billingInfo.company", null)
 		};
 
-		if(job) {
-			result.job = {_id: job._id, color: job.color};
+		if(role) {
+			result.role = {_id: UUIDToString(role._id), color: role.color};
 		}
 		return result;
 	}

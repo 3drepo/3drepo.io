@@ -21,9 +21,11 @@ const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
-const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomNumber, generateUUID } = require('../../../helper/services');
 
-const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+
+const { DEFAULT_OWNER_ROLE } = require(`${src}/models/jobs.constants`);
 
 const Teamspaces = require(`${src}/processors/teamspaces`);
 
@@ -89,27 +91,33 @@ const testGetTeamspaceMembersInfo = () => {
 	describe('Get Teamspace members info', () => {
 		const tsWithUsers = 'withUsers';
 		const tsWithoutUsers = 'withoutUsers';
-		const tsWithoutJobs = 'noJobs';
+		const tsWithoutRoles = 'noRoles';
+		const roleA = generateUUID();
+		const roleB = generateUUID();
 		const goldenData = [
-			{ user: 'abc', firstName: 'ab', lastName: 'c', company: 'yy', job: 'jobA' },
-			{ user: 'abcd', firstName: 'ab', lastName: 'cd', job: 'jobB' },
-			{ user: 'abcd2', firstName: 'ab', lastName: 'cd2', job: 'jobB', company: 'dxfd' },
+			{ user: 'abc', firstName: 'ab', lastName: 'c', company: 'yy', roles: [UUIDToString(roleA), UUIDToString(roleB)] },
+			{ user: 'abcd', firstName: 'ab', lastName: 'cd', roles: [UUIDToString(roleB)] },
+			{ user: 'abcd2', firstName: 'ab', lastName: 'cd2', roles: [UUIDToString(roleB)], company: 'dxfd' },
 			{ user: 'abcde', firstName: 'ab', lastName: 'cde', company: 'dsfs' },
-		];
-		const jobList = [
-			{ _id: 'jobA', users: ['abc'] },
-			{ _id: 'jobB', users: ['abcd', 'abcd2'] },
 		];
 		TeamspacesModel.getMembersInfo.mockImplementation((ts) => {
 			if (tsWithoutUsers === ts) return Promise.resolve([]);
 			return Promise.resolve(goldenData.map((data) => _.omit(data, 'job')));
 		});
+		const roleList = [
+			{ _id: roleA, users: ['abc'] },
+			{ _id: roleB, users: ['abc', 'abcd', 'abcd2'] },
+		];
 
-		JobsModel.getJobsToUsers.mockImplementation((ts) => {
-			if (tsWithoutJobs === ts) return Promise.resolve([]);
-			return Promise.resolve(jobList);
+		TeamspacesModel.getMembersInfo.mockImplementation((ts) => {
+			if (tsWithoutUsers === ts) return Promise.resolve([]);
+			return Promise.resolve(goldenData.map((data) => _.omit(data, 'role')));
 		});
 
+		RolesModel.getRolesToUsers.mockImplementation((ts) => {
+			if (tsWithoutRoles === ts) return Promise.resolve([]);
+			return Promise.resolve(roleList);
+		});
 		test('should give the list of members within the given teamspace with their details', async () => {
 			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithUsers);
 			expect(res).toEqual(goldenData);
@@ -120,9 +128,9 @@ const testGetTeamspaceMembersInfo = () => {
 			expect(res).toEqual([]);
 		});
 
-		test('should return the list of members with details if the teamspace had no jobs', async () => {
-			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithoutJobs);
-			expect(res).toEqual(goldenData.map((data) => _.omit(data, 'job')));
+		test('should return the list of members with details if the teamspace had no roles', async () => {
+			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithoutRoles);
+			expect(res).toEqual(goldenData.map((data) => _.omit(data, 'role')));
 		});
 	});
 };
@@ -153,13 +161,13 @@ const testInitTeamspace = () => {
 
 			expect(RolesModel.createTeamspaceRole).toHaveBeenCalledTimes(1);
 			expect(RolesModel.createTeamspaceRole).toHaveBeenCalledWith(teamspace);
-			expect(JobsModel.addDefaultJobs).toHaveBeenCalledTimes(1);
-			expect(JobsModel.addDefaultJobs).toHaveBeenCalledWith(teamspace);
+			expect(RolesModel.addDefaultRoles).toHaveBeenCalledTimes(1);
+			expect(RolesModel.addDefaultRoles).toHaveBeenCalledWith(teamspace);
 
 			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledTimes(1);
 			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledWith(teamspace, teamspaceId);
 			expect(JobsModel.assignUserToJob).toHaveBeenCalledTimes(1);
-			expect(JobsModel.assignUserToJob).toHaveBeenCalledWith(teamspace, DEFAULT_OWNER_JOB, username);
+			expect(JobsModel.assignUserToJob).toHaveBeenCalledWith(teamspace, DEFAULT_OWNER_ROLE, username);
 			expect(TemplatesModel.addDefaultTemplates).toHaveBeenCalledTimes(1);
 			expect(TemplatesModel.addDefaultTemplates).toHaveBeenCalledWith(teamspace);
 

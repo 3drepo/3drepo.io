@@ -17,8 +17,8 @@
 
 const { getAllUsersInTeamspace, getTeamspaceAdmins } = require('../../../../../models/teamspaceSettings');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
-const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getProjectAdmins } = require('../../../../../models/projectSettings');
+const { getRolesByUsers } = require('../../../../../models/roles');
 const { getUsersWithPermissions } = require('../../../../../models/modelSettings');
 
 const Settings = {};
@@ -34,9 +34,9 @@ Settings.getUsersWithPermissions = async (teamspace, project, model, excludeView
 	return getCommonElements([...tsAdmins, ...projectAdmins, ...modelMembers], tsMembers.map(({ user }) => user));
 };
 
-Settings.getJobsWithAccess = async (teamspace, project, model, excludeViewers) => {
+Settings.getRolesWithAccess = async (teamspace, project, model, excludeViewers) => {
 	const users = await Settings.getUsersWithPermissions(teamspace, project, model, excludeViewers);
-	return getJobsByUsers(teamspace, users);
+	return getRolesByUsers(teamspace, users);
 };
 
 module.exports = Settings;

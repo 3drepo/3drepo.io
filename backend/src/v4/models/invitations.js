@@ -21,7 +21,8 @@ const { v5Path } = require("../../interop");
 
 const db = require("../handler/db");
 const User = require("./user");
-const Job = require("./job");
+const Roles = require(`${v5Path}/models/roles`);
+
 const { changePermissions, findModelSettings } = require("./modelSetting");
 const { findProjectsById, setUserAsProjectAdminById } = require("./project");
 const systemLogger = require("../logger.js").systemLogger;
@@ -39,6 +40,7 @@ const { contains: setContains } = require("./helper/set");
 
 const responseCodes = require("../response_codes.js");
 const { omit } = require("lodash");
+const { stringToUUID, UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
@@ -89,20 +91,21 @@ const sendInvitationEmail = async (email, username, teamspace) => {
 	await addUserToAccount(refId, email, undefined, {teamspace, sender  });
 };
 
-invitations.create = async (email, teamspace, job, username, permissions = {}) => {
+invitations.create = async (email, teamspace, role, username, permissions = {}) => {
 	// 1 - find if there is already and invitation with that email
 	// 2 - if there is update the invitation with the new teamspace data
-	// 2.5 - if there is not, create an entry with that email and job/permission
+	// 2.5 - if there is not, create an entry with that email and role/permission
 	// 3 - send an email invitation
-	// 4 - return the invitation for that teamspace ({email, job, permissions:[]})
+	// 4 - return the invitation for that teamspace ({email, role, permissions:[]})
 
 	const projectsPermissions = permissions.projects || [];
 
 	const projectIds = projectsPermissions.map(pr => pr.project);
+	const roleId = stringToUUID(role);
 
-	const [emailUser, teamspaceJob, projects] = await Promise.all([
+	const [emailUser, teamspaceRole, projects] = await Promise.all([
 		User.findByEmail(email),
-		Job.findByJob(teamspace, job),
+		Roles.getRoleById(teamspace, roleId, { _id: 1 }),
 		findProjectsById(teamspace, projectIds)
 	]);
 
@@ -110,8 +113,8 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		throw responseCodes.USER_ALREADY_EXISTS;
 	}
 
-	if (!teamspaceJob) { // If there is no job in that teamspace with the name
-		throw responseCodes.JOB_NOT_FOUND;
+	if (!teamspaceRole) { // If there is no role in that teamspace with the name
+		throw responseCodes.ROLE_NOT_FOUND;
 	}
 
 	if (projects.length !== projectIds.length) {
@@ -132,14 +135,14 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 	const coll = await getCollection();
 	coll.ensureIndex({ "teamSpaces.teamspace": 1 }, { "background": true });
 	const result = await coll.findOne({_id:email});
-	const teamspaceEntry = { teamspace, job, permissions };
+	const teamspaceEntry = { teamspace, role: roleId, permissions };
 
 	if (result) {
 
 		// if its a new teamspace that the user has been invited send an invitation email
 		if (result.teamSpaces.every(t=> t.teamspace !== teamspace)) {
 			await sendInvitationEmail(email, username, teamspace);
-			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
+			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, role, permissions});
 		}
 		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
 		teamSpaces.push(teamspaceEntry);
@@ -149,13 +152,12 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 	} else {
 		await User.hasReachedLicenceLimitCheck(teamspace);
-		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await sendInvitationEmail(email, username, teamspace);
-		await coll.insertOne(invitation);
-		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
+
+		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, role: roleId, permissions});
 	}
 
-	return {email, job, permissions};
+	return {email, role, permissions};
 };
 
 invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) => {
@@ -184,38 +186,10 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 		await coll.updateOne({_id:email}, { $set: data });
 	}
 
-	publish(events.INVITATION_REVOKED, { teamspace, executor, email, job: entryToRemove.job, permissions: entryToRemove.permissions});
+	publish(events.INVITATION_REVOKED, { teamspace, executor, email, role: entryToRemove.role, permissions: entryToRemove.permissions});
 
 	return {};
 
-};
-
-invitations.setJob = async (email, teamspace, job) => {
-	const coll = await getCollection();
-	const invitation = await coll.findOne({_id:email});
-	invitation.teamSpaces[teamspace].job = job;
-	await coll.updateOne({_id:email}, { $set: invitation });
-	return true;
-};
-
-invitations.setTeamspacePermission = async (email, teamspace, permissions) => {
-	await invitations.teamspaceInvitationCheck(email, teamspace);
-	const permissionsField = "teamSpaces." + teamspace + ".permissions.teamspace";
-	const coll = await getCollection();
-	await coll.updateOne({}, { $set: { [permissionsField]: permissions } });
-	return {user:email, permissions};
-};
-
-invitations.teamspaceInvitationCheck = async (email, teamspace) => {
-	const queryField = "teamSpaces." + teamspace ;
-	const coll = await getCollection();
-	const invitation = await coll.findOne({_id:email, [queryField]: {$exists:true}}, {_id: true});
-
-	if (!invitation) {
-		throw responseCodes.USER_NOT_FOUND;
-	}
-
-	return true;
 };
 
 const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => async modelSetting=> {
@@ -233,11 +207,11 @@ const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_adm
 	}
 };
 
-const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, permissions  }) => {
+const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, role, permissions  }) => {
 	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
 
 	try {
-		await User.addTeamMember(teamspace, invitedUser, job, teamPerms);
+		await User.addTeamMember(teamspace, invitedUser, role, teamPerms);
 
 		if (!permissions.teamspace_admin) {
 			await Promise.all(permissions.projects.map(applyProjectPermissions(teamspace, invitedUser)));
@@ -269,7 +243,7 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 	return results.map(invitationEntry => {
 		const email = invitationEntry._id;
 		const teamspaceData =  omit(invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName), "teamspace");
-		return { email, ...teamspaceData };
+		return { email, ...teamspaceData, role: UUIDToString(teamspaceData.role) };
 	});
 };
 

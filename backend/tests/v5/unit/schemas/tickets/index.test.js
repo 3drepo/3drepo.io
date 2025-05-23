@@ -34,8 +34,8 @@ const FS = require('fs');
 jest.mock('../../../../../src/v5/schemas/tickets/templates');
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 
-jest.mock('../../../../../src/v5/models/jobs');
-const JobsModel = require(`${src}/models/jobs`);
+jest.mock('../../../../../src/v5/models/roles');
+const RolesModel = require(`${src}/models/roles`);
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/settings');
 const ModelSettingsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/settings`);
@@ -283,16 +283,16 @@ const testPresetValues = () => {
 			}
 		};
 
-		describe(presetEnumValues.JOBS_AND_USERS, () => {
-			const template = generateTemplateWithValues(presetEnumValues.JOBS_AND_USERS);
+		describe(presetEnumValues.ROLES_AND_USERS, () => {
+			const template = generateTemplateWithValues(presetEnumValues.ROLES_AND_USERS);
 
-			const jobs = times(5, () => generateRandomString());
+			const roles = times(5, () => generateRandomString());
 			const users = times(5, () => generateRandomString());
-			JobsModel.getJobsByUsers.mockResolvedValue(jobs);
+			RolesModel.getRolesByUsers.mockResolvedValue(roles);
 			ModelSettingsProcessor.getUsersWithPermissions.mockResolvedValue(users);
 
 			const testCases = [
-				['With existing jobs', createData(jobs[2], jobs[4]), true],
+				['With existing roles', createData(roles[2], roles[4]), true],
 				['With existing users', createData(users[0], users[4]), true],
 				['With non existing values', createData(() => generateRandomString()(), () => generateRandomString()()), false],
 			];
