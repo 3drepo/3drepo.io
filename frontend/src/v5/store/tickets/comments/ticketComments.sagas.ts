@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { sortBy } from 'lodash';
@@ -30,6 +30,7 @@ import {
 } from './ticketComments.redux';
 import { DialogsActions } from '../../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../../store.helpers';
+import { selectCommentById } from './ticketComments.selectors';
 
 export function* fetchComments({
 	teamspace,
@@ -104,14 +105,22 @@ export function* updateComment({
 	comment,
 }: UpdateCommentAction) {
 	try {
+		const oldComment = yield select(selectCommentById, ticketId, commentId);
+		const newHistory = (oldComment.history || []).concat({
+			message: oldComment.message,
+			images: oldComment.images,
+			view: oldComment.view,
+			timestamp: new Date(),
+		});
+		const commentWithHistory = { ...comment, history: newHistory };
 		const updateModelComment = isFederation
 			? API.TicketComments.updateFederationComment
 			: API.TicketComments.updateContainerComment;
 
-		yield updateModelComment(teamspace, projectId, modelId, ticketId, commentId, parseMessageAndImages(comment));
+		yield updateModelComment(teamspace, projectId, modelId, ticketId, commentId, parseMessageAndImages(commentWithHistory));
 		yield put(TicketCommentsActions.upsertCommentSuccess(
 			ticketId,
-			{ _id: commentId, ...comment, updatedAt: new Date() },
+			{ _id: commentId, ...commentWithHistory, updatedAt: new Date() },
 		));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

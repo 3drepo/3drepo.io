@@ -200,6 +200,8 @@ const establishRoutes = (isFed) => {
 	 *                     format: uuid
 	 *                     description: The Id of the comment image
 	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                 view:
+	 *                   $ref: "#components/schemas/ticketCommentView"
 	 *                 history:
 	 *                   type: array
 	 *                   description: The update history of the comment
@@ -337,6 +339,8 @@ const establishRoutes = (isFed) => {
 	 *                       format: uuid
 	 *                       description: The Id of the comment image
 	 *                       example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   view:
+	 *                     $ref: "#components/schemas/ticketCommentView"
 	 *                   deleted:
 	 *                     type: boolean
 	 *                     example: true
@@ -419,6 +423,8 @@ const establishRoutes = (isFed) => {
 	 *                 items:
 	 *                   type: string
 	 *                   description: Image in a Base64 format
+	 *               view:
+	 *                 $ref: "#components/schemas/ticketCommentView"
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -490,6 +496,8 @@ const establishRoutes = (isFed) => {
 	 *                   items:
 	 *                     type: string
 	 *                     description: Image in a Base64 format or an ID of an image currently used in the comment
+	 *                 view:
+	 *                   $ref: "#components/schemas/ticketCommentView"
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -498,7 +506,7 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully updated
 	 */
-	router.put('/:comment', hasCommenterAccess, validateUpdateComment, updateComment(isFed));
+	router.put('/:comment', hasCommenterAccess, checkTicketExists, validateUpdateComment, updateComment(isFed));
 
 	/**
 	 * @openapi

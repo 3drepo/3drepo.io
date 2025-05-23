@@ -17,16 +17,10 @@
 
 import styled from 'styled-components';
 import { ImageWithExtraCount as CommentImageBase } from '@controls/imageWithExtraCount/imageWithExtraCount.component';
-import CameraIconBase from '@assets/icons/outlined/camera-outlined.svg';
 import { CommentMarkDown as CommentMarkDownBase } from '../commentMarkDown/commentMarkDown.component';
 
 export const CommentMarkDown = styled(CommentMarkDownBase)`
 	display: inline;
-`;
-
-export const CameraIcon = styled(CameraIconBase)`
-	margin-right: 5px;
-	margin-bottom: -1px;
 `;
 
 export const OriginalMessage = styled.div`

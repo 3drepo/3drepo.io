@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupById, getGroupsByIds, updateGroup } = require('../../../../../models/tickets.groups');
+const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getArrayDifference, getCommonElements } = require('../../../../../utils/helper/arrays');
 const {
 	getExternalIdsFromMetadata,
@@ -25,9 +27,12 @@ const {
 const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
+const { removeFiles, storeFiles } = require('../../../../../services/filesManager');
+const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
+const { getNestedProperty } = require('../../../../../utils/helper/objects');
 const { getNodesByIds } = require('../../../../../models/scenes');
+const { isUUID } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
-const { stringToUUID } = require('../../../../../utils/helper/uuids');
 
 const TicketGroups = {};
 
@@ -146,6 +151,74 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 
 	delete formattedEntry[idType];
 	return { ...formattedEntry, _ids: meshIds };
+};
+
+TicketGroups.processGroupsUpdate = (oldData, newData, fields, groupsState) => {
+	fields.forEach((fieldName) => {
+		const oldProp = getNestedProperty(oldData, fieldName) ?? [];
+		const newProp = getNestedProperty(newData, fieldName) ?? [];
+
+		oldProp.forEach(({ group }) => {
+			groupsState.old.add(UUIDToString(group));
+
+			if (newData === undefined || (newData && newData.state === undefined)) {
+				// New data is not specified so we are preserving the old ones
+				groupsState.stillUsed.add(UUIDToString(group));
+			}
+		});
+
+		newProp.forEach((propData) => {
+			const { group } = propData;
+			if (isUUID(group)) {
+				groupsState.stillUsed.add(UUIDToString(group));
+			} else {
+				const groupId = generateUUID();
+				groupsState.toAdd.push({ ...group, _id: groupId });
+				// eslint-disable-next-line no-param-reassign
+				propData.group = groupId;
+			}
+		});
+	});
+};
+
+TicketGroups.processExternalData = async (teamspace, project, model, ticketIds, data) => {
+	const refsToRemove = [];
+	const binariesToSave = [];
+
+	await Promise.all(ticketIds.map(async (ticketId, i) => {
+		const { binaries, groups } = data[i];
+
+		if (groups.stillUsed.size) {
+			const stillUsed = Array.from(groups.stillUsed);
+			const existingGroups = await getGroupsByIds(teamspace, project, model, ticketId,
+				stillUsed.map(stringToUUID), { _id: 1 });
+
+			if (existingGroups.length !== stillUsed.length) {
+				const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
+					stillUsed);
+				throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
+			}
+		}
+
+		refsToRemove.push(...binaries.toRemove);
+
+		binariesToSave.push(...binaries.toAdd.map(({ ref, data: bin }) => ({
+			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId },
+		})));
+
+		await Promise.all([
+			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
+			groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId,
+				groups.toRemove) : Promise.resolve(),
+		]);
+	}));
+
+	const promsToWait = [];
+
+	if (refsToRemove.length) promsToWait.push(removeFiles(teamspace, TICKETS_RESOURCES_COL, refsToRemove));
+	if (binariesToSave.length) promsToWait.push(storeFiles(teamspace, TICKETS_RESOURCES_COL, binariesToSave));
+
+	await Promise.all(promsToWait);
 };
 
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
