@@ -18,12 +18,12 @@
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { TicketsCardActionsDispatchers } from '../actionsDispatchers';
 import { combineSubscriptions, subscribeToRoomEvent } from './realtime.service';
-import { enableRealtimeNewTicket, enableRealtimeUpdateTicket, enableRealtimeUpdateTicketGroup, tickeEvent } from './ticket.events';
+import { enableRealtimeNewTicket, enableRealtimeUpdateTicket, enableRealtimeUpdateTicketGroup, ticketEvent } from './ticket.events';
 
 export const enableRealtimeUpdateTicketFilter = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean) => (
  	subscribeToRoomEvent(
  		{ teamspace, project, model: containerOrFederation },
- 		tickeEvent(isFederation, 'UpdateTicket'),
+ 		ticketEvent(isFederation, 'UpdateTicket'),
  		(ticket: Partial<ITicket>) => {
  			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
  		},
@@ -33,7 +33,7 @@ export const enableRealtimeUpdateTicketFilter = (teamspace: string, project: str
 export const enableRealtimeNewTicketFilter = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerOrFederation },
-		tickeEvent(isFederation, 'NewTicket'),
+		ticketEvent(isFederation, 'NewTicket'),
 		(ticket: ITicket) => {
  			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
 

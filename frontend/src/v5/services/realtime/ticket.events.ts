@@ -24,14 +24,14 @@ import { subscribeToRoomEvent } from './realtime.service';
 import { TicketsActionsDispatchers } from '../actionsDispatchers';
 import { fetchTicketGroup } from '../api/tickets';
 
-export const tickeEvent = (isFed: boolean, eventType: string) => isFed ? `federation${eventType}` : `container${eventType}`;
+export const ticketEvent = (isFed: boolean, eventType: string) => isFed ? `federation${eventType}` : `container${eventType}`;
 
 
 // Container ticket
 export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
-		tickeEvent(isFed, 'UpdateTicket'),
+		ticketEvent(isFed, 'UpdateTicket'),
 		(ticket: Partial<EditableTicket>) => {
 			fillOverridesIfEmpty(ticket);
 			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision);
@@ -42,7 +42,7 @@ export const enableRealtimeUpdateTicket = (teamspace: string, project: string, c
 export const enableRealtimeNewTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
-		tickeEvent(isFed, 'NewTicket'),
+		ticketEvent(isFed, 'NewTicket'),
 		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision),
 	)
 );
@@ -50,7 +50,7 @@ export const enableRealtimeNewTicket = (teamspace: string, project: string, cont
 export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: string, containerId: string, isFed:boolean, revision: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
-		tickeEvent(isFed, 'UpdateTicketGroup'),
+		ticketEvent(isFed, 'UpdateTicketGroup'),
 
 		async (group: Group) => {
 			if (group.rules) {
