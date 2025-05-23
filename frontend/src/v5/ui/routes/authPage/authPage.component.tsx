@@ -29,12 +29,17 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { LoginSchema } from '@/v5/validation/userSchemes/loginSchemes';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { SubmitButton } from '@controls/submitButton';
+import { useState } from 'react';
+import { UnhandledError } from '@controls/errorMessage/unhandledError/unhandledError.component';
 
 const APP_VERSION = ClientConfig.VERSION;
 
 export const AuthPage = () => {
 	const [login] = useSSOLogin();
 	const { url } = useRouteMatch();
+	const [loading, setLoading] = useState(false);
+	const [error, setError] = useState();
+	
 	const returnUrl = AuthHooksSelectors.selectReturnUrl();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
@@ -44,7 +49,15 @@ export const AuthPage = () => {
 		resolver: yupResolver(LoginSchema),
 	});
 
-	const onSubmit = ({ email }) => login(redirectUri, email);
+	const onSubmit = async ({ email }) => {
+		setLoading(true);
+		try {
+			await login(redirectUri, email);
+		} catch (e) {
+			setLoading(false);
+			setError(e);
+		}
+	};
 
 	if (isAuthenticated) {
 		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
@@ -68,8 +81,10 @@ export const AuthPage = () => {
 					label={formatMessage({ defaultMessage: 'Email', id: 'authPage.email' })}
 					control={control}
 					formError={errors.email}
+					disabled={loading}
 				/>
-				<SubmitButton disabled={!isValid}>
+				{error && (<UnhandledError error={error} />)}
+				<SubmitButton isPending={loading} disabled={!isValid}>
 					<FormattedMessage id="authPage.button" defaultMessage="Log in" />
 				</SubmitButton>
 				<Footer>
