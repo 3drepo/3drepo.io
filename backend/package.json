@@ -1,8 +1,8 @@
 {
   "name": "3drepo.io",
-  "version": "5.16.2",
+  "version": "5.17.0",
   "engines": {
-    "node": "18.x.x"
+    "node": "22.x.x"
   },
   "private": true,
   "scripts": {

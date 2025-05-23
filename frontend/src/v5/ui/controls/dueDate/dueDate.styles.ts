@@ -19,6 +19,7 @@ import CalendarIconBase from '@assets/icons/outlined/calendar-outlined.svg';
 import { Backdrop as MuiBackdrop } from '@mui/material';
 import styled, { css } from 'styled-components';
 import { FONT_WEIGHT } from '../../themes/theme';
+import { Container as TextOverflowContainer } from '@controls/textOverflow/textOverflow.styles';
 
 export const StopBackgroundInteraction = styled(MuiBackdrop)`
 	z-index: 15;
@@ -48,12 +49,11 @@ export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boole
 	gap: 3px;
 	height: inherit;
 	align-items: center;
+	color: ${({ isOverdue, theme }) => isOverdue ? theme.palette.error.main : theme.palette.base.main};
 
-	${({ isOverdue, theme }) => !isOverdue ? css`
-		color: ${theme.palette.base.main};
-	` : css`
-		color: ${theme.palette.error.main};
-	`};
+	${TextOverflowContainer} {
+		height: unset;
+	}
 
 	${({ disabled }) => !disabled && css`
 		cursor: pointer;
@@ -62,8 +62,3 @@ export const DateContainer = styled.span<{ isOverdue?: boolean; disabled?: boole
 		}
 	`}
 `;
-
-export const EmptyDateContainer = styled(DateContainer)`
-	color: ${({ theme }) => theme.palette.base.main};
-`;
-

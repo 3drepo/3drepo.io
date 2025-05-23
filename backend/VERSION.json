@@ -1,4 +1,4 @@
-{ "VERSION" : "5.16.2",
+{ "VERSION" : "5.17.0",
   "unity" : {
 	"current" : "5.20.0",
 	"supported": []

@@ -67,6 +67,8 @@ class SessionTracker {
 		const accounts = [];
 		let authAccount = 'abc';
 
+		this.headers = headers;
+
 		if (teamspace) {
 			authAccount = await getTeamspaceRefId(teamspace);
 			accounts.push(authAccount);
@@ -78,7 +80,7 @@ class SessionTracker {
 			.set(headers)
 			.expect(302);
 
-		const { body } = await this.get('/v5/login').expect(200);
+		const { body } = await this.get('/v5/login').set(headers).expect(200);
 		if (teamspace) {
 			expect(body.authenticatedTeamspace).toEqual(teamspace);
 		}
@@ -96,10 +98,14 @@ class SessionTracker {
 	}
 
 	setAuthHeaders(action) {
+		if (this.headers) {
+			action.set(this.headers);
+		}
 		if (this.cookies.token) {
 			return action.set(CSRF_HEADER, this.cookies.token)
 				.set('Cookie', generateCookieArray(this.cookies));
 		}
+
 		return action.set('Cookie', generateCookieArray(this.cookies));
 	}
 
