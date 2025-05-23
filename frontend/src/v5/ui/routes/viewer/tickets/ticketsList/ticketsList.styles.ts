@@ -25,14 +25,14 @@ import { TicketItemContainer } from './ticketItem/ticketItem.styles';
 export const Loader = styled(UnstyledLoader)`
 	height: 100%;
 	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
-	width: calc(100% - 12px);
+	width: calc(100% - 15px);
 	border-radius: 10px;
 	border: 0;
 `;
 
 export const ListContainer = styled.div`
 	flex-grow: 1;
-	margin-right: -12px;
+	margin-right: -15px;
 	& > div {
 		overflow-x: hidden;
 	}
