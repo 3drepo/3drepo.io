@@ -25,16 +25,15 @@ import { throttle } from 'lodash';
 const THROTTLE_TIME = 20;
 export const MovingColumnDropAreas = () => {
 	const {
-		setMovingColumn, movingColumn, moveColumn,
-		movingColumnDropIndex, setMovingColumnDropIndex,
-		columnGap, getIndex, getColumnOffsetLeft, getRowWidth, getVisibleColumns,
+		setMovingColumn, movingColumn, moveColumn, getWidth,
+		movingColumnDropIndex, setMovingColumnDropIndex, columnGap,
+		getIndex, getColumnOffsetLeft, getRowWidth, visibleSortedColumnsNames,
 	} = useContext(ResizableTableContext);
 	const [tableOffset, setTableOffset] = useState(0);
 	const ref = useRef(null);
-	
-	const columns = getVisibleColumns();
+
 	const movingColumnIndex = getIndex(movingColumn);
-	const offset = getColumnOffsetLeft(columns[movingColumnDropIndex]?.name) ?? getRowWidth();
+	const dropLineOffset = getColumnOffsetLeft(visibleSortedColumnsNames[movingColumnDropIndex]) ?? getRowWidth();
 	const isDropIndexValid = (
 		movingColumnDropIndex >= 0
 		&& movingColumnIndex !== movingColumnDropIndex
@@ -56,7 +55,8 @@ export const MovingColumnDropAreas = () => {
 	
 	const getDropAreasWidths = useCallback(() => {
 		let previousColHalfWidth = 0;
-		return columns.map(({ width }) => {
+		return visibleSortedColumnsNames.map((name) => {
+			const width = getWidth(name);
 			const colHalfWidth = width / 2;
 			const areaWidth = previousColHalfWidth + colHalfWidth + columnGap;
 			previousColHalfWidth = colHalfWidth;
@@ -78,7 +78,7 @@ export const MovingColumnDropAreas = () => {
 		const leftEdgeDistance = Math.abs(leftEdge - mouseX);
 		const rightEdgeDistance = Math.abs(rightEdge - mouseX);
 	  
-		const index = (leftEdgeDistance < rightEdgeDistance) ? 0 : columns.length;
+		const index = (leftEdgeDistance < rightEdgeDistance) ? 0 : visibleSortedColumnsNames.length;
 		setDropColumnIndex(e, index);
 	};
 
@@ -118,7 +118,7 @@ export const MovingColumnDropAreas = () => {
 					))}
 				</DropAreas>
 			</Container>
-			{isDropIndexValid && <DropLine $offset={offset} $style="solid" />}
+			{isDropIndexValid && <DropLine $offset={dropLineOffset} $style="solid" />}
 		</>
 	);
 };

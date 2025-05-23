@@ -17,6 +17,20 @@
 
 import styled, { css } from 'styled-components';
 import { Item as Cell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.styles';
+import { CalendarIcon, DueDateContainer } from '@controls/dueDate/dueDate.styles';
+
+export const CellDate = styled.div`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
+
+	${DueDateContainer} {
+		height: unset;
+	}
+
+	${CalendarIcon} {
+		min-width: 11px;
+	}
+`;
 
 export const Container = styled.div<{ $isMoving?: boolean }>`
 	display: contents;

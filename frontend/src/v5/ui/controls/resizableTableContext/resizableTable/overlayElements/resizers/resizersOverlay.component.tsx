@@ -20,11 +20,11 @@ import { useContext } from 'react';
 import { Resizer } from './resizer/resizer.component';
 
 export const ResizersOverlay = () => {
-	const { getVisibleColumns } = useContext(ResizableTableContext);
+	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
 
 	return (
 		<>
-			{getVisibleColumns().map(({ name }) => (
+			{visibleSortedColumnsNames.map((name) => (
 				<Resizer name={name} key={name} />
 			))}
 		</>
