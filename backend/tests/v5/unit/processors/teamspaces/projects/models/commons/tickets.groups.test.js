@@ -18,9 +18,10 @@
 const { cloneDeep, times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString } = require('../../../../../../helper/services');
-const { stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString, generateUUID } = require('../../../../../../helper/services');
+const { UUIDToString, stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
 const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
+const { viewGroups } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -41,8 +42,16 @@ const ScenesModel = require(`${src}/models/scenes`);
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/scenes');
 const SceneProcessor = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
-const getMetadata = (externalIdName) => times(10, () => ({ parents: times(2, () => generateRandomString()),
-	metadata: [{ key: externalIdName, value: generateRandomString() }] }));
+jest.mock('../../../../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+
+jest.mock('../../../../../../../../src/v5/utils/responseCodes');
+const ResponseCodes = require(`${src}/utils/responseCodes`);
+
+const getMetadata = (externalIdName) => times(10, () => ({
+	parents: times(2, () => generateRandomString()),
+	metadata: [{ key: externalIdName, value: generateRandomString() }],
+}));
 
 const getSmartTicketGroupById = () => {
 	const teamspace = generateRandomString();
@@ -99,8 +108,10 @@ const getSmartTicketGroupById = () => {
 					if (options.matchedMeta.length) {
 						const ids = times(options.matchedMeta.length, generateUUIDString);
 						SceneProcessor.getMeshesWithParentIds.mockResolvedValueOnce(ids);
-						expectedData = { ...options.group,
-							objects: [{ container, _ids: ids.map(stringToUUID) }] };
+						expectedData = {
+							...options.group,
+							objects: [{ container, _ids: ids.map(stringToUUID) }],
+						};
 					} else {
 						expectedData = { ...options.group, objects: [] };
 					}
@@ -119,20 +130,28 @@ const getSmartTicketGroupById = () => {
 					SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(
 						{ key: options.externalIdName, values: expectedValues });
 
-					expectedData = { ...options.group,
-						objects: [{ container, [options.externalIdName]: expectedValues }] };
+					expectedData = {
+						...options.group,
+						objects: [{ container, [options.externalIdName]: expectedValues }],
+					};
 					if (options.unwantedMeta.length) {
 						if (options.noUnwantedExternId) {
 							SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(undefined);
 						} else {
 							const unwantedIds = options.unwantedMeta.map(({ metadata }) => metadata[0].value);
 							SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(
-								{ key: options.externalIdName,
-									values: unwantedIds });
-							expectedData = { ...options.group,
-								objects: [{ container,
+								{
+									key: options.externalIdName,
+									values: unwantedIds,
+								});
+							expectedData = {
+								...options.group,
+								objects: [{
+									container,
 									[options.externalIdName]: expectedValues.filter(
-										(v) => !unwantedIds.includes(v)) }] };
+										(v) => !unwantedIds.includes(v)),
+								}],
+							};
 						}
 					}
 				}
@@ -155,8 +174,12 @@ const getSmartTicketGroupById = () => {
 				expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, container,
 					revision, options.group.rules, {
 						parents: 1,
-						...(options.convertToMeshIds ? {} : { metadata: { $elemMatch:
-							{ $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }),
+						...(options.convertToMeshIds ? {} : {
+							metadata: {
+								$elemMatch:
+								{ $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) },
+							},
+						}),
 					});
 			}
 		});
@@ -218,7 +241,8 @@ const getNormalTicketGroupById = () => {
 					SceneProcessor.getMeshesWithParentIds.mockResolvedValueOnce(ids);
 					expectedData.objects = expectedData.objects
 						.map(({ container: resContainer }) => ({
-							container: resContainer, _ids: ids.map(stringToUUID) }));
+							container: resContainer, _ids: ids.map(stringToUUID),
+						}));
 				}
 			}
 
@@ -377,9 +401,191 @@ const testUpdateGroup = () => {
 	describe.each(getCommonTestCases(true))('Update group', runTest);
 };
 
+const testProcessGroupsUpdate = () => {
+	describe('Process groups update', () => {
+		let groupsState;
+		let oldData;
+		let newData;
+		const fields = Object.values(viewGroups).map((groupName) => `state.${groupName}`);
+		const oldGroupId = generateUUIDString();
+		const newGroupId = generateUUIDString();
+		const oldGroup = {
+			_id: oldGroupId,
+			name: generateRandomString(),
+			description: generateRandomString(),
+			objects: [],
+		};
+		const newGroup = {
+			_id: newGroupId,
+			name: generateRandomString(),
+			description: generateRandomString(),
+			objects: [],
+		};
+
+		beforeEach(() => {
+			groupsState = {
+				old: new Set(),
+				stillUsed: new Set(),
+				toAdd: [],
+			};
+
+			oldData = {
+				state: {
+					colored: [{ group: oldGroup }],
+				},
+			};
+
+			newData = {
+				state: {
+					colored: [{ group: newGroup }],
+				},
+			};
+		});
+
+		test('should preserve old data when newData is undefined', () => {
+			newData = undefined;
+
+			Groups.processGroupsUpdate(oldData, newData, fields, groupsState);
+
+			expect(groupsState.old.has(oldGroup)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroup)).toBe(true);
+		});
+
+		test('should preserve old data when newData is undefined', () => {
+			newData = undefined;
+
+			Groups.processGroupsUpdate(oldData, newData, fields, groupsState);
+
+			expect(groupsState.old.has(oldGroup)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroup)).toBe(true);
+		});
+
+		test('should add new groups and preserve existing ones when newData is provided', () => {
+			newData = {
+				state: {
+					colored: [{ group: newGroup }],
+					hidden: [{ group: generateUUID() }],
+				},
+			};
+			Groups.processGroupsUpdate(oldData, newData, fields, groupsState);
+
+			expect(groupsState.old.has(oldGroup)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroup)).toBe(false);
+
+			// Check if new groups are added correctly
+			expect(groupsState.stillUsed.has(UUIDToString(newData.state.hidden[0].group))).toBe(true);
+			expect(groupsState.toAdd).toHaveLength(1);
+			expect(groupsState.toAdd[0]).toHaveProperty('_id');
+			expect(groupsState.toAdd[0].name).toBe(newGroup.name);
+			expect(groupsState.toAdd[0].description).toBe(newGroup.description);
+		});
+	});
+};
+
+const testProcessExternalData = () => {
+	describe('Process External Data', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+
+		test('should execute correctly with valid data', async () => {
+			const ticketIds = [generateUUIDString(), generateUUIDString()];
+			const data = [
+				{ binaries: { toRemove: ['ref1'], toAdd: [{ ref: 'ref1', data: 'binary1' }] }, groups: { stillUsed: new Set(['group1', 'group2']), toAdd: ['group1'], toRemove: ['group3'] } },
+				{ binaries: { toRemove: ['ref2'], toAdd: [{ ref: 'ref2', data: 'binary2' }] }, groups: { stillUsed: new Set(['group1', 'group2']), toAdd: ['group2'], toRemove: [] } },
+			];
+
+			GroupsModel.getGroupsByIds.mockResolvedValue([{ _id: 'group1-id' }, { _id: 'group2-id' }]);
+			GroupsModel.addGroups.mockResolvedValue(undefined);
+			GroupsModel.deleteGroups.mockResolvedValue(undefined);
+			FilesManager.removeFiles.mockResolvedValue(undefined);
+			FilesManager.storeFiles.mockResolvedValue(undefined);
+
+			await Groups.processExternalData(teamspace, project, model, ticketIds, data);
+
+			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, 'tickets.resources', ['ref1', 'ref2']);
+			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, 'tickets.resources', [
+				{ id: 'ref1', data: 'binary1', meta: { teamspace, project, model, ticket: ticketIds[0] } },
+				{ id: 'ref2', data: 'binary2', meta: { teamspace, project, model, ticket: ticketIds[1] } },
+			]);
+
+			expect(GroupsModel.addGroups.mock.calls).toEqual([[teamspace, project, model, ticketIds[0], ['group1']], [teamspace, project, model, ticketIds[1], ['group2']]]);
+			expect(GroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model, ticketIds[0], ['group3']);
+		});
+
+		test('should throw error if groups not found', async () => {
+			const ticketIds = ['ticket1'];
+			const data = [
+				{ binaries: { toRemove: [], toAdd: [] }, groups: { stillUsed: new Set(['group1']), toAdd: [], toRemove: [] } },
+			];
+
+			GroupsModel.getGroupsByIds.mockResolvedValue([]);
+			ResponseCodes.createResponseCode.mockImplementation((template, message) => ({ template, message }));
+
+			await expect(Groups.processExternalData(teamspace, project, model, ticketIds, data))
+				.rejects
+				.toEqual({
+					template: {
+						code: 'INVALID_ARGUMENTS',
+						message: 'The arguments provided are not valid.',
+						status: 400,
+						value: 'INVALID_ARGUMENTS',
+					},
+					message: 'The following groups are not found: group1',
+				});
+		});
+
+		test('should not throw errors if ticketIds is empty', async () => {
+			const ticketIds = [];
+			const data = [];
+
+			GroupsModel.getGroupsByIds.mockResolvedValue([]);
+			GroupsModel.addGroups.mockResolvedValue(undefined);
+			GroupsModel.deleteGroups.mockResolvedValue(undefined);
+
+			await expect(Groups.processExternalData(teamspace, project, model, ticketIds, data)).resolves.not.toThrow();
+		});
+
+		test('should handle empty group operations', async () => {
+			const ticketIds = ['ticket1'];
+			const data = [
+				{ binaries: { toRemove: [], toAdd: [] }, groups: { stillUsed: new Set([]), toAdd: [], toRemove: [] } },
+			];
+
+			GroupsModel.getGroupsByIds.mockResolvedValue([]);
+			GroupsModel.addGroups.mockResolvedValue(undefined);
+			GroupsModel.deleteGroups.mockResolvedValue(undefined);
+
+			await Groups.processExternalData(teamspace, project, model, ticketIds, data);
+
+			expect(GroupsModel.addGroups).not.toHaveBeenCalled();
+			expect(GroupsModel.deleteGroups).not.toHaveBeenCalled();
+		});
+
+		test('should handle file operations when binaries are provided', async () => {
+			const ticketIds = ['ticket1'];
+			const data = [
+				{ binaries: { toRemove: ['ref1'], toAdd: [{ ref: 'ref1', data: 'binary1' }] }, groups: { stillUsed: new Set([]), toAdd: [], toRemove: [] } },
+			];
+
+			FilesManager.removeFiles.mockResolvedValue(undefined);
+			FilesManager.storeFiles.mockResolvedValue(undefined);
+
+			await Groups.processExternalData(teamspace, project, model, ticketIds, data);
+
+			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, 'tickets.resources', ['ref1']);
+			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, 'tickets.resources', [
+				{ id: 'ref1', data: 'binary1', meta: { teamspace, project, model, ticket: 'ticket1' } },
+			]);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	getNormalTicketGroupById();
 	getSmartTicketGroupById();
 	testAddGroups();
 	testUpdateGroup();
+	testProcessGroupsUpdate();
+	testProcessExternalData();
 });

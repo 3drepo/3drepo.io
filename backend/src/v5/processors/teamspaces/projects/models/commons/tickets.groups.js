@@ -26,14 +26,12 @@ const {
 } = require('./scenes');
 const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
-const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
-const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
-const { propTypes, viewGroups } = require('../../../../../schemas/tickets/templates.constants');
 const { removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
-const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
+const { getNestedProperty } = require('../../../../../utils/helper/objects');
 const { getNodesByIds } = require('../../../../../models/scenes');
+const { isUUID } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 
 const TicketGroups = {};
@@ -180,134 +178,6 @@ TicketGroups.processGroupsUpdate = (oldData, newData, fields, groupsState) => {
 				propData.group = groupId;
 			}
 		});
-	});
-};
-
-TicketGroups.calculateRemoveGroups = ({ groups: { toRemove, old, stillUsed, ...otherGroups }, ...others }) => {
-	const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
-		Array.from(old)).map(stringToUUID);
-
-	return { groups: { toRemove: toRemoveCalculated, stillUsed, ...otherGroups }, ...others };
-};
-
-TicketGroups.processCommentGroups = (newView, oldView = undefined) => {
-	const externalReferences = {
-		binaries: {
-			toRemove: [],
-			toAdd: [],
-		},
-		groups: {
-			toAdd: [],
-			old: new Set(),
-			stillUsed: new Set(),
-		},
-	};
-
-	TicketGroups.processGroupsUpdate(
-		oldView,
-		newView,
-		Object.values(viewGroups).map((groupName) => `state.${groupName}`),
-		externalReferences.groups,
-	);
-
-	return TicketGroups.calculateRemoveGroups(externalReferences);
-};
-
-/**
- * Special properties:
- *  Images - images comes in as a base64 string within the JSON object, but we store this separate. A UUID reference is created and replaces thes the image entry, and
- *           the image itself will be stored via filesManager
- *  Groups - Groups will come in embedded, however we will store the group separately with a group id as reference
- */
-TicketGroups.processSpecialProperties = (template, oldTickets, updatedTickets) => {
-	const fullTemplate = generateFullSchema(template);
-
-	const res = [];
-
-	const updateReferences = (templateProperties, externalReferences, oldProperties = {}, updatedProperties = {}) => {
-		templateProperties.forEach(({ type, name }) => {
-			const processImageUpdate = (isArray, field) => {
-				const oldProp = field ? getNestedProperty(oldProperties[name], field) : oldProperties[name];
-				const newProp = field ? getNestedProperty(updatedProperties[name], field) : updatedProperties[name];
-
-				if (oldProp && newProp !== undefined) {
-					const idsToRemove = isArray
-						? getArrayDifference(newProp?.map(UUIDToString), oldProp.map(UUIDToString)).map(stringToUUID)
-						: [oldProp];
-
-					externalReferences.binaries.toRemove.push(...idsToRemove);
-				}
-
-				if (newProp) {
-					const getRefFromBuffer = (data) => {
-						if (isBuffer(data)) {
-							const ref = generateUUID();
-							externalReferences.binaries.toAdd.push({ ref, data });
-							return ref;
-						}
-
-						return data;
-					};
-
-					if (isArray) {
-						// eslint-disable-next-line no-param-reassign
-						updatedProperties[name] = newProp.map(getRefFromBuffer);
-					} else if (field) {
-						setNestedProperty(updatedProperties[name], field, getRefFromBuffer(newProp));
-					} else {
-						// eslint-disable-next-line no-param-reassign
-						updatedProperties[name] = getRefFromBuffer(newProp);
-					}
-				}
-			};
-
-			if (type === propTypes.IMAGE) {
-				processImageUpdate();
-			} else if (type === propTypes.VIEW) {
-				// Make constants out of these
-				processImageUpdate(false, 'screenshot');
-				TicketGroups.processGroupsUpdate(oldProperties[name], updatedProperties[name],
-					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
-					externalReferences.groups);
-			} else if (type === propTypes.IMAGE_LIST) {
-				processImageUpdate(true);
-			}
-		});
-	};
-
-	const isUpdate = !!oldTickets?.length;
-	updatedTickets.forEach((updateData, i) => {
-		const externalReferences = {
-			binaries: {
-				toRemove: [],
-				toAdd: [],
-			},
-			groups: {
-				toAdd: [],
-				old: new Set(),
-				stillUsed: new Set(),
-			},
-		};
-
-		updateReferences(fullTemplate.properties, externalReferences,
-			isUpdate ? oldTickets[i]?.properties : undefined, updateData.properties);
-
-		res.push(externalReferences);
-	});
-
-	fullTemplate.modules.forEach(({ properties, name, type }) => {
-		const id = name ?? type;
-		updatedTickets.forEach((updateData, i) => {
-			updateReferences(properties, res[i],
-				isUpdate ? oldTickets[i]?.modules?.[id] : undefined, updateData?.modules?.[id]);
-		});
-	});
-
-	return res.map(({ groups: { toRemove, old, stillUsed, ...otherGroups }, ...others }) => {
-		const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
-			Array.from(old)).map(stringToUUID);
-
-		return { groups: { toRemove: toRemoveCalculated, stillUsed, ...otherGroups }, ...others };
 	});
 };
 

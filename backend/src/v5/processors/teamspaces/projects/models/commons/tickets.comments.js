@@ -16,10 +16,11 @@
  */
 
 const { addComment, deleteComment, getCommentById, getCommentsByTicket, importComments, updateComment } = require('../../../../../models/tickets.comments');
-const { calculateRemoveGroups, processCommentGroups, processExternalData, processGroupsUpdate } = require('./tickets.groups');
+const { generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
+const { processExternalData, processGroupsUpdate } = require('./tickets.groups');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
-const { generateUUID } = require('../../../../../utils/helper/uuids');
+const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { storeFiles } = require('../../../../../services/filesManager');
@@ -43,6 +44,36 @@ const processCommentImages = (teamspace, project, model, ticket, images = []) =>
 	}
 
 	return refsAndBinaries;
+};
+
+const calculateRemoveGroups = ({ groups: { toRemove, old, stillUsed, ...otherGroups }, ...others }) => {
+	const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
+		Array.from(old)).map(stringToUUID);
+
+	return { groups: { toRemove: toRemoveCalculated, stillUsed, ...otherGroups }, ...others };
+};
+
+const processCommentGroups = (newView, oldView = undefined) => {
+	const externalReferences = {
+		binaries: {
+			toRemove: [],
+			toAdd: [],
+		},
+		groups: {
+			toAdd: [],
+			old: new Set(),
+			stillUsed: new Set(),
+		},
+	};
+
+	processGroupsUpdate(
+		oldView,
+		newView,
+		Object.values(viewGroups).map((groupName) => `state.${groupName}`),
+		externalReferences.groups,
+	);
+
+	return calculateRemoveGroups(externalReferences);
 };
 
 Comments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
