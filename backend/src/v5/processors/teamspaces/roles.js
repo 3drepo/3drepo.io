@@ -15,16 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createRole, deleteRole, getRoles, updateRole } = require('../../models/roles');
+const { DEFAULT_OWNER_ROLE, DEFAULT_ROLES } = require('../../models/roles.constants');
+
+const { createGroup } = require('../../services/sso/frontegg');
+const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
+const { getUserId } = require('../../models/users');
 
 const Roles = {};
 
-Roles.getRoles = getRoles;
+Roles.getRoles = (teamspace, projection) => {};
 
-Roles.createRole = createRole;
+Roles.createRole = (teamspace, role) => {};
 
-Roles.updateRole = updateRole;
+Roles.createDefaultRoles = async (teamspace, firstAdmin) => {
+	const teamspaceId = await getTeamspaceRefId(teamspace);
+	const userId = await getUserId(firstAdmin);
+	await Promise.all(DEFAULT_ROLES.map(({ name, color }) => createGroup(teamspaceId, name, color,
+		name === DEFAULT_OWNER_ROLE ? [userId] : undefined)));
+};
 
-Roles.deleteRole = deleteRole;
+Roles.createRoles = (teamspace, roles) => {};
+
+Roles.updateRole = (teamspace, role, updatedRole) => {};
+
+Roles.deleteRole = (teamspace, roleId) => {};
 
 module.exports = Roles;
