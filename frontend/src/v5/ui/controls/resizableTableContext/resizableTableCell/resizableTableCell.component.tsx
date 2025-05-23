@@ -21,11 +21,13 @@ import { Item } from './resizableTableCell.styles';
 
 export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	name: string;
+	className?: string;
+	onClick?: () => void;
 };
 export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isHidden, getIndex } = useContext(ResizableTableContext);
+	const { movingColumn, isVisible, getIndex } = useContext(ResizableTableContext);
 
-	if (isHidden(name)) return null;
+	if (!isVisible(name)) return null;
 
 	return (<Item $isMoving={movingColumn === name} $index={getIndex(name)} {...props} />);
 };

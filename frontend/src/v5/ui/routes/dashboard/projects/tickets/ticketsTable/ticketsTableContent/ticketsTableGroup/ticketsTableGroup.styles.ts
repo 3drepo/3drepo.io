@@ -19,9 +19,9 @@ import { ResizableTableRow } from '@controls/resizableTableContext/resizableTabl
 import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { Row } from './ticketsTableRow/ticketsTableRow.styles';
-import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 import { Highlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
 import { DropLine } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnDropAreas/movingColumnDropAreas.styles';
+import { TextOverflow } from '@controls/textOverflow';
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
@@ -40,16 +40,14 @@ export const IconContainer = styled.div<{ $flip?: boolean }>`
 	`}
 `;
 
-export const Header = styled(ResizableTableHeader)<{ $selectable?: boolean }>`
+export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
-	padding: 10px 0 10px 10px;
+	padding: 2px 0 8px 10px;
+	/* padding: 10px 0 10px 10px; */
 	text-align: start;
 	box-sizing: border-box;
 	user-select: none;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 
 	${({ $selectable }) => $selectable && css`
 		cursor: pointer;
@@ -74,16 +72,29 @@ export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	`}
 `;
 
-export const NewTicketText = styled.div`
-	font-weight: 600;
-	${({ theme }) => theme.typography.body1}
-
+export const NewTicketTextContainer = styled.div`
+	position: sticky;
+	margin-left: 15px;
+	left: 15px;
+	max-width: calc(100% - 15px);
+	width: fit-content;
+	overflow: hidden;
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	position: sticky;
-	left: 15px;
-	width: fit-content;
+
+	svg {
+		min-width: 15px;
+	}
+`;
+
+export const NewTicketText = styled.span`
+	font-weight: 600;
+	${({ theme }) => theme.typography.body1}
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 100%;
 `;
 
 const roundBorderTop = css`
@@ -91,22 +102,26 @@ const roundBorderTop = css`
 	border-top-right-radius: 10px;
 `;
 
-export const Group = styled.div<{ $empty: boolean }>`
+const roundBorderBottom = css`
+	border-bottom-left-radius: 10px;
+	border-bottom-right-radius: 10px;
+`;
+
+export const Group = styled.div<{ $empty: boolean, $hideNewticketButton: boolean }>`
 	display: grid;
 	gap: 1px;
 	width: fit-content;
 	background-color: transparent;
 
-	${({ $empty }) => !$empty && css`
-		& > ${/* sc-selector */Row}:first-child {
-			${roundBorderTop}
+	${({ $hideNewticketButton }) => $hideNewticketButton && css`
+		& > ${/* sc-selector */Row}:last-child{
+			${roundBorderBottom}
 			overflow: hidden;
 		}
 	`}
 
 	${NewTicketRow} {
-		border-bottom-left-radius: 10px;
-		border-bottom-right-radius: 10px;
+		${roundBorderBottom};
 		${({ $empty }) => $empty && roundBorderTop}
 	}
 `;

@@ -21,41 +21,44 @@ import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
-import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer, PlaceholderForStickyFunctionality } from './ticketsTableGroup.styles';
+import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer, PlaceholderForStickyFunctionality, NewTicketTextContainer } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
+import { getColumnLabel, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { orderBy } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
+import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 
 const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
-	const { isHidden } = useContext(ResizableTableContext);
 	const isSelected = name === sortingColumn;
 
-	if (isHidden(name)) return (null);
-
 	if (disableSorting) return (
-		<Header {...props} name={name}>
-			{children}
-		</Header>
+		<ResizableTableHeader name={name}>
+			<Header {...props}>
+				{children}
+			</Header>
+		</ResizableTableHeader>
 	);
 
 	return (
-		<Header {...props} name={name} onClick={() => onColumnClick(name)} $selectable>
-			{isSelected && (
-				<IconContainer $flip={isDescendingOrder}>
-					<ArrowIcon />
-				</IconContainer>
-			)}
-			{children}
-		</Header>
+		<ResizableTableHeader name={name} onClick={() => onColumnClick(name)}>
+			<Header {...props} $selectable>
+				{isSelected && (
+					<IconContainer $flip={isDescendingOrder}>
+						<ArrowIcon />
+					</IconContainer>
+				)}
+				{children}
+			</Header>
+		</ResizableTableHeader>
 	);
 };
 
@@ -68,9 +71,10 @@ type TicketsTableGroupProps = {
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const { getRowWidth } = useContext(ResizableTableContext);
+	const { getRowWidth, visibleSortedColumnsNames } = useContext(ResizableTableContext);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
+	const hideNewticketButton = template.deprecated;
 
 	const assigneesSort = (items: ITicket[], order) => orderBy(
 		items.map(sortAssignees),
@@ -94,43 +98,18 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 							{!tickets.length
 								? (<PlaceholderForStickyFunctionality />)
 								: (
-									<Headers>
-										<SortingTableHeader name="id" disableSorting>
-											<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
-										</SortingTableHeader>
-										<SortingTableHeader name={BaseProperties.TITLE}>
-											<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
-										</SortingTableHeader>
-										<SortingTableHeader name="modelName">
-											<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`}>
-											<FormattedMessage id="ticketTable.column.header.createdAt" defaultMessage="created at" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`}> 
-											<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${BaseProperties.OWNER}`}>
-											<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`}>
-											<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`}>
-											<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${BaseProperties.STATUS}`}>
-											<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
-											<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
-											<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
-										</SortingTableHeader>
-									</Headers>
+									<>
+										<Headers>
+											{visibleSortedColumnsNames.map((name) => (
+												<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
+													{getColumnLabel(name)}
+												</SortingTableHeader>
+											))}
+											<ColumnsVisibilitySettings />
+										</Headers>
+									</>
 								)}
-							<Group $empty={!sortedItems?.length}>
+							<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
 								{sortedItems.map(({ modelId, ...ticket }) => (
 									<TicketsTableRow
 										key={ticket._id}
@@ -140,23 +119,25 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										selected={selectedTicketId === ticket._id}
 									/>
 								))}
-								{!template.deprecated &&
-								<NewTicketMenu
-									disabled={newTicketButtonIsDisabled}
-									TriggerButton={(
-										<NewTicketRow
-											disabled={newTicketButtonIsDisabled}
-											style={{ width: getRowWidth() }}
-										>
-											<NewTicketText>
-												<AddCircleIcon />
-												<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
-											</NewTicketText>
-										</NewTicketRow>
-									)}
-									useMousePosition
-									onContainerOrFederationClick={onNewTicket}
-								/>
+								{!hideNewticketButton &&
+									<NewTicketMenu
+										disabled={newTicketButtonIsDisabled}
+										TriggerButton={(
+											<NewTicketRow
+												disabled={newTicketButtonIsDisabled}
+												style={{ width: getRowWidth() }}
+											>
+												<NewTicketTextContainer>
+													<AddCircleIcon />
+													<NewTicketText>
+														<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
+													</NewTicketText>
+												</NewTicketTextContainer>
+											</NewTicketRow>
+										)}
+										useMousePosition
+										onContainerOrFederationClick={onNewTicket}
+									/>
 								}
 							</Group>
 						</>

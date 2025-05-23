@@ -19,26 +19,30 @@ import { compact, sum } from 'lodash';
 import { createContext, useRef, useState } from 'react';
 import { RefHolder } from './resizableTableContext.styles';
 
-export type TableColumn = { name: string, minWidth?: number, width: number, stretch?: boolean };
+export type TableColumn = { name: string, minWidth?: number, width: number };
 
 export interface ResizableTableType {
-	getVisibleColumns: () => TableColumn[];
+	getAllColumnsNames: () => string[];
 	getWidth: (name: string) => number;
-	getMinWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
-	isHidden: (name: string) => boolean,
 	columnGap: number,
 	getRowWidth: () => number,
 	getColumnOffsetLeft: (name: string) => number,
 	getIndex: (name: string) => number,
-	resetColumnsOrderAndVisibility: () => void,
+
+	// columns visibility
+	hideColumn: (name: string) => void,
+	showColumn: (name: string) => void,
+	visibleSortedColumnsNames: string[],
+	isVisible: (name: string) => boolean,
+	setVisibleSortedColumnsNames: (names: string[]) => void,
 
 	// resizing
 	setResizerName: (name: string) => void,
 	resizerName: string,
 	setIsResizing: (isResizing: boolean) => void,
 	isResizing: boolean,
-	stretchTable: () => void,
+	stretchTable: (name: string) => void,
 
 	// moving columns
 	setMovingColumn: (name: string) => void,
@@ -49,16 +53,20 @@ export interface ResizableTableType {
 }
 
 const defaultValue: ResizableTableType = {
-	getVisibleColumns: () => [],
+	getAllColumnsNames: () => [],
 	getWidth: () => 0,
-	getMinWidth: () => 0,
 	setWidth: () => {},
-	isHidden: () => true,
 	columnGap: 0,
 	getRowWidth: () => 0,
 	getColumnOffsetLeft: () => 0,
 	getIndex: () => -1,
-	resetColumnsOrderAndVisibility: () => {},
+
+	// columns visibility
+	hideColumn: () => {},
+	showColumn: () => {},
+	visibleSortedColumnsNames: [],
+	isVisible: () => true,
+	setVisibleSortedColumnsNames: () => {},
 
 	// resizing
 	setResizerName: () => {},
@@ -80,92 +88,90 @@ ResizableTableContext.displayName = 'ResizeableColumns';
 interface Props {
 	children: any;
 	columns: TableColumn[];
-	hiddenColumns: string[];
 	columnGap?: number;
 }
-export const ResizableTableContextComponent = ({ children, columns: inputColumns, hiddenColumns, columnGap = 0 }: Props) => {
-	const [columns, setColumns] = useState([...inputColumns]);
-	const [visibleSortedColumns, setVisibleSortedColumns] = useState<string[]>([]);
+export const ResizableTableContextComponent = ({ children, columns, columnGap = 0 }: Props) => {
+	const [columnsWidths, setColumnsWidths] = useState<Record<string, number>>({});
+	const [visibleSortedColumnsNames, setVisibleSortedColumnsNames] = useState([]);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 	const [movingColumn, setMovingColumn] = useState('');
 	const [movingColumnDropIndex, setMovingColumnDropIndex] = useState(-1);
 	const ref = useRef<HTMLDivElement>();
 
-	const getColumnByName = (name) => columns.find((e) => e.name === name);
+	const getColumnByName = (name: string) => columns.find((e) => e.name === name) as TableColumn;
 
-	const isHidden = (name) => !visibleSortedColumns.includes(name);
-	const getMinWidth = (name) => getColumnByName(name)?.minWidth ?? 0;
-	const getWidth = (name) => (!isHidden(name) && getColumnByName(name)?.width) ?? 0;
+	const isVisible = (name: string) => visibleSortedColumnsNames.includes(name);
+	const getMinWidth = (name: string) => getColumnByName(name)?.minWidth ?? 0;
+	const getColumnWidth = (column: TableColumn) => columnsWidths[column.name] ?? column.width;
+	const getWidth = (name: string) => {
+		const column = getColumnByName(name);
+		if (!column || !isVisible(name)) return 0;
+		return getColumnWidth(column);
+	};
 
-	const getVisibleColumns = () => visibleSortedColumns.map(getColumnByName);
-	const getVisibleColumnsWidths = () => getVisibleColumns().map((c) => c.width);
+	const getAllColumnsNames = () => columns.map((c) => c.name);
 	const getRowWidth = () => {
-		const visibleColumnswidths = getVisibleColumnsWidths();
-		const gaps = (visibleColumnswidths.length - 1) * columnGap;
-		return sum(visibleColumnswidths) + gaps;
+		const visibleColumnsWidths = visibleSortedColumnsNames.map(getWidth);
+		const gaps = (visibleColumnsWidths.length - 1) * columnGap;
+		return sum(visibleColumnsWidths) + gaps;
 	};
 
-	const setWidth = (name: string, width: number) => {
-		getColumnByName(name).width = Math.max(getMinWidth(name), width);
-		setColumns([ ...columns ]);
-	};
+	const setWidth = (name: string, width: number) => setColumnsWidths({
+		...columnsWidths,
+		[name]: Math.max(getMinWidth(name), width),
+	});
 
 	const getColumnOffsetLeft = (name: string) => {
 		let offset = 0;
-		for (const col of getVisibleColumns()) {
-			if (col.name === name) {
+		for (const colName of visibleSortedColumnsNames) {
+			if (colName === name) {
 				break;
 			}
-			offset += col.width + columnGap;
+			offset += getWidth(colName) + columnGap;
 		}
 		return offset;
 	};
 
-	const stretchTable = () => {
-		const stretchableColumns = getVisibleColumns().filter((c) => c.stretch);
-		if (!stretchableColumns.length) return;
-
+	const stretchTable = (name: string) => {
 		const parentWidth = +getComputedStyle(ref.current).width.replace('px', '');
 		const tableWidth = getRowWidth();
 		if (tableWidth >= parentWidth) return;
 
 		const gap = parentWidth - tableWidth;
-		const gapFraction = gap / stretchableColumns.length;
-		stretchableColumns.forEach((c) => {
-			getColumnByName(c.name).width += gapFraction;
-		});
-		setColumns([ ...columns ]);
+		columnsWidths[name] = getColumnWidth(getColumnByName(name)) + gap;
+		setColumnsWidths({ ...columnsWidths });
 	};
 
-	const getIndex = (name: string) => getVisibleColumns().findIndex((c) => c.name === name);
+	const showColumn = (name: string) => setVisibleSortedColumnsNames([...visibleSortedColumnsNames, name]);
+	const hideColumn = (name: string) => setVisibleSortedColumnsNames(visibleSortedColumnsNames.filter((columnName) => columnName !== name));
+
+
+	const getIndex = (name: string) => visibleSortedColumnsNames.findIndex((colName) => colName === name);
 
 	const moveColumn = (name: string, to: number) => {
-		const currentIndex = visibleSortedColumns.findIndex((n) => n === name);
-		delete visibleSortedColumns[currentIndex];
-		visibleSortedColumns.splice(to, 0, name);
-		setVisibleSortedColumns(compact(visibleSortedColumns));
-	};
-
-	const resetColumnsOrderAndVisibility = () => {
-		const inputColumnsNames = inputColumns.map(({ name }) => name);
-		setVisibleSortedColumns(inputColumnsNames.filter((name) => !hiddenColumns.includes(name)));
+		const currentIndex = visibleSortedColumnsNames.findIndex((n) => n === name);
+		delete visibleSortedColumnsNames[currentIndex];
+		visibleSortedColumnsNames.splice(to, 0, name);
+		setVisibleSortedColumnsNames(compact(visibleSortedColumnsNames));
 	};
 
 	return (
 		<ResizableTableContext.Provider value={{
-			getVisibleColumns,
+			getAllColumnsNames,
 			getWidth,
 			setWidth,
-			getMinWidth,
 			setResizerName,
 			getColumnOffsetLeft,
 			getIndex,
 			resizerName,
 			setIsResizing,
 			isResizing,
-			isHidden,
-			resetColumnsOrderAndVisibility,
+			hideColumn,
+			showColumn,
+			isVisible,
+			visibleSortedColumnsNames,
+			setVisibleSortedColumnsNames,
 			getRowWidth,
 			columnGap,
 			stretchTable,

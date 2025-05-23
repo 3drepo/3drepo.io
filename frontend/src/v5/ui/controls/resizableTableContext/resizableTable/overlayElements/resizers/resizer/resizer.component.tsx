@@ -22,9 +22,8 @@ import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/del
 
 type ResizerProps = { name: string };
 export const Resizer = ({ name }: ResizerProps) => {
-	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName, isHidden } = useContext(ResizableTableContext);
+	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName } = useContext(ResizableTableContext);
 	const width = getWidth(name);
-	const hidden = isHidden(name);
 	const initialPosition = useRef(null);
 
 	const preventEventPropagation = (e) => {
@@ -71,8 +70,6 @@ export const Resizer = ({ name }: ResizerProps) => {
 		overlay.addEventListener('mousemove', onResize);
 		overlay.addEventListener('mouseup', onMouseUp);
 	};
-	
-	if (hidden) return null;
 
 	const getStyle = () => {
 		if (resizerName !== name) return 'none';

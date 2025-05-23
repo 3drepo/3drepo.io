@@ -15,13 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import styled from 'styled-components';
+import { CalendarIcon, DueDateContainer } from '@controls/dueDate/dueDate.styles';
 
-export const ResizableTableRow = (props) => {
-	const { visibleSortedColumnsNames, getWidth, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = visibleSortedColumnsNames.map((column) => `${getWidth(column)}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
-};
+export const CellDate = styled.div`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
+
+	${DueDateContainer} {
+		height: unset;
+	}
+
+	${CalendarIcon} {
+		min-width: 11px;
+	}
+`;

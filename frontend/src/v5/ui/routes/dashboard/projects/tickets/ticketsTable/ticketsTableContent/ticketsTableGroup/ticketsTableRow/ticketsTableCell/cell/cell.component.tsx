@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
-import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
+import { CellContainer } from './cell.styles';
+import { TextOverflow } from '@controls/textOverflow';
 
-export const ResizableTableRow = (props) => {
-	const { visibleSortedColumnsNames, getWidth, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = visibleSortedColumnsNames.map((column) => `${getWidth(column)}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
-};
+type CellProps = { name: string, children: any, className?: string };
+export const Cell = ({ name, children, className }: CellProps) => (
+	<CellContainer name={name} className={className}>
+		<TextOverflow>
+			{children}
+		</TextOverflow>
+	</CellContainer>
+);

@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import styled from 'styled-components';
 import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
-import styled, { css } from 'styled-components';
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import { TicketsTableCell } from './ticketsTableCell/ticketsTableCell.component';
-import { Item as Cell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.styles';
+import { CellContainer } from './ticketsTableCell/cell/cell.styles';
 
 // TODO - fix when new palette is released
 export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
@@ -28,11 +28,15 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	cursor: pointer;
 	width: fit-content;
 
-	${({ $selected }) => $selected && css`
-		&& ${Cell} {
-			background-color: #edf0f8;
-		}
-	`}
+	${CellContainer} {
+		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
+	}
+
+	&:first-child {
+		border-top-left-radius: 10px;
+		border-top-right-radius: 10px;
+		overflow: hidden;
+	}
 `;
 
 export const OverflowContainer = styled.div`

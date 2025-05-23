@@ -169,7 +169,10 @@ const testCreateProject = () => {
 
 		test('should fail if multiple projects are being sent at similar times with the same name', async () => {
 			const payload = { name: ServiceHelper.generateRandomString() };
-			const [res1, res2, res3] = await Promise.all(times(3, () => agent.post(route()).send(payload)));
+			const prom1 = agent.post(route()).send(payload);
+			const [res1, res2, res3] = await Promise.all([
+				prom1,
+				...times(2, () => agent.post(route()).send(payload))]);
 
 			expect(res1.statusCode).toBe(templates.ok.status);
 			expect(res2.statusCode).toBe(templates.invalidArguments.status);
