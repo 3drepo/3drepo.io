@@ -518,6 +518,7 @@ Schemas.schemas.ticketCommentView = {
 			},
 		},
 		clippingPlanes: {
+			description: 'Array of planes defining which directoin the model gets clipped.',
 			type: 'array',
 			items: {
 				type: 'object',
@@ -542,7 +543,7 @@ Schemas.schemas.ticketCommentView = {
 			},
 		},
 		state: {
-			description: 'Details about the position and type of view',
+			description: 'Details about the state of the model.',
 			type: 'object',
 			properties: {
 				showHidden: {
@@ -572,14 +573,14 @@ Schemas.schemas.ticketCommentView = {
 						},
 					},
 				},
-			},
-		},
-		hidden: {
-			type: 'array',
-			items: {
-				type: 'object',
-				properties: {
-					group: Schemas.schemas.ticketGroup,
+				hidden: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							group: Schemas.schemas.ticketGroup,
+						},
+					},
 				},
 			},
 		},
