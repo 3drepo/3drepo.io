@@ -62,11 +62,16 @@ export class AsyncFunctionExecutor<T> {
 	private async start() {
 		this.running = true;
 		while (this.calls.length) {
-			const start = this.strategy === ExecutionStrategy.Lifo ? Math.max(this.calls.length - this.batchSize, 0) : 0;
+			const strategyIsLifo = this.strategy === ExecutionStrategy.Lifo;
+			const start = strategyIsLifo ? Math.max(this.calls.length - this.batchSize, 0) : 0;
 			const deleteCount = Math.min(this.batchSize, this.calls.length);
+			const batch = this.calls.splice(start, deleteCount);
 
-			const batch =  this.calls.splice(start, deleteCount);
-			await Promise.all(batch.reverse().map(async (p) => {
+			if (strategyIsLifo) {
+				batch.reverse();
+			}
+
+			await Promise.all(batch.map(async (p) => {
 				if (p.resolved) {
 					return p.promise;
 				}

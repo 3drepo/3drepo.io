@@ -15,22 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
 import styled from 'styled-components';
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
-import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
-
-export const Cell = styled(ResizableTableCell)`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	height: 100%;
-	padding: 0 10px;
-	display: flex;
-	align-items: center;
-	justify-content: flex-start;
-	font-weight: 500;
-	overflow: hidden;
-	box-sizing: border-box;
-`;
+import { CellContainer } from './ticketsTableCell/cell/cell.styles';
 
 // TODO - fix when new palette is released
 export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
@@ -39,32 +26,13 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	cursor: pointer;
 	width: fit-content;
 
-	${Cell} {
+	${CellContainer} {
 		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
 	}
-`;
 
-export const OverflowContainer = styled.div`
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	display: inline-block;
-`;
-
-export const CellOwner = styled(Cell)`
-	.MuiAvatar-root {
-		width: 24px;
-		height: 24px;
+	&:first-child {
+		border-top-left-radius: 10px;
+		border-top-right-radius: 10px;
+		overflow: hidden;
 	}
-`;
-
-export const CellDate = styled(Cell)`
-	${DueDateContainer} {
-		height: unset;
-	}
-`;
-
-export const SmallFont = styled.span`
-	color: ${({ theme }) => theme.palette.base.main};
-	font-size: 10px;
 `;
