@@ -17,13 +17,31 @@
 
 const { DEFAULT_OWNER_ROLE, DEFAULT_ROLES } = require('../../models/roles.constants');
 
-const { createGroup } = require('../../services/sso/frontegg');
+const { createGroup, getGroups } = require('../../services/sso/frontegg');
 const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
-const { getUserId } = require('../../models/users');
+const { getUserId, getUsersByQuery } = require('../../models/users');
 
 const Roles = {};
 
-Roles.getRoles = (teamspace, projection) => {};
+Roles.getRoles = async (teamspace) => {
+	const teamspaceId = await getTeamspaceRefId(teamspace);
+	const groups = await getGroups(teamspaceId);
+	const roles = await Promise.all(groups.map(async ({ id, name, color, users }) => {
+		const groupInfo = { id, name, color };
+
+		if (users?.length) {
+			const userEmails = users.map(({ email }) => email);
+
+			console.log(userEmails);
+
+			const userDocs = await getUsersByQuery({ 'customData.email': { $in: userEmails } }, { user: 1 });
+			groupInfo.users = userDocs.map(({ user }) => user);
+		}
+
+		return groupInfo;
+	}));
+	return roles;
+};
 
 Roles.createRole = (teamspace, role) => {};
 

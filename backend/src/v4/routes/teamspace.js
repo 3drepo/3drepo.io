@@ -30,7 +30,7 @@
 	const utils = require("../utils");
 
 	const { v5Path } = require("../../interop");
-	const { httpVerbs, routeDeprecated } = require(`${v5Path}/middleware/common`);
+	const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 	/**
 	 * @apiDefine Teamspace Teamspace
@@ -247,7 +247,7 @@
 	 * }
 	 *
 	 */
-	router.get("/members", routeDeprecated(httpVerbs.GET, "/v5/teamspaces/{teamspace}/members"));
+	router.get("/members", routeDecommissioned("GET", "/v5/teamspaces/{teamspace}/members"));
 
 	/**
 	 *
@@ -303,7 +303,7 @@
 	 *    role: {"_id": "Role1", color: "#FFFFFF"}
 	 * }
 	 */
-	router.get("/members/:user",  routeDeprecated(httpVerbs.GET, "/v5/teamspaces/{teamspace}/members"));
+	router.get("/members/:user",  routeDecommissioned("GET", "/v5/teamspaces/{teamspace}/members"));
 
 	/**
 	 *

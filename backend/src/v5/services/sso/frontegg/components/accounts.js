@@ -99,7 +99,6 @@ Accounts.addUsersToGroup = async (accountId, groupId, userIds) => {
 			[HEADER_TENANT_ID]: accountId,
 		};
 
-		// add teamspace name as a metadata
 		const payload = {
 			userIds,
 		};
@@ -108,6 +107,23 @@ Accounts.addUsersToGroup = async (accountId, groupId, userIds) => {
 	} catch (err) {
 		logger.logError(`Failed to add user to group in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to add user to  group in account: ${err.message}`);
+	}
+};
+
+Accounts.getGroups = async (accountId) => {
+	try {
+		const config = await getConfig();
+
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		const { data: { groups } } = await get(`${config.vendorDomain}/identity/resources/groups/v1/`, { headers });
+		return groups;
+	} catch (err) {
+		logger.logError(`Failed to get groups in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to get groups in account: ${err.message}`);
 	}
 };
 

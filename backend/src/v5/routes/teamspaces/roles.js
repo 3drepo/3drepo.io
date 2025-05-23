@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 const { roleExists, validateNewRole, validateUpdateRole } = require('../../middleware/dataConverter/inputs/teamspaces/roles');
 
 const Roles = require('../../processors/teamspaces/roles');

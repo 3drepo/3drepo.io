@@ -27,7 +27,6 @@ const {
 	hasReadAccessToFederation,
 	isAdminToProject,
 } = require('../../../../../middleware/permissions');
-const { httpVerbs, routeDeprecated } = require('../../../../../middleware/common');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
@@ -40,6 +39,7 @@ const { canDeleteContainer } = require('../../../../../middleware/dataConverter/
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
+const { routeDecommissioned } = require('../../../../../middleware/common');
 
 const getThumbnail = async (req, res) => {
 	const { teamspace, project, drawing } = req.params;
@@ -1045,7 +1045,7 @@ const establishRoutes = (modelType) => {
 	 */
 	router.get('/:model/roles', hasReadAccessToModel[modelType], getRolesWithAccess);
 
-	router.get('/:model/jobs', routeDeprecated(httpVerbs.GET, '/v5/teamspaces/{teamspace}/projects/{project}/{type}/{model}/roles'));
+	router.get('/:model/jobs', routeDecommissioned('GET', '/v5/teamspaces/{teamspace}/projects/{project}/{type}/{model}/roles'));
 
 	if (modelType === modelTypes.DRAWING) {
 	/**

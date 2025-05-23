@@ -18,7 +18,7 @@
 "use strict";
 
 const { v5Path } = require("../../interop");
-const { httpVerbs, routeDeprecated } = require(`${v5Path}/middleware/common`);
+const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 (function () {
 	const express = require("express");
@@ -57,7 +57,7 @@ const { httpVerbs, routeDeprecated } = require(`${v5Path}/middleware/common`);
 	 * 	color:"#ffff00"
 	 * }
 	 */
-	router.post("/jobs", routeDeprecated(httpVerbs.POST, "/v5/teamspaces/{teamspace}/roles"));
+	router.post("/jobs", routeDecommissioned("POST", "/v5/teamspaces/{teamspace}/roles"));
 
 	/**
 	 * @api {put} /:teamspace/jobs/:jobId Update job
@@ -82,7 +82,7 @@ const { httpVerbs, routeDeprecated } = require(`${v5Path}/middleware/common`);
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.put("/jobs/:jobId", routeDeprecated(httpVerbs.PATCH, "/v5/teamspaces/{teamspace}/roles/{role}"));
+	router.put("/jobs/:jobId", routeDecommissioned("PATCH", "/v5/teamspaces/{teamspace}/roles/{role}"));
 
 	/**
 	 * @api {get} /:teamspace/jobs List all jobs
@@ -115,7 +115,7 @@ const { httpVerbs, routeDeprecated } = require(`${v5Path}/middleware/common`);
 	 * 	}
 	 * ]
 	 */
-	router.get("/jobs", routeDeprecated(httpVerbs.GET, "/v5/teamspaces/{teamspace}/roles"));
+	router.get("/jobs", routeDecommissioned("GET", "/v5/teamspaces/{teamspace}/roles"));
 
 	/**
 	 * @api {post} /:teamspace/jobs/:jobId/:user Assign a job
@@ -135,7 +135,7 @@ const { httpVerbs, routeDeprecated } = require(`${v5Path}/middleware/common`);
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.post("/jobs/:jobId/:user", routeDeprecated(httpVerbs.PATCH, "/v5/teamspaces/{teamspace}/roles/{role}"));
+	router.post("/jobs/:jobId/:user", routeDecommissioned("PATCH", "/v5/teamspaces/{teamspace}/roles/{role}"));
 
 	/**
 	 * @api {delete} /:teamspace/jobs/:jobId Delete a job
@@ -154,7 +154,7 @@ const { httpVerbs, routeDeprecated } = require(`${v5Path}/middleware/common`);
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.delete("/jobs/:jobId", routeDeprecated(httpVerbs.DELETE, "/v5/teamspaces/{teamspace}/roles/{role}"));
+	router.delete("/jobs/:jobId", routeDecommissioned("DELETE", "/v5/teamspaces/{teamspace}/roles/{role}"));
 
 	module.exports = router;
 }());
