@@ -58,6 +58,7 @@ export const edgeScrolling = (options: Options = {}): EdgeScrolling => {
 	);
 
 	const scrollLoop = () => {
+		if (!observer.isObserving) return;
 		throttledScroll();
 		requestAnimationFrame(scrollLoop);
 	};
