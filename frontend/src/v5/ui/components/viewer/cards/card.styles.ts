@@ -61,6 +61,8 @@ export const CardContent = styled.div`
 	box-sizing: border-box;
 	overflow: overlay;
 	height: 100%;
+	display: flex;
+	flex-direction: column;
 `;
 
 // TODO - fix after new palette is released

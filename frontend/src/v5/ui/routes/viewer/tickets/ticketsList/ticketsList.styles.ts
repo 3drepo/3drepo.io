@@ -19,16 +19,34 @@ import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
+import { Loader as UnstyledLoader } from '@/v4/routes/components/loader/loader.component';
 import { TicketItemContainer } from './ticketItem/ticketItem.styles';
 
-export const List = styled.div`
+export const Loader = styled(UnstyledLoader)`
+	height: 100%;
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	width: calc(100% - 15px);
+	border-radius: 10px;
+	border: 0;
+`;
+
+export const ListContainer = styled.div`
+	flex-grow: 1;
+	margin-right: -15px;
+	& > div {
+		overflow-x: hidden;
+	}
+`;
+
+export const List = styled.table`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	overflow: hidden;
-	display: inline-block;
-	width: 100%;
+	width: 350px;
 	margin-bottom: 0;
-	${/* sc-selector */ TicketItemContainer}:not(:last-child) {
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	box-sizing: border-box;
+	tr:not(:last-child) ${/* sc-selector */ TicketItemContainer}{
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
 `;

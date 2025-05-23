@@ -63,7 +63,7 @@ export const selectTemplateById = createSelector(
 	selectTemplates,
 	(state, modelId, templateId) => templateId,
 	(state, templates, templateId) => templates.find(({ _id }) => _id === templateId) || null,
-);
+) as (state: object, modelId: string, templateId: string) => ITemplate;
 
 export const selectTicketsGroups = createSelector(
 	selectTicketsDomain,
@@ -95,13 +95,13 @@ export const selectTicketByIdRaw = createSelector(
 	selectTicketsRaw,
 	(_, modelId, ticketId) => ticketId,
 	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
-);
+) as (state:object, containerOrFederation:string, ticketId: string) => ITicket;
 
 export const selectTicketById = createSelector(
 	selectTickets,
 	(_, modelId, ticketId) => ticketId,
 	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
-);
+) as (state:object, containerOrFederation:string, ticketId: string) => ITicket;
 
 export const selectRiskCategories = createSelector(
 	selectTicketsDomain,
