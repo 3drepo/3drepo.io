@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useCallback, useContext, useState } from 'react';
+import { TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { useCallback, useState } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { AssigneesListContainer } from './assigneesSelect.styles';
 import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
-import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
-import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assignees.helpers';
+import { getInvalidValues, getValidValues, groupJobsAndUsers } from './assignees.helpers';
+import { useSelectedModelsIds } from '../../routes/dashboard/projects/tickets/ticketsTable/newTicketMenu/useSelectedModels';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
@@ -51,9 +51,11 @@ export const AssigneesSelect = ({
 	...props
 }: AssigneesSelectProps) => {
 	const [open, setOpen] = useState(false);
-	const { containerOrFederation } = useContext(TicketContext);
+	
+	const containersAndFederations = useSelectedModelsIds();
 
-	const { jobs, users } = getModelJobsAndUsers(containerOrFederation);
+	const jobsAndUsers = TicketsCardHooksSelectors.selectJobsAndUsersByModelIds(containersAndFederations);
+	const { jobs, users } = groupJobsAndUsers(jobsAndUsers);
 
 	const emptyValue = multiple ? [] : '';
 	const value = valueRaw || emptyValue;

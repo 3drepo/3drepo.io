@@ -21,7 +21,7 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List } from './ticketsList.styles';
 
 export const TicketsList = () => {
-	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const filteredTickets = TicketsCardHooksSelectors.selectCurrentModelFilteredTickets();
 
 	return (
 		<>

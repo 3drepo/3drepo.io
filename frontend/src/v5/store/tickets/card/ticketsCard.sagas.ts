@@ -19,7 +19,7 @@ import { put, race, select, take, takeLatest } from 'redux-saga/effects';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { AdditionalProperties, BaseProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
-import { FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes, UpsertFilterAction } from './ticketsCard.redux';
+import { FetchFilteredTicketsAction, FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes, UpsertFilterAction } from './ticketsCard.redux';
 import { TicketsActions, TicketsTypes } from '../tickets.redux';
 import { DialogsActions, DialogsTypes } from '../../dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
@@ -27,7 +27,8 @@ import { selectTemplates } from '../tickets.selectors';
 import { selectCardFilters } from './ticketsCard.selectors';
 import * as API from '@/v5/services/api';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { isEqual, pick } from 'lodash';
+import { flatten, isEqual, pick } from 'lodash';
+import { selectIsFederation } from '../../federations/federations.selectors';
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
 	yield put(TicketsCardActions.setSelectedTicket(ticketId));
@@ -57,14 +58,17 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 	}
 }
 
-export function* fetchFilteredTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsListAction) {
+export function* fetchFilteredTickets({ teamspace, projectId, modelIds }: FetchFilteredTicketsAction) {
 	try {
 		const filters = yield select(selectCardFilters);
-		const fetchModelTickets = isFederation
-			? API.Tickets.fetchFederationTickets
-			: API.Tickets.fetchContainerTickets;
-		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { filters: filtersToQuery(filters) });
-		const ticketIds = tickets.map((t) => t._id);
+		const isFed = yield select(selectIsFederation);
+		const ticketIds: string[] = flatten(yield Promise.all(modelIds.map(async (modelId) => {
+			const fetchModelTickets = isFed(modelId)
+				? API.Tickets.fetchFederationTickets
+				: API.Tickets.fetchContainerTickets;
+			const tickets = await fetchModelTickets(teamspace, projectId, modelId, { filters: filtersToQuery(filters) });
+			return tickets.map((t) => t._id);
+		})));
 		yield put(TicketsCardActions.setFilteredTicketIds(ticketIds));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {

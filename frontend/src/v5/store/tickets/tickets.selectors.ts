@@ -22,7 +22,7 @@ import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
-import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
+import { selectCurrentProjectTemplateById, selectCurrentProjectTemplates } from '../projects/projects.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -67,6 +67,18 @@ export const selectTemplateById = createSelector(
 	(state, templates, templateId) => templates.find(({ _id }) => _id === templateId) || null,
 );
 
+export const selectTemplatesByIds = createSelector(
+	selectTicketsDomain,
+	selectCurrentProjectTemplates,
+	(state, templateIds) => templateIds,
+	(state, templates, templateIds) => templates.filter(({ _id }) => templateIds.includes(_id)),
+);
+
+export const selectFilterableTemplatesIds = createSelector(
+	selectTicketsDomain,
+	(state) => state.filterableTemplatesIds,
+);
+
 export const selectTicketsGroups = createSelector(
 	selectTicketsDomain,
 	(state) => state.groupsByGroupId,
@@ -81,12 +93,19 @@ export const selectTicketsRaw = createSelector(
 export const selectTickets = createSelector(
 	selectTicketsRaw,
 	selectTicketsGroups,
+	selectFederationById,
+	selectContainerById,
 	(state, modelId) => modelId,
-	(ticketsList, groups, modelId): ITicket[] => {
+	(ticketsList, groups, federation, container, modelId): ITicket[] => {
 		const storeState = getState();
 		const tickets = ticketsList.map((ticket) => {
 			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
-			return ticketWithGroups(({ ...ticketWithStatus, modelId }), groups);
+			const ticketWithStatusAndModelInfo = {
+				...ticketWithStatus,
+				modelId,
+				modelName: (federation || container)?.name,
+			} as ITicket;
+			return ticketWithGroups(ticketWithStatusAndModelInfo, groups);
 		});
 
 		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
@@ -111,14 +130,10 @@ export const selectRiskCategories = createSelector(
 );
 
 export const selectTicketsByContainersAndFederations = createSelector(
-	(state) => state,
+	selectTicketsDomain,
 	(state, modelsIds: string[]) => modelsIds,
-	(storeState, modelsIds) => {
-		const tickets = modelsIds.flatMap((modelId) => {
-			const modelTickets = selectTickets(storeState, modelId);
-			const modelName = (selectFederationById(storeState, modelId) || selectContainerById(storeState, modelId))?.name;
-			return modelTickets.map((t) => ({ ...t, modelName })); // modelName is added for column sorting
-		});
+	(state, modelsIds) => {
+		const tickets = modelsIds.flatMap((modelId) => selectTickets(getState(), modelId));
 		return sortTicketsByCreationDate(tickets);
 	},
 );

@@ -28,7 +28,7 @@ import {
 	enableRealtimeFederationUpdateTicketGroup,
 } from '@/v5/services/realtime/ticket.events';
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { JobsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardViews } from './tickets.constants';
 import { TicketsListCard } from './ticketsList/ticketsListCard.component';
 import { TicketDetailsCard } from './ticketDetailsCard/ticketsDetailsCard.component';
@@ -36,12 +36,16 @@ import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
 import { TicketContextComponent } from './ticket.context';
 import { Viewer } from '@/v4/services/viewer/viewer';
+import { uniq } from 'lodash';
 
 export const Tickets = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();
+	const filters = TicketsCardHooksSelectors.selectFilters();
+	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	const templateIdsInUse = uniq(tickets.map(({ type }) => type));
 
 	const readOnly = isFederation
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -52,6 +56,7 @@ export const Tickets = () => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
 		UsersActionsDispatchers.fetchUsers(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+		ProjectsActionsDispatchers.fetchTemplates(teamspace, project, true);
 	}, []);
 
 	useEffect(() => {
@@ -75,6 +80,14 @@ export const Tickets = () => {
 			newTicketPins.forEach(({ id }) => Viewer.removePin(id));
 		}
 	}, [view]);
+
+	useEffect(() => {
+		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederation]);
+	}, [tickets, filters]);
+
+	useEffect(() => {
+		TicketsActionsDispatchers.setFilterableTemplatesIds(templateIdsInUse);
+	}, [templateIdsInUse.length]);
 
 	return (
 		<TicketContextComponent isViewer containerOrFederation={containerOrFederation}>
