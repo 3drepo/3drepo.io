@@ -39,3 +39,5 @@ export const getDefaultUserNotFound = (name: string): IUser => ({
 });
 
 export const userHasMissingRequiredData = ({ lastName }: ICurrentUser) => !lastName;
+
+export const getFullnameFromUser = (user: IUser) => `${user.firstName} ${user.lastName}`;
