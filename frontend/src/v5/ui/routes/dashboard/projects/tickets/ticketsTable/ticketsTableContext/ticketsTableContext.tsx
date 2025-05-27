@@ -22,7 +22,7 @@ import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { stripStartingModuleOrPropertyPrefix } from '../ticketsTable.helper';
+import { stripModuleOrPropertyPrefix } from '../ticketsTable.helper';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 
 export interface TicketsTableType {
@@ -32,6 +32,7 @@ export interface TicketsTableType {
 	groupByProperties: string[],
 	groupBy: string,
 	setGroupBy: (groupBy: React.SetStateAction<string>) => void;
+	fetchColumn: (name: string, tickets: ITicket[]) => void;
 }
 
 const defaultValue: TicketsTableType = {
@@ -41,6 +42,7 @@ const defaultValue: TicketsTableType = {
 	groupByProperties: [],
 	groupBy: '',
 	setGroupBy: () => {},
+	fetchColumn: () => {},
 };
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
@@ -50,6 +52,9 @@ interface Props {
 }
 export const TicketsTableContextComponent = ({ children }: Props) => {
 	const [groupBy, setGroupBy] = useState('');
+	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
+	const alreadyFetchedTicketIdAndProperty = useRef({});
+	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
@@ -57,6 +62,23 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
 		{},
 	);
+	
+	const fetchColumn = (name: string, tickets: ITicket[]) => tickets.forEach(({ modelId, _id: ticketId }) => {
+		const ticketIdAndProperty = `${ticketId}${name}`;
+		if (alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty]) return;
+		alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty] = ticketIdAndProperty;
+			
+		const isFederation = isFed(modelId);
+		TicketsActionsDispatchers.fetchTicketProperties(
+			teamspace,
+			project,
+			modelId,
+			ticketId,
+			template.code,
+			isFederation,
+			[stripModuleOrPropertyPrefix(name)],
+		);
+	});
 
 	const getPropertyDefaultValue = (name: string) => definitionsAsObject[name]?.default;
 	const getPropertyType = (name: string) => definitionsAsObject[name]?.type as PropertyTypeDefinition;
@@ -77,6 +99,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 			groupByProperties,
 			groupBy,
 			setGroupBy,
+			fetchColumn,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>

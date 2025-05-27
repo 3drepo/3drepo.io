@@ -18,13 +18,11 @@
 import { BaseProperties, IssueProperties, SafetibaseProperties, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
-import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
-import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
+import { RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
+import { IStatusConfig, ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
-
-export const NONE_OPTION = 'None';
 
 export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
@@ -47,11 +45,6 @@ export const NEW_TICKET_ID = 'new';
 export const SAFETIBASE_PROPERTIES_GROUPS = {
 	[SafetibaseProperties.LEVEL_OF_RISK]: RiskLevels,
 	[SafetibaseProperties.TREATMENT_STATUS]: TreatmentStatuses,
-};
-
-const GROUP_NAMES_BY_TYPE = {
-	[IssueProperties.PRIORITY]: PriorityLevels,
-	...SAFETIBASE_PROPERTIES_GROUPS,
 };
 
 const groupByDate = (tickets: ITicket[]) => {
@@ -84,76 +77,64 @@ const groupHasDefaultValue = (groupBy, templateId) => {
 	return _.has(property, 'default');
 };
 
-const groupByList = (tickets: ITicket[], groupBy: string, groupValues: string[]) => {
+const groupByStatus = (tickets: ITicket[]) => {
+	const { type } = tickets[0];
+	const config: IStatusConfig = selectStatusConfigByTemplateId(getState(), type);
+	const labels = config.values.map(({ name, label }) => label || name);
 	const groups = {};
 	let remainingTickets = tickets;
 	let currentTickets = [];
 
-	groupValues.forEach((groupValue) => {
+	labels.forEach((groupValue) => {
 		[currentTickets, remainingTickets] = _.partition(
 			remainingTickets,
-			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupBy] === groupValue,
+			({ properties }) => properties[BaseProperties.STATUS],
 		);
 		groups[groupValue] = currentTickets;
 	});
-	if (!groupHasDefaultValue(groupBy, tickets[0].type)) {
+	if (!groupHasDefaultValue(BaseProperties.STATUS, tickets[0].type)) {
 		groups[UNSET] = remainingTickets;
 	}
 	return groups;
 };
 
-const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
-export const getAssignees = (t) => _.get(t, ASSIGNEES_PATH);
-
-export const sortAssignees = (ticket: ITicket) => {
-	const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
-	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
+const sortValues = (ticket: ITicket, groupBy: string) => {
+	const sortedValues = _.orderBy(
+		_.get(ticket, groupBy),
+		(value) => value.trim().toLowerCase(),
+	);
+	return _.set(_.cloneDeep(ticket), groupBy, sortedValues);
 };
-const groupByAssignees = (tickets: ITicket[]) => {
-	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
 
-	const ticketsWithSortedAssignees = ticketsWithAssignees.map(sortAssignees);
-
-	const ticketsSortedByAssignees = _.orderBy(
-		ticketsWithSortedAssignees,
+const groupByManyOfValues = (tickets: ITicket[], groupBy: string) => {
+	const [ticketsWithValue, ticketsWithUnsetValue] = _.partition(tickets, (ticket) => _.get(ticket, groupBy)?.length > 0);
+	const ticketsWithSortedValues = ticketsWithValue.map((ticket) => sortValues(ticket, groupBy));
+	const ticketsSortedByValues = _.orderBy(
+		ticketsWithSortedValues,
 		(ticket) => {
-			const assignees = getAssignees(ticket).map((assignee) => assignee.trim().toLowerCase());
-			return _.orderBy(assignees).join();
+			const values = _.get(ticket, groupBy).map((assignee) => assignee.trim().toLowerCase());
+			return _.orderBy(values).join();
 		},
 	);
-
-	const groups = _.groupBy(ticketsSortedByAssignees, (ticket) => {
-		const assignees = getAssignees(ticket);
-		return assignees.join(', ');
+	
+	const groups = _.groupBy(ticketsSortedByValues, (ticket) => {
+		const values = _.get(ticket, groupBy);
+		return values.join(', ');
 	});
-	if (unsetAssignees.length) {
-		groups[UNSET] = unsetAssignees;
+	if (ticketsWithUnsetValue.length) {
+		groups[UNSET] = ticketsWithUnsetValue;
 	}
 	return groups;
 };
 
-export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string, ITicket[]> => {
-	switch (groupBy) {
-		case BaseProperties.OWNER:
-			return _.groupBy(tickets, `properties.${BaseProperties.OWNER}`);
-		case IssueProperties.ASSIGNEES:
-			return groupByAssignees(tickets);
-		case IssueProperties.DUE_DATE:
-			return groupByDate(tickets);
-		case BaseProperties.STATUS:
-			const { type } = tickets[0];
-			const config: IStatusConfig = selectStatusConfigByTemplateId(getState(), type);
-			const labels = config.values.map(({ name, label }) => label || name);
-			return groupByList(tickets, groupBy, labels);
-		default:
-			return groupByList(tickets, groupBy, _.values(GROUP_NAMES_BY_TYPE[groupBy]));
-	}
-};
+const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => {
+	const [ticketsWithValue, ticketsWithUnsetValue] = _.partition(tickets, (ticket) => !!_.get(ticket, groupBy));
 
-export const hasRequiredViewerProperties = (template) => {
-	const modules = template.modules?.flatMap((module) => module.properties) || [];
-	const properties = modules.concat(template.properties || []);
-	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
+	const groups = _.groupBy(ticketsWithValue, groupBy);
+	if (ticketsWithUnsetValue.length) {
+		groups[UNSET] = ticketsWithUnsetValue;
+	}
+	return groups;
 };
 
 const TICKET_PROPERTIES_LABEL = {
@@ -175,16 +156,24 @@ const TICKET_PROPERTIES_LABEL = {
 	[`modules.sequencing.${SequencingProperties.END_TIME}`]: formatMessage({ id: 'modules.sequencing.label.endTime', defaultMessage: 'Sequencing : End Time' }),
 } as const;
 
-export const getPropertyLabel = (name) => {
-	const defaultName = TICKET_PROPERTIES_LABEL[name];
-	if (defaultName) return defaultName;
-	
-	return name
-		.replace('properties.', '')
-		.replace('modules.', '')
-		.split('.')
-		.map(_.startCase)
-		.join(' : ');
+export const stripModuleOrPropertyPrefix = (name) => name.replace(/^(properties|modules)\./, '');
+
+export const groupTickets = (groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition): Record<string, ITicket[]> => {
+	switch (stripModuleOrPropertyPrefix(groupBy)) {
+		case IssueProperties.DUE_DATE:
+			return groupByDate(tickets);
+		case BaseProperties.STATUS:
+			return groupByStatus(tickets);
+		default:
+			const isOneOf = propertyType === 'oneOf';
+			return isOneOf ? groupByOneOfValues(tickets, groupBy) : groupByManyOfValues(tickets, groupBy);
+	}
+};
+
+export const hasRequiredViewerProperties = (template) => {
+	const modules = template.modules?.flatMap((module) => module.properties) || [];
+	const properties = modules.concat(template.properties || []);
+	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
 };
 
 export const INITIAL_COLUMNS = [
@@ -200,3 +189,13 @@ export const INITIAL_COLUMNS = [
 	`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
 	`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
 ];
+
+export const getPropertyLabel = (name) => {
+	const defaultName = TICKET_PROPERTIES_LABEL[name];
+	if (defaultName) return defaultName;
+	
+	return stripModuleOrPropertyPrefix(name)
+		.split('.')
+		.map(_.startCase)
+		.join(' : ');
+};

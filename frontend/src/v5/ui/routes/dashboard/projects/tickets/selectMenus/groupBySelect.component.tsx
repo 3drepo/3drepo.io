@@ -16,11 +16,12 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { getPropertyLabel } from '../ticketsTable/ticketsTable.helper';
+import { getPropertyLabel, INITIAL_COLUMNS } from '../ticketsTable/ticketsTable.helper';
 import { MenuItem } from './selectMenus.styles';
 import { Select } from '@controls/inputs/select/select.component';
 import { useContext, useEffect } from 'react';
 import { TicketsTableContext } from '../ticketsTable/ticketsTableContext/ticketsTableContext';
+import { SearchContext } from '@controls/search/searchContext';
 import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 
@@ -29,13 +30,21 @@ const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', def
 
 export const GroupBySelect = () => {
 	const { template } = useParams<DashboardTicketsParams>();
-	const { groupByProperties, groupBy, setGroupBy, getPropertyType } = useContext(TicketsTableContext);
+	const { groupByProperties, groupBy, setGroupBy, fetchColumn, getPropertyType } = useContext(TicketsTableContext);
+	const { filteredItems: tickets } = useContext(SearchContext);
+
+	useEffect(() => {
+		if (groupBy && !INITIAL_COLUMNS.includes(groupBy)) {
+			fetchColumn(groupBy, tickets);
+		}
+	}, [groupBy]);
 
 	useEffect(() => {
 		if (!getPropertyType(groupBy)) {
 			setGroupBy('');
 		}
 	}, [template, getPropertyType]);
+
 	return (
 		<Select
 			onChange={(e) => setGroupBy(e.target.value)}
