@@ -15,18 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext } from 'react';
+import { createContext, useRef, useState } from 'react';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 import { IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { stripStartingModuleOrPropertyPrefix } from '../ticketsTable.helper';
+import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 
 export interface TicketsTableType {
 	getPropertyDefaultValue: (name: string) => unknown;
-	getPropertyType: (name: string) => string;
+	getPropertyType: (name: string) => PropertyTypeDefinition;
 	isJobAndUsersType: (name: string) => boolean;
 	groupByProperties: string[],
+	groupBy: string,
+	setGroupBy: (groupBy: React.SetStateAction<string>) => void;
 }
 
 const defaultValue: TicketsTableType = {
@@ -34,6 +39,8 @@ const defaultValue: TicketsTableType = {
 	getPropertyType: () => null,
 	isJobAndUsersType: () => false,
 	groupByProperties: [],
+	groupBy: '',
+	setGroupBy: () => {},
 };
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
@@ -42,8 +49,9 @@ interface Props {
 	children: any;
 }
 export const TicketsTableContextComponent = ({ children }: Props) => {
-	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const [groupBy, setGroupBy] = useState('');
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
@@ -51,7 +59,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	);
 
 	const getPropertyDefaultValue = (name: string) => definitionsAsObject[name]?.default;
-	const getPropertyType = (name: string) => definitionsAsObject[name]?.type;
+	const getPropertyType = (name: string) => definitionsAsObject[name]?.type as PropertyTypeDefinition;
 	const isJobAndUsersType = (name: string) => (
 		definitionsAsObject[name]?.values === 'jobsAndUsers'
 		|| ['properties.Owner', 'properties.Assignees'].includes(name)
@@ -67,6 +75,8 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 			getPropertyType,
 			isJobAndUsersType,
 			groupByProperties,
+			groupBy,
+			setGroupBy,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>
