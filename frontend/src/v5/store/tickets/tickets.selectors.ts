@@ -49,16 +49,16 @@ export const selectTicketsHaveBeenFetched = createSelector(
 
 
 const removeDeprecated = (template: ITemplate): ITemplate => {
-	const removeDeDeprecatedItems = (properties: any[])  => properties.filter((prop) => !prop.deprecated);
+	const removeDeprecatedItems = (properties: any[])  => properties.filter((prop) => !prop.deprecated);
 
 	return {
 		...template,
-		properties: removeDeDeprecatedItems(template.properties ?? []),
-		modules: removeDeDeprecatedItems(template.modules ?? [])
+		properties: removeDeprecatedItems(template.properties ?? []),
+		modules: removeDeprecatedItems(template.modules ?? [])
 			.map((module) => (
 				{
 					...module, 
-					properties: removeDeDeprecatedItems(module.properties ?? []),
+					properties: removeDeprecatedItems(module.properties ?? []),
 				}
 			)),
 	};
