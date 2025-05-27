@@ -279,8 +279,6 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = null;
 		}
 	}
-
-	console.log(newSafetibaseProps);
 };
 
 const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
