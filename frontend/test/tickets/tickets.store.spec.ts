@@ -90,7 +90,84 @@ describe('Tickets: store', () => {
 
 			expect(ticketFromStore).toEqual(newTemplate);
 		});
+
+		it('deprecated fields shouldnt be there', () => {
+			const templateWithDeprecated = templateMockFactory({ 
+				properties: [
+					{
+						name:'Prop1',
+						type:'text',
+					},
+					{
+						name:'Deprecated prop',
+						type:'boolean',
+						deprecated: true,
+					}
+				],
+				modules: [
+					{ 
+						name: 'a module',
+						properties: [
+							{
+								name:'A deprecated module prop',
+								type:'text',
+								deprecated: true,
+							},
+							{
+								name:'Modules Prop',
+								type:'text',
+							},
+							{
+								name:'Another deprecated prop',
+								type:'boolean',
+								deprecated: true,
+							}
+						],
+					},
+					{ 
+						name: 'a deprecated module',
+						deprecated: true,
+						properties: [
+							{
+								name:'A deprecated Modules Prop',
+								type:'text',
+							}
+						],
+					},
+
+				]
+			});
+			
+
+			const templateWithoutDeprecated = {
+				...templateWithDeprecated,
+				properties: [
+					{
+						name:'Prop1',
+						type:'text',
+					}
+				],
+				modules: [
+					{ 
+						name: 'a module',
+						properties: [
+							{
+								name:'Modules Prop',
+								type:'text',
+							}
+						],
+					},
+				]
+			};
+
+			dispatch(TicketsActions.fetchTemplatesSuccess(modelId, [templateWithDeprecated]));
+			const templatesFromState = selectTemplates(getState(), modelId);
+	
+			expect(templatesFromState[0]).toEqual(templateWithoutDeprecated);	
+		});
 	});
+
+
 
 	describe('settings', () => {
 		const riskCategories = mockRiskCategories();

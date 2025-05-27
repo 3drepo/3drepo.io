@@ -29,7 +29,7 @@ import { CircleButton } from '@controls/circleButton';
 import { ThemeProvider as MuiThemeProvider, SelectChangeEvent } from '@mui/material';
 import { theme } from '@/v5/ui/routes/viewer/theme';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeContainerNewTicket, enableRealtimeContainerUpdateTicket, enableRealtimeFederationNewTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
+import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
@@ -161,15 +161,9 @@ export const TicketsTable = () => {
 		});
 
 		const subscriptions = containersAndFederations.flatMap((modelId) => {
-			if (isFed(modelId)) {
-				return [
-					enableRealtimeFederationNewTicket(teamspace, project, modelId),
-					enableRealtimeFederationUpdateTicket(teamspace, project, modelId),
-				];
-			}
 			return [
-				enableRealtimeContainerNewTicket(teamspace, project, modelId),
-				enableRealtimeContainerUpdateTicket(teamspace, project, modelId),
+				enableRealtimeNewTicket(teamspace, project, modelId, isFed(modelId)),
+				enableRealtimeUpdateTicket(teamspace, project, modelId, isFed(modelId)),
 			];
 		});
 		return combineSubscriptions(...subscriptions);
