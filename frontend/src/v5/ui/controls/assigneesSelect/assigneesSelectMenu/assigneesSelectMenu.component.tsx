@@ -24,6 +24,7 @@ import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSele
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
 import { groupJobsAndUsers } from '../assignees.helpers';
 import { SearchContext } from '@controls/search/searchContext';
+import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 
 const NoResultsMessage = () => (
 	<NoResults>
@@ -119,7 +120,7 @@ export const AssigneesSelectMenu = ({
 					key={user.user}
 					value={user.user}
 					assignee={user.user}
-					title={`${user.firstName} ${user.lastName}`}
+					title={getFullnameFromUser(user)}
 					subtitle={user.job}
 					multiple={multiple}
 					error={isInvalid(user.user)}
