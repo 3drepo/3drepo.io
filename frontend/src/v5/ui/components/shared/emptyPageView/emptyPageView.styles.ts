@@ -24,7 +24,7 @@ export const EmptyPageView = styled(CentredContainer)`
 	${({ theme }) => theme.typography.h2}
 	border-radius: 20px;
 	width: 100%;
-	height: 600px;
+	height: 580px;
 	padding: 50px;
 	text-align: center;
 	box-sizing: border-box;

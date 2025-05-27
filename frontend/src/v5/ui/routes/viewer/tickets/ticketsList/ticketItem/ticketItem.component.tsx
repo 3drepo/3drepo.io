@@ -16,7 +16,7 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip, DueDate } from './ticketItem.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -69,13 +69,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 		selectTicket(event);
 		TicketsCardActionsDispatchers.openTicket(ticket._id);
 	};
-
-	useEffect(() => {
-		if (isSelected && ref.current) {
-			// @ts-ignore
-			ref.current.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
-		}
-	}, []);
 
 	return (
 		<TicketItemContainer key={ticket._id} ref={ref} onClick={onClickTicket} $selected={isSelected}>

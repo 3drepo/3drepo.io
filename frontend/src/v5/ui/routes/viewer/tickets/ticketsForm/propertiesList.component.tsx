@@ -65,6 +65,7 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 				return (
 					<Fragment key={inputName}>
 						<InputController
+							// @ts-ignore
 							Input={PropertyComponent}
 							label={name}
 							disabled={disabled || ticketIsReadOnly || readOnlyOnUI || disableBecauseImmutable}

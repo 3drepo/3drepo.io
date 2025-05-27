@@ -18,7 +18,7 @@
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { enableRealtimeContainerUpdateTicket, enableRealtimeFederationUpdateTicket } from '@/v5/services/realtime/ticket.events';
+import { enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { DialogsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
@@ -89,9 +89,7 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	}, [ticketId, ticketsHaveBeenFetched]);
 
 	useEffect(() => {
-		return isFederation
-			? enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation)
-			: enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation);
+		return enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation);
 	}, [containerOrFederation]);
 
 	useEffect(() => {

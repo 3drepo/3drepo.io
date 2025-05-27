@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { fillInForm, clickOn } from './selenium.helpers';
+import { Container as TextOverflowContainer } from '@controls/textOverflow/textOverflow.styles';
+import styled from 'styled-components';
+import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 
-export const signInInMicrosoft = async (driver, email, password) => {
-	await fillInForm(driver, { 'Sign in': email });
-	await clickOn(driver, 'Next');
-	await fillInForm(driver, { 'Enter password': password });
-	await clickOn(driver, 'Sign in');
-	await clickOn(driver, 'Yes');
-};
+export const CellContainer = styled(ResizableTableCell)`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	height: 100%;
+	padding: 0 10px;
+	display: flex;
+	align-items: center;
+	justify-content: flex-start;
+	font-weight: 500;
+	overflow: hidden;
+	box-sizing: border-box;
 
+	${TextOverflowContainer} {
+		height: unset;
+	}
+`;
