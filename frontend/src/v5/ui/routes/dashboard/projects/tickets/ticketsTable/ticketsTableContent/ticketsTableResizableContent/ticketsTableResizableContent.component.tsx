@@ -23,7 +23,8 @@ import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import {  groupTickets, NEW_TICKET_ID, SetTicketValue, UNSET } from '../../ticketsTable.helper';
+import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
+import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, ScrollableContainer, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
 
