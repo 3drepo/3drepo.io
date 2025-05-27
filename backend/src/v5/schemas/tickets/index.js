@@ -214,7 +214,7 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 };
 
 const calculateLevelOfRisk = (likelihood, consequence) => {
-	let levelOfRisk;
+	let levelOfRisk = null;
 
 	const data1 = riskLevelsToNum(likelihood);
 	const data2 = riskLevelsToNum(consequence);
@@ -255,26 +255,32 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 	if (newSafetibaseProps) {
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
-		if (newSafetibaseProps[modProps.RISK_LIKELIHOOD] || newSafetibaseProps[modProps.RISK_CONSEQUENCE]) {
+		const newLikelihood = newSafetibaseProps[modProps.RISK_LIKELIHOOD];
+		const newConsequence = newSafetibaseProps[modProps.RISK_CONSEQUENCE];
+
+		if (newLikelihood || newConsequence) {
 			newSafetibaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
-				newSafetibaseProps[modProps.RISK_LIKELIHOOD] ?? oldSafetibaseProps[modProps.RISK_LIKELIHOOD],
-				newSafetibaseProps[modProps.RISK_CONSEQUENCE] ?? oldSafetibaseProps[modProps.RISK_CONSEQUENCE],
+				newLikelihood ?? oldSafetibaseProps[modProps.RISK_LIKELIHOOD],
+				newConsequence ?? oldSafetibaseProps[modProps.RISK_CONSEQUENCE],
 			);
+		} else if (newLikelihood === null || newConsequence === null) {
+			newSafetibaseProps[modProps.LEVEL_OF_RISK] = null;
 		}
 
-		if (newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
-			|| newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]) {
-			const treatedLevel = calculateLevelOfRisk(
-				newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
-				?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
-				newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]
-				?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
+		const newTreatedLikelihood = newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD];
+		const newTreatedConsequence = newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE];
+
+		if (newTreatedLikelihood || newTreatedConsequence) {
+			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = calculateLevelOfRisk(
+				newTreatedLikelihood ?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
+				newTreatedConsequence ?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
 			);
-			if (treatedLevel) {
-				newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
-			}
+		} else if (newTreatedLikelihood === null || newTreatedConsequence === null) {
+			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = null;
 		}
 	}
+
+	console.log(newSafetibaseProps);
 };
 
 const uuidString = Yup.string().transform((val, orgVal) => UUIDToString(orgVal));
