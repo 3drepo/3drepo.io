@@ -53,10 +53,12 @@ export const Description = styled(TextOverflow).attrs({
 
 export const TicketItemContainer = styled(CardListItem)<{ $selected?: boolean }>`
 	cursor: pointer;
+	display: block;
+	width: 350px;
 	box-sizing: border-box;
 	padding: 12px;
 	min-height: 65px;
-	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	background-color: transparent;
 	${({ theme, $selected }) => $selected && css`
 		background-color: ${theme.palette.primary.lightest};
 		${Title} {
