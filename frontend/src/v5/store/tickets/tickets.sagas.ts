@@ -66,7 +66,8 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 	(isFederation, teamspace, projectId, modelId, queryParams) => (
 		isFederation
 			? API.Tickets.fetchFederationTickets
-			: API.Tickets.fetchContainerTickets)(teamspace, projectId, modelId, queryParams),
+			: API.Tickets.fetchContainerTickets
+	)(teamspace, projectId, modelId, queryParams),
 	40,
 	ExecutionStrategy.Fifo,
 );
@@ -93,12 +94,12 @@ export function* fetchTicketProperties({
 			modelId,
 			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
 		);
-		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+		yield put(TicketsActions.upsertTicketSuccess(modelId, { ...ticket, _id: ticketId }));
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTickets.error', defaultMessage: 'trying to fetch {model} tickets' },
+				{ id: 'tickets.fetchTicketProperties.error', defaultMessage: 'trying to fetch {model} ticket properties' },
 				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
