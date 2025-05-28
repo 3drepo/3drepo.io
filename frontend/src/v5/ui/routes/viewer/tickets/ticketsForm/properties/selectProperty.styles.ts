@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,28 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import styled from 'styled-components';
 
-export const ValuesAndClearButton = styled.div`
-	display: inline-flex;
-	flex-direction: row;
-	align-items: center;
-`;
+export const ClearIconContainer = styled.div`
+	cursor: pointer;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	display: flex;
+	position: absolute;
+	right: 25px;
 
-export const AssigneesListContainer = styled.div`
-	display: inline-flex;
-	justify-content: space-between;
-	align-items: center;
-	position: relative;
-	user-select: none;
-	color: ${({ theme }) => theme.palette.base.main};
-	font-size: 10px;
-	line-height: 100%;
-	width: 100%;
-	height: 24px;
-
-	${Spinner} {
-		margin: 6px 0;
+	svg {
+		width: 16px;
+		height: 16px;
 	}
-`;
+`; 
