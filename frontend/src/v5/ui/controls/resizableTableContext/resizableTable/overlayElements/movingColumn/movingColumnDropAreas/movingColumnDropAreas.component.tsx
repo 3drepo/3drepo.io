@@ -19,10 +19,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
 import { blockEvent } from '@/v5/helpers/events.helpers';
-import { throttle } from 'lodash';
 
-
-const THROTTLE_TIME = 20;
 export const MovingColumnDropAreas = () => {
 	const {
 		setMovingColumn, movingColumn, moveColumn, getWidth,
@@ -89,19 +86,9 @@ export const MovingColumnDropAreas = () => {
 	};
 
 	useEffect(() => {
-		const updateTableOffset = () => {
-			if (!ref.current) return;
-			setTableOffset(getTableOffset());
-		};
-		const throttledRepaint = throttle(
-			updateTableOffset,
-			THROTTLE_TIME,
-			{ leading: true, trailing: true },
-		);
-	
 		const repaint = () => {
 			if (!ref.current) return;
-			throttledRepaint();
+			setTableOffset(getTableOffset());
 			requestAnimationFrame(repaint);
 		};
 

@@ -35,7 +35,7 @@ import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTa
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
-	const edgeScrolling = useEdgeScrolling({ throttleTime: 20 });
+	const edgeScrolling = useEdgeScrolling();
 	const { filteredItems } = useContext(SearchContext);
 	const {
 		stretchTable, movingColumn, getAllColumnsNames, 

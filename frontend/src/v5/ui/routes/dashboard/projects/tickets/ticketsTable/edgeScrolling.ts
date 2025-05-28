@@ -17,7 +17,6 @@
 
 import { useRef } from 'react';
 import { EdgeHoveringData, EdgeHoveringObserver } from './edgeHoveringObserver';
-import { throttle } from 'lodash';
 
 type EdgeScrolling = {
 	start: (container: HTMLElement) => void;
@@ -27,13 +26,13 @@ type EdgeScrolling = {
 type Options = {
 	edgeSize?: number,
 	speed?: number,
-	throttleTime?: number,
 };
 export const edgeScrolling = (options: Options = {}): EdgeScrolling => {
-	const { speed = 50, throttleTime = 20 } = options;
+	const { speed = 1000 } = options;
 	let scrollSpeed = 0;
 	let containerElement: HTMLElement | null = null;
 	let observer = new EdgeHoveringObserver();
+	let prevTime;
 
 	const handleMouseMove = ({ side, proximity }: EdgeHoveringData) => {
 		scrollSpeed = ((proximity / 100) ** 3) * speed;
@@ -42,31 +41,24 @@ export const edgeScrolling = (options: Options = {}): EdgeScrolling => {
 		}
 	};
 
-	// Throttled scroll logic
 	const scrollContainer = () => {
 		if (!observer.isObserving || !containerElement) return;
 
-		if (scrollSpeed !== 0) {
-			containerElement.scrollLeft += scrollSpeed;
+		const now = new Date().getTime();
+		if (prevTime && scrollSpeed !== 0) {
+			const timeDiff = now - prevTime;
+			const distanceToScroll = scrollSpeed * (timeDiff / 1_000);
+			containerElement.scrollLeft += distanceToScroll;
 		}
-	};
+		prevTime = now;
 
-	const throttledScroll = throttle(
-		scrollContainer,
-		throttleTime,
-		{ leading: true, trailing: true },
-	);
-
-	const scrollLoop = () => {
-		if (!observer.isObserving) return;
-		throttledScroll();
-		requestAnimationFrame(scrollLoop);
+		requestAnimationFrame(scrollContainer);
 	};
 
 	const start = (container: HTMLElement) => {
 		containerElement = container;
 		observer.observe(container, handleMouseMove, options.edgeSize);
-		scrollLoop();
+		scrollContainer();
 	};
 
 	return {
