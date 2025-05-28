@@ -20,13 +20,11 @@ import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 
 export interface TicketsTableType {
-	getPropertyDefaultValue: (name: string) => unknown;
 	getPropertyType: (name: string) => string;
 	isJobAndUsersType: (name: string) => boolean;
 }
 
 const defaultValue: TicketsTableType = {
-	getPropertyDefaultValue: () => null,
 	getPropertyType: () => null,
 	isJobAndUsersType: () => false,
 };
@@ -44,7 +42,6 @@ export const TicketsTableContextComponent = ({ children, template }: Props) => {
 		{},
 	);
 
-	const getPropertyDefaultValue = (name: string) => definitionsAsObject[name]?.default;
 	const getPropertyType = (name: string) => definitionsAsObject[name]?.type;
 	const isJobAndUsersType = (name: string) => (
 		definitionsAsObject[name]?.values === 'jobsAndUsers'
@@ -53,7 +50,6 @@ export const TicketsTableContextComponent = ({ children, template }: Props) => {
 
 	return (
 		<TicketsTableContext.Provider value={{
-			getPropertyDefaultValue,
 			getPropertyType,
 			isJobAndUsersType,
 		}}>
