@@ -214,7 +214,7 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 };
 
 const calculateLevelOfRisk = (likelihood, consequence) => {
-	let levelOfRisk = null;
+	let levelOfRisk;
 
 	const data1 = riskLevelsToNum(likelihood);
 	const data2 = riskLevelsToNum(consequence);
@@ -258,25 +258,25 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 		const newLikelihood = newSafetibaseProps[modProps.RISK_LIKELIHOOD];
 		const newConsequence = newSafetibaseProps[modProps.RISK_CONSEQUENCE];
 
-		if (newLikelihood || newConsequence) {
+		if (newLikelihood === null || newConsequence === null) {
+			newSafetibaseProps[modProps.LEVEL_OF_RISK] = null;
+		} else if (newLikelihood || newConsequence) {
 			newSafetibaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
 				newLikelihood ?? oldSafetibaseProps[modProps.RISK_LIKELIHOOD],
 				newConsequence ?? oldSafetibaseProps[modProps.RISK_CONSEQUENCE],
 			);
-		} else if (newLikelihood === null || newConsequence === null) {
-			newSafetibaseProps[modProps.LEVEL_OF_RISK] = null;
 		}
 
 		const newTreatedLikelihood = newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD];
 		const newTreatedConsequence = newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE];
 
-		if (newTreatedLikelihood || newTreatedConsequence) {
+		if (newTreatedLikelihood === null || newTreatedConsequence === null) {
+			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = null;
+		} else if (newTreatedLikelihood || newTreatedConsequence) {
 			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = calculateLevelOfRisk(
 				newTreatedLikelihood ?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
 				newTreatedConsequence ?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
 			);
-		} else if (newTreatedLikelihood === null || newTreatedConsequence === null) {
-			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = null;
 		}
 	}
 };
