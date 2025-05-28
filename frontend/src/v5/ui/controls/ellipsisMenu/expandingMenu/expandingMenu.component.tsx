@@ -14,18 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { MenuList } from '@mui/material';
+import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import { ExpandIconContainer, MenuItem } from './expandingMenu.styles';
+import { PopoverHoveringContent } from '@controls/hoverPopover/popoverHoveringContent.component';
 
-import styled from 'styled-components';
-
-export const SwitchContainer = styled.span`
-	width: 100%;
-	height: 32px;
-	align-content: center;
-	text-align: left;
-	display: grid;
-	grid-template-columns: 26px auto 16px;
-	svg {
-		height: 16px;
-		width: 16px;
-	}
-`;
+export const ExpandingMenu = ({ children, title }) => (
+	<PopoverHoveringContent
+		anchor={() => (
+			<MenuItem>
+				{title}
+				<ExpandIconContainer>
+					<ChevronIcon />
+				</ExpandIconContainer>
+			</MenuItem>
+		)}
+	>
+		<MenuList>
+			{children}
+		</MenuList>
+	</PopoverHoveringContent>
+);

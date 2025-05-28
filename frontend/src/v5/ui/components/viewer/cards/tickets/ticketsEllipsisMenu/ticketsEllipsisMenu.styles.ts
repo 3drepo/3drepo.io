@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,30 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Popover } from '@mui/material';
 import styled from 'styled-components';
 
-export const PopoverContainer = styled(Popover).attrs({
-	disableRestoreFocus: true,
-	anchorOrigin: {
-		vertical: 'bottom',
-		horizontal: 'center',
-	},
-	transformOrigin: {
-		vertical: 'top',
-		horizontal: 'left',
-	},
-})`
-	pointer-events: none;
-`;
+export const SwitchContainer = styled.span`
+	width: 100%;
+	height: 32px;
+	align-content: center;
+	text-align: left;
+	display: grid;
+	grid-template-columns: auto 15px;
 
-export const PopoverHoveringContentContainer = styled(PopoverContainer).attrs({
-	anchorOrigin: {
-		vertical: 'top',
-		horizontal: 'right',
-	},
-})`
-	.MuiPopover-paper {
-		pointer-events: auto;
+	svg {
+		height: 15px;
+		width: 15px;
 	}
 `;
