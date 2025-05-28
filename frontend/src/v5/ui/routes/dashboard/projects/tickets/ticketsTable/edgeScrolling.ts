@@ -47,8 +47,8 @@ export const edgeScrolling = (options: Options = {}): EdgeScrolling => {
 		const now = new Date().getTime();
 		if (prevTime && scrollSpeed !== 0) {
 			const timeDiff = now - prevTime;
-			const distanceToScroll = scrollSpeed * (timeDiff / 1_000);
-			containerElement.scrollLeft += distanceToScroll;
+			const incrementX = scrollSpeed * (timeDiff / 1000);
+			containerElement.scrollLeft += incrementX;
 		}
 		prevTime = now;
 
