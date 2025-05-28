@@ -60,6 +60,8 @@ export const templateMockFactory = (overrides?: Partial<ITemplate>): ITemplate =
 	_id: faker.datatype.uuid(),
 	name: faker.random.word(),
 	code: faker.random.alpha({ count: 5, upcase: true }),
+	modules: [],
+	properties: [],
 	...overrides,
 });
 

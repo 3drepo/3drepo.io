@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,13 +15,4 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
-export const pick = (object: Record<string, string>, fields:string[]) => {
-	const newObj = {};
-	fields.forEach((field) => {
-		if (object[field]) newObj[field] = object[field];
-	});
-	return newObj;
-};
-
-export const sleep = async (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
+export const matchesQuery = (item, query) => item.toLowerCase().includes(query.toLowerCase());

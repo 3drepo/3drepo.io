@@ -33,14 +33,17 @@ import {
 	FetchTicketGroupsAction,
 	UpsertTicketAndFetchGroupsAction,
 	UpdateTicketGroupAction,
+	FetchTicketPropertiesAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
+import { selectTicketById, selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { addUpdatedAtTime } from './tickets.helpers';
+import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -49,6 +52,50 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation, pro
 			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { propertiesToInclude });
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.fetchTickets.error', defaultMessage: 'trying to fetch {model} tickets' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
+			),
+			error,
+		}));
+	}
+}
+
+const ticketPropertiesQueue = new AsyncFunctionExecutor(
+	(isFederation, teamspace, projectId, modelId, queryParams) => (
+		isFederation
+			? API.Tickets.fetchFederationTickets
+			: API.Tickets.fetchContainerTickets)(teamspace, projectId, modelId, queryParams),
+	40,
+	ExecutionStrategy.Fifo,
+);
+
+
+export function* fetchTicketProperties({
+	teamspace, projectId, modelId, ticketId,
+	templateCode, isFederation, propertiesToInclude,
+}: FetchTicketPropertiesAction) {
+	try {
+		const { number } = yield select(selectTicketById, modelId, ticketId);
+		const filterByTemplateCode = {
+			filter: {
+				operator: 'is',
+				values: [`${templateCode}:${number}`],
+			},
+			property: 'Ticket ID',
+			type: 'ticketCode',
+		} as any;
+		const [ticket] = yield ticketPropertiesQueue.addCall(
+			isFederation,
+			teamspace,
+			projectId,
+			modelId,
+			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
+		);
+		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -261,4 +308,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS, fetchTicketGroups);
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
+	yield takeEvery(TicketsTypes.FETCH_TICKET_PROPERTIES, fetchTicketProperties);
 }

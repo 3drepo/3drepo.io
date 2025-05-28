@@ -433,7 +433,7 @@ describe("Implied permission::", function () {
 				.field("tag", "project_admin_upload")
 				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
 				.expect(410, (err, res) => {
-					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
+					expect(res?.body?.code).to.equal("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});

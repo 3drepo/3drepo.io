@@ -111,7 +111,7 @@ describe('Tickets: sagas', () => {
 				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, false));
 			}, [DialogsTypes.OPEN]);
 
-			const ticketFromState = selectTicketById(getState(), ticket._id);
+			const ticketFromState = selectTicketById(getState(), modelId, ticket._id);
 			expect(ticketFromState).toBeNull();
 		});
 
@@ -229,7 +229,7 @@ describe('Tickets: sagas', () => {
 			await waitForActions(() => {
 				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, true));
 			}, [DialogsTypes.OPEN]);
-			const ticketFromState = selectTicketById(getState(), ticket._id);
+			const ticketFromState = selectTicketById(getState(), modelId, ticket._id);
 			expect(ticketFromState).toBeNull();
 		});
 
@@ -477,7 +477,7 @@ describe('Tickets: sagas', () => {
 				dispatch(TicketsActions.fetchTemplate(teamspace, projectId, modelId, template._id, false));
 			}, [DialogsTypes.OPEN]);
 
-			const templateFromState = selectTemplateById(getState(), template._id);
+			const templateFromState = selectTemplateById(getState(),modelId , template._id);
 			expect(templateFromState).toBeNull();
 		});
 
@@ -524,7 +524,7 @@ describe('Tickets: sagas', () => {
 				dispatch(TicketsActions.fetchTemplate(teamspace, projectId, modelId, template._id, true));
 			}, [DialogsTypes.OPEN]);
 
-			const templateFromState = selectTemplateById(getState(), template._id);
+			const templateFromState = selectTemplateById(getState() , modelId, template._id);
 			expect(templateFromState).toBeNull();
 		});
 	});
