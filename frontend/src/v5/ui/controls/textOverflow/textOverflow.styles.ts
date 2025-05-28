@@ -40,8 +40,4 @@ export const Container = styled.div<{ lines: number }>`
 			-webkit-box-orient: vertical;
 		}
 	`}
-
-	&:hover > * {
-		text-decoration: underline;
-	}
 `;

@@ -24,9 +24,10 @@ interface IProps {
 	size?: number;
 	horizontal?: boolean;
 	className?: string;
+	children?;
 }
 
-export const Loader: FunctionComponent<IProps> = (props) => {
+export const Loader = (props: IProps) => {
 	const styleProps = {
 		horizontal: props.horizontal
 	};

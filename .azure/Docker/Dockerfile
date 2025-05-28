@@ -1,5 +1,5 @@
 ARG REBUILD_DATE=unknown
-FROM node:18 as builder
+FROM node:22 as builder
 COPY . /home/node/3drepo.io
 RUN cd /home/node/3drepo.io/backend && \
         yarn install --network-timeout 100000 && \
@@ -7,7 +7,7 @@ RUN cd /home/node/3drepo.io/backend && \
         yarn install --network-timeout 100000 && \ 
         yarn build
 
-FROM node:18 as deploy
+FROM node:22 as deploy
 
 RUN apt-get update && apt-get install -y \
         gosu \
