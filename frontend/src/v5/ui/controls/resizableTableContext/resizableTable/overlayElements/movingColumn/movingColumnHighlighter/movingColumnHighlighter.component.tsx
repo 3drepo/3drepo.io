@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { useContext } from 'react';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { Highlighter } from './movingColumnHighlighter.styles';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
+export const MovingColumnHighlighter = (props) => {
+	const { movingColumn, getColumnOffsetLeft, getWidth, columnGap } = useContext(ResizableTableContext);
+	const width = getWidth(movingColumn);
+	const offset = getColumnOffsetLeft(movingColumn);
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
-`;
+	return (<Highlighter $offset={offset} $width={width} $gap={columnGap} {...props} />);
+};

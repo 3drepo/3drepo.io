@@ -27,7 +27,6 @@ import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { getColumnLabel, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
-import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { orderBy } from 'lodash';
@@ -35,26 +34,27 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { useParams } from 'react-router';
+import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 
 const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
 	const isSelected = name === sortingColumn;
 
 	if (disableSorting) return (
-		<ResizableTableCell name={name}>
+		<ResizableTableHeader name={name}>
 			<Header {...props}>
 				{children}
 			</Header>
-		</ResizableTableCell>
+		</ResizableTableHeader>
 	);
 
 	return (
-		<ResizableTableCell name={name} onClick={() => onColumnClick(name)}>
+		<ResizableTableHeader name={name} onClick={() => onColumnClick(name)}>
 			<Header {...props} $selectable>
 				{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
 				{children}
 			</Header>
-		</ResizableTableCell>
+		</ResizableTableHeader>
 	);
 };
 
@@ -86,7 +86,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	};
 
 	return (
-		<Table $empty={!tickets.length}>
+		<Table $empty={!tickets.length} $canCreateTicket={!newTicketButtonIsDisabled}>
 			<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
 				<SortedTableContext.Consumer>
 					{({ sortedItems }: SortedTableType<ITicket>) => (

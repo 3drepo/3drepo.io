@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
-
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
+export const Highlighter = styled.div<{ $offset: number, $width: number, $gap: number }>`
+	border: solid 2px ${({ theme }) => theme.palette.primary.main};
+	min-width: ${({ $width, $gap }) => $width + 2 * $gap}px;
+	position: absolute;
+	left: ${({ $offset }) => $offset}px;
+	margin-left: ${({ $gap }) => -$gap}px;
 `;

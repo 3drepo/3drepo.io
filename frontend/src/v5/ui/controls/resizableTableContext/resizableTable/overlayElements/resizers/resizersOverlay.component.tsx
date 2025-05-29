@@ -15,15 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { useContext } from 'react';
+import { Resizer } from './resizer/resizer.component';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
+export const ResizersOverlay = () => {
+	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
-`;
+	return (
+		<>
+			{visibleSortedColumnsNames.map((name) => (
+				<Resizer name={name} key={name} />
+			))}
+		</>
+	);
+};
