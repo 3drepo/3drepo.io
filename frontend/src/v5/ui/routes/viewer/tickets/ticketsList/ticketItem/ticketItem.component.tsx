@@ -29,6 +29,7 @@ import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/
 import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
+import { formatMessage } from '@/v5/services/intl';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -83,10 +84,10 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 								value={assignees}
 								maxItems={5}
 								multiple
-								showAddButton
 								onBlur={onBlurAssignees}
-								disabled={readOnly}
+								disabled
 								excludeViewers
+								emptyListMessage={formatMessage({ id: 'ticket.preview.noAssignees', defaultMessage: 'No assignees' })}
 							/>
 							<FlexRow>
 								<DueDate value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />

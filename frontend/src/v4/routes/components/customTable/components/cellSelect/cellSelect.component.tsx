@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, Component } from 'react';
-import Input from '@mui/material/Input';
+import Input from '@mui/material/OutlinedInput';
 import { Item, StyledSelect } from './cellSelect.styles';
 
 interface IProps {
@@ -31,6 +31,7 @@ interface IProps {
 	inputId?: string;
 	labelName?: string;
 	onChange: (event, selectedValue: string) => void;
+	renderValue?: (value: unknown) => React.ReactNode
 }
 
 export class CellSelect extends PureComponent<IProps> {
@@ -78,7 +79,7 @@ export class CellSelect extends PureComponent<IProps> {
 	}
 
 	public render() {
-		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, readOnly, inputId, name, hidden, value} = this.props;
+		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, readOnly, inputId, name, hidden, value, renderValue} = this.props;
 		const hasNoOptions = !items.length;
 		const options = [];
 
@@ -102,6 +103,7 @@ export class CellSelect extends PureComponent<IProps> {
 				input={<Input id={inputId} readOnly={readOnly} />}
 				value={value}
 				onChange={this.handleChange}
+				renderValue={renderValue}
 			>
 				{this.renderOptions(options, itemTemplate)}
 			</StyledSelect>

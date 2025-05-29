@@ -17,7 +17,7 @@
 
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { DialogsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
@@ -25,6 +25,7 @@ import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { isEmpty, set } from 'lodash';
@@ -91,8 +92,9 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 		return enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation);
 	}, [containerOrFederation]);
 
-	useEffect(() => () => {
-		onBlurHandler();
+	useEffect(() => {
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.Details);
+		return () => { onBlurHandler(); };
 	}, []);
 
 	if (!templateAlreadyFetched(template) || !ticket || !containerOrFederation) return (<Loader />);

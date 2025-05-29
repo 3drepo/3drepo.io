@@ -20,13 +20,7 @@ import styled, { css } from 'styled-components';
 import { COLOR, FONT_WEIGHT } from '../../../../../styles';
 import { SelectField } from '../../../selectField/selectField.component';
 
-export const StyledSelect = styled(SelectField).attrs({
-	classes: {
-		select: 'select',
-		disabled: 'select--disabled',
-		icon: 'select__icon'
-	}
-})`
+export const StyledSelect = styled(SelectField)`
 	&& {
 		width: 100%;
 		display: ${({ hidden }) => hidden ? 'none' : 'block'};
