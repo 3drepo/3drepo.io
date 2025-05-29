@@ -22,8 +22,7 @@ import { isCommenterRole } from '@/v5/store/store.helpers';
 import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
-import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer, PlaceholderForStickyFunctionality, NewTicketTextContainer } from './ticketsTableGroup.styles';
+import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, PlaceholderForStickyFunctionality, NewTicketTextContainer } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
@@ -33,6 +32,7 @@ import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVi
 import { orderBy } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { useParams } from 'react-router';
 import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 
@@ -51,11 +51,7 @@ const SortingTableHeader = ({ name, children, disableSorting = false, ...props }
 	return (
 		<ResizableTableHeader name={name} onClick={() => onColumnClick(name)}>
 			<Header {...props} $selectable>
-				{isSelected && (
-					<IconContainer $flip={isDescendingOrder}>
-						<ArrowIcon />
-					</IconContainer>
-				)}
+				{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
 				{children}
 			</Header>
 		</ResizableTableHeader>
