@@ -19,6 +19,7 @@ import { BaseProperties, IssueProperties, SafetibaseProperties, SequencingProper
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 
 export type SetTicketValue =  (modelId: string, ticketId?: string, groupValue?: string) => void;
 
@@ -54,6 +55,14 @@ export const hasRequiredViewerProperties = (template) => {
 	const modules = template.modules?.flatMap((module) => module.properties) || [];
 	const properties = modules.concat(template.properties || []);
 	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
+};
+
+const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
+export const getAssignees = (t) => _.get(t, ASSIGNEES_PATH);
+
+export const sortAssignees = (ticket: ITicket) => {
+	const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
+	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
 };
 
 export const INITIAL_COLUMNS = [
