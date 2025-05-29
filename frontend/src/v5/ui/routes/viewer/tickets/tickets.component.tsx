@@ -17,16 +17,8 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import {
-	enableRealtimeContainerNewTicket,
-	enableRealtimeContainerUpdateTicket,
-	enableRealtimeContainerUpdateTicketGroup,
-	enableRealtimeFederationNewTicket,
-	enableRealtimeFederationUpdateTicket,
-	enableRealtimeFederationUpdateTicketGroup,
-} from '@/v5/services/realtime/ticket.events';
+
 import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardViews } from './tickets.constants';
@@ -39,7 +31,7 @@ import { Viewer } from '@/v4/services/viewer/viewer';
 import { uniq } from 'lodash';
 
 export const Tickets = () => {
-	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();
@@ -58,21 +50,6 @@ export const Tickets = () => {
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 		ProjectsActionsDispatchers.fetchTemplates(teamspace, project, true);
 	}, []);
-
-	useEffect(() => {
-		if (isFederation) {
-			return combineSubscriptions(
-				enableRealtimeFederationNewTicket(teamspace, project, containerOrFederation, revision),
-				enableRealtimeFederationUpdateTicket(teamspace, project, containerOrFederation, revision),
-				enableRealtimeFederationUpdateTicketGroup(teamspace, project, containerOrFederation),
-			);
-		}
-		return combineSubscriptions(
-			enableRealtimeContainerNewTicket(teamspace, project, containerOrFederation, revision),
-			enableRealtimeContainerUpdateTicket(teamspace, project, containerOrFederation, revision),
-			enableRealtimeContainerUpdateTicketGroup(teamspace, project, containerOrFederation, revision),
-		);
-	}, [containerOrFederation, revision]);
 
 	useEffect(() => {
 		if (view !== TicketsCardViews.New) {

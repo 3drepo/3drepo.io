@@ -64,6 +64,11 @@ export const selectIsEditingGroups = createSelector(
 	(ticketCardState) => ticketCardState.isEditingGroups,
 );
 
+export const selectIsFiltering = createSelector(
+	selectTicketsCardDomain,
+	(ticketCardState) => ticketCardState.isFiltering,
+);
+
 export const selectPinToDrop = createSelector(
 	selectTicketsCardDomain,
 	(ticketCardState) => ticketCardState.pinToDrop,
@@ -128,10 +133,10 @@ export const selectCardFilters = createSelector(
 	(filters) => toTicketCardFilter(filters) || [],
 );
 
-const selectFilteredTicketIds = createSelector(
+export const selectFilteredTicketIds = createSelector(
 	selectTicketsCardDomain,
-	(ticketCardState) => ticketCardState.filteredTicketIds || [],
-);
+	(ticketCardState) => ticketCardState.filteredTicketIds || new Set(),
+) as (state) => Set<string>;
 
 export const selectFilteredTickets = createSelector(
 	selectCardFilters,
@@ -139,7 +144,7 @@ export const selectFilteredTickets = createSelector(
 	selectFilteredTicketIds,
 	(filters, tickets, ids) => {
 		if (!filters.length) return tickets;
-		return tickets.filter(({ _id }) => ids.includes(_id));
+		return tickets.filter((t) => ids.has(t._id));
 	},
 );
 
@@ -156,7 +161,12 @@ export const selectIsShowingPins = createSelector(
 export const selectCurrentModelFilteredTickets = createSelector(
 	selectCurrentTickets,
 	selectFilteredTicketIds,
-	(tickets, ids) => tickets.filter(({ _id }) => ids.includes(_id)),
+	(tickets, ids) => {
+		console.log('@@ selector ticks', tickets);
+		console.log('@@ selector ids', ids);
+		if (!tickets.length || !ids.size) return [];
+		return tickets.filter((t) => ids?.has(t._id));
+	},
 );
 
 export const selectTicketPins = createSelector(

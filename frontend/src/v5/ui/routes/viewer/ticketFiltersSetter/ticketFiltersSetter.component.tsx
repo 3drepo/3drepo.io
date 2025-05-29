@@ -25,6 +25,11 @@ import { TicketStatusDefaultValues, TicketStatusTypes, TreatmentStatuses } from 
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
+import { useParams } from 'react-router-dom';
+import { ViewerParams } from '../../routes.constants';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type ITicketFiltersSetter = {
 	templates: ITemplate[],
@@ -33,6 +38,19 @@ type ITicketFiltersSetter = {
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = ({ templates }: ITicketFiltersSetter) => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const isFed = modelIsFederation(containerOrFederation);
+	
+	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
+
+	useEffect(() => {
+		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederation]);
+	}, [cardFilters]);
+
+	useEffect(() => 
+		enableRealtimeTickets(teamspace, project, containerOrFederation, isFed, revision)
+	, [containerOrFederation, revision, isFed]);
+
 
 	const getTicketFiltersFromCodes = (values): CardFilter[] => [{
 		module: '',
