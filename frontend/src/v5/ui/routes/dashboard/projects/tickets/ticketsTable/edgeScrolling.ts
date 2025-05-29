@@ -32,7 +32,7 @@ export const edgeScrolling = (options: Options = {}): EdgeScrolling => {
 	let scrollSpeed = 0;
 	let containerElement: HTMLElement | null = null;
 	let observer = new EdgeHoveringObserver();
-	let prevTime;
+	let prevTime = null;
 
 	const handleMouseMove = ({ side, proximity }: EdgeHoveringData) => {
 		scrollSpeed = ((proximity / 100) ** 3) * speed;
@@ -61,9 +61,16 @@ export const edgeScrolling = (options: Options = {}): EdgeScrolling => {
 		scrollContainer();
 	};
 
+	const stop = () => {
+		scrollSpeed = 0;
+		containerElement = null;
+		observer.unobserve();
+		prevTime = null;
+	};
+
 	return {
 		start,
-		stop: observer.unobserve,
+		stop,
 		isRunning: observer.isObserving,
 	};
 };
