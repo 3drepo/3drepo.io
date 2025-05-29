@@ -31,7 +31,7 @@ import { Viewer } from '@/v4/services/viewer/viewer';
 import { uniq } from 'lodash';
 
 export const Tickets = () => {
-	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();

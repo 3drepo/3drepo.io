@@ -16,7 +16,7 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCardActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext, useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
@@ -34,13 +34,14 @@ import { CalibrationContext } from '../dashboard/projects/calibration/calibratio
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
+import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
 	const { isCalibrating } = useContext(CalibrationContext);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
-
+	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	const isLoading = isFetching || fetchPending;
@@ -48,7 +49,7 @@ export const Viewer = () => {
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
 	const federationsContainers = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
-
+	const containerOrFederationId  = (selectedContainer || selectedFederation)?._id;
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
 
@@ -85,6 +86,15 @@ export const Viewer = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
+
+	useEffect(() => {
+		if (!containerOrFederationId) return;
+		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederationId]);
+	}, [cardFilters]);
+
+	useEffect(() => 
+		enableRealtimeTickets(teamspace, project, containerOrFederation, !!selectedFederation, revision)
+	, [containerOrFederation, revision, selectedFederation]);
 
 	useEffect(() => {
 		DrawingsCardActionsDispatchers.setQueries([]);

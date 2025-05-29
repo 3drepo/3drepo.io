@@ -62,14 +62,13 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 }
 
 const apiFetchFilteredTickets = async (teamspace, projectId, modelIds, isFederation, filters ): Promise<Set<string>> => {
-	const allTickets = await Promise.all(modelIds.map(async (modelId) => {
+	const combinedTickets = await Promise.all(modelIds.map(async (modelId) => {
 		const fetchModelTickets = await isFederation(modelId)
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		return fetchModelTickets(teamspace, projectId, modelId, { filters: filtersToQuery(filters) });
 	}));
-	
-	return new Set(flatten(allTickets).map((t) => t._id));
+	return new Set(flatten(combinedTickets).map((t) => t._id));
 };
 
 export function* fetchFilteredTickets({ teamspace, projectId, modelIds }: FetchFilteredTicketsAction) {

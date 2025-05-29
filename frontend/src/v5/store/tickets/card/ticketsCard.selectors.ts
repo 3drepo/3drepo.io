@@ -162,8 +162,6 @@ export const selectCurrentModelFilteredTickets = createSelector(
 	selectCurrentTickets,
 	selectFilteredTicketIds,
 	(tickets, ids) => {
-		console.log('@@ selector ticks', tickets);
-		console.log('@@ selector ids', ids);
 		if (!tickets.length || !ids.size) return [];
 		return tickets.filter((t) => ids?.has(t._id));
 	},
