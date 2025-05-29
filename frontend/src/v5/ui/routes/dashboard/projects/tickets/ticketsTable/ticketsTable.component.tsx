@@ -62,7 +62,7 @@ export const TicketsTable = () => {
 	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
 	const [groupByValue,, setGroupByValue] = useSearchParam('groupByValue');
 	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
-
+	const [filtersInitialised, setFiltersInitialised] = useState(false);
 	const setGroupBy = (val) => {
 		// this is for clearing also the groupByValue when groupBy so we dont have an inconsistent groupByValue
 		const search =  '?' + setGroupByValue(null,  setGroupByParam(val)); 
@@ -97,6 +97,8 @@ export const TicketsTable = () => {
 
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const allTickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
+	const ticketHasBeenFetched = TicketsHooksSelectors.selectTicketsHaveBeenFetched();
+	const allTicketsAreFetched = containersAndFederations.every(ticketHasBeenFetched);
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets(containersAndFederations)
 		.filter(({ type }) => type === templateId);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
@@ -104,7 +106,6 @@ export const TicketsTable = () => {
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 	
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-	const ticketHasBeenFetched = TicketsHooksSelectors.selectTicketsHaveBeenFetched();
 
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -157,9 +158,14 @@ export const TicketsTable = () => {
 	}, [containersAndFederations]);
 
 	useEffect(() => {
-		if (!containersAndFederations.length) return;
+		if (!containersAndFederations.length || !filtersInitialised || !allTicketsAreFetched) return;
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containersAndFederations);
-	}, [allTickets, filters, containersAndFederations]);
+	}, [allTickets, filters, containersAndFederations, filtersInitialised, allTicketsAreFetched]);
+
+	useEffect(() => {
+		if (!filters.length || filtersInitialised) return;
+		setFiltersInitialised(true);
+	}, [!!filters.length, filtersInitialised]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
