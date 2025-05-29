@@ -19,17 +19,11 @@ const { src } = require('../../helper/path');
 
 const { cloneDeep, times } = require('lodash');
 
-jest.mock('../../../../src/v5/processors/users');
-const UserProcessor = require(`${src}/processors/users`);
-
-jest.mock('../../../../src/v5/services/sso/frontegg');
-const FronteggService = require(`${src}/services/sso/frontegg`);
-
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, determineTestGroup, generateUserCredentials } = require('../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../helper/services');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
