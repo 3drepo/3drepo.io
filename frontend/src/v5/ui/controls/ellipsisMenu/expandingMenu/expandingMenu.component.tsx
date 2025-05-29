@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,14 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { MenuList } from '@mui/material';
+import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
+import { ExpandIconContainer, MenuItem } from './expandingMenu.styles';
+import { PopoverHoveringContent } from '@controls/hoverPopover/popoverHoveringContent.component';
 
-
-export const pick = (object: Record<string, string>, fields:string[]) => {
-	const newObj = {};
-	fields.forEach((field) => {
-		if (object[field]) newObj[field] = object[field];
-	});
-	return newObj;
-};
-
-export const sleep = async (timeout) => new Promise((resolve) => setTimeout(resolve, timeout));
+export const ExpandingMenu = ({ children, title }) => (
+	<PopoverHoveringContent
+		anchor={() => (
+			<MenuItem>
+				{title}
+				<ExpandIconContainer>
+					<ChevronIcon />
+				</ExpandIconContainer>
+			</MenuItem>
+		)}
+	>
+		<MenuList>
+			{children}
+		</MenuList>
+	</PopoverHoveringContent>
+);

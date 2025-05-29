@@ -15,17 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.component';
 import styled from 'styled-components';
 
-export const SwitchContainer = styled.span`
-	width: 100%;
-	height: 32px;
-	align-content: center;
-	text-align: left;
-	display: grid;
-	grid-template-columns: 26px auto 16px;
-	svg {
-		height: 16px;
-		width: 16px;
+export const AddUserButton = styled(PopoverCircle).attrs({
+	size: 'small',
+})`
+	padding: 5px;
+	box-sizing: border-box;
+	color: ${({ theme }) => theme.palette.base.main};
+	cursor: pointer;
+
+	&& {
+		border: 1px dashed ${({ theme }) => theme.palette.base.light};
+		outline: none;
+		margin: 0;
 	}
 `;

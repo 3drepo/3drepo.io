@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,12 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const center = (rect: DOMRect) => 
-	( { x: (rect.left + rect.right) / 2, y: (rect.top + rect.bottom) / 2 });
+import { formatMessage } from '@/v5/services/intl';
+import AddUserIcon from '@assets/icons/outlined/add_user-outlined.svg';
+import { AddUserButton } from './assigneesSelectMenuTriggerButton.styles';
+import { Tooltip } from '@mui/material';
 
-export const distanceBetweenRects = (rectA: DOMRect, rectB: DOMRect) => {
-	const centerA = center(rectA);
-	const centerB = center(rectB);
-
-	return Math.pow(centerA.y - centerB.y, 2) + Math.pow(centerA.x - centerB.x, 2);
-};
+export const AssigneesSelectMenuTriggerButton = (props) => (
+	<Tooltip
+		title={formatMessage({
+			id: 'customTicket.topPanel.addAssignees.tooltip',
+			defaultMessage: 'Assign',
+		})}
+		arrow
+	>
+		<AddUserButton {...props}>
+			<AddUserIcon />
+		</AddUserButton>
+	</Tooltip>
+);

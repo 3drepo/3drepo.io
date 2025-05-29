@@ -26,7 +26,6 @@ import { stripModuleOrPropertyPrefix } from '../ticketsTable.helper';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 
 export interface TicketsTableType {
-	getPropertyDefaultValue: (name: string) => unknown;
 	getPropertyType: (name: string) => PropertyTypeDefinition;
 	isJobAndUsersType: (name: string) => boolean;
 	groupByProperties: string[],
@@ -36,7 +35,6 @@ export interface TicketsTableType {
 }
 
 const defaultValue: TicketsTableType = {
-	getPropertyDefaultValue: () => null,
 	getPropertyType: () => null,
 	isJobAndUsersType: () => false,
 	groupByProperties: [],
@@ -80,7 +78,6 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		);
 	});
 
-	const getPropertyDefaultValue = (name: string) => definitionsAsObject[name]?.default;
 	const getPropertyType = (name: string) => definitionsAsObject[name]?.type as PropertyTypeDefinition;
 	const isJobAndUsersType = (name: string) => (
 		definitionsAsObject[name]?.values === 'jobsAndUsers'
@@ -93,7 +90,6 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	
 	return (
 		<TicketsTableContext.Provider value={{
-			getPropertyDefaultValue,
 			getPropertyType,
 			isJobAndUsersType,
 			groupByProperties,

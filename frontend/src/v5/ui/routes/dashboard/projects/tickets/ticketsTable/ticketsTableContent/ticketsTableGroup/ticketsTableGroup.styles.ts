@@ -28,16 +28,6 @@ export const Headers = styled(ResizableTableRow)`
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
 
-export const IconContainer = styled.div<{ $flip?: boolean }>`
-	animation: all .2s;
-	display: inline-flex;
-	margin-right: 5px;
-
-	${({ $flip }) => $flip && css`
-		transform: rotate(180deg);
-	`}
-`;
-
 export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
