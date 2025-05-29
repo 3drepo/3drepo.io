@@ -22,7 +22,7 @@ const { src } = require('../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
-const Users = require(`${src}/models/users`);
+const { USERS_DB_NAME } = require(`${src}/models/users.constants`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 const db = require(`${src}/handler/db`);
@@ -819,29 +819,20 @@ const testGetTeamspaceSetting = () => {
 	});
 };
 
-const testGetMemberInfoFromId = () => {
-	describe('Get member info from ID', () => {
-		test('Should return the user object based on the ID provided', async () => {
-			const mockData = { user: 'A', customData: { firstName: 'a', lastName: 'b', billing: { billingInfo: { company: 'companyA' } } } };
-			const expectedData = { user: 'A', firstName: 'a', lastName: 'b', company: 'companyA' };
+const testGetTeamspaceInvites = () => {
+	describe('Get a list of teamspace invitations', () => {
+		test('Should return a list of emails', async () => {
 			const ts = generateRandomString();
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(mockData);
-			const res = await Users.getUserInfoFromId(ts);
-			expect(res).toEqual(expectedData);
+			const fn = jest.spyOn(db, 'find');
+			await Teamspace.getTeamspaceInvites(ts);
 
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ 'customData.userId': ts });
-		});
-		test('Should return the user object based on the ID provided - missing billing info', async () => {
-			const mockData = { user: 'A', customData: { firstName: 'a', lastName: 'b', billing: {} } };
-			const expectedData = { user: 'A', firstName: 'a', lastName: 'b' };
-			const ts = generateRandomString();
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue(mockData);
-			const res = await Users.getUserInfoFromId(ts);
-			expect(res).toEqual(expectedData);
-
-			expect(fn.mock.calls.length).toBe(1);
-			expect(fn.mock.calls[0][2]).toEqual({ 'customData.userId': ts });
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				USERS_DB_NAME, 'invitations',
+				{ 'teamSpaces.teamspace': ts },
+				{ _id: 1 },
+				undefined,
+			);
 		});
 	});
 };
@@ -869,5 +860,5 @@ describe(determineTestGroup(__filename), () => {
 	testSetTeamspaceRefId();
 	testGetTeamspaceRefId();
 	testGetTeamspaceSetting();
-	testGetMemberInfoFromId();
+	testGetTeamspaceInvites();
 });

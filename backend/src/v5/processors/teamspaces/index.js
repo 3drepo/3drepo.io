@@ -17,18 +17,19 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount, getAllUsersInAccount, getUserStatusInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, getAllUsersInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
 	createTeamspaceSettings,
 	getAddOns,
+	getTeamspaceInvites,
 	getTeamspaceRefId,
 	getTeamspaceSetting,
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
-const { deleteFavourites, getAccessibleTeamspaces, getUserByUsername, getUserId, getUserInfoFromEmailArray, getUserInfoFromId, updateProfile, updateUserId } = require('../../models/users');
+const { deleteFavourites, getAccessibleTeamspaces, getUserByUsername, getUserId, getUserInfoFromEmail, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { COL_NAME } = require('../../models/projectSettings.constants');
@@ -38,7 +39,6 @@ const { createNewUserRecord } = require('../users');
 const { getUserById } = require('../../services/sso/frontegg');
 const { isTeamspaceAdmin } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
-const { membershipStatus } = require('../../services/sso/frontegg/frontegg.constants');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
 const { removeUserFromAllModels } = require('../../models/modelSettings');
 const { removeUserFromAllProjects } = require('../../models/projectSettings');
@@ -106,38 +106,47 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 	const frontEggUsers = await getAllUsersInAccount(tenantId);
 	const membersData = await getUserInfoFromEmailArray(frontEggUsers.map((user) => user.email));
 
-	// check any unfound users
-	if (frontEggUsers.length !== membersData.length) {
-		const foundUsersEmails = membersData.map((userData) => userData.email);
-		const unfoundUsers = frontEggUsers.filter(({ email }) => !foundUsersEmails.includes(email));
-
-		unfoundUsers.forEach(async ({ id, email }) => {
-			const userStatus = await getUserStatusInAccount(tenantId, id);
-			if (userStatus === membershipStatus.ACTIVE) {
-				logger.logDebug(`User not found: ${id}, creating user based on info from IDP...`);
-
-				const userData = await getUserById(id);
-				await createNewUserRecord(userData);
-
-				membersData.push(await getUserInfoFromId(email));
-			}
-		});
-	}
-
 	// check id discrepancies
 	membersData.forEach(async ({ user, email, userId }) => {
 		const { id } = frontEggUsers.filter((frontEggUserData) => frontEggUserData.email === email)[0];
-
 		// update the mongo userId to match
-		if (userId !== id) await updateProfile(user, { userId: id });
+		if (userId !== id) await updateUserId(user, id);
 	});
 
-	return membersData.map((memberData) => ({
-		user: memberData.user,
-		firstName: memberData.firstName,
-		lastName: memberData.lastName,
-		company: memberData?.company,
-	}));
+	// check for unprocessed users
+	if (frontEggUsers.length !== membersData.length) {
+		const teamspaceInvites = await getTeamspaceInvites(teamspace);
+
+		const foundUsersEmails = membersData.map((userData) => userData.email);
+		const processedInvites = teamspaceInvites.map((invite) => invite._id);
+
+		const unprocessedUsers = frontEggUsers.filter(
+			({ email }) => !foundUsersEmails.includes(email) && !processedInvites.includes(email),
+		);
+
+		const newUsers = await Promise.all(unprocessedUsers.map(async ({ id, email }) => {
+			logger.logDebug(`User not found: ${id}, creating user based on info from IDP...`);
+
+			const userData = await getUserById(id);
+			await createNewUserRecord(userData);
+			const newMemberData = await getUserInfoFromEmail(email);
+
+			return newMemberData;
+		}));
+
+		membersData.push(...newUsers);
+	}
+
+	return membersData.map(({ user, firstName, lastName, company }) => {
+		const res = {
+			user,
+			firstName,
+			lastName,
+		};
+		if (company) res.company = company;
+
+		return res;
+	});
 };
 
 Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
