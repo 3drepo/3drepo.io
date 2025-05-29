@@ -27,7 +27,7 @@ import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers'
 import { formatMessage } from '@/v5/services/intl';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
-import { FilterEllipsisMenu } from '@components/viewer/cards/cardFilters/filterEllipsisMenu/filterEllipsisMenu.component';
+import { TicketsEllipsisMenu } from '@components/viewer/cards/tickets/ticketsEllipsisMenu/ticketsEllipsisMenu.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { Tooltip } from '@mui/material';
 import { CardAction } from '@components/viewer/cards/cardAction/cardAction.styles';
@@ -56,7 +56,7 @@ export const TicketsListCard = () => {
 								</Tooltip>
 							)}
 						/>
-						<FilterEllipsisMenu />
+						<TicketsEllipsisMenu />
 					</>
 				)}
 			/>

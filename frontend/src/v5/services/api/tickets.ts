@@ -227,6 +227,5 @@ export const updateTicketGroup = async (
  * Types
  */
 type FetchTemplatesResponse = { templates: ITemplate[] };
-type FetchTicketsResponse = ITicket[];
 type CreateTicketResponse = { _id: string };
 type FetchRiskCategoriesResponse = { riskCategories: string[] };

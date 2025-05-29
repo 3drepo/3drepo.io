@@ -16,8 +16,9 @@
  */
 
 import { useContext, useRef } from 'react';
-import { overlayStyles, ResizerElement, ResizerLine } from './resizer.styles';
-import { ResizableTableContext } from '../resizableTableContext';
+import { overlayStyles, ResizerElement } from './resizer.styles';
+import { ResizableTableContext } from '../../../../resizableTableContext';
+import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.styles';
 
 type ResizerProps = { name: string };
 export const Resizer = ({ name }: ResizerProps) => {
@@ -70,15 +71,20 @@ export const Resizer = ({ name }: ResizerProps) => {
 		overlay.addEventListener('mouseup', onMouseUp);
 	};
 
+	const getStyle = () => {
+		if (resizerName !== name) return 'none';
+		if (isResizing) return 'solid';
+		return 'dashed';
+	};
+
 	return (
-		<ResizerLine
-			$offset={width}
+		<DelimiterLine
 			onMouseOver={handleMouseOver}
 			onMouseOut={handleMouseOut}
-			$highlight={resizerName === name}
-			$isResizing={isResizing && resizerName === name}
+			$offset={getWidth(name)}
+			$style={getStyle()}
 		>
 			<ResizerElement onMouseDown={onMouseDown} />
-		</ResizerLine>
+		</DelimiterLine>
 	);
 };

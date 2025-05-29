@@ -16,7 +16,6 @@
  */
 
 import { TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useCallback, useState } from 'react';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FormInputProps } from '@controls/inputs/inputController.component';
@@ -29,29 +28,27 @@ import { useSelectedModelsIds } from '../../routes/dashboard/projects/tickets/ti
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
-	showAddButton?: boolean;
-	showEmptyText?: boolean;
+	canClear?: boolean;
 	onBlur?: () => void;
 	excludeViewers?: boolean;
+	emptyListMessage?: string;
 	excludeJobs?: boolean;
 };
 
 export const AssigneesSelect = ({
 	value: valueRaw,
 	maxItems,
-	showAddButton,
-	showEmptyText,
 	multiple,
-	disabled,
-	onBlur,
 	className,
 	excludeViewers = false,
 	helperText,
 	onChange,
+	onBlur,
+	canClear = false,
+	disabled,
+	emptyListMessage,
 	...props
 }: AssigneesSelectProps) => {
-	const [open, setOpen] = useState(false);
-	
 	const containersAndFederations = useSelectedModelsIds();
 
 	const jobsAndUsers = TicketsCardHooksSelectors.selectJobsAndUsersByModelIds(containersAndFederations);
@@ -76,15 +73,9 @@ export const AssigneesSelect = ({
 		onChange({ target: { value: validVals } });
 	};
 
-	const handleOpen = useCallback((e) => {
-		if (disabled) return;
-		e.stopPropagation();
-		setOpen(true);
-	}, [disabled]);
-
-	const handleClose = () => {
-		setOpen(false);
-		onBlur();
+	const handleClear = () => {
+		onChange({ target: { value: emptyValue } });
+		onBlur?.();
 	};
 
 	if (!users.length || !jobs.length) return (
@@ -94,22 +85,21 @@ export const AssigneesSelect = ({
 	);
 	return (
 		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay}>
-			<AssigneesListContainer onClick={handleOpen} className={className}>
+			<AssigneesListContainer className={className}>
 				<AssigneesSelectMenu
-					open={open}
 					value={value}
-					onClose={handleClose}
-					onOpen={handleOpen}
 					multiple={multiple}
 					isInvalid={(v) => invalidValues.includes(v)}
 					onChange={handleChange}
+					onBlur={onBlur}
+					disabled={disabled}
 					{...props}
 				/>
 				<AssigneesValuesDisplay
 					value={valueAsArray}
 					maxItems={maxItems}
-					showEmptyText={showEmptyText}
-					disabled={disabled || !showAddButton}
+					onClear={canClear && !disabled && valueAsArray?.length ? handleClear : undefined}
+					emptyListMessage={emptyListMessage}
 				/>
 			</AssigneesListContainer>
 		</SearchContextComponent>

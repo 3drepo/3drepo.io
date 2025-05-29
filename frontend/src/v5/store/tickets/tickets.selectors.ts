@@ -26,6 +26,7 @@ import { selectCurrentProjectTemplateById, selectCurrentProjectTemplates } from 
 import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { TicketSortingProperty } from './card/ticketsCard.types';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -109,7 +110,7 @@ export const selectTicketsRaw = createSelector(
 	(state, modelId) => state.ticketsByModelId[modelId] || [],
 );
 
-export const selectTickets = createSelector(
+export const selectTicketsWithGroups = createSelector(
 	selectTicketsRaw,
 	selectTicketsGroups,
 	selectFederationById,
@@ -117,7 +118,7 @@ export const selectTickets = createSelector(
 	(state, modelId) => modelId,
 	(ticketsList, groups, federation, container, modelId): ITicket[] => {
 		const storeState = getState();
-		const tickets = ticketsList.map((ticket) => {
+		return ticketsList.map((ticket) => {
 			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
 			const ticketWithStatusAndModelInfo = {
 				...ticketWithStatus,
@@ -126,8 +127,25 @@ export const selectTickets = createSelector(
 			} as ITicket;
 			return ticketWithGroups(ticketWithStatusAndModelInfo, groups);
 		});
+	},
+);
+export const selectSorting = createSelector(
+	selectTicketsDomain,
+	(state) => state.sorting,
+);
 
-		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+export const selectTickets = createSelector(
+	selectTicketsWithGroups,
+	selectSorting,
+	(tickets, { property, order }) => {
+		if (property === TicketSortingProperty.TICKET_CODE) {
+			const ticketCodeSorting = [
+				(ticket) => selectTemplateById(getState(), ticket.modelId, ticket.type).code,
+				(ticket) => ticket.number,
+			];
+			return orderBy(tickets, ticketCodeSorting, [order, order]);
+		}
+		return orderBy(tickets, property, order);
 	},
 );
 

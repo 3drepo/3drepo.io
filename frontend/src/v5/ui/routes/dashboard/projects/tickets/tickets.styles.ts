@@ -33,7 +33,7 @@ export const ControlsContainer = styled.div`
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: flex-end;
-	margin-bottom: 2px;
+	margin-bottom: 12px;
 `;
 
 export const FlexContainer = styled.div`
