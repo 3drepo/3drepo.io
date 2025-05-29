@@ -15,19 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { HTMLAttributes, useContext } from 'react';
+import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { Item } from './resizableTableCell.styles';
+import { ResizableTableCell } from '../resizableTableCell/resizableTableCell.component';
+import { blockEvent } from '@/v5/helpers/events.helpers';
 
-export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
-	name: string;
-	className?: string;
-	onClick?: () => void;
-};
-export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isVisible, getIndex } = useContext(ResizableTableContext);
+export const ResizableTableHeader = ({ name, children, ...props }) => {
+	const { setMovingColumn } = useContext(ResizableTableContext);
 
-	if (!isVisible(name)) return null;
+	const onDragStart = (e) => {
+		// The blockEvent is to fix a bug in firefox where the dragging the
+		// dragged column is not dropped on mouseUp, but requires a further click
+		blockEvent(e);
+		setMovingColumn(name);
+	};
 
-	return (<Item $isMoving={movingColumn === name} $index={getIndex(name)} {...props} />);
+	return (
+		<ResizableTableCell draggable onDragStart={onDragStart} name={name} {...props}>
+			{children}
+		</ResizableTableCell>
+	);
 };

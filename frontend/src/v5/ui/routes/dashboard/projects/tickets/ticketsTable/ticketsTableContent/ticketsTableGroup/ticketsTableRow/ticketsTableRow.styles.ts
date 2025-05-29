@@ -16,7 +16,9 @@
  */
 
 import styled from 'styled-components';
+import { DueDateContainer } from '@controls/dueDate/dueDate.styles';
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
+import { TicketsTableCell } from './ticketsTableCell/ticketsTableCell.component';
 import { CellContainer } from './ticketsTableCell/cell/cell.styles';
 
 // TODO - fix when new palette is released
@@ -35,4 +37,29 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 		border-top-right-radius: 10px;
 		overflow: hidden;
 	}
+`;
+
+export const OverflowContainer = styled.div`
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	display: inline-block;
+`;
+
+export const CellOwner = styled(TicketsTableCell)`
+	.MuiAvatar-root {
+		width: 24px;
+		height: 24px;
+	}
+`;
+
+export const CellDate = styled(TicketsTableCell)`
+	${DueDateContainer} {
+		height: unset;
+	}
+`;
+
+export const SmallFont = styled.span`
+	color: ${({ theme }) => theme.palette.base.main};
+	font-size: 10px;
 `;

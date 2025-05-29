@@ -15,15 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { MovingColumnHighlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.component';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { useContext } from 'react';
+import { MovingColumnDropAreas } from './movingColumnDropAreas/movingColumnDropAreas.component';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
+export const MovingColumnOverlay = () => {
+	const { movingColumn } = useContext(ResizableTableContext);
+	if (!movingColumn) return null;
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
-`;
+	return (
+		<>
+			<MovingColumnDropAreas />
+			<MovingColumnHighlighter />
+		</>
+	);
+};

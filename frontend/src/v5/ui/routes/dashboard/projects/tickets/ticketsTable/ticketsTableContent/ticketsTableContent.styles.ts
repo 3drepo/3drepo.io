@@ -15,15 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
+import { ControlsContainer as GroupCollapseHeader } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
+export const Container = styled.div`
+	margin-bottom: -30px;
+	overflow: auto;
+	position: relative;
+	height: calc(100vh - 287px);
+	width: 100vw;
+	margin-left: -75px;
+	padding: 0 64px 30px 75px;
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
+	${GroupCollapseHeader} {
+		position: sticky;
+		left: 0;
+		overflow: unset;
+		width: calc(100vw - 161px);
+		margin-right: 0;
+	}
 `;

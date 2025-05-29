@@ -15,15 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
+// This is not to interfere with other components and to keep the cursor as
+// "col-resize" while resizing even when moving the mouse outside the table
+export const overlayStyles = `
+	height: 100vh;
+	width: 100vw;
+	cursor: col-resize;
+	pointer-events: all;
+	position: absolute;
+	z-index: 100;
+	top: 0;
+`;
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
+export const ResizerElement = styled.div`
+	height: 100%;
+	position: relative;
+	cursor: col-resize;
+	width: 7px;
+	left: -3.5px;
 `;

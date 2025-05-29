@@ -23,10 +23,10 @@ import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
-import { Container, ScrollableContainer, Title } from './ticketsTableResizableContent.styles';
+import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
+import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -42,14 +42,12 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 
 	if (!groupBy) {
 		return (
-			<ScrollableContainer>
-				<TicketsTableGroup
-					tickets={filteredItems}
-					onNewTicket={onGroupNewTicket('')}
-					onEditTicket={setTicketValue}
-					selectedTicketId={selectedTicketId}
-				/>
-			</ScrollableContainer>
+			<TicketsTableGroup
+				tickets={filteredItems}
+				onNewTicket={onGroupNewTicket('')}
+				onEditTicket={setTicketValue}
+				selectedTicketId={selectedTicketId}
+			/>
 		);
 	}
 
