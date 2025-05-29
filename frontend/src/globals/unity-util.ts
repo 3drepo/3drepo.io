@@ -1574,6 +1574,10 @@ export class UnityUtil {
 		UnityUtil.toUnity('DisableExternalWebRequestHandler', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
+	public static setMaxNumRequests(numRequests: number) {
+		UnityUtil.toUnity('SetMaxNumWebRequests', UnityUtil.LoadingState.VIEWER_READY, Number(numRequests));
+	}
+
 	/**
 	 * Get Object Status within the viewer. This will return you the list of
 	 * objects that are currently set invisible, and a list of object that are
