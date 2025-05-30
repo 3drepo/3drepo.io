@@ -64,7 +64,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	const fetchColumn = (name: string, tickets: ITicket[]) => tickets.forEach(({ modelId, _id: ticketId }) => {
 		const ticketIdAndProperty = `${ticketId}${name}`;
 		if (alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty]) return;
-		alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty] = ticketIdAndProperty;
+		alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty] = true;
 			
 		const isFederation = isFed(modelId);
 		TicketsActionsDispatchers.fetchTicketProperties(
