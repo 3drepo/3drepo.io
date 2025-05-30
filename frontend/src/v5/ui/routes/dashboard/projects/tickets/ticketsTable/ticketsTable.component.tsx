@@ -17,7 +17,7 @@
 
 import { ContainersActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, generatePath, useHistory } from 'react-router-dom';
@@ -36,16 +36,18 @@ import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.c
 import { Transformers, useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
-import { GroupBySelect } from '../selectMenus/groupByFormSelect.component';
+import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
 import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { NEW_TICKET_ID, NONE_OPTION } from './ticketsTable.helper';
+import { INITIAL_COLUMNS, NEW_TICKET_ID } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
-import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { TicketsTableContext } from './ticketsTableContext/ticketsTableContext';
+import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -58,19 +60,14 @@ export const TicketsTable = () => {
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, template, ticketId } = params;
 	const prevTemplate = useRef(undefined);
+	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
+	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
 
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
-	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
-	const [groupByValue,, setGroupByValue] = useSearchParam('groupByValue');
+	const [groupByValue, setGroupByValue] = useState('');
 	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
 	const models = useSelectedModels();
-
-	const setGroupBy = (val) => {
-		// this is for clearing also the groupByValue when groupBy so we dont have an inconsistent groupByValue
-		const search =  '?' + setGroupByValue(null,  setGroupByParam(val)); 
-		history.push(location.pathname + search);
-	};
 
 	const setTemplate = useCallback((newTemplate) => {
 		const newParams = { ...params, template: newTemplate };
@@ -79,10 +76,11 @@ export const TicketsTable = () => {
 	}, [params]);
 
 	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
-		const id = (modelId && !ticket_id ) ? NEW_TICKET_ID : ticket_id;
+		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
 		const newParams = { ...params, ticketId: id };
-		const search = '?' + setGroupByValue(groupByVal, setContainerOrFederation(modelId));
-		const path = generatePath(TICKETS_ROUTE +  search, newParams);
+		const search = '?' + setContainerOrFederation(modelId);
+		setGroupByValue(groupByVal);
+		const path = generatePath(TICKETS_ROUTE + search, newParams);
 
 		if (replace) {
 			history.replace(path);
@@ -190,6 +188,20 @@ export const TicketsTable = () => {
 		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
 	}, [template]);
 
+	useEffect(() => {
+		setGroupByValue('');
+	}, [groupBy]);
+
+	useEffect(() => {
+		let columnsToFetch = [...visibleSortedColumnsNames];
+		if (groupBy) {
+			columnsToFetch.push(groupBy);
+		}
+		columnsToFetch
+			.filter((name) => !INITIAL_COLUMNS.includes(name))
+			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
+	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join(''), groupBy]);
+
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
 			<FiltersContainer>
@@ -203,10 +215,7 @@ export const TicketsTable = () => {
 							isNewTicketDirty={isNewTicketDirty}
 							{...paramToInputProps(template, setTemplate)}
 						/>
-						<GroupBySelect 
-							templateId={template}
-							{...paramToInputProps(groupBy || NONE_OPTION, setGroupBy)}
-						/>
+						<GroupBySelect />
 					</SelectorsContainer>
 					<CompletedChip
 						icon={<TickIcon />}
@@ -235,7 +244,7 @@ export const TicketsTable = () => {
 						/>}
 				</FlexContainer>
 			</FiltersContainer>
-			<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} groupBy={groupBy}/>
+			<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} />
 			<SidePanel open={!!ticketId && !!models.length && !!containerOrFederation}>
 				<SlidePanelHeader>
 					<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
@@ -255,7 +264,7 @@ export const TicketsTable = () => {
 						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
 						{isNewTicket && (
 							<NewTicketSlide
-								preselectedValue={{ [groupBy]: groupByValue }}
+								preselectedValue={{ key: groupBy, value: groupByValue }}
 								template={selectedTemplate}
 								containerOrFederation={containerOrFederation}
 								onSave={onSaveTicket}

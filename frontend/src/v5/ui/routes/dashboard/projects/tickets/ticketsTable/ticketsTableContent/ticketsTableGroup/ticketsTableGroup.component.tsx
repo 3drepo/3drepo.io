@@ -26,7 +26,7 @@ import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, Placeholder
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { getColumnLabel, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
+import { getPropertyLabel, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { orderBy } from 'lodash';
@@ -98,7 +98,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										<Headers>
 											{visibleSortedColumnsNames.map((name) => (
 												<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
-													{getColumnLabel(name)}
+													{getPropertyLabel(name)}
 												</SortingTableHeader>
 											))}
 											<ColumnsVisibilitySettings />
