@@ -23,6 +23,8 @@ import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
+import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selectors';
+import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 
 export const NONE_OPTION = 'None';
 
@@ -102,8 +104,13 @@ const groupByList = (tickets: ITicket[], groupBy: string, groupValues: string[])
 	return groups;
 };
 
+const convertUserToFullname = (jobOrUsername) => {
+	const user = selectCurrentTeamspaceUsersByIds(getState())[jobOrUsername];
+	return user ? getFullnameFromUser(user) : jobOrUsername;
+};
+
 const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
-export const getAssignees = (t) => _.get(t, ASSIGNEES_PATH);
+export const getAssignees = (t) => (_.get(t, ASSIGNEES_PATH) ?? []).map(convertUserToFullname);
 
 export const sortAssignees = (ticket: ITicket) => {
 	const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
@@ -135,7 +142,7 @@ const groupByAssignees = (tickets: ITicket[]) => {
 export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string, ITicket[]> => {
 	switch (groupBy) {
 		case BaseProperties.OWNER:
-			return _.groupBy(tickets, `properties.${BaseProperties.OWNER}`);
+			return _.groupBy(tickets, (ticket) => convertUserToFullname(_.get(ticket, `properties.${BaseProperties.OWNER}`)));
 		case IssueProperties.ASSIGNEES:
 			return groupByAssignees(tickets);
 		case IssueProperties.DUE_DATE:
