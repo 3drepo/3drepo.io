@@ -65,16 +65,20 @@ const AddUserButton = css`
 
 const SelectStyles = css`
 	.MuiInputBase-root {
+		width: 100%;
 		svg { /* Chevron icon */
 			top: 15px;
 		}
 		.MuiSelect-select {
-			border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 			padding-left: 10px;
+			width: 100%;
 			&, .MuiGrid-root {
 				${({ theme }) => theme.typography.body1};
 				line-height: 35px;
 				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+
+			.MuiGrid-root {
 				width: auto;
 			}
 		}

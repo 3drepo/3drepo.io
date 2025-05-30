@@ -26,6 +26,7 @@ import { selectCurrentProjectTemplateById } from '../projects/projects.selectors
 import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { TicketSortingProperty } from './card/ticketsCard.types';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -49,10 +50,29 @@ export const selectTicketsHaveBeenFetched = createSelector(
 	(state): (modelId) => boolean => (modelId) => modelId in state.ticketsByModelId,
 );
 
+
+const removeDeprecated = (template: ITemplate): ITemplate => {
+	const removeDeprecatedItems = (properties: any[])  => properties.filter((prop) => !prop.deprecated);
+
+	return {
+		...template,
+		properties: removeDeprecatedItems(template.properties ?? []),
+		modules: removeDeprecatedItems(template.modules ?? [])
+			.map((module) => (
+				{
+					...module, 
+					properties: removeDeprecatedItems(module.properties ?? []),
+				}
+			)),
+	};
+};
+
+
+
 export const selectTemplates = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
-	(state, modelId) => state.templatesByModelId[modelId] || [],
+	(state, modelId) => (state.templatesByModelId[modelId] || []).map(removeDeprecated),
 );
 
 export const selectActiveTemplates = createSelector(
@@ -65,7 +85,7 @@ export const selectTemplateById = createSelector(
 	selectTemplates,
 	(state, modelId, templateId) => templateId,
 	(state, templates, templateId) => templates.find(({ _id }) => _id === templateId) || null,
-);
+) as (state: object, modelId: string, templateId: string) => ITemplate;
 
 export const selectTicketsGroups = createSelector(
 	selectTicketsDomain,
@@ -78,18 +98,35 @@ export const selectTicketsRaw = createSelector(
 	(state, modelId) => state.ticketsByModelId[modelId] || [],
 );
 
-export const selectTickets = createSelector(
+export const selectTicketsWithGroups = createSelector(
 	selectTicketsRaw,
 	selectTicketsGroups,
 	(state, modelId) => modelId,
 	(ticketsList, groups, modelId): ITicket[] => {
 		const storeState = getState();
-		const tickets = ticketsList.map((ticket) => {
+		return ticketsList.map((ticket) => {
 			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
 			return ticketWithGroups(({ ...ticketWithStatus, modelId }), groups);
 		});
+	},
+);
+export const selectSorting = createSelector(
+	selectTicketsDomain,
+	(state) => state.sorting,
+);
 
-		return orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
+export const selectTickets = createSelector(
+	selectTicketsWithGroups,
+	selectSorting,
+	(tickets, { property, order }) => {
+		if (property === TicketSortingProperty.TICKET_CODE) {
+			const ticketCodeSorting = [
+				(ticket) => selectTemplateById(getState(), ticket.modelId, ticket.type).code,
+				(ticket) => ticket.number,
+			];
+			return orderBy(tickets, ticketCodeSorting, [order, order]);
+		}
+		return orderBy(tickets, property, order);
 	},
 );
 
@@ -97,13 +134,13 @@ export const selectTicketByIdRaw = createSelector(
 	selectTicketsRaw,
 	(_, modelId, ticketId) => ticketId,
 	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
-);
+) as (state:object, containerOrFederation:string, ticketId: string) => ITicket;
 
 export const selectTicketById = createSelector(
 	selectTickets,
 	(_, modelId, ticketId) => ticketId,
 	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
-);
+) as (state:object, containerOrFederation:string, ticketId: string) => ITicket;
 
 export const selectRiskCategories = createSelector(
 	selectTicketsDomain,

@@ -41,6 +41,7 @@ import { ITicket, ViewpointState } from './tickets.types';
 import { selectTicketById, selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
+import { addUpdatedAtTime } from './tickets.helpers';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 
@@ -66,7 +67,8 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 	(isFederation, teamspace, projectId, modelId, queryParams) => (
 		isFederation
 			? API.Tickets.fetchFederationTickets
-			: API.Tickets.fetchContainerTickets)(teamspace, projectId, modelId, queryParams),
+			: API.Tickets.fetchContainerTickets
+	)(teamspace, projectId, modelId, queryParams),
 	40,
 	ExecutionStrategy.Fifo,
 );
@@ -93,12 +95,12 @@ export function* fetchTicketProperties({
 			modelId,
 			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
 		);
-		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
+		yield put(TicketsActions.upsertTicketSuccess(modelId, { ...ticket, _id: ticketId }));
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTickets.error', defaultMessage: 'trying to fetch {model} tickets' },
+				{ id: 'tickets.fetchTicketProperties.error', defaultMessage: 'trying to fetch {model} ticket properties' },
 				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
@@ -200,6 +202,7 @@ export function* updateTicket({ teamspace, projectId, modelId, ticketId, ticket,
 			: API.Tickets.updateContainerTicket;
 
 		yield updateModelTicket(teamspace, projectId, modelId, ticketId, ticket);
+		addUpdatedAtTime(ticket);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { _id: ticketId, ...ticket }));
 		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateTicket.updated', defaultMessage: 'Ticket updated' })));
 	} catch (error) {
@@ -290,6 +293,7 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId, re
 }
 
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket, revision }: UpsertTicketAndFetchGroupsAction) {
+	addUpdatedAtTime(ticket);
 	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision));
 }

@@ -19,7 +19,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelec
 import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
-import { Cell } from './cell/cell.component';
+import { Cell as BaseCell } from './cell/cell.component';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { Chip } from '@controls/chip/chip.component';
@@ -30,7 +30,8 @@ import { useContext } from 'react';
 import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
-import { CellDate } from './ticketsTableCell.styles';
+import { CellDate, Container } from './ticketsTableCell.styles';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -40,13 +41,14 @@ type TicketsTableCellProps = {
 };
 export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProps) => {
 	const { title, properties, number, type: templateId } = ticket;
-	const { getPropertyDefaultValue, getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
+	const { getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
+	const { movingColumn } = useContext(ResizableTableContext);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
 	const container = ContainersHooksSelectors.selectContainerById(modelId);
 	const federation = FederationsHooksSelectors.selectFederationById(modelId);
 	const { name: modelName } = container || federation || {};
-	const value = get(ticket, name) ?? getPropertyDefaultValue(name);
+	const value = get(ticket, name);
 	
 	const {
 		owner,
@@ -55,6 +57,12 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 		dueDate,
 	} = getPropertiesInCamelCase(properties);
 	const propertyType = getPropertyType(name);
+
+	const Cell = (props) => (
+		<Container $isMoving={props.name === movingColumn}>
+			<BaseCell {...props} />
+		</Container>
+	);
 
 	if (name === 'id') return (
 		<Cell name={name}>
