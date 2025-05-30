@@ -39,14 +39,15 @@ import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFede
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
 import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { NEW_TICKET_ID } from './ticketsTable.helper';
+import { INITIAL_COLUMNS, NEW_TICKET_ID } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
-import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableContext } from './ticketsTableContext/ticketsTableContext';
+import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -59,11 +60,12 @@ export const TicketsTable = () => {
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, template, ticketId } = params;
 	const prevTemplate = useRef(undefined);
-	const { groupBy } = useContext(TicketsTableContext);
+	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
+	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
 
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
-	const [groupByValue,, setGroupByValue] = useSearchParam('groupByValue');
+	const [groupByValue, setGroupByValue] = useState('');
 	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
 	const models = useSelectedModels();
 
@@ -74,10 +76,11 @@ export const TicketsTable = () => {
 	}, [params]);
 
 	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
-		const id = (modelId && !ticket_id ) ? NEW_TICKET_ID : ticket_id;
+		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
 		const newParams = { ...params, ticketId: id };
-		const search = '?' + setGroupByValue(groupByVal, setContainerOrFederation(modelId));
-		const path = generatePath(TICKETS_ROUTE +  search, newParams);
+		const search = '?' + setContainerOrFederation(modelId);
+		setGroupByValue(groupByVal);
+		const path = generatePath(TICKETS_ROUTE + search, newParams);
 
 		if (replace) {
 			history.replace(path);
@@ -185,6 +188,20 @@ export const TicketsTable = () => {
 		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
 	}, [template]);
 
+	useEffect(() => {
+		setGroupByValue('');
+	}, [groupBy]);
+
+	useEffect(() => {
+		let columnsToFetch = [...visibleSortedColumnsNames];
+		if (groupBy) {
+			columnsToFetch.push(groupBy);
+		}
+		columnsToFetch
+			.filter((name) => !INITIAL_COLUMNS.includes(name))
+			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
+	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join(''), groupBy]);
+
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
 			<FiltersContainer>
@@ -247,7 +264,7 @@ export const TicketsTable = () => {
 						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
 						{isNewTicket && (
 							<NewTicketSlide
-								preselectedValue={{ [groupBy]: groupByValue }}
+								preselectedValue={{ key: groupBy, value: groupByValue }}
 								template={selectedTemplate}
 								containerOrFederation={containerOrFederation}
 								onSave={onSaveTicket}

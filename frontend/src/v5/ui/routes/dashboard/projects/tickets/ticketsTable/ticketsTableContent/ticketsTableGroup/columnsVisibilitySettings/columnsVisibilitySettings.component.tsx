@@ -22,7 +22,7 @@ import { getPropertyLabel, INITIAL_COLUMNS } from '../../../ticketsTable.helper'
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
@@ -93,7 +93,7 @@ const List = ({ onShowColumn }) => {
 	);
 };
 export const ColumnsVisibilitySettings = () => {
-	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn } = useContext(ResizableTableContext);
+	const { getAllColumnsNames, showColumn } = useContext(ResizableTableContext);
 	const { sortedItems: tickets } = useContext(SortedTableContext);
 	const { fetchColumn } = useContext(TicketsTableContext);
 	const columnsNames = getAllColumnsNames();
@@ -108,12 +108,6 @@ export const ColumnsVisibilitySettings = () => {
 		}
 		showColumn(name);
 	};
-
-	useEffect(() => {
-		visibleSortedColumnsNames
-			.filter((name) => !INITIAL_COLUMNS.includes(name))
-			.forEach((name) => fetchColumn(name, tickets));
-	}, [visibleSortedColumnsNames, tickets]);
 
 	return (
 		<ActionMenu
