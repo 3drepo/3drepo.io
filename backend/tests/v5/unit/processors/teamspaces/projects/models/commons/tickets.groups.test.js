@@ -42,11 +42,7 @@ const ScenesModel = require(`${src}/models/scenes`);
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/scenes');
 const SceneProcessor = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
-jest.mock('../../../../../../../../src/v5/services/filesManager');
-const FilesManager = require(`${src}/services/filesManager`);
-
-jest.mock('../../../../../../../../src/v5/utils/responseCodes');
-const ResponseCodes = require(`${src}/utils/responseCodes`);
+const { templates } = require(`${src}/utils/responseCodes`);
 
 const getMetadata = (externalIdName) => times(10, () => ({
 	parents: times(2, () => generateRandomString()),
@@ -482,101 +478,82 @@ const testProcessGroupsUpdate = () => {
 	});
 };
 
-const testProcessExternalData = () => {
-	describe('Process External Data', () => {
+const testCommitGroupChanges = () => {
+	describe('Commit group changes', () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
 
 		test('should execute correctly with valid data', async () => {
-			const ticketIds = [generateUUIDString(), generateUUIDString()];
-			const data = [
-				{ binaries: { toRemove: ['ref1'], toAdd: [{ ref: 'ref1', data: 'binary1' }] }, groups: { stillUsed: new Set(['group1', 'group2']), toAdd: ['group1'], toRemove: ['group3'] } },
-				{ binaries: { toRemove: ['ref2'], toAdd: [{ ref: 'ref2', data: 'binary2' }] }, groups: { stillUsed: new Set(['group1', 'group2']), toAdd: ['group2'], toRemove: [] } },
-			];
+			const toAdd = times(2, () => generateUUID());
+			const old = times(2, () => generateUUID());
 
-			GroupsModel.getGroupsByIds.mockResolvedValue([{ _id: 'group1-id' }, { _id: 'group2-id' }]);
-			GroupsModel.addGroups.mockResolvedValue(undefined);
-			GroupsModel.deleteGroups.mockResolvedValue(undefined);
-			FilesManager.removeFiles.mockResolvedValue(undefined);
-			FilesManager.storeFiles.mockResolvedValue(undefined);
+			const ticketId = generateUUID();
+			const data = { stillUsed: new Set([generateUUIDString(), generateUUIDString()]), toAdd, old };
 
-			await Groups.processExternalData(teamspace, project, model, ticketIds, data);
+			GroupsModel.getGroupsByIds.mockResolvedValueOnce([{ _id: generateUUID() }, { _id: generateUUID() }]);
 
-			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, 'tickets.resources', ['ref1', 'ref2']);
-			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, 'tickets.resources', [
-				{ id: 'ref1', data: 'binary1', meta: { teamspace, project, model, ticket: ticketIds[0] } },
-				{ id: 'ref2', data: 'binary2', meta: { teamspace, project, model, ticket: ticketIds[1] } },
-			]);
+			await Groups.commitGroupChanges(teamspace, project, model, ticketId, data);
 
-			expect(GroupsModel.addGroups.mock.calls).toEqual([[teamspace, project, model, ticketIds[0], ['group1']], [teamspace, project, model, ticketIds[1], ['group2']]]);
-			expect(GroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model, ticketIds[0], ['group3']);
+			expect(GroupsModel.getGroupsByIds).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.getGroupsByIds).toHaveBeenCalledWith(
+				teamspace, project, model, ticketId, Array.from(data.stillUsed).map((stringToUUID)), { _id: 1 });
+
+			expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model, ticketId, toAdd);
+
+			expect(GroupsModel.deleteGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model, ticketId, old);
+		});
+
+		test('should not remove the old UUID if it is being used', async () => {
+			const toAdd = times(2, () => generateUUID());
+			const old = times(2, () => generateUUID());
+
+			const ticketId = generateUUID();
+			const data = { stillUsed: new Set([generateUUIDString(), generateUUIDString(), UUIDToString(old[0])]),
+				toAdd,
+				old };
+
+			GroupsModel.getGroupsByIds.mockResolvedValueOnce([{ _id: generateUUID() }, { _id: generateUUID() },
+				{ _id: generateUUID() }]);
+
+			await Groups.commitGroupChanges(teamspace, project, model, ticketId, data);
+
+			expect(GroupsModel.getGroupsByIds).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.getGroupsByIds).toHaveBeenCalledWith(
+				teamspace, project, model, ticketId, Array.from(data.stillUsed).map((stringToUUID)), { _id: 1 });
+
+			expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model, ticketId, toAdd);
+
+			expect(GroupsModel.deleteGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model, ticketId, [old[1]]);
 		});
 
 		test('should throw error if groups not found', async () => {
-			const ticketIds = ['ticket1'];
-			const data = [
-				{ binaries: { toRemove: [], toAdd: [] }, groups: { stillUsed: new Set(['group1']), toAdd: [], toRemove: [] } },
-			];
+			const ticketId = generateUUID();
+			const data = { stillUsed: new Set(['group1', 'group2']), toAdd: [], old: [] };
+			GroupsModel.getGroupsByIds.mockResolvedValueOnce([{ _id: 'group2' }]);
 
-			GroupsModel.getGroupsByIds.mockResolvedValue([]);
-			ResponseCodes.createResponseCode.mockImplementation((template, message) => ({ template, message }));
-
-			await expect(Groups.processExternalData(teamspace, project, model, ticketIds, data))
+			await expect(Groups.commitGroupChanges(teamspace, project, model, ticketId, data))
 				.rejects
 				.toEqual({
-					template: {
-						code: 'INVALID_ARGUMENTS',
-						message: 'The arguments provided are not valid.',
-						status: 400,
-						value: 'INVALID_ARGUMENTS',
-					},
+					...templates.invalidArguments,
 					message: 'The following groups are not found: group1',
 				});
 		});
 
-		test('should not throw errors if ticketIds is empty', async () => {
-			const ticketIds = [];
-			const data = [];
-
-			GroupsModel.getGroupsByIds.mockResolvedValue([]);
-			GroupsModel.addGroups.mockResolvedValue(undefined);
-			GroupsModel.deleteGroups.mockResolvedValue(undefined);
-
-			await expect(Groups.processExternalData(teamspace, project, model, ticketIds, data)).resolves.not.toThrow();
-		});
-
 		test('should handle empty group operations', async () => {
-			const ticketIds = ['ticket1'];
-			const data = [
-				{ binaries: { toRemove: [], toAdd: [] }, groups: { stillUsed: new Set([]), toAdd: [], toRemove: [] } },
-			];
+			const ticketIds = generateUUID();
+			const data = { };
 
 			GroupsModel.getGroupsByIds.mockResolvedValue([]);
-			GroupsModel.addGroups.mockResolvedValue(undefined);
-			GroupsModel.deleteGroups.mockResolvedValue(undefined);
 
-			await Groups.processExternalData(teamspace, project, model, ticketIds, data);
+			await Groups.commitGroupChanges(teamspace, project, model, ticketIds, data);
 
 			expect(GroupsModel.addGroups).not.toHaveBeenCalled();
 			expect(GroupsModel.deleteGroups).not.toHaveBeenCalled();
-		});
-
-		test('should handle file operations when binaries are provided', async () => {
-			const ticketIds = ['ticket1'];
-			const data = [
-				{ binaries: { toRemove: ['ref1'], toAdd: [{ ref: 'ref1', data: 'binary1' }] }, groups: { stillUsed: new Set([]), toAdd: [], toRemove: [] } },
-			];
-
-			FilesManager.removeFiles.mockResolvedValue(undefined);
-			FilesManager.storeFiles.mockResolvedValue(undefined);
-
-			await Groups.processExternalData(teamspace, project, model, ticketIds, data);
-
-			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, 'tickets.resources', ['ref1']);
-			expect(FilesManager.storeFiles).toHaveBeenCalledWith(teamspace, 'tickets.resources', [
-				{ id: 'ref1', data: 'binary1', meta: { teamspace, project, model, ticket: 'ticket1' } },
-			]);
 		});
 	});
 };
@@ -587,5 +564,5 @@ describe(determineTestGroup(__filename), () => {
 	testAddGroups();
 	testUpdateGroup();
 	testProcessGroupsUpdate();
-	testProcessExternalData();
+	testCommitGroupChanges();
 });

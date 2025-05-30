@@ -27,8 +27,6 @@ const {
 const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
-const { removeFiles, storeFiles } = require('../../../../../services/filesManager');
-const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { getNestedProperty } = require('../../../../../utils/helper/objects');
 const { getNodesByIds } = require('../../../../../models/scenes');
 const { isUUID } = require('../../../../../utils/helper/typeCheck');
@@ -181,44 +179,11 @@ TicketGroups.processGroupsUpdate = (oldData, newData, fields, groupsState) => {
 	});
 };
 
-TicketGroups.processExternalData = async (teamspace, project, model, ticketIds, data) => {
-	const refsToRemove = [];
-	const binariesToSave = [];
+const calculateRemovedGroups = ({ toRemove, old = [], stillUsed = new Set(), ...otherGroups }) => {
+	const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
+		Array.from(old.map(UUIDToString)));
 
-	await Promise.all(ticketIds.map(async (ticketId, i) => {
-		const { binaries, groups } = data[i];
-
-		if (groups.stillUsed.size) {
-			const stillUsed = Array.from(groups.stillUsed);
-			const existingGroups = await getGroupsByIds(teamspace, project, model, ticketId,
-				stillUsed.map(stringToUUID), { _id: 1 });
-
-			if (existingGroups.length !== stillUsed.length) {
-				const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
-					stillUsed);
-				throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
-			}
-		}
-
-		refsToRemove.push(...binaries.toRemove);
-
-		binariesToSave.push(...binaries.toAdd.map(({ ref, data: bin }) => ({
-			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId },
-		})));
-
-		await Promise.all([
-			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
-			groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId,
-				groups.toRemove) : Promise.resolve(),
-		]);
-	}));
-
-	const promsToWait = [];
-
-	if (refsToRemove.length) promsToWait.push(removeFiles(teamspace, TICKETS_RESOURCES_COL, refsToRemove));
-	if (binariesToSave.length) promsToWait.push(storeFiles(teamspace, TICKETS_RESOURCES_COL, binariesToSave));
-
-	await Promise.all(promsToWait);
+	return { toRemove: toRemoveCalculated.map(stringToUUID), stillUsed, ...otherGroups };
 };
 
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
@@ -233,6 +198,30 @@ TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 		}));
 
 	await addGroups(teamspace, project, model, ticket, convertedGroups);
+};
+
+// This should be called base on the information generated in processGroupsUpdate
+TicketGroups.commitGroupChanges = async (teamspace, project, model, ticket, groupsPreFilter) => {
+	const groups = calculateRemovedGroups(groupsPreFilter);
+
+	if (groups.stillUsed?.size) {
+		const stillUsed = Array.from(groups.stillUsed);
+		const existingGroups = await getGroupsByIds(teamspace, project, model, ticket,
+			stillUsed.map(stringToUUID), { _id: 1 });
+
+		if (existingGroups.length !== stillUsed.length) {
+			const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
+				stillUsed);
+			throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
+		}
+	}
+
+	await Promise.all([
+		groups.toAdd?.length ? TicketGroups.addGroups(teamspace, project, model, ticket, groups.toAdd)
+			: Promise.resolve(),
+		groups.toRemove?.length ? deleteGroups(teamspace, project, model, ticket,
+			groups.toRemove) : Promise.resolve(),
+	]);
 };
 
 TicketGroups.deleteGroups = deleteGroups;

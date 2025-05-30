@@ -16,11 +16,10 @@
  */
 
 const { addComment, deleteComment, getCommentById, getCommentsByTicket, importComments, updateComment } = require('../../../../../models/tickets.comments');
-const { generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { processExternalData, processGroupsUpdate } = require('./tickets.groups');
+const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
-const { getArrayDifference } = require('../../../../../utils/helper/arrays');
+const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { storeFiles } = require('../../../../../services/filesManager');
@@ -46,44 +45,34 @@ const processCommentImages = (teamspace, project, model, ticket, images = []) =>
 	return refsAndBinaries;
 };
 
-const calculateRemoveGroups = ({ groups: { toRemove, old, stillUsed, ...otherGroups }, ...others }) => {
-	const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
-		Array.from(old)).map(stringToUUID);
-
-	return { groups: { toRemove: toRemoveCalculated, stillUsed, ...otherGroups }, ...others };
-};
-
-const processCommentGroups = (newView, oldView = undefined) => {
-	const externalReferences = {
-		binaries: {
-			toRemove: [],
-			toAdd: [],
-		},
-		groups: {
-			toAdd: [],
-			old: new Set(),
-			stillUsed: new Set(),
-		},
+// This function expects [{comment, oldComment}] (old comment can be undefined)
+const processCommentsGroups = (comments) => {
+	const groupChanges = {
+		toAdd: [],
+		old: new Set(),
+		stillUsed: new Set(),
 	};
 
-	processGroupsUpdate(
-		oldView,
-		newView,
-		Object.values(viewGroups).map((groupName) => `state.${groupName}`),
-		externalReferences.groups,
-	);
+	comments.forEach(({ comment, oldComment }) => {
+		processGroupsUpdate(
+			oldComment?.view,
+			comment.view,
+			Object.values(viewGroups).map((groupName) => `state.${groupName}`),
+			groupChanges,
+		);
+	});
 
-	return calculateRemoveGroups(externalReferences);
+	return groupChanges;
 };
 
 Comments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
 	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, commentData.images);
-	const externalDataDelta = processCommentGroups(commentData.view);
+	const groupsDelta = processCommentsGroups([{ comment: commentData }]);
 
 	const res = await addComment(teamspace, project, model, ticket, commentData, author);
 
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
-	await processExternalData(teamspace, project, model, [res._id], [externalDataDelta]);
+	await commitGroupChanges(teamspace, project, model, [res._id], [groupsDelta]);
 
 	publish(events.NEW_COMMENT, {
 		teamspace,
@@ -97,51 +86,31 @@ Comments.addComment = async (teamspace, project, model, ticket, commentData, aut
 
 Comments.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
 	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, updateData.images);
-	const externalDataDelta = processCommentGroups(updateData.view, oldComment.view);
+	const groupsDelta = processCommentsGroups([{ comment: updateData, oldComment }]);
 
 	await updateComment(teamspace, project, model, ticket, oldComment, updateData);
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
-	await processExternalData(teamspace, project, model, [oldComment._id], [externalDataDelta]);
+	await commitGroupChanges(teamspace, project, model, [oldComment._id], [groupsDelta]);
 };
 
 Comments.importComments = async (teamspace, project, model, commentsByTickets, author) => {
 	const refsAndBinaries = commentsByTickets.flatMap(({ ticket, comments }) => comments.flatMap(
 		({ images }) => processCommentImages(teamspace, project, model, ticket, images)));
 
-	const externalDataDelta = commentsByTickets.map(({ comments }) => {
-		const externalReferences = {
-			binaries: {
-				toRemove: [],
-				toAdd: [],
-			},
-			groups: {
-				toAdd: [],
-				old: new Set(),
-				stillUsed: new Set(),
-			},
-		};
+	const groupsDelta = commentsByTickets.map(({ ticket, comments }) => {
+		const groupChanges = processCommentsGroups(comments.map((comment) => ({ comment })));
 
-		comments.forEach((comment) => {
-			processGroupsUpdate(
-				undefined,
-				comment.view,
-				Object.values(viewGroups).map((groupName) => `state.${groupName}`),
-				externalReferences.groups,
-			);
-		});
-
-		return calculateRemoveGroups(externalReferences);
-	},
-	);
+		return { groupChanges, ticket };
+	});
 
 	const res = await importComments(teamspace, project, model, commentsByTickets, author);
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
-	await processExternalData(
+	await Promise.all(groupsDelta.map(({ ticket, groupChanges }) => commitGroupChanges(
 		teamspace,
 		project,
 		model,
-		commentsByTickets.map(({ comments }) => comments._id),
-		externalDataDelta);
+		ticket,
+		groupChanges)));
 
 	return res.map((data) => {
 		publish(events.NEW_COMMENT, {

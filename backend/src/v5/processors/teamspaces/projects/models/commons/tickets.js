@@ -23,11 +23,12 @@ const {
 	modulePropertyLabels,
 	presetModules,
 } = require('../../../../../schemas/tickets/templates.constants');
+const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
-const { processExternalData, processGroupsUpdate } = require('./tickets.groups');
 const { propTypes, viewGroups } = require('../../../../../schemas/tickets/templates.constants');
+const { removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
@@ -130,12 +131,31 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 		});
 	});
 
-	return res.map(({ groups: { toRemove, old, stillUsed, ...otherGroups }, ...others }) => {
-		const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
-			Array.from(old)).map(stringToUUID);
+	return res;
+};
 
-		return { groups: { toRemove: toRemoveCalculated, stillUsed, ...otherGroups }, ...others };
-	});
+const processExternalData = async (teamspace, project, model, ticketIds, data) => {
+	const refsToRemove = [];
+	const binariesToSave = [];
+
+	await Promise.all(ticketIds.map(async (ticketId, i) => {
+		const { binaries, groups } = data[i];
+
+		refsToRemove.push(...binaries.toRemove);
+
+		binariesToSave.push(...binaries.toAdd.map(({ ref, data: bin }) => ({
+			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId },
+		})));
+
+		await commitGroupChanges(teamspace, project, model, ticketId, groups);
+	}));
+
+	const promsToWait = [];
+
+	if (refsToRemove.length) promsToWait.push(removeFiles(teamspace, TICKETS_RESOURCES_COL, refsToRemove));
+	if (binariesToSave.length) promsToWait.push(storeFiles(teamspace, TICKETS_RESOURCES_COL, binariesToSave));
+
+	await Promise.all(promsToWait);
 };
 
 const processNewTickets = async (teamspace, project, model, template, tickets) => {
