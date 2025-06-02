@@ -179,9 +179,9 @@ TicketGroups.processGroupsUpdate = (oldData, newData, fields, groupsState) => {
 	});
 };
 
-const calculateRemovedGroups = ({ toRemove, old = [], stillUsed = new Set(), ...otherGroups }) => {
+const calculateRemovedGroups = ({ toRemove, old = new Set(), stillUsed = new Set(), ...otherGroups }) => {
 	const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
-		Array.from(old.map(UUIDToString)));
+		Array.from(old).map(UUIDToString));
 
 	return { toRemove: toRemoveCalculated.map(stringToUUID), stillUsed, ...otherGroups };
 };
