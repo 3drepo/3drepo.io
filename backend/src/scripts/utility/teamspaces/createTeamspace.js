@@ -21,12 +21,12 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const { initTeamspace } = require(`${v5Path}/processors/teamspaces`);
-const { getUserByUsername } = require(`${v5Path}/models/users`);
+const { getUserByUsernameOrEmail } = require(`${v5Path}/models/users`);
 const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 
-const run = async (teamspace, user) => {
+const run = async (teamspace, user, accountId) => {
 	logger.logInfo(`Checking ${user} exists...`);
-	await getUserByUsername(user);
+	const userInfo = await getUserByUsernameOrEmail(user);
 
 	logger.logInfo(`Checking if teamspace ${teamspace} already exists...`);
 	const teamspaceExists = await getTeamspaceSetting(teamspace, { _id: 1 }).catch(() => false);
@@ -35,10 +35,9 @@ const run = async (teamspace, user) => {
 		throw new Error('Teamspace already exists');
 	}
 
-	await initTeamspace(teamspace, user);
+	await initTeamspace(teamspace, userInfo.user, accountId);
 	logger.logInfo(`Teamspace ${teamspace} created.`);
 };
-
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('teamspace',
@@ -51,11 +50,15 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 			describe: 'a user to be assigned to be an admin of this teamspace',
 			type: 'string',
 			demandOption: true,
-		});
+		}).option('accountId', {
+		describe: 'an already existing frontEgg account Id (tennant Id) for the teamspace',
+		type: 'string',
+		demandOption: false,
+	});
 	return yargs.command(commandName,
 		'Create a teamspace of the name provided and gives the user specified admin privileges',
 		argsSpec,
-		({ teamspace, user }) => run(teamspace, user));
+		({ teamspace, user, accountId }) => run(teamspace, user, accountId));
 };
 
 module.exports = {

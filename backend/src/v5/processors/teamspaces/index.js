@@ -17,7 +17,7 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, getTeamspaceByAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
@@ -56,9 +56,9 @@ const removeAllUsersFromTS = async (teamspace) => {
 
 Teamspaces.getAvatar = (teamspace) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 
-Teamspaces.initTeamspace = async (teamspaceName, owner) => {
+Teamspaces.initTeamspace = async (teamspaceName, owner, accountId) => {
 	try {
-		const teamspaceId = await createAccount(teamspaceName);
+		const teamspaceId = await getTeamspaceByAccount(accountId) ? accountId : await createAccount(teamspaceName);
 		await Promise.all([
 			createTeamspaceRole(teamspaceName),
 			addDefaultJobs(teamspaceName),
