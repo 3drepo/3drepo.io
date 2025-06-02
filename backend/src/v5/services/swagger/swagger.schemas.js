@@ -518,7 +518,7 @@ Schemas.schemas.ticketCommentView = {
 			},
 		},
 		clippingPlanes: {
-			description: 'Array of planes defining which directoin the model gets clipped.',
+			description: 'Array of planes defining which direction the model gets clipped.',
 			type: 'array',
 			items: {
 				type: 'object',
