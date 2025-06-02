@@ -23,6 +23,7 @@ import { useContext, useEffect } from 'react';
 import { TicketsTableContext } from '../ticketsTable/ticketsTableContext/ticketsTableContext';
 import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 
 const NONE_OPTION = 'None';
 const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
@@ -30,6 +31,8 @@ const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', def
 export const GroupBySelect = () => {
 	const { template } = useParams<DashboardTicketsParams>();
 	const { groupByProperties, groupBy, setGroupBy, getPropertyType } = useContext(TicketsTableContext);
+	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const items = groupByProperties.filter((property) => visibleSortedColumnsNames.includes(property));
 
 	useEffect(() => {
 		if (!getPropertyType(groupBy)) {
@@ -46,7 +49,7 @@ export const GroupBySelect = () => {
 			renderValue={(value: string) => (<b>{value === NONE_OPTION ? NONE_OPTION_MESSAGE : getPropertyLabel(value)}</b>)}
 		>
 			<MenuItem value={NONE_OPTION}>{NONE_OPTION_MESSAGE}</MenuItem>
-			{groupByProperties.map((property) => (
+			{items.map((property) => (
 				<MenuItem value={property} key={property}>
 					{getPropertyLabel(property)}
 				</MenuItem>

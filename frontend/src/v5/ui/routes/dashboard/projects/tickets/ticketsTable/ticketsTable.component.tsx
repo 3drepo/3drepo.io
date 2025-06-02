@@ -194,13 +194,10 @@ export const TicketsTable = () => {
 
 	useEffect(() => {
 		let columnsToFetch = [...visibleSortedColumnsNames];
-		if (groupBy) {
-			columnsToFetch.push(groupBy);
-		}
 		columnsToFetch
 			.filter((name) => !INITIAL_COLUMNS.includes(name))
 			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
-	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join(''), groupBy]);
+	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join('')]);
 
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>

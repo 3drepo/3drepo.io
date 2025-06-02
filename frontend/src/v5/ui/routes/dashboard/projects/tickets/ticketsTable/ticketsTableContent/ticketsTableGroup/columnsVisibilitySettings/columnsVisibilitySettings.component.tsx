@@ -34,9 +34,18 @@ import { FormattedMessage } from 'react-intl';
 import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
 
-const List = ({ onShowColumn }) => {
+const List = () => {
 	const { filteredItems, query } = useContext(SearchContext);
-	const { visibleSortedColumnsNames, hideColumn, isVisible } = useContext(ResizableTableContext);
+	const { sortedItems: tickets } = useContext(SortedTableContext);
+	const { visibleSortedColumnsNames, hideColumn, isVisible, showColumn } = useContext(ResizableTableContext);
+	const { fetchColumn, groupBy } = useContext(TicketsTableContext);
+
+	const onShowColumn = (name) => {
+		if (!INITIAL_COLUMNS.includes(name)) {
+			fetchColumn(name, tickets);
+		}
+		showColumn(name);
+	};
 
 	const groupBySelected = () => {
 		const groups = { selected: [], unselected: [] };
@@ -72,7 +81,7 @@ const List = ({ onShowColumn }) => {
 			{groupedItems.selected.map((columnName) => (
 				<MenuItem key={columnName}>
 					<Checkbox
-						disabled={visibleSortedColumnsNames.length === 1}
+						disabled={visibleSortedColumnsNames.length === 1 || columnName === groupBy}
 						onChange={() => hideColumn(columnName)}
 						value={true}
 						label={<TextOverflow>{getPropertyLabel(columnName)}</TextOverflow>}
@@ -93,21 +102,12 @@ const List = ({ onShowColumn }) => {
 	);
 };
 export const ColumnsVisibilitySettings = () => {
-	const { getAllColumnsNames, showColumn } = useContext(ResizableTableContext);
-	const { sortedItems: tickets } = useContext(SortedTableContext);
-	const { fetchColumn } = useContext(TicketsTableContext);
+	const { getAllColumnsNames } = useContext(ResizableTableContext);
 	const columnsNames = getAllColumnsNames();
 
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getPropertyLabel(col), query))
 	);
-
-	const onShowColumn = (name) => {
-		if (!INITIAL_COLUMNS.includes(name)) {
-			fetchColumn(name, tickets);
-		}
-		showColumn(name);
-	};
 
 	return (
 		<ActionMenu
@@ -130,7 +130,7 @@ export const ColumnsVisibilitySettings = () => {
 						placeholder={formatMessage({ id: 'ticketsTable.columnsVisibilitySettings.search.placeholder', defaultMessage: 'Search...' })}
 					/>
 				</SearchInputContainer>
-				<List onShowColumn={onShowColumn} />
+				<List />
 			</SearchContextComponent>
 		</ActionMenu>
 	);
