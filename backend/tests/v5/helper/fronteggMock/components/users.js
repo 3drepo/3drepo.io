@@ -23,7 +23,7 @@ Users.getUserById = (userId) => Promise.resolve(usersById[userId]);
 Users.doesUserExist = (email) => {
 	const user = usersByEmail[email];
 
-	return Promise.resolve(user.id ?? false);
+	return Promise.resolve(user?.id ?? false);
 };
 
 Users.destroyAllSessions = () => Promise.resolve();

@@ -21,12 +21,31 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const { initTeamspace } = require(`${v5Path}/processors/teamspaces`);
-const { getUserByUsernameOrEmail } = require(`${v5Path}/models/users`);
+const { addUser, getUserByUsernameOrEmail } = require(`${v5Path}/models/users`);
 const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
+const { getUserById, doesUserExist } = require(`${v5Path}/services/sso/frontegg`);
+const { templates } = require(`${v5Path}/utils/responseCodes`);
 
 const run = async (teamspace, user, accountId) => {
-	logger.logInfo(`Checking ${user} exists...`);
-	const userInfo = await getUserByUsernameOrEmail(user);
+	logger.logInfo(`Checking ${user} information...`);
+	const userMetaData = { user, createUser: false };
+	try {
+		const userInformation = await getUserByUsernameOrEmail(user);
+		userMetaData.user = userInformation.user;
+	} catch (error) {
+		if (error.message !== templates.userNotFound.message) throw error;
+
+		const frontEggUserId = await doesUserExist(user);
+		if (frontEggUserId) {
+			const frontEggUserData = await getUserById(frontEggUserId);
+			logger.logInfo(`Creating ${user} from existing information...`);
+			await addUser(frontEggUserData);
+			const userInformation = await getUserByUsernameOrEmail(user);
+			userMetaData.user = userInformation.user;
+		} else {
+			userMetaData.createUser = true;
+		}
+	}
 
 	logger.logInfo(`Checking if teamspace ${teamspace} already exists...`);
 	const teamspaceExists = await getTeamspaceSetting(teamspace, { _id: 1 }).catch(() => false);
@@ -35,7 +54,7 @@ const run = async (teamspace, user, accountId) => {
 		throw new Error('Teamspace already exists');
 	}
 
-	await initTeamspace(teamspace, userInfo.user, accountId);
+	await initTeamspace(teamspace, userMetaData.user, accountId, userMetaData.createUser);
 	logger.logInfo(`Teamspace ${teamspace} created.`);
 };
 const genYargs = /* istanbul ignore next */(yargs) => {
