@@ -48,20 +48,20 @@ const toDefaultValue = ({ key, value }: PreselectedValue, propertyType: Property
 	if (!key || key === IssueProperties.DUE_DATE || !value) return;
 
 	let val: string | string[] = value;
-	if (propertyType) {
+	if (propertyType === 'manyOf') {
 		val = value.split(',').map((v) => v.trim());
 	}
 
-	let preselectedVal = set({}, key, val);
-	return preselectedVal;
+	return set({}, key, val);
 };
-
 
 export const NewTicketSlide = ({ template, containerOrFederation, preselectedValue, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const { getPropertyType } = useContext(TicketsTableContext);
 	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
-	const defaultValues = merge(getDefaultTicket(template), toDefaultValue(preselectedValue, getPropertyType(preselectedValue.key)));
+	const preselectedDefaultValue = toDefaultValue(preselectedValue, getPropertyType(preselectedValue.key));
+	const defaultTicket = getDefaultTicket(template);
+	const defaultValues = preselectedDefaultValue ? merge(defaultTicket, preselectedDefaultValue) : defaultTicket;
 	const isFederation = modelIsFederation(containerOrFederation);
 	
 	const formData = useForm({
