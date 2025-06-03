@@ -1,0 +1,67 @@
+/**
+ *  Copyright (C) 2025 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+import { useContext } from 'react';
+import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
+import { Header, Headers } from './ticketsTableHeaders.styles';
+import { getColumnLabel } from '../../../ticketsTable.helper';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
+import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
+import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
+import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
+import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
+
+const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
+	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
+	const isSelected = name === sortingColumn;
+
+	if (disableSorting) return (
+		<ResizableTableHeader name={name}>
+			<Header {...props}>
+				{children}
+			</Header>
+		</ResizableTableHeader>
+	);
+
+	return (
+		<ResizableTableHeader name={name} onClick={() => onColumnClick(name)}>
+			<Header {...props} $selectable>
+				{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
+				{children}
+			</Header>
+		</ResizableTableHeader>
+	);
+};
+
+export const TicketsTableHeaders = () => {
+	const { getVisibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const visibleSortedColumnsNames = useResizableState(
+		[ResizableEvent.VISIBLE_COLUMNS_CHANGE, ResizableEvent.WIDTH_CHANGE],
+		getVisibleSortedColumnsNames,
+	);
+
+	return (
+		<Headers>
+			{visibleSortedColumnsNames.map((name) => (
+				<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
+					{getColumnLabel(name)}
+				</SortingTableHeader>
+			))}
+			<ColumnsVisibilitySettings />
+		</Headers>
+	);
+};
