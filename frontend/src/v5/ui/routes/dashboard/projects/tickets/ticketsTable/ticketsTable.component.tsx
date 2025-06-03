@@ -17,7 +17,7 @@
 
 import { ContainersActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
 import { useParams, generatePath, useHistory } from 'react-router-dom';
@@ -59,7 +59,6 @@ export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, template, ticketId } = params;
-	const prevTemplate = useRef(undefined);
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
 	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
 
@@ -182,10 +181,10 @@ export const TicketsTable = () => {
 	}, []);
 
 	useEffect(() => {
-		if (prevTemplate.current && ticketId) clearTicketId();
-		prevTemplate.current = template;
-		if (templateAlreadyFetched(selectedTemplate)) return;
-		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
+		if (!templateAlreadyFetched(selectedTemplate)) {
+			ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
+		}
+		if (ticketId) return clearTicketId;
 	}, [template]);
 
 	useEffect(() => {
