@@ -26,6 +26,11 @@ import { formatMessage, formatDate } from '@/v5/services/intl';
 import { TicketContext } from '../../../../ticket.context';
 import { useContext, useState, useEffect } from 'react';
 import { getRelativeTime } from '@/v5/helpers/intl.helper';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { isString } from 'lodash';
 
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
@@ -47,11 +52,25 @@ export const BasicComment = ({
 	view,
 	...props
 }: BasicCommentProps) => {
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const [ ticketId ] = useSearchParam('ticketId');
 	const { isViewer } = useContext(TicketContext);
 	const isEdited = updatedAt && (createdAt !== updatedAt);
 	const [commentAge, setCommentAge] = useState('');
 	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
-	
+	const coloredGroupIds = view?.state?.colored?.map(({ group }) => group) || [];
+	const hiddenGroupIds = view?.state?.hidden?.map(({ group }) => group) || [];
+	const transformedGroupIds = view?.state?.transformed?.map(({ group }) => group) || [];
+	const groupIds = [...coloredGroupIds, ...hiddenGroupIds, ...transformedGroupIds];
+
+	const onClickViewpoint = async () => {
+		await Promise.all(groupIds.map((groupId) => {
+			if (!isString(groupId)) return;
+			TicketsActionsDispatchers.fetchTicketGroup(teamspace, project, containerOrFederation, ticketId, groupId);
+		}));
+		goToView(view);
+	};
+
 	useEffect(() => {
 		updateMessageAge();
 		const intervalId = window.setInterval(updateMessageAge, 10000);
@@ -70,7 +89,7 @@ export const BasicComment = ({
 				{!!view && (
 					<Tooltip title={isViewer && formatMessage({ id: 'basicComment.viewpoint', defaultMessage: 'Go to viewpoint' })} placement="top" arrow>
 						<span>
-							<ViewpointIcon disabled={!isViewer} onClick={() => goToView(view)} />
+							<ViewpointIcon disabled={!isViewer} onClick={onClickViewpoint} />
 						</span>
 					</Tooltip>
 				)}

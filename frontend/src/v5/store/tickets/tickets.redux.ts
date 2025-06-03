@@ -41,6 +41,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	upsertTicketSuccess: ['modelId', 'ticket'],
 	fetchRiskCategories: ['teamspace'],
 	fetchRiskCategoriesSuccess: ['riskCategories'],
+	fetchTicketGroup: ['teamspace', 'projectId', 'modelId', 'ticketId', 'groupId', 'revision'],
 	fetchTicketGroups: ['teamspace', 'projectId', 'modelId', 'ticketId', 'revision'],
 	fetchTicketGroupsSuccess: ['groups'],
 	upsertTicketAndFetchGroups: ['teamspace', 'projectId', 'modelId', 'ticket', 'revision'],
@@ -141,6 +142,7 @@ export type FetchTemplateAction = Action<'FETCH_TEMPLATES'> & TeamspaceProjectAn
 export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & ModelId & { templates: ITemplate[] };
 export type FetchRiskCategoriesAction = Action<'FETCH_RISK_CATEGORIES'> & TeamspaceId;
 export type FetchRiskCategoriesSuccessAction = Action<'FETCH_RISK_CATEGORIES_SUCCESS'> & { riskCategories: string[] };
+export type FetchTicketGroupAction = Action<'FETCH_TICKET_GROUP'> & TeamspaceProjectAndModel & { ticketId: string, groupId: string, revision?: string };
 export type FetchTicketGroupsAction = Action<'FETCH_TICKET_GROUPS'> & TeamspaceProjectAndModel & { ticketId: string, groupId: string, revision?: string };
 export type FetchTicketGroupsSuccessAction = Action<'FETCH_TICKET_GROUPS_SUCCESS'> & { groups: Group[] };
 export type UpdateTicketGroupAction = Action<'UPDATE_TICKET_GROUP'> & TeamspaceProjectAndModel & { ticketId: string, group: Group, isFederation: boolean };
@@ -220,6 +222,14 @@ export interface ITicketsActionCreators {
 	replaceTemplateSuccess: (modelId: string, ticket: ITemplate) => ReplaceTemplateSuccessAction;
 	fetchRiskCategories: (teamspace: string) => FetchRiskCategoriesAction;
 	fetchRiskCategoriesSuccess: (riskCategories: string[]) => FetchRiskCategoriesSuccessAction;
+	fetchTicketGroup: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		ticketId: string,
+		groupId: string,
+		revision?: string,
+	) => FetchTicketGroupsAction,
 	fetchTicketGroups: (
 		teamspace: string,
 		projectId: string,

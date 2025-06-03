@@ -34,6 +34,7 @@ import {
 	UpsertTicketAndFetchGroupsAction,
 	UpdateTicketGroupAction,
 	FetchTicketPropertiesAction,
+	FetchTicketGroupAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
@@ -235,6 +236,21 @@ export function* createTicket({ teamspace, projectId, modelId, ticket, isFederat
 	}
 }
 
+export function* fetchTicketGroup({ teamspace, projectId, modelId, ticketId, groupId, revision }: FetchTicketGroupAction) {
+	try {
+		const isFed = !!(yield select(selectContainersByFederationId, modelId)).length;
+		const group = yield API.Tickets.fetchTicketGroup(teamspace, projectId, modelId, ticketId, groupId, isFed, revision);
+		yield put(TicketsActions.fetchTicketGroupsSuccess([group]));
+	} catch (error) {
+		// yield put(DialogsActions.open('alert', {
+		// currentActions: formatMessage(
+		// { id: 'tickets.fetchTicketGroup.error', defaultMessage: 'trying to fetch a group for a ticket' },
+		// ),
+		// error,
+		// }));
+	}
+}
+
 const getViewGroupsIds = (state: ViewpointState): string[] => {
 	const colored = state.colored || [];
 	const hidden = state.hidden || [];
@@ -282,7 +298,7 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId, re
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketGroups.error', defaultMessage: 'trying to fetch the groups for ticket' },
+				{ id: 'tickets.fetchTicketGroups.error', defaultMessage: 'trying to fetch the groups for a ticket' },
 			),
 			error,
 		}));
@@ -306,4 +322,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
 	yield takeEvery(TicketsTypes.FETCH_TICKET_PROPERTIES, fetchTicketProperties);
+	yield takeEvery(TicketsTypes.FETCH_TICKET_GROUP, fetchTicketGroup);
 }
