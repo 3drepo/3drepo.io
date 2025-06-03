@@ -72,7 +72,7 @@ Comments.addComment = async (teamspace, project, model, ticket, commentData, aut
 	const res = await addComment(teamspace, project, model, ticket, commentData, author);
 
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
-	await commitGroupChanges(teamspace, project, model, [res._id], [groupsDelta]);
+	await commitGroupChanges(teamspace, project, model, ticket, groupsDelta);
 
 	publish(events.NEW_COMMENT, {
 		teamspace,
@@ -90,7 +90,7 @@ Comments.updateComment = async (teamspace, project, model, ticket, oldComment, u
 
 	await updateComment(teamspace, project, model, ticket, oldComment, updateData);
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
-	await commitGroupChanges(teamspace, project, model, [oldComment._id], [groupsDelta]);
+	await commitGroupChanges(teamspace, project, model, ticket, groupsDelta);
 };
 
 Comments.importComments = async (teamspace, project, model, commentsByTickets, author) => {
