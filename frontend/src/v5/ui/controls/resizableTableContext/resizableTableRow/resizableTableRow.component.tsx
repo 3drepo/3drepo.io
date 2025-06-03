@@ -17,11 +17,16 @@
 
 import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
+import { ResizableEvent } from '../resizableTableContext.types';
 import { Row } from './resizableTableRow.styles';
+import { useResizableState } from '../resizableTableContext.hooks';
 
 export const ResizableTableRow = (props) => {
-	const { visibleSortedColumnsNames, getWidth, columnGap } = useContext(ResizableTableContext);
+	const { getWidth, columnGap, getVisibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const visibleSortedColumnsNames = useResizableState(
+		[ResizableEvent.VISIBLE_COLUMNS_CHANGE, ResizableEvent.WIDTH_CHANGE],
+		getVisibleSortedColumnsNames,
+	);
 	const gridTemplateColumns = visibleSortedColumnsNames.map((column) => `${getWidth(column)}px`).join(' ');
-	
 	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
 };

@@ -28,6 +28,7 @@ import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { getColumnLabel, getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
 import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { orderBy } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -35,6 +36,7 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { useParams } from 'react-router';
 import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
+import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
 
 const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -58,6 +60,25 @@ const SortingTableHeader = ({ name, children, disableSorting = false, ...props }
 	);
 };
 
+const TableHeaders = () => {
+	const { getVisibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const visibleSortedColumnsNames = useResizableState(
+		[ResizableEvent.VISIBLE_COLUMNS_CHANGE, ResizableEvent.WIDTH_CHANGE],
+		getVisibleSortedColumnsNames,
+	);
+
+	return (
+		<Headers>
+			{visibleSortedColumnsNames.map((name) => (
+				<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
+					{getColumnLabel(name)}
+				</SortingTableHeader>
+			))}
+			<ColumnsVisibilitySettings />
+		</Headers>
+	);
+};
+
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
 	tickets: ITicket[];
@@ -67,7 +88,8 @@ type TicketsTableGroupProps = {
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const { getRowWidth, visibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const { getRowWidth } = useContext(ResizableTableContext);
+	const rowWidth = useResizableState([ResizableEvent.VISIBLE_COLUMNS_CHANGE, ResizableEvent.WIDTH_CHANGE], getRowWidth);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 	const hideNewticketButton = template.deprecated;
@@ -91,20 +113,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 				<SortedTableContext.Consumer>
 					{({ sortedItems }: SortedTableType<ITicket>) => (
 						<>
-							{!tickets.length
-								? (<PlaceholderForStickyFunctionality />)
-								: (
-									<>
-										<Headers>
-											{visibleSortedColumnsNames.map((name) => (
-												<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
-													{getColumnLabel(name)}
-												</SortingTableHeader>
-											))}
-											<ColumnsVisibilitySettings />
-										</Headers>
-									</>
-								)}
+							{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TableHeaders />}
 							<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
 								{sortedItems.map(({ modelId, ...ticket }) => (
 									<TicketsTableRow
@@ -121,7 +130,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										TriggerButton={(
 											<NewTicketRow
 												disabled={newTicketButtonIsDisabled}
-												style={{ width: getRowWidth() }}
+												style={{ width: rowWidth }}
 											>
 												<NewTicketTextContainer>
 													<AddCircleIcon />

@@ -18,7 +18,7 @@
 import { ITemplate, PropertyDefinition, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { compact } from 'lodash';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { TableColumn } from '@controls/resizableTableContext/resizableTableContext';
+import { TableColumn } from '@controls/resizableTableContext/resizableTableContext.types';
 
 const TABLE_COLUMNS_INVALID_PROPERTIES = ['view', 'image', 'imageList', 'coords'];
 const TABLE_COLUMNS_DEFAULT_PROPERTIES = ['id', 'modelName', BaseProperties.TITLE];

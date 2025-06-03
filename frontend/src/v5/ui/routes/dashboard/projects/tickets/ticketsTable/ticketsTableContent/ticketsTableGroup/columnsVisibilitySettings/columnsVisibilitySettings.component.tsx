@@ -24,6 +24,7 @@ import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from 
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
 import { useContext, useEffect, useRef } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Divider } from '@mui/material';
@@ -36,10 +37,12 @@ import { SortedTableContext } from '@controls/sortedTableContext/sortedTableCont
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
+import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
 
 const List = ({ onShowColumn }) => {
 	const { filteredItems, query } = useContext(SearchContext);
-	const { visibleSortedColumnsNames, hideColumn, isVisible } = useContext(ResizableTableContext);
+	const { getVisibleSortedColumnsNames, hideColumn, isVisible } = useContext(ResizableTableContext);
+	const visibleSortedColumnsNames = useResizableState([ResizableEvent.VISIBLE_COLUMNS_CHANGE], getVisibleSortedColumnsNames);
 
 	const groupBySelected = () => {
 		const groups = { selected: [], unselected: [] };
@@ -99,11 +102,15 @@ const List = ({ onShowColumn }) => {
 export const ColumnsVisibilitySettings = () => {
 	const alreadyFetchedTicketIdAndProperty = useRef({});
 	const { teamspace, project, template } = useParams<DashboardParams>();
+	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn } = useContext(ResizableTableContext);
+	const { getVisibleSortedColumnsNames, getAllColumnsNames, showColumn } = useContext(ResizableTableContext);
 	const { sortedItems: tickets } = useContext(SortedTableContext);
 	const columnsNames = getAllColumnsNames();
-	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+	const visibleSortedColumnsNames = useResizableState(
+		[ResizableEvent.VISIBLE_COLUMNS_CHANGE, ResizableEvent.WIDTH_CHANGE],
+		getVisibleSortedColumnsNames,
+	);
 
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))

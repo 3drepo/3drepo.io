@@ -17,7 +17,9 @@
 
 import { HTMLAttributes, useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
+import { ResizableEvent } from '../resizableTableContext.types';
 import { Item } from './resizableTableCell.styles';
+import { useResizableState } from '../resizableTableContext.hooks';
 
 export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	name: string;
@@ -25,9 +27,12 @@ export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	onClick?: () => void;
 };
 export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isVisible, getIndex } = useContext(ResizableTableContext);
+	const { getMovingColumn, isVisible, getIndex } = useContext(ResizableTableContext);
 
-	if (!isVisible(name)) return null;
+	const movingColumn = useResizableState([ResizableEvent.MOVING_COLUMN_CHANGE], getMovingColumn);
+	const isHidden = useResizableState([ResizableEvent.VISIBLE_COLUMNS_CHANGE], () => !isVisible(name));
+
+	if (isHidden) return null;
 
 	return (<Item $isMoving={movingColumn === name} $index={getIndex(name)} {...props} />);
 };
