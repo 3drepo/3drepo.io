@@ -34,17 +34,17 @@ import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { IssueProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketsTableContext } from '../../ticketsTable/ticketsTableContext/ticketsTableContext';
 
-type PreselectedValue = { key: string, value: string };
+type PresetValue = { key: string, value: string };
 type NewTicketSlideProps = {
 	template: ITemplate,
 	containerOrFederation: string,
-	preselectedValue: PreselectedValue,
+	presetValue: PresetValue,
 	onSave: (newTicketId: string) => void,
 	onDirtyStateChange: (isDirty: boolean) => void,
 };
 
 
-const toDefaultValue = ({ key, value }: PreselectedValue, propertyType: PropertyTypeDefinition) => {
+const toDefaultValue = ({ key, value }: PresetValue, propertyType: PropertyTypeDefinition) => {
 	if (!key || key === IssueProperties.DUE_DATE || !value) return;
 
 	let val: string | string[] = value;
@@ -55,11 +55,11 @@ const toDefaultValue = ({ key, value }: PreselectedValue, propertyType: Property
 	return set({}, key, val);
 };
 
-export const NewTicketSlide = ({ template, containerOrFederation, preselectedValue, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
+export const NewTicketSlide = ({ template, containerOrFederation, presetValue, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const { getPropertyType } = useContext(TicketsTableContext);
 	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
-	const preselectedDefaultValue = toDefaultValue(preselectedValue, getPropertyType(preselectedValue.key));
+	const preselectedDefaultValue = toDefaultValue(presetValue, getPropertyType(presetValue.key));
 	const defaultTicket = getDefaultTicket(template);
 	const defaultValues = preselectedDefaultValue ? merge(defaultTicket, preselectedDefaultValue) : defaultTicket;
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -104,7 +104,7 @@ export const NewTicketSlide = ({ template, containerOrFederation, preselectedVal
 	useEffect(() => {
 		if (isLoading) return;
 		reset(defaultValues);
-	}, [containerOrFederation, template, isLoading, preselectedValue.key, preselectedValue.value]);
+	}, [containerOrFederation, template, isLoading, presetValue.key, presetValue.value]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));

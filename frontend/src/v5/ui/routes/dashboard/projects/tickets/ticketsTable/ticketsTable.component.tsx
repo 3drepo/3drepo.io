@@ -65,7 +65,7 @@ export const TicketsTable = () => {
 
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
-	const [groupByValue, setGroupByValue] = useState('');
+	const [presetValue, setPresetValue] = useState('');
 	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
 	const models = useSelectedModels();
 
@@ -79,7 +79,7 @@ export const TicketsTable = () => {
 		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
 		const newParams = { ...params, ticketId: id };
 		const search = '?' + setContainerOrFederation(modelId);
-		setGroupByValue(groupByVal);
+		setPresetValue(groupByVal);
 		const path = generatePath(TICKETS_ROUTE + search, newParams);
 
 		if (replace) {
@@ -189,7 +189,7 @@ export const TicketsTable = () => {
 	}, [template]);
 
 	useEffect(() => {
-		setGroupByValue('');
+		setPresetValue('');
 	}, [groupBy]);
 
 	useEffect(() => {
@@ -261,7 +261,7 @@ export const TicketsTable = () => {
 						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
 						{isNewTicket && (
 							<NewTicketSlide
-								preselectedValue={{ key: groupBy, value: groupByValue }}
+								presetValue={{ key: groupBy, value: presetValue }}
 								template={selectedTemplate}
 								containerOrFederation={containerOrFederation}
 								onSave={onSaveTicket}
