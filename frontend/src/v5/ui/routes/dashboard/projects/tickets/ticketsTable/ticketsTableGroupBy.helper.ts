@@ -15,12 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { getState } from '@/v5/helpers/redux.helpers';
 import { formatMessage } from '@/v5/services/intl';
-import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
-import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
-import { ITicket, IStatusConfig, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
-import { IssueProperties, BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
+import { IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
 import { stripModuleOrPropertyPrefix } from './ticketsTable.helper';
 
@@ -53,34 +50,6 @@ const groupByDate = (tickets: ITicket[]) => {
 		const currentDueDateOption = dueDateOptions.shift();
 		groups[currentDueDateOption] = dueDateOptions.length ? currentWeekTickets : currentWeekTickets.concat(remainingTickets);
 		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() + 7);
-	}
-	return groups;
-};
-const groupHasDefaultValue = (groupBy, templateId) => {
-	const template = selectCurrentProjectTemplateById(getState(), templateId);
-	const property = [
-		...template.properties,
-		...(template.modules.find(({ type }) => type === 'safetibase')?.properties || []),
-	].find(({ name }) => name === groupBy);
-	return _.has(property, 'default');
-};
-const groupByStatus = (tickets: ITicket[]) => {
-	const { type } = tickets[0];
-	const config: IStatusConfig = selectStatusConfigByTemplateId(getState(), type);
-	const labels = config.values.map(({ name, label }) => label || name);
-	const groups = {};
-	let remainingTickets = tickets;
-	let currentTickets = [];
-
-	labels.forEach((groupValue) => {
-		[currentTickets, remainingTickets] = _.partition(
-			remainingTickets,
-			({ properties }) => properties[BaseProperties.STATUS],
-		);
-		groups[groupValue] = currentTickets;
-	});
-	if (!groupHasDefaultValue(BaseProperties.STATUS, tickets[0].type)) {
-		groups[UNSET] = remainingTickets;
 	}
 	return groups;
 };
@@ -122,13 +91,8 @@ const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => {
 };
 
 export const groupTickets = (groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition): Record<string, ITicket[]> => {
-	switch (stripModuleOrPropertyPrefix(groupBy)) {
-		case IssueProperties.DUE_DATE:
-			return groupByDate(tickets);
-		case BaseProperties.STATUS:
-			return groupByStatus(tickets);
-		default:
-			const isOneOf = propertyType === 'oneOf';
-			return isOneOf ? groupByOneOfValues(tickets, groupBy) : groupByManyOfValues(tickets, groupBy);
-	}
+	if (stripModuleOrPropertyPrefix(groupBy) === IssueProperties.DUE_DATE) return groupByDate(tickets);
+
+	const isOneOf = propertyType === 'oneOf';
+	return isOneOf ? groupByOneOfValues(tickets, groupBy) : groupByManyOfValues(tickets, groupBy);
 };
