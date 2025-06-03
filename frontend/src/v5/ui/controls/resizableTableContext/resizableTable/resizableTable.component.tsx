@@ -15,16 +15,62 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { OverlayElements, Table } from './resizableTable.styles';
+import { GridTemplateColumns, OverlayElements, Table } from './resizableTable.styles';
 import { ResizersOverlay } from './overlayElements/resizers/resizersOverlay.component';
 import { MovingColumnOverlay } from './overlayElements/movingColumn/movingColumnOverlay.component';
+import { ResizableTableContext } from '../resizableTableContext';
+import { useContext, useEffect, useRef, useState } from 'react';
+import { ResizableEvent } from '../resizableTableContext.types';
+import { Row } from '../resizableTableRow/resizableTableRow.styles';
 
-export const ResizableTable = ({ className = '', children }) => (
-	<Table className={className}>
-		{children}
-		<OverlayElements>
-			<MovingColumnOverlay />
-			<ResizersOverlay />
-		</OverlayElements>
-	</Table>
-);
+export const ResizableTable = ({ className = '', children }) => {
+	const { getWidth, getVisibleSortedColumnsNames, subscribe } = useContext(ResizableTableContext);
+	const ref = useRef<HTMLDivElement>();
+	const [key] = useState(+new Date());
+	const gridClassName = `ResizableTableTemplateColumns_${key}`;
+
+	useEffect(() => {
+		const styleTag = document.createElement('style');
+		document.head.appendChild(styleTag);
+
+		const setGridTemplateColumns = () => {
+			if (!ref.current) return;
+
+			const gridTemplateColumns = getVisibleSortedColumnsNames()
+				.map((column) => `${getWidth(column)}px`)
+				.join(' ');
+
+			styleTag.innerHTML = `
+				.${gridClassName} ${Row} {
+					display: grid;
+					grid-template-columns: ${gridTemplateColumns};
+				}
+			`;
+		};
+
+		const subscriptions = [
+			subscribe(ResizableEvent.WIDTH_CHANGE, setGridTemplateColumns),
+			subscribe(ResizableEvent.VISIBLE_COLUMNS_CHANGE, setGridTemplateColumns),
+		];
+
+		return () => {
+			subscriptions.forEach((fn) => fn());
+			if (ref.current) {
+				ref.current.classList.remove(gridClassName);
+				document.head.removeChild(styleTag);
+			}
+		};
+	}, []);
+
+	return (
+		<Table className={className}>
+			<GridTemplateColumns ref={ref} className={gridClassName}>
+				{children}
+			</GridTemplateColumns>
+			<OverlayElements>
+				<MovingColumnOverlay />
+				<ResizersOverlay />
+			</OverlayElements>
+		</Table>
+	);
+};
