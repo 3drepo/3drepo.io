@@ -25,7 +25,7 @@ import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
 
-const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
+const TableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
 	const isSelected = name === sortingColumn;
 
@@ -57,9 +57,9 @@ export const TicketsTableHeaders = () => {
 	return (
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
-				<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
+				<TableHeader key={name} name={name} disableSorting={name === 'id'}>
 					{getColumnLabel(name)}
-				</SortingTableHeader>
+				</TableHeader>
 			))}
 			<ColumnsVisibilitySettings />
 		</Headers>
