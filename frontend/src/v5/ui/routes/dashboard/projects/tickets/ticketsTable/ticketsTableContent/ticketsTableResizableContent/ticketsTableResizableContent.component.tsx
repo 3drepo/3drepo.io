@@ -19,26 +19,27 @@ import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../../ticketsTable.helper';
+import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, Title } from './ticketsTableResizableContent.styles';
+import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
+import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
-	groupBy: string
 	selectedTicketId?: string;
 };
-export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selectedTicketId }: TicketsTableResizableContentProps) => {
+export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
+	const { groupBy, getPropertyType } = useContext(TicketsTableContext);
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
 
-	if (groupBy === NONE_OPTION || !groupBy) {
+	if (!groupBy) {
 		return (
 			<TicketsTableGroup
 				tickets={filteredItems}
@@ -49,11 +50,11 @@ export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selected
 		);
 	}
 
-	const groups = groupTickets(groupBy, filteredItems);
+	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy));
 
 	return (
 		<Container>
-			{_.entries(groups).map(([groupName, tickets]) => (
+			{groups.map(([groupName, tickets]) => (
 				<DashboardListCollapse
 					title={(
 						<>

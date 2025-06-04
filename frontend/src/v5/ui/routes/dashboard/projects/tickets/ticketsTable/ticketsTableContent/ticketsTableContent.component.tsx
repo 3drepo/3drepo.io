@@ -21,7 +21,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
-import { ResizableTableContext, ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
@@ -31,8 +31,6 @@ import { Container } from './ticketsTableContent.styles';
 import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
-import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
-import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
@@ -63,7 +61,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		}
 	}, [movingColumn]);
 
-	if (!templateAlreadyFetched(template)) {
+	if (!templateWasFetched) {
 		return (
 			<EmptyPageView>
 				<Spinner />
@@ -88,16 +86,10 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const tableRef = useRef(null);
-	const templatHasBeenFetched = templateAlreadyFetched(template);
-	const columns = templatHasBeenFetched ? getAvailableColumnsForTemplate(template) : [];
 
 	return (
-		<TicketsTableContextComponent template={template}>
-			<ResizableTableContextComponent columns={columns} columnGap={1} key={template._id}>
-				<Container ref={tableRef}>
-					<TableContent {...props} tableRef={tableRef} template={template} />
-				</Container>
-			</ResizableTableContextComponent>
-		</TicketsTableContextComponent>
+		<Container ref={tableRef}>
+			<TableContent {...props} tableRef={tableRef} template={template} />
+		</Container>
 	);
 };
