@@ -16,35 +16,26 @@
  */
 
 const Path = require('path');
-const { v5Path } = require('../../../interop');
+const { v5Path, v4Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const { initTeamspace } = require(`${v5Path}/processors/teamspaces`);
-const { addUser, getUserByUsernameOrEmail } = require(`${v5Path}/models/users`);
+const { getUserByUsernameOrEmail } = require(`${v5Path}/models/users`);
 const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
-const { getUserById, doesUserExist } = require(`${v5Path}/services/sso/frontegg`);
 const { templates } = require(`${v5Path}/utils/responseCodes`);
+const { create: createInvite } = require(`${v4Path}/models/invitations`);
+
+const { DEFAULT_OWNER_JOB } = require(`${v5Path}/models/jobs.constants`);
 
 const run = async (teamspace, user, accountId) => {
 	logger.logInfo(`Checking ${user} information...`);
-	const userMetaData = { user, createUser: false };
+	let username;
 	try {
-		const userInformation = await getUserByUsernameOrEmail(user);
-		userMetaData.user = userInformation.user;
+		const { user: foundUser } = await getUserByUsernameOrEmail(user);
+		username = foundUser;
 	} catch (error) {
 		if (error.message !== templates.userNotFound.message) throw error;
-
-		const frontEggUserId = await doesUserExist(user);
-		if (frontEggUserId) {
-			const frontEggUserData = await getUserById(frontEggUserId);
-			logger.logInfo(`Creating ${user} from existing information...`);
-			await addUser(frontEggUserData);
-			const userInformation = await getUserByUsernameOrEmail(user);
-			userMetaData.user = userInformation.user;
-		} else {
-			userMetaData.createUser = true;
-		}
 	}
 
 	logger.logInfo(`Checking if teamspace ${teamspace} already exists...`);
@@ -54,7 +45,11 @@ const run = async (teamspace, user, accountId) => {
 		throw new Error('Teamspace already exists');
 	}
 
-	await initTeamspace(teamspace, userMetaData.user, accountId, userMetaData.createUser);
+	await initTeamspace(teamspace, username, accountId);
+	if (!username) {
+		await createInvite(user, teamspace, DEFAULT_OWNER_JOB, undefined, { TEAMSPACE_ADMIN: true });
+	}
+
 	logger.logInfo(`Teamspace ${teamspace} created.`);
 };
 const genYargs = /* istanbul ignore next */(yargs) => {

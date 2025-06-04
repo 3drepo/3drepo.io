@@ -33,7 +33,6 @@ const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { COL_NAME } = require('../../models/projectSettings.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
-const Invitations = require('../../../v4/models/invitations');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { isTeamspaceAdmin } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
@@ -58,7 +57,7 @@ const removeAllUsersFromTS = async (teamspace) => {
 
 Teamspaces.getAvatar = (teamspace) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 
-Teamspaces.initTeamspace = async (teamspaceName, owner, accountId, createUser) => {
+Teamspaces.initTeamspace = async (teamspaceName, owner, accountId) => {
 	try {
 		let teamspaceId;
 		if (accountId) {
@@ -76,9 +75,7 @@ Teamspaces.initTeamspace = async (teamspaceName, owner, accountId, createUser) =
 			createTeamspaceSettings(teamspaceName, teamspaceId),
 			addDefaultTemplates(teamspaceName),
 		]);
-		if (createUser) {
-			await Invitations.create(owner, teamspaceName, DEFAULT_OWNER_JOB, '', { TEAMSPACE_ADMIN: true });
-		} else {
+		if (owner) {
 			await Promise.all([
 				assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, owner),
 				Teamspaces.addTeamspaceMember(teamspaceName, owner),

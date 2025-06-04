@@ -83,8 +83,12 @@ const cleanPermissions = (permissions) => {
 
 const sendInvitationEmail = async (email, username, teamspace) => {
 	const refId = await getTeamspaceRefId(teamspace);
-	const { customData: { firstName, lastName }} = await User.findByUserName(username, { "customData.firstName": 1, "customData.lastName": 1});
-	const sender = [firstName, lastName].join(" ");
+
+	let sender;
+	if(username) {
+		const { customData: { firstName, lastName }} = await User.findByUserName(username, { "customData.firstName": 1, "customData.lastName": 1});
+		sender = [firstName, lastName].join(" ");
+	}
 
 	await addUserToAccount(refId, email, undefined, {teamspace, sender  });
 };
