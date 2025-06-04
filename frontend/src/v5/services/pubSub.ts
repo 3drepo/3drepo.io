@@ -15,8 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { useRef } from 'react';
 
-export const Row = styled.div<{ $gap: number }>`
-	gap: ${({ $gap }) => $gap}px;
-`;
+export class PubSub<K extends string> {
+	private subscriptions: Partial<Record<K, Function[]>> = {};
+
+	public publish = (event: K, ...args) => this.subscriptions[event]?.forEach((fn) => fn(...args));
+
+	public subscribe = (event: K, fn: Function) => {
+		this.subscriptions[event] ||= [];
+		this.subscriptions[event].push(fn);
+		return () => {
+			this.subscriptions[event] = this.subscriptions[event].filter((subscribedFn) => subscribedFn !== fn);
+		};
+	};
+}
+
+export const usePubSub = <K extends string>() => {
+	const ref = useRef(new PubSub<K>());
+	return {
+		publish: ref.current.publish,
+		subscribe: ref.current.subscribe,
+	};
+};

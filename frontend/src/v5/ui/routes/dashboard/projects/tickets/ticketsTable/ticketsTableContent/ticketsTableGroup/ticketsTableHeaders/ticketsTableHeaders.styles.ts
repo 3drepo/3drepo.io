@@ -15,29 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container as TextOverflowContainer } from '@controls/textOverflow/textOverflow.styles';
+import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import styled, { css } from 'styled-components';
-import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
+import { TextOverflow } from '@controls/textOverflow';
 
-export const CellContainer = styled(ResizableTableCell)<{ $isMoving?: boolean }>`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	height: 100%;
-	padding: 0 10px;
-	display: flex;
-	align-items: center;
-	justify-content: flex-start;
-	font-weight: 500;
-	overflow: hidden;
+export const Headers = styled(ResizableTableRow)`
+	gap: 1px;
+	width: fit-content;
+`;
+
+export const PlaceholderForStickyFunctionality = styled(Headers)``;
+
+export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
+	${({ theme }) => theme.typography.kicker};
+	color: ${({ theme }) => theme.palette.base.main};
+	padding: 2px 0 8px 10px;
+	/* padding: 10px 0 10px 10px; */
+	text-align: start;
 	box-sizing: border-box;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	user-select: none;
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		&&& {
-			background-color: ${theme.palette.primary.lightest};
-		}
+	${({ $selectable }) => $selectable && css`
+		cursor: pointer;
 	`}
-
-	${TextOverflowContainer} {
-		height: unset;
-	}
 `;

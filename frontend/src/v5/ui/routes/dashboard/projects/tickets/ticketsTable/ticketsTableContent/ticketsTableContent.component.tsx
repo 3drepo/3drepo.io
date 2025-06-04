@@ -22,6 +22,7 @@ import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { ResizableTableContext, ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
@@ -38,11 +39,11 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	const edgeScrolling = useEdgeScrolling();
 	const { filteredItems } = useContext(SearchContext);
 	const {
-		stretchTable, movingColumn, getAllColumnsNames, 
-		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
+		stretchTable, getAllColumnsNames, subscribe, 
+		getVisibleSortedColumnsNames, setVisibleSortedColumnsNames,
 	} = useContext(ResizableTableContext);
 	const templateWasFetched = templateAlreadyFetched(template);
-	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
+	const tableHasCompletedRendering = getVisibleSortedColumnsNames().length > 0;
 
 	useEffect(() => {
 		const allColumns = getAllColumnsNames();
@@ -57,11 +58,15 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	}, [template, templateWasFetched, tableHasCompletedRendering]);
 
 	useEffect(() => {
-		if (movingColumn) {
-			edgeScrolling.start(tableRef.current);
-			return edgeScrolling.stop;
-		}
-	}, [movingColumn]);
+		const onMovingColumnChange = (movingColumn) => {
+			if (movingColumn) {
+				edgeScrolling.start(tableRef.current);
+			} else {
+				edgeScrolling.stop();
+			}
+		};
+		return subscribe(ResizableEvent.MOVING_COLUMN_CHANGE, onMovingColumnChange);
+	}, [edgeScrolling]);
 
 	if (!templateAlreadyFetched(template)) {
 		return (

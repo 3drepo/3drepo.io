@@ -16,11 +16,17 @@
  */
 
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
 import { useContext } from 'react';
 import { Resizer } from './resizer/resizer.component';
+import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
 
 export const ResizersOverlay = () => {
-	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const { getVisibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const visibleSortedColumnsNames = useResizableState(
+		[ResizableEvent.VISIBLE_COLUMNS_CHANGE, ResizableEvent.WIDTH_CHANGE],
+		getVisibleSortedColumnsNames,
+	);
 
 	return (
 		<>

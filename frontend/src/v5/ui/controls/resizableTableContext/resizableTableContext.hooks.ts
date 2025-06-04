@@ -15,8 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import { useContext, useState, useEffect } from 'react';
+import { ResizableTableContext } from './resizableTableContext';
+import { ResizableEventType } from './resizableTableContext.types';
 
-export const Row = styled.div<{ $gap: number }>`
-	gap: ${({ $gap }) => $gap}px;
-`;
+export const useResizableState = (events: ResizableEventType[], getValue) => {
+	const { subscribe } = useContext(ResizableTableContext);
+	const [state, setState] = useState(getValue());
+
+	useEffect(() => {
+		const subscriptions = events.map((event) => subscribe(event, () => setState(getValue())));
+		return () => subscriptions.forEach((fn) => fn());
+	}, []);
+
+	return state;
+};

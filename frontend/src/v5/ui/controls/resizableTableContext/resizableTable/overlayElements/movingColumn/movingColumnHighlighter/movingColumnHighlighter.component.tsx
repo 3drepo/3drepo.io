@@ -17,10 +17,13 @@
 
 import { useContext } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
+import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
 import { Highlighter } from './movingColumnHighlighter.styles';
 
 export const MovingColumnHighlighter = (props) => {
-	const { movingColumn, getColumnOffsetLeft, getWidth, columnGap } = useContext(ResizableTableContext);
+	const { getMovingColumn, getColumnOffsetLeft, getWidth, columnGap } = useContext(ResizableTableContext);
+	const movingColumn = useResizableState([ResizableEvent.MOVING_COLUMN_CHANGE], getMovingColumn);
 	const width = getWidth(movingColumn);
 	const offset = getColumnOffsetLeft(movingColumn);
 
