@@ -55,7 +55,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 
 	return (
 		<Container>
-			{_.entries(groups).map(([groupName, tickets]) => (
+			{groups.map(([groupName, tickets]) => (
 				<DashboardListCollapse
 					title={(
 						<>

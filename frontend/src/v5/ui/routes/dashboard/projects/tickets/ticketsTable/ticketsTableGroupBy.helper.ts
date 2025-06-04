@@ -17,9 +17,12 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
-import { IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _ from 'lodash';
 import { stripModuleOrPropertyPrefix } from './ticketsTable.helper';
+import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
+import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
@@ -34,10 +37,13 @@ const getOptionsForGroupsWithDueDate = () => [
 	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
 ];
 const groupByDate = (tickets: ITicket[]) => {
-	const groups = {};
+	const groups = [];
 	// eslint-disable-next-line prefer-const
 	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
-	groups[NO_DUE_DATE] = ticketsWithUnsetDueDate;
+
+	if (ticketsWithUnsetDueDate.length) {
+		groups.push([NO_DUE_DATE, ticketsWithUnsetDueDate]);
+	}
 
 	const dueDateOptions = getOptionsForGroupsWithDueDate();
 	const endOfCurrentWeek = new Date();
@@ -48,12 +54,33 @@ const groupByDate = (tickets: ITicket[]) => {
 	while (dueDateOptions.length) {
 		[currentWeekTickets, remainingTickets] = _.partition(remainingTickets, ticketDueDateIsPassed);
 		const currentDueDateOption = dueDateOptions.shift();
-		groups[currentDueDateOption] = dueDateOptions.length ? currentWeekTickets : currentWeekTickets.concat(remainingTickets);
+		const ticketsWithCurrentDueDate = dueDateOptions.length ? currentWeekTickets : currentWeekTickets.concat(remainingTickets);
+		groups.push([currentDueDateOption, ticketsWithCurrentDueDate]);
 		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() + 7);
 	}
 	return groups;
 };
-const sortValues = (ticket: ITicket, groupBy: string) => {
+
+const groupByStatus = (tickets: ITicket[]) => {
+	const statusPath = `properties.${BaseProperties.STATUS}`;
+	const statusConfigValues = (selectStatusConfigByTemplateId(getState(), tickets[0].type) || DEFAULT_STATUS_CONFIG).values;
+	
+	const ticketsByStatus = _.groupBy(tickets, statusPath);
+	// handling formatting
+	const ticketsByStatusDisplayValue = _.mapKeys(ticketsByStatus, (tkts, status) => {
+		const value = statusConfigValues.find(({ name }) => name === status);
+		return value.label || value.name;
+	});
+	const statusOrder = Object.fromEntries(DEFAULT_STATUS_CONFIG.values.map(({ type }, index) => [type, index]));
+	const statusToOrder = Object.fromEntries(statusConfigValues.map(({ name, type }) => [name, statusOrder[type]]));
+
+	const toStatusTypeOrder = ([, [ticket]]) => statusToOrder[_.get(ticket, statusPath)];
+	const toStatusDisplayValue = ([statusDisplayValue]) => statusDisplayValue;
+
+	return _.orderBy(Object.entries(ticketsByStatusDisplayValue), [toStatusTypeOrder, toStatusDisplayValue]) as Array<[string, ITicket[]]>;
+};
+
+const sortManyOfValues = (ticket: ITicket, groupBy: string) => {
 	const sortedValues = _.orderBy(
 		_.get(ticket, groupBy),
 		(value) => value.trim().toLowerCase(),
@@ -62,7 +89,7 @@ const sortValues = (ticket: ITicket, groupBy: string) => {
 };
 const groupByManyOfValues = (tickets: ITicket[], groupBy: string) => {
 	const [ticketsWithValue, ticketsWithUnsetValue] = _.partition(tickets, (ticket) => _.get(ticket, groupBy)?.length > 0);
-	const ticketsWithSortedValues = ticketsWithValue.map((ticket) => sortValues(ticket, groupBy));
+	const ticketsWithSortedValues = ticketsWithValue.map((ticket) => sortManyOfValues(ticket, groupBy));
 	const ticketsSortedByValues = _.orderBy(
 		ticketsWithSortedValues,
 		(ticket) => {
@@ -75,24 +102,29 @@ const groupByManyOfValues = (tickets: ITicket[], groupBy: string) => {
 		const values = _.get(ticket, groupBy);
 		return values.join(', ');
 	});
-	if (ticketsWithUnsetValue.length) {
-		groups[UNSET] = ticketsWithUnsetValue;
-	}
-	return groups;
-};
-const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => {
-	const [ticketsWithValue, ticketsWithUnsetValue] = _.partition(tickets, (ticket) => !!_.get(ticket, groupBy));
-
-	const groups = _.groupBy(ticketsWithValue, groupBy);
-	if (ticketsWithUnsetValue.length) {
-		groups[UNSET] = ticketsWithUnsetValue;
-	}
-	return groups;
+	return { ...groups, [UNSET]: ticketsWithUnsetValue };
 };
 
-export const groupTickets = (groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition): Record<string, ITicket[]> => {
-	if (stripModuleOrPropertyPrefix(groupBy) === IssueProperties.DUE_DATE) return groupByDate(tickets);
+const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => _.groupBy(tickets, (ticket) => _.get(ticket, groupBy) ?? UNSET);
 
-	const isOneOf = propertyType === 'oneOf';
-	return isOneOf ? groupByOneOfValues(tickets, groupBy) : groupByManyOfValues(tickets, groupBy);
+const sortSelectGroups = (groups: Record<string, ITicket[]>) => {
+	const { [UNSET]: groupsWithUnsetValue, ...grouspWithSetValue } = groups;
+	const sortedGroups = _.orderBy(_.entries(grouspWithSetValue), ([groupName]) => groupName);
+	if (groupsWithUnsetValue?.length) {
+		sortedGroups.push([UNSET, groupsWithUnsetValue]);
+	}
+	return sortedGroups;
+};
+
+export const groupTickets = (groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition): Array<[string, ITicket[]]> => {
+	switch (stripModuleOrPropertyPrefix(groupBy)) {
+		case IssueProperties.DUE_DATE:
+			return groupByDate(tickets);
+		case BaseProperties.STATUS:
+			return groupByStatus(tickets);
+		default:
+			const isOneOf = propertyType === 'oneOf';
+			const selectGroups = isOneOf ? groupByOneOfValues(tickets, groupBy) : groupByManyOfValues(tickets, groupBy);
+			return sortSelectGroups(selectGroups);
+	}
 };
