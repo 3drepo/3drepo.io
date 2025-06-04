@@ -19,23 +19,23 @@ import { GridTemplateColumns, OverlayElements, Table } from './resizableTable.st
 import { ResizersOverlay } from './overlayElements/resizers/resizersOverlay.component';
 import { MovingColumnOverlay } from './overlayElements/movingColumn/movingColumnOverlay.component';
 import { ResizableTableContext } from '../resizableTableContext';
-import { useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { ResizableEvent } from '../resizableTableContext.types';
 import { Row } from '../resizableTableRow/resizableTableRow.styles';
 
 export const ResizableTable = ({ className = '', children }) => {
 	const { getWidth, getVisibleSortedColumnsNames, subscribe } = useContext(ResizableTableContext);
-	const ref = useRef<HTMLDivElement>();
 	const [key] = useState(+new Date());
+	const [tableNode, setTableNode] = useState(null);
 	const gridClassName = `ResizableTableTemplateColumns_${key}`;
 
 	useEffect(() => {
+		if (!tableNode) return;
+
 		const styleTag = document.createElement('style');
 		document.head.appendChild(styleTag);
 
 		const setGridTemplateColumns = () => {
-			if (!ref.current) return;
-
 			const gridTemplateColumns = getVisibleSortedColumnsNames()
 				.map((column) => `${getWidth(column)}px`)
 				.join(' ');
@@ -47,6 +47,8 @@ export const ResizableTable = ({ className = '', children }) => {
 				}
 			`;
 		};
+		
+		setGridTemplateColumns();
 
 		const subscriptions = [
 			subscribe(ResizableEvent.WIDTH_CHANGE, setGridTemplateColumns),
@@ -55,16 +57,14 @@ export const ResizableTable = ({ className = '', children }) => {
 
 		return () => {
 			subscriptions.forEach((fn) => fn());
-			if (ref.current) {
-				ref.current.classList.remove(gridClassName);
-				document.head.removeChild(styleTag);
-			}
+			tableNode.classList.remove(gridClassName);
+			document.head.removeChild(styleTag);
 		};
-	}, []);
+	}, [tableNode]);
 
 	return (
 		<Table className={className}>
-			<GridTemplateColumns ref={ref} className={gridClassName}>
+			<GridTemplateColumns ref={(node) => setTableNode(node)} className={gridClassName}>
 				{children}
 			</GridTemplateColumns>
 			<OverlayElements>
