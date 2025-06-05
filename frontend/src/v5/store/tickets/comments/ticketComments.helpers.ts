@@ -20,6 +20,7 @@ import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { TicketCommentReplyMetadata, ITicketComment } from './ticketComments.types';
+import { createStateWithGroup } from '../ticketsGroups.helpers';
 
 export const IMAGE_MAX_SIZE_MESSAGE = formatInfoUnit(clientConfigService.resourceUploadSizeLimit);
 export const imageIsTooBig = (file): boolean => (file.size > clientConfigService.resourceUploadSizeLimit);
@@ -82,4 +83,10 @@ export const parseMessageAndImages = (inputComment: Partial<ITicketComment>) => 
 		comment.images = comment.images.map(stripBase64Prefix);
 	}
 	return comment;
+};
+
+export const commentWithGroups = (groups) => (comment) => {
+	if (!comment.view?.state) return comment;
+	const state = createStateWithGroup(comment.view.state, groups);
+	return { ...comment, view: { ...comment.view, state } };
 };

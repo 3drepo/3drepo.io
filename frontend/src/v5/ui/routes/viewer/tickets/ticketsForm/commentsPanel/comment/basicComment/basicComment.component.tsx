@@ -20,17 +20,15 @@ import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown.component';
 import { CommentContainer, CommentAge, EditedCommentLabel, ViewpointIcon, CommentAgeContent } from './basicComment.styles';
 import { CommentNonMessageContent } from '../commentNonMessageContent/commentNonMessageContent.component';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { Tooltip } from '@mui/material';
 import { formatMessage, formatDate } from '@/v5/services/intl';
 import { TicketContext } from '../../../../ticket.context';
 import { useContext, useState, useEffect } from 'react';
 import { getRelativeTime } from '@/v5/helpers/intl.helper';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { isString } from 'lodash';
 
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
@@ -44,6 +42,7 @@ export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>>
 };
 
 export const BasicComment = ({
+	commentId,
 	message,
 	createdAt,
 	updatedAt,
@@ -57,19 +56,9 @@ export const BasicComment = ({
 	const { isViewer } = useContext(TicketContext);
 	const isEdited = updatedAt && (createdAt !== updatedAt);
 	const [commentAge, setCommentAge] = useState('');
-	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
-	const coloredGroupIds = view?.state?.colored?.map(({ group }) => group) || [];
-	const hiddenGroupIds = view?.state?.hidden?.map(({ group }) => group) || [];
-	const transformedGroupIds = view?.state?.transformed?.map(({ group }) => group) || [];
-	const groupIds = [...coloredGroupIds, ...hiddenGroupIds, ...transformedGroupIds];
 
-	const onClickViewpoint = async () => {
-		await Promise.all(groupIds.map((groupId) => {
-			if (!isString(groupId)) return;
-			TicketsActionsDispatchers.fetchTicketGroup(teamspace, project, containerOrFederation, ticketId, groupId);
-		}));
-		goToView(view);
-	};
+	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
+	const onClickViewpoint = () => TicketCommentsActionsDispatchers.goToCommentViewpoint(teamspace, project, containerOrFederation, ticketId, commentId);
 
 	useEffect(() => {
 		updateMessageAge();
