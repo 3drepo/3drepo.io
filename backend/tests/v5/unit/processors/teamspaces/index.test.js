@@ -213,6 +213,63 @@ const testInitTeamspace = () => {
 			expect(TeamspacesModel.grantAdminToUser).toHaveBeenCalledWith(teamspace, username);
 		});
 
+		test(`should throw an error of "${templates.teamspaceNotFound.message}" if accountId provided but not found`, async () => {
+			const username = generateRandomString();
+			const teamspace = generateRandomString();
+			const teamspaceId = generateRandomString();
+
+			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(undefined);
+
+			await expect(Teamspaces.initTeamspace(teamspace, username, teamspaceId))
+				.rejects.toEqual(templates.teamspaceNotFound);
+
+			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledWith(teamspaceId);
+
+			expect(TeamspacesModel.getTeamspaceRefId).not.toHaveBeenCalled();
+
+			expect(UsersModel.getUserByUsername).not.toHaveBeenCalled();
+
+			expect(RolesModel.createTeamspaceRole).not.toHaveBeenCalled();
+			expect(JobsModel.addDefaultJobs).not.toHaveBeenCalled();
+
+			expect(TeamspacesModel.createTeamspaceSettings).not.toHaveBeenCalled();
+			expect(JobsModel.assignUserToJob).not.toHaveBeenCalled();
+			expect(TemplatesModel.addDefaultTemplates).not.toHaveBeenCalled();
+
+			expect(RolesModel.grantTeamspaceRoleToUser).not.toHaveBeenCalled();
+			expect(FronteggService.addUserToAccount).not.toHaveBeenCalled();
+			expect(TeamspacesModel.grantAdminToUser).not.toHaveBeenCalled();
+		});
+
+		test('should not call any owner functions if an owner is not provided', async () => {
+			const teamspace = generateRandomString();
+			const teamspaceId = generateRandomString();
+
+			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(generateRandomString());
+			FronteggService.getUserById.mockResolvedValueOnce(true);
+
+			await Teamspaces.initTeamspace(teamspace, undefined, teamspaceId);
+
+			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledWith(teamspaceId);
+
+			expect(RolesModel.createTeamspaceRole).toHaveBeenCalledTimes(1);
+			expect(RolesModel.createTeamspaceRole).toHaveBeenCalledWith(teamspace);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledTimes(1);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledWith(teamspace);
+
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledWith(teamspace, teamspaceId);
+			expect(JobsModel.assignUserToJob).not.toHaveBeenCalled();
+			expect(TemplatesModel.addDefaultTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.addDefaultTemplates).toHaveBeenCalledWith(teamspace);
+
+			expect(RolesModel.grantTeamspaceRoleToUser).not.toHaveBeenCalled();
+			expect(FronteggService.addUserToAccount).not.toHaveBeenCalled();
+			expect(TeamspacesModel.grantAdminToUser).not.toHaveBeenCalled();
+		});
+
 		test('should initialize a teamspace even if an error is thrown ', async () => {
 			RolesModel.createTeamspaceRole.mockRejectedValueOnce(templates.unknown);
 			await expect(Teamspaces.initTeamspace(generateRandomString(), generateRandomString()))
