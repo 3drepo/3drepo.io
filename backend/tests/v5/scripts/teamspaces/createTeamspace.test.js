@@ -26,7 +26,6 @@ const {
 const { createAccount } = require('../../helper/fronteggMock');
 
 const { src, srcV4, utilScripts } = require('../../helper/path');
-const Users = require('../../../../src/v5/models/users');
 
 const CreateTeamspace = require(`${utilScripts}/teamspaces/createTeamspace`);
 
