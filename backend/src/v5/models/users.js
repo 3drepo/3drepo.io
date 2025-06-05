@@ -165,35 +165,11 @@ User.ensureIndicesExist = async () => {
 	}
 };
 
-User.getUserInfoFromEmail = async (frontEggEmail) => {
-	const projection = { _id: 0, user: 1, 'customData.email': 1, 'customData.userId': 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 };
-	const { user, customData } = await User.getUserByEmail(frontEggEmail, projection);
-
-	const { firstName, lastName, billing, userId, email } = customData;
-	const res = { user, firstName, lastName, userId, email };
-	if (billing?.billingInfo?.company) {
-		res.company = billing.billingInfo.company;
-	}
+User.getUserInfoFromEmailArray = async (emailArray, projection) => {
+	const query = { 'customData.email': { $in: emailArray } };
+	const res = await User.getUsersByQuery(query, projection);
 
 	return res;
-};
-
-User.getUserInfoFromEmailArray = async (emailArray) => {
-	const query = { 'customData.email': { $in: emailArray } };
-	const projection = { _id: 0, user: 1, 'customData.email': 1, 'customData.userId': 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 };
-	const rawData = await User.getUsersByQuery(query, projection);
-
-	const processedData = rawData.map(({ user, customData }) => {
-		const { firstName, lastName, billing, userId, email } = customData;
-		const res = { user, firstName, lastName, userId, email };
-		if (billing?.billingInfo?.company) {
-			res.company = billing.billingInfo.company;
-		}
-
-		return res;
-	});
-
-	return processedData;
 };
 
 module.exports = User;

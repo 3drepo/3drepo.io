@@ -503,96 +503,13 @@ const testEnsureIndicesExist = () => {
 	});
 };
 
-const testGetUserInfoFromEmail = () => {
-	describe('Get user information from email', () => {
-		test('Should retrieve user information', async () => {
-			const userId = generateRandomString();
-			const email = generateRandomString();
-			const userEntryMock = {
-				user: 'user',
-				customData: {
-					email,
-					userId,
-					firstName: generateRandomString(),
-					lastName: generateRandomString(),
-					billing: {} },
-			};
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(userEntryMock);
-			const mockGetUserByEmail = jest.spyOn(User, 'getUserByEmail');
-			const res = await User.getUserInfoFromEmail(email);
-			expect(res).toEqual(
-				{
-					user: userEntryMock.user,
-					firstName: userEntryMock.customData.firstName,
-					lastName: userEntryMock.customData.lastName,
-					email,
-					userId,
-				},
-			);
-			expect(mockGetUserByEmail).toHaveBeenCalledTimes(1);
-			expect(mockGetUserByEmail).toHaveBeenCalledWith(
-				email,
-				{ _id: 0, user: 1, 'customData.userId': 1, 'customData.email': 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 },
-			);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(
-				USERS_DB_NAME, USERS_COL,
-				{ 'customData.email': email },
-				{ _id: 0, user: 1, 'customData.userId': 1, 'customData.email': 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 }, undefined);
-		});
-		test('Should retrieve user information(company information present)', async () => {
-			const userId = generateRandomString();
-			const email = generateRandomString();
-			const userEntryMock = {
-				user: 'user',
-				customData: {
-					email,
-					userId,
-					firstName: generateRandomString(),
-					lastName: generateRandomString(),
-					billing: {
-						billingInfo: {
-							company: generateRandomString(),
-						},
-					},
-				},
-			};
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(userEntryMock);
-			const mockGetUserByEmail = jest.spyOn(User, 'getUserByEmail');
-
-			const res = await User.getUserInfoFromEmail(email);
-			expect(res).toEqual(
-				{
-					email,
-					userId,
-					user: userEntryMock.user,
-					firstName: userEntryMock.customData.firstName,
-					lastName: userEntryMock.customData.lastName,
-					company: userEntryMock.customData.billing.billingInfo.company,
-				},
-			);
-			expect(mockGetUserByEmail).toHaveBeenCalledTimes(1);
-			expect(mockGetUserByEmail).toHaveBeenCalledWith(
-				email,
-				{ _id: 0, user: 1, 'customData.userId': 1, 'customData.email': 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 },
-			);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(
-				USERS_DB_NAME, USERS_COL,
-				{ 'customData.email': email },
-				{ _id: 0, user: 1, 'customData.userId': 1, 'customData.email': 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 }, undefined,
-			);
-		});
-	});
-};
-
 const testGetUserInfoFromEmailArray = () => {
 	describe('Get users information from an array of emails', () => {
 		test('Should retrieve an array of users', async () => {
 			const userEntriesMock = times(10, (iterator) => {
 				if (iterator % 2 === 0) {
 					return {
-						user: 'user',
+						user: generateRandomString(),
 						customData: {
 							email: generateRandomString(),
 							userId: generateRandomString(),
@@ -602,7 +519,7 @@ const testGetUserInfoFromEmailArray = () => {
 					};
 				}
 				return {
-					user: 'user',
+					user: generateRandomString(),
 					customData: {
 						email: generateRandomString(),
 						userId: generateRandomString(),
@@ -619,28 +536,23 @@ const testGetUserInfoFromEmailArray = () => {
 			const listOfEmails = userEntriesMock.map(({ customData }) => customData.email);
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(userEntriesMock);
 			const mockGetUserByEmail = jest.spyOn(User, 'getUsersByQuery');
+			const projection = {
+				[generateRandomString()]: generateRandomString(),
+			};
 
-			const res = await User.getUserInfoFromEmailArray(listOfEmails);
+			const res = await User.getUserInfoFromEmailArray(listOfEmails, projection);
 
-			expect(res).toEqual(userEntriesMock.map(({ user, customData }) => {
-				const { firstName, lastName, billing, userId, email } = customData;
-				const returnData = { user, firstName, lastName, userId, email };
-				if (billing?.billingInfo?.company) {
-					returnData.company = billing.billingInfo.company;
-				}
-
-				return returnData;
-			}));
+			expect(res).toEqual(userEntriesMock);
 			expect(mockGetUserByEmail).toHaveBeenCalledTimes(1);
 			expect(mockGetUserByEmail).toHaveBeenCalledWith(
 				{ 'customData.email': { $in: listOfEmails } },
-				{ _id: 0, user: 1, 'customData.userId': 1, 'customData.email': 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 },
+				projection,
 			);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(
 				USERS_DB_NAME, USERS_COL,
 				{ 'customData.email': { $in: listOfEmails } },
-				{ _id: 0, user: 1, 'customData.userId': 1, 'customData.email': 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 },
+				projection,
 			);
 		});
 	});
@@ -663,6 +575,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetUserId();
 	testUpdateUserId();
 	testEnsureIndicesExist();
-	testGetUserInfoFromEmail();
 	testGetUserInfoFromEmailArray();
 });

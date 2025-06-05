@@ -21,7 +21,7 @@ const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
-const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
 
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 
@@ -97,16 +97,16 @@ const testGetTeamspaceMembersInfo = () => {
 		const tsTenantWithoutUsers = generateRandomString();
 		const tsTennatnWithExtraUser = generateRandomString();
 		const goldenData = [
-			{ user: 'abc', firstName: 'ab', lastName: 'c', company: 'yy', job: 'jobA', userId: generateRandomString(), email: generateRandomString() },
-			{ user: 'abcd', firstName: 'ab', lastName: 'cd', job: 'jobB', userId: generateRandomString(), email: generateRandomString() },
-			{ user: 'abcd2', firstName: 'ab', lastName: 'cd2', job: 'jobB', company: 'dxfd', userId: generateRandomString(), email: generateRandomString() },
-			{ user: 'abcde', firstName: 'ab', lastName: 'cde', company: 'dsfs', userId: generateRandomString(), email: generateRandomString() },
+			{ user: 'abc', customData: { firstName: 'ab', lastName: 'c', billing: { billingInfo: { company: 'yy' } }, job: 'jobA', userId: generateRandomString(), email: generateRandomString() } },
+			{ user: 'abcd', customData: { firstName: 'ab', lastName: 'cd', job: 'jobB', userId: generateRandomString(), email: generateRandomString() } },
+			{ user: 'abcd2', customData: { firstName: 'ab', lastName: 'cd2', job: 'jobB', billing: { billingInfo: { company: 'dxfd' } }, userId: generateRandomString(), email: generateRandomString() } },
+			{ user: 'abcde', customData: { firstName: 'ab', lastName: 'cde', billing: { billingInfo: { company: 'dsfs' } }, userId: generateRandomString(), email: generateRandomString() } },
 		];
 		const jobList = [
 			{ _id: 'jobA', users: ['abc'] },
 			{ _id: 'jobB', users: ['abcd', 'abcd2'] },
 		];
-		const frontEggData = goldenData.map(({ email, userId }) => ({ email, id: userId }));
+		const frontEggData = goldenData.map(({ customData: { email, userId } }) => ({ email, id: userId }));
 
 		test('should give the list of members within the given teamspace with their details', async () => {
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce({ refId: tsTennatnWithExtraUser });
@@ -120,7 +120,18 @@ const testGetTeamspaceMembersInfo = () => {
 
 			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithUsers);
 
-			expect(res).toEqual(goldenData.map((data) => _.omit(data, ['userId', 'email'])));
+			expect(res).toEqual(goldenData.map(
+				({
+					user,
+					customData: { firstName, lastName, billing, job },
+				}) => {
+					const data = { user, firstName, lastName, job };
+					if (billing?.billingInfo?.company) {
+						data.company = billing.billingInfo.company;
+					}
+
+					return data;
+				}));
 		});
 
 		test('should return empty array if the teamspace had no memebrs', async () => {
@@ -146,7 +157,18 @@ const testGetTeamspaceMembersInfo = () => {
 
 			const res = await Teamspaces.getTeamspaceMembersInfo(tsWithoutJobs);
 
-			expect(res).toEqual(goldenData.map((data) => _.omit(data, ['job', 'userId', 'email'])));
+			expect(res).toEqual(goldenData.map(
+				({
+					user,
+					customData: { firstName, lastName, billing },
+				}) => {
+					const data = { user, firstName, lastName };
+					if (billing?.billingInfo?.company) {
+						data.company = billing.billingInfo.company;
+					}
+
+					return data;
+				}));
 		});
 	});
 };
@@ -400,15 +422,21 @@ const testRemoveTeamspace = () => {
 			TeamspacesModel.getTeamspaceRefId.mockResolvedValue(teamspaceId);
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValue({ refId: teamspaceId });
 
-			const usersData = _.times(2, {
+			const usersData = _.times(2, () => ({
 				user: generateRandomString(),
-				firstName: generateRandomString(),
-				lastName: generateRandomString(),
-				company: generateRandomString(),
-				userId: generateRandomString(),
-				email: generateRandomString(),
-			});
-			const frontEggUsers = usersData.map(({ email, userId }) => ({ email, id: userId }));
+				customData: {
+					firstName: generateRandomString(),
+					lastName: generateRandomString(),
+					billing: {
+						billingInfo: {
+							company: generateRandomString(),
+						},
+					},
+					userId: generateRandomString(),
+					email: generateRandomString(),
+				},
+			}));
+			const frontEggUsers = usersData.map(({ customData: { email, userId } }) => ({ email, id: userId }));
 
 			FronteggService.getAllUsersInAccount.mockResolvedValueOnce(frontEggUsers);
 			UsersModel.getUserInfoFromEmailArray.mockResolvedValueOnce(usersData);
@@ -423,7 +451,7 @@ const testRemoveTeamspace = () => {
 			expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledTimes(frontEggUsers.length);
 			expect(UsersModel.deleteFavourites).toHaveBeenCalledTimes(frontEggUsers.length);
 
-			frontEggUsers.forEach((user) => {
+			usersData.forEach((user) => {
 				expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledWith(teamspace, user.user);
 				expect(UsersModel.deleteFavourites).toHaveBeenCalledWith(user.user, teamspace);
 			});
@@ -452,21 +480,21 @@ const testGetAllMembersInTeamspace = () => {
 		const tsTenantId = generateRandomString();
 
 		const goldenData = [
-			{ user: 'abc', firstName: 'ab', lastName: 'c', company: 'yy', userId: generateRandomString(), email: generateRandomString() },
-			{ user: 'abcd', firstName: 'ab', lastName: 'cd', userId: generateRandomString(), email: generateRandomString() },
-			{ user: 'abcd2', firstName: 'ab', lastName: 'cd2', company: 'dxfd', userId: generateRandomString(), email: generateRandomString() },
-			{ user: 'abcde', firstName: 'ab', lastName: 'cde', company: 'dsfs', userId: generateRandomString(), email: generateRandomString() },
+			{ user: 'abc', customData: { firstName: 'ab', lastName: 'c', billing: { billingInfo: { company: 'yy' } }, userId: generateRandomString(), email: generateRandomString() } },
+			{ user: 'abcd', customData: { firstName: 'ab', lastName: 'cd', userId: generateRandomString(), email: generateRandomString() } },
+			{ user: 'abcd2', customData: { firstName: 'ab', lastName: 'cd2', billing: { billingInfo: { company: 'dxfd' } }, userId: generateRandomString(), email: generateRandomString() } },
+			{ user: 'abcde', customData: { firstName: 'ab', lastName: 'cde', billing: { billingInfo: { company: 'dsfs' } }, userId: generateRandomString(), email: generateRandomString() } },
 		];
 
 		test('should return a list of teamspace members members', async () => {
-			const frontEggData = goldenData.map(({ email, userId }) => ({ email, id: userId }));
-			const expectedRes = goldenData.map(({ user, firstName, lastName, company }) => {
+			const frontEggData = goldenData.map(({ customData: { email, userId } }) => ({ email, id: userId }));
+			const expectedRes = goldenData.map(({ user, customData: { firstName, lastName, billing } }) => {
 				const res = {
 					user,
 					firstName,
 					lastName,
 				};
-				if (company) res.company = company;
+				if (billing?.billingInfo?.company) res.company = billing.billingInfo.company;
 
 				return res;
 			});
@@ -481,17 +509,17 @@ const testGetAllMembersInTeamspace = () => {
 		});
 		test('should update db userId if missmatch', async () => {
 			const newId = generateRandomString();
-			const frontEggData = goldenData.map(({ email, userId }, index) => {
+			const frontEggData = goldenData.map(({ customData: { email, userId } }, index) => {
 				if (index === 0) return { email, id: newId };
 				return { email, id: userId };
 			});
-			const expectedRes = goldenData.map(({ user, firstName, lastName, company }) => {
+			const expectedRes = goldenData.map(({ user, customData: { firstName, lastName, billing } }) => {
 				const res = {
 					user,
 					firstName,
 					lastName,
 				};
-				if (company) res.company = company;
+				if (billing?.billingInfo?.company) res.company = billing.billingInfo.company;
 
 				return res;
 			});
@@ -502,53 +530,72 @@ const testGetAllMembersInTeamspace = () => {
 
 			const res = await Teamspaces.getAllMembersInTeamspace(tsWithUsers);
 
-			expect(res).toEqual(expectedRes);
+			outOfOrderArrayEqual(res, expectedRes);
 			expect(UsersModel.updateUserId).toHaveBeenCalledTimes(1);
 			expect(UsersModel.updateUserId).toHaveBeenCalledWith(goldenData[0].user, newId);
 		});
 		test('should create new user records for any users in frontEgg but not in mongo', async () => {
-			const extraUserData = {
+			const extraUserData = [{
 				user: generateRandomString(),
-				firstName: generateRandomString(),
-				lastName: generateRandomString(),
-				company: generateRandomString(),
-				userId: generateRandomString(),
-				email: generateRandomString(),
-			};
-			const extraUserFrontEggData = {
-				email: extraUserData.email,
-				id: extraUserData.userId,
-			};
+				customData: {
+					firstName: generateRandomString(),
+					lastName: generateRandomString(),
+					billing: {
+						billingInfo: {
+							company: generateRandomString(),
+						},
+					},
+					userId: generateRandomString(),
+					email: generateRandomString(),
+				},
+			}, {
+				user: generateRandomString(),
+				customData: {
+					firstName: generateRandomString(),
+					lastName: generateRandomString(),
+					userId: generateRandomString(),
+					email: generateRandomString(),
+				},
+			}];
+			const extraUserFrontEggData = extraUserData.map(({ customData: { email, userId } }) => ({
+				email,
+				id: userId,
+			}));
 			const frontEggData = [
-				...goldenData.map(({ email, userId }) => ({ email, id: userId })),
-				extraUserFrontEggData,
+				...goldenData.map(({ customData: { email, userId } }) => ({ email, id: userId })),
+				...extraUserFrontEggData,
 			];
 			const newGoldenData = [
 				...goldenData,
-				extraUserData,
+				...extraUserData,
 			];
-			const expectedRes = newGoldenData.map(({ user, firstName, lastName, company }) => {
+			const expectedRes = newGoldenData.map(({ user, customData: { firstName, lastName, billing } }) => {
 				const res = {
 					user,
 					firstName,
 					lastName,
 				};
-				if (company) res.company = company;
+				if (billing?.billingInfo?.company) res.company = billing.billingInfo.company;
 
 				return res;
 			});
 
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce(tsTenantId);
 			FronteggService.getAllUsersInAccount.mockResolvedValueOnce(frontEggData);
-			UsersModel.getUserInfoFromEmailArray.mockResolvedValueOnce(goldenData);
+			UsersModel.getUserInfoFromEmailArray.mockImplementation((emailArray) => {
+				if (emailArray.length === 1) {
+					return extraUserData.filter((user) => user.customData.email === emailArray[0]);
+				}
+				return goldenData;
+			});
 			TeamspacesModel.getTeamspaceInvites.mockResolvedValueOnce([]);
 			FronteggService.getUserById.mockResolvedValueOnce({});
-			UsersModel.getUserInfoFromEmail.mockResolvedValueOnce(extraUserData);
+			const fn = jest.spyOn(Users, 'createNewUserRecord');
 
 			const res = await Teamspaces.getAllMembersInTeamspace(tsWithUsers);
 
 			expect(res).toEqual(expectedRes);
-			expect(Users.createNewUserRecord).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledTimes(2);
 		});
 		test('should not create a new user records for any users waiting invitations', async () => {
 			const extraUserFrontEggData = {
@@ -556,16 +603,16 @@ const testGetAllMembersInTeamspace = () => {
 				id: generateRandomString(),
 			};
 			const frontEggData = [
-				...goldenData.map(({ email, userId }) => ({ email, id: userId })),
+				...goldenData.map(({ customData: { email, userId } }) => ({ email, id: userId })),
 				extraUserFrontEggData,
 			];
-			const expectedRes = goldenData.map(({ user, firstName, lastName, company }) => {
+			const expectedRes = goldenData.map(({ user, customData: { firstName, lastName, billing } }) => {
 				const res = {
 					user,
 					firstName,
 					lastName,
 				};
-				if (company) res.company = company;
+				if (billing?.billingInfo?.company) res.company = billing.billingInfo.company;
 
 				return res;
 			});
