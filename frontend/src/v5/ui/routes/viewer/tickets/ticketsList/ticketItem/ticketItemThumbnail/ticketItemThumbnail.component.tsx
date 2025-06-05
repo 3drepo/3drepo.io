@@ -20,10 +20,10 @@ import { get, has } from 'lodash';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { AdditionalProperties } from '../../../tickets.constants';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 type ITicketItemThumbnail = {
 	ticket: ITicket;
@@ -31,7 +31,7 @@ type ITicketItemThumbnail = {
 };
 
 export const TicketItemThumbnail = ({ ticket, selectTicket }: ITicketItemThumbnail) => {
-	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 
 	const defaultView = get(ticket.properties, AdditionalProperties.DEFAULT_VIEW);
@@ -41,11 +41,9 @@ export const TicketItemThumbnail = ({ ticket, selectTicket }: ITicketItemThumbna
 	const thumbnailSrc = resourceId ?
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, resourceId, isFederation) : null;
 
-	const goToViewpoint = (event) => {
+	const goToViewpoint = async (event) => {
 		selectTicket(event);
-		
-		if (!hasViewpoint) return;
-		goToView(defaultView); 
+		TicketsActionsDispatchers.fetchTicketGroupsAndGoToView(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
 
 	return (

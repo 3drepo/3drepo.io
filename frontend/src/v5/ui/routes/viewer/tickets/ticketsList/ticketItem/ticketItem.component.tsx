@@ -61,7 +61,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const selectTicket = (event) => {
 		event.stopPropagation();
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
 
 	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {

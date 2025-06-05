@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
-import { isString } from 'lodash';
+import { get, isString } from 'lodash';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -34,7 +34,7 @@ import {
 	UpsertTicketAndFetchGroupsAction,
 	UpdateTicketGroupAction,
 	FetchTicketPropertiesAction,
-	FetchTicketGroupAction,
+	FetchTicketGroupsAndGoToView,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
@@ -44,6 +44,8 @@ import { selectContainersByFederationId } from '../federations/federations.selec
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
+import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -236,21 +238,6 @@ export function* createTicket({ teamspace, projectId, modelId, ticket, isFederat
 	}
 }
 
-export function* fetchTicketGroup({ teamspace, projectId, modelId, ticketId, groupId, revision }: FetchTicketGroupAction) {
-	try {
-		const isFed = !!(yield select(selectContainersByFederationId, modelId)).length;
-		const group = yield API.Tickets.fetchTicketGroup(teamspace, projectId, modelId, ticketId, groupId, isFed, revision);
-		yield put(TicketsActions.fetchTicketGroupsSuccess([group]));
-	} catch (error) {
-		// yield put(DialogsActions.open('alert', {
-		// currentActions: formatMessage(
-		// { id: 'tickets.fetchTicketGroup.error', defaultMessage: 'trying to fetch a group for a ticket' },
-		// ),
-		// error,
-		// }));
-	}
-}
-
 const getViewGroupsIds = (state: ViewpointState): string[] => {
 	const colored = state.colored || [];
 	const hidden = state.hidden || [];
@@ -293,7 +280,6 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId, re
 		const groups = yield all(
 			groupsIds.map((groupId) => API.Tickets.fetchTicketGroup(teamspace, projectId, modelId, ticketId, groupId, isFed, revision)),
 		);
-
 		yield put(TicketsActions.fetchTicketGroupsSuccess(groups));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -305,6 +291,23 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId, re
 	}
 }
 
+export function* fetchTicketGroupsAndGoToView({ teamspace, projectId, modelId, ticketId, revision }: FetchTicketGroupsAndGoToView) {
+	try {
+		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticketId, revision));
+		yield take(TicketsTypes.FETCH_TICKET_GROUPS_SUCCESS);
+		const ticketWithGroups = yield select(selectTicketById, modelId, ticketId);
+		const defaultView = get(ticketWithGroups?.properties, AdditionalProperties.DEFAULT_VIEW);
+		if (!defaultView) return;
+		goToView(defaultView);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.fetchTicketGroupsAndGoToView.error', defaultMessage: 'trying to fetch the groups for a ticket and go to view' },
+			),
+			error,
+		}));
+	}
+}
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket, revision }: UpsertTicketAndFetchGroupsAction) {
 	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision));
@@ -319,8 +322,8 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
 	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS, fetchTicketGroups);
+	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS_AND_GO_TO_VIEW, fetchTicketGroupsAndGoToView);
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
 	yield takeEvery(TicketsTypes.FETCH_TICKET_PROPERTIES, fetchTicketProperties);
-	yield takeEvery(TicketsTypes.FETCH_TICKET_GROUP, fetchTicketGroup);
 }
