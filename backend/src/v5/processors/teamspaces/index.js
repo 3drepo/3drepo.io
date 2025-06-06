@@ -17,23 +17,26 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, getAllUsersInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
 	createTeamspaceSettings,
 	getAddOns,
-	getMembersInfo,
+	getTeamspaceInvites,
 	getTeamspaceRefId,
+	getTeamspaceSetting,
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
-const { deleteFavourites, getAccessibleTeamspaces, getUserByUsername, getUserId, updateUserId } = require('../../models/users');
+const { deleteFavourites, getAccessibleTeamspaces, getUserByUsername, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
+const { deleteIfUndefined, isEmpty } = require('../../utils/helper/objects');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { COL_NAME } = require('../../models/projectSettings.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
+const { createNewUserRecord } = require('../users');
 const { isTeamspaceAdmin } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
@@ -43,9 +46,9 @@ const { removeUserFromAllProjects } = require('../../models/projectSettings');
 const Teamspaces = {};
 
 const removeAllUsersFromTS = async (teamspace) => {
-	const members = await getMembersInfo(teamspace);
+	const membersList = await Teamspaces.getAllMembersInTeamspace(teamspace);
 	await Promise.all(
-		members.map(async ({ user }) => {
+		membersList.map(async ({ user }) => {
 			await Promise.all([
 				revokeTeamspaceRoleFromUser(teamspace, user),
 				deleteFavourites(user, teamspace),
@@ -98,12 +101,78 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
 };
 
-Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
-	const [membersList, jobsList] = await Promise.all([
-		getMembersInfo(teamspace),
-		getJobsToUsers(teamspace),
-	]);
+Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
+	const membersInTeamspace = [];
+	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
+	const accountUsers = await getAllUsersInAccount(tenantId);
+	const projection = {
+		_id: 0,
+		user: 1,
+		'customData.email': 1,
+		'customData.userId': 1,
+		'customData.firstName': 1,
+		'customData.lastName': 1,
+		'customData.billing.billingInfo.company': 1,
+	};
 
+	const emailToUsers = {};
+
+	const emails = accountUsers.map((user) => {
+		const { email } = user;
+
+		emailToUsers[email] = user;
+
+		return email;
+	});
+
+	const rawData = await getUserInfoFromEmailArray(emails, projection);
+
+	const addUserToMemberList = ({ user, customData }) => {
+		const { firstName, lastName, billing, userId, email } = customData;
+		membersInTeamspace.push(deleteIfUndefined(
+			{ user, firstName, lastName, company: billing?.billingInfo?.company }));
+		return { email, userId };
+	};
+
+	await Promise.all(rawData.map(
+		async (data) => {
+			const { userId, email } = addUserToMemberList(data);
+
+			const { id } = emailToUsers[email];
+
+			// update the mongo userId to match
+			if (userId !== id) await updateUserId(data.user, id);
+
+			delete emailToUsers[email];
+		},
+	));
+
+	// check for unprocessed users
+	if (!isEmpty(emailToUsers)) {
+		const teamspaceInvites = await getTeamspaceInvites(teamspace);
+
+		// Invitees (i.e. emails with 3drepo invites stored in mongo) are currently not considered
+		// real users, disregard them
+		teamspaceInvites.forEach(({ _id: email }) => {
+			delete emailToUsers[email];
+		});
+
+		await Promise.all(Object.values(emailToUsers).map(async (userRec) => {
+			const { email, id } = userRec;
+			logger.logDebug(`User not found: ${id}, creating user based on info from IDP...`);
+
+			await createNewUserRecord(userRec);
+			const newRawData = await getUserInfoFromEmailArray([email]);
+			addUserToMemberList(newRawData[0]);
+		}));
+	}
+
+	return membersInTeamspace;
+};
+
+Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
+	const membersList = await Teamspaces.getAllMembersInTeamspace(teamspace);
+	const jobsList = await getJobsToUsers(teamspace);
 	const usersToJob = {};
 	jobsList.forEach(({ _id, users }) => {
 		users.forEach((user) => {

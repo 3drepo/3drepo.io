@@ -25,7 +25,9 @@ const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
-
+const {createAccount, addUserToAccount} = require("../../v5/helper/fronteggMock/components/accounts")
+const { src } = require('../../v5/helper/path');
+const DbHandler = require(`${src}/handler/db`);
 
 const defaultAdmin = { "_id": "Admin", "color": "#f7f7b2"};
 describe("Job", function () {
@@ -38,16 +40,23 @@ describe("Job", function () {
 	const job2 = { _id: "job2", color: "#000000"};
 
 	before(async function() {
-
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");
 				resolve();
 			});
 		});
-
 		agent = SessionTracker(request(server));
 		await agent.login(username, password);
+
+		const mockEndTennantId  = await createAccount(username);
+		DbHandler.updateOne(username,"teamspace",{ _id: username }, { $set: { refId: mockEndTennantId}})
+
+		const jobUser = addUserToAccount(mockEndTennantId, "test-job@3drepo.org")
+		const user1 = addUserToAccount(mockEndTennantId, "test-user1@3drepo.org")
+
+		DbHandler.updateOne("admin","system.users",{ user: username }, { $set: { "customData.userId": jobUser}})
+		DbHandler.updateOne("admin","system.users",{ user: "user1" }, { $set: { "customData.userId": user1}})
 	});
 
 	after(function(done) {
