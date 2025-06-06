@@ -30,6 +30,7 @@ const {
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
 const { deleteFavourites, getAccessibleTeamspaces, getUserByUsername, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
+const { deleteIfUndefined, isEmpty } = require('../../utils/helper/objects');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { COL_NAME } = require('../../models/projectSettings.constants');
@@ -54,16 +55,6 @@ const removeAllUsersFromTS = async (teamspace) => {
 			]);
 		}),
 	);
-};
-
-const rawMemberDataProcessor = ({ user, customData }) => {
-	const { firstName, lastName, billing, userId, email } = customData;
-	const res = { user, firstName, lastName, userId, email };
-	if (billing?.billingInfo?.company) {
-		res.company = billing.billingInfo.company;
-	}
-
-	return res;
 };
 
 Teamspaces.getAvatar = (teamspace) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
@@ -111,7 +102,6 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 };
 
 Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
-	const foundUsersEmails = new Set();
 	const membersInTeamspace = [];
 	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
 	const accountUsers = await getAllUsersInAccount(tenantId);
@@ -124,43 +114,56 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 		'customData.lastName': 1,
 		'customData.billing.billingInfo.company': 1,
 	};
-	const rawData = await getUserInfoFromEmailArray(accountUsers.map((user) => user.email), projection);
+
+	const emailToUsers = {};
+
+	const emails = accountUsers.map((user) => {
+		const { email } = user;
+
+		emailToUsers[email] = user;
+
+		return email;
+	});
+
+	const rawData = await getUserInfoFromEmailArray(emails, projection);
+
+	const addUserToMemberList = ({ user, customData }) => {
+		const { firstName, lastName, billing, userId, email } = customData;
+		membersInTeamspace.push(deleteIfUndefined(
+			{ user, firstName, lastName, company: billing?.billingInfo?.company }));
+		return { email, userId };
+	};
 
 	await Promise.all(rawData.map(
 		async (data) => {
-			const { user, firstName, lastName, userId, email, company } = rawMemberDataProcessor(data);
-			foundUsersEmails.add(email);
+			const { userId, email } = addUserToMemberList(data);
 
-			// check id discrepancies
-			const { id } = accountUsers.filter((userData) => userData.email === email)[0];
+			const { id } = emailToUsers[email];
+
 			// update the mongo userId to match
 			if (userId !== id) await updateUserId(data.user, id);
 
-			const res = { user, firstName, lastName };
-			if (company) res.company = company;
-			membersInTeamspace.push(res);
+			delete emailToUsers[email];
 		},
 	));
 
 	// check for unprocessed users
-	if (accountUsers.length !== membersInTeamspace.length) {
+	if (!isEmpty(emailToUsers)) {
 		const teamspaceInvites = await getTeamspaceInvites(teamspace);
 
-		const processedInvites = new Set(teamspaceInvites.map((invite) => invite._id));
+		// Invitees (i.e. emails with 3drepo invites stored in mongo) are currently not considered
+		// real users, disregard them
+		teamspaceInvites.forEach(({ _id: email }) => {
+			delete emailToUsers[email];
+		});
 
-		const unprocessedUsers = accountUsers.filter(
-			({ email }) => !foundUsersEmails.has(email) && !processedInvites.has(email),
-		);
-
-		await Promise.all(unprocessedUsers.map(async ({ id, email }) => {
+		await Promise.all(Object.values(emailToUsers).map(async (userRec) => {
+			const { email, id } = userRec;
 			logger.logDebug(`User not found: ${id}, creating user based on info from IDP...`);
 
-			await createNewUserRecord(accountUsers.filter((userData) => userData.id === id));
+			await createNewUserRecord(userRec);
 			const newRawData = await getUserInfoFromEmailArray([email]);
-			const { user, firstName, lastName, company } = rawMemberDataProcessor(newRawData[0]);
-			const res = { user, firstName, lastName };
-			if (company) res.company = company;
-			membersInTeamspace.push(res);
+			addUserToMemberList(newRawData[0]);
 		}));
 	}
 
