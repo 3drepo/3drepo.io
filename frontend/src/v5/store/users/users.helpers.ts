@@ -42,4 +42,5 @@ export const userHasMissingRequiredData = ({ lastName }: ICurrentUser) => !lastN
 
 export const getFullnameFromUser = (user: IUser) => `${user.firstName} ${user.lastName}`;
 
+// if an assignee has an _id that means it is a job, so we return this _id instead of getting fullname
 export const getAssigneeDisplayName = (assignee) => assignee?._id ?? getFullnameFromUser(assignee);
