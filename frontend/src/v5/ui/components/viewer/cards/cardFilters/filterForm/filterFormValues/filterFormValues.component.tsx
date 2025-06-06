@@ -23,15 +23,14 @@ import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayF
 import { useEffect, useRef } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
+import { useSelectedModelsIds } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/newTicketMenu/useSelectedModels';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -47,7 +46,8 @@ const getInputField = (type: CardFilterType) => {
 
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
-	const { containerOrFederation } = useParams<ViewerParams>();
+	const availableTemplateIds = TicketsHooksSelectors.selectFilterableTemplatesIds();
+	const containersAndFederations = useSelectedModelsIds();
 	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -59,10 +59,18 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
-	const selectOptions = type === 'template' ?
-		TicketsCardHooksSelectors.selectCurrentTemplates().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
-		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property) : [];
+	let selectOptions = [];
 
+	if (type === 'template') {
+		selectOptions = TicketsHooksSelectors.selectTemplatesByIds(availableTemplateIds).map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }));
+	} else if (isSelectType(type)) {
+		selectOptions = TicketsCardHooksSelectors.selectPropertyOptions(
+			availableTemplateIds,
+			containersAndFederations,
+			module,
+			property,
+		);
+	}
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
 
@@ -133,7 +141,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 		);
 	}
 
-	if (isSelectType(type)) {
+	if (isSelectType(type) && selectOptions.length) {
 		const allJobsAndUsers = selectOptions.every(({ type: t }) => t === 'jobsAndUsers');
 		if (allJobsAndUsers) return (
 			<FormJobsAndUsersSelect
