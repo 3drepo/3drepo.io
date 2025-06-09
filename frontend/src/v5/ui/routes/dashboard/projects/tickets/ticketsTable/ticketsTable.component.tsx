@@ -41,6 +41,7 @@ import { NEW_TICKET_ID, NONE_OPTION } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
+import { useSelectedModels } from './newTicketMenu/useSelectedModels';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
@@ -62,6 +63,7 @@ export const TicketsTable = () => {
 	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
 	const [groupByValue,, setGroupByValue] = useSearchParam('groupByValue');
 	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
+	const models = useSelectedModels();
 	const [filtersInitialised, setFiltersInitialised] = useState(false);
 	const setGroupBy = (val) => {
 		// this is for clearing also the groupByValue when groupBy so we dont have an inconsistent groupByValue
@@ -113,8 +115,8 @@ export const TicketsTable = () => {
 	
 	
 	const newTicketButtonIsDisabled = useMemo(() => 
-		!containersAndFederations.length || containersAndFederations.filter(({ role }) => isCommenterRole(role)).length === 0,
-	[containersAndFederations, containerOrFederation]);
+		!models.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
+	[models]);
 
 	const onSaveTicket = (_id: string) => {
 		setTicketValue(containerOrFederation, _id, null, true);
