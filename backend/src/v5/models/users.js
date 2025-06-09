@@ -165,4 +165,11 @@ User.ensureIndicesExist = async () => {
 	}
 };
 
+User.getUserInfoFromEmailArray = async (emailArray, projection) => {
+	const query = { 'customData.email': { $in: emailArray } };
+	const res = await User.getUsersByQuery(query, projection);
+
+	return res;
+};
+
 module.exports = User;
