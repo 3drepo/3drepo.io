@@ -90,6 +90,7 @@ export const selectTemplateById = createSelector(
 export const selectTemplatesByIds = createSelector(
 	selectTicketsDomain,
 	selectCurrentProjectTemplates,
+	// templateIds can either be an array of a string of one _id
 	(state, templateIds) => templateIds,
 	(state, templates, templateIds) => templates.filter(({ _id }) => templateIds.includes(_id)),
 );
