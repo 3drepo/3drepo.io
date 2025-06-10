@@ -34,12 +34,14 @@ const { templates } = require(`${src}/utils/responseCodes`);
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const adminUser = generateRandomString();
+const tsNoAddons = generateRandomString();
 const nonAdminUser = generateRandomString();
 const usernameToRemove = generateRandomString();
 const nonTsMemberUser = generateRandomString();
 const teamspace = generateRandomString();
 
 TeamspacesModel.hasAccessToTeamspace.mockImplementation((ts, username) => username !== nonTsMemberUser);
+TeamspacesModel.getAddOns.mockImplementation((ts) => (ts === teamspace ? {} : { usersProvisioned: true }));
 
 PermissionsUtils.isTeamspaceAdmin.mockImplementation((ts, user) => user === adminUser);
 
@@ -51,6 +53,8 @@ const testCanRemoveTeamspaceMember = () => {
 			params: { teamspace, username: adminUser } }, false],
 		['User to be removed is not member of the teamspace', { session: { user: { username: adminUser } },
 			params: { teamspace, username: nonTsMemberUser } }, false],
+		['Logged in user is a teamspace admin on a teamspace with the usersProvisioned true', { session: { user: { username: adminUser } },
+			params: { teamspace: tsNoAddons, username: usernameToRemove } }, false],
 		['Logged in user is not a teamspace admin but remove themselves', { session: { user: { username: nonAdminUser } },
 			params: { teamspace, username: nonAdminUser } }, true],
 		['Logged in user is a teamspace admin', { session: { user: { username: adminUser } },

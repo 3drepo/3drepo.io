@@ -16,8 +16,8 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const { getAddOns, hasAccessToTeamspace } = require('../../../../models/teamspaceSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../../models/teamspaceSettings');
 const { isTeamspaceAdmin } = require('../../../../utils/permissions');
 const { respond } = require('../../../../utils/responder');
 
@@ -35,6 +35,13 @@ Teamspaces.canRemoveTeamspaceMember = async (req, res, next) => {
 	if (username !== user && !await isTeamspaceAdmin(teamspace, user)) {
 		respond(req, res, createResponseCode(templates.notAuthorized,
 			'Admin permissions are required to remove another user from a teamspace.'));
+		return;
+	}
+
+	const addOns = await getAddOns(teamspace);
+	if (addOns?.usersProvisioned) {
+		respond(req, res, createResponseCode(templates.notAuthorized,
+			'The user is restricted from removing other users from the teamspace.'));
 		return;
 	}
 
