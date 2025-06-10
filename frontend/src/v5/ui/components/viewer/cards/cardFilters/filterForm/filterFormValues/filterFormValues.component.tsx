@@ -64,7 +64,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	if (type === 'template') {
 		selectOptions = TicketsHooksSelectors.selectTemplatesByIds(availableTemplateIds).map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }));
 	} else if (isSelectType(type)) {
-		selectOptions = TicketsCardHooksSelectors.selectPropertyOptions(
+		selectOptions = TicketsCardHooksSelectors.selectFilterPropertyOptions(
 			availableTemplateIds,
 			containersAndFederations,
 			module,

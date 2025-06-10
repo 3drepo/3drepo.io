@@ -242,7 +242,7 @@ export const selectJobsAndUsersByModelIds = createSelector(
 	},
 );
 
-export const selectPropertyOptions = createSelector(
+export const selectFilterPropertyOptions = createSelector(
 	selectTemplatesByIds,
 	(state, templateIds, modelIds) => modelIds,
 	selectRiskCategories,
