@@ -22,6 +22,7 @@ const { escapeRegexChrs, getURLDomain } = require('./helper/strings');
 const { apiUrls } = require('./config');
 const { deleteIfUndefined } = require('./helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { logger } = require('./logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 
 const referrerMatch = (sessionReferrer, headerReferrer) => {
@@ -45,12 +46,12 @@ const validateCookie = async (session, cookies, headers) => {
 			await validateToken(session.user.auth.tokenInfo, session.user.auth.userId);
 			return true;
 		} catch (err) {
-			logger.logInfo(`Session ${session.id} was invalid due to jwt is invalid`);
+			logger.logInfo(`Session ${session.id} was invalid due to an invalid JWT token`);
 			return false;
 		}
 	}
-	
-	logger.logInfo(`Session ${session.id} was invalid due to ${csrfMatched ? "CSRF" : "referrer"} mismatch`);	
+
+	logger.logInfo(`Session ${session.id} was invalid due to ${csrfMatched ? 'CSRF' : 'referrer'} mismatch`);
 	return false;
 };
 
