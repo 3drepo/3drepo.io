@@ -29,6 +29,10 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
 import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.component';
+import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
+
+
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
@@ -64,21 +68,25 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 						<>
 							{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
 							<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
-								{sortedItems.map(({ modelId, ...ticket }) => (
-									<TicketsTableRow
-										key={ticket._id}
-										ticket={ticket}
-										modelId={modelId}
-										onClick={onEditTicket}
-										selected={selectedTicketId === ticket._id}
-									/>
-								))}
-								{!hideNewticketButton && (
+								<VirtualList
+									items={sortedItems}
+									itemHeight={37}
+									itemContent={(ticket: ITicket) => (
+										<TicketsTableRow
+											key={ticket._id}
+											ticket={ticket}
+											modelId={ticket.modelId}
+											onClick={onEditTicket}
+											selected={selectedTicketId === ticket._id}
+										/>
+									)}
+								/>
+								{!hideNewticketButton &&
 									<NewTicketRowButton
 										onNewTicket={onNewTicket}
 										disabled={newTicketButtonIsDisabled}
 									/>
-								)}
+								}
 							</Group>
 						</>
 					)}
