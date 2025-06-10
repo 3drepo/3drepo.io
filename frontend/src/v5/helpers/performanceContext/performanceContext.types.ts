@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ValuesOf } from '@/v5/helpers/types.helpers';
-
-export enum ResizableEvent {
-	WIDTH_CHANGE = 'WIDTH_CHANGE',
-	VISIBLE_COLUMNS_CHANGE = 'VISIBLE_COLUMNS_CHANGE',
-	MOVING_COLUMN_CHANGE = 'MOVING_COLUMN_CHANGE',
-	MOVING_COLUMN_DROP_INDEX_CHANGE = 'MOVING_COLUMN_DROP_INDEX_CHANGE',
-}
-
-export type ResizableEventType = ValuesOf<typeof ResizableEvent>;
-export type TableColumn = { name: string; minWidth?: number; width: number; };
 export type UnsubscribeFn = () => void;
+export type SubscribeFn<Event> = (events: Event[], callback: (...args) => void) => UnsubscribeFn;
+export type PublishFn<Event> = (event: Event, ...args) => void;
+
+export type SubscribableObject<ContextState> = {
+	state: ContextState,
+	subscribe: SubscribeFn<keyof ContextState>,
+};
+
+export type CustomEqualityCheck<ContextState> = (currentState: ContextState, previousState: ContextState) => boolean;
+export type ArrayOfAtLeastOneElement<Element> = [Element, ...Element[]];
+export type ObservedProperties<ContextState> = ArrayOfAtLeastOneElement<keyof ContextState>;

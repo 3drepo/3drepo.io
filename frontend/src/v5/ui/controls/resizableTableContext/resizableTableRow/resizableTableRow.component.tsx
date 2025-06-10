@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
 import { Row } from './resizableTableRow.styles';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export const ResizableTableRow = (props) => {
-	const { columnGap } = useContext(ResizableTableContext);
+	const { columnGap } = usePerformanceContext(ResizableTableContext, () => false);
 	return (<Row $gap={columnGap} {...props} />);
 };

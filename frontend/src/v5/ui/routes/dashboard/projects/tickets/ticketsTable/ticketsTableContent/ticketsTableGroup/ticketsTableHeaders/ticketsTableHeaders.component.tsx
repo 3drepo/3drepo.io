@@ -19,11 +19,10 @@ import { SortedTableContext } from '@controls/sortedTableContext/sortedTableCont
 import { Header, Headers } from './ticketsTableHeaders.styles';
 import { getColumnLabel } from '../../../ticketsTable.helper';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
 import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
-import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 const TableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -48,11 +47,7 @@ const TableHeader = ({ name, children, disableSorting = false, ...props }) => {
 };
 
 export const TicketsTableHeaders = () => {
-	const { getVisibleSortedColumnsNames } = useContext(ResizableTableContext);
-	const visibleSortedColumnsNames = useResizableState(
-		[ResizableEvent.VISIBLE_COLUMNS_CHANGE, ResizableEvent.WIDTH_CHANGE],
-		getVisibleSortedColumnsNames,
-	);
+	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	return (
 		<Headers>

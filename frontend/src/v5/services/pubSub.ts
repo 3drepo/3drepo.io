@@ -16,18 +16,22 @@
  */
 
 import { useRef } from 'react';
+import { PublishFn, SubscribeFn } from '../helpers/performanceContext/performanceContext.types';
 
 export class PubSub<K extends string> {
 	private subscriptions: Partial<Record<K, Function[]>> = {};
 
-	public publish = (event: K, ...args) => this.subscriptions[event]?.forEach((fn) => fn(...args));
+	public publish: PublishFn<K> = (event: K, ...args) => this.subscriptions[event]?.forEach((fn) => fn(event, ...args));
 
-	public subscribe = (event: K, fn: Function) => {
-		this.subscriptions[event] ||= [];
-		this.subscriptions[event].push(fn);
-		return () => {
-			this.subscriptions[event] = this.subscriptions[event].filter((subscribedFn) => subscribedFn !== fn);
-		};
+	public subscribe: SubscribeFn<K> = (events: K[], fn: Function) => {
+		const subs = events.map((event) => {
+			this.subscriptions[event] ||= [];
+			this.subscriptions[event].push(fn);
+			return () => {
+				this.subscriptions[event] = this.subscriptions[event].filter((subscribedFn) => subscribedFn !== fn);
+			};
+		});
+		return () => subs.forEach((unsibscribe) => unsibscribe());
 	};
 }
 

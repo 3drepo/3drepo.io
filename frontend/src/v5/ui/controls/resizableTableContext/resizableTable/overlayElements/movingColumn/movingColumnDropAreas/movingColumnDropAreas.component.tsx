@@ -15,27 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
 import { blockEvent } from '@/v5/helpers/events.helpers';
-import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export const MovingColumnDropAreas = () => {
-	const {
-		setMovingColumn, getMovingColumn, moveColumn, getWidth,
-		getMovingColumnDropIndex, setMovingColumnDropIndex, columnGap,
-		getIndex, getColumnOffsetLeft, getRowWidth, getVisibleSortedColumnsNames,
-	} = useContext(ResizableTableContext);
 	const [tableOffset, setTableOffset] = useState(0);
 	const ref = useRef(null);
-	const visibleSortedColumnsNames = useResizableState(
-		[ResizableEvent.VISIBLE_COLUMNS_CHANGE, ResizableEvent.WIDTH_CHANGE],
-		getVisibleSortedColumnsNames,
-	);
-	const movingColumn = useResizableState([ResizableEvent.MOVING_COLUMN_CHANGE], getMovingColumn);
-	const movingColumnDropIndex = useResizableState([ResizableEvent.MOVING_COLUMN_DROP_INDEX_CHANGE], getMovingColumnDropIndex);
+	const {
+		setMovingColumn, moveColumn, getWidth, setMovingColumnDropIndex, columnGap,
+		getIndex, getColumnOffsetLeft, getRowWidth, visibleSortedColumnsNames,
+		movingColumn, movingColumnDropIndex,
+	} = usePerformanceContext(ResizableTableContext, ['movingColumn', 'movingColumnDropIndex', 'columnsWidths', 'visibleSortedColumnsNames']);
 
 	const movingColumnIndex = getIndex(movingColumn);
 	const dropLineOffset = getColumnOffsetLeft(visibleSortedColumnsNames[movingColumnDropIndex]) ?? getRowWidth();
@@ -89,7 +82,7 @@ export const MovingColumnDropAreas = () => {
 
 	const dropColumn = () => {
 		setMovingColumn(null);
-		setMovingColumnDropIndex(-1);
+		setMovingColumnDropIndex(null);
 		moveColumn(movingColumn, movingColumnDropIndex);
 	};
 

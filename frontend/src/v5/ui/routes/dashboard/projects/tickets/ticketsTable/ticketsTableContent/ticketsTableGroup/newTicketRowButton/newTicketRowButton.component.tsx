@@ -16,21 +16,19 @@
  */
 
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
-import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
-import { useContext } from 'react';
 import { NewTicketRow, NewTicketText, NewTicketTextContainer } from './newTicketRowButton.styles';
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { NewTicketMenu } from '../../../newTicketMenu/newTicketMenu.component';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 type NewTicketRowButtonProps = {
 	disabled?: boolean;
 	onNewTicket: (modelId: string) => void;
 };
 export const NewTicketRowButton = ({ onNewTicket, disabled }: NewTicketRowButtonProps) => {
-	const { getRowWidth } = useContext(ResizableTableContext);
-	const rowWidth = useResizableState([ResizableEvent.VISIBLE_COLUMNS_CHANGE, ResizableEvent.WIDTH_CHANGE], getRowWidth);
+	const { getRowWidth } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
+	const rowWidth = getRowWidth();
 
 	return (
 		<NewTicketMenu

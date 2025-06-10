@@ -18,14 +18,11 @@
 import { CellContainer } from './cell.styles';
 import { TextOverflow } from '@controls/textOverflow';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
-import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
-import { useContext } from 'react';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 type CellProps = { name: string, children: any, className?: string };
 export const Cell = ({ name, children, className }: CellProps) => {
-	const { getMovingColumn } = useContext(ResizableTableContext);
-	const movingColumn = useResizableState([ResizableEvent.MOVING_COLUMN_CHANGE], getMovingColumn);
+	const { movingColumn } = usePerformanceContext(ResizableTableContext, ['movingColumn']);
 
 	return (
 		<CellContainer name={name} className={className} $isMoving={name === movingColumn}>

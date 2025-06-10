@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
-import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
 import { Highlighter } from './movingColumnHighlighter.styles';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export const MovingColumnHighlighter = (props) => {
-	const { getMovingColumn, getColumnOffsetLeft, getWidth, columnGap } = useContext(ResizableTableContext);
-	const movingColumn = useResizableState([ResizableEvent.MOVING_COLUMN_CHANGE], getMovingColumn);
+	const { getColumnOffsetLeft, getWidth, columnGap, movingColumn } = usePerformanceContext(ResizableTableContext, ['movingColumn']);
 	const width = getWidth(movingColumn);
 	const offset = getColumnOffsetLeft(movingColumn);
 

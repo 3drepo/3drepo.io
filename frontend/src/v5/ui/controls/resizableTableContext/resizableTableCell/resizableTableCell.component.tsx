@@ -15,11 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { HTMLAttributes, useContext } from 'react';
+import { HTMLAttributes } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
-import { ResizableEvent } from '../resizableTableContext.types';
 import { Item } from './resizableTableCell.styles';
-import { useResizableState } from '../resizableTableContext.hooks';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	name: string;
@@ -27,12 +26,12 @@ export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	onClick?: () => void;
 };
 export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { getMovingColumn, isVisible, getIndex } = useContext(ResizableTableContext);
+	const { movingColumn, getIndex } = usePerformanceContext(ResizableTableContext, ['movingColumn']);
+	const { isVisible } = usePerformanceContext(ResizableTableContext, (curr, prev) => (
+		curr.visibleSortedColumnsNames.includes(name) !== prev.visibleSortedColumnsNames.includes(name)
+	));
 
-	const movingColumn = useResizableState([ResizableEvent.MOVING_COLUMN_CHANGE], getMovingColumn);
-	const isHidden = useResizableState([ResizableEvent.VISIBLE_COLUMNS_CHANGE], () => !isVisible(name));
-
-	if (isHidden) return null;
+	if (!isVisible(name)) return null;
 
 	return (<Item $isMoving={movingColumn === name} $index={getIndex(name)} {...props} />);
 };

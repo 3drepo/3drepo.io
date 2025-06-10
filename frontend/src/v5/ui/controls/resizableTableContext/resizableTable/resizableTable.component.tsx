@@ -19,12 +19,12 @@ import { GridTemplateColumns, OverlayElements, Table } from './resizableTable.st
 import { ResizersOverlay } from './overlayElements/resizers/resizersOverlay.component';
 import { MovingColumnOverlay } from './overlayElements/movingColumn/movingColumnOverlay.component';
 import { ResizableTableContext } from '../resizableTableContext';
-import { useContext, useEffect, useState } from 'react';
-import { ResizableEvent } from '../resizableTableContext.types';
+import { useEffect, useState } from 'react';
 import { Row } from '../resizableTableRow/resizableTableRow.styles';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export const ResizableTable = ({ className = '', children }) => {
-	const { getWidth, getVisibleSortedColumnsNames, subscribe } = useContext(ResizableTableContext);
+	const { getWidth, getVisibleSortedColumnsNames, subscribe } = usePerformanceContext(ResizableTableContext, () => false);
 	const [key] = useState(+new Date());
 	const [tableNode, setTableNode] = useState(null);
 	const gridClassName = `ResizableTableTemplateColumns_${key}`;
@@ -50,13 +50,10 @@ export const ResizableTable = ({ className = '', children }) => {
 		
 		setGridTemplateColumns();
 
-		const subscriptions = [
-			subscribe(ResizableEvent.WIDTH_CHANGE, setGridTemplateColumns),
-			subscribe(ResizableEvent.VISIBLE_COLUMNS_CHANGE, setGridTemplateColumns),
-		];
+		const unsubscribe = subscribe(['columnsWidths', 'visibleSortedColumnsNames'], setGridTemplateColumns);
 
 		return () => {
-			subscriptions.forEach((fn) => fn());
+			unsubscribe();
 			tableNode.classList.remove(gridClassName);
 			document.head.removeChild(styleTag);
 		};

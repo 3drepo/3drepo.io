@@ -17,14 +17,13 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { memo, useContext } from 'react';
+import { memo } from 'react';
 import { Row } from './ticketsTableRow.styles';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isEqual } from 'lodash';
 import { TicketsTableCell } from './ticketsTableCell/ticketsTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ResizableEvent } from '@controls/resizableTableContext/resizableTableContext.types';
-import { useResizableState } from '@controls/resizableTableContext/resizableTableContext.hooks';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -36,8 +35,7 @@ type TicketsTableRowProps = {
 export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: TicketsTableRowProps) => {
 	const { _id: id, properties, type } = ticket;
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
-	const { getVisibleSortedColumnsNames } = useContext(ResizableTableContext);
-	const visibleSortedcolumns = useResizableState([ResizableEvent.VISIBLE_COLUMNS_CHANGE], getVisibleSortedColumnsNames);
+	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	if (!properties || !template?.code) return null;
 
@@ -49,7 +47,7 @@ export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: Tic
 	return (
 		<TicketContextComponent containerOrFederation={modelId}>
 			<Row key={id} onClickCapture={handleClick} $selected={selected}>
-				{visibleSortedcolumns.map((name) => (
+				{visibleSortedColumnsNames.map((name) => (
 					<TicketsTableCell
 						name={name}
 						ticket={ticket}

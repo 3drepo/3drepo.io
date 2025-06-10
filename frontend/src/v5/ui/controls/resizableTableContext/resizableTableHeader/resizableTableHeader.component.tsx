@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
 import { ResizableTableCell } from '../resizableTableCell/resizableTableCell.component';
 import { blockEvent } from '@/v5/helpers/events.helpers';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export const ResizableTableHeader = ({ name, children, ...props }) => {
-	const { setMovingColumn } = useContext(ResizableTableContext);
+	const { setMovingColumn } = usePerformanceContext(ResizableTableContext, () => false);
 
 	const onDragStart = (e) => {
 		// The blockEvent is to fix a bug in firefox where the dragging the
