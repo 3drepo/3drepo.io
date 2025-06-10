@@ -35,6 +35,7 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { useParams } from 'react-router';
 import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -106,15 +107,19 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 									</>
 								)}
 							<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
-								{sortedItems.map(({ modelId, ...ticket }) => (
-									<TicketsTableRow
-										key={ticket._id}
-										ticket={ticket}
-										modelId={modelId}
-										onClick={onEditTicket}
-										selected={selectedTicketId === ticket._id}
-									/>
-								))}
+								<VirtualList
+									items={sortedItems}
+									itemHeight={37}
+									itemContent={(ticket: ITicket) => (
+										<TicketsTableRow
+											key={ticket._id}
+											ticket={ticket}
+											modelId={ticket.modelId}
+											onClick={onEditTicket}
+											selected={selectedTicketId === ticket._id}
+										/>
+									)}
+								/>
 								{!hideNewticketButton &&
 									<NewTicketMenu
 										disabled={newTicketButtonIsDisabled}
