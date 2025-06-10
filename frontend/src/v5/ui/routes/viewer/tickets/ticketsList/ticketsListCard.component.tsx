@@ -16,7 +16,7 @@
  */
 
 import FunnelIcon from '@assets/icons/filters/funnel.svg';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
@@ -35,7 +35,7 @@ import { CardAction } from '@components/viewer/cards/cardAction/cardAction.style
 export const TicketsListCard = () => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const availableTemplateIds = TicketsHooksSelectors.selectFilterableTemplatesIds();
+	const availableTemplateIds = TicketsCardHooksSelectors.selectCurrentTemplates().map(({ _id }) => _id);
 	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(availableTemplateIds);
 	
 	return (
