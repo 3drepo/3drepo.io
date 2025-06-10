@@ -221,7 +221,7 @@ const selectModelJobsAndUsers = createSelector(
 	selectFederationUsers,
 	selectContainerUsers,
 	(fedJobs, contJobs, fedUsers, contUsers) => ({
-		conatiner: [...contJobs, ...contUsers] as IJobOrUserList,
+		container: [...contJobs, ...contUsers] as IJobOrUserList,
 		federation: [...fedJobs, ...fedUsers] as IJobOrUserList,
 	}),
 );
@@ -229,7 +229,7 @@ const selectModelJobsAndUsers = createSelector(
 const selectJobsAndUsersByModelId = createSelector(
 	selectFederationById,
 	selectModelJobsAndUsers,
-	(fed, modelJobsAndUsers) => !!fed ? modelJobsAndUsers.federation : modelJobsAndUsers.conatiner,
+	(fed, modelJobsAndUsers) => !!fed ? modelJobsAndUsers.federation : modelJobsAndUsers.container,
 );
 
 export const selectJobsAndUsersByModelIds = createSelector(
