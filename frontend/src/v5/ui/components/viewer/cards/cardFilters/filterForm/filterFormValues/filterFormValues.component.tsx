@@ -23,7 +23,7 @@ import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayF
 import { useEffect, useRef } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { CardFilterType } from '../../cardFilters.types';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
@@ -31,6 +31,7 @@ import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
 import { useSelectedModelsIds } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/newTicketMenu/useSelectedModels';
+import { getFilterPropertyOptions } from '@/v5/store/tickets/card/ticketsCard.helpers';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -64,8 +65,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	if (type === 'template') {
 		selectOptions = TicketsHooksSelectors.selectTemplatesByIds(availableTemplateIds).map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }));
 	} else if (isSelectType(type)) {
-		selectOptions = TicketsCardHooksSelectors.selectFilterPropertyOptions(
-			availableTemplateIds,
+		selectOptions = getFilterPropertyOptions(
 			containersAndFederations,
 			module,
 			property,

@@ -18,13 +18,13 @@
 import { selectCurrentModel } from '@/v4/modules/model';
 import { SequencingProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
-import { selectRiskCategories, selectTemplateById, selectTemplates, selectTemplatesByIds, selectTicketById, selectTickets, selectTicketsByContainersAndFederations } from '../tickets.selectors';
+import { selectTemplateById, selectTemplates, selectTemplatesByIds, selectTicketById, selectTickets, selectTicketsByContainersAndFederations } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getTicketPins, toPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
-import { sortBy, sortedUniqBy, uniqBy } from 'lodash';
-import { toTicketCardFilter, templatesToFilters, getFiltersFromJobsAndUsers } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { uniqBy } from 'lodash';
+import { toTicketCardFilter, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { selectFederationById, selectFederationJobs, selectFederationUsers } from '../../federations/federations.selectors';
 import { selectContainerJobs, selectContainerUsers } from '../../containers/containers.selectors';
 import { IJobOrUserList } from '../../jobs/jobs.types';
@@ -242,33 +242,3 @@ export const selectJobsAndUsersByModelIds = createSelector(
 	},
 );
 
-export const selectFilterPropertyOptions = createSelector(
-	selectTemplatesByIds,
-	(state, templateIds, modelIds) => modelIds,
-	selectRiskCategories,
-	(state, templateIds, modelIds, module) => module,
-	(state, templateIds, modelIds, module, property) =>  property,
-	// this is to recompute the selector when the store jobs or users change
-	selectModelJobsAndUsers,
-	(templates, modelIds, riskCategories, module, property) => {
-		const jobsAndUsers = selectJobsAndUsersByModelIds(getState(), modelIds);
-		const allValues = [];
-		if (!module && property === 'Owner') return getFiltersFromJobsAndUsers(jobsAndUsers.filter((ju) => !!ju.firstName));
-		templates.forEach((template) => {
-			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
-			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
-			if (!matchingProperty) return;
-			switch (matchingProperty.values) {
-				case 'riskCategories':
-					allValues.push(...riskCategories.map((value) => ({ value, type: 'riskCategories' })));
-					break;
-				case 'jobsAndUsers':
-					allValues.push(...getFiltersFromJobsAndUsers(jobsAndUsers));
-					break;
-				default:
-					allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
-			}
-		});
-		return sortedUniqBy(sortBy(allValues, 'value'), 'value');
-	},
-);
