@@ -45,9 +45,12 @@ const validateCookie = async (session, cookies, headers) => {
 			await validateToken(session.user.auth.tokenInfo, session.user.auth.userId);
 			return true;
 		} catch (err) {
+			logger.logInfo(`Session ${session.id} was invalid due to jwt is invalid`);
 			return false;
 		}
 	}
+	
+	logger.logInfo(`Session ${session.id} was invalid due to ${csrfMatched ? "CSRF" : "referrer"} mismatch`);	
 	return false;
 };
 
