@@ -43,7 +43,6 @@ const testGetTeamspaceList = () => {
 			await Promise.all([
 				...teamspacesWithAdmin.map((ts) => ServiceHelper.db.createTeamspace(ts, [testUser.user])),
 				...times(5, () => ServiceHelper.db.createTeamspace(ServiceHelper.generateRandomString())),
-
 			]);
 		});
 		test('should fail without a valid session', async () => {
@@ -131,9 +130,20 @@ const testGetTeamspaceMembers = () => {
 
 				return data;
 			});
-			expectedData.push({ job: DEFAULT_OWNER_JOB, user: teamspace });
 
-			ServiceHelper.outOfOrderArrayEqual(res.body.members, expectedData);
+			// when the default user for the teamspace is created the details are randomly generated
+			const resWithoutAdmin = res.body.members.filter(
+				(element) => element.job !== DEFAULT_OWNER_JOB && element.user !== teamspace,
+			);
+			const resAdminJob = res.body.members.filter(
+				(element) => element.job === DEFAULT_OWNER_JOB && element.user === teamspace,
+			);
+
+			// check that the rest of the data matches
+			ServiceHelper.outOfOrderArrayEqual(resWithoutAdmin, expectedData);
+			// ensure the default owner exists
+			expect(resAdminJob[0].job).toEqual(DEFAULT_OWNER_JOB);
+			expect(resAdminJob[0].user).toEqual(teamspace);
 		});
 	});
 };
@@ -425,8 +435,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	testGetTeamspaceList();
 	testGetTeamspaceMembers();
+	testGetTeamspaceList();
 	testGetAvatar();
 	testGetQuotaInfo();
 	testRemoveTeamspaceMember();
