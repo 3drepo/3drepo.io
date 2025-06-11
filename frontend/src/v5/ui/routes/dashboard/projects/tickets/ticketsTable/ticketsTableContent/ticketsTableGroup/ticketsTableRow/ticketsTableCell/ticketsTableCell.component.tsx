@@ -31,6 +31,9 @@ import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 import { CellDate } from './ticketsTableCell.styles';
 import { Cell } from './cell/cell.component';
+import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
+import { selectIsPropertyLoading } from '@/v5/store/tickets/tickets.selectors';
+import { useSelector } from 'react-redux';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -39,7 +42,7 @@ type TicketsTableCellProps = {
 	ticket: ITicket,
 };
 export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProps) => {
-	const { title, properties, number, type: templateId } = ticket;
+	const { title, properties, number, type: templateId, _id: ticketId } = ticket;
 	const { getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
@@ -47,7 +50,11 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	const federation = FederationsHooksSelectors.selectFederationById(modelId);
 	const { name: modelName } = container || federation || {};
 	const value = get(ticket, name);
-	
+
+	// Check if this property is currently being loaded
+	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
+	const isPropertyLoading = useSelector((state) => selectIsPropertyLoading(state, ticketId, propertyName));
+
 	const {
 		owner,
 		priority,
@@ -55,6 +62,15 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 		dueDate,
 	} = getPropertiesInCamelCase(properties);
 	const propertyType = getPropertyType(name);
+
+	// Show loading skeleton if property is being loaded and value is undefined/null
+	if (isPropertyLoading) {
+		return (
+			<Cell name={name}>
+				<SkeletonBlock width="80%" />
+			</Cell>
+		);
+	}
 
 	if (name === 'id') return (
 		<Cell name={name}>
