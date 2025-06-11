@@ -24,11 +24,14 @@ import { subscribeToRoomEvent } from './realtime.service';
 import { TicketsActionsDispatchers } from '../actionsDispatchers';
 import { fetchTicketGroup } from '../api/tickets';
 
+export const ticketEvent = (isFed: boolean, eventType: string) => isFed ? `federation${eventType}` : `container${eventType}`;
+
+
 // Container ticket
-export const enableRealtimeContainerUpdateTicket = (teamspace: string, project: string, containerId: string, revision?: string) => (
+export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
-		'containerUpdateTicket',
+		ticketEvent(isFed, 'UpdateTicket'),
 		(ticket: Partial<EditableTicket>) => {
 			fillOverridesIfEmpty(ticket);
 			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision);
@@ -36,18 +39,19 @@ export const enableRealtimeContainerUpdateTicket = (teamspace: string, project: 
 	)
 );
 
-export const enableRealtimeContainerNewTicket = (teamspace: string, project: string, containerId: string, revision?: string) => (
+export const enableRealtimeNewTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
-		'containerNewTicket',
+		ticketEvent(isFed, 'NewTicket'),
 		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, containerId, ticket, revision),
 	)
 );
 
-export const enableRealtimeContainerUpdateTicketGroup = (teamspace: string, project: string, containerId: string, revision: string) => (
+export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: string, containerId: string, isFed:boolean, revision: string) => (
 	subscribeToRoomEvent(
 		{ teamspace, project, model: containerId },
-		'containerUpdateTicketGroup',
+		ticketEvent(isFed, 'UpdateTicketGroup'),
+
 		async (group: Group) => {
 			if (group.rules) {
 				const { data } = await getMeshIDsByQuery(teamspace, containerId, group.rules, revision);
@@ -56,45 +60,6 @@ export const enableRealtimeContainerUpdateTicketGroup = (teamspace: string, proj
 			// eslint-disable-next-line no-underscore-dangle
 			} else if (group.objects.some((o) => !o._ids)) {
 				const { objects } = await fetchTicketGroup(teamspace, project, containerId, group.ticket, group._id, false);
-				group.objects = objects;
-			}
-			TicketsActionsDispatchers.updateTicketGroupSuccess(group);
-		},
-	)
-);
-
-// Federation ticket
-export const enableRealtimeFederationUpdateTicket = (teamspace: string, project: string, federationId: string, revision?: string) => (
-	subscribeToRoomEvent(
-		{ teamspace, project, model: federationId },
-		'federationUpdateTicket',
-		(ticket: Partial<EditableTicket>) => {
-			fillOverridesIfEmpty(ticket);
-			TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket, revision);
-		},
-	)
-);
-
-export const enableRealtimeFederationNewTicket = (teamspace: string, project: string, federationId: string, revision?: string) => (
-	subscribeToRoomEvent(
-		{ teamspace, project, model: federationId },
-		'federationNewTicket',
-		(ticket: ITicket) => TicketsActionsDispatchers.upsertTicketAndFetchGroups(teamspace, project, federationId, ticket, revision),
-	)
-);
-
-export const enableRealtimeFederationUpdateTicketGroup = (teamspace: string, project: string, federationId: string) => (
-	subscribeToRoomEvent(
-		{ teamspace, project, model: federationId },
-		'federationUpdateTicketGroup',
-		async (group: Group) => {
-			if (group.rules) {
-				const { data } = await getMeshIDsByQuery(teamspace, federationId, group.rules);
-				// eslint-disable-next-line no-param-reassign
-				group.objects = meshObjectsToV5GroupNode(data);
-			// eslint-disable-next-line no-underscore-dangle
-			} else if (group.objects.some((o) => !o._ids)) {
-				const { objects } = await fetchTicketGroup(teamspace, project, federationId, group.ticket, group._id, true);
 				group.objects = objects;
 			}
 			TicketsActionsDispatchers.updateTicketGroupSuccess(group);

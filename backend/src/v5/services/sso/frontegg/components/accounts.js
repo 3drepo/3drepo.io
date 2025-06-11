@@ -179,8 +179,8 @@ Accounts.getAllUsersInAccount = async (accountId) => {
 			const { data: { items, _links } } = await get(`${config.vendorDomain}/identity/resources/users/v3?${query}`,
 				header);
 
-			items.forEach(({ id, email }) => {
-				entries.push({ id, email });
+			items.forEach(({ id, email, name, createdAt }) => {
+				entries.push({ id, email, name, createdAt });
 			});
 			query = _links.next;
 		}

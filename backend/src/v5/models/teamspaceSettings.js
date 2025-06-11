@@ -38,6 +38,7 @@ const TeamspaceSetting = {};
 
 const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
+const teamspaceInvitesQuery = (query, projection, sort) => db.find(USERS_DB_NAME, 'invitations', query, projection, sort);
 
 const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPACE_SETTINGS_COL, query, actions);
 const teamspaceSettingQuery = (ts, query, projection, sort) => db.findOne(ts,
@@ -269,6 +270,11 @@ TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
 TeamspaceSetting.getRiskCategories = async (teamspace) => {
 	const { riskCategories } = await teamspaceSettingQuery(teamspace, { _id: teamspace }, { riskCategories: 1 });
 	return riskCategories;
+};
+
+TeamspaceSetting.getTeamspaceInvites = (teamspace, projection = { _id: 1 }) => {
+	const query = { 'teamSpaces.teamspace': teamspace };
+	return teamspaceInvitesQuery(query, projection);
 };
 
 module.exports = TeamspaceSetting;

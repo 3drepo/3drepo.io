@@ -47,6 +47,7 @@ const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
 const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces`);
+const { getTeamspaceMembersInfo } = require(`${v5Path}/processors/teamspaces`);
 
 const COLL_NAME = "system.users";
 
@@ -590,10 +591,7 @@ User.hasReachedLicenceLimitCheck = hasReachedLicenceLimit;
 User.getMembers = async function (teamspace) {
 	const promises = [];
 
-	const getTeamspaceMembers = User.findUsersInTeamspace(teamspace, {
-		user: 1,
-		customData: 1
-	});
+	const getTeamspaceMembers = getTeamspaceMembersInfo(teamspace);
 	const getRoleInfo = usersWithRole(teamspace);
 
 	const getTeamspacePermissions = TeamspaceSettings.getTeamspaceSettings(teamspace).then(({permissions}) => permissions);
@@ -606,14 +604,14 @@ User.getMembers = async function (teamspace) {
 
 	const [members = [], teamspacePermissions, memToRole = {}] = await Promise.all(promises);
 
-	return members.map(({user, customData}) => {
-		const permissions = _.find(teamspacePermissions, {user});
+	return members.map(({user, firstName, lastName, company}) => {
+		const permissions = _.find(teamspacePermissions, { user});
 
 		return {
 			user,
-			firstName: customData.firstName,
-			lastName: customData.lastName,
-			company: _.get(customData, "billing.billingInfo.company", null),
+			firstName,
+			lastName,
+			company,
 			permissions: _.get(permissions, "permissions", []),
 			role: _.get(memToRole, user)
 		};

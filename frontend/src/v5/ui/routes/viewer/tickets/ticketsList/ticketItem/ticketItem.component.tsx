@@ -16,7 +16,7 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip, DueDate } from './ticketItem.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -29,6 +29,7 @@ import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/
 import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
+import { formatMessage } from '@/v5/services/intl';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -69,13 +70,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 		TicketsCardActionsDispatchers.openTicket(ticket._id);
 	};
 
-	useEffect(() => {
-		if (isSelected && ref.current) {
-			// @ts-ignore
-			ref.current.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
-		}
-	}, []);
-
 	return (
 		<TicketItemContainer key={ticket._id} ref={ref} onClick={onClickTicket} $selected={isSelected}>
 			<FlexRow>
@@ -90,10 +84,10 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 								value={assignees}
 								maxItems={5}
 								multiple
-								showAddButton
 								onBlur={onBlurAssignees}
-								disabled={readOnly}
+								disabled
 								excludeViewers
+								emptyListMessage={formatMessage({ id: 'ticket.preview.noAssignees', defaultMessage: 'No assignees' })}
 							/>
 							<FlexRow>
 								<DueDate value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />

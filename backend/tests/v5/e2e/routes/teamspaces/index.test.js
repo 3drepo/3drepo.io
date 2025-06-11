@@ -43,7 +43,6 @@ const testGetTeamspaceList = () => {
 			await Promise.all([
 				...teamspacesWithAdmin.map((ts) => ServiceHelper.db.createTeamspace(ts, [testUser.user])),
 				...times(5, () => ServiceHelper.db.createTeamspace(ServiceHelper.generateRandomString())),
-
 			]);
 		});
 		test('should fail without a valid session', async () => {
@@ -140,9 +139,21 @@ const testGetTeamspaceMembers = () => {
 
 			const allRoles = await agent.get(`/v5/teamspaces/${teamspace.name}/roles?key=${testUser.apiKey}`);
 			const adminRoleId = allRoles.body.roles.find((r) => r.name === DEFAULT_OWNER_ROLE)._id;
-			expectedData.push({ roles: [adminRoleId], user: teamspace.name });
 
-			ServiceHelper.outOfOrderArrayEqual(res.body.members, expectedData);
+			// FIXME: to have another look
+			// when the default user for the teamspace is created the details are randomly generated
+			const resWithoutAdmin = res.body.members.filter(
+				(element) => element.roles !== DEFAULT_OWNER_ROLE && element.user !== teamspace,
+			);
+			const resAdminJob = res.body.members.filter(
+				(element) => element.roles === DEFAULT_OWNER_ROLE && element.user === teamspace,
+			);
+
+			// check that the rest of the data matches
+			ServiceHelper.outOfOrderArrayEqual(resWithoutAdmin, expectedData);
+			// ensure the default owner exists
+			expect(resAdminJob[0].role).toEqual(adminRoleId);
+			expect(resAdminJob[0].user).toEqual(teamspace);
 		});
 	});
 };
@@ -434,8 +445,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	testGetTeamspaceList();
 	testGetTeamspaceMembers();
+	testGetTeamspaceList();
 	testGetAvatar();
 	testGetQuotaInfo();
 	testRemoveTeamspaceMember();

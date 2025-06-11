@@ -16,26 +16,27 @@
  */
 
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
-import { FormattedMessage } from 'react-intl';
-import { formatMessage } from '@/v5/services/intl';
-import AddUserIcon from '@assets/icons/outlined/add_user-outlined.svg';
-import { AddUserButton, Tooltip } from '../assigneesSelect.styles';
 import { AssigneeCircle } from '../assigneeCircle/assigneeCircle.component';
 import { ExtraAssigneesPopover } from '../extraAssigneesCircle/extraAssigneesPopover.component';
 import { ExtraAssigneesCircle } from '../extraAssigneesCircle/extraAssignees.styles';
+import { AvatarsOpacityHandler, ClearIconContainer, Container } from './assigneeValuesDisplay.styles';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
+import { formatMessage } from '@/v5/services/intl';
+
+const DEFAULT_EMPTY_LIST_MESSAGE = formatMessage({ id: 'assignees.circleList.none', defaultMessage: 'None Selected' });
 
 export type AssigneesValuesDisplayProps = {
 	value: any[];
-	disabled?: boolean;
 	maxItems?: number;
-	showEmptyText?: boolean;
+	onClear?: () => void;
+	emptyListMessage?: string;
 };
 export const AssigneesValuesDisplay = ({
 	value,
 	maxItems = 3,
-	showEmptyText = false,
-	disabled,
-}: AssigneesValuesDisplayProps) => {
+	onClear,
+	emptyListMessage = DEFAULT_EMPTY_LIST_MESSAGE,
+}) => {
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
 	// since the overflowing assignee could just be displayed instead
@@ -43,33 +44,25 @@ export const AssigneesValuesDisplay = ({
 	const listedAssignees = overflowRequired ? value.slice(0, maxItems - 1) : value;
 	const overflowValue = overflowRequired ? value.slice(maxItems - 1).length : 0;
 	return (
-		<>
-			{!listedAssignees.length && showEmptyText && (
-				<FormattedMessage id="assignees.circleList.unassigned" defaultMessage="Unassigned" />
+		<Container>
+			<AvatarsOpacityHandler>
+				{!listedAssignees.length && emptyListMessage}
+				{listedAssignees.map((assignee) => (
+					<AssigneeCircle key={assignee} assignee={assignee} size="small" />
+				))}
+				{overflowRequired && (
+					<HoverPopover
+						anchor={(attrs) => <ExtraAssigneesCircle {...attrs}> +{overflowValue} </ExtraAssigneesCircle>}
+					>
+						<ExtraAssigneesPopover assignees={value} />
+					</HoverPopover>
+				)}
+			</AvatarsOpacityHandler>
+			{onClear && (
+				<ClearIconContainer onClick={onClear}>
+					<ClearIcon />
+				</ClearIconContainer>
 			)}
-			{listedAssignees.map((assignee) => (
-				<AssigneeCircle key={assignee} assignee={assignee} size="small" />
-			))}
-			{overflowRequired && (
-				<HoverPopover
-					anchor={(attrs) => <ExtraAssigneesCircle {...attrs}> +{overflowValue} </ExtraAssigneesCircle>}
-				>
-					<ExtraAssigneesPopover assignees={value} />
-				</HoverPopover>
-			)}
-			{!disabled && (
-				<Tooltip
-					title={formatMessage({
-						id: 'customTicket.topPanel.addAssignees.tooltip',
-						defaultMessage: 'Assign',
-					})}
-					arrow
-				>
-					<AddUserButton>
-						<AddUserIcon />
-					</AddUserButton>
-				</Tooltip>
-			)}
-		</>
+		</Container>
 	);
 };

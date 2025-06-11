@@ -1288,6 +1288,8 @@ const testProcessReadOnlyValues = () => {
 				[riskLevels.MODERATE, riskLevels.LOW, riskLevels.MODERATE],
 				[riskLevels.LOW, riskLevels.LOW, riskLevels.LOW],
 				[riskLevels.VERY_LOW, riskLevels.VERY_LOW, riskLevels.VERY_LOW],
+				[null, riskLevels.VERY_LOW, null],
+				[riskLevels.VERY_LOW, null, null],
 			])('Level of risk calculation', (likelihood, consequence, expectedRes) => {
 				test(`Likelihood: ${likelihood}, Consequence: ${consequence} should result in ${expectedRes}`, () => {
 					const { OWNER, CREATED_AT, UPDATED_AT } = basePropertyLabels;
