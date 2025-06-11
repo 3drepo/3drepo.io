@@ -27,8 +27,8 @@ import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
 import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
-import { selectFetchingPropertiesByTicketId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { selectHasPropertyBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -55,7 +55,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 
 	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
 	const ticketsToDisplay = groupBy
-		? filteredItems.filter(({ _id: ticketId }) => !selectFetchingPropertiesByTicketId(getState(), ticketId).has(propertyName))
+		? filteredItems.filter(({ _id: ticketId }) => selectHasPropertyBeenFetched(getState(), ticketId, propertyName))
 		: filteredItems;
 
 	const isLoading = groupBy && (ticketsToDisplay.length !== filteredItems.length);
