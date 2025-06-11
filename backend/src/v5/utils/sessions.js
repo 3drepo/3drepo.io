@@ -51,7 +51,7 @@ const validateCookie = async (session, cookies, headers) => {
 		}
 	}
 
-	logger.logInfo(`Session ${session.id} was invalid due to ${csrfMatched ? 'CSRF' : 'referrer'} mismatch`);
+	logger.logInfo(`Session ${session.id} was invalid due to ${csrfMatched ? 'referrer' : 'CSRF'} mismatch`);
 	return false;
 };
 
