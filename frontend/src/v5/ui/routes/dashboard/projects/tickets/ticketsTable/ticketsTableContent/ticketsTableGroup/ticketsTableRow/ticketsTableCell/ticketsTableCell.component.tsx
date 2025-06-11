@@ -26,7 +26,7 @@ import { Chip } from '@controls/chip/chip.component';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 import { get } from 'lodash';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
@@ -35,6 +35,9 @@ import { ResizableTableContext } from '@controls/resizableTableContext/resizable
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { selectIsPropertyLoading } from '@/v5/store/tickets/tickets.selectors';
 import { useSelector } from 'react-redux';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -46,6 +49,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	const { title, properties, number, type: templateId, _id: ticketId } = ticket;
 	const { getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const { movingColumn } = useContext(ResizableTableContext);
+	const { teamspace, project } = useParams<DashboardParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
 	const container = ContainersHooksSelectors.selectContainerById(modelId);
@@ -70,6 +74,25 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 			<BaseCell {...props} />
 		</Container>
 	);
+
+	useEffect(() => {
+		if (!isPropertyLoading) return ;
+		const templateCode = template?.code || '';
+		const isFederation = !!federation;
+	
+		// fetchTicketProperties again will make the fetch jump to the top of the queue
+		// This means that if the user is scrolling through the table, the ticket that he is currently viewing will be fetched first
+		// Takes precedence over any other fetches that are currently in the queue
+		TicketsActionsDispatchers.fetchTicketProperties(
+			teamspace,
+			project,
+			modelId,
+			ticketId,
+			templateCode,
+			isFederation,
+			[propertyName],
+		);
+	}, [isPropertyLoading, ticketId, propertyName, ticket, template, federation]);
 
 	// Show loading skeleton if property is being loaded and value is undefined/null
 	if (isPropertyLoading) {
