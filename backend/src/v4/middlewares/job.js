@@ -16,14 +16,27 @@
  */
 
 "use strict";
-(() => {
-	const checkPermissions = require("./checkPermissions").checkPermissions;
-	const C	= require("../constants");
+const { v5Path } = require("../../interop");
+const {getAddOns} = require(`${v5Path}/models/teamspaceSettings`);
+const checkPermissions = require("./checkPermissions").checkPermissions;
+const responseCodes = require("../response_codes");
+const C	= require("../constants");
 
-	module.exports = {
-		canCreate: checkPermissions([C.PERM_CREATE_JOB]),
-		canView: checkPermissions([C.PERM_ASSIGN_JOB]),
-		canDelete: checkPermissions([C.PERM_DELETE_JOB])
-	};
+const hasAddOns = async (req,res,next) => {
+	const { account } = req.params;
 
-})();
+	const addOns = await getAddOns(account);
+	if (addOns?.usersProvisioned) {
+		responseCodes.respond("The teamspace has usersProvisioned on.",req, res, next, responseCodes.NOT_AUTHORIZED, null, {});
+		return ;
+	}
+	next();
+};
+
+module.exports = {
+	canCreate: checkPermissions([C.PERM_CREATE_JOB]),
+	canView: checkPermissions([C.PERM_ASSIGN_JOB]),
+	canDelete: checkPermissions([C.PERM_DELETE_JOB]),
+	canEdit: [checkPermissions([C.PERM_CREATE_JOB]), hasAddOns],
+	hasAddOns
+};

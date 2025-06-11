@@ -30,6 +30,7 @@ const checkPermissions = require("./checkPermissions").checkPermissions;
 const checkMultiplePermissions = require("./checkPermissions").checkMultiplePermissions;
 const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessToModelHelper;
 const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
+const {hasAddOns} = require("./job");
 
 const { validSession } = require(`${v5Path}/middleware/auth`);
 const { hasAccessToTeamspace } = require(`${v5Path}/middleware/permissions`);
@@ -200,6 +201,7 @@ const middlewares = {
 	isHereEnabled: isHereEnabled,
 
 	// models
+	canAddOrRemoveUsers: [checkTeamspaceAccess(checkPermissions([C.PERM_TEAMSPACE_ADMIN])), hasAddOns],
 	canCreateModel: checkTeamspaceAccess(canCreateModel),
 	hasReadAccessToModel: checkTeamspaceAccess(checkPermissions(readAccessToModel)),
 	hasCommenterAccessToModel: checkTeamspaceAccess(checkPermissions([C.PERM_CREATE_ISSUE])),
