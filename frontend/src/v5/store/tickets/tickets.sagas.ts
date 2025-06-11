@@ -79,6 +79,11 @@ export function* fetchTicketProperties({
 	templateCode, isFederation, propertiesToInclude,
 }: FetchTicketPropertiesAction) {
 	try {
+		// Mark properties as loading
+		for (const property of propertiesToInclude) {
+			yield put(TicketsActions.setPropertyLoading(ticketId, property, true));
+		}
+
 		const { number } = yield select(selectTicketById, modelId, ticketId);
 		const filterByTemplateCode = {
 			filter: {
@@ -97,12 +102,17 @@ export function* fetchTicketProperties({
 		);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { ...ticket, _id: ticketId }));
 
-		// Mark properties as fetched
+		// Mark properties as no longer loading
 		for (const property of propertiesToInclude) {
-			yield put(TicketsActions.markPropertyAsFetched(ticketId, property));
+			yield put(TicketsActions.setPropertyLoading(ticketId, property, false));
 		}
 
 	} catch (error) {
+		// Clear loading states on error
+		for (const property of propertiesToInclude) {
+			yield put(TicketsActions.setPropertyLoading(ticketId, property, false));
+		}
+
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.fetchTicketProperties.error', defaultMessage: 'trying to fetch {model} ticket properties' },

@@ -29,7 +29,6 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
 import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.component';
-import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 
