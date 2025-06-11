@@ -79,6 +79,7 @@ export function* fetchTicketProperties({
 	templateCode, isFederation, propertiesToInclude,
 }: FetchTicketPropertiesAction) {
 	try {
+
 		const { number } = yield select(selectTicketById, modelId, ticketId);
 		const filterByTemplateCode = {
 			filter: {
@@ -96,6 +97,11 @@ export function* fetchTicketProperties({
 			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
 		);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { ...ticket, _id: ticketId }));
+
+		// Mark properties as fetched
+		for (const property of propertiesToInclude) {
+			yield put(TicketsActions.markPropertyAsFetched(ticketId, property));
+		}
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
