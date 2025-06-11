@@ -171,3 +171,15 @@ export const selectStatusConfigByTemplateId = createSelector(
 	(state, ...args) => selectCurrentProjectTemplateById(state, args.at(-1)),
 	(ticketTemplate, projectTemplate) => ticketTemplate?.config?.status || projectTemplate?.config?.status || DEFAULT_STATUS_CONFIG,
 );
+
+// Selectors for fetched properties tracking
+export const selectFetchedProperties = createSelector(
+	selectTicketsDomain,
+	(state): Record<string, Set<string>> => state.fetchedProperties || {},
+);
+
+export const selectHasPropertyBeenFetched = (state, ticketId: string, property: string): boolean => {
+	const fetchedProperties = selectFetchedProperties(state);
+	const ticketProperties = fetchedProperties[ticketId];
+	return ticketProperties ? ticketProperties.has(property) : false;
+};
