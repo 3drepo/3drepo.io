@@ -118,8 +118,7 @@ Accounts.getGroups = async (accountId) => {
 			...await getBearerHeader(),
 			[HEADER_TENANT_ID]: accountId,
 		};
-
-		const { data: { groups } } = await get(`${config.vendorDomain}/identity/resources/groups/v1/`, { headers });
+		const { data: { groups } } = await get(`${config.vendorDomain}/identity/resources/groups/v1/?_groupsRelations=users`, headers);
 		return groups;
 	} catch (err) {
 		logger.logError(`Failed to get groups in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);

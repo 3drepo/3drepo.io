@@ -17,7 +17,7 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addUserToAccount, createAccount, getAllUsersInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
-const { createDefaultRoles, getRolesToUsers, removeUserFromRoles } = require('./roles');
+const { createDefaultRoles, getRoles, removeUserFromRoles } = require('./roles');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
@@ -173,17 +173,17 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 	const [membersList, rolesList] = await Promise.all([
 		Teamspaces.getAllMembersInTeamspace(teamspace),
-		getRolesToUsers(teamspace),
+		getRoles(teamspace),
 	]);
 
 	const usersToRoles = {};
-	rolesList.forEach(({ _id, users }) => {
-		users.forEach((user) => {
+	rolesList.forEach(({ id, users }) => {
+		(users ?? []).forEach((user) => {
 			if (!usersToRoles[user]) {
 				usersToRoles[user] = [];
 			}
 
-			usersToRoles[user].push(UUIDToString(_id));
+			usersToRoles[user].push(id);
 		});
 	});
 
