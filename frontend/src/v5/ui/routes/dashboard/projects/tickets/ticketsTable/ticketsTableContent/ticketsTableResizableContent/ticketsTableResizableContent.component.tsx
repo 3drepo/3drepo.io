@@ -42,7 +42,6 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
 
-
 	if (!groupBy) {
 		return (
 			<TicketsTableGroup
@@ -61,7 +60,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 
 	const isLoading = groupBy && (ticketsToDisplay.length !== filteredItems.length);
 
-	const groups = groupTickets(groupBy, ticketsToDisplay, getPropertyType(groupBy));
+	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy));
 
 	return (
 		<Container>
