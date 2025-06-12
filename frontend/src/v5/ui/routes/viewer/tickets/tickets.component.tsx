@@ -35,7 +35,6 @@ export const Tickets = () => {
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();
-	const filters = TicketsCardHooksSelectors.selectFilters();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const templateIdsInUse = uniq(tickets.map(({ type }) => type));
 
@@ -57,10 +56,6 @@ export const Tickets = () => {
 			newTicketPins.forEach(({ id }) => Viewer.removePin(id));
 		}
 	}, [view]);
-
-	useEffect(() => {
-		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederation]);
-	}, [tickets, filters]);
 
 	useEffect(() => {
 		TicketsActionsDispatchers.setFilterableTemplatesIds(templateIdsInUse);

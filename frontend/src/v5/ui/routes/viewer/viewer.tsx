@@ -24,7 +24,6 @@ import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
-import { TicketFiltersSetter } from './ticketFiltersSetter/ticketFiltersSetter.component';
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
@@ -34,14 +33,14 @@ import { CalibrationContext } from '../dashboard/projects/calibration/calibratio
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
-import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
+import { useSetDefaultTicketFilters, useViewerTicketFilterParams } from '@/v5/ui/routes/viewer/tickets/tickets.hooks';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
 	const { isCalibrating } = useContext(CalibrationContext);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
-	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
+	const filters = TicketsCardHooksSelectors.selectFilters();
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	const isLoading = isFetching || fetchPending;
@@ -62,6 +61,9 @@ export const Viewer = () => {
 
 		TicketsCardActionsDispatchers.openTicket(id);
 	};
+
+	useViewerTicketFilterParams();
+	useSetDefaultTicketFilters(templates);
 
 	useEffect(() => {
 		ViewerService.on(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
@@ -90,11 +92,7 @@ export const Viewer = () => {
 	useEffect(() => {
 		if (!containerOrFederationId) return;
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederationId]);
-	}, [cardFilters]);
-
-	useEffect(() => 
-		enableRealtimeTickets(teamspace, project, containerOrFederation, !!selectedFederation, revision)
-	, [containerOrFederation, revision, selectedFederation]);
+	}, [filters]);
 
 	useEffect(() => {
 		DrawingsCardActionsDispatchers.setQueries([]);
@@ -123,7 +121,6 @@ export const Viewer = () => {
 
 	return (
 		<>
-			<TicketFiltersSetter templates={templates}/>
 			<OpenDrawingFromUrl />
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />

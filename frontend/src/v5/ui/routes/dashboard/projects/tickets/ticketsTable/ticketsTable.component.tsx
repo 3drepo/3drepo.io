@@ -36,7 +36,7 @@ import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../..
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupBySelect } from '../selectMenus/groupByFormSelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
-import { Link, ControlsContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, NewFilterButton, StickyHeader } from '../tickets.styles';
+import { Link, ControlsContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, NewFilterButton } from '../tickets.styles';
 import { NEW_TICKET_ID, NONE_OPTION } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
@@ -46,7 +46,7 @@ import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters as TableFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { TicketFiltersSetter } from '@/v5/ui/routes/viewer/ticketFiltersSetter/ticketFiltersSetter.component';
+import { useSetDefaultTicketFilters } from '@/v5/ui/routes/viewer/tickets/tickets.hooks';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -133,6 +133,7 @@ export const TicketsTable = () => {
 		return pathname + (ticketId ? `?ticketId=${ticketId}` : '');
 	};
 
+	useSetDefaultTicketFilters([selectedTemplate]);
 
 	useEffect(() => {
 		if (!containersAndFederations.length ) return;
@@ -188,7 +189,6 @@ export const TicketsTable = () => {
 
 	return (
 		<>
-			<TicketFiltersSetter templates={[selectedTemplate]} />
 			<SearchContextComponent items={filteredTickets}>
 				<ControlsContainer>
 					<FlexContainer>
