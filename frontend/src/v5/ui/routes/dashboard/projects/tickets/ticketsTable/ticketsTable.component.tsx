@@ -184,7 +184,9 @@ export const TicketsTable = () => {
 		if (!templateAlreadyFetched(selectedTemplate)) {
 			ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
 		}
-		if (ticketId) return clearTicketId;
+		if (ticketId) {
+			clearTicketId();
+		}
 	}, [template]);
 
 	useEffect(() => {
