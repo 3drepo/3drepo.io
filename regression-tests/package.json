@@ -26,10 +26,10 @@
     "typescript": "5.0.3"
   },
   "dependencies": {
-    "@cucumber/cucumber": "9.1.0",
+    "@cucumber/cucumber": "10.3.2",
     "@types/selenium-webdriver": "4.1.27",
     "chai": "4.3.7",
     "quoted-printable": "1.0.1",
-    "selenium-webdriver": "4.15.0"
+    "selenium-webdriver": "4.19.0"
   }
 }
