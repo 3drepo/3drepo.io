@@ -45,7 +45,7 @@ Accounts.addUserToAccount = (accountId, email) => {
 	const id = emailToUser[email] ?? generateUUIDString();
 	emailToUser[email] = id;
 	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
-	usersInAccount[accountId].push(id);
+	usersInAccount[accountId].push({ id, email });
 	return id;
 };
 
@@ -53,7 +53,7 @@ Accounts.getUserStatusInAccount = () => Promise.resolve(membershipStatus.ACTIVE)
 
 Accounts.removeUserFromAccount = (accountId, userId) => {
 	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
-	usersInAccount[accountId] = usersInAccount[accountId].filter((u) => u !== userId);
+	usersInAccount[accountId] = usersInAccount[accountId].filter((u) => u.id !== userId);
 };
 
 Accounts.removeAccount = (accountId) => {

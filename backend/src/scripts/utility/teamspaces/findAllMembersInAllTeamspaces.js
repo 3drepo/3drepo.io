@@ -24,16 +24,12 @@ const { v5Path } = require('../../../interop');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getLastLoginDate } = require(`${v5Path}/models/loginRecords`);
+const { getTeamspaceMembersInfo } = require(`${v5Path}/processors/teamspaces`);
 const { getTeamspaceList, parsePath } = require('../../utils');
 const FS = require('fs');
 const Path = require('path');
-const { USERS_DB_NAME } = require('../../../v5/models/users.constants');
-
-const { find } = require(`${v5Path}/handler/db`);
 
 const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
-
-const findMembersInTS = (teamspace) => find(USERS_DB_NAME, 'system.users', { 'roles.db': teamspace }, { _id: 0, user: 1 });
 
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {
 	logger.logInfo(`Writing results to ${outFile}`);
@@ -63,7 +59,8 @@ const run = async (outFile) => {
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`\t-${teamspace}`);
 		// eslint-disable-next-line no-await-in-loop
-		const members = await findMembersInTS(teamspace);
+		const membersList = await getTeamspaceMembersInfo(teamspace);
+		const members = membersList.map((member) => ({ user: member.user }));
 		// eslint-disable-next-line no-await-in-loop
 		await findMembersLastLogin(members);
 		res.push({ teamspace, members });
