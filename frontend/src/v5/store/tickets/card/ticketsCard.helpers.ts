@@ -24,7 +24,8 @@ export const getFilterPropertyOptions = (
 	module: string,
 	property: string,
 ) => {
-	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
+	const templateIds = TicketsHooksSelectors.selectFilterableTemplatesIds();
+	const templates = TicketsHooksSelectors.selectTemplatesByIds(templateIds);
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
 	const jobsAndUsers = TicketsCardHooksSelectors.selectJobsAndUsersByModelIds(containersAndFederations);
 

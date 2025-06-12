@@ -24,9 +24,11 @@ import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.c
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
 import { getInvalidValues, getValidValues, groupJobsAndUsers } from './assignees.helpers';
-import { useSelectedModelsIds } from '../../routes/dashboard/projects/tickets/ticketsTable/newTicketMenu/useSelectedModels';
+import { useContext } from 'react';
+import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
+	modelIds?: string[];
 	maxItems?: number;
 	canClear?: boolean;
 	onBlur?: () => void;
@@ -47,11 +49,12 @@ export const AssigneesSelect = ({
 	canClear = false,
 	disabled,
 	emptyListMessage,
+	modelIds, // Model IDs to filter jobs and users by, defaults to the current container or federation
 	...props
 }: AssigneesSelectProps) => {
-	const containersAndFederations = useSelectedModelsIds();
+	const { containerOrFederation } = useContext(TicketContext);
 
-	const jobsAndUsers = TicketsCardHooksSelectors.selectJobsAndUsersByModelIds(containersAndFederations);
+	const jobsAndUsers = TicketsCardHooksSelectors.selectJobsAndUsersByModelIds(modelIds ?? [containerOrFederation]);
 	const { jobs, users } = groupJobsAndUsers(jobsAndUsers);
 
 	const emptyValue = multiple ? [] : '';
