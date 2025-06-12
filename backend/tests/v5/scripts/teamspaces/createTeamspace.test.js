@@ -76,7 +76,7 @@ const runTest = () => {
 		['teamspace does not exist but the user exists (using email)', true, undefined, generateRandomString(), emailUser.basicData.email, undefined],
 		['teamspace does not exist but the user exists and accountId is provided.', true, undefined, generateRandomString(), user.user, existingAccountId],
 		['teamspace does not exist but the user exists and accountId is provided (using email)', true, undefined, generateRandomString(), emailUser.basicData.email, existingAccountId],
-		['teamspace does not exist and the user does not exists', true, undefined, generateRandomString(), 'nonExistantUser', undefined],
+		['teamspace does not exist and the user does not exists', true, undefined, generateRandomString(), 'nonExistentUser', undefined],
 		['if trying to find the user and an error different from "userNotFound" is thrown', false, new Error('Made up error!'), undefined, 'problemUser', undefined],
 		['teamspace already exists', false, new Error('Teamspace already exists'), teamspace, user.user, undefined],
 	])('Create Teamspace', (desc, success, expectedOutput, teamspaceName, userName, accountId) => {

@@ -217,7 +217,7 @@ const testInitTeamspace = () => {
 			expect(TeamspacesModel.grantAdminToUser).toHaveBeenCalledWith(teamspace, username);
 		});
 
-		test('should initialize a teamspace and use the provided accountId if it exits', async () => {
+		test('should initialize a teamspace and use the provided accountId if it exists', async () => {
 			const username = generateRandomString();
 			const teamspace = generateRandomString();
 			const email = generateRandomString();
