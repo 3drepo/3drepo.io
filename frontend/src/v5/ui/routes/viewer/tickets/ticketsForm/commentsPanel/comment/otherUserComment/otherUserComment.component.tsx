@@ -22,7 +22,7 @@ import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, AuthorAvatar, ImportedAuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
-import { getDefaultUserNotFound } from '@/v5/store/users/users.helpers';
+import { getDefaultUserNotFound, getFullnameFromUser } from '@/v5/store/users/users.helpers';
 
 type OtherUserCommentProps = ITicketComment & {
 	isFirstOfBlock: boolean;
@@ -41,18 +41,22 @@ export const OtherUserComment = ({
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const imported = !!originalAuthor;
-	const user = imported ? getDefaultUserNotFound(originalAuthor) : UsersHooksSelectors.selectUser(teamspace, author);
+	const user = UsersHooksSelectors.selectUser(teamspace, author);
+	const importedUser = getDefaultUserNotFound(originalAuthor);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
-	const authorDisplayName = isFirstOfBlock ? `${user.firstName} ${user.lastName}` : null;
+
+	const getAuthorDisplayName = () => {
+		if (!isFirstOfBlock) return null;
+		return getFullnameFromUser(imported ? importedUser : user);
+	};
 
 	const Avatar = () => {
 		if (!imported) return <AuthorAvatar user={user} />;
 		return (
 			<ImportedAuthorAvatar
-				author={author}
-				originalAuthor={originalAuthor}
+				importedBy={getFullnameFromUser(user)}
+				author={importedUser}
 				importedAt={importedAt}
-				user={user}
 			/>
 		);
 	};
@@ -63,13 +67,13 @@ export const OtherUserComment = ({
 			{deleted ? (
 				<DeletedComment
 					user={user}
-					author={authorDisplayName}
+					author={getAuthorDisplayName()}
 					isFirstOfBlock={isFirstOfBlock}
 				/>
 			) : (
 				<>
 					<Comment
-						author={authorDisplayName}
+						author={getAuthorDisplayName()}
 						isCurrentUserComment={false}
 						isFirstOfBlock={isFirstOfBlock}
 						originalAuthor={originalAuthor}
