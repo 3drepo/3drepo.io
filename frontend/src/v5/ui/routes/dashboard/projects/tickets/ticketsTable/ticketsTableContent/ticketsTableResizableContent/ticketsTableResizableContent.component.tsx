@@ -25,7 +25,10 @@ import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.compon
 import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
-import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
+import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import { selectFetchingPropertiesByTicketId } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
@@ -39,6 +42,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
 
+
 	if (!groupBy) {
 		return (
 			<TicketsTableGroup
@@ -50,7 +54,14 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 		);
 	}
 
-	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy));
+	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
+	const ticketsToDisplay = groupBy
+		? filteredItems.filter(({ _id: ticketId }) => !selectFetchingPropertiesByTicketId(getState(), ticketId).has(propertyName))
+		: filteredItems;
+
+	const isLoading = groupBy && (ticketsToDisplay.length !== filteredItems.length);
+
+	const groups = groupTickets(groupBy, ticketsToDisplay, getPropertyType(groupBy));
 
 	return (
 		<Container>
@@ -59,7 +70,9 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 					title={(
 						<>
 							<Title>{groupName}</Title>
-							<CircledNumber disabled={!tickets.length}>{tickets.length}</CircledNumber>
+							<CircledNumber disabled={!tickets.length || isLoading}>
+								{isLoading ? <Spinner /> : tickets.length}
+							</CircledNumber>
 						</>
 					)}
 					defaultExpanded={!!tickets.length}

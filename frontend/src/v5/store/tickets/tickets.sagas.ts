@@ -44,6 +44,7 @@ import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { addUpdatedAtTime } from './tickets.helpers';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
+import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -79,6 +80,7 @@ export function* fetchTicketProperties({
 	templateCode, isFederation, propertiesToInclude,
 }: FetchTicketPropertiesAction) {
 	try {
+		yield put(TicketsActions.addFetchingTicketProperties(ticketId, propertiesToInclude));
 		const { number } = yield select(selectTicketById, modelId, ticketId);
 		const filterByTemplateCode = {
 			filter: {
@@ -95,6 +97,7 @@ export function* fetchTicketProperties({
 			modelId,
 			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
 		);
+		yield put(TicketsActions.removeFetchingTicketProperties(ticketId, propertiesToInclude));
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { ...ticket, _id: ticketId }));
 
 	} catch (error) {
