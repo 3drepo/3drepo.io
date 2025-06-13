@@ -30,7 +30,6 @@ export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 	padding: 2px 0 8px 10px;
-	/* padding: 10px 0 10px 10px; */
 	text-align: start;
 	box-sizing: border-box;
 	user-select: none;
