@@ -16,7 +16,7 @@
  */
 
 const { DEFAULT_OWNER_ROLE, DEFAULT_ROLES } = require('../../models/roles.constants');
-const { createGroup, getAllUsersInAccount, getGroupById, getGroups } = require('../../services/sso/frontegg');
+const { createGroup, getAllUsersInAccount, getGroupById, getGroups, removeGroup } = require('../../services/sso/frontegg');
 const { getUserId, getUsersByQuery } = require('../../models/users');
 const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
 const { templates } = require('../../utils/responseCodes');
@@ -48,6 +48,7 @@ Roles.getRoleById = async (teamspace, roleId) => {
 		const group = await getGroupById(teamspaceId, roleId);
 		return group;
 	} catch (err) {
+		console.log(err);
 		throw templates.roleNotFound;
 	}
 };
@@ -113,6 +114,9 @@ Roles.createRoles = async (teamspace, roles) => {
 // FIXME Split update between user assignmnets and ac
 Roles.updateRole = (teamspace, role, updatedRole) => {};
 
-Roles.deleteRole = (teamspace, roleId) => {};
+Roles.deleteRole = async (teamspace, roleId) => {
+	const teamspaceId = await getTeamspaceRefId(teamspace);
+	await removeGroup(teamspaceId, roleId);
+};
 
 module.exports = Roles;

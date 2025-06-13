@@ -170,6 +170,22 @@ Accounts.createGroup = async (accountId, name, color, users) => {
 	}
 };
 
+Accounts.removeGroup = async (accountId, groupId) => {
+	try {
+		const config = await getConfig();
+
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		await httpDelete(`${config.vendorDomain}/identity/resources/groups/v1/${groupId}`, headers);
+	} catch (err) {
+		logger.logError(`Failed to remove group(${groupId}) in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to remove group in account: ${err.message}`);
+	}
+};
+
 Accounts.getAllUsersInAccount = async (accountId) => {
 	try {
 		const config = await getConfig();

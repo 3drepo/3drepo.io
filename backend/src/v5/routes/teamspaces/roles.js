@@ -20,7 +20,6 @@ const { roleExists, validateNewRole, validateUpdateRole } = require('../../middl
 
 const Roles = require('../../processors/teamspaces/roles');
 const { Router } = require('express');
-const { UUIDToString } = require('../../utils/helper/uuids');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 
@@ -29,8 +28,7 @@ const getRoles = async (req, res) => {
 
 	try {
 		const roles = await Roles.getRoles(teamspace);
-		respond(req, res, templates.ok,
-			{ roles: roles.map(({ _id, ...rest }) => ({ _id: UUIDToString(_id), ...rest })) });
+		respond(req, res, templates.ok, { roles });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
