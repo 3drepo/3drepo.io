@@ -22,7 +22,7 @@ const checkPermissions = require("./checkPermissions").checkPermissions;
 const responseCodes = require("../response_codes");
 const C	= require("../constants");
 
-const hasAddOns = async (req,res,next) => {
+const checkForUsersProvisionedAddOn = async (req,res,next) => {
 	const { account } = req.params;
 
 	const addOns = await getAddOns(account);
@@ -34,9 +34,8 @@ const hasAddOns = async (req,res,next) => {
 };
 
 module.exports = {
-	canCreate: checkPermissions([C.PERM_CREATE_JOB]),
+	canCreate: [checkPermissions([C.PERM_CREATE_JOB]), checkForUsersProvisionedAddOn],
 	canView: checkPermissions([C.PERM_ASSIGN_JOB]),
-	canDelete: checkPermissions([C.PERM_DELETE_JOB]),
-	canEdit: [checkPermissions([C.PERM_CREATE_JOB]), hasAddOns],
-	hasAddOns
+	canDelete: [checkPermissions([C.PERM_DELETE_JOB]), checkForUsersProvisionedAddOn],
+	checkForUsersProvisionedAddOn
 };

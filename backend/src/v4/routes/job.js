@@ -102,7 +102,7 @@
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.put("/jobs/:jobId", middlewares.job.canEdit, updateJob);
+	router.put("/jobs/:jobId", middlewares.job.canCreate, updateJob);
 
 	/**
 	 * @api {get} /:teamspace/jobs List all jobs
@@ -155,7 +155,7 @@
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
-	router.post("/jobs/:jobId/:user", middlewares.job.canEdit, addUserToJob);
+	router.post("/jobs/:jobId/:user", middlewares.job.canCreate, addUserToJob);
 
 	/**
 	 * @api {delete} /:teamspace/jobs/:jobId Delete a job
