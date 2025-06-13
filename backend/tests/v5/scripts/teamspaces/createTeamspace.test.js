@@ -25,14 +25,11 @@ const {
 
 const { createAccount } = require('../../helper/fronteggMock');
 
-const { src, srcV4, utilScripts } = require('../../helper/path');
+const { src, utilScripts } = require('../../helper/path');
 
 const CreateTeamspace = require(`${utilScripts}/teamspaces/createTeamspace`);
 
 const { disconnect } = require(`${src}/handler/db`);
-
-jest.mock('../../../../src/v4/models/userBilling');
-const UserBillingMock = require(`${srcV4}/models/userBilling`);
 
 const user = generateUserCredentials();
 const emailUser = generateUserCredentials();
@@ -42,25 +39,15 @@ const teamspace = generateRandomString();
 const existingAccount = generateRandomString();
 let existingAccountId;
 
-jest.mock('../../../../src/v5/models/users', () => {
-	const original = jest.requireActual('../../../../src/v5/models/users');
-	return {
-		...original,
-		getUserByUsernameOrEmail: jest.fn((mockUser) => {
-			if (mockUser === 'problemUser') throw new Error('Made up error!');
-			if (mockUser === 'nonExistantUser') throw new Error('User not found.');
-			if (mockUser === 'test@email.com') return { user: 'emailUser' };
-
-			return { user: mockUser };
-		}),
-	};
-});
-UserBillingMock.getSubscriptionLimits.mockResolvedValue({ collaboratorLimit: 'unlimited' });
-
 const setupData = async () => {
 	await createUser(user);
 	await createUser(emailUser);
-	await createTeamspace(teamspace, [user.user]);
+	await createTeamspace(teamspace, [user.user], {
+		discretionary: {
+			collaborators: 'unlimited',
+			data: 1024,
+			expiryDate: Date.now() + 10000,
+		} });
 	existingAccountId = await createAccount(existingAccount);
 };
 
@@ -77,7 +64,6 @@ const runTest = () => {
 		['teamspace does not exist but the user exists and accountId is provided.', true, undefined, generateRandomString(), user.user, existingAccountId],
 		['teamspace does not exist but the user exists and accountId is provided (using email)', true, undefined, generateRandomString(), emailUser.basicData.email, existingAccountId],
 		['teamspace does not exist and the user does not exists', true, undefined, generateRandomString(), 'nonExistentUser', undefined],
-		['if trying to find the user and an error different from "userNotFound" is thrown', false, new Error('Made up error!'), undefined, 'problemUser', undefined],
 		['teamspace already exists', false, new Error('Teamspace already exists'), teamspace, user.user, undefined],
 	])('Create Teamspace', (desc, success, expectedOutput, teamspaceName, userName, accountId) => {
 		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {

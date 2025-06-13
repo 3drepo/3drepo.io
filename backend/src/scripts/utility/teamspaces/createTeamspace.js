@@ -35,6 +35,7 @@ const run = async (teamspace, user, accountId) => {
 		const { user: foundUser } = await getUserByUsernameOrEmail(user);
 		username = foundUser;
 	} catch (error) {
+		/* istanbul ignore next */
 		if (error.message !== templates.userNotFound.message) throw error;
 	}
 

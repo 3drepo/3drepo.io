@@ -152,7 +152,9 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		await coll.updateOne({_id:email}, { $set: invitation });
 
 	} else {
-		await User.hasReachedLicenceLimitCheck(teamspace);
+		if(username) {
+			await User.hasReachedLicenceLimitCheck(teamspace);
+		}
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await sendInvitationEmail(email, username, teamspace);
 		await coll.insertOne(invitation);
