@@ -17,12 +17,19 @@
 
 import { CellContainer } from './cell.styles';
 import { TextOverflow } from '@controls/textOverflow';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 type CellProps = { name: string, children: any, className?: string };
-export const Cell = ({ name, children, className }: CellProps) => (
-	<CellContainer name={name} className={className}>
-		<TextOverflow>
-			{children}
-		</TextOverflow>
-	</CellContainer>
-);
+export const Cell = ({ name, children, className }: CellProps) => {
+	const { movingColumn } = usePerformanceContext(ResizableTableContext, ['movingColumn']);
+
+	return (
+		<CellContainer name={name} className={className} $isMoving={name === movingColumn}>
+			<TextOverflow>
+				{children}
+			</TextOverflow>
+		</CellContainer>
+	);
+};
+

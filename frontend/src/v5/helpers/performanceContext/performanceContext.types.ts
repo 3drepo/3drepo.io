@@ -15,18 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { Resizer } from './resizer/resizer.component';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+export type UnsubscribeFn = () => void;
+export type SubscribeFn<Event> = (events: Event[], callback: (...args) => void) => UnsubscribeFn;
+export type PublishFn<Event> = (event: Event, ...args) => void;
 
-export const ResizersOverlay = () => {
-	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
-
-	return (
-		<>
-			{visibleSortedColumnsNames.map((name) => (
-				<Resizer name={name} key={name} />
-			))}
-		</>
-	);
+export type SubscribableObject<ContextState> = {
+	state: ContextState,
+	subscribe: SubscribeFn<keyof ContextState>,
 };
+
+export type CustomEqualityCheck<ContextState> = (currentState: ContextState, previousState: ContextState) => boolean;
+export type ArrayOfAtLeastOneElement<Element> = [Element, ...Element[]];
+export type ObservedProperties<ContextState> = ArrayOfAtLeastOneElement<keyof ContextState>;

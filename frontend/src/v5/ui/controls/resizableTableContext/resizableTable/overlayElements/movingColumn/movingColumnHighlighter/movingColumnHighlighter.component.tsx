@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { Highlighter } from './movingColumnHighlighter.styles';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export const MovingColumnHighlighter = (props) => {
-	const { movingColumn, getColumnOffsetLeft, getWidth, columnGap } = useContext(ResizableTableContext);
+	const { getColumnOffsetLeft, getWidth, columnGap, movingColumn } = usePerformanceContext(ResizableTableContext, ['movingColumn']);
 	const width = getWidth(movingColumn);
 	const offset = getColumnOffsetLeft(movingColumn);
 

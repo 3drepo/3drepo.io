@@ -33,14 +33,15 @@ import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants'
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
 	const { filteredItems } = useContext(SearchContext);
 	const {
-		stretchTable, movingColumn, getAllColumnsNames, 
+		stretchTable, getAllColumnsNames, subscribe, 
 		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
-	} = useContext(ResizableTableContext);
+	} = usePerformanceContext(ResizableTableContext, () => false);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
 
@@ -57,11 +58,15 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	}, [template, templateWasFetched, tableHasCompletedRendering]);
 
 	useEffect(() => {
-		if (movingColumn) {
-			edgeScrolling.start(tableRef.current);
-			return edgeScrolling.stop;
-		}
-	}, [movingColumn]);
+		const onMovingColumnChange = (event, movingColumn) => {
+			if (movingColumn) {
+				edgeScrolling.start(tableRef.current);
+			} else {
+				edgeScrolling.stop();
+			}
+		};
+		return subscribe(['movingColumn'], onMovingColumnChange);
+	}, [edgeScrolling]);
 
 	if (!templateAlreadyFetched(template)) {
 		return (

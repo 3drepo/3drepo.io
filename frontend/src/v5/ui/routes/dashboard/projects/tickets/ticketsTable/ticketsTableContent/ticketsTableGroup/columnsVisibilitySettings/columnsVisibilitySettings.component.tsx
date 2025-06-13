@@ -36,10 +36,11 @@ import { SortedTableContext } from '@controls/sortedTableContext/sortedTableCont
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 const List = ({ onShowColumn }) => {
 	const { filteredItems, query } = useContext(SearchContext);
-	const { visibleSortedColumnsNames, hideColumn, isVisible } = useContext(ResizableTableContext);
+	const { visibleSortedColumnsNames, hideColumn, isVisible } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	const groupBySelected = () => {
 		const groups = { selected: [], unselected: [] };
@@ -99,11 +100,11 @@ const List = ({ onShowColumn }) => {
 export const ColumnsVisibilitySettings = () => {
 	const alreadyFetchedTicketIdAndProperty = useRef({});
 	const { teamspace, project, template } = useParams<DashboardParams>();
+	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn } = useContext(ResizableTableContext);
+	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
 	const { sortedItems: tickets } = useContext(SortedTableContext);
 	const columnsNames = getAllColumnsNames();
-	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))

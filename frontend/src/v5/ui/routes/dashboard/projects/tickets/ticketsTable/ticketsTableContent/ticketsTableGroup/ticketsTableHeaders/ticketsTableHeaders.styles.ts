@@ -15,18 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { Resizer } from './resizer/resizer.component';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
+import styled, { css } from 'styled-components';
+import { TextOverflow } from '@controls/textOverflow';
 
-export const ResizersOverlay = () => {
-	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
+export const Headers = styled(ResizableTableRow)`
+	gap: 1px;
+	width: fit-content;
+`;
 
-	return (
-		<>
-			{visibleSortedColumnsNames.map((name) => (
-				<Resizer name={name} key={name} />
-			))}
-		</>
-	);
-};
+export const PlaceholderForStickyFunctionality = styled(Headers)``;
+
+export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
+	${({ theme }) => theme.typography.kicker};
+	color: ${({ theme }) => theme.palette.base.main};
+	padding: 2px 0 8px 10px;
+	text-align: start;
+	box-sizing: border-box;
+	user-select: none;
+
+	${({ $selectable }) => $selectable && css`
+		cursor: pointer;
+	`}
+`;

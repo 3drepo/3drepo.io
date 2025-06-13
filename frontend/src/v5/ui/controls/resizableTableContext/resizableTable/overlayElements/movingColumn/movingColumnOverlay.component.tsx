@@ -17,11 +17,12 @@
 
 import { MovingColumnHighlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { useContext } from 'react';
 import { MovingColumnDropAreas } from './movingColumnDropAreas/movingColumnDropAreas.component';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export const MovingColumnOverlay = () => {
-	const { movingColumn } = useContext(ResizableTableContext);
+	const { movingColumn } = usePerformanceContext(ResizableTableContext, (curr, prev) => !curr.movingColumn !== !prev.movingColumn);
+
 	if (!movingColumn) return null;
 
 	return (

@@ -15,14 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useRef } from 'react';
+import { useRef, useState } from 'react';
 import { overlayStyles, ResizerElement } from './resizer.styles';
 import { ResizableTableContext } from '../../../../resizableTableContext';
 import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.styles';
+import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 type ResizerProps = { name: string };
 export const Resizer = ({ name }: ResizerProps) => {
-	const { setWidth, getWidth, setIsResizing, isResizing, setResizerName, resizerName } = useContext(ResizableTableContext);
+	const { setWidth, getWidth } = usePerformanceContext(ResizableTableContext, ['columnsWidths']);
+	const [resizerName, setResizerName] = useState('');
+	const [isResizing, setIsResizing] = useState(false);
 	const width = getWidth(name);
 	const initialPosition = useRef(null);
 
