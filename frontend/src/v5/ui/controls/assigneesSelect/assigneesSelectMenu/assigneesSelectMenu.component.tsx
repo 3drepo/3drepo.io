@@ -66,6 +66,7 @@ export const AssigneesSelectMenu = ({
 	const handleClose = (e) => {
 		e.stopPropagation();
 		setOpen(false);
+		if (multiple && !e.target.value?.length && !value?.length) return;
 		onBlur?.();
 	};
 

@@ -46,10 +46,16 @@ export const ManyOfProperty = ({ values, onBlur, immutable, ...props }: ManyOfPr
 	}
 
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
+
+	const onClose = (e) => {
+		if (!e.target.value?.length && !props.value?.length) return;
+		onBlur?.();
+	};
+
 	return (
 		<MultiSelect
 			{...props}
-			onClose={onBlur}
+			onClose={onClose}
 			value={props.value || []}
 			endAdornment={canClear && (
 				<ClearIconContainer onClick={onClear}>
