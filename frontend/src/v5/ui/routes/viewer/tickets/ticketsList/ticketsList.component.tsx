@@ -23,7 +23,7 @@ import { TableVirtuoso } from 'react-virtuoso';
 import { useEffect, useRef } from 'react';
 
 export const TicketsList = () => {
-	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const filteredTickets = TicketsCardHooksSelectors.selectCurrentModelFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
 	const shouldShowLoader = filteredTickets.length >= 10;

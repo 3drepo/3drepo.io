@@ -18,16 +18,17 @@
 import { selectCurrentModel } from '@/v4/modules/model';
 import { SequencingProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { createSelector } from 'reselect';
-import { selectRiskCategories, selectTemplateById, selectTemplates, selectTicketById, selectTickets } from '../tickets.selectors';
+import { selectTemplateById, selectTemplates, selectTemplatesByIds, selectTicketById, selectTickets, selectTicketsByContainersAndFederations } from '../tickets.selectors';
 import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getTicketPins, toPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
-import { sortBy, sortedUniqBy } from 'lodash';
-import { toTicketCardFilter, templatesToFilters, getFiltersFromJobsAndUsers } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { uniqBy } from 'lodash';
+import { toTicketCardFilter, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { selectFederationById, selectFederationJobs, selectFederationUsers } from '../../federations/federations.selectors';
 import { selectContainerJobs, selectContainerUsers } from '../../containers/containers.selectors';
 import { IJobOrUserList } from '../../jobs/jobs.types';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -139,7 +140,7 @@ export const selectFilteredTicketIds = createSelector(
 
 export const selectFilteredTickets = createSelector(
 	selectCardFilters,
-	selectCurrentTickets,
+	selectTicketsByContainersAndFederations,
 	selectFilteredTicketIds,
 	(filters, tickets, ids) => {
 		if (!filters.length) return tickets;
@@ -149,16 +150,25 @@ export const selectFilteredTickets = createSelector(
 
 export const selectAvailableTemplatesFilters = createSelector(
 	selectFilters,
-	selectCurrentTemplates,
-	(usedFilters, allFilters) => templatesToFilters(allFilters).filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
+	selectTemplatesByIds,
+	(usedFilters, templates) => templatesToFilters(templates).filter(({ module, property, type }) => !usedFilters[`${module}.${property}.${type}`]),
 );
 
 export const selectIsShowingPins = createSelector(
 	selectTicketsCardDomain, (state) => state.isShowingPins,
 );
 
+export const selectCurrentModelFilteredTickets = createSelector(
+	selectCurrentTickets,
+	selectFilteredTicketIds,
+	(tickets, ids) => {
+		if (!tickets.length || !ids.size) return [];
+		return tickets.filter((t) => ids?.has(t._id));
+	},
+);
+
 export const selectTicketPins = createSelector(
-	selectFilteredTickets,
+	selectCurrentModelFilteredTickets,
 	selectCurrentTemplates,
 	selectView,
 	selectSelectedTicketPinId,
@@ -205,44 +215,30 @@ export const selectNewTicketPins = createSelector(
 	selectSelectedTicketPinId,
 	getTicketPins,
 );
-const selectJobsAndUsersByModelId = createSelector(
-	selectFederationById,
+const selectModelJobsAndUsers = createSelector(
 	selectFederationJobs,
 	selectContainerJobs,
 	selectFederationUsers,
 	selectContainerUsers,
-	(fed, fedJobs, contJobs, fedUsers, contUsers) => {
-		const isFed = !!fed;
-		const jobs = isFed ? fedJobs : contJobs;
-		const users = isFed ? fedUsers : contUsers;
-		return [...jobs, ...users] as IJobOrUserList;
+	(fedJobs, contJobs, fedUsers, contUsers) => ({
+		container: [...contJobs, ...contUsers] as IJobOrUserList,
+		federation: [...fedJobs, ...fedUsers] as IJobOrUserList,
+	}),
+);
+
+const selectJobsAndUsersByModelId = createSelector(
+	selectFederationById,
+	selectModelJobsAndUsers,
+	(fed, modelJobsAndUsers) => !!fed ? modelJobsAndUsers.federation : modelJobsAndUsers.container,
+);
+
+export const selectJobsAndUsersByModelIds = createSelector(
+	(state, modelIds) => modelIds,
+	// this is to recompute the selector when the store jobs or users change
+	selectJobsAndUsersByModelId,
+	(modelIds) => {
+		const jobsAndUsers: IJobOrUserList = (modelIds || []).reduce((acc, modelId) => [...acc, ...selectJobsAndUsersByModelId(getState(), modelId)], []);
+		return uniqBy(jobsAndUsers, (jU) => jU._id || jU.user);
 	},
 );
 
-export const selectPropertyOptions = createSelector(
-	selectCurrentTemplates,
-	selectRiskCategories,
-	selectJobsAndUsersByModelId,
-	(state, modelId, module) => module,
-	(state, modelId, module, property) => property,
-	(templates, riskCategories, jobsAndUsers, module, property) => {
-		const allValues = [];
-		if (!module && property === 'Owner') return getFiltersFromJobsAndUsers(jobsAndUsers.filter((ju) => !!ju.firstName));
-		templates.forEach((template) => {
-			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
-			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
-			if (!matchingProperty) return;
-			switch (matchingProperty.values) {
-				case 'riskCategories':
-					allValues.push(...riskCategories.map((value) => ({ value, type: 'riskCategories' })));
-					break;
-				case 'jobsAndUsers':
-					allValues.push(...getFiltersFromJobsAndUsers(jobsAndUsers));
-					break;
-				default:
-					allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
-			}
-		});
-		return sortedUniqBy(sortBy(allValues, 'value'), 'value');
-	},
-);

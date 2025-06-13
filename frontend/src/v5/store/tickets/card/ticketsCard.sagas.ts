@@ -19,7 +19,7 @@ import { put, race, select, take, takeEvery, takeLatest } from 'redux-saga/effec
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { AdditionalProperties, BaseProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ViewerGuiActions } from '@/v4/modules/viewerGui/viewerGui.redux';
-import { ApplyFilterForTicketAction, FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes, UpsertFilterAction } from './ticketsCard.redux';
+import { FetchFilteredTicketsAction, FetchTicketsListAction, OpenTicketAction, TicketsCardActions, TicketsCardTypes, UpsertFilterAction, ApplyFilterForTicketAction } from './ticketsCard.redux';
 import { TicketsActions, TicketsTypes } from '../tickets.redux';
 import { DialogsActions, DialogsTypes } from '../../dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
@@ -27,7 +27,8 @@ import { selectTemplateById, selectTemplates, selectTicketByIdRaw } from '../tic
 import { selectCardFilters, selectFilteredTicketIds } from './ticketsCard.selectors';
 import * as API from '@/v5/services/api';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { isEqual, pick } from 'lodash';
+import { flatten, isEqual, pick } from 'lodash';
+import { selectIsFederation } from '../../federations/federations.selectors';
 import { enableMapSet } from 'immer';
 
 enableMapSet();
@@ -60,21 +61,24 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 	}
 }
 
-const apiFetchFilteredTickets = async (teamspace, projectId, modelId, isFederation, filters ): Promise<Set<string>> => {
-	const fetchModelTickets = isFederation
-		? API.Tickets.fetchFederationTickets
-		: API.Tickets.fetchContainerTickets;
-	const tickets = await fetchModelTickets(teamspace, projectId, modelId, { filters: filtersToQuery(filters) });
-	return new Set(tickets.map((t) => t._id));
+const apiFetchFilteredTickets = async (teamspace, projectId, modelIds, isFederation, filters ): Promise<Set<string>> => {
+	const combinedTickets = await Promise.all(modelIds.map(async (modelId) => {
+		const fetchModelTickets = await isFederation(modelId)
+			? API.Tickets.fetchFederationTickets
+			: API.Tickets.fetchContainerTickets;
+		return fetchModelTickets(teamspace, projectId, modelId, { filters: filtersToQuery(filters) });
+	}));
+	return new Set(flatten(combinedTickets).map((t) => t._id));
 };
 
-export function* fetchFilteredTickets({ teamspace, projectId, modelId, isFederation }: FetchTicketsListAction) {
+export function* fetchFilteredTickets({ teamspace, projectId, modelIds }: FetchFilteredTicketsAction) {
 	try {
 		yield put(TicketsCardActions.setFiltering(true));
 
 		const filters = yield select(selectCardFilters);
-		const ticketIds = yield apiFetchFilteredTickets(teamspace, projectId, modelId, isFederation, filters);
-
+		const isFed = yield select(selectIsFederation);
+		const ticketIds: Set<string> = yield apiFetchFilteredTickets(teamspace, projectId, modelIds, isFed, filters);
+		
 		yield put(TicketsCardActions.setFilteredTicketIds(ticketIds));
 		yield put(TicketsCardActions.setFiltering(false));
 	} catch (error) {

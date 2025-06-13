@@ -64,7 +64,6 @@ describe('Tickets: store', () => {
 		});
 
 		describe('filters', () => {
-			// const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = DEFAULT_FILTERS;
 			const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = templatesToFilters([]);
 			const baseFilter: BaseFilter = {
 				operator: 'is',
@@ -98,10 +97,10 @@ describe('Tickets: store', () => {
 					const filtersInStore = selectCardFilters(getState());
 					expect(filtersInStore).toEqual([]);
 				});
-			})
+			});
 
 			describe('available template filters', () => {
-				const getAvailableFilters = () => selectAvailableTemplatesFilters(getState());
+				const getAvailableFilters = () => selectAvailableTemplatesFilters(getState(), [templateId]);
 				const getAvailableFiltersNames = () => getAvailableFilters().map((value) => value.property);
 			
 				it('all the default filters should be available originally', () => {
