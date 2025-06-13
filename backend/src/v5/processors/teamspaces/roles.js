@@ -16,7 +16,7 @@
  */
 
 const { DEFAULT_OWNER_ROLE, DEFAULT_ROLES } = require('../../models/roles.constants');
-const { createGroup, getGroups } = require('../../services/sso/frontegg');
+const { createGroup, getAllUsersInAccount, getGroups } = require('../../services/sso/frontegg');
 const { getUserId, getUsersByQuery } = require('../../models/users');
 const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
 
@@ -50,8 +50,38 @@ Roles.createDefaultRoles = async (teamspace, firstAdmin) => {
 		name === DEFAULT_OWNER_ROLE ? [userId] : undefined)));
 };
 
-Roles.createRoles = (teamspace, roles) => {};
+const getUserIdMapping = async (teamspaceId) => {
+	const accountUsers = await getAllUsersInAccount(teamspaceId);
+	const emailToUserId = {};
+	const usernameToUserId = {};
+	const emails = accountUsers.map(({ id, email }) => {
+		emailToUserId[email] = id;
+		return email;
+	});
 
+	const usersMatchedEmails = await getUsersByQuery({ 'customData.email': { $in: emails } }, { user: 1, 'customData.email': 1 });
+	usersMatchedEmails.forEach(({ user, customData: { email } }) => {
+		const id = emailToUserId[email];
+		if (id) {
+			usernameToUserId[user] = id;
+		}
+	});
+	return usernameToUserId;
+};
+Roles.createRoles = async (teamspace, roles) => {
+	const teamspaceId = await getTeamspaceRefId(teamspace);
+	const usernameToUserId = await getUserIdMapping(teamspaceId);
+
+	return Promise.all(roles.map(async ({ name, color, users }) => {
+		let userIds;
+		if (users?.length) {
+			userIds = users.flatMap((user) => usernameToUserId[user] || []);
+		}
+		const roleId = await createGroup(teamspaceId, name, color, userIds);
+		return { id: roleId, name };
+	}));
+};
+// FIXME Split update between user assignmnets and ac
 Roles.updateRole = (teamspace, role, updatedRole) => {};
 
 Roles.deleteRole = (teamspace, roleId) => {};

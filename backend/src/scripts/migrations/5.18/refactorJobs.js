@@ -25,8 +25,7 @@ const { basePropertyLabels, presetEnumValues, propTypes } = require(`${v5Path}/s
 const { deleteIfUndefined, isEmpty } = require(`${v5Path}/utils/helper/objects`);
 const { isArray } = require(`${v5Path}/utils/helper/typeCheck`);
 const { UUIDToString, stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
-const { createRoles, getRoles, createIndex } = require(`${v5Path}/models/roles`);
-const { generateUUID } = require(`${v5Path}/utils/helper/uuids`);
+const { createRoles, getRoles } = require(`${v5Path}/processors/teamspaces/roles`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { actions } = require(`${v5Path}/models/teamspaces.audits.constants`);
 
@@ -67,7 +66,7 @@ const updateTicketLogs = async (teamspace, ticketIds, ticketsToTemplates, templa
 			const roleId = roleNamesToIds[propValue];
 			if (roleId) {
 				// eslint-disable-next-line no-param-reassign
-				logUpdate[propPath] = stringToUUID(roleId);
+				logUpdate[propPath] = roleId;
 			}
 		}
 	};
@@ -265,7 +264,7 @@ const updateIssuesAndRisks = async (teamspace, roleNamesToIds) => {
 };
 
 const replaceJobsWithRoles = async (teamspace) => {
-	const existingRoles = await getRoles(teamspace, { _id: 0, name: 1 });
+	const existingRoles = await getRoles(teamspace);
 	const existingRolesMap = {};
 	existingRoles.forEach(({ name }) => { existingRolesMap[name] = true; });
 
@@ -275,14 +274,17 @@ const replaceJobsWithRoles = async (teamspace) => {
 
 	jobs.forEach((job) => {
 		if (!existingRolesMap[job._id]) {
-			const role = { ...job, name: job._id, _id: generateUUID() };
+			const role = { ...job, name: job._id };
 			newRoles.push(role);
-			roleNamesToIds[role.name] = role._id;
+			logger.logInfo(`Creating new role ${job._id}`);
 		}
 	});
 
 	if (newRoles.length) {
-		await createRoles(teamspace, newRoles);
+		const roleInfo = await createRoles(teamspace, newRoles);
+		roleInfo.forEach(({ id, name }) => {
+			roleNamesToIds[name] = id;
+		});
 	}
 
 	return roleNamesToIds;
@@ -292,9 +294,6 @@ const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (const teamspace of teamspaces) {
 		logger.logInfo(`-${teamspace}`);
-
-		// eslint-disable-next-line no-await-in-loop
-		await createIndex(teamspace);
 
 		// eslint-disable-next-line no-await-in-loop
 		const roleNamesToIds = await replaceJobsWithRoles(teamspace);
