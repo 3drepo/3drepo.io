@@ -31,7 +31,7 @@ export class PubSub<K extends string> {
 				this.subscriptions[event] = this.subscriptions[event].filter((subscribedFn) => subscribedFn !== fn);
 			};
 		});
-		return () => subs.forEach((unsibscribe) => unsibscribe());
+		return () => subs.forEach((unsubscribe) => unsubscribe());
 	};
 }
 
