@@ -53,6 +53,7 @@ const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules
 const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { DEFAULT_ROLES } = require(`${src}/models/roles.constants`);
 
 const db = {};
 const queue = {};
@@ -290,7 +291,10 @@ db.createComment = (teamspace, project, model, ticket, comment) => {
 	return DbHandler.insertOne(teamspace, 'tickets.comments', formattedComment);
 };
 
-db.createJobs = (teamspace, jobs) => DbHandler.insertMany(teamspace, 'jobs', jobs);
+db.createRoles = (teamspace, roles) => {
+	const formattedRoles = roles.map((role) => ({ ...role, _id: stringToUUID(role._id) }));
+	return DbHandler.insertMany(teamspace, 'roles', formattedRoles);
+};
 
 db.createIssue = (teamspace, modelId, issue) => {
 	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
@@ -381,6 +385,13 @@ ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map(
 	name: ServiceHelper.generateRandomString(15),
 	type,
 }));
+
+ServiceHelper.generateRole = (users = []) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	color: DEFAULT_ROLES[0].color,
+	users,
+});
 
 ServiceHelper.generateSequenceEntry = (rid) => {
 	const startDate = ServiceHelper.generateRandomDate();
@@ -670,12 +681,12 @@ ServiceHelper.generateAuditAction = (actionType) => {
 		[actionTypes.USER_REMOVED]: { user: ServiceHelper.generateRandomString() },
 		[actionTypes.INVITATION_ADDED]: {
 			email: ServiceHelper.generateRandomString(),
-			job: ServiceHelper.generateRandomString(),
+			role: ServiceHelper.generateRandomString(),
 			permissions: { teamspace_admin: true },
 		},
 		[actionTypes.INVITATION_REVOKED]: {
 			email: ServiceHelper.generateRandomString(),
-			job: ServiceHelper.generateRandomString(),
+			role: ServiceHelper.generateRandomString(),
 			permissions: { teamspace_admin: true },
 		},
 		[actionTypes.PERMISSIONS_UPDATED]: { users: [ServiceHelper.generateRandomString()],

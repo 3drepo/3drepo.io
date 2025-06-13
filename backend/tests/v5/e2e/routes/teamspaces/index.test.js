@@ -22,7 +22,7 @@ const { image, src } = require('../../../helper/path');
 const fs = require('fs');
 const { generateRandomModel, generateRandomProject, generateRandomString } = require('../../../helper/services');
 
-const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
+const { DEFAULT_OWNER_ROLE } = require(`${src}/models/jobs.constants`);
 const config = require(`${src}/utils/config`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { ADD_ONS, ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
@@ -64,17 +64,17 @@ const testGetTeamspaceMembers = () => {
 	describe('Get teamspace members info', () => {
 		const testUser = ServiceHelper.generateUserCredentials();
 		const userNoAccess = ServiceHelper.generateUserCredentials();
-		const jobToUsers = times(3, () => ({
-			_id: ServiceHelper.generateRandomString(),
-			users: [],
-		}));
+
+		const roleMems = times(3, () => ([]));
 
 		const members = times(10, (i) => {
 			const mem = ServiceHelper.generateUserCredentials();
-			jobToUsers[i % 2].users.push(mem.user);
+			roleMems[i % 2].users.push(mem.user);
 
 			return mem;
 		});
+
+		const roles = roleMems.map((mems) => ServiceHelper.generateRole(mems));
 
 		const teamspace = ServiceHelper.generateRandomString();
 
@@ -89,7 +89,7 @@ const testGetTeamspaceMembers = () => {
 			await Promise.all(
 				members.map((user) => ServiceHelper.db.createUser(user, [teamspace])),
 			);
-			await ServiceHelper.db.createJobs(teamspace, jobToUsers);
+			await ServiceHelper.db.createRoles(teamspace, roles);
 		});
 
 		test('should fail without a valid session', async () => {
@@ -108,12 +108,18 @@ const testGetTeamspaceMembers = () => {
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
-		test('should return list of users with their jobs with valid access rights', async () => {
+		test('should return list of users with their roles with valid access rights', async () => {
 			const res = await agent.get(`${route()}/?key=${testUser.apiKey}`).expect(templates.ok.status);
 
-			const userToJob = {};
+			const userToRoles = {};
 
-			jobToUsers.forEach(({ _id, users }) => users.forEach((user) => { userToJob[user] = _id; }));
+			roles.forEach(({ _id, users }) => users.forEach((user) => {
+				if (!userToRoles[user]) {
+					userToRoles[user] = [];
+				}
+
+				userToRoles[user].push(_id);
+			}));
 
 			const expectedData = [testUser, ...members].map(({ user, basicData }) => {
 				const { firstName, lastName, billing } = basicData;
@@ -124,25 +130,29 @@ const testGetTeamspaceMembers = () => {
 					company: billing?.billingInfo?.company,
 				};
 
-				if (userToJob[user]) {
-					data.job = userToJob[user];
+				if (userToRoles[user]) {
+					data.job = userToRoles[user];
 				}
 
 				return data;
 			});
 
+			const allRoles = await agent.get(`/v5/teamspaces/${teamspace.name}/roles?key=${testUser.apiKey}`);
+			const adminRoleId = allRoles.body.roles.find((r) => r.name === DEFAULT_OWNER_ROLE)._id;
+
+			// FIXME: to have another look
 			// when the default user for the teamspace is created the details are randomly generated
 			const resWithoutAdmin = res.body.members.filter(
-				(element) => element.job !== DEFAULT_OWNER_JOB && element.user !== teamspace,
+				(element) => element.roles !== DEFAULT_OWNER_ROLE && element.user !== teamspace,
 			);
 			const resAdminJob = res.body.members.filter(
-				(element) => element.job === DEFAULT_OWNER_JOB && element.user === teamspace,
+				(element) => element.roles === DEFAULT_OWNER_ROLE && element.user === teamspace,
 			);
 
 			// check that the rest of the data matches
 			ServiceHelper.outOfOrderArrayEqual(resWithoutAdmin, expectedData);
 			// ensure the default owner exists
-			expect(resAdminJob[0].job).toEqual(DEFAULT_OWNER_JOB);
+			expect(resAdminJob[0].role).toEqual(adminRoleId);
 			expect(resAdminJob[0].user).toEqual(teamspace);
 		});
 	});

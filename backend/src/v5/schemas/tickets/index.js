@@ -33,8 +33,8 @@ const Yup = require('yup');
 const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
 const { getArrayDifference } = require('../../utils/helper/arrays');
-const { getJobsByUsers } = require('../../models/jobs');
 const { getRiskCategories } = require('../../models/teamspaceSettings');
+const { getRolesByUsers } = require('../../models/roles');
 const { getTicketsByQuery } = require('../../models/tickets');
 const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
 const { importCommentSchema } = require('./tickets.comments');
@@ -54,13 +54,13 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 			if (prop.values) {
 				let values;
 				switch (prop.values) {
-				case presetEnumValues.JOBS_AND_USERS:
+				case presetEnumValues.ROLES_AND_USERS:
 					{
 						const excludeViewers = prop.name === basePropertyLabels.ASSIGNEES;
 						const users = await getUsersWithPermissions(teamspace, project, model, excludeViewers);
-						const accessibleJobs = await getJobsByUsers(teamspace, users);
+						const accessibleRoles = await getRolesByUsers(teamspace, users);
 
-						values = [...accessibleJobs, ...users];
+						values = [...accessibleRoles.map(UUIDToString), ...users];
 					}
 					break;
 				case presetEnumValues.RISK_CATEGORIES:
@@ -303,9 +303,9 @@ const generateCastObject = ({ properties, modules }, stripDeprecated) => {
 						[viewGroups.TRANSFORMED]: groupCast,
 					}).default(undefined),
 				}).nullable().default(undefined);
-			} else if (type === propTypes.IMAGE) {
+			} else if (type === propTypes.IMAGE || type === propTypes.ONE_OF) {
 				res[name] = uuidString.nullable();
-			} else if (type === propTypes.IMAGE_LIST) {
+			} else if (type === propTypes.IMAGE_LIST || type === propTypes.MANY_OF) {
 				res[name] = Yup.array().of(uuidString).nullable();
 			}
 		});

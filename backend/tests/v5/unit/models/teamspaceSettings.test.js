@@ -554,6 +554,28 @@ const testGetAllUsersInTeamspace = () => {
 	});
 };
 
+const testGetUsersWithNoAccess = () => {
+	describe('Get users with no access', () => {
+		test('should get all users with no access in the teamspace', async () => {
+			const teamspace = generateRandomString();
+			const userWithNoAccess = generateRandomString();
+			const users = [
+				{ id: generateRandomString(), user: generateRandomString() },
+				{ id: generateRandomString(), user: generateRandomString() },
+				{ id: generateRandomString(), user: generateRandomString() },
+			];
+			const usernames = [...users.map((u) => u.user), userWithNoAccess];
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
+			const res = await Teamspace.getUsersWithNoAccess(teamspace, usernames);
+			expect(res).toEqual([userWithNoAccess]);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', USER_COL, { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
+				{ user: 1 }, undefined);
+		});
+	});
+};
+
 const testRemoveUserFromAdminPrivileges = () => {
 	describe('Remove user from admin privileges', () => {
 		test('Should trigger a query to remove user from admin permissions array', async () => {
@@ -850,6 +872,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
 	testGetAllUsersInTeamspace();
+	testGetUsersWithNoAccess();
 	testRemoveUserFromAdminPrivileges();
 	testGetTeamspaceActiveLicenses();
 	testGetTeamspaceExpiredLicenses();

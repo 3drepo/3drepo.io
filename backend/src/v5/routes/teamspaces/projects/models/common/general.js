@@ -34,10 +34,12 @@ const Drawings = require('../../../../../processors/teamspaces/projects/models/d
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const ModelSettings = require('../../../../../processors/teamspaces/projects/models/commons/settings');
 const { Router } = require('express');
+const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
+const { routeDecommissioned } = require('../../../../../middleware/common');
 
 const getThumbnail = async (req, res) => {
 	const { teamspace, project, drawing } = req.params;
@@ -214,13 +216,13 @@ const getUsersWithPermissions = async (req, res) => {
 	}
 };
 
-const getJobsWithAccess = async (req, res) => {
+const getRolesWithAccess = async (req, res) => {
 	const { teamspace, project, model } = req.params;
 	const excludeViewers = req.query.excludeViewers === 'true';
 
 	try {
-		const jobs = await ModelSettings.getJobsWithAccess(teamspace, project, model, excludeViewers);
-		respond(req, res, templates.ok, { jobs });
+		const roles = await ModelSettings.getRolesWithAccess(teamspace, project, model, excludeViewers);
+		respond(req, res, templates.ok, { roles: roles.map(UUIDToString) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -986,11 +988,11 @@ const establishRoutes = (modelType) => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/roles:
 	 *   get:
-	 *     description: Get the names of the jobs that are associated with users who have access to the model
+	 *     description: Get the names of the roles that are associated with users who have access to the model
 	 *     tags: [Models]
-	 *     operationId: getJobsWithAccess
+	 *     operationId: getRolesWithAccess
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Name of teamspace
@@ -1029,19 +1031,21 @@ const establishRoutes = (modelType) => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: returns the jobs that are associated with users who have access to the model
+	 *         description: returns the roles that are associated with users who have access to the model
 	 *         content:
 	 *           application/json:
 	 *             schema:
 	 *               type: object
 	 *               properties:
-	 *                 jobs:
+	 *                 roles:
 	 *                   type: array
 	 *                   items:
 	 *                     type: string
-	 *                     example: Architect
+	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
-	router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
+	router.get('/:model/roles', hasReadAccessToModel[modelType], getRolesWithAccess);
+
+	router.get('/:model/jobs', routeDecommissioned('GET', '/v5/teamspaces/{teamspace}/projects/{project}/{type}/{model}/roles'));
 
 	if (modelType === modelTypes.DRAWING) {
 	/**
