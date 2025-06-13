@@ -16,7 +16,7 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -27,17 +27,29 @@ import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
-import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
-import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
+import { Container } from './ticketsTableContent.styles';
+import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
+import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
+import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
 
-const TableContent = ({ template, ...props }: TicketsTableResizableContentProps & { template: ITemplate }) => {
+const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
+	const edgeScrolling = useEdgeScrolling();
 	const { filteredItems } = useContext(SearchContext);
-	const { stretchTable, visibleSortedColumnsNames, getAllColumnsNames, setVisibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const {
+		stretchTable, movingColumn, getAllColumnsNames, 
+		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
+	} = useContext(ResizableTableContext);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
 
+	useEffect(() => {
+		const allColumns = getAllColumnsNames();
+		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
+		setVisibleSortedColumnsNames(initialVisibleColumns);
+	}, [template]);
+	
 	useEffect(() => {
 		if (templateWasFetched && tableHasCompletedRendering) {
 			stretchTable(BaseProperties.TITLE);
@@ -45,19 +57,19 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 	}, [template, templateWasFetched, tableHasCompletedRendering]);
 
 	useEffect(() => {
-		const allColumns = getAllColumnsNames();
-		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
-		setVisibleSortedColumnsNames(initialVisibleColumns);
-	}, [template]);
+		if (movingColumn) {
+			edgeScrolling.start(tableRef.current);
+			return edgeScrolling.stop;
+		}
+	}, [movingColumn]);
 
-	if (!templateWasFetched) {
+	if (!templateAlreadyFetched(template)) {
 		return (
 			<EmptyPageView>
 				<Spinner />
 			</EmptyPageView>
 		);
 	}
-
 	if (!filteredItems.length) {
 		return (
 			<EmptyPageView>
@@ -68,20 +80,23 @@ const TableContent = ({ template, ...props }: TicketsTableResizableContentProps 
 			</EmptyPageView>
 		);
 	}
-
+	
 	return <TicketsTableResizableContent {...props} />;
 };
 
 export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+	const tableRef = useRef(null);
 	const templatHasBeenFetched = templateAlreadyFetched(template);
 	const columns = templatHasBeenFetched ? getAvailableColumnsForTemplate(template) : [];
 
 	return (
 		<TicketsTableContextComponent template={template}>
 			<ResizableTableContextComponent columns={columns} columnGap={1} key={template._id}>
-				<TableContent {...props} template={template} />
+				<Container ref={tableRef}>
+					<TableContent {...props} tableRef={tableRef} template={template} />
+				</Container>
 			</ResizableTableContextComponent>
 		</TicketsTableContextComponent>
 	);

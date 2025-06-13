@@ -17,28 +17,8 @@
 
 import styled, { css } from 'styled-components';
 
-// This is not to interfere with other components and to keep the cursor as
-// "col-resize" while resizing even when moving the mouse outside the table
-export const overlayStyles = `
-	height: 100vh;
-	width: 100vw;
-	cursor: col-resize;
-	pointer-events: all;
-	position: absolute;
-	z-index: 100;
-	top: 0;
-`;
-
-export const ResizerElement = styled.div`
-	height: 100%;
-	position: relative;
-	cursor: col-resize;
-	width: 7px;
-	left: -3.5px;
-`;
-
 const LINE_WIDTH = 2;
-export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $highlight: boolean }>`
+export const DelimiterLine = styled.div<{ $offset: number, $style: 'dashed' | 'solid' | 'none' }>`
 	position: relative;
 	z-index: 10;
 	width: ${LINE_WIDTH}px;
@@ -46,13 +26,14 @@ export const ResizerLine = styled.div<{ $offset: number, $isResizing: boolean, $
 	margin-left: ${({ $offset }) => $offset - (LINE_WIDTH / 2)}px;
 	pointer-events: all;
 
-	${({ $highlight, theme }) => $highlight && css`
-		background-repeat: repeat-y;
-		background-image: linear-gradient(${theme.palette.primary.main} 50%, transparent 50%);
-		background-size: 2px 7px;
-	`}
-
-	${({ $isResizing, theme }) => $isResizing && css`
-		background-color: ${theme.palette.primary.main};
-	`}
+	${({ $style, theme }) => {
+		if ($style === 'dashed') return css`
+			background-repeat: repeat-y;
+			background-image: linear-gradient(${theme.palette.primary.main} 50%, transparent 50%);
+			background-size: 2px 7px;
+		`;
+		if ($style === 'solid') return css`
+			background-color: ${theme.palette.primary.main};
+		`;
+	}}
 `;

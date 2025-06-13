@@ -22,6 +22,7 @@ const { src } = require('../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
+const { USERS_DB_NAME } = require(`${src}/models/users.constants`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 const db = require(`${src}/handler/db`);
@@ -818,6 +819,24 @@ const testGetTeamspaceSetting = () => {
 	});
 };
 
+const testGetTeamspaceInvites = () => {
+	describe('Get a list of teamspace invitations', () => {
+		test('Should return a list of emails', async () => {
+			const ts = generateRandomString();
+			const fn = jest.spyOn(db, 'find');
+			await Teamspace.getTeamspaceInvites(ts);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				USERS_DB_NAME, 'invitations',
+				{ 'teamSpaces.teamspace': ts },
+				{ _id: 1 },
+				undefined,
+			);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testTeamspaceAdmins();
 	testHasAccessToTeamspace();
@@ -841,4 +860,5 @@ describe(determineTestGroup(__filename), () => {
 	testSetTeamspaceRefId();
 	testGetTeamspaceRefId();
 	testGetTeamspaceSetting();
+	testGetTeamspaceInvites();
 });

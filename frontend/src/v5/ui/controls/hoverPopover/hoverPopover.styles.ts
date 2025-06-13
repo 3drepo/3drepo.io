@@ -31,3 +31,14 @@ export const PopoverContainer = styled(Popover).attrs({
 })`
 	pointer-events: none;
 `;
+
+export const PopoverHoveringContentContainer = styled(PopoverContainer).attrs({
+	anchorOrigin: {
+		vertical: 'top',
+		horizontal: 'right',
+	},
+})`
+	.MuiPopover-paper {
+		pointer-events: auto;
+	}
+`;
