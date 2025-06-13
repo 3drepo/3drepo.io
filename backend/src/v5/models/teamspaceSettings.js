@@ -253,16 +253,6 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
 	username, TEAMSPACE_ADMIN);
 
-TeamspaceSetting.getAllUsersInTeamspace = (teamspace, projection = { user: 1 }) => {
-	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
-	return findMany(query, projection);
-};
-
-TeamspaceSetting.getUsersWithNoAccess = async (teamspace, usernames) => {
-	const teamspaceUsers = await TeamspaceSetting.getAllUsersInTeamspace(teamspace);
-	return getArrayDifference(teamspaceUsers, usernames);
-};
-
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
 	await teamspaceSettingUpdate(teamspace, { _id: teamspace }, { $pull: { permissions: { user } } });
 };

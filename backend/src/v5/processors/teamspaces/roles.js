@@ -16,9 +16,10 @@
  */
 
 const { DEFAULT_OWNER_ROLE, DEFAULT_ROLES } = require('../../models/roles.constants');
-const { createGroup, getAllUsersInAccount, getGroups } = require('../../services/sso/frontegg');
+const { createGroup, getAllUsersInAccount, getGroupById, getGroups } = require('../../services/sso/frontegg');
 const { getUserId, getUsersByQuery } = require('../../models/users');
 const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
+const { templates } = require('../../utils/responseCodes');
 
 const Roles = {};
 
@@ -41,13 +42,21 @@ Roles.getRoles = async (teamspace) => {
 	return roles;
 };
 
-Roles.createRole = (teamspace, role) => {};
-
-Roles.createDefaultRoles = async (teamspace, firstAdmin) => {
+Roles.getRoleById = async (teamspace, roleId) => {
 	const teamspaceId = await getTeamspaceRefId(teamspace);
-	const userId = await getUserId(firstAdmin);
-	await Promise.all(DEFAULT_ROLES.map(({ name, color }) => createGroup(teamspaceId, name, color,
-		name === DEFAULT_OWNER_ROLE ? [userId] : undefined)));
+	try {
+		const group = await getGroupById(teamspaceId, roleId);
+		return group;
+	} catch (err) {
+		throw templates.roleNotFound;
+	}
+};
+
+Roles.isRoleNameUsed = async (teamspace, name) => {
+	const teamspaceId = await getTeamspaceRefId(teamspace);
+	const groups = await getGroups(teamspaceId, false);
+	const nameToCheck = name.toLowerCase().trim();
+	return groups.some(({ name: groupName }) => groupName.toLowerCase() === nameToCheck);
 };
 
 const getUserIdMapping = async (teamspaceId) => {
@@ -68,6 +77,26 @@ const getUserIdMapping = async (teamspaceId) => {
 	});
 	return usernameToUserId;
 };
+
+Roles.createRole = async (teamspace, { name, color, users }) => {
+	const teamspaceId = await getTeamspaceRefId(teamspace);
+	let userIds;
+
+	if (users?.length) {
+		const usernameToUserId = await getUserIdMapping(teamspaceId);
+		userIds = users.flatMap((user) => usernameToUserId[user] || []);
+	}
+
+	return createGroup(teamspaceId, name, color, userIds);
+};
+
+Roles.createDefaultRoles = async (teamspace, firstAdmin) => {
+	const teamspaceId = await getTeamspaceRefId(teamspace);
+	const userId = await getUserId(firstAdmin);
+	await Promise.all(DEFAULT_ROLES.map(({ name, color }) => createGroup(teamspaceId, name, color,
+		name === DEFAULT_OWNER_ROLE ? [userId] : undefined)));
+};
+
 Roles.createRoles = async (teamspace, roles) => {
 	const teamspaceId = await getTeamspaceRefId(teamspace);
 	const usernameToUserId = await getUserIdMapping(teamspaceId);

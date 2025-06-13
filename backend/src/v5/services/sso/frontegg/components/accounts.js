@@ -110,7 +110,7 @@ Accounts.addUsersToGroup = async (accountId, groupId, userIds) => {
 	}
 };
 
-Accounts.getGroups = async (accountId) => {
+Accounts.getGroups = async (accountId, getUsers = true) => {
 	try {
 		const config = await getConfig();
 
@@ -118,11 +118,27 @@ Accounts.getGroups = async (accountId) => {
 			...await getBearerHeader(),
 			[HEADER_TENANT_ID]: accountId,
 		};
-		const { data: { groups } } = await get(`${config.vendorDomain}/identity/resources/groups/v1/?_groupsRelations=users`, headers);
+		const { data: { groups } } = await get(`${config.vendorDomain}/identity/resources/groups/v1/${getUsers ? '?_groupsRelations=users' : ''}`, headers);
 		return groups;
 	} catch (err) {
 		logger.logError(`Failed to get groups in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to get groups in account: ${err.message}`);
+	}
+};
+
+Accounts.getGroupById = async (accountId, groupId) => {
+	try {
+		const config = await getConfig();
+
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+		const { data } = await get(`${config.vendorDomain}/identity/resources/groups/v1/${groupId}?_groupsRelations=users`, headers);
+		return data;
+	} catch (err) {
+		logger.logError(`Failed to get group by Id(${groupId}) in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to get group by Id account: ${err.message}`);
 	}
 };
 

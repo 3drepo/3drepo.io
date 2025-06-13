@@ -619,13 +619,9 @@ User.getMembers = async function (teamspace) {
 };
 
 User.getAllUsersInTeamspace = async function (teamspace) {
-	const users =  await User.findUsersInTeamspace(teamspace, {user: 1});
+	const {getAllMembersInTeamspace} = require(`${v5Path}/processors/teamspaces`);
+	const users =  await getAllMembersInTeamspace(teamspace);
 	return users.map(({user}) => user);
-};
-
-User.findUsersInTeamspace =  async function (teamspace, fields) {
-	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
-	return await db.find("admin", COLL_NAME, query, fields);
 };
 
 User.teamspaceMemberCheck = async function (user, teamspace) {

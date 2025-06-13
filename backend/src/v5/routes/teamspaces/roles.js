@@ -43,7 +43,7 @@ const createRole = async (req, res) => {
 
 	try {
 		const roleId = await Roles.createRole(teamspace, role);
-		respond(req, res, templates.ok, { _id: UUIDToString(roleId) });
+		respond(req, res, templates.ok, { _id: roleId });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

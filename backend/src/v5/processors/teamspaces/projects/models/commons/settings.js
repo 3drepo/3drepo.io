@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAllUsersInTeamspace, getTeamspaceAdmins } = require('../../../../../models/teamspaceSettings');
+const { getAllMembersInTeamspace } = require('../../..');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getProjectAdmins } = require('../../../../../models/projectSettings');
 const { getRolesByUsers } = require('../../../../../models/roles');
+const { getTeamspaceAdmins } = require('../../../../../models/teamspaceSettings');
 const { getUsersWithPermissions } = require('../../../../../models/modelSettings');
 
 const Settings = {};
 
 Settings.getUsersWithPermissions = async (teamspace, project, model, excludeViewers) => {
 	const [tsMembers, tsAdmins, projectAdmins, modelMembers] = await Promise.all([
-		getAllUsersInTeamspace(teamspace),
+		getAllMembersInTeamspace(teamspace),
 		getTeamspaceAdmins(teamspace),
 		getProjectAdmins(teamspace, project),
 		getUsersWithPermissions(teamspace, model, excludeViewers),

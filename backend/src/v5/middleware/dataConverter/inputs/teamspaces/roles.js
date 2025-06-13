@@ -16,18 +16,20 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
-const { getRoleById, getRoleByName } = require('../../../../models/roles');
+const { getArrayDifference, uniqueElements } = require('../../../../utils/helper/arrays');
+const { getRoleById, isRoleNameUsed } = require('../../../../processors/teamspaces/roles');
 const Yup = require('yup');
-const { getUsersWithNoAccess } = require('../../../../models/teamspaceSettings');
+const { getAllMembersInTeamspace } = require('../../../../processors/teamspaces');
 const { respond } = require('../../../../utils/responder');
 const { types } = require('../../../../utils/helper/yup');
-const { uniqueElements } = require('../../../../utils/helper/arrays');
 const { validateMany } = require('../../../common');
 
 const Roles = {};
 
-const nameExists = (teamspace, name) => getRoleByName(teamspace, name, { _id: 1 })
-	.then(() => true).catch(() => false);
+const getUsersWithNoAccess = async (teamspace, usernames) => {
+	const teamspaceUsers = await getAllMembersInTeamspace(teamspace);
+	return getArrayDifference(teamspaceUsers.map(({ user }) => user), usernames);
+};
 
 const validateRole = async (req, res, next) => {
 	const isUpdate = !!req.roleData;
@@ -36,7 +38,7 @@ const validateRole = async (req, res, next) => {
 		name: (isUpdate ? types.strings.title : types.strings.title.required())
 			.test('check-name-is-unique', 'Role with the same name already exists', async (value) => {
 				if (value !== req.roleData?.name) {
-					const nameTaken = await nameExists(req.params.teamspace, value);
+					const nameTaken = await isRoleNameUsed(req.params.teamspace, value);
 					return !nameTaken;
 				}
 
@@ -81,7 +83,7 @@ Roles.roleExists = async (req, res, next) => {
 	try {
 		const { teamspace, role } = req.params;
 
-		req.roleData = await getRoleById(teamspace, role, { _id: 1, name: 1 });
+		req.roleData = await getRoleById(teamspace, role);
 		await next();
 	} catch (err) {
 		respond(req, res, err);
