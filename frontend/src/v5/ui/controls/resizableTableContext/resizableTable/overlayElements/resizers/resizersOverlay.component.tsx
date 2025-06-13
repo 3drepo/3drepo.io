@@ -20,7 +20,7 @@ import { Resizer } from './resizer/resizer.component';
 import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export const ResizersOverlay = () => {
-	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
+	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	return (
 		<>

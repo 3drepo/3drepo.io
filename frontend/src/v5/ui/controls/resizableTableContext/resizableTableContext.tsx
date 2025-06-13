@@ -56,9 +56,7 @@ export interface ResizableTableType extends SubscribableObject<StateType> {
 
 	// moving columns
 	setMovingColumn: (name: string) => void,
-	getMovingColumn: () => string,
 	setMovingColumnDropIndex: (index: number) => void,
-	getMovingColumnDropIndex: () => number,
 	moveColumn: (name: string, dropIndex: number) => void,
 }
 
@@ -83,9 +81,7 @@ const defaultValue: ResizableTableType = {
 	setVisibleSortedColumnsNames: () => {},
 
 	// moving columns
-	getMovingColumn: () => '',
 	setMovingColumn: () => {},
-	getMovingColumnDropIndex: () => null,
 	setMovingColumnDropIndex: () => {},
 	moveColumn: () => {},
 };
@@ -186,9 +182,7 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 			getRowWidth,
 			columnGap,
 			stretchTable,
-			getMovingColumn: () => state.movingColumn,
 			setMovingColumn,
-			getMovingColumnDropIndex: () => state.movingColumnDropIndex,
 			setMovingColumnDropIndex,
 			moveColumn,
 		}}>
