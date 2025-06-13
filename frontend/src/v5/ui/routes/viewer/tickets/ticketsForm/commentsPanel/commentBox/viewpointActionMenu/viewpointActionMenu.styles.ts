@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,25 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { DashedContainer, DropArea } from './dragAndDrop.styles';
-import { useDropzone } from 'react-dropzone';
+import CameraIcon from '@assets/icons/outlined/camera_side-outlined.svg';
+import styled from 'styled-components';
 
-interface IDragAndDrop {
-	onDrop: (files) => void,
-	className?: string;
-	children?: any;
-	accept?: string;
-	hidden?: boolean;
-}
-
-export const DragAndDrop = ({ children, onDrop, hidden, accept, className, ...props }: IDragAndDrop) => {
-	const { getRootProps, isDragActive } = useDropzone({ onDrop, accept, noClick: true });
-	if (hidden) return null;
-	return (
-		<DropArea {...props} {...getRootProps()}>
-			<DashedContainer className={className} $isDragActive={isDragActive}>
-				{children}
-			</DashedContainer>
-		</DropArea>
-	);
-};
+export const ViewpointIcon = styled(CameraIcon)`
+	margin-top: -1px;
+	color: ${({ theme }) => theme.palette.success.main};
+`;
