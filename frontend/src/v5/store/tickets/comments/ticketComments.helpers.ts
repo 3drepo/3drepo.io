@@ -53,9 +53,10 @@ export const stripMetadata = (message: string = '') => message.replaceAll(/\[[_a
 export const sanitiseMessage = (message: string = '') => message.replaceAll('"', '&#34;');
 export const desanitiseMessage = (message: string = '') => message.replaceAll('&#34;', '"');
 
-const createMetadataValue = (metadataName: keyof TicketCommentReplyMetadata, metadataValue: string) => (
-	`[${metadataName}]:- "${metadataValue}"\n`
-);
+const createMetadataValue = (metadataName: keyof TicketCommentReplyMetadata, metadataValue: string) => {
+	if (!metadataValue) return null;
+	return `[${metadataName}]:- "${metadataValue}"\n`;
+};
 
 const stringifyMetadata = ({ originalAuthor = '', author, _id, message, images = [] }: TicketCommentReplyMetadata) => {
 	const metadata = [
