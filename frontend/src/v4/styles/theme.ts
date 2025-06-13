@@ -166,12 +166,12 @@ export const MuiTheme = createTheme({
 		},
 		MuiTextField: {
 			defaultProps: {
-				variant: 'standard',
+				variant: 'outlined',
 			},
 		},
 		MuiSelect: {
 			defaultProps: {
-				variant: 'standard',
+				variant: 'outlined',
 			},
 			styleOverrides: {
 				select: {

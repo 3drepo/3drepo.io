@@ -17,8 +17,7 @@
 
 import { ELEMENT_TYPES, MODES } from '@/v4/routes/components/screenshotDialog/markupStage/markupStage.helpers';
 import { MODE_OPERATION } from '@/v4/routes/components/screenshotDialog/screenshotDialog.helpers';
-
-export type ValuesOf<T> = T[keyof T];
+import { ValuesOf } from '@/v5/helpers/types.helpers';
 
 export type ISize = 'XS' | 'S' | 'M' | 'L' | 'XL';
 export type IMode = ValuesOf<typeof MODES>;
