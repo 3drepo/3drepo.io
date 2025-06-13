@@ -23,7 +23,7 @@ import { TicketsTableContextComponent } from './ticketsTableContext/ticketsTable
 import { ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
 import { getAvailableColumnsForTemplate } from './ticketsTableContext/ticketsTableContext.helpers';
 
-export const TicketsTableContexts = ({ children }) => {
+export const TicketsAndResizableTableProvider = ({ children }) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const templatHasBeenFetched = templateAlreadyFetched(template);

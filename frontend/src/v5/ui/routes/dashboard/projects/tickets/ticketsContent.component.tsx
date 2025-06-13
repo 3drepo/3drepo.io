@@ -30,7 +30,7 @@ import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 import { EmptyPageView } from '../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { DashboardParams, TICKETS_ROUTE } from '../../../routes.constants';
-import { TicketsTableContexts } from './ticketsTable/ticketsTableContexts.component';
+import { TicketsAndResizableTableProvider } from './ticketsTable/ticketsTableContexts.component';
 
 export const TicketsContent = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -76,9 +76,9 @@ export const TicketsContent = () => {
 	return (
 		<Switch>
 			<Route exact path={TICKETS_ROUTE}>
-				<TicketsTableContexts>
+				<TicketsAndResizableTableProvider>
 					<TicketsTable />
-				</TicketsTableContexts>
+				</TicketsAndResizableTableProvider>
 			</Route>
 			<Route path={path}>
 				<TicketsSelection />
