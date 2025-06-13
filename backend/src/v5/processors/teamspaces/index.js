@@ -17,7 +17,7 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount, getAllUsersInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, getAllUsersInAccount, getTeamspaceByAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
@@ -42,6 +42,7 @@ const { logger } = require('../../utils/logger');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
 const { removeUserFromAllModels } = require('../../models/modelSettings');
 const { removeUserFromAllProjects } = require('../../models/projectSettings');
+const { templates } = require('../../utils/responseCodes');
 
 const Teamspaces = {};
 
@@ -59,9 +60,15 @@ const removeAllUsersFromTS = async (teamspace) => {
 
 Teamspaces.getAvatar = (teamspace) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 
-Teamspaces.initTeamspace = async (teamspaceName, owner) => {
+Teamspaces.initTeamspace = async (teamspaceName, owner, accountId) => {
 	try {
-		const teamspaceId = await createAccount(teamspaceName);
+		let teamspaceId;
+		if (accountId) {
+			if (!await getTeamspaceByAccount(accountId)) throw templates.teamspaceNotFound;
+			teamspaceId = accountId;
+		} else {
+			teamspaceId = await createAccount(teamspaceName);
+		}
 		await Promise.all([
 			createTeamspaceRole(teamspaceName),
 			addDefaultJobs(teamspaceName),
@@ -69,13 +76,15 @@ Teamspaces.initTeamspace = async (teamspaceName, owner) => {
 		]);
 		await Promise.all([
 			createTeamspaceSettings(teamspaceName, teamspaceId),
-			assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, owner),
 			addDefaultTemplates(teamspaceName),
 		]);
-		await Promise.all([
-			Teamspaces.addTeamspaceMember(teamspaceName, owner),
-			grantAdminToUser(teamspaceName, owner),
-		]);
+		if (owner) {
+			await Promise.all([
+				assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, owner),
+				Teamspaces.addTeamspaceMember(teamspaceName, owner),
+				grantAdminToUser(teamspaceName, owner),
+			]);
+		}
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${teamspaceName}:${err.message}`);
 		throw err;

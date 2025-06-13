@@ -83,8 +83,12 @@ const cleanPermissions = (permissions) => {
 
 const sendInvitationEmail = async (email, username, teamspace) => {
 	const refId = await getTeamspaceRefId(teamspace);
-	const { customData: { firstName, lastName }} = await User.findByUserName(username, { "customData.firstName": 1, "customData.lastName": 1});
-	const sender = [firstName, lastName].join(" ");
+
+	let sender;
+	if(username) {
+		const { customData: { firstName, lastName }} = await User.findByUserName(username, { "customData.firstName": 1, "customData.lastName": 1});
+		sender = [firstName, lastName].join(" ");
+	}
 
 	await addUserToAccount(refId, email, undefined, {teamspace, sender  });
 };
@@ -148,7 +152,9 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		await coll.updateOne({_id:email}, { $set: invitation });
 
 	} else {
-		await User.hasReachedLicenceLimitCheck(teamspace);
+		if(username) {
+			await User.hasReachedLicenceLimitCheck(teamspace);
+		}
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await sendInvitationEmail(email, username, teamspace);
 		await coll.insertOne(invitation);
