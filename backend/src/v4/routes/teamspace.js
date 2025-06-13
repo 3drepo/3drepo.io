@@ -323,7 +323,7 @@
 	 *    user: "viewerTeamspace1Model1JobB",
 	 * }
 	 */
-	router.delete("/members/:user", middlewares.isAccountAdmin , removeTeamMember);
+	router.delete("/members/:user", middlewares.canAddOrRemoveUsers , removeTeamMember);
 
 	/**
 	 *
@@ -419,7 +419,7 @@
 	 * }
 	 *
 	 */
-	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
+	router.post("/members", middlewares.canAddOrRemoveUsers, addTeamMember);
 
 	/**
 	 * @api {get} /:teamspace/addOns get enabled add ons
