@@ -35,7 +35,7 @@ const propertySetterInterceptor = <O,>(object: O, publish) => {
 	return new Proxy(object, proxyHandler) as O;
 };
 
-export const useSubscribableObject = <O,>(defaultValue: O) => {
+export const useSubscribableState = <O extends Record<string, unknown>>(defaultValue: O) => {
 	const { publish, subscribe } = usePubSub();
 	const [state] = useState(propertySetterInterceptor(defaultValue, publish));
 	return [state, subscribe] as [O, SubscribeFn<keyof typeof state>];

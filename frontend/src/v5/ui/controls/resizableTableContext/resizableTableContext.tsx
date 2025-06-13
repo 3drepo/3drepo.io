@@ -18,7 +18,7 @@
 import { compact, sum } from 'lodash';
 import { RefHolder } from './resizableTableContext.styles';
 import { SubscribableObject } from '@/v5/helpers/performanceContext/performanceContext.types';
-import { createPerformanceContext, useSubscribableObject } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { createPerformanceContext, useSubscribableState } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 
 export type TableColumn = { name: string; minWidth?: number; width: number; };
 
@@ -94,7 +94,7 @@ interface Props {
 	columnGap?: number;
 }
 export const ResizableTableContextComponent = ({ children, columns, columnGap = 0 }: Props) => {
-	const [state, subscribe] = useSubscribableObject(defaultState);
+	const [state, subscribe] = useSubscribableState(defaultState);
 
 	const setVisibleSortedColumnsNames = (names: string[]) => {
 		state.visibleSortedColumnsNames = names;
