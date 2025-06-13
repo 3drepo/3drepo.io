@@ -17,9 +17,9 @@
 
 import { ResizableTableContext } from '../resizableTableContext';
 import { Row } from './resizableTableRow.styles';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizableTableRow = (props) => {
-	const { columnGap } = usePerformanceContext(ResizableTableContext, () => false);
+	const { columnGap } = useContextWithCondition(ResizableTableContext, () => false);
 	return (<Row $gap={columnGap} {...props} />);
 };

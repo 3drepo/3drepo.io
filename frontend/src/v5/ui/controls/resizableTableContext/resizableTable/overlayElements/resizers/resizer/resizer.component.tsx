@@ -19,11 +19,11 @@ import { useRef, useState } from 'react';
 import { overlayStyles, ResizerElement } from './resizer.styles';
 import { ResizableTableContext } from '../../../../resizableTableContext';
 import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.styles';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 type ResizerProps = { name: string };
 export const Resizer = ({ name }: ResizerProps) => {
-	const { setWidth, getWidth } = usePerformanceContext(ResizableTableContext, ['columnsWidths']);
+	const { setWidth, getWidth } = useContextWithCondition(ResizableTableContext, ['columnsWidths']);
 	const [resizerName, setResizerName] = useState('');
 	const [isResizing, setIsResizing] = useState(false);
 	const width = getWidth(name);

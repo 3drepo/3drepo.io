@@ -16,7 +16,7 @@
  */
 
 import { createContext, useContext, useEffect, useRef, useState } from 'react';
-import { CustomEqualityCheck, ObservedProperties, SubscribeFn, SubscribableObject } from './performanceContext.types';
+import { CustomEqualityCheck, ObservedProperties, SubscribeFn, SubscribableObject } from './contextWithCondition.types';
 import { usePubSub } from '@/v5/services/pubSub';
 import { cloneDeep } from 'lodash';
 
@@ -41,11 +41,11 @@ export const useSubscribableState = <O extends Record<string, unknown>>(defaultV
 	return [state, subscribe] as [O, SubscribeFn<keyof typeof state>];
 };
 
-export const createPerformanceContext = <ContextState, ContextType extends SubscribableObject<ContextState>>(
+export const createContextWithCondition = <ContextState, ContextType extends SubscribableObject<ContextState>>(
 	defaultValue: ContextType,
 ) => createContext(defaultValue) as React.Context<ContextType>;
 
-export const usePerformanceContext = <ContextType extends SubscribableObject<any>>(
+export const useContextWithCondition = <ContextType extends SubscribableObject<any>>(
 	context: React.Context<ContextType>,
 	updatingCondition: CustomEqualityCheck<ContextType['state']> | ObservedProperties<ContextType['state']>
 ) => {

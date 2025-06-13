@@ -33,7 +33,7 @@ import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants'
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
 import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
@@ -41,7 +41,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	const {
 		stretchTable, getAllColumnsNames, subscribe, 
 		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
-	} = usePerformanceContext(ResizableTableContext, () => false);
+	} = useContextWithCondition(ResizableTableContext, () => false);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
 

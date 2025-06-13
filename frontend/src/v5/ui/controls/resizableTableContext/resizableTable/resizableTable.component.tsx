@@ -21,10 +21,10 @@ import { MovingColumnOverlay } from './overlayElements/movingColumn/movingColumn
 import { ResizableTableContext } from '../resizableTableContext';
 import { useEffect, useState } from 'react';
 import { Row } from '../resizableTableRow/resizableTableRow.styles';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizableTable = ({ className = '', children }) => {
-	const { getWidth, getVisibleSortedColumnsNames, subscribe } = usePerformanceContext(ResizableTableContext, () => false);
+	const { getWidth, getVisibleSortedColumnsNames, subscribe } = useContextWithCondition(ResizableTableContext, () => false);
 	const [key] = useState(+new Date());
 	const [tableNode, setTableNode] = useState(null);
 	const gridClassName = `ResizableTableTemplateColumns_${key}`;

@@ -20,14 +20,14 @@ import { NewTicketRow, NewTicketText, NewTicketTextContainer } from './newTicket
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { NewTicketMenu } from '../../../newTicketMenu/newTicketMenu.component';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 type NewTicketRowButtonProps = {
 	disabled?: boolean;
 	onNewTicket: (modelId: string) => void;
 };
 export const NewTicketRowButton = ({ onNewTicket, disabled }: NewTicketRowButtonProps) => {
-	const { getRowWidth } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
+	const { getRowWidth } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
 	const rowWidth = getRowWidth();
 
 	return (

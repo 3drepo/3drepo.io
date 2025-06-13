@@ -17,10 +17,10 @@
 
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { Resizer } from './resizer/resizer.component';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizersOverlay = () => {
-	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames']);
+	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	return (
 		<>

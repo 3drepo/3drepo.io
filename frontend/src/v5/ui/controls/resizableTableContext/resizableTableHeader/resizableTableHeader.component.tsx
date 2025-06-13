@@ -18,10 +18,10 @@
 import { ResizableTableContext } from '../resizableTableContext';
 import { ResizableTableCell } from '../resizableTableCell/resizableTableCell.component';
 import { blockEvent } from '@/v5/helpers/events.helpers';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizableTableHeader = ({ name, children, ...props }) => {
-	const { setMovingColumn } = usePerformanceContext(ResizableTableContext, () => false);
+	const { setMovingColumn } = useContextWithCondition(ResizableTableContext, () => false);
 
 	const onDragStart = (e) => {
 		// The blockEvent is to fix a bug in firefox where the dragging the

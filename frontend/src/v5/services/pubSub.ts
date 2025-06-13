@@ -16,7 +16,7 @@
  */
 
 import { useRef } from 'react';
-import { PublishFn, SubscribeFn } from '../helpers/performanceContext/performanceContext.types';
+import { PublishFn, SubscribeFn } from '../helpers/contextWithCondition/contextWithCondition.types';
 
 export class PubSub<K extends string> {
 	private subscriptions: Partial<Record<K, Function[]>> = {};
