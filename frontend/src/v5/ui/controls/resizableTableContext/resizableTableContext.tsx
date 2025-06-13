@@ -18,7 +18,8 @@
 import { compact, sum } from 'lodash';
 import { RefHolder } from './resizableTableContext.styles';
 import { SubscribableObject } from '@/v5/helpers/contextWithCondition/contextWithCondition.types';
-import { createContextWithCondition, useSubscribableState } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { useSubscribableState } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { createContext } from 'react';
 
 export type TableColumn = { name: string; minWidth?: number; width: number; };
 
@@ -85,7 +86,7 @@ const defaultValue: ResizableTableType = {
 	setMovingColumnDropIndex: () => {},
 	moveColumn: () => {},
 };
-export const ResizableTableContext = createContextWithCondition(defaultValue);
+export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
 
 interface Props {

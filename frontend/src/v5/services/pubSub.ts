@@ -36,9 +36,7 @@ export class PubSub<K extends string> {
 }
 
 export const usePubSub = <K extends string>() => {
+	// Using useRef to ensure that the same instance of PubSub is used across renders
 	const ref = useRef(new PubSub<K>());
-	return {
-		publish: ref.current.publish,
-		subscribe: ref.current.subscribe,
-	};
+	return ref.current;
 };

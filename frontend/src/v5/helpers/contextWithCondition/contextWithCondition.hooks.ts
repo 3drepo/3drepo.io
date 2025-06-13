@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { CustomEqualityCheck, ObservedProperties, SubscribeFn, SubscribableObject } from './contextWithCondition.types';
 import { usePubSub } from '@/v5/services/pubSub';
 import { cloneDeep } from 'lodash';
@@ -40,10 +40,6 @@ export const useSubscribableState = <O extends Record<string, unknown>>(defaultV
 	const [state] = useState(propertySetterInterceptor(defaultValue, publish));
 	return [state, subscribe] as [O, SubscribeFn<keyof typeof state>];
 };
-
-export const createContextWithCondition = <ContextState, ContextType extends SubscribableObject<ContextState>>(
-	defaultValue: ContextType,
-) => createContext(defaultValue) as React.Context<ContextType>;
 
 export const useContextWithCondition = <ContextType extends SubscribableObject<any>>(
 	context: React.Context<ContextType>,
