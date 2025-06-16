@@ -64,6 +64,7 @@ export interface ResizableTableType extends SubscribableObject<StateType> {
 const defaultValue: ResizableTableType = {
 	subscribe: () => () => {},
 	state: defaultState,
+	previousState: { current: defaultState },
 
 	getAllColumnsNames: () => [],
 	getWidth: () => 0,
@@ -95,7 +96,7 @@ interface Props {
 	columnGap?: number;
 }
 export const ResizableTableContextComponent = ({ children, columns, columnGap = 0 }: Props) => {
-	const [state, subscribe] = useSubscribableState(defaultState);
+	const [state, previousState, subscribe] = useSubscribableState(defaultState);
 
 	const setVisibleSortedColumnsNames = (names: string[]) => {
 		state.visibleSortedColumnsNames = names;
@@ -169,6 +170,7 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 	return (
 		<ResizableTableContext.Provider value={{
 			subscribe,
+			previousState,
 			state,
 			getAllColumnsNames,
 			getWidth,

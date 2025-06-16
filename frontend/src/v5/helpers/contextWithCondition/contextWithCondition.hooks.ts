@@ -16,38 +16,42 @@
  */
 
 import { useContext, useEffect, useRef, useState } from 'react';
-import { CustomEqualityCheck, ObservedProperties, SubscribeFn, SubscribableObject } from './contextWithCondition.types';
+import { CustomEqualityCheck, ObservedProperties, SubscribableObject } from './contextWithCondition.types';
 import { usePubSub } from '@/v5/services/pubSub';
 import { cloneDeep } from 'lodash';
 
 /* eslint-disable @typescript-eslint/comma-dangle */
-const propertySetterInterceptor = <O,>(object: O, publish) => {
+const propertySetterInterceptor = <O,>(object: O, onChange) => {
 	const proxyHandler = {
 		set: (obj, propName, newVal) => {
 			const oldVal = obj[propName];
 			if (oldVal === newVal) return false;
 
 			obj[propName] = newVal;
-			publish(propName, newVal, oldVal);
+			onChange(propName, newVal, oldVal);
 			return true;
 		},
 	};
 	return new Proxy(object, proxyHandler) as O;
 };
 
-export const useSubscribableState = <O extends Record<string, unknown>>(defaultValue: O) => {
+export const useSubscribableState = <O extends Record<string, unknown>>(defaultValue = {} as O) => {
 	const { publish, subscribe } = usePubSub();
-	const [state] = useState(propertySetterInterceptor(defaultValue, publish));
-	return [state, subscribe] as [O, SubscribeFn<keyof typeof state>];
+	const previousState = useRef<O>(cloneDeep(defaultValue));
+	const [state] = useState(propertySetterInterceptor(defaultValue, (prop: string, newVal, oldVal) => {
+		publish(prop, newVal, oldVal);
+		(previousState.current as any)[prop] = cloneDeep(oldVal);
+	}));
+
+	return [state, previousState, subscribe] as const;
 };
 
 export const useContextWithCondition = <ContextType extends SubscribableObject<any>>(
 	context: React.Context<ContextType>,
 	updatingCondition: CustomEqualityCheck<ContextType['state']> | ObservedProperties<ContextType['state']>
 ) => {
-	const { state: contextState, subscribe, ...rest } = useContext(context);
+	const { state: contextState, previousState, subscribe, ...rest } = useContext(context);
 	const [state, setState] = useState(contextState);
-	const previousState = useRef(contextState);
 
 	useEffect(() => {
 		const updatingConditionIsAFunction = typeof updatingCondition === 'function';
@@ -56,20 +60,14 @@ export const useContextWithCondition = <ContextType extends SubscribableObject<a
 			const shouldUpdate = updatingCondition as CustomEqualityCheck<typeof contextState>;
 
 			return subscribe(Object.keys(contextState) as any, () => {
-				const currentState = cloneDeep(contextState);
-				if (shouldUpdate(currentState, previousState.current)) {
-					setState(currentState);
+				if (shouldUpdate(contextState, previousState.current)) {
+					setState({ ...contextState });
 				}
-				previousState.current = currentState;
 			});
 		}
 
 		const observedProperties = updatingCondition as ObservedProperties<typeof contextState>;
-		return subscribe(observedProperties, () => {
-			const currentState = cloneDeep(contextState);
-			setState(currentState);
-			previousState.current = currentState;
-		});
+		return subscribe(observedProperties, () => setState({ ...contextState }));
 	}, [updatingCondition]);
 
 	return { ...state, ...rest, subscribe } as ContextType & ContextType['state'];

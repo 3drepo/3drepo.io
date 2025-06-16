@@ -15,12 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { MutableRefObject } from 'react';
+
 export type UnsubscribeFn = () => void;
 export type SubscribeFn<Event> = (events: Event[], callback: (...args) => void) => UnsubscribeFn;
 export type PublishFn<Event> = (event: Event, ...args) => void;
 
 export type SubscribableObject<ContextState> = {
 	state: ContextState,
+	previousState: MutableRefObject<ContextState>,
 	subscribe: SubscribeFn<keyof ContextState>,
 };
 
