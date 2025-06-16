@@ -17,19 +17,23 @@
 
 import { useRef } from 'react';
 import { PublishFn, SubscribeFn } from '../helpers/contextWithCondition/contextWithCondition.types';
+import { EventEmitter } from 'eventemitter3';
 
 export class PubSub<K extends string> {
-	private subscriptions: Partial<Record<K, Function[]>> = {};
+	private emitter = new EventEmitter();
 
-	public publish: PublishFn<K> = (event: K, ...args) => this.subscriptions[event]?.forEach((fn) => fn(event, ...args));
+	private on = this.emitter.on.bind(this.emitter);
+
+	private off = this.emitter.off.bind(this.emitter);
+
+	private emit = this.emitter.emit.bind(this.emitter);
+
+	public publish: PublishFn<K> = (event: K, ...args) => this.emit(event, ...args);
 
 	public subscribe: SubscribeFn<K> = (events: K[], fn: Function) => {
 		const subs = events.map((event) => {
-			this.subscriptions[event] ||= [];
-			this.subscriptions[event].push(fn);
-			return () => {
-				this.subscriptions[event] = this.subscriptions[event].filter((subscribedFn) => subscribedFn !== fn);
-			};
+			this.on(event, fn);
+			return () => this.off(event, fn);
 		});
 		return () => subs.forEach((unsubscribe) => unsubscribe());
 	};

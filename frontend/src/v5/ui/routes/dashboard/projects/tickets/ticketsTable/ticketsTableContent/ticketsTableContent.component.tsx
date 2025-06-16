@@ -58,7 +58,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	}, [template, templateWasFetched, tableHasCompletedRendering]);
 
 	useEffect(() => {
-		const onMovingColumnChange = (event, movingColumn) => {
+		const onMovingColumnChange = (movingColumn) => {
 			if (movingColumn) {
 				edgeScrolling.start(tableRef.current);
 			} else {
