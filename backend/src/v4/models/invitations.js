@@ -93,7 +93,7 @@ const sendInvitationEmail = async (email, username, teamspace) => {
 	await addUserToAccount(refId, email, undefined, {teamspace, sender  });
 };
 
-invitations.create = async (email, teamspace, job, username, permissions = {}) => {
+invitations.create = async (email, teamspace, job, username, permissions = {}, checkLicenceLimit = true) => {
 	// 1 - find if there is already and invitation with that email
 	// 2 - if there is update the invitation with the new teamspace data
 	// 2.5 - if there is not, create an entry with that email and job/permission
@@ -152,7 +152,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		await coll.updateOne({_id:email}, { $set: invitation });
 
 	} else {
-		if(username) {
+		if(checkLicenceLimit) {
 			await User.hasReachedLicenceLimitCheck(teamspace);
 		}
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };

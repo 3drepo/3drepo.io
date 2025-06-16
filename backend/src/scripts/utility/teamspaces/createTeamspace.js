@@ -48,7 +48,7 @@ const run = async (teamspace, user, accountId) => {
 
 	await initTeamspace(teamspace, username, accountId);
 	if (!username) {
-		await createInvite(user, teamspace, DEFAULT_OWNER_JOB, undefined, { teamspace_admin: true });
+		await createInvite(user, teamspace, DEFAULT_OWNER_JOB, undefined, { teamspace_admin: true }, false);
 	}
 
 	logger.logInfo(`Teamspace ${teamspace} created.`);
