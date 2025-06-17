@@ -45,6 +45,7 @@ export const AssigneesSelect = ({
 	helperText,
 	onChange,
 	onBlur,
+	onClose,
 	canClear = false,
 	disabled,
 	emptyListMessage,
@@ -91,6 +92,7 @@ export const AssigneesSelect = ({
 					isInvalid={(v) => invalidValues.includes(v)}
 					onChange={handleChange}
 					onBlur={onBlur}
+					onClose={onClose}
 					disabled={disabled}
 					{...props}
 				/>

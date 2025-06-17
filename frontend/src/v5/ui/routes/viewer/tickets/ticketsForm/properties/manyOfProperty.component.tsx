@@ -23,6 +23,7 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import { ClearIconContainer } from './selectProperty.styles';
+import { useState } from 'react';
 
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
@@ -33,37 +34,42 @@ type ManyOfPropertyProps = FormInputProps & {
 	onBlur: () => void;
 };
 
-export const ManyOfProperty = ({ values, onBlur, immutable, ...props }: ManyOfPropertyProps) => {
-	const canClear = !props.required && !props.disabled && !!props.value?.length && !immutable;
+export const ManyOfProperty = ({ values, value: formValue, immutable, onChange, ...props }: ManyOfPropertyProps) => {
+	const [value, setValue] = useState(formValue);
+	const canClear = !props.required && !props.disabled && !!value?.length && !immutable;
 
-	const onClear = () => {
-		props.onChange([]);
-		onBlur?.();
+	const handleClose = () => {
+		if (!value?.length && !formValue?.length) return;
+		onChange(value);
+		props.onBlur?.();
 	};
 
+	const handleChange = (e) => setValue(e.target.value);
+
 	if (values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty maxItems={17} multiple canClear={canClear} onBlur={onBlur} {...props} />);
+		return (<JobsAndUsersProperty maxItems={17} multiple canClear={canClear} value={value} onClose={handleClose} onChange={handleChange} {...props} />);
 	}
 
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
 
-	const onClose = (e) => {
-		if (!e.target.value?.length && !props.value?.length) return;
-		onBlur?.();
+	const handleClear = () => {
+		onChange([]);
+		props.onBlur?.();
 	};
 
 	return (
 		<MultiSelect
 			{...props}
-			onClose={onClose}
-			value={props.value || []}
+			onClose={handleClose}
+			value={value || []}
+			onChange={handleChange}
 			endAdornment={canClear && (
-				<ClearIconContainer onClick={onClear}>
+				<ClearIconContainer onClick={handleClear}>
 					<ClearIcon />
 				</ClearIconContainer>
 			)}
 		>
-			{(items).map((value) => <MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>)}
+			{(items).map((item) => <MultiSelectMenuItem key={item} value={item}>{item}</MultiSelectMenuItem>)}
 		</MultiSelect>
 	);
 };

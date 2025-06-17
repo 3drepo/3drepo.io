@@ -51,6 +51,7 @@ export const AssigneesSelectMenu = ({
 	isInvalid,
 	disabled,
 	onBlur,
+	onClose,
 	excludeJobs,
 	...props
 }: AssigneesSelectMenuProps) => {
@@ -66,8 +67,7 @@ export const AssigneesSelectMenu = ({
 	const handleClose = (e) => {
 		e.stopPropagation();
 		setOpen(false);
-		if (multiple && !e.target.value?.length && !value?.length) return;
-		onBlur?.();
+		onClose?.(e);
 	};
 
 	if (disabled) return null;
