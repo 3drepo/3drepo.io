@@ -28,7 +28,7 @@ export const MovingColumnDropAreas = () => {
 		setMovingColumn, moveColumn, getWidth, setMovingColumnDropIndex, columnGap,
 		getIndex, getColumnOffsetLeft, getRowWidth, visibleSortedColumnsNames,
 		movingColumn, movingColumnDropIndex,
-	} = useContextWithCondition(ResizableTableContext, ['movingColumn', 'movingColumnDropIndex', 'columnsWidths', 'visibleSortedColumnsNames']);
+	} = useContextWithCondition(ResizableTableContext, ['movingColumn', 'movingColumnDropIndex', 'resizingColumn', 'visibleSortedColumnsNames']);
 
 	const movingColumnIndex = getIndex(movingColumn);
 	const dropLineOffset = getColumnOffsetLeft(visibleSortedColumnsNames[movingColumnDropIndex]) ?? getRowWidth();

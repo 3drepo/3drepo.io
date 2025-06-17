@@ -23,7 +23,11 @@ import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/conte
 
 type ResizerProps = { name: string };
 export const Resizer = ({ name }: ResizerProps) => {
-	const { setWidth, getWidth, resizingColumn, setResizingColumn } = useContextWithCondition(ResizableTableContext, ['columnsWidths', 'resizingColumn']);
+	const { setWidth, getWidth, resizingColumn, setResizingColumn } = useContextWithCondition(
+		ResizableTableContext,
+		['columnsWidths', 'resizingColumn'],
+		(curr, prev) => prev.resizingColumn === name || curr.resizingColumn === name,
+	);
 	const [isHovering, setIsHovering] = useState(false);
 	const width = getWidth(name);
 	const initialPosition = useRef(null);
