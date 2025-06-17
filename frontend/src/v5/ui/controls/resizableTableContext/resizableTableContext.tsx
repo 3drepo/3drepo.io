@@ -29,6 +29,7 @@ type StateType = {
 	movingColumn: string,
 	movingColumnDropIndex: number,
 	tableNode: HTMLDivElement | null,
+	resizingColumn: string,
 };
 const defaultState: StateType = {
 	columnsWidths: {},
@@ -36,6 +37,7 @@ const defaultState: StateType = {
 	movingColumn: '',
 	movingColumnDropIndex: null,
 	tableNode: null,
+	resizingColumn: '',
 };
 
 export interface ResizableTableType extends SubscribableObject<StateType> {
@@ -59,6 +61,7 @@ export interface ResizableTableType extends SubscribableObject<StateType> {
 	setMovingColumn: (name: string) => void,
 	setMovingColumnDropIndex: (index: number) => void,
 	moveColumn: (name: string, dropIndex: number) => void,
+	setResizingColumn: (name: string) => void,
 }
 
 const defaultValue: ResizableTableType = {
@@ -86,6 +89,8 @@ const defaultValue: ResizableTableType = {
 	setMovingColumn: () => {},
 	setMovingColumnDropIndex: () => {},
 	moveColumn: () => {},
+	setResizingColumn: () => {},
+
 };
 export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
@@ -108,6 +113,10 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 
 	const setMovingColumnDropIndex = (index: number) => {
 		state.movingColumnDropIndex = index;
+	};
+
+	const setResizingColumn = (name: string) => {
+		state.resizingColumn = name;
 	};
 
 	const getColumnByName = (name: string) => columns.find((e) => e.name === name) as TableColumn;
@@ -188,6 +197,7 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 			setMovingColumn,
 			setMovingColumnDropIndex,
 			moveColumn,
+			setResizingColumn,
 		}}>
 			{children}
 			<RefHolder ref={(node) => { state.tableNode = node; }} />
