@@ -39,8 +39,8 @@ export const useSubscribableState = <O extends Record<string, unknown>>(defaultV
 	const { publish, subscribe } = usePubSub();
 	const previousState = useRef<O>(cloneDeep(defaultValue));
 	const [state] = useState(propertySetterInterceptor(defaultValue, (prop: string, newVal, oldVal) => {
-		publish(prop, newVal, oldVal);
 		(previousState.current as any)[prop] = cloneDeep(oldVal);
+		publish(prop, newVal, oldVal);
 	}));
 
 	return [state, previousState, subscribe] as const;
