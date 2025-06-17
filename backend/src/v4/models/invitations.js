@@ -142,6 +142,9 @@ invitations.create = async (email, teamspace, job, username, permissions = {}, c
 
 		// if its a new teamspace that the user has been invited send an invitation email
 		if (result.teamSpaces.every(t=> t.teamspace !== teamspace)) {
+			if(checkLicenceLimit) {
+				await User.hasReachedLicenceLimitCheck(teamspace);
+			}
 			await sendInvitationEmail(email, username, teamspace);
 			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
 		}
@@ -243,13 +246,13 @@ const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, perm
 	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
 
 	try {
-		await User.addTeamMember(teamspace, invitedUser, job, teamPerms);
+		await User.addTeamMember(teamspace, invitedUser, job, teamPerms, undefined, true);
 
 		if (!permissions.teamspace_admin) {
 			await Promise.all(permissions.projects.map(applyProjectPermissions(teamspace, invitedUser)));
 		}
 	} catch(err) {
-		systemLogger.logError("Something failed when unpacking invitation: " + err.stack);
+		systemLogger.logError("Something failed when unpacking invitation: ", err.message);
 	}
 };
 
