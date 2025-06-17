@@ -193,11 +193,10 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 
 	return overrides.reduce((acum, current) => {
 		const color = current.color ? getGroupHexColor(current.color) : undefined;
-		const { opacity } = current;
 		const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
 
 		return v4Objects.reduce((dict, objects) => {
-			const overrideDict = toMeshDictionary(objects, color, opacity);
+			const overrideDict = toMeshDictionary(objects, color, current.opacity ?? 1);
 
 			// eslint-disable-next-line no-param-reassign
 			dict.overrides = { ...dict.overrides, ...overrideDict.overrides };
