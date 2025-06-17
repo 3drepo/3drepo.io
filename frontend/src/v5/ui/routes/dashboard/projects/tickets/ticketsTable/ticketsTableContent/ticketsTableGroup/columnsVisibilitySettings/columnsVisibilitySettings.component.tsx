@@ -102,7 +102,7 @@ export const ColumnsVisibilitySettings = () => {
 	const { teamspace, project, template } = useParams<DashboardParams>();
 	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
+	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const { sortedItems: tickets } = useContext(SortedTableContext);
 	const columnsNames = getAllColumnsNames();
 
