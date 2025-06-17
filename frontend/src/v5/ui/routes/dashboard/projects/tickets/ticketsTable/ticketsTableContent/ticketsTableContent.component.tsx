@@ -41,7 +41,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	const {
 		stretchTable, getAllColumnsNames, subscribe, 
 		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
-	} = useContextWithCondition(ResizableTableContext, () => false);
+	} = useContextWithCondition(ResizableTableContext, []);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
 

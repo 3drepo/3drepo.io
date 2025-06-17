@@ -16,7 +16,7 @@
  */
 
 import { useContext, useEffect, useRef, useState } from 'react';
-import { CustomEqualityCheck, ObservedProperties, SubscribableObject } from './contextWithCondition.types';
+import { UpdatingCondition, DependencyArray, SubscribableObject } from './contextWithCondition.types';
 import { usePubSub } from '@/v5/services/pubSub';
 import { cloneDeep } from 'lodash';
 
@@ -48,27 +48,19 @@ export const useSubscribableState = <O extends Record<string, unknown>>(defaultV
 
 export const useContextWithCondition = <ContextType extends SubscribableObject<any>>(
 	context: React.Context<ContextType>,
-	updatingCondition: CustomEqualityCheck<ContextType['state']> | ObservedProperties<ContextType['state']>
+	dependencyArray: DependencyArray<ContextType['state']>,
+	updatingCondition?: UpdatingCondition<ContextType['state'], ContextType>
 ) => {
 	const { state: contextState, previousState, subscribe, ...rest } = useContext(context);
 	const [state, setState] = useState(contextState);
 
 	useEffect(() => {
-		const updatingConditionIsAFunction = typeof updatingCondition === 'function';
-
-		if (updatingConditionIsAFunction) {
-			const shouldUpdate = updatingCondition as CustomEqualityCheck<typeof contextState>;
-
-			return subscribe(Object.keys(contextState) as any, () => {
-				if (shouldUpdate(contextState, previousState.current)) {
-					setState({ ...contextState });
-				}
-			});
-		}
-
-		const observedProperties = updatingCondition as ObservedProperties<typeof contextState>;
-		return subscribe(observedProperties, () => setState({ ...contextState }));
-	}, [updatingCondition]);
+		return subscribe(dependencyArray, () => {
+			if (!updatingCondition || updatingCondition(contextState, previousState.current, rest)) {
+				setState({ ...contextState });
+			}
+		});
+	}, [dependencyArray, updatingCondition]);
 
 	return { ...state, ...rest, subscribe } as ContextType & ContextType['state'];
 };

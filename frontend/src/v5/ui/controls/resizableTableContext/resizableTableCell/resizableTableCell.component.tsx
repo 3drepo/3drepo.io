@@ -27,7 +27,7 @@ export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 };
 export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
 	const { movingColumn, getIndex } = useContextWithCondition(ResizableTableContext, ['movingColumn']);
-	const { isVisible } = useContextWithCondition(ResizableTableContext, (curr, prev) => (
+	const { isVisible } = useContextWithCondition(ResizableTableContext, (['visibleSortedColumnsNames']), (curr, prev) => (
 		curr.visibleSortedColumnsNames.includes(name) !== prev.visibleSortedColumnsNames.includes(name)
 	));
 

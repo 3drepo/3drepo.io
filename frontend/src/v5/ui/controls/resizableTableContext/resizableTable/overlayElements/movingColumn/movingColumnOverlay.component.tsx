@@ -21,7 +21,7 @@ import { MovingColumnDropAreas } from './movingColumnDropAreas/movingColumnDropA
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const MovingColumnOverlay = () => {
-	const { movingColumn } = useContextWithCondition(ResizableTableContext, (curr, prev) => !curr.movingColumn !== !prev.movingColumn);
+	const { movingColumn } = useContextWithCondition(ResizableTableContext, ['movingColumn']);
 
 	if (!movingColumn) return null;
 

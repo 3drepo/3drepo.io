@@ -27,6 +27,9 @@ export type SubscribableObject<ContextState> = {
 	subscribe: SubscribeFn<keyof ContextState>,
 };
 
-export type CustomEqualityCheck<ContextState> = (currentState: ContextState, previousState: ContextState) => boolean;
-export type ArrayOfAtLeastOneElement<Element> = [Element, ...Element[]];
-export type ObservedProperties<ContextState> = ArrayOfAtLeastOneElement<keyof ContextState>;
+export type DependencyArray<ContextState> = (keyof ContextState)[];
+export type UpdatingCondition<ContextState, ContextType> = (
+	currentState: ContextState,
+	previousState: ContextState,
+	context: Omit<ContextType, keyof SubscribableObject<ContextState>>
+) => boolean;

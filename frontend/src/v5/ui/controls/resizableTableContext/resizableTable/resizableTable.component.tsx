@@ -24,7 +24,7 @@ import { Row } from '../resizableTableRow/resizableTableRow.styles';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizableTable = ({ className = '', children }) => {
-	const { getWidth, getVisibleSortedColumnsNames, subscribe } = useContextWithCondition(ResizableTableContext, () => false);
+	const { getWidth, getVisibleSortedColumnsNames, subscribe } = useContextWithCondition(ResizableTableContext, []);
 	const [key] = useState(+new Date());
 	const [tableNode, setTableNode] = useState(null);
 	const gridClassName = `ResizableTableTemplateColumns_${key}`;

@@ -21,7 +21,7 @@ import { blockEvent } from '@/v5/helpers/events.helpers';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizableTableHeader = ({ name, children, ...props }) => {
-	const { setMovingColumn } = useContextWithCondition(ResizableTableContext, () => false);
+	const { setMovingColumn } = useContextWithCondition(ResizableTableContext, []);
 
 	const onDragStart = (e) => {
 		// The blockEvent is to fix a bug in firefox where the dragging the

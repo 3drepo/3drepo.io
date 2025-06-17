@@ -20,6 +20,6 @@ import { Row } from './resizableTableRow.styles';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizableTableRow = (props) => {
-	const { columnGap } = useContextWithCondition(ResizableTableContext, () => false);
+	const { columnGap } = useContextWithCondition(ResizableTableContext, []);
 	return (<Row $gap={columnGap} {...props} />);
 };
