@@ -39,4 +39,4 @@ export type ITicketComment = {
 	importedAt?: Date,
 };
 
-export type TicketCommentReplyMetadata = Pick<ITicketComment, '_id' | 'message' | 'author' | 'originalAuthor' | 'images'  | 'view'>;
+export type TicketCommentReplyMetadata = Pick<ITicketComment, '_id' | 'message' | 'author' | 'originalAuthor' | 'images' > & { view?: boolean | Viewpoint };
