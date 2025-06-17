@@ -34,6 +34,7 @@ type CommentReplyProps = TicketCommentReplyMetadata & {
 	shortMessage?: boolean,
 	images?: string[],
 	originalAuthor?: string,
+	view?: any,
 };
 export const CommentReply = ({
 	message,
