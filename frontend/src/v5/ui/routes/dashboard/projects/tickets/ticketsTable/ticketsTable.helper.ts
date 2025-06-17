@@ -110,27 +110,28 @@ const convertUserToFullname = (jobOrUsername) => {
 };
 
 const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
-export const getAssignees = (t) => (_.get(t, ASSIGNEES_PATH) ?? []).map(convertUserToFullname);
+const getAssigneesRaw = (t) => (_.get(t, ASSIGNEES_PATH) ?? []);
+export const getAssigneesDisplayValues = (t) => getAssigneesRaw(t).map(convertUserToFullname);
 
 export const sortAssignees = (ticket: ITicket) => {
-	const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
+	const sortedAssignees = _.orderBy(getAssigneesRaw(ticket), (assignee) => convertUserToFullname(assignee).trim().toLowerCase());
 	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
 };
 const groupByAssignees = (tickets: ITicket[]) => {
-	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
+	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssigneesRaw(ticket)?.length > 0);
 
 	const ticketsWithSortedAssignees = ticketsWithAssignees.map(sortAssignees);
 
 	const ticketsSortedByAssignees = _.orderBy(
 		ticketsWithSortedAssignees,
 		(ticket) => {
-			const assignees = getAssignees(ticket).map((assignee) => assignee.trim().toLowerCase());
+			const assignees = getAssigneesDisplayValues(ticket).map((assignee) => assignee.trim().toLowerCase());
 			return _.orderBy(assignees).join();
 		},
 	);
 
 	const groups = _.groupBy(ticketsSortedByAssignees, (ticket) => {
-		const assignees = getAssignees(ticket);
+		const assignees = getAssigneesDisplayValues(ticket);
 		return assignees.join(', ');
 	});
 	if (unsetAssignees.length) {
