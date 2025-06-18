@@ -30,7 +30,6 @@ import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assign
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
 	canClear?: boolean;
-	onBlur?: () => void;
 	excludeViewers?: boolean;
 	emptyListMessage?: string;
 	excludeJobs?: boolean;
@@ -44,7 +43,6 @@ export const AssigneesSelect = ({
 	excludeViewers = false,
 	helperText,
 	onChange,
-	onBlur,
 	onClose,
 	canClear = false,
 	disabled,
@@ -73,9 +71,9 @@ export const AssigneesSelect = ({
 		onChange({ target: { value: validVals } });
 	};
 
-	const handleClear = () => {
+	const handleClear = (e) => {
 		onChange({ target: { value: emptyValue } });
-		onBlur?.();
+		onClose?.(e);
 	};
 
 	if (!users.length || !jobs.length) return (
@@ -91,7 +89,6 @@ export const AssigneesSelect = ({
 					multiple={multiple}
 					isInvalid={(v) => invalidValues.includes(v)}
 					onChange={handleChange}
-					onBlur={onBlur}
 					onClose={onClose}
 					disabled={disabled}
 					{...props}

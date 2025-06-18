@@ -23,7 +23,7 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import { ClearIconContainer } from './selectProperty.styles';
-import { useState } from 'react';
+import { isEqual } from 'lodash';
 
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
@@ -34,42 +34,39 @@ type ManyOfPropertyProps = FormInputProps & {
 	onBlur: () => void;
 };
 
-export const ManyOfProperty = ({ values, value: formValue, immutable, onChange, ...props }: ManyOfPropertyProps) => {
-	const [value, setValue] = useState(formValue);
-	const canClear = !props.required && !props.disabled && !!value?.length && !immutable;
+export const ManyOfProperty = ({ values, onBlur, onChange, immutable, ...props }: ManyOfPropertyProps) => {
+	const canClear = !props.required && !props.disabled && !!props.value?.length && !immutable;
 
-	const handleClose = () => {
-		if (!value?.length && !formValue?.length) return;
-		onChange(value);
-		props.onBlur?.();
+	const handleChange = (e) => {
+		const newVal = e.target.value;
+		if (isEqual(newVal, (props.value || []))) return;
+		onChange?.(newVal);
 	};
 
-	const handleChange = (e) => setValue(e.target.value);
+	const onClear = () => {
+		onChange([]);
+		onBlur?.();
+	};
 
 	if (values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty maxItems={17} multiple canClear={canClear} value={value} onClose={handleClose} onChange={handleChange} {...props} />);
+		return (<JobsAndUsersProperty maxItems={17} multiple saveOnClose canClear={canClear} onClose={onBlur} onChange={handleChange} {...props} />);
 	}
 
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
-
-	const handleClear = () => {
-		onChange([]);
-		props.onBlur?.();
-	};
-
 	return (
 		<MultiSelect
 			{...props}
-			onClose={handleClose}
-			value={value || []}
+			onClose={onBlur}
 			onChange={handleChange}
+			saveOnClose
+			value={props.value || []}
 			endAdornment={canClear && (
-				<ClearIconContainer onClick={handleClear}>
+				<ClearIconContainer onClick={onClear}>
 					<ClearIcon />
 				</ClearIconContainer>
 			)}
 		>
-			{(items).map((item) => <MultiSelectMenuItem key={item} value={item}>{item}</MultiSelectMenuItem>)}
+			{(items).map((value) => <MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>)}
 		</MultiSelect>
 	);
 };

@@ -36,7 +36,7 @@ export const AssigneesProperty = ({ onBlur, readOnly }) => (
 			<InputController
 				Input={JobsAndUsersProperty}
 				name={`properties[${IssueProperties.ASSIGNEES}]`}
-				onBlur={onBlur}
+				onClose={onBlur}
 				key={IssueProperties.ASSIGNEES}
 				disabled={readOnly}
 				multiple
