@@ -42,7 +42,7 @@ type TicketsTableCellProps = {
 	ticket: ITicket,
 };
 export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProps) => {
-	const { title, properties, number, type: templateId, _id: ticketId } = ticket;
+	const {  properties, number, type: templateId, _id: ticketId } = ticket;
 	const { getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
@@ -57,12 +57,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
 	const isPropertyLoading = TicketsHooksSelectors.selectIsPropertyLoading(ticketId, propertyName);
 
-	const {
-		owner,
-		priority,
-		status,
-		dueDate,
-	} = getPropertiesInCamelCase(properties);
+	const { owner } = getPropertiesInCamelCase(properties);
 	const propertyType = getPropertyType(name);
 
 
@@ -99,11 +94,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 			{`${template.code}:${number}`}
 		</Cell>
 	);
-	if (name === BaseProperties.TITLE) return (
-		<Cell name={name}>
-			{title}
-		</Cell>
-	);
+
 	if (name === 'modelName') return (
 		<Cell name={name}>
 			{modelName}
@@ -122,8 +113,8 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 				return (
 					<CellDate>
 						<Cell name={name}>
-							{!!dueDate && (
-								<DueDate value={dueDate} disabled />
+							{!!value && (
+								<DueDate value={value} disabled />
 							)}
 						</Cell>
 					</CellDate>
@@ -131,13 +122,13 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 			case IssueProperties.PRIORITY:
 				return (
 					<Cell name={name}>
-						<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
+						<Chip {...PRIORITY_LEVELS_MAP[value]} variant="text" />
 					</Cell>
 				);
 			case BaseProperties.STATUS:
 				return (
 					<Cell name={name}>
-						<Chip {...getChipPropsFromConfig(statusConfig, status)} />
+						<Chip {...getChipPropsFromConfig(statusConfig, value)} />
 					</Cell>
 				);
 		}
