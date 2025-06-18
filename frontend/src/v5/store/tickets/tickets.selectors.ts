@@ -92,7 +92,10 @@ export const selectTicketsGroups = createSelector(
 export const selectTicketsRaw = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
-	(state, modelId) => state.ticketsByModelId[modelId] || [],
+	(state, modelId) => {
+		const ticketIds = state.ticketsByModelId[modelId] || [];
+		return ticketIds.map((ticketId) => state.ticketsData[ticketId]).filter(Boolean);
+	},
 );
 
 export const selectTicketsWithGroups = createSelector(
@@ -128,9 +131,9 @@ export const selectTickets = createSelector(
 );
 
 export const selectTicketByIdRaw = createSelector(
-	selectTicketsRaw,
+	selectTicketsDomain,
 	(_, modelId, ticketId) => ticketId,
-	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
+	(state, ticketId) => state.ticketsData[ticketId] || null,
 ) as (state:object, containerOrFederation:string, ticketId: string) => ITicket;
 
 export const selectTicketById = createSelector(
@@ -144,6 +147,11 @@ export const selectRiskCategories = createSelector(
 	(state) => state.riskCategories,
 );
 
+
+export const selectTicketsData = createSelector(
+	selectTicketsDomain,
+	(state) => state.ticketsData,
+);
 
 export const selectTicketsByModelIdDictionary = createSelector(
 	selectTicketsDomain,
