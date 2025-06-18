@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { orderBy } from 'lodash';
+import { orderBy, get } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
@@ -47,7 +47,7 @@ const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
 export const selectTicketsHaveBeenFetched = createSelector(
 	selectTicketsDomain,
-	(state): (modelId) => boolean => (modelId) => modelId in state.ticketsByModelId,
+	(state): (modelId: string) => boolean => (modelId: string) => modelId in state.ticketsByModelId,
 );
 
 const removeDeprecated = (template: ITemplate): ITemplate => {
@@ -196,3 +196,15 @@ export const selectIsPropertyLoading = createSelector(
 		(loadingProperties[ticketId] || {}) [property] || false
 	,
 ) as (state: any, ticketId: string, property: string) => boolean;
+
+export const selectTicketPropertyByName = createSelector(
+	selectTicketsData,
+	(_, ticketId: string, propertyName: string) => ({ ticketId, propertyName }),
+	(ticketsData, { ticketId, propertyName }) => {
+		const ticket = ticketsData[ticketId];
+		if (!ticket) return undefined;
+		
+		// Handle nested property access (e.g., "properties.status", "title", etc.)
+		return get(ticket, propertyName);
+	},
+) as (state: any, ticketId: string, propertyName: string) => any;

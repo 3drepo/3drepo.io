@@ -23,7 +23,6 @@ import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.compo
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { Chip } from '@controls/chip/chip.component';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
-import { get } from 'lodash';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useContext, useEffect } from 'react';
 import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
@@ -32,8 +31,6 @@ import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanS
 import { CellDate } from './ticketsTableCell.styles';
 import { Cell } from './cell/cell.component';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
-import { selectIsPropertyLoading } from '@/v5/store/tickets/tickets.selectors';
-import { useSelector } from 'react-redux';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
@@ -52,12 +49,13 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	const container = ContainersHooksSelectors.selectContainerById(modelId);
 	const federation = FederationsHooksSelectors.selectFederationById(modelId);
 	const { name: modelName } = container || federation || {};
-	const value = get(ticket, name);
+	const value = TicketsHooksSelectors.selectTicketPropertyByName(ticketId, name);
+
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	// Check if this property is currently being loaded
 	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
-	const isPropertyLoading = useSelector((state) => selectIsPropertyLoading(state, ticketId, propertyName));
+	const isPropertyLoading = TicketsHooksSelectors.selectIsPropertyLoading(ticketId, propertyName);
 
 	const {
 		owner,
