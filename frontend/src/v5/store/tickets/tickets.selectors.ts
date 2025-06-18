@@ -50,7 +50,6 @@ export const selectTicketsHaveBeenFetched = createSelector(
 	(state): (modelId) => boolean => (modelId) => modelId in state.ticketsByModelId,
 );
 
-
 const removeDeprecated = (template: ITemplate): ITemplate => {
 	const removeDeprecatedItems = (properties: any[])  => properties.filter((prop) => !prop.deprecated);
 
@@ -66,8 +65,6 @@ const removeDeprecated = (template: ITemplate): ITemplate => {
 			)),
 	};
 };
-
-
 
 export const selectTemplates = createSelector(
 	selectTicketsDomain,
@@ -147,13 +144,19 @@ export const selectRiskCategories = createSelector(
 	(state) => state.riskCategories,
 );
 
+
+export const selectTicketsByModelIdDictionary = createSelector(
+	selectTicketsDomain,
+	(state) => state.ticketsByModelId,
+);
+
 export const selectTicketsByContainersAndFederations = createSelector(
-	(state) => state,
-	(state, modelsIds: string[]) => modelsIds,
-	(storeState, modelsIds) => {
+	selectTicketsByModelIdDictionary,
+	(_, modelsIds: string[]) => modelsIds,
+	(_, modelsIds) => {
 		const tickets = modelsIds.flatMap((modelId) => {
-			const modelTickets = selectTickets(storeState, modelId);
-			const modelName = (selectFederationById(storeState, modelId) || selectContainerById(storeState, modelId))?.name;
+			const modelTickets = selectTickets(getState(), modelId);
+			const modelName = (selectFederationById(getState(), modelId) || selectContainerById(getState(), modelId))?.name;
 			return modelTickets.map((t) => ({ ...t, modelName })); // modelName is added for column sorting
 		});
 		return sortTicketsByCreationDate(tickets);
@@ -175,13 +178,13 @@ export const selectStatusConfigByTemplateId = createSelector(
 // Selectors for loading properties tracking
 export const selectLoadingProperties = createSelector(
 	selectTicketsDomain,
-	(state): Record<string, Set<string>> => state.loadingProperties || {},
+	(state) => state.loadingProperties || {},
 );
 
 export const selectIsPropertyLoading = createSelector(
 	selectLoadingProperties,
 	(state, ticketId: string, property: string) => ({ ticketId, property }),
-	(loadingProperties, { ticketId, property }): boolean =>
-		loadingProperties[ticketId]?.has(property) || false
+	(loadingProperties, { ticketId, property }): boolean => 
+		(loadingProperties[ticketId] || {}) [property] || false
 	,
 ) as (state: any, ticketId: string, property: string) => boolean;

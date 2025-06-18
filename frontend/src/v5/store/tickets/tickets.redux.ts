@@ -51,7 +51,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	setSorting: ['property', 'order'],
 	resetSorting: [],
 	setPropertyLoading: ['ticketId', 'property', 'isLoading'],
-	clearLoadingProperties: [],
+	updateTicketPropertySuccess: ['ticketId', 'property', 'value'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -126,22 +126,10 @@ export const resetSorting = (state: ITicketsState) => {
 
 export const setPropertyLoading = (state: ITicketsState, { ticketId, property, isLoading }: SetPropertyLoadingAction) => {
 	if (!state.loadingProperties[ticketId]) {
-		state.loadingProperties[ticketId] = new Set();
+		state.loadingProperties[ticketId] = {};
 	}
 	
-	if (isLoading) {
-		state.loadingProperties[ticketId].add(property);
-	} else {
-		state.loadingProperties[ticketId].delete(property);
-		// Clean up empty sets
-		if (state.loadingProperties[ticketId].size === 0) {
-			delete state.loadingProperties[ticketId];
-		}
-	}
-};
-
-export const clearLoadingProperties = (state: ITicketsState) => {
-	state.loadingProperties = {};
+	state.loadingProperties[ticketId][property] = isLoading;
 };
 
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
@@ -156,7 +144,6 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.SET_SORTING]: setSorting,
 	[TicketsTypes.RESET_SORTING]: resetSorting,
 	[TicketsTypes.SET_PROPERTY_LOADING]: setPropertyLoading,
-	[TicketsTypes.CLEAR_LOADING_PROPERTIES]: clearLoadingProperties,
 }));
 
 export interface ITicketsState {
@@ -165,7 +152,7 @@ export interface ITicketsState {
 	riskCategories: string[],
 	groupsByGroupId: Record<string, Group>,
 	sorting: TicketsSorting,
-	loadingProperties: Record<string, Set<string>>,
+	loadingProperties: Record<string, Record<string, boolean>>,
 }
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[] };
@@ -190,7 +177,8 @@ export type ClearGroupsAction = Action<'CLEAR_GROUPS'>;
 export type SetSortingAction = Action<'SET_SORTING'> & TicketsSorting;
 export type ResetSortingAction = Action<'RESET_SORTING'>;
 export type SetPropertyLoadingAction = Action<'SET_PROPERTY_LOADING'> & { ticketId: string, property: string, isLoading: boolean };
-export type ClearLoadingPropertiesAction = Action<'CLEAR_LOADING_PROPERTIES'>;
+export type UpdateTicketPropertySuccessAction = Action<'UPDATE_TICKET_PROPERTY_SUCCESS_ACTION'> & { ticketId:string, property: string, value: any };
+
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -290,5 +278,5 @@ export interface ITicketsActionCreators {
 	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
 	resetSorting: () => ResetSortingAction,
 	setPropertyLoading: (ticketId: string, property: string, isLoading: boolean) => SetPropertyLoadingAction,
-	clearLoadingProperties: () => ClearLoadingPropertiesAction,
+	updateTicketPropertySuccess: (ticketId:string, property: string, value: any) => UpdateTicketPropertySuccessAction,
 }

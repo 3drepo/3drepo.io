@@ -47,7 +47,7 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
 
 const getDrawingFromState = (state: DrawingsState, projectId, drawingId) => (
-	state.drawingsByProject[projectId].find((drawing) => drawing._id === drawingId)
+	(state.drawingsByProject[projectId] || []).find((drawing) => drawing._id === drawingId)
 );
 
 export const setFavouriteSuccess = (state: DrawingsState, {

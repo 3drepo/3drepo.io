@@ -46,12 +46,13 @@ import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 const paramToInputProps = (value, setter) => ({
 	value,
 	onChange: (ev: SelectChangeEvent<unknown>) =>  setter((ev.target as HTMLInputElement).value),
 });
-
 
 export const TicketsTable = () => {
 	const history = useHistory();
@@ -102,9 +103,7 @@ export const TicketsTable = () => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
-	
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-	const ticketHasBeenFetched = TicketsHooksSelectors.selectTicketsHaveBeenFetched();
 
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -148,7 +147,7 @@ export const TicketsTable = () => {
 		if (!models.length ) return;
 
 		containersAndFederations.forEach((modelId) => {
-			if (ticketHasBeenFetched(modelId)) return;
+			if (selectTicketsHaveBeenFetched(getState())(modelId)) return;
 			const isFederation = isFed(modelId);
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFederation);
 			if (isFederation) {
