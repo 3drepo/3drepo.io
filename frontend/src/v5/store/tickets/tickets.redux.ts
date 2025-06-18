@@ -24,10 +24,6 @@ import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
 import { mergeWithArray } from '../store.helpers';
 import { DEFAULT_TICKETS_SORTING, TicketsSorting, TicketsSortingOrder, TicketsSortingProperty } from './card/ticketsCard.types';
 
-const getTicketByModelId = (state, modelId, ticketId) => (
-	state.ticketsByModelId?.[modelId].find(({ _id }) => _id === ticketId)
-);
-
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation', 'propertiesToInclude'],
 	fetchTicketProperties: ['teamspace', 'projectId', 'modelId', 'ticketId', 'templateCode', 'isFederation', 'propertiesToInclude'],
@@ -51,11 +47,11 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	setSorting: ['property', 'order'],
 	resetSorting: [],
 	setPropertyLoading: ['ticketId', 'property', 'isLoading'],
-	updateTicketPropertySuccess: ['ticketId', 'property', 'value'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
 	ticketsByModelId: {},
+	ticketsData: {},
 	templatesByModelId: {},
 	groupsByGroupId: {},
 	riskCategories: [],
@@ -64,18 +60,28 @@ export const INITIAL_STATE: ITicketsState = {
 };
 
 export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: FetchTicketsSuccessAction) => {
-	state.ticketsByModelId[modelId] = tickets;
+	const ticketIds: string[] = [];
+	
+	tickets.forEach((ticket) => {
+		state.ticketsData[ticket._id] = ticket;
+		ticketIds.push(ticket._id);
+	});
+	
+	state.ticketsByModelId[modelId] = ticketIds;
 };
 
 export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: UpsertTicketSuccessAction) => {
 	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
 
-	const modelTicket = getTicketByModelId(state, modelId, ticket._id);
+	const existingTicket = state.ticketsData[ticket._id];
 
-	mergeWithArray(modelTicket, ticket);
-
-	if (!modelTicket) {
-		state.ticketsByModelId[modelId].push(ticket as ITicket);
+	if (existingTicket) {
+		// Update existing ticket
+		mergeWithArray(existingTicket, ticket);
+	} else {
+		// Add new ticket
+		state.ticketsData[ticket._id] = ticket as ITicket;
+		state.ticketsByModelId[modelId].push(ticket._id);
 	}
 };
 
@@ -147,7 +153,8 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 }));
 
 export interface ITicketsState {
-	ticketsByModelId: Record<string, ITicket[]>,
+	ticketsByModelId: Record<string, string[]>,
+	ticketsData: Record<string, ITicket>,
 	templatesByModelId: Record<string, ITemplate[]>,
 	riskCategories: string[],
 	groupsByGroupId: Record<string, Group>,
@@ -177,8 +184,6 @@ export type ClearGroupsAction = Action<'CLEAR_GROUPS'>;
 export type SetSortingAction = Action<'SET_SORTING'> & TicketsSorting;
 export type ResetSortingAction = Action<'RESET_SORTING'>;
 export type SetPropertyLoadingAction = Action<'SET_PROPERTY_LOADING'> & { ticketId: string, property: string, isLoading: boolean };
-export type UpdateTicketPropertySuccessAction = Action<'UPDATE_TICKET_PROPERTY_SUCCESS_ACTION'> & { ticketId:string, property: string, value: any };
-
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -278,5 +283,4 @@ export interface ITicketsActionCreators {
 	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
 	resetSorting: () => ResetSortingAction,
 	setPropertyLoading: (ticketId: string, property: string, isLoading: boolean) => SetPropertyLoadingAction,
-	updateTicketPropertySuccess: (ticketId:string, property: string, value: any) => UpdateTicketPropertySuccessAction,
 }
