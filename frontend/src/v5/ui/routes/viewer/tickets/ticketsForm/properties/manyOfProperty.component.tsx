@@ -23,7 +23,6 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import { ClearIconContainer } from './selectProperty.styles';
-import { isEqual } from 'lodash';
 
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
@@ -39,7 +38,7 @@ export const ManyOfProperty = ({ values, onBlur, onChange, immutable, ...props }
 
 	const handleChange = (e) => {
 		const newVal = e.target.value;
-		if (isEqual(newVal, (props.value || []))) return;
+		if (!newVal?.length && !props.value?.length) return;
 		onChange?.(newVal);
 	};
 

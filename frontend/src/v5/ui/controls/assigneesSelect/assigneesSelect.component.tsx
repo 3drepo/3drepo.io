@@ -43,7 +43,6 @@ export const AssigneesSelect = ({
 	excludeViewers = false,
 	helperText,
 	onChange,
-	onClose,
 	canClear = false,
 	disabled,
 	emptyListMessage,
@@ -73,7 +72,7 @@ export const AssigneesSelect = ({
 
 	const handleClear = (e) => {
 		onChange({ target: { value: emptyValue } });
-		onClose?.(e);
+		props.onClose?.(e);
 	};
 
 	if (!users.length || !jobs.length) return (
@@ -89,7 +88,6 @@ export const AssigneesSelect = ({
 					multiple={multiple}
 					isInvalid={(v) => invalidValues.includes(v)}
 					onChange={handleChange}
-					onClose={onClose}
 					disabled={disabled}
 					{...props}
 				/>
