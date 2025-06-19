@@ -44,6 +44,7 @@ export interface ResizableTableType extends SubscribableObject<StateType> {
 	getAllColumnsNames: () => string[];
 	getWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
+	resetWidths: () => void,
 	columnGap: number,
 	getRowWidth: () => number,
 	getColumnOffsetLeft: (name: string) => number,
@@ -72,6 +73,7 @@ const defaultValue: ResizableTableType = {
 	getAllColumnsNames: () => [],
 	getWidth: () => 0,
 	setWidth: () => {},
+	resetWidths: () => {},
 	columnGap: 0,
 	getRowWidth: () => 0,
 	getColumnOffsetLeft: () => 0,
@@ -142,6 +144,10 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 		[name]: Math.max(getMinWidth(name), width),
 	};
 
+	const resetWidths = () => {
+		state.columnsWidths = {};
+	};
+
 	const getColumnOffsetLeft = (name: string) => {
 		let offset = 0;
 		for (const colName of state.visibleSortedColumnsNames) {
@@ -184,6 +190,7 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 			getAllColumnsNames,
 			getWidth,
 			setWidth,
+			resetWidths,
 			getColumnOffsetLeft,
 			getIndex,
 			hideColumn,

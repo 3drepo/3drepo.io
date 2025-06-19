@@ -39,7 +39,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	const edgeScrolling = useEdgeScrolling();
 	const { filteredItems } = useContext(SearchContext);
 	const {
-		stretchTable, getAllColumnsNames, subscribe, 
+		stretchTable, getAllColumnsNames, subscribe, resetWidths,
 		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
 	const templateWasFetched = templateAlreadyFetched(template);
@@ -49,6 +49,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		const allColumns = getAllColumnsNames();
 		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
 		setVisibleSortedColumnsNames(initialVisibleColumns);
+		resetWidths();
 	}, [template]);
 	
 	useEffect(() => {
@@ -98,7 +99,7 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 
 	return (
 		<TicketsTableContextComponent template={template}>
-			<ResizableTableContextComponent columns={columns} columnGap={1} key={template._id}>
+			<ResizableTableContextComponent columns={columns} columnGap={1} key={templateId}>
 				<Container ref={tableRef}>
 					<TableContent {...props} tableRef={tableRef} template={template} />
 				</Container>
