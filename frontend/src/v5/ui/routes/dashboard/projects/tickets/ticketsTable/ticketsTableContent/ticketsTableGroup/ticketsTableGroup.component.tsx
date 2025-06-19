@@ -30,6 +30,8 @@ import { useParams } from 'react-router';
 import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
 import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.component';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 
 
 
@@ -55,8 +57,22 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 		[order, order],
 	);
 
-	const customSortingFunctions = {
-		[`properties.${IssueProperties.ASSIGNEES}`]: assigneesSort,
+	const sortTicketsByProperty = (items: ITicket[], order, column: string) => {
+		return orderBy(
+			items,
+			(item) => {
+				const sortingElement = selectTicketPropertyByName(getState(), item._id, column);
+		
+				return sortingElement?.toLowerCase?.() ?? sortingElement;
+			},
+			order,
+		);
+	};
+
+	const customSortingFunctions = (column: string) => {
+		if (column === `properties.${IssueProperties.ASSIGNEES}` ) return assigneesSort;
+
+		return sortTicketsByProperty;
 	};
 
 	return (
