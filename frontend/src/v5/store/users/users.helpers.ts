@@ -19,6 +19,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { ICurrentUser } from '../currentUser/currentUser.types';
 import { IUser } from './users.redux';
+import { formatMessage } from '@/v5/services/intl';
 
 export const getMemberImgSrc = (teamspace: string, member: string) => (
 	generateV5ApiUrl(`teamspaces/${teamspace}/members/${member}/avatar`, clientConfigService.GET_API)
@@ -30,8 +31,21 @@ export const getUserInitials = ({ firstName, lastName }: ICurrentUser | IUser) =
 		.map((name) => name.trim().charAt(0).toUpperCase())
 		.join('');
 };
+export const JOB_OR_USER_NOT_FOUND_NAME = formatMessage({
+	id: 'user.nonexistentJobOrUser.name',
+	defaultMessage: 'Unknown User/Job',
+});
+export const JOB_OR_USER_NOT_FOUND_MESSAGE = formatMessage({
+	id: 'user.nonexistentJobOrUser.message',
+	defaultMessage: 'The user/job could not be found in this teamspace',
+});
 
 export const getDefaultUserNotFound = (name: string): IUser => ({
+	firstName: USER_NOT_FOUND_NAME,
+	lastName: '',
+	avatarUrl: '',
+	user: name,
+});
 	firstName: name,
 	lastName: '',
 	avatarUrl: '',
