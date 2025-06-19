@@ -46,7 +46,6 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	clearGroups: [],
 	setSorting: ['property', 'order'],
 	resetSorting: [],
-	setPropertyLoading: ['ticketId', 'property', 'isLoading'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -56,7 +55,7 @@ export const INITIAL_STATE: ITicketsState = {
 	groupsByGroupId: {},
 	riskCategories: [],
 	sorting: DEFAULT_TICKETS_SORTING,
-	loadingProperties: {},
+	fetchedProperties: {}, // This is used to track which properties have been fetched for each ticket
 };
 
 export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: FetchTicketsSuccessAction) => {
@@ -130,14 +129,6 @@ export const resetSorting = (state: ITicketsState) => {
 	state.sorting = { ...DEFAULT_TICKETS_SORTING };
 };
 
-export const setPropertyLoading = (state: ITicketsState, { ticketId, property, isLoading }: SetPropertyLoadingAction) => {
-	if (!state.loadingProperties[ticketId]) {
-		state.loadingProperties[ticketId] = {};
-	}
-	
-	state.loadingProperties[ticketId][property] = isLoading;
-};
-
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
@@ -149,7 +140,6 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.CLEAR_GROUPS]: clearGroups,
 	[TicketsTypes.SET_SORTING]: setSorting,
 	[TicketsTypes.RESET_SORTING]: resetSorting,
-	[TicketsTypes.SET_PROPERTY_LOADING]: setPropertyLoading,
 }));
 
 export interface ITicketsState {
@@ -159,7 +149,7 @@ export interface ITicketsState {
 	riskCategories: string[],
 	groupsByGroupId: Record<string, Group>,
 	sorting: TicketsSorting,
-	loadingProperties: Record<string, Record<string, boolean>>,
+	fetchedProperties: Record<string, Record<string, boolean>>, // Tracks which properties have been fetched for each ticket
 }
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[] };
@@ -183,7 +173,6 @@ export type UpdateTicketGroupSuccessAction = Action<'UPDATE_TICKET_GROUP_SUCCESS
 export type ClearGroupsAction = Action<'CLEAR_GROUPS'>;
 export type SetSortingAction = Action<'SET_SORTING'> & TicketsSorting;
 export type ResetSortingAction = Action<'RESET_SORTING'>;
-export type SetPropertyLoadingAction = Action<'SET_PROPERTY_LOADING'> & { ticketId: string, property: string, isLoading: boolean };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -282,5 +271,4 @@ export interface ITicketsActionCreators {
 	clearGroups: () => ClearGroupsAction;
 	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
 	resetSorting: () => ResetSortingAction,
-	setPropertyLoading: (ticketId: string, property: string, isLoading: boolean) => SetPropertyLoadingAction,
 }
