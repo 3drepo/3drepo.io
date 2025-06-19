@@ -105,6 +105,7 @@ export const ColumnsVisibilitySettings = () => {
 	const { visibleSortedColumnsNames, getAllColumnsNames, showColumn } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const { sortedItems: tickets } = useContext(SortedTableContext);
 	const columnsNames = getAllColumnsNames();
+	const ticketsAreInSyncWithTemplate = tickets[0]?._id === template;
 
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
@@ -139,6 +140,7 @@ export const ColumnsVisibilitySettings = () => {
 	};
 
 	useEffect(() => {
+		if (!ticketsAreInSyncWithTemplate) return;
 		visibleSortedColumnsNames
 			.filter((name) => !INITIAL_COLUMNS.includes(name))
 			.forEach(fetchColumn);
