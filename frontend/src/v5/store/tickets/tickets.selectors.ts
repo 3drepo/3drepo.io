@@ -192,8 +192,10 @@ export const selectLoadingProperties = createSelector(
 export const selectIsPropertyLoading = createSelector(
 	selectLoadingProperties,
 	(state, ticketId: string, property: string) => ({ ticketId, property }),
-	(loadingProperties, { ticketId, property }): boolean => 
-		(loadingProperties[ticketId] || {}) [property] || false
+	(loadingProperties, { ticketId, property }): boolean => {
+		const loadingprop =  (loadingProperties[ticketId] || {}) [property];
+		return loadingprop === undefined ||  loadingprop;
+	}
 	,
 ) as (state: any, ticketId: string, property: string) => boolean;
 

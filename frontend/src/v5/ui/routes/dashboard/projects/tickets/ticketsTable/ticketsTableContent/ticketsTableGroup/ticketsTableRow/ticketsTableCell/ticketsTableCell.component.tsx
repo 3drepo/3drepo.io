@@ -34,6 +34,7 @@ import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
+import { INITIAL_COLUMNS } from '../../../../ticketsTable.helper';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -55,7 +56,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 
 	// Check if this property is currently being loaded
 	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
-	const isPropertyLoading = TicketsHooksSelectors.selectIsPropertyLoading(ticketId, propertyName);
+	const isPropertyLoading = TicketsHooksSelectors.selectIsPropertyLoading(ticketId, propertyName) && !INITIAL_COLUMNS.includes(name);
 
 	const { owner } = getPropertiesInCamelCase(properties);
 	const propertyType = getPropertyType(name);
@@ -79,6 +80,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 			[propertyName],
 		);
 	}, [isPropertyLoading, ticketId, propertyName, ticket, template, federation]);
+
 
 	// Show loading skeleton if property is being loaded and value is undefined/null
 	if (isPropertyLoading) {
