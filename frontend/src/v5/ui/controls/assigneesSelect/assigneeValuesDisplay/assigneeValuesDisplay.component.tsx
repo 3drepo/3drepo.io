@@ -28,7 +28,7 @@ const DEFAULT_EMPTY_LIST_MESSAGE = formatMessage({ id: 'assignees.circleList.non
 export type AssigneesValuesDisplayProps = {
 	value: any[];
 	maxItems?: number;
-	onClear?: (e) => void;
+	onClear?: () => void;
 	emptyListMessage?: string;
 };
 export const AssigneesValuesDisplay = ({
