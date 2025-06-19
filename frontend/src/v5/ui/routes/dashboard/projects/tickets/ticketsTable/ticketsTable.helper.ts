@@ -115,6 +115,8 @@ const getAssigneeDisplayName = (assignee: string) => {
 	return JOB_OR_USER_NOT_FOUND_NAME;
 };
 
+export const getAssigneeDisplayNamesFromTicket = (ticket: ITicket): string[] => getAssigneesRaw(ticket).map(getAssigneeDisplayName);
+
 export const sortAssignees = (ticket: ITicket): ITicket => {
 	const sortedAssignees = _.orderBy(getAssigneesRaw(ticket), (assignee) => getAssigneeDisplayName(assignee).trim().toLowerCase());
 	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
