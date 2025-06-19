@@ -31,6 +31,11 @@ export const getUserInitials = ({ firstName, lastName }: ICurrentUser | IUser) =
 		.map((name) => name.trim().charAt(0).toUpperCase())
 		.join('');
 };
+
+export const USER_NOT_FOUND_NAME = formatMessage({
+	id: 'user.nonexistentUser.name',
+	defaultMessage: 'Unknown User',
+});
 export const JOB_OR_USER_NOT_FOUND_NAME = formatMessage({
 	id: 'user.nonexistentJobOrUser.name',
 	defaultMessage: 'Unknown User/Job',
