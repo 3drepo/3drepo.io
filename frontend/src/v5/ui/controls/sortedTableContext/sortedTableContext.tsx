@@ -31,7 +31,7 @@ SortedTableContext.displayName = 'SortedTable';
 
 export interface Props<T> {
 	items: T[];
-	customSortingFunctions?: Record<string, (items: T[], order: string, column: string, ) => any | any[]>;
+	customSortingFunctions?: (sortingColumn: string) => ((items: T[], order: 'asc' | 'desc', column: string) => T[]) | undefined;
 	sortingColumn?: string;
 	isDescendingOrder?: boolean;
 	children: any;
@@ -56,7 +56,7 @@ export const SortedTableComponent = <T,>({
 	const sortingOrder = isDescendingOrder ? 'desc' : 'asc';
 
 	const getSortedItems = () => {
-		const customSortingFn = customSortingFunctions[sortingColumn];
+		const customSortingFn = customSortingFunctions(sortingColumn);
 		if (customSortingFn) return customSortingFn(items, sortingOrder, sortingColumn);
 		return orderBy(
 			items as T[],
