@@ -37,7 +37,7 @@ export const OneOfProperty = ({ values, value, onBlur, immutable, ...props }: On
 	};
 	
 	if (values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty value={value} canClear={canClear} onClose={onBlur} {...props} />);
+		return (<JobsAndUsersProperty value={value} canClear={canClear} onClose={onBlur} onClear={onClear} {...props} />);
 	}
 	
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;

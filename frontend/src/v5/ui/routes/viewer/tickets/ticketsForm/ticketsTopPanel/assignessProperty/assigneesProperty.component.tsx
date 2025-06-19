@@ -22,6 +22,12 @@ import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { JobsAndUsersProperty } from '../../properties/jobsAndUsersProperty.component';
 import { IssueProperties } from '../../../tickets.constants';
+import { useMultiSelectPropertyProps } from '../../properties/useMultiSelectPropertyProps';
+
+const ControlledJobsAndUsersProperty = (props) => {
+	const controlledProps = useMultiSelectPropertyProps(props);
+	return <JobsAndUsersProperty {...controlledProps} />;
+};
 
 export const AssigneesProperty = ({ onBlur, readOnly }) => (
 	<>
@@ -34,9 +40,9 @@ export const AssigneesProperty = ({ onBlur, readOnly }) => (
 				/>
 			</Typography>
 			<InputController
-				Input={JobsAndUsersProperty}
+				Input={ControlledJobsAndUsersProperty}
 				name={`properties[${IssueProperties.ASSIGNEES}]`}
-				onClose={onBlur}
+				onBlur={onBlur}
 				key={IssueProperties.ASSIGNEES}
 				disabled={readOnly}
 				multiple

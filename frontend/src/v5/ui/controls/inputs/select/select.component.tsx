@@ -22,52 +22,22 @@ import {
 	FormHelperText,
 } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { useEffect, useState } from 'react';
 
-export type SelectProps = Omit<MuiSelectProps, 'variant'> & FormInputProps & { children?: any[], saveOnClose?: boolean };
+export type SelectProps = Omit<MuiSelectProps, 'variant'> & FormInputProps & { children?: any[] };
 
 export const Select = ({
 	required = false,
 	helperText,
 	label,
 	className,
-	onClose,
-	onChange,
-	value: originalValue,
-	// if true, the value will be saved on close instead of on change
-	saveOnClose = false,
 	...props
-}: SelectProps) => {
-	const [value, setValue] = useState(originalValue);
-
-	const handleChange = (e) => {
-		if (saveOnClose) {
-			setValue(e.target.value);
-			return;
-		}
-		onChange?.(e);
-	};
-
-	const handleClose = (event) => {
-		if (saveOnClose) {
-			onChange?.({ target: { value } });
-		}
-		onClose?.(event);
-	};
-	
-	useEffect(() => { setValue(originalValue); }, [originalValue]);
-
-	return (
-		<FormControl required={required} disabled={props.disabled} error={props.error} className={className}>
-			<InputLabel id={`${props.name}-label`}>{label}</InputLabel>
-			<MuiSelect
-				renderValue={() => props.children.find(({ key }) => key === value)?.props.children ?? value}
-				value={value}
-				onChange={handleChange}
-				onClose={handleClose}
-				{...props}
-			/>
-			<FormHelperText>{helperText}</FormHelperText>
-		</FormControl>
-	);
-};
+}: SelectProps) => (
+	<FormControl required={required} disabled={props.disabled} error={props.error} className={className}>
+		<InputLabel id={`${props.name}-label`}>{label}</InputLabel>
+		<MuiSelect
+			renderValue={(value) => props.children.find(({ key }) => key === value)?.props.children ?? value}
+			{...props}
+		/>
+		<FormHelperText>{helperText}</FormHelperText>
+	</FormControl>
+);

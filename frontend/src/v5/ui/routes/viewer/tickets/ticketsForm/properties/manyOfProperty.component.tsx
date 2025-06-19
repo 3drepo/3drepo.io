@@ -23,6 +23,7 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import { ClearIconContainer } from './selectProperty.styles';
+import { useMultiSelectPropertyProps } from './useMultiSelectPropertyProps';
 
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
@@ -33,32 +34,19 @@ type ManyOfPropertyProps = FormInputProps & {
 	onBlur: () => void;
 };
 
-export const ManyOfProperty = ({ values, onBlur, onChange, immutable, ...props }: ManyOfPropertyProps) => {
+export const ManyOfProperty = ({ values, immutable, ...uncontrolledProps }: ManyOfPropertyProps) => {
+	const { onClear, ...props } = useMultiSelectPropertyProps(uncontrolledProps);
 	const canClear = !props.required && !props.disabled && !!props.value?.length && !immutable;
 
-	const handleChange = (e) => {
-		const newVal = e.target.value;
-		if (!newVal?.length && !props.value?.length) return;
-		onChange?.(newVal);
-	};
-
-	const onClear = () => {
-		onChange([]);
-		onBlur?.();
-	};
-
 	if (values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty maxItems={17} multiple saveOnClose canClear={canClear} onClose={onBlur} onChange={handleChange} {...props} />);
+		return (<JobsAndUsersProperty maxItems={17} multiple canClear={canClear} onClear={onClear} {...props} />);
 	}
 
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
+
 	return (
 		<MultiSelect
 			{...props}
-			onClose={onBlur}
-			onChange={handleChange}
-			saveOnClose
-			value={props.value || []}
 			endAdornment={canClear && (
 				<ClearIconContainer onClick={onClear}>
 					<ClearIcon />

@@ -87,7 +87,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 								onClose={onBlurAssignees}
 								disabled
 								excludeViewers
-								saveOnClose
 								emptyListMessage={formatMessage({ id: 'ticket.preview.noAssignees', defaultMessage: 'No assignees' })}
 							/>
 							<FlexRow>
