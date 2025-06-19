@@ -22,34 +22,33 @@ import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { JobsAndUsersProperty } from '../../properties/jobsAndUsersProperty.component';
 import { IssueProperties } from '../../../tickets.constants';
-import { useMultiSelectPropertyProps } from '../../properties/useMultiSelectPropertyProps';
+import { SaveOnCloseMultiSelectWrapper } from '../../properties/saveOnCloseMultiSelectWrapper';
 
-const ControlledJobsAndUsersProperty = (props) => {
-	const controlledProps = useMultiSelectPropertyProps(props);
-	return <JobsAndUsersProperty {...controlledProps} />;
-};
 
-export const AssigneesProperty = ({ onBlur, readOnly }) => (
-	<>
-		<Gap $height="10px" />
-		<InputContainer>
-			<Typography variant="h5">
-				<FormattedMessage
-					id="customTicket.topPanel.assignees.label"
-					defaultMessage="Assignees"
+export const AssigneesProperty = ({ onBlur, readOnly }) => {
+	const SaveOnCloseJobsAndUsersProperty = SaveOnCloseMultiSelectWrapper(JobsAndUsersProperty);
+	return (
+		<>
+			<Gap $height="10px" />
+			<InputContainer>
+				<Typography variant="h5">
+					<FormattedMessage
+						id="customTicket.topPanel.assignees.label"
+						defaultMessage="Assignees"
+					/>
+				</Typography>
+				<InputController
+					Input={SaveOnCloseJobsAndUsersProperty}
+					name={`properties[${IssueProperties.ASSIGNEES}]`}
+					onBlur={onBlur}
+					key={IssueProperties.ASSIGNEES}
+					disabled={readOnly}
+					multiple
+					excludeViewers
+					maxItems={17}
+					canClear
 				/>
-			</Typography>
-			<InputController
-				Input={ControlledJobsAndUsersProperty}
-				name={`properties[${IssueProperties.ASSIGNEES}]`}
-				onBlur={onBlur}
-				key={IssueProperties.ASSIGNEES}
-				disabled={readOnly}
-				multiple
-				excludeViewers
-				maxItems={17}
-				canClear
-			/>
-		</InputContainer>
-	</>
-);
+			</InputContainer>
+		</>
+	);
+};

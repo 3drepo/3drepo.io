@@ -23,7 +23,7 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import { ClearIconContainer } from './selectProperty.styles';
-import { useMultiSelectPropertyProps } from './useMultiSelectPropertyProps';
+import { SaveOnCloseMultiSelectWrapper } from './saveOnCloseMultiSelectWrapper';
 
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;
@@ -32,10 +32,10 @@ type ManyOfPropertyProps = FormInputProps & {
 	immutable?: boolean;
 	onOpen: () => void;
 	onBlur: () => void;
+	onClear: () => void;
 };
 
-export const ManyOfProperty = ({ values, immutable, ...uncontrolledProps }: ManyOfPropertyProps) => {
-	const { onClear, ...props } = useMultiSelectPropertyProps(uncontrolledProps);
+export const ManyOfProperty = SaveOnCloseMultiSelectWrapper(({ values, immutable, onClear, ...props }: ManyOfPropertyProps) => {
 	const canClear = !props.required && !props.disabled && !!props.value?.length && !immutable;
 
 	if (values === 'jobsAndUsers') {
@@ -56,4 +56,4 @@ export const ManyOfProperty = ({ values, immutable, ...uncontrolledProps }: Many
 			{(items).map((value) => <MultiSelectMenuItem key={value} value={value}>{value}</MultiSelectMenuItem>)}
 		</MultiSelect>
 	);
-};
+});
