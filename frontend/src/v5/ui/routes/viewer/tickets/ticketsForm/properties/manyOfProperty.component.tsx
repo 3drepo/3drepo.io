@@ -23,7 +23,7 @@ import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import { ClearIconContainer } from './selectProperty.styles';
-import { SaveOnCloseMultiSelectWrapper } from './saveOnCloseMultiSelectWrapper';
+import { SaveOnCloseMultiSelectWrapper } from './saveOnCloseMultiSelect';
 
 type ManyOfPropertyProps = FormInputProps & {
 	open?: boolean;

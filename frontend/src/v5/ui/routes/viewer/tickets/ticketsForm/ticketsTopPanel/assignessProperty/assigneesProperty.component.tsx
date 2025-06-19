@@ -22,7 +22,7 @@ import { FormattedMessage } from 'react-intl';
 import { InputController } from '@controls/inputs/inputController.component';
 import { JobsAndUsersProperty } from '../../properties/jobsAndUsersProperty.component';
 import { IssueProperties } from '../../../tickets.constants';
-import { SaveOnCloseMultiSelectWrapper } from '../../properties/saveOnCloseMultiSelectWrapper';
+import { SaveOnCloseMultiSelectWrapper } from '../../properties/saveOnCloseMultiSelect';
 
 
 export const AssigneesProperty = ({ onBlur, readOnly }) => {
