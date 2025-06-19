@@ -46,6 +46,8 @@ export const getDefaultUserNotFound = (name: string): IUser => ({
 	avatarUrl: '',
 	user: name,
 });
+
+export const getImportedUser = (name: string): IUser => ({
 	firstName: name,
 	lastName: '',
 	avatarUrl: '',

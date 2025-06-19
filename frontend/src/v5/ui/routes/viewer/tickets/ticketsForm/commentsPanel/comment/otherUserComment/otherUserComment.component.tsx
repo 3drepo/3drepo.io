@@ -22,7 +22,7 @@ import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, AuthorAvatar, ImportedAuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
-import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
+import { getFullnameFromUser, getImportedUser } from '@/v5/store/users/users.helpers';
 
 type OtherUserCommentProps = ITicketComment & {
 	isFirstOfBlock: boolean;
@@ -32,8 +32,8 @@ type OtherUserCommentProps = ITicketComment & {
 export const OtherUserComment = ({
 	_id,
 	deleted,
-	author,
-	originalAuthor,
+	author, // The author of a non-imported comment. Or who imported the comment
+	originalAuthor, // The author of the comment if it was imported
 	onReply,
 	isFirstOfBlock,
 	importedAt,
@@ -42,12 +42,12 @@ export const OtherUserComment = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const imported = !!originalAuthor;
 	const authorUser = UsersHooksSelectors.selectUser(teamspace, author);
-	const originalAuthorUser = UsersHooksSelectors.selectUser(teamspace, originalAuthor);
+	const importedAuthorUser = getImportedUser(originalAuthor);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 
 	const getAuthorDisplayName = () => {
 		if (!isFirstOfBlock) return null;
-		return getFullnameFromUser(originalAuthorUser);
+		return getFullnameFromUser(originalAuthor ? importedAuthorUser : authorUser);
 	};
 
 	const Avatar = () => {
@@ -55,7 +55,7 @@ export const OtherUserComment = ({
 		return (
 			<ImportedAuthorAvatar
 				importedBy={getFullnameFromUser(authorUser)}
-				author={originalAuthorUser}
+				author={importedAuthorUser}
 				importedAt={importedAt}
 			/>
 		);
