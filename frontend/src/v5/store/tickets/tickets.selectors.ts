@@ -183,22 +183,6 @@ export const selectStatusConfigByTemplateId = createSelector(
 	(ticketTemplate, projectTemplate) => ticketTemplate?.config?.status || projectTemplate?.config?.status || DEFAULT_STATUS_CONFIG,
 );
 
-// Selectors for loading properties tracking
-export const selectLoadingProperties = createSelector(
-	selectTicketsDomain,
-	(state) => state.loadingProperties || {},
-);
-
-export const selectIsPropertyLoading = createSelector(
-	selectLoadingProperties,
-	(state, ticketId: string, property: string) => ({ ticketId, property }),
-	(loadingProperties, { ticketId, property }): boolean => {
-		const loadingprop =  (loadingProperties[ticketId] || {}) [property];
-		return loadingprop === undefined ||  loadingprop;
-	}
-	,
-) as (state: any, ticketId: string, property: string) => boolean;
-
 export const selectTicketPropertyByName = createSelector(
 	selectTicketsData,
 	(_, ticketId: string, propertyName: string) => ({ ticketId, propertyName }),
