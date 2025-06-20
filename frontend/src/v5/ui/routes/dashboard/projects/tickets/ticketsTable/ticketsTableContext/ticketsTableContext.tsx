@@ -25,6 +25,8 @@ import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { stripModuleOrPropertyPrefix } from '../ticketsTable.helper';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { chunk } from 'lodash';
+import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export interface TicketsTableType {
 	getPropertyType: (name: string) => PropertyTypeDefinition;
@@ -62,13 +64,15 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	);
 
 	const fetchColumn = (name, tickets: ITicket[]) => {
-		const idsByModelId = tickets.reduce((acc, { _id: ticketId, modelId }) => {
-			if (!acc[modelId]) {
-				acc[modelId] = [];
-			}
-			acc[modelId].push(ticketId);
-			return acc;
-		},  {} ) as Record<string, string[]>;
+		const idsByModelId = tickets
+			.filter(({ _id }) => !selectPropertyFetched(getState(), _id, stripModuleOrPropertyPrefix(name)))
+			.reduce((acc, { _id: ticketId, modelId }) => {
+				if (!acc[modelId]) {
+					acc[modelId] = [];
+				}
+				acc[modelId].push(ticketId);
+				return acc;
+			},  {} ) as Record<string, string[]>;
 
 		Object.keys(idsByModelId).map((modelId) => {
 			const ids = idsByModelId[modelId];
