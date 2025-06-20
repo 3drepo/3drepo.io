@@ -34,7 +34,7 @@ import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
-// import { INITIAL_COLUMNS } from '../../../../ticketsTable.helper';
+import { INITIAL_COLUMNS } from '../../../../ticketsTable.helper';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -56,36 +56,33 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 
 	// Check if this property is currently being loaded
 	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
-	// const isPropertyLoading = TicketsHooksSelectors.selectIsPropertyLoading(ticketId, propertyName) && !INITIAL_COLUMNS.includes(name);
-	const isPropertyLoading = false;
-
+	const propertyWasFetched = TicketsHooksSelectors.selectPropertyFetched(ticketId, propertyName) || INITIAL_COLUMNS.includes(name);
 
 	const { owner } = getPropertiesInCamelCase(properties);
 	const propertyType = getPropertyType(name);
 
-
-	useEffect(() => {
-		if (!isPropertyLoading) return ;
-		const templateCode = template?.code || '';
-		const isFederation = !!federation;
+	// useEffect(() => {
+	// 	if (propertyWasFetched) return ;
+	// 	const templateCode = template?.code || '';
+	// 	const isFederation = !!federation;
 	
-		// fetchTicketProperties again will make the fetch jump to the top of the queue
-		// This means that if the user is scrolling through the table, the ticket that he is currently viewing will be fetched first
-		// Takes precedence over any other fetches that are currently in the queue
-		TicketsActionsDispatchers.fetchTicketProperties(
-			teamspace,
-			project,
-			modelId,
-			ticketId,
-			templateCode,
-			isFederation,
-			[propertyName],
-		);
-	}, [isPropertyLoading, ticketId, propertyName, ticket, template, federation]);
+	// 	// fetchTicketProperties again will make the fetch jump to the top of the queue
+	// 	// This means that if the user is scrolling through the table, the ticket that he is currently viewing will be fetched first
+	// 	// Takes precedence over any other fetches that are currently in the queue
+	// 	TicketsActionsDispatchers.fetchTicketProperties(
+	// 		teamspace,
+	// 		project,
+	// 		modelId,
+	// 		ticketId,
+	// 		templateCode,
+	// 		isFederation,
+	// 		[propertyName],
+	// 	);
+	// }, [propertyWasFetched, ticketId, propertyName, ticket, template, federation]);
 
 
 	// Show loading skeleton if property is being loaded and value is undefined/null
-	if (isPropertyLoading) {
+	if (!propertyWasFetched) {
 		return (
 			<Cell name={name}>
 				<SkeletonBlock width="80%" />
