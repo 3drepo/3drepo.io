@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useRef, useState } from 'react';
+import { createContext, useState } from 'react';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 import { IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useParams } from 'react-router';
@@ -24,6 +24,7 @@ import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { stripModuleOrPropertyPrefix } from '../ticketsTable.helper';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
+import { chunk } from 'lodash';
 
 export interface TicketsTableType {
 	getPropertyType: (name: string) => PropertyTypeDefinition;
@@ -51,7 +52,6 @@ interface Props {
 export const TicketsTableContextComponent = ({ children }: Props) => {
 	const [groupBy, setGroupBy] = useState('');
 	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
-	const alreadyFetchedTicketIdAndProperty = useRef({});
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 
@@ -60,23 +60,33 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
 		{},
 	);
-	
-	const fetchColumn = (name: string, tickets: ITicket[]) => tickets.forEach(({ modelId, _id: ticketId }) => {
-		const ticketIdAndProperty = `${ticketId}${name}`;
-		if (alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty]) return;
-		alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty] = true;
-			
-		const isFederation = isFed(modelId);
-		TicketsActionsDispatchers.fetchTicketProperties(
-			teamspace,
-			project,
-			modelId,
-			ticketId,
-			template.code,
-			isFederation,
-			[stripModuleOrPropertyPrefix(name)],
-		);
-	});
+
+	const fetchColumn = (name, tickets: ITicket[]) => {
+		const idsByModelId = tickets.reduce((acc, { _id: ticketId, modelId }) => {
+			if (!acc[modelId]) {
+				acc[modelId] = [];
+			}
+			acc[modelId].push(ticketId);
+			return acc;
+		},  {} ) as Record<string, string[]>;
+
+		Object.keys(idsByModelId).map((modelId) => {
+			const ids = idsByModelId[modelId];
+			const isFederation = isFed(modelId);
+			const chunks = chunk(ids, 200);
+			chunks.forEach((idsChunk) => {
+				TicketsActionsDispatchers.fetchTicketsProperties(
+					teamspace,
+					project,
+					modelId,
+					idsChunk,
+					template.code,
+					isFederation,
+					[stripModuleOrPropertyPrefix(name)],
+				);
+			});
+		});
+	};
 
 	const getPropertyType = (name: string) => definitionsAsObject[name]?.type as PropertyTypeDefinition;
 	const isJobAndUsersType = (name: string) => (
