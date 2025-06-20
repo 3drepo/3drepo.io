@@ -23,6 +23,7 @@ export interface SortedTableType<T> {
 	onColumnClick: (col: string) => void;
 	sortingColumn: string;
 	isDescendingOrder: boolean;
+	refreshSorting?: () => void;
 }
 
 const defaultValue: SortedTableType<any> = { sortedItems: [], onColumnClick: () => {}, sortingColumn: '', isDescendingOrder: true };
@@ -46,6 +47,7 @@ export const SortedTableComponent = <T,>({
 }: Props<T>) => {
 	const [isDescendingOrder, setIsDescendingOrder] = useState(initialIsDescendingOrder ?? true);
 	const [sortingColumn, setSortingColumn] = useState(initialSortingColumn || '');
+	const [refreshFlag, setRefreshFlag] = useState(false);
 
 	const onColumnClick = (col) => {
 		if (!col) return;
@@ -68,8 +70,12 @@ export const SortedTableComponent = <T,>({
 		);
 	};
 
+	const refreshSorting = () => {
+		setRefreshFlag(!refreshFlag);
+	};
+
 	return (
-		<SortedTableContext.Provider value={{ onColumnClick, sortingColumn, isDescendingOrder, sortedItems: getSortedItems() }}>
+		<SortedTableContext.Provider value={{ onColumnClick, sortingColumn, isDescendingOrder, sortedItems: getSortedItems(), refreshSorting }}>
 			{children}
 		</SortedTableContext.Provider>
 	);

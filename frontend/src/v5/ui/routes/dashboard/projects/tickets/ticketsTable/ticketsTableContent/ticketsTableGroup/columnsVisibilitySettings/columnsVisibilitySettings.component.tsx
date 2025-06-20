@@ -19,7 +19,7 @@ import { usePerformanceContext } from '@/v5/helpers/performanceContext/performan
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
@@ -32,7 +32,7 @@ import { ResizableTableContext } from '@controls/resizableTableContext/resizable
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
-import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
+import { SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { TextOverflow } from '@controls/textOverflow';
 import { Divider } from '@mui/material';
 import { chunk } from 'lodash';
@@ -107,7 +107,7 @@ export const ColumnsVisibilitySettings = () => {
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const { teamspace, project, template } = useParams<DashboardParams>();
 	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
-	const { sortedItems: tickets } = useContext(SortedTableContext) as { sortedItems: ITicket[] };
+	const { sortedItems: tickets, sortingColumn, refreshSorting } = useContext(SortedTableContext as React.Context<SortedTableType<ITicket>>);
 
 	const nameToExtraPropertyToFetch = (name) => name
 		.replace(/properties\./, '')
@@ -149,6 +149,15 @@ export const ColumnsVisibilitySettings = () => {
 	const onShowColumn = (name) => {
 		showColumn(name);
 	};
+
+	const ticketsIds = tickets.map(({ _id }) => _id);
+
+	const orderingColumnPropertiesFetched = TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, nameToExtraPropertyToFetch(sortingColumn));
+
+	useEffect(() => {
+		if (!orderingColumnPropertiesFetched) return;
+		refreshSorting();
+	}, [orderingColumnPropertiesFetched]);
 
 	useEffect(() => {
 		visibleSortedColumnsNames
