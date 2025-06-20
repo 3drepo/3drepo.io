@@ -224,3 +224,10 @@ export const selectPropertyFetched = createSelector(
 	(propertiesFetched, { ticketId, property }): boolean => 
 		(propertiesFetched[ticketId] || {}) [property] || false,
 ) as (state: any, ticketId: string, property: string) => boolean;
+
+export const selectPropertyFetchedForTickets = createSelector(
+	selectPropertiesFetched,
+	(state, ticketIds: string[], property: string) => ({ ticketIds, property }),
+	(propertiesFetched, { ticketIds, property }): boolean =>
+		ticketIds.every((ticketId) => (propertiesFetched[ticketId] || {}) [property] || false),
+) as (state: any, ticketIds: string[], property: string) => boolean;
