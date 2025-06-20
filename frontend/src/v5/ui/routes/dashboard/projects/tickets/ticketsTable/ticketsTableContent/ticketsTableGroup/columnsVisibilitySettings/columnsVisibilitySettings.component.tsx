@@ -15,29 +15,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
-import { ActionMenu } from '@controls/actionMenu';
-import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { getColumnLabel } from '../../../ticketsTable.helper';
-import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
-import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
-import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
-import { useContext } from 'react';
-import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { matchesQuery } from '@controls/search/searchContext.helpers';
-import { formatMessage } from '@/v5/services/intl';
-import { Divider } from '@mui/material';
-import { TextOverflow } from '@controls/textOverflow';
-import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
-import { FormattedMessage } from 'react-intl';
-import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
 import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router';
+import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
+import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
+import { ActionMenu } from '@controls/actionMenu';
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
+import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
+import { matchesQuery } from '@controls/search/searchContext.helpers';
+import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
+import { TextOverflow } from '@controls/textOverflow';
+import { Divider } from '@mui/material';
 import { chunk } from 'lodash';
+import { useContext, useEffect } from 'react';
+import { FormattedMessage } from 'react-intl';
+import { useParams } from 'react-router';
+import { getColumnLabel, INITIAL_COLUMNS } from '../../../ticketsTable.helper';
+import { EmptyListMessageContainer, IconContainer, MenuItem, SearchInput } from './columnsVisibilitySettings.styles';
 
 const List = ({ onShowColumn }) => {
 	const { filteredItems, query } = useContext(SearchContext);
@@ -99,25 +102,27 @@ const List = ({ onShowColumn }) => {
 };
 
 export const ColumnsVisibilitySettings = () => {
-	const { getAllColumnsNames, showColumn } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
+	const { getAllColumnsNames, showColumn, visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
 	const columnsNames = getAllColumnsNames();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const { teamspace, project, template } = useParams<DashboardParams>();
 	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
-	const { sortedItems: tickets } = useContext(SortedTableContext);
+	const { sortedItems: tickets } = useContext(SortedTableContext) as { sortedItems: ITicket[] };
 
 	const nameToExtraPropertyToFetch = (name) => name
 		.replace(/properties\./, '')
 		.replace(/modules\./, '');
 
 	const fetchColumn = (name) => {
-		const idsByModelId = tickets.reduce((acc, { _id: ticketId, modelId }) => {
-			if (!acc[modelId]) {
-				acc[modelId] = [];
-			}
-			acc[modelId].push(ticketId);
-			return acc;
-		},  {} ) as Record<string, string[]>;
+		const idsByModelId = tickets
+			.filter(({ _id }) => !selectPropertyFetched(getState(), _id, nameToExtraPropertyToFetch(name)))
+			.reduce((acc, { _id: ticketId, modelId }) => {
+				if (!acc[modelId]) {
+					acc[modelId] = [];
+				}
+				acc[modelId].push(ticketId);
+				return acc;
+			},  {} ) as Record<string, string[]>;
 
 		Object.keys(idsByModelId).map((modelId) => {
 			const ids = idsByModelId[modelId];
@@ -142,9 +147,14 @@ export const ColumnsVisibilitySettings = () => {
 	);
 
 	const onShowColumn = (name) => {
-		fetchColumn(name);
 		showColumn(name);
 	};
+
+	useEffect(() => {
+		visibleSortedColumnsNames
+			.filter((name) => !INITIAL_COLUMNS.includes(name))
+			.forEach(fetchColumn);
+	}, [visibleSortedColumnsNames, tickets]);
 
 	return (
 		<ActionMenu
