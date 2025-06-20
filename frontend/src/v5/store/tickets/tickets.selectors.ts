@@ -115,6 +115,11 @@ export const selectSorting = createSelector(
 	(state) => state.sorting,
 );
 
+export const selectTicketsData = createSelector(
+	selectTicketsDomain,
+	(state) => state.ticketsData,
+);
+
 export const selectTickets = createSelector(
 	selectTicketsWithGroups,
 	selectSorting,
@@ -142,16 +147,27 @@ export const selectTicketById = createSelector(
 	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
 ) as (state:object, containerOrFederation:string, ticketId: string) => ITicket;
 
+export const selectTicketsById = createSelector(
+	selectTicketsData,
+	(_, ticketIds: string[]) => ticketIds,
+	(ticketsData, ticketIds) => {
+		return ticketIds.reduce((acc, ticketId) => {
+			const ticket = ticketsData[ticketId];
+			if (ticket) {
+				acc.push(ticket);
+			}
+			return acc;
+		}, []);
+	},
+) as (state:object, ticketIds: string[]) => ITicket[];
+
 export const selectRiskCategories = createSelector(
 	selectTicketsDomain,
 	(state) => state.riskCategories,
 );
 
 
-export const selectTicketsData = createSelector(
-	selectTicketsDomain,
-	(state) => state.ticketsData,
-);
+
 
 export const selectTicketsByModelIdDictionary = createSelector(
 	selectTicketsDomain,
@@ -194,3 +210,17 @@ export const selectTicketPropertyByName = createSelector(
 		return get(ticket, propertyName);
 	},
 ) as (state: any, ticketId: string, propertyName: string) => any;
+
+
+// Selectors for loading properties tracking
+export const selectPropertiesFetched = createSelector(
+	selectTicketsDomain,
+	(state) => state.fetchedProperties || {},
+);
+
+export const selectPropertyFetched = createSelector(
+	selectPropertiesFetched,
+	(state, ticketId: string, property: string) => ({ ticketId, property }),
+	(propertiesFetched, { ticketId, property }): boolean => 
+		(propertiesFetched[ticketId] || {}) [property] || false,
+) as (state: any, ticketId: string, property: string) => boolean;

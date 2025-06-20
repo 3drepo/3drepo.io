@@ -32,6 +32,14 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { FormattedMessage } from 'react-intl';
 import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
 import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DashboardParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router';
+import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
+import { chunk, debounce } from 'lodash';
 
 const List = ({ onShowColumn }) => {
 	const { filteredItems, query } = useContext(SearchContext);
@@ -95,12 +103,64 @@ const List = ({ onShowColumn }) => {
 export const ColumnsVisibilitySettings = () => {
 	const { getAllColumnsNames, showColumn } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
 	const columnsNames = getAllColumnsNames();
+	const isFed = FederationsHooksSelectors.selectIsFederation();
+	const { teamspace, project, template } = useParams<DashboardParams>();
+	const { code: templateCode } = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+	const { sortedItems: tickets } = useContext(SortedTableContext);
+
+	const nameToExtraPropertyToFetch = (name) => name
+		.replace(/properties\./, '')
+		.replace(/modules\./, '');
+
+
+	// const fetchColumn = debounce((name) => tickets.forEach(({ modelId, _id: ticketId }) => {
+	// 	if (selectPropertyFetched(getState(), ticketId, name)) return;
+			
+	// 	const isFederation = isFed(modelId);
+	// 	TicketsActionsDispatchers.fetchTicketProperties(
+	// 		teamspace,
+	// 		project,
+	// 		modelId,
+	// 		ticketId,
+	// 		templateCode,
+	// 		isFederation,
+	// 		[nameToExtraPropertyToFetch(name)],
+	// 	);
+	// }), 10);
+
+	const fetchColumn = (name) => {
+		const idsByModelId = tickets.reduce((acc, { _id: ticketId, modelId }) => {
+			if (!acc[modelId]) {
+				acc[modelId] = [];
+			}
+			acc[modelId].push(ticketId);
+			return acc;
+		},  {} ) as Record<string, string[]>;
+
+		Object.keys(idsByModelId).map((modelId) => {
+			const ids = idsByModelId[modelId];
+			const isFederation = isFed(modelId);
+			const chunks = chunk(ids, 200);
+			chunks.forEach((idsChunk) => {
+				TicketsActionsDispatchers.fetchTicketsProperties(
+					teamspace,
+					project,
+					modelId,
+					idsChunk,
+					templateCode,
+					isFederation,
+					[nameToExtraPropertyToFetch(name)],
+				);
+			});
+		});
+	};
 
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getColumnLabel(col), query))
 	);
 
 	const onShowColumn = (name) => {
+		fetchColumn(name);
 		showColumn(name);
 	};
 
