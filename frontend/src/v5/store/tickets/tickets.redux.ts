@@ -91,23 +91,7 @@ export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: U
 
 export const upsertTicketsSuccess = (state: ITicketsState, { modelId, tickets }: UpsertTicketsSuccessAction) => {
 	if (tickets.length === 0) return;
-
-	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
-
-	tickets.forEach((ticket) => {
-		if (!ticket._id) return; // Skip tickets without an ID
-
-		const existingTicket = state.ticketsData[ticket._id];
-
-		if (existingTicket) {
-			// Update existing ticket
-			mergeWithArray(existingTicket, ticket);
-		} else {
-			// Add new ticket
-			state.ticketsData[ticket._id] = ticket as ITicket;
-			state.ticketsByModelId[modelId].push(ticket._id);
-		}
-	});
+	tickets.forEach((ticket) => upsertTicketSuccess(state, { modelId, ticket } as UpsertTicketSuccessAction));
 };
 
 
