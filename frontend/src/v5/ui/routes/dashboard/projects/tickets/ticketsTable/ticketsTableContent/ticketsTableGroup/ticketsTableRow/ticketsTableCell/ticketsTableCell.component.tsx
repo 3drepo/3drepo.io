@@ -24,16 +24,13 @@ import { DueDate } from '@controls/dueDate/dueDate.component';
 import { Chip } from '@controls/chip/chip.component';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 import { CellDate } from './ticketsTableCell.styles';
 import { Cell } from './cell/cell.component';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router';
 import { INITIAL_COLUMNS } from '../../../../ticketsTable.helper';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
@@ -52,34 +49,12 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	const { name: modelName } = container || federation || {};
 	const value = TicketsHooksSelectors.selectTicketPropertyByName(ticketId, name);
 
-	const { teamspace, project } = useParams<DashboardParams>();
-
 	// Check if this property is currently being loaded
 	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
 	const propertyWasFetched = TicketsHooksSelectors.selectPropertyFetched(ticketId, propertyName) || INITIAL_COLUMNS.includes(name);
 
 	const { owner } = getPropertiesInCamelCase(properties);
 	const propertyType = getPropertyType(name);
-
-	// useEffect(() => {
-	// 	if (propertyWasFetched) return ;
-	// 	const templateCode = template?.code || '';
-	// 	const isFederation = !!federation;
-	
-	// 	// fetchTicketProperties again will make the fetch jump to the top of the queue
-	// 	// This means that if the user is scrolling through the table, the ticket that he is currently viewing will be fetched first
-	// 	// Takes precedence over any other fetches that are currently in the queue
-	// 	TicketsActionsDispatchers.fetchTicketProperties(
-	// 		teamspace,
-	// 		project,
-	// 		modelId,
-	// 		ticketId,
-	// 		templateCode,
-	// 		isFederation,
-	// 		[propertyName],
-	// 	);
-	// }, [propertyWasFetched, ticketId, propertyName, ticket, template, federation]);
-
 
 	// Show loading skeleton if property is being loaded and value is undefined/null
 	if (!propertyWasFetched) {

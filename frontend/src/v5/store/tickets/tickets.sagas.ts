@@ -74,9 +74,6 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 	ExecutionStrategy.Fifo,
 );
 
-
-let count = 0;
-
 export function* fetchTicketProperties({
 	teamspace, projectId, modelId, ticketId,
 	templateCode, isFederation, propertiesToInclude,
@@ -102,9 +99,7 @@ export function* fetchTicketProperties({
 		yield put(TicketsActions.upsertTicketSuccess(modelId, { ...ticket, _id: ticketId }));
 
 		// Mark properties as fetched
-		for (const property of propertiesToInclude) {
-			yield put(TicketsActions.setPropertiesFetched(ticketId, property, true));
-		}
+		yield put(TicketsActions.setPropertiesFetched([ticketId], propertiesToInclude, true));
 
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
