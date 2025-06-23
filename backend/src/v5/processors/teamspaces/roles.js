@@ -16,14 +16,20 @@
  */
 
 const { DEFAULT_OWNER_ROLE, DEFAULT_ROLES } = require('../../models/roles.constants');
-const { createGroup, getAllUsersInAccount, getGroupById, getGroups, removeGroup } = require('../../services/sso/frontegg');
+const { addUsersToGroup, createGroup, getAllUsersInAccount, getGroupById, getGroups, removeGroup, removeUsersFromGroup, updateGroup } = require('../../services/sso/frontegg');
 const { getUserId, getUsersByQuery } = require('../../models/users');
 const { getTeamspaceRefId } = require('../../models/teamspaceSettings');
+const { isEmpty } = require('../../utils/helper/objects');
 const { templates } = require('../../utils/responseCodes');
 
 const Roles = {};
 
-// FIXME: check who uses this and make sure it still works
+const convertUsersToUsernames = async (users) => {
+	const userEmails = users.map(({ email }) => email);
+	const userDocs = await getUsersByQuery({ 'customData.email': { $in: userEmails } }, { user: 1 });
+	return userDocs.map(({ user }) => user);
+};
+
 Roles.getRoles = async (teamspace) => {
 	const teamspaceId = await getTeamspaceRefId(teamspace);
 	const groups = await getGroups(teamspaceId);
@@ -31,10 +37,7 @@ Roles.getRoles = async (teamspace) => {
 		const groupInfo = { id, name, color };
 
 		if (users?.length) {
-			const userEmails = users.map(({ email }) => email);
-
-			const userDocs = await getUsersByQuery({ 'customData.email': { $in: userEmails } }, { user: 1 });
-			groupInfo.users = userDocs.map(({ user }) => user);
+			groupInfo.users = convertUsersToUsernames(users);
 		}
 
 		return groupInfo;
@@ -42,13 +45,15 @@ Roles.getRoles = async (teamspace) => {
 	return roles;
 };
 
-Roles.getRoleById = async (teamspace, roleId) => {
+Roles.getRoleById = async (teamspace, roleId, fetchUsers = false) => {
 	const teamspaceId = await getTeamspaceRefId(teamspace);
 	try {
-		const group = await getGroupById(teamspaceId, roleId);
-		return group;
+		const groupInfo = await getGroupById(teamspaceId, roleId, fetchUsers);
+		if (groupInfo.users?.length) {
+			groupInfo.users = convertUsersToUsernames(groupInfo.users);
+		}
+		return groupInfo;
 	} catch (err) {
-		console.log(err);
 		throw templates.roleNotFound;
 	}
 };
@@ -111,8 +116,36 @@ Roles.createRoles = async (teamspace, roles) => {
 		return { id: roleId, name };
 	}));
 };
-// FIXME Split update between user assignmnets and ac
-Roles.updateRole = (teamspace, role, updatedRole) => {};
+
+Roles.updateRole = async (teamspace, role, { users, ...others }) => {
+	const teamspaceId = await getTeamspaceRefId(teamspace);
+	if (!isEmpty(others)) {
+		await updateGroup(teamspaceId, role, others);
+	}
+
+	if (users?.length) {
+		const { users: existingUsers = [] } = await getGroupById(teamspaceId, role);
+
+		const usersInRole = {};
+		existingUsers.forEach(({ id }) => { usersInRole[id] = true; });
+
+		const toAdd = [];
+
+		users.forEach((user) => {
+			if (usersInRole[user]) {
+				// User already exists in the role, no need to add/remove
+				delete usersInRole[user];
+			} else {
+				toAdd.push(user);
+			}
+		});
+
+		await Promise.all([
+			addUsersToGroup(teamspaceId, role, toAdd),
+			removeUsersFromGroup(teamspaceId, role, Object.keys(usersInRole)),
+		]);
+	}
+};
 
 Roles.deleteRole = async (teamspace, roleId) => {
 	const teamspaceId = await getTeamspaceRefId(teamspace);

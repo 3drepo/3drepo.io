@@ -21,7 +21,7 @@ const { v5Path } = require("../../interop");
 
 const db = require("../handler/db");
 const User = require("./user");
-const Roles = require(`${v5Path}/models/roles`);
+const Roles = require(`${v5Path}/processors/teamspaces/roles`);
 
 const { changePermissions, findModelSettings } = require("./modelSetting");
 const { findProjectsById, setUserAsProjectAdminById } = require("./project");
@@ -109,7 +109,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}, c
 
 	const [emailUser, teamspaceRole, projects] = await Promise.all([
 		User.findByEmail(email),
-		Roles.getRoleById(teamspace, roleId, { _id: 1 }),
+		Roles.getRoleById(teamspace, roleId),
 		findProjectsById(teamspace, projectIds)
 	]);
 

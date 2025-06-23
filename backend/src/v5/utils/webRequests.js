@@ -41,5 +41,6 @@ WebRequests.delete = (uri, headers) => {
 
 WebRequests.post = axios.post;
 WebRequests.put = axios.put;
+WebRequests.patch = axios.patch;
 
 module.exports = WebRequests;

@@ -16,7 +16,8 @@
  */
 
 const { HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, membershipStatus, mfaPolicy } = require('../frontegg.constants');
-const { get, delete: httpDelete, post, put } = require('../../../../utils/webRequests');
+const { deleteIfUndefined, isEmpty } = require('../../../../utils/helper/objects');
+const { get, delete: httpDelete, patch, post, put } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const { errCodes } = require('../frontegg.constants');
 const { generateUUIDString } = require('../../../../utils/helper/uuids');
@@ -56,7 +57,7 @@ Accounts.setMFAPolicy = async (accountId, policySetting) => {
 
 		await put(`${config.vendorDomain}/identity/resources/configurations/v1/mfa-policy`, payload, { headers });
 	} catch (err) {
-		logger.logError(`Failed to create account: ${err?.response?.data} `);
+		logger.logError(`Failed to create account: ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to create account on Accounts: ${err.message}`);
 	}
 };
@@ -110,6 +111,27 @@ Accounts.addUsersToGroup = async (accountId, groupId, userIds) => {
 	}
 };
 
+Accounts.removeUsersFromGroup = async (accountId, groupId, userIds) => {
+	if (!userIds?.length) return;
+	try {
+		const config = await getConfig();
+
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		const payload = {
+			userIds,
+		};
+
+		await httpDelete(`${config.vendorDomain}/identity/resources/groups/v1/${groupId}/users`, headers, payload);
+	} catch (err) {
+		logger.logError(`Failed to remove users from group(${groupId}) in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to remove users from group in account: ${err.message}`);
+	}
+};
+
 Accounts.getGroups = async (accountId, getUsers = true) => {
 	try {
 		const config = await getConfig();
@@ -126,7 +148,7 @@ Accounts.getGroups = async (accountId, getUsers = true) => {
 	}
 };
 
-Accounts.getGroupById = async (accountId, groupId) => {
+Accounts.getGroupById = async (accountId, groupId, fetchUsers) => {
 	try {
 		const config = await getConfig();
 
@@ -134,7 +156,7 @@ Accounts.getGroupById = async (accountId, groupId) => {
 			...await getBearerHeader(),
 			[HEADER_TENANT_ID]: accountId,
 		};
-		const { data } = await get(`${config.vendorDomain}/identity/resources/groups/v1/${groupId}?_groupsRelations=users`, headers);
+		const { data } = await get(`${config.vendorDomain}/identity/resources/groups/v1/${groupId}${getUsers ? '?_groupsRelations=users' : ''}`, headers);
 		return data;
 	} catch (err) {
 		logger.logError(`Failed to get group by Id(${groupId}) in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
@@ -167,6 +189,26 @@ Accounts.createGroup = async (accountId, name, color, users) => {
 	} catch (err) {
 		logger.logError(`Failed to create group in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
 		throw new Error(`Failed to create group in account: ${err.message}`);
+	}
+};
+
+Accounts.updateGroup = async (accountId, groupId, { name, color }) => {
+	try {
+		const config = await getConfig();
+
+		const headers = {
+			...await getBearerHeader(),
+			[HEADER_TENANT_ID]: accountId,
+		};
+
+		const payload = deleteIfUndefined({ name, color });
+
+		if (!isEmpty(payload)) {
+			await patch(`${config.vendorDomain}/identity/resources/groups/v1/${groupId}`, payload, { headers });
+		}
+	} catch (err) {
+		logger.logError(`Failed to update group(${groupId}) in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);
+		throw new Error(`Failed to update group in account: ${err.message}`);
 	}
 };
 

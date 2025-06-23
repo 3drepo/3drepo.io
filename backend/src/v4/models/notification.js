@@ -28,7 +28,7 @@ const {v5Path} = require("../../interop");
 const { stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { INTERNAL_DB } = require(`${v5Path}/handler/db.constants`);
 
-const { getRoleById, getUsersByRoles } = require(`${v5Path}/models/roles`);
+const { getRoleById, getUsersByRoles } = require(`${v5Path}/processors/teamspaces/roles`);
 
 const types = {
 	ISSUE_ASSIGNED : "ISSUE_ASSIGNED",
@@ -278,7 +278,7 @@ module.exports = {
 	 */
 	upsertIssueAssignedNotifications : async function(username, teamSpace, modelId, issue) {
 		const assignedRole = stringToUUID(issue.assigned_roles[0]);
-		const rs = await getRoleById(teamSpace, assignedRole);
+		const rs = await getRoleById(teamSpace, assignedRole, true);
 		if (!rs || !rs.users) {
 			return [];
 		}
@@ -348,7 +348,7 @@ module.exports = {
 
 		const assignedRole = stringToUUID(issue.assigned_roles[0]);
 
-		return getRoleById(teamSpace,assignedRole)
+		return getRoleById(teamSpace, assignedRole, true)
 			.then(rs => {
 				if (!rs || !rs.users) {
 					return [];
