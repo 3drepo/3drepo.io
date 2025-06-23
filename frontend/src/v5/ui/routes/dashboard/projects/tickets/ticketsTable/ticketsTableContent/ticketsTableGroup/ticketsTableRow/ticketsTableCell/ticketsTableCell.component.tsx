@@ -16,7 +16,6 @@
  */
 
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
@@ -40,7 +39,7 @@ type TicketsTableCellProps = {
 	ticket: ITicket,
 };
 export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProps) => {
-	const {  properties, number, type: templateId, _id: ticketId } = ticket;
+	const {  type: templateId, _id: ticketId } = ticket;
 	const { getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
@@ -48,12 +47,13 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	const federation = FederationsHooksSelectors.selectFederationById(modelId);
 	const { name: modelName } = container || federation || {};
 	const value = TicketsHooksSelectors.selectTicketPropertyByName(ticketId, name);
+	const number = TicketsHooksSelectors.selectTicketPropertyByName(ticketId, 'number') || 0;
 
 	// Check if this property is currently being loaded
 	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
 	const propertyWasFetched = TicketsHooksSelectors.selectPropertyFetched(ticketId, propertyName) || INITIAL_COLUMNS.includes(name);
 
-	const { owner } = getPropertiesInCamelCase(properties);
+	// const { owner } = getPropertiesInCamelCase(properties);
 	const propertyType = getPropertyType(name);
 
 	// Show loading skeleton if property is being loaded and value is undefined/null
@@ -82,7 +82,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 			case BaseProperties.OWNER:
 				return (
 					<Cell name={name}>
-						<AssigneesSelect value={owner} disabled />
+						<AssigneesSelect value={value} disabled />
 					</Cell>
 				);
 			case IssueProperties.DUE_DATE:
