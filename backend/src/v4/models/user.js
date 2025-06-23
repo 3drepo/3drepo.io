@@ -527,8 +527,10 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, 
 	publish(events.USER_REMOVED, { teamspace, executor, user: userToRemove});
 };
 
-User.addTeamMember = async function(teamspace, userToAdd, role, permissions, executor) {
-	await hasReachedLicenceLimit(teamspace);
+User.addTeamMember = async function(teamspace, userToAdd, role, permissions, executor, bypassQuotaCheck = false) {
+	if(!bypassQuotaCheck) {
+		await hasReachedLicenceLimit(teamspace);
+	}
 
 	let userEntry = null;
 	if (strings.email.isValidSync(userToAdd)) { // if the submited username is the email
