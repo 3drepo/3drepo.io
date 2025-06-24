@@ -30,10 +30,10 @@ import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assign
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
 	maxItems?: number;
 	canClear?: boolean;
-	onBlur?: () => void;
 	excludeViewers?: boolean;
 	emptyListMessage?: string;
 	excludeJobs?: boolean;
+	onClear?: () => void;
 };
 
 export const AssigneesSelect = ({
@@ -44,7 +44,7 @@ export const AssigneesSelect = ({
 	excludeViewers = false,
 	helperText,
 	onChange,
-	onBlur,
+	onClear,
 	canClear = false,
 	disabled,
 	emptyListMessage,
@@ -72,11 +72,6 @@ export const AssigneesSelect = ({
 		onChange({ target: { value: validVals } });
 	};
 
-	const handleClear = () => {
-		onChange({ target: { value: emptyValue } });
-		onBlur?.();
-	};
-
 	if (!users.length || !jobs.length) return (
 		<AssigneesListContainer className={className}>
 			<Spinner />
@@ -90,14 +85,13 @@ export const AssigneesSelect = ({
 					multiple={multiple}
 					isInvalid={(v) => invalidValues.includes(v)}
 					onChange={handleChange}
-					onBlur={onBlur}
 					disabled={disabled}
 					{...props}
 				/>
 				<AssigneesValuesDisplay
 					value={valueAsArray}
 					maxItems={maxItems}
-					onClear={canClear && !disabled && valueAsArray?.length ? handleClear : undefined}
+					onClear={canClear && !disabled && valueAsArray?.length ? onClear : undefined}
 					emptyListMessage={emptyListMessage}
 				/>
 			</AssigneesListContainer>
