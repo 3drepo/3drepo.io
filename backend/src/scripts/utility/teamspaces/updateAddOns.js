@@ -90,12 +90,12 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 			})
 		.option(ADD_ONS.USERS_PROVISIONED,
 			{
-				describe: 'Enables the ability to add/remove users, send invites, edit jobs and edit users job assignments.',
+				describe: 'If enabled, user & roles management are expected to be managed externally.',
 				type: 'boolean',
 			})
 		.option(ADD_ONS.DISABLE_PERMISSIONS_ON_UI,
 			{
-				describe: 'Enables the ability to tweak permissions on the UI.',
+				describe: 'Disables the ability to tweak permissions on the UI.',
 				type: 'boolean',
 			})
 		.option('teamspace',
