@@ -22,21 +22,23 @@ const {getAddOns} = require(`${v5Path}/models/teamspaceSettings`);
 const checkPermissions = require("./checkPermissions").checkPermissions;
 const responseCodes = require("../response_codes");
 const C	= require("../constants");
+const utils = require("../utils");
 
-const checkForUsersProvisionedAddOn = async (req,res,next) => {
+const notUserProvisioned = async (req,res,next) => {
 	const { account } = req.params;
 
 	const addOns = await getAddOns(account);
 	if (addOns?.[USERS_PROVISIONED]) {
-		responseCodes.respond("The teamspace has usersProvisioned on.",req, res, next, responseCodes.NOT_AUTHORIZED, null, {});
+		const place = utils.APIInfo(req);
+		responseCodes.respond(place,req, res, next, responseCodes.NOT_AUTHORIZED);
 		return ;
 	}
 	next();
 };
 
 module.exports = {
-	canCreate: [checkPermissions([C.PERM_CREATE_JOB]), checkForUsersProvisionedAddOn],
+	canCreate: [checkPermissions([C.PERM_CREATE_JOB]), notUserProvisioned],
 	canView: checkPermissions([C.PERM_ASSIGN_JOB]),
-	canDelete: [checkPermissions([C.PERM_DELETE_JOB]), checkForUsersProvisionedAddOn],
-	checkForUsersProvisionedAddOn
+	canDelete: [checkPermissions([C.PERM_DELETE_JOB]), notUserProvisioned],
+	notUserProvisioned
 };
