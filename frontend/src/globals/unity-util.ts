@@ -20,6 +20,8 @@
 
 import { IndexedDbCache } from './unity-indexedbcache';
 import { ExternalWebRequestHandler } from './unity-externalwebrequesthandler';
+import { createTestObject } from './metadataManagerTestDriver';
+import { MetadataManager } from './metadataManager';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 declare let SendMessage;
@@ -159,6 +161,11 @@ export class UnityUtil {
 	public static unityOnUpdateActions = [];
 
 	/**
+	 * Handles all metadata and supermesh maps for the viewer instance.
+	 */
+	public static metadataManager : MetadataManager;
+
+	/**
 	* Initialise Unity.
 	* @category Configurations
 	* @param errorCallback - function to call when an error occurs.
@@ -172,6 +179,7 @@ export class UnityUtil {
 		UnityUtil.modelLoaderProgressCallback = modelLoaderProgressCallback;
 		UnityUtil.unityBuildSubdirectory = '/unity/Build'; // These directories are determined by webpack.common.config.js
 		UnityUtil.setUnityMemory(0); // This forces the browser to update the viewer with the autodetected memory. If the user has set it explicitly in viewer settings, it will be overridden later when they are processed.
+		UnityUtil.metadataManager = new MetadataManager();
 	}
 
 	/** @hidden */
@@ -341,6 +349,8 @@ export class UnityUtil {
 			this.onProgress(progress);
 		}).then((unityInstance) => {
 			UnityUtil.unityInstance = unityInstance;
+			UnityUtil.tests.ctx = unityInstance.Module.ctx;
+			UnityUtil.metadataManager.initialise(unityInstance);
 		}).catch(UnityUtil.onUnityError);
 
 		return UnityUtil.onReady();
@@ -825,7 +835,7 @@ export class UnityUtil {
 	 * @category Object Highlighting
 	 */
 	public static clearHighlights() {
-		UnityUtil.toUnity('ClearHighlighting', UnityUtil.LoadingState.MODEL_LOADED, undefined);
+		this.metadataManager.unhighlightAll();
 	}
 
 	/**
@@ -1646,22 +1656,22 @@ export class UnityUtil {
 		account: string,
 		model: string,
 		idArr: string[],
-		color: [number],
+		color: number[],
 		toggleMode: boolean,
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		// forceReHighlight has been deprecated since the highlight colour now always updates
 		forceReHighlight: boolean,
 	) {
-		return UnityUtil.multipleCallInChunks(idArr.length, (start, end) => {
-			const arr = idArr.slice(start, end);
-			const params: any = {
-				database: account,
-				model,
-				ids: arr,
-				toggle: toggleMode,
-				forceReHighlight,
-				color: color || UnityUtil.defaultHighlightColor,
-			};
-			UnityUtil.toUnity('HighlightObjects', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
-		});
+		if (!toggleMode) {
+			this.metadataManager.unhighlightAll();
+		}
+		if (!color) {
+			color = this.defaultHighlightColor as number[];
+		}
+		for (const uuid of idArr) {
+			this.metadataManager.highlightNode(uuid, toggleMode, { r: color[0], g: color[1], b: color[2] });
+		}
+		UnityUtil.setSceneUpdated();
 	}
 
 	/**
@@ -2354,6 +2364,10 @@ export class UnityUtil {
 		});
 	}
 
+	public static setSceneUpdated() {
+		UnityUtil.toUnity('SetSceneUpdated', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
 	/**
 	 * Change the background colour of the viewer
 	 * note: alpha defaults to 1 if an array of 3 numbers is sent
@@ -2663,4 +2677,6 @@ export class UnityUtil {
 	public static createWebRequestHandler(gameObjectName: string) {
 		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
 	}
+
+	public static tests = createTestObject();
 }
