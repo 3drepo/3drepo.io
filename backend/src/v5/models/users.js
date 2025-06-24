@@ -20,6 +20,7 @@ const { createResponseCode, templates } = require('../utils/responseCodes');
 const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
 const db = require('../handler/db');
 const { logger } = require('../utils/logger');
+const { updateUserDetails } = require('../services/sso/frontegg');
 
 const User = {};
 
@@ -106,19 +107,11 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	}
 };
 
-User.updateProfile = async (username, updatedProfile) => {
-	const updateData = {};
-	const billingInfoFields = ['countryCode', 'company'];
+User.updateProfile = async (username, updateData, backupData) => {
+	const userId = await User.getUserId(username);
 
-	Object.keys(updatedProfile).forEach((key) => {
-		if (billingInfoFields.includes(key)) {
-			updateData[`customData.billing.billingInfo.${key}`] = updatedProfile[key];
-		} else {
-			updateData[`customData.${key}`] = updatedProfile[key];
-		}
-	});
-
-	await updateUser(username, { $set: updateData });
+	await updateUserDetails(userId, updateData);
+	await updateUser(username, { $set: backupData });
 };
 
 User.updateUserId = async (username, userId) => {

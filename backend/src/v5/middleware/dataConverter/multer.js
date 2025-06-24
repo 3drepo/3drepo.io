@@ -19,6 +19,7 @@ const { codeExists, createResponseCode, templates } = require('../../utils/respo
 const Multer = require('multer');
 const Path = require('path');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
+const { readFile } = require('fs/promises');
 const { respond } = require('../../utils/responder');
 const { fileUploads: uploadConfig } = require('../../utils/config');
 
@@ -69,7 +70,10 @@ const fileMatchesExt = async (buffer, fileName) => {
 MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.uploadSizeLimit, storeInMemory = false) => async (req, res, next) => {
 	try {
 		await singleFileMulterPromise(req, fileName, fileFilter, maxSize, storeInMemory);
+
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
+
+		if (!storeInMemory) req.file.buffer = await readFile(req.file.path);
 
 		if (!await fileMatchesExt(req.file.buffer, req.file.originalname)) {
 			throw templates.unsupportedFileFormat;
@@ -91,6 +95,6 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = upload
 };
 
 MulterHelper.singleImageUpload = (fileName) => MulterHelper.singleFileUpload(
-	fileName, imageFilter, uploadConfig.imageSizeLimit, true);
+	fileName, imageFilter, uploadConfig.imageSizeLimit);
 
 module.exports = MulterHelper;

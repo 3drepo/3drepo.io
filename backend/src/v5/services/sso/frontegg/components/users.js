@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { HEADER_APP_ID, HEADER_USER_ID } = require('../frontegg.constants');
-const { delete: deleteReq, get, post } = require('../../../../utils/webRequests');
+const { HEADER_APP_ID, HEADER_ENVIRONMENT_ID, HEADER_TENANT_ID, HEADER_USER_ID } = require('../frontegg.constants');
+const { delete: deleteReq, get, post, put } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 
 const Users = {};
@@ -64,6 +64,44 @@ Users.triggerPasswordReset = async (email) => {
 		[HEADER_APP_ID]: config.appId,
 	};
 	await post(url, { email }, { headers });
+};
+
+Users.uploadAvatar = async (userId, tenantId, avatarPath) => {
+	try {
+		const config = await getConfig();
+		const headers = {
+			...await getBearerHeader(),
+			'Content-Type': 'multipart/form-data',
+			[HEADER_ENVIRONMENT_ID]: config.clientId,
+			[HEADER_TENANT_ID]: tenantId,
+			[HEADER_USER_ID]: userId,
+		};
+		const data = { image: avatarPath };
+
+		const imageUrl = await put(
+			`${config.vendorDomain}/team/resources/profile/me/image/v1`,
+			avatarPath,
+			{ headers },
+		);
+
+		return imageUrl;
+	} catch (err) {
+		console.dir(err, { depth: 3 });
+		throw new Error(`Failed to upload avatar for user(${userId}) from Users: ${err.message}`);
+	}
+};
+
+Users.updateUserDetails = async (userId, payload) => {
+	try {
+		const config = await getConfig();
+		const headers = await getBearerHeader();
+
+		const res = await put(`${config.vendorDomain}/identity/resources/users/v1/${userId}`, payload, { headers });
+
+		return res.data.id;
+	} catch (err) {
+		throw new Error(`Failed to update user(${userId}) from Users: ${err.message}`);
+	}
 };
 
 module.exports = Users;

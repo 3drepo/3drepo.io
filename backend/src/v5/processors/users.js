@@ -21,6 +21,9 @@ const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants')
 const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
 	removeUser, updatePassword, updateProfile } = require('../models/users');
 const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
+const { triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
+const Path = require('path');
+const { createReadStream } = require('fs');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
@@ -29,8 +32,6 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
 const { templates } = require('../utils/responseCodes');
-const { triggerPasswordReset } = require('../services/sso/frontegg');
-
 // This is used for the situation where a user has a record from
 // the IDP but we don't have a matching record in the db. We need
 // to create a record (for now, at least) to know the username mapping
@@ -96,7 +97,21 @@ Users.getProfileByUsername = async (username) => {
 };
 
 Users.updateProfile = async (username, fieldsToUpdate) => {
-	await updateProfile(username, fieldsToUpdate);
+	const name = `${fieldsToUpdate.firstName} ${fieldsToUpdate.lastName}`.trim();
+	const metadata = {};
+	const backupData = {};
+	const billingInfoFields = ['countryCode', 'company'];
+
+	Object.keys(fieldsToUpdate).forEach((key) => {
+		if (billingInfoFields.includes(key)) {
+			backupData[`customData.billing.billingInfo.${key}`] = fieldsToUpdate[key];
+			metadata[key] = fieldsToUpdate[key];
+		} else {
+			backupData[`customData.${key}`] = fieldsToUpdate[key];
+		}
+	});
+
+	await updateProfile(username, { name, metadata: JSON.stringify(metadata) }, backupData);
 };
 
 Users.resetPassword = async (user) => {
@@ -120,7 +135,30 @@ Users.getUserByUsername = getUserByUsername;
 
 Users.getAvatar = (username) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
 
-Users.uploadAvatar = (username, avatarBuffer) => storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
+// update here
+Users.uploadAvatar = async (username, avatarBuffer) => {
+	const { customData: { userId } } = await getUserByUsername(username, { 'customData.userId': 1 });
+
+	const filePath = Path.resolve(avatarBuffer.path);
+
+	const formData = new FormData();
+
+	formData.append('image', JSON.stringify(createReadStream(filePath)));
+
+	console.log(formData);
+
+	const test = await uploadAvatar(
+		userId,
+		'fa2d0b27-bc04-425e-bed2-16ccdb7413b3',
+		formData,
+	);
+
+	// console.log(test);
+
+	// await updateUserDetails(userId, { profilePictureUrl: test });
+
+	storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer.buffer);
+};
 
 Users.updatePassword = updatePassword;
 

@@ -95,7 +95,7 @@ const getAvatar = async (req, res) => {
 const uploadAvatar = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
-		await Users.uploadAvatar(user, req.file.buffer);
+		await Users.uploadAvatar(user, req.file);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
