@@ -17,6 +17,7 @@
 
 "use strict";
 const { v5Path } = require("../../interop");
+const { ADD_ONS: { USERS_PROVISIONED } } = require(`${v5Path}/models/teamspaces.constants`);
 const {getAddOns} = require(`${v5Path}/models/teamspaceSettings`);
 const checkPermissions = require("./checkPermissions").checkPermissions;
 const responseCodes = require("../response_codes");
@@ -26,7 +27,7 @@ const checkForUsersProvisionedAddOn = async (req,res,next) => {
 	const { account } = req.params;
 
 	const addOns = await getAddOns(account);
-	if (addOns?.usersProvisioned) {
+	if (addOns?.[USERS_PROVISIONED]) {
 		responseCodes.respond("The teamspace has usersProvisioned on.",req, res, next, responseCodes.NOT_AUTHORIZED, null, {});
 		return ;
 	}
