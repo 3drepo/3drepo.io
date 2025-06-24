@@ -37,11 +37,12 @@ Roles.getRoles = async (teamspace) => {
 		const groupInfo = { id, name, color };
 
 		if (users?.length) {
-			groupInfo.users = convertUsersToUsernames(users);
+			groupInfo.users = await convertUsersToUsernames(users);
 		}
 
 		return groupInfo;
 	}));
+
 	return roles;
 };
 
@@ -98,9 +99,10 @@ Roles.createRole = async (teamspace, { name, color, users }) => {
 
 Roles.createDefaultRoles = async (teamspace, firstAdmin) => {
 	const teamspaceId = await getTeamspaceRefId(teamspace);
-	const userId = await getUserId(firstAdmin);
+	let userId;
+	if (firstAdmin) { userId = await getUserId(firstAdmin); }
 	await Promise.all(DEFAULT_ROLES.map(({ name, color }) => createGroup(teamspaceId, name, color,
-		name === DEFAULT_OWNER_ROLE ? [userId] : undefined)));
+		name === DEFAULT_OWNER_ROLE && userId ? [userId] : undefined)));
 };
 
 Roles.createRoles = async (teamspace, roles) => {
@@ -123,8 +125,9 @@ Roles.updateRole = async (teamspace, role, { users, ...others }) => {
 		await updateGroup(teamspaceId, role, others);
 	}
 
-	if (users?.length) {
-		const { users: existingUsers = [] } = await getGroupById(teamspaceId, role);
+	if (users !== undefined) {
+		const usernameToUserId = await getUserIdMapping(teamspaceId);
+		const { users: existingUsers = [] } = await getGroupById(teamspaceId, role, true);
 
 		const usersInRole = {};
 		existingUsers.forEach(({ id }) => { usersInRole[id] = true; });
@@ -132,11 +135,13 @@ Roles.updateRole = async (teamspace, role, { users, ...others }) => {
 		const toAdd = [];
 
 		users.forEach((user) => {
-			if (usersInRole[user]) {
+			const userId = usernameToUserId[user];
+			if (!userId) return;
+			if (usersInRole[userId]) {
 				// User already exists in the role, no need to add/remove
-				delete usersInRole[user];
+				delete usersInRole[userId];
 			} else {
-				toAdd.push(user);
+				toAdd.push(userId);
 			}
 		});
 

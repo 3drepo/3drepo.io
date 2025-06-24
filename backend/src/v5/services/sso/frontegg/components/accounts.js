@@ -156,7 +156,7 @@ Accounts.getGroupById = async (accountId, groupId, fetchUsers) => {
 			...await getBearerHeader(),
 			[HEADER_TENANT_ID]: accountId,
 		};
-		const { data } = await get(`${config.vendorDomain}/identity/resources/groups/v1/${groupId}${getUsers ? '?_groupsRelations=users' : ''}`, headers);
+		const { data } = await get(`${config.vendorDomain}/identity/resources/groups/v1/${groupId}${fetchUsers ? '?_groupsRelations=users' : ''}`, headers);
 		return data;
 	} catch (err) {
 		logger.logError(`Failed to get group by Id(${groupId}) in account (${accountId}): ${JSON.stringify(err?.response?.data)} `);

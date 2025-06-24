@@ -34,7 +34,6 @@ const { deleteIfUndefined, isEmpty } = require('../../utils/helper/objects');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
 const { COL_NAME } = require('../../models/projectSettings.constants');
-const { UUIDToString } = require('../../utils/helper/uuids');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { createNewUserRecord } = require('../users');
 const { isTeamspaceAdmin } = require('../../utils/permissions');
@@ -43,7 +42,6 @@ const { removeAllTeamspaceNotifications } = require('../../models/notifications'
 const { removeUserFromAllModels } = require('../../models/modelSettings');
 const { removeUserFromAllProjects } = require('../../models/projectSettings');
 const { templates } = require('../../utils/responseCodes');
-const { DEFAULT_OWNER_ROLE } = require('../../models/roles.constants');
 
 const Teamspaces = {};
 
@@ -75,19 +73,17 @@ Teamspaces.initTeamspace = async (teamspaceName, owner, accountId) => {
 			createTeamspaceSettings(teamspaceName, teamspaceId),
 			// create index on project settings
 			createIndex(teamspaceName, COL_NAME, { name: 1 }, { unique: true }),
-		]);
-		await Promise.all([
-			createTeamspaceSettings(teamspaceName, teamspaceId),
 			addDefaultTemplates(teamspaceName),
-			Teamspaces.addTeamspaceMember(teamspaceName, owner),
 		]);
+
 		if (owner) {
 			await Promise.all([
-				createDefaultRoles(teamspaceName, owner),
 				Teamspaces.addTeamspaceMember(teamspaceName, owner),
 				grantAdminToUser(teamspaceName, owner),
 			]);
 		}
+
+		await createDefaultRoles(teamspaceName, owner);
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${teamspaceName}:${err.message}`);
 		throw err;

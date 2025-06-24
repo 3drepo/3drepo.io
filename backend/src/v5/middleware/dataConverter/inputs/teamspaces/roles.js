@@ -32,47 +32,43 @@ const getUsersWithNoAccess = async (teamspace, usernames) => {
 };
 
 const validateRole = async (req, res, next) => {
-	const isUpdate = !!req.roleData;
-
-	let schema = Yup.object().shape({
-		name: (isUpdate ? types.strings.title : types.strings.title.required())
-			.test('check-name-is-unique', 'Role with the same name already exists', async (value) => {
-				if (value !== req.roleData?.name) {
-					const nameTaken = await isRoleNameUsed(req.params.teamspace, value);
-					return !nameTaken;
-				}
-
-				return true;
-			}),
-		users: Yup.array().of(types.strings.title)
-			.test('check-users-teamspace-access', async (values, context) => {
-				if (values?.length) {
-					const usersWithNoAccess = await getUsersWithNoAccess(req.params.teamspace, values);
-					if (usersWithNoAccess.length) {
-						return context.createError({ message: `User(s) ${usersWithNoAccess} have no access to the teamspace` });
-					}
-				}
-
-				return true;
-			}),
-		color: types.rgbColor,
-	}).strict(true).noUnknown();
-
-	if (isUpdate) {
-		schema = schema.test(
-			'at-least-one-property',
-			'You must provide at least one role value',
-			(value) => Object.keys(value).length,
-		);
-	}
-
 	try {
-		await schema.validate(req.body);
+		const isUpdate = !!req.roleData;
+		let schema = Yup.object().shape({
+			name: (isUpdate ? types.strings.title : types.strings.title.required())
+				.test('check-name-is-unique', 'Role with the same name already exists', async (value) => {
+					if (value?.length && value !== req.roleData?.name) {
+						const nameTaken = await isRoleNameUsed(req.params.teamspace, value);
+						return !nameTaken;
+					}
 
-		if (req.body.users) {
+					return true;
+				}),
+			users: Yup.array().of(types.strings.title)
+				.test('check-users-teamspace-access', async (values, context) => {
+					if (values?.length) {
+						const usersWithNoAccess = await getUsersWithNoAccess(req.params.teamspace, values);
+						if (usersWithNoAccess.length) {
+							return context.createError({ message: `User(s) ${usersWithNoAccess} have no access to the teamspace` });
+						}
+					}
+
+					return true;
+				}),
+			color: types.rgbColor,
+		}).strict(true).noUnknown();
+
+		if (isUpdate) {
+			schema = schema.test(
+				'at-least-one-property',
+				'You must provide at least one role value',
+				(value) => Object.keys(value).length,
+			);
+		}
+		await schema.validate(req.body);
+		if (req.body?.users?.length) {
 			req.body.users = uniqueElements(req.body.users);
 		}
-
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
