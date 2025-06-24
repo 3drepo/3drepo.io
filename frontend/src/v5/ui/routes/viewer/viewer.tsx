@@ -16,7 +16,7 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCardActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext, useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
@@ -24,7 +24,6 @@ import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
-import { TicketFiltersSetter } from './ticketFiltersSetter/ticketFiltersSetter.component';
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
@@ -34,13 +33,14 @@ import { CalibrationContext } from '../dashboard/projects/calibration/calibratio
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
+import { useSetDefaultTicketFilters, useViewerTicketFilterParams } from '@/v5/ui/routes/viewer/tickets/tickets.hooks';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
 	const { isCalibrating } = useContext(CalibrationContext);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
-
+	const filters = TicketsCardHooksSelectors.selectFilters();
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	const isLoading = isFetching || fetchPending;
@@ -48,11 +48,12 @@ export const Viewer = () => {
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
 	const federationsContainers = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
-
+	const containerOrFederationId  = (selectedContainer || selectedFederation)?._id;
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
 
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
+	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const handlePinClick = ({ id }) => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(id);
@@ -60,6 +61,9 @@ export const Viewer = () => {
 
 		TicketsCardActionsDispatchers.openTicket(id);
 	};
+
+	useViewerTicketFilterParams();
+	useSetDefaultTicketFilters(templates);
 
 	useEffect(() => {
 		ViewerService.on(VIEWER_EVENTS.CLICK_PIN, handlePinClick);
@@ -84,6 +88,11 @@ export const Viewer = () => {
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
+
+	useEffect(() => {
+		if (!containerOrFederationId) return;
+		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederationId]);
+	}, [filters]);
 
 	useEffect(() => {
 		DrawingsCardActionsDispatchers.setQueries([]);
@@ -112,7 +121,6 @@ export const Viewer = () => {
 
 	return (
 		<>
-			<TicketFiltersSetter />
 			<OpenDrawingFromUrl />
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />

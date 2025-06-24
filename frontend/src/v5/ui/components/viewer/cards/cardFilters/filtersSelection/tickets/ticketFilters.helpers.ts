@@ -60,7 +60,7 @@ export const DEFAULT_FILTERS: CardFilter[] = [
 export const isBaseProperty = (propertyType) => DEFAULT_FILTERS.some(({ type }) => type === propertyType);
 const isBasePropertyName = (name) => ['Owner', 'Created at', 'Updated at', 'Status'].includes(name);
 
-const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): CardFilter[] => properties
+const propertiesToValidFilters = (properties: { name: string, type: string }[] = [], module: string = ''): CardFilter[] => properties
 	.filter(({ name, type }) => !(!module && isBasePropertyName(name)) && Object.keys(TYPE_TO_ICON).includes(type))
 	.map(({ name, type }) => ({
 		module,
@@ -70,7 +70,7 @@ const propertiesToValidFilters = (properties: { name: string, type: string }[], 
 
 const templateToFilters = (template: ITemplate): CardFilter[] => [
 	...propertiesToValidFilters(template.properties, ''),
-	...template.modules.flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
+	...(template.modules || []).flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
 ];
 
 export const templatesToFilters = (templates: ITemplate[]): CardFilter[] => {

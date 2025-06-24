@@ -38,7 +38,9 @@ export const RangeContainer = styled.div<{ $showOneError: boolean }>`
 `;
 
 export const RangeInputSeparator = styled.span`
-	margin-top: 3px;
+	display: flex;
+	height: 100%;
+	align-items: center;
 
 	&::after {
 		content: "${formatMessage({ id: 'rangeInputs.to', defaultMessage: 'to' })}";

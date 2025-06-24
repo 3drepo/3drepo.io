@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import FunnelIcon from '@assets/icons/filters/funnel.svg';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
@@ -28,10 +29,14 @@ import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { TicketsEllipsisMenu } from '@components/viewer/cards/tickets/ticketsEllipsisMenu/ticketsEllipsisMenu.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
+import { Tooltip } from '@mui/material';
+import { CardAction } from '@components/viewer/cards/cardAction/cardAction.styles';
 
 export const TicketsListCard = () => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
+	const availableTemplateIds = TicketsCardHooksSelectors.selectCurrentTemplates().map(({ _id }) => _id);
+	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters(availableTemplateIds);
 	
 	return (
 		<CardContainer>
@@ -41,7 +46,16 @@ export const TicketsListCard = () => {
 				actions={(
 					<>
 						{!readOnly && (<NewTicketMenu />)}
-						<FilterSelection />
+						<FilterSelection
+							unusedFilters={unusedFilters}
+							TriggerButton={(props) => (
+								<Tooltip title={props.disabled ? '' : formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
+									<CardAction {...props}>
+										<FunnelIcon />
+									</CardAction>
+								</Tooltip>
+							)}
+						/>
 						<TicketsEllipsisMenu />
 					</>
 				)}

@@ -38,7 +38,8 @@ const defaultValue: TicketContextType = {
 export const TicketContext = createContext(defaultValue);
 TicketContext.displayName = 'TicketContext';
 
-export const TicketContextComponent = ({ children, isViewer = false, containerOrFederation }) => {
+export const TicketContextComponent = ({
+	children, isViewer = false, containerOrFederation }) => {
 	const [detailsView, setView] = useState(TicketDetailsView.Form);
 	const [detailsViewProps, setViewProps] = useState();
 

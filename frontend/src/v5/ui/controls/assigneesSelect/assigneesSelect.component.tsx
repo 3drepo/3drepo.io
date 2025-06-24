@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useContext } from 'react';
+import { TicketsCardHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SelectProps } from '@controls/inputs/select/select.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { AssigneesListContainer } from './assigneesSelect.styles';
 import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
-import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
-import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assignees.helpers';
+import { getInvalidValues, getValidValues, groupJobsAndUsers } from './assignees.helpers';
+import { useContext } from 'react';
+import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
 
 export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
+	modelIds?: string[];
 	maxItems?: number;
 	canClear?: boolean;
 	excludeViewers?: boolean;
@@ -48,10 +49,13 @@ export const AssigneesSelect = ({
 	canClear = false,
 	disabled,
 	emptyListMessage,
+	modelIds, // Model IDs to filter jobs and users by, defaults to the current container or federation
 	...props
 }: AssigneesSelectProps) => {
 	const { containerOrFederation } = useContext(TicketContext);
-	const { jobs, users } = getModelJobsAndUsers(containerOrFederation);
+
+	const jobsAndUsers = TicketsCardHooksSelectors.selectJobsAndUsersByModelIds(modelIds ?? [containerOrFederation]);
+	const { jobs, users } = groupJobsAndUsers(jobsAndUsers);
 
 	const emptyValue = multiple ? [] : '';
 	const value = valueRaw || emptyValue;
