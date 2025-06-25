@@ -34,7 +34,6 @@ const { templates } = require(`${src}/utils/responseCodes`);
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
 const adminUser = generateRandomString();
-const tsNoAddons = generateRandomString();
 const nonAdminUser = generateRandomString();
 const usernameToRemove = generateRandomString();
 const nonTsMemberUser = generateRandomString();
