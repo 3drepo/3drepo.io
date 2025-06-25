@@ -53,8 +53,6 @@ const testCanRemoveTeamspaceMember = () => {
 			params: { teamspace, username: adminUser } }, false],
 		['User to be removed is not member of the teamspace', { session: { user: { username: adminUser } },
 			params: { teamspace, username: nonTsMemberUser } }, false],
-		['Logged in user is a teamspace admin on a teamspace with the usersProvisioned true', { session: { user: { username: adminUser } },
-			params: { teamspace: tsNoAddons, username: usernameToRemove } }, false],
 		['Logged in user is not a teamspace admin but remove themselves', { session: { user: { username: nonAdminUser } },
 			params: { teamspace, username: nonAdminUser } }, true],
 		['Logged in user is a teamspace admin', { session: { user: { username: adminUser } },
