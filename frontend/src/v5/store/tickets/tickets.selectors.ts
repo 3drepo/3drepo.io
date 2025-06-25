@@ -171,3 +171,14 @@ export const selectStatusConfigByTemplateId = createSelector(
 	(state, ...args) => selectCurrentProjectTemplateById(state, args.at(-1)),
 	(ticketTemplate, projectTemplate) => ticketTemplate?.config?.status || projectTemplate?.config?.status || DEFAULT_STATUS_CONFIG,
 );
+
+export const selectFetchingProperties = createSelector(
+	selectTicketsDomain,
+	(state) => state.fetchingProperties || {},
+);
+
+export const selectFetchingPropertiesByTicketId = createSelector(
+	selectFetchingProperties,
+	(state, ticketId) => ticketId,
+	(fetchingProperties, ticketId) => fetchingProperties[ticketId] || new Set([]),
+);
