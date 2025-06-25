@@ -17,28 +17,12 @@
 
 "use strict";
 const { v5Path } = require("../../interop");
-const { ADD_ONS: { USERS_PROVISIONED } } = require(`${v5Path}/models/teamspaces.constants`);
-const {getAddOns} = require(`${v5Path}/models/teamspaceSettings`);
 const checkPermissions = require("./checkPermissions").checkPermissions;
-const responseCodes = require("../response_codes");
 const C	= require("../constants");
-const utils = require("../utils");
-
-const notUserProvisioned = async (req,res,next) => {
-	const { account } = req.params;
-
-	const addOns = await getAddOns(account);
-	if (addOns?.[USERS_PROVISIONED]) {
-		const place = utils.APIInfo(req);
-		responseCodes.respond(place,req, res, next, responseCodes.NOT_AUTHORIZED);
-		return ;
-	}
-	next();
-};
+const { notUserProvisioned } = require(`${v5Path}/middleware/permissions/components/teamspaces`);
 
 module.exports = {
 	canCreate: [checkPermissions([C.PERM_CREATE_JOB]), notUserProvisioned],
 	canView: checkPermissions([C.PERM_ASSIGN_JOB]),
-	canDelete: [checkPermissions([C.PERM_DELETE_JOB]), notUserProvisioned],
-	notUserProvisioned
+	canDelete: [checkPermissions([C.PERM_DELETE_JOB]), notUserProvisioned]
 };

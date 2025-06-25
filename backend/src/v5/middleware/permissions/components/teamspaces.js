@@ -16,10 +16,11 @@
  */
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
+const { getAddOns, isAddOnModuleEnabled } = require('../../../models/teamspaceSettings');
 const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../../utils/permissions');
 const { getUserFromSession } = require('../../../utils/sessions');
-const { isAddOnModuleEnabled } = require('../../../models/teamspaceSettings');
 const { respond } = require('../../../utils/responder');
+const { ADD_ONS: { USERS_PROVISIONED } } = require('../../../models/teamspaces.constants');
 
 const TeamspacePerms = {};
 
@@ -75,6 +76,19 @@ TeamspacePerms.isAddOnModuleEnabled = (moduleName) => async (req, res, next) => 
 	} catch (err) {
 		respond(req, res, err);
 	}
+};
+
+TeamspacePerms.notUserProvisioned = async (req, res, next) => {
+	const { teamspace } = req.params;
+
+	const addOns = await getAddOns(teamspace);
+	if (addOns?.[USERS_PROVISIONED]) {
+		respond(req, res, createResponseCode(templates.notAuthorized,
+			'The teamspace users and roles are managed externally.'));
+		return;
+	}
+
+	await next();
 };
 
 module.exports = TeamspacePerms;

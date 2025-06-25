@@ -30,10 +30,10 @@ const checkPermissions = require("./checkPermissions").checkPermissions;
 const checkMultiplePermissions = require("./checkPermissions").checkMultiplePermissions;
 const hasReadAccessToModelHelper = require("./checkPermissions").hasReadAccessToModelHelper;
 const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
-const {notUserProvisioned} = require("./job");
 
 const { validSession } = require(`${v5Path}/middleware/auth`);
 const { hasAccessToTeamspace } = require(`${v5Path}/middleware/permissions`);
+const { notUserProvisioned } = require(`${v5Path}/middleware/permissions/components/teamspaces`);
 
 const readAccessToModel = [C.PERM_VIEW_MODEL];
 
