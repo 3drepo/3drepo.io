@@ -16,9 +16,6 @@
  */
 
 import { Stack } from '@datastructures-js/stack';
-import { UnityUtil } from './unity-util';
-import { sum } from 'lodash';
-import { Mode } from 'react-hook-form';
 
 /**
  * Represents an absolute state that is held by an element/the metadata buffers.
@@ -86,6 +83,11 @@ enum MaterialFlags {
 	Transparent = 2,
 }
 
+/**
+ * Helper class that keeps track of how many elements within the mesh
+ * are within the transparent or opaque queues (and so whether the mesh
+ * should be in one, the other, or both).
+ */
 class FlagsHelper {
 	numOpaque: number;
 
@@ -100,19 +102,26 @@ class FlagsHelper {
 	}
 }
 
+/**
+ * Manages the flags for a supermesh/bundle. There is one flag for each Unity
+ * Component (MeshRenderer), which can be either Opaque or Transparent. This
+ * object manages the memory directly in the WebAssembly - that is, the same
+ * memory that the Unity instance will use when issue the draw calls.
+ */
 class FlagsManager {
 	constructor(supermeshId: string, memory: WebAssembly.Memory) {
-		this.flags = [];
+		this.flagsByMesh = [];
 		this.updated = new Set<FlagsHelper>();
-		this.helpers = new Map<number, FlagsHelper[]>();
+		this.flagsByElement = new Map<number, FlagsHelper[]>();
 		this.supermeshId = supermeshId;
 		this.memory = memory;
-		this.arrayValid = false;
+		this.length = 0;
+		this.offset = 0;
 	}
 
-	flags: FlagsHelper[];
+	flagsByMesh: FlagsHelper[];
 
-	helpers: Map<number, FlagsHelper[]>;
+	flagsByElement: Map<number, FlagsHelper[]>;
 
 	updated: Set<FlagsHelper>;
 
@@ -122,30 +131,34 @@ class FlagsManager {
 
 	private offset: number;
 
+	// Length of the flags array in bytes in the WebAssembly memory. When
+	// this is zero it means the array has not yet been set up.
 	private length: number;
 
-	private arrayValid: boolean;
-
+	/**
+	 * Registers that the element with luid elementIdx exists as part of the
+	 * mesh with the index meshIdx. From now on, if the flags for that element
+	 * change, they will change for all the meshes it belongs to as well.
+	 */
 	addFlagsGroup(elementIdx: number, meshIdx: number) {
-		if (!this.flags[meshIdx]) {
-			this.flags[meshIdx] = new FlagsHelper(meshIdx);
+		if (!this.flagsByMesh[meshIdx]) {
+			this.flagsByMesh[meshIdx] = new FlagsHelper(meshIdx);
 		}
 
-		const flags = this.flags[meshIdx];
+		const componentFlags = this.flagsByMesh[meshIdx];
 
-		var set = this.helpers.get(elementIdx);
-		if (!set) {
-			set = [];
-			this.helpers.set(elementIdx, set);
+		var elementFlags = this.flagsByElement.get(elementIdx);
+		if (!elementFlags) {
+			elementFlags = [];
+			this.flagsByElement.set(elementIdx, elementFlags);
 		}
-
-		set.push(flags);
+		elementFlags.push(componentFlags);
 
 		// All flags are set to a default value to begin with. This is not an
 		// alternative to initialising the flags explicitly, but rather to make
 		// the update logic simpler.
-		flags.numTransparent++;
-		this.updated.add(flags);
+		componentFlags.numTransparent++;
+		this.updated.add(componentFlags);
 	}
 
 	// Opaque and Transparent flags are mutually exclusive, setting one will
@@ -159,7 +172,7 @@ class FlagsManager {
 	}
 
 	private updateFlagCounts(index: number, opaque: number, transparent: number) {
-		const flagsSet = this.helpers.get(index);
+		const flagsSet = this.flagsByElement.get(index);
 		for (const flags of flagsSet) {
 			flags.numOpaque += opaque;
 			flags.numTransparent += transparent;
@@ -185,7 +198,7 @@ class FlagsManager {
 	// In the future we may want to find a way to share an array with Unity
 	// instead of going through these calls.
 	update() {
-		if (this.updated.size && this.arrayValid) {
+		if (this.updated.size && this.length) {
 			const view = new Uint16Array(this.memory.buffer, this.offset, this.length);
 			for (const flags of this.updated) {
 				var f = MaterialFlags.None;
@@ -204,10 +217,9 @@ class FlagsManager {
 	setArray(offset: number, length: number) {
 		this.offset = offset;
 		this.length = length;
-		for (const helper of this.flags) {
+		for (const helper of this.flagsByMesh) {
 			this.updated.add(helper);
 		}
-		this.arrayValid = true;
 	}
 }
 
@@ -363,8 +375,6 @@ class MetadataBufferObjectsManager implements IMetadataMapOwner {
 	 * textures set. Indexed by supermesh/bundle Id.
 	 */
 	private buffers: Map<string, MetadataBuffer>;
-
-	private flags: Map<string, number>;
 
 	constructor(viewer: UnityViewer) {
 		this.numResources = 0;
