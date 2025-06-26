@@ -16,21 +16,20 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip, DueDate } from './ticketItem.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { hasDefaultPin } from '../../ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { ControlledAssigneesSelect as Assignees } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
-import { Highlight } from '@controls/highlight/highlight.component';
 import { IssueProperties, TicketBaseKeys } from '../../tickets.constants';
 import { has, isEqual } from 'lodash';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.component';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
+import { formatMessage } from '@/v5/services/intl';
+import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -43,7 +42,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const isSelected = selectedTicketId === ticket._id;
 	const isFederation = modelIsFederation(containerOrFederation);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket.type);
-	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const { description = '', assignees = [], priority, dueDate = null } = getPropertiesInCamelCase(ticket[TicketBaseKeys.PROPERTIES]);
 	const hasIssueProperties = has(template, [TicketBaseKeys.CONFIG, 'issueProperties']);
@@ -64,7 +62,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const selectTicket = (event) => {
 		event.stopPropagation();
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
-		TicketsCardActionsDispatchers.setSelectedTicketPin(hasDefaultPin(ticket) ? ticket._id : null);
 		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
 
@@ -73,33 +70,24 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 		TicketsCardActionsDispatchers.openTicket(ticket._id);
 	};
 
-	useEffect(() => {
-		if (isSelected && ref.current) {
-			// @ts-ignore
-			ref.current.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
-		}
-	}, []);
-
 	return (
 		<TicketItemContainer key={ticket._id} ref={ref} onClick={onClickTicket} $selected={isSelected}>
 			<FlexRow>
 				<FlexColumn>
 					<Title>
-						<Highlight search={queries}>
-							{ticket.title}
-						</Highlight>
+						{ticket.title}
 					</Title>
 					{description && <Description>{description}</Description>}
 					{hasIssueProperties && (
 						<IssuePropertiesContainer>
-							<Assignees
+							<AssigneesSelect
 								value={assignees}
 								maxItems={5}
 								multiple
-								showAddButton
-								onBlur={onBlurAssignees}
-								disabled={readOnly}
+								onClose={onBlurAssignees}
+								disabled
 								excludeViewers
+								emptyListMessage={formatMessage({ id: 'ticket.preview.noAssignees', defaultMessage: 'No assignees' })}
 							/>
 							<FlexRow>
 								<DueDate value={dueDate} onChange={onChangeDueDate} disabled={readOnly} />
@@ -112,9 +100,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 			</FlexRow>
 			<BottomRow>
 				<Id>
-					<Highlight search={queries}>
-						{`${template?.code}:${ticket.number}`}
-					</Highlight>
+					{template?.code}:{ticket.number}
 				</Id>
 				<StatusChip {...getChipPropsFromConfig(statusConfig, ticket.properties.Status)} />
 			</BottomRow>

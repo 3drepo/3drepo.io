@@ -30,6 +30,7 @@ import { createTestStore } from '../test.helpers';
 import { mockGroup, mockRiskCategories, templateMockFactory, ticketMockFactory, ticketWithGroupMockFactory } from './tickets.fixture';
 import { mockServer } from '../../internals/testing/mockServer';
 import Mockdate from 'mockdate';
+import { addUpdatedAtTime } from '@/v5/store/tickets/tickets.helpers';
 
 describe('Tickets: sagas', () => {
 	let onSuccess;
@@ -110,11 +111,12 @@ describe('Tickets: sagas', () => {
 				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, false));
 			}, [DialogsTypes.OPEN]);
 
-			const ticketFromState = selectTicketById(getState(), ticket._id);
+			const ticketFromState = selectTicketById(getState(), modelId, ticket._id);
 			expect(ticketFromState).toBeNull();
 		});
 
 		it('should call updateContainerTicket endpoint', async () => {
+			Mockdate.set(new Date());
 			populateTicketsStore();
 			mockServer
 				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/${ticket._id}`)
@@ -124,9 +126,10 @@ describe('Tickets: sagas', () => {
 			await waitForActions(() => {
 				dispatch(TicketsActions.updateTicket(teamspace, projectId, modelId, ticket._id, updateProp, false, onError));
 			}, [
-				TicketsActions.upsertTicketSuccess(modelId, { _id: ticket._id, ...updateProp }),
+				TicketsActions.upsertTicketSuccess(modelId, { _id: ticket._id, ...addUpdatedAtTime(updateProp) }),
 			]);
 			expect(onError).not.toHaveBeenCalled();
+			Mockdate.reset();
 		});
 		it('should call updateContainerTicket with a 404', async () => {
 			populateTicketsStore();
@@ -226,7 +229,7 @@ describe('Tickets: sagas', () => {
 			await waitForActions(() => {
 				dispatch(TicketsActions.fetchTicket(teamspace, projectId, modelId, ticket._id, true));
 			}, [DialogsTypes.OPEN]);
-			const ticketFromState = selectTicketById(getState(), ticket._id);
+			const ticketFromState = selectTicketById(getState(), modelId, ticket._id);
 			expect(ticketFromState).toBeNull();
 		});
 
@@ -435,7 +438,7 @@ describe('Tickets: sagas', () => {
 		// Basic Container templates
 		it('should call fetchContainerTemplates endpoint', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?getDetails=false`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?showDeprecated=true`)
 				.reply(200, { templates })
 
 			await waitForActions(() => {
@@ -445,7 +448,7 @@ describe('Tickets: sagas', () => {
 
 		it('should call fetchContainerTemplates endpoint with a 404', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?getDetails=false`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets/templates?showDeprecated=true`)
 				.reply(404);
 
 			await waitForActions(() => {
@@ -474,14 +477,14 @@ describe('Tickets: sagas', () => {
 				dispatch(TicketsActions.fetchTemplate(teamspace, projectId, modelId, template._id, false));
 			}, [DialogsTypes.OPEN]);
 
-			const templateFromState = selectTemplateById(getState(), template._id);
+			const templateFromState = selectTemplateById(getState(),modelId , template._id);
 			expect(templateFromState).toBeNull();
 		});
 
 		// Basic Federation templates
 		it('should call fetchFederationTemplates endpoint', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?getDetails=false`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?showDeprecated=true`)
 				.reply(200, { templates });
 
 			await waitForActions(() => {
@@ -491,7 +494,7 @@ describe('Tickets: sagas', () => {
 
 		it('should call fetchFederationTemplates endpoint with a 404', async () => {
 			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?getDetails=false`)
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/tickets/templates?showDeprecated=true`)
 				.reply(404);
 
 			await waitForActions(() => {
@@ -521,7 +524,7 @@ describe('Tickets: sagas', () => {
 				dispatch(TicketsActions.fetchTemplate(teamspace, projectId, modelId, template._id, true));
 			}, [DialogsTypes.OPEN]);
 
-			const templateFromState = selectTemplateById(getState(), template._id);
+			const templateFromState = selectTemplateById(getState() , modelId, template._id);
 			expect(templateFromState).toBeNull();
 		});
 	});

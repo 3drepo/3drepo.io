@@ -37,9 +37,8 @@ const testSendEmail = () => {
 		const recipient = 'example@email.com';
 		const attachments = { attachment: generateRandomString() };
 		const data = {
-			username: generateRandomString(),
-			token: generateRandomString(),
 			firstName: generateRandomString(),
+			err: new Error(generateRandomString()),
 		};
 
 		const mailerConfig = { ...config.mail };
@@ -52,7 +51,7 @@ const testSendEmail = () => {
 			Mailer.reset();
 			config.mail.sender = undefined;
 
-			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
+			await expect(Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, data, attachments))
 				.rejects.toThrow('config.mail.sender is not set');
 			Mailer.reset();
 		});
@@ -61,7 +60,7 @@ const testSendEmail = () => {
 			Mailer.reset();
 			config.mail.generateCredentials = false;
 			delete config.mail.smtpConfig;
-			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
+			await expect(Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, data, attachments))
 				.rejects.toThrow('config.mail.smtpConfig is not set');
 			Mailer.reset();
 		});
@@ -70,15 +69,15 @@ const testSendEmail = () => {
 			Mailer.reset();
 			config.mail.generateCredentials = true;
 			delete config.mail.smtpConfig;
-			await Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments);
+			await Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, data, attachments);
 			expect(sendMailMock).toBeCalledTimes(1);
 			expect(sendMailMock).toBeCalledWith({
 				from: config.mail.sender,
 				to: recipient,
-				subject: emailTemplates.FORGOT_PASSWORD.subject(),
+				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
 				html: await BaseTemplate.html({
 					...data,
-					emailContent: await emailTemplates.FORGOT_PASSWORD.html(data),
+					emailContent: await emailTemplates.ERROR_NOTIFICATION.html(data),
 				}),
 				attachments,
 			});
@@ -86,35 +85,36 @@ const testSendEmail = () => {
 		});
 
 		test('should send email if attachments are provided', async () => {
-			await Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments);
+			await Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, data, attachments);
 			expect(sendMailMock).toBeCalledTimes(1);
 			expect(sendMailMock).toBeCalledWith({
 				from: config.mail.sender,
 				to: recipient,
-				subject: emailTemplates.FORGOT_PASSWORD.subject(),
+				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
 				html: await BaseTemplate.html({
 					...data,
-					emailContent: await emailTemplates.FORGOT_PASSWORD.html(data),
+					emailContent: await emailTemplates.ERROR_NOTIFICATION.html(data),
 				}),
 				attachments,
 			});
 		});
 
 		test('should send email if attachments are not provided', async () => {
-			await Mailer.sendEmail(emailTemplates.VERIFY_USER.name, recipient, data);
+			await Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, data);
 			expect(sendMailMock).toBeCalledTimes(1);
 			expect(sendMailMock).toBeCalledWith({
 				from: config.mail.sender,
 				to: recipient,
-				subject: emailTemplates.VERIFY_USER.subject(),
-				html: await BaseTemplate.html({ ...data, emailContent: await emailTemplates.VERIFY_USER.html(data) }),
+				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
+				html: await BaseTemplate.html({ ...data,
+					emailContent: await emailTemplates.ERROR_NOTIFICATION.html(data) }),
 			});
 		});
 
 		test('should log the error and throw it back if sendMail fails', async () => {
 			sendMailMock.mockImplementationOnce(() => { throw templates.unknown; });
 
-			await expect(Mailer.sendEmail(emailTemplates.FORGOT_PASSWORD.name, recipient, data, attachments))
+			await expect(Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, data, attachments))
 				.rejects.toEqual(templates.unknown);
 		});
 
@@ -124,7 +124,7 @@ const testSendEmail = () => {
 		});
 
 		test('should throw error if the data does not provide sufficient info for the template', async () => {
-			await expect(Mailer.sendEmail(emailTemplates.VERIFY_USER.name, recipient, undefined, attachments))
+			await expect(Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, undefined, attachments))
 				.rejects.toThrow();
 		});
 	});
@@ -142,14 +142,14 @@ const testSendSystemEmail = () => {
 		const mailerConfig = { ...config.mail };
 
 		beforeEach(() => {
+			Mailer.reset();
 			config.mail = { ...mailerConfig };
 		});
-
 		test('should fail if config.mail.sender is not set', async () => {
 			Mailer.reset();
 			config.mail.sender = undefined;
 
-			await expect(Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments))
+			await expect(Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments))
 				.rejects.toThrow('config.mail.sender is not set');
 			Mailer.reset();
 		});
@@ -158,7 +158,7 @@ const testSendSystemEmail = () => {
 			Mailer.reset();
 			config.mail.generateCredentials = false;
 			delete config.mail.smtpConfig;
-			await expect(Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments))
+			await expect(Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments))
 				.rejects.toThrow('config.mail.smtpConfig is not set');
 			Mailer.reset();
 		});
@@ -167,15 +167,15 @@ const testSendSystemEmail = () => {
 			Mailer.reset();
 			config.mail.generateCredentials = true;
 			delete config.mail.smtpConfig;
-			await Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments);
+			await Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments);
 			expect(sendMailMock).toBeCalledTimes(1);
 			expect(sendMailMock).toBeCalledWith({
 				from: config.mail.sender,
 				to: config.contact.mail,
-				subject: emailTemplates.FORGOT_PASSWORD.subject(),
+				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
 				html: await SystemTemplate.html({
 					...data,
-					emailContent: await emailTemplates.FORGOT_PASSWORD.html(data),
+					emailContent: await emailTemplates.ERROR_NOTIFICATION.html(data),
 				}),
 				attachments,
 			});
@@ -183,35 +183,36 @@ const testSendSystemEmail = () => {
 		});
 
 		test('should send email if attachments are provided', async () => {
-			await Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments);
+			await Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments);
 			expect(sendMailMock).toBeCalledTimes(1);
 			expect(sendMailMock).toBeCalledWith({
 				from: config.mail.sender,
 				to: config.contact.mail,
-				subject: emailTemplates.FORGOT_PASSWORD.subject(),
+				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
 				html: await SystemTemplate.html({
 					...data,
-					emailContent: await emailTemplates.FORGOT_PASSWORD.html(data),
+					emailContent: await emailTemplates.ERROR_NOTIFICATION.html(data),
 				}),
 				attachments,
 			});
 		});
 
 		test('should send email if attachments are not provided', async () => {
-			await Mailer.sendSystemEmail(emailTemplates.VERIFY_USER.name, data);
+			await Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data);
 			expect(sendMailMock).toBeCalledTimes(1);
 			expect(sendMailMock).toBeCalledWith({
 				from: config.mail.sender,
 				to: config.contact.mail,
-				subject: emailTemplates.VERIFY_USER.subject(),
-				html: await SystemTemplate.html({ ...data, emailContent: await emailTemplates.VERIFY_USER.html(data) }),
+				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
+				html: await SystemTemplate.html({ ...data,
+					emailContent: await emailTemplates.ERROR_NOTIFICATION.html(data) }),
 			});
 		});
 
 		test('should log the error and throw it back if sendSystemMail fails', async () => {
-			sendMailMock.mockImplementationOnce(() => { throw templates.unknown; });
+			sendMailMock.mockRejectedValueOnce(templates.unknown);
 
-			await expect(Mailer.sendSystemEmail(emailTemplates.FORGOT_PASSWORD.name, data, attachments))
+			await expect(Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments))
 				.rejects.toEqual(templates.unknown);
 		});
 
@@ -219,9 +220,9 @@ const testSendSystemEmail = () => {
 			await expect(Mailer.sendSystemEmail(generateRandomString(), data, attachments))
 				.rejects.toEqual(templates.unknown);
 		});
-
 		test('should throw error if the data does not provide sufficient info for the template', async () => {
-			await expect(Mailer.sendSystemEmail(emailTemplates.VERIFY_USER.name, undefined, attachments))
+			await expect(Mailer.sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
+				{ }, attachments))
 				.rejects.toThrow();
 		});
 	});

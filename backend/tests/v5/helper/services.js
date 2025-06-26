@@ -21,15 +21,13 @@ const http = require('http');
 const fs = require('fs');
 const { times } = require('lodash');
 
+const SessionTracker = require('./sessionTracker');
+
 const { image, src, srcV4 } = require('./path');
 
 const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
-
-const { providers } = require(`${src}/services/sso/sso.constants`);
-
-const { CSRF_COOKIE, SESSION_HEADER } = require(`${src}/utils/sessions.constants`);
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
@@ -37,10 +35,8 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
-const { templates } = require(`${src}/utils/responseCodes`);
 const { editSubscriptions, grantAdminToUser, updateAddOns } = require(`${src}/models/teamspaceSettings`);
-const { createTeamspaceRole } = require(`${src}/models/roles`);
-const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
+const { initTeamspace, addTeamspaceMember } = require(`${src}/processors/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { MODEL_COMMENTER, MODEL_VIEWER, PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
@@ -54,7 +50,7 @@ const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
-const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -106,28 +102,38 @@ db.reset = async () => {
 	await DbHandler.disconnect();
 };
 
-db.addSSO = async (user, id = ServiceHelper.generateRandomString()) => {
-	await DbHandler.updateOne(USERS_DB_NAME, USERS_COL, { user }, { $set: { 'customData.sso': { type: providers.AAD, id } } });
-};
-
 // userCredentials should be the same format as the return value of generateUserCredentials
-db.createUser = (userCredentials, tsList = [], customData = {}) => {
+db.createUser = async (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
-	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	return DbHandler.createUser(user, password, {
+
+	await DbHandler.createUser(user, password, {
 		billing: { billingInfo: {} },
+		userId: user,
 		...basicData,
 		...customData,
 		apiKey,
-	}, roles);
+	}, []);
+
+	await Promise.all(tsList.map((ts) => addTeamspaceMember(ts, user)));
 };
 
-db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
-
 db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true, addOns) => {
-	if (createUser) await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
-	await initTeamspace(teamspace);
-	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
+	if (createUser) {
+		await ServiceHelper.db.createUser({
+			...ServiceHelper.generateUserCredentials(),
+			user: teamspace,
+			password: teamspace });
+	} else if (admins.length === 0) {
+		throw Error('an admin needs to be provided, or createUser needs to be set to true.');
+	}
+	const firstAdmin = createUser ? teamspace : admins[0];
+	const accountId = await initTeamspace(teamspace, firstAdmin);
+	await Promise.all(admins.map(async (adminUser) => {
+		if (firstAdmin !== adminUser) {
+			await addTeamspaceMember(teamspace, adminUser);
+			await grantAdminToUser(teamspace, adminUser);
+		}
+	}));
 
 	if (subscriptions) {
 		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace,
@@ -137,6 +143,8 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 	if (Object.keys(addOns ?? {}).length) {
 		await updateAddOns(teamspace, addOns);
 	}
+
+	return accountId;
 };
 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {
@@ -844,35 +852,10 @@ ServiceHelper.chatApp = () => {
 	return ChatService.createApp(server);
 };
 
-ServiceHelper.parseSetCookie = (arr) => {
-	let token; let session;
-	arr.forEach((instr) => {
-		const matchSession = instr.match(/connect.sid=([^;]*)/);
-		if (matchSession) {
-			[, session] = matchSession;
-		}
-
-		const matchToken = instr.match(/csrf_token=([^;]*)/);
-		if (matchToken) {
-			[, token] = matchToken;
-		}
-	});
-
-	return { token, session };
-};
-
-ServiceHelper.generateCookieArray = ({ token, session }) => [
-	`${CSRF_COOKIE}=${token}`,
-	`${SESSION_HEADER}=${session}`,
-];
-
-ServiceHelper.loginAndGetCookie = async (agent, user, password, headers = {}) => {
-	const res = await agent.post('/v5/login')
-		.set(headers)
-		.send({ user, password })
-		.expect(templates.ok.status);
-
-	return ServiceHelper.parseSetCookie(res.header['set-cookie']);
+ServiceHelper.loginAndGetCookie = async (agent, user, options) => {
+	const session = SessionTracker(agent);
+	await session.login(user, options);
+	return session.getCookies();
 };
 
 ServiceHelper.socket.connectToSocket = (session) => new Promise((resolve, reject) => {

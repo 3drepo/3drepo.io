@@ -1,19 +1,19 @@
-{ "VERSION" : "5.14.1",
+{ "VERSION" : "5.17.1",
   "unity" : {
 	"current" : "5.20.0",
 	"supported": []
   },
   "civil" :{
-	"current" : "5.14.0",
-	"supported": ["5.10.1"]
+	"current" : "5.16.1",
+	"supported": ["5.16.0"]
   },
   "navis" :{
-	"current" : "5.14.0",
-	"supported": ["5.10.2"]
+	"current" : "5.16.1",
+	"supported": ["5.16.0"]
   },
    "revit" :{
-	"current" : "5.14.0",
-	"supported": ["5.10.1"]
+	"current" : "5.16.1",
+	"supported": ["5.16.0"]
   },
   "unitydll" : {
 	"current": "5.4.0",
@@ -29,6 +29,6 @@
   },
   "powerbi" : {
 	  "current": "5.10.0",
-	  "supported": ["5.10.0"]
+	  "supported": []
   }
 }

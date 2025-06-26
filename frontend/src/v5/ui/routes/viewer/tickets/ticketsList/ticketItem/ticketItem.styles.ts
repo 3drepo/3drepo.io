@@ -36,9 +36,10 @@ export const FlexColumn = styled(FlexRow)`
 export const Title = styled(TextOverflow)`
 	color: ${({ theme }) => theme.palette.base.main};
 	${({ theme }) => theme.typography.body1};
-	line-height: 1em;
-	height: 1em;
-	min-height: 1em;
+	line-height: 18px;
+	height: 18px;
+	min-height: 18px;
+	margin-top: -3px;
 	font-weight: 600;
 `;
 
@@ -52,10 +53,12 @@ export const Description = styled(TextOverflow).attrs({
 
 export const TicketItemContainer = styled(CardListItem)<{ $selected?: boolean }>`
 	cursor: pointer;
+	display: block;
+	width: 350px;
 	box-sizing: border-box;
 	padding: 12px;
 	min-height: 65px;
-	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	background-color: transparent;
 	${({ theme, $selected }) => $selected && css`
 		background-color: ${theme.palette.primary.lightest};
 		${Title} {

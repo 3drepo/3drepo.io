@@ -16,25 +16,78 @@
  */
 
 const { src } = require('./path');
-const { parseSetCookie, generateCookieArray } = require('./services');
+
+const { CSRF_COOKIE, SESSION_HEADER } = require(`${src}/utils/sessions.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { CSRF_HEADER } = require(`${src}/utils/sessions.constants`);
 const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 
+const { getUserInfoFromToken } = require(`${src}/services/sso/frontegg`);
+const { getTeamspaceRefId } = require(`${src}/models/teamspaceSettings`);
+
+const parseSetCookie = (arr) => {
+	let token; let session;
+	arr.forEach((instr) => {
+		const matchSession = instr.match(/connect.sid=([^;]*)/);
+		if (matchSession) {
+			[, session] = matchSession;
+		}
+
+		const matchToken = instr.match(/csrf_token=([^;]*)/);
+		if (matchToken) {
+			[, token] = matchToken;
+		}
+	});
+
+	return { token, session };
+};
+const generateCookieArray = ({ token, session }) => [
+	`${CSRF_COOKIE}=${token}`,
+	`${SESSION_HEADER}=${session}`,
+];
 class SessionTracker {
 	constructor(agent) {
 		this.agent = agent;
 	}
 
-	async login(user, password, headers = {}) {
-		const resp = await this.agent.post('/v5/login/')
+	// We expect the user data to be the same format as the data returned by
+	// generateUserCredentials in serviceHelper
+	async login({ user: userId, basicData: { email } }, { headers = {}, teamspace } = {}) {
+		const resp = await this.agent.get('/v5/authentication/authenticate?redirectUri=https://localhost:3200')
 			.set(headers)
-			.send({ user, password })
 			.expect(templates.ok.status);
 
 		this.extractSessionFromResponse(resp);
-		return resp;
+
+		const url = new URL(resp.body.link);
+		const state = url.searchParams.get('state');
+		const code = url.searchParams.get('code');
+
+		const accounts = [];
+		let authAccount = 'abc';
+
+		this.headers = headers;
+
+		if (teamspace) {
+			authAccount = await getTeamspaceRefId(teamspace);
+			accounts.push(authAccount);
+		}
+
+		getUserInfoFromToken.mockResolvedValueOnce({ userId, email, accounts, authAccount });
+
+		await this.get(`/v5/authentication/authenticate-post?state=${state}&code=${code}`)
+			.set(headers)
+			.expect(302);
+
+		const { body } = await this.get('/v5/login').set(headers).expect(200);
+		if (teamspace) {
+			expect(body.authenticatedTeamspace).toEqual(teamspace);
+		}
+	}
+
+	getCookies() {
+		return this.cookies;
 	}
 
 	extractSessionFromResponse(resp, fabricateCSRF) {
@@ -45,10 +98,14 @@ class SessionTracker {
 	}
 
 	setAuthHeaders(action) {
+		if (this.headers) {
+			action.set(this.headers);
+		}
 		if (this.cookies.token) {
 			return action.set(CSRF_HEADER, this.cookies.token)
 				.set('Cookie', generateCookieArray(this.cookies));
 		}
+
 		return action.set('Cookie', generateCookieArray(this.cookies));
 	}
 

@@ -27,6 +27,8 @@ const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants'
 const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
+const { getUserStatusInAccount } = require('../services/sso/frontegg');
+const { membershipStatus } = require('../services/sso/frontegg/frontegg.constants');
 const { templates } = require('../utils/responseCodes');
 
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
@@ -35,12 +37,13 @@ const TeamspaceSetting = {};
 
 const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
+const teamspaceInvitesQuery = (query, projection, sort) => db.find(USERS_DB_NAME, 'invitations', query, projection, sort);
 
 const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPACE_SETTINGS_COL, query, actions);
 const teamspaceSettingQuery = (ts, query, projection, sort) => db.findOne(ts,
 	TEAMSPACE_SETTINGS_COL, query, projection, sort);
 
-TeamspaceSetting.getTeamspaceSetting = async (ts, projection) => {
+TeamspaceSetting.getTeamspaceSetting = async (ts, projection = { refId: 0 }) => {
 	const tsDoc = await teamspaceSettingQuery(ts, { _id: ts }, projection);
 	if (!tsDoc) {
 		throw templates.teamspaceNotFound;
@@ -160,21 +163,34 @@ TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
 	);
 };
 
-TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
+TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username, bypassStatusCheck = false) => {
 	const query = { user: username, 'roles.db': teamspace };
-	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1 } });
+	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1, userId: 1 } });
 	if (!userDoc) return false;
 
-	const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
+	if (!bypassStatusCheck) {
+		const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
 
-	if (restrictions[SECURITY_SETTINGS.SSO_RESTRICTED] && !userDoc.customData.sso) {
-		throw templates.ssoRestricted;
-	}
+		if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
+			const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
+			if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
+				throw templates.domainRestricted;
+			}
+		}
 
-	if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
-		const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
-		if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
-			throw templates.domainRestricted;
+		const teamspaceId = await TeamspaceSetting.getTeamspaceRefId(teamspace);
+
+		const memStatus = await getUserStatusInAccount(teamspaceId, userDoc.customData.userId);
+		if (memStatus === membershipStatus.NOT_MEMBER) {
+			return false;
+		}
+
+		if (memStatus === membershipStatus.INACTIVE) {
+			throw templates.membershipInactive;
+		}
+
+		if (memStatus === membershipStatus.PENDING_INVITE) {
+			throw templates.pendingInviteAcceptance;
 		}
 	}
 
@@ -210,12 +226,22 @@ TeamspaceSetting.getTeamspaceExpiredLicenses = (teamspace) => {
 	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
 };
 
-TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {
+TeamspaceSetting.createTeamspaceSettings = async (teamspace, teamspaceId) => {
 	const settings = { _id: teamspace,
+		refId: teamspaceId,
 		topicTypes: DEFAULT_TOPIC_TYPES,
 		riskCategories: DEFAULT_RISK_CATEGORIES,
 		permissions: [] };
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
+};
+
+TeamspaceSetting.setTeamspaceRefId = async (teamspace, refId) => {
+	await teamspaceSettingUpdate(teamspace, { _id: teamspace }, { $set: { refId } });
+};
+
+TeamspaceSetting.getTeamspaceRefId = async (teamspace) => {
+	const { refId } = await TeamspaceSetting.getTeamspaceSetting(teamspace, { refId: 1 });
+	return refId;
 };
 
 const grantPermissionToUser = async (teamspace, username, permission) => {
@@ -226,11 +252,9 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
 	username, TEAMSPACE_ADMIN);
 
-TeamspaceSetting.getAllUsersInTeamspace = async (teamspace) => {
+TeamspaceSetting.getAllUsersInTeamspace = (teamspace, projection = { user: 1 }) => {
 	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
-	const users = await findMany(query, { user: 1 });
-
-	return users.map(({ user }) => user);
+	return findMany(query, projection);
 };
 
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
@@ -240,6 +264,11 @@ TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
 TeamspaceSetting.getRiskCategories = async (teamspace) => {
 	const { riskCategories } = await teamspaceSettingQuery(teamspace, { _id: teamspace }, { riskCategories: 1 });
 	return riskCategories;
+};
+
+TeamspaceSetting.getTeamspaceInvites = (teamspace, projection = { _id: 1 }) => {
+	const query = { 'teamSpaces.teamspace': teamspace };
+	return teamspaceInvitesQuery(query, projection);
 };
 
 module.exports = TeamspaceSetting;

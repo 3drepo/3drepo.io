@@ -17,15 +17,13 @@
 
 const { CSRF_COOKIE, CSRF_HEADER, SESSION_HEADER } = require('./sessions.constants');
 const { cookie, cookie_domain } = require('./config');
+const { destroyAllSessions, validateToken } = require('../services/sso/frontegg');
 const { escapeRegexChrs, getURLDomain } = require('./helper/strings');
+const { apiUrls } = require('./config');
 const { deleteIfUndefined } = require('./helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { logger } = require('./logger');
 const { publish } = require('../services/eventsManager/eventsManager');
-const { v4Path } = require('../../interop');
-
-// FIXME: can remove the disable once we migrated config
-// eslint-disable-next-line
-const { apiUrls } = require(`${v4Path}/config`);
 
 const referrerMatch = (sessionReferrer, headerReferrer) => {
 	const domain = getURLDomain(headerReferrer);
@@ -35,34 +33,58 @@ const referrerMatch = (sessionReferrer, headerReferrer) => {
 
 const SessionUtils = {};
 
-const validateCookie = (session, cookies, headers) => {
+const validateCookie = async (session, cookies, headers) => {
 	const referrerMatched = !headers.referer || referrerMatch(session.user.referer, headers.referer);
-
 	const headerToken = headers[CSRF_HEADER] || headers[CSRF_HEADER.toLowerCase()];
 
 	const csrfMatched = !!session.token && (headerToken === session.token);
 
-	return csrfMatched && referrerMatched;
+	const internalSessionValid = csrfMatched && referrerMatched;
+
+	if (internalSessionValid) {
+		try {
+			await validateToken(session.user.auth.tokenInfo, session.user.auth.userId);
+			return true;
+		} catch (err) {
+			logger.logInfo(`Session ${session.id} was invalid due to an invalid JWT token`);
+			return false;
+		}
+	}
+
+	logger.logInfo(`Session ${session.id} was invalid due to ${csrfMatched ? 'referrer' : 'CSRF'} mismatch`);
+	return false;
 };
 
-SessionUtils.isSessionValid = (session, cookies, headers, ignoreApiKey = false) => {
+SessionUtils.isSessionValid = async (session, cookies, headers, ignoreApiKey = false) => {
 	const user = session?.user;
-
 	if (user) {
-		const validSession = session.user.isAPIKey ? !ignoreApiKey
-			: validateCookie(session, cookies, headers);
-		return validSession;
+		const res = session.user.isAPIKey ? !ignoreApiKey
+			: await validateCookie(session, cookies, headers);
+
+		return res;
 	}
 
 	return false;
 };
 
+SessionUtils.setCSRFCookie = (token, res) => {
+	const { domain, maxAge } = cookie;
+	res.cookie(CSRF_COOKIE, token, { httpOnly: false, secure: true, sameSite: 'Strict', maxAge, domain });
+};
+
 SessionUtils.getUserFromSession = ({ user } = {}) => (user ? user.username : undefined);
 
 SessionUtils.destroySession = (session, res, callback, elective) => {
-	session.destroy(() => {
+	session.destroy(async () => {
 		res.clearCookie(CSRF_COOKIE, { domain: cookie.domain });
 		res.clearCookie(SESSION_HEADER, { domain: cookie_domain, path: '/' });
+
+		const userId = session?.user?.auth?.userId;
+		if (userId) {
+			await destroyAllSessions(userId).catch(() => {
+				// if it failed, we don't really care, keep going and destroy the 3DR session.
+			});
+		}
 
 		publish(events.SESSIONS_REMOVED, deleteIfUndefined({ ids: [session.id], elective }));
 

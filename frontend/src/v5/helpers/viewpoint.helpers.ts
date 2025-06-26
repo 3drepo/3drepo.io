@@ -22,7 +22,7 @@ import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors
 import { ViewpointsActionsDispatchers } from '../services/actionsDispatchers';
 import { getState, dispatch } from './redux.helpers';
 import { getGroupHexColor, rgbToHex } from './colors.helper';
-import { groupsOfViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded, ViewpointsActions } from '@/v4/modules/viewpoints';
+import { getGroupsIDsOfViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded, ViewpointsActions } from '@/v4/modules/viewpoints';
 import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
 import { prepareGroup } from '@/v4/helpers/groups';
 import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
@@ -193,11 +193,10 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 
 	return overrides.reduce((acum, current) => {
 		const color = current.color ? getGroupHexColor(current.color) : undefined;
-		const { opacity } = current;
 		const v4Objects = convertToV4GroupNodes((current.group as Group)?.objects || []);
 
 		return v4Objects.reduce((dict, objects) => {
-			const overrideDict = toMeshDictionary(objects, color, opacity);
+			const overrideDict = toMeshDictionary(objects, color, current.opacity ?? 1);
 
 			// eslint-disable-next-line no-param-reassign
 			dict.overrides = { ...dict.overrides, ...overrideDict.overrides };
@@ -238,13 +237,11 @@ export const getViewpointWithGroups = async ({ teamspace, modelId, view }) => {
 
 	// This part discriminates which groups hasnt been loaded yet and add their ids to
 	// the groupsToFetch array
-	const ids = [];
-	for (const id of groupsOfViewpoint(viewpoint)) {
-		ids.push(id);
+	getGroupsIDsOfViewpoint(viewpoint).forEach((id) =>{
 		if (!viewpointsGroups[id] && !viewpointsGroupsBeingLoaded.has(id)) {
 			groupsToFetch.push(id);
 		}
-	}
+	});
 
 	if (groupsToFetch.length > 0) {
 		dispatch(ViewpointsActions.addViewpointGroupsBeingLoaded(groupsToFetch));

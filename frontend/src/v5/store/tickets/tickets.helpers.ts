@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FederationsHooksSelectors, SequencesHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { camelCase, isEmpty, isEqual, isObject, mapKeys, last } from 'lodash';
+import { camelCase, isEmpty, isEqual, isObject, mapKeys, last, set } from 'lodash';
 import { getUrl } from '@/v5/services/api/default';
 import ClashIcon from '@assets/icons/outlined/clash-outlined.svg';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
@@ -26,7 +26,7 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { TicketBaseKeys, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { TicketBaseKeys, SequencingProperties, BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
@@ -38,6 +38,7 @@ export const modelIsFederation = (modelId: string) => !!FederationsHooksSelector
 export const getEditableProperties = (template) => {
 	const propertyIsEditable = ({ readOnly }) => !readOnly;
 
+	// Doesnt return the config or anything else; this is used in the new ticket form in order to not show the comments.
 	return {
 		properties: (template.properties || []).filter(propertyIsEditable),
 		modules: (template.modules || []).map((module) => ({
@@ -46,6 +47,7 @@ export const getEditableProperties = (template) => {
 		})),
 	};
 };
+
 
 const templatePropertiesToTicketProperties = (properties = []) => (
 	properties.reduce(
@@ -307,4 +309,5 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 	}
 };
 
+export const addUpdatedAtTime = (ticket) => set(ticket, `properties.${BaseProperties.UPDATED_AT}`, +new Date());
 

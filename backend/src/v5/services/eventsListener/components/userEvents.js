@@ -19,14 +19,14 @@ const { events } = require('../../eventsManager/eventsManager.constants');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { unpack: unpackInvitations } = require('../../../processors/teamspaces/invitations');
 
-const userVerified = async ({ username }) => {
+const userCreated = async ({ username }) => {
 	await unpackInvitations(username);
 };
 
 const UserEventsListener = {};
 
 UserEventsListener.init = () => {
-	subscribe(events.USER_VERIFIED, userVerified);
+	subscribe(events.USER_CREATED, userCreated);
 };
 
 module.exports = UserEventsListener;

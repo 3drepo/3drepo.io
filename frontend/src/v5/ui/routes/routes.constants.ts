@@ -17,12 +17,7 @@
 import { matchPath } from 'react-router';
 
 export const NOT_FOUND_ROUTE_PATH = '/v5/404';
-export const LOGIN_PATH = '/v5/login';
-export const PASSWORD_FORGOT_PATH = '/v5/password-forgot';
-export const SIGN_UP_PATH = '/v5/signup';
-export const SIGN_UP_SSO_PATH = '/v5/signup-sso';
-export const PASSWORD_CHANGE_PATH = '/v5/password-change';
-export const REGISTER_VERIFY_PATH = '/v5/register-verify';
+export const AUTH_PATH = '/v5/auth';
 export const VIEWER_ROUTE = '/v5/viewer/:teamspace/:project/:containerOrFederation/:revision?';
 export const DASHBOARD_ROUTE = '/v5/dashboard';
 export const TEAMSPACE_ROUTE_BASE = `${DASHBOARD_ROUTE}/:teamspace`;
@@ -60,7 +55,6 @@ export interface DashboardParams extends TeamspaceParams {
 }
 
 export interface DashboardTicketsParams extends DashboardParams {
-	groupBy?: string;
 	template?: string;
 	ticketId?: string;
 }

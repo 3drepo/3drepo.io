@@ -18,7 +18,7 @@
 const {
 	determineTestGroup,
 	resetFileshare,
-	db: { reset: resetDB, createTeamspace, createTeamspaceRole, createUser },
+	db: { reset: resetDB, createTeamspace, createUser },
 	generateRandomString,
 	generateUserCredentials,
 } = require('../../helper/services');
@@ -29,7 +29,7 @@ const RemoveTeamspace = require(`${utilScripts}/teamspaces/removeTeamspaceAndOwn
 
 const { getMembersInfo, getRiskCategories } = require(`${src}/models/teamspaceSettings`);
 const { getUserByUsername } = require(`${src}/models/users`);
-const { grantTeamspaceRoleToUser } = require(`${src}/models/roles`);
+const { addTeamspaceMember } = require(`${src}/processors/teamspaces`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { disconnect } = require(`${src}/handler/db`);
 
@@ -57,7 +57,6 @@ const setupTeamspaces = async ({ normal, partial }) => {
 		[...normal, ...partial].map(async ({ name, hasTS, hasUsers }) => {
 			if (hasTS) {
 				await createTeamspace(name);
-				await grantTeamspaceRoleToUser(name, name);
 
 				if (hasUsers) {
 					await Promise.all(times(2, async () => {
@@ -65,10 +64,9 @@ const setupTeamspaces = async ({ normal, partial }) => {
 					}));
 				}
 			} else {
-				await createTeamspaceRole(name);
-				await createUser({ ...generateUserCredentials(), user: name }, [name]);
+				await createUser({ ...generateUserCredentials(), user: name });
 			}
-			await grantTeamspaceRoleToUser(randomTS, name);
+			await addTeamspaceMember(randomTS, name);
 		}),
 	);
 };

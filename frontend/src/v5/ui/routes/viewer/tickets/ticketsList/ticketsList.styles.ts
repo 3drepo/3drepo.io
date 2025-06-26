@@ -14,46 +14,40 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
-import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
+import { Loader as UnstyledLoader } from '@/v4/routes/components/loader/loader.component';
 import { TicketItemContainer } from './ticketItem/ticketItem.styles';
 
-export const List = styled.div`
-	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
-	border-radius: 8px;
-	overflow: hidden;
-	display: inline-block;
-	width: 100%;
-	margin-bottom: 0;
-	${/* sc-selector */ TicketItemContainer}:not(:last-child) {
-		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
+export const Loader = styled(UnstyledLoader)`
+	height: 100%;
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	width: calc(100% - 15px);
+	border-radius: 10px;
+	border: 0;
+`;
+
+export const ListContainer = styled.div`
+	flex-grow: 1;
+	margin-right: -15px;
+	& > div {
+		overflow-x: hidden;
 	}
 `;
 
-export const Filters = styled.div`
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-top: 10px;
-	margin-bottom: 13px;
-`;
-
-export const CompletedFilterChip = styled(FilterChip).attrs(({ selected, theme }: any) => ({
-	color: theme.palette.success.main,
-	variant: selected ? 'filled' : 'outlined',
-}))<{ selected: boolean }>`
-	.MuiChip-root, .MuiChip-root:hover {
-		color: ${({ theme }) => theme.palette.success.main};
-		border: 1px solid ${({ theme }) => theme.palette.success.main};
-		${({ selected, theme: { palette } }) => selected && css`
-			color: ${palette.primary.contrast};
-			background-color: ${palette.success.main};
-		`}
+export const List = styled.table`
+	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	border-radius: 8px;
+	overflow: hidden;
+	width: 350px;
+	margin-bottom: 0;
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	box-sizing: border-box;
+	tr:not(:last-child) ${/* sc-selector */ TicketItemContainer}{
+		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
 `;
 

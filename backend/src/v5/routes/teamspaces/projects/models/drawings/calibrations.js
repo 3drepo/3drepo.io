@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
+const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions');
 const Calibrations = require('../../../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { Router } = require('express');
 const { formatCalibration } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/drawings/calibrations');

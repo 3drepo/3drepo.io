@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch, useSelector, useStore } from 'react-redux';
 import { TreeActions } from '@/v4/modules/tree';
 import { convertToV4GroupNodes, toGroupPropertiesDicts } from '@/v5/helpers/viewpoint.helpers';
-import { cloneDeep, isString, isUndefined, uniqBy, xor } from 'lodash';
+import { cloneDeep, isEmpty, isString, isUndefined, uniqBy, xor } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { selectLeftPanels } from '@/v4/modules/viewerGui';
 import { selectHiddenGeometryVisible } from '@/v4/modules/tree/tree.selectors';
@@ -206,12 +206,22 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		};
 	}, []);
 
+	const addKeyToGroupsWithoutIdentifier = (groups) => {
+		const group = groups[0];
+		if (!group || groupHasId(group) || groupHasKey(group)) return groups;
+		return groups.map((groupOverride) => ({ ...groupOverride, key: count++ }));
+	};
+
 	useEffect(() => {
-		const groups = (state.colored || []).concat(state.hidden || []);
-		const [group] = groups;
-		if (!group || groupHasId(group) || groupHasKey(group)) return;
-		groups.forEach((groupOverride) => groupOverride.key = count++);
-		onChange({ ...value, state });
+		const stateWithGroupsWithKeys = { ...state };
+		if (state.colored) {
+			stateWithGroupsWithKeys.colored = addKeyToGroupsWithoutIdentifier(state.colored);
+		}
+		if (state.hidden) {
+			stateWithGroupsWithKeys.hidden = addKeyToGroupsWithoutIdentifier(state.hidden);
+		}
+		if (isEmpty(stateWithGroupsWithKeys)) return;
+		onChange({ ...value, state: stateWithGroupsWithKeys });
 	}, []);
 
 	if (isLoading) return (<Loader />);

@@ -25,5 +25,6 @@ config.coveragePathIgnorePatterns = [
 
 config.testMatch = ['**/tests/**/e2e/**/*.test.[jt]s?(x)'];
 config.testSequencer = './jest.sequencer.e2e.js'
+config.setupFiles = ["./tests/v5/e2e/setup.js"];
 
 module.exports = config;

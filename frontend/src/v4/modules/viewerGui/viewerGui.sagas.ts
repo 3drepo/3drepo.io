@@ -23,6 +23,7 @@ import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { dispatch } from '@/v5/helpers/redux.helpers';
+import { UsersActions } from '@/v5/store/users/users.redux';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_EVENTS, VIEWER_CLIP_MODES } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -84,7 +85,8 @@ function* fetchData({ teamspace, model }) {
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
-			put(CommentsActions.fetchUsers(teamspace))
+			put(CommentsActions.fetchUsers(teamspace)),
+			put(UsersActions.fetchUsers(teamspace)),
 		]);
 
 		yield all([
@@ -95,6 +97,7 @@ function* fetchData({ teamspace, model }) {
 		const revision = yield select(selectCurrentRevisionId);
 		yield all([
 			put(ViewerGuiActions.loadModel()),
+			put(TicketsActions.resetSorting()),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
