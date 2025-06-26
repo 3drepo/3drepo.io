@@ -22,15 +22,44 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
+const useSubscribableSearchParam = (name) => {
+	const emitterRef = useRef(new EventEmitter());
+
+	const set = (value, pushInHistory = true) => {
+		const searchParams = new URLSearchParams(window.location.search);
+		if (value) {
+			searchParams.set(name, value);
+		} else {
+			searchParams.delete(name);
+		}
+	
+		if (pushInHistory) {
+			window.history.pushState({}, '', `${location.pathname}?${searchParams.toString()}`);
+		} else {
+			window.history.replaceState({}, '', `${location.pathname}?${searchParams.toString()}`);
+		}
+		emitterRef.current.emit(name, searchParams.get(name) || '');
+	};
+
+	const get = () => new URLSearchParams(window.location.search).get(name) || '';
+
+	const subscribe = (fn) => {
+		emitterRef.current.on(name, fn);
+		return () => emitterRef.current.off(name, fn);
+	};
+
+	return [get, set, subscribe] as const;
+};
+
 export interface TicketsTableType {
 	getPropertyType: (name: string) => string;
 	isJobAndUsersType: (name: string) => boolean;
 	onSelectedTicketChange: (fn: (ticketId: string) => void) => () => void;
 	setSelectedTicket: (ticketId: string) => void;
-	selectedTicket: { current: string };
+	getSelectedTicket: () => string;
 	onSelectedModelChange: (fn: (modelId: string) => void) => () => void;
 	setSelectedModel: (modelId: string) => void;
-	selectedModel: { current: string };
+	getSelectedModel: () => string;
 }
 
 const defaultValue: TicketsTableType = {
@@ -38,10 +67,10 @@ const defaultValue: TicketsTableType = {
 	isJobAndUsersType: () => false,
 	onSelectedTicketChange: () => () => {},
 	setSelectedTicket: () => {},
-	selectedTicket: { current: '' },
+	getSelectedTicket: () => '',
 	onSelectedModelChange: () => () => {},
 	setSelectedModel: () => {},
-	selectedModel: { current: '' },
+	getSelectedModel: () => '',
 };
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
@@ -50,34 +79,14 @@ interface Props { children: any; }
 export const TicketsTableContextComponent = ({ children }: Props) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const selectedTicket = useRef('');
-	const selectedModel = useRef('');
-	const emitter = useRef(new EventEmitter());
+	const [getSelectedTicket, setSelectedTicket, onSelectedTicketChange] = useSubscribableSearchParam('ticketId');
+	const [getSelectedModel, setSelectedModel, onSelectedModelChange] = useSubscribableSearchParam('containerOrFederation');
+
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
 		{},
 	);
-
-	const onSelectedTicketChange = (fn) => {
-		emitter.current.on('setSelectedTicket', () => fn(selectedTicket.current));
-		return () => emitter.current.off('setSelectedTicket', fn);
-	};
-
-	const setSelectedTicket = (ticketId: string) => {
-		selectedTicket.current = ticketId;
-		emitter.current.emit('setSelectedTicket', ticketId);
-	};
-
-	const onSelectedModelChange = (fn) => {
-		emitter.current.on('setSelectedModel', () => fn(selectedModel.current));
-		return () => emitter.current.off('setSelectedModel', fn);
-	};
-
-	const setSelectedModel = (modelId: string) => {
-		selectedModel.current = modelId;
-		emitter.current.emit('setSelectedModel', modelId);
-	};
 
 	const getPropertyType = (name: string) => definitionsAsObject[name]?.type;
 	const isJobAndUsersType = (name: string) => (
@@ -91,10 +100,10 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 			isJobAndUsersType,
 			onSelectedTicketChange,
 			setSelectedTicket,
-			selectedTicket,
+			getSelectedTicket,
 			onSelectedModelChange,
 			setSelectedModel,
-			selectedModel,
+			getSelectedModel,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>

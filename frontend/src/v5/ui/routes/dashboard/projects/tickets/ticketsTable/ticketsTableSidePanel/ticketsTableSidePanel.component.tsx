@@ -42,9 +42,10 @@ type TicketsTableSidePanelProps = {
 
 export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue }: TicketsTableSidePanelProps) => {
 	const { teamspace, project, template } = useParams<DashboardTicketsParams>();
-	const { selectedTicket, onSelectedTicketChange, selectedModel, onSelectedModelChange } = useContext(TicketsTableContext);
-	const [ticketId, setTicketId] = useState(selectedTicket.current);
-	const [modelId, setModelId] = useState(selectedModel.current);
+	// TODO improve this
+	const { getSelectedTicket, onSelectedTicketChange, getSelectedModel, onSelectedModelChange } = useContext(TicketsTableContext);
+	const [ticketId, setTicketId] = useState(getSelectedTicket());
+	const [modelId, setModelId] = useState(getSelectedModel());
 	const [groupBy] = useSearchParam('groupBy');
 	const [groupByValue] = useSearchParam('groupByValue');
 	const models = useSelectedModels();

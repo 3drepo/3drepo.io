@@ -19,7 +19,7 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
-import { ModelId, TeamspaceId, TeamspaceProjectAndModel } from '../store.types';
+import { ModelId, SuccessAndErrorCallbacks, TeamspaceId, TeamspaceProjectAndModel } from '../store.types';
 import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
 import { mergeWithArray } from '../store.helpers';
 import { DEFAULT_TICKETS_SORTING, TicketsSorting, TicketsSortingOrder, TicketsSortingProperty } from './card/ticketsCard.types';
@@ -27,7 +27,7 @@ import { DEFAULT_TICKETS_SORTING, TicketsSorting, TicketsSortingOrder, TicketsSo
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation', 'propertiesToInclude'],
 	fetchTicketProperties: ['teamspace', 'projectId', 'modelId', 'ticketId', 'templateCode', 'isFederation', 'propertiesToInclude'],
-	fetchTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'revision'],
+	fetchTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'revision', 'onSuccess', 'onError'],
 	fetchTicketsSuccess: ['modelId', 'tickets'],
 	fetchTemplates: ['teamspace', 'projectId', 'modelId', 'isFederation', 'getDetails'],
 	fetchTemplate: ['teamspace', 'projectId', 'modelId', 'templateId', 'isFederation'],
@@ -178,7 +178,7 @@ export interface ITicketsState {
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[] };
 export type FetchTicketPropertiesAction = Action<'FETCH_TICKET_PROPERTIES'> & TeamspaceProjectAndModel & { ticketId: string, templateCode: string, isFederation: boolean, propertiesToInclude?: string[] };
-export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, isFederation: boolean, revision?: string };
+export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceProjectAndModel & SuccessAndErrorCallbacks & { ticketId: string, isFederation: boolean, revision?: string };
 export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, ticket: Partial<ITicket>, isFederation: boolean, onError?: () => void };
 export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceProjectAndModel & { ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void, onError: () => void };
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & ModelId & { tickets: ITicket[] };
@@ -234,6 +234,8 @@ export interface ITicketsActionCreators {
 		ticketId: string,
 		isFederation: boolean,
 		revision?: string,
+		onSuccess?: () => void,
+		onError?: () => void,
 	) => FetchTicketAction;
 	updateTicket: (
 		teamspace: string,

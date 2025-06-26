@@ -56,18 +56,17 @@ export const TicketsTable = () => {
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, template } = params;
 	const prevTemplate = useRef(undefined);
-	const { selectedTicket: { current: ticketId }, setSelectedTicket, onSelectedTicketChange, setSelectedModel } = useContext(TicketsTableContext);
+	const { getSelectedTicket, setSelectedTicket, onSelectedTicketChange, setSelectedModel } = useContext(TicketsTableContext);
 
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
 	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
 	const [,, setGroupByValue] = useSearchParam('groupByValue');
-	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
 	const models = useSelectedModels();
 
 	const setGroupBy = (val) => {
 		// this is for clearing also the groupByValue when groupBy so we dont have an inconsistent groupByValue
-		const search =  '?' + setGroupByValue(null,  setGroupByParam(val)); 
+		const search = '?' + setGroupByValue(null, setGroupByParam(val)); 
 		history.push(location.pathname + search);
 	};
 
@@ -77,18 +76,10 @@ export const TicketsTable = () => {
 		history.push(path);
 	}, [params]);
 
-	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string) => {
-		const id = (modelId && !ticket_id ) ? NEW_TICKET_ID : ticket_id;
+	const setTicketValue = useCallback((modelId?: string, ticket_id?: string) => {
+		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
 		setSelectedTicket(id);
 		setSelectedModel(modelId);
-		const search = '?' + setGroupByValue(groupByVal, setContainerOrFederation(modelId));
-		const path = generatePath(TICKETS_ROUTE +  search, params);
-
-		// if (replace) {
-		// 	history.replace(path);
-		// } else {
-		// 	history.push(path);
-		// }
 	}, [params]);
 
 	useEffect(() => {
@@ -109,7 +100,7 @@ export const TicketsTable = () => {
 	
 	const newTicketButtonIsDisabled = useMemo(() => 
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
-	[models, containerOrFederation]);
+	[models, !!containersAndFederations.length]);
 
 	const filterTickets = useCallback((items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
@@ -160,7 +151,7 @@ export const TicketsTable = () => {
 	}, []);
 
 	useEffect(() => {
-		if (prevTemplate.current && ticketId) clearTicketId();
+		if (prevTemplate.current && getSelectedTicket()) clearTicketId();
 		prevTemplate.current = template;
 		if (templateAlreadyFetched(selectedTemplate)) return;
 		ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);

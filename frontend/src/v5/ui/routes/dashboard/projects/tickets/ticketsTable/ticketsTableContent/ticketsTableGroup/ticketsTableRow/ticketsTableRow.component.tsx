@@ -34,8 +34,8 @@ type TicketsTableRowProps = {
 
 export const TicketsTableRow = memo(({ ticket, onClick, modelId }: TicketsTableRowProps) => {
 	const { _id: id, properties, type } = ticket;
-	const { selectedTicket, onSelectedTicketChange } = useContext(TicketsTableContext);
-	const [selected, setSelected] = useState(selectedTicket.current === id);
+	const { getSelectedTicket, onSelectedTicketChange } = useContext(TicketsTableContext);
+	const [selected, setSelected] = useState(getSelectedTicket() === id);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames']);
 

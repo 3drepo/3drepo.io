@@ -150,7 +150,7 @@ export function* fetchTicketsProperties({
 	}
 }
 
-export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFederation, revision }: FetchTicketAction) {
+export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFederation, revision, onSuccess, onError }: FetchTicketAction) {
 	try {
 		const fetchModelTicket = isFederation
 			? API.Tickets.fetchFederationTicket
@@ -158,7 +158,9 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 		const ticket = yield fetchModelTicket(teamspace, projectId, modelId, ticketId);
 		yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticketId, revision));
+		onSuccess?.();
 	} catch (error) {
+		onError?.();
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model}' },
