@@ -36,11 +36,11 @@ import { useParams } from 'react-router-dom';
 type TicketSlideProps = {
 	ticketId: string,
 	template: ITemplate,
+	containerOrFederation: string,
 };
-export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
+export const TicketSlide = ({ template, ticketId, containerOrFederation }: TicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	
-	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const templateValidationSchema = getValidators(template);

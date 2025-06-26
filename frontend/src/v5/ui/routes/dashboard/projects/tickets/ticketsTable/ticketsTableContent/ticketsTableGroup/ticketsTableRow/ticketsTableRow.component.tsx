@@ -17,23 +17,25 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { memo } from 'react';
+import { memo, useContext, useEffect, useState } from 'react';
 import { Row } from './ticketsTableRow.styles';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isEqual } from 'lodash';
 import { TicketsTableCell } from './ticketsTableCell/ticketsTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
 	modelId: string,
-	selected: boolean,
 	onClick: (modelId, ticketId) => void,
 };
 
-export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: TicketsTableRowProps) => {
+export const TicketsTableRow = memo(({ ticket, onClick, modelId }: TicketsTableRowProps) => {
 	const { _id: id, properties, type } = ticket;
+	const { selectedTicket, onSelectedTicketChange } = useContext(TicketsTableContext);
+	const [selected, setSelected] = useState(selectedTicket.current === id);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
 	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames']);
 
@@ -43,6 +45,10 @@ export const TicketsTableRow = memo(({ ticket, onClick, modelId, selected }: Tic
 		e.preventDefault();
 		onClick(modelId, ticket._id);
 	};
+
+	useEffect(() => {
+		return onSelectedTicketChange((newSelectedTicket) => setSelected(newSelectedTicket === id));
+	}, [setSelected, id, onSelectedTicketChange]);
 
 	return (
 		<TicketContextComponent containerOrFederation={modelId}>

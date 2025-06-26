@@ -29,9 +29,8 @@ import { Container, Title } from './ticketsTableResizableContent.styles';
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	groupBy: string
-	selectedTicketId?: string;
 };
-export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selectedTicketId }: TicketsTableResizableContentProps) => {
+export const TicketsTableResizableContent = ({ setTicketValue, groupBy }: TicketsTableResizableContentProps) => {
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
@@ -44,7 +43,6 @@ export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selected
 				tickets={filteredItems}
 				onNewTicket={onGroupNewTicket('')}
 				onEditTicket={setTicketValue}
-				selectedTicketId={selectedTicketId}
 			/>
 		);
 	}
@@ -68,7 +66,6 @@ export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selected
 						tickets={tickets}
 						onNewTicket={onGroupNewTicket(groupName)}
 						onEditTicket={setTicketValue}
-						selectedTicketId={selectedTicketId}
 					/>
 				</DashboardListCollapse>
 			))}

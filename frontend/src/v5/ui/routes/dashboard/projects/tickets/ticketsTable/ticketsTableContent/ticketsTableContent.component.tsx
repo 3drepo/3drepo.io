@@ -16,7 +16,7 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext, useEffect, useRef } from 'react';
+import { memo, useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -32,8 +32,8 @@ import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
-import { TicketsTableContextComponent } from '../ticketsTableContext/ticketsTableContext';
 import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { isEqual } from 'lodash';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
@@ -89,7 +89,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	return <TicketsTableResizableContent {...props} />;
 };
 
-export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
+export const TicketsTableContent = memo((props: TicketsTableResizableContentProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const tableRef = useRef(null);
@@ -97,12 +97,10 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 	const columns = templatHasBeenFetched ? getAvailableColumnsForTemplate(template) : [];
 
 	return (
-		<TicketsTableContextComponent template={template}>
-			<ResizableTableContextComponent columns={columns} columnGap={1} key={template._id}>
-				<Container ref={tableRef}>
-					<TableContent {...props} tableRef={tableRef} template={template} />
-				</Container>
-			</ResizableTableContextComponent>
-		</TicketsTableContextComponent>
+		<ResizableTableContextComponent columns={columns} columnGap={1} key={templateId}>
+			<Container ref={tableRef}>
+				<TableContent {...props} tableRef={tableRef} template={template} />
+			</Container>
+		</ResizableTableContextComponent>
 	);
-};
+}, isEqual);

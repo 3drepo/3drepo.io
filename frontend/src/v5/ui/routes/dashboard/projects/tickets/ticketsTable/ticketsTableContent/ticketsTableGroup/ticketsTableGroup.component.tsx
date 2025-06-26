@@ -36,12 +36,11 @@ import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors
 
 
 type TicketsTableGroupProps = {
-	selectedTicketId?: string;
 	tickets: ITicket[];
 	onEditTicket: SetTicketValue;
 	onNewTicket: (modelId: string) => void;
 };
-export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket }: TicketsTableGroupProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const models = useSelectedModels();
@@ -92,7 +91,6 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 											ticket={ticket}
 											modelId={ticket.modelId}
 											onClick={onEditTicket}
-											selected={selectedTicketId === ticket._id}
 										/>
 									)}
 								/>

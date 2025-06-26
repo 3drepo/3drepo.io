@@ -40,7 +40,7 @@ const getOptionsForGroupsWithDueDate = () => [
 	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
 ];
 
-export type SetTicketValue =  (modelId: string, ticketId?: string, groupValue?: string) => void;
+export type SetTicketValue =  (modelId?: string, ticketId?: string, groupValue?: string) => void;
 
 export const NEW_TICKET_ID = 'new';
 
