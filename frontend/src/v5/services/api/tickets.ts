@@ -98,7 +98,7 @@ const getTicketsSearchParams = (params: TicketsQueryParams) => {
 	}
 	// filters are a set of rules that can be passed to the backend
 	// to filter out tickets based on their: template, ticketCode,
-	// and properties. 
+	// and properties.
 	if (filters) {
 		searchParams.push(`query=${filters}`);
 	}

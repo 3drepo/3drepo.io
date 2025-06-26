@@ -26,6 +26,7 @@ const CreateTicketCommentsRoutes = require('./teamspaces/projects/models/common/
 const CreateTicketGroupsRoutes = require('./teamspaces/projects/models/common/tickets.groups');
 const CreateTicketRoutes = require('./teamspaces/projects/models/common/tickets');
 const CreateViewRoutes = require('./teamspaces/projects/models/common/views');
+const FederationFilesRoutes = require('./teamspaces/projects/models/federations/files');
 const FederationRevisionRoutes = require('./teamspaces/projects/models/federations/revisions');
 const MetadataRoutes = require('./teamspaces/projects/models/containers/metadata');
 const ProjectRoutes = require('./teamspaces/projects/projects');
@@ -68,6 +69,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/groups', CreateGroupRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/views', CreateViewRoutes(true));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/revisions', FederationRevisionRoutes);
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/files', FederationFilesRoutes);
 
 	// Drawings
 	app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));
