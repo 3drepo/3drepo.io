@@ -217,11 +217,14 @@ const testNotUserProvisioned = () => {
 
 		test('should respond with notAuthorized if userProvisioned is set to true', async () => {
 			TeamspaceSettings.getAddOns.mockResolvedValueOnce({ [USERS_PROVISIONED]: true });
-			await TSMiddlewares.notUserProvisioned({ params: { teamspace } }, {}, mockCB);
+			const req = { params: { teamspace } };
+			const res = {};
+			await TSMiddlewares.notUserProvisioned(req, res, mockCB);
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.notAuthorized.code);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.userProvisioned);
+
 			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
 		});

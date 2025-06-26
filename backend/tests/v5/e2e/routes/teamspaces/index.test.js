@@ -312,7 +312,7 @@ const testRemoveTeamspaceMember = () => {
 
 		describe.each([
 			['the user does not have a valid session', route(), false, templates.notLoggedIn],
-			['the teamspace has userProvisioned true', route(testUser.apiKey, userProvisionedTeamspace), false, templates.notAuthorized],
+			['the teamspace has userProvisioned true', route(testUser.apiKey, userProvisionedTeamspace), false, templates.userProvisioned],
 			['the teamspace does not exist', route(userNoAccess.apiKey, ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
 			['the user does not have access to the teamspace', route(userNoAccess.apiKey), false, templates.teamspaceNotFound],
 			['the user does not have admin permissions to the teamspace', route(userNotAdmin.apiKey), false, templates.notAuthorized],

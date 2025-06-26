@@ -83,8 +83,7 @@ TeamspacePerms.notUserProvisioned = async (req, res, next) => {
 
 	const addOns = await getAddOns(teamspace);
 	if (addOns?.[USERS_PROVISIONED]) {
-		respond(req, res, createResponseCode(templates.notAuthorized,
-			'The teamspace users and roles are managed externally.'));
+		respond(req, res, templates.userProvisioned);
 		return;
 	}
 
