@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
@@ -26,7 +25,9 @@ import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
+import { CentredContainer } from '@controls/centredContainer';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { CircularProgress } from '@mui/material';
 import { isEmpty, set } from 'lodash';
 import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -113,7 +114,11 @@ export const TicketSlide = ({ template, ticketId, containerOrFederation }: Ticke
 		return () => { onBlurHandler(); };
 	}, []);
 
-	if (!templateAlreadyFetched(template) || !ticketFetched || !containerOrFederation) return (<Loader />);
+	if (!templateAlreadyFetched(template) || !ticketFetched || !containerOrFederation) return (
+		<CentredContainer>
+			<CircularProgress disableShrink size={30} />
+		</CentredContainer>
+	);
 
 	return (
 		<FormProvider {...formData}>
