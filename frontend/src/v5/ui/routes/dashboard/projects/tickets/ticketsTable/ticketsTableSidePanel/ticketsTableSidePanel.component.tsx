@@ -35,6 +35,16 @@ import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers'
 import { TicketsTableContext } from '../ticketsTableContext/ticketsTableContext';
 import { isEqual } from 'lodash';
 
+const useSubscribableSearchParamState = (getValue, onChange) => {
+	const [value, setValue] = useState(getValue());
+
+	useEffect(() => {
+		return onChange(setValue);
+	}, [getValue, onChange]);
+
+	return value;
+};
+
 type TicketsTableSidePanelProps = {
 	setIsNewTicketDirty: (isDirty: boolean) => void;
 	setTicketValue: SetTicketValue;
@@ -42,10 +52,9 @@ type TicketsTableSidePanelProps = {
 
 export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue }: TicketsTableSidePanelProps) => {
 	const { teamspace, project, template } = useParams<DashboardTicketsParams>();
-	// TODO improve this
 	const { getSelectedTicket, onSelectedTicketChange, getSelectedModel, onSelectedModelChange } = useContext(TicketsTableContext);
-	const [ticketId, setTicketId] = useState(getSelectedTicket());
-	const [modelId, setModelId] = useState(getSelectedModel());
+	const ticketId = useSubscribableSearchParamState(getSelectedTicket, onSelectedTicketChange);
+	const modelId = useSubscribableSearchParamState(getSelectedModel, onSelectedModelChange);
 	const [groupBy] = useSearchParam('groupBy');
 	const [groupByValue] = useSearchParam('groupByValue');
 	const models = useSelectedModels();
@@ -75,14 +84,6 @@ export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 	}, [readOnly]);
-
-	useEffect(() => {
-		return onSelectedTicketChange(setTicketId);
-	}, [setTicketId, onSelectedTicketChange]);
-
-	useEffect(() => {
-		return onSelectedModelChange(setModelId);
-	}, [setModelId, onSelectedModelChange]);
 
 	return (
 		<SidePanel open={!!ticketId && !!models.length && !!modelId}>
