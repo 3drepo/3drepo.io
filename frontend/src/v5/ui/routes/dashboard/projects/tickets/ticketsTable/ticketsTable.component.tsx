@@ -56,7 +56,7 @@ export const TicketsTable = () => {
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, template } = params;
 	const prevTemplate = useRef(undefined);
-	const { getSelectedTicket, setSelectedTicket, onSelectedTicketChange, setSelectedModel } = useContext(TicketsTableContext);
+	const { getSelectedTicket, onSelectedTicketChange, setModelAndTicketId } = useContext(TicketsTableContext);
 
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
@@ -78,9 +78,8 @@ export const TicketsTable = () => {
 
 	const setTicketValue = useCallback((modelId?: string, ticket_id?: string) => {
 		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
-		setSelectedTicket(id);
-		setSelectedModel(modelId);
-	}, [params]);
+		setModelAndTicketId(modelId, id);
+	}, [setModelAndTicketId]);
 
 	useEffect(() => {
 		return onSelectedTicketChange(TicketsCardActionsDispatchers.setSelectedTicket);

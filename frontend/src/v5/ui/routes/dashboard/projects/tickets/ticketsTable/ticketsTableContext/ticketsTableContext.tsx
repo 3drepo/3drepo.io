@@ -22,14 +22,12 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
-const useSubscribableSearchParam = (name) => {
+const useSubscribableSearchParam = () => {
 	const emitterRef = useRef(new EventEmitter());
 
-	const getValue = () => new URLSearchParams(window.location.search).get(name) ?? '';
+	const getValue = (name) => new URLSearchParams(window.location.search).get(name) || '';
 
-	const setValue = (val, pushInHistory = false) => {
-		const value = val ?? '';
-		const searchParams = new URLSearchParams(window.location.search);
+	const setValue = (name, value, searchParams) => {
 
 		if (value) {
 			searchParams.set(name, value);
@@ -37,15 +35,10 @@ const useSubscribableSearchParam = (name) => {
 			searchParams.delete(name);
 		}
 	
-		if (pushInHistory) {
-			window.history.pushState({}, '', `${location.pathname}?${searchParams.toString()}`);
-		} else {
-			window.history.replaceState({}, '', `${location.pathname}?${searchParams.toString()}`);
-		}
-		emitterRef.current.emit(name, value);
+		emitterRef.current.emit(name, value || '');
 	};
 
-	const subscribeToValueChange = (fn) => {
+	const subscribeToValueChange = (name, fn) => {
 		emitterRef.current.on(name, fn);
 		return () => emitterRef.current.off(name, fn);
 	};
@@ -56,23 +49,21 @@ const useSubscribableSearchParam = (name) => {
 export interface TicketsTableType {
 	getPropertyType: (name: string) => string;
 	isJobAndUsersType: (name: string) => boolean;
-	onSelectedTicketChange: (fn: (ticketId: string) => void) => () => void;
-	setSelectedTicket: (ticketId: string) => void;
 	getSelectedTicket: () => string;
-	onSelectedModelChange: (fn: (modelId: string) => void) => () => void;
-	setSelectedModel: (modelId: string) => void;
 	getSelectedModel: () => string;
+	onSelectedTicketChange: (fn: (ticketId: string) => void) => () => void;
+	onSelectedModelChange: (fn: (modelId: string) => void) => () => void;
+	setModelAndTicketId: (modelId: string, ticketId: string) => void;
 }
 
 const defaultValue: TicketsTableType = {
 	getPropertyType: () => null,
 	isJobAndUsersType: () => false,
-	onSelectedTicketChange: () => () => {},
-	setSelectedTicket: () => {},
 	getSelectedTicket: () => '',
-	onSelectedModelChange: () => () => {},
-	setSelectedModel: () => {},
 	getSelectedModel: () => '',
+	onSelectedTicketChange: () => () => {},
+	onSelectedModelChange: () => () => {},
+	setModelAndTicketId: () => {},
 };
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
@@ -81,8 +72,14 @@ interface Props { children: any; }
 export const TicketsTableContextComponent = ({ children }: Props) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const [getSelectedTicket, setSelectedTicket, onSelectedTicketChange] = useSubscribableSearchParam('ticketId');
-	const [getSelectedModel, setSelectedModel, onSelectedModelChange] = useSubscribableSearchParam('containerOrFederation');
+	const [getSearchParam, setSearchParam, subscribeToSearchParam] = useSubscribableSearchParam();
+
+	const setModelAndTicketId = (modelId: string, ticketId: string) => {
+		const searchParams = new URLSearchParams(window.location.search);
+		setSearchParam('containerOrFederation', modelId, searchParams);
+		setSearchParam('ticketId', ticketId, searchParams);
+		window.history.pushState({}, '', `${location.pathname}?${searchParams}`);
+	};
 
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
@@ -100,12 +97,11 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		<TicketsTableContext.Provider value={{
 			getPropertyType,
 			isJobAndUsersType,
-			onSelectedTicketChange,
-			setSelectedTicket,
-			getSelectedTicket,
-			onSelectedModelChange,
-			setSelectedModel,
-			getSelectedModel,
+			getSelectedTicket: () => getSearchParam('ticketId'),
+			getSelectedModel: () => getSearchParam('containerOrFederation'),
+			onSelectedTicketChange: (fn) => subscribeToSearchParam('ticketId', fn),
+			onSelectedModelChange: (fn) => subscribeToSearchParam('containerOrFederation', fn),
+			setModelAndTicketId,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>
