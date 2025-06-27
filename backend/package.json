@@ -4,6 +4,11 @@
   "engines": {
     "node": "22.x.x"
   },
+  "apidoc": {
+    "title": "3D Repo V4 Backend documentation",
+    "name": "3D Repo V4 backend documentation",
+    "description": "Backend documentation for v4 APIs. To view v5 API endpoints, please visition https://www.3drepo.io/docs"
+  },
   "private": true,
   "scripts": {
     "gen-docs": "yarn apidoc -i src/v4/routes/ -o docs/ ",
@@ -29,7 +34,7 @@
     "@elastic/elasticsearch": "7.17.14",
     "@frontegg/client": "5.3.2",
     "amqplib": "0.10.5",
-    "apidoc": "0.29.0",
+    "apidoc": "1.2.0",
     "app-config": "1.0.1",
     "archiver": "6.0.2",
     "archiver-zip-encrypted": "2.0.0",
