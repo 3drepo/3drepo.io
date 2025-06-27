@@ -748,8 +748,8 @@ function importGroups(req, res, next) {
 
 function listGroups(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, rid } = req.params;
-	const branch = rid ? null : "master";
+	const { account, model, revId } = req.params;
+	const branch = revId ? null : "master";
 
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
@@ -763,7 +763,7 @@ function listGroups(req, res, next) {
 		}
 	}
 
-	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids).then(groups => {
+	Group.getList(account, model, branch, revId, ids, req.query, showIfcGuids).then(groups => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
@@ -773,11 +773,11 @@ function listGroups(req, res, next) {
 
 function findGroup(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, rid, uid } = req.params;
-	const branch = rid ? null : "master";
+	const { account, model, revId, groupId } = req.params;
+	const branch = revId ? null : "master";
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
-	Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(group => {
+	Group.findByUID(account, model, branch, revId, groupId, showIfcGuids, false).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
@@ -789,10 +789,10 @@ function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-	const rid = req.params.rid ? req.params.rid : null;
-	const branch = rid ? null : "master";
+	const revId = req.params.revId ? req.params.revId : null;
+	const branch = revId ? null : "master";
 
-	Group.create(account, model, branch, rid, sessionId, req.session.user.username, req.body).then(group => {
+	Group.create(account, model, branch, revId, sessionId, req.session.user.username, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -819,13 +819,13 @@ function deleteGroups(req, res, next) {
 
 function updateGroup(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, uid } = req.params;
+	const { account, model, groupId } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	const rid = req.params.rid ? req.params.rid : null;
-	const branch = rid ? null : "master";
+	const revId = req.params.revId ? req.params.revId : null;
+	const branch = revId ? null : "master";
 
-	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(group => {
+	Group.update(account, model, branch, revId, sessionId, req.session.user.username, groupId, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
