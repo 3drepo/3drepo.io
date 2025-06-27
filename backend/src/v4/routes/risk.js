@@ -224,7 +224,6 @@ router.get("/risks/:riskId/thumbnail.png", risksMiddleware.canView, getThumbnail
  * @apiQuery {Number[]} [consequences] Array of consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
  * @apiQuery {Number[]} [residualLikelihoods] Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
  * @apiQuery {Number[]} [levelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
- * @apiQuery {Number[]} [residualLikelihoods] Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
  * @apiQuery {Number[]} [residualConsequences] Array of residual consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
  * @apiQuery {Number[]} [residualLevelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
  *
