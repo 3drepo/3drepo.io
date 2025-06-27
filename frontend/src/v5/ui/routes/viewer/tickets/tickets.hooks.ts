@@ -23,11 +23,10 @@ import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/servi
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { ITemplate, StatusValue } from '@/v5/store/tickets/tickets.types';
 import { CardFilter } from '../../../components/viewer/cards/cardFilters/cardFilters.types';
-import { TicketStatusDefaultValues, TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
+import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { uniq } from 'lodash';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
@@ -47,16 +46,10 @@ const getNonCompletedTicketFiltersByStatus = (templates: ITemplate[]): CardFilte
 		[TicketStatusTypes.DONE, TicketStatusTypes.VOID].includes(type);
 	const getValuesByTemplate = ({ _id }) => selectStatusConfigByTemplateId(getState(), _id).values;
 
-	const completedValueNames = templates
+	const values = templates
 		.flatMap(getValuesByTemplate)
 		.filter(isCompletedValue)
 		.map((v) => v.name);
-
-	const values = uniq([
-		TicketStatusDefaultValues.CLOSED,
-		TicketStatusDefaultValues.VOID,
-		...completedValueNames,
-	]);
 
 	return {
 		module: '',
