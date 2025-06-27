@@ -17,7 +17,7 @@
 import { useContext } from 'react';
 import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
 import { Header, Headers } from './ticketsTableHeaders.styles';
-import { getColumnLabel } from '../../../ticketsTable.helper';
+import { getPropertyLabel } from '../../../ticketsTable.helper';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
@@ -53,7 +53,7 @@ export const TicketsTableHeaders = () => {
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
 				<TableHeader key={name} name={name} disableSorting={name === 'id'}>
-					{getColumnLabel(name)}
+					{getPropertyLabel(name)}
 				</TableHeader>
 			))}
 			<ColumnsVisibilitySettings />
