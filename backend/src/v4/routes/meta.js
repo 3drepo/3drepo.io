@@ -48,14 +48,14 @@
 	router.get("/revision/:rev/meta/4DTaskSequence.json", middlewares.hasReadAccessToModel, getAllIdsWith4DSequenceTag);
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/master/head/meta/all.json?filter=:filter Get all metadata
+	 * @api {get} /:teamspace/:model/revision/master/head/meta/all.json Get all metadata
 	 * @apiName getAllMetadata
 	 * @apiGroup Meta
 	 * @apiDescription Get all objects in the tree with their metadata.
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
-	 * @apiParam {String} filter (optional) properties to filter for, comma separated
+	 * @apiParam (Query) {String} [filter] properties to filter for, comma separated
 	 *
 	 * @apiExample {get} Example usage:
 	 * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/all.json HTTP/1.1
@@ -117,7 +117,7 @@
 	router.get("/revision/master/head/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/:rev/meta/all.json?filter=:filter Get all metadata by revision
+	 * @api {get} /:teamspace/:model/revision/:rev/meta/all.json Get all metadata by revision
 	 * @apiName getAllMetadataByRev
 	 * @apiGroup Meta
 	 * @apiDescription Get all tree objects with their metadata tags by revision.
@@ -126,12 +126,12 @@
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
 	 * @apiParam {String} rev Revision to get metadata from
-	 * @apiParam {String} filter (optional) properties to filter for, comma separated
+	 * @apiParam (Query) {String} [filter] properties to filter for, comma separated
 	 */
 	router.get("/revision/:rev/meta/all.json", middlewares.hasReadAccessToModel, getAllMetadata);
 
 	/**
-	 * @api {post} /:teamspace/:model/revision(/master/head/|/:revId)/meta/rules?filter=:filter Filter metadata by rules
+	 * @api {post} /:teamspace/:model/revision/master/head/meta/rules Filter metadata by rules
 	 * @apiName queryMetadataByRules
 	 * @apiGroup Meta
 	 * @apiDescription Get all objects matching filter rules in the tree with their metadata.
@@ -139,7 +139,7 @@
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
 	 * @apiParam (Query) {Boolean} [meshids] Flag that returns Mesh IDs for matching rule queries
-	 * @apiParam {String} filter (optional) properties to filter for, comma separated
+	 * @apiParam (Query) {String} [filter] properties to filter for, comma separated
 	 *
 	 * @apiExample {post} Example usage (/master/head)
 	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/rules HTTP/1.1
@@ -158,9 +158,6 @@
 	 * 		]
 	 * 	}
 	 * ]
-	 *
-	 * @apiExample {post} Example usage (/:revId)
-	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/00000000-0000-0000-0000-000000000001/meta/rules HTTP/1.1
 	 *
 	 * @apiExample {post} Example usage (mesh IDs)
 	 * POST /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/rules?meshids=true HTTP/1.1
@@ -319,6 +316,171 @@
 	 * ]
 	 */
 	router.post("/revision/master/head/meta/rules", middlewares.hasReadAccessToModel, queryMetadataByRules);
+	/**
+	 * @api {post} /:teamspace/:model/revision/:rev/meta/rules Filter metadata by rules
+	 * @apiName queryMetadataByRules
+	 * @apiGroup Meta
+	 * @apiDescription Get all objects matching filter rules in the tree with their metadata.
+	 *
+	 * @apiParam {String} teamspace Name of teamspace
+	 * @apiParam {String} model Model ID
+	 * @apiParam {String} rev Revision ID
+	 * @apiParam (Query) {Boolean} [meshids] Flag that returns Mesh IDs for matching rule queries
+	 * @apiParam (Query) {String} [filter] properties to filter for, comma separated
+	 *
+	 * @apiSuccessExample {json} Success (metadata):
+	 * {
+	 *    "data": [
+	 *       {
+	 *          "_id": "2f461edf-4544-412a-bb84-ffdb3bbe563b",
+	 *          "metadata": {
+	 *             "IFC Type": "IfcBuilding",
+	 *             "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A",
+	 *             "BuildingID": "n/a",
+	 *             "IsPermanentID": "True",
+	 *             "OccupancyType": "Private dwelling",
+	 *             "IsLandmarked": "True",
+	 *             "Area": 9000,
+	 *             "NumberOfStoreys": 2
+	 *          },
+	 *          "parents": [
+	 *             "9eeddbe2-750d-46fb-988f-bcf9ec2ecf51"
+	 *          ]
+	 *       },
+	 *       {
+	 *          "_id": "85ad29bd-cd99-4472-a92f-86266b07e57d",
+	 *          "metadata": {
+	 *             "IFC Type": "IfcWall",
+	 *             "IFC GUID": "20FpTZCqJy2vhVJYtjuIce"
+	 *          },
+	 *          "parents": [
+	 *             "48359ad0-9b6d-44ed-ae93-47e2ec69ea88"
+	 *          ]
+	 *       },
+	 *       {
+	 *          "_id": "b5fe5dcf-ce8c-4b1e-a96b-bdc5aa001963",
+	 *          "metadata": {
+	 *             "IFC Type": "IfcBuildingElementProxy",
+	 *             "IFC GUID": "3VkTAO0fr0XQHS3DxQzfxm",
+	 *             "Area": 6,
+	 *             "Reference": "LegoRoundTree"
+	 *          },
+	 *          "parents": [
+	 *             "2bf2a864-5cb0-41ba-85a8-c2cffc3da06d"
+	 *          ]
+	 *       },
+	 *       {
+	 *          "_id": "c4682cf2-7b2a-41c7-8fe2-c0c39512dd99",
+	 *          "metadata": {
+	 *             "IFC Type": "IfcDoor",
+	 *             "IFC GUID": "1oZ0wPs_PE8ANCPg3bIs4j",
+	 *             "AboveGround": "False"
+	 *          },
+	 *          "parents": [
+	 *             "323a9900-ece1-4857-8980-ec96ffc7f681"
+	 *          ]
+	 *       }
+	 *    ]
+	 * }
+	 *
+	 * @apiSuccessExample {json} Success (federation metadata):
+	 * {
+	 *    "data": [],
+	 *    "subModels": [
+	 *       {
+	 *           "data": [
+	 *               {
+	 *                   "_id": "2f461edf-4544-412a-bb84-ffdb3bbe563b",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcBuilding",
+	 *                       "IFC GUID": "00tMo7QcxqWdIGvc4sMN2A",
+	 *                       "BuildingID": "n/a",
+	 *                       "IsPermanentID": "True",
+	 *                       "OccupancyType": "Private dwelling",
+	 *                       "IsLandmarked": "True",
+	 *                       "Area": 9000,
+	 *                       "NumberOfStoreys": 2
+	 *                   },
+	 *                   "parents": [
+	 *                       "9eeddbe2-750d-46fb-988f-bcf9ec2ecf51"
+	 *                   ]
+	 *               },
+	 *               {
+	 *                   "_id": "85ad29bd-cd99-4472-a92f-86266b07e57d",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcWall",
+	 *                       "IFC GUID": "20FpTZCqJy2vhVJYtjuIce"
+	 *                   },
+	 *                   "parents": [
+	 *                       "48359ad0-9b6d-44ed-ae93-47e2ec69ea88"
+	 *                   ]
+	 *               },
+	 *               {
+	 *                   "_id": "b5fe5dcf-ce8c-4b1e-a96b-bdc5aa001963",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcBuildingElementProxy",
+	 *                       "IFC GUID": "3VkTAO0fr0XQHS3DxQzfxm",
+	 *                       "Area": 6,
+	 *                       "Reference": "LegoRoundTree"
+	 *                   },
+	 *                   "parents": [
+	 *                       "2bf2a864-5cb0-41ba-85a8-c2cffc3da06d"
+	 *                   ]
+	 *               },
+	 *               {
+	 *                   "_id": "c4682cf2-7b2a-41c7-8fe2-c0c39512dd99",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcDoor",
+	 *                       "IFC GUID": "1oZ0wPs_PE8ANCPg3bIs4j",
+	 *                       "AboveGround": "False"
+	 *                   },
+	 *                   "parents": [
+	 *                       "323a9900-ece1-4857-8980-ec96ffc7f681"
+	 *                   ]
+	 *               }
+	 *          ],
+	 *          "account": "acme",
+	 *          "model": "00000000-0000-0000-0000-000000000001"
+	 *       },
+	 *       {
+	 *           "data": [
+	 *               {
+	 *                   "_id": "2f461edf-4544-412a-bb84-ffdb3bbe563b",
+	 *                   "metadata": {
+	 *                       "IFC Type": "IfcBuilding",
+	 *                       "IFC GUID": "12tTo3QcxqWd5Gvc4sABCA",
+	 *                       "BuildingID": "Site B",
+	 *                       "IsPermanentID": "True",
+	 *                       "OccupancyType": "Private dwelling",
+	 *                       "IsLandmarked": "True",
+	 *                       "Area": 20,
+	 *                       "NumberOfStoreys": 1
+	 *                   },
+	 *                   "parents": [
+	 *                       "9eeddbe2-750d-46fb-988f-bcf9ec2ecf51"
+	 *                   ]
+	 *               }
+	 *          ],
+	 *          "account": "acme",
+	 *          "model": "00000000-0000-0000-0000-000000000002"
+	 *       }
+	 *    ]
+	 * }
+	 *
+	 * @apiSuccessExample {json} Success (mesh IDs):
+	 * [
+	 * 	{
+	 * 		"account": "acme",
+	 * 		"model": "00000000-0000-0000-0000-000000000000",
+	 * 		"mesh_ids": [
+	 * 			"11111111-1111-1111-1111-111111111111",
+	 * 			"22222222-2222-2222-2222-222222222222",
+	 * 			"33333333-3333-3333-3333-333333333333",
+	 * 			"44444444-4444-4444-4444-444444444444"
+	 * 		]
+	 * 	}
+	 * ]
+	 */
 	router.post("/revision/:rev/meta/rules", middlewares.hasReadAccessToModel, queryMetadataByRules);
 
 	/**
@@ -356,7 +518,7 @@
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
-	 * @apiParam id Meta Unique ID
+	 * @apiParam {String} id.json Meta Unique ID with .json extension
 	 *
 	 * @apiExample {get} Example usage:
 	 * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/meta/b5fe5dcf-ce8c-4b1e-a96b-bdc5aa001963.json HTTP/1.1
@@ -387,7 +549,7 @@
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
-	 * @apiParam {String} metaKey Unique metadata key
+	 * @apiParam {String} metaKey.json Unique metadata key
 	 *
 	 * @apiExample {get} Example usage:
 	 * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/meta/findObjsWith/IsLandmarked.json HTTP/1.1
@@ -411,7 +573,7 @@
 	router.get("/revision/master/head/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 
 	/**
-	 * @api {get} /:teamspace/:model/revision/:rev/meta/findObjsWith/:metaKey.json Get ids by metadata
+	 * @api {get} /:teamspace/:model/revision/:rev/meta/findObjsWith/:metaKey.json Get ids by metadata in a revision
 	 * @apiName getIdsWithMetadataFieldByRev
 	 * @apiGroup Meta
 	 * @apiDescription Get ids of tree objects which has a particular metadata key from a particular revision.
@@ -420,7 +582,7 @@
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} model Model ID
 	 * @apiParam {String} rev Revision to get metadata from
-	 * @apiParam {String} metaKey Unique meta key
+	 * @apiParam {String} metaKey.json Unique meta key
 	 */
 	router.get("/revision/:rev/meta/findObjsWith/:metaKey.json", middlewares.hasReadAccessToModel, getAllIdsWithMetadataField);
 

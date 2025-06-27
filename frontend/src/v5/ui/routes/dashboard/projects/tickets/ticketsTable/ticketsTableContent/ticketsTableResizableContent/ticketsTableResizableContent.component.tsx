@@ -16,57 +16,62 @@
  */
 
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../../ticketsTable.helper';
-import { Container, ScrollableContainer, Title } from './ticketsTableResizableContent.styles';
-import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
+import { Container, Title } from './ticketsTableResizableContent.styles';
+import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
+import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import { selectFetchingPropertiesByTicketId } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
-	groupBy: string
 	selectedTicketId?: string;
 };
-export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selectedTicketId }: TicketsTableResizableContentProps) => {
+export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
+	const { groupBy, getPropertyType } = useContext(TicketsTableContext);
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
-	const { stretchTable } = useContext(ResizableTableContext);
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
-	
-	useEffect(() => {
-		stretchTable();
-	}, [template]);
 
-	if (groupBy === NONE_OPTION || !groupBy) {
+	if (!groupBy) {
 		return (
-			<ScrollableContainer>
-				<TicketsTableGroup
-					tickets={filteredItems}
-					onNewTicket={onGroupNewTicket('')}
-					onEditTicket={setTicketValue}
-					selectedTicketId={selectedTicketId}
-				/>
-			</ScrollableContainer>
+			<TicketsTableGroup
+				tickets={filteredItems}
+				onNewTicket={onGroupNewTicket('')}
+				onEditTicket={setTicketValue}
+				selectedTicketId={selectedTicketId}
+			/>
 		);
 	}
 
-	const groups = groupTickets(groupBy, filteredItems);
+	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
+	const ticketsToDisplay = groupBy
+		? filteredItems.filter(({ _id: ticketId }) => !selectFetchingPropertiesByTicketId(getState(), ticketId).has(propertyName))
+		: filteredItems;
+
+	const isLoading = groupBy && (ticketsToDisplay.length !== filteredItems.length);
+
+	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy));
 
 	return (
 		<Container>
-			{_.entries(groups).map(([groupName, tickets]) => (
+			{groups.map(([groupName, tickets]) => (
 				<DashboardListCollapse
 					title={(
 						<>
 							<Title>{groupName}</Title>
-							<CircledNumber disabled={!tickets.length}>{tickets.length}</CircledNumber>
+							<CircledNumber disabled={!tickets.length || isLoading}>
+								{isLoading ? <Spinner /> : tickets.length}
+							</CircledNumber>
 						</>
 					)}
 					defaultExpanded={!!tickets.length}
