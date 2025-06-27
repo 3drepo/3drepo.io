@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useRef } from 'react';
+import { createContext, useEffect, useRef } from 'react';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 import { EventEmitter } from 'eventemitter3';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -24,15 +24,17 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 const useSubscribableSearchParam = () => {
 	const emitterRef = useRef(new EventEmitter());
+	const prevSearchParamsRef = useRef(Object.fromEntries(new URLSearchParams(window.location.search).entries()));
 
 	const getValue = (name) => new URLSearchParams(window.location.search).get(name) || '';
 
 	const setValue = (name, value, searchParams) => {
-
 		if (value) {
 			searchParams.set(name, value);
+			prevSearchParamsRef.current[name] = value;
 		} else {
 			searchParams.delete(name);
+			delete prevSearchParamsRef.current[name];
 		}
 	
 		emitterRef.current.emit(name, value || '');
@@ -42,6 +44,37 @@ const useSubscribableSearchParam = () => {
 		emitterRef.current.on(name, fn);
 		return () => emitterRef.current.off(name, fn);
 	};
+
+	useEffect(() => {
+		const onPopState = () => {
+			const searchParams = new URLSearchParams(window.location.search);
+			const differentParams = [];
+
+			searchParams.forEach((value, name) => {
+				if (!prevSearchParamsRef.current[name]) {
+					// new parameter
+					differentParams.push(name);
+					return;
+				}
+
+				if (getValue(name) !== prevSearchParamsRef.current[name]) {
+					// changed parameter
+					differentParams.push(name);
+				}
+			});
+
+			Object.keys(prevSearchParamsRef.current).forEach((name) => {
+				if (!searchParams.has(name)) {
+					// removed parameter
+					differentParams.push(name);
+				}
+			});
+			differentParams.forEach((name) => emitterRef.current.emit(name, getValue(name)));
+			prevSearchParamsRef.current = Object.fromEntries(searchParams.entries());
+		};
+		window.addEventListener('popstate', onPopState);
+		return () => window.removeEventListener('popstate', onPopState);
+	}, []);
 
 	return [getValue, setValue, subscribeToValueChange] as const;
 };
