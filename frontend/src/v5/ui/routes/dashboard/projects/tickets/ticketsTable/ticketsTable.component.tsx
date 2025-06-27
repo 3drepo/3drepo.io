@@ -173,6 +173,9 @@ export const TicketsTable = () => {
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+		return () => {
+			TicketsCardActionsDispatchers.resetFilters();
+		};
 	}, []);
 
 	useEffect(() => {
