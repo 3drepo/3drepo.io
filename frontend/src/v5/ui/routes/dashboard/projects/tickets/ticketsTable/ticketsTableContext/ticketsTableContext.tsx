@@ -25,8 +25,12 @@ import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 const useSubscribableSearchParam = (name) => {
 	const emitterRef = useRef(new EventEmitter());
 
-	const set = (value, pushInHistory = true) => {
+	const getValue = () => new URLSearchParams(window.location.search).get(name) ?? '';
+
+	const setValue = (val, pushInHistory = false) => {
+		const value = val ?? '';
 		const searchParams = new URLSearchParams(window.location.search);
+
 		if (value) {
 			searchParams.set(name, value);
 		} else {
@@ -38,17 +42,15 @@ const useSubscribableSearchParam = (name) => {
 		} else {
 			window.history.replaceState({}, '', `${location.pathname}?${searchParams.toString()}`);
 		}
-		emitterRef.current.emit(name, searchParams.get(name) || '');
+		emitterRef.current.emit(name, value);
 	};
 
-	const get = () => new URLSearchParams(window.location.search).get(name) || '';
-
-	const subscribe = (fn) => {
+	const subscribeToValueChange = (fn) => {
 		emitterRef.current.on(name, fn);
 		return () => emitterRef.current.off(name, fn);
 	};
 
-	return [get, set, subscribe] as const;
+	return [getValue, setValue, subscribeToValueChange] as const;
 };
 
 export interface TicketsTableType {
