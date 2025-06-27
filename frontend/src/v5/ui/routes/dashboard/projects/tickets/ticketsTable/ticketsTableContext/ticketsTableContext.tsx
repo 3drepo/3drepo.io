@@ -28,7 +28,7 @@ const useSubscribableSearchParam = () => {
 
 	const getValue = (name) => new URLSearchParams(window.location.search).get(name) || '';
 
-	const setValue = (name, value, searchParams) => {
+	const updateValue = (name, value, searchParams) => {
 		if (value) {
 			searchParams.set(name, value);
 			prevSearchParamsRef.current[name] = value;
@@ -36,8 +36,19 @@ const useSubscribableSearchParam = () => {
 			searchParams.delete(name);
 			delete prevSearchParamsRef.current[name];
 		}
-	
-		emitterRef.current.emit(name, value || '');
+	};
+
+	const setValues = (newValues: Record<string, string>, pushInHistory = false) => {
+		const searchParams = new URLSearchParams(window.location.search);
+		Object.entries(newValues).forEach(([name, value]) => {
+			updateValue(name, value, searchParams);
+			emitterRef.current.emit(name, value || '');
+		});
+		if (pushInHistory) {
+			window.history.pushState({}, '', `${location.pathname}?${searchParams}`);
+		} else {
+			window.history.replaceState({}, '', `${location.pathname}?${searchParams}`);
+		}
 	};
 
 	const subscribeToValueChange = (name, fn) => {
@@ -76,7 +87,7 @@ const useSubscribableSearchParam = () => {
 		return () => window.removeEventListener('popstate', onPopState);
 	}, []);
 
-	return [getValue, setValue, subscribeToValueChange] as const;
+	return [getValue, setValues, subscribeToValueChange] as const;
 };
 
 export interface TicketsTableType {
@@ -85,8 +96,8 @@ export interface TicketsTableType {
 	getSelectedTicket: () => string;
 	getSelectedModel: () => string;
 	onSelectedTicketChange: (fn: (ticketId: string) => void) => () => void;
-	onSelectedModelChange: (fn: (modelId: string) => void) => () => void;
-	setModelAndTicketId: (modelId: string, ticketId: string) => void;
+	onSelectedModelChange: (fn: (containerOrFederation: string) => void) => () => void;
+	setModelAndTicketId: (containerOrFederation: string, ticketId: string) => void;
 }
 
 const defaultValue: TicketsTableType = {
@@ -103,16 +114,11 @@ TicketsTableContext.displayName = 'TicketsTableContext';
 
 interface Props { children: any; }
 export const TicketsTableContextComponent = ({ children }: Props) => {
+	const [getSearchParam, setSearchParams, subscribeToSearchParam] = useSubscribableSearchParam();
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const [getSearchParam, setSearchParam, subscribeToSearchParam] = useSubscribableSearchParam();
 
-	const setModelAndTicketId = (modelId: string, ticketId: string) => {
-		const searchParams = new URLSearchParams(window.location.search);
-		setSearchParam('containerOrFederation', modelId, searchParams);
-		setSearchParam('ticketId', ticketId, searchParams);
-		window.history.pushState({}, '', `${location.pathname}?${searchParams}`);
-	};
+	const setModelAndTicketId = (containerOrFederation: string, ticketId: string) => setSearchParams({ containerOrFederation, ticketId });
 
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
