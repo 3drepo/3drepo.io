@@ -19,6 +19,8 @@ import { ITemplate, PropertyDefinition, PropertyTypeDefinition } from '@/v5/stor
 import { compact } from 'lodash';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TableColumn } from '@controls/resizableTableContext/resizableTableContext';
+import { EventEmitter } from 'eventemitter3';
+import { useRef, useEffect } from 'react';
 
 const TABLE_COLUMNS_INVALID_PROPERTIES = ['view', 'image', 'imageList', 'coords'];
 const TABLE_COLUMNS_DEFAULT_PROPERTIES = ['id', 'modelName', BaseProperties.TITLE];
@@ -64,4 +66,73 @@ export const getAvailableColumnsForTemplate = (template: ITemplate): TableColumn
 	];
 
 	return compact(columns.map(getTableColumnData));
+};
+
+export const useSubscribableSearchParams = () => {
+	const emitterRef = useRef(new EventEmitter());
+	const prevSearchParamsRef = useRef(Object.fromEntries(new URLSearchParams(window.location.search).entries()));
+
+	const getValue = (name) => new URLSearchParams(window.location.search).get(name) || '';
+
+	const updateValue = (name, value, searchParams) => {
+		if (value) {
+			searchParams.set(name, value);
+			prevSearchParamsRef.current[name] = value;
+		} else {
+			searchParams.delete(name);
+			delete prevSearchParamsRef.current[name];
+		}
+	};
+
+	const setValues = (newValues: Record<string, string>, pushInHistory = false) => {
+		const searchParams = new URLSearchParams(window.location.search);
+		Object.entries(newValues).forEach(([name, value]) => {
+			updateValue(name, value, searchParams);
+			emitterRef.current.emit(name, value || '');
+		});
+		if (pushInHistory) {
+			window.history.pushState({}, '', `${location.pathname}?${searchParams}`);
+		} else {
+			window.history.replaceState({}, '', `${location.pathname}?${searchParams}`);
+		}
+	};
+
+	const subscribeToValueChange = (name, fn) => {
+		emitterRef.current.on(name, fn);
+		return () => emitterRef.current.off(name, fn);
+	};
+
+	// register to navigate back/forth in browser history
+	useEffect(() => {
+		const onPopState = () => {
+			const searchParams = new URLSearchParams(window.location.search);
+			const differentParams = [];
+
+			searchParams.forEach((value, name) => {
+				if (!prevSearchParamsRef.current[name]) {
+					// new parameter
+					differentParams.push(name);
+					return;
+				}
+
+				if (getValue(name) !== prevSearchParamsRef.current[name]) {
+					// changed parameter
+					differentParams.push(name);
+				}
+			});
+
+			Object.keys(prevSearchParamsRef.current).forEach((name) => {
+				if (!searchParams.has(name)) {
+					// removed parameter
+					differentParams.push(name);
+				}
+			});
+			differentParams.forEach((name) => emitterRef.current.emit(name, getValue(name)));
+			prevSearchParamsRef.current = Object.fromEntries(searchParams.entries());
+		};
+		window.addEventListener('popstate', onPopState);
+		return () => window.removeEventListener('popstate', onPopState);
+	}, []);
+
+	return [getValue, setValues, subscribeToValueChange] as const;
 };

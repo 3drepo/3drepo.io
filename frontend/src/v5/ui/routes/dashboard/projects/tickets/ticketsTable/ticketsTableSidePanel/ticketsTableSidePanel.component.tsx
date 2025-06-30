@@ -68,7 +68,7 @@ export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	
 	const clearTicketId = () => setTicketValue();
-	const onSaveTicket = (_id: string) => setTicketValue(modelId || '', _id, null);
+	const onSaveTicket = (_id: string) => setTicketValue(modelId || '', _id);
 
 	const getOpenInViewerLink = () => {
 		if (!modelId) return '';

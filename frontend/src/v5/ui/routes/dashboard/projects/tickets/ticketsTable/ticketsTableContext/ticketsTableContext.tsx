@@ -15,80 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useEffect, useRef } from 'react';
-import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
-import { EventEmitter } from 'eventemitter3';
+import { createContext, useEffect } from 'react';
+import { getTemplatePropertiesDefinitions, useSubscribableSearchParams } from './ticketsTableContext.helpers';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-
-const useSubscribableSearchParam = () => {
-	const emitterRef = useRef(new EventEmitter());
-	const prevSearchParamsRef = useRef(Object.fromEntries(new URLSearchParams(window.location.search).entries()));
-
-	const getValue = (name) => new URLSearchParams(window.location.search).get(name) || '';
-
-	const updateValue = (name, value, searchParams) => {
-		if (value) {
-			searchParams.set(name, value);
-			prevSearchParamsRef.current[name] = value;
-		} else {
-			searchParams.delete(name);
-			delete prevSearchParamsRef.current[name];
-		}
-	};
-
-	const setValues = (newValues: Record<string, string>, pushInHistory = false) => {
-		const searchParams = new URLSearchParams(window.location.search);
-		Object.entries(newValues).forEach(([name, value]) => {
-			updateValue(name, value, searchParams);
-			emitterRef.current.emit(name, value || '');
-		});
-		if (pushInHistory) {
-			window.history.pushState({}, '', `${location.pathname}?${searchParams}`);
-		} else {
-			window.history.replaceState({}, '', `${location.pathname}?${searchParams}`);
-		}
-	};
-
-	const subscribeToValueChange = (name, fn) => {
-		emitterRef.current.on(name, fn);
-		return () => emitterRef.current.off(name, fn);
-	};
-
-	useEffect(() => {
-		const onPopState = () => {
-			const searchParams = new URLSearchParams(window.location.search);
-			const differentParams = [];
-
-			searchParams.forEach((value, name) => {
-				if (!prevSearchParamsRef.current[name]) {
-					// new parameter
-					differentParams.push(name);
-					return;
-				}
-
-				if (getValue(name) !== prevSearchParamsRef.current[name]) {
-					// changed parameter
-					differentParams.push(name);
-				}
-			});
-
-			Object.keys(prevSearchParamsRef.current).forEach((name) => {
-				if (!searchParams.has(name)) {
-					// removed parameter
-					differentParams.push(name);
-				}
-			});
-			differentParams.forEach((name) => emitterRef.current.emit(name, getValue(name)));
-			prevSearchParamsRef.current = Object.fromEntries(searchParams.entries());
-		};
-		window.addEventListener('popstate', onPopState);
-		return () => window.removeEventListener('popstate', onPopState);
-	}, []);
-
-	return [getValue, setValues, subscribeToValueChange] as const;
-};
 
 export interface TicketsTableType {
 	getPropertyType: (name: string) => string;
@@ -114,8 +45,8 @@ TicketsTableContext.displayName = 'TicketsTableContext';
 
 interface Props { children: any; }
 export const TicketsTableContextComponent = ({ children }: Props) => {
-	const [getSearchParam, setSearchParams, subscribeToSearchParam] = useSubscribableSearchParam();
-	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const [getSearchParam, setSearchParams, subscribeToSearchParam] = useSubscribableSearchParams();
+	const { template: templateId, ...params } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 
 	const setModelAndTicketId = (containerOrFederation: string, ticketId: string) => setSearchParams({ containerOrFederation, ticketId });
@@ -131,6 +62,13 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		definitionsAsObject[name]?.values === 'jobsAndUsers'
 		|| ['properties.Owner', 'properties.Assignees'].includes(name)
 	);
+
+	useEffect(() => {
+		if (params.ticketId) {
+			// for backward compatibility, as the ticketId used to be set in the URL
+			setSearchParams({ ticketId: params.ticketId });
+		}
+	}, []);
 
 	return (
 		<TicketsTableContext.Provider value={{
