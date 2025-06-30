@@ -18,7 +18,7 @@
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import { getTicketResourceUrl, isResourceId, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { useParams } from 'react-router-dom';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketCommentsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { formatMessage } from '@/v5/services/intl';
 import { CommentImages } from '../commentImages/commentImages.component';
@@ -52,6 +52,7 @@ export const CommentNonMessageContent = ({
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly() || !isCurrentUserComment;
+	const comment = TicketCommentsHooksSelectors.selectCommentById(ticketId, commentId);
 
 	const disabledDeleteMessage = (hasMessage || images.length > 1) ? null : formatMessage({
 		id: 'comment.deleteImage.disabled.emptyMessage',
@@ -70,7 +71,7 @@ export const CommentNonMessageContent = ({
 		ticketId,
 		isFederation,
 		commentId,
-		{ images: imgs },
+		{ ...comment, images: imgs },
 	);
 	const onEditImage = (img, index) => {
 		const newImages = [...images];
