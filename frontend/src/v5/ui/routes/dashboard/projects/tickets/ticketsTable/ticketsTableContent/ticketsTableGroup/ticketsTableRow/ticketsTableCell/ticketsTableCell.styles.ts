@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
-import { Item as Cell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.styles';
+import styled from 'styled-components';
 import { CalendarIcon, DueDateContainer } from '@controls/dueDate/dueDate.styles';
 
 export const CellDate = styled.div`
@@ -30,27 +29,4 @@ export const CellDate = styled.div`
 	${CalendarIcon} {
 		min-width: 11px;
 	}
-`;
-
-export const Container = styled.div<{ $isMoving?: boolean }>`
-	display: contents;
-
-	${Cell} {
-		color: ${({ theme }) => theme.palette.secondary.main};
-		height: 100%;
-		padding: 0 10px;
-		display: flex;
-		align-items: center;
-		justify-content: flex-start;
-		font-weight: 500;
-		overflow: hidden;
-		box-sizing: border-box;
-		background-color: ${({ $isMoving, theme }) => $isMoving ? theme.palette.primary.lightest : theme.palette.primary.contrast};
-	}
-
-	${({ $isMoving, theme }) => $isMoving && css`
-		&&& ${Cell} {
-			background-color: ${theme.palette.primary.lightest};
-		}
-	`}
 `;

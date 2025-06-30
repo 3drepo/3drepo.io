@@ -15,29 +15,47 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container as TextOverflowContainer } from '@controls/textOverflow/textOverflow.styles';
 import styled, { css } from 'styled-components';
-import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 
-export const CellContainer = styled(ResizableTableCell)<{ $isMoving?: boolean }>`
-	color: ${({ theme }) => theme.palette.secondary.main};
-	height: 100%;
-	padding: 0 10px;
+export const NEW_TICKET_ROW_HEIGHT = '37px';
+export const NewTicketRow = styled.div<{ disabled?: boolean }>`
+	width: 100%;
+	height: ${NEW_TICKET_ROW_HEIGHT};
+	cursor: pointer;
+	color: ${({ theme }) => theme.palette.base.main};
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	display: grid;
+	position: relative;
+	z-index: 11;
+
+	${({ disabled }) => disabled && css`
+		cursor: initial;
+		pointer-events: none;
+		color: ${({ theme }) => theme.palette.base.light};
+	`}
+`;
+
+export const NewTicketTextContainer = styled.div`
+	position: sticky;
+	margin-left: 15px;
+	left: 15px;
+	max-width: calc(100% - 15px);
+	width: fit-content;
+	overflow: hidden;
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
-	font-weight: 500;
-	overflow: hidden;
-	box-sizing: border-box;
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	gap: 6px;
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		&&& {
-			background-color: ${theme.palette.primary.lightest};
-		}
-	`}
-
-	${TextOverflowContainer} {
-		height: unset;
+	svg {
+		min-width: 15px;
 	}
+`;
+
+export const NewTicketText = styled.span`
+	font-weight: 600;
+	${({ theme }) => theme.typography.body1}
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	width: 100%;
 `;

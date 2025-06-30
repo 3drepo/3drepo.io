@@ -15,11 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
-import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { MutableRefObject } from 'react';
 
-export const ResizableTableRow = (props) => {
-	const { columnGap } = useContextWithCondition(ResizableTableContext, []);
-	return (<Row $gap={columnGap} {...props} />);
+export type UnsubscribeFn = () => void;
+export type SubscribeFn<Event> = (events: Event[], callback: (...args) => void) => UnsubscribeFn;
+export type PublishFn<Event> = (event: Event, ...args) => void;
+
+export type SubscribableObject<ContextState> = {
+	state: ContextState,
+	previousState: MutableRefObject<ContextState>,
+	subscribe: SubscribeFn<keyof ContextState>,
 };
+
+export type DependencyArray<ContextState> = (keyof ContextState)[];
+export type UpdatingCondition<ContextState, ContextType> = (
+	currentState: ContextState,
+	previousState: ContextState,
+	context: Omit<ContextType, keyof SubscribableObject<ContextState>>
+) => boolean;

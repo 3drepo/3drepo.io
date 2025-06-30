@@ -31,6 +31,8 @@ const getTicketByModelId = (state, modelId, ticketId) => (
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation', 'propertiesToInclude'],
 	fetchTicketProperties: ['teamspace', 'projectId', 'modelId', 'ticketId', 'templateCode', 'isFederation', 'propertiesToInclude'],
+	addFetchingTicketProperties: ['ticketId', 'properties'],
+	removeFetchingTicketProperties: ['ticketId', 'properties'],
 	fetchTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'revision'],
 	fetchTicketsSuccess: ['modelId', 'tickets'],
 	fetchTemplates: ['teamspace', 'projectId', 'modelId', 'isFederation', 'getDetails'],
@@ -59,6 +61,7 @@ export const INITIAL_STATE: ITicketsState = {
 	groupsByGroupId: {},
 	riskCategories: [],
 	sorting: DEFAULT_TICKETS_SORTING,
+	fetchingProperties: {},
 };
 
 export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: FetchTicketsSuccessAction) => {
@@ -122,6 +125,20 @@ export const resetSorting = (state: ITicketsState) => {
 	state.sorting = { ...DEFAULT_TICKETS_SORTING };
 };
 
+export const addFetchingTicketProperties = (state: ITicketsState, { ticketId, properties }: AddFetchingTicketPropertiesAction) => {
+	if (!state.fetchingProperties[ticketId]) {
+		state.fetchingProperties[ticketId] = new Set([]);
+	}
+	properties.forEach((property) => state.fetchingProperties[ticketId].add(property));
+};
+
+export const removeFetchingTicketProperties = (state: ITicketsState, { ticketId, properties }: RemoveFetchingTicketPropertiesAction) => {
+	properties.forEach((property) => state.fetchingProperties[ticketId].delete(property));
+	if (!state.fetchingProperties[ticketId].size) {
+		delete state.fetchingProperties[ticketId];
+	}
+};
+
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
@@ -133,6 +150,8 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.CLEAR_GROUPS]: clearGroups,
 	[TicketsTypes.SET_SORTING]: setSorting,
 	[TicketsTypes.RESET_SORTING]: resetSorting,
+	[TicketsTypes.ADD_FETCHING_TICKET_PROPERTIES]: addFetchingTicketProperties,
+	[TicketsTypes.REMOVE_FETCHING_TICKET_PROPERTIES]: removeFetchingTicketProperties,
 }));
 
 export interface ITicketsState {
@@ -141,6 +160,7 @@ export interface ITicketsState {
 	riskCategories: string[],
 	groupsByGroupId: Record<string, Group>,
 	sorting: TicketsSorting,
+	fetchingProperties: Record<string, Set<string>>,
 }
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[] };
@@ -165,6 +185,8 @@ export type UpdateTicketGroupSuccessAction = Action<'UPDATE_TICKET_GROUP_SUCCESS
 export type ClearGroupsAction = Action<'CLEAR_GROUPS'>;
 export type SetSortingAction = Action<'SET_SORTING'> & TicketsSorting;
 export type ResetSortingAction = Action<'RESET_SORTING'>;
+export type AddFetchingTicketPropertiesAction = Action<'ADD_FETCHING_TICKET_PROPERTIES'> & { ticketId: string, properties: string[] };
+export type RemoveFetchingTicketPropertiesAction = Action<'REMOVE_FETCHING_TICKET_PROPERTIES'> & { ticketId: string, properties: string[] };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -270,4 +292,6 @@ export interface ITicketsActionCreators {
 	clearGroups: () => ClearGroupsAction;
 	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
 	resetSorting: () => ResetSortingAction,
+	addFetchingTicketProperties: (ticketId: string, properties: string[]) => AddFetchingTicketPropertiesAction,
+	removeFetchingTicketProperties: (ticketId: string, properties: string[]) => RemoveFetchingTicketPropertiesAction,
 }
