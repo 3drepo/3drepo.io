@@ -66,27 +66,26 @@ Users.triggerPasswordReset = async (email) => {
 	await post(url, { email }, { headers });
 };
 
-Users.uploadAvatar = async (userId, tenantId, avatarPath) => {
+Users.uploadAvatar = async (userId, tenantId, formDataPayload) => {
 	try {
 		const config = await getConfig();
 		const headers = {
 			...await getBearerHeader(),
 			'Content-Type': 'multipart/form-data',
+			...formDataPayload.getHeaders(),
 			[HEADER_ENVIRONMENT_ID]: config.clientId,
 			[HEADER_TENANT_ID]: tenantId,
 			[HEADER_USER_ID]: userId,
 		};
-		const data = { image: avatarPath };
 
-		const imageUrl = await put(
+		const { data } = await put(
 			`${config.vendorDomain}/team/resources/profile/me/image/v1`,
-			avatarPath,
-			{ headers },
-		);
+			formDataPayload,
+			{ headers,
+			});
 
-		return imageUrl;
+		return data;
 	} catch (err) {
-		console.dir(err, { depth: 3 });
 		throw new Error(`Failed to upload avatar for user(${userId}) from Users: ${err.message}`);
 	}
 };

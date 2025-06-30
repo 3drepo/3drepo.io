@@ -19,7 +19,6 @@ const { isLoggedIn, validSession } = require('../middleware/auth');
 const { Router } = require('express');
 const Users = require('../processors/users');
 const { destroySession } = require('../middleware/sessions');
-const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { getUserFromSession } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { routeDecommissioned } = require('../middleware/common');
@@ -82,10 +81,10 @@ const deleteApiKey = (req, res) => {
 const getAvatar = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
-		const buffer = await Users.getAvatar(user);
-		const fileExt = await fileExtensionFromBuffer(buffer);
-		req.params.format = fileExt || 'png';
-		respond(req, res, templates.ok, buffer);
+		const userAvatar = await Users.getAvatar(user);
+		req.params.format = userAvatar?.extension || 'png';
+
+		respond(req, res, templates.ok, userAvatar.buffer);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -334,7 +333,7 @@ const establishRoutes = () => {
 	*       200:
 	*         description: Uploads a new avatar for the user
 	*/
-	router.put('/user/avatar', isLoggedIn, singleImageUpload('file'), uploadAvatar);
+	router.put('/user/avatar', isLoggedIn, singleImageUpload('file', false), uploadAvatar);
 
 	/**
 	* @openapi

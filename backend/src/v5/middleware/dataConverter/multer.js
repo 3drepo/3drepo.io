@@ -35,7 +35,17 @@ const singleFileMulterPromise = (req, fileName, fileFilter, maxSize,
 	if (storeInMemory) {
 		options.storage = Multer.memoryStorage();
 	} else {
-		options.dest = uploadConfig.uploadDir;
+		options.storage = Multer.diskStorage({
+			destination: (req, file, cb) => {
+				cb(null, uploadConfig.uploadDir);
+			},
+			filename: (req, file, cb) => {
+				const ext = Path.extname(file.originalname);
+				const name = Path.basename(file.originalname, ext);
+				const uniqueName = `${name}_${Date.now()}${ext}`;
+				cb(null, uniqueName);
+			},
+		});
 	}
 
 	Multer(options).single(fileName)(req, null, (err) => {
@@ -94,7 +104,7 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = upload
 	}
 };
 
-MulterHelper.singleImageUpload = (fileName) => MulterHelper.singleFileUpload(
-	fileName, imageFilter, uploadConfig.imageSizeLimit);
+MulterHelper.singleImageUpload = (fileName, storeInMemory = true) => MulterHelper.singleFileUpload(
+	fileName, imageFilter, uploadConfig.imageSizeLimit, storeInMemory);
 
 module.exports = MulterHelper;

@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { fromBuffer: fileTypeFromBuffer, fromStream: fileTypeFromStream } = require('file-type');
 const UUIDParse = require('uuid-parse');
 const _ = require('lodash');
-const { fromBuffer: fileTypeFromBuffer } = require('file-type');
 
 const TypeChecker = {};
 
@@ -45,12 +45,18 @@ TypeChecker.isUUID = (uuid) => {
 };
 
 const getTypeFromBuffer = (fileBuffer) => (Buffer.isBuffer(fileBuffer) ? fileTypeFromBuffer(fileBuffer) : null);
+const getTypeFromStream = (fileBuffer) => (Buffer.isBuffer(fileBuffer) ? fileTypeFromStream(fileBuffer) : null);
 TypeChecker.fileMimeFromBuffer = async (fileBuffer) => {
 	const type = await getTypeFromBuffer(fileBuffer);
 	return type?.mime;
 };
 TypeChecker.fileExtensionFromBuffer = async (fileBuffer) => {
 	const type = await getTypeFromBuffer(fileBuffer);
+	return type?.ext;
+};
+
+TypeChecker.fileExtensionFromStream = async (fileStream) => {
+	const type = await getTypeFromStream(fileStream);
 	return type?.ext;
 };
 

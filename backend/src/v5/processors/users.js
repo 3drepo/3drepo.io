@@ -18,13 +18,15 @@
 const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
-const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
-	removeUser, updatePassword, updateProfile } = require('../models/users');
-const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
-const { triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
+const { addUser, deleteApiKey, generateApiKey, getAvatarStream,
+	getUserByUsername, removeUser, updatePassword, updateProfile } = require('../models/users');
+const { fileExists, removeFile, storeFile } = require('../services/filesManager');
+const { getUserById, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
+const FormData = require('form-data');
 const Path = require('path');
 const { createReadStream } = require('fs');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { fileExtensionFromStream } = require('../utils/helper/typeCheck');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
 const { logger } = require('../utils/logger');
@@ -32,6 +34,7 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
 const { templates } = require('../utils/responseCodes');
+
 // This is used for the situation where a user has a record from
 // the IDP but we don't have a matching record in the db. We need
 // to create a record (for now, at least) to know the username mapping
@@ -127,38 +130,41 @@ Users.resetPassword = async (user) => {
 	}
 };
 
+Users.getAvatar = async (username) => {
+	const avatarStream = await getAvatarStream(username);
+	const fileExt = await fileExtensionFromStream(avatarStream.body);
+	const arrayBuffer = await avatarStream.arrayBuffer();
+
+	return {
+		buffer: Buffer.from(arrayBuffer),
+		extension: fileExt,
+	};
+};
+
+Users.uploadAvatar = async (username, avatarBuffer) => {
+	const { customData: { userId } } = await getUserByUsername(username, { 'customData.userId': 1 });
+	const { tenantId } = await getUserById(userId);
+
+	const filePath = Path.resolve(avatarBuffer.path);
+	const formData = new FormData();
+	formData.append('image', createReadStream(filePath));
+
+	const profilePictureUrl = await uploadAvatar(
+		userId,
+		tenantId,
+		formData,
+	);
+
+	await updateUserDetails(userId, { profilePictureUrl });
+
+	storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer.buffer);
+};
+
 Users.generateApiKey = generateApiKey;
 
 Users.deleteApiKey = deleteApiKey;
 
 Users.getUserByUsername = getUserByUsername;
-
-Users.getAvatar = (username) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
-
-// update here
-Users.uploadAvatar = async (username, avatarBuffer) => {
-	const { customData: { userId } } = await getUserByUsername(username, { 'customData.userId': 1 });
-
-	const filePath = Path.resolve(avatarBuffer.path);
-
-	const formData = new FormData();
-
-	formData.append('image', JSON.stringify(createReadStream(filePath)));
-
-	console.log(formData);
-
-	const test = await uploadAvatar(
-		userId,
-		'fa2d0b27-bc04-425e-bed2-16ccdb7413b3',
-		formData,
-	);
-
-	// console.log(test);
-
-	// await updateUserDetails(userId, { profilePictureUrl: test });
-
-	storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer.buffer);
-};
 
 Users.updatePassword = updatePassword;
 
