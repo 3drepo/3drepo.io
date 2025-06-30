@@ -32,12 +32,13 @@ import { SortedTableContext } from '@controls/sortedTableContext/sortedTableCont
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
 
 const List = () => {
-	const { filteredItems, query } = useContext(SearchContext);
 	const { sortedItems: tickets } = useContext(SortedTableContext);
-	const { visibleSortedColumnsNames, hideColumn, isVisible, showColumn } = useContext(ResizableTableContext);
+	const { filteredItems, query } = useContext(SearchContext);
+	const { visibleSortedColumnsNames, hideColumn, showColumn, isVisible } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const { fetchColumn, groupBy } = useContext(TicketsTableContext);
 
 	const onShowColumn = (name) => {
@@ -102,7 +103,7 @@ const List = () => {
 	);
 };
 export const ColumnsVisibilitySettings = () => {
-	const { getAllColumnsNames } = useContext(ResizableTableContext);
+	const { getAllColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const columnsNames = getAllColumnsNames();
 
 	const filteringFunction = (cols, query) => (

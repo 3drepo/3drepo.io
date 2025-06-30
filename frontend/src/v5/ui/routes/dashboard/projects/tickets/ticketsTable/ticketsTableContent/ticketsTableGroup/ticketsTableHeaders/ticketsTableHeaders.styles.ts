@@ -15,11 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ResizableTableContext } from '../resizableTableContext';
-import { Row } from './resizableTableRow.styles';
-import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
+import styled, { css } from 'styled-components';
+import { TextOverflow } from '@controls/textOverflow';
 
-export const ResizableTableRow = (props) => {
-	const { columnGap } = useContextWithCondition(ResizableTableContext, []);
-	return (<Row $gap={columnGap} {...props} />);
-};
+export const Headers = styled(ResizableTableRow)`
+	gap: 1px;
+	width: fit-content;
+`;
+
+export const PlaceholderForStickyFunctionality = styled(Headers)``;
+
+export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
+	${({ theme }) => theme.typography.kicker};
+	color: ${({ theme }) => theme.palette.base.main};
+	padding: 2px 0 8px 10px;
+	text-align: start;
+	box-sizing: border-box;
+	user-select: none;
+
+	${({ $selectable }) => $selectable && css`
+		cursor: pointer;
+	`}
+`;

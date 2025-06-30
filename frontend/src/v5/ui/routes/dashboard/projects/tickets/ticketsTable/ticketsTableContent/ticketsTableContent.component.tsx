@@ -31,14 +31,15 @@ import { Container } from './ticketsTableContent.styles';
 import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
 	const { filteredItems } = useContext(SearchContext);
 	const {
-		stretchTable, movingColumn, getAllColumnsNames, 
+		stretchTable, getAllColumnsNames, subscribe, resetWidths,
 		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
-	} = useContext(ResizableTableContext);
+	} = useContextWithCondition(ResizableTableContext, []);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
 
@@ -46,6 +47,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		const allColumns = getAllColumnsNames();
 		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
 		setVisibleSortedColumnsNames(initialVisibleColumns);
+		resetWidths();
 	}, [template]);
 	
 	useEffect(() => {
@@ -55,11 +57,15 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	}, [template, templateWasFetched, tableHasCompletedRendering]);
 
 	useEffect(() => {
-		if (movingColumn) {
-			edgeScrolling.start(tableRef.current);
-			return edgeScrolling.stop;
-		}
-	}, [movingColumn]);
+		const onMovingColumnChange = (movingColumn) => {
+			if (movingColumn) {
+				edgeScrolling.start(tableRef.current);
+			} else {
+				edgeScrolling.stop();
+			}
+		};
+		return subscribe(['movingColumn'], onMovingColumnChange);
+	}, [edgeScrolling]);
 
 	if (!templateWasFetched) {
 		return (
