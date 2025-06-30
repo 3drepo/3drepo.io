@@ -160,7 +160,7 @@ export function* fetchTicket({ teamspace, projectId, modelId, ticketId, isFedera
 		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticketId, revision));
 		onSuccess?.();
 	} catch (error) {
-		onError?.();
+		onError?.(error);
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.fetchTicket.error', defaultMessage: 'trying to fetch the ticket details for {model}' },

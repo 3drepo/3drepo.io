@@ -33,7 +33,9 @@ export type TicketsTableResizableContentProps = {
 export const TicketsTableResizableContent = ({ setTicketValue, groupBy }: TicketsTableResizableContentProps) => {
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
+	// TODO - fix after parent branch (ISSUE_5545) is merged
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
+		// @ts-ignore
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
 
