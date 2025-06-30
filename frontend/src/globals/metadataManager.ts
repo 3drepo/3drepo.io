@@ -667,6 +667,7 @@ class MetadataManager {
 		this.uuidToNode = new Map<string, Node>();
 		this.guidManager = new GuidManager();
 		this.suidToNode = new Map<string, Node>();
+		this.containerToRootNode = new Map<string, Node>();
 		this.store = new StateStorage();
 		this.updated = false;
 	}
@@ -711,6 +712,8 @@ class MetadataManager {
 	private mapsManager: MetadataBufferObjectsManager;
 
 	private store: StateStorage;
+
+	private containerToRootNode: Map<string, Node>;
 
 	/**
 	 * When true, indicates that an update should be run on the main tree.
@@ -952,6 +955,14 @@ class MetadataManager {
 		this.updated = true;
 	}
 
+	/**
+	 * createContainer must be called before any metadat is loaded, either
+	 * streamed or all-in-one.
+	 */
+	createContainer() {
+
+	}
+
 	async loadAssetMaps(modelInfo: string) {
 		const info = JSON.parse(modelInfo) as ModelInfo;
 
@@ -1101,6 +1112,9 @@ class MetadataManager {
 				// This is a reference to a sub-tree, so we need to resolve it
 				const url = subTrees.get(node._id);
 				const response = await this.fetchJson(url);
+
+				this.mergeLegacyTree(response.mainTree.nodes);
+
 				if (response && response.mainTree && response.mainTree.nodes) {
 					const branch = response.mainTree.nodes;
 					json.mainTree.nodes.children[i] = branch;
@@ -1116,6 +1130,15 @@ class MetadataManager {
 		branch.teamspace = info.teamspace;
 
 		this.mergeBranch(branch);
+	}
+
+	mergeLegacyTree(root: any): Node {
+		const branch = this.createNodeFromLegacyTree(root);
+		branch.revision = 'master/head';
+		branch.container = root.project;
+		branch.teamspace = root.account;
+		this.mergeBranch(branch);
+		return branch;
 	}
 
 	createNodeFromLegacyTree(legacyNode: any): Node {
