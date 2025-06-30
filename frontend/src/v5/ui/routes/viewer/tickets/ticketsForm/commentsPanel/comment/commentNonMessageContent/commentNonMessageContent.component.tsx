@@ -79,7 +79,7 @@ export const CommentNonMessageContent = ({
 	};
 
 	// @ts-ignore
-	const onDeleteImage = (index) => onEdit(images.toSpliced(index, 1));
+	const onDeleteImage = (index) => setImages(images.toSpliced(index, 1));
 	const onUploadImages = async () => uploadImages((imagesToUpload) => setImages(images.concat(imagesToUpload)));
 	const imagesEditingFunctions = !readOnly ? { 
 		onUpload: onUploadImages,
@@ -88,7 +88,7 @@ export const CommentNonMessageContent = ({
 	} : {};
 	const syncProps = useSyncProps({
 		images: imgsSrcs,
-		disabledDeleteMessage: disabledDeleteMessage,
+		disabledDeleteMessage,
 		...imagesEditingFunctions,
 	});
 	const openImagesModal = (index) => DialogsActionsDispatchers.open(ImagesModal, { displayImageIndex: index },  syncProps);

@@ -68,7 +68,7 @@ export const BasicComment = ({
 
 	return (
 		<CommentContainer className={className}>
-			<CommentNonMessageContent {...props} originalAuthor={originalAuthor} hasMessage={!!message} />
+			<CommentNonMessageContent {...props} commentId={commentId} originalAuthor={originalAuthor} hasMessage={!!message} />
 			{isEdited && !originalAuthor && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>
