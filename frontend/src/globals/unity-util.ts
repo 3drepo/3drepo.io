@@ -29,6 +29,17 @@ declare let createUnityInstance;
 
 type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
+type Position = {
+	x: number;
+	y: number;
+	z: number;
+};
+
+type Bounds = {
+	min: Position;
+	max: Position;
+};
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -584,6 +595,22 @@ export class UnityUtil {
 		}
 	}
 
+	public static doubleClickPointInfo(pointInfo) {
+		const point = JSON.parse(pointInfo);
+		if (UnityUtil.verbose) {
+			console.debug('[FROM UNITY] doubleClickPointInfo', point);
+		}
+		// For compatability with embedded viewers, the default double click
+		// behaviour is to zoom to the selected items, though this could be
+		// overridden with a new handler.
+		if (!point.isPin) {
+			const bounds = UnityUtil.metadataManager.getBounds(point.id);
+			if (bounds) {
+				UnityUtil.centreToBounds(bounds);
+			}
+		}
+	}
+
 	/** @hidden */
 	public static comparatorLoaded() {
 		UnityUtil.loadComparatorResolve.resolve();
@@ -813,6 +840,10 @@ export class UnityUtil {
 			UnityUtil.toUnity('ZoomToObjectsEnd', UnityUtil.LoadingState.MODEL_LOADED);
 
 		});
+	}
+
+	public static centreToBounds(bounds: Bounds) {
+		UnityUtil.toUnity('ZoomToBounds', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(bounds));
 	}
 
 	/**

@@ -62,7 +62,7 @@ interface IMetadataBuffer {
 	setShininess(index: number, shininess: number): void;
 	setGUID(index: number, guid: number): void;
 
-	// Tells the system that this index exists in the specified group. And index
+	// Tells the system that this index exists in the specified group. An index
 	// may sit in multiple groups at once.
 	addFlagsGroup(index: number, group: number): void;
 }
@@ -358,6 +358,36 @@ type UnityViewer = {
 	Module: Module;
 };
 
+class Vector3 {
+	x: number;
+
+	y: number;
+
+	z: number;
+
+	constructor(x: number, y: number, z: number) {
+		this.x = x;
+		this.y = y;
+		this.z = z;
+	}
+
+	static fromArray(arr: number[]): Vector3 {
+		return new Vector3(arr[0], arr[1], arr[2]);
+	}
+}
+
+class Bounds {
+	min: Vector3;
+
+	max: Vector3;
+
+	constructor(min: number[], max: number[]) {
+		this.min = Vector3.fromArray(min);
+		this.max = Vector3.fromArray(max);
+	}
+}
+
+// Provides the interface to the viewer
 class MetadataBufferObjectsManager implements IMetadataMapOwner {
 
 	numResources: number;
@@ -431,9 +461,12 @@ class Metadata {
 
 	index: number; // Offset into the metadata buffer object
 
+	bounds: Bounds;
+
 	constructor(buffer: IMetadataBuffer, index: number) {
 		this.buffer = buffer;
 		this.index = index;
+		this.bounds = new Bounds([0, 0, 0], [0, 0, 0]);
 	}
 
 	updateState(state: State) {
@@ -479,6 +512,10 @@ class Metadata {
 	setGUID(guid: number) {
 		this.buffer.setGUID(this.index, guid);
 	}
+
+	setBounds(min: number[], max: number[]) {
+		this.bounds = new Bounds(min, max);
+	}
 }
 
 class Node {
@@ -504,14 +541,10 @@ class Node {
 
 	parent: Node | null;
 
-	// Root nodes should have the container, teamspace and revision set.
-	// These properties should be set together or not at all.
+	// Root nodes should reference the Container to which they belong, so tree
+	// queries can get things like the Conainer Id and offset.
 
-	container: string | undefined;
-
-	teamspace: string | undefined;
-
-	revision: string | undefined;
+	container: Container | undefined;
 
 	// The following are possible states that may be set on this object.
 	// A state being set indicates it is overridden for that branch.
@@ -620,18 +653,22 @@ class GuidManager {
 	}
 }
 
-class ContainerInfo {
+class Container {
+	teamspace: string;
+
 	container: string;
 
 	revision: string;
 
+	offset: Vector3;
+}
+
+class ModelInfo {
 	teamspace: string;
 
-	comparator: boolean;
+	container: string;
 
-	getNamespace(): string {
-		return this.teamspace + '.' + this.container + '.' + this.revision + '.' + (this.comparator ? 'true' : 'false');
-	}
+	revision: string;
 }
 
 /**
@@ -646,7 +683,9 @@ class StateStorage {
 
 	private uuidToState: Map<string, StateUpdate>;
 
-	add(uuid: string, state: StateUpdate) {
+	// Can be called multiple times for one pop, in which case different states
+	// may stack, or override previous states.
+	push(uuid: string, state: StateUpdate) {
 		const s = this.uuidToState.get(uuid);
 		if (s) {
 			Object.assign(s, state);
@@ -675,7 +714,7 @@ class MetadataManager {
 		this.uuidToNode = new Map<string, Node>();
 		this.guidManager = new GuidManager();
 		this.suidToNode = new Map<string, Node>();
-		this.containers = new Map<string, ContainerInfo>();
+		this.containers = new Map<string, Container>();
 		this.store = new StateStorage();
 		this.updated = false;
 	}
@@ -721,7 +760,7 @@ class MetadataManager {
 
 	private store: StateStorage;
 
-	private containers: Map<string, ContainerInfo>;
+	private containers: Map<string, Container>;
 
 	/**
 	 * When true, indicates that an update should be run on the main tree.
@@ -894,6 +933,7 @@ class MetadataManager {
 			this.updated = false;
 
 			const time = performance.now() - start;
+			// eslint-disable-next-line no-console
 			console.log('Metadata tree update took ' + time + 'ms');
 		}
 		this.mapsManager.update();
@@ -928,6 +968,7 @@ class MetadataManager {
 
 		const time = performance.now() - start;
 
+		// eslint-disable-next-line no-console
 		console.log('MetadataManager: unhighlightAll took ' + time + 'ms');
 	}
 
@@ -948,32 +989,21 @@ class MetadataManager {
 		} else {
 			// The node is not yet loaded, so we put the highlight into the persistent
 			// store.
-			this.store.add(uuid, {
+			this.store.push(uuid, {
 				highlight: colour,
 			});
 		}
 		this.updated = true;
 	}
 
-	unhighlightNode(sharedId: string) {
-		const node = this.suidToNode.get(sharedId);
-		if (node.highlight) {
-			delete node.highlight;
-		}
+	unhighlightNode(uuid: string) {
+		const node = this.uuidToNode.get(uuid);
+		delete node.highlight;
 		this.updated = true;
 	}
 
-	/**
-	 * createContainer must be called before any metadat is loaded, either
-	 * streamed or all-in-one.
-	 */
-	createContainer(info: string) {
-		const container = JSON.parse(info) as ContainerInfo;
-		this.containers.set(container.guid, container);
-	}
-
 	async loadAssetMaps(modelInfo: string) {
-		const info = JSON.parse(modelInfo) as ContainerInfo;
+		const info = JSON.parse(modelInfo) as ModelInfo;
 
 		// The tree must be loaded first because the legacy supermeshes loader
 		// expects to find existing Nodes for all the meshes. We don't want to
@@ -987,16 +1017,10 @@ class MetadataManager {
 		console.log('MetadataManager: loadAssetMaps completed for ' + info.teamspace + '/' + info.container + '/' + info.revision);
 	}
 
- 	// modelInfo can be a container or federation for this method. In the
-	// future this should be replaced by streamed branches per bundle.
-
-
-
-	async loadSupermeshesJson(info: ContainerInfo) {
+	async loadSupermeshesJson(info: ModelInfo) {
 		if (!info.revision) {
 			info.revision = 'master/head';
 		}
-
 		const url = 'api/' + info.teamspace + '/' + info.container + '/revision/' + info.revision + '/supermeshes.json.mpc';
 
 		const cookies = document?.cookie;
@@ -1011,10 +1035,11 @@ class MetadataManager {
 		const response = await fetch(url, { headers });
 		const json = await response.json();
 
+		const container = this.containers.get(this.getContainerIdentifier(info.teamspace, info.container, info.revision));
 
 		if (json.supermeshes) {
 			for (const supermesh of json.supermeshes) {
-				this.loadSupermesh(supermesh, info);
+				this.loadSupermesh(supermesh, container);
 			}
 		}
 
@@ -1023,13 +1048,13 @@ class MetadataManager {
 				info.container = submodel.model;
 				info.revision = '';
 				for (const supermesh of submodel.supermeshes) {
-					this.loadSupermesh(supermesh, info);
+					this.loadSupermesh(supermesh, container);
 				}
 			}
 		}
 	}
 
-	loadSupermesh(supermesh, info: ContainerInfo) {
+	loadSupermesh(supermesh, info: Container) {
 		// The buffer holds all the flags for this supermesh/bundle, and is
 		// shared by all the Nodes in the bundle's branch.
 
@@ -1061,6 +1086,7 @@ class MetadataManager {
 			node.metadata.setSpecular(material.specularColor);
 			node.metadata.setShininess(material.shininess);
 			node.metadata.setGUID(this.guidManager.addNode(node));
+			node.metadata.setBounds(element.min, element.max);
 		}
 
 		// Tell the viewer about this supermesh. (Ideally, the viewer would get these
@@ -1101,19 +1127,20 @@ class MetadataManager {
 	* Imports a tree using the existing fulltree.json API, turning into a node graph
 	* and connecting with the Nodes established from loadAssetMaps.
 	*/
-	async loadFullTreeJson(info: ContainerInfo) {
+	async loadFullTreeJson(info: ModelInfo) {
 		if (!info.revision) {
 			info.revision = 'master/head';
 		}
 
 		const json = await this.fetchJson(info.teamspace + '/' + info.container + '/revision/' + info.revision + '/fulltree.json');
 
-		const branch = this.mergeContainerTree(json.mainTree.nodes);
+		// If we are are loading a container, it can have a revision. (Federations
+		// and subtrees do not). This line creates an entry for the revision at
+		// the root - this is not part of the schema, but is picked up by
+		// mergeContainerTree
 
-		// If are are loading a container, it can have a revision. (Federations
-		// and subtrees do not).
-
-		branch.revision = info.revision;
+		json.mainTree.nodes.revision = info.revision;
+		this.mergeContainerTree(json.mainTree.nodes);
 
 		// Resolve children - we only do this for the top level tree as federations
 		// are only one deep, though in theory we could do it for all subtrees too.
@@ -1134,13 +1161,47 @@ class MetadataManager {
 		}
 	}
 
-	// May be called either for the container itself or a ref node, if loading
-	// a federation.
+	/**
+	 * Computes the portable identifier for a Container instance, which can be
+	 * used to look up a Container here or in the viewer.
+	 */
+	getContainerIdentifier(teamspace: string, container: string, revision: string): string {
+		// For the purposes of the portable identifier, the revision can never
+		// be empty. Additionally, the metadata manager doesn't care whether the
+		// container is loaded as a comparator or not; the same revision can
+		// never be loaded twice, so the (non-null) revision is enough to fully
+		// distinguish the instance.
+
+		if (!revision) {
+			revision = 'master/head';
+		}
+		return `${teamspace}.${container}.${revision}`;
+	}
+
+	createContainer(containerInfoJson: string) {
+		const containerInfo = JSON.parse(containerInfoJson) as Container;
+		const identifier = this.getContainerIdentifier(containerInfo.teamspace, containerInfo.container, containerInfo.revision);
+		this.containers.set(identifier, containerInfo);
+	}
+
+	/**
+	 * Called to integrate a Container from the legacy fulltree.json API. This
+	 * should only be called for the actual Container tree - if a federation is
+	 * being loaded, this should be called for each resolved sub-tree
+	 * individually.
+	 */
 	mergeContainerTree(root: any): Node {
 		const branch = this.createNodeFromLegacyNode(root);
-		branch.revision = 'master/head';
-		branch.container = root.project;
-		branch.teamspace = root.account;
+
+		// Create a reference to the Container object, that should have been
+		// created by the viewer previously. This is done using a portable
+		// instance identifier, which is the teamspace.container.revision.
+		// The Container reference is used to provide additional context to
+		// the metadata, such as the offset into Project Coordinates.
+
+		const container = this.containers.get(this.getContainerIdentifier(root.account, root.project, root.revision));
+		branch.container = container;
+
 		this.mergeBranch(branch);
 		return branch;
 	}
@@ -1181,9 +1242,32 @@ class MetadataManager {
 			while (root && !root.container) {
 				root = root.parent;
 			}
-			return `${root.teamspace}.${root.container}.${root.revision}.${node.id}`;
+			return `${root.container.teamspace}.${root.container.container}.${root.container.revision}.${node.id}`;
 		}
 		return '';
+	}
+
+	getContainer(node: Node): Container {
+		while (node && !node.container) {
+			node = node.parent;
+		}
+		return node.container;
+	}
+
+	/**
+	 * Returns the bounds of the node with the unique id in Project Coordinates.
+	 */
+	getBounds(uuid: string): Bounds | undefined {
+		const node = this.uuidToNode.get(uuid);
+		if (node && node.metadata) {
+			const bounds = node.metadata.bounds;
+			const container = this.getContainer(node);
+			return {
+				min: new Vector3(container.offset[0] + bounds.min.x, container.offset[1] + bounds.min.y, container.offset[2] + bounds.min.z),
+				max: new Vector3(container.offset[0] + bounds.max.x, container.offset[1] + bounds.max.y, container.offset[2] + bounds.max.z),
+			};
+		}
+		return undefined;
 	}
 
 	/**
@@ -1192,15 +1276,14 @@ class MetadataManager {
 	 * corresponding to the Unity Bounds struct.
 	 */
 	getLocalBounds(uuid: string, ptr: number): void {
-		const view = new Float32Array(this.viewer.Module.asm.memory.buffer, ptr, 24);
-		view[0] = 0; // min.x
-		view[1] = 0; // min.y
-		view[2] = 0; // min.z
-		view[3] = 1; // max.x
-		view[4] = 1; // max.y
-		view[5] = 1; // max.z
 		const node = this.uuidToNode.get(uuid);
-
+		const view = new Float32Array(this.viewer.Module.asm.memory.buffer, ptr, 24);
+		view[0] = node.metadata.bounds.min.x; // min.x
+		view[1] = node.metadata.bounds.min.y; // min.y
+		view[2] = node.metadata.bounds.min.z; // min.z
+		view[3] = node.metadata.bounds.max.x; // max.x
+		view[4] = node.metadata.bounds.max.y; // max.y
+		view[5] = node.metadata.bounds.max.z; // max.z
 	}
 
 	onAnimationFrame() {
@@ -1227,9 +1310,13 @@ class MetadataManager {
 			}
 		};
 		gatherNode(this.tree, 0);
+		// eslint-disable-next-line no-console
 		console.log('Tree summary:');
+		// eslint-disable-next-line no-console
 		console.log('Number of nodes: ' + summary.numNodes);
+		// eslint-disable-next-line no-console
 		console.log('Number of leaves: ' + summary.numLeaves);
+		// eslint-disable-next-line no-console
 		console.log('Tree depth: ' + summary.depth);
 	}
 
