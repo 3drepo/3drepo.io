@@ -37,7 +37,7 @@ import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFede
 import { GroupBySelect } from '../selectMenus/groupByFormSelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
 import { Link, ControlsContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, NewFilterButton } from '../tickets.styles';
-import { NEW_TICKET_ID, NONE_OPTION } from './ticketsTable.helper';
+import { isValidFilter, NEW_TICKET_ID, NONE_OPTION } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
@@ -181,6 +181,15 @@ export const TicketsTable = () => {
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 	}, [readOnly]);
+
+	useEffect(() => {
+		if (!selectedTemplate || !filters.length) return;
+		filters.forEach((filter) => {
+			if (!isValidFilter(filter, selectedTemplate)) {
+				TicketsCardActionsDispatchers.deleteFilter(filter);
+			}
+		});
+	}, [selectedTemplate, filters]);
 
 	useEffect(() => {
 		if (prevTemplate.current && ticketId) clearTicketId();

@@ -23,6 +23,7 @@ import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
+import { isBaseProperty } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 export const NONE_OPTION = 'None';
 
@@ -200,3 +201,19 @@ export const INITIAL_COLUMNS = [
 	`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
 	`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
 ];
+
+export const isValidFilter = (filter, selectedTemplate) => {
+	const { module, property, type } = filter;
+	if (!module) {
+		if (isBaseProperty(type)) return true;
+		return selectedTemplate.properties?.some(
+			({ name, type: propType }) => name === property && propType === type,
+		);
+	}
+	const moduleDef = selectedTemplate.modules?.find(
+		({ type: moduleType, name: moduleName }) => [moduleType, moduleName].includes(module),
+	);
+	return moduleDef?.properties?.some(
+		({ name, type: propType }) => name === property && propType === type,
+	);
+};
