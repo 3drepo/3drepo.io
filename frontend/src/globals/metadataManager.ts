@@ -620,11 +620,19 @@ class GuidManager {
 	}
 }
 
-type ModelInfo = {
-	container: string,
-	revision: string,
-	teamspace: string,
-};
+class ContainerInfo {
+	container: string;
+
+	revision: string;
+
+	teamspace: string;
+
+	comparator: boolean;
+
+	getNamespace(): string {
+		return this.teamspace + '.' + this.container + '.' + this.revision + '.' + (this.comparator ? 'true' : 'false');
+	}
+}
 
 /**
  * Implements the persistent store for metadata overrides on branches that
@@ -667,7 +675,7 @@ class MetadataManager {
 		this.uuidToNode = new Map<string, Node>();
 		this.guidManager = new GuidManager();
 		this.suidToNode = new Map<string, Node>();
-		this.containerToRootNode = new Map<string, Node>();
+		this.containers = new Map<string, ContainerInfo>();
 		this.store = new StateStorage();
 		this.updated = false;
 	}
@@ -713,7 +721,7 @@ class MetadataManager {
 
 	private store: StateStorage;
 
-	private containerToRootNode: Map<string, Node>;
+	private containers: Map<string, ContainerInfo>;
 
 	/**
 	 * When true, indicates that an update should be run on the main tree.
@@ -959,12 +967,13 @@ class MetadataManager {
 	 * createContainer must be called before any metadat is loaded, either
 	 * streamed or all-in-one.
 	 */
-	createContainer() {
-
+	createContainer(info: string) {
+		const container = JSON.parse(info) as ContainerInfo;
+		this.containers.set(container.guid, container);
 	}
 
 	async loadAssetMaps(modelInfo: string) {
-		const info = JSON.parse(modelInfo) as ModelInfo;
+		const info = JSON.parse(modelInfo) as ContainerInfo;
 
 		// The tree must be loaded first because the legacy supermeshes loader
 		// expects to find existing Nodes for all the meshes. We don't want to
@@ -974,6 +983,7 @@ class MetadataManager {
 
 		this.loadSupermeshesJson(info);
 
+		// eslint-disable-next-line no-console
 		console.log('MetadataManager: loadAssetMaps completed for ' + info.teamspace + '/' + info.container + '/' + info.revision);
 	}
 
@@ -982,7 +992,7 @@ class MetadataManager {
 
 
 
-	async loadSupermeshesJson(info: ModelInfo) {
+	async loadSupermeshesJson(info: ContainerInfo) {
 		if (!info.revision) {
 			info.revision = 'master/head';
 		}
@@ -1019,7 +1029,7 @@ class MetadataManager {
 		}
 	}
 
-	loadSupermesh(supermesh, info: ModelInfo) {
+	loadSupermesh(supermesh, info: ContainerInfo) {
 		// The buffer holds all the flags for this supermesh/bundle, and is
 		// shared by all the Nodes in the bundle's branch.
 
@@ -1091,12 +1101,19 @@ class MetadataManager {
 	* Imports a tree using the existing fulltree.json API, turning into a node graph
 	* and connecting with the Nodes established from loadAssetMaps.
 	*/
-	async loadFullTreeJson(info: ModelInfo) {
+	async loadFullTreeJson(info: ContainerInfo) {
 		if (!info.revision) {
 			info.revision = 'master/head';
 		}
 
 		const json = await this.fetchJson(info.teamspace + '/' + info.container + '/revision/' + info.revision + '/fulltree.json');
+
+		const branch = this.mergeContainerTree(json.mainTree.nodes);
+
+		// If are are loading a container, it can have a revision. (Federations
+		// and subtrees do not).
+
+		branch.revision = info.revision;
 
 		// Resolve children - we only do this for the top level tree as federations
 		// are only one deep, though in theory we could do it for all subtrees too.
@@ -1112,28 +1129,15 @@ class MetadataManager {
 				// This is a reference to a sub-tree, so we need to resolve it
 				const url = subTrees.get(node._id);
 				const response = await this.fetchJson(url);
-
-				this.mergeLegacyTree(response.mainTree.nodes);
-
-				if (response && response.mainTree && response.mainTree.nodes) {
-					const branch = response.mainTree.nodes;
-					json.mainTree.nodes.children[i] = branch;
-				}
+				this.mergeContainerTree(response.mainTree.nodes);
 			}
 		}
-
-		// Create the nodes top-down
-		const branch = this.createNodeFromLegacyTree(json.mainTree.nodes);
-
-		branch.revision = info.revision;
-		branch.container = info.container;
-		branch.teamspace = info.teamspace;
-
-		this.mergeBranch(branch);
 	}
 
-	mergeLegacyTree(root: any): Node {
-		const branch = this.createNodeFromLegacyTree(root);
+	// May be called either for the container itself or a ref node, if loading
+	// a federation.
+	mergeContainerTree(root: any): Node {
+		const branch = this.createNodeFromLegacyNode(root);
 		branch.revision = 'master/head';
 		branch.container = root.project;
 		branch.teamspace = root.account;
@@ -1141,21 +1145,15 @@ class MetadataManager {
 		return branch;
 	}
 
-	createNodeFromLegacyTree(legacyNode: any): Node {
+	createNodeFromLegacyNode(legacyNode: any): Node {
 		const node = new Node(legacyNode._id);
 		node.sharedId = legacyNode.shared_id;
 		node.name = legacyNode.name;
 
-		if (legacyNode.name === 'rootNode') {
-			node.container = legacyNode.project;
-			node.teamspace = legacyNode.account;
-			node.revision = 'master/head';
-		}
-
 		if (legacyNode.children) {
 			node.children = new Map<string, Node>();
 			for (const legacyChild of legacyNode.children) {
-				const child = this.createNodeFromLegacyTree(legacyChild);
+				const child = this.createNodeFromLegacyNode(legacyChild);
 				child.parent = node;
 				node.children.set(child.id, child);
 			}
@@ -1186,6 +1184,23 @@ class MetadataManager {
 			return `${root.teamspace}.${root.container}.${root.revision}.${node.id}`;
 		}
 		return '';
+	}
+
+	/**
+	 * Writes the bounds from the node with the given uuid into the wasm vm memory
+	 * at the given pointer. The bounds are written as an array of floats
+	 * corresponding to the Unity Bounds struct.
+	 */
+	getLocalBounds(uuid: string, ptr: number): void {
+		const view = new Float32Array(this.viewer.Module.asm.memory.buffer, ptr, 24);
+		view[0] = 0; // min.x
+		view[1] = 0; // min.y
+		view[2] = 0; // min.z
+		view[3] = 1; // max.x
+		view[4] = 1; // max.y
+		view[5] = 1; // max.z
+		const node = this.uuidToNode.get(uuid);
+
 	}
 
 	onAnimationFrame() {
