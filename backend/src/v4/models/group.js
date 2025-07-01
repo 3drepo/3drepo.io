@@ -37,7 +37,6 @@ const ChatEvent = require("./chatEvent");
 
 const { systemLogger } = require("../logger.js");
 const { splitArrayIntoChunks } = require("../../v5/utils/helper/arrays.js");
-const { chunk } = require("lodash");
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -370,7 +369,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	const groupsRes = await Promise.all(resChunks.map(async (groupsChunk) => {
 		return Promise.all(groupsChunk.map(async (result) => {
 			try {
-				results.objects = await getObjectIds(account, model, branch, revId, result, true, showIfcGuids);
+				result.objects = await getObjectIds(account, model, branch, revId, result, true, showIfcGuids);
 
 			} catch (err) {
 				// do nothing
