@@ -90,11 +90,6 @@ export const Viewer = () => {
 	}, [teamspace, project, containerOrFederation]);
 
 	useEffect(() => {
-		if (!containerOrFederationId) return;
-		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, [containerOrFederationId]);
-	}, [filters]);
-
-	useEffect(() => {
 		DrawingsCardActionsDispatchers.setQueries([]);
 	}, [teamspace, project]);
 
