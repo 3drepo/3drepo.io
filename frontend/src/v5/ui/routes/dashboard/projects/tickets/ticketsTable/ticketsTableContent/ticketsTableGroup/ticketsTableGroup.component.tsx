@@ -16,47 +16,20 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { FormattedMessage } from 'react-intl';
-import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { isCommenterRole } from '@/v5/store/store.helpers';
-import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, PlaceholderForStickyFunctionality, NewTicketTextContainer } from './ticketsTableGroup.styles';
+import { Table, Group, PlaceholderForStickyFunctionality } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
-import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { getColumnLabel, SetTicketValue, sortAssignees, getAssigneeDisplayNamesFromTicket } from '../../ticketsTable.helper';
-import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ColumnsVisibilitySettings } from './columnsVisibilitySettings/columnsVisibilitySettings.component';
+import { SetTicketValue } from '../../ticketsTable.helper';
 import { orderBy } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { useParams } from 'react-router';
-import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
-
-const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
-	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
-	const isSelected = name === sortingColumn;
-
-	if (disableSorting) return (
-		<ResizableTableHeader name={name}>
-			<Header {...props}>
-				{children}
-			</Header>
-		</ResizableTableHeader>
-	);
-
-	return (
-		<ResizableTableHeader name={name} onClick={() => onColumnClick(name)}>
-			<Header {...props} $selectable>
-				{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
-				{children}
-			</Header>
-		</ResizableTableHeader>
-	);
-};
+import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
+import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.component';
+import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
@@ -67,7 +40,6 @@ type TicketsTableGroupProps = {
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const { getRowWidth, visibleSortedColumnsNames } = useContext(ResizableTableContext);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 	const hideNewticketButton = template.deprecated;
@@ -91,20 +63,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 				<SortedTableContext.Consumer>
 					{({ sortedItems }: SortedTableType<ITicket>) => (
 						<>
-							{!tickets.length
-								? (<PlaceholderForStickyFunctionality />)
-								: (
-									<>
-										<Headers>
-											{visibleSortedColumnsNames.map((name) => (
-												<SortingTableHeader key={name} name={name} disableSorting={name === 'id'}>
-													{getColumnLabel(name)}
-												</SortingTableHeader>
-											))}
-											<ColumnsVisibilitySettings />
-										</Headers>
-									</>
-								)}
+							{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
 							<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
 								{sortedItems.map(({ modelId, ...ticket }) => (
 									<TicketsTableRow
@@ -115,26 +74,12 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										selected={selectedTicketId === ticket._id}
 									/>
 								))}
-								{!hideNewticketButton &&
-									<NewTicketMenu
+								{!hideNewticketButton && (
+									<NewTicketRowButton
+										onNewTicket={onNewTicket}
 										disabled={newTicketButtonIsDisabled}
-										TriggerButton={(
-											<NewTicketRow
-												disabled={newTicketButtonIsDisabled}
-												style={{ width: getRowWidth() }}
-											>
-												<NewTicketTextContainer>
-													<AddCircleIcon />
-													<NewTicketText>
-														<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
-													</NewTicketText>
-												</NewTicketTextContainer>
-											</NewTicketRow>
-										)}
-										useMousePosition
-										onContainerOrFederationClick={onNewTicket}
 									/>
-								}
+								)}
 							</Group>
 						</>
 					)}
