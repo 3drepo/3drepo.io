@@ -49,7 +49,7 @@ const generateBasicData = () => ({
 	fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 });
 
-const setupBasicData = async (users, teamspace, project, models, templatesToAdd) => {
+const setupBasicData = async (users, teamspace, project, models, templatesToAdd, roles) => {
 	const { tsAdmin, ...otherUsers } = users;
 
 	await ServiceHelper.db.createUser(tsAdmin);
@@ -69,6 +69,9 @@ const setupBasicData = async (users, teamspace, project, models, templatesToAdd)
 			[users.projectAdmin.user]),
 		ServiceHelper.db.createTemplates(teamspace, templatesToAdd),
 	]);
+	if (roles?.length) {
+		await ServiceHelper.commitRoles(teamspace, roles);
+	}
 };
 
 const testGetAllTemplates = () => {
@@ -555,8 +558,7 @@ const testGetTicket = () => {
 		const roles = times(5, () => ServiceHelper.generateRole([users.tsAdmin.user]));
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed], [templateToUse]);
-			await ServiceHelper.db.createRoles(teamspace, roles);
+			await setupBasicData(users, teamspace, project, [con, fed], [templateToUse], roles);
 			await Promise.all([fed, con].map(async (model) => {
 				const ticket = ServiceHelper.generateTicket(templateToUse);
 				ticket.properties[rolesOneOfPropName] = roles[0]._id;

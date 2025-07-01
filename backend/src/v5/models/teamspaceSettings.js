@@ -24,10 +24,8 @@ const {
 	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
-const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
-const { getArrayDifference } = require('../utils/helper/arrays');
 const { getUserStatusInAccount } = require('../services/sso/frontegg');
 const { membershipStatus } = require('../services/sso/frontegg/frontegg.constants');
 const { templates } = require('../utils/responseCodes');

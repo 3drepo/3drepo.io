@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { uniqueElements } = require('../../../../../src/v5/utils/helper/arrays');
+const Objects = require('../../../../../src/v5/utils/helper/objects');
+const { deleteIfUndefined } = require('../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../path');
 
 const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
@@ -25,6 +28,7 @@ const Accounts = {};
 const teamspaceByAccount = {};
 const usersInAccount = {};
 const emailToUser = {};
+const groupsByAccount = {};
 
 Accounts.getTeamspaceByAccount = (accountId) => teamspaceByAccount[accountId];
 
@@ -60,4 +64,85 @@ Accounts.removeAccount = (accountId) => {
 	delete usersInAccount[accountId];
 	delete teamspaceByAccount[accountId];
 };
+
+Accounts.addUsersToGroup =  (accountId, groupId, userIds) => {
+	if(groupsByAccount[accountId]?.[groupId]) {
+		const group = groupsByAccount[accountId][groupId];
+		group.users = group.users || [];
+		group.users = [...group.users, ...userIds];
+		uniqueElements(group.users);
+	} else {
+		throw new Error(`Group with ID ${groupId} not found in account: ${accountId}`);
+	}
+	
+};
+
+Accounts.removeUsersFromGroup = async (accountId, groupId, userIds) => {
+	if(groupsByAccount[accountId]?.[groupId]) {
+		groupsByAccount[accountId][groupId].users = groupsByAccount[accountId][groupId].users.filter((user) => !userIds.includes(user.id));
+	} else {
+		throw new Error(`Group with ID ${groupId} not found in account: ${accountId}`);
+	}
+	
+};
+
+Accounts.getGroups = async (accountId, getUsers = true) => {
+	if(groupsByAccount[accountId]) {
+		return Objects.values(groupsByAccount[accountId]).map((group) => {
+			if (getUsers) {
+				return group;
+			}
+			const { users, ...groupData } = group;
+			return groupData;
+		}
+	}
+
+	throw new Error(`No groups found for account: ${accountId}`);
+	
+};
+
+Accounts.getGroupById = (accountId, groupId, fetchUsers) => {
+	if (groupsByAccount[accountId]?.[groupId]) {
+		if (fetchUsers) {
+			return groupsByAccount[accountId][groupId];
+		}
+		const { users, ...groupData } = groupsByAccount[accountId][groupId];
+		return groupData;
+	}
+	throw new Error(`Group with ID ${groupId} not found in account: ${accountId}`);
+};
+
+Accounts.createGroup = (accountId, name, color, users) => {
+	groupsByAccount[accountId] = groupsByAccount[accountId] || {};
+
+	const groupId = generateUUIDString();
+
+	groupsByAccount[accountId][groupId] = deleteIfUndefined({
+		id: groupId,
+		name,
+		color,
+		users,
+	});
+};
+
+Accounts.updateGroup = (accountId, groupId, { name, color }) => {
+	if (groupsByAccount[accountId]?.[groupId]) {
+		groupsByAccount[accountId][groupId] = deleteIfUndefined({
+			...groupsByAccount[accountId][groupId],
+			name,
+			color,
+		});
+	} else {
+		throw new Error(`Group with ID ${groupId} not found in account: ${accountId}`);
+	}
+};
+
+Accounts.removeGroup = (accountId, groupId) => {
+	if (groupsByAccount[accountId]?.[groupId]) {
+		delete groupsByAccount[accountId][groupId];
+	} else {
+		throw new Error(`Group with ID ${groupId} not found in account: ${accountId}`);
+	}
+};
+
 module.exports = Accounts;

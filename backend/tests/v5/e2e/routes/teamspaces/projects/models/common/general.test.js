@@ -76,7 +76,7 @@ const generateBasicData = () => {
 	return data;
 };
 
-const setupBasicData = async (users, teamspace, project, models) => {
+const setupBasicData = async (users, teamspace, project, models, roles) => {
 	const { tsAdmin, ...otherUsers } = users;
 
 	await ServiceHelper.db.createUser(tsAdmin);
@@ -95,6 +95,10 @@ const setupBasicData = async (users, teamspace, project, models) => {
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id),
 			[users.projectAdmin.user]),
 	]);
+
+	if (roles?.length) {
+		await ServiceHelper.commitRoles(teamspace, roles);
+	}
 };
 
 const testGetModelList = () => {
@@ -1114,7 +1118,6 @@ const testGetRolesWithAccess = () => {
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed, draw], roles);
-			await ServiceHelper.db.createRoles(teamspace, roles);
 		});
 
 		const generateTestData = (modelType) => {

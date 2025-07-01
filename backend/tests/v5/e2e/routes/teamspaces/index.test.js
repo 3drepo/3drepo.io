@@ -89,7 +89,7 @@ const testGetTeamspaceMembers = () => {
 			await Promise.all(
 				members.map((user) => ServiceHelper.db.createUser(user, [teamspace])),
 			);
-			await ServiceHelper.db.createRoles(teamspace, roles);
+			await ServiceHelper.commitRoles(teamspace, roles);
 		});
 
 		test('should fail without a valid session', async () => {

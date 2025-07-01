@@ -28,6 +28,7 @@ const { image, src, srcV4 } = require('./path');
 const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
+const { createRole } = require('../../../src/v5/processors/teamspaces/roles');
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
@@ -291,11 +292,6 @@ db.createComment = (teamspace, project, model, ticket, comment) => {
 	return DbHandler.insertOne(teamspace, 'tickets.comments', formattedComment);
 };
 
-db.createRoles = (teamspace, roles) => {
-	const formattedRoles = roles.map((role) => ({ ...role, _id: stringToUUID(role._id) }));
-	return DbHandler.insertMany(teamspace, 'roles', formattedRoles);
-};
-
 db.createIssue = (teamspace, modelId, issue) => {
 	const formattedIssue = { ...issue, _id: stringToUUID(issue._id) };
 	return DbHandler.insertOne(teamspace, `${modelId}.issues`, formattedIssue);
@@ -387,11 +383,18 @@ ServiceHelper.generateCustomStatusValues = () => Object.values(statusTypes).map(
 }));
 
 ServiceHelper.generateRole = (users = []) => ({
-	_id: ServiceHelper.generateUUIDString(),
 	name: ServiceHelper.generateRandomString(),
 	color: DEFAULT_ROLES[0].color,
 	users,
 });
+
+ServiceHelper.commitRoles = async (teamspace, roles) => {
+	await Promise.all(roles.map(async (role) => {
+		const id = await createRole(teamspace, roles);
+		// eslint-disable-next-line no-param-reassign
+		role.id = id;
+	}));
+};
 
 ServiceHelper.generateSequenceEntry = (rid) => {
 	const startDate = ServiceHelper.generateRandomDate();
