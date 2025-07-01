@@ -375,6 +375,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 			} catch (err) {
 				// do nothing
 			}
+			return clean(result);
 		}));
 	}));
 
