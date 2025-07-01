@@ -33,13 +33,12 @@ import {
 	FetchTicketGroupsAction,
 	UpsertTicketAndFetchGroupsAction,
 	UpdateTicketGroupAction,
-	FetchTicketPropertiesAction,
 	FetchTicketsPropertiesAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketById, selectTicketByIdRaw, selectTicketsById, selectTicketsGroups } from './tickets.selectors';
+import { selectTicketByIdRaw, selectTicketsById, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { addUpdatedAtTime } from './tickets.helpers';
@@ -74,45 +73,10 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 	ExecutionStrategy.Fifo,
 );
 
-export function* fetchTicketProperties({
-	teamspace, projectId, modelId, ticketId,
-	templateCode, isFederation, propertiesToInclude,
-}: FetchTicketPropertiesAction) {
-	try {
 
-		const { number } = yield select(selectTicketById, modelId, ticketId);
-		const filterByTemplateCode = {
-			filter: {
-				operator: 'is',
-				values: [`${templateCode}:${number}`],
-			},
-			property: 'Ticket ID',
-			type: 'ticketCode',
-		} as any;
-		const [ticket] = yield ticketPropertiesQueue.addCall(
-			isFederation,
-			teamspace,
-			projectId,
-			modelId,
-			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
-		);
-		yield put(TicketsActions.upsertTicketSuccess(modelId, { ...ticket, _id: ticketId }));
-
-		// Mark properties as fetched
-		yield put(TicketsActions.setPropertiesFetched([ticketId], propertiesToInclude, true));
-
-	} catch (error) {
-		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketProperties.error', defaultMessage: 'trying to fetch {model} ticket properties' },
-				{ model: getContainerOrFederationFormattedText(isFederation) },
-			),
-			error,
-		}));
-	}
-}
-
-
+// The format of the propertiesToInclude is the propety name without property prefix, e.g. 'Assignees', 'Due Date', etc.
+// And with modules properties its the module name and property name separated by a dot, e.g. 'ModuleName.PropertyName' like
+// 'safetybase.Level Of Risk'.
 export function* fetchTicketsProperties({
 	teamspace, projectId, modelId, ticketIds,
 	templateCode, isFederation, propertiesToInclude,
@@ -142,7 +106,7 @@ export function* fetchTicketsProperties({
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketProperties.error', defaultMessage: 'trying to fetch {model} ticket properties' },
+				{ id: 'tickets.fetchTicketsProperties.error', defaultMessage: 'trying to fetch {model} tickets properties' },
 				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
@@ -351,6 +315,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS, fetchTicketGroups);
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
-	yield takeEvery(TicketsTypes.FETCH_TICKET_PROPERTIES, fetchTicketProperties);
 	yield takeEvery(TicketsTypes.FETCH_TICKETS_PROPERTIES, fetchTicketsProperties);
 }

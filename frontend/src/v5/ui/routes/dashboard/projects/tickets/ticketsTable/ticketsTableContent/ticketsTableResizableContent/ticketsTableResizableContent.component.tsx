@@ -27,17 +27,53 @@ import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
 import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
-import { getState } from '@/v5/helpers/redux.helpers';
-import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
+
+type TicketsTableContextProps = {
+	groupName: string;
+	tickets: ITicket[];
+	setTicketValue: SetTicketValue;
+	selectedTicketId?: string;
+	onNewTicket: (groupByValue: string) => (modelId: string) => void;
+	propertyName: string;
+};
+
+const CollapsableTicketsTableGroup = ({ groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: TicketsTableContextProps) => {
+	const ticketsIds = tickets.map(({ _id }) => _id);
+
+	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
+
+	return (<DashboardListCollapse
+		title={(
+			<>
+				<Title>{groupName}</Title>
+				<CircledNumber disabled={!tickets.length || isLoading}>
+					{isLoading ? <Spinner /> : tickets.length}
+				</CircledNumber>
+			</>
+		)}
+		defaultExpanded={!!tickets.length}
+	>
+		<TicketsTableGroup
+			tickets={tickets}
+			onNewTicket={onNewTicket(groupName)}
+			onEditTicket={setTicketValue}
+			selectedTicketId={selectedTicketId}
+		/>
+	</DashboardListCollapse>);
+};
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
 };
+
 export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
 	const { groupBy, getPropertyType } = useContext(TicketsTableContext);
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
+
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
@@ -53,37 +89,21 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 		);
 	}
 
-	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
-	const ticketsToDisplay = groupBy
-		? filteredItems.filter(({ _id: ticketId }) => selectPropertyFetched(getState(), ticketId, propertyName))
-		: filteredItems;
-
-	const isLoading = groupBy && (ticketsToDisplay.length !== filteredItems.length);
-
 	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy));
+	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
 
 	return (
 		<Container>
 			{groups.map(([groupName, tickets]) => (
-				<DashboardListCollapse
-					title={(
-						<>
-							<Title>{groupName}</Title>
-							<CircledNumber disabled={!tickets.length || isLoading}>
-								{isLoading ? <Spinner /> : tickets.length}
-							</CircledNumber>
-						</>
-					)}
-					defaultExpanded={!!tickets.length}
+				<CollapsableTicketsTableGroup
+					groupName={groupName}
+					tickets={tickets}
+					setTicketValue={setTicketValue}
+					onNewTicket={onGroupNewTicket}
+					selectedTicketId={selectedTicketId}
+					propertyName={propertyName}
 					key={groupBy + groupName + template + tickets}
-				>
-					<TicketsTableGroup
-						tickets={tickets}
-						onNewTicket={onGroupNewTicket(groupName)}
-						onEditTicket={setTicketValue}
-						selectedTicketId={selectedTicketId}
-					/>
-				</DashboardListCollapse>
+				/>
 			))}
 		</Container>
 	);

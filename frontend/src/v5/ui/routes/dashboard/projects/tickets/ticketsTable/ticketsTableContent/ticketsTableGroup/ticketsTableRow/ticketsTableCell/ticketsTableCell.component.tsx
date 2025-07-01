@@ -30,7 +30,6 @@ import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanS
 import { CellDate } from './ticketsTableCell.styles';
 import { Cell } from './cell/cell.component';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
-import { INITIAL_COLUMNS } from '../../../../ticketsTable.helper';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -51,7 +50,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 
 	// Check if this property is currently being loaded
 	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
-	const propertyWasFetched = TicketsHooksSelectors.selectPropertyFetched(ticketId, propertyName) || INITIAL_COLUMNS.includes(name);
+	const propertyWasFetched = TicketsHooksSelectors.selectPropertyFetched(ticketId, propertyName);
 
 	// const { owner } = getPropertiesInCamelCase(properties);
 	const propertyType = getPropertyType(name);
