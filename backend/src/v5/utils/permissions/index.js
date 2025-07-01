@@ -23,7 +23,8 @@ const {
 } = require('./permissions.constants');
 const { findModels, getContainerById, getDrawingById, getFederationById, getModelById } = require('../../models/modelSettings');
 const { getProjectAdmins, modelsExistInProject } = require('../../models/projectSettings');
-const { getTeamspaceAdmins, hasAccessToTeamspace } = require('../../models/teamspaceSettings');
+const { getTeamspaceAdmins } = require('../../models/teamspaceSettings');
+const { isTeamspaceMember } = require('../../processors/teamspaces');
 const { modelTypes } = require('../../models/modelSettings.constants');
 
 const Permissions = {};
@@ -47,7 +48,7 @@ const hasAdminPermissions = async (teamspace, project, username) => {
 	return isAdminArr.filter((bool) => bool).length;
 };
 
-Permissions.hasAccessToTeamspace = hasAccessToTeamspace;
+Permissions.hasAccessToTeamspace = isTeamspaceMember;
 
 Permissions.hasProjectAdminPermissions = (perms, username) => perms.some(
 	({ user, permissions }) => user === username && permissions.includes(PROJECT_ADMIN),

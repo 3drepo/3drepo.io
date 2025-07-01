@@ -34,7 +34,7 @@ const { deserialiseGroupSchema } = require('./tickets.groups');
 const { generateFullSchema } = require('./templates');
 const { getArrayDifference } = require('../../utils/helper/arrays');
 const { getRiskCategories } = require('../../models/teamspaceSettings');
-const { getRolesByUsers } = require('../../models/roles');
+const { getRolesByUsers } = require('../../processors/teamspaces/roles');
 const { getTicketsByQuery } = require('../../models/tickets');
 const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
 const { importCommentSchema } = require('./tickets.comments');
@@ -60,7 +60,7 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 						const users = await getUsersWithPermissions(teamspace, project, model, excludeViewers);
 						const accessibleRoles = await getRolesByUsers(teamspace, users);
 
-						values = [...accessibleRoles.map(UUIDToString), ...users];
+						values = [...accessibleRoles, ...users];
 					}
 					break;
 				case presetEnumValues.RISK_CATEGORIES:

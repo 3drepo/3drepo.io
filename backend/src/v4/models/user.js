@@ -37,6 +37,7 @@ const {
 const PermissionTemplates = require("./permissionTemplates");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { isTeamspaceMember } = require("../../v5/processors/teamspaces/index.js");
 const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects.js`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 const { types: { strings } } = require(`${v5Path}/utils/helper/yup.js`);
@@ -47,13 +48,9 @@ const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
 const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces`);
-const { getTeamspaceMembersInfo } = require(`${v5Path}/processors/teamspaces`);
+const { getTeamspaceMembersInfo, isMemberOfTeamspace } = require(`${v5Path}/processors/teamspaces`);
 
 const COLL_NAME = "system.users";
-
-const isMemberOfTeamspace = function (user, teamspace) {
-	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
-};
 
 const hasReachedLicenceLimit = async function (teamspace) {
 	const Invitations = require("./invitations");
@@ -196,27 +193,28 @@ User.deleteApiKey = (username) => UserProcessorV5.deleteApiKey(username);
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
 	const regex = new RegExp(`^${searchString}$`, "i");
-	const notMembers = await db.find("admin", COLL_NAME, {
+	const notMember = await db.findOne("admin", COLL_NAME, {
 		$or: [
 			{"customData.email": regex},
 			{"user": regex}
 		],
-		"customData.inactive": { "$exists": false },
-		"roles.db": {$ne: teamspace }
+		"customData.inactive": { "$exists": false }
 	});
 
-	return notMembers.map(({user, customData }) => {
-		return {
+	if(notMember && await isTeamspaceMember(teamspace, notMember.user, true)) {
+		const {user, customData} = notMember;
+		return [{
 			user,
 			firstName: customData.firstName,
 			lastName: customData.lastName,
 			company: _.get(customData, "billing.billingInfo.company", null)
-		};
-	});
+		}];
+	}
+	return [];
 
 };
 
-// case insenstive
+// case insensitive
 User.checkUserNameAvailableAndValid = async function (username) {
 	if (!User.usernameRegExp.test(username) ||
 		-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())
@@ -543,7 +541,7 @@ User.addTeamMember = async function(teamspace, userToAdd, role, permissions, exe
 		throw (responseCodes.USER_NOT_FOUND);
 	}
 
-	if (isMemberOfTeamspace(userEntry, teamspace)) {
+	if (isMemberOfTeamspace(teamspace, userEntry)) {
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
@@ -633,14 +631,14 @@ User.teamspaceMemberCheck = async function (user, teamspace) {
 		throw (responseCodes.USER_NOT_FOUND);
 	}
 
-	if (!isMemberOfTeamspace(userEntry, teamspace)) {
+	if (!isMemberOfTeamspace(teamspace,userEntry)) {
 		throw (responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 	}
 };
 
 User.getTeamMemberInfo = async function(teamspace, user) {
 	const userEntry = await User.findByUserName(user);
-	if(!userEntry || !isMemberOfTeamspace(userEntry,teamspace)) {
+	if(!userEntry || !isMemberOfTeamspace(teamspace, userEntry)) {
 		throw responseCodes.USER_NOT_FOUND;
 	} else {
 		const role = await findRoleByUser(teamspace, user);

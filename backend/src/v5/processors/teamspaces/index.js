@@ -16,7 +16,7 @@
  */
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
-const { addUserToAccount, createAccount, getAllUsersInAccount, getTeamspaceByAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, getAccountsByUser, getAllUsersInAccount, getTeamspaceByAccount, getUserById, getUserStatusInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createDefaultRoles, getRoles, removeUserFromRoles } = require('./roles');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
@@ -42,6 +42,8 @@ const { removeAllTeamspaceNotifications } = require('../../models/notifications'
 const { removeUserFromAllModels } = require('../../models/modelSettings');
 const { removeUserFromAllProjects } = require('../../models/projectSettings');
 const { templates } = require('../../utils/responseCodes');
+const { membershipStatus } = require('../../services/sso/frontegg/frontegg.constants');
+const Accounts = require('../../services/sso/frontegg/components/accounts');
 
 const Teamspaces = {};
 
@@ -105,8 +107,25 @@ Teamspaces.removeTeamspace = async (teamspace) => {
 };
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
-	const tsList = await getAccessibleTeamspaces(user);
-	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
+	const userId = await getUserId(user);
+
+	const accountIds = getAccountsByUser(userId);
+
+	const teamspaceInfo = await Promise.all(accountIds.map(async (accountId) => {
+		try {
+			const teamspace = await getTeamspaceByAccount(accountId);
+			if (teamspace) {
+				const isAdmin = await isTeamspaceAdmin(teamspace, user);
+				return { name: teamspace, isAdmin };
+			}
+
+			return undefined;
+		} catch (err) {
+			return undefined;
+		}
+	}));
+
+	return teamspaceInfo.filter((info) => !!info);
 };
 
 Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
@@ -263,6 +282,21 @@ Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove, removePermiss
 		removeUserFromAccount(accountId, userId),
 		revokeTeamspaceRoleFromUser(teamspace, userToRemove),
 	]);
+};
+
+Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck = false) => {
+	try {
+		const [accountId, userId] = await Promise.all([
+			getTeamspaceRefId(teamspace),
+			getUserId(username),
+		]);
+		const memStatus = await getUserStatusInAccount(accountId, userId);
+
+		return bypassStatusCheck ? memStatus !== membershipStatus.NOT_MEMBER
+			: memStatus === membershipStatus.ACTIVE || memStatus === membershipStatus.PENDING_LOGIN;
+	} catch (err) {
+		return false;
+	}
 };
 
 Teamspaces.getAddOns = getAddOns;

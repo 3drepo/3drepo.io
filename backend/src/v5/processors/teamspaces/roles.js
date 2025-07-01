@@ -59,6 +59,24 @@ Roles.getRoleById = async (teamspace, roleId, fetchUsers = false) => {
 	}
 };
 
+Roles.getRolesByUsers = async (teamspace, users) => {
+	const rolesInTS = await Roles.getRoles(teamspace);
+	const roles = [];
+
+	const usersToCheck = {};
+	users.forEach((user) => {
+		usersToCheck[user] = true;
+	});
+
+	rolesInTS.forEach(({ id, users: usersInRole }) => {
+		if (usersInRole?.length && usersInRole.some((user) => usersToCheck[user])) {
+			roles.push(id);
+		}
+	});
+
+	return roles;
+};
+
 Roles.isRoleNameUsed = async (teamspace, name) => {
 	const teamspaceId = await getTeamspaceRefId(teamspace);
 	const groups = await getGroups(teamspaceId, false);

@@ -25,7 +25,7 @@ const { UUIDToString } = require('../../utils/helper/uuids');
 const { basePropertyLabels } = require('../../schemas/tickets/templates.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
 const { getClosedStatuses } = require('../../schemas/tickets/templates');
-const { getRolesToUsers } = require('../../models/roles');
+const { getRoles } = require('../../processors/teamspaces/roles');
 const { getTemplateById } = require('../../models/tickets.templates');
 const { getTicketById } = require('../../models/tickets');
 const { getUsersWithPermissions } = require('../../processors/teamspaces/projects/models/commons/settings');
@@ -45,13 +45,13 @@ const getUserList = (roleToUsers, toNotify) => toNotify.flatMap(
  */
 const generateTicketNotifications = async (teamspace, project, model, actionedBy, notificationData) => {
 	const [roleList, usersWithAccess] = await Promise.all([
-		getRolesToUsers(teamspace),
+		getRoles(teamspace),
 		getUsersWithPermissions(teamspace, project, model, false),
 	]);
 
 	const roleToUsers = {};
-	roleList.forEach(({ _id, users }) => {
-		roleToUsers[UUIDToString(_id)] = users;
+	roleList.forEach(({ id, users }) => {
+		roleToUsers[id] = users;
 	});
 
 	await Promise.all(notificationData.map(async ({ info, notifyFn }) => {

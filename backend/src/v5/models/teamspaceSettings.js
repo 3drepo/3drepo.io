@@ -162,55 +162,6 @@ TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
 	);
 };
 
-TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username, bypassStatusCheck = false) => {
-	const query = { user: username, 'roles.db': teamspace };
-	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1, userId: 1 } });
-	if (!userDoc) return false;
-
-	if (!bypassStatusCheck) {
-		const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
-
-		if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
-			const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
-			if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
-				throw templates.domainRestricted;
-			}
-		}
-
-		const teamspaceId = await TeamspaceSetting.getTeamspaceRefId(teamspace);
-
-		const memStatus = await getUserStatusInAccount(teamspaceId, userDoc.customData.userId);
-		if (memStatus === membershipStatus.NOT_MEMBER) {
-			return false;
-		}
-
-		if (memStatus === membershipStatus.INACTIVE) {
-			throw templates.membershipInactive;
-		}
-
-		if (memStatus === membershipStatus.PENDING_INVITE) {
-			throw templates.pendingInviteAcceptance;
-		}
-	}
-
-	return !!userDoc;
-};
-
-TeamspaceSetting.getMembersInfo = async (teamspace) => {
-	const query = { 'roles.db': teamspace };
-	const projection = { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 };
-	const data = await findMany(query, projection);
-
-	return data.map(({ user, customData }) => {
-		const { firstName, lastName, billing } = customData;
-		const res = { user, firstName, lastName };
-		if (billing?.billingInfo?.company) {
-			res.company = billing.billingInfo.company;
-		}
-		return res;
-	});
-};
-
 TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace) => {
 	const currentDate = new Date();
 	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`subscriptions.${type}`]: { $exists: true }, [`subscriptions.${type}.expiryDate`]: null },

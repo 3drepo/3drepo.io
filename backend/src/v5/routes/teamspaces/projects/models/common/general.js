@@ -222,7 +222,7 @@ const getRolesWithAccess = async (req, res) => {
 
 	try {
 		const roles = await ModelSettings.getRolesWithAccess(teamspace, project, model, excludeViewers);
-		respond(req, res, templates.ok, { roles: roles.map(UUIDToString) });
+		respond(req, res, templates.ok, { roles });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
