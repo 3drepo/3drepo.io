@@ -18,7 +18,7 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { getPropertyLabel } from '../../../ticketsTable.helper';
+import { getPropertyLabel, stripModuleOrPropertyPrefix } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
@@ -105,16 +105,12 @@ export const ColumnsVisibilitySettings = () => {
 	const columnsNames = getAllColumnsNames();
 	const { sortedItems: tickets, sortingColumn, refreshSorting } = useContext(SortedTableContext as React.Context<SortedTableType<ITicket>>);
 
-	const nameToExtraPropertyToFetch = (name) => name
-		.replace(/properties\./, '')
-		.replace(/modules\./, '');
-
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getPropertyLabel(col), query))
 	);
 	const ticketsIds = tickets.map(({ _id }) => _id);
 
-	const orderingColumnPropertiesFetched = TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, nameToExtraPropertyToFetch(sortingColumn));
+	const orderingColumnPropertiesFetched = TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, stripModuleOrPropertyPrefix(sortingColumn));
 
 	useEffect(() => {
 		if (!orderingColumnPropertiesFetched) return;

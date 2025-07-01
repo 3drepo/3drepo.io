@@ -39,7 +39,7 @@ import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFede
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
 import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { INITIAL_COLUMNS, NEW_TICKET_ID } from './ticketsTable.helper';
+import { NEW_TICKET_ID } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
@@ -194,10 +194,7 @@ export const TicketsTable = () => {
 	}, [groupBy]);
 
 	useEffect(() => {
-		let columnsToFetch = [...visibleSortedColumnsNames];
-		columnsToFetch
-			.filter((name) => !INITIAL_COLUMNS.includes(name))
-			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
+		visibleSortedColumnsNames.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
 	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join('')]);
 
 	return (
