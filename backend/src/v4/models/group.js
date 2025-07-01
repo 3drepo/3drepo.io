@@ -36,7 +36,6 @@ const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
 const { systemLogger } = require("../logger.js");
-const { splitArrayIntoChunks } = require("../../v5/utils/helper/arrays.js");
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -365,21 +364,19 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	}
 
 	const results = await db.find(account, getGroupCollectionName(model), query);
-	const resChunks = splitArrayIntoChunks(results, 10);
-	const groupsRes = await Promise.all(resChunks.map(async (groupsChunk) => {
-		return Promise.all(groupsChunk.map(async (result) => {
-			try {
-				result.objects = await getObjectIds(account, model, branch, revId, result, true, showIfcGuids);
 
-			} catch (err) {
-				// do nothing
-			}
-			return clean(result);
-		}));
-	}));
+	const sharedIdConversionPromises = [];
 
-	return groupsRes.flat();
+	results.forEach(result => {
+		const getObjIdProm = getObjectIds(account, model, branch, revId, result, true, showIfcGuids)
+			.then((sharedIdObjects) => {
+				result.objects = sharedIdObjects;
+				return clean(result);
+			}).catch(() => clean(result));
+		sharedIdConversionPromises.push(getObjIdProm);
+	});
 
+	return Promise.all(sharedIdConversionPromises);
 };
 
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {
