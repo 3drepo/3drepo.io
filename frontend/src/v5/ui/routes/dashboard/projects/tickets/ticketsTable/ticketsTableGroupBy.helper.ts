@@ -21,7 +21,7 @@ import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/t
 import _ from 'lodash';
 import { stripModuleOrPropertyPrefix } from './ticketsTable.helper';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
-import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
+import { selectStatusConfigByTemplateId, selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 
 export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
@@ -105,7 +105,8 @@ const groupByManyOfValues = (tickets: ITicket[], groupBy: string) => {
 	return { ...groups, [UNSET]: ticketsWithUnsetValue };
 };
 
-const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => _.groupBy(tickets, (ticket) => _.get(ticket, groupBy) ?? UNSET);
+const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => _.groupBy(tickets, 
+	(ticket) => selectTicketPropertyByName(getState(), ticket._id, groupBy) ?? UNSET);
 
 const sortSelectGroups = (groups: Record<string, ITicket[]>) => {
 	const { [UNSET]: groupsWithUnsetValue, ...grouspWithSetValue } = groups;

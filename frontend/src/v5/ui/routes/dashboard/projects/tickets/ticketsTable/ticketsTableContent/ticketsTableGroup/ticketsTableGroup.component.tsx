@@ -24,7 +24,7 @@ import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
 import { orderBy } from 'lodash';
-import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
@@ -32,10 +32,7 @@ import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.comp
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeWatchPropertyUpdateTicket } from '@/v5/services/realtime/ticketTable.events';
-import { useEffect } from 'react';
-import { useSearchParam, Transformers } from '@/v5/ui/routes/useSearchParam';
+import { useWatchPropertyChange } from '../../useWatchPropertyChange';
 
 type TicketsTableGroupContentProps = {
 	tickets: ITicket[];
@@ -60,16 +57,7 @@ const TicketsTableGroupContent = ({
 	newTicketButtonIsDisabled, 
 	hideNewticketButton,
 }: TicketsTableGroupContentProps) => {
-	const { teamspace, project } = useParams<DashboardTicketsParams>();
-	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
-	const isFed = FederationsHooksSelectors.selectIsFederation();
-
-	useEffect(() => {
-		const subscriptions = containersAndFederations.map((modelId) => 
-			enableRealtimeWatchPropertyUpdateTicket(teamspace, project, modelId, isFed(modelId), sortingColumn, refreshSorting));
-
-		return combineSubscriptions(...subscriptions);
-	}, [teamspace, project, containersAndFederations, isFed, sortingColumn]);
+	// useWatchPropertyChange(sortingColumn, refreshSorting);
 
 	return (
 		<>
