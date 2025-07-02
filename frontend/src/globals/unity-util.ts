@@ -2663,4 +2663,26 @@ export class UnityUtil {
 	public static createWebRequestHandler(gameObjectName: string) {
 		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
 	}
+
+	/**
+	 * Called by the viewer on processing a repoAssets response, when it needs
+	 * to indicate something about that response to UnityUtil. Currently, there
+	 * is only one such case, where the requisite action is to invalidate a
+	 * cache entry.
+	 */
+	public static repoAssetsAlert(alertJson: string) {
+		const alert = JSON.parse(alertJson);
+		console.debug('UnityUtil.repoAssetsAlert called with alert:', alert);
+		if (alert.version === 1) {
+			// For now, we only have one known alert, which is for a container that has
+			// had its unity assets replaced with repobundles. In this case, we should
+			// invalidate the supermeshes.json.mpc response.
+			const key = `/${alert.teamspace}/${alert.container}/revision/${alert.revision}/supermeshes.json.mpc`;
+			if (this.externalWebRequestHandler) {
+				this.externalWebRequestHandler.invalidateCache(key);
+			} else {
+				console.warn('UnityUtil.repoAssetsAlert called without an externalWebRequestHandler set');
+			}
+		}
+	}
 }
