@@ -57,28 +57,24 @@ export const selectIsFetchingAddons = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => !state.addOns[teamspace],
 );
 
-export const selectAddons = createSelector(
+const selectAddons = createSelector(
 	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => (
-		state.addOns[teamspace] || {
-			modules: [],
-			usersProvisioned: false,
-			disablePermissionsOnUI: false,
-		} as AddOns
+		state.addOns[teamspace] || {} as AddOns
 	),
 );
 
 export const selectRisksEnabled = createSelector(
-	selectAddons, (addOns) => addOns.modules.includes(AddOnModule.Risks),
+	selectAddons, (addOns) => !!addOns.modules?.includes(AddOnModule.Risks),
 );
 
 export const selectIssuesEnabled = createSelector(
-	selectAddons, (addOns) => addOns.modules.includes(AddOnModule.Issues),
+	selectAddons, (addOns) => !!addOns.modules?.includes(AddOnModule.Issues),
 );
 
 export const selectUsersProvisionedEnabled = createSelector(
-	selectAddons, (addOns) => addOns.usersProvisioned,
+	selectAddons, (addOns) => !!addOns.usersProvisioned,
 );
 
 export const selectPermissionsOnUIDisabled = createSelector(
-	selectAddons, (addOns) => addOns.disablePermissionsOnUI,
+	selectAddons, (addOns) => !!addOns.disablePermissionsOnUI,
 );
