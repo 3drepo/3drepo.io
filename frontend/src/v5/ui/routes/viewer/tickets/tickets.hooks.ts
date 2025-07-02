@@ -104,7 +104,7 @@ export const useViewerTicketFilterParams = () => {
 
 export const useSetDefaultTicketFilters = (templates: ITemplate[]) => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
-
+	const templateIds = templates.map((t) => t._id).sort();
 	useEffect(() => {
 		if (!templates) return;
 		const ticketCodes = ticketSearchParam
@@ -118,5 +118,5 @@ export const useSetDefaultTicketFilters = (templates: ITemplate[]) => {
 			ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 		}
 		setTicketSearchParam();
-	}, [templates.length, ticketSearchParam]);
+	}, [JSON.stringify(templateIds), ticketSearchParam]);
 };
