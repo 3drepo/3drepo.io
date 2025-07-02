@@ -81,6 +81,12 @@ export class IndexedDbCache {
 				this.transactions[id].resolve(ev.data.parms.data);
 				delete this.transactions[id];
 			}
+
+			if (ev.data.type === 'OnDeleteTransactionComplete') {
+				const { id } = ev.data.parms;
+				this.transactions[id].resolve();
+				delete this.transactions[id];
+			}
 		};
 		this.worker.postMessage({ message: 'createIndexedDb' });
 	}
@@ -113,6 +119,18 @@ export class IndexedDbCache {
 			message: 'Set',
 			key: url,
 			record,
+		});
+	}
+
+	delete(url: string): Promise<void> {
+		const id = this.getId();
+		return new Promise<void>((resolve) => {
+			this.transactions[id] = { resolve };
+			this.worker.postMessage({
+				message: 'Delete',
+				id,
+				key: url,
+			});
 		});
 	}
 }

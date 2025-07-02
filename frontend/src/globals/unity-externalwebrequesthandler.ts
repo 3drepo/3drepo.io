@@ -207,4 +207,8 @@ export class ExternalWebRequestHandler {
 	sendOnWebResponse(parms: any) {
 		this.unityInstance.SendMessage(this.gameObjectName, 'OnWebResponse', JSON.stringify(parms));
 	}
+
+	invalidateCache(url: string): Promise<void> {
+		return this.cache.delete(url);
+	}
 }
