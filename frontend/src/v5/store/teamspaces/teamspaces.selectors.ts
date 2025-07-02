@@ -17,7 +17,7 @@
 
 import { createSelector } from 'reselect';
 import { ITeamspace, TeamspacesState } from './teamspaces.redux';
-import { AddOn } from '../store.types';
+import { AddOnModule, AddOns } from '../store.types';
 
 const selectTeamspacesDomain = (state): TeamspacesState => state.teamspaces2 || {};
 
@@ -58,21 +58,27 @@ export const selectIsFetchingAddons = createSelector(
 );
 
 export const selectAddons = createSelector(
-	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => state.addOns[teamspace] || [],
+	selectTeamspacesDomain, selectCurrentTeamspace, (state, teamspace) => (
+		state.addOns[teamspace] || {
+			modules: [],
+			usersProvisioned: false,
+			disablePermissionsOnUI: false,
+		} as AddOns
+	),
 );
 
 export const selectRisksEnabled = createSelector(
-	selectAddons, (addOns) => addOns.includes(AddOn.Risks),
+	selectAddons, (addOns) => addOns.modules.includes(AddOnModule.Risks),
 );
 
 export const selectIssuesEnabled = createSelector(
-	selectAddons, (addOns) => addOns.includes(AddOn.Issues),
+	selectAddons, (addOns) => addOns.modules.includes(AddOnModule.Issues),
 );
 
 export const selectUsersProvisionedEnabled = createSelector(
-	selectAddons, (addOns) => addOns.includes(AddOn.UsersProvisioned),
+	selectAddons, (addOns) => addOns.usersProvisioned,
 );
 
 export const selectPermissionsOnUIDisabled = createSelector(
-	selectAddons, (addOns) => addOns.includes(AddOn.DisablePermissionsOnUI),
+	selectAddons, (addOns) => addOns.disablePermissionsOnUI,
 );
