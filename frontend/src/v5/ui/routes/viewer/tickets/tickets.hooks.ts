@@ -28,6 +28,7 @@ import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selec
 import { getState } from '@/v5/helpers/redux.helpers';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
+import { uniq } from 'lodash';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 
@@ -46,7 +47,7 @@ const getNonCompletedTicketFiltersByStatus = (templates: ITemplate[]): CardFilte
 		[TicketStatusTypes.DONE, TicketStatusTypes.VOID].includes(type);
 	const getValuesByTemplate = ({ _id }) => selectStatusConfigByTemplateId(getState(), _id).values;
 
-	const values = templates
+	const completedValues = templates
 		.flatMap(getValuesByTemplate)
 		.filter(isCompletedValue)
 		.map((v) => v.name);
@@ -57,7 +58,7 @@ const getNonCompletedTicketFiltersByStatus = (templates: ITemplate[]): CardFilte
 		type: 'status',
 		filter: {
 			operator: 'nis',
-			values,
+			values: uniq(completedValues),
 		},
 	};
 };

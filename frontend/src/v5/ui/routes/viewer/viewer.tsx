@@ -16,7 +16,7 @@
  */
 
 import { useParams } from 'react-router-dom';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsCardHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, TicketsHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsCardActionsDispatchers, ProjectsActionsDispatchers, TeamspacesActionsDispatchers, TicketsCardActionsDispatchers, ViewerActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useContext, useEffect, useState } from 'react';
 import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
@@ -40,7 +40,6 @@ export const Viewer = () => {
 	const { isCalibrating } = useContext(CalibrationContext);
 
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
-	const filters = TicketsCardHooksSelectors.selectFilters();
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
 
 	const isLoading = isFetching || fetchPending;
@@ -48,13 +47,12 @@ export const Viewer = () => {
 	const selectedContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const selectedFederation = FederationsHooksSelectors.selectFederationById(containerOrFederation);
 	const federationsContainers = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
-	const containerOrFederationId  = (selectedContainer || selectedFederation)?._id;
 	const federationIsEmpty = selectedFederation?.containers?.length === 0
 		|| federationsContainers.every((container) => container?.revisionsCount === 0);
 
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
-	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
-
+	const templateIds = TicketsHooksSelectors.selectFilterableTemplatesIds();
+	const templates = TicketsHooksSelectors.selectTemplatesByIds(templateIds);
 	const handlePinClick = ({ id }) => {
 		TicketsCardActionsDispatchers.setSelectedTicketPin(id);
 		if (!tickets.some((t) => t._id === id)) return;
