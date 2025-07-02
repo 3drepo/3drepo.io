@@ -192,12 +192,15 @@ export class Users extends PureComponent<IProps, IState> {
 					disabled: user.isCurrentUser || user.isOwner || this.props.permissionsOnUIDisabled
 				},
 				{},
-				{
-					Icon: BinIcon,
-					disabled: user.isCurrentUser || user.isOwner || this.props.usersProvisionedEnabled,
-					onClick: this.onRemove.bind(null, user.user)
-				}
 			];
+			if (!this.props.usersProvisionedEnabled) {
+				data.push({
+					// @ts-ignore
+					Icon: BinIcon,
+					disabled: user.isCurrentUser || user.isOwner,
+					onClick: this.onRemove.bind(null, user.user)
+				});
+			}
 			return { ...user, data };
 		});
 	}

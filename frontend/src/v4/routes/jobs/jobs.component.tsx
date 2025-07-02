@@ -112,12 +112,14 @@ export class Jobs extends PureComponent<IProps, IState> {
 					onChange: this.handleColorChange(job._id)
 				},
 				{},
-				{
-					Icon: BinIcon,
-					onClick: this.onRemove.bind(null, job._id),
-					disabled: this.props.usersProvisionedEnabled,
-				}
 			];
+			if (!this.props.usersProvisionedEnabled) {
+				data.push({
+					// @ts-ignore
+					Icon: BinIcon,
+					onClick: this.onRemove.bind(null, job._id)
+				});
+			}
 			return { ...job, name: job._id, data };
 		});
 	}
