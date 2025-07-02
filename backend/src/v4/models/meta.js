@@ -16,8 +16,8 @@
  */
 
 "use strict";
-const FileRef = require("./fileRef");
 const History = require("./history");
+const {v5Path} = require("../../interop.js");
 const { findModelSettingById } = require("./modelSetting");
 const { getSubModels } = require("./ref");
 const { findNodesByField, getNodeById, findMetadataNodesByFields } = require("./scene");
@@ -28,6 +28,10 @@ const { positiveRulesToQueries, negativeRulesToQueries } = require("./helper/rul
 const {intersection, difference} = require("./helper/set");
 const utils = require("../utils");
 const Stream = require("stream");
+const { getMetadataByRules } = require(`${v5Path}/models/metadata.js`);
+const { getArrayDifference } = require(`${v5Path}/utils/helper/arrays.js`);
+const { getMeshesWithParentIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scenes.js`);
+const { stringToUUID } = require(`${v5Path}/utils/helper/uuids.js`);
 
 const clean = (metadataToClean) => {
 	if (metadataToClean._id) {
@@ -52,11 +56,6 @@ const clean = (metadataToClean) => {
 
 const cleanAll = (metaListToClean) => {
 	return metaListToClean.map(clean);
-};
-
-const getIdToMeshesDict = async (account, model, revId) => {
-	const treeFileName = `${revId}/idToMeshes.json`;
-	return JSON.parse(await FileRef.getJSONFile(account, model, treeFileName));
 };
 
 const getSceneCollectionName = (model) => `${model}.scene`;
@@ -228,8 +227,6 @@ Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convert
 
 	const objectIdPromises = [];
 
-	const positiveQueries = positiveRulesToQueries(rules);
-	const negativeQueries = negativeRulesToQueries(rules);
 	const models = new Set();
 	models.add(model);
 
@@ -245,8 +242,7 @@ Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convert
 		objectIdPromises.push(findModelSharedIdsByRulesQueries(
 			account,
 			submodel,
-			positiveQueries,
-			negativeQueries,
+			rules,
 			_branch,
 			_revId,
 			convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
@@ -456,98 +452,28 @@ const findObjectsByQuery = (account, model, query, projection = { $project: {...
  *
  * @returns {Promise<Array<string | object>>}
  */
-const findModelSharedIdsByRulesQueries = async (account, model, posRuleQueries, negRuleQueries, branch, revId, convertSharedIDsToString) => {
-	const ids = await findModelMeshIdsByRulesQueries(account, model, posRuleQueries, negRuleQueries, branch, revId, false);
+const findModelSharedIdsByRulesQueries = async (account, model, rules, branch, revId, convertSharedIDsToString) => {
+	const ids = await findModelMeshIdsByRulesQueries(account, model, rules, branch, revId, false);
 	return idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
 };
 
-const findModelMeshIdsByRulesQueries = async (account, model, posRuleQueries, negRuleQueries, branch, revId, toString = false) => {
+const findModelMeshIdsByRulesQueries = async (account, model, rules, branch, revId, toString = false) => {
 	const history = await  History.getHistory(account, model, branch, revId);
 
-	const idToMeshesDict = await getIdToMeshesDict(account, model, utils.uuidToString(history._id));
-	let allRulesResults = null;
+	const {matched, unwanted} = await getMetadataByRules(account, undefined, model, history._id, rules);
+	const project = undefined;
+	const [
+		matchedMeshIds,
+		unwantedMeshIds
+	] = await Promise.all([
+		matched.length ? getMeshesWithParentIds(account, project, model, history._id,
+			matched.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
+		unwanted.length ? getMeshesWithParentIds(account, project, model,  history._id,
+			unwanted.flatMap(({ parents }) => parents), true) : Promise.resolve([])
+	]);
+	const meshes =  getArrayDifference(unwantedMeshIds, matchedMeshIds);
+	return toString ? meshes : meshes.map(stringToUUID);
 
-	if (posRuleQueries.length !== 0) {
-		const eachPosRuleResults = await Promise.all(posRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history._id, ruleQuery)));
-
-		allRulesResults = intersection(eachPosRuleResults);
-	} else {
-		const rootQuery =  { $match: { rev_id: history._id, "parents": {$exists: false} } };
-		const rootId = (await findObjectsByQuery(account, model, rootQuery))[0]._id;
-		allRulesResults = idToMeshesDict[utils.uuidToString(rootId)];
-	}
-
-	if(negRuleQueries.length > 0) {
-		const eachNegRuleResults = await Promise.all(negRuleQueries.map(ruleQuery => getRuleQueryResults(account, model, idToMeshesDict, history._id, ruleQuery)));
-		allRulesResults = difference(allRulesResults, eachNegRuleResults);
-	}
-
-	const ids = [];
-	for (const id of allRulesResults) {
-		if (toString) {
-			ids.push(id);
-		} else {
-			ids.push(utils.stringToUUID(id));
-		}
-	}
-
-	return ids;
-};
-
-/**
- * @param {string} account
- * @param {string} model
- * @param {object} idToMeshesDict
- * @param {Array<object>} revisionElementsIds
- * @param {object} query
- *
- * @returns {Promise<Set<string>>} Is a set of the ids that that matches the particular query rule
- */
-const getRuleQueryResults = async (account, model, idToMeshesDict, revId, query) => {
-	const fullQuery = {rev_id: revId, ...query};
-	const pipelines = [
-		{$match: fullQuery},
-		// merge all parents into a single array (all Parents: [[parentSet1], [parentSet2]])
-		{$group: { _id: null, allParents: {$addToSet:"$parents"}}},
-		// necessary prep to concatenate the parent arrays
-		{$unwind: "$allParents"},
-		// necessary prep to concatenate the parent arrays (yes , it has to be done twice)
-		{$unwind: "$allParents"},
-		// final concatenation
-		{$group: { _id: null, parents: {$addToSet:"$allParents"}}}
-	];
-
-	const metaResults = await db.aggregate(account, `${model}.scene`, pipelines);
-
-	if (metaResults.length === 0) {
-		return new Set();
-	}
-	const { parents } = metaResults[0];
-
-	const res = await batchPromises((parentsForQuery) => {
-		const meshQuery = { rev_id: revId, shared_id: { $in: parentsForQuery }, type: { $in: ["transformation", "mesh"]}};
-		const meshProject = { _id: 1, type: 1 };
-		return db.find(account, getSceneCollectionName(model), meshQuery, meshProject);
-	}, parents, 7000);
-
-	const ids = new Set();
-
-	for (let i = 0; i < res.length ; i++) {
-		const resBatch = res[i];
-		for (let j = 0; j < resBatch.length ; j++) {
-			const { type, _id } = resBatch[j];
-			const idStr = utils.uuidToString(_id);
-			if (type === "transformation") {
-				if(idToMeshesDict[idStr]) {
-					idToMeshesDict[idStr].forEach((meshId) => ids.add(meshId));
-				}
-			} else {
-				ids.add(idStr);
-			}
-		}
-	}
-
-	return ids;
 };
 
 const getMetadataRuleQueryResults = async (account, model, query, projection) => {
