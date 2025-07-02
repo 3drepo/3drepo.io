@@ -36,10 +36,10 @@ const singleFileMulterPromise = (req, fileName, fileFilter, maxSize,
 		options.storage = Multer.memoryStorage();
 	} else {
 		options.storage = Multer.diskStorage({
-			destination: (req, file, cb) => {
+			destination: (_req, _file, cb) => {
 				cb(null, uploadConfig.uploadDir);
 			},
-			filename: (req, file, cb) => {
+			filename: (_req, file, cb) => {
 				const ext = Path.extname(file.originalname);
 				const name = Path.basename(file.originalname, ext);
 				const uniqueName = `${name}_${Date.now()}${ext}`;
@@ -57,7 +57,7 @@ const singleFileMulterPromise = (req, fileName, fileFilter, maxSize,
 	});
 });
 
-const imageFilter = (req, file, cb) => {
+const imageFilter = (_req, file, cb) => {
 	const format = file.originalname.split('.').splice(-1)[0].toLowerCase();
 
 	if (!uploadConfig.imageExtensions.includes(format)) {
