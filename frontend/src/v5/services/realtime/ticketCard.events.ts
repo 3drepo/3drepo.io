@@ -25,7 +25,7 @@ export const enableRealtimeUpdateTicketFilter = (teamspace: string, project: str
  		{ teamspace, project, model: containerOrFederation },
  		ticketEvent(isFederation, 'UpdateTicket'),
  		(ticket: Partial<ITicket>) => {
- 			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
+ 			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, ticket._id);
  		},
  	)
 );
@@ -35,7 +35,7 @@ export const enableRealtimeNewTicketFilter = (teamspace: string, project: string
 		{ teamspace, project, model: containerOrFederation },
 		ticketEvent(isFederation, 'NewTicket'),
 		(ticket: ITicket) => {
- 			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
+ 			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, ticket._id);
 
 		},
 	)

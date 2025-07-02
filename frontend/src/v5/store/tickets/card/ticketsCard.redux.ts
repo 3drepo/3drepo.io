@@ -46,7 +46,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setEditingGroups: ['isEditing'],
 	setIsShowingPins: ['isShowing'],
 	setFiltering: ['isFiltering'],
-	applyFilterForTicket: ['teamspace', 'projectId', 'modelId', 'isFederation', 'ticketId'],
+	applyFilterForTicket: ['teamspace', 'projectId', 'modelId', 'ticketId'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
 export interface ITicketsCardState {
@@ -197,7 +197,7 @@ export type SetUnsavedTicketAction = Action<'SET_UNSAVED_TICKET'> & { ticket: Ed
 export type SetEditingGroupsAction = Action<'SET_EDITING_GROUPS'> & { isEditing: boolean } ;
 export type SetIsShowingPinsAction = Action<'SET_IS_SHOWING_PINS'> & { isShowing: boolean };
 export type SetFilteringAction = Action<'SET_FILTERING'> & { isFiltering: boolean } ;
-export type ApplyFilterForTicketAction = Action<'APPLY_FILTER_FOR_TICKET'> & TeamspaceProjectAndModel & { isFederation: boolean, ticketId: string } ;
+export type ApplyFilterForTicketAction = Action<'APPLY_FILTER_FOR_TICKET'> & TeamspaceProjectAndModel & { ticketId: string } ;
 
 
 export interface ITicketsCardActionCreators {
@@ -234,7 +234,6 @@ export interface ITicketsCardActionCreators {
 		teamspace: string,
 		projectId: string,
 		modelId: string,
-		isFederation: boolean,
 		ticketId: string,
 	) => ApplyFilterForTicketAction,
 }

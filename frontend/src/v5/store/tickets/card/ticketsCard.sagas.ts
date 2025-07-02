@@ -28,8 +28,10 @@ import { selectCardFilters, selectFilteredTicketIds } from './ticketsCard.select
 import * as API from '@/v5/services/api';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { flatten, isEqual, pick } from 'lodash';
-import { selectIsFederation } from '../../federations/federations.selectors';
+import { selectFederationById } from '../../federations/federations.selectors';
 import { enableMapSet } from 'immer';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectContainerById } from '../../containers/containers.selectors';
 
 enableMapSet();
 
@@ -61,9 +63,13 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 	}
 }
 
-const apiFetchFilteredTickets = async (teamspace, projectId, modelIds, isFederation, filters ): Promise<Set<string>> => {
-	const combinedTickets = await Promise.all(modelIds.map(async (modelId) => {
-		const fetchModelTickets = await isFederation(modelId)
+const apiFetchFilteredTickets = async (teamspace, projectId, modelIds, filters): Promise<Set<string>> => {
+	const state = getState();
+	const combinedTickets = await Promise.all(modelIds.map((modelId) => {
+		const federation = selectFederationById(state, modelId);
+		const container = selectContainerById(state, modelId);
+		if (!federation && !container) return [];
+		const fetchModelTickets = !!federation
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		return fetchModelTickets(teamspace, projectId, modelId, { filters: filtersToQuery(filters) });
@@ -76,8 +82,7 @@ export function* fetchFilteredTickets({ teamspace, projectId, modelIds }: FetchF
 		yield put(TicketsCardActions.setFiltering(true));
 
 		const filters = yield select(selectCardFilters);
-		const isFed = yield select(selectIsFederation);
-		const ticketIds: Set<string> = yield apiFetchFilteredTickets(teamspace, projectId, modelIds, isFed, filters);
+		const ticketIds: Set<string> = yield apiFetchFilteredTickets(teamspace, projectId, modelIds, filters);
 		
 		yield put(TicketsCardActions.setFilteredTicketIds(ticketIds));
 		yield put(TicketsCardActions.setFiltering(false));
@@ -113,7 +118,7 @@ export function* upsertFilter({ filter }: UpsertFilterAction) {
 	}
 }
 
-export function* applyFilterForTicket({ teamspace, projectId, modelId, isFederation, ticketId }: ApplyFilterForTicketAction) {
+export function* applyFilterForTicket({ teamspace, projectId, modelId, ticketId }: ApplyFilterForTicketAction) {
 	let ticket =  yield select(selectTicketByIdRaw, modelId, ticketId);
 
 	while (!ticket) { // If new ticket message wasnt attended yet wait until the ticket gets defined
@@ -136,7 +141,7 @@ export function* applyFilterForTicket({ teamspace, projectId, modelId, isFederat
 		},
 	});
 
-	const ticketWasIncluded = (yield apiFetchFilteredTickets(teamspace, projectId, modelId, isFederation, filters)).size > 0;
+	const ticketWasIncluded = (yield apiFetchFilteredTickets(teamspace, projectId, [modelId], filters)).size > 0;
 	const ticketIds: Set<string> = new Set(yield select(selectFilteredTicketIds));
 
 	if (ticketWasIncluded) ticketIds.add(ticketId);
