@@ -57,7 +57,7 @@ const TicketsTableGroupContent = ({
 	newTicketButtonIsDisabled, 
 	hideNewticketButton,
 }: TicketsTableGroupContentProps) => {
-	// useWatchPropertyChange(sortingColumn, refreshSorting);
+	useWatchPropertyChange(sortingColumn, refreshSorting);
 
 	return (
 		<>
