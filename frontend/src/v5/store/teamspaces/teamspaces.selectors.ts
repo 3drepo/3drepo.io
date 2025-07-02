@@ -68,3 +68,11 @@ export const selectRisksEnabled = createSelector(
 export const selectIssuesEnabled = createSelector(
 	selectAddons, (addOns) => addOns.includes(AddOn.Issues),
 );
+
+export const selectUsersProvisionedEnabled = createSelector(
+	selectAddons, (addOns) => addOns.includes(AddOn.UsersProvisioned),
+);
+
+export const selectPermissionsOnUIDisabled = createSelector(
+	selectAddons, (addOns) => addOns.includes(AddOn.DisablePermissionsOnUI),
+);

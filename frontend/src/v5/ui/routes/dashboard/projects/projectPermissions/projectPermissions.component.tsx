@@ -18,7 +18,7 @@ import { useEffect } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
 import { useDispatch } from 'react-redux';
-import { ProjectsHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Container, V4ProjectsPermissions } from './projectPermissions.styles';
 import { SuppressPermissionModalToggle } from '@components/shared/updatePermissionModal/suppressPermissionModalToggle.component';
@@ -26,20 +26,20 @@ import { SuppressPermissionModalToggle } from '@components/shared/updatePermissi
 export const ProjectPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
-
+	const permissionsOnUIDisabled = TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();
 	const username = CurrentUserHooksSelectors.selectUsername();
 
 	useEffect(() => {
-		if (!username || !projectName) {
+		if (!username || !projectName || permissionsOnUIDisabled) {
 			return;
 		}
 
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
 		dispatch(UserManagementActions.fetchProject(projectName));
 		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
-	}, [projectName, username]);
+	}, [projectName, username, permissionsOnUIDisabled]);
 
-	if (!username || !projectName) {
+	if (!username || !projectName || permissionsOnUIDisabled) {
 		return (<></>);
 	}
 

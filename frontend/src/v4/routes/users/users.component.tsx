@@ -92,6 +92,8 @@ interface IProps extends RouteComponentProps<any> {
 	userNotExists?: boolean;
 	currentTeamspace?: string;
 	selectedTeamspace: string;
+	usersProvisionedEnabled: boolean;
+	permissionsOnUIDisabled: boolean;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateUserJob: (username, job) => void;
@@ -179,19 +181,20 @@ export class Users extends PureComponent<IProps, IState> {
 					value: user.job,
 					items: jobs,
 					itemTemplate: JobItem,
-					onChange: this.handleChange(user, 'job')
+					onChange: this.handleChange(user, 'job'),
+					disabled: this.props.usersProvisionedEnabled,
 				},
 				{
 					value: user.isAdmin,
 					items: teamspacePermissions,
 					onChange: this.handleChange(user, 'permissions'),
-					readOnly: user.isCurrentUser || user.isOwner,
-					disabled: user.isCurrentUser || user.isOwner
+					readOnly: user.isCurrentUser || user.isOwner || this.props.permissionsOnUIDisabled,
+					disabled: user.isCurrentUser || user.isOwner || this.props.permissionsOnUIDisabled
 				},
 				{},
 				{
 					Icon: BinIcon,
-					disabled: user.isCurrentUser || user.isOwner,
+					disabled: user.isCurrentUser || user.isOwner || this.props.usersProvisionedEnabled,
 					onClick: this.onRemove.bind(null, user.user)
 				}
 			];
@@ -272,6 +275,7 @@ export class Users extends PureComponent<IProps, IState> {
 			title: this.getFooterLabel(),
 			jobs: this.state.jobs,
 			users: usersSuggestions,
+			usersProvisionedEnabled: this.props.usersProvisionedEnabled,
 			onSave: this.onSave,
 			clearSuggestions: clearUsersSuggestions,
 			getUsersSuggestions: onUsersSearch,
@@ -285,9 +289,13 @@ export class Users extends PureComponent<IProps, IState> {
 
 	public renderNewUserForm = (container) => {
 		const { limit } = this.state;
-		const { users } = this.props;
+		const { users, usersProvisionedEnabled } = this.props;
 
 		const isButtonDisabled = (limit || 0) as number <= users.length;
+
+		if (usersProvisionedEnabled) {
+			return null;
+		}
 
 		return (
 			<FloatingActionPanel
@@ -340,8 +348,15 @@ export class Users extends PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { isPending, selectedTeamspace } = this.props;
+		const { isPending, selectedTeamspace, usersProvisionedEnabled } = this.props;
 		const { rows, containerElement } = this.state;
+		const cells = USERS_TABLE_CELLS;
+
+		if (usersProvisionedEnabled) {
+			const deleteCellIndex = cells.findIndex(({ type }) => type === CELL_TYPES.ICON_BUTTON);
+			// @ts-ignore
+			cells[deleteCellIndex] = { ...cells[deleteCellIndex], disabled: true };
+		}
 
 		if (isPending) {
 			const content = `Loading "${selectedTeamspace}" users data...`;
@@ -359,7 +374,7 @@ export class Users extends PureComponent<IProps, IState> {
 		return (
 			<>
 				<UserManagementTab footerLabel={this.getFooterLabel(true)} className={this.props.className}>
-					<CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
+					<CustomTable cells={cells} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}
 			</>

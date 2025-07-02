@@ -59,4 +59,6 @@ export type View = {
 export enum AddOn {
 	Issues = 'issues',
 	Risks = 'risks',
+	UsersProvisioned = 'usersProvisioned',
+	DisablePermissionsOnUI = 'disablePermissionsOnUI',
 }
