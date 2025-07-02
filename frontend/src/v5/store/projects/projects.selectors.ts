@@ -19,6 +19,7 @@ import { createSelector } from 'reselect';
 import { selectCurrentTeamspace } from '../teamspaces/teamspaces.selectors';
 import { IProjectsState } from './projects.redux';
 import { IProject } from './projects.types';
+import { removeDeprecated } from '../tickets/tickets.helpers';
 
 const selectProjectsDomain = (state): IProjectsState => state?.projects;
 
@@ -58,7 +59,7 @@ export const selectTemplatesArePending = createSelector(
 export const selectCurrentProjectTemplates = createSelector(
 	selectProjectsDomain,
 	selectCurrentProject,
-	(state, currentProject) => state.templatesByProject[currentProject] || [],
+	(state, currentProject) => state.templatesByProject[currentProject]?.map(removeDeprecated) || [],
 );
 
 export const selectCurrentProjectTemplateById = createSelector(

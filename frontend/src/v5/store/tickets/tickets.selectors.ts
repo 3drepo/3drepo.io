@@ -27,6 +27,7 @@ import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketSortingProperty } from './card/ticketsCard.types';
+import { removeDeprecated } from './tickets.helpers';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -49,25 +50,6 @@ export const selectTicketsHaveBeenFetched = createSelector(
 	selectTicketsDomain,
 	(state): (modelId) => boolean => (modelId) => modelId in state.ticketsByModelId,
 );
-
-
-const removeDeprecated = (template: ITemplate): ITemplate => {
-	const removeDeprecatedItems = (properties: any[])  => properties.filter((prop) => !prop.deprecated);
-
-	return {
-		...template,
-		properties: removeDeprecatedItems(template.properties ?? []),
-		modules: removeDeprecatedItems(template.modules ?? [])
-			.map((module) => (
-				{
-					...module, 
-					properties: removeDeprecatedItems(module.properties ?? []),
-				}
-			)),
-	};
-};
-
-
 
 export const selectTemplates = createSelector(
 	selectTicketsDomain,

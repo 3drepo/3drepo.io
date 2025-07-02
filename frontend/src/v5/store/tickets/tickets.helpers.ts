@@ -311,3 +311,19 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 
 export const addUpdatedAtTime = (ticket) => set(ticket, `properties.${BaseProperties.UPDATED_AT}`, +new Date());
 
+export const removeDeprecated = (template: ITemplate): ITemplate => {
+	if (!template) return null;
+	const removeDeprecatedItems = (properties: any[])  => properties.filter((prop) => !prop.deprecated);
+
+	return {
+		...template,
+		properties: removeDeprecatedItems(template.properties ?? []),
+		modules: removeDeprecatedItems(template.modules ?? [])
+			.map((module) => (
+				{
+					...module, 
+					properties: removeDeprecatedItems(module.properties ?? []),
+				}
+			)),
+	};
+};
