@@ -19,13 +19,16 @@ import { useRef, useState } from 'react';
 import { overlayStyles, ResizerElement } from './resizer.styles';
 import { ResizableTableContext } from '../../../../resizableTableContext';
 import { DelimiterLine } from '@controls/resizableTableContext/delimiterLine/delimiterLine.styles';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 type ResizerProps = { name: string };
 export const Resizer = ({ name }: ResizerProps) => {
-	const { setWidth, getWidth } = usePerformanceContext(ResizableTableContext, ['columnsWidths']);
-	const [resizerName, setResizerName] = useState('');
-	const [isResizing, setIsResizing] = useState(false);
+	const { setWidth, getWidth, resizingColumn, setResizingColumn } = useContextWithCondition(
+		ResizableTableContext,
+		['columnsWidths', 'resizingColumn'],
+		(curr, prev) => prev.resizingColumn === name || curr.resizingColumn === name,
+	);
+	const [isHovering, setIsHovering] = useState(false);
 	const width = getWidth(name);
 	const initialPosition = useRef(null);
 
@@ -36,8 +39,8 @@ export const Resizer = ({ name }: ResizerProps) => {
 
 	const onResizeStart = (e) => {
 		preventEventPropagation(e);
-		setIsResizing(true);
-		setResizerName(name);
+		setResizingColumn(name);
+		setIsHovering(true);
 		initialPosition.current = e.clientX;
 	};
 
@@ -48,14 +51,14 @@ export const Resizer = ({ name }: ResizerProps) => {
 
 	const onResizeEnd = (e) => {
 		preventEventPropagation(e);
-		setIsResizing(false);
-		setResizerName('');
+		setResizingColumn('');
+		setIsHovering(false);
 		initialPosition.current = null;
 	};
 
-	const handleMouseOver = () => setResizerName(name);
+	const handleMouseOver = () => setIsHovering(true);
 	const handleMouseOut = () => {
-		if (!isResizing) setResizerName('');
+		if (!resizingColumn) setIsHovering(false);
 	};
 	
 	const onMouseDown = (e) => {
@@ -75,9 +78,9 @@ export const Resizer = ({ name }: ResizerProps) => {
 	};
 
 	const getStyle = () => {
-		if (resizerName !== name) return 'none';
-		if (isResizing) return 'solid';
-		return 'dashed';
+		if (resizingColumn && isHovering) return 'solid';
+		if (isHovering) return 'dashed';
+		return 'none';
 	};
 
 	return (

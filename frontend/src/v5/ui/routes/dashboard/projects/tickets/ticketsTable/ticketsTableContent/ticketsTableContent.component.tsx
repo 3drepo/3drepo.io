@@ -21,7 +21,7 @@ import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
-import { ResizableTableContext, ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
@@ -31,17 +31,16 @@ import { Container } from './ticketsTableContent.styles';
 import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
-import { getAvailableColumnsForTemplate } from '../ticketsTableContext/ticketsTableContext.helpers';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { isEqual } from 'lodash';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
 	const { filteredItems } = useContext(SearchContext);
 	const {
-		stretchTable, getAllColumnsNames, subscribe, 
+		stretchTable, getAllColumnsNames, subscribe, resetWidths,
 		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
-	} = usePerformanceContext(ResizableTableContext, () => false);
+	} = useContextWithCondition(ResizableTableContext, []);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
 
@@ -49,6 +48,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		const allColumns = getAllColumnsNames();
 		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
 		setVisibleSortedColumnsNames(initialVisibleColumns);
+		resetWidths();
 	}, [template]);
 	
 	useEffect(() => {
@@ -58,7 +58,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	}, [template, templateWasFetched, tableHasCompletedRendering]);
 
 	useEffect(() => {
-		const onMovingColumnChange = (event, movingColumn) => {
+		const onMovingColumnChange = (movingColumn) => {
 			if (movingColumn) {
 				edgeScrolling.start(tableRef.current);
 			} else {
@@ -68,7 +68,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		return subscribe(['movingColumn'], onMovingColumnChange);
 	}, [edgeScrolling]);
 
-	if (!templateAlreadyFetched(template)) {
+	if (!templateWasFetched) {
 		return (
 			<EmptyPageView>
 				<Spinner />
@@ -93,14 +93,10 @@ export const TicketsTableContent = memo((props: TicketsTableResizableContentProp
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const tableRef = useRef(null);
-	const templatHasBeenFetched = templateAlreadyFetched(template);
-	const columns = templatHasBeenFetched ? getAvailableColumnsForTemplate(template) : [];
 
 	return (
-		<ResizableTableContextComponent columns={columns} columnGap={1} key={templateId}>
-			<Container ref={tableRef}>
-				<TableContent {...props} tableRef={tableRef} template={template} />
-			</Container>
-		</ResizableTableContextComponent>
+		<Container ref={tableRef}>
+			<TableContent {...props} tableRef={tableRef} template={template} />
+		</Container>
 	);
 }, isEqual);

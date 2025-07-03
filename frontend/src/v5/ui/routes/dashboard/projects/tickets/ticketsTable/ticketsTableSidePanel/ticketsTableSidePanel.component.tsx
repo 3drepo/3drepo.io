@@ -30,7 +30,6 @@ import { NewTicketSlide } from '../../ticketsList/slides/newTicketSlide.componen
 import { TicketSlide } from '../../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from '../newTicketMenu/useSelectedModels';
 import { memo, useContext, useEffect, useState } from 'react';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsTableContext } from '../ticketsTableContext/ticketsTableContext';
 import { isEqual } from 'lodash';
@@ -48,15 +47,14 @@ const useSubscribableSearchParamState = (getValue, onChange) => {
 type TicketsTableSidePanelProps = {
 	setIsNewTicketDirty: (isDirty: boolean) => void;
 	setTicketValue: SetTicketValue;
+	presetValue?: string;
 };
 
-export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue }: TicketsTableSidePanelProps) => {
+export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue, presetValue }: TicketsTableSidePanelProps) => {
 	const { teamspace, project, template } = useParams<DashboardTicketsParams>();
-	const { getSelectedTicket, onSelectedTicketChange, getSelectedModel, onSelectedModelChange } = useContext(TicketsTableContext);
+	const { getSelectedTicket, onSelectedTicketChange, getSelectedModel, onSelectedModelChange, groupBy } = useContext(TicketsTableContext);
 	const ticketId = useSubscribableSearchParamState(getSelectedTicket, onSelectedTicketChange);
 	const modelId = useSubscribableSearchParamState(getSelectedModel, onSelectedModelChange);
-	const [groupBy] = useSearchParam('groupBy');
-	const [groupByValue] = useSearchParam('groupByValue');
 	const models = useSelectedModels();
 
 	const isFed = FederationsHooksSelectors.selectIsFederation();
@@ -111,7 +109,7 @@ export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue
 					)}
 					{isNewTicket && (
 						<NewTicketSlide
-							preselectedValue={{ [groupBy]: groupByValue }}
+							presetValue={{ key: groupBy, value: presetValue }}
 							template={selectedTemplate}
 							containerOrFederation={modelId}
 							onSave={onSaveTicket}

@@ -19,15 +19,15 @@ import { GridTemplateColumns, OverlayElements, Table } from './resizableTable.st
 import { ResizersOverlay } from './overlayElements/resizers/resizersOverlay.component';
 import { MovingColumnOverlay } from './overlayElements/movingColumn/movingColumnOverlay.component';
 import { ResizableTableContext } from '../resizableTableContext';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Row } from '../resizableTableRow/resizableTableRow.styles';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizableTable = ({ className = '', children }) => {
-	const { getWidth, getVisibleSortedColumnsNames, subscribe } = usePerformanceContext(ResizableTableContext, () => false);
-	const [key] = useState(+new Date());
+	const { getWidth, getVisibleSortedColumnsNames, subscribe } = useContextWithCondition(ResizableTableContext, []);
+	const key = useRef(+new Date());
 	const [tableNode, setTableNode] = useState(null);
-	const gridClassName = `ResizableTableTemplateColumns_${key}`;
+	const gridClassName = `ResizableTableTemplateColumns_${key.current}`;
 
 	useEffect(() => {
 		if (!tableNode) return;
@@ -54,7 +54,6 @@ export const ResizableTable = ({ className = '', children }) => {
 
 		return () => {
 			unsubscribe();
-			tableNode.classList.remove(gridClassName);
 			document.head.removeChild(styleTag);
 		};
 	}, [tableNode]);

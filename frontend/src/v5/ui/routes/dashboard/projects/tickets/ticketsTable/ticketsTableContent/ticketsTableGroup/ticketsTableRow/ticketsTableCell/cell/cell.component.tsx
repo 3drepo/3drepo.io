@@ -18,11 +18,11 @@
 import { CellContainer } from './cell.styles';
 import { TextOverflow } from '@controls/textOverflow';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 type CellProps = { name: string, children: any, className?: string };
 export const Cell = ({ name, children, className }: CellProps) => {
-	const { movingColumn } = usePerformanceContext(ResizableTableContext, ['movingColumn']);
+	const { movingColumn } = useContextWithCondition(ResizableTableContext, ['movingColumn']);
 
 	return (
 		<CellContainer name={name} className={className} $isMoving={name === movingColumn}>

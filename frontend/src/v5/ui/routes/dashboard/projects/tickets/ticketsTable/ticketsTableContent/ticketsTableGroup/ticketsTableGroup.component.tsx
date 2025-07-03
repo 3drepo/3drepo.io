@@ -32,8 +32,57 @@ import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.comp
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
+import { useWatchPropertyChange } from '../../useWatchPropertyChange';
 
+type TicketsTableGroupContentProps = {
+	tickets: ITicket[];
+	sortedItems: ITicket[];
+	sortingColumn: string;
+	refreshSorting: () => void;
+	onEditTicket: SetTicketValue;
+	onNewTicket: (modelId: string) => void;
+	newTicketButtonIsDisabled: boolean;
+	hideNewticketButton: boolean;
+};
 
+const TicketsTableGroupContent = ({ 
+	tickets, 
+	sortedItems,
+	refreshSorting,
+	sortingColumn,
+	onEditTicket, 
+	onNewTicket, 
+	newTicketButtonIsDisabled, 
+	hideNewticketButton,
+}: TicketsTableGroupContentProps) => {
+	useWatchPropertyChange(sortingColumn, refreshSorting);
+
+	return (
+		<>
+			{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
+			<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
+				<VirtualList
+					items={sortedItems}
+					itemHeight={37}
+					itemContent={(ticket: ITicket) => (
+						<TicketsTableRow
+							key={ticket._id}
+							ticket={ticket}
+							modelId={ticket.modelId}
+							onClick={onEditTicket}
+						/>
+					)}
+				/>
+				{!hideNewticketButton &&
+					<NewTicketRowButton
+						onNewTicket={onNewTicket}
+						disabled={newTicketButtonIsDisabled}
+					/>
+				}
+			</Group>
+		</>
+	);
+};
 
 type TicketsTableGroupProps = {
 	tickets: ITicket[];
@@ -78,30 +127,17 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket }: Ticket
 		<Table $empty={!tickets.length} $canCreateTicket={!newTicketButtonIsDisabled}>
 			<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
 				<SortedTableContext.Consumer>
-					{({ sortedItems }: SortedTableType<ITicket>) => (
-						<>
-							{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
-							<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
-								<VirtualList
-									items={sortedItems}
-									itemHeight={37}
-									itemContent={(ticket: ITicket) => (
-										<TicketsTableRow
-											key={ticket._id}
-											ticket={ticket}
-											modelId={ticket.modelId}
-											onClick={onEditTicket}
-										/>
-									)}
-								/>
-								{!hideNewticketButton &&
-									<NewTicketRowButton
-										onNewTicket={onNewTicket}
-										disabled={newTicketButtonIsDisabled}
-									/>
-								}
-							</Group>
-						</>
+					{({ refreshSorting, sortedItems, sortingColumn }: SortedTableType<ITicket>) => (
+						<TicketsTableGroupContent
+							tickets={tickets}
+							onEditTicket={onEditTicket}
+							onNewTicket={onNewTicket}
+							newTicketButtonIsDisabled={newTicketButtonIsDisabled}
+							hideNewticketButton={hideNewticketButton}
+							sortedItems={sortedItems}
+							sortingColumn={sortingColumn}
+							refreshSorting={refreshSorting}
+						/>
 					)}
 				</SortedTableContext.Consumer>
 			</SortedTableComponent>

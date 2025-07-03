@@ -15,15 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export type UnsubscribeFn = () => void;
-export type SubscribeFn<Event> = (events: Event[], callback: (...args) => void) => UnsubscribeFn;
-export type PublishFn<Event> = (event: Event, ...args) => void;
+import { EditableTicket } from '@/v5/store/tickets/tickets.types';
+import { subscribeToRoomEvent } from './realtime.service';
+import { ticketEvent } from './ticket.events';
+import { get } from 'lodash';
 
-export type SubscribableObject<ContextState> = {
-	state: ContextState,
-	subscribe: SubscribeFn<keyof ContextState>,
-};
+export const enableRealtimeWatchPropertyUpdateTicket = 
+	(teamspace: string, project: string, containerId: string, isFed:boolean, watchedProperty:string, callback: () => void) => (
+		subscribeToRoomEvent(
+			{ teamspace, project, model: containerId },
+			ticketEvent(isFed, 'UpdateTicket'),
+			(ticket: Partial<EditableTicket>) => {
+				if (get(ticket, watchedProperty)) {
+					callback();
+				}
+			},
+		)
+	);
 
-export type CustomEqualityCheck<ContextState> = (currentState: ContextState, previousState: ContextState) => boolean;
-export type ArrayOfAtLeastOneElement<Element> = [Element, ...Element[]];
-export type ObservedProperties<ContextState> = ArrayOfAtLeastOneElement<keyof ContextState>;

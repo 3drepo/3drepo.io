@@ -17,8 +17,9 @@
 
 import { compact, sum } from 'lodash';
 import { RefHolder } from './resizableTableContext.styles';
-import { SubscribableObject } from '@/v5/helpers/performanceContext/performanceContext.types';
-import { createPerformanceContext, useSubscribableObject } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { SubscribableObject } from '@/v5/helpers/contextWithCondition/contextWithCondition.types';
+import { useSubscribableState } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { createContext } from 'react';
 
 export type TableColumn = { name: string; minWidth?: number; width: number; };
 
@@ -28,6 +29,7 @@ type StateType = {
 	movingColumn: string,
 	movingColumnDropIndex: number,
 	tableNode: HTMLDivElement | null,
+	resizingColumn: string,
 };
 const defaultState: StateType = {
 	columnsWidths: {},
@@ -35,12 +37,14 @@ const defaultState: StateType = {
 	movingColumn: '',
 	movingColumnDropIndex: null,
 	tableNode: null,
+	resizingColumn: '',
 };
 
 export interface ResizableTableType extends SubscribableObject<StateType> {
 	getAllColumnsNames: () => string[];
 	getWidth: (name: string) => number;
 	setWidth: (name: string, width: number) => void;
+	resetWidths: () => void,
 	columnGap: number,
 	getRowWidth: () => number,
 	getColumnOffsetLeft: (name: string) => number,
@@ -56,19 +60,20 @@ export interface ResizableTableType extends SubscribableObject<StateType> {
 
 	// moving columns
 	setMovingColumn: (name: string) => void,
-	getMovingColumn: () => string,
 	setMovingColumnDropIndex: (index: number) => void,
-	getMovingColumnDropIndex: () => number,
 	moveColumn: (name: string, dropIndex: number) => void,
+	setResizingColumn: (name: string) => void,
 }
 
 const defaultValue: ResizableTableType = {
 	subscribe: () => () => {},
 	state: defaultState,
+	previousState: { current: defaultState },
 
 	getAllColumnsNames: () => [],
 	getWidth: () => 0,
 	setWidth: () => {},
+	resetWidths: () => {},
 	columnGap: 0,
 	getRowWidth: () => 0,
 	getColumnOffsetLeft: () => 0,
@@ -83,13 +88,13 @@ const defaultValue: ResizableTableType = {
 	setVisibleSortedColumnsNames: () => {},
 
 	// moving columns
-	getMovingColumn: () => '',
 	setMovingColumn: () => {},
-	getMovingColumnDropIndex: () => null,
 	setMovingColumnDropIndex: () => {},
 	moveColumn: () => {},
+	setResizingColumn: () => {},
+
 };
-export const ResizableTableContext = createPerformanceContext(defaultValue);
+export const ResizableTableContext = createContext(defaultValue);
 ResizableTableContext.displayName = 'ResizeableColumns';
 
 interface Props {
@@ -98,7 +103,7 @@ interface Props {
 	columnGap?: number;
 }
 export const ResizableTableContextComponent = ({ children, columns, columnGap = 0 }: Props) => {
-	const [state, subscribe] = useSubscribableObject(defaultState);
+	const [state, previousState, subscribe] = useSubscribableState(defaultState);
 
 	const setVisibleSortedColumnsNames = (names: string[]) => {
 		state.visibleSortedColumnsNames = names;
@@ -110,6 +115,10 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 
 	const setMovingColumnDropIndex = (index: number) => {
 		state.movingColumnDropIndex = index;
+	};
+
+	const setResizingColumn = (name: string) => {
+		state.resizingColumn = name;
 	};
 
 	const getColumnByName = (name: string) => columns.find((e) => e.name === name) as TableColumn;
@@ -133,6 +142,10 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 	const setWidth = (name: string, width: number) => state.columnsWidths = {
 		...state.columnsWidths,
 		[name]: Math.max(getMinWidth(name), width),
+	};
+
+	const resetWidths = () => {
+		state.columnsWidths = {};
 	};
 
 	const getColumnOffsetLeft = (name: string) => {
@@ -172,10 +185,12 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 	return (
 		<ResizableTableContext.Provider value={{
 			subscribe,
+			previousState,
 			state,
 			getAllColumnsNames,
 			getWidth,
 			setWidth,
+			resetWidths,
 			getColumnOffsetLeft,
 			getIndex,
 			hideColumn,
@@ -186,11 +201,10 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 			getRowWidth,
 			columnGap,
 			stretchTable,
-			getMovingColumn: () => state.movingColumn,
 			setMovingColumn,
-			getMovingColumnDropIndex: () => state.movingColumnDropIndex,
 			setMovingColumnDropIndex,
 			moveColumn,
+			setResizingColumn,
 		}}>
 			{children}
 			<RefHolder ref={(node) => { state.tableNode = node; }} />

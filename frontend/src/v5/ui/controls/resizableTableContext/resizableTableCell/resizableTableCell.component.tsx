@@ -18,7 +18,7 @@
 import { HTMLAttributes } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
 import { Item } from './resizableTableCell.styles';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	name: string;
@@ -26,8 +26,8 @@ export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	onClick?: () => void;
 };
 export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, getIndex } = usePerformanceContext(ResizableTableContext, ['movingColumn']);
-	const { isVisible } = usePerformanceContext(ResizableTableContext, (curr, prev) => (
+	const { movingColumn, getIndex } = useContextWithCondition(ResizableTableContext, ['movingColumn']);
+	const { isVisible } = useContextWithCondition(ResizableTableContext, (['visibleSortedColumnsNames']), (curr, prev) => (
 		curr.visibleSortedColumnsNames.includes(name) !== prev.visibleSortedColumnsNames.includes(name)
 	));
 

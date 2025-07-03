@@ -23,8 +23,8 @@ import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.con
 import { isEqual } from 'lodash';
 import { TicketsTableCell } from './ticketsTableCell/ticketsTableCell.component';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 type TicketsTableRowProps = {
 	ticket: ITicket,
@@ -37,7 +37,7 @@ export const TicketsTableRow = memo(({ ticket, onClick, modelId }: TicketsTableR
 	const { getSelectedTicket, onSelectedTicketChange } = useContext(TicketsTableContext);
 	const [selected, setSelected] = useState(getSelectedTicket() === id);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(type);
-	const { visibleSortedColumnsNames } = usePerformanceContext(ResizableTableContext, ['visibleSortedColumnsNames']);
+	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	if (!properties || !template?.code) return null;
 

@@ -19,7 +19,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
 import { blockEvent } from '@/v5/helpers/events.helpers';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const MovingColumnDropAreas = () => {
 	const [tableOffset, setTableOffset] = useState(0);
@@ -28,7 +28,7 @@ export const MovingColumnDropAreas = () => {
 		setMovingColumn, moveColumn, getWidth, setMovingColumnDropIndex, columnGap,
 		getIndex, getColumnOffsetLeft, getRowWidth, visibleSortedColumnsNames,
 		movingColumn, movingColumnDropIndex,
-	} = usePerformanceContext(ResizableTableContext, ['movingColumn', 'movingColumnDropIndex', 'columnsWidths', 'visibleSortedColumnsNames']);
+	} = useContextWithCondition(ResizableTableContext, ['movingColumn', 'movingColumnDropIndex', 'resizingColumn', 'visibleSortedColumnsNames']);
 
 	const movingColumnIndex = getIndex(movingColumn);
 	const dropLineOffset = getColumnOffsetLeft(visibleSortedColumnsNames[movingColumnDropIndex]) ?? getRowWidth();

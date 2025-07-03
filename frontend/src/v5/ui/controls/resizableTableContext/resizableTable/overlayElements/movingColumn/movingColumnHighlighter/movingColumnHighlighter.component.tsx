@@ -17,10 +17,10 @@
 
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { Highlighter } from './movingColumnHighlighter.styles';
-import { usePerformanceContext } from '@/v5/helpers/performanceContext/performanceContext.hooks';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const MovingColumnHighlighter = (props) => {
-	const { getColumnOffsetLeft, getWidth, columnGap, movingColumn } = usePerformanceContext(ResizableTableContext, ['movingColumn']);
+	const { getColumnOffsetLeft, getWidth, columnGap, movingColumn } = useContextWithCondition(ResizableTableContext, ['movingColumn']);
 	const width = getWidth(movingColumn);
 	const offset = getColumnOffsetLeft(movingColumn);
 
