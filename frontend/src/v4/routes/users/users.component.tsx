@@ -279,6 +279,7 @@ export class Users extends PureComponent<IProps, IState> {
 			jobs: this.state.jobs,
 			users: usersSuggestions,
 			usersProvisionedEnabled: this.props.usersProvisionedEnabled,
+			permissionsOnUIDisabled: this.props.permissionsOnUIDisabled,
 			onSave: this.onSave,
 			clearSuggestions: clearUsersSuggestions,
 			getUsersSuggestions: onUsersSearch,
