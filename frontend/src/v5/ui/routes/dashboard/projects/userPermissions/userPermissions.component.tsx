@@ -18,28 +18,35 @@ import { useEffect } from 'react';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 
 import { useDispatch } from 'react-redux';
-import { ProjectsHooksSelectors, CurrentUserHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Container, V4ModelsPermissions } from './userPermissions.styles';
 import { SuppressPermissionModalToggle } from '@components/shared/updatePermissionModal/suppressPermissionModalToggle.component';
+import { useUIPermissions } from '../useUIPermissions.hook';
 
 export const UserPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = CurrentUserHooksSelectors.selectUsername();
-	const permissionsOnUIDisabled = TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();
+	const { isLoading, hasPermissions, openRedirectModal } = useUIPermissions();
 
 	useEffect(() => {
-		if (!username || !projectName || permissionsOnUIDisabled) {
+		if (!username || !projectName) {
 			return;
 		}
 
 		dispatch(UserManagementActions.fetchTeamspaceUsers());
 		dispatch(UserManagementActions.fetchProject(projectName));
 		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
-	}, [projectName, username, permissionsOnUIDisabled]);
+	}, [projectName, username]);
 
-	if (!username || !projectName || permissionsOnUIDisabled) {
+	useEffect(() => {
+		if (!hasPermissions && !isLoading) {
+			openRedirectModal();
+		}
+	}, [hasPermissions, isLoading]);
+
+	if (!username || !projectName || !hasPermissions || isLoading) {
 		return (<></>);
 	}
 
