@@ -323,7 +323,7 @@
 	 *    user: "viewerTeamspace1Model1JobB",
 	 * }
 	 */
-	router.delete("/members/:user", middlewares.canAddOrRemoveUsers , removeTeamMember);
+	router.delete("/members/:user", middlewares.canAddOrRemoveUsers, removeTeamMember);
 
 	/**
 	 *

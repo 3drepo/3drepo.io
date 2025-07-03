@@ -79,15 +79,19 @@ TeamspacePerms.isAddOnModuleEnabled = (moduleName) => async (req, res, next) => 
 };
 
 TeamspacePerms.notUserProvisioned = async (req, res, next) => {
-	const { teamspace } = req.params;
+	try {
+		const { teamspace } = req.params;
 
-	const addOns = await getAddOns(teamspace);
-	if (addOns?.[USERS_PROVISIONED]) {
-		respond(req, res, templates.userProvisioned);
-		return;
+		const addOns = await getAddOns(teamspace);
+		if (addOns?.[USERS_PROVISIONED]) {
+			respond(req, res, templates.userProvisioned);
+			return;
+		}
+
+		await next();
+	} catch (error) {
+		respond(req, res, error);
 	}
-
-	await next();
 };
 
 module.exports = TeamspacePerms;

@@ -201,7 +201,7 @@ const middlewares = {
 	isHereEnabled: isHereEnabled,
 
 	// models
-	canAddOrRemoveUsers: [checkTeamspaceAccess(checkPermissions([C.PERM_TEAMSPACE_ADMIN])), notUserProvisioned],
+	canAddOrRemoveUsers: [checkTeamspaceAccess(checkPermissions([C.PERM_TEAMSPACE_ADMIN])), formatV5NewModelParams, notUserProvisioned],
 	canCreateModel: checkTeamspaceAccess(canCreateModel),
 	hasReadAccessToModel: checkTeamspaceAccess(checkPermissions(readAccessToModel)),
 	hasCommenterAccessToModel: checkTeamspaceAccess(checkPermissions([C.PERM_CREATE_ISSUE])),
