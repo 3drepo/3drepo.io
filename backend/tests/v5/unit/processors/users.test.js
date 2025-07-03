@@ -147,10 +147,21 @@ const tesGetProfileByUsername = () => {
 const tesUpdateProfile = () => {
 	describe('Update user profile by username', () => {
 		test('should update user profile', async () => {
-			const updatedProfile = { firstName: 'Nick' };
+			const updatedProfile = { firstName: 'Nick', lastName: 'Doe', countryCode: 'US', company: '3D Repo' };
+			const backupDataExpected = {
+				'customData.firstName': updatedProfile.firstName,
+				'customData.lastName': updatedProfile.lastName,
+				'customData.billing.billingInfo.countryCode': updatedProfile.countryCode,
+				'customData.billing.billingInfo.company': updatedProfile.company,
+			};
+			const updateProfileExpected = {
+				name: `${updatedProfile.firstName} ${updatedProfile.lastName}`,
+				metadata: JSON.stringify({ countryCode: updatedProfile.countryCode, company: updatedProfile.company	}),
+			};
 			await Users.updateProfile(user.user, updatedProfile);
 			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
-			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updatedProfile);
+			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updateProfileExpected);
+			expect(UsersModel.updateProfile.mock.calls[0][2]).toEqual(backupDataExpected);
 		});
 	});
 };
@@ -159,11 +170,16 @@ const testGetAvatarStream = () => {
 	describe('Get avatar stream', () => {
 		test('should get avatar stream', async () => {
 			const username = generateRandomString();
-			const stream = generateRandomString();
-			FilesManager.getFile.mockResolvedValueOnce(stream);
+			const mockImageBlob = new Blob(
+				[new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])],
+				{ type: 'image/png' },
+			);
+
+			UsersModel.getAvatarStream.mockResolvedValueOnce(mockImageBlob);
+
 			await Users.getAvatar(username);
-			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
+			expect(UsersModel.getAvatarStream).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getAvatarStream).toHaveBeenCalledWith(username);
 		});
 	});
 };
@@ -172,11 +188,30 @@ const testUploadAvatar = () => {
 	describe('Remove old avatar and upload a new one', () => {
 		test('should upload new avatar', async () => {
 			const username = generateRandomString();
-			const avatarBuffer = generateRandomString();
-			await Users.uploadAvatar(username, avatarBuffer);
+			const userId = generateRandomString();
+			const tenantId = generateRandomString();
+			const avatarUrl = generateRandomString();
+			FronteggService.uploadAvatar.mockResolvedValueOnce(avatarUrl);
+			FronteggService.updateUserDetails.mockResolvedValueOnce(generateRandomString());
+			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { userId } });
+			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
+
+			const avatarObject = {
+				path: 'avatar.png',
+				buffer: generateRandomString(),
+			};
+			await Users.uploadAvatar(username, avatarObject);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
+				userId, tenantId, expect.any(Object),
+			);
+			expect(FronteggService.updateUserDetails).toHaveBeenCalledTimes(1);
+			expect(FronteggService.updateUserDetails).toHaveBeenCalledWith(userId,
+				{ profilePictureUrl: avatarUrl },
+			);
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username,
-				avatarBuffer);
+				avatarObject.buffer);
 		});
 	});
 };

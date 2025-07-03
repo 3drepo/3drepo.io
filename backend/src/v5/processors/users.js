@@ -141,11 +141,11 @@ Users.getAvatar = async (username) => {
 	};
 };
 
-Users.uploadAvatar = async (username, avatarBuffer) => {
+Users.uploadAvatar = async (username, avatarObject) => {
 	const { customData: { userId } } = await getUserByUsername(username, { 'customData.userId': 1 });
 	const { tenantId } = await getUserById(userId);
 
-	const filePath = Path.resolve(avatarBuffer.path);
+	const filePath = Path.resolve(avatarObject.path);
 	const formData = new FormData();
 	formData.append('image', createReadStream(filePath));
 
@@ -157,7 +157,7 @@ Users.uploadAvatar = async (username, avatarBuffer) => {
 
 	await updateUserDetails(userId, { profilePictureUrl });
 
-	storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer.buffer);
+	storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarObject.buffer);
 };
 
 Users.generateApiKey = generateApiKey;
