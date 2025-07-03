@@ -228,6 +228,21 @@ const testNotUserProvisioned = () => {
 			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
 		});
+
+		test('should respond with error if getAddOns throws error', async () => {
+			const error = new Error();
+			TeamspaceSettings.getAddOns.mockRejectedValueOnce(error);
+			const req = { params: { teamspace } };
+			const res = {};
+			await TSMiddlewares.notUserProvisioned(req, res, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, error);
+
+			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
+		});
 	});
 };
 
