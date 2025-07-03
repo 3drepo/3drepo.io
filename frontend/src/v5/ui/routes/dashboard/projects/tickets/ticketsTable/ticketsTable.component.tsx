@@ -48,6 +48,7 @@ import { ResizableTableContext } from '@controls/resizableTableContext/resizable
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableContext } from './ticketsTableContext/ticketsTableContext';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -60,7 +61,7 @@ export const TicketsTable = () => {
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, template, ticketId } = params;
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
-	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);

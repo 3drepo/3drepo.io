@@ -24,6 +24,7 @@ import { TicketsTableContext } from '../ticketsTable/ticketsTableContext/tickets
 import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 const NONE_OPTION = 'None';
 const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
@@ -31,7 +32,7 @@ const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', def
 export const GroupBySelect = () => {
 	const { template } = useParams<DashboardTicketsParams>();
 	const { groupByProperties, groupBy, setGroupBy, getPropertyType } = useContext(TicketsTableContext);
-	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const items = groupByProperties.filter((property) => visibleSortedColumnsNames.includes(property));
 
 	useEffect(() => {

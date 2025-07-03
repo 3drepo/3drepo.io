@@ -38,23 +38,23 @@
 	 *
 	 * @apiUse Jobs
 	 *
-	 * @apiParam {String} _id Name of job
-	 * @apiParam {String} color Colour of job
+	 * @apiBody {String} _id Name of job
+	 * @apiBody {String} color Colour of job
 	 * @apiSuccess (Job object) {String} _id Name of job
 	 * @apiSuccess (Job object) {String} color Colour of job
 	 *
 	 * @apiExample {post} Example usage:
 	 * POST /acme/jobs HTTP/1.1
 	 * {
-	 * 	_id:"Job4",
-	 * 	color:"#ffff00"
+	 * 	"_id":"Job4",
+	 * 	"color":"#ffff00"
 	 * }
 	 *
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiSuccessExample {json} Success-Response:
 	 * HTTP/1.1 200 OK
 	 * {
-	 * 	_id:"Job4",
-	 * 	color:"#ffff00"
+	 * 	"_id":"Job4",
+	 * 	"color":"#ffff00"
 	 * }
 	 */
 	router.post("/jobs", middlewares.formatV5NewModelParams, middlewares.job.canCreate, createJob);
@@ -70,11 +70,11 @@
 	 * @apiExample {get} Example usage:
 	 * GET /acme/myJob HTTP/1.1
 	 *
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiSuccessExample {json} Success-Response:
 	 * HTTP/1.1 200 OK
 	 * {
-	 * 	_id":"Job1",
-	 * 	"color":"ff00000"
+	 * 	"_id":"Job1",
+	 * 	"color":"#ff0000"
 	 * }
 	 */
 	router.get("/myJob", middlewares.isTeamspaceMember, getUserJob);
@@ -88,17 +88,17 @@
 	 * @apiUse Jobs
 	 *
 	 * @apiParam {String} jobId Job ID
-	 * @apiParam {String} _id Name of job
-	 * @apiParam {String} color Colour of job
+	 * @apiBody {String} _id Name of job
+	 * @apiBody {String} color Colour of job
 	 *
 	 * @apiExample {put} Example usage:
 	 * PUT /acme/jobs/Job1 HTTP/1.1
 	 * {
-	 * 	_id:"Renamed Job",
-	 * 	color:"#00ffff"
+	 * 	"_id":"Renamed Job",
+	 * 	"color":"#00ffff"
 	 * }
 	 *
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiSuccessExample {json} Success-Response:
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
@@ -118,7 +118,7 @@
 	 * @apiExample {get} Example usage:
 	 * GET /acme/jobs HTTP/1.1
 	 *
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiSuccessExample {json} Success-Response:
 	 * HTTP/1.1 200 OK
 	 * [
 	 * 	{
@@ -145,13 +145,13 @@
 	 *
 	 * @apiUse Jobs
 	 *
-	 * @apiParam jobId Job ID
+	 * @apiParam {String} jobId Job ID
 	 * @apiParam {String} user User
 	 *
 	 * @apiExample {post} Example usage:
 	 * POST /acme/jobs/Job1/alice HTTP/1.1
 	 *
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiSuccessExample {json} Success-Response:
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
@@ -168,9 +168,9 @@
 	 * @apiParam {String} jobId Job ID
 	 *
 	 * @apiExample {delete} Example usage:
-	 * DELETE /acme/jobs/Job 1 HTTP/1.1
+	 * DELETE /acme/jobs/Job1 HTTP/1.1
 	 *
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiSuccessExample {json} Success-Response:
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */
@@ -189,7 +189,7 @@
 	 * @apiExample {get} Example usage:
 	 * GET /acme/jobs/colors HTTP/1.1
 	 *
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiSuccessExample {json} Success-Response:
 	 * HTTP/1.1 200 OK
 	 * [
 	 * 	"#ff0000",

@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { HTMLAttributes, useContext } from 'react';
+import { HTMLAttributes } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
 import { Item } from './resizableTableCell.styles';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	name: string;
@@ -25,7 +26,10 @@ export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	onClick?: () => void;
 };
 export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
-	const { movingColumn, isVisible, getIndex } = useContext(ResizableTableContext);
+	const { movingColumn, getIndex } = useContextWithCondition(ResizableTableContext, ['movingColumn']);
+	const { isVisible } = useContextWithCondition(ResizableTableContext, (['visibleSortedColumnsNames']), (curr, prev) => (
+		curr.visibleSortedColumnsNames.includes(name) !== prev.visibleSortedColumnsNames.includes(name)
+	));
 
 	if (!isVisible(name)) return null;
 
