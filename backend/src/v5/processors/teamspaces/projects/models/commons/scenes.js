@@ -23,14 +23,41 @@ const { getFile } = require('../../../../../services/filesManager');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
+const contextCache = {};
+const CACHE_EXPIRATION = 300000; // 5 minutes
+
 const getIdToMeshesMapping = async (teamspace, model, revId) => {
-	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
-	return JSON.parse(fileData);
+	const cacheKey = `${teamspace}/${model}/${UUIDToString(revId)}`;
+	if (!contextCache[cacheKey]) {
+		const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
+		contextCache[cacheKey] = JSON.parse(fileData);
+		setTimeout(() => {
+			delete contextCache[cacheKey];
+		}, CACHE_EXPIRATION);
+	}
+
+	return contextCache[cacheKey];
+};
+
+const timer = {
+	getNodes: 0,
+	idToMeshes: 0,
+	getMeshes: 0,
+};
+Scene.printTimer = () => {
+	console.log(timer);
+};
+
+Scene.prepareCache = async (teamspace, model, revId) => {
+	await getIdToMeshesMapping(teamspace, model, revId);
 };
 
 Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds, returnString = false) => {
+	const getNodesStart = Date.now();
 	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
+	const getNodesEnd = Date.now();
 	const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
+	const idToMeshesEnd = Date.now();
 	const meshes = new Set();
 	nodes.forEach(({ _id }) => {
 		const idStr = UUIDToString(_id);
@@ -40,6 +67,12 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 	});
 
 	const meshesArr = Array.from(meshes);
+	const getMeshesEnd = Date.now();
+
+	timer.getNodes += getNodesEnd - getNodesStart;
+	timer.idToMeshes += idToMeshesEnd - getNodesEnd;
+	timer.getMeshes += getMeshesEnd - idToMeshesEnd;
+
 	return returnString ? meshesArr : meshesArr.map(stringToUUID);
 };
 

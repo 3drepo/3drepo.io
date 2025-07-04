@@ -28,6 +28,7 @@ const { positiveRulesToQueries, negativeRulesToQueries } = require("./helper/rul
 const {intersection, difference} = require("./helper/set");
 const utils = require("../utils");
 const Stream = require("stream");
+const { printTimer } = require("../../v5/processors/teamspaces/projects/models/commons/scenes.js");
 const { getMetadataByRules } = require(`${v5Path}/models/metadata.js`);
 const { getArrayDifference } = require(`${v5Path}/utils/helper/arrays.js`);
 const { getMeshesWithParentIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scenes.js`);
@@ -223,15 +224,17 @@ Meta.uuidsToIfcGuids = async (account, model, ids) => {
 	return db.find(account, getSceneCollectionName(model), query, project);
 };
 
-Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false) => {
+Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convertSharedIDsToString, showIfcGuids = false, {skipSubModelCheck = false, skipRevCheck = false} = {}) => {
 
 	const objectIdPromises = [];
 
 	const models = new Set();
 	models.add(model);
 
-	// Check submodels
-	await getSubModels(account, model, branch, revId, (ts, subModel) => models.add(subModel));
+	if(!skipSubModelCheck) {
+		// Check submodels
+		await getSubModels(account, model, branch, revId, (ts, subModel) => models.add(subModel));
+	}
 
 	const modelsIter = models.values();
 
@@ -245,7 +248,8 @@ Meta.findObjectIdsByRules = async (account, model, rules, branch, revId, convert
 			rules,
 			_branch,
 			_revId,
-			convertSharedIDsToString && !showIfcGuids // in the case of ifcguids I need the uuid for querying and geting the ifcguids
+			convertSharedIDsToString && !showIfcGuids, // in the case of ifcguids I need the uuid for querying and geting the ifcguids
+			skipRevCheck
 		).then(shared_ids => {
 
 			if(!shared_ids.length) {
@@ -452,26 +456,53 @@ const findObjectsByQuery = (account, model, query, projection = { $project: {...
  *
  * @returns {Promise<Array<string | object>>}
  */
-const findModelSharedIdsByRulesQueries = async (account, model, rules, branch, revId, convertSharedIDsToString) => {
-	const ids = await findModelMeshIdsByRulesQueries(account, model, rules, branch, revId, false);
+const findModelSharedIdsByRulesQueries = async (account, model, rules, branch, revId, convertSharedIDsToString, skipRevCheck) => {
+	const ids = await findModelMeshIdsByRulesQueries(account, model, rules, branch, revId, false, skipRevCheck);
 	return idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
 };
 
-const findModelMeshIdsByRulesQueries = async (account, model, rules, branch, revId, toString = false) => {
-	const history = await  History.getHistory(account, model, branch, revId);
+const timer = {
+	history: 0,
+	metaQuery: 0,
+	meshIds: 0,
+	calDiff: 0
+};
+Meta.printTimers = () =>{
+	console.log(timer);
+	printTimer();
+};
 
-	const {matched, unwanted} = await getMetadataByRules(account, undefined, model, history._id, rules);
+const findModelMeshIdsByRulesQueries = async (account, model, rules, branch, revId, toString = false, skipRevCheck = false) => {
+	const historyStart = Date.now();
+	if (!skipRevCheck) {
+		const history = await  History.getHistory(account, model, branch, revId);
+		revId = history._id; // Ensure revId is set to the history ID
+	}
+	const historyEnd = Date.now();
+
+	const {matched, unwanted} = await getMetadataByRules(account, undefined, model, revId, rules);
 	const project = undefined;
+	const metaQueryEnd = Date.now();
+
 	const [
 		matchedMeshIds,
 		unwantedMeshIds
 	] = await Promise.all([
-		matched.length ? getMeshesWithParentIds(account, project, model, history._id,
+		matched.length ? getMeshesWithParentIds(account, project, model, revId,
 			matched.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
-		unwanted.length ? getMeshesWithParentIds(account, project, model,  history._id,
+		unwanted.length ? getMeshesWithParentIds(account, project, model,  revId,
 			unwanted.flatMap(({ parents }) => parents), true) : Promise.resolve([])
 	]);
+	const matchedMeshIdsEnd = Date.now();
+
 	const meshes =  getArrayDifference(unwantedMeshIds, matchedMeshIds);
+	const arrayDifferenceEnd = Date.now();
+
+	timer.history += historyEnd - historyStart;
+	timer.metaQuery += metaQueryEnd - historyEnd;
+	timer.meshIds += matchedMeshIdsEnd - metaQueryEnd;
+	timer.calDiff += arrayDifferenceEnd - matchedMeshIdsEnd;
+
 	return toString ? meshes : meshes.map(stringToUUID);
 
 };
