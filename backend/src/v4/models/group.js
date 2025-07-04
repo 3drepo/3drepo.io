@@ -389,7 +389,7 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		models = [{model, revId: modelRev._id}];
 	}
 
-	const toReturn = await Promise.all(groups.map(async group => {
+	return Promise.all(groups.map(async group => {
 		try {
 			const sharedIdObjects = await Promise.all(models.map(({model: container, revId: conRevId}) =>
 				getObjectIds(account, container, undefined, conRevId, group, true, showIfcGuids)));
@@ -402,7 +402,6 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		return clean(group);
 	}));
 
-	return toReturn;
 };
 
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {
