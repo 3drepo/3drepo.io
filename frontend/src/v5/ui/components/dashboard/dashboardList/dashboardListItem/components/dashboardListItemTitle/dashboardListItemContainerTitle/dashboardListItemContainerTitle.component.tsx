@@ -22,7 +22,6 @@ import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
-import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';
@@ -32,6 +31,30 @@ interface IContainerTitle extends FixedOrGrowContainerProps {
 	container: IContainer;
 	isSelected?: boolean;
 	openInNewTab?: boolean;
+}
+
+function startAndEnd(str) {
+	if (str.length > 35) {
+		return str.substring(0, 20) + '...' + str.substring(str.length - 10, str.length);
+	}
+
+	return str;
+}
+
+function cutQuery(query: string, str: string) {
+	if (str.length <= 35) {
+		return query;
+	}
+
+	const index = str.toLowerCase().indexOf(query.toLowerCase());
+
+	if ((index < 20 && index + query.length > 20) || (index > 20 && index < str.length - 10) ) {
+		const totalQuery = ' '.repeat(index) + query + ' '.repeat(Math.max(str.length - (index + query.length), 0));
+		const res:string = startAndEnd(totalQuery);
+		return res.trim();
+	}
+
+	return query;
 }
 
 export const DashboardListItemContainerTitle = ({
@@ -70,17 +93,12 @@ export const DashboardListItemContainerTitle = ({
 				/>
 			)}
 			selected={isSelected}
-			tooltipTitle={canLaunchContainer ? (
-				<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
-			) : (
-				<FormattedMessage id="containers.list.item.title.tooltip.empty" defaultMessage="No revisions" />
-			)
-			}
+			tooltipTitle={container.name}
 			disabled={!canLaunchContainer}
 		>
 			<Link {...linkProps}>
-				<Highlight search={query}>
-					{container.name}
+				<Highlight search={cutQuery(query, container.name)}>
+					{startAndEnd(container.name)}
 				</Highlight>
 			</Link>
 		</DashboardListItemTitle>
