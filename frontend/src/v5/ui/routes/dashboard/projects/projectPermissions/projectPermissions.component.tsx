@@ -22,13 +22,11 @@ import { ProjectsHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Container, V4ProjectsPermissions } from './projectPermissions.styles';
 import { SuppressPermissionModalToggle } from '@components/shared/updatePermissionModal/suppressPermissionModalToggle.component';
-import { useUIPermissions } from '../useUIPermissions.hook';
 
 export const ProjectPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = CurrentUserHooksSelectors.selectUsername();
-	const { isLoading, hasPermissions, openRedirectModal } = useUIPermissions();
 
 	useEffect(() => {
 		if (!username || !projectName) {
@@ -40,13 +38,8 @@ export const ProjectPermissions = () => {
 		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
 	}, [projectName, username]);
 
-	useEffect(() => {
-		if (!hasPermissions && !isLoading) {
-			openRedirectModal();
-		}
-	}, [hasPermissions, isLoading]);
 
-	if (!username || !projectName || !hasPermissions || isLoading) {
+	if (!username || !projectName) {
 		return (<></>);
 	}
 
