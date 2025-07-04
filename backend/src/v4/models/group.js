@@ -38,7 +38,6 @@ const ChatEvent = require("./chatEvent");
 const { systemLogger } = require("../logger.js");
 const { prepareCache } = require("../../v5/processors/teamspaces/projects/models/commons/scenes.js");
 const { getSubModels } = require("./ref.js");
-const { getSubModelRevisions } = require("./helper/model.js");
 
 const fieldTypes = {
 	"description": "[object String]",
