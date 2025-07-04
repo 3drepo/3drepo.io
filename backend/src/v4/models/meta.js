@@ -28,7 +28,6 @@ const { positiveRulesToQueries, negativeRulesToQueries } = require("./helper/rul
 const {intersection, difference} = require("./helper/set");
 const utils = require("../utils");
 const Stream = require("stream");
-const { printTimer } = require("../../v5/processors/teamspaces/projects/models/commons/scenes.js");
 const { getMetadataByRules } = require(`${v5Path}/models/metadata.js`);
 const { getArrayDifference } = require(`${v5Path}/utils/helper/arrays.js`);
 const { getMeshesWithParentIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scenes.js`);

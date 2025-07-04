@@ -23,7 +23,7 @@ const { getCommonElements } = require(`${v5Path}/utils/helper/arrays`);
 const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 const { idTypes, idTypesToKeys } = require(`${v5Path}/models/metadata.constants`);
 const { getMetadataWithMatchingData } = require(`${v5Path}/models/metadata`);
-const { sharedIdsToExternalIds, getMeshesWithParentIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scenes`);
+const { sharedIdsToExternalIds, getMeshesWithParentIds, prepareCache } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scenes`);
 const { findProjectByModelId } = require(`${v5Path}/models/projectSettings.js`);
 
 const utils = require("../utils");
@@ -36,7 +36,6 @@ const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
 const { systemLogger } = require("../logger.js");
-const { prepareCache } = require("../../v5/processors/teamspaces/projects/models/commons/scenes.js");
 const { getSubModels } = require("./ref.js");
 
 const fieldTypes = {
