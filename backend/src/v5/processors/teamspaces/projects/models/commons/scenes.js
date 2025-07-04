@@ -24,23 +24,33 @@ const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
 const contextCache = {};
-const CACHE_EXPIRATION = 300000; // 5 minutes
+let CACHE_EXPIRATION = 300000; // 5 minutes
 
-const getIdToMeshesMapping = async (teamspace, model, revId) => {
+const getIdToMeshesMapping = async (teamspace, model, revId, cacheExpiry = CACHE_EXPIRATION) => {
 	const cacheKey = `${teamspace}/${model}/${UUIDToString(revId)}`;
 	if (!contextCache[cacheKey]) {
 		const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
 		contextCache[cacheKey] = JSON.parse(fileData);
 		setTimeout(() => {
 			delete contextCache[cacheKey];
-		}, CACHE_EXPIRATION);
+		}, cacheExpiry);
 	}
 
 	return contextCache[cacheKey];
 };
 
-Scene.prepareCache = async (teamspace, model, revId) => {
-	await getIdToMeshesMapping(teamspace, model, revId);
+// This function is only used by tests to avoid tests hanging due to an unresolved promise
+Scene.setCacheExpiration = (expiry) => {
+	CACHE_EXPIRATION = expiry;
+};
+
+// This function is only used by tests to clear the cache
+Scene.clearCache = () => {
+	Object.keys(contextCache).forEach((key) => delete contextCache[key]);
+};
+
+Scene.prepareCache = async (teamspace, model, revId, cacheExpiry = CACHE_EXPIRATION) => {
+	await getIdToMeshesMapping(teamspace, model, revId, cacheExpiry);
 };
 
 Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds, returnString = false) => {
