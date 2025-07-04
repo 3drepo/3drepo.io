@@ -461,28 +461,14 @@ const findModelSharedIdsByRulesQueries = async (account, model, rules, branch, r
 	return idsToSharedIds(account, model, ids, convertSharedIDsToString) ;
 };
 
-const timer = {
-	history: 0,
-	metaQuery: 0,
-	meshIds: 0,
-	calDiff: 0
-};
-Meta.printTimers = () =>{
-	console.log(timer);
-	printTimer();
-};
-
 const findModelMeshIdsByRulesQueries = async (account, model, rules, branch, revId, toString = false, skipRevCheck = false) => {
-	const historyStart = Date.now();
 	if (!skipRevCheck) {
 		const history = await  History.getHistory(account, model, branch, revId);
 		revId = history._id; // Ensure revId is set to the history ID
 	}
-	const historyEnd = Date.now();
 
 	const {matched, unwanted} = await getMetadataByRules(account, undefined, model, revId, rules);
 	const project = undefined;
-	const metaQueryEnd = Date.now();
 
 	const [
 		matchedMeshIds,
@@ -493,15 +479,8 @@ const findModelMeshIdsByRulesQueries = async (account, model, rules, branch, rev
 		unwanted.length ? getMeshesWithParentIds(account, project, model,  revId,
 			unwanted.flatMap(({ parents }) => parents), true) : Promise.resolve([])
 	]);
-	const matchedMeshIdsEnd = Date.now();
 
 	const meshes =  getArrayDifference(unwantedMeshIds, matchedMeshIds);
-	const arrayDifferenceEnd = Date.now();
-
-	timer.history += historyEnd - historyStart;
-	timer.metaQuery += metaQueryEnd - historyEnd;
-	timer.meshIds += matchedMeshIdsEnd - metaQueryEnd;
-	timer.calDiff += arrayDifferenceEnd - matchedMeshIdsEnd;
 
 	return toString ? meshes : meshes.map(stringToUUID);
 

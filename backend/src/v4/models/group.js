@@ -327,8 +327,6 @@ Group.findByUID = async function (account, model, branch, revId, uid, showIfcGui
 };
 
 Group.getList = async function (account, model, branch, revId, ids, queryParams, showIfcGuids) {
-	const timers = {};
-	timers.start = Date.now();
 	const query = {};
 
 	// If we want groups that aren't from issues
@@ -351,8 +349,6 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		query.view_id = { $exists: false };
 	}
 
-	timers.afterQueryBuild = Date.now();
-
 	if (queryParams.updatedSince) {
 		const updatedSince = parseFloat(queryParams.updatedSince);
 
@@ -369,8 +365,6 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	if (ids) {
 		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
-
-	timers.beforeDbFind = Date.now();
 	const submodels = new Set();
 
 	const [groups, modelRev] = await Promise.all([
@@ -395,10 +389,6 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		models = [{model, revId: modelRev._id}];
 	}
 
-	timers.afterDbFind = Date.now();
-
-	timers.beforeObjectIds = Date.now();
-
 	const toReturn = await Promise.all(groups.map(async group => {
 		try {
 			const sharedIdObjects = await Promise.all(models.map(({model: container, revId: conRevId}) =>
@@ -411,19 +401,6 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 
 		return clean(group);
 	}));
-
-	timers.afterObjectIds = Date.now();
-
-	timers.end = Date.now();
-	systemLogger.logInfo("[Group.getList] timings (ms):");
-	Object.entries({
-		buildQuery: timers.afterQueryBuild - timers.start,
-		dbFind: timers.afterDbFind - timers.beforeDbFind,
-		buildObjectIdsPromises: timers.afterObjectIds - timers.beforeObjectIds,
-		total: timers.end - timers.start
-	}).forEach(([k, v]) => systemLogger.logInfo(`  ${k}: ${v}`));
-
-	Meta.printTimers();
 
 	return toReturn;
 };
