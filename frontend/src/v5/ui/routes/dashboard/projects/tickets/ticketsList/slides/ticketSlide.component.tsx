@@ -38,14 +38,13 @@ const useFetchTicket = (ticketId, containerOrFederation) => {
 	const isFederation = modelIsFederation(containerOrFederation);
 	
 	const [isTicketFetched, setIsTicketFetched] = useState(false);
-	const ticketsHaveBeenFetched = TicketsHooksSelectors.selectTicketsHaveBeenFetched()(containerOrFederation);
 
 	useEffect(() => {
 		setIsTicketFetched(false);
 	}, [ticketId]);
 
 	useEffect(() => {
-		if (!ticketId || !containerOrFederation || !ticketsHaveBeenFetched) return;
+		if (!ticketId || !containerOrFederation) return;
 		TicketsActionsDispatchers.fetchTicket(
 			teamspace,
 			project,
@@ -56,7 +55,7 @@ const useFetchTicket = (ticketId, containerOrFederation) => {
 			() => setIsTicketFetched(true),
 			() => setIsTicketFetched(true),
 		);
-	}, [ticketId, ticketsHaveBeenFetched, containerOrFederation]);
+	}, [ticketId, containerOrFederation]);
 
 	return isTicketFetched;
 };
