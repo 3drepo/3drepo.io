@@ -364,11 +364,14 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
 	const submodels = new Set();
-
 	const [groups, modelRev] = await Promise.all([
 		db.find(account, getGroupCollectionName(model), query),
-		getHistory(account, model, branch, revId),
-		getSubModels(account, model, branch, revId, async (ts, subModel) => {
+		getHistory(account, model, branch, revId).catch(() => undefined)
+
+	]);
+
+	if(modelRev) {
+		await getSubModels(account, model, branch, revId, async (ts, subModel) => {
 			const revNode = await findLatest(ts, subModel, {_id: 1});
 
 			if(revNode) {
@@ -376,8 +379,8 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 				await prepareCache(ts, subModel, revNode._id);
 			}
 
-		})
-	]);
+		});
+	}
 
 	let models = [];
 	if(submodels.size) {
