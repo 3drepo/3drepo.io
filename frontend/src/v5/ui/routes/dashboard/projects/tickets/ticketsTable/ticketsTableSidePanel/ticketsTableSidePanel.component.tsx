@@ -29,7 +29,7 @@ import { NEW_TICKET_ID, SetTicketValue } from '../ticketsTable.helper';
 import { NewTicketSlide } from '../../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from '../newTicketMenu/useSelectedModels';
-import { memo, useContext, useEffect, useState } from 'react';
+import { memo, useContext, useEffect, useRef, useState } from 'react';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsTableContext } from '../ticketsTableContext/ticketsTableContext';
 import { isEqual } from 'lodash';
@@ -59,6 +59,7 @@ export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue
 	const ticketId = useSubscribableSearchParamState(getSelectedTicket, onSelectedTicketChange);
 	const modelId = useSubscribableSearchParamState(getSelectedModel, onSelectedModelChange);
 	const models = useSelectedModels();
+	const firstRender = useRef(true);
 
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const readOnly = isFed(modelId)
@@ -87,6 +88,10 @@ export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue
 	}, [readOnly]);
 
 	useEffect(() => {
+		if (firstRender.current) {
+			firstRender.current = false;
+			return;
+		}
 		setModelAndTicketId(null, null);
 	}, [template]);
 
