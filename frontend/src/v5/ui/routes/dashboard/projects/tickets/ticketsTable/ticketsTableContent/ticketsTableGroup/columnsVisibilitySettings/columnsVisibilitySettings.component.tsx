@@ -117,11 +117,6 @@ export const ColumnsVisibilitySettings = () => {
 		refreshSorting();
 	}, [orderingColumnPropertiesFetched]);
 
-	useEffect(() => {
-		if (!orderingColumnPropertiesFetched) return;
-		refreshSorting();
-	}, [orderingColumnPropertiesFetched]);
-
 	return (
 		<ActionMenu
 			TriggerButton={(
