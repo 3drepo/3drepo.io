@@ -87,10 +87,8 @@ export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: U
 };
 
 export const upsertTicketsSuccess = (state: ITicketsState, { modelId, tickets }: UpsertTicketsSuccessAction) => {
-	if (tickets.length === 0) return;
 	tickets.forEach((ticket) => upsertTicketSuccess(state, { modelId, ticket } as UpsertTicketSuccessAction));
 };
-
 
 export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template }: ReplaceTemplateSuccessAction) => {
 	if (!state.templatesByModelId[modelId]) state.templatesByModelId[modelId] = [];

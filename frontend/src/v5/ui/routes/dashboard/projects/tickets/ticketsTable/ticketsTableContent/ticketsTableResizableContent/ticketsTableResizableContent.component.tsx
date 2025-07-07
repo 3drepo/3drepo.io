@@ -30,7 +30,7 @@ import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-type TicketsTableContextProps = {
+type CollapsibleTicketsGroupProps = {
 	groupName: string;
 	tickets: ITicket[];
 	setTicketValue: SetTicketValue;
@@ -39,7 +39,7 @@ type TicketsTableContextProps = {
 	propertyName: string;
 };
 
-const CollapsableTicketsTableGroup = ({ groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: TicketsTableContextProps) => {
+const CollapsibleTicketsGroup = ({ groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: CollapsibleTicketsGroupProps) => {
 	const ticketsIds = tickets.map(({ _id }) => _id);
 
 	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
@@ -95,7 +95,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 	return (
 		<Container>
 			{groups.map(([groupName, tickets]) => (
-				<CollapsableTicketsTableGroup
+				<CollapsibleTicketsGroup
 					groupName={groupName}
 					tickets={tickets}
 					setTicketValue={setTicketValue}

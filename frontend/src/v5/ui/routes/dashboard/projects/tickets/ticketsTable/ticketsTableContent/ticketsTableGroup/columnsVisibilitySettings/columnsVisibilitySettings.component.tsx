@@ -42,10 +42,6 @@ const List = () => {
 	const { visibleSortedColumnsNames, hideColumn, showColumn, isVisible } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const { groupBy } = useContext(TicketsTableContext);
 
-	const onShowColumn = (name) => {
-		showColumn(name);
-	};
-
 	const groupBySelected = () => {
 		const groups = { selected: [], unselected: [] };
 		filteredItems.forEach((item) => {
@@ -91,7 +87,7 @@ const List = () => {
 			{groupedItems.unselected.map((columnName) => (
 				<MenuItem key={columnName}>
 					<Checkbox
-						onChange={() => onShowColumn(columnName)}
+						onChange={() => showColumn(columnName)}
 						value={false}
 						label={<TextOverflow>{getPropertyLabel(columnName)}</TextOverflow>}
 					/>
