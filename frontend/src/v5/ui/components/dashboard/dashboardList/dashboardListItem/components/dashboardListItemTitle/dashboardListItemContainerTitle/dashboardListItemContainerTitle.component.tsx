@@ -31,36 +31,50 @@ interface IContainerTitle extends FixedOrGrowContainerProps {
 	container: IContainer;
 	isSelected?: boolean;
 	openInNewTab?: boolean;
+	maxCharacterLength?: number;
 }
 
-function startAndEnd(str) {
-	if (str.length > 35) {
-		return str.substring(0, 20) + '...' + str.substring(str.length - 10, str.length);
+const ellipsisLimits = (length) => {
+	const lenghtWithoutEllipsis = length - 5; // (...) + 2 characters for padding
+	const max = Math.round((2 / 3) * lenghtWithoutEllipsis);
+	const min = lenghtWithoutEllipsis - max;
+	return { max, min };
+};
+
+const middleEllipsis = (str: string, maxLength: number ) => {
+	if (str.length > maxLength) {
+		const { max, min } = ellipsisLimits(maxLength);
+		return str.substring(0, max) + '...' + str.substring(str.length - min, str.length);
 	}
 
 	return str;
-}
+};
 
-function cutQuery(query: string, str: string) {
-	if (str.length <= 35) {
+const cutQuery = (query: string, str: string, maxLength: number) =>{
+	if (str.length <= maxLength) {
 		return query;
 	}
 
 	const index = str.toLowerCase().indexOf(query.toLowerCase());
+	
+	const { max, min } = ellipsisLimits(maxLength);
 
-	if ((index < 20 && index + query.length > 20) || (index > 20 && index < str.length - 10) ) {
+	//    1. If the query is at the start of the string and it crosses to the ellipsis.
+	// or 2. If the query is in the middle of the dots and cross pass the dots.
+	if ((index < max && index + query.length > max) || (index > max && index < str.length - min) ) {
 		const totalQuery = ' '.repeat(index) + query + ' '.repeat(Math.max(str.length - (index + query.length), 0));
-		const res:string = startAndEnd(totalQuery);
+		const res:string = middleEllipsis(totalQuery, maxLength);
 		return res.trim();
 	}
 
 	return query;
-}
+};
 
 export const DashboardListItemContainerTitle = ({
 	container,
 	isSelected = false,
 	openInNewTab = false,
+	maxCharacterLength,
 	...props
 }: IContainerTitle): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -97,8 +111,8 @@ export const DashboardListItemContainerTitle = ({
 			disabled={!canLaunchContainer}
 		>
 			<Link {...linkProps}>
-				<Highlight search={cutQuery(query, container.name)}>
-					{startAndEnd(container.name)}
+				<Highlight search={maxCharacterLength ? cutQuery(query, container.name, maxCharacterLength) : query}>
+					{maxCharacterLength ? middleEllipsis(container.name, maxCharacterLength) : container.name}
 				</Highlight>
 			</Link>
 		</DashboardListItemTitle>
