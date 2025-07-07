@@ -24,7 +24,7 @@ const { findNodesByField, getNodeById, findMetadataNodesByFields } = require("./
 const db = require("../handler/db");
 const responseCodes = require("../response_codes.js");
 const { batchPromises } = require("./helper/promises");
-const { positiveRulesToQueries, negativeRulesToQueries } = require("./helper/rule");
+const { positiveRulesToQueries, negativeRulesToQueries, validateRules } = require("./helper/rule");
 const {intersection, difference} = require("./helper/set");
 const utils = require("../utils");
 const Stream = require("stream");
@@ -391,9 +391,6 @@ Meta.getAllMetadata = async (account, model, branch, rev, fieldNames) => {
 Meta.getMeshIdsByRules = async (account, model, branch, revId, rules) => {
 	const objectIdPromises = [];
 
-	const positiveQueries = positiveRulesToQueries(rules);
-	const negativeQueries = negativeRulesToQueries(rules);
-
 	const models = new Set();
 	models.add(model);
 
@@ -404,6 +401,10 @@ Meta.getMeshIdsByRules = async (account, model, branch, revId, rules) => {
 
 	const modelsIter = models.values();
 
+	// this needs to be called as v4 does not have a middleware to enforce validation
+	// including changing the old schema to new.
+	rules = validateRules(rules);
+
 	for (const submodel of modelsIter) {
 		const _branch = (model === submodel) ? branch : "master";
 		const _revId = (model === submodel) ? revId : null;
@@ -411,8 +412,7 @@ Meta.getMeshIdsByRules = async (account, model, branch, revId, rules) => {
 		objectIdPromises.push(findModelMeshIdsByRulesQueries(
 			account,
 			submodel,
-			positiveQueries,
-			negativeQueries,
+			rules,
 			_branch,
 			_revId,
 			true
@@ -461,6 +461,7 @@ const findModelSharedIdsByRulesQueries = async (account, model, rules, branch, r
 };
 
 const findModelMeshIdsByRulesQueries = async (account, model, rules, branch, revId, toString = false, skipRevCheck = false) => {
+
 	if (!skipRevCheck) {
 		const history = await  History.getHistory(account, model, branch, revId);
 		revId = history._id; // Ensure revId is set to the history ID
