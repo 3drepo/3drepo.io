@@ -95,7 +95,7 @@ export const selectTicketsRaw = createSelector(
 	(state, modelId) => modelId,
 	(state, modelId) => {
 		const ticketIds = state.ticketsByModelId[modelId] || [];
-		return ticketIds.map((ticketId) => state.ticketsData[ticketId]).filter(Boolean);
+		return ticketIds.map((ticketId) => state.ticketsData[ticketId]);
 	},
 );
 

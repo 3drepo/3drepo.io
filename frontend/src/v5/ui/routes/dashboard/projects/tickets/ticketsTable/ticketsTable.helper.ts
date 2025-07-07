@@ -21,7 +21,7 @@ import _ from 'lodash';
 import { RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-export type SetTicketValue =  (modelId?: string, ticketId?: string) => void;
+export type SetTicketValue =  (modelId?: string, ticketId?: string, groupByVal?: string) => void;
 
 export const NEW_TICKET_ID = 'new';
 

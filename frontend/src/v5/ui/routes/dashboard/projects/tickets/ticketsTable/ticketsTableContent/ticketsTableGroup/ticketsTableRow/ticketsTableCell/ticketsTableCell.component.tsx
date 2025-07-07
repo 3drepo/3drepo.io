@@ -52,7 +52,6 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
 	const propertyWasFetched = TicketsHooksSelectors.selectPropertyFetched(ticketId, propertyName);
 
-	// const { owner } = getPropertiesInCamelCase(properties);
 	const propertyType = getPropertyType(name);
 
 	// Show loading skeleton if property is being loaded and value is undefined/null
