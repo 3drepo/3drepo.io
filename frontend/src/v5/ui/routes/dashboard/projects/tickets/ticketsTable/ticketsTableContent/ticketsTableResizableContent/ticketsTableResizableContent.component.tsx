@@ -34,12 +34,11 @@ type CollapsibleTicketsGroupProps = {
 	groupName: string;
 	tickets: ITicket[];
 	setTicketValue: SetTicketValue;
-	selectedTicketId?: string;
 	onNewTicket: (groupByValue: string) => (modelId: string) => void;
 	propertyName: string;
 };
 
-const CollapsibleTicketsGroup = ({ groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: CollapsibleTicketsGroupProps) => {
+const CollapsibleTicketsGroup = ({ groupName, tickets, setTicketValue, onNewTicket, propertyName }: CollapsibleTicketsGroupProps) => {
 	const ticketsIds = tickets.map(({ _id }) => _id);
 
 	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
@@ -59,20 +58,17 @@ const CollapsibleTicketsGroup = ({ groupName, tickets, setTicketValue, selectedT
 			tickets={tickets}
 			onNewTicket={onNewTicket(groupName)}
 			onEditTicket={setTicketValue}
-			selectedTicketId={selectedTicketId}
 		/>
 	</DashboardListCollapse>);
 };
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
-	selectedTicketId?: string;
 };
-
-export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
-	const { groupBy, getPropertyType } = useContext(TicketsTableContext);
+export const TicketsTableResizableContent = ({ setTicketValue }: TicketsTableResizableContentProps) => {
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
+	const { groupBy, getPropertyType } = useContext(TicketsTableContext);
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
@@ -84,7 +80,6 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 				tickets={filteredItems}
 				onNewTicket={onGroupNewTicket('')}
 				onEditTicket={setTicketValue}
-				selectedTicketId={selectedTicketId}
 			/>
 		);
 	}
@@ -100,7 +95,6 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 					tickets={tickets}
 					setTicketValue={setTicketValue}
 					onNewTicket={onGroupNewTicket}
-					selectedTicketId={selectedTicketId}
 					propertyName={propertyName}
 					key={groupBy + groupName + template + tickets}
 				/>

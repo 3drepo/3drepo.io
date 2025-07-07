@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useState } from 'react';
-import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
+import { createContext, useState, useEffect } from 'react';
+import { getTemplatePropertiesDefinitions, useSubscribableSearchParams } from './ticketsTableContext.helpers';
 import { IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -31,6 +31,11 @@ import { getState } from '@/v5/helpers/redux.helpers';
 export interface TicketsTableType {
 	getPropertyType: (name: string) => PropertyTypeDefinition;
 	isJobAndUsersType: (name: string) => boolean;
+	getSelectedTicket: () => string;
+	getSelectedModel: () => string;
+	onSelectedTicketChange: (fn: (ticketId: string) => void) => () => void;
+	onSelectedModelChange: (fn: (containerOrFederation: string) => void) => () => void;
+	setModelAndTicketId: (containerOrFederation: string, ticketId: string) => void;
 	groupByProperties: string[],
 	groupBy: string,
 	setGroupBy: (groupBy: React.SetStateAction<string>) => void;
@@ -40,6 +45,11 @@ export interface TicketsTableType {
 const defaultValue: TicketsTableType = {
 	getPropertyType: () => null,
 	isJobAndUsersType: () => false,
+	getSelectedTicket: () => '',
+	getSelectedModel: () => '',
+	onSelectedTicketChange: () => () => {},
+	onSelectedModelChange: () => () => {},
+	setModelAndTicketId: () => {},
 	groupByProperties: [],
 	groupBy: '',
 	setGroupBy: () => {},
@@ -48,14 +58,15 @@ const defaultValue: TicketsTableType = {
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
 
-interface Props {
-	children: any;
-}
+interface Props { children: any; }
 export const TicketsTableContextComponent = ({ children }: Props) => {
+	const [getSearchParam, setSearchParams, subscribeToSearchParam] = useSubscribableSearchParams();
+	const { teamspace, project, template: templateId, ...params } = useParams<DashboardTicketsParams>();
 	const [groupBy, setGroupBy] = useState('');
-	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
-	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+
+	const setModelAndTicketId = (containerOrFederation: string, ticketId: string) => setSearchParams({ containerOrFederation, ticketId });
+	const isFed = FederationsHooksSelectors.selectIsFederation();
 
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
@@ -101,11 +112,23 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	const groupByProperties = definitionsAsArray
 		.filter((definition) => ['manyOf', 'oneOf'].includes(definition.type) || definition.name === `properties.${IssueProperties.DUE_DATE}`)
 		.map((definition) => definition.name);
+
+	useEffect(() => {
+		if (params.ticketId) {
+			// for backward compatibility, as the ticketId used to be set in the URL
+			setSearchParams({ ticketId: params.ticketId });
+		}
+	}, []);
 	
 	return (
 		<TicketsTableContext.Provider value={{
 			getPropertyType,
 			isJobAndUsersType,
+			getSelectedTicket: () => getSearchParam('ticketId'),
+			getSelectedModel: () => getSearchParam('containerOrFederation'),
+			onSelectedTicketChange: (fn) => subscribeToSearchParam('ticketId', fn),
+			onSelectedModelChange: (fn) => subscribeToSearchParam('containerOrFederation', fn),
+			setModelAndTicketId,
 			groupByProperties,
 			groupBy,
 			setGroupBy,

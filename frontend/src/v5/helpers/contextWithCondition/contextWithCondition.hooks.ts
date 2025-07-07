@@ -25,10 +25,10 @@ const propertySetterInterceptor = <O,>(object: O, onChange) => {
 	const proxyHandler = {
 		set: (obj, propName, newVal) => {
 			const oldVal = obj[propName];
-			if (oldVal === newVal) return false;
-
-			obj[propName] = newVal;
-			onChange(propName, newVal, oldVal);
+			if (oldVal !== newVal) {
+				obj[propName] = newVal;
+				onChange(propName, newVal, oldVal);
+			}
 			return true;
 		},
 	};

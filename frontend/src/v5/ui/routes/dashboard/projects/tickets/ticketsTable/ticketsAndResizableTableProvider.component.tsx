@@ -31,7 +31,7 @@ export const TicketsAndResizableTableProvider = ({ children }) => {
 
 	return (
 		<TicketsTableContextComponent>
-			<ResizableTableContextComponent columns={columns} columnGap={1} key={templateId + templatHasBeenFetched}>
+			<ResizableTableContextComponent columns={columns} columnGap={1}>
 				{children}
 			</ResizableTableContextComponent>
 		</TicketsTableContextComponent>

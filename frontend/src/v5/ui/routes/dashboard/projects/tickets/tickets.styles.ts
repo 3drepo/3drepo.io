@@ -17,16 +17,7 @@
 import { Button } from '@controls/button';
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import styled, { css } from 'styled-components';
-import { Drawer } from '@mui/material';
-import { Link as LinkBase } from 'react-router-dom';
 import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
-
-export const Link = styled(LinkBase)<{ disabled?: boolean }>`
-	${({ disabled }) => disabled && css`
-		pointer-events: none;
-		cursor: unset;
-	`}
-`;
 
 export const FiltersContainer = styled.div`
 	width: 100%;
@@ -65,43 +56,6 @@ export const NewTicketButton = styled(Button).attrs({
 })`
 	width: 119px;
 	margin-right: 0;
-`;
-
-export const OpenInViewerButton = styled(Button).attrs({
-	variant: 'contained',
-	color: 'primary',
-})`
-	padding: 5px 16px;
-	height: 28px;
-	margin-left: 14px;
-`;
-
-export const SidePanel = styled(Drawer).attrs({
-	variant: 'persistent',
-	anchor: 'right',
-	SlideProps: { unmountOnExit: true },
-	PaperProps: {
-		style: {
-			width: 410,
-			height: 'calc(100vh - 112px)',
-			top: 112,
-			zIndex: 12,
-		},
-	},
-})``;
-
-export const SlidePanelHeader = styled.div`
-	height: 50px;
-	width: 100%;
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	align-items: center;
-	border-bottom: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
-	position: sticky;
-	top: 0;
-	z-index: 5;
-	background: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const CompletedChip = styled(FilterChip).attrs(({ selected, theme }: any) => ({

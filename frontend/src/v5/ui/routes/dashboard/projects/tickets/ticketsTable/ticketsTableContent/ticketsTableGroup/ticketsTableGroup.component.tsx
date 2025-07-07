@@ -39,7 +39,6 @@ type TicketsTableGroupContentProps = {
 	sortedItems: ITicket[];
 	sortingColumn: string;
 	refreshSorting: () => void;
-	selectedTicketId?: string;
 	onEditTicket: SetTicketValue;
 	onNewTicket: (modelId: string) => void;
 	newTicketButtonIsDisabled: boolean;
@@ -51,7 +50,6 @@ const TicketsTableGroupContent = ({
 	sortedItems,
 	refreshSorting,
 	sortingColumn,
-	selectedTicketId, 
 	onEditTicket, 
 	onNewTicket, 
 	newTicketButtonIsDisabled, 
@@ -72,15 +70,14 @@ const TicketsTableGroupContent = ({
 							ticket={ticket}
 							modelId={ticket.modelId}
 							onClick={onEditTicket}
-							selected={selectedTicketId === ticket._id}
 						/>
 					)}
 				/>
 				{!hideNewticketButton &&
-				<NewTicketRowButton
-					onNewTicket={onNewTicket}
-					disabled={newTicketButtonIsDisabled}
-				/>
+					<NewTicketRowButton
+						onNewTicket={onNewTicket}
+						disabled={newTicketButtonIsDisabled}
+					/>
 				}
 			</Group>
 		</>
@@ -88,12 +85,11 @@ const TicketsTableGroupContent = ({
 };
 
 type TicketsTableGroupProps = {
-	selectedTicketId?: string;
 	tickets: ITicket[];
 	onEditTicket: SetTicketValue;
 	onNewTicket: (modelId: string) => void;
 };
-export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket }: TicketsTableGroupProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const models = useSelectedModels();
@@ -134,7 +130,6 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 					{({ refreshSorting, sortedItems, sortingColumn }: SortedTableType<ITicket>) => (
 						<TicketsTableGroupContent
 							tickets={tickets}
-							selectedTicketId={selectedTicketId}
 							onEditTicket={onEditTicket}
 							onNewTicket={onNewTicket}
 							newTicketButtonIsDisabled={newTicketButtonIsDisabled}

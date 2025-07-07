@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { dirtyValues, filterErrors, nullifyEmptyObjects, removeEmptyObjects } from '@/v5/helpers/form.helper';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
@@ -24,28 +23,56 @@ import { modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
+import { CentredContainer } from '@controls/centredContainer';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { CircularProgress } from '@mui/material';
 import { isEmpty, set } from 'lodash';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
+
+const useFetchTicket = (ticketId, containerOrFederation) => {
+	const { teamspace, project } = useParams<DashboardTicketsParams>();
+	const isFederation = modelIsFederation(containerOrFederation);
+	
+	const [isTicketFetched, setIsTicketFetched] = useState(false);
+
+	useEffect(() => {
+		setIsTicketFetched(false);
+	}, [ticketId]);
+
+	useEffect(() => {
+		if (!ticketId || !containerOrFederation) return;
+		TicketsActionsDispatchers.fetchTicket(
+			teamspace,
+			project,
+			containerOrFederation,
+			ticketId,
+			isFederation,
+			null,
+			() => setIsTicketFetched(true),
+			() => setIsTicketFetched(true),
+		);
+	}, [ticketId, containerOrFederation]);
+
+	return isTicketFetched;
+};
 
 type TicketSlideProps = {
 	ticketId: string,
 	template: ITemplate,
+	containerOrFederation: string,
 };
-export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
+export const TicketSlide = ({ template, ticketId, containerOrFederation }: TicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
-	
-	const [containerOrFederation] = useSearchParam('containerOrFederation');
+
 	const isFederation = modelIsFederation(containerOrFederation);
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const templateValidationSchema = getValidators(template);
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
-	const ticketsHaveBeenFetched = TicketsHooksSelectors.selectTicketsHaveBeenFetched()(containerOrFederation);
+	const ticketFetched = useFetchTicket(ticketId, containerOrFederation);
 
 	const formData = useForm({
 		resolver: yupResolver(templateValidationSchema),
@@ -78,17 +105,6 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 	}, [JSON.stringify(ticket)]);
 
 	useEffect(() => {
-		if (!containerOrFederation || !ticketsHaveBeenFetched) return;
-		TicketsActionsDispatchers.fetchTicket(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticketId,
-			isFederation,
-		);
-	}, [ticketId, ticketsHaveBeenFetched]);
-
-	useEffect(() => {
 		return enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation);
 	}, [containerOrFederation]);
 
@@ -97,7 +113,11 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 		return () => { onBlurHandler(); };
 	}, []);
 
-	if (!templateAlreadyFetched(template) || !ticket || !containerOrFederation) return (<Loader />);
+	if (!templateAlreadyFetched(template) || !ticketFetched || !containerOrFederation) return (
+		<CentredContainer>
+			<CircularProgress disableShrink size={30} />
+		</CentredContainer>
+	);
 
 	return (
 		<FormProvider {...formData}>
