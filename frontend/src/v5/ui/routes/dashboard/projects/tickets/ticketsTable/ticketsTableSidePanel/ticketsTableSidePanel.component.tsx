@@ -52,7 +52,10 @@ type TicketsTableSidePanelProps = {
 
 export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue, presetValue }: TicketsTableSidePanelProps) => {
 	const { teamspace, project, template } = useParams<DashboardTicketsParams>();
-	const { getSelectedTicket, onSelectedTicketChange, getSelectedModel, onSelectedModelChange, groupBy } = useContext(TicketsTableContext);
+	const {
+		getSelectedTicket, onSelectedTicketChange, setModelAndTicketId,
+		getSelectedModel, onSelectedModelChange, groupBy,
+	} = useContext(TicketsTableContext);
 	const ticketId = useSubscribableSearchParamState(getSelectedTicket, onSelectedTicketChange);
 	const modelId = useSubscribableSearchParamState(getSelectedModel, onSelectedModelChange);
 	const models = useSelectedModels();
@@ -82,6 +85,10 @@ export const TicketsTableSidePanel = memo(({ setIsNewTicketDirty, setTicketValue
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 	}, [readOnly]);
+
+	useEffect(() => {
+		setModelAndTicketId(null, null);
+	}, [template]);
 
 	return (
 		<SidePanel open={!!ticketId && !!models.length && !!modelId}>
