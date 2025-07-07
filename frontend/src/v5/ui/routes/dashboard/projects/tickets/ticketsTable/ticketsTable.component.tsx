@@ -43,16 +43,18 @@ import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableContext } from './ticketsTableContext/ticketsTableContext';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
+import { selectTicketPropertyByName, selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { useWatchPropertyChange } from './useWatchPropertyChange';
 import { selectIsFederation } from '@/v5/store/federations/federations.selectors';
 import { TicketsTableSidePanel } from './ticketsTableSidePanel/ticketsTableSidePanel.component';
+import { throttle } from 'lodash';
 
 const paramToInputProps = (value, setter) => ({
 	value,
 	onChange: (ev: SelectChangeEvent<unknown>) =>  setter((ev.target as HTMLInputElement).value),
 });
+
 
 export const TicketsTable = () => {
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
@@ -101,16 +103,16 @@ export const TicketsTable = () => {
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
 	[models, !!containersAndFederations.length]);
 
-	const filterTickets = useCallback((items, query: string) => items.filter((ticket) => {
+	const filterTickets = useCallback(throttle((items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
 		const ticketCode = `${templateCode}:${ticket.number}`;
 
-		const elementsToFilter = [ticketCode, ticket.title];
+		const elementsToFilter = [ticketCode, selectTicketPropertyByName(getState(), ticket._id, 'title')];
 		if (containersAndFederations.length > 1) {
 			elementsToFilter.push(ticket.modelName);
 		}
 		return elementsToFilter.some((str = '') => str.toLowerCase().includes(query.toLowerCase()));
-	}), [templates]);
+	}, 100)), [templates]);
 
 	useEffect(() => {
 		if (!models.length) return;
