@@ -19,6 +19,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { generateV5ApiUrl } from '@/v5/services/api/default';
 import { ICurrentUser } from '../currentUser/currentUser.types';
 import { IUser } from './users.redux';
+import { formatMessage } from '@/v5/services/intl';
 
 export const getMemberImgSrc = (teamspace: string, member: string) => (
 	generateV5ApiUrl(`teamspaces/${teamspace}/members/${member}/avatar`, clientConfigService.GET_API)
@@ -31,7 +32,27 @@ export const getUserInitials = ({ firstName, lastName }: ICurrentUser | IUser) =
 		.join('');
 };
 
+export const USER_NOT_FOUND_NAME = formatMessage({
+	id: 'user.nonexistentUser.name',
+	defaultMessage: 'Unknown User',
+});
+export const JOB_OR_USER_NOT_FOUND_NAME = formatMessage({
+	id: 'user.nonexistentJobOrUser.name',
+	defaultMessage: 'Unknown User/Job',
+});
+export const JOB_OR_USER_NOT_FOUND_MESSAGE = formatMessage({
+	id: 'user.nonexistentJobOrUser.message',
+	defaultMessage: 'The user/job could not be found in this teamspace',
+});
+
 export const getDefaultUserNotFound = (name: string): IUser => ({
+	firstName: USER_NOT_FOUND_NAME,
+	lastName: '',
+	avatarUrl: '',
+	user: name,
+});
+
+export const getImportedUser = (name: string): IUser => ({
 	firstName: name,
 	lastName: '',
 	avatarUrl: '',
@@ -39,3 +60,8 @@ export const getDefaultUserNotFound = (name: string): IUser => ({
 });
 
 export const userHasMissingRequiredData = ({ lastName }: ICurrentUser) => !lastName;
+
+export const getFullnameFromUser = (user: IUser) => `${user.firstName} ${user.lastName}`;
+
+// if an assignee has an _id that means it is a job, so we return this _id instead of getting fullname
+export const getAssigneeDisplayName = (assignee) => assignee?._id ?? getFullnameFromUser(assignee);
