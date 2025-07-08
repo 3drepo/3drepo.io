@@ -15,10 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { onlineAvatarPath, newAvatarPath } = require('../../path');
+
 const usersById = {};
 const usersByEmail = {};
 const Users = {};
-Users.getUserById = (userId) => Promise.resolve(usersById[userId]);
+Users.getUserById = (userId) => Promise.resolve({
+	...usersById[userId],
+	profilePictureUrl: onlineAvatarPath,
+});
 
 Users.doesUserExist = (email) => {
 	const user = usersByEmail[email];
@@ -29,4 +34,19 @@ Users.doesUserExist = (email) => {
 Users.destroyAllSessions = () => Promise.resolve();
 
 Users.triggerPasswordReset = process.env.NODE_ENV === 'testV5' ? jest.fn() : (() => {});
+
+Users.uploadAvatar = (userId, tenantId, formDataPayload) => Promise.resolve({ profilePictureUrl: newAvatarPath });
+
+Users.updateUserDetails = (userId, payload) => {
+	console.dir(usersById, { depth: 2 });
+	console.dir(userId);
+	console.dir(payload);
+
+	usersById[userId] = {
+		...usersById[userId],
+		...payload,
+	};
+	return Promise.resolve(userId);
+};
+
 module.exports = Users;

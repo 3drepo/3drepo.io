@@ -26,7 +26,7 @@ const FormData = require('form-data');
 const Path = require('path');
 const { createReadStream } = require('fs');
 const { events } = require('../services/eventsManager/eventsManager.constants');
-const { fileExtensionFromStream } = require('../utils/helper/typeCheck');
+const { fileExtensionFromBuffer, fileExtensionFromStream } = require('../utils/helper/typeCheck');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
 const { logger } = require('../utils/logger');
@@ -132,8 +132,8 @@ Users.resetPassword = async (user) => {
 
 Users.getAvatar = async (username) => {
 	const avatarStream = await getAvatarStream(username);
-	const fileExt = await fileExtensionFromStream(avatarStream.body);
 	const arrayBuffer = await avatarStream.arrayBuffer();
+	const fileExt = await fileExtensionFromBuffer(Buffer.from(arrayBuffer));
 
 	return {
 		buffer: Buffer.from(arrayBuffer),

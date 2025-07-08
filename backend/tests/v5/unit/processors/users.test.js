@@ -17,7 +17,8 @@
 
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
-const { src } = require('../../helper/path');
+const { src, image } = require('../../helper/path');
+const fs = require('fs');
 
 const Users = require(`${src}/processors/users`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -170,12 +171,12 @@ const testGetAvatarStream = () => {
 	describe('Get avatar stream', () => {
 		test('should get avatar stream', async () => {
 			const username = generateRandomString();
-			const mockImageBlob = new Blob(
-				[new Uint8Array([137, 80, 78, 71, 13, 10, 26, 10])],
-				{ type: 'image/png' },
-			);
+			const imageBuffer = fs.readFileSync(image);
+			const mockImageStream = new Blob([imageBuffer], { type: 'image/png' });
 
-			UsersModel.getAvatarStream.mockResolvedValueOnce(mockImageBlob);
+			mockImageStream.arrayBuffer = jest.fn().mockResolvedValueOnce(imageBuffer);
+
+			UsersModel.getAvatarStream.mockResolvedValueOnce(mockImageStream);
 
 			await Users.getAvatar(username);
 			expect(UsersModel.getAvatarStream).toHaveBeenCalledTimes(1);

@@ -35,5 +35,7 @@ PathHelper.objModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUpperc
 PathHelper.dwgModelUppercaseExt = Path.join(PathHelper.modelFolder, 'dummyUppercaseExt.DWG');
 PathHelper.pdfModel = Path.join(PathHelper.modelFolder, 'model.pdf');
 PathHelper.emptyPdf = Path.join(PathHelper.modelFolder, 'empty.pdf');
+PathHelper.onlineAvatarPath = 'https://ui-avatars.com/api/Test+User/15/random';
+PathHelper.newAvatarPath = 'https://ui-avatars.com/api/Test+User/25/random';
 
 module.exports = PathHelper;

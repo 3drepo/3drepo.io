@@ -50,6 +50,7 @@ const updateProfile = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
 		const updatedProfile = req.body;
+
 		await Users.updateProfile(user, updatedProfile);
 		respond(req, res, templates.ok);
 	} catch (err) {

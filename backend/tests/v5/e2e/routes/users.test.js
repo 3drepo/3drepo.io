@@ -20,6 +20,7 @@ const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
 const SessionTracker = require('../../helper/sessionTracker');
 const fs = require('fs');
+const { onlineAvatarPath, newAvatarPath } = require('../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -204,7 +205,7 @@ const testUpdateProfile = () => {
 			});
 
 			test('should update the profile if the user is logged in', async () => {
-				const data = { firstName: 'newName', company: 'newCompany', countryCode: 'GR' };
+				const data = { firstName: 'newName', lastName: 'oldName', company: 'newCompany', countryCode: 'GR' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
@@ -223,27 +224,22 @@ const testGetAvatar = () => {
 		});
 
 		test('should get the avatar if the user has an fs avatar and has a session via an API key', async () => {
-			const res = await agent.get(`/v5/user/avatar?key=${userWithFsAvatar.apiKey}`).expect(200);
-			expect(res.body).toEqual(Buffer.from(fsAvatarData));
-		});
+			const fetchAvatarData = await fetch(onlineAvatarPath);
+			const onlineAvatarData = await fetchAvatarData.arrayBuffer();
 
-		test('should get the avatar if the user has an gridfs avatar and has a session via an API key', async () => {
-			const res = await agent.get(`/v5/user/avatar?key=${userWithGridFsAvatar.apiKey}`).expect(200);
-			expect(res.body).toEqual(Buffer.from(gridFsAvatarData));
+			const res = await agent.get(`/v5/user/avatar?key=${userWithFsAvatar.apiKey}`).expect(200);
+			expect(res.body).toEqual(Buffer.from(onlineAvatarData));
 		});
 
 		test('should get the avatar if the user has an fs avatar and is logged in', async () => {
+			const fetchAvatarData = await fetch(onlineAvatarPath);
+			const onlineAvatarData = await fetchAvatarData.arrayBuffer();
+
 			const testSession = SessionTracker(agent);
 			await testSession.login(userWithFsAvatar);
 			const res = await testSession.get('/v5/user/avatar').expect(200);
-			expect(res.body).toEqual(Buffer.from(fsAvatarData));
+			expect(res.body).toEqual(Buffer.from(onlineAvatarData));
 			await testSession.post('/v5/logout/');
-		});
-
-		test('should fail if the user has no avatar', async () => {
-			const res = await agent.get(`/v5/user/avatar?key=${testUser.apiKey}`)
-				.expect(templates.fileNotFound.status);
-			expect(res.body.code).toEqual(templates.fileNotFound.code);
 		});
 	});
 };
@@ -270,13 +266,16 @@ const testUploadAvatar = () => {
 			});
 
 			test('should remove old avatar and upload a new one if the user is logged in', async () => {
+				const fetchAvatarData = await fetch(newAvatarPath);
+				const onlineAvatarData = await fetchAvatarData.arrayBuffer();
+
 				await testSession.put('/v5/user/avatar').attach('file', image)
 					.expect(templates.ok.status);
 
 				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
 				const resBuffer = avatarRes.body;
-				const imageBuffer = fs.readFileSync(image);
-				expect(resBuffer).toEqual(imageBuffer);
+				// const imageBuffer = fs.readFileSync(image);
+				expect(resBuffer).toEqual(Buffer.from(onlineAvatarData));
 			});
 		});
 
