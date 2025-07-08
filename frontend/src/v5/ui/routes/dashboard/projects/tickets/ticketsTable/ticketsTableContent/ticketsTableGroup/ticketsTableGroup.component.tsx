@@ -22,13 +22,14 @@ import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/t
 import { Table, Group, PlaceholderForStickyFunctionality } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
+import { SetTicketValue } from '../../ticketsTable.helper';
 import { orderBy } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
 import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.component';
+import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
@@ -46,8 +47,8 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const assigneesSort = (items: ITicket[], order) => orderBy(
 		items.map(sortAssignees),
 		[
-			(item) => getAssignees(item).length,
-			(item) => getAssignees(item).join(),
+			(item) => getAssigneeDisplayNamesFromTicket(item).length,
+			(item) => getAssigneeDisplayNamesFromTicket(item).join(),
 		],
 		[order, order],
 	);
