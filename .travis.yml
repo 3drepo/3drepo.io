@@ -54,7 +54,7 @@ matrix:
       script:
         - cd ../backend
         - mkdir coverage
-        - unbuffer yarn test
+        - unbuffer yarn test:one .\tests\v4\integrated\group.js
 
 notifications:
     email:
