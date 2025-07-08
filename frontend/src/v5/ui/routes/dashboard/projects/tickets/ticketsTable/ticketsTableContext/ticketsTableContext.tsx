@@ -17,7 +17,7 @@
 
 import { createContext, useState } from 'react';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
-import { IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -98,8 +98,9 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		|| ['properties.Owner', 'properties.Assignees'].includes(name)
 	);
 
+	const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
 	const groupByProperties = definitionsAsArray
-		.filter((definition) => ['manyOf', 'oneOf'].includes(definition.type) || definition.name === `properties.${IssueProperties.DUE_DATE}`)
+		.filter((definition) => ['manyOf', 'oneOf'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
 		.map((definition) => definition.name);
 	
 	return (
