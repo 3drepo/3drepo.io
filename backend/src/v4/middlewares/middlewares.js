@@ -24,6 +24,7 @@ const { findModelSettingById } = require("../models/modelSetting");
 const User = require("../models/user");
 const utils = require("../utils");
 const config = require("../config");
+const { formatV5NewModelParams } = require("./formatV5NewModelParams");
 
 const checkPermissionsHelper = require("./checkPermissions").checkPermissionsHelper;
 const checkPermissions = require("./checkPermissions").checkPermissions;
@@ -155,13 +156,6 @@ function formatV5LogInData(req, res, next) {
 		req.body.user = req.body.username;
 		delete req.body.username;
 	}
-	next();
-}
-
-function formatV5NewModelParams(req, res, next) {
-	req.params.teamspace = req.params.account;
-	req.params.container = req.params.model;
-	req.params.federation = req.params.model;
 	next();
 }
 
