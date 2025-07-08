@@ -201,11 +201,6 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 		const prevView = prevProps.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		const currView = this.props.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-
-		if (!isEqual(prevView, currView) || this.props.treeNodesList !== prevProps.treeNodesList) {
-			// This is for not refreshing the view when exiting a selected ticket or when the card is closed
-			goToView(currView);
-		}
 	}
 
 	public componentWillUnmount() {

@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { TableVirtuoso } from 'react-virtuoso';
 import { isFirefox } from '@/v4/styles';
+import { CommentBox } from './commentBox/commentBox.component';
 
 export const Accordion = styled(AccordionBase)`
 	&& {
@@ -67,4 +68,9 @@ export const TableRow = styled.div`
 
 export const FillerRow = styled.div<{ height: number }>`
 	height: ${({ height }) => height}px;
+`;
+
+export const CreateCommentBox = styled(CommentBox)`
+	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
+	border-top-width: 1px;
 `;

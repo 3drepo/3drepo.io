@@ -22,7 +22,7 @@ import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { CommentMarkDown, CommentImage, OriginalMessage, CameraIcon } from './commentReply.styles';
+import { CommentMarkDown, CommentImage, OriginalMessage } from './commentReply.styles';
 import { CommentAuthor } from '../commentNonMessageContent/commentNonMessageContent.styles';
 import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
@@ -35,6 +35,7 @@ type CommentReplyProps = TicketCommentReplyMetadata & {
 	shortMessage?: boolean,
 	images?: string[],
 	originalAuthor?: string,
+	view?: any,
 };
 export const CommentReply = ({
 	message,
@@ -42,6 +43,7 @@ export const CommentReply = ({
 	variant = 'primary',
 	images = [],
 	originalAuthor,
+	view,
 	...props
 }: CommentReplyProps) => {
 	const { teamspace, project } = useParams<ViewerParams>();
@@ -70,7 +72,7 @@ export const CommentReply = ({
 
 	const openImagesModal = () => DialogsActionsDispatchers.open('images', { images: imagesSrcs });
 
-	if (!message && images.length === 0) return (<></>);
+	if (!message && images.length === 0 && !view) return (<></>);
 
 	return (
 		<QuotedMessage variant={variant} {...props}>
@@ -81,7 +83,6 @@ export const CommentReply = ({
 					</CommentAuthor>
 				)}
 				<OriginalMessage>
-					{images.length > 0 && (<CameraIcon />)}
 					<CommentMarkDown>
 						{message}
 					</CommentMarkDown>
