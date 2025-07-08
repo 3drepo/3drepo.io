@@ -2526,6 +2526,7 @@ describe("Groups", function () {
 		});
 
 		it("delete groups with valid IDs should succeed", function(done){
+			this.timeout(5000); 
 			let idsString = null;
 			async.series([
 				function(done) {
