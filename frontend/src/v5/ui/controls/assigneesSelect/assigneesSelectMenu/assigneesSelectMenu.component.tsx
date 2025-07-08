@@ -24,6 +24,7 @@ import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSele
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
 import { groupJobsAndUsers } from '../assignees.helpers';
 import { SearchContext } from '@controls/search/searchContext';
+import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME } from '@/v5/store/users/users.helpers';
 import { AssigneesSelectMenuTriggerButton } from './assigneesSelectMenuTriggerButton/assigneesSelectMenuTriggerButton.component';
 
 const NoResultsMessage = () => (
@@ -99,7 +100,7 @@ export const AssigneesSelectMenu = ({
 						key={ju}
 						assignee={ju}
 						value={ju}
-						title={ju}
+						title={JOB_OR_USER_NOT_FOUND_NAME}
 						multiple={multiple}
 						selected
 						error
@@ -131,7 +132,7 @@ export const AssigneesSelectMenu = ({
 						key={user.user}
 						value={user.user}
 						assignee={user.user}
-						title={`${user.firstName} ${user.lastName}`}
+						title={getFullnameFromUser(user)}
 						subtitle={user.job}
 						multiple={multiple}
 						error={isInvalid(user.user)}

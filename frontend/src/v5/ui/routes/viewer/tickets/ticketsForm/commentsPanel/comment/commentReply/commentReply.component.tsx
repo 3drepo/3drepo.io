@@ -28,6 +28,7 @@ import { QuotedMessage } from '../quotedMessage/quotedMessage.styles';
 import { ExternalLabel } from '../otherUserComment/importedUserPopover/importedUserPopover.styles';
 import { useContext } from 'react';
 import { TicketContext } from '../../../../ticket.context';
+import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 
 type CommentReplyProps = TicketCommentReplyMetadata & {
 	variant?: 'primary' | 'secondary',
@@ -58,7 +59,7 @@ export const CommentReply = ({
 	if (!originalAuthor) {
 		authorDisplayName = (author === currentUser)
 			? formatMessage({ id: 'comment.currentUser.author', defaultMessage: 'You' })
-			: `${user.firstName} ${user.lastName}`;
+			: getFullnameFromUser(user);
 	}
 	const imagesSrcs = images.map((image) => getTicketResourceUrl(
 		teamspace,

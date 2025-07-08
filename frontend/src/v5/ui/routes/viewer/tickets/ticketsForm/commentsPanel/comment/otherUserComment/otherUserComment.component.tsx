@@ -22,7 +22,7 @@ import { TicketButton } from '../../../../ticketButton/ticketButton.styles';
 import { Comment, AuthorAvatar, ImportedAuthorAvatar } from './otherUserComment.styles';
 import { DeletedComment } from './deletedComment/deletedComment.component';
 import { CommentButtons, CommentWithButtonsContainer } from '../basicComment/basicComment.styles';
-import { getDefaultUserNotFound } from '@/v5/store/users/users.helpers';
+import { getFullnameFromUser, getImportedUser } from '@/v5/store/users/users.helpers';
 
 type OtherUserCommentProps = ITicketComment & {
 	isFirstOfBlock: boolean;
@@ -32,8 +32,8 @@ type OtherUserCommentProps = ITicketComment & {
 export const OtherUserComment = ({
 	_id,
 	deleted,
-	author,
-	originalAuthor,
+	author, // The author of a non-imported comment. Or who imported the comment
+	originalAuthor, // The author of the comment if it was imported
 	onReply,
 	isFirstOfBlock,
 	importedAt,
@@ -41,18 +41,22 @@ export const OtherUserComment = ({
 }: OtherUserCommentProps) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const imported = !!originalAuthor;
-	const user = imported ? getDefaultUserNotFound(originalAuthor) : UsersHooksSelectors.selectUser(teamspace, author);
+	const authorUser = UsersHooksSelectors.selectUser(teamspace, author);
+	const importedAuthorUser = getImportedUser(originalAuthor);
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
-	const authorDisplayName = isFirstOfBlock ? `${user.firstName} ${user.lastName}` : null;
+
+	const getAuthorDisplayName = () => {
+		if (!isFirstOfBlock) return null;
+		return getFullnameFromUser(originalAuthor ? importedAuthorUser : authorUser);
+	};
 
 	const Avatar = () => {
-		if (!imported) return <AuthorAvatar user={user} />;
+		if (!imported) return <AuthorAvatar user={authorUser} />;
 		return (
 			<ImportedAuthorAvatar
-				author={author}
-				originalAuthor={originalAuthor}
+				importedBy={getFullnameFromUser(authorUser)}
+				author={importedAuthorUser}
 				importedAt={importedAt}
-				user={user}
 			/>
 		);
 	};
@@ -62,15 +66,15 @@ export const OtherUserComment = ({
 			{isFirstOfBlock && <Avatar />}
 			{deleted ? (
 				<DeletedComment
-					user={user}
-					author={authorDisplayName}
+					user={authorUser}
+					author={getAuthorDisplayName()}
 					isFirstOfBlock={isFirstOfBlock}
 				/>
 			) : (
 				<>
 					<Comment
 						commentId={_id}
-						author={authorDisplayName}
+						author={getAuthorDisplayName()}
 						isCurrentUserComment={false}
 						isFirstOfBlock={isFirstOfBlock}
 						originalAuthor={originalAuthor}
