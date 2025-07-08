@@ -39,7 +39,7 @@ import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFede
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
 import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { INITIAL_COLUMNS, NEW_TICKET_ID } from './ticketsTable.helper';
+import { NEW_TICKET_ID } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
@@ -49,6 +49,10 @@ import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableContext } from './ticketsTableContext/ticketsTableContext';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { selectTicketPropertyByName, selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { useWatchPropertyChange } from './useWatchPropertyChange';
+import { throttle } from 'lodash';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -59,6 +63,9 @@ const paramToInputProps = (value, setter) => ({
 export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
+	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
+
+
 	const { teamspace, project, template, ticketId } = params;
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
@@ -100,9 +107,7 @@ export const TicketsTable = () => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
-	
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-	const ticketHasBeenFetched = TicketsHooksSelectors.selectTicketsHaveBeenFetched();
 
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -119,16 +124,16 @@ export const TicketsTable = () => {
 
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 
-	const filterTickets = useCallback((items, query: string) => items.filter((ticket) => {
+	const filterTickets = useCallback(throttle((items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
 		const ticketCode = `${templateCode}:${ticket.number}`;
 
-		const elementsToFilter = [ticketCode, ticket.title];
+		const elementsToFilter = [ticketCode, selectTicketPropertyByName(getState(), ticket._id, 'title')];
 		if (containersAndFederations.length > 1) {
 			elementsToFilter.push(ticket.modelName);
 		}
 		return elementsToFilter.some((str = '') => str.toLowerCase().includes(query.toLowerCase()));
-	}), [templates]);
+	}, 100)), [templates]);
 
 	const getOpenInViewerLink = () => {
 		if (!containerOrFederation) return '';
@@ -146,7 +151,7 @@ export const TicketsTable = () => {
 		if (!models.length ) return;
 
 		containersAndFederations.forEach((modelId) => {
-			if (ticketHasBeenFetched(modelId)) return;
+			if (selectTicketsHaveBeenFetched(getState())(modelId)) return;
 			const isFederation = isFed(modelId);
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFederation);
 			if (isFederation) {
@@ -195,12 +200,10 @@ export const TicketsTable = () => {
 	}, [groupBy]);
 
 	useEffect(() => {
-		let columnsToFetch = [...visibleSortedColumnsNames];
-		columnsToFetch
-			.filter((name) => !INITIAL_COLUMNS.includes(name))
-			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
+		visibleSortedColumnsNames.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
 	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join('')]);
 
+	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
 	return (
 		<SearchContextComponent items={ticketsFilteredByTemplate} filteringFunction={filterTickets}>
 			<FiltersContainer>
