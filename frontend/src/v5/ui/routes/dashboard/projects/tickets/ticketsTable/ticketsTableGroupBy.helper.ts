@@ -23,6 +23,9 @@ import { stripModuleOrPropertyPrefix } from './ticketsTable.helper';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selectors';
+import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME, USER_NOT_FOUND_NAME } from '@/v5/store/users/users.helpers';
+import { selectJobById } from '@/v4/modules/jobs/jobs.selectors';
 
 export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
@@ -60,6 +63,23 @@ const groupByDate = (tickets: ITicket[]) => {
 	}
 	return groups;
 };
+
+const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
+const getAssigneesRaw = (t: ITicket) => (_.get(t, ASSIGNEES_PATH) ?? []);
+const getAssigneeDisplayName = (assignee: string) => {
+	const job = selectJobById(getState(), assignee);
+	if (job) return job._id;
+	const user = selectCurrentTeamspaceUsersByIds(getState())[assignee];
+	if (user) return getFullnameFromUser(user);
+	return JOB_OR_USER_NOT_FOUND_NAME;
+};
+
+export const sortAssignees = (ticket: ITicket): ITicket => {
+	const sortedAssignees = _.orderBy(getAssigneesRaw(ticket), (assignee) => getAssigneeDisplayName(assignee).trim().toLowerCase());
+	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
+};
+
+export const getAssigneeDisplayNamesFromTicket = (ticket: ITicket): string[] => getAssigneesRaw(ticket).map(getAssigneeDisplayName);
 
 const groupByStatus = (tickets: ITicket[]) => {
 	const statusPath = `properties.${BaseProperties.STATUS}`;
@@ -116,8 +136,43 @@ const sortSelectGroups = (groups: Record<string, ITicket[]>) => {
 	return sortedGroups;
 };
 
+const groupByAssignees = (tickets: ITicket[])=> {
+	const [ticketsWithAssignees, ticketsWithoutAssignees] = _.partition(tickets, (ticket) => getAssigneesRaw(ticket)?.length > 0);
+
+	const ticketsWithSortedAssignees = ticketsWithAssignees.map(sortAssignees);
+
+	const ticketsSortedByAssignees = _.orderBy(
+		ticketsWithSortedAssignees,
+		(ticket) => {
+			const assignees = getAssigneesRaw(ticket).map((assignee) => assignee.trim().toLowerCase());
+			return _.orderBy(assignees).join();
+		},
+	);
+
+	const groups = _.groupBy(ticketsSortedByAssignees, (ticket) => {
+		const assignees = getAssigneesRaw(ticket).map(getAssigneeDisplayName);
+		return assignees.join(', ');
+	});
+	if (ticketsWithoutAssignees.length) {
+		groups[UNSET] = ticketsWithoutAssignees;
+	}
+	return sortSelectGroups(groups);
+};
+
+const groupByOwner = (tickets: ITicket[]) => {
+	const groups = _.groupBy(tickets, (ticket) => {
+		const user = selectCurrentTeamspaceUsersByIds(getState())[_.get(ticket, `properties.${BaseProperties.OWNER}`)];
+		return user ? getFullnameFromUser(user) : USER_NOT_FOUND_NAME;
+	});
+	return sortSelectGroups(groups);
+};
+
 export const groupTickets = (groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition): Array<[string, ITicket[]]> => {
 	switch (stripModuleOrPropertyPrefix(groupBy)) {
+		case BaseProperties.OWNER:
+			return groupByOwner(tickets);
+		case IssueProperties.ASSIGNEES:
+			return groupByAssignees(tickets);
 		case IssueProperties.DUE_DATE:
 			return groupByDate(tickets);
 		case BaseProperties.STATUS:
