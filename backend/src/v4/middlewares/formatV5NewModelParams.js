@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,16 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 "use strict";
-const { v5Path } = require("../../interop");
-const checkPermissions = require("./checkPermissions").checkPermissions;
-const C	= require("../constants");
-const { notUserProvisioned } = require(`${v5Path}/middleware/permissions/components/teamspaces`);
-const { formatV5NewModelParams } = require("./formatV5NewModelParams");
-
-module.exports = {
-	canCreate: [checkPermissions([C.PERM_CREATE_JOB]), formatV5NewModelParams, notUserProvisioned],
-	canView: checkPermissions([C.PERM_ASSIGN_JOB]),
-	canDelete: [checkPermissions([C.PERM_DELETE_JOB]), formatV5NewModelParams, notUserProvisioned]
-};
+function formatV5NewModelParams(req, res, next) {
+	req.params.teamspace = req.params.account;
+	req.params.container = req.params.model;
+	req.params.federation = req.params.model;
+	next();
+}
+exports.formatV5NewModelParams = formatV5NewModelParams;

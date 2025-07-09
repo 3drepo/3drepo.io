@@ -171,7 +171,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  *	}
  *
  */
-router.post("/invitations", middlewares.isAccountAdmin, sendInvitation);
+router.post("/invitations", middlewares.canAddOrRemoveUsers, sendInvitation);
 
 /**
  *
