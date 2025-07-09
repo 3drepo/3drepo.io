@@ -15,38 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { onlineAvatarPath, newAvatarPath } = require('../../path');
+const { newAvatarPath } = require('../../path');
+const UsersCache = require('./cache');
 
-const usersById = {};
-const usersByEmail = {};
 const Users = {};
-Users.getUserById = (userId) => Promise.resolve({
-	...usersById[userId],
-	profilePictureUrl: onlineAvatarPath,
-});
+Users.getUserById = (userId) => Promise.resolve(UsersCache.getUserById(userId));
 
-Users.doesUserExist = (email) => {
-	const user = usersByEmail[email];
-
-	return Promise.resolve(user.id ?? false);
-};
+Users.doesUserExist = (email) => Promise.resolve(UsersCache.doesUserExist(email));
 
 Users.destroyAllSessions = () => Promise.resolve();
 
 Users.triggerPasswordReset = process.env.NODE_ENV === 'testV5' ? jest.fn() : (() => {});
 
-Users.uploadAvatar = (userId, tenantId, formDataPayload) => Promise.resolve({ profilePictureUrl: newAvatarPath });
+Users.uploadAvatar = () => Promise.resolve(newAvatarPath);
 
-Users.updateUserDetails = (userId, payload) => {
-	console.dir(usersById, { depth: 2 });
-	console.dir(userId);
-	console.dir(payload);
-
-	usersById[userId] = {
-		...usersById[userId],
-		...payload,
-	};
-	return Promise.resolve(userId);
-};
+Users.updateUserDetails = (userId, payload) => Promise.resolve(UsersCache.updateUserById(userId, payload));
 
 module.exports = Users;
