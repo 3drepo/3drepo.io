@@ -990,10 +990,12 @@ const testConnectionString = () => {
 			// eslint-disable-next-line no-underscore-dangle
 			await DB._context.connect(user, pass);
 			expect(fn).toHaveBeenCalledWith(expectedString, expect.anything());
+			fn.mockRestore();
+		});
+		afterAll(() => {
+			config.db = oldConfig;
 		});
 	});
-
-	config.db = oldConfig;
 };
 
 describe(determineTestGroup(__filename), () => {

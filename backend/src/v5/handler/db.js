@@ -38,7 +38,7 @@ const getURL = (username, password) => {
 
 	const hostsAndPorts = config.db.host.map((host, i) => `${host}:${config.db.port[i]}`);
 
-	urlElements.push(hostsAndPorts, '/');
+	urlElements.push(hostsAndPorts.join(','), '/');
 
 	const queryString = [];
 
