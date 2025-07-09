@@ -255,24 +255,28 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 	if (newSafetibaseProps) {
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
-		if (newSafetibaseProps[modProps.RISK_LIKELIHOOD] || newSafetibaseProps[modProps.RISK_CONSEQUENCE]) {
+		const newLikelihood = newSafetibaseProps[modProps.RISK_LIKELIHOOD];
+		const newConsequence = newSafetibaseProps[modProps.RISK_CONSEQUENCE];
+
+		if (newLikelihood === null || newConsequence === null) {
+			newSafetibaseProps[modProps.LEVEL_OF_RISK] = null;
+		} else if (newLikelihood || newConsequence) {
 			newSafetibaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
-				newSafetibaseProps[modProps.RISK_LIKELIHOOD] ?? oldSafetibaseProps[modProps.RISK_LIKELIHOOD],
-				newSafetibaseProps[modProps.RISK_CONSEQUENCE] ?? oldSafetibaseProps[modProps.RISK_CONSEQUENCE],
+				newLikelihood ?? oldSafetibaseProps[modProps.RISK_LIKELIHOOD],
+				newConsequence ?? oldSafetibaseProps[modProps.RISK_CONSEQUENCE],
 			);
 		}
 
-		if (newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
-			|| newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]) {
-			const treatedLevel = calculateLevelOfRisk(
-				newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
-				?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
-				newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]
-				?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
+		const newTreatedLikelihood = newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD];
+		const newTreatedConsequence = newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE];
+
+		if (newTreatedLikelihood === null || newTreatedConsequence === null) {
+			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = null;
+		} else if (newTreatedLikelihood || newTreatedConsequence) {
+			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = calculateLevelOfRisk(
+				newTreatedLikelihood ?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
+				newTreatedConsequence ?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
 			);
-			if (treatedLevel) {
-				newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
-			}
 		}
 	}
 };

@@ -43,7 +43,6 @@ const testGetTeamspaceList = () => {
 			await Promise.all([
 				...teamspacesWithAdmin.map((ts) => ServiceHelper.db.createTeamspace(ts, [testUser.user])),
 				...times(5, () => ServiceHelper.db.createTeamspace(ServiceHelper.generateRandomString())),
-
 			]);
 		});
 		test('should fail without a valid session', async () => {
@@ -131,9 +130,20 @@ const testGetTeamspaceMembers = () => {
 
 				return data;
 			});
-			expectedData.push({ job: DEFAULT_OWNER_JOB, user: teamspace });
 
-			ServiceHelper.outOfOrderArrayEqual(res.body.members, expectedData);
+			// when the default user for the teamspace is created the details are randomly generated
+			const resWithoutAdmin = res.body.members.filter(
+				(element) => element.job !== DEFAULT_OWNER_JOB && element.user !== teamspace,
+			);
+			const resAdminJob = res.body.members.filter(
+				(element) => element.job === DEFAULT_OWNER_JOB && element.user === teamspace,
+			);
+
+			// check that the rest of the data matches
+			ServiceHelper.outOfOrderArrayEqual(resWithoutAdmin, expectedData);
+			// ensure the default owner exists
+			expect(resAdminJob[0].job).toEqual(DEFAULT_OWNER_JOB);
+			expect(resAdminJob[0].user).toEqual(teamspace);
 		});
 	});
 };
@@ -280,6 +290,7 @@ const testRemoveTeamspaceMember = () => {
 		const testUser2 = ServiceHelper.generateUserCredentials();
 
 		const teamspace = ServiceHelper.generateRandomString();
+		const userProvisionedTeamspace = ServiceHelper.generateRandomString();
 
 		const route = (key, ts = teamspace, username = userToRemove.user) => `/v5/teamspaces/${ts}/members/${username}${key ? `?key=${key}` : ''}`;
 
@@ -289,8 +300,11 @@ const testRemoveTeamspaceMember = () => {
 				ServiceHelper.db.createUser(userNoAccess),
 			]);
 			await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
+			await ServiceHelper.db.createTeamspace(
+				userProvisionedTeamspace, [testUser.user], {}, true, { [ADD_ONS.USERS_PROVISIONED]: true },
+			);
 			await Promise.all([
-				ServiceHelper.db.createUser(userToRemove, [teamspace]),
+				ServiceHelper.db.createUser(userToRemove, [teamspace, userProvisionedTeamspace]),
 				ServiceHelper.db.createUser(userNotAdmin, [teamspace]),
 				ServiceHelper.db.createUser(testUser2, [teamspace]),
 			]);
@@ -298,6 +312,7 @@ const testRemoveTeamspaceMember = () => {
 
 		describe.each([
 			['the user does not have a valid session', route(), false, templates.notLoggedIn],
+			['the teamspace has userProvisioned true', route(testUser.apiKey, userProvisionedTeamspace), false, templates.userProvisioned],
 			['the teamspace does not exist', route(userNoAccess.apiKey, ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
 			['the user does not have access to the teamspace', route(userNoAccess.apiKey), false, templates.teamspaceNotFound],
 			['the user does not have admin permissions to the teamspace', route(userNotAdmin.apiKey), false, templates.notAuthorized],
@@ -425,8 +440,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	testGetTeamspaceList();
 	testGetTeamspaceMembers();
+	testGetTeamspaceList();
 	testGetAvatar();
 	testGetQuotaInfo();
 	testRemoveTeamspaceMember();

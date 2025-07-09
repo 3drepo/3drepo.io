@@ -29,6 +29,7 @@ interface IProps extends RouteComponentProps<any> {
 	className?: string;
 	invitations: any[];
 	projects: any[];
+	usersProvisionedEnabled: boolean;
 	onInvitationOpen: (email, job, isAdmin, permissions) => void;
 	removeInvitation: (email) => void;
 	handleClose: () => void;
@@ -70,16 +71,18 @@ export const InvitationsDialog = (props: IProps) => {
 			{props.invitations.map((invitation) => (
 				<Invitation key={invitation.email}>
 					{invitation.email}
-					<Actions>
-						<SmallIconButton
-							Icon={Edit}
-							onClick={handleInvitationClick(invitation)}
-						/>
-						<SmallIconButton
-							Icon={Delete}
-							onClick={handleInvitationRemove(invitation)}
-						/>
-					</Actions>
+					{!props.usersProvisionedEnabled && (
+						<Actions>
+							<SmallIconButton
+								Icon={Edit}
+								onClick={handleInvitationClick(invitation)}
+							/>
+							<SmallIconButton
+								Icon={Delete}
+								onClick={handleInvitationRemove(invitation)}
+							/>
+						</Actions>
+					)}
 				</Invitation>
 			))}
 		</List>
@@ -89,24 +92,26 @@ export const InvitationsDialog = (props: IProps) => {
 		<Container className={props.className}>
 			{renderInvitationsList(!!props.invitations.length)}
 			{renderNoInvitationsInfo(!props.invitations.length)}
-			<Footer>
-				<CancelButton
-					type="button"
-					color="primary"
-					variant="text"
-					onClick={props.handleClose}
-				>
-					Cancel
-				</CancelButton>
-				<Button
-					type="button"
-					variant="contained"
-					color="secondary"
-					onClick={handleInvitationClick({})}
-				>
-					Add
-				</Button>
-			</Footer>
+			{!props.usersProvisionedEnabled && (
+				<Footer>
+					<CancelButton
+						type="button"
+						color="primary"
+						variant="text"
+						onClick={props.handleClose}
+					>
+						Cancel
+					</CancelButton>
+						<Button
+							type="button"
+							variant="contained"
+							color="secondary"
+							onClick={handleInvitationClick({})}
+						>
+							Add
+						</Button>
+				</Footer>
+			)}
 		</Container>
 	);
 };

@@ -61,6 +61,8 @@ router.post("/apikey", middlewares.loggedIn, generateApiKey, onSuccess);
 /**
  * @api {delete} /apikey Deletes the current apikey for the logged user
  * @apiName deleteApiKey
+ *
+ * @apiSuccessExample {json} Success
  *    HTTP/1.1 200 OK
  *    {}
  *
@@ -91,7 +93,7 @@ router.get("/starredMeta", middlewares.loggedIn, getStarredMetadataTags, onSucce
  * @apiName StarMetadataTags
  * @apiGroup User
  *
- * @apiParam (Request body) {String} tag The tag to be starred
+ * @apiBody {String} tag The tag to be starred
  * @apiParamExample {json} Input
  *    {
  *      "tag": "material"
@@ -110,7 +112,7 @@ router.post("/starredMeta", middlewares.loggedIn, appendStarredMetadataTag, onSu
  * @apiName SetMetadataTags
  * @apiGroup User
  *
- * @apiParam  [String] (Request body) An array of tags to be starred
+ * @apiBody {String[]} tags An array of tags to be starred
  * @apiParamExample {json} Input
  *    [
  *    	"material",
@@ -130,7 +132,7 @@ router.put("/starredMeta", middlewares.loggedIn, replaceStarredMetadataTags, onS
  * @apiName UnstarMetadataTags
  * @apiGroup User
  *
- * @apiParam (Request body) {String} tag The tag to be starred
+ * @apiBody {String} tag The tag to be starred
  * @apiParamExample {json} Input
  *    {
  *      "tag": "material"
@@ -148,6 +150,19 @@ router.delete("/starredMeta", middlewares.loggedIn, deleteStarredMetadataTag, on
  * @api {get} /starredModels Gets the starred models for the logged user
  * @apiName GetStarredModels
  * @apiGroup User
+ *
+ * @apiSuccessExample {json} Success
+ *    HTTP/1.1 200 OK
+ *    [
+ *      {
+ *        "teamspace": "ts1",
+ *        "models": ["c7d9184a-83d3-4ef0-975c-ba2ced888e79"]
+ *      },
+ *      {
+ *        "teamspace": "ts2",
+ *        "models": ["4d17e126-8238-432d-a421-93819373e21a", "0411e74a-0661-48f9-bf4f-8eabe4a673a0"]
+ *      }
+ *    ]
  * */
 router.get("/starredModels", middlewares.loggedIn, getStarredModels, onSuccess);
 
@@ -156,8 +171,8 @@ router.get("/starredModels", middlewares.loggedIn, getStarredModels, onSuccess);
  * @apiName StarModels
  * @apiGroup User
  *
- * @apiParam  {String} teamspace teamspace where model resides
- * @apiParam  {String} model model ID  to add
+ * @apiBody {String} teamspace teamspace where model resides
+ * @apiBody {String} model model ID  to add
  * @apiParamExample {json} Input
  *    {
  *      "teamspace": "user1",
@@ -177,12 +192,20 @@ router.post("/starredModels", middlewares.loggedIn, appendStarredModels, onSucce
  * @apiName SetStarredModels
  * @apiGroup User
  *
- * @apiParam  [String]  An array of models to be starred, belong to the teamspace
+ * @apiBody {Object[]} starredModels Array of objects containing teamspace and models
+ * @apiBody (starredModels) {String} teamspace Teamspace name
+ * @apiBody (starredModels) {String[]} models Array of model IDs
  * @apiParamExample {json} Input
- *    {
- *     	"user1": ["c7d9184a-83d3-4ef0-975c-ba2ced888e79"],
- *     	"user2": ["4d17e126-8238-432d-a421-93819373e21a", "0411e74a-0661-48f9-bf4f-8eabe4a673a0"]
- * 	  }
+ *    [
+ *      {
+ *        "teamspace": "user1",
+ *        "models": ["c7d9184a-83d3-4ef0-975c-ba2ced888e79"]
+ *      },
+ *      {
+ *        "teamspace": "user2",
+ *        "models": ["4d17e126-8238-432d-a421-93819373e21a", "0411e74a-0661-48f9-bf4f-8eabe4a673a0"]
+ *      }
+ *    ]
  *
  * @apiSuccessExample {json} Success
  *    HTTP/1.1 200 OK
@@ -197,8 +220,8 @@ router.put("/starredModels", middlewares.loggedIn, replaceStarredModels, onSucce
  * @apiName UnstarModels
  * @apiGroup User
  *
- * @apiParam  {String} teamspace teamspace where model resides
- * @apiParam  {String} model model ID  to remove
+ * @apiBody {String} teamspace teamspace where model resides
+ * @apiBody  {String} model model ID  to remove
  * @apiParamExample {json} Input
  *    {
  *      "teamspace": "user1",

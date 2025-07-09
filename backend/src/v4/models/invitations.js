@@ -83,13 +83,17 @@ const cleanPermissions = (permissions) => {
 
 const sendInvitationEmail = async (email, username, teamspace) => {
 	const refId = await getTeamspaceRefId(teamspace);
-	const { customData: { firstName, lastName }} = await User.findByUserName(username, { "customData.firstName": 1, "customData.lastName": 1});
-	const sender = [firstName, lastName].join(" ");
+
+	let sender;
+	if(username) {
+		const { customData: { firstName, lastName }} = await User.findByUserName(username, { "customData.firstName": 1, "customData.lastName": 1});
+		sender = [firstName, lastName].join(" ");
+	}
 
 	await addUserToAccount(refId, email, undefined, {teamspace, sender  });
 };
 
-invitations.create = async (email, teamspace, job, username, permissions = {}) => {
+invitations.create = async (email, teamspace, job, username, permissions = {}, checkLicenceLimit = true) => {
 	// 1 - find if there is already and invitation with that email
 	// 2 - if there is update the invitation with the new teamspace data
 	// 2.5 - if there is not, create an entry with that email and job/permission
@@ -138,6 +142,9 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 
 		// if its a new teamspace that the user has been invited send an invitation email
 		if (result.teamSpaces.every(t=> t.teamspace !== teamspace)) {
+			if(checkLicenceLimit) {
+				await User.hasReachedLicenceLimitCheck(teamspace);
+			}
 			await sendInvitationEmail(email, username, teamspace);
 			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
 		}
@@ -148,7 +155,9 @@ invitations.create = async (email, teamspace, job, username, permissions = {}) =
 		await coll.updateOne({_id:email}, { $set: invitation });
 
 	} else {
-		await User.hasReachedLicenceLimitCheck(teamspace);
+		if(checkLicenceLimit) {
+			await User.hasReachedLicenceLimitCheck(teamspace);
+		}
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
 		await sendInvitationEmail(email, username, teamspace);
 		await coll.insertOne(invitation);
@@ -237,13 +246,13 @@ const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, perm
 	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
 
 	try {
-		await User.addTeamMember(teamspace, invitedUser, job, teamPerms);
+		await User.addTeamMember(teamspace, invitedUser, job, teamPerms, undefined, true);
 
 		if (!permissions.teamspace_admin) {
 			await Promise.all(permissions.projects.map(applyProjectPermissions(teamspace, invitedUser)));
 		}
 	} catch(err) {
-		systemLogger.logError("Something failed when unpacking invitation: " + err.stack);
+		systemLogger.logError("Something failed when unpacking invitation: ", err.message);
 	}
 };
 

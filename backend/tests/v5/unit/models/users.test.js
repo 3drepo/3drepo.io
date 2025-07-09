@@ -21,6 +21,7 @@ const { cloneDeep, times } = require('lodash');
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateRandomString, determineTestGroup } = require('../../helper/services');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
@@ -502,6 +503,61 @@ const testEnsureIndicesExist = () => {
 	});
 };
 
+const testGetUserInfoFromEmailArray = () => {
+	describe('Get users information from an array of emails', () => {
+		test('Should retrieve an array of users', async () => {
+			const userEntriesMock = times(10, (iterator) => {
+				if (iterator % 2 === 0) {
+					return {
+						user: generateRandomString(),
+						customData: {
+							email: generateRandomString(),
+							userId: generateRandomString(),
+							firstName: generateRandomString(),
+							lastName: generateRandomString(),
+							billing: {} },
+					};
+				}
+				return {
+					user: generateRandomString(),
+					customData: {
+						email: generateRandomString(),
+						userId: generateRandomString(),
+						firstName: generateRandomString(),
+						lastName: generateRandomString(),
+						billing: {
+							billingInfo: {
+								company: generateRandomString(),
+							},
+						},
+					},
+				};
+			});
+			const listOfEmails = userEntriesMock.map(({ customData }) => customData.email);
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(userEntriesMock);
+			const mockGetUserByEmail = jest.spyOn(User, 'getUsersByQuery');
+			const projection = {
+				[generateRandomString()]: generateRandomString(),
+			};
+
+			const res = await User.getUserInfoFromEmailArray(listOfEmails, projection);
+
+			expect(res).toEqual(userEntriesMock);
+			expect(mockGetUserByEmail).toHaveBeenCalledTimes(1);
+			expect(mockGetUserByEmail).toHaveBeenCalledWith(
+				{ 'customData.email': { $in: listOfEmails } },
+				projection,
+			);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				USERS_DB_NAME, USERS_COL,
+				{ 'customData.email': { $in: listOfEmails } },
+				projection,
+			);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -519,4 +575,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetUserId();
 	testUpdateUserId();
 	testEnsureIndicesExist();
+	testGetUserInfoFromEmailArray();
 });

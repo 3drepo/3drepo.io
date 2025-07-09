@@ -18,6 +18,8 @@
 import { cond, curry, intersection, isEqual, keys } from 'lodash';
 import { all, call, put, select, take, takeLatest } from 'redux-saga/effects';
 
+import { selectHasViewerAccess } from '@/v5/store/containers/containers.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 import { CLASH_COMPARE_TYPE, COMPARE_SORT_TYPES, DIFF_COMPARE_TYPE, RENDERING_TYPES, VULNERABLE_PROPS } from '../../constants/compare';
 import { SORT_ORDER_TYPES } from '../../constants/sorting';
 import { VISIBILITY_STATES } from '../../constants/tree';
@@ -82,10 +84,12 @@ function* getCompareModelData({ isFederation, revision }) {
 			yield put(CompareActions.setComponentState({ compareModels: [model], isPending: false }));
 		} else {
 			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, revision);
-			const compareModels = Object.keys(submodelsRevisionsMap).map((model) => {
+			let compareModels = Object.keys(submodelsRevisionsMap).map((model) => {
 				const subModelData = submodelsRevisionsMap[model];
 				return prepareModelToCompare(teamspace, model, subModelData.name, false, subModelData.revisions);
 			});
+
+			compareModels = compareModels.filter((model) => selectHasViewerAccess(getState(), model._id));
 
 			const selectedDiffModels = compareModels.reduce((map, model) => {
 				map[model._id] = model.revisions?.length > 1;

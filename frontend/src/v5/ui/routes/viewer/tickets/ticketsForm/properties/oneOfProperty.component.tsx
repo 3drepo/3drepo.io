@@ -21,16 +21,37 @@ import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
+import ClearIcon from '@assets/icons/controls/clear_circle.svg';
+import { ClearIconContainer } from './selectProperty.styles';
 
-type OneOfPropertyProps = FormInputProps & { values: PropertyDefinition['values']; onBlur: () => void };
-export const OneOfProperty = ({ values, value, ...props }: OneOfPropertyProps) => {
+type OneOfPropertyProps = FormInputProps & {
+	values: PropertyDefinition['values'];
+	onBlur: () => void,
+	immutable?: boolean;
+};
+export const OneOfProperty = ({ values, value, onBlur, immutable, ...props }: OneOfPropertyProps) => {
+	const canClear = !props.required && !props.disabled && !!value && !immutable;
+	const onClear = () => {
+		props.onChange('');
+		onBlur?.();
+	};
+	
 	if (values === 'jobsAndUsers') {
-		return (<JobsAndUsersProperty value={value} {...props} />);
+		return (<JobsAndUsersProperty value={value} canClear={canClear} onClose={onBlur} onClear={onClear} {...props} />);
 	}
 	
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
 	return (
-		<Select {...props} value={value ?? ''}>
+		<Select
+			{...props}
+			onClose={onBlur}
+			value={value ?? ''}
+			endAdornment={canClear && (
+				<ClearIconContainer onClick={onClear}>
+					<ClearIcon />
+				</ClearIconContainer>
+			)}
+		>
 			{(items as string[]).map((propValue) => (
 				<MenuItem key={propValue} value={propValue}>
 					{propValue}

@@ -28,22 +28,21 @@ import {
 	enableRealtimeFederationUpdateTicketComment,
 } from '@/v5/services/realtime/ticketComments.events';
 import { FormattedMessage } from 'react-intl';
-import { ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
+import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { useContext, useEffect, useState } from 'react';
 import { Gap } from '@controls/gap';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { sanitiseMessage, stripMetadata } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { ViewerParams } from '../../../../routes.constants';
-import { Accordion, Comments, EmptyCommentsBox, FillerRow, Table, TableBody, TableRow, VirtualisedList } from './commentsPanel.styles';
+import { Accordion, Comments, CreateCommentBox, EmptyCommentsBox, FillerRow, Table, TableBody, TableRow, VirtualisedList } from './commentsPanel.styles';
 import { Comment } from './comment/comment.component';
-import { CreateCommentBox } from './createCommentBox/createCommentBox.component';
 import { TicketContext } from '../../ticket.context';
 
 type CommentsPanelProps = {
 	scrollPanelIntoView: (event, isExpanding) => void,
 };
 export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
-	const [commentReply, setCommentReply] = useState<ITicketComment>(null);
+	const [commentReply, setCommentReply] = useState<TicketCommentReplyMetadata>(null);
 	const { teamspace, project } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -79,23 +78,6 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 		});
 	};
 
-	const handleEditComment = (commentId, message, images) => {
-		const oldComment = comments.find(({ _id }) => _id === commentId);
-		const newHistory = (oldComment.history || []).concat({
-			message: oldComment.message,
-			images: oldComment.images,
-			timestamp: new Date(),
-		});
-		TicketCommentsActionsDispatchers.updateComment(
-			teamspace,
-			project,
-			containerOrFederation,
-			ticketId,
-			isFederation,
-			commentId,
-			{ history: newHistory, message, images },
-		);
-	};
 
 	useEffect(() => {
 		if (!ticketId) return null;
@@ -145,7 +127,6 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 									key={comment._id}
 									onDelete={handleDeleteComment}
 									onReply={handleReplyToComment}
-									onEdit={handleEditComment}
 									isFirstOfBlock={getCommentIsFirstOfBlock(index)}
 								/>
 								{index === commentsLength - 1 && (<Gap $height="5px" />)}
@@ -160,12 +141,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 					</EmptyCommentsBox>
 				)}
 			</Comments>
-			{!readOnly && (
-				<CreateCommentBox
-					commentReply={commentReply}
-					deleteCommentReply={() => setCommentReply(null)}
-				/>
-			)}
+			{!readOnly && <CreateCommentBox commentReply={commentReply} setCommentReply={setCommentReply} />}
 		</Accordion>
 	);
 };

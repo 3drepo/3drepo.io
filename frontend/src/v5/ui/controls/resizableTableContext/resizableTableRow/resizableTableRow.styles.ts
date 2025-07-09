@@ -17,6 +17,6 @@
 
 import styled from 'styled-components';
 
-export const Row = styled.div`
-	display: grid;
+export const Row = styled.div<{ $gap: number }>`
+	gap: ${({ $gap }) => $gap}px;
 `;

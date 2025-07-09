@@ -48,6 +48,7 @@ interface IProps {
 	title: string | ReactNode[];
 	jobs: any[];
 	users: any[];
+	permissionsOnUIDisabled: boolean;
 	onInvitationOpen: (email, job, isAdmin) => void;
 	onSave: (user) => void;
 	onCancel: () => void;
@@ -175,7 +176,7 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 	};
 
 	public render() {
-		const { clearSuggestions, jobs, users, title } = this.props;
+		const { clearSuggestions, jobs, users, title, permissionsOnUIDisabled } = this.props;
 		return (
 			<Container>
 				<Grid
@@ -219,16 +220,18 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 						</StyledSelect>
 					</FormControl>
 
-					<FormControlLabel
-						control={
-							<Checkbox
-								color="secondary"
-								checked={this.state.isAdmin}
-								onChange={this.handlePermissionsChange}
-							/>
-						}
-						label="Add as Teamspace Admin"
-					/>
+					{!permissionsOnUIDisabled && (
+						<FormControlLabel
+							control={
+								<Checkbox
+									color="secondary"
+									checked={this.state.isAdmin}
+									onChange={this.handlePermissionsChange}
+								/>
+							}
+							label="Add as Teamspace Admin"
+						/>
+					)}
 					{this.renderUserNotFoundMessage(this.state.userNotExists)}
 					<Grid
 						container

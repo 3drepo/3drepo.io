@@ -40,6 +40,7 @@ const nonTsMemberUser = generateRandomString();
 const teamspace = generateRandomString();
 
 TeamspacesModel.hasAccessToTeamspace.mockImplementation((ts, username) => username !== nonTsMemberUser);
+TeamspacesModel.getAddOns.mockImplementation((ts) => (ts === teamspace ? {} : { usersProvisioned: true }));
 
 PermissionsUtils.isTeamspaceAdmin.mockImplementation((ts, user) => user === adminUser);
 

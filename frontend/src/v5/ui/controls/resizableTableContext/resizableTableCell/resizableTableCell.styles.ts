@@ -15,9 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const Item = styled.div`
+export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
 	width: 100%;
 	overflow: hidden;
+	grid-row: 1;
+	grid-column: ${({ $index }) => $index + 1};
+
+	${({ $isMoving, theme }) => $isMoving && css`
+		background-color: ${theme.palette.primary.lightest};
+	`};
 `;

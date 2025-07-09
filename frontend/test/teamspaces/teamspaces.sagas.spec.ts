@@ -20,13 +20,13 @@ import { mockServer } from '../../internals/testing/mockServer';
 import { quotaMockFactory } from './teamspaces.fixtures';
 import { createTestStore } from '../test.helpers';
 import { selectTeamspaces } from '@/v5/store/teamspaces/teamspaces.selectors';
-import { AddOn } from '@/v5/store/store.types';
+import { AddOnModule, AddOns } from '@/v5/store/store.types';
 
 describe('Teamspaces: sagas', () => {
 	const teamspaceName = 'teamspaceId';
 	const teamspace = { name: teamspaceName, isAdmin: true };
 	const teamspaces = [teamspace];
-	const addOns: AddOn[] = [AddOn.Risks];
+	const addOns: AddOns = { modules: [AddOnModule.Risks], usersProvisioned: false, disablePermissionsOnUI: false };
 	let dispatch, getState, waitForActions;
 
 	beforeEach(() => {
