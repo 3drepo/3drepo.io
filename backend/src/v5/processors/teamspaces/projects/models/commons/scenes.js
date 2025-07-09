@@ -25,6 +25,8 @@ const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
 const contextCache = {};
+
+/* istanbul ignore next */
 let CACHE_EXPIRATION = config.testEnv ? 1 : 300000; // 5 minutes
 
 const getIdToMeshesMapping = async (teamspace, model, revId, cacheExpiry = CACHE_EXPIRATION) => {
