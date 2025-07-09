@@ -25,7 +25,10 @@ const {
 	generateUserCredentials,
 	outOfOrderArrayEqual,
 	db: dbHelper,
+	generateRandomNumber,
 } = require('../../helper/services');
+const mongodb = require('mongodb');
+const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 
 const DB = require(`${src}/handler/db`);
 const { ADMIN_DB } = require(`${src}/handler/db.constants`);
@@ -956,6 +959,35 @@ const testSetPassword = () => {
 	});
 };
 
+const testConnectionString = () => {
+	const oldConfig = cloneDeep(config.db);
+	const hosts = times(3, () => generateRandomString());
+	const ports = times(3, () => generateRandomNumber(1000, 9999));
+	const username = generateRandomString();
+	const password = generateRandomString();
+
+	describe.each([
+		['config only has a host and port', { host: [hosts[0]], port: [ports[0]] }, `mongodb://${hosts[0]}:${ports[0]}/`],
+		['multiple hosts, multiple ports', { host: [hosts[0], hosts[1], hosts[2]], port: [ports[0], ports[1], ports[2]] }, `mongodb://${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]},${hosts[2]}:${ports[2]}/`],
+		['with username and password in config', { host: [hosts[0]], port: [ports[0]], username, password }, `mongodb://${username}:${encodeURIComponent(password)}@${hosts[0]}:${ports[0]}/`],
+		['with username and password provided externally', { host: [hosts[0]], port: [ports[0]] }, `mongodb://${username}:${encodeURIComponent(password)}@${hosts[0]}:${ports[0]}/`, username, password],
+		['with replicaSet', { host: [hosts[0]], port: [ports[0]], replicaSet: 'rs0' }, `mongodb://${hosts[0]}:${ports[0]}/?replicaSet=rs0`],
+		['with authSource', { host: [hosts[0]], port: [ports[0]], authSource: 'admin' }, `mongodb://${hosts[0]}:${ports[0]}/?authSource=admin`],
+		['with socketTimeoutMS', { host: [hosts[0]], port: [ports[0]], timeout: 12345 }, `mongodb://${hosts[0]}:${ports[0]}/?socketTimeoutMS=12345`],
+		['all options', { host: [hosts[0], hosts[1]], port: [ports[0], ports[1]], username: '123', password: '123', replicaSet: 'rs0', authSource: 'admin', timeout: 12345 }, `mongodb://${username}:${encodeURIComponent(password)}@${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]}/?replicaSet=rs0&authSource=admin&socketTimeoutMS=12345`, username, password],
+	])('Connection String', (desc, configOverride, expectedString, user, pass) => {
+		test(`Should return the expected connection string if ${desc}`, async () => {
+			const fn = jest.spyOn(mongodb.MongoClient, 'connect').mockImplementationOnce(() => Promise.resolve());
+			config.db = configOverride;
+			// eslint-disable-next-line no-underscore-dangle
+			await DB._context.connect(user, pass);
+			expect(fn).toHaveBeenCalledWith(expectedString, expect.anything());
+		});
+	});
+
+	config.db = oldConfig;
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -987,6 +1019,7 @@ describe(determineTestGroup(__filename), () => {
 	testGrantRole();
 	testRevokeRole();
 	testSetPassword();
+	testConnectionString();
 
 	afterAll(() => DB.disconnect());
 });

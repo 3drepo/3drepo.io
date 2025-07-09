@@ -16,6 +16,7 @@
  */
 
 const { DEFAULT: DEFAULT_ROLE, ROLES_COL } = require('../models/roles.constants');
+
 const { GridFSBucket, Long, MongoClient } = require('mongodb');
 const { ADMIN_DB } = require('./db.constants');
 const { PassThrough } = require('stream');
@@ -28,8 +29,7 @@ let sessionConn;
 let defaultRoleProm;
 const DBHandler = {};
 
-// not testing coverage for options as anything that fails to connect has a long wait time
-const getURL = /* istanbul ignore next */(username, password) => {
+const getURL = (username, password) => {
 	const urlElements = ['mongodb://'];
 	const user = username ?? config.db.username;
 	const pw = password ?? config.db.password;
@@ -38,14 +38,26 @@ const getURL = /* istanbul ignore next */(username, password) => {
 
 	const hostsAndPorts = config.db.host.map((host, i) => `${host}:${config.db.port[i]}`);
 
-	urlElements.push(hostsAndPorts, '/?');
+	urlElements.push(hostsAndPorts, '/');
 
-	urlElements.push(config.db.replicaSet ? `&replicaSet=${config.db.replicaSet}` : '');
-	urlElements.push(config.db.authSource ? `&authSource=${config.db.authSource}` : '');
+	const queryString = [];
+
+	if (config.db.replicaSet) {
+		queryString.push(`replicaSet=${config.db.replicaSet}`);
+	}
+
+	if (config.db.authSource) {
+		queryString.push(`authSource=${config.db.authSource}`);
+	}
 
 	if (Number.isInteger(config.db.timeout)) {
-		urlElements.push(`&socketTimeoutMS=${config.db.timeout}`);
+		queryString.push(`socketTimeoutMS=${config.db.timeout}`);
 	}
+
+	if (queryString.length > 0) {
+		urlElements.push(`?${queryString.join('&')}`);
+	}
+
 	return urlElements.join('');
 };
 
