@@ -99,7 +99,6 @@ export const EditFederationContainersListItem = memo(({
 					container={container}
 					isSelected={isSelected}
 					openInNewTab
-					maxCharacterLength={40}
 				/>
 				<DashboardListItemButton
 					width={186}

@@ -26,6 +26,8 @@ import { Link } from 'react-router-dom';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';
 import { formatMessage } from '@/v5/services/intl';
+import { MiddleEllipsis, MiddleEllipsisContext } from '@controls/middleEllipsis/middleEllipsis.component';
+import { TextContainer } from '../dashboardListItemTitle.styles';
 
 interface IContainerTitle extends FixedOrGrowContainerProps {
 	container: IContainer;
@@ -33,42 +35,6 @@ interface IContainerTitle extends FixedOrGrowContainerProps {
 	openInNewTab?: boolean;
 	maxCharacterLength?: number;
 }
-
-const ellipsisLimits = (length) => {
-	const lenghtWithoutEllipsis = length - 5; // (...) + 2 characters for padding
-	const max = Math.round((2 / 3) * lenghtWithoutEllipsis);
-	const min = lenghtWithoutEllipsis - max;
-	return { max, min };
-};
-
-const middleEllipsis = (str: string, maxLength: number ) => {
-	if (str.length > maxLength) {
-		const { max, min } = ellipsisLimits(maxLength);
-		return str.substring(0, max) + '...' + str.substring(str.length - min, str.length);
-	}
-
-	return str;
-};
-
-const cutQuery = (query: string, str: string, maxLength: number) =>{
-	if (str.length <= maxLength) {
-		return query;
-	}
-
-	const index = str.toLowerCase().indexOf(query.toLowerCase());
-	
-	const { max, min } = ellipsisLimits(maxLength);
-
-	//    1. If the query is at the start of the string and it crosses to the ellipsis.
-	// or 2. If the query is in the middle of the dots and cross pass the dots.
-	if ((index < max && index + query.length > max) || (index > max && index < str.length - min) ) {
-		const totalQuery = ' '.repeat(index) + query + ' '.repeat(Math.max(str.length - (index + query.length), 0));
-		const res:string = middleEllipsis(totalQuery, maxLength);
-		return res.trim();
-	}
-
-	return query;
-};
 
 export const DashboardListItemContainerTitle = ({
 	container,
@@ -91,30 +57,38 @@ export const DashboardListItemContainerTitle = ({
 	const canLaunchContainer = container.hasStatsPending || hasRevisions;
 
 	return (
-		<DashboardListItemTitle
-			{...props}
-			subtitle={!container.hasStatsPending && (
-				<LatestRevision
-					name={(
-						<Highlight search={query}>
-							{container.latestRevision}
-						</Highlight>
-					)}
-					status={container.status}
-					error={container.errorReason}
-					hasRevisions={hasRevisions}
-					emptyLabel={formatMessage({ id: 'containers.list.item.title.latestRevision.empty', defaultMessage: 'Container empty' })}
-				/>
-			)}
-			selected={isSelected}
-			tooltipTitle={container.name}
-			disabled={!canLaunchContainer}
-		>
-			<Link {...linkProps}>
-				<Highlight search={maxCharacterLength ? cutQuery(query, container.name, maxCharacterLength) : query}>
-					{maxCharacterLength ? middleEllipsis(container.name, maxCharacterLength) : container.name}
-				</Highlight>
-			</Link>
-		</DashboardListItemTitle>
+		<MiddleEllipsis text={container.name} style={{ display: 'flex', flex: 1 }} >
+			<DashboardListItemTitle
+				{...props}
+				subtitle={!container.hasStatsPending && (
+					<LatestRevision
+						name={(
+							<Highlight search={query}>
+								{container.latestRevision}
+							</Highlight>
+						)}
+						status={container.status}
+						error={container.errorReason}
+						hasRevisions={hasRevisions}
+						emptyLabel={formatMessage({ id: 'containers.list.item.title.latestRevision.empty', defaultMessage: 'Container empty' })}
+					/>
+				)}
+				selected={isSelected}
+				tooltipTitle={container.name}
+				disabled={!canLaunchContainer}
+			>
+				<Link {...linkProps}>
+					<TextContainer data-ellipsis-text>
+						<MiddleEllipsisContext.Consumer>
+							{({ text, searchText }) => (
+								<Highlight search={ searchText }>
+									{text}
+								</Highlight>
+							)}
+						</MiddleEllipsisContext.Consumer>
+					</TextContainer>
+				</Link>
+			</DashboardListItemTitle>
+		</MiddleEllipsis>
 	);
 };
