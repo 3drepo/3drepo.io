@@ -967,14 +967,22 @@ const testConnectionString = () => {
 	const password = generateRandomString();
 
 	describe.each([
-		['config only has a host and port', { host: [hosts[0]], port: [ports[0]] }, `mongodb://${hosts[0]}:${ports[0]}/`],
-		['multiple hosts, multiple ports', { host: [hosts[0], hosts[1], hosts[2]], port: [ports[0], ports[1], ports[2]] }, `mongodb://${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]},${hosts[2]}:${ports[2]}/`],
-		['with username and password in config', { host: [hosts[0]], port: [ports[0]], username, password }, `mongodb://${username}:${encodeURIComponent(password)}@${hosts[0]}:${ports[0]}/`],
-		['with username and password provided externally', { host: [hosts[0]], port: [ports[0]] }, `mongodb://${username}:${encodeURIComponent(password)}@${hosts[0]}:${ports[0]}/`, username, password],
-		['with replicaSet', { host: [hosts[0]], port: [ports[0]], replicaSet: 'rs0' }, `mongodb://${hosts[0]}:${ports[0]}/?replicaSet=rs0`],
-		['with authSource', { host: [hosts[0]], port: [ports[0]], authSource: 'admin' }, `mongodb://${hosts[0]}:${ports[0]}/?authSource=admin`],
-		['with socketTimeoutMS', { host: [hosts[0]], port: [ports[0]], timeout: 12345 }, `mongodb://${hosts[0]}:${ports[0]}/?socketTimeoutMS=12345`],
-		['all options', { host: [hosts[0], hosts[1]], port: [ports[0], ports[1]], username: '123', password: '123', replicaSet: 'rs0', authSource: 'admin', timeout: 12345 }, `mongodb://${username}:${encodeURIComponent(password)}@${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]}/?replicaSet=rs0&authSource=admin&socketTimeoutMS=12345`, username, password],
+		['config only has a host and port', { host: [hosts[0]], port: [ports[0]] },
+			`mongodb://${hosts[0]}:${ports[0]}/`],
+		['multiple hosts, multiple ports', { host: [hosts[0], hosts[1], hosts[2]], port: [ports[0], ports[1], ports[2]] },
+			`mongodb://${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]},${hosts[2]}:${ports[2]}/`],
+		['with username and password in config', { host: [hosts[0]], port: [ports[0]], username, password },
+			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]}/`],
+		['with username and password provided externally', { host: [hosts[0]], port: [ports[0]] },
+			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]}/`, username, password],
+		['with replicaSet', { host: [hosts[0]], port: [ports[0]], replicaSet: 'rs0' },
+			`mongodb://${hosts[0]}:${ports[0]}/?replicaSet=rs0`],
+		['with authSource', { host: [hosts[0]], port: [ports[0]], authSource: 'admin' },
+			`mongodb://${hosts[0]}:${ports[0]}/?authSource=admin`],
+		['with socketTimeoutMS', { host: [hosts[0]], port: [ports[0]], timeout: 12345 },
+			`mongodb://${hosts[0]}:${ports[0]}/?socketTimeoutMS=12345`],
+		['all options', { host: [hosts[0], hosts[1]], port: [ports[0], ports[1]], username: '123', password: '123', replicaSet: 'rs0', authSource: 'admin', timeout: 12345 },
+			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]}/?replicaSet=rs0&authSource=admin&socketTimeoutMS=12345`, username, password],
 	])('Connection String', (desc, configOverride, expectedString, user, pass) => {
 		test(`Should return the expected connection string if ${desc}`, async () => {
 			const fn = jest.spyOn(mongodb.MongoClient, 'connect').mockImplementationOnce(() => Promise.resolve());
