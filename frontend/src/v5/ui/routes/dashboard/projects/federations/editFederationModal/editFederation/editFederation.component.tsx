@@ -107,7 +107,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 				/>
 			</SearchContextComponent>
 			<Divider />
-			{/* <SearchContextComponent items={available} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
+			<SearchContextComponent items={available} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
 				<EditFederationContainers
 					title={
 						formatMessage({
@@ -159,7 +159,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 						</Tooltip>
 					), [])}
 				/>
-			</SearchContextComponent> */}
+			</SearchContextComponent>
 		</>
 	);
 };
