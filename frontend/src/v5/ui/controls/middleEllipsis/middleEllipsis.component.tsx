@@ -73,15 +73,17 @@ export const MiddleEllipsis = ({ children, text, style }: MiddleEllipsisProps) =
 	const { query } = useContext(SearchContext);
 	const [characterSize, setCharacterSize] = useState(-1);
 	
-	// const lastText = useRef('');
-
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	const prepEllipse = useCallback(() => {
 		if (characterSize === -1 || !containerRef.current ) return;
 		const maxCharacters = Math.floor(containerRef.current.offsetWidth / characterSize);
 		
-		if (maxCharacters > text.length) return;
+		if (maxCharacters > text.length) {
+			if (contextValue.text === text && contextValue.searchText === query) return;
+			setContextValue({ text, searchText: query });
+			return;
+		}
 	
 		const newText = middleEllipsis(text, maxCharacters);
 		let searchText = query;
