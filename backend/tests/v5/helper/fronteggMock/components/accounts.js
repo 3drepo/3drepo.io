@@ -20,7 +20,6 @@ const { src } = require('../../path');
 const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 const { findOne } = require(`${src}/handler/db`);
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 const Cache = require('./cache');
 
