@@ -19,6 +19,9 @@ const { src } = require('../../path');
 
 const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
+const { findOne } = require(`${src}/handler/db`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+
 const Cache = require('./cache');
 
 const Accounts = {};
@@ -36,8 +39,9 @@ Accounts.createAccount = (name) => {
 
 Accounts.getAllUsersInAccount = (accountId) => Promise.resolve(Cache.getAllUsersInAccount(accountId));
 
-Accounts.addUserToAccount = (accountId, email) => {
-	const id = Cache.doesUserExist(email) ? Cache.doesUserExist(email) : generateUUIDString();
+Accounts.addUserToAccount = async (accountId, email) => {
+	const { customData: { userId } } = await findOne('admin', 'system.users', { 'customData.email': email });
+	const id = Cache.doesUserExist(email) ? Cache.doesUserExist(email) : userId;
 
 	Cache.addUserToAccount(accountId, { id, email });
 	Cache.updateUserByEmail(email, { id, tenantId: accountId });

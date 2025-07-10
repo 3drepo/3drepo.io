@@ -19,7 +19,6 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
 const SessionTracker = require('../../helper/sessionTracker');
-const fs = require('fs');
 const { onlineAvatarPath, newAvatarPath } = require('../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -38,14 +37,14 @@ const teamspace = ServiceHelper.generateRandomString();
 const fsAvatarData = ServiceHelper.generateRandomString();
 const gridFsAvatarData = ServiceHelper.generateRandomString();
 const setupData = async () => {
+	await ServiceHelper.db.createUser(testUser);
+	await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
 	await Promise.all([
-		ServiceHelper.db.createUser(testUser),
-		ServiceHelper.db.createUser(userWithFsAvatar, []),
-		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
+		ServiceHelper.db.createUser(userWithFsAvatar, [teamspace]),
+		ServiceHelper.db.createUser(userWithGridFsAvatar, [teamspace]),
 		ServiceHelper.db.createAvatar(userWithFsAvatar.user, 'fs', fsAvatarData),
 		ServiceHelper.db.createAvatar(userWithGridFsAvatar.user, 'gridfs', gridFsAvatarData),
 	]);
-	await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
 };
 
 const testEndpointRoutes = () => {
@@ -266,38 +265,17 @@ const testUploadAvatar = () => {
 			});
 
 			test('should remove old avatar and upload a new one if the user is logged in', async () => {
-				console.log('here');
 				const fetchAvatarData = await fetch(newAvatarPath);
-				console.log('here2');
 				const onlineAvatarData = await fetchAvatarData.arrayBuffer();
-				console.log('here3');
 
 				await testSession.put('/v5/user/avatar').attach('file', image)
 					.expect(templates.ok.status);
-				console.log('here4');
 
 				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
-				console.log('here5');
 				const resBuffer = avatarRes.body;
-				// const imageBuffer = fs.readFileSync(image);
 				expect(resBuffer).toEqual(Buffer.from(onlineAvatarData));
 			});
 		});
-
-		// describe('With valid authentication', () => {
-		// 	test('should upload a new avatar if the user is logged in', async () => {
-		// 		const testSession = SessionTracker(agent);
-		// 		await testSession.login(testUser);
-		// 		await testSession.get('/v5/user/avatar').expect(templates.fileNotFound.status);
-		// 		await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
-		// 			.expect(templates.ok.status);
-
-		// 		const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
-		// 		const resBuffer = avatarRes.body;
-		// 		const imageBuffer = fs.readFileSync(image);
-		// 		expect(resBuffer).toEqual(imageBuffer);
-		// 	});
-		// });
 	});
 };
 
