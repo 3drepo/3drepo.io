@@ -16,11 +16,11 @@
  */
 
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { useContext } from 'react';
 import { Resizer } from './resizer/resizer.component';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizersOverlay = () => {
-	const { visibleSortedColumnsNames } = useContext(ResizableTableContext);
+	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	return (
 		<>

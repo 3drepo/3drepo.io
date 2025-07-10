@@ -17,10 +17,10 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
-import _ from 'lodash';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { TicketCommentReplyMetadata, ITicketComment } from './ticketComments.types';
+import { createStateWithGroup } from '../ticketsGroups.helpers';
 
 export const IMAGE_MAX_SIZE_MESSAGE = formatInfoUnit(clientConfigService.resourceUploadSizeLimit);
 export const imageIsTooBig = (file): boolean => (file.size > clientConfigService.resourceUploadSizeLimit);
@@ -47,25 +47,29 @@ export const extractMetadata = (message: string): TicketCommentReplyMetadata => 
 	originalAuthor: extractMetadataValue(message, 'originalAuthor'),
 	message: extractMetadataValue(message, 'message'),
 	images: extractMetadataImages(message),
+	view: extractMetadataValue(message, 'view') === 'true',
 });
-
-export const createMetadata = (comment: ITicketComment): TicketCommentReplyMetadata => _.pick(comment, '_id', 'message', 'images', 'author', 'originalAuthor');
 
 export const stripMetadata = (message: string = '') => message.replaceAll(/\[[_a-zA-Z]*\]:- "([^"]*)"(\n)+/g, '');
 export const sanitiseMessage = (message: string = '') => message.replaceAll('"', '&#34;');
 export const desanitiseMessage = (message: string = '') => message.replaceAll('&#34;', '"');
 
-const createMetadataValue = (metadataName: keyof TicketCommentReplyMetadata, metadataValue: string) => (
-	`[${metadataName}]:- "${metadataValue}"\n`
-);
+const createMetadataValue = (metadataName: keyof TicketCommentReplyMetadata, metadataValue: string) => {
+	if (!metadataValue) return null;
+	return `[${metadataName}]:- "${metadataValue}"\n`;
+};
 
-const stringifyMetadata = ({ originalAuthor = '', author, _id, message, images = [] }: TicketCommentReplyMetadata) => {
+const stringifyMetadata = ({ originalAuthor = '', author, _id, message, images = [], view }: TicketCommentReplyMetadata) => {
 	const metadata = [
 		createMetadataValue('_id', _id),
 		createMetadataValue('originalAuthor', originalAuthor),
 		createMetadataValue('author', author),
 		createMetadataValue('message', stripMetadata(message)),
 		createMetadataValue('images', images.join(',')),
+		// reduces metadata size. For comment replies only need to know if a view exists
+		// This is for when replying to a comment that only has a viewpoint to still render the reply component
+		createMetadataValue('view', `${!!view}`), 
+		
 	];
 	return metadata.join('');
 };
@@ -83,4 +87,10 @@ export const parseMessageAndImages = (inputComment: Partial<ITicketComment>) => 
 		comment.images = comment.images.map(stripBase64Prefix);
 	}
 	return comment;
+};
+
+export const commentWithGroups = (groups) => (comment) => {
+	if (!comment.view?.state) return comment;
+	const state = createStateWithGroup(comment.view.state, groups);
+	return { ...comment, view: { ...comment.view, state } };
 };

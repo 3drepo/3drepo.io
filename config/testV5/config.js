@@ -38,6 +38,7 @@ try {
 
 
 module.exports = {
+	testEnv: true,
 	host: hostname,
 	port: 8080,
 	cookie: {

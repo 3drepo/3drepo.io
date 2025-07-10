@@ -16,10 +16,10 @@
  */
 
 import { Container as TextOverflowContainer } from '@controls/textOverflow/textOverflow.styles';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
 
-export const CellContainer = styled(ResizableTableCell)`
+export const CellContainer = styled(ResizableTableCell)<{ $isMoving?: boolean }>`
 	color: ${({ theme }) => theme.palette.secondary.main};
 	height: 100%;
 	padding: 0 10px;
@@ -29,6 +29,13 @@ export const CellContainer = styled(ResizableTableCell)`
 	font-weight: 500;
 	overflow: hidden;
 	box-sizing: border-box;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+
+	${({ $isMoving, theme }) => $isMoving && css`
+		&&& {
+			background-color: ${theme.palette.primary.lightest};
+		}
+	`}
 
 	${TextOverflowContainer} {
 		height: unset;

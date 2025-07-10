@@ -16,14 +16,14 @@
  */
 
 "use strict";
-(() => {
-	const checkPermissions = require("./checkPermissions").checkPermissions;
-	const C	= require("../constants");
+const { v5Path } = require("../../interop");
+const checkPermissions = require("./checkPermissions").checkPermissions;
+const C	= require("../constants");
+const { notUserProvisioned } = require(`${v5Path}/middleware/permissions/components/teamspaces`);
+const { formatV5NewModelParams } = require("./formatV5NewModelParams");
 
-	module.exports = {
-		canCreate: checkPermissions([C.PERM_CREATE_JOB]),
-		canView: checkPermissions([C.PERM_ASSIGN_JOB]),
-		canDelete: checkPermissions([C.PERM_DELETE_JOB])
-	};
-
-})();
+module.exports = {
+	canCreate: [checkPermissions([C.PERM_CREATE_JOB]), formatV5NewModelParams, notUserProvisioned],
+	canView: checkPermissions([C.PERM_ASSIGN_JOB]),
+	canDelete: [checkPermissions([C.PERM_DELETE_JOB]), formatV5NewModelParams, notUserProvisioned]
+};

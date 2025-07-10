@@ -26,6 +26,7 @@ import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { isString, sortBy, uniqBy, compact } from 'lodash';
 import { CardFilterType, BaseFilter, CardFilter, CardFilterOperator } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
+import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 
 export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'template': TemplateIcon,
@@ -103,7 +104,7 @@ export const getFiltersFromJobsAndUsers = (jobsAndUsers) => jobsAndUsers.map((ju
 	const isUser = !!ju.firstName;
 	return ({
 		value: isUser ? ju.user : ju._id,
-		displayValue: isUser ? `${ju?.firstName} ${ju?.lastName}` : null,
+		displayValue: isUser ? getFullnameFromUser(ju) : null,
 		type: 'jobsAndUsers',
 	});
 });

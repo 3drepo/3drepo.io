@@ -19,13 +19,41 @@ const Scene = {};
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
+const config = require('../../../../../utils/config');
 const { getFile } = require('../../../../../services/filesManager');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
 
-const getIdToMeshesMapping = async (teamspace, model, revId) => {
-	const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
-	return JSON.parse(fileData);
+const contextCache = {};
+
+/* istanbul ignore next */
+let CACHE_EXPIRATION = config.testEnv ? 1 : 300000; // 5 minutes
+
+const getIdToMeshesMapping = async (teamspace, model, revId, cacheExpiry = CACHE_EXPIRATION) => {
+	const cacheKey = `${teamspace}/${model}/${UUIDToString(revId)}`;
+	if (!contextCache[cacheKey]) {
+		const fileData = await getFile(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
+		contextCache[cacheKey] = JSON.parse(fileData);
+		setTimeout(() => {
+			delete contextCache[cacheKey];
+		}, cacheExpiry);
+	}
+
+	return contextCache[cacheKey];
+};
+
+// This function is only used by tests to avoid tests hanging due to an unresolved promise
+Scene.setCacheExpiration = (expiry) => {
+	CACHE_EXPIRATION = expiry;
+};
+
+// This function is only used by tests to clear the cache
+Scene.clearCache = () => {
+	Object.keys(contextCache).forEach((key) => delete contextCache[key]);
+};
+
+Scene.prepareCache = async (teamspace, model, revId, cacheExpiry = CACHE_EXPIRATION) => {
+	await getIdToMeshesMapping(teamspace, model, revId, cacheExpiry);
 };
 
 Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds, returnString = false) => {
@@ -40,6 +68,7 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 	});
 
 	const meshesArr = Array.from(meshes);
+
 	return returnString ? meshesArr : meshesArr.map(stringToUUID);
 };
 

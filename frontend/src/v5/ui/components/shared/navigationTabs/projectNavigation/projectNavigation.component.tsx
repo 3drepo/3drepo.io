@@ -16,7 +16,7 @@
  */
 import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { discardSlash, discardUrlComponent } from '@/v5/helpers/url.helper';
 import { Container, Link } from '../navigationTabs.styles';
 import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
@@ -24,8 +24,10 @@ import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 export const ProjectNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardSlash(url);
-	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const { linkLabel, shouldRenderLink } = useKanbanNavigationData();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const permissionsOnUIDisabled = TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();
+	const hasPermissions = !permissionsOnUIDisabled && isProjectAdmin;
 
 	return (
 		<Container>
@@ -35,8 +37,8 @@ export const ProjectNavigation = (): JSX.Element => {
 			{shouldRenderLink &&  <Link to={`${url}/t/board`}>{linkLabel}</Link> }
 			<Link to={`${url}/t/tickets`}><FormattedMessage id="projectNavigation.tickets" defaultMessage="Tickets" /></Link>
 			<Link to={`${discardUrlComponent(url, 'settings')}/t/project_settings`}><FormattedMessage id="projectNavigation.settings" defaultMessage="Project settings" /></Link>
-			{ isProjectAdmin && <Link to={`${url}/t/project_permissions`}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link> }
-			{ isProjectAdmin && <Link to={`${url}/t/user_permissions`}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link> }
+			{hasPermissions && <Link to={`${url}/t/project_permissions`}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link> }
+			{hasPermissions && <Link to={`${url}/t/user_permissions`}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link> }
 		</Container>
 	);
 };
