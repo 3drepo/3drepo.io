@@ -39,8 +39,10 @@ Accounts.createAccount = (name) => {
 Accounts.getAllUsersInAccount = (accountId) => Promise.resolve(Cache.getAllUsersInAccount(accountId));
 
 Accounts.addUserToAccount = async (accountId, email) => {
-	const { customData: { userId } } = await findOne('admin', 'system.users', { 'customData.email': email });
-	const id = Cache.doesUserExist(email) ? Cache.doesUserExist(email) : userId;
+	const data = await findOne('admin', 'system.users', { 'customData.email': email });
+	const id = Cache.doesUserExist(email)
+		? Cache.doesUserExist(email)
+		: data?.customData?.userId || generateUUIDString();
 
 	Cache.addUserToAccount(accountId, { id, email });
 	Cache.updateUserByEmail(email, { id, tenantId: accountId });
