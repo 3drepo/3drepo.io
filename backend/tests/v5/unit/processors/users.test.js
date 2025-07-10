@@ -157,7 +157,7 @@ const tesUpdateProfile = () => {
 			};
 			const updateProfileExpected = {
 				name: `${updatedProfile.firstName} ${updatedProfile.lastName}`,
-				metadata: JSON.stringify({ countryCode: updatedProfile.countryCode, company: updatedProfile.company	}),
+				metadata: JSON.stringify({ countryCode: updatedProfile.countryCode, company: updatedProfile.company }),
 			};
 			await Users.updateProfile(user.user, updatedProfile);
 			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
