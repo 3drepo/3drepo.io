@@ -39,24 +39,47 @@ const cutQuery = (query: string, str: string, maxLength: number) =>{
 		return query;
 	}
 
-	const index = str.toLowerCase().indexOf(query.toLowerCase());
-	
+	const querySet = new Set([query]);
+	const splitted = str.toLowerCase().split(query.toLowerCase());
 	const { max, min } = ellipsisLimits(maxLength);
+	const rightCuttoffIndex = str.length - min; 
+	
+	let index = 0;
 
-	//    1. If the query is at the start of the string and it crosses to the ellipsis.
-	// or 2. If the query is in the middle of the dots and cross pass the dots.
-	if ((index <= max && index + query.length >= max) || (index >= max && index <= str.length - min) ) {
-		const totalQuery = ' '.repeat(index) + query + ' '.repeat(Math.max(str.length - (index + query.length), 0));
-		const res:string = middleEllipsis(totalQuery, maxLength);
-		return res.trim();
+	for (let i = 0; i < splitted.length; i++) {
+		index += splitted[i].length;
+
+		// If the match crosses the dots but dosn't reach the right cuttoff end staring before the dots 
+		// for example: text with "orange apple grape" with max 8 and min 3 ("orange a...ape")
+		// with query "apple" the match will be cut off to "a..."
+		if (index < max && index + query.length > max && index < rightCuttoffIndex) {
+			querySet.add(query.substring(0, max - index) + '...');
+		}
+
+		// If the match crosses the dots but dosn't reach the right cuttoff end 
+		// for example: text with "orange apple grape" with max 8 and min 3 ("orange a...ape")
+		// with query "grape" the match will be cut off to "...ape"
+		// with query "pple" the match will be converted to just "..."
+		if (index >= max && index < rightCuttoffIndex) {
+			querySet.add('...' + query.substring(Math.min(rightCuttoffIndex - index, query.length)));
+		}
+
+		// If the match crosses the dots starting before the dots and passing the right cuttoff end 
+		// for example: text with "orange apple grape" with max 8 and min 3 ("orange a...ape")
+		// with query "apple grap" the match will be cut off to "a...ap"
+		if (index < max && index + query.length > rightCuttoffIndex) {
+			querySet.add(query.substring(0, max - index) + '...' + query.substring(rightCuttoffIndex - index));
+		}
+
+		index += query.length;
 	}
 
-	return query;
+	return Array.from(querySet);
 };
 
 export interface MiddleEllipsisContextType {
 	text?: string;
-	searchText?: string;
+	searchText?: string | string[];
 }
 
 export const MiddleEllipsisContext = createContext<MiddleEllipsisContextType>({});
@@ -86,7 +109,7 @@ export const MiddleEllipsis = ({ children, text, style }: MiddleEllipsisProps) =
 		}
 	
 		const newText = middleEllipsis(text, maxCharacters);
-		let searchText = query;
+		let searchText: string | string[] = query;
 		if (query) {
 			searchText = cutQuery(query, text, maxCharacters);
 		}
