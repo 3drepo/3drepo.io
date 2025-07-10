@@ -19,26 +19,66 @@ import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import _ from 'lodash';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../../ticketsTable.helper';
+import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, Title } from './ticketsTableResizableContent.styles';
+import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
+import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
+
+type TicketsTableContextProps = {
+	groupName: string;
+	tickets: ITicket[];
+	setTicketValue: SetTicketValue;
+	selectedTicketId?: string;
+	onNewTicket: (groupByValue: string) => (modelId: string) => void;
+	propertyName: string;
+};
+
+const CollapsableTicketsTableGroup = ({ groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: TicketsTableContextProps) => {
+	const ticketsIds = tickets.map(({ _id }) => _id);
+
+	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
+
+	return (<DashboardListCollapse
+		title={(
+			<>
+				<Title>{groupName}</Title>
+				<CircledNumber disabled={!tickets.length || isLoading}>
+					{isLoading ? <Spinner /> : tickets.length}
+				</CircledNumber>
+			</>
+		)}
+		defaultExpanded={!!tickets.length}
+	>
+		<TicketsTableGroup
+			tickets={tickets}
+			onNewTicket={onNewTicket(groupName)}
+			onEditTicket={setTicketValue}
+			selectedTicketId={selectedTicketId}
+		/>
+	</DashboardListCollapse>);
+};
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
-	groupBy: string
 	selectedTicketId?: string;
 };
-export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selectedTicketId }: TicketsTableResizableContentProps) => {
+
+export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
+	const { groupBy, getPropertyType } = useContext(TicketsTableContext);
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
+
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
 
-	if (groupBy === NONE_OPTION || !groupBy) {
+	if (!groupBy) {
 		return (
 			<TicketsTableGroup
 				tickets={filteredItems}
@@ -49,28 +89,21 @@ export const TicketsTableResizableContent = ({ setTicketValue, groupBy, selected
 		);
 	}
 
-	const groups = groupTickets(groupBy, filteredItems);
+	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy));
+	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
 
 	return (
 		<Container>
-			{_.entries(groups).map(([groupName, tickets]) => (
-				<DashboardListCollapse
-					title={(
-						<>
-							<Title>{groupName}</Title>
-							<CircledNumber disabled={!tickets.length}>{tickets.length}</CircledNumber>
-						</>
-					)}
-					defaultExpanded={!!tickets.length}
+			{groups.map(([groupName, tickets]) => (
+				<CollapsableTicketsTableGroup
+					groupName={groupName}
+					tickets={tickets}
+					setTicketValue={setTicketValue}
+					onNewTicket={onGroupNewTicket}
+					selectedTicketId={selectedTicketId}
+					propertyName={propertyName}
 					key={groupBy + groupName + template + tickets}
-				>
-					<TicketsTableGroup
-						tickets={tickets}
-						onNewTicket={onGroupNewTicket(groupName)}
-						onEditTicket={setTicketValue}
-						selectedTicketId={selectedTicketId}
-					/>
-				</DashboardListCollapse>
+				/>
 			))}
 		</Container>
 	);

@@ -47,10 +47,10 @@ type AssigneesSelectMenuProps = SelectProps & {
 export const AssigneesSelectMenu = ({
 	value,
 	onClick,
+	onClose,
 	multiple,
 	isInvalid,
 	disabled,
-	onBlur,
 	excludeJobs,
 	...props
 }: AssigneesSelectMenuProps) => {
@@ -66,7 +66,7 @@ export const AssigneesSelectMenu = ({
 	const handleClose = (e) => {
 		e.stopPropagation();
 		setOpen(false);
-		onBlur?.();
+		onClose?.(e);
 	};
 
 	if (disabled) return null;
