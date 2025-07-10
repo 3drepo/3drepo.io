@@ -83,7 +83,7 @@ const getAvatar = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
 		const userAvatar = await Users.getAvatar(user);
-		req.params.format = userAvatar?.extension || 'png';
+		req.params.format = userAvatar.extension;
 
 		respond(req, res, templates.ok, userAvatar.buffer);
 	} catch (err) {

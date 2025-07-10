@@ -44,6 +44,9 @@ const Intercom = require(`${src}/services/intercom`);
 jest.mock('../../../../src/v5/services/sso/frontegg');
 const FronteggService = require(`${src}/services/sso/frontegg`);
 
+jest.mock('../../../../src/v5/utils/helper/typeCheck');
+const TypeChecker = require(`${src}/utils/helper/typeCheck`);
+
 const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
 const user = {
@@ -175,6 +178,21 @@ const testGetAvatarStream = () => {
 			const mockImageStream = new Blob([imageBuffer], { type: 'image/png' });
 
 			mockImageStream.arrayBuffer = jest.fn().mockResolvedValueOnce(imageBuffer);
+
+			UsersModel.getAvatarStream.mockResolvedValueOnce(mockImageStream);
+
+			await Users.getAvatar(username);
+			expect(UsersModel.getAvatarStream).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getAvatarStream).toHaveBeenCalledWith(username);
+		});
+		test('should get avatar add png if the extention is not there', async () => {
+			const username = generateRandomString();
+			const imageBuffer = fs.readFileSync(image);
+			const mockImageStream = new Blob([imageBuffer], { type: 'image/png' });
+
+			mockImageStream.arrayBuffer = jest.fn().mockResolvedValueOnce(imageBuffer);
+
+			TypeChecker.fileExtensionFromBuffer.mockResolvedValueOnce(undefined);
 
 			UsersModel.getAvatarStream.mockResolvedValueOnce(mockImageStream);
 

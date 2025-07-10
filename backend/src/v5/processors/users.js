@@ -137,7 +137,7 @@ Users.getAvatar = async (username) => {
 
 	return {
 		buffer: Buffer.from(arrayBuffer),
-		extension: fileExt,
+		extension: fileExt || 'png',
 	};
 };
 
