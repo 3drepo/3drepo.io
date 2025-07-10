@@ -22,7 +22,6 @@ import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
-import { ControlledAssigneesSelect as Assignees } from '@controls/assigneesSelect/controlledAssigneesSelect.component';
 import { IssueProperties, TicketBaseKeys } from '../../tickets.constants';
 import { has, isEqual } from 'lodash';
 import { getPropertiesInCamelCase, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
@@ -30,13 +29,14 @@ import { TicketItemThumbnail } from './ticketItemThumbnail/ticketItemThumbnail.c
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 import { formatMessage } from '@/v5/services/intl';
+import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 
 type TicketItemProps = {
 	ticket: ITicket;
 };
 
 export const TicketItem = ({ ticket }: TicketItemProps) => {
-	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const ref = useRef<HTMLDivElement>();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isSelected = selectedTicketId === ticket._id;
@@ -62,7 +62,6 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const selectTicket = (event) => {
 		event.stopPropagation();
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
 
 	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -80,11 +79,11 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 					{description && <Description>{description}</Description>}
 					{hasIssueProperties && (
 						<IssuePropertiesContainer>
-							<Assignees
+							<AssigneesSelect
 								value={assignees}
 								maxItems={5}
 								multiple
-								onBlur={onBlurAssignees}
+								onClose={onBlurAssignees}
 								disabled
 								excludeViewers
 								emptyListMessage={formatMessage({ id: 'ticket.preview.noAssignees', defaultMessage: 'No assignees' })}

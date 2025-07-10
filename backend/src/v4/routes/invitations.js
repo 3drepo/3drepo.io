@@ -92,19 +92,19 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  *
  * @apiParam {String} teamspace Name of teamspace
  *
- * @apiParam (Request body) {String} email The email to which the invitation will be sent
- * @apiParam (Request body) {String} role An existing role for the teamspace
- * @apiParam (Request body) {Permissions} permissions Valid permissions for the invited. If there is a teamspace_admin: true the rest of the permissions for that teamspace are ignored.
+ * @apiBody {String} email The email to which the invitation will be sent
+ * @apiBody {String} role An existing role for the teamspace
+ * @apiBody {Permissions} permissions Valid permissions for the invited. If there is a teamspace_admin: true the rest of the permissions for that teamspace are ignored.
  *
- * @apiParam (Request body: Permisssions) {Boolean} [teamspace_admin] Flag indicating if the invited user will become a teamspace administrator. If this flag is true the rest of the permissions are ignored.
- * @apiParam (Request body: Permisssions) {ProjectPermissions[]} [projects]  Permissions for projects and their models.
+ * @apiBody (Permissions) {Boolean} [teamspace_admin] Flag indicating if the invited user will become a teamspace administrator. If this flag is true the rest of the permissions are ignored.
+ * @apiBody (Permissions) {ProjectPermissions[]} [projects] Permissions for projects and their models.
  *
- * @apiParam (Request body: ProjectPermissions) {String} project The id of the project in which the project permissions will be applied for the invited user.
- * @apiParam (Request body: ProjectPermissions) {Boolean} [project_admin] Flag indicating if the invited user will become a teamspace administrator. If this flag is true the rest of the permissions are ignored.
- * @apiParam (Request body: ProjectPermissions) {ModelPermissions[]} [models] An array indicating the permissions for the models.
+ * @apiBody (ProjectPermissions) {String} project The id of the project in which the project permissions will be applied for the invited user.
+ * @apiBody (ProjectPermissions) {Boolean} [project_admin] Flag indicating if the invited user will become a project administrator. If this flag is true the rest of the permissions are ignored.
+ * @apiBody (ProjectPermissions) {ModelPermissions[]} [models] An array indicating the permissions for the models.
  *
- * @apiParam (Request body: ModelPermissions) {String} model The id of the model that will have the permission applied for the invited user.
- * @apiParam (Request body: ModelPermissions) {String} permission The type of permission applied for the invited user. Valid values are 'viewer', 'commenter' or 'collaborator'
+ * @apiBody (ModelPermissions) {String} model The id of the model that will have the permission applied for the invited user.
+ * @apiBody (ModelPermissions) {String} permission The type of permission applied for the invited user. Valid values are 'viewer', 'commenter' or 'collaborator'
  *
  * @apiExample {post} Example usage (with projects and models, permissions):
  * POST /teamSpace1/invitations HTTP/1.1
@@ -171,7 +171,7 @@ router.get("/invitations", middlewares.isAccountAdmin, getInvitations);
  *	}
  *
  */
-router.post("/invitations", middlewares.isAccountAdmin, sendInvitation);
+router.post("/invitations", middlewares.canAddOrRemoveUsers, sendInvitation);
 
 /**
  *

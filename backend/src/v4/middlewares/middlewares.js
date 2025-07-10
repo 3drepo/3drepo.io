@@ -24,6 +24,7 @@ const { findModelSettingById } = require("../models/modelSetting");
 const User = require("../models/user");
 const utils = require("../utils");
 const config = require("../config");
+const { formatV5NewModelParams } = require("./formatV5NewModelParams");
 
 const checkPermissionsHelper = require("./checkPermissions").checkPermissionsHelper;
 const checkPermissions = require("./checkPermissions").checkPermissions;
@@ -33,6 +34,7 @@ const isAccountAdminHelper = require("./checkPermissions").isAccountAdminHelper;
 
 const { validSession } = require(`${v5Path}/middleware/auth`);
 const { hasAccessToTeamspace } = require(`${v5Path}/middleware/permissions`);
+const { notUserProvisioned } = require(`${v5Path}/middleware/permissions/components/teamspaces`);
 
 const readAccessToModel = [C.PERM_VIEW_MODEL];
 
@@ -157,13 +159,6 @@ function formatV5LogInData(req, res, next) {
 	next();
 }
 
-function formatV5NewModelParams(req, res, next) {
-	req.params.teamspace = req.params.account;
-	req.params.container = req.params.model;
-	req.params.federation = req.params.model;
-	next();
-}
-
 function formatV5NewModelRevisionsData(req, res, next) {
 	req.params.teamspace = req.params.account;
 	req.params.container = req.params.model;
@@ -198,6 +193,7 @@ const middlewares = {
 	isHereEnabled: isHereEnabled,
 
 	// models
+	canAddOrRemoveUsers: [checkTeamspaceAccess(checkPermissions([C.PERM_TEAMSPACE_ADMIN])), formatV5NewModelParams, notUserProvisioned],
 	canCreateModel: checkTeamspaceAccess(canCreateModel),
 	hasReadAccessToModel: checkTeamspaceAccess(checkPermissions(readAccessToModel)),
 	hasCommenterAccessToModel: checkTeamspaceAccess(checkPermissions([C.PERM_CREATE_ISSUE])),

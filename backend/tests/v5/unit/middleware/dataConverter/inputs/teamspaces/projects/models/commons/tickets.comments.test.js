@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 
 const { cloneDeep } = require(`${src}/utils/helper/objects`);
-const { generateRandomString, generateUUID } = require('../../../../../../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomNumber } = require('../../../../../../../../helper/services');
 
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
@@ -39,15 +40,14 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const testValidateNewComment = () => {
 	describe.each([
-		['Message is validated', true],
-		['Message is not validated', false],
-	])('Validate new comment', (desc, shouldPass) => {
-		test(`${shouldPass ? ' should call next()' : 'should respond with invalidArguments'} of ${desc}`, async () => {
-			const data = { params: {}, body: { message: generateRandomString() } };
+		['message is validated', true, { templateData: { config: { comments: true } } }, generateRandomString()],
+		['message is not validated', false, { templateData: { config: { comments: true } } }, generateRandomString()],
+		['template does not support comments', false, { templateData: { config: { } } }, 'This ticket does not support comments.'],
+	])('Validate new comment', (desc, shouldPass, extraArgs, message) => {
+		test(`${shouldPass ? 'should call next()' : 'should respond with invalidArguments'} if ${desc}`, async () => {
+			const data = { params: {}, body: { message: generateRandomString() }, ...extraArgs };
 			const mockCB = jest.fn();
 			const req = { ...cloneDeep(data) };
-
-			const message = generateRandomString();
 
 			if (shouldPass) {
 				CommentSchema.validateComment.mockResolvedValueOnce(message);
@@ -80,6 +80,7 @@ const testValidateUpdateComment = () => {
 				comment: generateRandomString(),
 			},
 			session: { user: { username: generateRandomString() } },
+			templateData: { config: { comments: true } },
 		};
 
 		const existingRef = generateUUID();
@@ -90,6 +91,15 @@ const testValidateUpdateComment = () => {
 			images: [existingRef],
 			history: [{ images: [existingRef2] }, { message: generateRandomString() }],
 		};
+		const viewComment = {
+			camera: {
+				position: times(3, () => generateRandomNumber()),
+				up: times(3, () => generateRandomNumber()),
+				forward: times(3, () => generateRandomNumber()),
+				type: 'perspective',
+			},
+			clippingPlanes: [],
+		};
 
 		describe.each([
 			[{ ...req, body: { message: generateRandomString() } }, false, true, 'with non authorized user', { ...existingComment, author: generateRandomString() }, templates.notAuthorized],
@@ -97,6 +107,7 @@ const testValidateUpdateComment = () => {
 			[{ ...req, body: { message: generateRandomString() } }, false, true, 'with an imported comment', { ...existingComment, importedAt: new Date() }, templates.notAuthorized],
 			[{ ...req, body: { message: '' } }, false, false, 'with invalid message', existingComment, templates.invalidArguments],
 			[{ ...req, body: { message: generateRandomString() } }, true, true, 'with a message'],
+			[{ ...req, body: { views: viewComment } }, true, true, 'with a view'],
 			[{ ...req, body: { images: [UUIDToString(existingRef)], message: existingComment.message } }, false, true, 'with no actual changes', { ...existingComment, history: undefined }],
 		])('Check if req arguments for updating a comment are valid', (request, shouldPass, passValidation, desc, comment = existingComment, error = templates.invalidArguments) => {
 			afterEach(() => { jest.resetAllMocks(); });

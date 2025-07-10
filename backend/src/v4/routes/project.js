@@ -35,7 +35,7 @@
 	 * @apiPermission canCreateProject
 	 *
 	 * @apiParam {String} teamspace Name of the teamspace
-	 * @apiParam (Request body) {String} name The name of the project to be created
+	 * @apiBody {String} name The name of the project to be created
 	 *
 	 * @apiExample {post} Example usage:
 	 * POST /teamSpace1/projects HTTP/1.1
@@ -77,11 +77,11 @@
 	 *
 	 * @apiParam {String} teamspace Name of the teamspace
 	 * @apiParam {String} project The name of the project to update
-	 * @apiParam (Request body) {String} name The name of the project to be created
-	 * @apiParam (Request body) {[]Permission} permissions The permissions for each user from the project
+	 * @apiBody {String} name The name of the project to be created
+	 * @apiBody {Object[]} permissions The permissions for each user from the project
 	 *
-	 * @apiParam (Request body: Permissions ) {String} user The username of the user to have it permission changed
-	 * @apiParam (Request body: Permissions ) {String[]} permissions An array of permissions for the user to be assigned
+	 * @apiBody (Permissions) {String} user The username of the user to have it permission changed
+	 * @apiBody (Permissions) {String[]} permissions An array of permissions for the user to be assigned
 	 *
 	 * @apiExample {put} Example usage update permissions:
 	 * PUT /teamSpace1/Classic%20project HTTP/1.1
@@ -156,11 +156,11 @@
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} project Name of project
-	 * @apiParam (Request body) {String} [name] Project name
-	 * @apiParam (Request body) {ProjectPermission[]} [permissions] List of user permissions
+	 * @apiBody {String} [name] Project name
+	 * @apiBody {ProjectPermission[]} [permissions] List of user permissions
 	 *
-	 * @apiParam (Type: ProjectPermission) {String} user Username of user
-	 * @apiParam (Type: ProjectPermission) {String[]} permissions List of user privileges
+	 * @apiBody (ProjectPermission) {String} user Username of user
+	 * @apiBody (ProjectPermission) {String[]} permissions List of user privileges
 	 *
 	 * @apiExample {patch} Example usage (update permissions):
 	 * PATCH /acme/ProjectAnvil HTTP/1.1
@@ -191,8 +191,8 @@
 	 *    name: "Project Trebuchet",
 	 *    permissions: [
 	 *       {
-	 *          user: "bob",
-	 *          permissions: [
+	 *          "user": "projectshared",
+	 *          "permissions": [
 	 *             "admin_project"
 	 *          ]
 	 *       }

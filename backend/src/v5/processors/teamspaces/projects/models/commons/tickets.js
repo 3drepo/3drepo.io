@@ -17,57 +17,29 @@
 
 const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
 const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
 	presetModules,
-	propTypes,
-	viewGroups,
 } = require('../../../../../schemas/tickets/templates.constants');
-const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
-const { generateFullSchema, getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
-const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { isArray, isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
+const { propTypes, viewGroups } = require('../../../../../schemas/tickets/templates.constants');
+const { removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
+const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
+const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');
+const { getFileWithMetaAsStream } = require('../../../../../services/filesManager');
 const { importComments } = require('./tickets.comments');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
 
 const Tickets = {};
-
-const processGroupsUpdate = (oldData, newData, fields, groupsState) => {
-	fields.forEach((fieldName) => {
-		const oldProp = getNestedProperty(oldData, fieldName) ?? [];
-		const newProp = getNestedProperty(newData, fieldName) ?? [];
-
-		oldProp.forEach(({ group }) => {
-			groupsState.old.add(UUIDToString(group));
-
-			if (newData === undefined || (newData && newData.state === undefined)) {
-				// New data is not specified so we are preserving the old ones
-				groupsState.stillUsed.add(UUIDToString(group));
-			}
-		});
-
-		newProp.forEach((propData) => {
-			const { group } = propData;
-			if (isUUID(group)) {
-				groupsState.stillUsed.add(UUIDToString(group));
-			} else {
-				const groupId = generateUUID();
-				groupsState.toAdd.push({ ...group, _id: groupId });
-				// eslint-disable-next-line no-param-reassign
-				propData.group = groupId;
-			}
-		});
-	});
-};
 
 /**
  * Special properties:
@@ -161,31 +133,15 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 		});
 	});
 
-	return res.map(({ groups: { toRemove, old, stillUsed, ...otherGroups }, ...others }) => {
-		const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
-			Array.from(old)).map(stringToUUID);
-
-		return { groups: { toRemove: toRemoveCalculated, stillUsed, ...otherGroups }, ...others };
-	});
+	return res;
 };
 
 const processExternalData = async (teamspace, project, model, ticketIds, data) => {
 	const refsToRemove = [];
 	const binariesToSave = [];
+
 	await Promise.all(ticketIds.map(async (ticketId, i) => {
 		const { binaries, groups } = data[i];
-
-		if (groups.stillUsed.size) {
-			const stillUsed = Array.from(groups.stillUsed);
-			const existingGroups = await getGroupsByIds(teamspace, project, model, ticketId,
-				stillUsed.map(stringToUUID), { _id: 1 });
-
-			if (existingGroups.length !== stillUsed.length) {
-				const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
-					stillUsed);
-				throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
-			}
-		}
 
 		refsToRemove.push(...binaries.toRemove);
 
@@ -193,11 +149,7 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId },
 		})));
 
-		await Promise.all([
-			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
-			groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId,
-				groups.toRemove) : Promise.resolve(),
-		]);
+		await commitGroupChanges(teamspace, project, model, ticketId, groups);
 	}));
 
 	const promsToWait = [];
