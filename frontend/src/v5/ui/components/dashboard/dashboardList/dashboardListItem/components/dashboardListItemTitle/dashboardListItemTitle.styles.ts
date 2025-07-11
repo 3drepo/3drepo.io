@@ -57,3 +57,10 @@ export const Container = styled.div`
 	display: block;
 	overflow: hidden;
 `;
+
+export const TextContainer = styled.div`
+	max-width: none;
+	text-overflow: initial;
+	white-space: nowrap;
+	width: fit-content;
+`;
