@@ -22,6 +22,7 @@ const Roles = require('../../processors/teamspaces/roles');
 const { Router } = require('express');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
+const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 
 const getRoles = async (req, res) => {
 	const { teamspace } = req.params;
@@ -178,7 +179,7 @@ const establishRoutes = () => {
 	*                   description: The id of the new role
 	*                   example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
 	*/
-	router.post('/', isTeamspaceAdmin, validateNewRole, createRole);
+	router.post('/', isTeamspaceAdmin, notUserProvisioned, validateNewRole, createRole);
 
 	/**
 	* @openapi
@@ -226,7 +227,7 @@ const establishRoutes = () => {
 	*       200:
 	*         description: Updates a role
 	*/
-	router.patch('/:role', isTeamspaceAdmin, validateUpdateRole, updateRole);
+	router.patch('/:role', isTeamspaceAdmin, notUserProvisioned, validateUpdateRole, updateRole);
 
 	/**
 	* @openapi
@@ -254,7 +255,7 @@ const establishRoutes = () => {
 	*       200:
 	*         description: Deletes a role
 	*/
-	router.delete('/:role', isTeamspaceAdmin, roleExists, deleteRole);
+	router.delete('/:role', isTeamspaceAdmin, notUserProvisioned, roleExists, deleteRole);
 
 	return router;
 };
