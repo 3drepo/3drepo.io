@@ -17,18 +17,18 @@
 
 const { times } = require('lodash');
 
-const { generateRandomString, generateRandomObject } = require('../../../../../helper/services');
+const { generateRandomString, generateRandomObject, determineTestGroup } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 const { DEFAULT_ROLES } = require('../../../../../../../src/v5/models/roles.constants');
 
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-jest.mock('../../../../../../../src/v5/models/roles');
-const RolesModel = require(`${src}/models/roles`);
+jest.mock('../../../../../../../src/v5/processors/teamspaces/roles');
+const RolesProcessor = require(`${src}/processors/teamspaces/roles`);
 
-jest.mock('../../../../../../../src/v5/models/teamspaceSettings');
-const TeamspaceSettingsModel = require(`${src}/models/teamspaceSettings`);
+jest.mock('../../../../../../../src/v5/processors/teamspaces');
+const TeamspaceProcessor = require(`${src}/processors/teamspaces`);
 
 const Roles = require(`${src}/middleware/dataConverter/inputs/teamspaces/roles`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -41,13 +41,12 @@ const testRoleExists = () => {
 		test('should respond with error if role does not exist', async () => {
 			const mockCB = jest.fn(() => {});
 			const req = { params: { teamspace: generateRandomString(), role: generateRandomString() } };
-			RolesModel.getRoleById.mockRejectedValueOnce(templates.roleNotFound);
+			RolesProcessor.getRoleById.mockRejectedValueOnce(templates.roleNotFound);
 
 			await Roles.roleExists(req, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
-			expect(RolesModel.getRoleById).toHaveBeenCalledTimes(1);
-			expect(RolesModel.getRoleById).toHaveBeenCalledWith(req.params.teamspace, req.params.role,
-				{ _id: 1, name: 1 });
+			expect(RolesProcessor.getRoleById).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoleById).toHaveBeenCalledWith(req.params.teamspace, req.params.role);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.roleNotFound);
 		});
@@ -56,14 +55,13 @@ const testRoleExists = () => {
 			const mockCB = jest.fn(() => {});
 			const req = { params: { teamspace: generateRandomString(), role: generateRandomString() } };
 			const role = generateRandomObject();
-			RolesModel.getRoleById.mockResolvedValueOnce(role);
+			RolesProcessor.getRoleById.mockResolvedValueOnce(role);
 
 			await Roles.roleExists(req, {}, mockCB);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(req.roleData).toEqual(role);
-			expect(RolesModel.getRoleById).toHaveBeenCalledTimes(1);
-			expect(RolesModel.getRoleById).toHaveBeenCalledWith(req.params.teamspace, req.params.role,
-				{ _id: 1, name: 1 });
+			expect(RolesProcessor.getRoleById).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoleById).toHaveBeenCalledWith(req.params.teamspace, req.params.role);
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 	});
@@ -91,29 +89,28 @@ const testValidateNewRoleData = () => {
 
 	describe.each([
 		...commonTestCases(data, takenName, userWithAccess),
-		// ['Without name', { ...data, name: undefined }],
 	])('Validate new role', (desc, body, success, userWithNoAccess) => {
 		test(`${desc} should ${success ? 'succeed and next() should be called' : `fail with ${templates.invalidArguments.code}`}`, async () => {
 			const mockCB = jest.fn(() => {});
 			const req = { params: { teamspace: generateRandomString() }, body };
 
 			if (body.name === takenName) {
-				RolesModel.getRoleByName.mockResolvedValueOnce(takenName);
+				RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(true);
 			} else if (body.name) {
-				RolesModel.getRoleByName.mockRejectedValueOnce();
+				RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(false);
 			}
 
 			if (body?.users?.length) {
-				TeamspaceSettingsModel.getUsersWithNoAccess
-					.mockResolvedValueOnce(userWithNoAccess ? [generateRandomString()] : []);
+				const userList = userWithNoAccess ? [] : body?.users ?? [];
+				TeamspaceProcessor.getAllMembersInTeamspace.mockResolvedValueOnce(userList.map((user) => ({ user })));
 			}
 
 			await Roles.validateNewRole(req, {}, mockCB);
 			if (success) {
-				expect(mockCB.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(1);
 			} else {
-				expect(mockCB.mock.calls.length).toBe(0);
-				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(mockCB).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 			}
 		});
@@ -140,32 +137,32 @@ const testValidateUpdateRoleData = () => {
 			const mockCB = jest.fn(() => {});
 			const req = { params: { teamspace: generateRandomString() }, body };
 
-			RolesModel.getRoleById.mockResolvedValueOnce(existingRole);
+			RolesProcessor.getRoleById.mockResolvedValueOnce(existingRole);
 
 			if (body.name === takenName) {
-				RolesModel.getRoleByName.mockResolvedValueOnce(takenName);
-			} else if (body.name !== existingRole.name) {
-				RolesModel.getRoleByName.mockRejectedValueOnce();
+				RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(true);
+			} else if (body.name) {
+				RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(false);
 			}
 
 			if (body?.users?.length) {
-				TeamspaceSettingsModel.getUsersWithNoAccess
-					.mockResolvedValueOnce(userWithNoAccess ? [generateRandomString()] : []);
+				const userList = userWithNoAccess ? [] : body?.users ?? [];
+				TeamspaceProcessor.getAllMembersInTeamspace.mockResolvedValueOnce(userList.map((user) => ({ user })));
 			}
 
 			await Roles.validateUpdateRole(req, {}, mockCB);
 			if (success) {
-				expect(mockCB.mock.calls.length).toBe(1);
+				expect(mockCB).toHaveBeenCalledTimes(1);
 			} else {
-				expect(mockCB.mock.calls.length).toBe(0);
-				expect(Responder.respond.mock.calls.length).toBe(1);
+				expect(mockCB).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
 				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 			}
 		});
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/roles', () => {
+describe(determineTestGroup(__filename), () => {
 	testRoleExists();
 	testValidateNewRoleData();
 	testValidateUpdateRoleData();

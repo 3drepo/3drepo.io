@@ -20,6 +20,7 @@ const { getArrayDifference, uniqueElements } = require('../../../../utils/helper
 const { getRoleById, isRoleNameUsed } = require('../../../../processors/teamspaces/roles');
 const Yup = require('yup');
 const { getAllMembersInTeamspace } = require('../../../../processors/teamspaces');
+const { logger } = require('../../../../utils/logger');
 const { respond } = require('../../../../utils/responder');
 const { types } = require('../../../../utils/helper/yup');
 const { validateMany } = require('../../../common');
@@ -37,17 +38,25 @@ const validateRole = async (req, res, next) => {
 		let schema = Yup.object().shape({
 			name: (isUpdate ? types.strings.title : types.strings.title.required())
 				.test('check-name-is-unique', 'Role with the same name already exists', async (value) => {
-					if (value?.length && value !== req.roleData?.name) {
-						const nameTaken = await isRoleNameUsed(req.params.teamspace, value);
-						return !nameTaken;
-					}
+					try {
+						if (value?.length && value !== req.roleData?.name) {
+							const nameTaken = await isRoleNameUsed(req.params.teamspace, value);
+							return !nameTaken;
+						}
 
-					return true;
+						return true;
+					} catch (err) {
+						logger.logError(`Failed to check if a role name is already used: ${err.message}`);
+						return false;
+					}
 				}),
 			users: Yup.array().of(types.strings.title)
+				.transform((v) => uniqueElements(v))
 				.test('check-users-teamspace-access', async (values, context) => {
 					if (values?.length) {
-						const usersWithNoAccess = await getUsersWithNoAccess(req.params.teamspace, values);
+						// test runs before transform
+						const usersWithNoAccess = await getUsersWithNoAccess(req.params.teamspace,
+							uniqueElements(values));
 						if (usersWithNoAccess.length) {
 							return context.createError({ message: `User(s) ${usersWithNoAccess} have no access to the teamspace` });
 						}
@@ -65,10 +74,8 @@ const validateRole = async (req, res, next) => {
 				(value) => Object.keys(value).length,
 			);
 		}
-		await schema.validate(req.body);
-		if (req.body?.users?.length) {
-			req.body.users = uniqueElements(req.body.users);
-		}
+		req.body = await schema.validate(req.body);
+
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
