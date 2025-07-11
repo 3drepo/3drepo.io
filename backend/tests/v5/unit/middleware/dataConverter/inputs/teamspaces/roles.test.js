@@ -78,6 +78,37 @@ const commonTestCases = (data, takenName, userWithAccess) => ([
 	['Without color', { ...data, color: undefined }, true],
 ]);
 
+const runValidateRoleDataTest = (isUpdate, takenName, existingRole) => (desc, body, success, userWithNoAccess) => {
+	test(`${desc} should ${success ? 'succeed and next() should be called' : `fail with ${templates.invalidArguments.code}`}`, async () => {
+		const mockCB = jest.fn(() => {});
+		const req = { params: { teamspace: generateRandomString() }, body };
+
+		if (isUpdate) RolesProcessor.getRoleById.mockResolvedValueOnce(existingRole);
+
+		if (body.name === takenName) {
+			RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(true);
+		} else if (body.name) {
+			RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(false);
+		}
+
+		if (body?.users?.length) {
+			const userList = userWithNoAccess ? [] : body?.users ?? [];
+			TeamspaceProcessor.getAllMembersInTeamspace.mockResolvedValueOnce(userList.map((user) => ({ user })));
+		}
+
+		const fn = isUpdate ? Roles.validateUpdateRole : Roles.validateNewRole;
+
+		await fn(req, {}, mockCB);
+		if (success) {
+			expect(mockCB).toHaveBeenCalledTimes(1);
+		} else {
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+		}
+	});
+};
+
 const testValidateNewRoleData = () => {
 	const takenName = generateRandomString();
 	const userWithAccess = generateRandomString();
@@ -89,32 +120,7 @@ const testValidateNewRoleData = () => {
 
 	describe.each([
 		...commonTestCases(data, takenName, userWithAccess),
-	])('Validate new role', (desc, body, success, userWithNoAccess) => {
-		test(`${desc} should ${success ? 'succeed and next() should be called' : `fail with ${templates.invalidArguments.code}`}`, async () => {
-			const mockCB = jest.fn(() => {});
-			const req = { params: { teamspace: generateRandomString() }, body };
-
-			if (body.name === takenName) {
-				RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(true);
-			} else if (body.name) {
-				RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(false);
-			}
-
-			if (body?.users?.length) {
-				const userList = userWithNoAccess ? [] : body?.users ?? [];
-				TeamspaceProcessor.getAllMembersInTeamspace.mockResolvedValueOnce(userList.map((user) => ({ user })));
-			}
-
-			await Roles.validateNewRole(req, {}, mockCB);
-			if (success) {
-				expect(mockCB).toHaveBeenCalledTimes(1);
-			} else {
-				expect(mockCB).not.toHaveBeenCalled();
-				expect(Responder.respond).toHaveBeenCalledTimes(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-			}
-		});
-	});
+	])('Validate new role', runValidateRoleDataTest(false, takenName));
 };
 
 const testValidateUpdateRoleData = () => {
@@ -132,34 +138,7 @@ const testValidateUpdateRoleData = () => {
 		['Without name', { ...data, name: undefined }, true],
 		['Without any values', { }],
 		['With the same name', { ...data, name: existingRole.name }, true],
-	])('Validate update role', (desc, body, success, userWithNoAccess) => {
-		test(`${desc} should ${success ? 'succeed and next() should be called' : `fail with ${templates.invalidArguments.code}`}`, async () => {
-			const mockCB = jest.fn(() => {});
-			const req = { params: { teamspace: generateRandomString() }, body };
-
-			RolesProcessor.getRoleById.mockResolvedValueOnce(existingRole);
-
-			if (body.name === takenName) {
-				RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(true);
-			} else if (body.name) {
-				RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(false);
-			}
-
-			if (body?.users?.length) {
-				const userList = userWithNoAccess ? [] : body?.users ?? [];
-				TeamspaceProcessor.getAllMembersInTeamspace.mockResolvedValueOnce(userList.map((user) => ({ user })));
-			}
-
-			await Roles.validateUpdateRole(req, {}, mockCB);
-			if (success) {
-				expect(mockCB).toHaveBeenCalledTimes(1);
-			} else {
-				expect(mockCB).not.toHaveBeenCalled();
-				expect(Responder.respond).toHaveBeenCalledTimes(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-			}
-		});
-	});
+	])('Validate update role', runValidateRoleDataTest(true, takenName, existingRole));
 };
 
 describe(determineTestGroup(__filename), () => {
