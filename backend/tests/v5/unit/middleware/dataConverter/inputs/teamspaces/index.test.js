@@ -15,11 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { generateRandomString } = require('../../../../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+
+jest.mock('../../../../../../../src/v5/processors/teamspaces');
+const TeamspaceProcessor = require(`${src}/processors/teamspaces`);
 
 jest.mock('../../../../../../../src/v5/models/teamspaceSettings');
 const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
@@ -39,15 +42,15 @@ const usernameToRemove = generateRandomString();
 const nonTsMemberUser = generateRandomString();
 const teamspace = generateRandomString();
 
-TeamspacesModel.hasAccessToTeamspace.mockImplementation((ts, username) => username !== nonTsMemberUser);
+TeamspaceProcessor.isTeamspaceMember.mockImplementation((ts, username) => username !== nonTsMemberUser);
 TeamspacesModel.getAddOns.mockImplementation((ts) => (ts === teamspace ? {} : { usersProvisioned: true }));
 
 PermissionsUtils.isTeamspaceAdmin.mockImplementation((ts, user) => user === adminUser);
 
 const testCanRemoveTeamspaceMember = () => {
 	describe.each([
-		['User to remove is the owner of teamspace', { session: { user: { username: adminUser } },
-			params: { teamspace, username: teamspace } }, false],
+		['User to remove has the same username as the teamspace', { session: { user: { username: adminUser } },
+			params: { teamspace, username: teamspace } }, true],
 		['Logged in user is not a teamspace admin', { session: { user: { username: nonAdminUser } },
 			params: { teamspace, username: adminUser } }, false],
 		['User to be removed is not member of the teamspace', { session: { user: { username: adminUser } },
@@ -73,7 +76,7 @@ const testCanRemoveTeamspaceMember = () => {
 };
 
 const testMemberExists = () => {
-	describe('memberExists', () => {
+	describe('member exists', () => {
 		test('next() should be called if the provided username is member of the teamspace', async () => {
 			const mockCB = jest.fn(() => {});
 
@@ -84,20 +87,20 @@ const testMemberExists = () => {
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).not.toHaveBeenCalled();
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser, true);
+			expect(TeamspaceProcessor.isTeamspaceMember).toHaveBeenCalledTimes(1);
+			expect(TeamspaceProcessor.isTeamspaceMember).toHaveBeenCalledWith(teamspace, adminUser);
 		});
 
 		test('should respond with error if hasAccess throws an error', async () => {
 			const mockCB = jest.fn(() => {});
 			const req = { params: { teamspace, member: adminUser } };
 			const err = new Error(generateRandomString());
-			TeamspacesModel.hasAccessToTeamspace.mockRejectedValueOnce(err);
+			TeamspaceProcessor.isTeamspaceMember.mockRejectedValueOnce(err);
 
 			await Teamspaces.memberExists(req, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, adminUser, true);
+			expect(TeamspaceProcessor.isTeamspaceMember).toHaveBeenCalledTimes(1);
+			expect(TeamspaceProcessor.isTeamspaceMember).toHaveBeenCalledWith(teamspace, adminUser);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, err);
 		});
@@ -108,15 +111,15 @@ const testMemberExists = () => {
 
 			await Teamspaces.memberExists(req, {}, mockCB);
 			expect(mockCB).not.toHaveBeenCalled();
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
-			expect(TeamspacesModel.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, nonTsMemberUser, true);
+			expect(TeamspaceProcessor.isTeamspaceMember).toHaveBeenCalledTimes(1);
+			expect(TeamspaceProcessor.isTeamspaceMember).toHaveBeenCalledWith(teamspace, nonTsMemberUser);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.userNotFound);
 		});
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces', () => {
+describe(determineTestGroup(__filename), () => {
 	testCanRemoveTeamspaceMember();
 	testMemberExists();
 });

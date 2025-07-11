@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAllUsersInTeamspace, getTeamspaceAdmins } = require('../../../../../models/teamspaceSettings');
+const { getAllMembersInTeamspace } = require('../../..');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
-const { getJobsByUsers } = require('../../../../../models/jobs');
 const { getProjectAdmins } = require('../../../../../models/projectSettings');
+const { getRolesByUsers } = require('../../../roles');
+const { getTeamspaceAdmins } = require('../../../../../models/teamspaceSettings');
 const { getUsersWithPermissions } = require('../../../../../models/modelSettings');
 
 const Settings = {};
 
 Settings.getUsersWithPermissions = async (teamspace, project, model, excludeViewers) => {
 	const [tsMembers, tsAdmins, projectAdmins, modelMembers] = await Promise.all([
-		getAllUsersInTeamspace(teamspace),
+		getAllMembersInTeamspace(teamspace),
 		getTeamspaceAdmins(teamspace),
 		getProjectAdmins(teamspace, project),
 		getUsersWithPermissions(teamspace, model, excludeViewers),
@@ -34,9 +35,9 @@ Settings.getUsersWithPermissions = async (teamspace, project, model, excludeView
 	return getCommonElements([...tsAdmins, ...projectAdmins, ...modelMembers], tsMembers.map(({ user }) => user));
 };
 
-Settings.getJobsWithAccess = async (teamspace, project, model, excludeViewers) => {
+Settings.getRolesWithAccess = async (teamspace, project, model, excludeViewers) => {
 	const users = await Settings.getUsersWithPermissions(teamspace, project, model, excludeViewers);
-	return getJobsByUsers(teamspace, users);
+	return getRolesByUsers(teamspace, users);
 };
 
 module.exports = Settings;

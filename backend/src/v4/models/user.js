@@ -21,7 +21,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
 const utils = require("../utils");
-const { findJobByUser, usersWithJob, addUserToJob } = require("./job");
+const { findRoleByUser, usersWithRole, addUserToRole } = require("./role");
 
 const TeamspaceSettings = require("./teamspaceSetting");
 
@@ -37,6 +37,9 @@ const {
 const PermissionTemplates = require("./permissionTemplates");
 const { fileExists } = require("./fileRef");
 const {v5Path} = require("../../interop");
+const { isTeamspaceMember } = require("../../v5/processors/teamspaces/index.js");
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects.js`);
+const { UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 const { types: { strings } } = require(`${v5Path}/utils/helper/yup.js`);
 const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings.js`);
 const { events } = require(`${v5Path}/services/eventsManager/eventsManager.constants`);
@@ -45,13 +48,9 @@ const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
 const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces`);
-const { getTeamspaceMembersInfo } = require(`${v5Path}/processors/teamspaces`);
+const { getTeamspaceMembersInfo, isMemberOfTeamspace } = require(`${v5Path}/processors/teamspaces`);
 
 const COLL_NAME = "system.users";
-
-const isMemberOfTeamspace = function (user, teamspace) {
-	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
-};
 
 const hasReachedLicenceLimit = async function (teamspace) {
 	const Invitations = require("./invitations");
@@ -194,27 +193,28 @@ User.deleteApiKey = (username) => UserProcessorV5.deleteApiKey(username);
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
 	const regex = new RegExp(`^${searchString}$`, "i");
-	const notMembers = await db.find("admin", COLL_NAME, {
+	const notMember = await db.findOne("admin", COLL_NAME, {
 		$or: [
 			{"customData.email": regex},
 			{"user": regex}
 		],
-		"customData.inactive": { "$exists": false },
-		"roles.db": {$ne: teamspace }
+		"customData.inactive": { "$exists": false }
 	});
 
-	return notMembers.map(({user, customData }) => {
-		return {
+	if(notMember && await isTeamspaceMember(teamspace, notMember.user, true)) {
+		const {user, customData} = notMember;
+		return [{
 			user,
 			firstName: customData.firstName,
 			lastName: customData.lastName,
 			company: _.get(customData, "billing.billingInfo.company", null)
-		};
-	});
+		}];
+	}
+	return [];
 
 };
 
-// case insenstive
+// case insensitive
 User.checkUserNameAvailableAndValid = async function (username) {
 	if (!User.usernameRegExp.test(username) ||
 		-1 !== C.REPO_BLACKLIST_USERNAME.indexOf(username.toLowerCase())
@@ -523,13 +523,13 @@ User.listAccounts = async function(user) {
 User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, executor) {
 	await removeTeamspaceMember(teamspace, userToRemove);
 	publish(events.USER_REMOVED, { teamspace, executor, user: userToRemove});
-
 };
 
-User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor, bypassQuotaCheck = false) {
+User.addTeamMember = async function(teamspace, userToAdd, role, permissions, executor, bypassQuotaCheck = false) {
 	if(!bypassQuotaCheck) {
 		await hasReachedLicenceLimit(teamspace);
 	}
+
 	let userEntry = null;
 	if (strings.email.isValidSync(userToAdd)) { // if the submited username is the email
 		userEntry = await User.findByEmail(userToAdd);
@@ -541,11 +541,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 		throw (responseCodes.USER_NOT_FOUND);
 	}
 
-	if (!job) {
-		throw (responseCodes.USER_NOT_ASSIGNED_JOB);
-	}
-
-	if (isMemberOfTeamspace(userEntry, teamspace)) {
+	if (isMemberOfTeamspace(teamspace, userEntry)) {
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
@@ -553,7 +549,10 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];
-	promises.push(addUserToJob(teamspace, job, userEntry.user));
+
+	if(role) {
+		promises.push(addUserToRole(teamspace, role, userEntry.user));
+	}
 
 	const teamspaceSettings = await TeamspaceSettings.getTeamspaceSettings(teamspace);
 
@@ -563,7 +562,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 
 	await Promise.all(promises);
 
-	return  { job, permissions, ... User.getBasicDetails(userEntry) };
+	return  deleteIfUndefined({ role, permissions, ... User.getBasicDetails(userEntry) });
 };
 
 User.getBasicDetails = function(userObj) {
@@ -593,16 +592,17 @@ User.getMembers = async function (teamspace) {
 	const promises = [];
 
 	const getTeamspaceMembers = getTeamspaceMembersInfo(teamspace);
-	const getJobInfo = usersWithJob(teamspace);
+	const getRoleInfo = usersWithRole(teamspace);
+
 	const getTeamspacePermissions = TeamspaceSettings.getTeamspaceSettings(teamspace).then(({permissions}) => permissions);
 
 	promises.push(
 		getTeamspaceMembers,
 		getTeamspacePermissions,
-		getJobInfo
+		getRoleInfo
 	);
 
-	const [members = [], teamspacePermissions, memToJob = {}] = await Promise.all(promises);
+	const [members = [], teamspacePermissions, memToRole = {}] = await Promise.all(promises);
 
 	return members.map(({user, firstName, lastName, company}) => {
 		const permissions = _.find(teamspacePermissions, { user});
@@ -613,19 +613,15 @@ User.getMembers = async function (teamspace) {
 			lastName,
 			company,
 			permissions: _.get(permissions, "permissions", []),
-			job: _.get(memToJob, user)
+			role: _.get(memToRole, user)
 		};
 	});
 };
 
 User.getAllUsersInTeamspace = async function (teamspace) {
-	const users =  await User.findUsersInTeamspace(teamspace, {user: 1});
+	const {getAllMembersInTeamspace} = require(`${v5Path}/processors/teamspaces`);
+	const users =  await getAllMembersInTeamspace(teamspace);
 	return users.map(({user}) => user);
-};
-
-User.findUsersInTeamspace =  async function (teamspace, fields) {
-	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
-	return await db.find("admin", COLL_NAME, query, fields);
 };
 
 User.teamspaceMemberCheck = async function (user, teamspace) {
@@ -635,17 +631,17 @@ User.teamspaceMemberCheck = async function (user, teamspace) {
 		throw (responseCodes.USER_NOT_FOUND);
 	}
 
-	if (!isMemberOfTeamspace(userEntry, teamspace)) {
+	if (!isMemberOfTeamspace(teamspace,userEntry)) {
 		throw (responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 	}
 };
 
 User.getTeamMemberInfo = async function(teamspace, user) {
 	const userEntry = await User.findByUserName(user);
-	if(!userEntry || !isMemberOfTeamspace(userEntry,teamspace)) {
+	if(!userEntry || !isMemberOfTeamspace(teamspace, userEntry)) {
 		throw responseCodes.USER_NOT_FOUND;
 	} else {
-		const job = await findJobByUser(teamspace, user);
+		const role = await findRoleByUser(teamspace, user);
 		const result = {
 			user,
 			firstName: userEntry.customData.firstName,
@@ -653,8 +649,8 @@ User.getTeamMemberInfo = async function(teamspace, user) {
 			company: _.get(userEntry.customData, "billing.billingInfo.company", null)
 		};
 
-		if(job) {
-			result.job = {_id: job._id, color: job.color};
+		if(role) {
+			result.role = {_id: UUIDToString(role._id), color: role.color};
 		}
 		return result;
 	}
