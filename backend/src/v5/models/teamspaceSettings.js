@@ -26,16 +26,12 @@ const {
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
-const { getUserStatusInAccount } = require('../services/sso/frontegg');
-const { membershipStatus } = require('../services/sso/frontegg/frontegg.constants');
 const { templates } = require('../utils/responseCodes');
 
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 const TeamspaceSetting = {};
 
-const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
-const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
 const teamspaceInvitesQuery = (query, projection, sort) => db.find(USERS_DB_NAME, 'invitations', query, projection, sort);
 
 const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPACE_SETTINGS_COL, query, actions);
