@@ -20,9 +20,9 @@ const { roleExists, validateNewRole, validateUpdateRole } = require('../../middl
 
 const Roles = require('../../processors/teamspaces/roles');
 const { Router } = require('express');
+const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
-const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 
 const getRoles = async (req, res) => {
 	const { teamspace } = req.params;
