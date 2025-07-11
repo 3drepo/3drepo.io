@@ -82,7 +82,6 @@ export function* fetchFilteredTickets({ teamspace, projectId, modelIds }: FetchF
 		yield put(TicketsCardActions.setFiltering(true));
 
 		const filters = yield select(selectCardFilters);
-		console.log('fetchFilteredTickets', { teamspace, projectId, modelIds, filters });
 		const ticketIds: Set<string> = yield apiFetchFilteredTickets(teamspace, projectId, modelIds, filters);
 		
 		yield put(TicketsCardActions.setFilteredTicketIds(ticketIds));

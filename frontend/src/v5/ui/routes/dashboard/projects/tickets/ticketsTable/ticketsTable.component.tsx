@@ -68,8 +68,6 @@ export const TicketsTable = () => {
 
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
-	const [groupBy,, setGroupByParam] = useSearchParam('groupBy');
-	const [groupByValue,, setGroupByValue] = useSearchParam('groupByValue');
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	
 	const [presetValue, setPresetValue] = useState('');
@@ -126,9 +124,7 @@ export const TicketsTable = () => {
 
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 
-	const onSaveTicket = (_id: string) => {
-		setTicketValue(containerOrFederation, _id, null, true);
-	};
+
 
 	const getOpenInViewerLink = () => {
 		if (!containerOrFederation) return '';
