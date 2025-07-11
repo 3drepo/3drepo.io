@@ -18,6 +18,7 @@
 const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
+const { getUserById, updateUserDetails } = require('../services/sso/frontegg');
 const db = require('../handler/db');
 const { logger } = require('../utils/logger');
 
@@ -106,19 +107,11 @@ User.deleteFavourites = async (username, teamspace, favouritesToRemove) => {
 	}
 };
 
-User.updateProfile = async (username, updatedProfile) => {
-	const updateData = {};
-	const billingInfoFields = ['countryCode', 'company'];
+User.updateProfile = async (username, updateData, backupData) => {
+	const userId = await User.getUserId(username);
 
-	Object.keys(updatedProfile).forEach((key) => {
-		if (billingInfoFields.includes(key)) {
-			updateData[`customData.billing.billingInfo.${key}`] = updatedProfile[key];
-		} else {
-			updateData[`customData.${key}`] = updatedProfile[key];
-		}
-	});
-
-	await updateUser(username, { $set: updateData });
+	await updateUserDetails(userId, updateData);
+	await updateUser(username, { $set: backupData });
 };
 
 User.updateUserId = async (username, userId) => {
@@ -170,6 +163,19 @@ User.getUserInfoFromEmailArray = async (emailArray, projection) => {
 	const res = await User.getUsersByQuery(query, projection);
 
 	return res;
+};
+
+User.getAvatarStream = async (username) => {
+	try {
+		const { customData: { userId } } = await User.getUserByUsername(username, { 'customData.userId': 1 });
+		const { profilePictureUrl } = await getUserById(userId);
+
+		return await fetch(profilePictureUrl);
+	} catch (error) {
+		logger.logError(`Failed to fetch avatar from URL: ${error.message}`);
+
+		throw templates.unknown;
+	}
 };
 
 module.exports = User;

@@ -17,7 +17,8 @@
 
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
-const { src } = require('../../helper/path');
+const { src, image } = require('../../helper/path');
+const fs = require('fs');
 
 const Users = require(`${src}/processors/users`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -42,6 +43,9 @@ const Intercom = require(`${src}/services/intercom`);
 
 jest.mock('../../../../src/v5/services/sso/frontegg');
 const FronteggService = require(`${src}/services/sso/frontegg`);
+
+jest.mock('../../../../src/v5/utils/helper/typeCheck');
+const TypeChecker = require(`${src}/utils/helper/typeCheck`);
 
 const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
@@ -147,10 +151,21 @@ const tesGetProfileByUsername = () => {
 const tesUpdateProfile = () => {
 	describe('Update user profile by username', () => {
 		test('should update user profile', async () => {
-			const updatedProfile = { firstName: 'Nick' };
+			const updatedProfile = { firstName: 'Nick', lastName: 'Doe', countryCode: 'US', company: '3D Repo' };
+			const backupDataExpected = {
+				'customData.firstName': updatedProfile.firstName,
+				'customData.lastName': updatedProfile.lastName,
+				'customData.billing.billingInfo.countryCode': updatedProfile.countryCode,
+				'customData.billing.billingInfo.company': updatedProfile.company,
+			};
+			const updateProfileExpected = {
+				name: `${updatedProfile.firstName} ${updatedProfile.lastName}`,
+				metadata: JSON.stringify({ countryCode: updatedProfile.countryCode, company: updatedProfile.company }),
+			};
 			await Users.updateProfile(user.user, updatedProfile);
 			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
-			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updatedProfile);
+			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updateProfileExpected);
+			expect(UsersModel.updateProfile.mock.calls[0][2]).toEqual(backupDataExpected);
 		});
 	});
 };
@@ -159,11 +174,31 @@ const testGetAvatarStream = () => {
 	describe('Get avatar stream', () => {
 		test('should get avatar stream', async () => {
 			const username = generateRandomString();
-			const stream = generateRandomString();
-			FilesManager.getFile.mockResolvedValueOnce(stream);
+			const imageBuffer = fs.readFileSync(image);
+			const mockImageStream = new Blob([imageBuffer], { type: 'image/png' });
+
+			mockImageStream.arrayBuffer = jest.fn().mockResolvedValueOnce(imageBuffer);
+
+			UsersModel.getAvatarStream.mockResolvedValueOnce(mockImageStream);
+
 			await Users.getAvatar(username);
-			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
+			expect(UsersModel.getAvatarStream).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getAvatarStream).toHaveBeenCalledWith(username);
+		});
+		test('should get avatar add png if the extention is not there', async () => {
+			const username = generateRandomString();
+			const imageBuffer = fs.readFileSync(image);
+			const mockImageStream = new Blob([imageBuffer], { type: 'image/png' });
+
+			mockImageStream.arrayBuffer = jest.fn().mockResolvedValueOnce(imageBuffer);
+
+			TypeChecker.fileExtensionFromBuffer.mockResolvedValueOnce(undefined);
+
+			UsersModel.getAvatarStream.mockResolvedValueOnce(mockImageStream);
+
+			await Users.getAvatar(username);
+			expect(UsersModel.getAvatarStream).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getAvatarStream).toHaveBeenCalledWith(username);
 		});
 	});
 };
@@ -172,11 +207,30 @@ const testUploadAvatar = () => {
 	describe('Remove old avatar and upload a new one', () => {
 		test('should upload new avatar', async () => {
 			const username = generateRandomString();
-			const avatarBuffer = generateRandomString();
-			await Users.uploadAvatar(username, avatarBuffer);
+			const userId = generateRandomString();
+			const tenantId = generateRandomString();
+			const avatarUrl = generateRandomString();
+			FronteggService.uploadAvatar.mockResolvedValueOnce(avatarUrl);
+			FronteggService.updateUserDetails.mockResolvedValueOnce(generateRandomString());
+			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { userId } });
+			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
+
+			const avatarObject = {
+				path: 'avatar.png',
+				buffer: generateRandomString(),
+			};
+			await Users.uploadAvatar(username, avatarObject);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
+				userId, tenantId, expect.any(Object),
+			);
+			expect(FronteggService.updateUserDetails).toHaveBeenCalledTimes(1);
+			expect(FronteggService.updateUserDetails).toHaveBeenCalledWith(userId,
+				{ profilePictureUrl: avatarUrl },
+			);
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username,
-				avatarBuffer);
+				avatarObject.buffer);
 		});
 	});
 };

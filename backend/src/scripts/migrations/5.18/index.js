@@ -15,20 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { newAvatarPath } = require('../../path');
-const UsersCache = require('./cache');
+const migrateUsersAvatar = require('./migrateUserAvatarToFrontegg');
 
-const Users = {};
-Users.getUserById = (userId) => Promise.resolve(UsersCache.getUserById(userId));
+const scripts = [
+	{ script: migrateUsersAvatar, desc: 'Migrate user avatars to Frontegg' },
+];
 
-Users.doesUserExist = (email) => Promise.resolve(UsersCache.doesUserExist(email));
-
-Users.destroyAllSessions = () => Promise.resolve();
-
-Users.triggerPasswordReset = process.env.NODE_ENV === 'testV5' ? jest.fn() : (() => {});
-
-Users.uploadAvatar = () => Promise.resolve(newAvatarPath);
-
-Users.updateUserDetails = (userId, payload) => Promise.resolve(UsersCache.updateUserById(userId, payload));
-
-module.exports = Users;
+module.exports = scripts;

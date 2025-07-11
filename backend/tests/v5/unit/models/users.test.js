@@ -22,6 +22,9 @@ const { cloneDeep, times } = require('lodash');
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 
+jest.mock('../../../../src/v5/services/sso/frontegg');
+const FrontEggMock = require(`${src}/services/sso/frontegg`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateRandomString, determineTestGroup } = require('../../helper/services');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
@@ -252,16 +255,49 @@ const testUpdateProfile = () => {
 	describe('Update user profile', () => {
 		test('should update a user profile', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
-			const updatedProfile = { firstName: 'John' };
-			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBeUndefined();
+			const fn2 = jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({ customData: { userId: 'user 1' } }));
+			const updatedProfile = {
+				name: 'John Doe',
+				metadata: JSON.stringify({}),
+			};
+			const backupData = { 'customData.firstName': 'John' };
+
+			await expect(User.updateProfile('user 1', updatedProfile, backupData)).resolves.toBeUndefined();
+
+			expect(FrontEggMock.updateUserDetails).toHaveBeenCalledTimes(1);
+			expect(FrontEggMock.updateUserDetails).toHaveBeenCalledWith('user 1', {
+				name: updatedProfile.name,
+				metadata: updatedProfile.metadata,
+			});
+			expect(fn2.mock.calls.length).toBe(1);
+			expect(fn2.mock.calls[0][2]).toEqual({ user: 'user 1' });
+			expect(fn2.mock.calls[0][3]).toEqual({ 'customData.userId': 1 });
 			expect(fn1.mock.calls.length).toBe(1);
-			expect(fn1.mock.calls[0][3]).toEqual({ $set: { 'customData.firstName': 'John' } });
+			expect(fn1.mock.calls[0][3]).toEqual({ $set: backupData });
 		});
 
 		test('should update a user profile with billing data', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			const updatedProfile = { firstName: 'John', company: '3D Repo', countryCode: 'GB' };
-			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBeUndefined();
+			const fn2 = jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({ customData: { userId: 'user 1' } }));
+			const updatedProfile = {
+				name: 'John Doe',
+				metadata: JSON.stringify({ company: '3D Repo', countryCode: 'GB' }),
+			};
+			const backupData = {
+				'customData.firstName': 'John',
+				'customData.billing.billingInfo.company': '3D Repo',
+				'customData.billing.billingInfo.countryCode': 'GB',
+			};
+			await expect(User.updateProfile('user 1', updatedProfile, backupData)).resolves.toBeUndefined();
+
+			expect(FrontEggMock.updateUserDetails).toHaveBeenCalledTimes(1);
+			expect(FrontEggMock.updateUserDetails).toHaveBeenCalledWith('user 1', {
+				name: updatedProfile.name,
+				metadata: updatedProfile.metadata,
+			});
+			expect(fn2.mock.calls.length).toBe(1);
+			expect(fn2.mock.calls[0][2]).toEqual({ user: 'user 1' });
+			expect(fn2.mock.calls[0][3]).toEqual({ 'customData.userId': 1 });
 			expect(fn1.mock.calls.length).toBe(1);
 			expect(fn1.mock.calls[0][3]).toEqual({
 				$set: {
@@ -558,6 +594,29 @@ const testGetUserInfoFromEmailArray = () => {
 	});
 };
 
+const testGetAvatarStream = () => {
+	describe('Get avatar stream', () => {
+		test('should return avatar stream if user exists', async () => {
+			const mockBlob = new Blob([''], { type: 'image/png' });
+			global.fetch = jest.fn(() => Promise.resolve(mockBlob));
+			const user = 'user1';
+			const userId = generateRandomString();
+			const profilePictureUrl = generateRandomString();
+			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { userId } });
+			FrontEggMock.getUserById.mockResolvedValue({ profilePictureUrl });
+			const res = await User.getAvatarStream(user);
+
+			expect(res).toEqual(mockBlob);
+		});
+
+		test('should throw error if user does not exist', async () => {
+			const user = 'user1';
+			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
+			await expect(User.getAvatarStream(user)).rejects.toEqual(templates.unknown);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -576,4 +635,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateUserId();
 	testEnsureIndicesExist();
 	testGetUserInfoFromEmailArray();
+	testGetAvatarStream();
 });
