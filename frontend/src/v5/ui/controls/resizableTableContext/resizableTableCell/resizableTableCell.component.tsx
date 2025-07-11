@@ -15,19 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
+import { HTMLAttributes } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
 import { Item } from './resizableTableCell.styles';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
-type ResizableTableCellProps = {
-	children: any;
+export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
 	name: string;
 	className?: string;
+	onClick?: () => void;
 };
-export const ResizableTableCell = ({ name, children, className }: ResizableTableCellProps) => {
-	const { isHidden } = useContext(ResizableTableContext);
+export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
+	const { movingColumn, getIndex } = useContextWithCondition(ResizableTableContext, ['movingColumn']);
+	const { isVisible } = useContextWithCondition(ResizableTableContext, (['visibleSortedColumnsNames']), (curr, prev) => (
+		curr.visibleSortedColumnsNames.includes(name) !== prev.visibleSortedColumnsNames.includes(name)
+	));
 
-	if (isHidden(name)) return null;
+	if (!isVisible(name)) return null;
 
-	return (<Item className={className}>{children}</Item>);
+	return (<Item $isMoving={movingColumn === name} $index={getIndex(name)} {...props} />);
 };

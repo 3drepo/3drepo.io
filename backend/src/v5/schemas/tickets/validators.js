@@ -27,7 +27,7 @@ const CameraType = {
 	PERSPECTIVE: 'perspective',
 };
 
-const generateViewValidator = (isUpdate, required) => {
+Validators.generateViewValidator = (isUpdate, required, isComment) => {
 	const imposeNullableRule = (val, optional) => {
 		const canBeNull = optional ? isUpdate : isUpdate && !required;
 		return canBeNull ? val.nullable() : val;
@@ -72,14 +72,17 @@ const generateViewValidator = (isUpdate, required) => {
 		}),
 	).default(undefined), true);
 
-	const validator = Yup.object().shape({
-		screenshot: types.embeddedImage(isUpdate),
+	const schema = {
 		state,
 		camera: !isUpdate && required ? camera.required() : camera,
 		clippingPlanes,
-	}).default(undefined);
+	};
 
-	return imposeNullableRule(validator);
+	if (!isComment) {
+		schema.screenshot = types.embeddedImage(isUpdate);
+	}
+
+	return imposeNullableRule(Yup.object(schema).default(undefined));
 };
 
 Validators.propTypesToValidator = (propType, isUpdate, required) => {
@@ -107,7 +110,7 @@ Validators.propTypesToValidator = (propType, isUpdate, required) => {
 	case propTypes.IMAGE_LIST:
 		return imposeNullableRule(Yup.array().of(isUpdate ? types.embeddedImageOrRef() : types.embeddedImage()).min(1));
 	case propTypes.VIEW:
-		return generateViewValidator(isUpdate, required);
+		return Validators.generateViewValidator(isUpdate, required);
 	case propTypes.MEASUREMENTS:
 		return imposeNullableRule(Yup.array().of(
 			Yup.object().shape({
