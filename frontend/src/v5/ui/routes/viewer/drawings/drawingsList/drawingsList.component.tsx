@@ -76,15 +76,6 @@ export const DrawingsList = () => {
 		</CentredContainer>
 	);
 
-	useEffect(() => {
-		const subscriptionsPerDrawing = allDrawings.map(({ _id }) => [
-			enableRealtimeDrawingRemoved(teamspace, project, _id),
-			enableRealtimeDrawingUpdate(teamspace, project, _id),
-			enableRealtimeDrawingRevisionUpdate(teamspace, project, _id),
-			enableRealtimeDrawingNewRevision(teamspace, project, _id),
-		]);
-		return combineSubscriptions(...flattenDeep(subscriptionsPerDrawing));
-	}, [allDrawings.length]);
 
 	useEffect(() => {
 		virtuosoRef.current.scrollToIndex({
