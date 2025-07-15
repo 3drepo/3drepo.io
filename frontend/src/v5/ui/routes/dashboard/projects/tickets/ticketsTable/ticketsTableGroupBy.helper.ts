@@ -136,43 +136,39 @@ const sortSelectGroups = (groups: Record<string, ITicket[]>) => {
 	return sortedGroups;
 };
 
-const groupByAssignees = (tickets: ITicket[])=> {
-	const [ticketsWithAssignees, ticketsWithoutAssignees] = _.partition(tickets, (ticket) => getAssigneesRaw(ticket)?.length > 0);
+const getJobsAndUsersValues = (ticket: ITicket, groupBy: string) => {
+	const propertyValue = _.get(ticket, groupBy);
+	if (!propertyValue) return [];
+	return Array.isArray(propertyValue) ? propertyValue : [propertyValue]; // handle both oneOf and manyOf properties
+};
 
-	const ticketsWithSortedAssignees = ticketsWithAssignees.map(sortAssignees);
+const groupByJobsAndUsers = (tickets: ITicket[], groupBy: string) => {
+	const groups: Record<string, ITicket[]> = {};
+	const unset: ITicket[] = [];
 
-	const ticketsSortedByAssignees = _.orderBy(
-		ticketsWithSortedAssignees,
-		(ticket) => {
-			const assignees = getAssigneesRaw(ticket).map((assignee) => assignee.trim().toLowerCase());
-			return _.orderBy(assignees).join();
-		},
-	);
-
-	const groups = _.groupBy(ticketsSortedByAssignees, (ticket) => {
-		const assignees = getAssigneesRaw(ticket).map(getAssigneeDisplayName);
-		return assignees.join(', ');
-	});
-	if (ticketsWithoutAssignees.length) {
-		groups[UNSET] = ticketsWithoutAssignees;
+	for (const ticket of tickets) {
+		const values = getJobsAndUsersValues(ticket, groupBy);
+		if (!values.length) {
+			unset.push(ticket);
+			continue;
+		}
+		const displayNames = values.map(getAssigneeDisplayName).sort((a, b) => a.localeCompare(b));
+		const key = displayNames.join(', ');
+		if (!groups[key]) groups[key] = [];
+		groups[key].push(ticket);
 	}
+
+	if (unset.length) {
+		groups[UNSET] = unset;
+	}
+
 	return sortSelectGroups(groups);
 };
 
-const groupByOwner = (tickets: ITicket[]) => {
-	const groups = _.groupBy(tickets, (ticket) => {
-		const user = selectCurrentTeamspaceUsersByIds(getState())[_.get(ticket, `properties.${BaseProperties.OWNER}`)];
-		return user ? getFullnameFromUser(user) : USER_NOT_FOUND_NAME;
-	});
-	return sortSelectGroups(groups);
-};
-
-export const groupTickets = (groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition): Array<[string, ITicket[]]> => {
+export const groupTickets = (
+	groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition, isJobAndUsersType: boolean): Array<[string, ITicket[]]> => {
+	if (isJobAndUsersType) return groupByJobsAndUsers(tickets, groupBy);
 	switch (stripModuleOrPropertyPrefix(groupBy)) {
-		case BaseProperties.OWNER:
-			return groupByOwner(tickets);
-		case IssueProperties.ASSIGNEES:
-			return groupByAssignees(tickets);
 		case IssueProperties.DUE_DATE:
 			return groupByDate(tickets);
 		case BaseProperties.STATUS:

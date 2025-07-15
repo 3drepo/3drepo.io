@@ -35,7 +35,7 @@ export type TicketsTableResizableContentProps = {
 	selectedTicketId?: string;
 };
 export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
-	const { groupBy, getPropertyType } = useContext(TicketsTableContext);
+	const { groupBy, getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
@@ -60,7 +60,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 
 	const isLoading = groupBy && (ticketsToDisplay.length !== filteredItems.length);
 
-	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy));
+	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
 
 	return (
 		<Container>
