@@ -185,9 +185,6 @@ export const TicketsTable = () => {
 		if (!templateAlreadyFetched(selectedTemplate)) {
 			ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
 		}
-		if (ticketId) {
-			clearTicketId();
-		}
 	}, [template]);
 
 	useEffect(() => {
@@ -260,7 +257,7 @@ export const TicketsTable = () => {
 				</SlidePanelHeader>
 				<MuiThemeProvider theme={theme}>
 					<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
-						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
+						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate}  clearTicketId={clearTicketId} />)}
 						{isNewTicket && (
 							<NewTicketSlide
 								presetValue={{ key: groupBy, value: presetValue }}
