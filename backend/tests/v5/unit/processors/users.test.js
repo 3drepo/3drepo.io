@@ -154,17 +154,6 @@ const tesUpdateProfile = () => {
 			UsersModel.getUserId.mockResolvedValueOnce(user.user);
 			const updatedProfile = { firstName: 'Nick', lastName: 'Doe', countryCode: 'US', company: '3D Repo' };
 
-			const backupDataExpected = {
-				'customData.firstName': updatedProfile.firstName,
-				'customData.lastName': updatedProfile.lastName,
-				'customData.billing.billingInfo.countryCode': updatedProfile.countryCode,
-				'customData.billing.billingInfo.company': updatedProfile.company,
-			};
-			const updateProfileExpected = {
-				name: `${updatedProfile.firstName} ${updatedProfile.lastName}`,
-				metadata: JSON.stringify({ countryCode: updatedProfile.countryCode, company: updatedProfile.company }),
-			};
-
 			await Users.updateProfile(user.user, updatedProfile);
 
 			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);

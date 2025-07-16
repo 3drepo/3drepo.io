@@ -17,7 +17,7 @@
 
 const { src } = require('../../helper/path');
 
-const { cloneDeep, times, update } = require('lodash');
+const { cloneDeep, times } = require('lodash');
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
