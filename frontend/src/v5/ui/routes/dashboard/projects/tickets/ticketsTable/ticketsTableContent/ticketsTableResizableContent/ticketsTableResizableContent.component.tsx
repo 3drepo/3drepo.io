@@ -22,7 +22,7 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
+import { getjobOrUserDisplayName, groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
 import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
@@ -62,13 +62,19 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 
 	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
 
+	const getGroupDisplayName = (groupName: string) => {
+		if (!isJobAndUsersType(groupBy)) return groupName;
+		const jobsAndUsernamesArray = groupName.split(',').map((user) => user.trim());
+		return jobsAndUsernamesArray.map(getjobOrUserDisplayName).join(', ');
+	};
+
 	return (
 		<Container>
 			{groups.map(([groupName, tickets]) => (
 				<DashboardListCollapse
 					title={(
 						<>
-							<Title>{groupName}</Title>
+							<Title>{getGroupDisplayName(groupName)}</Title>
 							<CircledNumber disabled={!tickets.length || isLoading}>
 								{isLoading ? <Spinner /> : tickets.length}
 							</CircledNumber>

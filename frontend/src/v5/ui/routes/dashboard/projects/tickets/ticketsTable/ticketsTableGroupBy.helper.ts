@@ -66,7 +66,7 @@ const groupByDate = (tickets: ITicket[]) => {
 
 const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
 const getAssigneesRaw = (t: ITicket) => (_.get(t, ASSIGNEES_PATH) ?? []);
-const getAssigneeDisplayName = (assignee: string) => {
+export const getjobOrUserDisplayName = (assignee: string) => {
 	const job = selectJobById(getState(), assignee);
 	if (job) return job._id;
 	const user = selectCurrentTeamspaceUsersByIds(getState())[assignee];
@@ -75,11 +75,11 @@ const getAssigneeDisplayName = (assignee: string) => {
 };
 
 export const sortAssignees = (ticket: ITicket): ITicket => {
-	const sortedAssignees = _.orderBy(getAssigneesRaw(ticket), (assignee) => getAssigneeDisplayName(assignee).trim().toLowerCase());
+	const sortedAssignees = _.orderBy(getAssigneesRaw(ticket), (assignee) => getjobOrUserDisplayName(assignee).trim().toLowerCase());
 	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
 };
 
-export const getAssigneeDisplayNamesFromTicket = (ticket: ITicket): string[] => getAssigneesRaw(ticket).map(getAssigneeDisplayName);
+export const getAssigneeDisplayNamesFromTicket = (ticket: ITicket): string[] => getAssigneesRaw(ticket).map(getjobOrUserDisplayName);
 
 const groupByStatus = (tickets: ITicket[]) => {
 	const statusPath = `properties.${BaseProperties.STATUS}`;
@@ -152,8 +152,8 @@ const groupByJobsAndUsers = (tickets: ITicket[], groupBy: string) => {
 			unset.push(ticket);
 			continue;
 		}
-		const displayNames = values.map(getAssigneeDisplayName).sort((a, b) => a.localeCompare(b));
-		const key = displayNames.join(', ');
+		const sortedValues = [...values].sort((a, b) => getjobOrUserDisplayName(a).localeCompare(getjobOrUserDisplayName(b)));
+		const key = sortedValues.join(', ');
 		if (!groups[key]) groups[key] = [];
 		groups[key].push(ticket);
 	}
