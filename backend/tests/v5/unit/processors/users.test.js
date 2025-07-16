@@ -151,7 +151,9 @@ const tesGetProfileByUsername = () => {
 const tesUpdateProfile = () => {
 	describe('Update user profile by username', () => {
 		test('should update user profile', async () => {
+			UsersModel.getUserId.mockResolvedValueOnce(user.user);
 			const updatedProfile = { firstName: 'Nick', lastName: 'Doe', countryCode: 'US', company: '3D Repo' };
+
 			const backupDataExpected = {
 				'customData.firstName': updatedProfile.firstName,
 				'customData.lastName': updatedProfile.lastName,
@@ -162,10 +164,15 @@ const tesUpdateProfile = () => {
 				name: `${updatedProfile.firstName} ${updatedProfile.lastName}`,
 				metadata: JSON.stringify({ countryCode: updatedProfile.countryCode, company: updatedProfile.company }),
 			};
+
 			await Users.updateProfile(user.user, updatedProfile);
+
 			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
-			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updateProfileExpected);
-			expect(UsersModel.updateProfile.mock.calls[0][2]).toEqual(backupDataExpected);
+			expect(UsersModel.updateProfile.mock.calls[0][0]).toEqual(user.user);
+			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updatedProfile);
+			expect(FronteggService.updateUserDetails.mock.calls.length).toBe(1);
+			expect(FronteggService.updateUserDetails.mock.calls[0][0]).toEqual(user.user);
+			expect(FronteggService.updateUserDetails.mock.calls[0][1]).toEqual(updatedProfile);
 		});
 	});
 };
@@ -185,7 +192,7 @@ const testGetAvatarStream = () => {
 			expect(UsersModel.getAvatarStream).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getAvatarStream).toHaveBeenCalledWith(username);
 		});
-		test('should get avatar add png if the extention is not there', async () => {
+		test('should get avatar add png if the extension is not there', async () => {
 			const username = generateRandomString();
 			const imageBuffer = fs.readFileSync(image);
 			const mockImageStream = new Blob([imageBuffer], { type: 'image/png' });

@@ -18,8 +18,8 @@
 const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
-const { addUser, deleteApiKey, generateApiKey, getAvatarStream,
-	getUserByUsername, removeUser, updatePassword, updateProfile } = require('../models/users');
+const { addUser, deleteApiKey, generateApiKey, getAvatarStream, getUserByUsername,
+	getUserId, removeUser, updatePassword, updateProfile } = require('../models/users');
 const { fileExists, removeFile, storeFile } = require('../services/filesManager');
 const { getUserById, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
 const FormData = require('form-data');
@@ -100,21 +100,10 @@ Users.getProfileByUsername = async (username) => {
 };
 
 Users.updateProfile = async (username, fieldsToUpdate) => {
-	const name = `${fieldsToUpdate.firstName} ${fieldsToUpdate.lastName}`.trim();
-	const metadata = {};
-	const backupData = {};
-	const billingInfoFields = ['countryCode', 'company'];
+	const userId = await getUserId(username);
 
-	Object.keys(fieldsToUpdate).forEach((key) => {
-		if (billingInfoFields.includes(key)) {
-			backupData[`customData.billing.billingInfo.${key}`] = fieldsToUpdate[key];
-			metadata[key] = fieldsToUpdate[key];
-		} else {
-			backupData[`customData.${key}`] = fieldsToUpdate[key];
-		}
-	});
-
-	await updateProfile(username, { name, metadata: JSON.stringify(metadata) }, backupData);
+	await updateUserDetails(userId, fieldsToUpdate);
+	await updateProfile(username, fieldsToUpdate);
 };
 
 Users.resetPassword = async (user) => {

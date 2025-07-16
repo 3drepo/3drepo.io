@@ -17,7 +17,7 @@
 
 const { src } = require('../../helper/path');
 
-const { cloneDeep, times } = require('lodash');
+const { cloneDeep, times, update } = require('lodash');
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
@@ -26,7 +26,7 @@ jest.mock('../../../../src/v5/services/sso/frontegg');
 const FrontEggMock = require(`${src}/services/sso/frontegg`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, determineTestGroup } = require('../../helper/services');
+const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
@@ -255,56 +255,38 @@ const testUpdateProfile = () => {
 	describe('Update user profile', () => {
 		test('should update a user profile', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
-			const fn2 = jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({ customData: { userId: 'user 1' } }));
-			const updatedProfile = {
-				name: 'John Doe',
-				metadata: JSON.stringify({}),
-			};
-			const backupData = { 'customData.firstName': 'John' };
+			const updatedProfileMock = generateRandomObject();
+			const updateDataMock = {};
 
-			await expect(User.updateProfile('user 1', updatedProfile, backupData)).resolves.toBeUndefined();
-
-			expect(FrontEggMock.updateUserDetails).toHaveBeenCalledTimes(1);
-			expect(FrontEggMock.updateUserDetails).toHaveBeenCalledWith('user 1', {
-				name: updatedProfile.name,
-				metadata: updatedProfile.metadata,
+			Object.keys(updatedProfileMock).forEach((key) => {
+				updateDataMock[`customData.${key}`] = updatedProfileMock[key];
 			});
-			expect(fn2.mock.calls.length).toBe(1);
-			expect(fn2.mock.calls[0][2]).toEqual({ user: 'user 1' });
-			expect(fn2.mock.calls[0][3]).toEqual({ 'customData.userId': 1 });
+
+			await expect(User.updateProfile('user 1', updatedProfileMock)).resolves.toBeUndefined();
+
 			expect(fn1.mock.calls.length).toBe(1);
-			expect(fn1.mock.calls[0][3]).toEqual({ $set: backupData });
+			expect(fn1.mock.calls[0][3]).toEqual({ $set: updateDataMock });
 		});
 
 		test('should update a user profile with billing data', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			const fn2 = jest.spyOn(db, 'findOne').mockImplementationOnce(() => ({ customData: { userId: 'user 1' } }));
-			const updatedProfile = {
-				name: 'John Doe',
-				metadata: JSON.stringify({ company: '3D Repo', countryCode: 'GB' }),
-			};
-			const backupData = {
-				'customData.firstName': 'John',
-				'customData.billing.billingInfo.company': '3D Repo',
-				'customData.billing.billingInfo.countryCode': 'GB',
-			};
-			await expect(User.updateProfile('user 1', updatedProfile, backupData)).resolves.toBeUndefined();
-
-			expect(FrontEggMock.updateUserDetails).toHaveBeenCalledTimes(1);
-			expect(FrontEggMock.updateUserDetails).toHaveBeenCalledWith('user 1', {
-				name: updatedProfile.name,
-				metadata: updatedProfile.metadata,
+			const billingInfoFields = ['countryCode', 'company'];
+			const updatedProfileMock = generateRandomObject();
+			updatedProfileMock.countryCode = generateRandomString();
+			updatedProfileMock.company = generateRandomString();
+			const updateDataMock = {};
+			Object.keys(updatedProfileMock).forEach((key) => {
+				if (billingInfoFields.includes(key)) {
+					updateDataMock[`customData.billing.billingInfo.${key}`] = updatedProfileMock[key];
+				} else {
+					updateDataMock[`customData.${key}`] = updatedProfileMock[key];
+				}
 			});
-			expect(fn2.mock.calls.length).toBe(1);
-			expect(fn2.mock.calls[0][2]).toEqual({ user: 'user 1' });
-			expect(fn2.mock.calls[0][3]).toEqual({ 'customData.userId': 1 });
+
+			await expect(User.updateProfile('user 1', updatedProfileMock)).resolves.toBeUndefined();
 			expect(fn1.mock.calls.length).toBe(1);
 			expect(fn1.mock.calls[0][3]).toEqual({
-				$set: {
-					'customData.firstName': 'John',
-					'customData.billing.billingInfo.company': '3D Repo',
-					'customData.billing.billingInfo.countryCode': 'GB',
-				},
+				$set: updateDataMock,
 			});
 		});
 	});

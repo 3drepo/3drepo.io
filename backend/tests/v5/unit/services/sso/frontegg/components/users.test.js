@@ -176,12 +176,17 @@ const testUploadAvatar = () => {
 		test('Should throw error if it failed to upload avatar', async () => {
 			const userId = generateRandomString();
 			const tenantId = generateRandomString();
-			const formDataPayload = generateRandomObject();
+			const formDataPayload = { getHeaders: jest.fn(() => ({ 'Content-Type': 'multipart/form-data' })) };
 
-			WebRequests.put.mockRejectedValueOnce({ message: generateRandomString() });
+			const mockResponse = { message: generateRandomString() };
+
+			WebRequests.put.mockRejectedValueOnce(mockResponse);
 			await expect(Users.uploadAvatar(userId, tenantId, formDataPayload)).rejects.not.toBeUndefined();
 
-			expect(WebRequests.put).not.toHaveBeenCalled();
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), formDataPayload, { headers: expect.any(Object) },
+			);
 		});
 	});
 };
@@ -190,17 +195,27 @@ const testUpdateUserDetails = () => {
 	describe('Update user details', () => {
 		test('Should update user details', async () => {
 			const userId = generateRandomString();
-			const payload = generateRandomObject();
+			const metadataInfo = generateRandomObject();
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const profilePictureUrl = generateRandomString();
+
+			const expectedPayload = {
+				name: `${firstName} ${lastName}`,
+				profilePictureUrl,
+				metadata: JSON.stringify(metadataInfo),
+			};
 
 			const responseMock = { data: { id: generateRandomString() } };
 
 			WebRequests.put.mockResolvedValueOnce(responseMock);
 
-			await expect(Users.updateUserDetails(userId, payload)).resolves.toEqual(responseMock.data.id);
+			await expect(Users.updateUserDetails(userId, { ...metadataInfo, firstName, lastName, profilePictureUrl }))
+				.resolves.toEqual(responseMock.data.id);
 
 			expect(WebRequests.put).toHaveBeenCalledTimes(1);
 			expect(WebRequests.put).toHaveBeenCalledWith(
-				expect.any(String), payload, { headers: bearerHeader },
+				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
 		});
 
@@ -222,6 +237,6 @@ describe(determineTestGroup(__filename), () => {
 	testDoesUserExist();
 	testDestroyAllSessions();
 	testTriggerPasswordReset();
-	testUpdateUserDetails();
 	testUploadAvatar();
+	testUpdateUserDetails();
 });

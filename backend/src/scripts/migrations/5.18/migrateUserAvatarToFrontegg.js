@@ -62,13 +62,13 @@ const migrateAvatars = async (ts) => {
 						knownLength: size,
 					});
 					// eslint-disable-next-line no-await-in-loop
-					const profilePictureURL = await uploadAvatar(
+					const profilePictureUrl = await uploadAvatar(
 						member.id,
 						refId,
 						formData,
 					);
 					// eslint-disable-next-line no-await-in-loop
-					await updateUserDetails(member.id, { profilePictureURL });
+					await updateUserDetails(member.id, { profilePictureUrl });
 				}
 
 				migratedUsersAvatars.add(member.id);

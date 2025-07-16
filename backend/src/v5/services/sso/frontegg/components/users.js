@@ -71,18 +71,14 @@ Users.uploadAvatar = async (userId, tenantId, formDataPayload) => {
 		const config = await getConfig();
 		const headers = {
 			...await getBearerHeader(),
-			'Content-Type': 'multipart/form-data',
 			...formDataPayload.getHeaders(),
 			[HEADER_ENVIRONMENT_ID]: config.clientId,
 			[HEADER_TENANT_ID]: tenantId,
 			[HEADER_USER_ID]: userId,
 		};
+		const url = `${config.vendorDomain}/team/resources/profile/me/image/v1`;
 
-		const { data } = await put(
-			`${config.vendorDomain}/team/resources/profile/me/image/v1`,
-			formDataPayload,
-			{ headers,
-			});
+		const { data } = await put(url, formDataPayload, { headers });
 
 		return data;
 	} catch (err) {
@@ -90,12 +86,39 @@ Users.uploadAvatar = async (userId, tenantId, formDataPayload) => {
 	}
 };
 
-Users.updateUserDetails = async (userId, payload) => {
+Users.updateUserDetails = async (userId, updatedProfile) => {
 	try {
 		const config = await getConfig();
 		const headers = await getBearerHeader();
+		const url = `${config.vendorDomain}/identity/resources/users/v1/${userId}`;
+		const payload = {};
+		const expectedFields = ['firstName', 'lastName', 'profilePictureUrl'];
 
-		const res = await put(`${config.vendorDomain}/identity/resources/users/v1/${userId}`, payload, { headers });
+		Object.keys(updatedProfile).forEach((key) => {
+			if (expectedFields.includes(key)) {
+				if (key === 'firstName') {
+					payload.name = `${updatedProfile[key]} ${payload.name || ''}`.trim();
+
+					return;
+				}
+				if (key === 'lastName') {
+					// istanbul ignore next
+					payload.name = `${payload.name || ''} ${updatedProfile[key]}`.trim();
+
+					return;
+				}
+
+				payload[key] = updatedProfile[key];
+
+				return;
+			}
+
+			payload.metadata = { ...payload.metadata, [key]: updatedProfile[key] };
+		});
+
+		payload.metadata = JSON.stringify(payload.metadata);
+
+		const res = await put(url, payload, { headers });
 
 		return res.data.id;
 	} catch (err) {
