@@ -34,11 +34,11 @@ import { CalibrationContext } from '../dashboard/projects/calibration/calibratio
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
 import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
+import { useApplyViewForTicketURL } from './applyViewForTicketURL.hook';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
 	const { isCalibrating } = useContext(CalibrationContext);
-
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
@@ -88,6 +88,8 @@ export const Viewer = () => {
 	useEffect(() => {
 		DrawingsCardActionsDispatchers.setQueries([]);
 	}, [teamspace, project]);
+
+	useApplyViewForTicketURL();
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
