@@ -193,10 +193,6 @@ export const TicketsTable = () => {
 	}, [template]);
 
 	useEffect(() => {
-		setPresetValue('');
-	}, [groupBy]);
-
-	useEffect(() => {
 		let columnsToFetch = [...visibleSortedColumnsNames];
 		columnsToFetch
 			.filter((name) => !INITIAL_COLUMNS.includes(name))
