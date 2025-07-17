@@ -154,9 +154,89 @@ const testTriggerPasswordReset = () => {
 	});
 };
 
+const testUploadAvatar = () => {
+	describe('Upload avatar', () => {
+		test('Should upload avatar for the user ID specified', async () => {
+			const userId = generateRandomString();
+			const tenantId = generateRandomString();
+			const formDataPayload = { getHeaders: jest.fn(() => ({ 'Content-Type': 'multipart/form-data' })) };
+
+			const responseMock = { data: generateRandomString() };
+
+			WebRequests.put.mockResolvedValueOnce(responseMock);
+
+			await expect(Users.uploadAvatar(userId, tenantId, formDataPayload)).resolves.toEqual(responseMock.data);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), formDataPayload, { headers: expect.any(Object) },
+			);
+		});
+
+		test('Should throw error if it failed to upload avatar', async () => {
+			const userId = generateRandomString();
+			const tenantId = generateRandomString();
+			const formDataPayload = { getHeaders: jest.fn(() => ({ 'Content-Type': 'multipart/form-data' })) };
+
+			const mockResponse = { message: generateRandomString() };
+
+			WebRequests.put.mockRejectedValueOnce(mockResponse);
+			await expect(Users.uploadAvatar(userId, tenantId, formDataPayload)).rejects.not.toBeUndefined();
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), formDataPayload, { headers: expect.any(Object) },
+			);
+		});
+	});
+};
+
+const testUpdateUserDetails = () => {
+	describe('Update user details', () => {
+		test('Should update user details', async () => {
+			const userId = generateRandomString();
+			const metadataInfo = generateRandomObject();
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const profilePictureUrl = generateRandomString();
+
+			const expectedPayload = {
+				name: `${firstName} ${lastName}`,
+				profilePictureUrl,
+				metadata: JSON.stringify(metadataInfo),
+			};
+
+			const responseMock = { data: { id: generateRandomString() } };
+
+			WebRequests.put.mockResolvedValueOnce(responseMock);
+
+			await expect(Users.updateUserDetails(userId, { ...metadataInfo, firstName, lastName, profilePictureUrl }))
+				.resolves.toEqual(responseMock.data.id);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), expectedPayload, { headers: bearerHeader },
+			);
+		});
+
+		test('Should throw error if it failed to update user details', async () => {
+			const userId = generateRandomString();
+			const tenantId = generateRandomString();
+			const formDataPayload = generateRandomObject();
+
+			WebRequests.put.mockRejectedValueOnce({ message: generateRandomString() });
+			await expect(Users.updateUserDetails(userId, tenantId, formDataPayload)).rejects.not.toBeUndefined();
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetUserById();
 	testDoesUserExist();
 	testDestroyAllSessions();
 	testTriggerPasswordReset();
+	testUploadAvatar();
+	testUpdateUserDetails();
 });
