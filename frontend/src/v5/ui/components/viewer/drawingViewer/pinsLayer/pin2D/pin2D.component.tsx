@@ -26,7 +26,7 @@ import { pinTypeToPinIcon } from '@/v5/ui/routes/viewer/tickets/ticketsForm/prop
 
 type Pin2DProps = IPin & { scale: number };
 export const Pin2D = ({ id, isSelected, position, colour, scale, type }: Pin2DProps) => {
-	const { containerOrFederation, teamspace, project, revision } = useParams<ViewerParams>();
+	const { containerOrFederation } = useParams<ViewerParams>();
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 
 	const handleClick = (e) => {
@@ -34,7 +34,7 @@ export const Pin2D = ({ id, isSelected, position, colour, scale, type }: Pin2DPr
 		TicketsCardActionsDispatchers.setSelectedTicketPin(id);
 		if (!tickets.some((t) => t._id === id)) return;
 		
-		TicketsCardActionsDispatchers.openTicket(id, teamspace, project, containerOrFederation, revision);
+		TicketsCardActionsDispatchers.openTicket(id);
 	};
 
 	return (
