@@ -173,6 +173,11 @@ export const TicketsTable = () => {
 	}, []);
 
 	useEffect(() => {
+		if (containersAndFederations.includes(containerOrFederation)) return;
+		clearTicketId();
+	}, [containersAndFederations, containerOrFederation]);
+
+	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 	}, [readOnly]);
 
