@@ -52,7 +52,7 @@ export const RevisionsListItem = ({
 	};
 
 	return (
-		<Container to={disabled ? undefined : redirectTo} disabled={disabled}>
+		<Container to={disabled ? undefined : redirectTo} disabled={disabled} target="_blank">
 			{children}
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasPermission} />
 			{hasPermission && (
