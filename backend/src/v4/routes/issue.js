@@ -72,6 +72,27 @@ const Comment = require("../models/comment");
  */
 
 /**
+ * @apiDefine viewpointObject
+ *
+ * @apiBody (Viewpoint) {Number[]} right Right vector of the camera
+ * @apiBody (Viewpoint) {Number[]} up Up vector of the camera
+ * @apiBody (Viewpoint) {Number[]} position Position of the camera
+ * @apiBody (Viewpoint) {Number[]} look_at Look at point of the camera
+ * @apiBody (Viewpoint) {Number[]} view_dir View direction of the camera
+ * @apiBody (Viewpoint) {Number} near Near clipping plane
+ * @apiBody (Viewpoint) {Number} far Far clipping plane
+ * @apiBody (Viewpoint) {Number} fov Field of view in radians
+ * @apiBody (Viewpoint) {Number} aspect_ratio Aspect ratio of the viewport
+ * @apiBody (Viewpoint) {Object[]} [clippingPlanes] Array of clipping planes
+ * @apiBody (Viewpoint) {Object[]} [override_groups] Array of override groups with colors and objects
+ * @apiBody (Viewpoint) {Object[]} [transformation_groups] Array of transformation groups
+ * @apiBody (Viewpoint) {Object} [highlighted_group] Highlighted group with objects and color
+ * @apiBody (Viewpoint) {Object} [hidden_group] Hidden group with objects
+ * @apiBody (Viewpoint) {Boolean} [hideIfc] Flag to hide IFC elements
+ * @apiBody (Viewpoint) {String} [screenshot] Base64 encoded screenshot image
+ */
+
+/**
  * @api {get} /:teamspace/:model/issues/:issueId Get issue
  * @apiName findIssue
  * @apiGroup Issues
@@ -135,7 +156,7 @@ router.get("/issues/:issueId", issuesMiddleware.canView, findIssue);
 router.get("/issues/:issueId/thumbnail.png", issuesMiddleware.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model/issues?[query] List Issues
+ * @api {get} /:teamspace/:model/issues List Issues
  * @apiName listIssues
  * @apiGroup Issues
  * @apiDescription List all issues for model.
@@ -362,15 +383,14 @@ router.get("/revision/:rid/issues.html", issuesMiddleware.canView, renderIssuesH
  *
  * @apiUse Issues
  *
- * @apiParam (Request body) {String} name The name of the issue
- * @apiParam (Request body) {String[]} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
- * @apiParam (Request body) {String} status The status of the issue. It can have a value of "open","in progress","for approval", "void" or "closed".
- * @apiParam (Request body) {String} priority The priority of the issue. It can have a value of "none", String"low", "medium" or "high".
- * @apiParam (Request body) {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
- * @apiParam (Request body) {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
- * @apiParam (Request body) {String} desc The description of the created issue
- * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
- * @apiParam (Request body) {Number[3]} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
+ * @apiBody {String} name The name of the issue
+ * @apiBody {String[]} assigned_roles The roles assigned to the issue. Even though its an array (this is for future support of multiple assigned jobs), currently it has one or none elements correspoing to the available jobs in the teamaspace.
+ * @apiBody {String} status The status of the issue. It can have a value of "open","in progress","for approval", "void" or "closed".
+ * @apiBody {String} priority The priority of the issue. It can have a value of "none", "low", "medium" or "high".
+ * @apiBody {String} topic_type Type of the issue. It's value has to be one of the defined topic_types for the model. See <a href='#api-Model-createModel'>here</a> for more details.
+ * @apiBody {Viewpoint} viewpoint The viewpoint of the issue, defining the position of the camera and the screenshot for that position.
+ * @apiBody {String} desc The description of the created issue
+ * @apiBody {Number{3..3}} position The vector defining the pin of the issue. If the pin doesnt has an issue its an empty array.
  *
  * @apiUse viewpointObject
  *
@@ -615,17 +635,17 @@ router.post("/issues", issuesMiddleware.canCreate, storeIssue, middlewares.notif
  * @apiUse Issues
  * @apiUse IssueIdParam
  *
- * @apiParam (Request body) {[]String} [assigned_roles] Job roles assigned to the issue
- * @apiParam (Request body) {String} [desc] Description of issue
- * @apiParam (Request body) {String} [status] The status of issue (values: "open", "in progress", "for approval", "closed")
- * @apiParam (Request body) {String} [topic_type] Topic type of issue (see <a href='#api-Model-createModel'>here</a> for available types)
- * @apiParam (Request body) {[3]Number} [position] Vector defining the pin position of the issue; empty if the issue has no pin
- * @apiParam (Request body) {Number} [due_date] Due date timestamp for the issue
- * @apiParam (Request body) {String} [priority] The priority of the issue (values: "none", "low", "medium", "high")
- * @apiParam (Request body) {Number} [scale] The scale factor of the issue
- * @apiParam (Request body) {Viewpoint} [viewpoint] The viewpoint and screenshot of the issue
- * @apiParam (Request body) {Number} [viewCount] The viewcount of the issue
- * @apiParam (Request body) {Object} [extras] A field containing any extras that wanted to be saved in the issue (typically used by BCF)
+ * @apiBody {String[]} [assigned_roles] Job roles assigned to the issue
+ * @apiBody {String} [desc] Description of issue
+ * @apiBody {String} [status] The status of issue (values: "open", "in progress", "for approval", "closed")
+ * @apiBody {String} [topic_type] Topic type of issue (see <a href='#api-Model-createModel'>here</a> for available types)
+ * @apiBody {Number{3..3}} [position] Vector defining the pin position of the issue; empty if the issue has no pin
+ * @apiBody {Number} [due_date] Due date timestamp for the issue
+ * @apiBody {String} [priority] The priority of the issue (values: "none", "low", "medium", "high")
+ * @apiBody {Number} [scale] The scale factor of the issue
+ * @apiBody {Viewpoint} [viewpoint] The viewpoint and screenshot of the issue
+ * @apiBody {Number} [viewCount] The viewcount of the issue
+ * @apiBody {Object} [extras] A field containing any extras that wanted to be saved in the issue (typically used by BCF)
  *
  * @apiUse viewpointObject
  *
@@ -766,12 +786,12 @@ router.patch("/revision/:rid/issues/:issueId", issuesMiddleware.canComment, upda
  * @apiUse Issues
  * @apiUse IssueIdParam
  *
- * @apiParam (Request body) {String} comment Comment text
- * @apiParam (Request body) {Viewpoint} [viewpoint] The viewpoint associated with the comment
+ * @apiBody {String} comment Comment text
+ * @apiBody {Viewpoint} [viewpoint] The viewpoint associated with the comment
  *
  * @apiUse viewpointObject
  *
- * @apiParamExample {json} PAYLOAD
+ * @apiParamExample {json} Request Body Example:
  *    {
  *      "comment": "This is a commment",
  *      "viewpoint": {right: [-0.0374530553817749, -7.450580596923828e-9, -0.9992983341217041],…}
@@ -800,10 +820,10 @@ router.post("/issues/:issueId/comments", issuesMiddleware.canComment, addComment
  *
  * @apiUse Issues
  * @apiUse IssueIdParam
- * @apiParam {Json} PAYLOAD The data with the comment guid to be deleted.
- * @apiParamExample {json} PAYLOAD
+ * @apiBody {String} guid The GUID of the comment to be deleted.
+ * @apiParamExample {json} Request Body Example:
  *    {
- *       guid: "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
+ *       "guid": "096de7ed-e3bb-4d5b-ae68-17a5cf7a5e5e"
  *    }
  *
  * @apiSuccessExample {json} Success
@@ -835,11 +855,10 @@ router.post("/revision/:rid/issues.json", issuesMiddleware.canCreate, storeIssue
  * @apiUse Issues
  * @apiUse IssueIdParam
  *
- * @apiParam (Request body file resource (multipart/form-data)) {File[]} files The array of files to be attached
- * @apiParam (Request body file resource (multipart/form-data)) {String[]} names The names of the files; it should have the same length as the files field and should include the file extension
- * @apiParam (Request body url resource) {String[]} urls The array of urls to be attached
- * @apiParam (Request body url resource) {String[]} names The names of the urls; it should have the same length as the url field
- *
+ * @apiBody (File Resource - multipart/form-data) {File[]} files The array of files to be attached
+ * @apiBody (File Resource - multipart/form-data) {String[]} names The names of the files; it should have the same length as the files field and should include the file extension
+ * @apiBody (URL Resource) {String[]} urls The array of urls to be attached
+ * @apiBody (URL Resource) {String[]} names The names of the urls; it should have the same length as the url field
  * @apiSuccessExample {json} Success example result after two files has been uploaded
  *
  * [
@@ -878,7 +897,7 @@ router.post("/issues/:issueId/resources",issuesMiddleware.canComment, attachReso
  * @apiUse Issues
  * @apiUse IssueIdParam
  *
- * @apiParam (Request body) {String} _id The resource id to be detached
+ * @apiBody {String} _id The resource id to be detached
  *
  * @apiSuccessExample {json} Success-Response
  * HTTP/1.1 200 OK

@@ -35,11 +35,18 @@ import { Board } from '../board/board.component';
 import { TicketsContent } from '../tickets/ticketsContent.component';
 import { Drawings } from '../drawings/drawings.component';
 import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { isEmpty } from 'lodash';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
 	const { pathname } = useLocation();
 	const { title:kanbanTitle,  shouldRenderContent: shouldRenderKanbanContent, issuesOrRisksEnabled, riskEnabled, issuesEnabled } = useKanbanNavigationData();
+
+	const hasPermissions = !TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();
+	const isFetchingAddons = TeamspacesHooksSelectors.selectIsFetchingAddons();
+	const isFetchingProject = isEmpty(ProjectsHooksSelectors.selectCurrentProjectDetails());
+	const isLoadingPermissions = isFetchingAddons || isFetchingProject;
 
 	let { path } = useRouteMatch();
 	path = discardSlash(path);
@@ -47,6 +54,8 @@ export const ProjectContent = () => {
 	useEffect(() => {
 		UsersActionsDispatchers.fetchUsers(teamspace);
 	}, [teamspace]);
+
+	if (isLoadingPermissions) return <></>;
 
 	return (
 		<>
@@ -76,12 +85,16 @@ export const ProjectContent = () => {
 					<Route title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })} exact path={`${path}/t/project_settings`}>
 						<ProjectSettings />
 					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })} exact path={`${path}/t/project_permissions`}>
-						<ProjectPermissions />
-					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })} exact path={`${path}/t/user_permissions`}>
-						<UserPermissions />
-					</Route>
+					{hasPermissions && (
+						<Route title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })} exact path={`${path}/t/project_permissions`}>
+							<ProjectPermissions />
+						</Route>
+					)}
+					{hasPermissions && (
+						<Route title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })} exact path={`${path}/t/user_permissions`}>
+							<UserPermissions />
+						</Route>
+					)}
 					<Route path="*">
 						<Redirect to={NOT_FOUND_ROUTE_PATH} />
 					</Route>

@@ -18,7 +18,6 @@
 import { FormattedMessage } from 'react-intl';
 import { ExistingDestinationOption, InUseText, Name } from './existingDestination.styles';
 import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';
-import { formatMessage } from '@/v5/services/intl';
 
 interface IExistingDestination {
 	inUse: boolean;
@@ -26,11 +25,12 @@ interface IExistingDestination {
 	latestRevision: string;
 	hasRevisions: boolean;
 	status: any,
+	emptyLabel: string;
 }
-export const ExistingDestination = ({ name, latestRevision, hasRevisions, status, inUse, ...props }: IExistingDestination) => (
+export const ExistingDestination = ({ name, latestRevision, hasRevisions, status, inUse, emptyLabel, ...props }: IExistingDestination) => (
 	<ExistingDestinationOption {...props}>
 		<Name>{name}</Name>
-		<LatestRevision hasRevisions={hasRevisions} name={latestRevision} status={status} emptyLabel={formatMessage({ id: 'drawingsUploads.list.item.title.latestRevision.empty', defaultMessage: 'Drawing empty' })} />
+		<LatestRevision hasRevisions={hasRevisions} name={latestRevision} status={status} emptyLabel={emptyLabel} />
 		<InUseText hidden={!inUse}>
 			<FormattedMessage id="uploads.destination.destinationInUse" defaultMessage="Already in use in another file upload" />
 		</InUseText>

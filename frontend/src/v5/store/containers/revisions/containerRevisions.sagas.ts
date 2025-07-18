@@ -31,6 +31,7 @@ import { ContainersActions } from '../containers.redux';
 import { UploadStatus } from '../containers.types';
 import { createContainerFromRevisionBody, createFormDataFromRevisionBody } from './containerRevisions.helpers';
 import { selectRevisions } from './containerRevisions.selectors';
+import { IContainerRevision } from './containerRevisions.types';
 
 export function* fetch({ teamspace, projectId, containerId, onSuccess }: FetchAction) {
 	yield put(ContainerRevisionsActions.setIsPending(containerId, true));
@@ -51,13 +52,14 @@ export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, 
 	try {
 		yield API.ContainerRevisions.setRevisionVoidStatus(teamspace, projectId, containerId, revisionId, isVoid);
 		yield put(ContainerRevisionsActions.setVoidStatusSuccess(containerId, revisionId, isVoid));
-		const revisions = yield select(selectRevisions, containerId);
+		const revisions: IContainerRevision[] = yield select(selectRevisions, containerId);
 		const activeRevisions = revisions.filter((rev) => !rev.void);
 		const revisionsCount = activeRevisions.length;
-		const latestRevision = revisionsCount ? orderBy(activeRevisions, 'timestamp')[0].tag : null;
+		const latestActiveRevision = orderBy(activeRevisions, 'timestamp').at(-1);
+		const latestRevision = revisionsCount ? latestActiveRevision.tag : null;
 		const updates = {
 			revisionsCount,
-			lastUpdated: new Date(),
+			lastUpdated: latestActiveRevision?.timestamp || null,
 			latestRevision,
 		};
 		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, updates));

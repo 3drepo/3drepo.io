@@ -42,11 +42,11 @@ const { fileExists } = require("../models/fileRef");
  * @apiDescription Show current application version.
  *
  * @apiSuccess (200) {String} VERSION API service version
- * @apiSuccess (200) {String} unity Unity viewer version
- * @apiSuccess (200) {String} navis Autodesk Navisworks version
- * @apiSuccess (200) {String} unitydll Unity viewer version
+ * @apiSuccess (200) {Object} unity Unity viewer version
+ * @apiSuccess (200) {Object} navis Autodesk Navisworks version
+ * @apiSuccess (200) {Object} unitydll Unity viewer version
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  * 	"VERSION": "2.20.1",
@@ -69,13 +69,13 @@ const { fileExists } = require("../models/fileRef");
 router.get("/version", printVersion);
 
 /**
- * @api {get} /:user.json List account information
+ * @api {get} /:account.json List account information
  * @apiName listInfo
  * @apiGroup Account
  * @apiDescription Account information and list of projects grouped by teamspace
  * that the user has access to.
  *
- * @apiParam {String} user User
+ * @apiParam {String} account.json Account name with .json extension
  * @apiSuccess (200) {Object[]} accounts User account
  * @apiSuccess (200) {Object} billingInfo Billing information
  * @apiSuccess (200) {String} email User e-mail address
@@ -83,10 +83,10 @@ router.get("/version", printVersion);
  * @apiSuccess (200) {String} lastName Surname
  * @apiSuccess (200) {Boolean} hasAvatar True if user account has an avatar
  *
- * @apiExample {delete} Example usage:
+ * @apiExample {get} Example usage:
  * GET /alice.json HTTP/1.1
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  * 	"accounts": [
@@ -220,7 +220,7 @@ router.get("/version", printVersion);
  * 			"_id": "Actor"
  * 		},
  * 		{
- * 			"_id": "Producer
+ * 			"_id": "Producer"
  * 		}
  * 	]
  * }
@@ -229,23 +229,25 @@ router.get("/:account.json", middlewares.loggedIn, listInfo);
 // TODO: divide into different endpoints that makes sense.
 
 /**
- * @api {get} /:user/avatar Get avatar
+ * @api {get} /:account/avatar Get avatar
  * @apiName getAvatar
  * @apiGroup Account
  * @apiDescription Get user avatar.
  *
- * @apiParam {String} user User
- * @apiSuccess (200) {Object} avatar User Avatar Image
+ * @apiParam {String} account Account name
+ * @apiSuccess (200) {File} avatar User Avatar Image
  * @apiError (404) USER_DOES_NOT_HAVE_AVATAR User does not have an avatar
  *
- * @apiExample {put} Example usage:
+ * @apiExample {get} Example usage:
  * GET /alice/avatar HTTP/1.1
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {binary} Success-Response:
  * HTTP/1.1 200 OK
- * <binary image>
+ * Content-Type: image/png
  *
- * @apiErrorExample {json} Error-Response
+ * <binary image data>
+ *
+ * @apiErrorExample {json} Error-Response:
  * HTTP/1.1 404 Not Found
  * {
  * 	"message": "User does not have an avatar",
@@ -257,16 +259,16 @@ router.get("/:account.json", middlewares.loggedIn, listInfo);
 router.get("/:account/avatar", middlewares.loggedIn, getAvatar);
 
 /**
- * @api {post} /:user/avatar Upload avatar
+ * @api {post} /:account/avatar Upload avatar
  * @apiName uploadAvatar
  * @apiGroup Account
  * @apiDescription Upload a new avatar image.
  * Only multipart form data content type will be accepted.
  *
- * @apiParam {String} user User
- * @apiParam (Request body) {File} file Image to upload
+ * @apiParam {String} account Account name
+ * @apiBody {File} file Image to upload
  *
- * @apiExample {put} Example usage:
+ * @apiExample {post} Example usage:
  * POST /alice/avatar HTTP/1.1
  * Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryN8dwXAkcO1frCHLf
  *
@@ -278,7 +280,7 @@ router.get("/:account/avatar", middlewares.loggedIn, getAvatar);
  * ------WebKitFormBoundaryN8dwXAkcO1frCHLf--
  *
  * @apiSuccess (200) {Object} status Status of Avatar upload.
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  *	"status":"success"

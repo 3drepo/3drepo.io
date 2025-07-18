@@ -43,7 +43,7 @@ export interface IDrawingRevisionUploadStatus {
 
 export type CreateDrawingRevisionBody = {
 	name: string;
-	description?: string;
+	revisionDesc: string;
 	file: File;
 	statusCode: string;
 	revCode: string;

@@ -55,7 +55,6 @@ export interface DashboardParams extends TeamspaceParams {
 }
 
 export interface DashboardTicketsParams extends DashboardParams {
-	groupBy?: string;
 	template?: string;
 	ticketId?: string;
 }

@@ -56,7 +56,13 @@ export type View = {
 	hasThumbnail: boolean;
 };
 
-export enum AddOn {
+export enum AddOnModule {
 	Issues = 'issues',
 	Risks = 'risks',
 }
+
+export type AddOns = {
+	modules?: AddOnModule[],
+	usersProvisioned?: boolean,
+	disablePermissionsOnUI?: boolean,
+};

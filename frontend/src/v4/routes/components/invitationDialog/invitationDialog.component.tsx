@@ -63,6 +63,7 @@ interface IProps {
 	permissions?: any[];
 	projects: any;
 	models: any;
+	permissionsOnUIDisabled: boolean;
 	handleClose: () => void;
 	sendInvitation: (email, job, isAdmin, permissions, onFinish, onError) => void;
 }
@@ -217,20 +218,22 @@ export const InvitationDialog = (props: IProps) => {
 							/>
 						</FormControl>
 					)} />
-					<Field name="isAdmin" render={({ field }) => (
-						<FormControlLabel
-							control={
-								<Checkbox
-									checked={field.value}
-									{...field}
-									color="secondary"
-								/>
-							}
-							label="Teamspace Admin"
-						/>
-					)} />
+					{!props.permissionsOnUIDisabled && (
+						<Field name="isAdmin" render={({ field }) => (
+							<FormControlLabel
+								control={
+									<Checkbox
+										checked={field.value}
+										{...field}
+										color="secondary"
+									/>
+								}
+								label="Teamspace Admin"
+							/>
+						)} />
+					)}
 
-					{!formValues.isAdmin && renderPermissions(formValues.permissions)}
+					{!formValues.isAdmin && !props.permissionsOnUIDisabled && renderPermissions(formValues.permissions)}
 				</Content>
 				<Footer>
 					<CancelButton

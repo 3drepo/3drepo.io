@@ -26,6 +26,7 @@ export const useErrorInterceptor = () => {
 	};
 
 	const handleError = (err) => {
+		if (err.status === 404) return;
 		setError(err);
 		return Promise.reject(err);
 	};

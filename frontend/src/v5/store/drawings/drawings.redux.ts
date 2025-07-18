@@ -156,7 +156,7 @@ export interface IDrawingsActionCreators {
 	fetchTypes: (teamspace: string, projectId: string) => FetchTypesAction;
 	fetchTypesSuccess: (projectId: string, types: string[]) => FetchTypesSuccessAction;
 	createDrawing: (teamspace: string, projectId: string, drawing: NewDrawing, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
-	createDrawingSuccess: (projecId: string, drawing: NewDrawing) => CreateDrawingSuccessAction;
+	createDrawingSuccess: (projectId: string, drawing: NewDrawing) => CreateDrawingSuccessAction;
 	updateDrawing: (
 		teamspace: string, 
 		projectId: string, 
@@ -165,6 +165,6 @@ export interface IDrawingsActionCreators {
 		onSuccess?: () => void, 
 		onError?: (e:Error) => void
 	) => UpdateDrawingAction;
-	updateDrawingSuccess: (projecId: string, drawingId: string, drawing: Partial<IDrawing>) => UpdateDrawingSuccessAction;
+	updateDrawingSuccess: (projectId: string, drawingId: string, drawing: Partial<IDrawing>) => UpdateDrawingSuccessAction;
 	resetDrawingStatsQueue: () => ResetDrawingStatsQueueAction;
 }

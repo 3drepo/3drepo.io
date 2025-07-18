@@ -44,29 +44,74 @@ const multer = require("multer");
  */
 
 /**
+ * @apiDefine viewpointObject
+ *
+ * @apiBody (Viewpoint) {Number[]} right Right vector of the camera
+ * @apiBody (Viewpoint) {Number[]} up Up vector of the camera
+ * @apiBody (Viewpoint) {Number[]} position Position of the camera
+ * @apiBody (Viewpoint) {Number[]} look_at Look at point of the camera
+ * @apiBody (Viewpoint) {Number[]} view_dir View direction of the camera
+ * @apiBody (Viewpoint) {Number} near Near clipping plane
+ * @apiBody (Viewpoint) {Number} far Far clipping plane
+ * @apiBody (Viewpoint) {Number} fov Field of view in radians
+ * @apiBody (Viewpoint) {Number} aspect_ratio Aspect ratio of the viewport
+ * @apiBody (Viewpoint) {Object[]} [clippingPlanes] Array of clipping planes
+ * @apiBody (Viewpoint) {Object[]} [override_groups] Array of override groups with colors and objects
+ * @apiBody (Viewpoint) {Object[]} [transformation_groups] Array of transformation groups
+ * @apiBody (Viewpoint) {Object} [highlighted_group] Highlighted group with objects and color
+ * @apiBody (Viewpoint) {Object} [hidden_group] Hidden group with objects
+ * @apiBody (Viewpoint) {Boolean} [hideIfc] Flag to hide IFC elements
+ * @apiBody (Viewpoint) {String} [screenshot] Base64 encoded screenshot image
+ * @apiBody (Viewpoint) {String} [guid] Unique identifier for the viewpoint
+ */
+
+/**
+ * @apiDefine viewpointResponse
+ *
+ * @apiSuccess (Viewpoint) {Number[]} right Right vector of the camera
+ * @apiSuccess (Viewpoint) {Number[]} up Up vector of the camera
+ * @apiSuccess (Viewpoint) {Number[]} position Position of the camera
+ * @apiSuccess (Viewpoint) {Number[]} look_at Look at point of the camera
+ * @apiSuccess (Viewpoint) {Number[]} view_dir View direction of the camera
+ * @apiSuccess (Viewpoint) {Number} near Near clipping plane
+ * @apiSuccess (Viewpoint) {Number} far Far clipping plane
+ * @apiSuccess (Viewpoint) {Number} fov Field of view in radians
+ * @apiSuccess (Viewpoint) {Number} aspect_ratio Aspect ratio of the viewport
+ * @apiSuccess (Viewpoint) {Object[]} [clippingPlanes] Array of clipping planes
+ * @apiSuccess (Viewpoint) {Object[]} [override_groups] Array of override groups with colors and objects
+ * @apiSuccess (Viewpoint) {Object[]} [transformation_groups] Array of transformation groups
+ * @apiSuccess (Viewpoint) {Object} [highlighted_group] Highlighted group with objects and color
+ * @apiSuccess (Viewpoint) {Object} [hidden_group] Hidden group with objects
+ * @apiSuccess (Viewpoint) {Boolean} [hideIfc] Flag to hide IFC elements
+ * @apiSuccess (Viewpoint) {String} [screenshot] URL to screenshot image
+ * @apiSuccess (Viewpoint) {String} [screenshotSmall] URL to small screenshot image
+ * @apiSuccess (Viewpoint) {String} [guid] Unique identifier for the viewpoint
+ */
+
+/**
  * @apiDefine risksCreationPayload
  *
- *  @apiParam (Request body) {String} name Risk name
- *  @apiParam (Request body) {String[]} assigned_roles Risk owner
- *  @apiParam (Request body) {String} associated_activity Associated activity
- *  @apiParam (Request body) {String} category Category
- *  @apiParam (Request body) {Number} consequence Risk consequence (0: very low, 1: low, 2: moderate, 3: high, 4: very high)
- *  @apiParam (Request body) {String} desc Risk description
- *  @apiParam (Request body) {String} element Element type
- *  @apiParam (Request body) {Number} likelihood Risk likelihood (0: very low, 1: low, 2: moderate, 3: high, 4: very high)
- *  @apiParam (Request body) {String} location_desc Location description
- *  @apiParam (Request body) {String} mitigation_status Treatment status
- *  @apiParam (Request body) {String} mitigation_desc Treatment summary
- *  @apiParam (Request body) {String} mitigation_detail Treatment detailed description
- *  @apiParam (Request body) {String} mitigation_stage Treatment stage
- *  @apiParam (Request body) {String} mitigation_type Treatment type
- *  @apiParam (Request body) {Number[3]} position Risk pin coordinates
- *  @apiParam (Request body) {Number} residual_consequence Treated risk consequence (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)
- *  @apiParam (Request body) {Number} residual_likelihood Treated risk likelihood (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)
- *  @apiParam (Request body) {String} residual_risk Residual risk
- *  @apiParam (Request body) {String} risk_factor Risk factor
- *  @apiParam (Request body) {String} scope Construction scope
- *  @apiParam (Request body) {Viewpoint} viewpoint Viewpoint
+ *  @apiBody {String} name Risk name
+ *  @apiBody {String[]} assigned_roles Risk owner
+ *  @apiBody {String} associated_activity Associated activity
+ *  @apiBody {String} category Category
+ *  @apiBody {Number} consequence Risk consequence (0: very low, 1: low, 2: moderate, 3: high, 4: very high)
+ *  @apiBody {String} desc Risk description
+ *  @apiBody {String} element Element type
+ *  @apiBody {Number} likelihood Risk likelihood (0: very low, 1: low, 2: moderate, 3: high, 4: very high)
+ *  @apiBody {String} location_desc Location description
+ *  @apiBody {String} mitigation_status Treatment status
+ *  @apiBody {String} mitigation_desc Treatment summary
+ *  @apiBody {String} mitigation_detail Treatment detailed description
+ *  @apiBody {String} mitigation_stage Treatment stage
+ *  @apiBody {String} mitigation_type Treatment type
+ *  @apiBody {Number{3..3}} position Risk pin coordinates
+ *  @apiBody {Number} residual_consequence Treated risk consequence (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)
+ *  @apiBody {Number} residual_likelihood Treated risk likelihood (-1: unset, 0: very low, 1: low, 2: moderate, 3: high, 4: very high)
+ *  @apiBody {String} residual_risk Residual risk
+ *  @apiBody {String} risk_factor Risk factor
+ *  @apiBody {String} scope Construction scope
+ *  @apiUse viewpointObject
  */
 
 /**
@@ -163,26 +208,113 @@ router.get("/risks/:riskId", risksMiddleware.canView, findRiskById);
 router.get("/risks/:riskId/thumbnail.png", risksMiddleware.canView, getThumbnail);
 
 /**
- * @api {get} /:teamspace/:model[/revision/:revId]/risks List all risks
+ * @api {get} /:teamspace/:model/risks List all risks
  * @apiName listRisks
  * @apiGroup Risks
  * @apiDescription Retrieve all model risks.
  *
  * @apiUse Risks
  *
+ * @apiQuery {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ * @apiQuery {Number[]} [numbers] Array of issue numbers to filter for
+ * @apiQuery {String[]} [ids] Array of issue ids to filter for
+ * @apiQuery {String[]} [categories] Array of categories to filter for
+ * @apiQuery {String[]} [mitigationStatus] Array of mitigation status to filter for
+ * @apiQuery {Number[]} [likelihoods] Array of likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [consequences] Array of consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [residualLikelihoods] Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [levelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [residualConsequences] Array of residual consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [residualLevelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ *
+ * @apiSuccess (200) {Object[]} risks Risk objects
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * [
+ * 	{
+ * 		"_id":"00000000-0000-0000-0000-000000000002",
+ * 		"account":"acme",
+ * 		"assigned_roles":[
+ * 			"Job1"
+ * 		],
+ * 		"associated_activity":"Column casting",
+ * 		"category":"safety_fall",
+ * 		"comments":[],
+ * 		"consequence":0,
+ * 		"created":1567156228976,
+ * 		"creator_role":"Job4",
+ * 		"desc":"Risk description that describes the risk",
+ * 		"element":"Doors",
+ * 		"level_of_risk":0,
+ * 		"likelihood":0,
+ * 		"location_desc":"Tower 3 - Level 2",
+ * 		"mitigation_desc":"Erect temporary barrier",
+ * 		"mitigation_detail":"Erect a temporary 1.5m metal barrier along edge",
+ * 		"mitigation_stage":"Construction stage 5",
+ * 		"mitigation_status":"proposed",
+ * 		"mitigation_type":"Eliminate",
+ * 		"model":"00000000-0000-0000-0000-000000000000",
+ * 		"name":"Risk 1",
+ * 		"overall_level_of_risk":0,
+ * 		"owner":"alice",
+ * 		"position":[55000.0,80000.0,-10000.0],
+ * 		"residual_consequence":-1,
+ * 		"residual_level_of_risk":-1,
+ * 		"residual_likelihood":-1,
+ * 		"residual_risk":"",
+ * 		"rev_id":"00000000-0000-0000-0000-000000000001",
+ * 		"risk_factor":"Factor 9",
+ * 		"safetibase_id":"",
+ * 		"scope":"Tower 3",
+ * 		"thumbnail":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png",
+ * 		"viewpoint":{
+ * 			"aspect_ratio":1.4,
+ * 			"clippingPlanes":[],
+ * 			"far":300000,
+ * 			"fov":1.05,
+ * 			"guid":"00000000-0000-0000-0000-000000000004",
+ * 			"hideIfc":true,
+ * 			"look_at":[35000.0,40000.0,8000.0],
+ * 			"near":600.0,
+ * 			"position":[-70000.0,120000.0,150000.0],
+ * 			"right":[0.8,-0.3,0.6],
+ * 			"screenshot":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png",
+ * 			"screenshotSmall":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png",
+ * 			"up":[0.3,0.9,-0.3],
+ * 			"view_dir":[0.5,-0.4,-0.7]
+ * 		}
+ * 	}
+ * ]
+ */
+
+/**
+ * @api {get} /:teamspace/:model/revision/:revId/risks List all risks of a revision
+ * @apiName listRisksByRevision
+ * @apiGroup Risks
+ * @apiDescription Retrieve all model risks.
+ *
+ * @apiUse Risks
+ *
  * @apiParam {String} [revId] Revision ID
- * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
- * @apiParam (Query) {Number[]} [numbers] Array of issue numbers to filter for
- * @apiParam (Query) {String[]} [ids] Array of issue ids to filter for
- * @apiParam (Query) {String[]} [categories] Array of categories to filter for
- * @apiParam (Query) {String[]} [mitigationStatus] Array of mitigation status to filter for
- * @apiParam (Query) {Number[]} [likelihoods] Array of likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
- * @apiParam (Query) {Number[]} [consequences] Array of consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
- * @apiParam (Query) {Number[]} [residualLikelihoods] Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
- * @apiParam (Query) {Number[]} [levelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
- * @apiParam (Query) {Number[]} [residualLikelihoods] Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
- * @apiParam (Query) {Number[]} [residualConsequences] Array of residual consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
- * @apiParam (Query) {Number[]} [residualLevelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ * @apiQuery {Number[]} [numbers] Array of issue numbers to filter for
+ * @apiQuery {String[]} [ids] Array of issue ids to filter for
+ * @apiQuery {String[]} [categories] Array of categories to filter for
+ * @apiQuery {String[]} [mitigationStatus] Array of mitigation status to filter for
+ * @apiQuery {Number[]} [likelihoods] Array of likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [consequences] Array of consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [residualLikelihoods] Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [levelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [residualLikelihoods] Array of residual likelihoods to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [residualConsequences] Array of residual consequences to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
+ * @apiQuery {Number[]} [residualLevelOfRisks] Array of levels of risks to filter for. The possible number values for this fields are UNSET: -1, VERY_LOW: 0, LOW: 1, MODERATE: 2, HIGH: 3, VERY_HIGH: 4 .
  *
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
@@ -295,15 +427,37 @@ router.get("/risks/:riskId/viewpoints/:vid/screenshotSmall.png", risksMiddleware
 router.get("/revision/:rid/risks", risksMiddleware.canView, listRisks);
 
 /**
- * @api {get} /:teamspace/:model[/revision/:revId]/risks.html Render risks as HTML
+ * @api {get} /:teamspace/:model/risks.html Render risks as HTML
  * @apiName renderRisksHTML
  * @apiGroup Risks
  * @apiDescription Retrieve HTML page of all risks.
  *
  * @apiUse Risks
  *
+ * @apiQuery {String} ids Risk IDs to show
+ * @apiSuccess (200) {Object[]} risks Risk objects
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/risks.html?[query] HTTP/1.1
+ *
+ * @apiExample {get} Example usage:
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks.html?[query] HTTP/1.1
+ *
+ * @apiSuccessExample {html} Success-Response
+ * HTTP/1.1 200 OK
+ * <html page>
+ */
+
+/**
+ * @api {get} /:teamspace/:model/revision/:revId/risks.html Render risks for a revision as HTML
+ * @apiName renderRisksByRevisionHTML
+ * @apiGroup Risks
+ * @apiDescription Retrieve HTML page of all risks.
+ *
+ * @apiUse Risks
+ *
  * @apiParam {String} [revId] Revision ID
- * @apiParam (Query) {String} ids Risk IDs to show
+ * @apiQuery {String} ids Risk IDs to show
  * @apiSuccess (200) {Object[]} risks Risk objects
  *
  * @apiExample {get} Example usage:
@@ -321,8 +475,8 @@ router.get("/risks.html", risksMiddleware.canView, renderRisksHTML);
 router.get("/revision/:rid/risks.html", risksMiddleware.canView, renderRisksHTML);
 
 /**
- * @api {post} /:teamspace/:model[/revision/:revId]/risks Create a risk
- * @apiName storeRisk
+ * @api {post} /:teamspace/:model/revision/:revId/risks Create a risk for a revision
+ * @apiName storeRiskForRevision
  * @apiGroup Risks
  * @apiDescription Create a model risk.
  *
@@ -484,11 +638,175 @@ router.get("/revision/:rid/risks.html", risksMiddleware.canView, renderRisksHTML
  * 	}
  * }
  */
+
+/**
+ * @api {post} /:teamspace/:model/risks Create a risk
+ * @apiName storeRisk
+ * @apiGroup Risks
+ * @apiDescription Create a model risk.
+ *
+ * @apiUse Risks
+ *
+ * @apiUse risksCreationPayload
+ * @apiUse viewpointObject
+ *
+ * @apiExample {post} Example usage:
+ * POST /acme/00000000-0000-0000-0000-000000000000/risks HTTP/1.1
+ * {
+ * 	"assigned_roles":[
+ * 		"Job1"
+ * 	],
+ * 	"associated_activity":"",
+ * 	"category":"safety_fall",
+ * 	"comments":[],
+ * 	"consequence":0,
+ * 	"creator_role":"Job4",
+ * 	"desc":"Risk description that describes the risk",
+ * 	"element":"Doors",
+ * 	"level_of_risk":0,
+ * 	"likelihood":0,
+ * 	"location_desc":"Tower 3 - Level 2",
+ * 	"mitigation_desc":"Erect temporary barrier",
+ * 	"mitigation_detail":"Erect a temporary 1.5m metal barrier along edge",
+ * 	"mitigation_stage":"Construction stage 5",
+ * 	"mitigation_status":"proposed",
+ * 	"mitigation_type":"Eliminate",
+ * 	"name":"Risk 1",
+ * 	"overall_level_of_risk":0,
+ * 	"position":[55000.0,80000.0,-10000.0],
+ * 	"residual_consequence":-1,
+ * 	"residual_level_of_risk":-1,
+ * 	"residual_likelihood":-1,
+ * 	"residual_risk":"",
+ *	"risk_factor":"Factor 9",
+ * 	"safetibase_id":"",
+ * 	"scope":"Tower 3",
+ * 	"viewpoint":{
+ * 		"aspect_ratio":1.4,
+ * 		"clippingPlanes":[],
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"hideIfc":true,
+ * 		"highlighted_group_id":"",
+ * 		"look_at":[35000.0,40000.0,8000.0],
+ * 		"near":600.0,
+ * 		"position":[-70000.0,120000.0,150000.0],
+ * 		"right":[0.8,-0.3,0.6],
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"view_dir":[0.5,-0.4,-0.7],
+ * 		"screenshot":<base64 image>
+ * 	}
+ * }
+ *
+ * @apiExample {post} Example usage:
+ * POST /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks HTTP/1.1
+ * {
+ * 	"assigned_roles":[
+ * 		"Job1"
+ * 	],
+ * 	"associated_activity":"",
+ * 	"category":"safety_fall",
+ * 	"comments":[],
+ * 	"consequence":0,
+ * 	"creator_role":"Job4",
+ * 	"desc":"Risk description that describes the risk",
+ * 	"element":"Doors",
+ * 	"level_of_risk":0,
+ * 	"likelihood":0,
+ * 	"location_desc":"Tower 3 - Level 2",
+ * 	"mitigation_desc":"Erect temporary barrier",
+ * 	"mitigation_detail":"Erect a temporary 1.5m metal barrier along edge",
+ * 	"mitigation_stage":"Construction stage 5",
+ * 	"mitigation_status":"proposed",
+ * 	"mitigation_type":"Eliminate",
+ * 	"name":"Risk 1",
+ * 	"overall_level_of_risk":0,
+ * 	"position":[55000.0,80000.0,-10000.0],
+ * 	"residual_consequence":-1,
+ * 	"residual_level_of_risk":-1,
+ * 	"residual_likelihood":-1,
+ * 	"residual_risk":"",
+ *	"risk_factor":"Factor 9",
+ * 	"safetibase_id":"",
+ * 	"scope":"Tower 3",
+ * 	"viewpoint":{
+ * 		"aspect_ratio":1.4,
+ * 		"clippingPlanes":[],
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"hideIfc":true,
+ * 		"highlighted_group_id":"",
+ * 		"look_at":[35000.0,40000.0,8000.0],
+ * 		"near":600.0,
+ * 		"position":[-70000.0,120000.0,150000.0],
+ * 		"right":[0.8,-0.3,0.6],
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"view_dir":[0.5,-0.4,-0.7],
+ * 		"screenshot":<base64 image>
+ * 	}
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	"_id":"00000000-0000-0000-0000-000000000002",
+ * 	"account":"acme",
+ * 	"assigned_roles":[
+ * 		"Job1"
+ * 	],
+ * 	"associated_activity":"",
+ * 	"category":"safety_fall",
+ * 	"comments":[],
+ * 	"consequence":0,
+ * 	"created":1567156228976,
+ * 	"creator_role":"Job4",
+ * 	"desc":"Risk description that describes the risk",
+ * 	"element":"Doors",
+ * 	"level_of_risk":0,
+ * 	"likelihood":0,
+ * 	"location_desc":"Tower 3 - Level 2",
+ * 	"mitigation_desc":"Erect temporary barrier",
+ * 	"mitigation_detail":"Erect a temporary 1.5m metal barrier along edge",
+ * 	"mitigation_stage":"Construction stage 5",
+ * 	"mitigation_status":"proposed",
+ * 	"mitigation_type":"Eliminate",
+ * 	"model":"00000000-0000-0000-0000-000000000000",
+ * 	"name":"Risk 1",
+ * 	"overall_level_of_risk":0,
+ * 	"owner":"alice",
+ * 	"position":[55000.0,80000.0,-10000.0],
+ * 	"residual_consequence":-1,
+ * 	"residual_level_of_risk":-1,
+ * 	"residual_likelihood":-1,
+ * 	"residual_risk":"",
+ * 	"rev_id":"00000000-0000-0000-0000-000000000001",
+ *	"risk_factor":"Factor 9",
+ * 	"safetibase_id":"",
+ * 	"scope":"Tower 3",
+ * 	"thumbnail":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png",
+ * 	"viewpoint":{
+ * 		"aspect_ratio":1.4,
+ * 		"clippingPlanes":[],
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"guid":"00000000-0000-0000-0000-000000000004",
+ * 		"hideIfc":true,
+ * 		"look_at":[35000.0,40000.0,8000.0],
+ * 		"near":600.0,
+ * 		"position":[-70000.0,120000.0,150000.0],
+ * 		"right":[0.8,-0.3,0.6],
+ * 		"screenshot":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png",
+ * 		"screenshotSmall":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png",
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"view_dir":[0.5,-0.4,-0.7]
+ * 	}
+ * }
+ */
 router.post("/risks", risksMiddleware.canCreate, storeRisk);
 
 /**
- * @api {patch} /:teamspace/:model[/revision/:revId]/risks/:riskId Update risk
- * @apiName updateRisk
+ * @api {patch} /:teamspace/:model/revision/:revId/risks/:riskId Update risk for a revision
+ * @apiName updateRiskForRevision
  * @apiGroup Risks
  * @apiDescription Update model risk.
  *
@@ -496,6 +814,87 @@ router.post("/risks", risksMiddleware.canCreate, storeRisk);
  * @apiUse RiskIdParam
  *
  * @apiParam {String} [revId] Revision ID
+ *
+ * @apiUse risksCreationPayload
+ *
+ * @apiExample {patch} Example usage:
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ * {
+ * 	"residual_likelihood":1
+ * }
+ *
+ * @apiExample {patch} Example usage:
+ * PATCH /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/risks/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ * {
+ * 	"residual_likelihood":1
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response
+ * HTTP/1.1 200 OK
+ * {
+ * 	"_id":"00000000-0000-0000-0000-000000000002",
+ * 	"account":"acme",
+ * 	"assigned_roles":[
+ * 		"Job1"
+ * 	],
+ * 	"associated_activity":"",
+ * 	"category":"safety_fall",
+ * 	"comments":[],
+ * 	"consequence":0,
+ * 	"created":1567156228976,
+ * 	"creator_role":"Job4",
+ * 	"desc":"Risk description that describes the risk",
+ * 	"element":"Doors",
+ * 	"level_of_risk":0,
+ * 	"likelihood":0,
+ * 	"location_desc":"Tower 3 - Level 2",
+ * 	"mitigation_desc":"Erect temporary barrier",
+ * 	"mitigation_detail":"Erect a temporary 1.5m metal barrier along edge",
+ * 	"mitigation_stage":"Construction stage 5",
+ * 	"mitigation_status":"proposed",
+ * 	"mitigation_type":"Eliminate",
+ * 	"model":"00000000-0000-0000-0000-000000000000",
+ * 	"name":"Risk 1",
+ * 	"owner":"alice",
+ * 	"overall_level_of_risk":0,
+ * 	"position":[55000.0,80000.0,-10000.0],
+ * 	"residual_consequence":-1,
+ * 	"residual_level_of_risk":-1,
+ * 	"residual_likelihood":1,
+ * 	"residual_risk":"",
+ * 	"rev_id":"00000000-0000-0000-0000-000000000001",
+ *	"risk_factor":"Factor 9",
+ * 	"safetibase_id":"",
+ * 	"scope":"Tower 3",
+ * 	"thumbnail":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/thumbnail.png",
+ * 	"viewpoint":{
+ * 		"aspect_ratio":1.4,
+ * 		"clippingPlanes":[],
+ * 		"far":300000,
+ * 		"fov":1.05,
+ * 		"guid":"00000000-0000-0000-0000-000000000004",
+ * 		"hideIfc":true,
+ * 		"look_at":[35000.0,40000.0,8000.0],
+ * 		"near":600.0,
+ * 		"position":[-70000.0,120000.0,150000.0],
+ * 		"right":[0.8,-0.3,0.6],
+ * 		"screenshot":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshot.png",
+ * 		"screenshotSmall":"acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/viewpoints/00000000-0000-0000-0000-000000000003/screenshotSmall.png",
+ * 		"up":[0.3,0.9,-0.3],
+ * 		"view_dir":[0.5,-0.4,-0.7]
+ * 	}
+ * }
+ */
+
+/**
+ * @api {patch} /:teamspace/:model/risks/:riskId Update risk
+ * @apiName updateRisk
+ * @apiGroup Risks
+ * @apiDescription Update model risk.
+ *
+ * @apiUse Risks
+ * @apiUse RiskIdParam
+ *
  *
  * @apiUse risksCreationPayload
  *
@@ -582,16 +981,16 @@ router.patch("/revision/:rid/risks/:riskId", risksMiddleware.canComment, updateR
  * @apiUse Risks
  * @apiUse RiskIdParam
  *
- * @apiParam (Request body) {String} _id Risk ID
- * @apiParam (Request body) {String} rev_id Revision ID
- * @apiParam (Request body) {String} comment Comment text
- * @apiParam (Request body) {Viewpoint} viewpoint Viewpoint object
+ * @apiBody {String} _id Risk ID
+ * @apiBody {String} rev_id Revision ID
+ * @apiBody {String} comment Comment text
+ * @apiUse viewpointObject
  *
  * @apiSuccess {String} guid Comment ID
  * @apiSuccess {Number} created Comment creation timestamp
  * @apiSuccess {String} owner Comment owner
  * @apiSuccess {String} comment Comment text
- * @apiSuccess {Object} viewpoint Viewpoint object
+ * @apiUse viewpointResponse
  *
  * @apiExample {post} Example usage:
  * POST /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/comments HTTP/1.1
@@ -650,7 +1049,7 @@ router.post("/risks/:riskId/comments", risksMiddleware.canComment, addComment, m
  * @apiUse Risks
  * @apiUse RiskIdParam
  *
- * @apiParam (Request body) {String} guid Comment ID
+ * @apiBody {String} guid Comment ID
  *
  * @apiExample {delete} Example usage:
  * DELETE /acme/00000000-0000-0000-0000-000000000000/risks/00000000-0000-0000-0000-000000000002/comments HTTP/1.1
@@ -682,10 +1081,10 @@ router.delete("/risks/:riskId/comments", risksMiddleware.canComment, deleteComme
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  *
- * @apiParam (Request body file resource (multipart/form-data)) {File[]} files The array of files to be attached
- * @apiParam (Request body file resource (multipart/form-data)) {String[]} names The names of the files; it should have the same length as the files field and should include the file extension
- * @apiParam (Request body URL resource) {String[]} urls The array of URLs to be attached
- * @apiParam (Request body URL resource) {String[]} names The names of the URLs; it should have the same length as the URL field
+ * @apiBody (file resource (multipart/form-data)) {File[]} files The array of files to be attached
+ * @apiBody (file resource (multipart/form-data)) {String[]} names The names of the files; it should have the same length as the files field and should include the file extension
+ * @apiBody (URL resource) {String[]} urls The array of URLs to be attached
+ * @apiBody (URL resource) {String[]} names The names of the URLs; it should have the same length as the URL field
  *
  * @apiSuccessExample {json} Success example result after two files has been uploaded
  *
@@ -727,7 +1126,7 @@ router.post("/risks/:riskId/resources",risksMiddleware.canComment, attachResourc
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  *
- * @apiParam (Request body) {String} _id The resource id to be detached
+ * @apiBody {String} _id The resource id to be detached
  *
  * @apiSuccessExample {json}
  *

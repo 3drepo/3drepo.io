@@ -89,9 +89,14 @@ export default css`
 		${Container} {
 			padding-top: 0;
 
-			${StyledSelect} svg {
-				color: ${({ theme }) => theme.palette.base.lighter};
-				top: -13px;
+			${StyledSelect} {
+				.MuiOutlinedInput-root {
+					width: 100%;
+				}
+
+				svg {
+					color: ${({ theme }) => theme.palette.secondary.main};
+				}
 			}
 
 			&:first-of-type {

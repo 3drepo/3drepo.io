@@ -23,6 +23,7 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../src/v5/utils/permissions');
 const Permissions = require(`${src}/utils/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { ADD_ONS: { USERS_PROVISIONED } } = require(`${src}/models/teamspaces.constants`);
 
 jest.mock('../../../../../../src/v5/utils/sessions');
 const Sessions = require(`${src}/utils/sessions`);
@@ -200,9 +201,55 @@ const testIsAddOnModuleEnabled = () => {
 	});
 };
 
+const testNotUserProvisioned = () => {
+	describe('notUserProvisioned', () => {
+		const teamspace = generateRandomString();
+		const mockCB = jest.fn(() => {});
+
+		test('next() should be called if userProvisioned is not set', async () => {
+			TeamspaceSettings.getAddOns.mockResolvedValueOnce({});
+			await TSMiddlewares.notUserProvisioned({ params: { teamspace } }, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
+		});
+
+		test('should respond with notAuthorized if userProvisioned is set to true', async () => {
+			TeamspaceSettings.getAddOns.mockResolvedValueOnce({ [USERS_PROVISIONED]: true });
+			const req = { params: { teamspace } };
+			const res = {};
+			await TSMiddlewares.notUserProvisioned(req, res, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.userProvisioned);
+
+			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
+		});
+
+		test('should respond with error if getAddOns throws error', async () => {
+			const error = new Error();
+			TeamspaceSettings.getAddOns.mockRejectedValueOnce(error);
+			const req = { params: { teamspace } };
+			const res = {};
+			await TSMiddlewares.notUserProvisioned(req, res, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, error);
+
+			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.getAddOns).toHaveBeenCalledWith(teamspace);
+		});
+	});
+};
+
 describe('middleware/permissions/components/teamspaces', () => {
 	testIsTeamspaceMember();
 	testIsActiveTeamspaceMember();
 	testIsTeamspaceAdmin();
 	testIsAddOnModuleEnabled();
+	testNotUserProvisioned();
 });

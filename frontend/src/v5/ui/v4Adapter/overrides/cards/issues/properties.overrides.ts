@@ -31,6 +31,10 @@ export default css`
 				padding: 0px 11px;
 			}
 
+			.MuiOutlinedInput-root {
+				width: 100%;
+			}
+
 			// Drop down icon for date selector
 			.MuiInputAdornment-root {
 				position: absolute;

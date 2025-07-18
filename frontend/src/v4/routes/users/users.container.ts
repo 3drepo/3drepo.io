@@ -20,6 +20,7 @@ import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectPermissionsOnUIDisabled, selectUsersProvisionedEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import {
 	selectCollaboratorLimit,
 	selectCurrentTeamspace,
@@ -51,6 +52,8 @@ const mapStateToProps = createStructuredSelector({
 	selectedTeamspace: selectCurrentTeamspace,
 	isPending: selectUsersPending,
 	isTeamspaceAdmin: selectIsTeamspaceAdmin,
+	usersProvisionedEnabled: selectUsersProvisionedEnabled,
+	permissionsOnUIDisabled: selectPermissionsOnUIDisabled,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

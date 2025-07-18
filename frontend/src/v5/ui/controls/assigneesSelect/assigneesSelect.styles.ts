@@ -15,75 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.component';
-import { Tooltip as TooltipBase } from '@mui/material';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import styled from 'styled-components';
 
-export const Tooltip = styled(TooltipBase)``;
+export const ValuesAndClearButton = styled.div`
+	display: inline-flex;
+	flex-direction: row;
+	align-items: center;
+`;
 
 export const AssigneesListContainer = styled.div`
 	display: inline-flex;
-	position: relative;
+	justify-content: space-between;
 	align-items: center;
+	position: relative;
 	user-select: none;
 	color: ${({ theme }) => theme.palette.base.main};
 	font-size: 10px;
 	line-height: 100%;
-	width: fit-content;
-	>* {
-		cursor: pointer;
-	}
-	span + ${Tooltip} {
-		margin-left: 13px;
-	}
+	width: 100%;
+	height: 24px;
 
-	.MuiAvatar-root {
-		z-index: 2;
-		margin-right: -8px;
-		outline: 2px solid ${({ theme }) => theme.palette.primary.contrast};
-		&:hover {
-			z-index: 3; /* avatar appears on top when hovered */
-		}
-
-		::before {
-			content: "";
-			margin: 0;
-			background-color: ${({ theme }) => theme.palette.primary.contrast};
-			position: absolute;
-			opacity: 0;
-			width: 100%;
-			height: 100%;
-			box-sizing: border-box;
-			border-radius: 50%;
-			z-index: 10;
-		}
-	}
-	span:last-child .MuiAvatar-root {
-		margin: 0;
-	}
-
-	&:hover .MuiAvatar-root {
-		&::before {
-			opacity: 0.3;
-		}
-		&:hover::before {
-			opacity: 0;
-		}
-	}
-`;
-
-export const AddUserButton = styled(PopoverCircle).attrs({
-	size: 'small',
-})`
-	padding: 5px;
-	box-sizing: border-box;
-	color: ${({ theme }) => theme.palette.base.main};
-	&& {
-		border: 1px dashed ${({ theme }) => theme.palette.base.light};
-		outline: none;
-		margin: 0;
-		&::before {
-			background-color: transparent;
-		}
+	${Spinner} {
+		margin: 6px 0;
 	}
 `;

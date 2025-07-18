@@ -43,7 +43,7 @@ export const createFormDataFromRevisionBody = (body: CreateDrawingRevisionBody) 
 	formData.append('file', body.file);
 	formData.append('revCode', body.revCode);
 	formData.append('statusCode', body.statusCode);
-	if (body.description) formData.append('desc', body.description);
+	if (body.revisionDesc) formData.append('desc', body.revisionDesc);
 	return formData;
 };
 

@@ -40,8 +40,8 @@ const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 /**
  * @apiDefine PermissionObject
  *
- * @apiParam (Request body: Permission) {string} user User ID
- * @apiParam (Request body: Permission) {string} permission Permission type ('viewer'|'commenter'|'collaborator'|'').
+ * @apiBody (Permission) {string} user User ID
+ * @apiBody (Permission) {string} permission Permission type ('viewer'|'commenter'|'collaborator'|'').
  */
 
 // Get model info
@@ -52,7 +52,7 @@ const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
  * @apiGroup Model
  *
  * @apiParam {String} teamspace Name of teamspace
- * @apiParam {Object} model The modelId to get settings for.
+ * @apiParam {String} model.json The modelId to get settings for, with a json extension.
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818.json HTTP/1.1
@@ -99,6 +99,7 @@ router.get("/:model.json", middlewares.hasReadAccessToModel, getModelSetting);
  * @apiName getHeliSpeed
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model The modelId to get Heli speed for.
  *
  * @apiExample {get} Example usage:
@@ -116,8 +117,9 @@ router.get("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, getHe
  * @apiName updateHeliSpeed
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to Update Heli speed.
- * @apiParam (Request body) {Number} heliSpeed The value of the speed that will replace the heli speed.
+ * @apiBody {Number} heliSpeed The value of the speed that will replace the heli speed.
  *
  * @apiExample {put} Example usage:
  * PUT /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/settings/heliSpeed HTTP/1.1
@@ -135,18 +137,19 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
  * @apiName updateSettings
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to update Settings.
  *
- * @apiParam (Request body) {String} name Name of the model to be created
- * @apiParam (Request body) {String} unit The unit in which the model is specified
- * @apiParam (Request body) {String} code A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers
- * @apiParam (Request body) {String} type The type of the model
- * @apiParam (Request body) {Number} angleFromNorth GIS bearing angle
- * @apiParam (Request body) {Number} elevation GIS elevation
- * @apiParam (Request body) {[]SurveyPoint} surveyPoints  an array containing GIS surveypoints
+ * @apiBody {String} name Name of the model to be created
+ * @apiBody {String} unit The unit in which the model is specified
+ * @apiBody {String} code A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers
+ * @apiBody {String} type The type of the model
+ * @apiBody {Number} angleFromNorth GIS bearing angle
+ * @apiBody {Number} elevation GIS elevation
+ * @apiBody {Object[]} surveyPoints  an array containing GIS surveypoints
  *
- * @apiParam (Request body: SurveyPoint) {Number[]} position an array representing a three dimensional coordinate
- * @apiParam (Request body: SurveyPoint) {Number[]} latLong an array representing a two dimensional coordinate for latitude and logitude
+ * @apiBody (SurveyPoint) {Number[]} position an array representing a three dimensional coordinate
+ * @apiBody (SurveyPoint) {Number[]} latLong an array representing a two dimensional coordinate for latitude and logitude
  *
  * @apiExample {put} Example usage:
  * PUT /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/settings HTTP/1.1
@@ -340,20 +343,13 @@ router.get("/:model/revision/master/head/repoAssets.json", middlewares.hasReadAc
 router.get("/:model/revision/:rev/repoAssets.json", middlewares.hasReadAccessToModel, getRepoAssets);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/unityAssets.json Get unity assets
- * @apiName getUnityAssets
+ * @api {get} /:teamspace/:model/revision/master/head/assetsMeta Get unity assets metadata
+ * @apiName getAssetsMeta
  * @apiGroup Model
- * @apiDescription Get the lastest model's version unity assets
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model The model Id to get unity assets for.
- *
- * @apiExample {get} Example usage:
- * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/unityAssets.json HTTP/1.1
+ * @apiDescription Get the lastest model's version unity assets metadata
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model The model Id
- * @apiParam {String} rev The revision of the model
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/assetsMeta HTTP/1.1
@@ -417,7 +413,7 @@ router.get("/:model/revision/:rev/supermeshes.json.mpc", middlewares.hasReadAcce
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model to get JSON Mpc for.
- * @apiParam {String} uid id of the json.mpc file
+ * @apiParam {String} uid.json.mpc id of the json.mpc file
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500_unity.json.mpc HTTP/1.1
@@ -459,21 +455,10 @@ router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMp
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model
- * @apiParam {String} uid id of the unity bundle
+ * @apiParam {String} uid.unity3d id of the unity bundle
  */
 
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
-
-/**
- * @api {get} /:teamspace/:model/:uid.src.mpc Get Model in SRC representation
- * @apiName getSRC
- * @apiGroup Model
- * @apiDescription Get a mesh presented in SRC format.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model id of the model
- * @apiParam {String} uid id of the SRC file.
- */
 
 router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
 
@@ -485,7 +470,7 @@ router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model
- * @apiParam {String} uid id of the repo bundle file.
+ * @apiParam {String} uid.repobundle id of the repo bundle file.
  */
 
 router.get("/:model/:uid.repobundle", middlewares.hasReadAccessToModel, getRepoBundle);
@@ -498,7 +483,7 @@ router.get("/:model/:uid.repobundle", middlewares.hasReadAccessToModel, getRepoB
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model
- * @apiParam {String} uid id of the texture file.
+ * @apiParam {String} uid.texture id of the texture file.
  */
 router.get("/:model/:uid.texture", middlewares.hasReadAccessToModel, getTexture);
 
@@ -630,10 +615,10 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Federated Model ID to update
  *
- * @apiParam (Request body){[]Submodel} subModels Information on the models that are going to get federated
+ * @apiBody {Object[]} subModels Information on the models that are going to get federated
  *
- * @apiParam (Request body: SubModel){String} database The teamspace name which the model belongs to
- * @apiParam (Request body: SubModel){String} model The model id to be federated
+ * @apiBody (SubModel) {String} database The teamspace name which the model belongs to
+ * @apiBody (SubModel) {String} model The model id to be federated
  *
  * @apiExample {put} Example usage:
  * PUT /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5 HTTP/1.1
@@ -719,16 +704,13 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
 router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5NewFedRevisionsData, validateNewFedRevisionData, updateModel);
 
 /**
- * @api {patch} /:teamspace/models/permissions Batch update model permissions
- * @apiName batchUpdateModelPermissions
+ * @api {patch} /:teamspace/model/permissions Update multiple model permissions
+ * @apiName updateModelPermissions
  * @apiGroup Model
  *
- * @apiParam {String} teamspace Name of teamspace.
+ * @apiParam {String} teamspace Name of teamspace
  *
- * @apiParam (Request body) {ModelPermissions[]} BODY List of model permissions
- *
- * @apiParam (Request body: ModelPermissions) {String} model Model ID
- * @apiParam (Request body: ModelPermissions) {Permission[]} permissions List of user permissions
+ * @apiBody {Permission[]} permissions List of user permissions
  *
  * @apiUse PermissionObject
  *
@@ -776,9 +758,10 @@ router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5N
  *    }
  * ]
  *
- * @apiSuccessExample {json} Success:
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
  * {
- *    status: "ok"
+ *    "status": "ok"
  * }
  */
 router.patch("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, batchUpdatePermissions);
@@ -791,7 +774,7 @@ router.patch("/models/permissions", middlewares.hasEditPermissionsAccessToMulitp
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  *
- * @apiParam (Request body) {Permission[]} BODY List of user permissions
+ * @apiBody {Permission[]} permissions List of user permissions
  *
  * @apiUse PermissionObject
  *
@@ -834,14 +817,14 @@ router.patch("/models/permissions", middlewares.hasEditPermissionsAccessToMulitp
 router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
 /**
- * @api {get} /:teamspace/model/permissions?models=[MODELS] Get multiple models permissions
+ * @api {get} /:teamspace/model/permissions Get multiple models permissions
  * @apiName getMultipleModelsPermissions
  * @apiGroup Model
  *
  * @apiDescription Gets the permissions of a list of models
  *
  * @apiParam {String} teamspace Name of teamspace.
- * @apiParam (Query) {String[]} MODELS An array of model ids.
+ * @apiQuery {String} models An array of model ids.
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/models/permissions?models=5ce7dd19-1252-4548-a9c9-4a5414f2e0c5,3549ddf6-885d-4977-87f1-eeac43a0e818 HTTP/1.1
@@ -1037,6 +1020,9 @@ router.get("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, g
  * @apiGroup Model
  *
  * @apiDescription Returns the full tree for the model
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/fulltree.json HTTP/1.1
@@ -1343,7 +1329,7 @@ router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAcce
 /**
  *
  *
- * @api {get} /:teamspace/:model/revision/master/head/searchtree.json?searchString=[searchString] Search model tree
+ * @api {get} /:teamspace/:model/revision/master/head/searchtree.json Search model tree
  * @apiName searchModelTree
  * @apiGroup Model
  * @apiDescription Searches the model (or models if it is a federation) tree and returns the objects matching their names with the searchString param.
@@ -1351,7 +1337,7 @@ router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAcce
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
  *
- * @apiParam (Query) {String} searchString The string to use for search tree objects
+ * @apiQuery {String} searchString The string to use for search tree objects
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/searchtree.json?searchString=fou HTTP/1.1
@@ -1377,7 +1363,7 @@ router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAcce
 router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rev/searchtree.json?searchString=[searchString] Search model tree by revision
+ * @api {get} /:teamspace/:model/revision/:rev/searchtree.json Search model tree by revision
  * @apiName searchModelTreeRev
  * @apiGroup Model
  * @apiDescription Searches the model (or models if it is a federation) tree and returns the objects matching their names with the searchString param.
@@ -1387,7 +1373,7 @@ router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAc
  * @apiParam {String} model Model to use.
  * @apiParam {String} rev	Revision to use.
  *
- * @apiParam (Query) {String} searchString The string to use for search tree objects
+ * @apiQuery {String} searchString The string to use for search tree objects
  */
 
 router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
@@ -1459,7 +1445,7 @@ router.get("/:model/revision/master/head/subModelRevisions", middlewares.hasRead
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get properties for.
- * @apiParam {String} rev	Revision to use.
+ * @apiParam {String} revId	Revision to use.
  *
  */
 router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAccessToModel, getSubModelRevisions);

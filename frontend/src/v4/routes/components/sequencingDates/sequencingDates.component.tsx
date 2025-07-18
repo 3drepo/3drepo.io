@@ -24,7 +24,7 @@ import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 import { selectHasSequences } from '@/v4/modules/sequences';
 
-import { isDateOutsideRange } from '../../../helpers/dateTime';
+import dayjs from 'dayjs';
 import {
 	FieldsRow,
 	StyledFormControl,
@@ -63,7 +63,9 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 	return (
 		<SequenceDateContainer>
 			<SequenceDateField
-				shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
+				minDateTime={min ? dayjs(min) : null}
+				maxDateTime={max ? dayjs(max) : null}
+				// shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
 				name={name}
 				value={value}
 				onChange={handleChange}
@@ -102,9 +104,7 @@ export class BaseSequencingDates extends PureComponent<IProps, IState> {
 							<SequenceDate
 								{...field}
 								{...this.props}
-								max={this.props.max ?
-									new Date(Math.min(form.values.sequence_end || Number.POSITIVE_INFINITY, this.props.max))
-									: undefined}
+								max={this.props.max || form.values.sequence_end}
 								{...this.additionalProps}
 							/>
 						)} />
@@ -118,7 +118,7 @@ export class BaseSequencingDates extends PureComponent<IProps, IState> {
 							<SequenceDate
 								{...field}
 								{...this.props}
-								min={this.props.min ? Math.max(form.values.sequence_start || 0, this.props.min) : undefined}
+								min={this.props.min || form.values.sequence_start}
 							/>)
 					} />
 					</StyledFormControl>

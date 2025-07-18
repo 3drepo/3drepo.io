@@ -224,7 +224,7 @@ config.apiAlgorithm = createRoundRobinAlgorithm(config);
 
 // Subscription info
 config.subscriptions = coalesce(config.subscriptions, {});
-config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 200});
+config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 0});
 
 // Terms & Conditions update date
 config.termsUpdatedAt = coalesce(config.termsUpdatedAt, 0);

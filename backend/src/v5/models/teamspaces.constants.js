@@ -37,6 +37,8 @@ TeamspaceConstants.ADD_ONS = {
 	HERE: 'hereEnabled',
 	MODULES: 'modules',
 	DAILY_DIGEST: 'dailyDigestEnabled',
+	USERS_PROVISIONED: 'usersProvisioned',
+	DISABLE_PERMISSIONS_ON_UI: 'disablePermissionsOnUI',
 };
 
 TeamspaceConstants.ADD_ONS_MODULES = {

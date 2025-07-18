@@ -123,6 +123,7 @@ export const SidebarSchema = Yup.object().shape({
 	),
 	drawingDesc: desc,
 	calibration,
+	revisionDesc: desc,
 });
 
 export const UploadsSchema = Yup.object().shape({

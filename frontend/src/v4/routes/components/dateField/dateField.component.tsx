@@ -17,6 +17,7 @@
 import { TextField } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+import { Dayjs } from 'dayjs';
 
 interface IProps {
 	value?: any;
@@ -29,6 +30,9 @@ interface IProps {
 	onChange?: (event) => void;
 	onBlur?: (event) => void;
 	shouldDisableDate?: (day: any) => boolean;
+	shouldDisableTime?: (day: any) => boolean;
+	minDateTime?: Dayjs;
+	maxDateTime?: Dayjs;
 }
 
 export const DateField = ({

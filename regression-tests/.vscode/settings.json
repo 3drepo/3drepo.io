@@ -1,8 +1,0 @@
-{
-    "eslint.options": {
-        "rulePaths": [
-            "../frontend/internals/eslint-rules/"
-        ]
-    },
-    "files.eol": "\n"
-}

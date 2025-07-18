@@ -26,6 +26,7 @@ export const Button = styled(BaseCircleButton)<{ $variant?: 'primary' | 'seconda
 	margin-left: auto;
 	box-shadow: ${({ theme }) => theme.palette.shadows.level_3};
 	position: absolute;
+	top: 0;
 	right: 0;
 	z-index: 1;
 

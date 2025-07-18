@@ -38,7 +38,7 @@ const selectDrawingsByProject = createSelector(
 	(state, currentProject) => state.drawingsByProject[currentProject] ?? [],
 );
   
-const selectRawDrawingById =  createSelector(
+export const selectRawDrawingById =  createSelector(
 	selectDrawingsByProject,
 	(_, id: string) => id,
 	(drawings, id) => drawings.find((drawing) => drawing._id === id) || {},

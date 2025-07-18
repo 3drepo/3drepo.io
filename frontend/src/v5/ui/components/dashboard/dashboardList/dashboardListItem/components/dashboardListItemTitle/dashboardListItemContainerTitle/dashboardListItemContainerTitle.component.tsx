@@ -22,22 +22,25 @@ import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
-import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';
 import { formatMessage } from '@/v5/services/intl';
+import { MiddleEllipsis, MiddleEllipsisContext } from '@controls/middleEllipsis/middleEllipsis.component';
+import { TextContainer } from '../dashboardListItemTitle.styles';
 
 interface IContainerTitle extends FixedOrGrowContainerProps {
 	container: IContainer;
 	isSelected?: boolean;
 	openInNewTab?: boolean;
+	maxCharacterLength?: number;
 }
 
 export const DashboardListItemContainerTitle = ({
 	container,
 	isSelected = false,
 	openInNewTab = false,
+	maxCharacterLength,
 	...props
 }: IContainerTitle): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -54,35 +57,38 @@ export const DashboardListItemContainerTitle = ({
 	const canLaunchContainer = container.hasStatsPending || hasRevisions;
 
 	return (
-		<DashboardListItemTitle
-			{...props}
-			subtitle={!container.hasStatsPending && (
-				<LatestRevision
-					name={(
-						<Highlight search={query}>
-							{container.latestRevision}
-						</Highlight>
-					)}
-					status={container.status}
-					error={container.errorReason}
-					hasRevisions={hasRevisions}
-					emptyLabel={formatMessage({ id: 'containers.list.item.title.latestRevision.empty', defaultMessage: 'Container empty' })}
-				/>
-			)}
-			selected={isSelected}
-			tooltipTitle={canLaunchContainer ? (
-				<FormattedMessage id="containers.list.item.title.tooltip" defaultMessage="Launch latest revision" />
-			) : (
-				<FormattedMessage id="containers.list.item.title.tooltip.empty" defaultMessage="No revisions" />
-			)
-			}
-			disabled={!canLaunchContainer}
-		>
-			<Link {...linkProps}>
-				<Highlight search={query}>
-					{container.name}
-				</Highlight>
-			</Link>
-		</DashboardListItemTitle>
+		<MiddleEllipsis text={container.name} style={{ display: 'flex', flex: 1 }} >
+			<DashboardListItemTitle
+				{...props}
+				subtitle={!container.hasStatsPending && (
+					<LatestRevision
+						name={(
+							<Highlight search={query}>
+								{container.latestRevision}
+							</Highlight>
+						)}
+						status={container.status}
+						error={container.errorReason}
+						hasRevisions={hasRevisions}
+						emptyLabel={formatMessage({ id: 'containers.list.item.title.latestRevision.empty', defaultMessage: 'Container empty' })}
+					/>
+				)}
+				selected={isSelected}
+				tooltipTitle={container.name}
+				disabled={!canLaunchContainer}
+			>
+				<Link {...linkProps}>
+					<TextContainer data-ellipsis-text>
+						<MiddleEllipsisContext.Consumer>
+							{({ text, searchText }) => (
+								<Highlight search={ searchText }>
+									{text}
+								</Highlight>
+							)}
+						</MiddleEllipsisContext.Consumer>
+					</TextContainer>
+				</Link>
+			</DashboardListItemTitle>
+		</MiddleEllipsis>
 	);
 };

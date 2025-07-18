@@ -19,6 +19,7 @@ import styled, { css } from 'styled-components';
 import { BasicComment } from '../basicComment/basicComment.component';
 import { CommentWithButtonsContainer as CommentWithButtonsContainerBase } from '../basicComment/basicComment.styles';
 import { QuotedMessage, secondaryQuotedMessageStyles } from '../quotedMessage/quotedMessage.styles';
+import { CommentBox } from '../../commentBox/commentBox.component';
 
 export const CommentWithButtonsContainer = styled(CommentWithButtonsContainerBase)`
 	justify-content: flex-end;
@@ -35,4 +36,9 @@ export const Comment = styled(BasicComment)<{ isFirstOfBlock: boolean }>`
 	${({ isFirstOfBlock }) => isFirstOfBlock && css`
 		border-top-right-radius: 0;
 	`}
+`;
+
+export const EditComment = styled(CommentBox)`
+	width: 260px;
+	align-self: end;
 `;

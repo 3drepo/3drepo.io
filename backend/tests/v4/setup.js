@@ -16,5 +16,7 @@
  */
 const mockRequire = require('mock-require');
 const FronteggMock = require('../v5/helper/fronteggMock');
+const FrontEggAccountsMock = require('../v5/helper/fronteggMock/components/accounts')
 
 mockRequire('../../src/v5/services/sso/frontegg', FronteggMock);
+mockRequire('../../src/v5/services/sso/frontegg/components/accounts', FrontEggAccountsMock);
