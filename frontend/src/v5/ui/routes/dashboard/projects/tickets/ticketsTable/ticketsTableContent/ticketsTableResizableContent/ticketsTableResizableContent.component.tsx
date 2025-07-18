@@ -63,7 +63,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
 
 	const getGroupDisplayName = (groupName: string) => {
-		if (!isJobAndUsersType(groupBy)) return groupName;
+		if (groupName === UNSET || !isJobAndUsersType(groupBy)) return groupName;
 		const jobsAndUsernamesArray = groupName.split(',').map((user) => user.trim());
 		return jobsAndUsernamesArray.map(getjobOrUserDisplayName).join(', ');
 	};
