@@ -49,7 +49,9 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 
 	let colorTriggerPropPath = '';
 	let colorTriggerPropValue = '';
-	
+
+	// A weird bug appeared in prod if tabular view, using this would sometimes trigger an error in react useref would return
+	// a number instead of an object triggering an error inside usewatch
 	if (isViewer) {
 		colorTriggerPropPath = getColorTriggerPropName(name, template);
 		colorTriggerPropValue =  useWatch({ name: colorTriggerPropPath }) ?? get(ticket, colorTriggerPropPath);
