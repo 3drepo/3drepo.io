@@ -47,8 +47,13 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 
-	const colorTriggerPropPath = getColorTriggerPropName(name, template);
-	const colorTriggerPropValue =  useWatch({ name: colorTriggerPropPath || '-' }) ?? get(ticket, colorTriggerPropPath);
+	let colorTriggerPropPath = '';
+	let colorTriggerPropValue = '';
+	
+	if (isViewer) {
+		colorTriggerPropPath = getColorTriggerPropName(name, template);
+		colorTriggerPropValue =  useWatch({ name: colorTriggerPropPath }) ?? get(ticket, colorTriggerPropPath);
+	}
 
 	const isNewTicket = !ticket?._id;
 	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
