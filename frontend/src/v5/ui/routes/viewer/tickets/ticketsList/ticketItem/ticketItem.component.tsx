@@ -36,7 +36,7 @@ type TicketItemProps = {
 };
 
 export const TicketItem = ({ ticket }: TicketItemProps) => {
-	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const ref = useRef<HTMLDivElement>();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isSelected = selectedTicketId === ticket._id;
@@ -62,12 +62,16 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const selectTicket = (event) => {
 		event.stopPropagation();
 		TicketsCardActionsDispatchers.setSelectedTicket(ticket._id);
-		TicketsActionsDispatchers.fetchTicketGroups(teamspace, project, containerOrFederation, ticket._id, revision);
 	};
 
 	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
 		selectTicket(event);
 		TicketsCardActionsDispatchers.openTicket(ticket._id);
+	};
+
+	const onClickThumbnail = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		selectTicket(event);
+		TicketsActionsDispatchers.fetchTicketGroupsAndGoToView(teamspace, project, containerOrFederation, ticket._id);
 	};
 
 	return (
@@ -96,7 +100,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 						</IssuePropertiesContainer>
 					)}
 				</FlexColumn>
-				{hasThumbnail && <TicketItemThumbnail ticket={ticket} selectTicket={selectTicket} />}
+				{hasThumbnail && <TicketItemThumbnail ticket={ticket} onClick={onClickThumbnail} />}
 			</FlexRow>
 			<BottomRow>
 				<Id>

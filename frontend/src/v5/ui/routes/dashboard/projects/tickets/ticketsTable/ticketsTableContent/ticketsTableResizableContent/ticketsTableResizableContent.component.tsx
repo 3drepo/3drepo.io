@@ -22,7 +22,7 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
+import { getjobOrUserDisplayName, groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
 import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
@@ -32,6 +32,7 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 
 type CollapsibleTicketsGroupProps = {
 	groupName: string;
+	groupNameDisplay: string;
 	tickets: ITicket[];
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
@@ -39,15 +40,14 @@ type CollapsibleTicketsGroupProps = {
 	propertyName: string;
 };
 
-const CollapsibleTicketsGroup = ({ groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: CollapsibleTicketsGroupProps) => {
+const CollapsibleTicketsGroup = ({ groupName, groupNameDisplay, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: CollapsibleTicketsGroupProps) => {
 	const ticketsIds = tickets.map(({ _id }) => _id);
-
 	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
 
 	return (<DashboardListCollapse
 		title={(
 			<>
-				<Title>{groupName}</Title>
+				<Title>{groupNameDisplay}</Title>
 				<CircledNumber disabled={!tickets.length || isLoading}>
 					{isLoading ? <Spinner /> : tickets.length}
 				</CircledNumber>
@@ -70,7 +70,7 @@ export type TicketsTableResizableContentProps = {
 };
 
 export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
-	const { groupBy, getPropertyType } = useContext(TicketsTableContext);
+	const { groupBy, getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
 
@@ -89,13 +89,19 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 		);
 	}
 
-	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy));
+	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
 	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
 
+	const getGroupDisplayName = (groupName: string) => {
+		if (groupName === UNSET || !isJobAndUsersType(groupBy)) return groupName;
+		const jobsAndUsernamesArray = groupName.split(',').map((user) => user.trim());
+		return jobsAndUsernamesArray.map(getjobOrUserDisplayName).join(', ');
+	};
 	return (
 		<Container>
 			{groups.map(([groupName, tickets]) => (
 				<CollapsibleTicketsGroup
+					groupNameDisplay={getGroupDisplayName(groupName)}
 					groupName={groupName}
 					tickets={tickets}
 					setTicketValue={setTicketValue}

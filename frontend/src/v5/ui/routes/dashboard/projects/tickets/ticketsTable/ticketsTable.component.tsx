@@ -39,7 +39,7 @@ import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFede
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
 import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { NEW_TICKET_ID } from './ticketsTable.helper';
+import { INITIAL_COLUMNS, NEW_TICKET_ID } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
@@ -178,6 +178,11 @@ export const TicketsTable = () => {
 	}, []);
 
 	useEffect(() => {
+		if (containersAndFederations.includes(containerOrFederation)) return;
+		clearTicketId();
+	}, [containersAndFederations, containerOrFederation]);
+
+	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 	}, [readOnly]);
 
@@ -190,9 +195,6 @@ export const TicketsTable = () => {
 		if (!templateAlreadyFetched(selectedTemplate)) {
 			ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
 		}
-		if (ticketId) {
-			clearTicketId();
-		}
 	}, [template]);
 
 	useEffect(() => {
@@ -201,6 +203,10 @@ export const TicketsTable = () => {
 
 	useEffect(() => {
 		visibleSortedColumnsNames.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
+		let columnsToFetch = [...visibleSortedColumnsNames];
+		columnsToFetch
+			.filter((name) => !INITIAL_COLUMNS.includes(name))
+			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
 	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join('')]);
 
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
@@ -263,7 +269,7 @@ export const TicketsTable = () => {
 				</SlidePanelHeader>
 				<MuiThemeProvider theme={theme}>
 					<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
-						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
+						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate}  clearTicketId={clearTicketId} />)}
 						{isNewTicket && (
 							<NewTicketSlide
 								presetValue={{ key: groupBy, value: presetValue }}

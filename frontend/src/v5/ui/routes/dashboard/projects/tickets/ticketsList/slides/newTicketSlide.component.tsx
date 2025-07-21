@@ -104,7 +104,7 @@ export const NewTicketSlide = ({ template, containerOrFederation, presetValue, o
 	useEffect(() => {
 		if (isLoading) return;
 		reset(defaultValues);
-	}, [containerOrFederation, template, isLoading, presetValue.key, presetValue.value]);
+	}, [containerOrFederation, template, isLoading, presetValue.value]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));
