@@ -32,6 +32,7 @@ import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { useWatchPropertyChange } from '../useWatchPropertyChange';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
@@ -66,6 +67,9 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		};
 		return subscribe(['movingColumn'], onMovingColumnChange);
 	}, [edgeScrolling]);
+
+	const { refresh: refreshSearch } = useContext(SearchContext);
+	useWatchPropertyChange('title', refreshSearch);
 
 	if (!templateWasFetched) {
 		return (
