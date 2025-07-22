@@ -21,10 +21,10 @@ import { CommentMarkDown } from '../commentMarkDown/commentMarkDown.component';
 import { CommentContainer, CommentAge, EditedCommentLabel, ViewpointIcon, CommentAgeContent } from './basicComment.styles';
 import { CommentNonMessageContent } from '../commentNonMessageContent/commentNonMessageContent.component';
 import { Tooltip } from '@mui/material';
-import { formatMessage, formatDate } from '@/v5/services/intl';
+import { formatMessage } from '@/v5/services/intl';
 import { TicketContext } from '../../../../ticket.context';
 import { useContext, useState, useEffect } from 'react';
-import { getRelativeTime } from '@/v5/helpers/intl.helper';
+import { formatDateTime, getRelativeTime } from '@/v5/helpers/intl.helper';
 import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -72,7 +72,7 @@ export const BasicComment = ({
 			{isEdited && !originalAuthor && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
 			<CommentAge>
-				<Tooltip title={formatDate(updatedAt || createdAt)}>
+				<Tooltip title={formatDateTime(updatedAt || createdAt)}>
 					<CommentAgeContent>{commentAge}</CommentAgeContent>
 				</Tooltip>
 				{!!view && (

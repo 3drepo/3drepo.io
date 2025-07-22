@@ -173,6 +173,11 @@ export const TicketsTable = () => {
 	}, []);
 
 	useEffect(() => {
+		if (containersAndFederations.includes(containerOrFederation)) return;
+		clearTicketId();
+	}, [containersAndFederations, containerOrFederation]);
+
+	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 	}, [readOnly]);
 
@@ -185,14 +190,7 @@ export const TicketsTable = () => {
 		if (!templateAlreadyFetched(selectedTemplate)) {
 			ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
 		}
-		if (ticketId) {
-			clearTicketId();
-		}
 	}, [template]);
-
-	useEffect(() => {
-		setPresetValue('');
-	}, [groupBy]);
 
 	useEffect(() => {
 		let columnsToFetch = [...visibleSortedColumnsNames];
@@ -260,7 +258,7 @@ export const TicketsTable = () => {
 				</SlidePanelHeader>
 				<MuiThemeProvider theme={theme}>
 					<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
-						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} />)}
+						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate}  clearTicketId={clearTicketId} />)}
 						{isNewTicket && (
 							<NewTicketSlide
 								presetValue={{ key: groupBy, value: presetValue }}
