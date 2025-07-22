@@ -109,6 +109,8 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	};
 
 	const refreshPin = () => {
+		if (!isViewer) return;
+
 		if (prevValue.current) {
 			ViewerService.removePin(pinId);
 		}
@@ -137,14 +139,20 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	}, [value]);
 
 	useEffect(() => () => {
+		if (!isViewer) return;
+
 		ViewerService.clearMeasureMode();
 	}, [ticketId]);
 
 	useEffect(() => {
+		if (!isViewer) return;
+
 		ViewerService.setSelectionPin({ id: pinId, isSelected });
 	}, [isSelected]);
 
 	useEffect(() => () => {
+		if (!isViewer) return;
+
 		TicketsCardActionsDispatchers.setPinToDrop(null);
 		if (isNewTicket) ViewerService.removePin(pinId);
 	}, []);
