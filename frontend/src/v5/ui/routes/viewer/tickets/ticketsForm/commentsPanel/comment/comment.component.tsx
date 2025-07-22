@@ -25,7 +25,6 @@ import { OtherUserComment } from './otherUserComment/otherUserComment.component'
 export type CommentProps = ITicketComment & {
 	onDelete: (commentId) => void;
 	onReply: (commentId) => void;
-	onEdit: (commentId, newMessage, newImages) => void;
 	isFirstOfBlock: boolean;
 };
 export const Comment = ({

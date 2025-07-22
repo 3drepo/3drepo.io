@@ -29,18 +29,24 @@ const CommentsMiddleware = {};
 
 const validateComment = async (req, res, next) => {
 	try {
-		req.body = await validateCommentSchema(req.body, req.commentData);
-		if (req.commentData) {
-			const { message, images } = req.body;
-			const existingImgRefs = req.commentData.images?.map(UUIDToString).sort();
-			const newImgRefs = images?.map(UUIDToString).sort();
+		if (req.templateData?.config.comments) {
+			req.body = await validateCommentSchema(req.body, req.commentData);
+			if (req.commentData) {
+				const { message, images, view } = req.body;
+				const existingImgRefs = req.commentData.images?.map(UUIDToString).sort();
+				const newImgRefs = images?.map(UUIDToString).sort();
 
-			if (isEqual(req.commentData.message, message) && isEqual(existingImgRefs, newImgRefs)) {
-				throw createResponseCode(templates.invalidArguments, 'No valid properties to update');
+				if (isEqual(req.commentData.message, message)
+					&& isEqual(existingImgRefs, newImgRefs)
+					&& isEqual(req.commentData.view, view)
+				) {
+					throw createResponseCode(templates.invalidArguments, 'No valid properties to update');
+				}
 			}
+			await next();
+		} else {
+			throw createResponseCode(templates.invalidArguments, 'This ticket does not support comments.');
 		}
-
-		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err.message));
 	}

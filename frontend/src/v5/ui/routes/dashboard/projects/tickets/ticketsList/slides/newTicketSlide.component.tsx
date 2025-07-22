@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { filterEmptyTicketValues, getDefaultTicket, getEditableProperties, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
-import { ITemplate, ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket, NewTicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useEffect } from 'react';
+import { useContext, useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { useParams, generatePath } from 'react-router-dom';
@@ -31,45 +31,37 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from './newTicketSlide.styles';
 import { hasRequiredViewerProperties } from '../../ticketsTable/ticketsTable.helper';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { IssueProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { TicketsTableContext } from '../../ticketsTable/ticketsTableContext/ticketsTableContext';
 
+type PresetValue = { key: string, value: string };
 type NewTicketSlideProps = {
 	template: ITemplate,
 	containerOrFederation: string,
-	preselectedValue: object | null,
+	presetValue: PresetValue,
 	onSave: (newTicketId: string) => void,
 	onDirtyStateChange: (isDirty: boolean) => void,
 };
 
-const DEFAULTABLE_VALUES: string[] = [SafetibaseProperties.TREATMENT_STATUS, IssueProperties.PRIORITY,  BaseProperties.STATUS, IssueProperties.ASSIGNEES];
 
-const toDefaultValue = (preselected) => {
-	let [key, val] = Object.entries(preselected || {})[0] as [string, any];
+const toDefaultValue = ({ key, value }: PresetValue, propertyType: PropertyTypeDefinition) => {
+	if (!key || key === IssueProperties.DUE_DATE || !value) return;
 
-	if (!DEFAULTABLE_VALUES.includes(key))  {
-		return null;
+	let val: string | string[] = value;
+	if (propertyType === 'manyOf') {
+		val = value.split(',').map((v) => v.trim());
 	}
 
-	// ASSIGNEES is an array so conversion is needed
-	val = key !== IssueProperties.ASSIGNEES ? val : val.split(',').map((v) => v.trim());
-
-	if (!val) return null;
-
-	let preselectedVal = set({}, `properties.${key}`, val );
-
-	// If the preselected value is treatment status, then its on a different path
-	if (key === SafetibaseProperties.TREATMENT_STATUS) {
-		preselectedVal = set({}, `modules.safetibase.${key}`, val );
-	}
-
-	return preselectedVal;
+	return set({}, key, val);
 };
 
-
-export const NewTicketSlide = ({ template, containerOrFederation, preselectedValue, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
+export const NewTicketSlide = ({ template, containerOrFederation, presetValue, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
+	const { getPropertyType } = useContext(TicketsTableContext);
 	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
-	const defaultValues = merge(getDefaultTicket(template), toDefaultValue(preselectedValue));
+	const preselectedDefaultValue = toDefaultValue(presetValue, getPropertyType(presetValue.key));
+	const defaultTicket = getDefaultTicket(template);
+	const defaultValues = preselectedDefaultValue ? merge(defaultTicket, preselectedDefaultValue) : defaultTicket;
 	const isFederation = modelIsFederation(containerOrFederation);
 	
 	const formData = useForm({
@@ -112,14 +104,15 @@ export const NewTicketSlide = ({ template, containerOrFederation, preselectedVal
 	useEffect(() => {
 		if (isLoading) return;
 		reset(defaultValues);
-	}, [containerOrFederation, template, isLoading]);
+	}, [containerOrFederation, template, isLoading, presetValue.value]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));
 	}, [isEmpty(dirtyFields)]);
 
-	useEffect(() => () => {
-		onDirtyStateChange(false);
+	useEffect(() => {
+		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.New);
+		return () => onDirtyStateChange(false);
 	}, []);
 
 	if (isLoading) return (<Loader />);

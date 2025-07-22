@@ -45,7 +45,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 	const onSubmit: SubmitHandler<DrawingSettings> = async (body) => {
 		try {
 			await new Promise<void>((accept, reject) => {
-				const updatedDrawingData = pick(body, Object.keys(formState.dirtyFields));
+				const updatedDrawingData = pick({ desc: null, ...body }, Object.keys(formState.dirtyFields));
 				DrawingsActionsDispatchers.updateDrawing(teamspace, project, drawingId, updatedDrawingData, accept, reject);
 			});
 			onClickClose();

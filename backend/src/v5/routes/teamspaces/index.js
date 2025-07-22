@@ -16,11 +16,11 @@
  */
 
 const { canRemoveTeamspaceMember, memberExists } = require('../../middleware/dataConverter/inputs/teamspaces');
-const { hasAccessToTeamspace, isMemberOfTeamspace } = require('../../middleware/permissions');
+const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
-const { isTeamspaceAdmin } = require('../../middleware/permissions');
+const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../../middleware/auth');
@@ -311,7 +311,7 @@ const establishRoutes = () => {
 	*         description: Removes the user from the teamspace
 	*
 	*/
-	router.delete('/:teamspace/members/:username', hasAccessToTeamspace, canRemoveTeamspaceMember, removeTeamspaceMember);
+	router.delete('/:teamspace/members/:username', hasAccessToTeamspace, canRemoveTeamspaceMember, notUserProvisioned, removeTeamspaceMember);
 
 	/**
 	* @openapi
