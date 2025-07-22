@@ -22,26 +22,9 @@ const { v5Path } = require('../../../interop');
 const { getTeamspaceList } = require('../../utils');
 
 const { logger } = require(`${v5Path}/utils/logger`);
-const { getTeamspaceListByUser, removeTeamspaceMember, removeTeamspace } = require(`${v5Path}/processors/teamspaces`);
-const { remove: deleteUser, getUserByUsername } = require(`${v5Path}/processors/users`);
+const { removeTeamspace } = require(`${v5Path}/processors/teamspaces`);
 
-const removeUserFromAllTeamspaces = async (user) => {
-	const teamspaces = await getTeamspaceListByUser(user);
-	await Promise.all(teamspaces.map(
-		({ name: teamspace }) => removeTeamspaceMember(teamspace, user),
-	));
-};
-
-const removeUser = async (user) => {
-	const userExists = await getUserByUsername(user, { _id: 1 }).catch(() => false);
-
-	if (userExists) {
-		await removeUserFromAllTeamspaces(user);
-		await deleteUser(user);
-	}
-};
-
-const run = async (teamspaces, removeOwners) => {
+const run = async (teamspaces, removeAssociatedAccount) => {
 	if (!teamspaces?.length) throw new Error('A list of teamspaces must be provided');
 	const teamspaceArr = teamspaces.split(',');
 	const tsList = await getTeamspaceList();
@@ -49,11 +32,7 @@ const run = async (teamspaces, removeOwners) => {
 		logger.logInfo(`-${teamspace}`);
 		if (tsList.includes(teamspace)) {
 			// eslint-disable-next-line no-await-in-loop
-			await removeTeamspace(teamspace);
-		}
-		if (removeOwners) {
-			// eslint-disable-next-line no-await-in-loop
-			await removeUser(teamspace);
+			await removeTeamspace(teamspace, removeAssociatedAccount);
 		}
 	}
 };
@@ -65,16 +44,17 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 			describe: 'teamspaces to remove (comma separated)',
 			type: 'string',
 			demandOption: true,
-		}).option('removeOwners',
+		}).option('removeAssociatedAccount',
 		{
-			describe: 'also remove user account',
+			describe: 'also remove associated account',
 			type: 'boolean',
-			default: false,
+			demandOption: false,
+			default: true,
 		});
 	return yargs.command(commandName,
-		'Remove a teamspace and the owner\'s account',
+		'Remove a teamspace and the associated account',
 		argsSpec,
-		(argv) => run(argv.accounts, argv.removeOwners));
+		(argv) => run(argv.accounts, argv.removeAssociatedAccount));
 };
 
 module.exports = {
