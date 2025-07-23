@@ -19,150 +19,129 @@
 
 const FileRef = require("./fileRef");
 const History = require("./history");
+const ModelSetting = require("./modelSetting");
 const DB = require("../handler/db");
 const utils = require("../utils");
 const { getRefNodes } = require("./ref");
 const C = require("../constants");
 const { hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const Stream = require("stream");
+const uuidv5 = require("uuid").v5;
 
 const JSONAssets = {};
 
-async function getSubTreeInfo(account, model, branch, revision) {
-	const subModelRefs = await getRefNodes(account, model, branch, revision);
+async function getSubTreeInfo(federation) {
 	const subTreeInfo = [];
-	subModelRefs.forEach((ref) => {
-		const prom = History.findLatest(ref.owner, ref.project, {_id: 1}).then((rev) => ({
-			_id: utils.uuidToString(ref._id),
-			rid: utils.uuidToString(rev ? rev._id : ref._rid),
-			teamspace:ref.owner,
-			model: ref.project
+	federation.subModels.forEach(({_id, node_id}) => {
+		const prom = History.findLatest(federation.teamspace, _id, {_id: 1}).then((rev) => ({
+			_id: node_id,
+			rid: utils.uuidToString(rev._id),
+			teamspace: federation.teamspace,
+			model: _id
 		}));
 		subTreeInfo.push(prom);
 	});
 	return Promise.all(subTreeInfo);
 }
 
-function getFileFromSubModels(account, model, branch, revision, username, filename) {
-	return getRefNodes(account, model, branch, revision).then((subModelRefs) => {
-		const getFileProm = [];
-		subModelRefs.forEach((ref) => {
-			getFileProm.push(getFileFromRef(ref, username, filename).catch(() => {
-				// Ignore failures from submodel fetches.
-				return Promise.resolve();
-			}));
-		});
+async function appendSubModelFiles(federation, outStream, username, filename) {
 
-		return Promise.all(getFileProm).then((fileStreams) => {
-			return fileStreams.filter((stream) => stream);
-		});
-	});
-}
+	let hasFirstEntry = false;
+	for(const container of federation.subModels) {
+		if(container) {
+			const model = container._id;
+			const account = federation.teamspace;
 
-function getFileFromRef(ref, username, filename) {
-	return hasReadAccessToModelHelper(username, ref.owner, ref.project).then((granted) => {
-		if(granted) {
+			const granted = await hasReadAccessToModelHelper(username, account, model);
+			if(!granted) {
+				continue;
+			}
 
-			const revId = utils.uuidToString(ref._rid);
-			const getRevIdPromise = revId === C.MASTER_BRANCH ?
-				History.findLatest(ref.owner, ref.project, {_id: 1}) :
-				Promise.resolve({_id : ref._rid});
-
-			return getRevIdPromise.then((revInfo) => {
-				if (revInfo) {
-					const revision = utils.uuidToString(revInfo._id);
-					const fullFileName = `${revision}/${filename}`;
-					return FileRef.getJSONFileStream(ref.owner, ref.project, fullFileName).then((fileRef) => {
-						fileRef.account = ref.owner;
-						fileRef.model = ref.project;
-						return fileRef;
-					});
-				}
-			});
-		}
-	});
-}
-
-function appendSubModelFiles(subTreeFiles, outStream) {
-	outStream.write("\"subModels\":[");
-	let subStreamPromise = Promise.resolve();
-	for(let i = 0; i < subTreeFiles.length; ++i) {
-		if(subTreeFiles[i]) {
-			subStreamPromise = subStreamPromise.then(() => {
-				return new Promise(function(resolve) {
-					if(i > 0) {
+			const revision = await History.findLatest(account, model, {_id: 1});
+			if(revision) {
+				const revisionString = utils.uuidToString(revision._id);
+				const fullFileName = `${revisionString}/${filename}`;
+				try {
+					const fileStream = await FileRef.getJSONFileStream(account, model, fullFileName);
+					if(hasFirstEntry) {
 						outStream.write(",");
 					}
-					let first = true;
-					subTreeFiles[i].readStream.on("data", d => {
-						if(first) {
-							outStream.write("{\"account\":\""
-								+ subTreeFiles[i].account + "\",\"model\":\"" + subTreeFiles[i].model + "\",");
-							outStream.write(d.slice(1));
-							first = false;
-						} else {
-							outStream.write(d);
-						}
+					hasFirstEntry = true;
+					await new Promise((resolve) => {
+						let first = true;
+						fileStream.readStream.on("data", d => {
+							if(first) {
+								outStream.write(
+									"{\"account\":\"" + account +
+									"\",\"model\":\"" + model +
+									"\",");
+								outStream.write(d.slice(1));
+								first = false;
+							} else {
+								outStream.write(d);
+							}
+						});
+						fileStream.readStream.on("end", ()=> resolve());
+						fileStream.readStream.on("error", err => outStream.emit("error", err));
 					});
-					subTreeFiles[i].readStream.on("end", ()=> resolve());
-					subTreeFiles[i].readStream.on("error", err => outStream.emit("error", err));
-				});
-			});
+				} catch {
+					// By convention, subModel fetch failures should be ignored.
+				}
+			}
 		}
 	}
-	return subStreamPromise.then(() => {
-		outStream.write("]");
-	});
 }
 
-function getHelperJSONFile(account, model, branch, rev, username, filename, prefix = "mainTree", allowNotFound, defaultValues = {}) {
-	return  History.getHistory(account, model, branch, rev).then((history) => {
-		const revId = utils.uuidToString(history._id);
-		const treeFileName = `${revId}/${filename}.json`;
-		let mainTreePromise;
-		const subTreesPromise = getFileFromSubModels(account, model, branch, rev, username, `${filename}.json`);
+async function getHelperJSONFile(account, model, branch, rev, username, filename, generateFederationResponse, prefix = "mainTree", allowNotFound, defaultValues = {}) {
 
-		if (allowNotFound) {
-			mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName).catch(() => {
-				const fakeStream = Stream.PassThrough();
-				fakeStream.write(JSON.stringify(defaultValues));
-				fakeStream.end();
-				return { fileName: treeFileName, readStream: fakeStream };
-			});
+	const settings = await ModelSetting.findModelSettingById(account, model);
+
+	const isFed = settings.federate;
+	const outStream = Stream.PassThrough();
+
+	settings.teamspace = account;
+
+	try {
+		outStream.write(`{"${prefix}": `);
+
+		if (isFed) {
+			const fedTree = generateFederationResponse(settings);
+			outStream.write(JSON.stringify(fedTree));
 		} else {
-			mainTreePromise = FileRef.getJSONFileStream(account, model, treeFileName);
-		}
+			const history = await History.getHistory(account, model, branch, rev);
+			const revId = utils.uuidToString(history._id);
+			const treeFileName = `${revId}/${filename}.json`;
 
-		return mainTreePromise.then((file) => {
-			const outStream = Stream.PassThrough();
-			const readStream = file.readStream;
-			file.readStream = outStream;
-			delete file.size;
-			new Promise(function(resolve) {
-				outStream.write(`{"${prefix}":`);
-				if(readStream) {
+			try {
+				const file = await FileRef.getJSONFileStream(account, model, treeFileName);
+				const readStream = file.readStream;
+
+				await new Promise((resolve) => {
 					readStream.on("data", d => outStream.write(d));
 					readStream.on("end", ()=> resolve());
 					readStream.on("error", err => outStream.emit("error", err));
-				} else {
-					resolve();
-				}
-			}).then(() => {
-				return subTreesPromise.then((subTreeFiles) => {
-					outStream.write(",");
-					return appendSubModelFiles(subTreeFiles, outStream).then(() => {
-						outStream.write("}");
-						outStream.end();
-					});
 				});
-			}).catch((err) => {
-				outStream.emit("error", err);
-				outStream.end();
-			});
+			} catch {
+				if (allowNotFound) {
+					outStream.write(JSON.stringify(defaultValues));
+				}
+			}
+		}
 
-			return file;
-		});
-	});
+		outStream.write(", \"subModels\":[");
+
+		await appendSubModelFiles(settings, outStream, username, `${filename}.json`);
+
+		outStream.write("]}");
+		outStream.end();
+	} catch(err) {
+		outStream.emit("error", err);
+		outStream.end();
+	}
+
+	return {
+		readStream: outStream
+	};
 }
 
 JSONAssets.getSuperMeshMapping = function(account, model, id) {
@@ -279,9 +258,7 @@ const addSuperMeshMappingsToStream = async (account, model, revId, jsonFiles, ou
 
 		await generateSuperMeshMappings(account, model, jsonFiles, passThruStr);
 		await cacheWriteProm;
-
 	}
-
 };
 
 const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
@@ -344,43 +321,122 @@ JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
 
 };
 
-JSONAssets.getTree = async function(account, model, branch, rev) {
-	const history = await History.getHistory(account, model, branch, rev);
-	const revId = utils.uuidToString(history._id);
-	const treeFileName = `${revId}/fulltree.json`;
+function generateFullTreeForFederation(federation) {
 
-	const file = await FileRef.getJSONFileStream(account, model, treeFileName);
+	const response = {
+		nodes: {
+			account: federation.teamspace,
+			project: federation._id,
+			name: federation.name,
+			path: federation.node_id,
+			_id: federation.node_id,
+			shared_id: federation.node_shared_id,
+			type: "transformation",
+			children: []
+		},
+		idToName: {
+		}
+	};
 
-	let isFed = false;
-	const outStream = Stream.PassThrough();
-	const readStream = file.readStream;
-	file.readStream = outStream;
-	delete file.size;
+	response.idToName[federation.node_id] = federation.name;
 
-	try {
-		await new Promise((resolve) => {
-			outStream.write("{\"mainTree\": ");
-			readStream.on("data", d => outStream.write(d));
-			readStream.on("end", ()=> resolve());
-			readStream.on("error", err => outStream.emit("error", err));
+	for (const subModel of federation.subModels) {
+
+		// Take care below that the _id and shared_id are the identifiers of the
+		// synthethic tree node; the uuid of the Container is the *name* of the
+		// tree node, and is stored in the subModel._id.
+
+		response.nodes.children.push({
+			account: federation.teamspace,
+			project: federation._id,
+			type: "ref",
+			name: subModel._id,
+			path: `${federation.node_id}__${subModel.node_id}`,
+			_id: subModel.node_id,
+			shared_id: subModel.node_shared_id,
+			toggleState: "visible"
 		});
 
-		const subTreeInfo =  await getSubTreeInfo(account, model, branch, rev);
-		isFed = subTreeInfo.length > 0;
+		response.idToName[subModel.node_id] = subModel._id;
+	}
+
+	return response;
+}
+
+function generateTreeNodeIdsForFederation(settings) {
+	// The frontend tree presents the entire scene as one graph, where each node
+	// has a unique _id and shared_id. These ids may be stored and so are expected
+	// to be consistent between loads of a federation, though may change between
+	// federation revisions.
+
+	// To synthesize uuids that maintain these properties, we combine the Container,
+	// Federation ids and timestamp in a deterministic hash.
+
+	// The tree expects a root node (a transformation for the federation itself),
+	// as well as nodes for each Container (if any).
+
+	settings.node_id = uuidv5(settings.teamspace, settings._id);
+	settings.node_shared_id = uuidv5("shared", settings.node_id);
+	if(settings.subModels) {
+		for (const container of settings.subModels) {
+			container.node_id = uuidv5(container._id, settings._id);
+			container.node_shared_id = uuidv5("shared", container.node_id);
+		}
+	}
+}
+
+JSONAssets.getTree = async function(account, model, branch, rev) {
+
+	const settings = await ModelSetting.findModelSettingById(account, model);
+
+	const isFed = settings.federate;
+	const outStream = Stream.PassThrough();
+
+	// Annotate the settings object with additional properties to make it match
+	// the federation object schema.
+
+	settings.teamspace = account;
+
+	generateTreeNodeIdsForFederation(settings);
+
+	try {
+		outStream.write("{\"mainTree\": ");
+
+		if (isFed) {
+			const fedTree = generateFullTreeForFederation(settings);
+			outStream.write(JSON.stringify(fedTree));
+		} else {
+			const history = await History.getHistory(account, model, branch, rev);
+			const revId = utils.uuidToString(history._id);
+			const treeFileName = `${revId}/fulltree.json`;
+			const file = await FileRef.getJSONFileStream(account, model, treeFileName);
+			const readStream = file.readStream;
+
+			await new Promise((resolve) => {
+				readStream.on("data", d => outStream.write(d));
+				readStream.on("end", ()=> resolve());
+				readStream.on("error", err => outStream.emit("error", err));
+			});
+		}
 
 		outStream.write(", \"subTrees\":[");
-		for(let i = 0; i < subTreeInfo.length; ++i) {
-			if(subTreeInfo[i]) {
-				if(i > 0) {
-					outStream.write(",");
+
+		if(isFed) {
+			const subTreeInfo = await getSubTreeInfo(settings);
+			for(let i = 0; i < subTreeInfo.length; ++i) {
+				if(subTreeInfo[i]) {
+					if(i > 0) {
+						outStream.write(",");
+					}
+					const url = subTreeInfo[i].rid !== C.MASTER_BRANCH ?
+						`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/${subTreeInfo[i].rid}/fulltree.json` :
+						`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/master/head/fulltree.json`;
+					subTreeInfo[i].url = url;
+					outStream.write(JSON.stringify(subTreeInfo[i]));
 				}
-				const url = subTreeInfo[i].rid !== C.MASTER_BRANCH ?
-					`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/${subTreeInfo[i].rid}/fulltree.json` :
-					`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/master/head/fulltree.json`;
-				subTreeInfo[i].url = url;
-				outStream.write(JSON.stringify(subTreeInfo[i]));
 			}
 		}
+
 		outStream.write("]}");
 		outStream.end();
 	} catch(err) {
@@ -388,23 +444,52 @@ JSONAssets.getTree = async function(account, model, branch, rev) {
 		outStream.end();
 	}
 
-	return { file, isFed };
+	return {
+		file: {
+			readStream: outStream
+		},
+		isFed
+	};
 };
 
+function getFederationModelProperties(settings) {
+	return { hiddenNodes: [] };
+}
+
+function getFederationIdMap(settings) {
+	return {};
+}
+
+function getFederationIdToMeshes(settings) {
+	return {};
+}
+
+function getFederationTreePath(settings) {
+	generateTreeNodeIdsForFederation(settings);
+	const idToPath = {};
+	for (const container of settings.subModels) {
+		idToPath[container.node_id] = `${settings.node_id}__${container.node_id}`;
+	}
+	idToPath[settings.node_id] = settings.node_id;
+	return {
+		idToPath
+	};
+}
+
 JSONAssets.getModelProperties = function(account, model, branch, rev, username) {
-	return getHelperJSONFile(account, model, branch, rev, username, "modelProperties", "properties", true, {hiddenNodes: []});
+	return getHelperJSONFile(account, model, branch, rev, username, "modelProperties", getFederationModelProperties, "properties", true, {hiddenNodes: []});
 };
 
 JSONAssets.getIdMap = function(account, model, branch, rev, username) {
-	return getHelperJSONFile(account, model, branch, rev, username, "idMap");
+	return getHelperJSONFile(account, model, branch, rev, username, "idMap", getFederationIdMap);
 };
 
 JSONAssets.getIdToMeshes = function(account, model, branch, rev, username) {
-	return getHelperJSONFile(account, model, branch, rev, username, "idToMeshes");
+	return getHelperJSONFile(account, model, branch, rev, username, "idToMeshes", getFederationIdToMeshes);
 };
 
 JSONAssets.getTreePath = function(account, model, branch, rev, username) {
-	return getHelperJSONFile(account, model, branch, rev, username, "tree_path");
+	return getHelperJSONFile(account, model, branch, rev, username, "tree_path", getFederationTreePath);
 };
 
 module.exports = JSONAssets;
