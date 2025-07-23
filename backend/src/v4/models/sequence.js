@@ -25,7 +25,7 @@ const yup = require("yup");
 const { update: updateGroup } = require("./group");
 const History = require("./history");
 const FileRef = require("./fileRef");
-const { getRefNodes } = require("./ref");
+const { getSubModels } = require("./ref");
 const { getDefaultLegendId } = require("./modelSetting");
 const View = new (require("./view"))();
 const { cleanViewpoint, createViewpoint } = require("./viewpoint");
@@ -269,11 +269,9 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 		sequencesQuery["$or"] = [{"rev_id": history._id}, {"rev_id": {"$exists": false}}];
 	}
 
-	const refNodesBranch = revision ? undefined : "master";
-	const refNodes = await getRefNodes(account, model, refNodesBranch, revision, {project:1});
-	const submodels = refNodes.map(r => r.project);
+	const submodels = await getSubModels(account, model);
 
-	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel, submodelBranch, undefined, cleanResponse).catch(() => [])));
+	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel.model, submodelBranch, undefined, cleanResponse).catch(() => [])));
 
 	const sequences = await db.find(account, sequenceCol(model), sequencesQuery, {frames: 0});
 

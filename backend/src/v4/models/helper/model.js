@@ -47,6 +47,7 @@ const stringToStream = require("string-to-stream");
 const { BinToFaceStringStream, BinToVector3dStringStream } = require("./binary");
 const PermissionTemplates = require("../permissionTemplates");
 const AccountPermissions = require("../accountPermissions");
+const ModelSetting = require("../modelSetting");
 
 const {v5Path} = require("../../../interop");
 const { deleteModel } = require(`${v5Path}/processors/teamspaces/projects/models/commons/modelList`);
@@ -299,39 +300,25 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 }
 
-function listSubModels(account, model, branch = "master") {
+async function listSubModels(account, model, branch = "master") {
 
+	const settings = await ModelSetting.findModelSettingById(account, model);
 	const subModels = [];
 
-	return History.findByBranch(account, model, branch).then(history => {
-
-		if(history) {
-			return getRefNodes(account, model, branch);
-		} else {
-			return [];
-		}
-
-	}).then(refs => {
-
-		const proms = refs.map(ref =>
-
-			findModelSettingById(ref.owner, ref.project, { name: 1 }).then(subModel => {
-				// TODO: Why would this return null?
-				if (subModel) {
-					subModels.push({
-						database: ref.owner,
-						model: ref.project,
-						name: subModel.name
-					});
-				}
-
-			})
-
-		);
-
-		return Promise.all(proms).then(() => Promise.resolve(subModels));
-
+	const proms = settings.subModels.map((container) => {
+		findModelSettingById(account, container._id, { name: 1 }).then(subModel => {
+			// TODO: Why would this return null?
+			if (subModel) {
+				subModels.push({
+					database: account,
+					model: container._id,
+					name: subModel.name
+				});
+			}
+		});
 	});
+
+	return Promise.all(proms).then(() => Promise.resolve(subModels));
 }
 
 function downloadLatest(account, model) {
@@ -558,14 +545,13 @@ async function getMeshById(account, model, meshId) {
 }
 
 async function getSubModelRevisions(account, model, branch, rev) {
-	const history = await  History.getHistory(account, model, branch, rev);
 
-	if(!history) {
+	const settings = await ModelSetting.findModelSettingById(account, model);
+
+	if(!settings) {
 		return Promise.reject(responseCodes.INVALID_TAG_NAME);
 	}
-
-	const refNodes = await getRefNodes(account, model, branch, rev);
-	const modelIds = refNodes.map((refNode) => refNode.project);
+	const modelIds = settings.subModels.map((container) => container._id);
 	const results = {};
 
 	const param = {};
@@ -580,7 +566,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 			revisions = History.clean(revisions);
 
 			revisions.forEach(function(revision) {
-				revision.branch = history.branch || C.MASTER_BRANCH_NAME;
+				revision.branch = C.MASTER_BRANCH_NAME;
 			});
 			results[modelId].revisions = revisions;
 		}));

@@ -22,7 +22,6 @@ const History = require("./history");
 const ModelSetting = require("./modelSetting");
 const DB = require("../handler/db");
 const utils = require("../utils");
-const { getRefNodes } = require("./ref");
 const C = require("../constants");
 const { hasReadAccessToModelHelper } = require("../middlewares/checkPermissions");
 const Stream = require("stream");
@@ -284,17 +283,18 @@ const getSuperMeshMappingForModels = async (modelsToProcess, outStream) => {
 };
 
 JSONAssets.getAllSuperMeshMapping = async (account, model, branch, rev) => {
+
+	const settings = await ModelSetting.findModelSettingById(account, model);
+	const isFed = settings.federate;
+	settings.teamspace = account;
+
 	let modelsToProcess;
 
-	const subModelRefs = await getRefNodes(account, model, branch, rev);
-
-	const isFed = subModelRefs.length;
-
 	if(isFed) {
-		const getSubModelInfoProms = subModelRefs.map(async ({owner, project}) => {
-			const revNode = await History.findLatest(owner, project, {_id: 1});
+		const getSubModelInfoProms = settings.subModels.map(async ({_id}) => {
+			const revNode = await History.findLatest(account, _id, {_id: 1});
 			if(revNode) {
-				return {account: owner, model: project, rev: revNode._id};
+				return {account, model: _id, rev: revNode._id};
 			}
 		});
 		modelsToProcess = await Promise.all(getSubModelInfoProms);
