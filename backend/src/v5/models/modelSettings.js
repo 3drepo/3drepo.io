@@ -187,6 +187,33 @@ Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 	}
 };
 
+Models.updateModelSubModels = async (teamspace, project, model, user, revId, containers) => {
+	const query = { _id: model };
+	const set = {
+		subModels: containers,
+		timestamp: new Date(),
+	};
+
+	const updated = await updateOneModel(teamspace, query, { $set: set });
+	if (updated) {
+		const data = {
+			timestamp: set.timestamp,
+			containers: set.subModels,
+			status: processStatuses.OK,
+		};
+		publish(events.MODEL_IMPORT_FINISHED,
+			{
+				teamspace,
+				project,
+				model,
+				revId,
+				user,
+				modelType: modelTypes.FEDERATION,
+				data,
+			});
+	}
+};
+
 Models.newRevisionProcessed = async (teamspace, project, model, revId,
 	{ retVal, success, message, userErr }, user, containers) => {
 	const query = { _id: model };

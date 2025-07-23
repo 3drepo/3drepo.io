@@ -23,12 +23,15 @@ const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
+const { generateUUIDString } = require('../../../../utils/helper/uuids');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { hasReadAccessToContainer } = require('../../../../utils/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
+const { updateModelSubModels } = require('../../../../models/modelSettings');
+
 const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 
 const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
@@ -62,7 +65,10 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
 };
 
-Federations.newRevision = queueFederationUpdate;
+Federations.newRevision = async (teamspace, project, federation, info) => {
+	const revId = generateUUIDString();
+	await updateModelSubModels(teamspace, project, federation, info.owner, revId, info.containers);
+};
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
 	const lastUpdates = [];
