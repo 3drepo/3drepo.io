@@ -74,7 +74,7 @@ interface IState {
 interface IProps {
 	match: any;
 	location: any;
-	history: any;
+	navigate: (to: string, options?: { replace?: boolean }) => void;
 	fetchTeamspaceSettings: (teamspace) => void;
 	updateTeamspaceSettings: (teamspace, settings) => void;
 	downloadTreatmentsTemplate: () => void;
@@ -163,9 +163,9 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleBackLink = () => {
-		this.props.history.push({ pathname: ROUTES.TEAMSPACES });
-	}
+   public handleBackLink = () => {
+		this.props.navigate(ROUTES.TEAMSPACES);
+   }
 
 	public renderTitleWithBackLink = () => (
 		<>

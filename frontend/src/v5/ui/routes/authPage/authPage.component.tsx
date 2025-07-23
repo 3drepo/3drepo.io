@@ -20,7 +20,7 @@ import { AuthTemplate } from '@components/authTemplate/authTemplate.component';
 import { Footer, Form, Heading, Link } from './authPage.styles';
 import { COOKIES_ROUTE, PRIVACY_ROUTE, RELEASE_NOTES_ROUTE, TERMS_ROUTE } from '../routes.constants';
 import { useSSOLogin } from '@/v5/services/sso.hooks';
-import { Redirect, useRouteMatch } from 'react-router';
+import { Navigate, useMatch } from 'react-router-dom';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { addParams } from '@/v5/helpers/url.helper';
 import { formatMessage } from '@/v5/services/intl';
@@ -36,7 +36,8 @@ const APP_VERSION = ClientConfig.VERSION;
 
 export const AuthPage = () => {
 	const [login] = useSSOLogin();
-	const { url } = useRouteMatch();
+	const match = useMatch('*');
+	const url = match?.pathname || '';
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState();
 	
@@ -60,7 +61,16 @@ export const AuthPage = () => {
 	};
 
 	if (isAuthenticated) {
-		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
+		return (
+			<Navigate
+				to={{
+					pathname: returnUrl.pathname,
+					search: returnUrl.search,
+				}}
+				state={{ referrer: url }}
+				replace
+			/>
+		);
 	}
 
 	return (

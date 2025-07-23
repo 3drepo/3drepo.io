@@ -21,14 +21,14 @@ import { ProjectsHooksSelectors, CurrentUserHooksSelectors, TeamspacesHooksSelec
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Board as V4Board } from '@/v4/routes/board';
 import { selectBoardDomain } from '@/v4/modules/board';
-import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
+import { useNavigate, useLocation, useMatch } from 'react-router-dom';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 import { Container } from './board.styles';
 
 export const Board = () => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const location = useLocation();
-	const match = useRouteMatch();
+	const match = useMatch('*');
 	const dispatch = useDispatch();
 	const board = useSelector(selectBoardDomain);
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -50,7 +50,7 @@ export const Board = () => {
 			<V4Board
 				currentTeamspace={teamspace}
 				match={match}
-				history={history}
+				navigate={navigate}
 				location={location}
 				selectedRiskFilters={[]}
 			/>

@@ -16,7 +16,7 @@
  */
 
 import { DashboardParams, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { generatePath, useParams, useHistory } from 'react-router-dom';
+import { generatePath, useParams, useNavigate } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormProvider, useForm } from 'react-hook-form';
@@ -34,7 +34,7 @@ type FormType = {
 export const TicketsSelection = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const [models] = useSearchParam('models', Transformers.STRING_ARRAY);
-	const history = useHistory();
+	const navigate = useNavigate();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const formData = useForm<FormType>({
@@ -60,7 +60,7 @@ export const TicketsSelection = () => {
 			template,
 		});
 
-		history.push(path);
+		navigate(path);
 	};
 
 	if (!teamspace || !project || !templates) return (<Loader />);

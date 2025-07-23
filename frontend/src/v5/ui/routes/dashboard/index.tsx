@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRouteMatch, useLocation, Switch, Redirect } from 'react-router-dom';
+import { useMatch, useLocation, Routes, Navigate } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
@@ -47,7 +47,8 @@ import { CalibrationContextComponent } from './projects/calibration/calibrationC
 import { authBroadcastChannel } from '@/v5/store/auth/authBrodcastChannel';
 
 export const MainRoute = () => {
-	const { path } = useRouteMatch();
+	const match = useMatch('*');
+	const path = match?.pathname || '';
 	const { pathname } = useLocation();
 	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
 
@@ -62,58 +63,36 @@ export const MainRoute = () => {
 	return (
 		<CalibrationContextComponent>
 			<GlobalStyle />
-			<Switch>
-				<Route title={formatMessage({ id: 'pageTitle.auth', defaultMessage: 'Authenticate' })} exact path={AUTH_PATH}>
-					<AuthPage />
-				</Route>
-				<Route exact path={`${path}/(terms|privacy|cookies)`}>
-					<LegalRoutes path={path} />
-				</Route>
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.teamspaceSelection', defaultMessage: 'Teamspaces' })} exact path={DASHBOARD_ROUTE}>
-					<TeamspaceSelection />
-				</AuthenticatedRoute>
-				<AuthenticatedRoute exact path={`${TEAMSPACE_ROUTE_BASE}/(t|t/.*)?`}>
+			<Routes>
+				<Route title={formatMessage({ id: 'pageTitle.auth', defaultMessage: 'Authenticate' })} path={AUTH_PATH} element={<AuthPage />} />
+				<Route path={`${path}/(terms|privacy|cookies)`} element={<LegalRoutes path={path} />} />
+				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.teamspaceSelection', defaultMessage: 'Teamspaces' })} path={DASHBOARD_ROUTE} element={<TeamspaceSelection />} />
+				<AuthenticatedRoute path={`${TEAMSPACE_ROUTE_BASE}/(t|t/.*)?`} element={
 					<TeamspaceLayout>
-						<Switch>
-							<Route exact path={TEAMSPACE_ROUTE_BASE}>
-								<Redirect to={`${discardSlash(pathname)}/t/projects`} />
-							</Route>
-							<Route exact path={TEAMSPACE_ROUTE_BASE_TAB}>
-								<Redirect to={`${discardSlash(pathname)}/projects`} />
-							</Route>
-							<Route path={`${TEAMSPACE_ROUTE_BASE}/`}>
-								<TeamspaceContent />
-							</Route>
-						</Switch>
+						<Routes>
+							<Route path={TEAMSPACE_ROUTE_BASE} element={<Navigate to={`${discardSlash(pathname)}/t/projects`} replace />} />
+							<Route path={TEAMSPACE_ROUTE_BASE_TAB} element={<Navigate to={`${discardSlash(pathname)}/projects`} replace />} />
+							<Route path={`${TEAMSPACE_ROUTE_BASE}/`} element={<TeamspaceContent />} />
+						</Routes>
 					</TeamspaceLayout>
-				</AuthenticatedRoute>
-				<AuthenticatedRoute path={PROJECT_ROUTE_BASE}>
+				} />
+				<AuthenticatedRoute path={PROJECT_ROUTE_BASE} element={
 					<DashboardProjectLayout>
-						<Switch>
-							<Route exact path={PROJECT_ROUTE_BASE}>
-								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
-							</Route>
-							<Route exact path={PROJECT_ROUTE_BASE_TAB}>
-								<Redirect to={`${discardSlash(pathname)}/federations`} />
-							</Route>
-							<Route path={PROJECT_ROUTE_BASE}>
-								<ProjectContent />
-							</Route>
-						</Switch>
+						<Routes>
+							<Route path={PROJECT_ROUTE_BASE} element={<Navigate to={`${discardSlash(pathname)}/t/federations`} replace />} />
+							<Route path={PROJECT_ROUTE_BASE_TAB} element={<Navigate to={`${discardSlash(pathname)}/federations`} replace />} />
+							<Route path={PROJECT_ROUTE_BASE} element={<ProjectContent />} />
+						</Routes>
 					</DashboardProjectLayout>
-				</AuthenticatedRoute>
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE}>
+				} />
+				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE} element={
 					<DashboardViewerLayout>
 						<Viewer />
 					</DashboardViewerLayout>
-				</AuthenticatedRoute>
-				<AuthenticatedRoute exact path={path}>
-					<Redirect to={`${discardSlash(pathname)}/dashboard`} />
-				</AuthenticatedRoute>
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
-					<NotFound />
-				</AuthenticatedRoute>
-			</Switch>
+				} />
+				<AuthenticatedRoute path={path} element={<Navigate to={`${discardSlash(pathname)}/dashboard`} replace />} />
+				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*" element={<NotFound />} />
+			</Routes>
 		</CalibrationContextComponent>
 	);
 };

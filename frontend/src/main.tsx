@@ -16,7 +16,7 @@
  */
 
 import { ConnectedRouter } from 'connected-react-router';
-import { Switch, Redirect } from 'react-router-dom';
+import { Routes, Navigate } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
 import ReactDOM from 'react-dom';
@@ -71,23 +71,13 @@ const render = () => {
 			<ConnectedRouter history={history}>
 				<IntlProvider {...getIntl()}>
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
-						<Switch>
-							<Route exact path="/">
-								<Redirect to={{ pathname:'v5/' }} />
-							</Route>
-							<Route path={ROUTES.SIGN_UP}>
-								<Redirect to={{ pathname: V5_AUTH_PATH, search: window.location.search }} />
-							</Route>
-							<Route exact path={ROUTES.LOGIN}>
-								<Redirect to={{ pathname: V5_AUTH_PATH }} />
-							</Route>
-							<Route path="/v5">
-								<V5Root />
-							</Route>
-							<Route title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
-								<NotFound />
-							</Route>
-						</Switch>
+						<Routes>
+							<Route path="/" element={<Navigate to="v5/" />} />
+							<Route path={ROUTES.SIGN_UP} element={<Navigate to={{ pathname: V5_AUTH_PATH, search: window.location.search }} replace />} />
+							<Route path={ROUTES.LOGIN} element={<Navigate to={V5_AUTH_PATH} replace />} />
+							<Route path="/v5/*" element={<V5Root />} />
+							<Route title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*" element={<NotFound />} />
+						</Routes>
 					</LocalizationProvider>
 				</IntlProvider>
 			</ConnectedRouter>

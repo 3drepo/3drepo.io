@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRouteMatch, Switch, Redirect } from 'react-router-dom';
+import { useMatch, Navigate, Routes } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
 import { Route } from '@/v5/services/routing/route.component';
 import { NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
@@ -28,28 +28,18 @@ import { UsersList } from '../users/usersList.component';
 import { Jobs } from '../jobs/jobs.component';
 
 export const TeamspaceContent = () => {
-	let { path } = useRouteMatch();
+	let path = useMatch('*');
 	path = discardSlash(path);
 
 	useEffect(() => { ProjectsActionsDispatchers.setCurrentProject(''); }, []);
 
 	return (
-		<Switch>
-			<Route title={formatMessage({ id: 'pageTitle.teamspace.projects', defaultMessage: ':teamspace - Projects' })} exact path={`${path}/t/projects`}>
-				<ProjectsList />
-			</Route>
-			<Route title={formatMessage({ id: 'pageTitle.teamspace.jobs', defaultMessage: ':teamspace - Jobs' })} exact path={`${path}/t/jobs`}>
-				<Jobs />
-			</Route>
-			<Route title={formatMessage({ id: 'pageTitle.teamspace.settings', defaultMessage: ':teamspace - Settings' })} exact path={`${path}/t/settings`}>
-				<TeamspaceSettings />
-			</Route>
-			<Route title={formatMessage({ id: 'pageTitle.teamspace.users', defaultMessage: ':teamspace - Users' })} exact path={`${path}/t/users`}>
-				<UsersList />
-			</Route>
-			<Route path="*">
-				<Redirect to={NOT_FOUND_ROUTE_PATH} />
-			</Route>
-		</Switch>
+		<Routes>
+			<Route title={formatMessage({ id: 'pageTitle.teamspace.projects', defaultMessage: ':teamspace - Projects' })} path={`${path}/t/projects`} element={<ProjectsList />}/>
+			<Route title={formatMessage({ id: 'pageTitle.teamspace.jobs', defaultMessage: ':teamspace - Jobs' })} path={`${path}/t/jobs`} element={<Jobs />} />
+			<Route title={formatMessage({ id: 'pageTitle.teamspace.settings', defaultMessage: ':teamspace - Settings' })} path={`${path}/t/settings`} element={<TeamspaceSettings />} />
+			<Route title={formatMessage({ id: 'pageTitle.teamspace.users', defaultMessage: ':teamspace - Users' })} path={`${path}/t/users`} element={<UsersList />} />
+			<Route path="*" element={<Navigate to={NOT_FOUND_ROUTE_PATH} />} />
+		</Routes>
 	);
 };

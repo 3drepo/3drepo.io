@@ -17,7 +17,7 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
-import { useRouteMatch, Switch, Redirect, useLocation } from 'react-router-dom';
+import { useMatch, useLocation, Routes, Navigate } from 'react-router-dom';
 
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -41,14 +41,14 @@ import { isEmpty } from 'lodash';
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
 	const { pathname } = useLocation();
-	const { title:kanbanTitle,  shouldRenderContent: shouldRenderKanbanContent, issuesOrRisksEnabled, riskEnabled, issuesEnabled } = useKanbanNavigationData();
+	const { title: kanbanTitle, shouldRenderContent: shouldRenderKanbanContent, issuesOrRisksEnabled, riskEnabled, issuesEnabled } = useKanbanNavigationData();
 
 	const hasPermissions = !TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();
 	const isFetchingAddons = TeamspacesHooksSelectors.selectIsFetchingAddons();
 	const isFetchingProject = isEmpty(ProjectsHooksSelectors.selectCurrentProjectDetails());
 	const isLoadingPermissions = isFetchingAddons || isFetchingProject;
 
-	let { path } = useRouteMatch();
+	let path = useMatch('*');
 	path = discardSlash(path);
 
 	useEffect(() => {
@@ -60,45 +60,29 @@ export const ProjectContent = () => {
 	return (
 		<>
 			<Content>
-				<Switch>
-					<Route title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })} exact path={`${path}/t/federations`}>
-						<Federations />
-					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })} exact path={`${path}/t/containers`}>
-						<Containers />
-					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })} exact path={`${path}/t/drawings`}>
-						<Drawings />
-					</Route>
+				<Routes>
+					<Route title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })} path={`${path}/t/federations`} element={<Federations />} />
+					<Route title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })} path={`${path}/t/containers`} element={<Containers />} />
+					<Route title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })} path={`${path}/t/drawings`} element={<Drawings />} />
 					{(shouldRenderKanbanContent) && 
-						<Route title={kanbanTitle} exact path={`${path}/t/board/:type/:containerOrFederation?`}>
-							{issuesOrRisksEnabled && <Board />}
-						</Route>
+						<Route title={kanbanTitle} path={`${path}/t/board/:type/:containerOrFederation?`} element={issuesOrRisksEnabled && <Board />} />
 					}
-					<Route title={kanbanTitle} exact path={`${path}/t/board`}>
-						{issuesEnabled && <Redirect to={`${discardSlash(pathname)}/issues`} />}
-						{(!issuesEnabled && riskEnabled) && <Redirect to={`${discardSlash(pathname)}/risks`} />}
-					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })} path={`${path}/t/tickets`}>
-						<TicketsContent />
-					</Route>
-					<Route title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })} exact path={`${path}/t/project_settings`}>
-						<ProjectSettings />
-					</Route>
-					{hasPermissions && (
-						<Route title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })} exact path={`${path}/t/project_permissions`}>
-							<ProjectPermissions />
-						</Route>
+					{issuesEnabled && (
+						<Route title={kanbanTitle} path={`${path}/t/board`} element={<Navigate to={`${discardSlash(pathname)}/issues`} />} />
 					)}
-					{hasPermissions && (
-						<Route title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })} exact path={`${path}/t/user_permissions`}>
-							<UserPermissions />
-						</Route>
+					{(!issuesEnabled && riskEnabled) && (
+						<Route title={kanbanTitle} path={`${path}/t/board`} element={<Navigate to={`${discardSlash(pathname)}/risks`} />} />
 					)}
-					<Route path="*">
-						<Redirect to={NOT_FOUND_ROUTE_PATH} />
-					</Route>
-				</Switch>
+					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })} path={`${path}/t/tickets`} element={<TicketsContent />} />
+					<Route title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })} path={`${path}/t/project_settings`} element={<ProjectSettings />} />
+					{hasPermissions && (
+						<>
+							<Route title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })} path={`${path}/t/project_permissions`} element={<ProjectPermissions />} />
+							<Route title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })} path={`${path}/t/user_permissions`} element={<UserPermissions />} />
+						</>
+					)}
+					<Route path="*" element={<Navigate to={NOT_FOUND_ROUTE_PATH} />} />
+				</Routes>
 			</Content>
 			<DashboardFooter variant="light" />
 		</>

@@ -20,7 +20,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelec
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams, generatePath, useHistory } from 'react-router-dom';
+import { useParams, generatePath, useNavigate } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
@@ -57,7 +57,7 @@ const paramToInputProps = (value, setter) => ({
 
 
 export const TicketsTable = () => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const params = useParams<DashboardTicketsParams>();
 	const { teamspace, project, template, ticketId } = params;
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
@@ -72,8 +72,8 @@ export const TicketsTable = () => {
 	const setTemplate = useCallback((newTemplate) => {
 		const newParams = { ...params, template: newTemplate };
 		const path = generatePath(TICKETS_ROUTE + window.location.search, newParams);
-		history.push(path);
-	}, [params]);
+		navigate(path, { replace: false });
+	}, [params, navigate]);
 
 	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
 		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
@@ -83,11 +83,11 @@ export const TicketsTable = () => {
 		const path = generatePath(TICKETS_ROUTE + search, newParams);
 
 		if (replace) {
-			history.replace(path);
+			navigate(path, { replace: true });
 		} else {
-			history.push(path);
+			navigate(path, { replace: false });
 		}
-	}, [params]);
+	}, [params, navigate, setContainerOrFederation]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);

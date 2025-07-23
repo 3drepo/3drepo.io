@@ -19,7 +19,6 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { withRouter } from 'react-router';
 import { selectCurrentUser } from '../../../modules/currentUser';
 import { selectDrawerOpenState, selectHasNotificationsLastWeek,
 	selectHasNotificationsThisWeek, selectHasNotificationsUntilLastWeekOnly, selectHasOlderNotifications,
@@ -55,4 +54,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setDrawerPanelState: NotificationsActions.setDrawerPanelState
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Notifications as any));
+export default connect(mapStateToProps, mapDispatchToProps)(Notifications as any);
