@@ -24,37 +24,30 @@ const { getUserByUsernameOrEmail } = require(`${v5Path}/models/users`);
 const { getTeamspaceListByUser, removeTeamspaceMember } = require(`${v5Path}/processors/teamspaces`);
 const { remove: deleteUser } = require(`${v5Path}/processors/users`);
 
-const removeUserFromAllTeamspaces = async (user) => {
-	const teamspaces = await getTeamspaceListByUser(user);
-	await Promise.all(teamspaces.map(
-		({ name: teamspace }) => removeTeamspaceMember(teamspace, user),
-	));
-};
-
-const removeUser = async (user) => {
-	const userRecord = await getUserByUsernameOrEmail(user).catch(() => false);
-
-	if (userRecord) {
-		await removeUserFromAllTeamspaces(userRecord.user);
-		await deleteUser(userRecord.user);
-		return true;
-	}
-	return false;
-};
-
 const run = async (users) => {
 	if (!users?.length) throw new Error('A list of users must be provided');
 	const userArr = users.split(',');
-	let removedUsers = 0;
-	for (const user of userArr) {
+	const removedUsers = await Promise.all(userArr.map(async (user) => {
 		// eslint-disable-next-line no-await-in-loop
-		const userRemoved = await removeUser(user);
-		if (userRemoved) {
-			removedUsers += 1;
-		}
-	}
+		const userRecord = await getUserByUsernameOrEmail(user.trim()).catch(() => false);
+		if (userRecord) {
+			// eslint-disable-next-line no-await-in-loop
+			const teamspaces = await getTeamspaceListByUser(userRecord.user);
+			if (teamspaces.length) {
+				await Promise.all(teamspaces.map(
+					({ name: teamspace }) => removeTeamspaceMember(teamspace, userRecord.user),
+				));
+			}
+			// eslint-disable-next-line no-await-in-loop
+			await deleteUser(userRecord.user);
 
-	logger.logInfo(`Removed ${removedUsers}/${users.length} users successfully.`);
+			return true;
+		}
+
+		logger.logInfo(`User ${user.trim()} not found, skipping...`);
+		return false;
+	}));
+	logger.logInfo(`Removed users: ${removedUsers.filter(Boolean).length} out of ${userArr.length}`);
 };
 
 const genYargs = /* istanbul ignore next */(yargs) => {
