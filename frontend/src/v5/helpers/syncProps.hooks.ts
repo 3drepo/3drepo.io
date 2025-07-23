@@ -72,8 +72,6 @@ export const useSyncPropsEffect = (syncProps) => {
 				syncProps.current.removeListener(UPDATE_EVENT, setSynchedProps);
 			};
 		}
-	
-		return null;
 	}, []);
 
 	return synchedProps;

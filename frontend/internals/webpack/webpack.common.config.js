@@ -66,6 +66,7 @@ module.exports = (options) => ({
 			'@assets': PATHS.ASSETS_DIR,
 			'@components': PATHS.COMPONENTS,
 			'@controls': PATHS.CONTROLS,
+			'@mui/styled-engine': path.resolve('node_modules', '@mui/styled-engine-sc'),
 			"styled-components": path.resolve("node_modules", "styled-components"),
 			"react/jsx-runtime": path.resolve("node_modules", "react", "jsx-runtime.js"),
 		},

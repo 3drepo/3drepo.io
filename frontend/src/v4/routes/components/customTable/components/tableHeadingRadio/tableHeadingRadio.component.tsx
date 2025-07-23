@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { forwardRef } from 'react';
 import { Grid } from '@mui/material';
 
 import { SortLabel } from '../tableHeading/tableHeading.styles';
@@ -38,7 +37,7 @@ interface IProps {
 	onClick?: () => void;
 }
 
-export const TableHeadingRadio = forwardRef((({
+export const TableHeadingRadio = (({
 	activeSort,
 	label,
 	name,
@@ -49,8 +48,9 @@ export const TableHeadingRadio = forwardRef((({
 	value,
 	checked,
 	disabled,
+	ref,
 	...otherProps
-}: IProps, ref: any ) => {
+}: IProps) => {
 
 	const handleChange = (event) => {
 		onChange(event, value);
@@ -85,4 +85,4 @@ export const TableHeadingRadio = forwardRef((({
 			</Grid>
 		</RadioContainer>
 	);
-}));
+});

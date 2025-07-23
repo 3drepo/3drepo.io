@@ -68,7 +68,6 @@ export const ContainerListItem = memo(({
 				enableRealtimeNewContainerRevisionUpdate(teamspace, project, container._id),
 			);
 		}
-		return null;
 	}, [container._id]);
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {

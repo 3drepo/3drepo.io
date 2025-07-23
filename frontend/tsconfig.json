@@ -31,7 +31,8 @@
       "@components/*": ["./src/v5/ui/components/*"],
       "@controls/*": ["./src/v5/ui/controls/*"],
       "@assets/*": ["./assets/*"],
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+	  "react": ["./node_modules/@types/react"]
     }
   },
   "exclude": [

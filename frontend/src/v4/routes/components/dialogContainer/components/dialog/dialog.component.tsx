@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState, FunctionComponent, forwardRef, Ref } from 'react';
+import { useEffect, useState, FunctionComponent, Ref } from 'react';
 
 import Button from '@mui/material/Button';
 import DialogBase from '@mui/material/Dialog';
@@ -40,7 +40,7 @@ interface IProps extends RouteComponentProps<any> {
 	searchEnabled?: boolean;
 }
 
-export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTMLDivElement>) => {
+export const Dialog: FunctionComponent<IProps> = ({ ref, ...props }: IProps) => {
 	const [isOpen, setIsOpen] = useState(true);
 	const [closeDisabled, setCloseDisabled] = useState(false);
 
@@ -146,4 +146,4 @@ export const Dialog: FunctionComponent<IProps> = forwardRef((props, ref: Ref<HTM
 			</DialogBase>
 		</V4DialogsAdapter>
     );
-});
+};

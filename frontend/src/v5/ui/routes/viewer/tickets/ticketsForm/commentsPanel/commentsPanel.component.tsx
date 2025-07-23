@@ -80,7 +80,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 
 
 	useEffect(() => {
-		if (!ticketId) return null;
+		if (!ticketId) return;
 		TicketCommentsActionsDispatchers.fetchComments(
 			teamspace,
 			project,
