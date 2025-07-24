@@ -47,7 +47,6 @@ const stringToStream = require("string-to-stream");
 const { BinToFaceStringStream, BinToVector3dStringStream } = require("./binary");
 const PermissionTemplates = require("../permissionTemplates");
 const AccountPermissions = require("../accountPermissions");
-const ModelSetting = require("../modelSetting");
 
 const {v5Path} = require("../../../interop");
 const { deleteModel } = require(`${v5Path}/processors/teamspaces/projects/models/commons/modelList`);
@@ -543,7 +542,7 @@ async function getMeshById(account, model, meshId) {
 	return 	combinedStream;
 }
 
-async function getSubModelRevisions(account, model, branch, rev) {
+async function getSubModelRevisions(account, model) {
 	const containers = await getSubModels(account, model);
 	const modelIds = containers.map((container) => container.model);
 	const results = {};

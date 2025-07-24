@@ -20,12 +20,10 @@
 const History = require("./history");
 const middlewares = require("../middlewares/middlewares");
 const utils = require("../utils");
-const C = require("../constants");
 const db = require("../handler/db");
 const {v5Path} = require("../../interop");
 const responseCodes = require("../response_codes");
 const FilesManager = require(`${v5Path}/services/filesManager`);
-const ModelSetting = require("./modelSetting");
 const { getSubModels } = require("./ref");
 
 const UnityAssets = {};
@@ -53,7 +51,7 @@ async function getAssetListEntry(account, model, revId) {
 	}
 }
 
-UnityAssets.getAssetList = async function(account, model, branch, rev, username, legacy) {
+UnityAssets.getAssetList = async function(account, model, branch, rev, username) {
 	const subModels = await getSubModels(account, model);
 	const fetchPromise = [];
 	if(subModels.length) { // This is implicitly a federation
