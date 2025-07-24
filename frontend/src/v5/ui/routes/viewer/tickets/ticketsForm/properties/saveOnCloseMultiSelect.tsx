@@ -36,7 +36,7 @@ export const useSaveOnCloseMultiSelectProps = <P extends MultiSelectPropertyProp
 		onBlur?.();
 	};
 
-	useEffect(() => setDisplayValue(value), [value]);
+	useEffect(() => { setDisplayValue(value); }, [value]);
 
 	return {
 		...props,

@@ -50,8 +50,8 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Prop
 	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation);
 	const modelLoading = useModelLoading();
 
-	useEffect(() => viewportRef.current = viewport, [viewport]);
-	useEffect(() => scaleRef.current = viewbox.scale, [viewbox.scale]);
+	useEffect(() => { viewportRef.current = viewport; }, [viewport]);
+	useEffect(() => { scaleRef.current = viewbox.scale; }, [viewbox.scale]);
 
 	useViewpointSubscription((v) => {
 		if (!transform2DTo3D) return;
@@ -73,8 +73,7 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Prop
 		}
 
 
-		if (cameraInSight) 
-			return;
+		if (cameraInSight) return;
 
 		const vpWidth = (vp.right - vp.left) * scaleRef.current;
 		const vpHeight = (vp.bottom - vp.top) * scaleRef.current;

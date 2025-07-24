@@ -70,5 +70,5 @@ const subscribeToViewpointChange = (callback) => {
 };
 
 export const useViewpointSubscription = (onViewpointChange, deps) => {
-	useEffect(() => subscribeToViewpointChange(onViewpointChange), deps);
+	useEffect(() => { subscribeToViewpointChange(onViewpointChange); }, deps);
 };

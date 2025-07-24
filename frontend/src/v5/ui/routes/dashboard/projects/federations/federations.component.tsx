@@ -49,7 +49,7 @@ export const Federations = (): JSX.Element => {
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateFederationForm);
 
-	useEffect(() => enableRealtimeNewFederation(teamspace, project), [project]);
+	useEffect(() => { enableRealtimeNewFederation(teamspace, project); }, [project]);
 
 	if (isListPending) {
 		return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);

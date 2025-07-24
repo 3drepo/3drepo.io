@@ -129,7 +129,7 @@ export const TicketView = ({
 		onChange?.({ state, ...view });
 	};
 
-	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => { onBlur?.(); }, [value]);
 	useEffect(() => { setImgInModal(imgSrc); }, [imgSrc]);
 
 	const onGroupsClick = () => {

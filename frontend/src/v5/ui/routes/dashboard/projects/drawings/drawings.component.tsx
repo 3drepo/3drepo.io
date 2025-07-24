@@ -47,7 +47,7 @@ export const Drawings = () => {
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateDrawingDialog);
 
-	useEffect(() => enableRealtimeNewDrawing(teamspace, project), [project]);
+	useEffect(() => { enableRealtimeNewDrawing(teamspace, project); }, [project]);
 	useEffect(() => () => { DrawingsActionsDispatchers.resetDrawingStatsQueue(); }, []);
 
 	if (isListPending) return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);

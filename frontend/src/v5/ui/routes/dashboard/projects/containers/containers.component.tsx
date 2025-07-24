@@ -46,7 +46,7 @@ export const Containers = (): JSX.Element => {
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateContainerForm);
 
-	useEffect(() => enableRealtimeNewContainer(teamspace, project), [project]);
+	useEffect(() => { enableRealtimeNewContainer(teamspace, project); }, [project]);
 	useEffect(() => () => {ContainersActionsDispatchers.resetContainerStatsQueue();}, [] );
 
 	if (isListPending) {

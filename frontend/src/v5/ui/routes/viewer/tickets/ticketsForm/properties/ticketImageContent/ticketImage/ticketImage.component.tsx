@@ -52,7 +52,7 @@ export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperTe
 		}, syncProps);
 	};
 
-	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => { onBlur?.(); }, [value]);
 	useEffect(() => { setImgInModal(imgSrc); }, [imgSrc]);
 
 	return (

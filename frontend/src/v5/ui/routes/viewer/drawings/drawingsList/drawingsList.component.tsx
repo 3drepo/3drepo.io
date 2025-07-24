@@ -64,7 +64,7 @@ export const DrawingsList = () => {
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	const selectedIndex = drawings.findIndex((d) => d._id === selectedDrawingId);
 
-	useEffect(() => enableRealtimeNewDrawing(teamspace, project), [project]);
+	useEffect(() => { enableRealtimeNewDrawing(teamspace, project); }, [project]);
 
 	if (isLoading) return (
 		<CentredContainer>

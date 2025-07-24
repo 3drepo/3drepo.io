@@ -174,7 +174,7 @@ export const TicketGroups = ({ value, onChange, onBlur }: TicketGroupsProps) => 
 		}
 	};
 
-	useEffect(() => onBlur?.(), [value]);
+	useEffect(() => { onBlur?.(); }, [value]);
 
 	useEffect(() => {
 		if (highlightedOverride.index === NO_OVERRIDE_SELECTED.index) {
