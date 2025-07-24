@@ -84,7 +84,7 @@ export default css`
 			margin-left: 2px;
 		}
 
-		::before {
+		&::before {
 			background: transparent;
 		}
 

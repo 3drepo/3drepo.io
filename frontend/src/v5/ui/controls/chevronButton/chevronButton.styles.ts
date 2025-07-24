@@ -66,7 +66,7 @@ export const ChevronStyledIconButton = styled(IconButton)<{ $isOn?: boolean, $is
 		border-style: solid;
 	}
 
-	:disabled {
+	&:disabled {
 		background-color: transparent;
 
 		svg {

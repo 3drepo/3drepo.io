@@ -36,7 +36,7 @@ export const AvatarsOpacityHandler = styled.div`
 			z-index: 3; /* avatar appears on top when hovered */
 		}
 
-		::before {
+		&::before {
 			content: "";
 			margin: 0;
 			background-color: ${({ theme }) => theme.palette.primary.contrast};

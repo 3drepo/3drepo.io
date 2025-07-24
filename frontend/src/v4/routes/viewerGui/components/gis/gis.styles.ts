@@ -77,7 +77,7 @@ export const MapLayer = styled.div`
 	justify-content: space-between;
 	position: relative;
 
-	:last-child {
+	&:last-child {
 		padding-bottom: 0;
 	}
 `;

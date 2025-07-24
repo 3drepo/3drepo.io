@@ -106,7 +106,7 @@ const ProjectSelectorStyles = css`
 			${({ theme }) => theme.typography.body1};
 			font-weight: 600;
 			margin: 0 14px;
-			::before {
+			&::before {
 				content: 'Remove';
 			}
 			svg {

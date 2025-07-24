@@ -20,7 +20,7 @@ export const Tag = styled.mark`
 	position: relative;
 	background-color: ${({ theme }) => theme.palette.primary.light};
 
-	::after {
+	&::after {
 		content: '';
 		position: absolute;
 		left: 0;

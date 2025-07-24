@@ -30,7 +30,7 @@ export const Container = styled.div<{ selected?: boolean }>`
 	${({ theme, selected }) => selected && css`
 		background-color: ${theme.palette.secondary.main};
 
-		::before {
+		&::before {
 			background-color: ${theme.palette.secondary.main};
 			border: none;
 		}

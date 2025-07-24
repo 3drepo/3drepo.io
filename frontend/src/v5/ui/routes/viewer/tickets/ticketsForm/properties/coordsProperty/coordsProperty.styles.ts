@@ -68,7 +68,7 @@ export const CoordsAction = styled.div<{ selected?: boolean; disabled?: boolean 
 		color: ${({ theme }) => theme.palette.base.main};
 	`};
 
-	:hover {
+	&:hover {
 		background-color: ${({ selected, theme: { palette } }) => selected ? palette.primary.dark : palette.tertiary.lightest};
 	}
 

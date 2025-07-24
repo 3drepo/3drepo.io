@@ -24,8 +24,8 @@ export const FlexContainer = styled.div`
 	align-items: flex-start;
 	width: 100%;
 
-	> div {
-		:first-child {
+	& > div {
+		&:first-child {
 			margin-right: 9px;
 		}
 		flex: 1;

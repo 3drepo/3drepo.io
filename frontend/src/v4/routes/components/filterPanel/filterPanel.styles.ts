@@ -108,7 +108,7 @@ export const InputContainer = styled.div<IInputContainer>`
 			height: 30px;
 			padding: 10px 14px;
 
-			::placeholder {
+			&::placeholder {
 				color: ${COLOR.BLACK_60};
 				opacity: 1;
 			}

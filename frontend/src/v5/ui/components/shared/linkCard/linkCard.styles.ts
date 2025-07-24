@@ -25,8 +25,10 @@ export const CardListItem = styled.li`
 	list-style-type: none;
 	float: left;
 	margin: 10px;
-	.MuiCard-root { transition: margin 0.1s; }
-	:hover .MuiCard-root {
+	.MuiCard-root {
+		transition: margin 0.1s;
+	}
+	&:hover .MuiCard-root {
 		margin-top: -5px;
 		margin-bottom: 5px;
 		box-shadow: ${({ theme }) => theme.palette.shadows.level_5};

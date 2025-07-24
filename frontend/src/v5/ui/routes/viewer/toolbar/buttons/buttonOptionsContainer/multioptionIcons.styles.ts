@@ -39,7 +39,7 @@ export const ButtonOptionsContainer = styled.div<{ $expanded?: boolean }>`
 		`}
 	}
 
-	:is(&, &:hover) > ${/* sc-selector */Container}::after {
+	&:is(&, &:hover) > ${/* sc-selector */Container}::after {
 		border-left-color: transparent;
 		border-bottom-color: transparent;
 	}

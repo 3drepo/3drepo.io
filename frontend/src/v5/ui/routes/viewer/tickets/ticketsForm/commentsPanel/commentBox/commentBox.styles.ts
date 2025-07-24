@@ -147,7 +147,7 @@ export const MessageInput = styled(FormTextAreaFixedSize)`
 	padding: 8px 15px 0;
 	overflow: hidden;
 
-	:after {
+	&:after {
 		content: '';
 		box-shadow: 0 0 9px 7px ${({ theme }) => theme.palette.primary.contrast};
 		z-index: 1;

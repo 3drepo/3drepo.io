@@ -50,7 +50,7 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 			}
 
 			/* Panel resizer nodule */
-			:is(&:hover, &:active)::after {
+			&:is(&:hover, &:active)::after {
 				content: url('data:image/svg+xml;utf8,${ComponentToString(ResizePaneIcon)}');
 				padding-top: 3px;
 				height: 40px;

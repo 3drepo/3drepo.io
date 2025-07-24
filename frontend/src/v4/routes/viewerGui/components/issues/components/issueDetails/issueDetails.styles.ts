@@ -74,7 +74,7 @@ export const HorizontalView = styled.div`
 	}
 
 	${MessagesList} {
-		:before {
+		&:before {
 			box-shadow: none;
 		}
 	}
