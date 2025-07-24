@@ -25,6 +25,7 @@ interface IProps {
 	footerLabel?: string | ReactNode[];
 	withHeader?: boolean;
 	className?: string;
+	ref?: React.Ref<HTMLDivElement>;
 }
 
 export const UserManagementTab = (props: IProps) => {
@@ -37,6 +38,7 @@ export const UserManagementTab = (props: IProps) => {
 			wrap="nowrap"
 			justifyContent="space-between"
 			className={props.className}
+			ref={props.ref}
 		>
 			<Content item header={props.withHeader}>{children}</Content>
 			{footerLabel && (<Footer item>{footerLabel}</Footer>)}

@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef } from 'react';
+import { Fragment, PureComponent, createRef } from 'react';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import {
 	cond,
@@ -105,6 +105,7 @@ interface IProps extends RouteComponentProps<any> {
 	isPending: boolean;
 	className?: string;
 	isTeamspaceAdmin?: boolean;
+	parentRef?: React.RefObject<HTMLDivElement>;
 }
 
 interface IState {
@@ -125,7 +126,6 @@ const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
 
 export class Users extends PureComponent<IProps, IState> {
 	public formRef = createRef<any>();
-	public inputRef = createRef<HTMLDivElement>();
 	public static defaultProps = {
 		jobs: [],
 		users: []
@@ -207,12 +207,10 @@ export class Users extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = this.inputRef.current?.parentNode;
 		this.props.fetchQuotaAndInvitations(this.props.selectedTeamspace);
 		const preparedJobs = getPreparedJobs(this.props.jobs);
 
 		this.setState({
-			containerElement,
 			jobs: preparedJobs,
 			rows: this.getUsersTableRows(this.props.users, preparedJobs),
 			limit: this.props.limit
@@ -353,8 +351,8 @@ export class Users extends PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { isPending, selectedTeamspace, usersProvisionedEnabled } = this.props;
-		const { rows, containerElement } = this.state;
+		const { isPending, selectedTeamspace, usersProvisionedEnabled, parentRef } = this.props;
+		const { rows } = this.state;
 		const cells = USERS_TABLE_CELLS;
 
 		if (usersProvisionedEnabled) {
@@ -377,12 +375,12 @@ export class Users extends PureComponent<IProps, IState> {
 		}
 
 		return (
-			<div style={{ display: 'contents' }} ref={this.inputRef}>
+			<>
 				<UserManagementTab footerLabel={this.getFooterLabel(true)} className={this.props.className}>
 					<CustomTable cells={cells} rows={rows} />
 				</UserManagementTab>
-				{containerElement && this.renderNewUserForm(containerElement)}
-			</div>
+				{parentRef.current && this.renderNewUserForm(parentRef.current)}
+			</>
 		);
 	}
 }

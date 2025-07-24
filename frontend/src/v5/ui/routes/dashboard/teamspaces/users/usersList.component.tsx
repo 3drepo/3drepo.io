@@ -16,7 +16,7 @@
  */
 
 import { UserManagementActions } from '@/v4/modules/userManagement';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useDispatch } from 'react-redux';
 import { Users as V4UsersList } from '@/v4/routes/users';
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
@@ -30,6 +30,7 @@ export const UsersList = () => {
 	const dispatch = useDispatch();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const username = CurrentUserHooksSelectors.selectUsername();
+	const parentRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
 		if (!teamspace) return;
@@ -40,13 +41,13 @@ export const UsersList = () => {
 	}, [teamspace, username]);
 
 	return (
-		<V5UserListOverrides>
+		<V5UserListOverrides ref={parentRef}>
 			<Header>
 				<Title>
 					<FormattedMessage id="usersList.title" defaultMessage="Users" />
 				</Title>
 			</Header>
-			<V4UsersList />
+			<V4UsersList parentRef={parentRef} />
 		</V5UserListOverrides>
 	);
 };
