@@ -33,7 +33,7 @@ const importQueue = require("../../services/queue");
 const C = require("../../constants");
 const systemLogger = require("../../logger.js").systemLogger;
 const History = require("../history");
-const { getRefNodes } = require("../ref");
+const { getRefNodes, getSubModels } = require("../ref");
 const { findNodesByType, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
@@ -300,18 +300,17 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 }
 
-async function listSubModels(account, model, branch = "master") {
-
-	const settings = await ModelSetting.findModelSettingById(account, model);
+async function listSubModels(account, model) {
+	// This method is in the hot-path for validating permissions
+	const containers = await getSubModels(account, model);
 	const subModels = [];
-
-	const proms = settings.subModels.map((container) => {
-		findModelSettingById(account, container._id, { name: 1 }).then(subModel => {
+	const proms = containers.map((container) => {
+		findModelSettingById(account, container.model, { name: 1 }).then(subModel => {
 			// TODO: Why would this return null?
 			if (subModel) {
 				subModels.push({
 					database: account,
-					model: container._id,
+					model: container.model,
 					name: subModel.name
 				});
 			}
