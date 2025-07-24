@@ -544,13 +544,8 @@ async function getMeshById(account, model, meshId) {
 }
 
 async function getSubModelRevisions(account, model, branch, rev) {
-
-	const settings = await ModelSetting.findModelSettingById(account, model);
-
-	if(!settings) {
-		return Promise.reject(responseCodes.INVALID_TAG_NAME);
-	}
-	const modelIds = settings.subModels.map((container) => container._id);
+	const containers = await getSubModels(account, model);
+	const modelIds = containers.map((container) => container.model);
 	const results = {};
 
 	const param = {};

@@ -26,12 +26,12 @@ const {v5Path} = require("../../interop");
 const responseCodes = require("../response_codes");
 const FilesManager = require(`${v5Path}/services/filesManager`);
 const ModelSetting = require("./modelSetting");
+const { getSubModels } = require("./ref");
 
 const UnityAssets = {};
 
-async function getAssetListFromRef(teamspace, container, username) {
+async function getAssetListForSubModel(teamspace, container, username) {
 	const granted = await middlewares.hasReadAccessToModelHelper(username, teamspace, container);
-
 	if(granted) {
 		const revInfo = await History.findLatest(teamspace, container, {_id: 1});
 		if (revInfo) {
@@ -54,12 +54,12 @@ async function getAssetListEntry(account, model, revId) {
 }
 
 UnityAssets.getAssetList = async function(account, model, branch, rev, username, legacy) {
-	const settings = await ModelSetting.findModelSettingById(account, model);
+	const subModels = await getSubModels(account, model);
 	const fetchPromise = [];
-	if(settings.federate) {
+	if(subModels.length) { // This is implicitly a federation
 		// This is a federation, get asset lists from subModels and merge them
-		settings.subModels.forEach((container) => {
-			fetchPromise.push(getAssetListFromRef(account, container._id, username));
+		subModels.forEach((container) => {
+			fetchPromise.push(getAssetListForSubModel(account, container.model, username));
 		});
 	} else {
 		// Not a federation, get it's own assetList.
