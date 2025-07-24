@@ -262,14 +262,15 @@ Sequence.getList = async (account, model, branch, revision, cleanResponse = fals
 	let submodelBranch;
 	const sequencesQuery = {};
 
-	if (branch || revision) {
+	const submodels = await getSubModels(account, model);
+
+	const isFed = submodels.length > 0;
+	if (!isFed && (branch || revision)) {
 		const history = await History.getHistory(account, model, branch, revision, {_id: 1});
 
 		submodelBranch = "master";
 		sequencesQuery["$or"] = [{"rev_id": history._id}, {"rev_id": {"$exists": false}}];
 	}
-
-	const submodels = await getSubModels(account, model);
 
 	const submodelSequencesPromises = Promise.all(submodels.map((submodel) => Sequence.getList(account, submodel.model, submodelBranch, undefined, cleanResponse).catch(() => [])));
 
