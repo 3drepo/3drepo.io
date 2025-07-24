@@ -165,43 +165,6 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 	}
 };
 
-ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
-	const revId = generateUUIDString();
-	try {
-		const data = {
-			...info,
-			database: teamspace,
-			project: federation,
-			subProjects: info.containers.map(({ _id, group }) => ({ database: teamspace, project: _id, group })),
-			revId,
-		};
-		delete data.containers;
-
-		const filePath = `${SHARED_SPACE_TAG}/${revId}/obj.json`;
-
-		await mkdir(`${sharedDir}/${revId}`);
-		await writeFile(`${sharedDir}/${revId}/obj.json`, JSON.stringify(data));
-
-		await queueMessage(jobq, revId, `genFed ${filePath} ${teamspace}`);
-		publish(events.QUEUED_TASK_UPDATE, { teamspace,
-			model: federation,
-			corId: revId,
-			status: processStatuses.QUEUED });
-	} catch (err) {
-		// Clean up files we created
-		rm(`${sharedDir}/${revId}/obj.json`).catch((cleanUpErr) => {
-			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
-		});
-
-		if (err?.code && codeExists(err.code)) {
-			throw err;
-		}
-
-		logger.logError('Failed to queue federate job', err?.message);
-		throw templates.queueInsertionFailed;
-	}
-};
-
 ModelProcessing.getLogArchive = async (corId) => {
 	const filename = 'logs.zip';
 

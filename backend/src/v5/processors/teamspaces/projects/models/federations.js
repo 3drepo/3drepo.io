@@ -32,8 +32,6 @@ const { hasReadAccessToContainer } = require('../../../../utils/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { updateModelSubModels } = require('../../../../models/modelSettings');
 
-const { queueFederationUpdate } = require('../../../../services/modelProcessing');
-
 const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
 
 // Override
