@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Dispatch, useState, cloneElement, useEffect } from 'react';
+import { Dispatch, useState, cloneElement, useEffect, type JSX } from 'react';
 import { slice } from 'lodash';
 import { SortingDirection } from '../dashboardList.types';
 import { ISortConfig } from '../useOrderedList';

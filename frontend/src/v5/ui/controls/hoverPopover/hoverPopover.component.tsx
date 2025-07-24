@@ -19,8 +19,8 @@ import { ReactElement, useState } from 'react';
 import { PopoverContainer } from './hoverPopover.styles';
 
 type IHoverPopover = {
-	anchor: (props) => ReactElement;
-	children: ReactElement;
+	anchor: (props) => ReactElement<any>;
+	children: ReactElement<any>;
 	className?: string,
 };
 

@@ -18,6 +18,8 @@
 import { IButton } from '@controls/button/button.component';
 import { Button } from './submitButton.styles';
 
+import type { JSX } from "react";
+
 export const SubmitButton = ({
 	variant = 'contained',
 	color = 'primary',

@@ -26,7 +26,7 @@ interface IProps {
 export const TextNode = ({ element, isSelected, handleChange }: IProps) => {
 	const { color, ...elementProps } = element;
 	const shape = useRef<any>(null);
-	const transformer = useRef<any>();
+	const transformer = useRef<any>(undefined);
 
 	return (
 		<>

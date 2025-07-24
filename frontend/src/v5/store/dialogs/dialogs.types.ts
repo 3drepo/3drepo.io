@@ -21,7 +21,7 @@ import { ImagesModalProps } from '@components/shared/modalsDispatcher/templates/
 import { InfoModalProps } from '@components/shared/modalsDispatcher/templates/infoModal/infoModal.types';
 import { ShareModalProps } from '@components/shared/modalsDispatcher/templates/shareModal/shareModal.types';
 import { WarningModalProps } from '@components/shared/modalsDispatcher/templates/warningModal/warningModal.types';
-import React from 'react';
+import React, { type JSX } from 'react';
 
 export type FunctionComponent = ((props) => JSX.Element);
 

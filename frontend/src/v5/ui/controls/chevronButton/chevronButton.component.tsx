@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, Ref } from 'react';
+import { forwardRef, Ref, type JSX } from 'react';
 import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import { IconButtonProps } from '@mui/material';
 import { SpinnerLoader } from '@controls/spinnerLoader';

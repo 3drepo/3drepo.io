@@ -17,7 +17,7 @@
 
 import { ClickAwayListener } from '@mui/material';
 import { Container, FloatingButtonsContainer } from './toolbarSelect.styles';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type JSX } from 'react';
 import { ToolbarSelectContext } from './toolbarSelectContext';
 import { ToolbarButton } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/markupToolbar/toolbarButton/toolbarButton.component';
 

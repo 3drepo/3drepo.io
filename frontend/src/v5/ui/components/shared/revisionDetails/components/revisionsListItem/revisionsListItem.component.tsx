@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { SyntheticEvent } from 'react';
+import { SyntheticEvent, type JSX } from 'react';
 
 import { FormattedMessage } from 'react-intl';
 import { Tooltip } from '@mui/material';

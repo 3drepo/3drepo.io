@@ -25,7 +25,7 @@ export type DrawingViewerImageProps = {
 };
 
 export const DrawingViewerImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
-	const imgRef = useRef<HTMLImageElement>();
+	const imgRef = useRef<HTMLImageElement>(undefined);
 
 	(ref as any).current = {
 		setTransform: ({ scale, x, y }) => {

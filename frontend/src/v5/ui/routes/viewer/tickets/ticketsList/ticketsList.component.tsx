@@ -27,7 +27,7 @@ export const TicketsList = () => {
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
 	const shouldShowLoader = filteredTickets.length >= 10;
-	const virtuosoRef = useRef<any>();
+	const virtuosoRef = useRef<any>(undefined);
 	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
 	
 	useEffect(() => {

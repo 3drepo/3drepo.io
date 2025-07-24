@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useCallback, useEffect, useState, useRef } from 'react';
+import { ReactNode, useCallback, useEffect, useState, useRef, type JSX } from 'react';
 import { WindowEventListener } from '@/v4/helpers/windowEventListener';
 import { onlyText } from 'react-children-utilities';
 

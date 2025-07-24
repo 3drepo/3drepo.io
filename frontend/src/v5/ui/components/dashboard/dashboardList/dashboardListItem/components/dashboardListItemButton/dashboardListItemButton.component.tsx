@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Dispatch, ReactNode, SyntheticEvent } from 'react';
+import { Dispatch, ReactNode, SyntheticEvent, type JSX } from 'react';
 import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Tooltip } from '@mui/material';
 import { Button } from './dashboardListItemButton.styles';

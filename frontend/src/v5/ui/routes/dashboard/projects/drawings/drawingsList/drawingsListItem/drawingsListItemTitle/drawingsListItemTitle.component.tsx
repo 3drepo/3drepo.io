@@ -19,7 +19,7 @@ import { DashboardListItemTitle } from '@components/dashboard/dashboardList/dash
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext } from 'react';
+import { useContext, type JSX } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';

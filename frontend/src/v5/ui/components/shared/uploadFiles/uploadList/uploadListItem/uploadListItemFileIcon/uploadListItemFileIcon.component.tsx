@@ -17,6 +17,8 @@
 
 import { StyledIconButton } from './uploadListItemFileIcon.styles';
 
+import type { JSX } from "react";
+
 type IUploadListItemFileIcon = {
 	extension?: string;
 };

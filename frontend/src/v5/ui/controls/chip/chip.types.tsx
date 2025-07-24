@@ -37,7 +37,7 @@ export type IChip = Omit<ChipProps, 'color' | 'variant'> & {
 
 export type IChipMapItem = {
 	label: string;
-	icon?: ReactElement;
+	icon?: ReactElement<any>;
 	color?: string;
 	tooltip?: string;
 	value?: string;

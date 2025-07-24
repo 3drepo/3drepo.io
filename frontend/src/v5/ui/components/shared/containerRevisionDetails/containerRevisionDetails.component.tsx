@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
+import { useEffect, type JSX } from 'react';
 import { min, range } from 'lodash';
 
 import { Button } from '@controls/button';

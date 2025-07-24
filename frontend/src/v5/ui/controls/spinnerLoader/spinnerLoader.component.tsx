@@ -16,4 +16,6 @@
  */
 import { Spinner } from './spinnerLoader.styles';
 
+import type { JSX } from "react";
+
 export const SpinnerLoader = (): JSX.Element => <Spinner />;

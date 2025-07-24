@@ -16,6 +16,8 @@
  */
 import { MenuList, MenuItem } from './breadcrumbDropdownstyles';
 
+import type { JSX } from "react";
+
 export interface BreadcrumbItem {
 	title: string;
 	to?: string;

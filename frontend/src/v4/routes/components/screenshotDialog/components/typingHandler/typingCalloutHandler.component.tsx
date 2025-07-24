@@ -36,7 +36,7 @@ export const TypingCalloutHandler = ({
 	const [isPositionLocked, setIsPositionLocked] = useState(false);
 	const [offset, setOffset] = useState<CSSProperties>({});
 	const [maxSizes, setMaxSizes] = useState({ maxWidth: 0, maxHeight: 0 });
-	const textBoxRef = useRef<TextBoxRef>();
+	const textBoxRef = useRef<TextBoxRef>(undefined);
 	const previousBoxSizes = useRef<TextBoxSizes>(null);
 
 	const setTextPosition = () => {

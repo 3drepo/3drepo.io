@@ -22,6 +22,8 @@ import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamsp
 import { uriCombine } from '@/v5/helpers/url.helper';
 import { LinkCard } from '../linkCard.component';
 
+import type { JSX } from "react";
+
 interface ITeamspaceCard {
 	teamspaceName?: string;
 	className?: string;

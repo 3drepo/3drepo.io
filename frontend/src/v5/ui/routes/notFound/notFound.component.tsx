@@ -29,7 +29,7 @@ import { clientConfigService } from '@/v4/services/clientConfig';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useEffect } from 'react';
+import { useEffect, type JSX } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 
 export const NotFound = (): JSX.Element => {

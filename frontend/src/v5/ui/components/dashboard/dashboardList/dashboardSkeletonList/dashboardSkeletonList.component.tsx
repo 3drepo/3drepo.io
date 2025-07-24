@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Fragment, useMemo, cloneElement } from 'react';
+import { Fragment, useMemo, cloneElement, type JSX } from 'react';
 import { DashboardList } from '@components/dashboard/dashboardList';
 
 interface IDashboardSkeletonList {

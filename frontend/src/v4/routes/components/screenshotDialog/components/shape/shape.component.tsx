@@ -28,8 +28,8 @@ export const Shape = ({ element, isSelected, handleChange }: IProps) => {
 	const {
 		color, figure, draggable, groupX, groupY, rotation, initScaleX, initScaleY, scaleX, scaleY, ...elementProps
 	} = element;
-	const shape = useRef<any>();
-	const transformer = useRef<any>();
+	const shape = useRef<any>(undefined);
+	const transformer = useRef<any>(undefined);
 	const rect = useRef<any>(null);
 	const group = useRef<any>(null);
 	const hasLineLikeBehavior = [SHAPE_TYPES.LINE, SHAPE_TYPES.ARROW].includes(figure);

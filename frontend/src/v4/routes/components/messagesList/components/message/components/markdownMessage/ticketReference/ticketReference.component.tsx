@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactChild, useState } from 'react';
+import { ReactElement, useState, type JSX } from 'react';
 import { renderWhenTrueOtherwise } from '../../../../../../../../helpers/rendering';
 
 import { TicketPopover } from './ticketPopover/ticketPopover.component';
@@ -26,7 +26,7 @@ interface IReferenceLink {
 	onPopoverClose: () => void;
 	onCardChange: () => void;
 	to: string;
-	children: ReactChild;
+	children: ReactElement<any> | number | string;
 }
 
 const ReferenceLink = ({ onPopoverOpen, onPopoverClose, onCardChange, children, to, ...props }: IReferenceLink) => (

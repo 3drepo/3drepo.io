@@ -20,6 +20,8 @@ import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { discardTab } from '@/v5/helpers/url.helper';
 import { Container, Link } from '../navigationTabs.styles';
 
+import type { JSX } from "react";
+
 export const TeamspaceNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardTab(url);

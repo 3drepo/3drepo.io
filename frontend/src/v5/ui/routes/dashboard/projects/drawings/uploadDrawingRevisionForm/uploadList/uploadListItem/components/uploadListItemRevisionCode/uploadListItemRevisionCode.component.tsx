@@ -20,6 +20,8 @@ import { useFormContext, useFormState } from 'react-hook-form';
 import { RevisionCodeTextField } from './uploadListItemRevisionCode.styles';
 import { get } from 'lodash';
 
+import type { JSX } from "react";
+
 type UploadListItemRevisionCodeProps = {
 	name: string;
 	isSelected?: boolean;

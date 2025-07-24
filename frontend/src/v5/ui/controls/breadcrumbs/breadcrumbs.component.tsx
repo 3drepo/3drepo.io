@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState, MouseEvent } from 'react';
+import { useState, MouseEvent, type JSX } from 'react';
 import HomeIcon from '@assets/icons/outlined/home-outlined.svg';
 import DownArrowIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import { DASHBOARD_ROUTE } from '@/v5/ui/routes/routes.constants';

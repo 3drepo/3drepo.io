@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { IDialogConfig } from '@/v5/store/dialogs/dialogs.types';
 import { MODAL_TEMPLATES } from './templates';

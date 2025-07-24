@@ -24,7 +24,7 @@ import { UploadListItemDestination } from './components/uploadListItemDestinatio
 import { UploadListItemRevisionCode } from './components/uploadListItemRevisionCode/uploadListItemRevisionCode.component';
 import { UploadListItemButton } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItem.styles';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useEffect, type JSX } from 'react';
 import { UploadListItemFileIcon } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemFileIcon/uploadListItemFileIcon.component';
 import { UploadListItemTitle } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemTitle/uploadListItemTitle.component';
 import { UploadProgress } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadProgress/uploadProgress.component';

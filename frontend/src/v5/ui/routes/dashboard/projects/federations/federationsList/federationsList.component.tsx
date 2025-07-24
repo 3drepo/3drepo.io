@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useContext } from 'react';
+import { ReactNode, useContext, type JSX } from 'react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 

@@ -21,6 +21,8 @@ import { discardSlash, discardUrlComponent } from '@/v5/helpers/url.helper';
 import { Container, Link } from '../navigationTabs.styles';
 import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
+import type { JSX } from "react";
+
 export const ProjectNavigation = (): JSX.Element => {
 	let { url } = useRouteMatch();
 	url = discardSlash(url);

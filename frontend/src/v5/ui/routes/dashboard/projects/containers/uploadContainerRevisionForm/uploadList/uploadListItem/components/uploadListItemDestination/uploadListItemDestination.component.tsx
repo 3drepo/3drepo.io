@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useRef, useState } from 'react';
+import { memo, useRef, useState, type JSX } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { IContainer } from '@/v5/store/containers/containers.types';

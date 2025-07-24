@@ -27,8 +27,8 @@ export const DrawnLine = ({ element, isSelected, handleChange }: IProps) => {
 	const {
 		color, isEraser, draggable, groupX, groupY, rotation, initScaleX, initScaleY, scaleX, scaleY, ...elementProps
 	} = element;
-	const line = useRef<any>();
-	const transformer = useRef<any>();
+	const line = useRef<any>(undefined);
+	const transformer = useRef<any>(undefined);
 	const rect = useRef<any>(null);
 	const group = useRef<any>(null);
 

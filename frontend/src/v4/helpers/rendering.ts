@@ -17,6 +17,8 @@
 
 import { result } from 'lodash';
 
+import type { JSX } from "react";
+
 export const getWindowWidth = () =>
 	window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
 

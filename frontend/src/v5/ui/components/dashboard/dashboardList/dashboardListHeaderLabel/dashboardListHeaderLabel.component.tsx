@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Dispatch, ReactNode } from 'react';
+import { Dispatch, ReactNode, type JSX } from 'react';
 import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';

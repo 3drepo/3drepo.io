@@ -125,6 +125,7 @@ const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
 
 export class Users extends PureComponent<IProps, IState> {
 	public formRef = createRef<any>();
+	public inputRef = createRef<HTMLDivElement>();
 	public static defaultProps = {
 		jobs: [],
 		users: []
@@ -206,7 +207,7 @@ export class Users extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
+		const containerElement = this.inputRef.current?.parentNode;
 		this.props.fetchQuotaAndInvitations(this.props.selectedTeamspace);
 		const preparedJobs = getPreparedJobs(this.props.jobs);
 
@@ -376,12 +377,12 @@ export class Users extends PureComponent<IProps, IState> {
 		}
 
 		return (
-			<>
+			<div style={{ display: 'contents' }} ref={this.inputRef}>
 				<UserManagementTab footerLabel={this.getFooterLabel(true)} className={this.props.className}>
 					<CustomTable cells={cells} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}
-			</>
+			</div>
 		);
 	}
 }

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, type JSX } from 'react';
 import { ListContainer } from './dashboardList.styles';
 
 type IDashboardList = {

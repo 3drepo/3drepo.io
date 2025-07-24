@@ -20,6 +20,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { IButton } from '@controls/button/button.component';
 import { Button, Container } from './revisionsListItemButton.styles';
 
+import type { JSX } from "react";
+
 type IProps = IButton & {
 	status?: boolean;
 };

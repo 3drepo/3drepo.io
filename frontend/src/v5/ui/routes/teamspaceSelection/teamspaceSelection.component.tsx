@@ -19,14 +19,14 @@ import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { AppBar } from '@components/shared/appBar';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { TeamspaceList } from '@components/teamspace/teamspaceList';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type JSX } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { FadeMessageTrigger, Content, PricingLink, ScrollBar, WelcomeMessage } from './teamspaceSelection.styles';
 
 export const TeamspaceSelection = (): JSX.Element => {
 	const firstName = CurrentUserHooksSelectors.selectFirstName();
 	const [isVisible, setIsVisible] = useState(true);
-	const welcomeRef = useRef();
+	const welcomeRef = useRef(undefined);
 
 	useEffect(() => {
 		if (welcomeRef.current) {

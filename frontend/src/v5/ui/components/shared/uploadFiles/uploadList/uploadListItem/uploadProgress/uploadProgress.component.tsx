@@ -19,6 +19,8 @@ import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { CompletionMark, Container, Progress, StatusText } from './uploadProgress.styles';
 
+import type { JSX } from "react";
+
 type IUploadProgress = {
 	uploadId: string;
 	errorMessage: string;

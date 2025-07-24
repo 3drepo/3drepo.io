@@ -16,6 +16,8 @@
  */
 import { Card, CardListItem, Link, Heading, Subheading, Details, CardImage } from './linkCard.styles';
 
+import type { JSX } from "react";
+
 interface ILinkCard {
 	variant?: 'primary' | 'secondary',
 	className?: string;

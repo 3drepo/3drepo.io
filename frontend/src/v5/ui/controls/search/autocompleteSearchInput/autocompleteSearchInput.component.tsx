@@ -22,6 +22,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { TextField, StartAdornment, SearchChip } from '../searchInput/searchInput.styles';
 import { Autocomplete } from './autocompleteSearchInput.styles';
 
+import type { JSX } from "react";
+
 type AutocompleteSearchInputProps = Omit<Partial<AutocompleteProps<TextFieldProps, boolean, undefined, undefined, typeof SearchChip>>, 'onChange' | 'value'> & {
 	variant?: 'filled' | 'outlined',
 	placeholder?: string,
@@ -32,7 +34,7 @@ export const AutocompleteSearchInput = ({ variant = 'filled', placeholder, value
 	const handleChange = (event, newQueries, reason) => onChange(reason === 'clear' ? [] : newQueries);
 	const handleDeleteQuery = (deletedQuery) => onChange(value.filter((query) => query !== deletedQuery));
 	return (
-		<Autocomplete
+        <Autocomplete
 			value={value}
 			open={false}
 			freeSolo
@@ -59,16 +61,16 @@ export const AutocompleteSearchInput = ({ variant = 'filled', placeholder, value
 						startAdornment: (
 						// Mui Autocomplete sets the startAdornment to be the query chips
 						// therefore this is required to prevent the search icon and chips overwriting eachother
-							<>
-								<StartAdornment>
+							(<>
+                                <StartAdornment>
 									<SearchIcon />
 								</StartAdornment>
-								{params?.InputProps?.startAdornment}
-							</>
+                                {params?.InputProps?.startAdornment}
+                            </>)
 						),
 					}}
 				/>
 			)}
 		/>
-	);
+    );
 };

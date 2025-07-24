@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, ReactNode, createRef } from 'react';
+import { PureComponent, ReactNode, createRef, type JSX } from 'react';
 import { Field, Formik } from 'formik';
 import { Tooltip } from '@mui/material';
 import * as Yup from 'yup';

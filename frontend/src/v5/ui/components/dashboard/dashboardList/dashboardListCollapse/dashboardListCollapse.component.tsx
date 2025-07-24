@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useState, type JSX } from 'react';
 import { Collapse, Tooltip } from '@mui/material';
 import { ButtonContainer, ControlsContainer, CollapsedItemContainer, Title, ChevronButton, Container } from './dashboardListCollapse.styles';
 

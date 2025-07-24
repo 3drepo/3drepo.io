@@ -24,6 +24,8 @@ import { DASHBOARD_ROUTE, PRIVACY_ROUTE } from '@/v5/ui/routes/routes.constants'
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import { NavLink, NavLinks, Items } from './legalAppBar.styles';
 
+import type { JSX } from "react";
+
 type ILegalAppBar = {
 	activePage: string;
 };

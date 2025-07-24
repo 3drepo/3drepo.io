@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, type JSX } from 'react';
 
 interface Props {
 	items: any[];
@@ -24,9 +24,9 @@ interface Props {
 }
 
 export const VirtualList = ({ items, itemHeight, itemContent }:Props) => { 
-	const elem = useRef<Element>();
-	const itemsContainer = useRef<Element>();
-	const prevRect = useRef<DOMRect>();
+	const elem = useRef<Element>(undefined);
+	const itemsContainer = useRef<Element>(undefined);
+	const prevRect = useRef<DOMRect>(undefined);
 	const itemsHeight = useRef<Record<number, number>>({});
 
 

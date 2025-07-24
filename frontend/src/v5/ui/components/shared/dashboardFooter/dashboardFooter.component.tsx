@@ -20,6 +20,8 @@ import { Link } from 'react-router-dom';
 import { PRIVACY_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { FooterContainer, FooterItem, FooterItems, FooterLogo } from './dashboardFooter.styles';
 
+import type { JSX } from "react";
+
 type IDashboardFooter = {
 	variant?: 'light' | 'dark';
 };

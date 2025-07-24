@@ -108,8 +108,8 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		},
 	});
 	
-	const containerRef = useRef<HTMLElement>();
-	const inputRef = useRef<any>();
+	const containerRef = useRef<HTMLElement>(undefined);
+	const inputRef = useRef<any>(undefined);
 	const isEditMode = !!commentId;
 	const newMessage = watch('message');
 
@@ -255,14 +255,14 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	}, [commentReply?._id]);
 
 	return (
-		<Container
+        <Container
 			onDragEnter={() => setIsDraggingFile(true)}
 			onDragLeave={handleDragLeave}
 			onDrop={() => setIsDraggingFile(false)}
 			ref={containerRef}
 			className={className}
 		>
-			<MessageAndImages $isEditMode={isEditMode}>
+            <MessageAndImages $isEditMode={isEditMode}>
 				{commentReply?._id && (
 					<CommentReplyContainer>
 						<CommentReply {...commentReply} shortMessage />
@@ -316,7 +316,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 					</ErroredImageMessages>
 				)}
 			</MessageAndImages>
-			<Controls>
+            <Controls>
 				<ActionMenu TriggerButton={<ActionIcon><FileIcon /></ActionIcon>}>
 					<ActionMenuItem>
 						{is2DOpen && (
@@ -333,7 +333,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 					</ActionMenuItem>
 				</ActionMenu>
 				{(isViewer || viewpoint) && ( // user can delete existing viewpoints in tabular view
-					<ViewpointActionMenu viewpoint={viewpoint} setViewpoint={setViewpoint} />
+					(<ViewpointActionMenu viewpoint={viewpoint} setViewpoint={setViewpoint} />)
 				)}
 				<CharsCounter $error={charsLimitIsReached}>{charsCount}/{MAX_MESSAGE_LENGTH}</CharsCounter>
 				{ isEditMode ? (
@@ -355,6 +355,6 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 					</SendButton>
 				)}
 			</Controls>
-		</Container>
-	);
+        </Container>
+    );
 };

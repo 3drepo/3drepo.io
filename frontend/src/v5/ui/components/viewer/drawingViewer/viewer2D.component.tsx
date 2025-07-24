@@ -75,9 +75,9 @@ export const Viewer2D = () => {
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
 	const [viewport, setViewport] = useState({ left:0, right: 0, top: 0, bottom:0 });
 	const [isLoading, setIsLoading] = useState(false);
-	const containerRef = useRef();
-	const imgRef = useRef<ZoomableImage>();
-	const imgContainerRef = useRef();
+	const containerRef = useRef(undefined);
+	const imgRef = useRef<ZoomableImage>(undefined);
+	const imgContainerRef = useRef(undefined);
 
 	const canCalibrate2D = isCalibrating && step === 1;
 	const showSVGImage = !isFirefox() && !plainSrc.toLowerCase().endsWith('.png');

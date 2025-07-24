@@ -21,7 +21,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext } from 'react';
+import { useContext, type JSX } from 'react';
 import { Link } from 'react-router-dom';
 import { DashboardListItemTitle } from '../dashboardListItemTitle.component';
 import { LatestRevision } from '@components/shared/latestRevision/latestRevision.component';

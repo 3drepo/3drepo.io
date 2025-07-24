@@ -17,6 +17,8 @@
 import { Typography as MuiTypography, TypographyProps, TypographyVariant } from '@mui/material';
 import { KickerTypography, KickerTitleTypography, LinkTypography, LabelTypography } from './typography.styles';
 
+import type { JSX } from "react";
+
 type ITypographyVariants = TypographyVariant | 'kicker' | 'kickerTitle' | 'link' | 'label';
 
 type ITypography = Omit<TypographyProps, 'variant'> & {

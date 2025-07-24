@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactElement, useEffect, useState } from 'react';
+import { ReactElement, useEffect, useState, type JSX } from 'react';
 
 type MultiSelectPropertyProps = { value?: any; onClear?: () => void; onChange?: (event) => void; onBlur?: () => void; onClose?: (e) => void; };
 export const useSaveOnCloseMultiSelectProps = <P extends MultiSelectPropertyProps>({ value, onChange, onBlur, onClose, ...props }: P) => {
@@ -47,7 +47,7 @@ export const useSaveOnCloseMultiSelectProps = <P extends MultiSelectPropertyProp
 	} as unknown as P & MultiSelectPropertyProps;
 };
 
-export const SaveOnCloseMultiSelectWrapper = <P extends MultiSelectPropertyProps>(Component: (props: P) => JSX.Element) => (props: P): ReactElement => {
+export const SaveOnCloseMultiSelectWrapper = <P extends MultiSelectPropertyProps>(Component: (props: P) => JSX.Element) => (props: P): ReactElement<any> => {
 	const saveOnCloseProps = useSaveOnCloseMultiSelectProps(props);
 	return <Component {...saveOnCloseProps} />;
 };

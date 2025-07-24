@@ -51,7 +51,7 @@ export const TicketsTopPanel = ({
 
 
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
-	const ref = useRef<HTMLTextAreaElement>();
+	const ref = useRef<HTMLTextAreaElement>(undefined);
 
 	const owner = getValues(`properties.${BaseProperties.OWNER}`);
 	const createdAt = getValues(`properties.${BaseProperties.CREATED_AT}`);

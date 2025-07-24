@@ -35,7 +35,7 @@ type ColorPickerPaletteProps = {
 export const ColorPickerPalette = ({ disableTransparent = false, value, onChange, onClose }: ColorPickerPaletteProps) => {
 	const [color, setColor] = useState<string>(value.color);
 	const [opacity, setOpacity] = useState<number>(value.opacity);
-	const ref = useRef();
+	const ref = useRef(undefined);
 
 	const colorisValid = getColorHexIsValid(color);
 	const opacityInPercentage = Math.round((opacity ?? 1) * 100);

@@ -25,6 +25,8 @@ import { Constants } from '../../helpers/actions.helper';
 import { AuthenticatingModal } from '@components/shared/modalsDispatcher/templates/infoModal/authenticatingModal/authenticatingModal.component';
 import { ExtractModalProps, FunctionComponent, IDialogState, ModalType } from './dialogs.types';
 
+import type { JSX } from "react";
+
 export const INITIAL_STATE: IDialogState = {
 	dialogs: [],
 };

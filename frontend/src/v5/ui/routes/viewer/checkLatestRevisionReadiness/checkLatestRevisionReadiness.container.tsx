@@ -19,7 +19,7 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
-import { useEffect } from 'react';
+import { useEffect, type JSX } from 'react';
 import { useHistory, generatePath, useParams } from 'react-router-dom';
 import { TEAMSPACE_ROUTE_BASE, ViewerParams } from '../../routes.constants';
 

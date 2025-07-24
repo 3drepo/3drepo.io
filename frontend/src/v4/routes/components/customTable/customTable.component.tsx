@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, ReactChild, createRef } from 'react';
+import { PureComponent, createRef } from 'react';
 
 import { Checkbox, IconButton, Tooltip } from '@mui/material';
 import { cond, isEmpty, isEqual, matchesProperty, orderBy, pick, stubTrue, values } from 'lodash';
@@ -173,7 +173,7 @@ interface IProps {
 	defaultSort?: number;
 	onSelectionChange?: (selectedRows) => void;
 	onFilterChange?: (filteredRows) => void;
-	renderCheckbox?: (props, data) => ReactChild;
+	renderCheckbox?: (props, data) => any;
 	onSearch?: (props) => any[];
 	rowStyle?: any;
 	checkboxDisabled?: boolean;
@@ -396,7 +396,7 @@ export class CustomTable extends PureComponent<IProps, IState> {
 		});
 	}
 
-	public renderCheckbox({row = {}, ...props}): ReactChild {
+	public renderCheckbox({row = {}, ...props}) {
 		if (this.props.renderCheckbox) {
 			return this.props.renderCheckbox(props, row);
 		}

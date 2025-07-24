@@ -57,7 +57,7 @@ const maxScrollTop = (element) => element.scrollHeight - element.clientHeight;
 
 export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProps) => {
 	const [filter, setFilter] = useState('comments');
-	const listRef = useRef<HTMLDivElement>();
+	const listRef = useRef<HTMLDivElement>(undefined);
 
 	useLayoutEffect(() => {
 		if (listRef.current) {

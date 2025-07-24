@@ -22,7 +22,7 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext } from 'react';
+import { useContext, type JSX } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router';
 import { Link } from 'react-router-dom';

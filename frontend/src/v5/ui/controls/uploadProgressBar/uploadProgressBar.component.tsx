@@ -19,6 +19,8 @@ import { LinearProgress } from '@mui/material';
 
 import { LabelledProgressBar, ProgressBarLabelLight, ProgressBarLabelDark } from './uploadProgressBar.styles';
 
+import type { JSX } from "react";
+
 type IUploadProgressBar = {
 	progress: number;
 	uploadStatus: string;

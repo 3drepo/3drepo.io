@@ -21,6 +21,8 @@ import EllipsisIcon from '@assets/icons/outlined/ellipsis-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { EllipsisButton } from './ellipsisMenu.styles';
 
+import type { JSX } from "react";
+
 export interface IEllipsisMenu {
 	selected?: boolean;
 	children: any;

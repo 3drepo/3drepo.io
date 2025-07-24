@@ -27,7 +27,7 @@ type FiltersAccordionProps = {
 };
 export const FiltersAccordion = ({ children, onClear }: FiltersAccordionProps) => {
 	const [collapsed, setCollapsed] = useState(false);
-	const filterContainerRef = useRef();
+	const filterContainerRef = useRef(undefined);
 	const [canCollapse, setCanCollapse] = useState(false);
 	
 	const toggleCollapsedState = () => setCollapsed(!collapsed);

@@ -20,6 +20,8 @@ import { useFormContext, useFormState } from 'react-hook-form';
 import { get } from 'lodash';
 import { RevisionTagField } from './uploadListItemRevisionTag.styles';
 
+import type { JSX } from "react";
+
 type IUploadListItemRevision = {
 	revisionPrefix: string;
 	isSelected?: boolean;

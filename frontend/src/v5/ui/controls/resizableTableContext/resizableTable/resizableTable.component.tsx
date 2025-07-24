@@ -59,14 +59,16 @@ export const ResizableTable = ({ className = '', children }) => {
 	}, [tableNode]);
 
 	return (
-		<Table className={className}>
-			<GridTemplateColumns ref={(node) => setTableNode(node)} className={gridClassName}>
+        <Table className={className}>
+            <GridTemplateColumns ref={node => {
+                setTableNode(node);
+            }} className={gridClassName}>
 				{children}
 			</GridTemplateColumns>
-			<OverlayElements>
+            <OverlayElements>
 				<MovingColumnOverlay />
 				<ResizersOverlay />
 			</OverlayElements>
-		</Table>
-	);
+        </Table>
+    );
 };

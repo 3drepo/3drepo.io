@@ -24,7 +24,7 @@ import { UploadListItemDestination } from './components/uploadListItemDestinatio
 import { UploadListItemRevisionTag } from './components/uploadListItemRevisionTag/uploadListItemRevisionTag.component';
 import { UploadListItemButton } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItem.styles';
 import { useFormContext } from 'react-hook-form';
-import { useEffect } from 'react';
+import { useEffect, type JSX } from 'react';
 import { IContainer, UploadStatus } from '@/v5/store/containers/containers.types';
 import { UploadItemFields } from '@/v5/store/containers/revisions/containerRevisions.types';
 import { ContainerRevisionsActionsDispatchers, ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';

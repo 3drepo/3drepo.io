@@ -558,8 +558,8 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 };
 
 export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
-	const containerRef = useRef<HTMLElement>();
-	const pannableImage = useRef<ReturnType<typeof pannableSVG>>();
+	const containerRef = useRef<HTMLElement>(undefined);
+	const pannableImage = useRef<ReturnType<typeof pannableSVG>>(undefined);
 
 	useEffect(() => {
 		if (!containerRef.current || pannableImage.current) return;

@@ -37,7 +37,7 @@ type TicketItemProps = {
 
 export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const ref = useRef<HTMLDivElement>();
+	const ref = useRef<HTMLDivElement>(undefined);
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isSelected = selectedTicketId === ticket._id;
 	const isFederation = modelIsFederation(containerOrFederation);

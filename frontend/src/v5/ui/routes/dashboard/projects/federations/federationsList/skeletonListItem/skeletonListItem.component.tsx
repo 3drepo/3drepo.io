@@ -19,6 +19,8 @@ import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
 import { Container } from './skeletonListItem.styles';
 
+import type { JSX } from "react";
+
 interface ISkeletonListItem {
 	delay?: number;
 }

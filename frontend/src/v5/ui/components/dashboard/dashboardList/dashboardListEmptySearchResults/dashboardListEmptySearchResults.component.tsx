@@ -18,7 +18,7 @@
 import { FormattedMessage } from 'react-intl';
 import { DashboardListEmptyText } from '@components/dashboard/dashboardList/dashboardList.styles';
 import { SearchContext } from '@controls/search/searchContext';
-import { useContext } from 'react';
+import { useContext, type JSX } from 'react';
 import { SearchPhrase } from './dashboardListEmptySearchResults.styles';
 
 export const DashboardListEmptySearchResults = (): JSX.Element => {

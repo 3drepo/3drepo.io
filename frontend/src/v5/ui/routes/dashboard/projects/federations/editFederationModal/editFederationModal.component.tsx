@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SyntheticEvent } from 'react';
+import { SyntheticEvent, type JSX } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 
 import { FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';

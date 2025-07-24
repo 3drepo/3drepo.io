@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, type JSX } from 'react';
 
 import { AppBar } from '@components/shared/appBar';
 import { Content } from './dashboardProjectLayout.styles';

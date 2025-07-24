@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useEffect } from 'react';
+import { memo, useEffect, type JSX } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { useParams, useHistory } from 'react-router-dom';

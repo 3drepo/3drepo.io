@@ -28,6 +28,8 @@ import { NewUpdateDialog } from '@/v4/routes/components/dialogContainer/componen
 import { RedirectToTeamspaceDialog } from '@/v4/routes/components/dialogContainer/components/redirectToTeamspaceDialog/redirectToTeamspaceDialog.component';
 import { ROUTES } from '../../constants/routes';
 
+import type { JSX } from "react";
+
 export interface IDialogConfig {
 	id: number;
 	title: JSX.Element | string;

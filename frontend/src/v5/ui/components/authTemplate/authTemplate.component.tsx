@@ -18,6 +18,8 @@
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { Background, Footer, Logo, BackgroundOverlay, LogoContainer } from './authTemplate.styles';
 
+import type { JSX } from "react";
+
 interface IAuthTemplate {
 	footer?: JSX.Element;
 	children?: JSX.Element | JSX.Element[];

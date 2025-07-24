@@ -42,7 +42,7 @@ const UPDATE_EVENT = 'propsUpdate';
  * @returns a ref that wil emit the changes
  */
 export const useSyncProps = (props) => {
-	const ref = useRef<any>();
+	const ref = useRef<any>(undefined);
 
 	if (!ref.current) {
 		ref.current = new EventEmitter();

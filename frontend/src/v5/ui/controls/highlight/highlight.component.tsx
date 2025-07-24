@@ -18,6 +18,8 @@ import { isArray, trim } from 'lodash';
 import Highlighter from 'react-highlight-words';
 import { Tag } from './highlight.styles';
 
+import type { JSX } from "react";
+
 interface IHighlight {
 	children: string;
 	search: string | string[];

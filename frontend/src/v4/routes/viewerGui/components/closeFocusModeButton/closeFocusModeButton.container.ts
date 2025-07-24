@@ -22,6 +22,8 @@ import { createStructuredSelector } from 'reselect';
 import { selectIsFocusMode, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { CloseFocusModeButton } from './closeFocusModeButton.component';
 
+import type { JSX } from "react";
+
 const mapStateToProps = createStructuredSelector({
 	isFocusMode: selectIsFocusMode
 });

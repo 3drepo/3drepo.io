@@ -24,7 +24,7 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 import { Tooltip } from '@mui/material';
 import RemoveIcon from '@assets/icons/outlined/minus_minimal-outline.svg';
 import IncludeIcon from '@assets/icons/outlined/plus_minimal-outline.svg';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, type JSX } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useContainersData } from '../../../containers/containers.hooks';
 import { SuccessIconContainer, ErrorIconContainer, SuccessButton, ErrorButton } from './editFederation.styles';

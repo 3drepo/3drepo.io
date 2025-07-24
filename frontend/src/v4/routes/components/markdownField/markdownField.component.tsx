@@ -14,13 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactChild, forwardRef, Ref } from 'react';
+import { ReactElement, forwardRef, Ref } from 'react';
 import linkify from 'markdown-linkify';
 
 import { MarkdownMessage } from '../messagesList/components/message/components/markdownMessage/markdownMessage.component';
 
 interface IProps {
-	children?: ReactChild;
+	children?: ReactElement<any> | number | string;
 	className?: string;
 }
 

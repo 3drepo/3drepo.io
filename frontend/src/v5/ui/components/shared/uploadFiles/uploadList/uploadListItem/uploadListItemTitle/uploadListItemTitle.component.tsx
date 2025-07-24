@@ -22,6 +22,8 @@ import { DashboardListItemTitle, SubTitleError } from './uploadListItemTitle.sty
 import { FormattedMessage } from 'react-intl';
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 
+import type { JSX } from "react";
+
 type IUploadListItemTitle = {
 	name: string;
 	size: number;

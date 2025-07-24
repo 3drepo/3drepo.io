@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect, type JSX } from 'react';
 import { useParams } from 'react-router-dom';
 import { AppBar } from '@components/shared/appBar';
 import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';

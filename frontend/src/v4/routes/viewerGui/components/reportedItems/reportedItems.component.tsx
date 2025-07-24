@@ -69,7 +69,7 @@ interface IProps {
 }
 
 const PreviewListSingleItem = ({ active, index, ...props }) => {
-	const ref = useRef<HTMLDivElement>();
+	const ref = useRef<HTMLDivElement>(undefined);
 
 	useEffect(() => {
 		if (active && ref.current) {

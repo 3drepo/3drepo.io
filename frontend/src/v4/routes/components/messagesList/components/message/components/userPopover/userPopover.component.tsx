@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ReactChild } from 'react';
+import { ReactElement } from 'react';
 import { AvatarWrapper, Container, Details, Name, UserData } from './userPopover.styles';
 
 export interface IUser {
@@ -29,7 +29,7 @@ export interface IUser {
 
 interface IProps {
 	user: IUser;
-	children: ReactChild;
+	children: ReactElement<any> | number | string;
 }
 
 export const UserPopover = ({ user: { firstName, lastName, company, job }, children }: IProps) => {

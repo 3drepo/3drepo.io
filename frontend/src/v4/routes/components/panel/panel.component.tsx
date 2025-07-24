@@ -19,6 +19,8 @@ import { pick } from 'lodash';
 
 import { Container, Content, ContentWrapper, Title } from './panel.styles';
 
+import type { JSX } from "react";
+
 interface IProps {
 	className?: string;
 	title?: string | JSX.Element;

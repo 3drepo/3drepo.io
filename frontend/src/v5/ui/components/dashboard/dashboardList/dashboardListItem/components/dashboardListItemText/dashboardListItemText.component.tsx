@@ -18,7 +18,7 @@ import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixed
 import { Highlight } from '@controls/highlight';
 import { SearchContext } from '@controls/search/searchContext';
 import { isString } from 'lodash';
-import { useContext } from 'react';
+import { useContext, type JSX } from 'react';
 import { Text } from './dashboardListItemText.styles';
 
 interface IDashboardListItemText extends FixedOrGrowContainerProps {

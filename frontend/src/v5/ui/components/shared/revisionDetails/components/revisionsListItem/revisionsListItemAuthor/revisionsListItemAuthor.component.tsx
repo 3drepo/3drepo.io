@@ -21,6 +21,8 @@ import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { UserPopover } from '@components/shared/popoverCircles/userPopoverCircle/userPopover/userPopover.component';
 import { Name } from './revisionsListItemAuthor.styles';
 
+import type { JSX } from "react";
+
 interface IRevisionsListItemAuthor extends FixedOrGrowContainerProps {
 	authorName: string;
 }

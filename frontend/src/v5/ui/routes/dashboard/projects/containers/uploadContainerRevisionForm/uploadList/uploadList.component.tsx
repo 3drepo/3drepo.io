@@ -16,7 +16,7 @@
  */
 
 import { UploadItemFields } from '@/v5/store/containers/revisions/containerRevisions.types';
-import { useContext } from 'react';
+import { useContext, type JSX } from 'react';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';

@@ -17,6 +17,8 @@
 
 import { MarginWrapper, PositionedWrapper } from './centredContainer.styles';
 
+import type { JSX } from "react";
+
 export type ICentredContainer = {
 	onClick?: (e) => void;
 	vertical?: boolean;

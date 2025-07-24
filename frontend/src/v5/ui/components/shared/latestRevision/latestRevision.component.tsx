@@ -21,6 +21,8 @@ import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { Container, Label } from './latestRevision.styles';
 import { IRevisionStatus, RevisionStatus } from './revisionStatus/revisionStatus.component';
 
+import type { JSX } from "react";
+
 interface ILatestRevision extends IRevisionStatus {
 	hasRevisions: boolean;
 	emptyLabel: string;

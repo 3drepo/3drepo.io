@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { forwardRef } from 'react';
+import { forwardRef, type JSX } from 'react';
 import { get } from 'lodash';
 import { Controller, ControllerRenderProps, useFormContext } from 'react-hook-form';
 
@@ -63,13 +63,13 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 	const error = formError || get(ctx?.formState?.errors, name);
 
 	return (
-		<Controller
+        <Controller
 			name={name}
 			control={control}
 			defaultValue={defaultValue}
 			render={({ field: { ref: fieldRef, ...field } }) => (
 				// @ts-ignore
-				<Input
+				(<Input
 					{...field}
 					{...props}
 					value={transformInputValue(field.value) ?? ''}
@@ -84,8 +84,8 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 					inputRef={ref || fieldRef}
 					error={!!error}
 					helperText={error?.message}
-				/>
+				/>)
 			)}
 		/>
-	);
+    );
 });

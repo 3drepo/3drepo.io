@@ -21,6 +21,8 @@ import { TeamspaceCard } from '@components/shared/linkCard/teamspaceCard/teamspa
 import { TeamspacePlaceholderCard } from '@components/shared/linkCard/teamspaceCard/teamspacePlaceholderCard/teamspacePlaceholderCard.component';
 import { CardList } from './teamspaceList.styles';
 
+import type { JSX } from "react";
+
 type ITeamspaceList = {
 	className?: string;
 };

@@ -18,6 +18,8 @@
 import { FixedOrGrowContainer, FixedOrGrowContainerProps } from '@controls/fixedOrGrowContainer';
 import { TextOverflow } from '@controls/textOverflow';
 
+import type { JSX } from "react";
+
 export const RevisionsListItemText = ({
 	children,
 	...props

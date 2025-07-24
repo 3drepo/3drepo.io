@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, Ref } from 'react';
+import { forwardRef, Ref, type JSX } from 'react';
 import StarIcon from '@assets/icons/filled/star-filled.svg';
 import { CheckboxProps, Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';

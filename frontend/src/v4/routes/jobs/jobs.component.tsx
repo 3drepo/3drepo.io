@@ -14,8 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent } from 'react';
-import ReactDOM from 'react-dom';
+import { createRef, PureComponent } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg'
 import { FormattedMessage } from 'react-intl';
@@ -86,6 +85,8 @@ export class Jobs extends PureComponent<IProps, IState> {
 		panelBottomAnchorEl: null,
 	};
 
+	public inputRef = createRef<HTMLDivElement>();
+
 	public handleColorChange = (jobId) => (color) => {
 		this.props.updateColor(this.props.currentTeamspace, {_id: jobId, color});
 	}
@@ -125,7 +126,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
+		const containerElement = this.inputRef.current?.parentNode;
 		this.setState({ containerElement });
 		this.props.fetchJobsAndColors();
 	}
@@ -183,7 +184,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 		}
 
 		return (
-			<Container>
+			<Container ref={this.inputRef}>
 				<UserManagementTab footerLabel="Manage jobs">
 					<CustomTable
 						cells={JOBS_TABLE_CELLS}

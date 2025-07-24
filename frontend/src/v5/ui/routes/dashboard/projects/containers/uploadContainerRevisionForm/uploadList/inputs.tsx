@@ -16,7 +16,7 @@
  */
 
 import { TextField as TextFieldBase, TextFieldProps } from '@mui/material';
-import { forwardRef } from 'react';
+import { forwardRef, type JSX } from 'react';
 
 // These inputes are temporal. We are using them for the upload form for improved performance. With more testing 
 // we should replace the ones in  frominputs

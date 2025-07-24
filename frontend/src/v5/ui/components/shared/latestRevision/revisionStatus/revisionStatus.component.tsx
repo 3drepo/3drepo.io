@@ -21,8 +21,10 @@ import { TextOverflow } from '@controls/textOverflow';
 import { formatDate } from '@/v5/services/intl';
 import { Name, ProcessingStatus, QueuedStatus } from './revisionStatus.styles';
 
+import type { JSX } from "react";
+
 export interface IRevisionStatus {
-	name: React.ReactElement | string;
+	name: React.ReactElement<any> | string;
 	status: UploadStatus;
 	error?: {
 		timestamp: Date | null;

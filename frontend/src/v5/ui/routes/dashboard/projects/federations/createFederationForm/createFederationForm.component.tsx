@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useState, type JSX } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { NewFederationSettingsSchema } from '@/v5/validation/containerAndFederationSchemes/federationSchemes';
 import { FormModal } from '@controls/formModal/formModal.component';

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { MouseEventHandler, ReactNode } from 'react';
+import { MouseEventHandler, ReactNode, type JSX } from 'react';
 import { Container } from './dashboardListItemRow.styles';
 
 type IDashboardListItemRow = {
