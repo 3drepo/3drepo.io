@@ -33,7 +33,7 @@ export const UsersList = () => {
 	const parentRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		if (!teamspace) return;
+		if (!teamspace || !username) return;
 
 		UsersActionsDispatchers.fetchUsers(teamspace); // V5
 		dispatch(UserManagementActions.fetchTeamspaceUsers()); // V4
