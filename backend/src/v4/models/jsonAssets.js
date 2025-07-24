@@ -34,7 +34,7 @@ async function getSubTreeInfo(federation) {
 	federation.subModels.forEach(({_id, node_id}) => {
 		const prom = History.findLatest(federation.teamspace, _id, {_id: 1}).then((rev) => ({
 			_id: node_id,
-			rid: utils.uuidToString(rev._id),
+			rid: rev ? utils.uuidToString(rev._id) : C.MASTER_BRANCH,
 			teamspace: federation.teamspace,
 			model: _id
 		}));
