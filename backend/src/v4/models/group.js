@@ -370,17 +370,15 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 
 	]);
 
-	if(modelRev) {
-		await getSubModels(account, model, branch, revId, async (ts, subModel) => {
-			const revNode = await findLatest(ts, subModel, {_id: 1});
+	await getSubModels(account, model, branch, revId, async (ts, subModel) => {
+		const revNode = await findLatest(ts, subModel, {_id: 1});
 
-			if(revNode) {
-				submodels.add({model: subModel, revId: revNode._id});
-				await prepareCache(ts, subModel, revNode._id);
-			}
+		if(revNode) {
+			submodels.add({model: subModel, revId: revNode._id});
+			await prepareCache(ts, subModel, revNode._id);
+		}
 
-		});
-	}
+	});
 
 	let models = [];
 	if(submodels.size) {
