@@ -63,7 +63,7 @@ UnityAssets.getAssetList = async function(account, model, branch, rev, username,
 		});
 	} else {
 		// Not a federation, get it's own assetList.
-		const history = History.getHistory(account, model, branch, rev);
+		const history = await History.getHistory(account, model, branch, rev);
 		fetchPromise.push(getAssetListEntry(account, model, history._id));
 	}
 	return Promise.all(fetchPromise).then((assetLists) => {
