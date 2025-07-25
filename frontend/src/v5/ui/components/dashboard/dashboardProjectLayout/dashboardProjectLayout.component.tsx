@@ -15,21 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { AppBar } from '@components/shared/appBar';
 import { Content } from './dashboardProjectLayout.styles';
 import { ProjectsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 import { ProjectNavigation } from '@components/shared/navigationTabs';
 
-interface IDashboardProjectLayout {
-	children: ReactNode;
-	NavigationBar?: any;
-}
-
-export const DashboardProjectLayout = ({ children }: IDashboardProjectLayout): JSX.Element => {
+export const DashboardProjectLayout = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	useEffect(() => {
@@ -50,7 +45,7 @@ export const DashboardProjectLayout = ({ children }: IDashboardProjectLayout): J
 			<AppBar />
 			<ProjectNavigation />
 			<Content>
-				{children}
+				<Outlet />
 			</Content>
 		</>
 	);
