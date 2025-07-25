@@ -340,18 +340,45 @@ function generateFullTreeForFederation(federation) {
 
 	response.idToName[federation.node_id] = federation.name;
 
+	const groupNodes = {};
+
 	for (const subModel of federation.subModels) {
+
+		let parentNode = response.nodes;
+
+		if (subModel.group) {
+			const group = subModel.group;
+			parentNode = groupNodes[group];
+			if(!parentNode) {
+				const node_id = uuidv5(group, federation.node_id);
+				const node_shared_id = uuidv5("shared", node_id);
+				parentNode = {
+					account: federation.teamspace,
+					project: federation._id,
+					type: "transformation",
+					name: group,
+					path: `${federation.node_id}__${node_id}`,
+					_id: node_id,
+					shared_id: node_shared_id,
+					toggleState: "visible",
+					children: []
+				};
+				groupNodes[subModel.group] = parentNode;
+				response.nodes.children.push(parentNode);
+				response.idToName[node_id] = group;
+			}
+		}
 
 		// Take care below that the _id and shared_id are the identifiers of the
 		// synthethic tree node; the uuid of the Container is the *name* of the
 		// tree node, and is stored in the subModel._id.
 
-		response.nodes.children.push({
+		parentNode.children.push({
 			account: federation.teamspace,
 			project: federation._id,
 			type: "ref",
 			name: subModel._id,
-			path: `${federation.node_id}__${subModel.node_id}`,
+			path: `${parentNode.path}__${subModel.node_id}`,
 			_id: subModel.node_id,
 			shared_id: subModel.node_shared_id,
 			toggleState: "visible"
@@ -381,6 +408,7 @@ function generateTreeNodeIdsForFederation(settings) {
 		for (const container of settings.subModels) {
 			container.node_id = uuidv5(container._id, settings._id);
 			container.node_shared_id = uuidv5("shared", container.node_id);
+
 		}
 	}
 }
@@ -466,9 +494,22 @@ function getFederationIdToMeshes(settings) {
 
 function getFederationTreePath(settings) {
 	generateTreeNodeIdsForFederation(settings);
+	const group_node_ids = {};
 	const idToPath = {};
 	for (const container of settings.subModels) {
-		idToPath[container.node_id] = `${settings.node_id}__${container.node_id}`;
+		if(container.group) {
+			let group_id = group_node_ids[container.group];
+			if(!group_id) {
+				group_id = uuidv5(container.group, settings.node_id);
+				group_node_ids[container.group] = group_id;
+			}
+			idToPath[container.node_id] = `${settings.node_id}__${group_id}__${container.node_id}`;
+		} else {
+			idToPath[container.node_id] = `${settings.node_id}__${container.node_id}`;
+		}
+	}
+	for (const group of Object.values(group_node_ids)) {
+		idToPath[group] = `${settings.node_id}__${group}`;
 	}
 	idToPath[settings.node_id] = settings.node_id;
 	return {
