@@ -47,7 +47,7 @@ export const Containers = (): JSX.Element => {
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateContainerForm);
 
 	useEffect(() => { enableRealtimeNewContainer(teamspace, project); }, [project]);
-	useEffect(() => () => {ContainersActionsDispatchers.resetContainerStatsQueue();}, [] );
+	useEffect(() => () => { ContainersActionsDispatchers.resetContainerStatsQueue(); }, [] );
 
 	if (isListPending) {
 		return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);

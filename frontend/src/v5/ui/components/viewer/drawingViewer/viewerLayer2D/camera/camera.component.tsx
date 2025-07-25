@@ -42,7 +42,7 @@ export const Camera = ({ scale, offsetRef }) => {
 
 	const modelLoading = useModelLoading();
 
-	useEffect(() => scaleRef.current = scale, [scale]);
+	useEffect(() => { scaleRef.current = scale; }, [scale]);
 
 	useViewpointSubscription((v) => {
 		if (!transform3DTo2D) return;
