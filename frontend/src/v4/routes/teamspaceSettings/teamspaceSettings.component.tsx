@@ -93,6 +93,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		createMitigationSuggestions: false,
 		permissionsLogStart: null,
 		permissionsLogEnd: null,
+		isSettingsLoading: true,
 	};
 
 	get teamspace() {
@@ -108,36 +109,6 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		const { teamspace } = match.params;
 
 		fetchTeamspaceSettings(teamspace);
-	}
-
-	public componentDidUpdate(prevProps) {
-		const changes = {} as any;
-		const properties = this.props.teamspaceSettings;
-		const prevProperties = prevProps.modelSettingss;
-		const topicTypes = properties ? properties.topicTypes : [];
-		const prevTopicTypes = prevProperties ? prevProperties.topicTypes : [];
-		const riskCategories = properties ? properties.riskCategories : [];
-		const prevRiskCategories = prevProperties ? prevProperties.riskCategories : [];
-
-		if (topicTypes && topicTypes.length !== prevTopicTypes.length) {
-			changes.topicTypes = topicTypes;
-		}
-
-		if (riskCategories && riskCategories.length !== prevRiskCategories.length) {
-			changes.riskCategories = riskCategories;
-		}
-
-		changes.createMitigationSuggestions = properties.createMitigationSuggestions;
-
-		if (this.props.treatmentsUpdatedAt !== prevProps.treatmentsUpdatedAt && this.state.fileName !== '') {
-			this.setState({
-				fileName: '',
-			});
-		}
-
-		if (!isEmpty({ ...changes })) {
-			this.setState({ ...changes });
-		}
 	}
 
 	private handleUpdateSettings = (values, { resetForm }) => {
@@ -161,6 +132,39 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		this.setState({
 			fileName: '',
 		});
+	}
+
+	public componentDidUpdate(prevProps) {
+		const changes = {} as any;
+		const properties = this.props.teamspaceSettings;
+		const prevProperties = prevProps.teamspaceSettings;
+		const topicTypes = properties ? properties.topicTypes : [];
+		const prevTopicTypes = prevProperties ? prevProperties.topicTypes : [];
+		const riskCategories = properties ? properties.riskCategories : [];
+		const prevRiskCategories = prevProperties ? prevProperties.riskCategories : [];
+
+		if (topicTypes && topicTypes.length !== prevTopicTypes.length) {
+			changes.topicTypes = topicTypes;
+		}
+
+		if (riskCategories && riskCategories.length !== prevRiskCategories.length) {
+			changes.riskCategories = riskCategories;
+		}
+
+		changes.createMitigationSuggestions = properties.createMitigationSuggestions;
+
+		if (this.props.treatmentsUpdatedAt !== prevProps.treatmentsUpdatedAt && this.state.fileName !== '') {
+			this.setState({
+				fileName: '',
+			});
+		}
+		if (prevProps.isSettingsLoading && !this.props.isSettingsLoading) {
+			changes.isSettingsLoading = false;
+		}
+
+		if (!isEmpty({ ...changes })) {
+			this.setState({ ...changes });
+		}
 	}
 
 	public handleBackLink = () => {
@@ -404,7 +408,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	public render() {
-		const { isSettingsLoading } = this.props;
+		const { isSettingsLoading } = this.state;
 
 		return (
 			<Panel {...PANEL_PROPS} title={this.renderTitleWithBackLink()}>
