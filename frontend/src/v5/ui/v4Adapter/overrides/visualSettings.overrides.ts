@@ -141,10 +141,9 @@ export default css`
 						height: auto;
 						padding: 0;
 						color: ${({ theme }) => theme.palette.base.main};
-						${sharedInputStyles} {
-							${selectStyles}
-							${textInputStyles}
-						}
+						${sharedInputStyles}
+						${selectStyles}
+						${textInputStyles}
 						${WarningMessage} {
 							color: ${({ theme }) => theme.palette.warning.main};
 							margin-top: 25px;

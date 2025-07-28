@@ -32,7 +32,6 @@ export default css`
 
 		div {
 			position: relative;
-			height: auto;
 		}
 
 		.simplebar-content {

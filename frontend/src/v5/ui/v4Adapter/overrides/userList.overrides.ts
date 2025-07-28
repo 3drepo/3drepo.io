@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { StyledSelect } from '@/v4/routes/components/customTable/components/cellSelect/cellSelect.styles';
 import { Cell, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
 import { FloatingButton, FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
 import { Content as LoadingText } from '@/v4/routes/components/loader/loader.styles';
@@ -29,7 +30,7 @@ const AddUserButton = css`
 		height: 35px;
 		right: 0;
 		${FloatingButton} {
-			::after {
+			&::after {
 				content: 'Add user';
 				${({ theme }) => theme.typography.body1};
 				margin-left: 8px;
@@ -128,19 +129,21 @@ export const V5UserListOverrides = styled.div`
 		${JobCell} {
 			max-width: 27%;
 			padding: 0 10px 0 0;
-			${SelectStyles} {
-				.MuiGrid-container {
-					flex-wrap: nowrap;
-					.MuiGrid-item:first-of-type {
-						min-height: 10px;
-						min-width: 10px;
-					}
+			${SelectStyles}
+			.MuiGrid-container {
+				flex-wrap: nowrap;
+				.MuiGrid-item:first-of-type {
+					min-height: 10px;
+					min-width: 10px;
 				}
 			}
 		}
 		${PermissionsCell} {
 			padding: 0 0 0 10px;
 			max-width: 27%;
+			${StyledSelect} {
+				display: inline-flex;
+			}
 			${SelectStyles}
 		}
 		${BlankCell} {

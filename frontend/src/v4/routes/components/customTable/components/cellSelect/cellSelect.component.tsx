@@ -44,10 +44,11 @@ export class CellSelect extends PureComponent<IProps> {
 		hidden: false,
 	};
 
-	public renderOptions = (items, TemplateComponent) => {
+	public renderOptions = (items) => {
 		const labelName =  this.props.labelName || 'name';
+		const TemplateComponent = this.props.itemTemplate as any;
 
-		return items.map((item, index) => {
+		return items.map((item) => {
 			if (!item[labelName] && !item.value) {
 				const val = item;
 				item = {[labelName]: val, value: val};
@@ -57,7 +58,7 @@ export class CellSelect extends PureComponent<IProps> {
 				<Item
 					group={item.group ? 1 : 0}
 					disabled={item.disabled}
-					key={index}
+					key={`${item.value}`}
 					value={item.value}
 				>
 					{
@@ -79,7 +80,7 @@ export class CellSelect extends PureComponent<IProps> {
 	}
 
 	public render() {
-		const {items, itemTemplate, disabled, placeholder, disabledPlaceholder, readOnly, inputId, name, hidden, value, renderValue} = this.props;
+		const {items, disabled, placeholder, disabledPlaceholder, readOnly, inputId, name, hidden, value, renderValue} = this.props;
 		const hasNoOptions = !items.length;
 		const options = [];
 
@@ -101,11 +102,11 @@ export class CellSelect extends PureComponent<IProps> {
 				hidden={hidden}
 				displayEmpty
 				input={<Input id={inputId} readOnly={readOnly} />}
-				value={value}
+				value={`${value}`}
 				onChange={this.handleChange}
 				renderValue={renderValue}
 			>
-				{this.renderOptions(options, itemTemplate)}
+				{this.renderOptions(options)}
 			</StyledSelect>
 		);
 	}
