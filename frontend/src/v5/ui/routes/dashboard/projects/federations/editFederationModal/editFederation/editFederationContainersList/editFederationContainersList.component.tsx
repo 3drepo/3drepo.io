@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, ComponentType, useState, useContext, useCallback } from 'react';
+import { ReactNode, ComponentType, useState, useContext, useCallback, useEffect } from 'react';
 import {
 	DashboardList,
 	DashboardListCollapse,
@@ -79,7 +79,6 @@ export const EditFederationContainers = ({
 	const { groupsByContainer } = useContext(EditFederationContext);
 	// const [groupValue, setGroupValue] = useState(groupsByContainer[container._id] || null);
 	const [sortedList, setSortedList] = useState<IContainer[]>(filteredItems);
-
 	const onSortingChange = useCallback((sortConfig: ISortConfig) => {
 		if (sortConfig.column[0] === 'group') {
 			setSortedList([...filteredItems].sort((containerA, containerB) => {
@@ -94,7 +93,7 @@ export const EditFederationContainers = ({
 			return;
 		}
 		setSortedList([...filteredItems].sort(getSortingFunction(sortConfig)));
-	}, [filteredItems.length]);
+	}, [filteredItems]);
 
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
