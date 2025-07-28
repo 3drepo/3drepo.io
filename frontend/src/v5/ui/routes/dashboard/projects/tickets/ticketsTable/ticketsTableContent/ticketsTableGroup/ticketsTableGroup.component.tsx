@@ -123,6 +123,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	};
 
 	const customSortingFunctions = (column: string) => {
+		if (column === 'modelName') return null; // uses the default sorting function from srotcontext
 		if (column === `properties.${IssueProperties.ASSIGNEES}` ) return assigneesSort;
 
 		return sortTicketsByProperty;
