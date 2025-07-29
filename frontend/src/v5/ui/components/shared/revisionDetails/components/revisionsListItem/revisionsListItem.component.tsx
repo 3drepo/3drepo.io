@@ -28,6 +28,7 @@ type IRevisionsListItem = {
 	children: any,
 	onDownloadRevision: () => void;
 	redirectTo?: string;
+	target?: React.HTMLAttributeAnchorTarget;
 };
 
 export const RevisionsListItem = ({
@@ -37,6 +38,7 @@ export const RevisionsListItem = ({
 	redirectTo = undefined,
 	onDownloadRevision,
 	children,
+	target,
 }: IRevisionsListItem): JSX.Element => {
 	const disabled = voidStatus;
 
@@ -52,7 +54,7 @@ export const RevisionsListItem = ({
 	};
 
 	return (
-		<Container to={disabled ? undefined : redirectTo} disabled={disabled}>
+		<Container to={disabled ? undefined : redirectTo} disabled={disabled} target={target}>
 			{children}
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasPermission} />
 			{hasPermission && (

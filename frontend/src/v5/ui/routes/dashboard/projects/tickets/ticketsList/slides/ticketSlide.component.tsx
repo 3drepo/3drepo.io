@@ -36,8 +36,9 @@ import { useParams } from 'react-router-dom';
 type TicketSlideProps = {
 	ticketId: string,
 	template: ITemplate,
+	clearTicketId?: () => void,
 };
-export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
+export const TicketSlide = ({ template, ticketId, clearTicketId }: TicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
@@ -87,6 +88,15 @@ export const TicketSlide = ({ template, ticketId }: TicketSlideProps) => {
 			isFederation,
 		);
 	}, [ticketId, ticketsHaveBeenFetched]);
+
+	useEffect(() => {
+		// If 
+		if (ticket && ticket.type !== template._id) {
+			clearTicketId();
+			return;
+		}
+	}, [ticket?.type]);
+
 
 	useEffect(() => {
 		return enableRealtimeUpdateTicket(teamspace, project, containerOrFederation, isFederation);
