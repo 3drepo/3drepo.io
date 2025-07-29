@@ -20,7 +20,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 export const setCameraPos = (newPosition, currentViewpoint) => {
 	const {
 		up,
-		// eslint-disable-next-line @typescript-eslint/naming-convention
+		 
 		view_dir,
 		position: pos, type } = currentViewpoint;
 

@@ -35,7 +35,6 @@ const mass = 10;
 const zoomDuration = 300;
 const maxSpeed = 150;
 
-/* eslint-disable @typescript-eslint/no-use-before-define */
 export const panzoom = (target: ZoomableImage, options) => {
 	const transform = { scale:1, x: 0, y: 0 };
 	const zoomStep = 0.2;
@@ -48,7 +47,7 @@ export const panzoom = (target: ZoomableImage, options) => {
 	const speed = { x:0, y: 0 };
 
 	let minZoom = options.minZoom || 0.5;
-	let maxZoom = options.maxZoom || 10;
+	const maxZoom = options.maxZoom || 10;
 
 	const stopInertia = () => {
 		speed.x = 0;
@@ -121,7 +120,7 @@ export const panzoom = (target: ZoomableImage, options) => {
 		});
 	};
 
-	const zoom = (scaleFactor, smooth:boolean = true) => {
+	const zoom = (scaleFactor, smooth = true) => {
 		const contRect = container.getBoundingClientRect();
 		const pos = { x :contRect.width / 2,  y: contRect.height / 2 };
 

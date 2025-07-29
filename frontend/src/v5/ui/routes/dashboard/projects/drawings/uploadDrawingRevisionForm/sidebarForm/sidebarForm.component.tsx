@@ -36,7 +36,7 @@ export const SidebarForm = () => {
 	const types = DrawingsHooksSelectors.selectTypes();
 	const { getValues, formState: { errors, dirtyFields }, trigger, watch } = useFormContext();
 	const { fields, selectedId } = useContext(UploadFilesContext);
-	// @ts-ignore
+	// @ts-expect-error
 	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
 	const revisionPrefix = `uploads.${selectedIndex}`;
 	const [drawingId, drawingName] = getValues([`${revisionPrefix}.drawingId`, `${revisionPrefix}.drawingName`]);

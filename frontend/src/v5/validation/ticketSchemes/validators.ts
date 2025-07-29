@@ -47,7 +47,7 @@ export const FilterSchema = Yup.object().shape({
 	values: Yup.array()
 		.when(
 			['operator', '$type'],
-			// @ts-ignore
+			// @ts-expect-error
 			(operator: CardFilterOperator, filterType: CardFilterType, schema) => {
 				let value;
 				if (isRangeOperator(operator)) {

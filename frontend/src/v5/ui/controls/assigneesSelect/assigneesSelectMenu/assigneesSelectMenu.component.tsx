@@ -75,7 +75,7 @@ export const AssigneesSelectMenu = ({
 	return (
 		<>
 			<AssigneesSelectMenuTriggerButton onClick={openSelect} />
-			{/* @ts-ignore */}
+			{/* @ts-expect-error */}
 			<HiddenSelect
 				value={value}
 				onClick={onClick}

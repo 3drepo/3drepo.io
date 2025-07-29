@@ -21,7 +21,7 @@ import { useEffect, useState } from 'react';
 import { TicketGroupsContext } from './ticketGroupsContext';
 import { GroupState, IndexedOverride, addIndex } from './ticketGroupsContext.helper';
 
-/* eslint-disable no-param-reassign */
+ 
 type TicketGroupsContextComponentProps = {
 	overrides: GroupOverride[],
 	groupType: 'colored' | 'hidden',

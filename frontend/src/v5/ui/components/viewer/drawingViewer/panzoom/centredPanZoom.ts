@@ -71,7 +71,7 @@ export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH
 	const centerTarget = (animate = false) => {
 		const parentRect = targetContainer.getBoundingClientRect();
 		const fittedSize = aspectRatio(naturalSize.width, naturalSize.height, parentRect.width - paddingW * 2, parentRect.height - paddingH * 2);
-		let scale = Math.min(fittedSize.scaledWidth / naturalSize.width, fittedSize.scaledHeight / naturalSize.height );
+		const scale = Math.min(fittedSize.scaledWidth / naturalSize.width, fittedSize.scaledHeight / naturalSize.height );
 		const x = (parentRect.width - fittedSize.scaledWidth) / 2;
 		const y = (parentRect.height - fittedSize.scaledHeight) / 2;
 

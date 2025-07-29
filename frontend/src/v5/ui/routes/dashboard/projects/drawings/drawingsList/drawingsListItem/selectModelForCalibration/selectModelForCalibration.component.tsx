@@ -71,7 +71,7 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 					<Gap $height='35px' />
 					<Loader />
 				</>
-			 ) : (
+			) : (
 				<FormSearchSelect
 					control={control}
 					label={formatMessage({ id: 'calibration.modelSelection.label', defaultMessage: 'Federation / Container' })}

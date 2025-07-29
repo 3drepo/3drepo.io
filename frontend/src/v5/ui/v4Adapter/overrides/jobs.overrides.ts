@@ -57,7 +57,6 @@ export const V5JobsOverrides = styled.div<{ isAdmin: boolean }>`
 			color: ${({ theme }) => theme.palette.primary.contrast};
 
 			${({ isAdmin }) => {
-		/* eslint-disable @typescript-eslint/indent */
 				if (isAdmin) return primaryButtonStyling;
 				return css`
 					pointer-events: none;

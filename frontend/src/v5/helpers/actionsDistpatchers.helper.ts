@@ -16,8 +16,7 @@
  */
 
 let dispatch = null;
-
-// eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
+ 
 export const createActionsDispatchers = <T>(ActionsCreators: T) => {
 	const exportObject = {};
 	Object.keys(ActionsCreators).forEach((key) => {

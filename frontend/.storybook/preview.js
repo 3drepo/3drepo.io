@@ -6,7 +6,6 @@ import { GlobalStyle } from '@/v5/ui/themes/global';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
 import React from 'react';
-import _ from 'lodash';
 
 export const parameters = {
 	actions: { argTypesRegex: "^on[A-Z].*" },

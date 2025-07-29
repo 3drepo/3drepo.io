@@ -75,7 +75,7 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [], cont
 
 	const getIsDirty = () => {
 		const formValues = getValues();
-		// @ts-ignore
+		// @ts-expect-error
 		formValues.field.values = formValues.field.values.map(({ value }) => ({ value }));
 		formValues.values = formValues.values.filter(({ value }) => value);
 		return !isEqual(defaultValues, formValues);

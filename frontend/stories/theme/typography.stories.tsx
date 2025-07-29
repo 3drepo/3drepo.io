@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable max-len */
 
 import { Meta, StoryObj } from '@storybook/react';
 import { typography as typographies } from '@/v5/ui/themes/theme';

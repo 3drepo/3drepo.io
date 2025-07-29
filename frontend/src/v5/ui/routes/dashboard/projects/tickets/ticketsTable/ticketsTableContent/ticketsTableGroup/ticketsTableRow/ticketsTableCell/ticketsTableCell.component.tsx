@@ -124,7 +124,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 		case 'boolean':
 			return (
 				<Cell name={name}>
-					{!!value ? TRUE_LABEL : FALSE_LABEL}
+					{value ? TRUE_LABEL : FALSE_LABEL}
 				</Cell>
 			);
 		case 'date':

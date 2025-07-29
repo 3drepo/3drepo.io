@@ -51,12 +51,12 @@ export const getColorTriggerPropName = (pinPropName, template): string => {
 
 const getColorFromMapping = (ticket: ITicket, pinMapping: IPinColorMapping) => {
 	const { property: { module = TicketBaseKeys.PROPERTIES, name }, mapping } = pinMapping;
-	// @ts-ignore
+	// @ts-expect-error-error
 	const defaultColorHex = rgbToHex(mapping.find((option) => option.default)?.default) || DEFAULT_COLOR;
 	if (!ticket) return defaultColorHex;
 	const linkedValue = module === TicketBaseKeys.PROPERTIES ?
 		get(ticket, [TicketBaseKeys.PROPERTIES, name]) : get(ticket, [TicketBaseKeys.MODULES, module, name]);
-	// @ts-ignore
+	// @ts-expect-error-error
 	const rgb = mapping.find(({ value }) => value === linkedValue)?.color;
 	return rgb ? rgbToHex(rgb) : defaultColorHex;
 };
@@ -88,7 +88,7 @@ const pinIconToType = {
 	'MARKER' : 'bookmark',
 };
 
-export const toPin = (propName: string, template: ITemplate,  ticket: ITicket, isSelected:boolean = false, coordValue?: number[]): IPin => {
+export const toPin = (propName: string, template: ITemplate,  ticket: ITicket, isSelected = false, coordValue?: number[]): IPin => {
 	const colour = hexToGLColor(getPinColorHexForProperty(propName, template, ticket));
 	const icon = getPinIconForProperty(propName, template);
 	const id = getPinId(propName, ticket);

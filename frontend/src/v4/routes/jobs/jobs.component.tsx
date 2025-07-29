@@ -116,7 +116,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 			];
 			if (!this.props.usersProvisionedEnabled) {
 				data.push({
-					// @ts-ignore
+					// @ts-expect-error
 					Icon: BinIcon,
 					onClick: this.onRemove.bind(null, job._id)
 				});

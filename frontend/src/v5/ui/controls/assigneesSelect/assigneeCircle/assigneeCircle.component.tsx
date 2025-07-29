@@ -39,6 +39,6 @@ export const AssigneeCircle = memo(({ assignee, ...props }: IAssigneeCircle) => 
 			{...props}
 		/>
 	);
-	if (!!job) return <JobPopoverCircle job={job} {...props} />;
+	if (job) return <JobPopoverCircle job={job} {...props} />;
 	return (<UserPopoverCircle user={user} {...props} />);
 });

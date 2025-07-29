@@ -83,8 +83,8 @@ export const DrawingsList = () => {
 	}, [drawings.length]);
 
 	return (
-        // @ts-ignore
-        <VirtualisedList
+		// @ts-expect-error
+		<VirtualisedList
 			ref={virtuosoRef}
 			data={drawings}
 			totalCount={drawings.length}
@@ -103,5 +103,5 @@ export const DrawingsList = () => {
 				/>
 			)}
 		/>
-    );
+	);
 };

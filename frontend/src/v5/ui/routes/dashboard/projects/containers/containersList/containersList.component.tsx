@@ -62,7 +62,6 @@ export const ContainersList = ({
 	onClickCreate,
 }: IContainersList): JSX.Element => {
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
-	// eslint-disable-next-line max-len
 	const { items: containers, filteredItems: filteredContainers } = useContext<SearchContextType<IContainer>>(SearchContext);
 	const hasContainers = containers.length > 0;
 	const { sortedList, setSortConfig } = useOrderedList(filteredContainers, DEFAULT_SORT_CONFIG);

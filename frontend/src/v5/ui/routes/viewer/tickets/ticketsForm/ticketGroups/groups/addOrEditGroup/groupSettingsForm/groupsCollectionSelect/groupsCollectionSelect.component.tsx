@@ -46,7 +46,7 @@ export const GroupsCollectionSelect = ({ value, prefixes, onChange, ...props }: 
 				value={JSON.stringify(prefix)}
 				$depth={prefix.length - 1}
 			>
-				{/* @ts-ignore */}
+				{/* @ts-expect-error-error */}
 				<span>{prefix.at(-1)}</span>
 			</MenuItemPrefix>
 		))}

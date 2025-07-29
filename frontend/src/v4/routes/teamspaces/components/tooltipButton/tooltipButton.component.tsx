@@ -78,7 +78,7 @@ export const TooltipButton = (props: IProps) => {
 			{ disabled
 				? renderButton()
 				: (
-					// @ts-ignore
+					// @ts-expect-error
 					<Tooltip
 						title={label}
 						disableHoverListener={disabled}

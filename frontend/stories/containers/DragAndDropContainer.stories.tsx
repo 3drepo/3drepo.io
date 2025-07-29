@@ -19,7 +19,7 @@ import { DragAndDrop } from '@controls/dragAndDrop/dragAndDrop.component';
 import { FileInputField } from '@controls/fileInputField/fileInputField.component';
 import { Button } from '@controls/button';
 
-// eslint-disable-next-line
+ 
 const handleDropFiles = () => alert('Valid files have been dropped');
 
 export default {

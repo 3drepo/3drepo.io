@@ -93,7 +93,7 @@ export const EditProfilePersonalTab = ({
 	};
 
 	const onSubmit = async () => {
-		let values = getSubmittableValues();
+		const values = getSubmittableValues();
 		await new Promise((resolve, reject) => {
 			CurrentUserActionsDispatchers.updatePersonalData(
 				values,

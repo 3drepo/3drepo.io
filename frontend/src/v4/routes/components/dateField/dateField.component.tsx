@@ -68,7 +68,7 @@ export const DateField = ({
 			onAccept={handleAccept}
 			onChange={() => {}}
 			disableHighlightToday
-			// @ts-ignore
+			// @ts-expect-error
 			inputProps={{ readOnly: true, placeholder }}
 			components={{ ActionBar: null }}
 			renderInput={(props) => (

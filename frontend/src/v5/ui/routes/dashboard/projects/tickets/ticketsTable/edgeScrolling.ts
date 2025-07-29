@@ -31,7 +31,7 @@ export const edgeScrolling = (options: Options = {}): EdgeScrolling => {
 	const { speed = 1000 } = options;
 	let scrollSpeed = 0;
 	let containerElement: HTMLElement | null = null;
-	let observer = new EdgeHoveringObserver();
+	const observer = new EdgeHoveringObserver();
 	let prevTime = null;
 
 	const handleMouseMove = ({ side, proximity }: EdgeHoveringData) => {

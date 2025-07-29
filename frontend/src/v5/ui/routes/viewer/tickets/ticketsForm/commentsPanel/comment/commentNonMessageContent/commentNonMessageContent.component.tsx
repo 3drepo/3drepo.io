@@ -79,7 +79,7 @@ export const CommentNonMessageContent = ({
 		setImages(newImages);
 	};
 
-	// @ts-ignore
+	// @ts-expect-error
 	const onDeleteImage = (index) => setImages(images.toSpliced(index, 1));
 	const onUploadImages = async () => uploadImages((imagesToUpload) => setImages(images.concat(imagesToUpload)));
 	const imagesEditingFunctions = !readOnly ? { 

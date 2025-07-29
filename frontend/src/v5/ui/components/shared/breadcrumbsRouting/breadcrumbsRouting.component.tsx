@@ -86,7 +86,6 @@ export const BreadcrumbsRouting = () => {
 			path = TICKETS_ROUTE;
 		}
 
-		// eslint-disable-next-line no-restricted-globals
 		const { params: projectParams } = matchPath(location.pathname, { path });
 
 		options = projects.map(({ name, _id }) => ({

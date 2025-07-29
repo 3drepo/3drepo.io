@@ -19,7 +19,7 @@ import { TextField, TextFieldProps } from '@controls/inputs/textField/textField.
 
 const VALID_CODES = ['Backspace', 'Tab', 'Delete', 'ArrowLeft', 'ArrowRight'];
 const META_KEYS = ['altKey', 'ctrlKey', 'metaKey', 'shiftKey'];
-const isValidCharacterOrDigit = (val) => /[0-9\.+-]/.test(val);
+const isValidCharacterOrDigit = (val) => /[0-9.+-]/.test(val);
 
 export const NumberField = (props: TextFieldProps) => {
 	const handleKeyDown = (event) => {

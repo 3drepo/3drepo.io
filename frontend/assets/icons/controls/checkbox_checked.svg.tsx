@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 export default ({ className = '', tickColor = '' }) => (
-	// eslint-disable-next-line react/destructuring-assignment
 	<svg width="16" height="16" className={className} style={{ borderRadius: 0 }} viewBox="0 0 16 16" stroke="none" fill="none" xmlns="http://www.w3.org/2000/svg">
 		<path
 			fill="currentColor"

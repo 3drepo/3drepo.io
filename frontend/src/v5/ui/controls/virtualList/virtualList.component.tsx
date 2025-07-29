@@ -32,7 +32,7 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 
 	const [elemRect, setElemRect] = useState<DOMRect>({ x:0, y:0, width:0, height:0 } as DOMRect);
 
-	let { innerHeight } = window;
+	const { innerHeight } = window;
 
 	const contentCount = Math.ceil((1.5 * innerHeight) / itemHeight);
 	// const contentCountPadding = Math.floor(contentCount / 2);
@@ -56,8 +56,7 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 	const itemsSlice = items.slice(firstItemindex, Math.min(contentCount + firstItemindex, items.length));
 	const listHeight = items.reduce((partialSum, _, index) => (itemsHeight.current[index] || itemHeight) + partialSum, 0);
 
-	let onScroll;
-	onScroll = () => {
+	const onScroll = () => {
 		if (!elem.current) return;
 		const rect = elem.current.getBoundingClientRect();
 		let shouldUpdate = rect.y !== prevRect.current?.y;
@@ -65,7 +64,7 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 		const { firstItemindex: first } =  getFirstItemIndex(Math.max(0, -prevRect.current?.y));
 		let i = 0;
 
-		for (let child of itemsContainer.current.children as any as Iterable<Element>) {
+		for (const child of itemsContainer.current.children as any as Iterable<Element>) {
 			const height = child.getBoundingClientRect().height;
 		
 			if (!!height && itemsHeight.current[i + first] !== height) {

@@ -60,7 +60,7 @@ export class EdgeHoveringObserver {
 	public observe = (
 		container: HTMLElement,
 		onMouseMove: (data: EdgeHoveringData) => void,
-		edgeSize: number = 100,
+		edgeSize = 100,
 	) => {
 		this.containerElement = container;
 		this.onMouseMove = onMouseMove;

@@ -117,7 +117,7 @@ export const UploadDrawingRevisionForm = ({
 
 	const addFilesToList = async (files: File[], drawing?: IDrawing) => {
 		const filesToAppend = [];
-		for (let fileAsGeneric of files) {
+		for (const fileAsGeneric of files) {
 			const fileName = fileAsGeneric.name;
 			const fileData = {
 				file: fileAsGeneric,
@@ -195,7 +195,7 @@ export const UploadDrawingRevisionForm = ({
 
 	return (
 		<FormProvider {...formData}>
-			{/* @ts-ignore */}
+			{/* @ts-expect-error */}
 			<UploadFilesContextComponent fields={fields}>
 				<UploadFiles
 					open={open}

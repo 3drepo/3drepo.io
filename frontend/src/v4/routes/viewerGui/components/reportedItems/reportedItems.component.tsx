@@ -73,14 +73,14 @@ const PreviewListSingleItem = ({ active, index, ...props }) => {
 
 	useEffect(() => {
 		if (active && ref.current) {
-			// @ts-ignore
+			// @ts-expect-error
 			ref.current.firstElementChild.scrollIntoView({ behavior: 'instant', block: 'nearest', inline: 'start' });
 		}
 	}, [active]);
 
 	return (
 		<InvisibleContainer ref={ref}>
-			{/* @ts-ignore */}
+			{/* @ts-expect-error */}
 			<PreviewListItem {...props} active={active} key={index} />
 		</InvisibleContainer>
 	);

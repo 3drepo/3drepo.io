@@ -41,9 +41,9 @@ export const TERMS_ROUTE = '/v5/terms';
 
 export const RELEASE_NOTES_ROUTE = 'https://github.com/3drepo/3drepo.io/releases';
 
-// eslint-disable-next-line no-restricted-globals
+ 
 export const matchesPath = (path) => Boolean(matchPath(location.pathname, { path, exact: true }));
-// eslint-disable-next-line no-restricted-globals
+ 
 export const matchesSubPath = (path) => Boolean(matchPath(location.pathname, { path }));
 
 export interface TeamspaceParams extends Record<string, string> {

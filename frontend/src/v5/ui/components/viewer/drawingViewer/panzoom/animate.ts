@@ -18,7 +18,7 @@
 
 export const animate = (onAnimate: (current:number, elapsed?: number) => boolean) => {
 	let prevTime = +new Date(); 
-	let startTime = prevTime;
+	const startTime = prevTime;
 	let animFrame = 0;
 
 	const animationFrame = () => {

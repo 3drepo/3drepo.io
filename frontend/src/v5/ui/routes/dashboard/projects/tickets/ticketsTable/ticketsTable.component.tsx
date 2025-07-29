@@ -75,7 +75,7 @@ export const TicketsTable = () => {
 		history.push(path);
 	}, [params]);
 
-	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
+	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace = false) => {
 		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
 		const newParams = { ...params, ticketId: id };
 		const search = '?' + setContainerOrFederation(modelId);
@@ -193,7 +193,7 @@ export const TicketsTable = () => {
 	}, [template]);
 
 	useEffect(() => {
-		let columnsToFetch = [...visibleSortedColumnsNames];
+		const columnsToFetch = [...visibleSortedColumnsNames];
 		columnsToFetch
 			.filter((name) => !INITIAL_COLUMNS.includes(name))
 			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));

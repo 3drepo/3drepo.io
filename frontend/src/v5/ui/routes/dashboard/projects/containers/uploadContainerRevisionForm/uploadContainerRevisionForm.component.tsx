@@ -200,7 +200,7 @@ export const UploadContainerRevisionForm = ({
 
 	return (
 		<FormProvider {...formData}>
-			{/* @ts-ignore */}
+			{/* @ts-expect-error */}
 			<UploadFilesContextComponent fields={fields}>
 				<UploadFiles
 					open={open}

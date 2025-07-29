@@ -42,7 +42,7 @@ export type IChipMapItem = {
 	tooltip?: string;
 	value?: string;
 };
-export type IChipMap = { [key: string]: IChipMapItem };
+export type IChipMap = Record<string, IChipMapItem>;
 
 export enum PriorityLevels {
 	NONE = 'None',

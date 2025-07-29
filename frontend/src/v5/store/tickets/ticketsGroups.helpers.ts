@@ -44,7 +44,6 @@ export const createStateWithGroup = (state: ViewpointState, groups: Record<strin
 	return stateToReturn;
 };
 
-/* eslint-disable no-param-reassign */
 const createPropertiesWithGroups = (properties, groups) => Object.keys(properties).reduce((partialProps, key) => {
 	if (properties[key]?.state) {
 		partialProps[key] = {
@@ -68,7 +67,6 @@ export const ticketWithGroups = (ticket: ITicket, groups: Record<string, Group>)
 	return { ...ticket, properties, modules };
 };
 
-/* eslint-enable no-param-reassign */
 
 export const getSanitizedSmartGroup = (group) => {
 	if (group?.rules && group?.objects) {

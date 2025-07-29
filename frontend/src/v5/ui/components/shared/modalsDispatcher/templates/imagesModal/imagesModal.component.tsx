@@ -98,7 +98,7 @@ export const ImagesModal = ({
 
 	const centerSelectedThumbnail = () => {
 		if (!imageRef.current) return;
-		// @ts-ignore
+		// @ts-expect-error
 		imageRef.current.scrollIntoView({ behavior: 'instant', inline: 'center' });
 	};
 

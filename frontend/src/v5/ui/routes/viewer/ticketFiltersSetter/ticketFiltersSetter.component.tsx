@@ -98,7 +98,7 @@ export const TicketFiltersSetter = () => {
 	});
 
 	const getNonCompletedTicketFilters = (): CardFilter[] => {
-		let filters = [getNonCompletedTicketFiltersByStatus()];
+		const filters = [getNonCompletedTicketFiltersByStatus()];
 		const hasSafetibase = templates.some((t) => t?.modules?.some((module) => module.type === 'safetibase'));
 		if (hasSafetibase) {
 			filters.push(getNonCompletedTicketFiltersBySafetibase());

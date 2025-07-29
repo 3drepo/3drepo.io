@@ -196,7 +196,7 @@ export class Users extends PureComponent<IProps, IState> {
 			];
 			if (!this.props.usersProvisionedEnabled) {
 				data.push({
-					// @ts-ignore
+					// @ts-expect-error
 					Icon: BinIcon,
 					disabled: user.isCurrentUser || user.isOwner,
 					onClick: this.onRemove.bind(null, user.user)
@@ -357,7 +357,7 @@ export class Users extends PureComponent<IProps, IState> {
 
 		if (usersProvisionedEnabled) {
 			const deleteCellIndex = cells.findIndex(({ type }) => type === CELL_TYPES.ICON_BUTTON);
-			// @ts-ignore
+			// @ts-expect-error
 			cells[deleteCellIndex] = { ...cells[deleteCellIndex], disabled: true };
 		}
 

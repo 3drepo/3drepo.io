@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable implicit-arrow-linebreak */
 
 import { IDrawing, NewDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';

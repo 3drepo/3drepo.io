@@ -115,7 +115,7 @@ export const CommentsPanel = ({ scrollPanelIntoView }: CommentsPanelProps) => {
 						overscan={800}
 						components={{
 							Table,
-							// @ts-ignore
+							// @ts-expect-error
 							TableBody,
 							TableRow,
 							FillerRow,

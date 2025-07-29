@@ -52,7 +52,7 @@ const getTimezoneOptions = () => {
 export const SidebarForm = () => {
 	const { getValues, formState: { errors } } = useFormContext();
 	const { fields, selectedId } = useContext(UploadFilesContext);
-	// @ts-ignore
+	// @ts-expect-error
 	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
 	
 	const revisionPrefix = `uploads.${selectedIndex}`;

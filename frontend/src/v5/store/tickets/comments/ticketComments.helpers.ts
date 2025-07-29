@@ -31,7 +31,6 @@ export const deletedCommentMessage = formatMessage({ id: 'customTicket.comment.m
 export const editedCommentMessage = formatMessage({ id: 'customTicket.comment.message.edited', defaultMessage: 'edited' });
 
 const extractMetadataValue = (message: string, metadataName: keyof TicketCommentReplyMetadata) => {
-	// eslint-disable-next-line security/detect-non-literal-regexp
 	const regex = new RegExp(`\\[${metadataName}\\]:- "([^"]*)"\\n`);
 	return regex.exec(message)?.[1] || '';
 };
@@ -50,9 +49,9 @@ export const extractMetadata = (message: string): TicketCommentReplyMetadata => 
 	view: extractMetadataValue(message, 'view') === 'true',
 });
 
-export const stripMetadata = (message: string = '') => message.replaceAll(/\[[_a-zA-Z]*\]:- "([^"]*)"(\n)+/g, '');
-export const sanitiseMessage = (message: string = '') => message.replaceAll('"', '&#34;');
-export const desanitiseMessage = (message: string = '') => message.replaceAll('&#34;', '"');
+export const stripMetadata = (message = '') => message.replaceAll(/\[[_a-zA-Z]*\]:- "([^"]*)"(\n)+/g, '');
+export const sanitiseMessage = (message = '') => message.replaceAll('"', '&#34;');
+export const desanitiseMessage = (message = '') => message.replaceAll('&#34;', '"');
 
 const createMetadataValue = (metadataName: keyof TicketCommentReplyMetadata, metadataValue: string) => {
 	if (!metadataValue) return null;

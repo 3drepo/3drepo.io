@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable implicit-arrow-linebreak */
 
 import { EditableTicket, Group, ITicket } from '@/v5/store/tickets/tickets.types';
 import { fillOverridesIfEmpty } from '@/v5/store/tickets/tickets.helpers';
@@ -55,7 +54,6 @@ export const enableRealtimeUpdateTicketGroup = (teamspace: string, project: stri
 		async (group: Group) => {
 			if (group.rules) {
 				const { data } = await getMeshIDsByQuery(teamspace, containerId, group.rules, revision);
-				// eslint-disable-next-line no-param-reassign
 				group.objects = meshObjectsToV5GroupNode(data);
 			// eslint-disable-next-line no-underscore-dangle
 			} else if (group.objects.some((o) => !o._ids)) {

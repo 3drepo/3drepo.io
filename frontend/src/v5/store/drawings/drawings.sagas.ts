@@ -193,7 +193,7 @@ export function* updateDrawing({ teamspace, projectId, drawingId, drawing, onSuc
 }
 
 export function* resetDrawingStatsQueue() {
-	statsStack.reset();
+	yield statsStack.reset();
 }
 
 export default function* DrawingsSaga() {

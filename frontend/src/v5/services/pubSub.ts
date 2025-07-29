@@ -30,7 +30,7 @@ export class PubSub<K extends string> {
 
 	public publish: PublishFn<K> = (event: K, ...args) => this.emit(event, ...args);
 
-	public subscribe: SubscribeFn<K> = (events: K[], fn: Function) => {
+	public subscribe: SubscribeFn<K> = (events: K[], fn: PublishFn<K>) => {
 		const subs = events.map((event) => {
 			this.on(event, fn);
 			return () => this.off(event, fn);

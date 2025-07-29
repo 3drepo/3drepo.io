@@ -1,8 +1,6 @@
 {
     "eslint.options": {
-        "rulePaths": [
-            "internals/eslint-rules/"
-        ]
+        "overrideConfigFile": "eslint.config.mjs"
     },
     "files.eol": "\n"
 }

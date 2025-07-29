@@ -34,7 +34,7 @@ const mockViewpoint = {
 export const commentHistoryMockFactory = (overrides?: Partial<TicketCommentHistoryBlock>): TicketCommentHistoryBlock => ({
 	images: [faker.random.word()],
 	message: faker.random.word(),
-	// @ts-ignore
+	// @ts-expect-error
 	view: mockViewpoint,
 	timestamp: faker.datatype.datetime(),
 	...overrides,

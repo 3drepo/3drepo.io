@@ -57,11 +57,11 @@ export const DrawingsCalibrationButton = styled(DashboardListItemButton).attrs<{
 	.MuiButtonBase-root {
 		${({ calibrationStatus }) => CALIBRATION_STYLE[calibrationStatus]}
 		border: solid 1px ${({ calibrationStatus, theme }) => {
-		if (calibrationStatus === CalibrationStatus.CALIBRATED) return theme.palette.success.light;
-		if (calibrationStatus === CalibrationStatus.UNCONFIRMED) return theme.palette.warning.light;
-		if (calibrationStatus === CalibrationStatus.UNCALIBRATED) return theme.palette.primary.light;
-		return theme.palette.base.light;
-	}};
+			if (calibrationStatus === CalibrationStatus.CALIBRATED) return theme.palette.success.light;
+			if (calibrationStatus === CalibrationStatus.UNCONFIRMED) return theme.palette.warning.light;
+			if (calibrationStatus === CalibrationStatus.UNCALIBRATED) return theme.palette.primary.light;
+			return theme.palette.base.light;
+		}};
 	}
 
 	.MuiButton-endIcon {

@@ -899,35 +899,34 @@ function createCurveCurveProblem(a: CubicBezier, b: CubicBezier): CurveIntersect
 	const k19 = (n12k2 - 3 * A0x * n0 + 3 * A0y * j9 - 3 * B0y * j9 + 2 * j11 + j12 - j13 - 3 * j14);
 	const k20 = (3 * j10 - 2 * j15 + 2 * j16 + 6 * A0x * k4 * j9 - 6 * A0y * j17 - 3 * j18 + 3 * j19 - j20 + j21);
 	const k21 = (2 * j22 - 2 * j23 + 6 * A0x * k7 * j9 - 6 * A0y * j24 + 6 * B0y * j24 - 3 * j25 + 3 * j26 - j27 + j28);
-	// eslint-disable-next-line max-len
 	const k22 = (n18 * n4 + 3 * n19 * n0 + 3 * n20 * n4k0 + 3 * n17 * n4k0 + n21n11k0 - 2 * A0x * n12k2 + n22k15 * n6 - 2 * k13 * n21 * k2k0 + 2 * A0y * j29 + 2 * A0x * j13 - 2 * A0y * j30 - 2 * B0y * j29 + 2 * B0y * j30 - 6 * l13 * j9 + 6 * l14 * j9 - 6 * l12 * n4k0 - j31 + 3 * A0y * l4 - 4 * A0x * j11 - 3 * A0y * l2 - 2 * A0x * j12 - 3 * B0y * l4 + 3 * B0y * l2 + l10 * n10 * k2 + A0y * l0 - A0y * l1 + 6 * A0x * j14 - B0y * l0 + j35 - j34);
 
 	P.a9 = n0 * n1 - n2 * n3 + 3 * n4k0 * k1 * n5 - 3 * j9 * n7 * k3;
 
 	P.a8 = 3 * k4 * n2 * n5 - 3 * k5 * n0 * n7 + 3 * k4 * j9 * n7 - 3 * k5 * n4k0 * n5 + 6 * k5 * j9 * k1 * k3 - 6 * j17 * k1 * k3;
 
-	// eslint-disable-next-line max-len
+	 
 	P.a7 = (k8 * k1 + 2 * n8 * k1 + k6 * n7) * n0 - (k9 * k3 + 2 * n9 * k3 + k7 * n5) * n2 - 3 * k7 * j9 * n7 + 3 * k6 * n4k0 * n5 - 3 * k8 * j3 + 3 * k9 * n4k0 * k1 - 6 * k5 * k4 * j9 * k1 + 6 * k5 * k4 * j4;
 
-	// eslint-disable-next-line max-len
+	 
 	P.a6 = n2 * (k9 * k4 + B0y * n5 + k10 * k3 + 2 * k7 * k4 * k3) - n0 * (k8 * k5 + B0x * n7 + k11 * k1 + 2 * k6 * k5 * k1) - k1 * k18 - n7 * k19 + n13 * k0 * n5 - 3 * A0y * n2 * n5 + l5 * n5 + 2 * l3 * n5 + 3 * k11 * j3 + 3 * k8 * k4 * j9 - 3 * k9 * k5 * n4k0 - n11 * l7 * n5 + 3 * A0x * n4k0 * n5 - 3 * B0x * n4k0 * n5 - 3 * j32 * n5 + 6 * k7 * k5 * j9 * k1 - 6 * k6 * k4 * j4;
 
-	// eslint-disable-next-line max-len
+	 
 	P.a5 = k5 * k18 + n0 * (k16 * k1 + k11 * k5 + k8 * k6 + 2 * B0x * k5 * k1) - n2 * (k17 * k3 + k10 * k4 + k9 * k7 + 2 * B0y * k4 * k3) + k1 * k20 + 2 * k5 * k1 * k19 - 2 * n13 * k4 * k0 * k3 + 6 * A0y * k4 * n2 * k3 - 3 * k16 * j3 - 3 * k11 * k4 * j9 - 3 * k8 * k7 * j9 + 3 * k9 * k6 * n4k0 + 2 * n11 * l8 * k3 - 6 * A0x * k4 * j4 + 6 * B0x * k4 * j4 - 2 * l9 * n4 * k3 - 4 * k13 * k14 * k4 * n4 * k3 + 6 * k13 * k12 * k4 * k2k0 * k3;
 
-	// eslint-disable-next-line max-len
+	 
 	P.a4 = (B0y * k9 + k7 * k10 + k17 * k4 + 2 * B0y * k7 * k3) * n2 - (B0x * k8 + k6 * k11 + k16 * k5 + 2 * B0x * k6 * k1) * n0 - k1 * k21 - k6 * k18 - k5 * k20 - k8 * k19 + k9 * n13 * k0 - 3 * A0y * k9 * n2 + 3 * k7 * k11 * j9 - k9 * n11 * l7 + 3 * k16 * k4 * j9 + 3 * A0x * k9 * n4k0 - 3 * B0x * k9 * n4k0 + k9 * l5 + 2 * k9 * l3 + 6 * B0x * k6 * j3 - 3 * k9 * j32;
 
-	// eslint-disable-next-line max-len
+	 
 	P.a3 = k5 * k21 + B0x * k18 + (k16 * k6 + B0x * k11 + n16 * k1 + 2 * B0x * k6 * k5) * n0 - (k17 * k7 + B0y * k10 + n17 * k3 + 2 * B0y * k7 * k4) * n2 + k6 * k20 + k11 * k19 + k1 * k22 - k10 * n13 * k0 + 3 * A0y * k10 * n2 - 3 * n20 * n2 * k3 - n23 * n6 * k3 - n22 * n10 * k2 * k3 + 2 * A0y * n13 * k0 * k3 - k13 * n21 * n4 * k3 + k10 * n11 * l7 - 3 * k16 * k7 * j9 - 3 * A0x * j0 - 3 * n19 * j3 - 3 * n16 * j3 - k15 * k10 * k12 * n4 - 2 * k13 * k10 * k14 * n4 + 3 * k13 * k10 * k12 * k2k0 - l10 * n11 * k0 * k3 + 2 * n22k15 * k2k0 * k3 + 2 * A0x * j1 - 2 * A0y * n11 * l7 * k3 - 2 * A0x * j2 + 6 * l13 * j4 + n22 * l6 * k3 + 2 * A0y * l5 * k3 + 3 * A0x * j5 + 4 * A0y * l3 * k3 - 3 * A0x * j6 - 6 * B0x * k6 * k4 * j9 - 6 * A0y * j32 * k3 + A0x * j7 - A0x * j8 + j33 * k3;
 
-	// eslint-disable-next-line max-len
+	 
 	P.a2 = (n17 * k4 + 2 * B0y * n15 + B0y * k17) * n2 - (n16 * k5 + 2 * B0x * n14 + B0x * k16) * n0 - k16 * k19 - k6 * k21 - B0x * k20 - k5 * k22 + 3 * n20 * k4 * n2 + n23 * k4 * n6 + k17 * n13 * k0 - 3 * A0y * k17 * n2 - 2 * A0y * n13 * k4 * k0 - k17 * n11 * l7 + k13 * n21 * k4 * n4 + 3 * A0x * j10 + k17 * l5 + 2 * k17 * l3 + 3 * n19 * k4 * j9 + 3 * n16 * k4 * j9 + n22 * n10 * k4 * k2 + l10 * n11 * k4 * k0 - 2 * n22k15 * k4 * k2k0 - 2 * A0x * j15 + 2 * A0y * n11 * l8 + 2 * A0x * j16 + 6 * B0x * k6 * k7 * j9 - 6 * l13 * j17 - 3 * k17 * j32 - n22 * k12 * k14 * k4 * k0 - 2 * A0y * l9 * n4 - 3 * A0x * j18 - 4 * A0y * k13 * k14 * k4 * n4 + 3 * A0x * j19 + 6 * A0y * k13 * k12 * k4 * k2k0 - A0x * j20 + A0x * j21 - l10 * k12 * l8;
 
-	// eslint-disable-next-line max-len
+	 
 	P.a1 = k6 * k22 + B0x * k21 - 3 * n20 * k7 * n2 - 3 * n17 * k7 * n2 + 3 * n16 * k6 * n0 - n23 * k7 * n6 + 2 * B0x * k6 * k19 - 3 * n19 * k7 * j9 - 3 * n16 * k7 * j9 - n22 * k7 * n10 * k2 + 2 * A0y * k7 * n13 * k0 - 2 * B0y * k7 * n13 * k0 + 6 * l12 * k7 * n2 - k13 * n21 * k7 * n4 + n22 * k7 * l6 + 2 * A0y * k15 * k7 * k12 * n4 + 3 * A0x * j25 + 4 * A0y * l11 * n4 - 3 * A0x * j26 - 2 * B0y * k15 * k7 * k12 * n4 - 4 * B0y * l11 * n4 - l10 * k7 * n11 * k0 + 2 * n22k15 * k7 * k2k0 + 2 * A0x * j23 - 2 * A0y * k7 * n11 * l7 - 2 * A0x * j22 + 2 * B0y * k7 * n11 * l7 + 6 * l13 * j24 - 6 * l14 * j24 - 6 * A0y * k13 * k7 * k12 * k2k0 + A0x * j27 - A0x * j28 + 6 * B0y * k13 * k7 * k12 * k2k0 + l10 * k7 * k12 * l7;
 
-	// eslint-disable-next-line max-len
+	 
 	P.a0 = n24 * n0 - n16 * k19 - n25 * n2 - B0x * k22 + n26 * n2 - n27 * n0 - n19 * n12k2 + n20 * n13 * k0 + n17 * n13 * k0 - 3 * A0y * n17 * n2 + 3 * n20 * B0y * n2 + A0x * n18 * n4 - A0y * n23 * n6 + B0y * n23 * n6 - 2 * l12 * n13 * k0 - A0y * k13 * n21 * n4 + A0x * n22k15 * n6 + B0y * k13 * n21 * n4 - n20 * n11 * l7 + n19 * j13 - n17 * n11 * l7 + 3 * A0x * n20 * n4k0 - 3 * n19 * A0y * j9 + 3 * A0x * n17 * n4k0 + 3 * n19 * B0y * j9 + n20 * l5 - A0y * n22 * n10 * k2 + 2 * n20 * l3 + A0x * n21n11k0 - 2 * n19 * j11 - n19 * j12 + n17 * l5 + B0y * n22 * n10 * k2 + 2 * n17 * l3 + A0x * l10 * n10 * k2 - A0y * l10 * n11 * k0 + B0y * l10 * n11 * k0 - 2 * A0x * k13 * n21 * k2k0 + 2 * A0y * n22k15 * k2k0 + 2 * l13 * j29 - 2 * l13 * j30 - 2 * B0y * n22k15 * k2k0 - 2 * l14 * j29 + 2 * l12 * n11 * l7 + 2 * l14 * j30 - 6 * A0x * l12 * n4k0 - A0x * j31 + A0y * n22 * l6 + 3 * l13 * l4 - 3 * l13 * l2 - B0y * n22 * l6 - 2 * l12 * l5 - 3 * l14 * l4 - 4 * l12 * l3 + 3 * l14 * l2 - 3 * n20 * j32 + 3 * n19 * j14 - 3 * n17 * j32 + l13 * l0 - l13 * l1 + 6 * l12 * j32 - l14 * l0 + A0x * j35 + A0y * j33 - A0x * j34 - B0y * j33;
 
 	return new CurveIntersectionProblem(P, s);
@@ -984,7 +983,7 @@ export function closestPointOnCurve(curve: CubicBezier, p: Vector2): Vector2 {
 	let closestDistance = closestPoint.distanceTo(p);
 
 	for (const root of f.roots) {
-		let q = curve.evaluate(root.u);
+		const q = curve.evaluate(root.u);
 		const d = q.distanceTo(p);
 
 		if (d < closestDistance) {
@@ -1025,7 +1024,7 @@ export function lineCurveIntersection(curve: CubicBezier, line: Line2, results: 
 
 	for (const root of roots) {
 		if (root >= 0 && root <= 1) { // Only consider points in the range of the curve
-			let q = curve.evaluate(root);
+			const q = curve.evaluate(root);
 			results.push(q);
 		}
 	}
@@ -1053,8 +1052,8 @@ export function curveCurveIntersection(a: CubicBezier, b: CubicBezier, results: 
 			// We must therefore check each point against b. This can be done
 			// via inversion, or simply comparing with the closest point.
 
-			let q = a.evaluate(root.u);
-			let c = closestPointOnCurve(b, q);
+			const q = a.evaluate(root.u);
+			const c = closestPointOnCurve(b, q);
 
 			const d = c.distanceTo(q) / P.s; // P.s is the scale applied to normalise the polynomial. This is used to calibrate the threshold for rejecting intersections as outside 0..1.
 			if (d > 0.01) {

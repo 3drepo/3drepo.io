@@ -38,7 +38,7 @@ export const dirtyValues = (
 export const dirtyValuesChanged = (formData: UseFormReturn<any>, defaultValues: any) => 
 	Object.keys(formData.formState.dirtyFields).some((dirtyField) => formData.getValues(dirtyField) !== defaultValues[dirtyField]);
 
-// eslint-disable-next-line max-len
+// eslint-disable-next-line @stylistic/max-len
 export const isBasicValue = (value: any) => _.isNull(value) || !!(value?.toDate) || !_.isObject(value) || Array.isArray(value) || _.isString(value) || _.isDate(value);
 // value.toDate assumes that is a wrapped date type.
 

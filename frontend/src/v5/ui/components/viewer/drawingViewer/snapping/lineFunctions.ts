@@ -36,10 +36,10 @@ export function closestPointOnLine(line: Line2, p: Vector2Like) {
 	let t = (dx * nx) + (dy * ny);
 
 	if (t < 0) {
-  	    t = 0;
+		t = 0;
 	}
 	if (t > n) {
-  	    t = n;
+		t = n;
 	}
 
 	return new Vector2(line.start.x + nx * t, line.start.y + ny * t);

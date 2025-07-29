@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable @typescript-eslint/no-use-before-define */
+ 
 import { useEffect, useState } from 'react';
 import { GroupsListContainer, GroupsTreeList } from './groupsLists.styles';
 import { GroupSetItem } from './groupItem/groupSetItem.component';

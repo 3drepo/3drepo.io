@@ -109,7 +109,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 		// of what they expect to be array but is a values instead, and the
 		// useEffect that adapts fields' values to be arrays is async
 		// and it is only called later
-		// @ts-ignore
+		// @ts-expect-error
 		if (isRangeOp && isArray(fields[0]?.value)) {
 			const RangeInput = isDateType(type) ? DateRangeInput : NumberRangeInput;
 			return (

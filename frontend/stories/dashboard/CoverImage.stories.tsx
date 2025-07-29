@@ -46,7 +46,7 @@ export const CoverImageWithoutError: Story = {
 
 export const TeamspaceCoverImageUsingDefaultImg: Story = {
 	args: {
-		// @ts-ignore
+		// @ts-expect-error
 		imgSrc: INVALID_TEAMSPACE_IMG_SRC,
 		defaultImgSrc: DefaultTeamspaceImg,
 	},

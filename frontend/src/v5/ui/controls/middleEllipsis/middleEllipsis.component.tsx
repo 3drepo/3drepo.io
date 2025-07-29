@@ -46,8 +46,8 @@ const cutQuery = (query: string, str: string, maxLength: number) =>{
 	
 	let index = 0;
 
-	for (let i = 0; i < splitted.length; i++) {
-		index += splitted[i].length;
+	for (const currentSplitted of splitted) {
+		index += currentSplitted.length;
 
 		// If the match crosses the dots but dosn't reach the right cuttoff end staring before the dots 
 		// for example: text with "orange apple grape" with max 8 and min 3 ("orange a...ape")

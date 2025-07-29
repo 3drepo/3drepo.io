@@ -18,24 +18,6 @@
 import 'styled-components';
 import { palette, typography } from './theme';
 
-interface IGradient {
-	main: string;
-	secondary: string;
-}
-
-interface IShadow {
-	level_1: string;
-	level_2: string;
-	level_3: string;
-	level_4: string;
-	level_5: string;
-	level_6: string;
-	level_7: string;
-	level_8: string;
-	level_9: string;
-	level_10: string;
-}
-
 type TypographyInterface = { fontFamily: string } & {
 	[K in keyof typeof typography]: {
 		[P in keyof typeof typography[K]]: P extends 'textTransform' ? any : typeof typography[K][P];

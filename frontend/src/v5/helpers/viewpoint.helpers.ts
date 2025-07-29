@@ -142,7 +142,6 @@ const mergeGroups = (groups: any[]) => ({ objects: groups.flatMap((group) => gro
 export const viewpointV5ToV4 = (viewpoint: Viewpoint) => {
 	let v4Viewpoint:any = {};
 	if (viewpoint.camera) {
-		// eslint-disable-next-line @typescript-eslint/naming-convention
 		const { position, up, forward: view_dir, type, size: orthographicSize } = viewpoint.camera;
 		v4Viewpoint = { position, up, view_dir, type, orthographicSize, look_at: null, account: null, model: null };
 	}
@@ -180,12 +179,10 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 	const toMeshDictionary = (objects: V4GroupObjects, color: string, opacity: number): OverridesDicts => 
 		objects.shared_ids.reduce((dict, id) => {
 			if (color !== undefined) {
-			// eslint-disable-next-line no-param-reassign
 				dict.overrides[id] = color;
 			} 
 
 			if (opacity !== undefined) {
-			// eslint-disable-next-line no-param-reassign
 				dict.transparencies[id] = opacity;
 			}
 
@@ -199,9 +196,7 @@ export const toGroupPropertiesDicts = (overrides: GroupOverride[]): OverridesDic
 		return v4Objects.reduce((dict, objects) => {
 			const overrideDict = toMeshDictionary(objects, color, current.opacity ?? 1);
 
-			// eslint-disable-next-line no-param-reassign
 			dict.overrides = { ...dict.overrides, ...overrideDict.overrides };
-			// eslint-disable-next-line no-param-reassign
 			dict.transparencies = { ...dict.transparencies, ...overrideDict.transparencies };
 
 			return dict;
@@ -226,7 +221,7 @@ export const goToView = async (view: Viewpoint) => {
 			return;
 		}
 
-		let intervalId = setInterval(() =>  {
+		const intervalId = setInterval(() =>  {
 			if (!selectIsTreeProcessed(getState())) {
 				return;
 			}

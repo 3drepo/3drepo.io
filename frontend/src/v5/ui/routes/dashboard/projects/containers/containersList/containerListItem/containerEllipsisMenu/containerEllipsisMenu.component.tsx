@@ -56,7 +56,7 @@ export const ContainerEllipsisMenu = ({
 		});
 	};
 
-	// eslint-disable-next-line max-len
+	 
 	const onClickSettings = () => DialogsActionsDispatchers.open(ContainerSettingsModal, { containerId: container._id });
 
 	const onClickDelete = () => DialogsActionsDispatchers.open('delete', {

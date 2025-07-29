@@ -39,7 +39,7 @@ export const Transformers = {
 };
 
 // @ts-ignore
-export const useSearchParam = <T = string>(name: string, transformer: Transformer<T> = Transformers.DEFAULT, pushInHistory?: boolean = false) => {
+export const useSearchParam = <T = string>(name: string, transformer: Transformer<T> = Transformers.DEFAULT, pushInHistory = false) => {
 	const history = useHistory();
 	const location = useLocation();
 	const unprocessedValue = new URLSearchParams(location.search).get(name);

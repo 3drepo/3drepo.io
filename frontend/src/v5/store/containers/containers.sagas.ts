@@ -78,7 +78,6 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 		const stats = yield statsStack.addCall(teamspace, projectId, containerId);
 		
 		const basicDataEqual = compByColum(['unit', 'type'])(container, stats);
-		// eslint-disable-next-line max-len
 		const revisionsEqual = (container?.latestRevision === stats?.revisions?.latestRevision && container?.status === stats?.status) // if it has revisions
 							|| (container?.latestRevision === '' && stats?.revisions?.total === 0); // if it doesnt
 
@@ -235,7 +234,7 @@ export function* deleteContainer({ teamspace, projectId, containerId, onSuccess,
 }
 
 export function* resetContainerStatsQueue() {
-	statsStack.reset();
+	yield statsStack.reset();
 }
 
 export default function* ContainersSaga() {

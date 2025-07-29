@@ -81,7 +81,7 @@ export const Dialog: FunctionComponent<IProps> = ({ ref, ...props }: IProps) => 
 				onClose={search.onClose}
 			/>}
 			<IconButton onClick={handleClose} size="large">
-				{/* @ts-ignore */}
+				{/* @ts-expect-error */}
 				<CloseIcon htmlColor={COLOR.WHITE} />
 			</IconButton>
 		</TopDialogActions>

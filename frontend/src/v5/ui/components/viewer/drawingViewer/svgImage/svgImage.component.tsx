@@ -56,7 +56,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	// to createImageBitmap as a negative source position, which is why the top
 	// left of the canvas appears blank after painting.
 
-	let transform: Transform = { x: 0, y: 0, scale: 1 };
+	const transform: Transform = { x: 0, y: 0, scale: 1 };
 	let origin: Transform;
 	let D : Transform;
 	let projection: Transform;
@@ -133,7 +133,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		const y = (cnvs.height - view.height) * 0.5;
 
 		// Create a new projection transform with unit scale
-		let proj: Transform = { x, y, scale };
+		const proj: Transform = { x, y, scale };
 
 		return proj;
 	};
@@ -230,7 +230,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 		// These drawing methods take integers only, so round here explicitly
 		// so we can be sure of the rounding behaviour.
 
-		let scale = t.scale;
+		const scale = t.scale;
 
 		const sx = Math.round(-t.x / scale);
 		const sy = Math.round(-t.y / scale);

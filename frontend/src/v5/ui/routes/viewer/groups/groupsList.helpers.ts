@@ -32,7 +32,7 @@ const getGroupNameParent = (group):string => {
 };
 
 export const getSortedGroups = (groups = []) => {
-	// eslint-disable-next-line no-param-reassign
+	 
 	const clonedGroups = sortByName(groups);
 
 	clonedGroups.sort((groupA, groupB) => {
@@ -99,7 +99,7 @@ export const groupsToTree = (groups) => {
 				dict[parentPathName].children.push(groupsContainer);
 			}
 
-			// eslint-disable-next-line no-param-reassign
+			 
 			dict[pathName] = groupsContainer;
 			previous = groupsContainer;
 		}

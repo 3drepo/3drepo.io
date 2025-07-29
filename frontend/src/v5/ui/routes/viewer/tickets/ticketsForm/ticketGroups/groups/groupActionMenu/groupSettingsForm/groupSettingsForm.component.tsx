@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-/* eslint-disable no-param-reassign */
+ 
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors, TreeHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormTextField } from '@controls/inputs/formInputs.component';

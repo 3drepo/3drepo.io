@@ -83,15 +83,15 @@ export const ChipWrapper = styled.div<{ variant: string; color: string; disabled
 			line-height: normal;
 		}
 		${({ variant, color }) => {
-		switch (variant) {
-			case 'text':
-				return textStyles(color);
-			case 'filled':
-				return filledStyles(color);
-			default: // outlined
-				return outlinedStyles(color);
-		}
-	}}
+			switch (variant) {
+				case 'text':
+					return textStyles(color);
+				case 'filled':
+					return filledStyles(color);
+				default: // outlined
+					return outlinedStyles(color);
+			}
+		}}
 	}
 `;
 

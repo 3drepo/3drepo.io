@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-/* eslint-disable max-len */
 import { createActionsDispatchers } from '@/v5/helpers/actionsDistpatchers.helper';
 import { AuthActions, IAuthActionCreators } from '@/v5/store/auth/auth.redux';
 import { BimActions } from '@/v4/modules/bim';

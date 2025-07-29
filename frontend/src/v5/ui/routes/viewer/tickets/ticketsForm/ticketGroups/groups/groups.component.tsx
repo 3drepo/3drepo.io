@@ -40,7 +40,7 @@ import { GroupItem } from './groupItem/groupItem.component';
 import { TicketGroupsContext } from '../ticketGroupsContext';
 import { GroupState, IndexedOverride, getCollectionCheckboxState } from '../ticketGroupsContext.helper';
 
-/* eslint-disable @typescript-eslint/no-use-before-define */
+ 
 const GroupCollection = ({ overrides, prefix, level }) => {
 	const { getCollectionState, setCollectionIsChecked, deleteCollection } = useContext(TicketGroupsContext);
 	const overridesIndexes = overrides.map(({ index }) => index);

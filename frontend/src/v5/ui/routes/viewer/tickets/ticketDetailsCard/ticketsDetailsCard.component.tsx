@@ -96,7 +96,7 @@ export const TicketDetailsCard = () => {
 	const onBlurHandler = async () => {
 		if (isAlertOpen) return;
 		const formValues = formData.getValues();
-		let errors = {};
+		const errors = {};
 		try {
 			// cannot use formState.errors because the validation for complex objects is completed after
 			// onBlur gets called, so formState.errors for those objects is updated to the previous

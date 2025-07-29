@@ -20,7 +20,6 @@ import { UpdatingCondition, DependencyArray, SubscribableObject } from './contex
 import { usePubSub } from '@/v5/services/pubSub';
 import { cloneDeep } from 'lodash';
 
-/* eslint-disable @typescript-eslint/comma-dangle */
 const propertySetterInterceptor = <O,>(object: O, onChange) => {
 	const proxyHandler = {
 		set: (obj, propName, newVal) => {

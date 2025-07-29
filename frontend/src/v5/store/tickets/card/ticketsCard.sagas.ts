@@ -134,7 +134,7 @@ export function* applyFilterForTicket({ teamspace, projectId, modelId, isFederat
 	});
 
 	const ticketWasIncluded = (yield apiFetchFilteredTickets(teamspace, projectId, modelId, isFederation, filters)).size > 0;
-	const ticketIds: Set<string> = new Set(yield select(selectFilteredTicketIds));
+	const ticketIds = new Set<string>(yield select(selectFilteredTicketIds));
 
 	if (ticketWasIncluded) ticketIds.add(ticketId);
 	else ticketIds.delete(ticketId);

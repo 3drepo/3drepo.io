@@ -39,7 +39,7 @@ export const Comment = ({
 	isFirstOfBlock,
 	...props
 }: CommentProps) => {
-	const isCurrentUser = !!originalAuthor ? false : CurrentUserHooksSelectors.selectUsername() === author;
+	const isCurrentUser = originalAuthor ? false : CurrentUserHooksSelectors.selectUsername() === author;
 	const metadata = extractMetadata(message);
 	const noMetadataMessage = !deleted ? stripMetadata(message) : message;
 

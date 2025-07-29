@@ -48,7 +48,7 @@ export const DashboardListHeader = ({
 					? SortingDirection.DESCENDING : SortingDirection.ASCENDING;
 			}
 			setSort((prev) => ({ column: [colName, ...slice(prev.column, 1)], direction: [newDirection, ...slice(prev.direction, 1)] }));
-			// @ts-ignore
+			// @ts-expect-error
 		};
 
 		const sortingDirection = (colName === sort?.column[0] ? sort.direction[0] : undefined);

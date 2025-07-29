@@ -35,7 +35,7 @@ const TABLE_COLUMNS_TYPE_TO_WIDTHS: Partial<Record<PropertyTypeDefinition, { wid
 	'longText': { width: 200, minWidth: 25 },
 	'boolean': { width: 140, minWidth: 25 },
 	'number': { width: 100, minWidth: 25 },
-	// @ts-ignore
+	// @ts-expect-error
 	'pastDate': { width: 147, minWidth: 25 },
 	'date': { width: 147, minWidth: 25 },
 	'manyOf': { width: 140, minWidth: 25 },
@@ -51,8 +51,8 @@ const getTableColumnData = ({ name, type }): TableColumn => {
 export const getTemplatePropertiesDefinitions = (template: ITemplate): PropertyDefinition[] => {
 	if (!template.properties) return [];
 	return [
-		...template.properties?.map((property) => ({ ...property, name: `properties.${property.name}` })),
-		...template.modules?.flatMap((module) => module.properties.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
+		...template.properties.map((property) => ({ ...property, name: `properties.${property.name}` })),
+		...(template.modules || []).flatMap((module) => module.properties.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
 	];
 };
 

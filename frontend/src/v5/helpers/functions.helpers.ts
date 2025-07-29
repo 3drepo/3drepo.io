@@ -76,7 +76,6 @@ export class AsyncFunctionExecutor<T> {
 					return p.promise;
 				}
 				
-				// eslint-disable-next-line no-param-reassign
 				p.resolved = true;
 				try {
 					p.resolve(await this.func(...p.args));

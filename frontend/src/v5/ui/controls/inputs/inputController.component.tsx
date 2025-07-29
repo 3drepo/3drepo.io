@@ -28,7 +28,6 @@ export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	inputRef: any,
 }>;
 
-// eslint-disable-next-line @typescript-eslint/comma-dangle
 export type InputControllerProps<T,> = T & FormInputProps & {
 	name: string,
 	control?: any,
@@ -46,7 +45,6 @@ type Props<T> = InputControllerProps<T> & {
 };
 
 export type InputControllerType = <T>(Component: Props<T>, ref) => JSX.Element;
-// eslint-disable-next-line @typescript-eslint/comma-dangle
 export const InputController: InputControllerType = forwardRef(<T,>({
 	Input,
 	name,
@@ -63,12 +61,12 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 	const error = formError || get(ctx?.formState?.errors, name);
 
 	return (
-        <Controller
+		<Controller
 			name={name}
 			control={control}
 			defaultValue={defaultValue}
 			render={({ field: { ref: fieldRef, ...field } }) => (
-				// @ts-ignore
+				// @ts-expect-error
 				(<Input
 					{...field}
 					{...props}
@@ -87,5 +85,5 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 				/>)
 			)}
 		/>
-    );
+	);
 });

@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-// eslint-disable-next-line max-len
 import { ScreamingSnakeCase } from 'type-fest';
 
 export type Constants<Type> = {

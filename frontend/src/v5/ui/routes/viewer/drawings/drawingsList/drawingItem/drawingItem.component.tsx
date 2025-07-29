@@ -60,8 +60,8 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const { pathname, search } = useLocation();
 	const { setOrigin } = useContext(CalibrationContext);
 	const queries = DrawingsCardHooksSelectors.selectQueries();
-	const { calibrationStatus, name, number, lastUpdated, desc, _id: drawingId, latestRevision } = drawing;
-	const [statusCode, revCode] = latestRevision?.split('-');
+	const { calibrationStatus, name, number, lastUpdated, desc, _id: drawingId, latestRevision = '' } = drawing;
+	const [statusCode, revCode] = latestRevision.split('-');
 	const areStatsPending = !revCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
 	const thumbnailSrc = getDrawingThumbnailSrc(teamspace, project, drawing._id);

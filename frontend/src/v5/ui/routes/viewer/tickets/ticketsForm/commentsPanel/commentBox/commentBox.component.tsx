@@ -185,7 +185,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		setImagesToUpload([...imagesToUpload]);
 	};
 
-	// @ts-ignore
+	// @ts-expect-error-error
 	const deleteImage = (index) => setImagesToUpload(imagesToUpload.toSpliced(index, 1));
 
 	const uploadFiles = async (files: File[]) => {
@@ -255,14 +255,14 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 	}, [commentReply?._id]);
 
 	return (
-        <Container
+		<Container
 			onDragEnter={() => setIsDraggingFile(true)}
 			onDragLeave={handleDragLeave}
 			onDrop={() => setIsDraggingFile(false)}
 			ref={containerRef}
 			className={className}
 		>
-            <MessageAndImages $isEditMode={isEditMode}>
+			<MessageAndImages $isEditMode={isEditMode}>
 				{commentReply?._id && (
 					<CommentReplyContainer>
 						<CommentReply {...commentReply} shortMessage />
@@ -316,7 +316,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 					</ErroredImageMessages>
 				)}
 			</MessageAndImages>
-            <Controls>
+			<Controls>
 				<ActionMenu TriggerButton={<ActionIcon><FileIcon /></ActionIcon>}>
 					<ActionMenuItem>
 						{is2DOpen && (
@@ -355,6 +355,6 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 					</SendButton>
 				)}
 			</Controls>
-        </Container>
-    );
+		</Container>
+	);
 };

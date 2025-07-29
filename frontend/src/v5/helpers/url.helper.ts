@@ -35,7 +35,7 @@ export const uriCombine = (uri, path) => {
 	return val;
 };
 
-export const addParams = (url: string, searchParams: string = '') => {
+export const addParams = (url: string, searchParams = '') => {
 	const urlObject = new URL(url, window.location.origin);
 	new URLSearchParams(searchParams).forEach((value, key) => urlObject.searchParams.set(key, value));
 	return urlObject.toString();
@@ -52,7 +52,7 @@ export const getCurrentUrl = (searchParams = '') => addParams(window.location.hr
 
 export const getParams = () => new URL(window.location.href).searchParams;
 
-export const generateFullPath = (pattern: string, params: object, newSearchParams: Record<string, any> = {}, keepOldSearchParams: boolean = true) => {
+export const generateFullPath = (pattern: string, params: object, newSearchParams: Record<string, any> = {}, keepOldSearchParams = true) => {
 	const path = generatePath(pattern, params);
 	const searchParamsObj = keepOldSearchParams ? getParams() : new URLSearchParams();
 	
@@ -63,7 +63,7 @@ export const generateFullPath = (pattern: string, params: object, newSearchParam
 			searchParamsObj.delete(key);
 		}
 	});
-	// @ts-ignore
+	// @ts-expect-error
 	if (!searchParamsObj.size) return path;
 	return `${path}?${searchParamsObj}`;
 };

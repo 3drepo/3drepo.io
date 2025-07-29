@@ -71,7 +71,7 @@ export const fetchContainerUsers = async (
 	teamspace: string,
 	projectId: string,
 	modelId: string,
-	excludeViewers: boolean = false,
+	excludeViewers = false,
 ) => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/members?excludeViewers=${excludeViewers}`);
 	return data;
@@ -81,7 +81,7 @@ export const fetchContainerJobs = async (
 	teamspace: string,
 	projectId: string,
 	modelId: string,
-	excludeViewers: boolean = false,
+	excludeViewers = false,
 ) => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/jobs?excludeViewers=${excludeViewers}`);
 	return data;

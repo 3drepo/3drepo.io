@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-module.exports = {
+export default [{
 	rules: {
 		// used in redux files with Immer.js
 		'no-param-reassign': [
@@ -26,4 +26,4 @@ module.exports = {
 			},
 		],
 	},
-};
+}];

@@ -122,7 +122,7 @@ export const EditFederationContainersListItem = memo(({
 						{container.code}
 					</Highlight>
 				</DashboardListItemText>
-				{/* eslint-disable-next-line */}
+				{ }
 				<div onClick={(e) => e.stopPropagation()}>
 					<FixedOrGrowContainer width={160}>
 						{isIncluded && (

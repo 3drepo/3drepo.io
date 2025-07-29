@@ -21,13 +21,13 @@ import { combineSubscriptions, subscribeToRoomEvent } from './realtime.service';
 import { enableRealtimeNewTicket, enableRealtimeUpdateTicket, enableRealtimeUpdateTicketGroup, ticketEvent } from './ticket.events';
 
 export const enableRealtimeUpdateTicketFilter = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean) => (
- 	subscribeToRoomEvent(
- 		{ teamspace, project, model: containerOrFederation },
- 		ticketEvent(isFederation, 'UpdateTicket'),
- 		(ticket: Partial<ITicket>) => {
- 			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
- 		},
- 	)
+	subscribeToRoomEvent(
+		{ teamspace, project, model: containerOrFederation },
+		ticketEvent(isFederation, 'UpdateTicket'),
+		(ticket: Partial<ITicket>) => {
+			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
+		},
+	)
 );
 
 export const enableRealtimeNewTicketFilter = (teamspace: string, project: string, containerOrFederation: string, isFederation: boolean) => (
@@ -35,7 +35,7 @@ export const enableRealtimeNewTicketFilter = (teamspace: string, project: string
 		{ teamspace, project, model: containerOrFederation },
 		ticketEvent(isFederation, 'NewTicket'),
 		(ticket: ITicket) => {
- 			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
+			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
 
 		},
 	)
