@@ -26,7 +26,9 @@ const { logger } = require(`${v5Path}/utils/logger`);
 
 const deprecateTemplates = async (teamspace, templateIds) => {
 	logger.logInfo(`Deprecating ${templateIds.length} templates in teamspace: ${teamspace}`);
-	const templates = await Promise.all(templateIds.map((id) => getTemplateById(teamspace, id)));
+	const templatesObj = await Promise.all(
+		templateIds.map((id) => getTemplateById(teamspace, id).catch(() => undefined)));
+	const templates = templatesObj.filter((t) => !!t);
 	if (templates.length !== templateIds.length) {
 		const missingTems = templateIds.filter((id) => !templates.some((t) => t._id === id));
 		throw new Error(`Templates with IDs ${missingTems.join(', ')} not found in teamspace ${teamspace}`);
