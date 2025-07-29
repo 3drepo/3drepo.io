@@ -123,31 +123,19 @@ router.get("/revisions/:branch.json", middlewares.hasReadAccessToModel, listRevi
 
 router.patch("/revisions/:id", middlewares.hasReadAccessToModel, updateRevision);
 
-async function listRevisions(req, res, next) {
+function listRevisions(req, res, next) {
 	const place = utils.APIInfo(req);
 	const {account, model, branch } = req.params;
 	const showVoid = req.query.showVoid !== undefined;
 
-	const settings = await findModelSettingById(account, model);
-	try{
-		let histories = [];
-		if(settings.federate) {
-			const revId = uuidv5(settings.timestamp.toString(), settings._id);
-			histories.push({
-				_id: revId,
-				timestamp: settings.timestamp,
-				name: settings.id
-			});
-		} else {
-			const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1, void: 1, rFile: 1};
-			histories = await History.listByBranch(account, model, branch || null, projection, showVoid);
-			histories = History.clean(histories, branch);
-		}
-		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
-	} catch(err) {
-		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-	}
+	const projection = {_id : 1, tag: 1, timestamp: 1, desc: 1, author: 1, void: 1, rFile: 1};
 
+	History.listByBranch(account, model, branch || null, projection, showVoid).then(histories => {
+		histories = History.clean(histories, branch);
+		responseCodes.respond(place, req, res, next, responseCodes.OK, histories);
+	}).catch(err => {
+		responseCodes.respond(place, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
+	});
 }
 
 function listRevisionsByBranch(req, res, next) {
