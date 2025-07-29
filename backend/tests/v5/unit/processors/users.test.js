@@ -170,31 +170,26 @@ const testGetAvatarStream = () => {
 	describe('Get avatar stream', () => {
 		test('should get avatar stream', async () => {
 			const username = generateRandomString();
-			const imageBuffer = fs.readFileSync(image);
-			const mockImageStream = new Blob([imageBuffer], { type: 'image/png' });
+			const mockImageBuffer = generateRandomString();
+			const expectedPayload = { buffer: mockImageBuffer, extension: 'png' };
 
-			mockImageStream.arrayBuffer = jest.fn().mockResolvedValueOnce(imageBuffer);
+			UsersModel.getUserId.mockResolvedValueOnce(username);
+			FronteggService.getUserAvatarBuffer.mockResolvedValueOnce(mockImageBuffer);
 
-			UsersModel.getAvatarStream.mockResolvedValueOnce(mockImageStream);
+			await expect(Users.getAvatar(username)).resolves.toEqual(expectedPayload);
 
-			await Users.getAvatar(username);
-			expect(UsersModel.getAvatarStream).toHaveBeenCalledTimes(1);
-			expect(UsersModel.getAvatarStream).toHaveBeenCalledWith(username);
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
 		});
-		test('should get avatar add png if the extension is not there', async () => {
+		test('should throw an error if something happens', async () => {
 			const username = generateRandomString();
-			const imageBuffer = fs.readFileSync(image);
-			const mockImageStream = new Blob([imageBuffer], { type: 'image/png' });
 
-			mockImageStream.arrayBuffer = jest.fn().mockResolvedValueOnce(imageBuffer);
+			UsersModel.getUserId.mockResolvedValueOnce(username);
+			FronteggService.getUserAvatarBuffer.mockRejectedValueOnce(new Error('Failed to fetch avatar'));
 
-			TypeChecker.fileExtensionFromBuffer.mockResolvedValueOnce(undefined);
-
-			UsersModel.getAvatarStream.mockResolvedValueOnce(mockImageStream);
-
-			await Users.getAvatar(username);
-			expect(UsersModel.getAvatarStream).toHaveBeenCalledTimes(1);
-			expect(UsersModel.getAvatarStream).toHaveBeenCalledWith(username);
+			await expect(Users.getAvatar(username)).rejects.toEqual(templates.unknown);
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
 		});
 	});
 };
@@ -205,28 +200,18 @@ const testUploadAvatar = () => {
 			const username = generateRandomString();
 			const userId = generateRandomString();
 			const tenantId = generateRandomString();
-			const avatarUrl = generateRandomString();
-			FronteggService.uploadAvatar.mockResolvedValueOnce(avatarUrl);
-			FronteggService.updateUserDetails.mockResolvedValueOnce(generateRandomString());
-			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { userId } });
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.uploadAvatar.mockResolvedValueOnce(undefined);
 			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
-
 			const avatarObject = {
 				path: 'avatar.png',
 				buffer: generateRandomString(),
 			};
-			await Users.uploadAvatar(username, avatarObject);
+			await expect(Users.uploadAvatar(username, avatarObject)).resolves.toEqual(undefined);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
-				userId, tenantId, expect.any(Object),
+				userId, avatarObject.path,
 			);
-			expect(FronteggService.updateUserDetails).toHaveBeenCalledTimes(1);
-			expect(FronteggService.updateUserDetails).toHaveBeenCalledWith(userId,
-				{ profilePictureUrl: avatarUrl },
-			);
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username,
-				avatarObject.buffer);
 		});
 	});
 };

@@ -19,7 +19,6 @@ const { USERS_COL, USERS_DB_NAME } = require('./users.constants');
 const { createResponseCode, templates } = require('../utils/responseCodes');
 const { generateHashString, sanitiseRegex } = require('../utils/helper/strings');
 const db = require('../handler/db');
-const { getUserById } = require('../services/sso/frontegg');
 const { logger } = require('../utils/logger');
 
 const User = {};
@@ -171,19 +170,6 @@ User.getUserInfoFromEmailArray = async (emailArray, projection) => {
 	const res = await User.getUsersByQuery(query, projection);
 
 	return res;
-};
-
-User.getAvatarStream = async (username) => {
-	try {
-		const { customData: { userId } } = await User.getUserByUsername(username, { 'customData.userId': 1 });
-		const { profilePictureUrl } = await getUserById(userId);
-
-		return await fetch(profilePictureUrl);
-	} catch (error) {
-		logger.logError(`Failed to fetch avatar from URL: ${error.message}`);
-
-		throw templates.unknown;
-	}
 };
 
 module.exports = User;

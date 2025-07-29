@@ -27,28 +27,27 @@ const { getRefEntry } = require(`${v5Path}/models/fileRefs`);
 const { getUserByEmail } = require(`${v5Path}/models/users`);
 const { getTeamspaceRefId } = require(`${v5Path}/models/teamspaceSettings`);
 const { getTeamspaceInvites } = require(`${v5Path}/models/teamspaceSettings`);
+const { splitArrayIntoChunks } = require(`${v5Path}/utils/helper/arrays`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${v5Path}/models/users.constants`);
 const { getAllUsersInAccount, updateUserDetails, uploadAvatar } = require(`${v5Path}/services/sso/frontegg`);
 
 const migratedUsersAvatars = new Set();
 
-const migrateAvatars = async (ts) => {
-	const refId = await getTeamspaceRefId(ts);
-	const members = await getAllUsersInAccount(refId);
-	const invitations = await getTeamspaceInvites(ts);
-
-	const overlap = members.filter((member) => !invitations.some((invite) => invite._id === member.email));
-
-	for (const member of overlap) {
+const migrateUserAvatar = async (membersChunk, refId) => {
+	for (const member of membersChunk) {
 		if (!migratedUsersAvatars.has(member.id)) {
 			try {
-				const projection = {
-					user: 1,
-				};
 				// eslint-disable-next-line no-await-in-loop
-				const { user } = await getUserByEmail(member.email, projection);
+				const { user, customData: { firstName, lastName } } = await getUserByEmail(member.email);
 				// eslint-disable-next-line no-await-in-loop
 				const hasAvatar = await fileExists(USERS_DB_NAME, AVATARS_COL_NAME, user);
+				const updateDetailsPayload = {};
+
+				if (member.name !== `${firstName} ${lastName}`) {
+					updateDetailsPayload.name = `${firstName} ${lastName}`;
+				} else {
+					updateDetailsPayload.name = member.name;
+				}
 
 				// eslint-disable-next-line no-await-in-loop
 				if (hasAvatar) {
@@ -62,14 +61,14 @@ const migrateAvatars = async (ts) => {
 						knownLength: size,
 					});
 					// eslint-disable-next-line no-await-in-loop
-					const profilePictureUrl = await uploadAvatar(
+					updateDetailsPayload.profilePictureUrl = await uploadAvatar(
 						member.id,
 						refId,
 						formData,
 					);
-					// eslint-disable-next-line no-await-in-loop
-					await updateUserDetails(member.id, { profilePictureUrl });
 				}
+				// eslint-disable-next-line no-await-in-loop
+				await updateUserDetails(member.id, updateDetailsPayload);
 
 				migratedUsersAvatars.add(member.id);
 			} catch (error) {
@@ -85,7 +84,13 @@ const run = async () => {
 	for (const ts of teamspaces) {
 		logger.logInfo(`Migrating avatars for teamspace: ${ts}`);
 		// eslint-disable-next-line no-await-in-loop
-		await migrateAvatars(ts);
+		const [refId, invitations] = await Promise.all([getTeamspaceRefId(ts), getTeamspaceInvites(ts)]);
+		// eslint-disable-next-line no-await-in-loop
+		const members = await getAllUsersInAccount(refId);
+		const overlap = members.filter((member) => !invitations.some((invite) => invite._id === member.email));
+
+		// eslint-disable-next-line no-await-in-loop
+		await Promise.all(splitArrayIntoChunks(overlap, 5).map((chunk) => migrateUserAvatar(chunk, refId)));
 	}
 };
 

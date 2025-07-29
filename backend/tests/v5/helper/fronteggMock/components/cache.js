@@ -15,12 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { onlineAvatarPath } = require('../../path');
-
 const usersById = new Map();
 const usersByEmail = new Map();
 const teamspaceByAccount = new Map();
 const usersInAccount = new Map();
+
+const basicAvatar = 'basicAvatarUrl';
 
 const Cache = {};
 
@@ -73,14 +73,14 @@ Cache.getUserById = (userId) => {
 
 	return {
 		...user,
-		profilePictureUrl: user.profilePictureUrl || onlineAvatarPath,
+		profilePictureUrl: user.profilePictureUrl || basicAvatar,
 	};
 };
 
 Cache.addUserById = (userId, userData) => {
 	usersById.set(userId, {
 		...userData,
-		profilePictureUrl: userData.profilePictureUrl || onlineAvatarPath,
+		profilePictureUrl: userData.profilePictureUrl || basicAvatar,
 	});
 };
 
@@ -104,14 +104,14 @@ Cache.getUserByEmail = (email) => {
 	const user = usersByEmail.get(email);
 	return {
 		...user,
-		profilePictureUrl: user.profilePictureUrl || onlineAvatarPath,
+		profilePictureUrl: user.profilePictureUrl || basicAvatar,
 	};
 };
 
 Cache.addUserByEmail = (email, userData) => {
 	usersByEmail.set(email, {
 		...userData,
-		profilePictureUrl: userData.profilePictureUrl || onlineAvatarPath,
+		profilePictureUrl: userData.profilePictureUrl || basicAvatar,
 	});
 };
 

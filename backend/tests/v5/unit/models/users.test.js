@@ -576,29 +576,6 @@ const testGetUserInfoFromEmailArray = () => {
 	});
 };
 
-const testGetAvatarStream = () => {
-	describe('Get avatar stream', () => {
-		test('should return avatar stream if user exists', async () => {
-			const mockBlob = new Blob([''], { type: 'image/png' });
-			global.fetch = jest.fn(() => Promise.resolve(mockBlob));
-			const user = 'user1';
-			const userId = generateRandomString();
-			const profilePictureUrl = generateRandomString();
-			jest.spyOn(db, 'findOne').mockResolvedValue({ customData: { userId } });
-			FrontEggMock.getUserById.mockResolvedValue({ profilePictureUrl });
-			const res = await User.getAvatarStream(user);
-
-			expect(res).toEqual(mockBlob);
-		});
-
-		test('should throw error if user does not exist', async () => {
-			const user = 'user1';
-			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-			await expect(User.getAvatarStream(user)).rejects.toEqual(templates.unknown);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testGetAccessibleTeamspaces();
 	testGetFavourites();
@@ -617,5 +594,4 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateUserId();
 	testEnsureIndicesExist();
 	testGetUserInfoFromEmailArray();
-	testGetAvatarStream();
 });

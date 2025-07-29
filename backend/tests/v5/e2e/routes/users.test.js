@@ -203,11 +203,32 @@ const testUpdateProfile = () => {
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
 
-			test('should update the profile if the user is logged in', async () => {
-				const data = { firstName: 'newName', lastName: 'oldName', company: 'newCompany', countryCode: 'GR' };
+			test('should update the first name if the user is logged in', async () => {
+				const data = { firstName: 'newName' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
+				expect(updatedProfileRes.body.lastName).toEqual(testUser.basicData.lastName);
+				expect(updatedProfileRes.body.countryCode).toEqual(testUser.basicData.billing.billingInfo.countryCode);
+				expect(updatedProfileRes.body.company).toEqual(testUser.basicData.billing.billingInfo.company);
+			});
+
+			test('should update the last name if the user is logged in', async () => {
+				const data = { lastName: 'newName' };
+				await testSession.put('/v5/user/').send(data).expect(200);
+				const updatedProfileRes = await testSession.get('/v5/user/');
+				expect(updatedProfileRes.body.lastName).toEqual('newName');
+				expect(updatedProfileRes.body.firstName).toEqual('newName');
+				expect(updatedProfileRes.body.countryCode).toEqual(testUser.basicData.billing.billingInfo.countryCode);
+				expect(updatedProfileRes.body.company).toEqual(testUser.basicData.billing.billingInfo.company);
+			});
+
+			test('should update the profile if the user is logged in', async () => {
+				const data = { firstName: 'newName1', lastName: 'oldName', company: 'newCompany', countryCode: 'GR' };
+				await testSession.put('/v5/user/').send(data).expect(200);
+				const updatedProfileRes = await testSession.get('/v5/user/');
+				expect(updatedProfileRes.body.firstName).toEqual('newName1');
+				expect(updatedProfileRes.body.lastName).toEqual('oldName');
 				expect(updatedProfileRes.body.countryCode).toEqual('GR');
 				expect(updatedProfileRes.body.company).toEqual('newCompany');
 			});
@@ -223,21 +244,15 @@ const testGetAvatar = () => {
 		});
 
 		test('should get the avatar if the user has an fs avatar and has a session via an API key', async () => {
-			const fetchAvatarData = await fetch(onlineAvatarPath);
-			const onlineAvatarData = await fetchAvatarData.arrayBuffer();
-
 			const res = await agent.get(`/v5/user/avatar?key=${userWithFsAvatar.apiKey}`).expect(200);
-			expect(res.body).toEqual(Buffer.from(onlineAvatarData));
+			expect(res.body).toEqual(Buffer.from('basicAvatarUrl'));
 		});
 
 		test('should get the avatar if the user has an fs avatar and is logged in', async () => {
-			const fetchAvatarData = await fetch(onlineAvatarPath);
-			const onlineAvatarData = await fetchAvatarData.arrayBuffer();
-
 			const testSession = SessionTracker(agent);
 			await testSession.login(userWithFsAvatar);
 			const res = await testSession.get('/v5/user/avatar').expect(200);
-			expect(res.body).toEqual(Buffer.from(onlineAvatarData));
+			expect(res.body).toEqual(Buffer.from('basicAvatarUrl'));
 			await testSession.post('/v5/logout/');
 		});
 	});
@@ -265,15 +280,12 @@ const testUploadAvatar = () => {
 			});
 
 			test('should remove old avatar and upload a new one if the user is logged in', async () => {
-				const fetchAvatarData = await fetch(newAvatarPath);
-				const onlineAvatarData = await fetchAvatarData.arrayBuffer();
-
 				await testSession.put('/v5/user/avatar').attach('file', image)
 					.expect(templates.ok.status);
 
 				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
 				const resBuffer = avatarRes.body;
-				expect(resBuffer).toEqual(Buffer.from(onlineAvatarData));
+				expect(resBuffer).toEqual(Buffer.from('newAvatarUrl'));
 			});
 		});
 	});

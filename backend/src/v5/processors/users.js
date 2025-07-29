@@ -18,13 +18,10 @@
 const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
-const { addUser, deleteApiKey, generateApiKey, getAvatarStream, getUserByUsername,
+const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
 	getUserId, removeUser, updatePassword, updateProfile } = require('../models/users');
-const { fileExists, removeFile, storeFile } = require('../services/filesManager');
-const { getUserById, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
-const FormData = require('form-data');
-const Path = require('path');
-const { createReadStream } = require('fs');
+const { fileExists, removeFile } = require('../services/filesManager');
+const { getUserAvatarBuffer, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { generateHashString } = require('../utils/helper/strings');
@@ -120,33 +117,24 @@ Users.resetPassword = async (user) => {
 };
 
 Users.getAvatar = async (username) => {
-	const avatarStream = await getAvatarStream(username);
-	const arrayBuffer = await avatarStream.arrayBuffer();
-	const fileExt = await fileExtensionFromBuffer(Buffer.from(arrayBuffer));
+	try {
+		const userId = await getUserId(username);
+		const avatarBuffer = await getUserAvatarBuffer(userId);
+		const fileExt = await fileExtensionFromBuffer(avatarBuffer);
 
-	return {
-		buffer: Buffer.from(arrayBuffer),
-		extension: fileExt || 'png',
-	};
+		return {
+			buffer: avatarBuffer,
+			extension: fileExt || 'png',
+		};
+	} catch (error) {
+		logger.logError(`Failed to fetch avatar from URL: ${error.message}`);
+
+		throw templates.unknown;
+	}
 };
 
 Users.uploadAvatar = async (username, avatarObject) => {
-	const { customData: { userId } } = await getUserByUsername(username, { 'customData.userId': 1 });
-	const { tenantId } = await getUserById(userId);
-
-	const filePath = Path.resolve(avatarObject.path);
-	const formData = new FormData();
-	formData.append('image', createReadStream(filePath));
-
-	const profilePictureUrl = await uploadAvatar(
-		userId,
-		tenantId,
-		formData,
-	);
-
-	await updateUserDetails(userId, { profilePictureUrl });
-
-	storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarObject.buffer);
+	await uploadAvatar(await getUserId(username), avatarObject.path);
 };
 
 Users.generateApiKey = generateApiKey;
