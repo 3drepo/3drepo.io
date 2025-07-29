@@ -118,9 +118,9 @@ config.public_port = config.public_port || config.port;
 
 config.timeout = coalesce(config.timeout, 30 * 60); // Timeout in seconds
 
-const thirtyMins = (1000 * 60) * 30 ;
+const threeHours = (1000 * 60 * 60) * 3 ;
 config.cookie = coalesce(config.cookie, {});
-config.cookie.maxAge = coalesce(config.cookie.maxAge, thirtyMins);
+config.cookie.maxAge = coalesce(config.cookie.maxAge, threeHours);
 config.cookie.secret = coalesce(config.cookie.secret, config.default_cookie_secret);
 config.cookie.parser_secret = coalesce(config.cookie.parser_secret, config.default_cookie_parser_secret);
 config.cookie_domain = coalesce(config.cookie.domain, config.host);
@@ -224,7 +224,7 @@ config.apiAlgorithm = createRoundRobinAlgorithm(config);
 
 // Subscription info
 config.subscriptions = coalesce(config.subscriptions, {});
-config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 200});
+config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 0});
 
 // Terms & Conditions update date
 config.termsUpdatedAt = coalesce(config.termsUpdatedAt, 0);

@@ -54,19 +54,22 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 				readOnlyOnUI,
 				required,
 				values,
-				immutable,
+				immutable: propertyIsImmutable,
 			}) => {
 				const inputName = `${module}.${name}`;
 				const type = isSequencingProperty(inputName) ? 'sequencing' : basicType;
 				const PropertyComponent = TicketProperty[type] || UnsupportedProperty;
 				const formError = get(formState.errors, inputName);
-				const immutableDisabled = immutable && !isNewTicket && !isUndefined(get(ticketFromStore, inputName));
+				const immutable = propertyIsImmutable && !isNewTicket;
+				const disableBecauseImmutable = immutable && !isUndefined(get(ticketFromStore, inputName));
 				return (
 					<Fragment key={inputName}>
 						<InputController
+							// @ts-ignore
 							Input={PropertyComponent}
 							label={name}
-							disabled={disabled || ticketIsReadOnly || readOnlyOnUI || immutableDisabled}
+							disabled={disabled || ticketIsReadOnly || readOnlyOnUI || disableBecauseImmutable}
+							immutable={immutable}
 							required={required}
 							name={inputName}
 							formError={formError}

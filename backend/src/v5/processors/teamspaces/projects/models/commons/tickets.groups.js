@@ -15,7 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { addGroups, deleteGroups, getGroupById, getGroupsByIds, updateGroup } = require('../../../../../models/tickets.groups');
+const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getArrayDifference, getCommonElements } = require('../../../../../utils/helper/arrays');
 const {
 	getExternalIdsFromMetadata,
@@ -25,9 +27,10 @@ const {
 const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { getMetadataByRules, getMetadataWithMatchingData } = require('../../../../../models/metadata');
 const { idTypes, idTypesToKeys } = require('../../../../../models/metadata.constants');
+const { getNestedProperty } = require('../../../../../utils/helper/objects');
 const { getNodesByIds } = require('../../../../../models/scenes');
+const { isUUID } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
-const { stringToUUID } = require('../../../../../utils/helper/uuids');
 
 const TicketGroups = {};
 
@@ -148,6 +151,41 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 	return { ...formattedEntry, _ids: meshIds };
 };
 
+TicketGroups.processGroupsUpdate = (oldData, newData, fields, groupsState) => {
+	fields.forEach((fieldName) => {
+		const oldProp = getNestedProperty(oldData, fieldName) ?? [];
+		const newProp = getNestedProperty(newData, fieldName) ?? [];
+
+		oldProp.forEach(({ group }) => {
+			groupsState.old.add(UUIDToString(group));
+
+			if (newData === undefined || (newData && newData.state === undefined)) {
+				// New data is not specified so we are preserving the old ones
+				groupsState.stillUsed.add(UUIDToString(group));
+			}
+		});
+
+		newProp.forEach((propData) => {
+			const { group } = propData;
+			if (isUUID(group)) {
+				groupsState.stillUsed.add(UUIDToString(group));
+			} else {
+				const groupId = generateUUID();
+				groupsState.toAdd.push({ ...group, _id: groupId });
+				// eslint-disable-next-line no-param-reassign
+				propData.group = groupId;
+			}
+		});
+	});
+};
+
+const calculateRemovedGroups = ({ toRemove, old = new Set(), stillUsed = new Set(), ...otherGroups }) => {
+	const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
+		Array.from(old).map(UUIDToString));
+
+	return { toRemove: toRemoveCalculated.map(stringToUUID), stillUsed, ...otherGroups };
+};
+
 TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 	const convertedGroups = await Promise.all(groups.map(
 		async (group) => {
@@ -160,6 +198,30 @@ TicketGroups.addGroups = async (teamspace, project, model, ticket, groups) => {
 		}));
 
 	await addGroups(teamspace, project, model, ticket, convertedGroups);
+};
+
+// This should be called base on the information generated in processGroupsUpdate
+TicketGroups.commitGroupChanges = async (teamspace, project, model, ticket, groupsPreFilter) => {
+	const groups = calculateRemovedGroups(groupsPreFilter);
+
+	if (groups.stillUsed?.size) {
+		const stillUsed = Array.from(groups.stillUsed);
+		const existingGroups = await getGroupsByIds(teamspace, project, model, ticket,
+			stillUsed.map(stringToUUID), { _id: 1 });
+
+		if (existingGroups.length !== stillUsed.length) {
+			const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
+				stillUsed);
+			throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
+		}
+	}
+
+	await Promise.all([
+		groups.toAdd?.length ? TicketGroups.addGroups(teamspace, project, model, ticket, groups.toAdd)
+			: Promise.resolve(),
+		groups.toRemove?.length ? deleteGroups(teamspace, project, model, ticket,
+			groups.toRemove) : Promise.resolve(),
+	]);
 };
 
 TicketGroups.deleteGroups = deleteGroups;

@@ -98,7 +98,7 @@ const getTicketsSearchParams = (params: TicketsQueryParams) => {
 	}
 	// filters are a set of rules that can be passed to the backend
 	// to filter out tickets based on their: template, ticketCode,
-	// and properties. 
+	// and properties.
 	if (filters) {
 		searchParams.push(`query=${filters}`);
 	}
@@ -109,7 +109,7 @@ export const fetchContainerTickets = async (
 	projectId: string,
 	containerId: string,
 	queryParams: TicketsQueryParams,
-): Promise<FetchTicketsResponse> => {
+): Promise<ITicket[]> => {
 	const path = `teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets${getTicketsSearchParams(queryParams)}`;
 	const { data } = await api.get(path);
 	return data.tickets;
@@ -120,7 +120,7 @@ export const fetchFederationTickets = async (
 	projectId: string,
 	federationId: string,
 	queryParams: TicketsQueryParams,
-): Promise<FetchTicketsResponse> => {
+): Promise<ITicket[]> => {
 	const path = `teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets${getTicketsSearchParams(queryParams)}`;
 	const { data } = await api.get(path);
 	return data.tickets;
@@ -227,6 +227,5 @@ export const updateTicketGroup = async (
  * Types
  */
 type FetchTemplatesResponse = { templates: ITemplate[] };
-type FetchTicketsResponse = { tickets: ITicket[] };
 type CreateTicketResponse = { _id: string };
 type FetchRiskCategoriesResponse = { riskCategories: string[] };

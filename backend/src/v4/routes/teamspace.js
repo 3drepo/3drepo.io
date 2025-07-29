@@ -127,14 +127,14 @@
 	 *
 	 * @apiUse Teamspace
 	 *
-	 * @apiParam (Request body) {String[]} [riskCategories] List of risk categories
-	 * @apiParam (Request body) {String[]} [topicTypes] List of issue topic types
+	 * @apiBody {String[]} [riskCategories] List of risk categories
+	 * @apiBody {String[]} [topicTypes] List of issue topic types
 	 *
-	 * @apiParam (Risk category) {String} value Value of risk category
-	 * @apiParam (Risk category) {String} label Label for risk category
+	 * @apiBody (Risk category) {String} value Value of risk category
+	 * @apiBody (Risk category) {String} label Label for risk category
 	 *
-	 * @apiParam (Topic type) {String} value Value of topic type
-	 * @apiParam (Topic type) {String} label Label for topic type
+	 * @apiBody (Topic type) {String} value Value of topic type
+	 * @apiBody (Topic type) {String} label Label for topic type
 	 *
 	 * @apiExample {put} Example usage
 	 * PUT /acme/settings HTTP/1.1
@@ -323,7 +323,7 @@
 	 *    user: "viewerTeamspace1Model1JobB",
 	 * }
 	 */
-	router.delete("/members/:user", middlewares.isAccountAdmin , removeTeamMember);
+	router.delete("/members/:user", middlewares.canAddOrRemoveUsers, removeTeamMember);
 
 	/**
 	 *
@@ -337,7 +337,8 @@
 	 *
 	 * @apiPermission teamSpaceAdmin
 	 *
-	 * @apiParam {String} search Search string provided to find member
+	 * @apiParam {String} teamspace name of the teamspace
+	 * @apiParam {String} searchString Search string provided to find member
 	 *
 	 * @apiExample {get} Example usage:
 	 * GET /teamSpace1/members/search/project HTTP/1.1
@@ -396,9 +397,9 @@
 	 * @apiPermission teamSpaceAdmin
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
-	 * @apiParam (Request body) {String} job The job that the users going to have assigned
-	 * @apiParam (Request body) {String} user The username of the user to become a member
-	 * @apiParam (Request body) {String[]} permissions The permisions to be assigned to the member it can be an empty array or have a "teamspace_admin" value.
+	 * @apiBody {String} job The job that the users going to have assigned
+	 * @apiBody {String} user The username of the user to become a member
+	 * @apiBody {String[]} permissions The permisions to be assigned to the member it can be an empty array or have a "teamspace_admin" value.
 	 *
 	 * @apiExample {post} Example usage:
 	 * POST /teamSpace1/members HTTP/1.1
@@ -419,7 +420,7 @@
 	 * }
 	 *
 	 */
-	router.post("/members", middlewares.isAccountAdmin, addTeamMember);
+	router.post("/members", middlewares.canAddOrRemoveUsers, addTeamMember);
 
 	/**
 	 * @api {get} /:teamspace/addOns get enabled add ons

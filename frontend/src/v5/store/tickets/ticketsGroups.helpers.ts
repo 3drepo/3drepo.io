@@ -26,7 +26,7 @@ const overrideWithGroups = (groups: Record<string, Group>) => (override: GroupOv
 	return overrideToReturn;
 };
 
-const createStateWithGroup = (state: ViewpointState, groups: Record<string, Group>) => {
+export const createStateWithGroup = (state: ViewpointState, groups: Record<string, Group>) => {
 	const stateToReturn = { ...state };
 
 	if (state.colored) {
@@ -60,7 +60,6 @@ const createPropertiesWithGroups = (properties, groups) => Object.keys(propertie
 
 export const ticketWithGroups = (ticket: ITicket, groups: Record<string, Group>)  => {
 	const properties = createPropertiesWithGroups(ticket.properties, groups);
-
 
 	const modules:Record<string, Properties> = {};
 	Object.keys(ticket.modules || {}).forEach((moduleName) => 

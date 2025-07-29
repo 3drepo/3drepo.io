@@ -21,6 +21,7 @@ import { isEmpty, omitBy, pick } from 'lodash';
 
 import {
 	LEVELS_OF_RISK,
+	LEVELS_RENDER_VALUE,
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS,
 	RISK_MITIGATION_STATUSES
@@ -153,6 +154,7 @@ export const TreatmentRiskFormTab: FunctionComponent<IProps> = ({
 								items={RISK_LIKELIHOODS}
 								inputId="residual_likelihood"
 								disabled={!canComment}
+								renderValue={(val: number) => LEVELS_RENDER_VALUE[val]}
 							/>
 						)} />
 					</StyledFormControl>

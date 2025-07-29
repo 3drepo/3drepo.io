@@ -17,6 +17,7 @@
 
 import { get, isString } from 'lodash';
 import { createContext, useEffect, useState } from 'react';
+import { matchesQuery } from './searchContext.helpers';
 
 export interface SearchContextType<T> {
 	items: T[];
@@ -49,7 +50,7 @@ export const SearchContextComponent = ({ items, children, fieldsToFilter, filter
 				(key) => {
 					const property = get(item, key);
 					if (!isString(property)) return false;
-					return property.toLowerCase().includes(query.toLowerCase());
+					return matchesQuery(property, query);
 				},
 			));
 		}

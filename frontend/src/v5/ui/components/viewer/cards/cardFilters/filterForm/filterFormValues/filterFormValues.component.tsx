@@ -138,7 +138,6 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 		if (allJobsAndUsers) return (
 			<FormJobsAndUsersSelect
 				multiple
-				showAddButton
 				excludeJobs={type === 'owner'}
 				maxItems={19}
 				name={name}
