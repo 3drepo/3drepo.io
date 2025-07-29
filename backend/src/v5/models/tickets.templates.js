@@ -58,4 +58,9 @@ Templates.getAllTemplates = (teamspace, includeDeprecated, projection) => {
 	return find(teamspace, query, projection);
 };
 
+Templates.deleteTemplates = async (teamspace, templateIds) => {
+	if (!templateIds?.length) return;
+	await db.deleteMany(teamspace, TEMPLATES_COL, { _id: { $in: templateIds } });
+};
+
 module.exports = Templates;

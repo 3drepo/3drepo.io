@@ -22,6 +22,7 @@ const { isDate, isObject, isUUID } = require('../utils/helper/typeCheck');
 const DbHandler = require('../handler/db');
 const { basePropertyLabels } = require('../schemas/tickets/templates.constants');
 const { templates } = require('../utils/responseCodes');
+const DBHandler = require('../handler/db');
 
 const { Long } = DbHandler.dataTypes;
 
@@ -141,6 +142,24 @@ Tickets.removeAllTicketsInModel = (teamspace, project, model) => {
 		DbHandler.deleteMany(teamspace, TICKETS_COL, { teamspace, project, model }),
 		DbHandler.deleteMany(teamspace, TICKETS_COUNTER_COL, { _id: counterRegex }),
 	]);
+};
+
+Tickets.removeAllTicketsWithTemplates = async (teamspace, templateIds) => {
+	// eslint-disable-next-line security/detect-non-literal-regexp
+	const counterRegex = new RegExp(`.+_(${templateIds.map(UUIDToString).join('|')})$`);
+
+	const tickets = await DBHandler.find(teamspace, TICKETS_COL, { teamspace, type: { $in: templateIds } }, { _id: 1 });
+	const ticketIds = tickets.map(({ _id }) => _id);
+
+	await Promise.all([
+		DbHandler.deleteMany(teamspace, TICKETS_COL, { _id: { $in: ticketIds } }),
+		DbHandler.deleteMany(teamspace, TICKETS_COUNTER_COL, { _id: counterRegex }),
+		// FIXME: these should be in their own model files, not in tickets model
+		DbHandler.deleteMany(teamspace, 'tickets.comments', { ticket: { $in: ticketIds } }),
+		DbHandler.deleteMany(teamspace, 'tickets.logs', { ticket: { $in: ticketIds } }),
+	]);
+
+	return ticketIds;
 };
 
 Tickets.getTicketById = async (
