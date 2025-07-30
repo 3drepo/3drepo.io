@@ -19,12 +19,14 @@ import { PureComponent } from 'react';
 
 import ArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 
-import { RouteComponentProps } from 'react-router';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { NavigateFunction } from 'react-router-dom';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Container, DisplayedText, ProgressWrapper, StyledCircularProgress } from './revisionsSwitch.styles';
 
-interface IProps extends RouteComponentProps<any> {
+interface IProps {
+	location: any;
+	navigate: NavigateFunction;
 	className?: string;
 	modelSettings?: any;
 	revisions?: any[];
@@ -81,7 +83,7 @@ export class RevisionsSwitch extends PureComponent<IProps, any> {
 		const newPathnameBase = currentRevisionInPath ? pathname.substr(0, pathname.lastIndexOf('\/')) : pathname;
 		const newPathname = `${newPathnameBase}/${revision.tag || revision._id}`;
 
-		this.props.history.push(newPathname);
+		this.props.navigate(newPathname);
 		this.props.hideDialog();
 	}
 

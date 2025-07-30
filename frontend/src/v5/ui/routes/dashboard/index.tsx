@@ -15,42 +15,51 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useMatch, useLocation, Routes, Navigate } from 'react-router-dom';
+import { useLocation, Routes, Route, Navigate } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardProjectLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.component';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
-import { Route } from '@/v5/services/routing/route.component';
-import { AuthenticatedRoute } from '@/v5/services/routing/authenticatedRoute.component';
+import { AuthenticationRedirect } from '@/v5/services/routing/authenticationRedirect.component';
 import { discardSlash } from '@/v5/helpers/url.helper';
 import { TeamspaceSelection } from '../teamspaceSelection';
-import { TeamspaceContent } from './teamspaces/teamspaceContent/teamspaceContent.component';
-import { ProjectContent } from './projects/projectContent/projectContent';
 import { AuthPage } from '../authPage/authPage.component';
 import { Viewer } from '../viewer/viewer';
 import {
-	DASHBOARD_ROUTE,
-	AUTH_PATH,
-	PROJECT_ROUTE_BASE,
-	PROJECT_ROUTE_BASE_TAB,
-	TEAMSPACE_ROUTE_BASE,
-	TEAMSPACE_ROUTE_BASE_TAB,
-	VIEWER_ROUTE,
+	NOT_FOUND_ROUTE_PATH,
+	PRIVACY_ROUTE,
 } from '../routes.constants';
-import { LegalRoutes } from '../legal';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { AuthHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CalibrationContextComponent } from './projects/calibration/calibrationContext';
 import { authBroadcastChannel } from '@/v5/store/auth/authBrodcastChannel';
+import { RouteTitle } from '@/v5/services/routing/routeTitle.component';
+import { ProjectsList } from './teamspaces/projects/projectsList.component';
+import { UsersList } from './teamspaces/users/usersList.component';
+import { TeamspaceSettings } from './teamspaces/settings/teamspaceSettings.component';
+import { Jobs } from './teamspaces/jobs/jobs.component';
+import { TermsLegalPaper } from '@components/legal/terms.component';
+import { LegalLayout } from '@components/legal/LegalLayout/legalLayout.component';
+import { CookiesLegalPaper } from '@components/legal/cookies.component';
+import { Federations } from './projects/federations/federations.component';
+import { Containers } from './projects/containers/containers.component';
+import { Board } from './projects/board/board.component';
+import { Drawings } from './projects/drawings/drawings.component';
+import { ProjectSettings } from './projects/projectSettings/projectSettings.component';
+import { TicketsContent } from './projects/tickets/ticketsContent.component';
+import { ProjectPermissions } from './projects/projectPermissions/projectPermissions.component';
+import { UserPermissions } from './projects/userPermissions/userPermissions.component';
+import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
 export const MainRoute = () => {
-	const match = useMatch('*');
-	const path = match?.pathname || '';
 	const { pathname } = useLocation();
 	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
+	const hasPermissions = !TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();
+
+	const { title: kanbanTitle, shouldRenderContent: shouldRenderKanbanContent, issuesOrRisksEnabled, riskEnabled, issuesEnabled } = useKanbanNavigationData();
 
 	useEffect(() => {
 		if (!authenticationFetched) {
@@ -64,34 +73,62 @@ export const MainRoute = () => {
 		<CalibrationContextComponent>
 			<GlobalStyle />
 			<Routes>
-				<Route title={formatMessage({ id: 'pageTitle.auth', defaultMessage: 'Authenticate' })} path={AUTH_PATH} element={<AuthPage />} />
-				<Route path={`${path}/(terms|privacy|cookies)`} element={<LegalRoutes path={path} />} />
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.teamspaceSelection', defaultMessage: 'Teamspaces' })} path={DASHBOARD_ROUTE} element={<TeamspaceSelection />} />
-				<AuthenticatedRoute path={`${TEAMSPACE_ROUTE_BASE}/(t|t/.*)?`} element={
-					<TeamspaceLayout>
-						<Routes>
-							<Route path={TEAMSPACE_ROUTE_BASE} element={<Navigate to={`${discardSlash(pathname)}/t/projects`} replace />} />
-							<Route path={TEAMSPACE_ROUTE_BASE_TAB} element={<Navigate to={`${discardSlash(pathname)}/projects`} replace />} />
-							<Route path={`${TEAMSPACE_ROUTE_BASE}/`} element={<TeamspaceContent />} />
-						</Routes>
-					</TeamspaceLayout>
-				} />
-				<AuthenticatedRoute path={PROJECT_ROUTE_BASE} element={
-					<DashboardProjectLayout>
-						<Routes>
-							<Route path={PROJECT_ROUTE_BASE} element={<Navigate to={`${discardSlash(pathname)}/t/federations`} replace />} />
-							<Route path={PROJECT_ROUTE_BASE_TAB} element={<Navigate to={`${discardSlash(pathname)}/federations`} replace />} />
-							<Route path={PROJECT_ROUTE_BASE} element={<ProjectContent />} />
-						</Routes>
-					</DashboardProjectLayout>
-				} />
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE} element={
-					<DashboardViewerLayout>
-						<Viewer />
-					</DashboardViewerLayout>
-				} />
-				<AuthenticatedRoute path={path} element={<Navigate to={`${discardSlash(pathname)}/dashboard`} replace />} />
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*" element={<NotFound />} />
+				<Route path="auth" element={<RouteTitle title={formatMessage({ id: 'pageTitle.auth', defaultMessage: 'Authenticate' })}><AuthPage /></RouteTitle>} />
+				<Route element={<LegalLayout />}>
+					<Route path="terms" element={<RouteTitle title={formatMessage({ id: 'pageTitle.terms', defaultMessage: 'Terms & Conditions' })}><TermsLegalPaper /></RouteTitle>} />
+					<Route path="cookies" element={<RouteTitle title={formatMessage({ id: 'pageTitle.cookies', defaultMessage: 'Cookies' })}><CookiesLegalPaper /></RouteTitle>} />
+					<Route path="privacy" element={<Navigate to={PRIVACY_ROUTE} replace />} />
+				</Route>
+				<Route index element={<Navigate to="dashboard" replace />} />
+				<Route element={<AuthenticationRedirect />}>
+					<Route path="dashboard" element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspaceSelection', defaultMessage: 'Teamspaces' })}><TeamspaceSelection /></RouteTitle>} />
+					<Route path="dashboard/:teamspace">
+						<Route path="t/*" element={<TeamspaceLayout />}>
+							<Route index element={<Navigate to="projects" replace />} />
+							<Route path={'projects'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.projects', defaultMessage: ':teamspace - Projects' })}><ProjectsList /></RouteTitle>} />
+							<Route path={'jobs'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.jobs', defaultMessage: ':teamspace - Jobs' })}><Jobs /></RouteTitle>} />
+							<Route path={'settings'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.settings', defaultMessage: ':teamspace - Settings' })}><TeamspaceSettings /></RouteTitle>} />
+							<Route path={'users'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.users', defaultMessage: ':teamspace - Users' })}><UsersList /></RouteTitle>} />
+							<Route path="*" element={<Navigate to={NOT_FOUND_ROUTE_PATH} />} />
+						</Route>
+						<Route index element={<Navigate to="t/projects" replace />} />
+					</Route>
+					<Route path={'dashboard/:teamspace/:project'} element={<DashboardProjectLayout />}>
+						<Route index element={<Navigate to="t/federations" replace />} />
+						<Route path="t">
+							<Route index element={<Navigate to="federations" replace />} />
+							<Route path="federations" element={<RouteTitle title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })}><Federations /></RouteTitle>} />
+							<Route path="containers" element={<RouteTitle title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })}><Containers /></RouteTitle>} />
+							<Route path="drawings" element={<RouteTitle title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })}><Drawings /></RouteTitle>}/>
+							{(shouldRenderKanbanContent) && 
+								<Route path="board/:type/:containerOrFederation?" element={issuesOrRisksEnabled && <Board />} />
+							}
+							{issuesEnabled && (
+								<Route path="board" element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/issues`} /></RouteTitle>} />
+							)}
+							{(!issuesEnabled && riskEnabled) && (
+								<Route path="board" element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/risks`} /></RouteTitle>} />
+							)}
+							<Route path="tickets" element={<RouteTitle title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })}><TicketsContent /></RouteTitle>} />
+							<Route path="project_settings" element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })}><ProjectSettings /></RouteTitle>} />
+							{hasPermissions && (
+								<>
+									<Route path="project_permissions" element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })}><ProjectPermissions /></RouteTitle>} />
+									<Route path="user_permissions" element={<RouteTitle title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })}><UserPermissions /></RouteTitle>} />
+								</>
+							)}
+							<Route path="*" element={<Navigate to={NOT_FOUND_ROUTE_PATH} />} />
+						</Route>
+					</Route>
+					<Route path="*" element={<RouteTitle title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })}><NotFound /></RouteTitle>} />
+					<Route path="viewer/:teamspace/:project/:containerOrFederation/" element={<DashboardViewerLayout />}>
+						<Route index element={
+							<RouteTitle title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })}>
+								<Viewer />
+							</RouteTitle>
+						} />
+					</ Route>
+				</Route>
 			</Routes>
 		</CalibrationContextComponent>
 	);

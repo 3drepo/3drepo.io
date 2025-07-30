@@ -17,13 +17,12 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
-import { useMatch, useLocation, Routes, Navigate } from 'react-router-dom';
+import { useLocation, Routes, Route, Navigate } from 'react-router-dom';
 
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { DashboardFooter } from '@components/shared/dashboardFooter';
 import { formatMessage } from '@/v5/services/intl';
-import { Route } from '@/v5/services/routing/route.component';
 import { discardSlash } from '@/v5/helpers/url.helper';
 import { Federations } from '../federations';
 import { Containers } from '../containers';
@@ -37,6 +36,7 @@ import { Drawings } from '../drawings/drawings.component';
 import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
+import { RouteTitle } from '@/v5/services/routing/routeTitle.component';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();
@@ -48,9 +48,6 @@ export const ProjectContent = () => {
 	const isFetchingProject = isEmpty(ProjectsHooksSelectors.selectCurrentProjectDetails());
 	const isLoadingPermissions = isFetchingAddons || isFetchingProject;
 
-	let path = useMatch('*');
-	path = discardSlash(path);
-
 	useEffect(() => {
 		UsersActionsDispatchers.fetchUsers(teamspace);
 	}, [teamspace]);
@@ -61,26 +58,27 @@ export const ProjectContent = () => {
 		<>
 			<Content>
 				<Routes>
-					<Route title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })} path={`${path}/t/federations`} element={<Federations />} />
-					<Route title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })} path={`${path}/t/containers`} element={<Containers />} />
-					<Route title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })} path={`${path}/t/drawings`} element={<Drawings />} />
+					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })}><Federations /></RouteTitle>} path={'/t/federations'} />
+					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })}><Containers /></RouteTitle>} path={'/t/containers'} />
+					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })}><Drawings /></RouteTitle>} path={'/t/drawings'} />
 					{(shouldRenderKanbanContent) && 
-						<Route title={kanbanTitle} path={`${path}/t/board/:type/:containerOrFederation?`} element={issuesOrRisksEnabled && <Board />} />
+						<Route path={'/t/board/:type/:containerOrFederation?'} element={issuesOrRisksEnabled && <Board />} />
 					}
 					{issuesEnabled && (
-						<Route title={kanbanTitle} path={`${path}/t/board`} element={<Navigate to={`${discardSlash(pathname)}/issues`} />} />
+						<Route element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/issues`} /></RouteTitle>} path={'/t/board'} />
 					)}
 					{(!issuesEnabled && riskEnabled) && (
-						<Route title={kanbanTitle} path={`${path}/t/board`} element={<Navigate to={`${discardSlash(pathname)}/risks`} />} />
+						<Route element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/risks`} /></RouteTitle>} path={'/t/board'} />
 					)}
-					<Route title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })} path={`${path}/t/tickets`} element={<TicketsContent />} />
-					<Route title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })} path={`${path}/t/project_settings`} element={<ProjectSettings />} />
+					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })}><TicketsContent /></RouteTitle>} path={'/t/tickets'} />
+					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })}><ProjectSettings /></RouteTitle>} path={'/t/project_settings'} />
 					{hasPermissions && (
 						<>
-							<Route title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })} path={`${path}/t/project_permissions`} element={<ProjectPermissions />} />
-							<Route title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })} path={`${path}/t/user_permissions`} element={<UserPermissions />} />
+							<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })}><ProjectPermissions /></RouteTitle>} path={'/t/project_permissions'} />
+							<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })}><UserPermissions /></RouteTitle>} path={'/t/user_permissions'} />
 						</>
 					)}
+					<Route index element={<Navigate to={`${discardSlash(pathname)}/federations`} replace />} />
 					<Route path="*" element={<Navigate to={NOT_FOUND_ROUTE_PATH} />} />
 				</Routes>
 			</Content>

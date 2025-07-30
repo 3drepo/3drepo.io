@@ -28,10 +28,13 @@ export const Container = styled.nav`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
-export const Link: typeof NavLink = styled(LinkComponent).attrs({
-	component: NavLink,
-	activeClassName: 'active',
-})<{ disabled?: boolean }>`
+export const Link = styled(NavLink).attrs<{ disabled?: boolean }>((props) => ({
+	className: ({ isActive }: { isActive: boolean }) =>
+		[
+			props.className,
+			isActive ? 'active' : '',
+		].filter(Boolean).join(' '),
+}))<{ disabled?: boolean }>`
 	&& {
 		text-decoration: none;
 		display: flex;

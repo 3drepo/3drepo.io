@@ -37,7 +37,6 @@ interface ITeamspaceLayout {
 export const TeamspaceLayout = ({ className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
 	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
-	
 
 	useEffect(() => {
 		if (teamspace) {
@@ -46,6 +45,8 @@ export const TeamspaceLayout = ({ className }: ITeamspaceLayout): JSX.Element =>
 			UsersActionsDispatchers.fetchUsers(teamspace);
 		}
 	}, [teamspace]);
+
+	useEffect(() => { ProjectsActionsDispatchers.setCurrentProject(''); }, []);
 
 	return (
 		<Container className={className}>

@@ -17,12 +17,11 @@
 
 import { useEffect } from 'react';
 import axios from 'axios';
-import { useNavigate, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
 import { AuthActionsDispatchers, DialogsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
-import { Route, RouteProps } from './route.component';
 import { useSSOParams } from '../sso.hooks';
 import { postActions } from '../api/sso';
 import { enableKickedOutEvent } from '../realtime/auth.events';
@@ -36,7 +35,8 @@ const cleanSSOParams = (location) => {
 	return { ...location, search: searchParams.toString() };
 };
 
-const WrapAuthenticationRedirect = ({ children }) => {
+export const AuthenticationRedirect = () => {
+	console.log('@@ auth redirect?');
 	const navigate = useNavigate();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched = AuthHooksSelectors.selectAuthenticationFetched();
@@ -49,6 +49,8 @@ const WrapAuthenticationRedirect = ({ children }) => {
 		AuthActionsDispatchers.setReturnUrl(cleanSSOParams(location));
 		if (!isAuthenticated && authenticationFetched) {
 			const url = ssoError ? pathName(addParams(AUTH_PATH, searchParams)) : AUTH_PATH;
+			console.log('@@ auth redirect!', url);
+
 			navigate(url, { replace: true });
 		}
 	}, [isAuthenticated, authenticationFetched]);
@@ -70,7 +72,7 @@ const WrapAuthenticationRedirect = ({ children }) => {
 	}, [isAuthenticated, teamspace, authenticatedTeamspace]);
 
 	if (!isAuthenticated) {
-		return (<></>);
+		return (<> unauthed, m8</>);
 	}
 
 	// Unauthenticate when session times out
@@ -82,9 +84,5 @@ const WrapAuthenticationRedirect = ({ children }) => {
 		},
 	);
 
-	return children;
+	return <Outlet />;
 };
-
-export const AuthenticatedRoute = ({ element, ...props }: RouteProps) => (
-	<Route {...props} element={<WrapAuthenticationRedirect>{element}</WrapAuthenticationRedirect>} />
-);

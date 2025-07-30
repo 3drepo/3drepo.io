@@ -16,11 +16,8 @@
  */
 
 import { useEffect } from 'react';
-import { useParams } from 'react-router';
-import { useRouteMatch, Switch } from 'react-router-dom';
+import { Routes, Route, useParams  } from 'react-router-dom';
 import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { Route } from '@/v5/services/routing/route.component';
-import { discardSlash } from '@/v5/helpers/url.helper';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
@@ -34,9 +31,6 @@ import { TicketsAndResizableTableProvider } from './ticketsTable/ticketsAndResiz
 
 export const TicketsContent = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	let { path } = useRouteMatch();
-	path = discardSlash(path);
-
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const templatesArePending = ProjectsHooksSelectors.selectTemplatesArePending();
 	const { isListPending: containersArePending, containers } = useContainersData();
@@ -74,15 +68,15 @@ export const TicketsContent = () => {
 	}
 
 	return (
-		<Switch>
-			<Route exact path={TICKETS_ROUTE}>
+		<Routes>
+			<Route path={TICKETS_ROUTE} element={
 				<TicketsAndResizableTableProvider>
 					<TicketsTable />
 				</TicketsAndResizableTableProvider>
-			</Route>
-			<Route path={path}>
+			} />
+			<Route path="*" element={
 				<TicketsSelection />
-			</Route>
-		</Switch>
+			} />
+		</Routes>
 	);
 };

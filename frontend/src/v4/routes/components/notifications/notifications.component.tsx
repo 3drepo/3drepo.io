@@ -25,6 +25,7 @@ import Close from '@mui/icons-material/Close';
 import MoreVert from '@mui/icons-material/MoreVert';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
+import { NavigateFunction } from 'react-router-dom';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { BarIconButton } from '../components.styles';
@@ -36,6 +37,7 @@ import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.c
 import { NotificationsIconContainer, NotificationsList, NotificationWeekHeader } from './notifications.styles';
 
 interface IProps {
+	navigate: NavigateFunction;
 	notifications: INotification[];
 	unreadCount: number;
 	thisWeeksNotifications: INotification[];

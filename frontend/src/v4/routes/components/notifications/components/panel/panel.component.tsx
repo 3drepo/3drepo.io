@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent, SyntheticEvent } from 'react';
+import { NavigateFunction } from 'react-router-dom';
 import { INotification, NotificationItem } from '../notificationItem/notificationItem.component';
 import { NotificationsPanelHeader } from '../panelHeader/panelHeader.component';
 import { List, Container, NotificationsPanelItem } from './panel.styles';
 
 interface IProps {
+	navigate: NavigateFunction
 	labelLeft?: string;
 	labelRight?: string;
 	notifications: INotification[];

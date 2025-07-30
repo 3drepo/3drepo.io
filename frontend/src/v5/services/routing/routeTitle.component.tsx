@@ -17,20 +17,22 @@
 
 import { useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { Route as BaseRoute, RouteProps as BaseRouteProps } from 'react-router-dom';
 import { selectCurrentRevision } from '@/v4/modules/model/model.selectors';
 import { ProjectsHooksSelectors, ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '../intl';
+import { useParams } from 'react-router-dom';
 
-export type RouteProps = BaseRouteProps & {
+export type RouteProps = {
 	computedMatch?: any;
 	title?: string;
+	children: any;
 };
 
 const DEFAULT_TITLE = formatMessage({ id: 'pageTitle.default', defaultMessage: '3D Repo | Online BIM collaboration platform' });
 const LOADING_TEXT = formatMessage({ id: 'pageTitle.loading', defaultMessage: 'Loading...' });
 
-export const Route = ({ title = '', computedMatch: { params }, ...props }: RouteProps) => {
+export const RouteTitle = ({ title = '', children }: RouteProps) => {
+	const params = useParams();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectName();
 	const containerName = ContainersHooksSelectors.selectContainerById(params.containerOrFederation)?.name;
 	const federationName = FederationsHooksSelectors.selectFederationById(params.containerOrFederation)?.name;
@@ -61,5 +63,5 @@ export const Route = ({ title = '', computedMatch: { params }, ...props }: Route
 		};
 	}, [titleParsed]);
 
-	return <BaseRoute {...props} />;
+	return children;
 };

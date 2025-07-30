@@ -14,23 +14,19 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { discardTab } from '@/v5/helpers/url.helper';
 import { Container, Link } from '../navigationTabs.styles';
 
 export const TeamspaceNavigation = (): JSX.Element => {
-	let { url } = useRouteMatch();
-	url = discardTab(url);
 	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 
 	return (
 		<Container>
-			<Link to={`${url}/projects`}><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
-			<Link to={`${url}/jobs`}><FormattedMessage id="teamspaceNavigation.jobs" defaultMessage="Jobs" /></Link>
-			<Link to={`${url}/settings`}><FormattedMessage id="teamspaceNavigation.settings" defaultMessage="Teamspace Settings" /></Link>
-			{isAdmin && <Link to={`${url}/users`}><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>}
+			<Link to="projects"><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
+			<Link to="jobs"><FormattedMessage id="teamspaceNavigation.jobs" defaultMessage="Jobs" /></Link>
+			<Link to="settings"><FormattedMessage id="teamspaceNavigation.settings" defaultMessage="Teamspace Settings" /></Link>
+			{isAdmin && <Link to="users"><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>}
 		</Container>
 	);
 };

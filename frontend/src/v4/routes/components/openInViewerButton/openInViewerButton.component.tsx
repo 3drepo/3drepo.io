@@ -16,11 +16,10 @@
  */
 
 import { VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { generatePath } from 'react-router-dom';
+import { generatePath, useLocation } from 'react-router-dom';
 import OpenInBrowser from '@mui/icons-material/OpenInBrowser';
 import { memo } from 'react';
 
-import { ROUTES } from '../../../constants/routes';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ShowModelButtonContainer } from './openInViewerButton.styles';
 
@@ -33,6 +32,7 @@ interface IProps {
 };
 
 export const OpenInViewerButton = memo((props: IProps) => {
+	const location = useLocation();
 	const handleGoToModel = (event) => {
 		event.stopPropagation();
 		const { teamspace, model, query } = props;

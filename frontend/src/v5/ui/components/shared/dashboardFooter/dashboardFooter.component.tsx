@@ -29,7 +29,7 @@ export const DashboardFooter = ({ variant = 'light' }: IDashboardFooter): JSX.El
 		<FooterLogo />
 		<FooterItems>
 			<FooterItem>
-				<Link to={{ pathname: PRIVACY_ROUTE }} target="_blank" rel="noopener noreferrer">
+				<Link to={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">
 					<FormattedMessage id="dashboardFooter.privacy" defaultMessage="Privacy" />
 				</Link>
 			</FooterItem>
