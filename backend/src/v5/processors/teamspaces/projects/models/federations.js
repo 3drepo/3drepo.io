@@ -72,8 +72,8 @@ Federations.newRevision = async (teamspace, project, federation, info) => {
 		timestamp: new Date(),
 		containers: info.containers
 	}
-	await createRevision(teamspace, project, federation, revision);
-	await updateModelSubModels(teamspace, project, federation, info.owner, revision.name, info.containers);
+	await createRevision(teamspace, project, federation, revision); // Should await on this because updateModelSubModels is going to emit an event which will expect a revision node
+	await updateModelSubModels(teamspace, project, federation, info.owner, revisionId, info.containers);
 };
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
