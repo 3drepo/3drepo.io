@@ -485,6 +485,7 @@ function getFederationModelProperties() {
 }
 
 function getFederationIdMap() {
+	// The idMap is never used for federation nodes so we don't need to generate it
 	return {};
 }
 
