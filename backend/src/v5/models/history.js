@@ -15,12 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const db = require("../handler/db");
-
-const History = {};
-
-History.createRevision = async function(teamspace, project, container, revision) {
-    
-}
-
-module.exports = History;
+/* istanbul ignore file */
+const { v4Path } = require('../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+module.exports = require(`${v4Path}/models/history`);

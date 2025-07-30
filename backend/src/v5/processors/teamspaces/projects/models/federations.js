@@ -23,7 +23,7 @@ const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
-const { generateUUID, UUIDToString } = require('../../../../utils/helper/uuids');
+const { generateUUID } = require('../../../../utils/helper/uuids');
 const { getLatestRevision } = require('../../../../models/revisions');
 const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
@@ -68,10 +68,9 @@ Federations.newRevision = async (teamspace, project, federation, info) => {
 	const revisionId = generateUUID();
 	const revision = {
 		_id: revisionId,
-		author: "",
-		timestamp: Date(),
-		name: UUIDToString(revisionId),
-		branch: UUIDToString("00000000-0000-0000-0000-000000000000")
+		author: info.owner,
+		timestamp: new Date(),
+		containers: info.containers
 	}
 	await createRevision(teamspace, project, federation, revision);
 	await updateModelSubModels(teamspace, project, federation, info.owner, revision.name, info.containers);
