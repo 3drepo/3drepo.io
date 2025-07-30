@@ -23,8 +23,6 @@ const middlewares = require("../middlewares/middlewares");
 const responseCodes = require("../response_codes.js");
 const History = require("../models/history");
 const utils = require("../utils");
-const { findModelSettingById } = require("../models/modelSetting.js");
-const uuidv5 = require("uuid").v5;
 
 /**
  * @api {get} /:teamspace/:model/revisions.json List all revisions
