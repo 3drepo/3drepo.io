@@ -57,7 +57,7 @@ export const NewTicketCard = () => {
 
 	const formData = useForm({
 		resolver: yupResolver(isLoading ? null : getTicketValidator(template)),
-		mode: 'onChange',
+		mode: 'all',
 		defaultValues: defaultTicket,
 	});
 
