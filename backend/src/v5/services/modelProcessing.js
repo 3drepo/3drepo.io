@@ -38,7 +38,6 @@ const ModelProcessing = {};
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
 const {
 	callback_queue: callbackq,
-	worker_queue: jobq,
 	model_queue: modelq,
 	drawing_queue: drawingq,
 	shared_storage: sharedDir,

@@ -145,7 +145,7 @@ History.createRevision = async function(teamspace, project, container, revision)
 	revision.type = C.REPO_NODE_TYPE_REVISION;
 	revision.shared_id  = revision.shared_id ? revision.shared_id : C.MASTER_UUID;
 	return db.insertOne(teamspace, getCollName(container), revision);
-}
+};
 
 History.findByTag = async function(account, model, tag, projection = {}) {
 	return await findOne(account, model, { tag, incomplete: {"$exists": false }}, projection);

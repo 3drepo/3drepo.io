@@ -480,15 +480,15 @@ JSONAssets.getTree = async function(account, model, branch, rev) {
 	};
 };
 
-function getFederationModelProperties(settings) {
+function getFederationModelProperties() {
 	return { hiddenNodes: [] };
 }
 
-function getFederationIdMap(settings) {
+function getFederationIdMap() {
 	return {};
 }
 
-function getFederationIdToMeshes(settings) {
+function getFederationIdToMeshes() {
 	return {};
 }
 

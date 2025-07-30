@@ -58,7 +58,7 @@ const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	}
 };
 
-const queueTasksCompleted = async ({ teamspace, model, value, corId, user, containers }) => {
+const queueTasksCompleted = async ({ teamspace, model, value, corId, user }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		const modelType = await getModelType(teamspace, model);
