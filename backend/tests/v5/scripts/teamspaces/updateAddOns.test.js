@@ -71,6 +71,8 @@ const runTest = (data) => {
 			[ADD_ONS.HERE]: true,
 			[ADD_ONS.POWERBI]: true,
 			[ADD_ONS.DAILY_DIGEST]: true,
+			[ADD_ONS.USERS_PROVISIONED]: true,
+			[ADD_ONS.DISABLE_PERMISSIONS_ON_UI]: true,
 			[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES).join(','),
 		}],
 		['the request enables some add ons', true, undefined, data.noAddOn, {
@@ -83,6 +85,8 @@ const runTest = (data) => {
 			[ADD_ONS.SRC]: true,
 			[ADD_ONS.HERE]: true,
 			[ADD_ONS.POWERBI]: true,
+			[ADD_ONS.USERS_PROVISIONED]: true,
+			[ADD_ONS.DISABLE_PERMISSIONS_ON_UI]: true,
 			[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES).join(','),
 		}],
 		['the request disables all add ons', true, undefined, data.withAllAddOns,

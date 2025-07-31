@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
-import { sortBy } from 'lodash';
+import { difference, isString, sortBy } from 'lodash';
 import { parseMessageAndImages } from './ticketComments.helpers';
 import {
 	TicketCommentsTypes,
@@ -27,9 +27,15 @@ import {
 	CreateCommentAction,
 	UpdateCommentAction,
 	DeleteCommentAction,
+	GoToCommentViewpointAction,
 } from './ticketComments.redux';
 import { DialogsActions } from '../../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../../store.helpers';
+import { selectCommentById } from './ticketComments.selectors';
+import { TicketsActions } from '../tickets.redux';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import { selectFederationById } from '../../federations/federations.selectors';
+import { selectTicketsGroups } from '../tickets.selectors';
 
 export function* fetchComments({
 	teamspace,
@@ -104,14 +110,22 @@ export function* updateComment({
 	comment,
 }: UpdateCommentAction) {
 	try {
+		const oldComment = yield select(selectCommentById, ticketId, commentId);
+		const newHistory = (oldComment.history || []).concat({
+			message: oldComment.message,
+			images: oldComment.images,
+			view: oldComment.view,
+			timestamp: new Date(),
+		});
+		const commentWithHistory = { ...comment, history: newHistory };
 		const updateModelComment = isFederation
 			? API.TicketComments.updateFederationComment
 			: API.TicketComments.updateContainerComment;
 
-		yield updateModelComment(teamspace, projectId, modelId, ticketId, commentId, parseMessageAndImages(comment));
+		yield updateModelComment(teamspace, projectId, modelId, ticketId, commentId, parseMessageAndImages(commentWithHistory));
 		yield put(TicketCommentsActions.upsertCommentSuccess(
 			ticketId,
-			{ _id: commentId, ...comment, updatedAt: new Date() },
+			{ _id: commentId, ...commentWithHistory, updatedAt: new Date() },
 		));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -151,9 +165,45 @@ export function* deleteComment({
 	}
 }
 
+export function* goToCommentViewpoint({
+	teamspace,
+	projectId,
+	modelId,
+	ticketId,
+	commentId,
+}: GoToCommentViewpointAction) {
+	try {
+		const comment = yield select(selectCommentById, ticketId, commentId);
+		if (!comment?.view?.state) return;
+
+		const groupTypes = ['colored', 'hidden', 'transformed'];
+		const loadedGroups = Object.keys(yield select(selectTicketsGroups));
+
+		const groupIds = groupTypes.reduce((acc, groupType) => {
+			const groupTypeIds = comment.view.state[groupType]?.map(({ group }) => group) ?? [];
+			return [...groupTypeIds.filter(isString), ...acc];
+		}, []);
+		
+		const groupsToFetch = difference(groupIds, loadedGroups);
+		const isFederation = !!(yield select(selectFederationById, modelId));
+		const groups = yield all(groupsToFetch.map((groupId) => API.Tickets.fetchTicketGroup(teamspace, projectId, modelId, ticketId, groupId, isFederation)));
+
+		yield put(TicketsActions.fetchTicketGroupsSuccess(groups));
+		const viewpointWithGroups =  (yield select(selectCommentById, ticketId, commentId))?.view;
+		goToView(viewpointWithGroups);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'comments.goToView.error', defaultMessage: 'trying to go to a comment\'s viewpoint' }),
+			error,
+			details: RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE,
+		}));
+	}
+}
+
 export default function* ticketsSaga() {
 	yield takeLatest(TicketCommentsTypes.FETCH_COMMENTS, fetchComments);
 	yield takeEvery(TicketCommentsTypes.CREATE_COMMENT, createComment);
 	yield takeEvery(TicketCommentsTypes.UPDATE_COMMENT, updateComment);
 	yield takeEvery(TicketCommentsTypes.DELETE_COMMENT, deleteComment);
+	yield takeLatest(TicketCommentsTypes.GO_TO_COMMENT_VIEWPOINT, goToCommentViewpoint);
 }

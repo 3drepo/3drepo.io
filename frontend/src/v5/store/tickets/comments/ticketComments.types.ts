@@ -15,16 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Viewpoint } from '../tickets.types';
+
 export type TicketCommentHistoryBlock = {
 	message: string,
 	images: string[],
 	timestamp: Date,
+	view: Viewpoint,
 };
 
 export type ITicketComment = {
 	_id: string,
 	message?: string,
 	images?: string[],
+	view?: Viewpoint,
 	author: string,
 	createdAt: Date,
 	updatedAt: Date,
@@ -35,10 +39,4 @@ export type ITicketComment = {
 	importedAt?: Date,
 };
 
-export type TicketCommentReplyMetadata = {
-	_id: string,
-	message?: string,
-	author: string,
-	originalAuthor?: string,
-	images?: string[],
-};
+export type TicketCommentReplyMetadata = Pick<ITicketComment, '_id' | 'message' | 'author' | 'originalAuthor' | 'images' > & { view?: boolean | Viewpoint };
