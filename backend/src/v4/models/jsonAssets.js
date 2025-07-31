@@ -100,43 +100,38 @@ async function getHelperJSONFile(account, model, branch, rev, username, filename
 
 	settings.teamspace = account;
 
-	try {
-		outStream.write(`{"${prefix}": `);
+	outStream.write(`{"${prefix}": `);
 
-		if (isFed) {
-			const fedTree = generateFederationResponse(settings);
-			outStream.write(JSON.stringify(fedTree));
-		} else {
-			const history = await History.getHistory(account, model, branch, rev);
-			const revId = utils.uuidToString(history._id);
-			const treeFileName = `${revId}/${filename}.json`;
+	if (isFed) {
+		const fedTree = generateFederationResponse(settings);
+		outStream.write(JSON.stringify(fedTree));
+	} else {
+		const history = await History.getHistory(account, model, branch, rev);
+		const revId = utils.uuidToString(history._id);
+		const treeFileName = `${revId}/${filename}.json`;
 
-			try {
-				const file = await FileRef.getJSONFileStream(account, model, treeFileName);
-				const readStream = file.readStream;
+		try {
+			const file = await FileRef.getJSONFileStream(account, model, treeFileName);
+			const readStream = file.readStream;
 
-				await new Promise((resolve) => {
-					readStream.on("data", d => outStream.write(d));
-					readStream.on("end", ()=> resolve());
-					readStream.on("error", err => outStream.emit("error", err));
-				});
-			} catch {
-				if (allowNotFound) {
-					outStream.write(JSON.stringify(defaultValues));
-				}
+			await new Promise((resolve) => {
+				readStream.on("data", d => outStream.write(d));
+				readStream.on("end", ()=> resolve());
+				readStream.on("error", err => outStream.emit("error", err));
+			});
+		} catch {
+			if (allowNotFound) {
+				outStream.write(JSON.stringify(defaultValues));
 			}
 		}
-
-		outStream.write(", \"subModels\":[");
-
-		await appendSubModelFiles(settings, outStream, username, `${filename}.json`);
-
-		outStream.write("]}");
-		outStream.end();
-	} catch(err) {
-		outStream.emit("error", err);
-		outStream.end();
 	}
+
+	outStream.write(", \"subModels\":[");
+
+	await appendSubModelFiles(settings, outStream, username, `${filename}.json`);
+
+	outStream.write("]}");
+	outStream.end();
 
 	return {
 		readStream: outStream
@@ -425,52 +420,52 @@ JSONAssets.getTree = async function(account, model, branch, rev) {
 
 	settings.teamspace = account;
 
-	generateTreeNodeIdsForFederation(settings);
+	if(isFed) {
+		// Only federations are guaranteed to have UUIDs as _ids, which is a
+		// preqrequsitie for the procedural properties, so this is conditional
+		// on being a federation
+		generateTreeNodeIdsForFederation(settings);
+	}
 
-	try {
-		outStream.write("{\"mainTree\": ");
+	outStream.write("{\"mainTree\": ");
 
-		if (isFed) {
-			const fedTree = generateFullTreeForFederation(settings);
-			outStream.write(JSON.stringify(fedTree));
-		} else {
-			const history = await History.getHistory(account, model, branch, rev);
-			const revId = utils.uuidToString(history._id);
-			const treeFileName = `${revId}/fulltree.json`;
-			const file = await FileRef.getJSONFileStream(account, model, treeFileName);
-			const readStream = file.readStream;
+	if (isFed) {
+		const fedTree = generateFullTreeForFederation(settings);
+		outStream.write(JSON.stringify(fedTree));
+	} else {
+		const history = await History.getHistory(account, model, branch, rev);
+		const revId = utils.uuidToString(history._id);
+		const treeFileName = `${revId}/fulltree.json`;
+		const file = await FileRef.getJSONFileStream(account, model, treeFileName);
+		const readStream = file.readStream;
 
-			await new Promise((resolve) => {
-				readStream.on("data", d => outStream.write(d));
-				readStream.on("end", ()=> resolve());
-				readStream.on("error", err => outStream.emit("error", err));
-			});
-		}
+		await new Promise((resolve) => {
+			readStream.on("data", d => outStream.write(d));
+			readStream.on("end", ()=> resolve());
+			readStream.on("error", err => outStream.emit("error", err));
+		});
+	}
 
-		outStream.write(", \"subTrees\":[");
+	outStream.write(", \"subTrees\":[");
 
-		if(isFed) {
-			const subTreeInfo = await getSubTreeInfo(settings);
-			for(let i = 0; i < subTreeInfo.length; ++i) {
-				if(subTreeInfo[i]) {
-					if(i > 0) {
-						outStream.write(",");
-					}
-					const url = subTreeInfo[i].rid !== C.MASTER_BRANCH ?
-						`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/${subTreeInfo[i].rid}/fulltree.json` :
-						`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/master/head/fulltree.json`;
-					subTreeInfo[i].url = url;
-					outStream.write(JSON.stringify(subTreeInfo[i]));
+	if(isFed) {
+		const subTreeInfo = await getSubTreeInfo(settings);
+		for(let i = 0; i < subTreeInfo.length; ++i) {
+			if(subTreeInfo[i]) {
+				if(i > 0) {
+					outStream.write(",");
 				}
+				const url = subTreeInfo[i].rid !== C.MASTER_BRANCH ?
+					`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/${subTreeInfo[i].rid}/fulltree.json` :
+					`/${subTreeInfo[i].teamspace}/${subTreeInfo[i].model}/revision/master/head/fulltree.json`;
+				subTreeInfo[i].url = url;
+				outStream.write(JSON.stringify(subTreeInfo[i]));
 			}
 		}
-
-		outStream.write("]}");
-		outStream.end();
-	} catch(err) {
-		outStream.emit("error", err);
-		outStream.end();
 	}
+
+	outStream.write("]}");
+	outStream.end();
 
 	return {
 		file: {
