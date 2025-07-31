@@ -44,4 +44,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setComponentState: ActivitiesActions.setComponentState,
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(Activities as any);
+export default connect(mapStateToProps, mapDispatchToProps)(Activities) as any;

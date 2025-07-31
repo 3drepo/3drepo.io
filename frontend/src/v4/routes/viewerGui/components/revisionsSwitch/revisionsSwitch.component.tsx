@@ -32,6 +32,8 @@ interface IProps extends RouteComponentProps<any> {
 	showRevisionsDialog: (config) => void;
 	currentRevision: any;
 	getCompareModels: (revisionId) => void;
+	history;
+	location;
 };
 
 export class RevisionsSwitch extends PureComponent<IProps, any> {

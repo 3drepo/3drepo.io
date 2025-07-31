@@ -17,7 +17,7 @@
 
 export type ImagesModalProps = {
 	onClickClose?: (imgs: string[]) => void;
-	onClose?: () => void;
+	onClose?: (imgs: string[]) => void;
 	open?: boolean;
 	images: string[];
 	// to use if the image to display is not the first one

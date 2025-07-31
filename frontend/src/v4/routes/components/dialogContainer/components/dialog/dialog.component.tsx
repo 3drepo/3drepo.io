@@ -38,6 +38,7 @@ interface IProps extends RouteComponentProps<any> {
 	data?: any;
 	hide: (dialogId) => void;
 	searchEnabled?: boolean;
+	ref?: any;
 }
 
 export const Dialog: FunctionComponent<IProps> = ({ ref, ...props }: IProps) => {

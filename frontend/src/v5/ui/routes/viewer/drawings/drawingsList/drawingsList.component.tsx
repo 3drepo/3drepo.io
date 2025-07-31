@@ -21,7 +21,7 @@ import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { VirtualisedList, TableRow, FillerRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
-import { forwardRef, useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
 import { AutocompleteSearchInput } from '@controls/search/autocompleteSearchInput/autocompleteSearchInput.component';
 import { DrawingsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -32,7 +32,7 @@ import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
 import { useSearchParam } from '../../../useSearchParam';
 
-const Table = forwardRef(({ children, ...props }, ref: any) => {
+const Table = ({ children, ref, ...props }) => {
 	const queries = DrawingsCardHooksSelectors.selectQueries();
 	return (
 		<div ref={ref} {...props}>
@@ -45,15 +45,15 @@ const Table = forwardRef(({ children, ...props }, ref: any) => {
 			</CardContent>
 		</div>
 	);
-});
+};
 
-const EmptyPlaceholder = forwardRef((props, ref: any) => (
+const EmptyPlaceholder = ({ ref, ...props }) => (
 	<div ref={ref} {...props}>
 		<EmptyListMessage>
 			<FormattedMessage id="viewer.cards.drawings.noResults" defaultMessage="No drawings found. Please try another search." />
 		</EmptyListMessage>
 	</div>
-));
+);
 
 export const DrawingsList = () => {
 	const drawings = DrawingsCardHooksSelectors.selectDrawingsFilteredByQueries();
@@ -83,7 +83,6 @@ export const DrawingsList = () => {
 	}, [drawings.length]);
 
 	return (
-		// @ts-expect-error
 		<VirtualisedList
 			ref={virtuosoRef}
 			data={drawings}
@@ -93,6 +92,7 @@ export const DrawingsList = () => {
 				TableBody: CardList,
 				TableRow,
 				FillerRow,
+				// @ts-expect-error
 				EmptyPlaceholder,
 			}}
 			itemContent={(index, drawing: IDrawing) => (

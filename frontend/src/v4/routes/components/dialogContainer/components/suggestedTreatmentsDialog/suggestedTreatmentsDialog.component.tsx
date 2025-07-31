@@ -37,6 +37,7 @@ interface ITextWrapper {
 	inline?: boolean;
 	color?: string;
 	variant?: TypographyProps['variant'];
+	children?: any;
 }
 
 const TextWrapper: FunctionComponent<ITextWrapper> = ({

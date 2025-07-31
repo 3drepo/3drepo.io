@@ -70,6 +70,7 @@ const render = () => {
 	const root = createRoot(container);
 	root.render(
 		<Provider store={store as any}>
+			{/* @ts-expect-error */}
 			<ConnectedRouter history={history}>
 				<IntlProvider {...getIntl()}>
 					<LocalizationProvider dateAdapter={AdapterDayjs}>

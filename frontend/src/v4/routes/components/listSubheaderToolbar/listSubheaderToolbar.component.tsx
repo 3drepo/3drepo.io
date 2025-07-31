@@ -19,6 +19,7 @@ import { ListSubheaderContainer, RightContent, StyledToolbar } from './listSubhe
 
 interface IProps {
 	rightContent: JSX.Element;
+	children: any;
 }
 
 export class ListSubheaderToolbar extends PureComponent<IProps, any> {

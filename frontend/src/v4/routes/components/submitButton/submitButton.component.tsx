@@ -17,7 +17,6 @@
 
 import CircularProgress from '@mui/material/CircularProgress';
 import { merge } from 'lodash';
-import { ComponentType } from 'react';
 
 import { LoaderContainer, StyledButton, StyledFab } from './submitButton.styles';
 
@@ -39,16 +38,14 @@ export const SubmitButton = ({ pending, children, ...props }: IProps) => {
 
 	const isFabVariant = props.variant === 'fab';
 
-	const Button: ComponentType = isFabVariant ? StyledFab : StyledButton;
+	const Button: any = isFabVariant ? StyledFab : StyledButton;
 
 	if (additionalProps.hasOwnProperty('variant') && isFabVariant) {
 		delete additionalProps.variant;
 	}
 
 	return (
-		<Button
-			{...additionalProps}
-		>
+		<Button {...additionalProps}>
 			{children}
 			{pending && (
 				<LoaderContainer>

@@ -35,6 +35,7 @@ interface IProps {
 	width?: string;
 	onChange?: (event, value) => void;
 	onClick?: () => void;
+	ref?: any;
 }
 
 export const TableHeadingRadio = (({

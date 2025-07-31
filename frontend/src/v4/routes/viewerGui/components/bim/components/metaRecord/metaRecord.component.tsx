@@ -122,7 +122,7 @@ export const MetaRecord = (props: IProps) => {
 					showStarred={showStarred}
 					isSearch={isSearch}
 				/>
-			))}
+			)) as any}
 		</List>
 	);
 

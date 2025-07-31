@@ -34,7 +34,7 @@ export const FieldValueInput = ({ name, autoFocus = false, disabled }) => {
 			render={({ field: { onChange, ...field } }) => (
 				<Autocomplete
 					{...field}
-					renderOption={(props, option) => [props, option]}
+					renderOption={(props, option) => [props, option] as any}
 					disableClearable={!field.value}
 					disableListWrap
 					freeSolo

@@ -23,8 +23,9 @@ import { WarningIcon } from '../modalsDispatcher/modalsDispatcher.styles';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { InfoModalProps } from '../modalsDispatcher/templates/infoModal/infoModal.types';
 
-type UpdatePermissionProps = InfoModalProps &  {
+type UpdatePermissionProps = InfoModalProps & {
 	onConfirm?: () => void,
+	onClose?: () => void;
 	permissionsType: string,
 	permissionsCount?: number,
 };

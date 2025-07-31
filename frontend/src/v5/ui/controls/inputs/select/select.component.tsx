@@ -23,7 +23,7 @@ import {
 } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 
-export type SelectProps = Omit<MuiSelectProps, 'variant'> & FormInputProps & { children?: any[] };
+export type SelectProps = Omit<MuiSelectProps, 'variant'> & FormInputProps & { children? };
 
 export const Select = ({
 	required = false,

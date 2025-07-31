@@ -98,6 +98,7 @@ export const FoldableMenuItem = ({children, ...props}: IFoldableMenuItemProps) =
 
 interface IProps {
 	left?: boolean;
+	children: any;
 }
 
 interface IState {

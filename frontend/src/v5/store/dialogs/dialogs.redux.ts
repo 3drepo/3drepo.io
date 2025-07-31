@@ -85,8 +85,11 @@ type CloseAction = Action<'CLOSE'> & { dialogId: string };
 type CloseAllAction = Action<'CLOSE_ALL'>;
 
 export interface IDialogsActionCreators {
-	open: <T extends ModalType | FunctionComponent>
-	(modalType?: T, props?: ExtractModalProps<T> | undefined, syncProps?: any | undefined) => OpenAction;
+	open: <T extends ModalType | FunctionComponent>(
+		modalType?: T,
+		props?: Partial<ExtractModalProps<T>>,
+		syncProps?: React.RefObject<Partial<ExtractModalProps<T>>>,
+	) => OpenAction;
 	close: (id: string) => CloseAction;
 	closeAll: () => CloseAllAction;
 }

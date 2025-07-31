@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { forwardRef, type JSX } from 'react';
+import { type JSX } from 'react';
 import { get } from 'lodash';
 import { Controller, ControllerRenderProps, useFormContext } from 'react-hook-form';
 
@@ -44,8 +44,8 @@ type Props<T> = InputControllerProps<T> & {
 	Input: (props: T) => JSX.Element,
 };
 
-export type InputControllerType = <T>(Component: Props<T>, ref) => JSX.Element;
-export const InputController: InputControllerType = forwardRef(<T,>({
+export type InputControllerType = <T>(Component: Props<T> & { ref? }) => JSX.Element;
+export const InputController: InputControllerType = ({
 	Input,
 	name,
 	control,
@@ -55,8 +55,9 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 	onBlur,
 	transformInputValue = (val) => val,
 	transformOutputValue = (val) => val,
+	ref,
 	...props
-}: Props<T>, ref) => {
+}) => {
 	const ctx = useFormContext();
 	const error = formError || get(ctx?.formState?.errors, name);
 
@@ -67,11 +68,11 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 			defaultValue={defaultValue}
 			render={({ field: { ref: fieldRef, ...field } }) => (
 				// @ts-expect-error
-				(<Input
+				<Input
 					{...field}
 					{...props}
 					value={transformInputValue(field.value) ?? ''}
-					onChange={(event) => {
+					onChange={(event: any) => {
 						field.onChange(transformOutputValue(event));
 						onChange?.(transformOutputValue(event));
 					}}
@@ -82,8 +83,8 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 					inputRef={ref || fieldRef}
 					error={!!error}
 					helperText={error?.message}
-				/>)
+				/>
 			)}
 		/>
 	);
-});
+};

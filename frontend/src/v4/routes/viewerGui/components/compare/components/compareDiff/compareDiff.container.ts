@@ -41,4 +41,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setTargetRevision: CompareActions.setTargetRevision
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(CompareDiff as any);
+export default connect(mapStateToProps, mapDispatchToProps)(CompareDiff) as any;

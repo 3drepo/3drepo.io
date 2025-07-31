@@ -63,7 +63,7 @@ export const getIntl = () => {
 	return intlInternal;
 };
 
-export const formatMessage: typeof intlInternal.formatMessage = (descriptor, values?, opts?): string => getIntl().formatMessage(descriptor, values, opts);
+export const formatMessage = (descriptor, values?, opts?): string => getIntl().formatMessage(descriptor, values, opts);
 
 export const formatDate: typeof intlInternal.formatDate = (value, opts?): string => value && getIntl().formatDate(value, opts);
 

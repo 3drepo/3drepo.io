@@ -39,6 +39,7 @@ interface IProps extends RouteComponentProps<any> {
 	type: string;
 	isPending: boolean;
 	pendingRevision: string;
+	history?: any;
 	resetModelRevisions: () => void;
 	fetchModelRevisions: (teamspace, modelId, showVoid) => void;
 	setModelRevisionState: (teamspace, modelId, revision, isVoid) => void;

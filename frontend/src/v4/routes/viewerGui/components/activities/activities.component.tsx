@@ -34,6 +34,10 @@ import { Container } from './activities.styles';
 import { ActivityDetails } from './components/activityDetails/';
 
 interface IProps {
+	model: string;
+	teamspace: string;
+	revision?: string;
+	project?: string;
 	viewer: any;
 	isPending: boolean;
 	searchEnabled: boolean;

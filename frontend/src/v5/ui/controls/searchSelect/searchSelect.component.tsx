@@ -56,7 +56,7 @@ export const SearchSelect = ({ children, ...props }: SelectProps) => {
 								onKeyDown={preventPropagation}
 							/>
 						</SearchInputContainer>
-						{filteredItems.length > 0 && filteredItems}
+						{(filteredItems.length > 0 && filteredItems) as any}
 						{!filteredItems.length && (
 							<NoResults>
 								<FormattedMessage

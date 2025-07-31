@@ -30,7 +30,7 @@ interface IProps {
 	isAllSelected: boolean;
 	targetModels: any;
 	isCompareProcessed: boolean;
-	renderComparisonLoader: () => void;
+	renderComparisonLoader: () => any;
 	setTargetModel: (modelId, isTarget) => void;
 	setComponentState: (state) => void;
 	setTargetRevision: (modelId, targetRevision, isDiff) => void;

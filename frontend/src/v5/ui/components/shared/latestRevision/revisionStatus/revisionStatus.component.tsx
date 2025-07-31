@@ -71,7 +71,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 									minute: 'numeric',
 								}),
 								message: error.message,
-								b: (val:string) => <b>{val}</b>,
+								b: (val) => <b>{val}</b>,
 							}}
 						/>
 					) : (
@@ -80,7 +80,7 @@ export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.El
 							defaultMessage="The latest upload has failed due to <b>{message}</b>."
 							values={{
 								message: error.message,
-								b: (val:string) => <b>{val}</b>,
+								b: (val) => <b>{val}</b>,
 							}}
 						/>
 					)}

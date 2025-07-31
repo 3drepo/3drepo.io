@@ -35,7 +35,6 @@ const TABLE_COLUMNS_TYPE_TO_WIDTHS: Partial<Record<PropertyTypeDefinition, { wid
 	'longText': { width: 200, minWidth: 25 },
 	'boolean': { width: 140, minWidth: 25 },
 	'number': { width: 100, minWidth: 25 },
-	// @ts-expect-error
 	'pastDate': { width: 147, minWidth: 25 },
 	'date': { width: 147, minWidth: 25 },
 	'manyOf': { width: 140, minWidth: 25 },

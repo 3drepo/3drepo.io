@@ -30,6 +30,7 @@ interface IProps extends RouteComponentProps<any> {
 	model: string;
 	query?: string;
 	preview?: boolean;
+	location;
 };
 
 export const OpenInViewerButton = memo((props: IProps) => {

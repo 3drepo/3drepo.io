@@ -20,6 +20,7 @@ import { Container } from './circledIcon.styles';
 interface ICircledIcon {
 	variant: 'main' | 'contrast' | 'error';
 	size: 'small' | 'medium' | 'large';
+	children;
 }
 
 export const CircledIcon: React.FC<ICircledIcon> = ({ size = 'large', variant = 'main', children, ...props }) => (

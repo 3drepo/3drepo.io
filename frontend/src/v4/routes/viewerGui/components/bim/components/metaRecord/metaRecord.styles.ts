@@ -138,7 +138,6 @@ export const StyledSelectSimilarIcon = styled(SelectSimilarIcon).attrs({
 
 export const BimTooltip = styled(Tooltip).attrs({
 	PopperProps: {
-		// @ts-expect-error
 		sx: {
 			left: '-1px !important',
 		}
