@@ -36,9 +36,13 @@ matrix:
         - mkdir -p submodules
         - test_ver=`cat backend/testDBVersion`
         - cd submodules
-        - git clone -b $test_ver --depth 1 --single-branch https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
+        - mkdir tests
         - cd tests
-        - git status
+        - git init
+        - git remote add origin https://$TESTS_USER:$TESTS_PASSWORD@github.com/3drepo/tests.git
+        - git fetch origin $test_ver
+        - git reset --hard FETCH_HEAD
+        - git rev-parse HEAD
         - cd backend && mongorestore
         - cd ../../../
         - cp -r ./submodules/tests/frontend/staticPages/legal/ ./resources/legal
