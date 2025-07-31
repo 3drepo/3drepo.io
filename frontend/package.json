@@ -11,7 +11,7 @@
 	},
 	"scripts": {
 		"build:base:development": "webpack --watch --progress --config ./internals/webpack/webpack.dev.config.js",
-		"build:base:production": "yarn build-storybook && webpack --progress --config ./internals/webpack/webpack.prod.config.js",
+		"build:base:production": "yarn webpack --progress --config ./internals/webpack/webpack.prod.config.js",
 		"watch": "yarn build:base:development --devtool source-map",
 		"build": "yarn compile && yarn build:base:production",
 		"build:test": "cross-env NODE_OPTIONS='--max-old-space-size=4096' yarn build:base:production",
