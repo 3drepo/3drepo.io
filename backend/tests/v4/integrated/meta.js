@@ -526,17 +526,12 @@ describe("Metadata", function () {
 				});
 		});
 
-		it("retrieving mesh IDs with empty rule query should succeed", function(done) {
+		it("retrieving mesh IDs with empty rule query should fail", function(done) {
 			const query = [];
 
 			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
-				.expect(200, function(err, res) {
-					expect(res.body[0].account).to.equal(groupUser);
-					expect(res.body[0].model).to.equal(groupModel);
-					expect(res.body[0].mesh_ids.length).to.equal(1106);
-					done(err);
-				});
+				.expect(400, done);
 		});
 
 		it("retrieving metadata with rule query should succeed", function(done) {

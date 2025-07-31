@@ -30,6 +30,7 @@ import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSele
 import { isEqual, pick } from 'lodash';
 import { enableMapSet } from 'immer';
 
+
 enableMapSet();
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
@@ -49,7 +50,7 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 			const { property: { module, name } } = configColor;
 			const path = module ? `${module}.${name}` : name;
 			return [...acc, path];
-		}, [BaseProperties.DESCRIPTION,  AdditionalProperties.DEFAULT_IMAGE]);
+		}, [BaseProperties.DESCRIPTION, BaseProperties.UPDATED_AT, AdditionalProperties.DEFAULT_IMAGE]);
 		yield put(TicketsActions.fetchTickets(teamspace, projectId, modelId, isFederation, propertiesToInclude));
 
 	} catch (error) {

@@ -20,7 +20,11 @@ import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
-import { CalendarIcon, DateContainer, DueDateContainer, EmptyDateContainer } from './dueDate.styles';
+import { CalendarIcon, DateContainer, DueDateContainer } from './dueDate.styles';
+import { TextOverflow } from '@controls/textOverflow';
+
+const DATE_UNSET_MESSAGE = <FormattedMessage id="dueDate.unset.enabled" defaultMessage="Date unset" />;
+const SET_DATE_MESSAGE = <FormattedMessage id="dueDate.unset.disabled" defaultMessage="Set date" />;
 
 export type DueDateProps = Omit<FormInputProps, 'onBlur'> & {
 	tooltip?: string;
@@ -28,7 +32,7 @@ export type DueDateProps = Omit<FormInputProps, 'onBlur'> & {
 };
 
 export const DueDate = ({ value, disabled, tooltip, className, ...props }: DueDateProps) => {
-	const isOverdue = value < Date.now();
+	const isOverdue = value && value < Date.now();
 	return (
 		<DueDateContainer className={className}>
 			<DateTimePicker
@@ -36,22 +40,18 @@ export const DueDate = ({ value, disabled, tooltip, className, ...props }: DueDa
 				disabled={disabled}
 				renderInput={
 					({ inputRef, ...args }: any) => (
-						<Tooltip title={disabled ? '' : tooltip} arrow>
+						<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
+							<CalendarIcon />
 							{value ? (
-								<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
-									<CalendarIcon />
+								<TextOverflow>
 									{formatDateTime(value)}
-								</DateContainer>
+								</TextOverflow>
 							) : (
-								<EmptyDateContainer {...args} ref={inputRef} disabled={disabled}><CalendarIcon />
-									{ disabled ? (
-										<FormattedMessage id="dueDate.unset.enabled" defaultMessage="Date unset" />
-									) : (
-										<FormattedMessage id="dueDate.unset.disabled" defaultMessage="Set date" />
-									)}
-								</EmptyDateContainer>
+								<Tooltip title={disabled ? '' : tooltip} arrow>
+									{disabled ? DATE_UNSET_MESSAGE : SET_DATE_MESSAGE}
+								</Tooltip>
 							)}
-						</Tooltip>
+						</DateContainer>
 					)
 				}
 				{...props}

@@ -16,53 +16,20 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { FormattedMessage } from 'react-intl';
-import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { isCommenterRole } from '@/v5/store/store.helpers';
-import { useContext } from 'react';
 import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import ArrowIcon from '@assets/icons/outlined/arrow-outlined.svg';
-import { Table, Header, Headers, Group, NewTicketRow, NewTicketText, IconContainer, PlaceholderForStickyFunctionality } from './ticketsTableGroup.styles';
+import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { Table, Group, PlaceholderForStickyFunctionality } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
-import { NewTicketMenu } from '../../newTicketMenu/newTicketMenu.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { getAssignees, SetTicketValue, sortAssignees } from '../../ticketsTable.helper';
-import { ResizableTableCell } from '@controls/resizableTableContext/resizableTableCell/resizableTableCell.component';
-import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { SetTicketValue } from '../../ticketsTable.helper';
 import { orderBy } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
-
-const SortingTableHeader = ({ name, children, disableSorting = false, ...props }) => {
-	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
-	const { isHidden } = useContext(ResizableTableContext);
-	const isSelected = name === sortingColumn;
-
-	if (isHidden(name)) return (null);
-
-	if (disableSorting) return (
-		<ResizableTableCell name={name}>
-			<Header {...props}>
-				{children}
-			</Header>
-		</ResizableTableCell>
-	);
-
-	return (
-		<ResizableTableCell name={name}>
-			<Header {...props} onClick={() => onColumnClick(name)} $selectable>
-				{isSelected && (
-					<IconContainer $flip={isDescendingOrder}>
-						<ArrowIcon />
-					</IconContainer>
-				)}
-				{children}
-			</Header>
-		</ResizableTableCell>
-	);
-};
+import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
+import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.component';
+import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
 
 type TicketsTableGroupProps = {
 	selectedTicketId?: string;
@@ -73,15 +40,15 @@ type TicketsTableGroupProps = {
 export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	const { getRowWidth } = useContext(ResizableTableContext);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
+	const hideNewticketButton = template.deprecated;
 
 	const assigneesSort = (items: ITicket[], order) => orderBy(
 		items.map(sortAssignees),
 		[
-			(item) => getAssignees(item).length,
-			(item) => getAssignees(item).join(),
+			(item) => getAssigneeDisplayNamesFromTicket(item).length,
+			(item) => getAssigneeDisplayNamesFromTicket(item).join(),
 		],
 		[order, order],
 	);
@@ -91,51 +58,13 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	};
 
 	return (
-		<Table $empty={!tickets.length}>
+		<Table $empty={!tickets.length} $canCreateTicket={!newTicketButtonIsDisabled}>
 			<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
 				<SortedTableContext.Consumer>
 					{({ sortedItems }: SortedTableType<ITicket>) => (
 						<>
-							{!tickets.length
-								? (<PlaceholderForStickyFunctionality />)
-								: (
-									<Headers>
-										<SortingTableHeader name="id" disableSorting>
-											<FormattedMessage id="ticketTable.column.header.id" defaultMessage="#id" />
-										</SortingTableHeader>
-										<SortingTableHeader name={BaseProperties.TITLE}>
-											<FormattedMessage id="ticketTable.column.header.title" defaultMessage="title" />
-										</SortingTableHeader>
-										<SortingTableHeader name="modelName">
-											<FormattedMessage id="ticketTable.column.header.federationContainer" defaultMessage="federation / container" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${BaseProperties.CREATED_AT}`}>
-											<FormattedMessage id="ticketTable.column.header.createdAt" defaultMessage="created at" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${IssueProperties.ASSIGNEES}`}> 
-											<FormattedMessage id="ticketTable.column.header.assignees" defaultMessage="assignees" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${BaseProperties.OWNER}`}>
-											<FormattedMessage id="ticketTable.column.header.owner" defaultMessage="owner" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${IssueProperties.DUE_DATE}`}>
-											<FormattedMessage id="ticketTable.column.header.dueDate" defaultMessage="due date" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${IssueProperties.PRIORITY}`}>
-											<FormattedMessage id="ticketTable.column.header.priority" defaultMessage="priority" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`properties.${BaseProperties.STATUS}`}>
-											<FormattedMessage id="ticketTable.column.header.status" defaultMessage="status" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`}>
-											<FormattedMessage id="ticketTable.column.header.levelOfRisk" defaultMessage="level of risk" />
-										</SortingTableHeader>
-										<SortingTableHeader name={`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`}>
-											<FormattedMessage id="ticketTable.column.header.treatmentStatus" defaultMessage="treatment status" />
-										</SortingTableHeader>
-									</Headers>
-								)}
-							<Group $empty={!sortedItems?.length}>
+							{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
+							<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
 								{sortedItems.map(({ modelId, ...ticket }) => (
 									<TicketsTableRow
 										key={ticket._id}
@@ -145,24 +74,12 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 										selected={selectedTicketId === ticket._id}
 									/>
 								))}
-								{!template.deprecated &&
-								<NewTicketMenu
-									disabled={newTicketButtonIsDisabled}
-									TriggerButton={(
-										<NewTicketRow
-											disabled={newTicketButtonIsDisabled}
-											style={{ width: getRowWidth() }}
-										>
-											<NewTicketText>
-												<AddCircleIcon />
-												<FormattedMessage id="ticketTable.row.newTicket" defaultMessage="New ticket" />
-											</NewTicketText>
-										</NewTicketRow>
-									)}
-									useMousePosition
-									onContainerOrFederationClick={onNewTicket}
-								/>
-								}
+								{!hideNewticketButton && (
+									<NewTicketRowButton
+										onNewTicket={onNewTicket}
+										disabled={newTicketButtonIsDisabled}
+									/>
+								)}
 							</Group>
 						</>
 					)}

@@ -14,7 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import { TicketCommentsActions } from '@/v5/store/tickets/comments/ticketComments.redux';
 import { selectComments, selectCommentById } from '@/v5/store/tickets/comments/ticketComments.selectors';
 import { createTestStore } from '../../test.helpers';

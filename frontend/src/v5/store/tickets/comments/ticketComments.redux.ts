@@ -34,6 +34,7 @@ export const { Types: TicketCommentsTypes, Creators: TicketCommentsActions } = c
 	updateComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'commentId', 'comment'],
 	deleteComment: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'commentId'],
 	upsertCommentSuccess: ['ticketId', 'comment'],
+	goToCommentViewpoint: ['teamspace', 'projectId', 'modelId', 'ticketId', 'commentId'],
 }, { prefix: 'TICKET_COMMENTS/' }) as { Types: Constants<ITicketCommentsActionCreators>; Creators: ITicketCommentsActionCreators };
 
 export const INITIAL_STATE: ITicketCommentsState = {
@@ -57,6 +58,9 @@ export const upsertCommentSuccess = (state: ITicketCommentsState, {
 	if (commentToUpdate) {
 		merge(commentToUpdate, comment);
 		commentToUpdate.images = comment.images;
+		if (!comment.view) {
+			delete commentToUpdate.view;
+		}
 	} else {
 		state.commentsByTicketId[ticketId].push({ ...comment, message: comment.message || '' } as ITicketComment);
 	}
@@ -77,6 +81,7 @@ export type CreateCommentAction = Action<'CREATE_COMMENT'> & TeamspaceAndProject
 export type UpdateCommentAction = Action<'UPDATE_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, commentId: string, comment: Partial<ITicketComment> };
 export type DeleteCommentAction = Action<'DELETE_COMMENT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, isFederation: boolean, commentId: string };
 export type UpsertCommentSuccessAction = Action<'UPSERT_COMMENT_SUCCESS'> & { ticketId: string, comment: Partial<ITicketComment> };
+export type GoToCommentViewpointAction = Action<'GO_TO_COMMENT_VIEWPOINT'> & TeamspaceAndProjectId & { modelId: string, ticketId: string, commentId: string };
 
 export interface ITicketCommentsActionCreators {
 	fetchComments: (
@@ -121,4 +126,11 @@ export interface ITicketCommentsActionCreators {
 		ticketId: string,
 		comment: Partial<ITicketComment>,
 	) => UpsertCommentSuccessAction;
+	goToCommentViewpoint: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		ticketId: string,
+		commentId: string,
+	) => GoToCommentViewpointAction;
 }

@@ -52,9 +52,10 @@ interface IContainerRevisionDetails {
 	containerId: string;
 	revisionsCount: number;
 	status?: UploadStatus
+	linkTarget?: React.HTMLAttributeAnchorTarget;
 }
 
-export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }: IContainerRevisionDetails): JSX.Element => {
+export const ContainerRevisionDetails = ({ containerId, revisionsCount, status, linkTarget }: IContainerRevisionDetails): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isLoading = ContainerRevisionsHooksSelectors.selectIsPending(containerId);
@@ -129,6 +130,7 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 								onDownloadRevision={() => handleDownloadRevision(revision._id, revision.tag + revision.format)}
 								hasPermission={selectHasCollaboratorAccess(getState(), containerId)}
 								redirectTo={viewerRoute(teamspace, project, containerId, revision)}
+								target={linkTarget}
 							>
 								<RevisionsListItemText width={140} tabletWidth={94}> {formatDateTime(revision.timestamp)} </RevisionsListItemText>
 								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />

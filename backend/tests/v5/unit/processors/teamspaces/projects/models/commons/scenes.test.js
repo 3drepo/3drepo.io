@@ -25,6 +25,7 @@ const {
 	generateUUIDString,
 	generateRandomIfcGuid,
 	generateRandomRvtId,
+	sleepMS,
 } = require('../../../../../../helper/services');
 const { UUIDToString, stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
 const { idTypesToKeys, idTypes, metaKeyToIdType } = require('../../../../../../../../src/v5/models/metadata.constants');
@@ -78,6 +79,8 @@ const testGetMeshesWithParentIds = () => {
 		['expected mesh ids without duplicates', { ...defaultParams, meshMapFile: JSON.stringify(dupMeshMap), expectedResults: dupValues.map(stringToUUID) }],
 	])('Get meshes with parent Ids', (desc, { nodes, meshMapFile, expectedResults, returnString }) => {
 		test(`Should return ${desc}`, async () => {
+			Scenes.setCacheExpiration(1);
+			Scenes.clearCache();
 			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodes);
 			FilesManager.getFile.mockResolvedValueOnce(meshMapFile);
 
@@ -177,8 +180,32 @@ const testSharedIdsToExternalIds = () => {
 	});
 };
 
+const testPrepareCache = () => {
+	describe('Prepare cache', () => {
+		const teamspace = generateRandomString();
+		const model = generateRandomString();
+		const revId = generateUUID();
+		test('should prepare the cache file when called', async () => {
+			FilesManager.getFile.mockResolvedValue(JSON.stringify({}));
+			await expect(Scenes.prepareCache(teamspace, model, revId, 50)).resolves.toBeUndefined();
+
+			await sleepMS(10);
+
+			await expect(Scenes.prepareCache(teamspace, model, revId)).resolves.toBeUndefined();
+
+			await sleepMS(100);
+
+			await expect(Scenes.prepareCache(teamspace, model, revId, 1)).resolves.toBeUndefined();
+
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(2);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, `${model}.stash.json_mpc`, `${UUIDToString(revId)}/idToMeshes.json`);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
 	testGetExternalIdsFromMetadata();
 	testSharedIdsToExternalIds();
+	testPrepareCache();
 });

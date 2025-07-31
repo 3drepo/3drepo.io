@@ -80,7 +80,7 @@ const EmailAndJobInputStyles = css`
 const TeamspaceAdminCheckboxStyles = css`
 	.MuiFormControlLabel-root {
 		height: auto;
-		margin: 10px 0;
+		margin: 0 0 10px 0;
 		.MuiCheckbox-root {
 			color: ${({ theme }) => theme.palette.primary.main};
 			margin: 0 8px 0 0;
@@ -198,6 +198,9 @@ export default css`
 		${Content} {
 			background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 			padding: 30px;
+			.MuiInputBase-root {
+				width: 100%;
+			}
 			${EmailAndJobInputStyles}
 			${TeamspaceAdminCheckboxStyles}
 			${ProjectSelectorStyles}
