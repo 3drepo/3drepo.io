@@ -30,6 +30,7 @@ import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSele
 import { isEqual, pick } from 'lodash';
 import { enableMapSet } from 'immer';
 
+
 enableMapSet();
 
 export function* openTicket({ ticketId }: OpenTicketAction) {
