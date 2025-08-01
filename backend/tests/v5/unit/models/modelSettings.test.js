@@ -603,7 +603,7 @@ const testNewRevisionProcessed = () => {
 		);
 
 		test('should not trigger if model no longer exists', async () => {
-			DBHandler.updateOne.mockResolvedValueOnce(true);
+			DBHandler.updateOne.mockResolvedValueOnce(false);
 			EventsManager.publish.mockClear();
 
 			await expect(Model.updateModelSubModels(
