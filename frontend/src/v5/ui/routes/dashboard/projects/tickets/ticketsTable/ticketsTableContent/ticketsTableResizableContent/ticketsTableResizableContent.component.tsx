@@ -27,17 +27,53 @@ import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
 import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
-import { selectFetchingPropertiesByTicketId } from '@/v5/store/tickets/tickets.selectors';
-import { getState } from '@/v5/helpers/redux.helpers';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
+
+type CollapsibleTicketsGroupProps = {
+	groupName: string;
+	groupNameDisplay: string;
+	tickets: ITicket[];
+	setTicketValue: SetTicketValue;
+	selectedTicketId?: string;
+	onNewTicket: (groupByValue: string) => (modelId: string) => void;
+	propertyName: string;
+};
+
+const CollapsibleTicketsGroup = ({ groupName, groupNameDisplay, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: CollapsibleTicketsGroupProps) => {
+	const ticketsIds = tickets.map(({ _id }) => _id);
+	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
+
+	return (<DashboardListCollapse
+		title={(
+			<>
+				<Title>{groupNameDisplay}</Title>
+				<CircledNumber disabled={!tickets.length || isLoading}>
+					{isLoading ? <Spinner /> : tickets.length}
+				</CircledNumber>
+			</>
+		)}
+		defaultExpanded={!!tickets.length}
+	>
+		<TicketsTableGroup
+			tickets={tickets}
+			onNewTicket={onNewTicket(groupName)}
+			onEditTicket={setTicketValue}
+			selectedTicketId={selectedTicketId}
+		/>
+	</DashboardListCollapse>);
+};
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
 };
+
 export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
 	const { groupBy, getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const { template } = useParams<DashboardTicketsParams>();
 	const { filteredItems } = useContext(SearchContext);
+
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
 	};
@@ -53,43 +89,27 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 		);
 	}
 
-	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
-	const ticketsToDisplay = groupBy
-		? filteredItems.filter(({ _id: ticketId }) => !selectFetchingPropertiesByTicketId(getState(), ticketId).has(propertyName))
-		: filteredItems;
-
-	const isLoading = groupBy && (ticketsToDisplay.length !== filteredItems.length);
-
 	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
+	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
 
 	const getGroupDisplayName = (groupName: string) => {
 		if (groupName === UNSET || !isJobAndUsersType(groupBy)) return groupName;
 		const jobsAndUsernamesArray = groupName.split(',').map((user) => user.trim());
 		return jobsAndUsernamesArray.map(getjobOrUserDisplayName).join(', ');
 	};
-
 	return (
 		<Container>
 			{groups.map(([groupName, tickets]) => (
-				<DashboardListCollapse
-					title={(
-						<>
-							<Title>{getGroupDisplayName(groupName)}</Title>
-							<CircledNumber disabled={!tickets.length || isLoading}>
-								{isLoading ? <Spinner /> : tickets.length}
-							</CircledNumber>
-						</>
-					)}
-					defaultExpanded={!!tickets.length}
+				<CollapsibleTicketsGroup
+					groupNameDisplay={getGroupDisplayName(groupName)}
+					groupName={groupName}
+					tickets={tickets}
+					setTicketValue={setTicketValue}
+					onNewTicket={onGroupNewTicket}
+					selectedTicketId={selectedTicketId}
+					propertyName={propertyName}
 					key={groupBy + groupName + template + tickets}
-				>
-					<TicketsTableGroup
-						tickets={tickets}
-						onNewTicket={onGroupNewTicket(groupName)}
-						onEditTicket={setTicketValue}
-						selectedTicketId={selectedTicketId}
-					/>
-				</DashboardListCollapse>
+				/>
 			))}
 		</Container>
 	);
