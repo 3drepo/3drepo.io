@@ -554,8 +554,8 @@ const testNewRevisionProcessed = () => {
 		const containers = [
 			{ _id: generateUUID(), group: generateRandomString() },
 			{ _id: generateUUID(), group: generateRandomString() },
-			{ _id: generateUUID(), },
-			{ _id: generateUUID(), },
+			{ _id: generateUUID() },
+			{ _id: generateUUID() },
 		];
 		const modelType = modelTypes.FEDERATION;
 		test(`Updating the submodels of a federation should trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
@@ -575,7 +575,7 @@ const testNewRevisionProcessed = () => {
 				const expectedData = {
 					status: processStatuses.OK,
 					containers,
-					timestamp: action.$set.timestamp
+					timestamp: action.$set.timestamp,
 				};
 
 				expect(EventsManager.publish).toHaveBeenCalledTimes(2);
@@ -588,7 +588,7 @@ const testNewRevisionProcessed = () => {
 						user,
 						modelType,
 						data: expectedData,
-					}
+					},
 				);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
 					{
@@ -597,9 +597,9 @@ const testNewRevisionProcessed = () => {
 						model,
 						modelType,
 						data: expectedData,
-					}
+					},
 				);
-			}
+			},
 		);
 	});
 

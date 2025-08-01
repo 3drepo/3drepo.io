@@ -217,9 +217,8 @@ Models.updateModelSubModels = async (teamspace, project, model, user, revId, con
 				project,
 				model,
 				modelType: modelTypes.FEDERATION,
-				data
-			}
-		);
+				data,
+			});
 	}
 };
 

@@ -17,7 +17,7 @@
 
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
-const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
+const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
 const { createWriteStream, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
@@ -43,7 +43,7 @@ const {
 	shared_storage: sharedDir,
 } = queueConfig;
 
-const onCallbackQMsg = async ({ content, properties }) => {
+const onCallbackQMsg = ({ content, properties }) => {
 	logger.logInfo(`[Received][${properties.correlationId}] ${content}`);
 	try {
 		const { status, database: teamspace, project: model, user, value, message } = JSON.parse(content);

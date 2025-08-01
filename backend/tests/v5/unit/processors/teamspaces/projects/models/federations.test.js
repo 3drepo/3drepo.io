@@ -307,19 +307,19 @@ const testNewRevision = () => {
 			const containers = [
 				{
 					_id: generateUUIDString(),
-					group: generateRandomString()
+					group: generateRandomString(),
 				},
 				{
 					_id: generateUUIDString(),
-					group: generateRandomString()
+					group: generateRandomString(),
 				},
 				{
 					_id: generateUUIDString(),
-				}
+				},
 			];
 			const info = {
 				owner,
-				containers
+				containers,
 			};
 
 			await Federations.newRevision(teamspace, projectId, model, info);
@@ -339,7 +339,7 @@ const testNewRevision = () => {
 				model,
 				owner,
 				revision._id,
-				containers
+				containers,
 			);
 		});
 	});

@@ -18,8 +18,6 @@
 const { src, modelFolder, objModel } = require('../../helper/path');
 const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 
-const { times } = require('lodash');
-
 jest.mock('../../../../src/v5/handler/queue');
 const Queue = require(`${src}/handler/queue`);
 
