@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { array } = require('yup');
 const { src } = require('../../../../../helper/path');
 
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');

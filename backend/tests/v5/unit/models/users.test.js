@@ -23,7 +23,6 @@ jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 
 jest.mock('../../../../src/v5/services/sso/frontegg');
-const FrontEggMock = require(`${src}/services/sso/frontegg`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');

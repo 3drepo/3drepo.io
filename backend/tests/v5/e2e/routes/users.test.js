@@ -19,7 +19,6 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
 const SessionTracker = require('../../helper/sessionTracker');
-const { onlineAvatarPath, newAvatarPath } = require('../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 

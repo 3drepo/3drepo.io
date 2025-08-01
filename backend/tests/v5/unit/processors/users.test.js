@@ -17,8 +17,7 @@
 
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
-const { src, image } = require('../../helper/path');
-const fs = require('fs');
+const { src } = require('../../helper/path');
 
 const Users = require(`${src}/processors/users`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -43,9 +42,6 @@ const Intercom = require(`${src}/services/intercom`);
 
 jest.mock('../../../../src/v5/services/sso/frontegg');
 const FronteggService = require(`${src}/services/sso/frontegg`);
-
-jest.mock('../../../../src/v5/utils/helper/typeCheck');
-const TypeChecker = require(`${src}/utils/helper/typeCheck`);
 
 const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
