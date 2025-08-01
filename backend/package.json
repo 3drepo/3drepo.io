@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "5.18.0",
+  "version": "5.18.1",
   "engines": {
     "node": "22.x.x"
   },
@@ -36,7 +36,7 @@
     "amqplib": "0.10.5",
     "apidoc": "1.2.0",
     "app-config": "1.0.1",
-    "archiver": "6.0.2",
+    "archiver": "7.0.0",
     "archiver-zip-encrypted": "2.0.0",
     "async": "3.2.5",
     "axios": "1.8.3",
