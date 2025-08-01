@@ -24,14 +24,15 @@ import { DashboardListItemRow } from '@components/dashboard/dashboardList/dashbo
 import { DashboardListItemText } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemText/dashboardListItemText.component';
 import { SearchInput } from '@controls/search/searchInput';
 
-export default {
+const meta: Meta<typeof SearchContextComponent> = {
 	title: 'Dashboard/SearchContext',
 	component: SearchContextComponent,
 	argTypes: {
 		items: { control: 'object' },
 	},
 	parameters: { controls: { exclude: 'children' } },
-} as Meta<typeof SearchContextComponent>;
+};
+export default meta;
 
 const ObjectsListHeader = ({ columnNames, setSortConfig }) => (
 	<DashboardListHeader onSortingChange={setSortConfig}>

@@ -17,7 +17,7 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { Button } from '@mui/material';
 
-export default {
+const meta: Meta<typeof Button> = {
 	title: 'Buttons/MuiButton',
 	component: Button,
 	argTypes: {
@@ -52,7 +52,8 @@ export default {
 	parameters: {
 		controls: { exclude: ['variant'] },
 	},
-} as Meta<typeof Button>;
+};
+export default meta;
 
 type Story = StoryObj<typeof Button>;
 

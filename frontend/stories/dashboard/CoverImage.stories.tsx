@@ -19,7 +19,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
 import DefaultTeamspaceImg from '@assets/images/teamspace_placeholder.svg';
 
-export default {
+const meta: Meta<typeof CoverImage> = {
 	title: 'Dashboard/CoverImage',
 	component: CoverImage,
 	argTypes: {
@@ -31,7 +31,8 @@ export default {
 		},
 	},
 	parameters: { controls: { exclude: ['className'] } },
-} as Meta<typeof CoverImage>;
+};
+export default meta;
 
 type Story = StoryObj<typeof CoverImage>;
 

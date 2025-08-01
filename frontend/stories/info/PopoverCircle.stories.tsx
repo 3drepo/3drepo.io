@@ -18,11 +18,12 @@ import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { Meta, StoryObj } from '@storybook/react';
 import { PopoverCircle } from '@components/shared/popoverCircles/popoverCircle.component';
 
-export default {
+const meta: Meta<typeof PopoverCircle> = {
 	title: 'Info/PopoverCircle',
 	component: PopoverCircle,
 	parameters: { controls: { exclude: ['PopoverComponent'] } },
-} as Meta<typeof PopoverCircle>;
+};
+export default meta;
 
 type Story = StoryObj<typeof PopoverCircle>;
 

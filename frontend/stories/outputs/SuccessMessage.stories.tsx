@@ -17,7 +17,7 @@
 import { StoryObj, Meta } from '@storybook/react';
 import { SuccessMessage } from '@controls/successMessage/successMessage.component';
 
-export default {
+const meta: Meta<typeof SuccessMessage> = {
 	title: 'Outputs/SuccessMessage',
 	component: SuccessMessage,
 	argTypes: {
@@ -27,7 +27,8 @@ export default {
 		},
 	},
 	parameters: { controls: { exclude: ['className'] } },
-} as Meta<typeof SuccessMessage>;
+};
+export default meta;
 
 type Story = StoryObj<typeof SuccessMessage>;
 

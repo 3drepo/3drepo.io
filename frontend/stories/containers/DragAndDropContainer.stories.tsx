@@ -22,14 +22,15 @@ import { Button } from '@controls/button';
  
 const handleDropFiles = () => alert('Valid files have been dropped');
 
-export default {
+const meta: Meta<typeof DragAndDrop> = {
 	title: 'Containers/DragAndDrop',
 	component: DragAndDrop,
 	parameters: { controls: { exclude: ['className', 'onDrop'] } },
 	args: {
 		onDrop: handleDropFiles,
 	},
-} as Meta<typeof DragAndDrop>;
+};
+export default meta;
 
 type Story = StoryObj<typeof DragAndDrop>;
 

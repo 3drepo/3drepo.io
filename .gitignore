@@ -112,3 +112,6 @@ backend/globalConfig.json
 backend/bouncer_worker.log
 *.swl
 .vscode/settings.json
+
+*storybook.log
+storybook-static

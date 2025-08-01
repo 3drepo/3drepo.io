@@ -19,7 +19,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { LinkCard } from '@components/shared/linkCard/linkCard.component';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { Button } from '@controls/button';
-import { BrowserRouterDecorator } from '../../stories/decorators';
+import { BrowserRouterDecorator } from '../decorators';
 
 export default {
 	title: 'Dashboard/LinkCard',

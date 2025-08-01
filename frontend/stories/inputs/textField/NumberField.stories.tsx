@@ -18,7 +18,7 @@ import { NumberField } from '@controls/inputs/numberField/numberField.component'
 import { StoryObj, Meta } from '@storybook/react';
 import { FormDecorator } from '../inputDecorators';
 
-export default {
+const meta: Meta<typeof NumberField> = {
 	title: 'Inputs/TextField/NumberField',
 	argTypes: {
 		label: {
@@ -50,7 +50,8 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as Meta<typeof NumberField>;
+};
+export default meta;
 
 type Story = StoryObj<typeof NumberField>;
 

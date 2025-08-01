@@ -18,7 +18,7 @@ import { TextArea } from '@controls/inputs/textArea/textArea.component';
 import { StoryObj, Meta } from '@storybook/react';
 import { FormDecorator } from '../inputDecorators';
 
-export default {
+const meta: Meta<typeof TextArea> = {
 	title: 'Inputs/TextField/TextArea',
 	argTypes: {
 		label: {
@@ -55,7 +55,8 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as Meta<typeof TextArea>;
+};
+export default meta;
 
 type Story = StoryObj<typeof TextArea>;
 

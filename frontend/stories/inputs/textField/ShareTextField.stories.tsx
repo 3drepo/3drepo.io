@@ -17,7 +17,7 @@
 import { ShareTextField } from '@controls/shareTextField';
 import { Meta, StoryObj } from '@storybook/react';
 
-export default {
+const meta: Meta<typeof ShareTextField> = {
 	title: 'Inputs/ShareTextField',
 	argTypes: {
 		hideValue: {
@@ -33,7 +33,8 @@ export default {
 	},
 	component: ShareTextField,
 	parameters: { controls: { exclude: ['className'] } },
-} as Meta<typeof ShareTextField>;
+};
+export default meta;
 
 type Story = StoryObj<typeof ShareTextField>;
 

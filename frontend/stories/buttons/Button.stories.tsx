@@ -17,7 +17,7 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { Button } from '@controls/button';
 
-export default {
+const meta: Meta<typeof Button> = {
 	title: 'Buttons/Button',
 	component: Button,
 	argTypes: {
@@ -48,7 +48,8 @@ export default {
 	args: {
 		children: 'Controls Button',
 	},
-} as Meta<typeof Button>;
+}
+export default meta;
 
 type Story = StoryObj<typeof Button>;
 

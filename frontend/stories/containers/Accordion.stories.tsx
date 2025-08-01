@@ -19,7 +19,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { Accordion } from '@controls/accordion/accordion.component';
 import Icon from '@assets/icons/outlined/stepper_error-outlined.svg';
 
-export default {
+const meta: Meta<typeof Accordion> = {
 	title: 'Containers/Accordion',
 	component: Accordion,
 	argTypes: {
@@ -30,8 +30,24 @@ export default {
 			type: 'boolean',
 		},
 	},
-	parameters: { controls: { exclude: ['ref', 'elevation', 'square', 'variant', 'Icon'] } },
-} as Meta<typeof Accordion>;
+	parameters: { controls: { exclude: [
+		'ref',
+		'elevation',
+		'square',
+		'variant',
+		'Icon',
+		'children',
+		'classes',
+		'onChange',
+		'sx',
+		'TransitionComponent',
+		'TransitionProps',
+		'slots',
+		'slotProps',
+		'component',
+	] } },
+};
+export default meta;
 
 type Story = StoryObj<typeof Accordion>;
 

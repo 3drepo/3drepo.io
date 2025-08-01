@@ -1,3 +1,19 @@
+/**
+ *  Copyright (C) 2025 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 import { theme as V5Theme } from '@/v5/ui/themes/theme';
 import { theme as V5ViewerTheme } from '@/v5/ui/routes/viewer/theme';
 import { IntlProvider } from 'react-intl';
@@ -5,21 +21,23 @@ import { getIntl } from '@/v5/services/intl';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { ThemeProvider as MuiThemeProvider } from '@mui/material';
 import { ThemeProvider, createGlobalStyle } from 'styled-components';
-import React from 'react';
 
-export const parameters = {
-	actions: { argTypesRegex: "^on[A-Z].*" },
-	controls: {
-		matchers: {
-			color: /(background|color)$/i,
-			date: /Date$/,
+const preview = {
+	parameters: {
+		controls: {
+			matchers: {
+				color: /(background|color)$/i,
+				date: /Date$/i,
+			},
+			expanded: true,
 		},
-		expanded: true,
+		docs: {
+			transformSource: source => source.replace(/WithStyles\(ForwardRef\(/g, "").replace(/\)\)/g, ""),
+		},
 	},
-	docs: {
-		transformSource: source => source.replace(/WithStyles\(ForwardRef\(/g, "").replace(/\)\)/g, ""),
-	},
-}
+};
+
+export default preview;
 
 const V5_THEME = "V5";
 const V5_VIEWER_THEME = "V5 Viewer";

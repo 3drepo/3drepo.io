@@ -17,7 +17,7 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { JobPopoverCircle } from '@components/shared/popoverCircles/jobPopoverCircle/jobPopoverCircle.component';
 
-export default {
+const meta: Meta<typeof JobPopoverCircle> = {
 	title: 'Info/JobPopoverCircle',
 	component: JobPopoverCircle,
 	parameters: { controls: { exclude: [
@@ -33,7 +33,8 @@ export default {
 		'ref',
 		'backgroundColor',
 	] } },
-} as Meta<typeof JobPopoverCircle>;
+};
+export default meta;
 
 type Story = StoryObj<typeof JobPopoverCircle>;
 

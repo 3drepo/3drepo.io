@@ -25,14 +25,15 @@ const defaultUser = {
 	user: null,
 };
 
-export default {
+const meta: Meta<typeof Avatar> = {
 	title: 'Info/Avatar',
 	component: Avatar,
 	parameters: { controls: { exclude: ['onClick', 'className'] } },
 	args: {
 		user: defaultUser,
 	},
-} as Meta<typeof Avatar>;
+};
+export default meta;
 
 type Story = StoryObj<typeof Avatar>;
 

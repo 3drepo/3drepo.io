@@ -18,7 +18,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
 import { FormDecorator } from '../inputDecorators';
 
-export default {
+const meta: Meta<typeof Checkbox> = {
 	title: 'Inputs/Control/Checkbox',
 	argTypes: {
 		label: {
@@ -41,7 +41,8 @@ export default {
 		'ref',
 	] } },
 	decorators: [FormDecorator],
-} as Meta<typeof Checkbox>;
+};
+export default meta;
 
 type Story = StoryObj<typeof Checkbox>;
 

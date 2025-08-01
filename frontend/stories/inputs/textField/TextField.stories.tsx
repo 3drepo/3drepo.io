@@ -17,7 +17,7 @@
 import { TextField } from '@controls/inputs/textField/textField.component';
 import { StoryObj, Meta } from '@storybook/react';
 
-export default {
+const meta: Meta<typeof TextField> = {
 	title: 'Inputs/TextField/TextField',
 	argTypes: {
 		label: {
@@ -48,7 +48,8 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as Meta<typeof TextField>;
+};
+export default meta;
 
 type Story = StoryObj<typeof TextField>;
 

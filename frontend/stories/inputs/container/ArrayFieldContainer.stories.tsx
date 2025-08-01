@@ -47,7 +47,7 @@ const StatefulContainer = ({ disableAdd, disableRemove, Input }) => {
 	);
 };
 
-export default {
+const meta: Meta<typeof StatefulContainer> = {
 	title: 'Inputs/Container/ArrayFieldContainer',
 	component: StatefulContainer,
 	parameters: { controls: { exclude: [
@@ -58,7 +58,8 @@ export default {
 		'Input',
 	] } },
 	decorators: [FormDecorator],
-} as Meta<typeof StatefulContainer>;
+};
+export default meta;
 
 type Story = StoryObj<typeof StatefulContainer>;
 

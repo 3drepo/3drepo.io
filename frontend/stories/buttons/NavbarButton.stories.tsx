@@ -17,9 +17,9 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { NavbarButton } from '@controls/navbarButton/navbarButton.styles';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
-import { AppBarDecorator } from '../../stories/decorators';
+import { AppBarDecorator } from '../decorators';
 
-export default {
+const meta: Meta<typeof NavbarButton> = {
 	title: 'Buttons/NavbarButton',
 	component: NavbarButton,
 	parameters: { controls: { exclude: ['onClick', 'formError', 'children'] } },
@@ -27,7 +27,8 @@ export default {
 	args: {
 		children: <NotificationsIcon />,
 	},
-} as Meta<typeof NavbarButton>;
+};
+export default meta;
 
 type Story = StoryObj<typeof NavbarButton>;
 

@@ -18,7 +18,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { Toggle } from '@controls/inputs/toggle/toggle.component';
 import { FormDecorator } from '../inputDecorators';
 
-export default {
+const meta: Meta<typeof Toggle> = {
 	title: 'Inputs/Control/Toggle',
 	argTypes: {
 		defaultChecked: {
@@ -53,7 +53,8 @@ export default {
 		'ref',
 	] } },
 	decorators: [FormDecorator],
-} as Meta<typeof Toggle>;
+};
+export default meta;
 
 type Story = StoryObj<typeof Toggle>;
 

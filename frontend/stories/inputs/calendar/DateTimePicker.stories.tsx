@@ -19,7 +19,7 @@ import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.compo
 import { LocalizationProviderDecorator } from './date.decorator';
 import { FormDecorator } from '../inputDecorators';
 
-export default {
+const meta: Meta<typeof DateTimePicker> = {
 	title: 'Inputs/Calendar/DateTimePicker',
 	argTypes: {
 		disablePast: {
@@ -38,7 +38,8 @@ export default {
 		'PickerComponent',
 	] } },
 	decorators: [LocalizationProviderDecorator, FormDecorator],
-} as Meta<typeof DateTimePicker>;
+};
+export default meta;
 
 type Story = StoryObj<typeof DateTimePicker>;
 

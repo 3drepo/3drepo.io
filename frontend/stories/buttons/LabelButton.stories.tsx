@@ -17,7 +17,7 @@
 import { Meta, StoryObj } from '@storybook/react';
 import { LabelButton } from '@controls/button';
 
-export default {
+const meta: Meta<typeof LabelButton> = {
 	title: 'Buttons/Button',
 	component: LabelButton,
 	args: {
@@ -46,7 +46,8 @@ export default {
 		'startIcon',
 		'ref',
 	] } },
-} as Meta<typeof LabelButton>;
+};
+export default meta;
 
 type Story = StoryObj<typeof LabelButton>;
 

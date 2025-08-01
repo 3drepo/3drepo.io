@@ -39,11 +39,12 @@ const ThemePalette = () => (
 	</PaletteContainer>
 );
 
-export default {
+const meta: Meta<typeof ThemePalette> = {
 	title: 'Theme/Palette',
 	parameters: { layout: 'fullscreen' },
 	component: ThemePalette,
-} as Meta<typeof ThemePalette>;
+};
+export default meta;
 
 type Story = StoryObj<typeof ThemePalette>;
 export const Palette: Story = {};

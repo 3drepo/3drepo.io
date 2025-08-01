@@ -18,7 +18,7 @@ import { Meta, StoryObj } from '@storybook/react';
 import { CircleButton } from '@controls/circleButton';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
-export default {
+const meta: Meta<typeof CircleButton> = {
 	title: 'Buttons/CircleButton',
 	component: CircleButton,
 	argTypes: {
@@ -32,7 +32,8 @@ export default {
 		children: <NotificationsIcon />,
 	},
 	parameters: { controls: { exclude: ['onClick', 'children'] } },
-} as Meta<typeof CircleButton>;
+};
+export default meta;
 
 type Story = StoryObj<typeof CircleButton>;
 

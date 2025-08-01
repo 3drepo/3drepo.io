@@ -17,14 +17,15 @@
 
 import { Meta, StoryObj } from '@storybook/react';
 import { Breadcrumbs } from '@controls/breadcrumbs';
-import { AppBarDecorator, BrowserRouterDecorator } from '../../stories/decorators';
+import { AppBarDecorator, BrowserRouterDecorator } from '../decorators';
 
-export default {
+const meta: Meta<typeof Breadcrumbs> = {
 	title: 'Dashboard/BreadCrumbs',
 	component: Breadcrumbs,
 	decorators: [AppBarDecorator, BrowserRouterDecorator],
 	parameters: { controls: { exclude: ['breadcrumbs'] } },
-} as Meta<typeof Breadcrumbs>;
+};
+export default meta;
 
 type Story = StoryObj<typeof Breadcrumbs>;
 

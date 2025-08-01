@@ -51,7 +51,7 @@ export default {
 	args: {
 		children: 'Dashed container\'s content',
 	},
-	parameters: { controls: { exclude: ['className'] } },
+	parameters: { controls: { exclude: ['className', 'onClick'] } },
 } as Meta<typeof DashedContainer>;
 
 type Story = StoryObj<typeof DashedContainer>;

@@ -18,7 +18,7 @@ import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.c
 import { StoryObj, Meta } from '@storybook/react';
 import { FormDecorator } from '../inputDecorators';
 
-export default {
+const meta: Meta<typeof TextAreaFixedSize> = {
 	title: 'Inputs/TextField/TextAreaFixedSize',
 	argTypes: {
 		label: {
@@ -49,7 +49,8 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as Meta<typeof TextAreaFixedSize>;
+};
+export default meta;
 
 type Story = StoryObj<typeof TextAreaFixedSize>;
 

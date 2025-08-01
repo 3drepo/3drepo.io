@@ -52,6 +52,7 @@ export default {
 			defaultValue: 'Centred container\'s content',
 		},
 	},
+	parameters: { controls: { exclude: ['className', 'onClick'] } },
 	decorators: [
 		(Story) => (
 			<ParentComponent>
