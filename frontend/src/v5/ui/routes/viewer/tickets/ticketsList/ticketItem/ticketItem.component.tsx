@@ -69,6 +69,11 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 		TicketsCardActionsDispatchers.openTicket(ticket._id);
 	};
 
+	const onClickThumbnail = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		selectTicket(event);
+		TicketsActionsDispatchers.fetchTicketGroupsAndGoToView(teamspace, project, containerOrFederation, ticket._id);
+	};
+
 	return (
 		<TicketItemContainer key={ticket._id} ref={ref} onClick={onClickTicket} $selected={isSelected}>
 			<FlexRow>
@@ -95,7 +100,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 						</IssuePropertiesContainer>
 					)}
 				</FlexColumn>
-				{hasThumbnail && <TicketItemThumbnail ticket={ticket} selectTicket={selectTicket} />}
+				{hasThumbnail && <TicketItemThumbnail ticket={ticket} onClick={onClickThumbnail} />}
 			</FlexRow>
 			<BottomRow>
 				<Id>
