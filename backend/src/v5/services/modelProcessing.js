@@ -51,18 +51,8 @@ const onCallbackQMsg = async ({ content, properties }) => {
 			publish(events.QUEUED_TASK_UPDATE,
 				{ teamspace, model, corId: properties.correlationId, status });
 		} else {
-			const fedDataPath = `${sharedDir}/${properties.correlationId}/obj.json`;
-
-			const isFed = !!await stat(fedDataPath).catch(() => false);
-			const fedData = { };
-			if (isFed) {
-				// eslint-disable-next-line
-				const { subProjects } = require(fedDataPath);
-				fedData.containers = subProjects;
-			}
-
 			publish(events.QUEUED_TASK_COMPLETED,
-				{ teamspace, model, corId: properties.correlationId, user, value, message, ...fedData });
+				{ teamspace, model, corId: properties.correlationId, user, value, message });
 		}
 	} catch (err) {
 		logger.logError(`[${properties.correlationId}] Failed to process message: ${err?.message}`);
