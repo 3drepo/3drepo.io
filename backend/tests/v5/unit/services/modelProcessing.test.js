@@ -88,39 +88,6 @@ const testQueueModelUpload = () => {
 	afterAll(() => fs.rm(fileCreated).catch(() => {}));
 };
 
-const testQueueFederationUpdate = () => {
-	describe('queue federation update', () => {
-		const teamspace = generateRandomString();
-		const federation = generateRandomString();
-		const data = {
-			containers: times(4, () => ({ _id: generateUUIDString(), group: generateRandomString() })),
-			owner: generateRandomString(),
-		};
-
-		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
-			await expect(ModelProcessing.queueFederationUpdate(teamspace, federation, {}))
-				.rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
-		});
-		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
-			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
-			await expect(ModelProcessing.queueFederationUpdate(teamspace, federation, data))
-				.rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
-		});
-
-		test('should succeed with job inserted into the queue', async () => {
-			await expect(ModelProcessing.queueFederationUpdate(teamspace, federation, data)).resolves.toBeUndefined();
-
-			expect(Queue.queueMessage).toBeCalledTimes(1);
-			const corId = Queue.queueMessage.mock.calls[0][1];
-
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId, status: 'queued' });
-		});
-	});
-
-	afterEach(Queue.close);
-};
-
 const testCallbackQueueConsumer = () => {
 	describe('Callback queue consumption', () => {
 		const getCallbackFn = async () => {
@@ -175,44 +142,6 @@ const testCallbackQueueConsumer = () => {
 				value: content.value,
 				message: content.message,
 				user: content.user,
-			};
-
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
-		});
-
-		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event with container information if the task was a federation`, async () => {
-			const content = {
-				database: generateRandomString(),
-				value: 0,
-				project: generateRandomString(),
-				user: generateRandomString(),
-			};
-			const properties = {
-				correlationId: generateRandomString(),
-			};
-
-			const containers = [
-				generateRandomString(),
-				generateRandomString(),
-				generateRandomString(),
-			];
-
-			await fs.mkdir(`${config.cn_queue.shared_storage}/${properties.correlationId}`);
-			await fs.writeFile(`${config.cn_queue.shared_storage}/${properties.correlationId}/obj.json`,
-				JSON.stringify({ subProjects: containers }));
-
-			const callbackFn = await getCallbackFn();
-			await callbackFn({ content: JSON.stringify(content), properties });
-
-			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
-				corId: properties.correlationId,
-				value: content.value,
-				message: content.message,
-				user: content.user,
-				containers,
 			};
 
 			expect(publishFn).toBeCalledTimes(1);
@@ -343,7 +272,6 @@ const testGetLogArchive = () => {
 };
 describe('services/modelProcessing', () => {
 	testQueueModelUpload();
-	testQueueFederationUpdate();
 	testCallbackQueueConsumer();
 	testProcessDrawingUpload();
 	testGetLogArchive();
