@@ -211,6 +211,15 @@ Models.updateModelSubModels = async (teamspace, project, model, user, revId, con
 				modelType: modelTypes.FEDERATION,
 				data,
 			});
+		publish(events.MODEL_SETTINGS_UPDATE,
+			{
+				teamspace,
+				project,
+				model,
+				modelType: modelTypes.FEDERATION,
+				data
+			}
+		);
 	}
 };
 

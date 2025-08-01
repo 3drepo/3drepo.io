@@ -545,99 +545,62 @@ const testNewRevisionProcessed = () => {
 		});
 	});
 
-	describe('Update with new revision (Federation)', () => {
-		const retVal = 0;
+	describe('Update with new submodels (Federation)', () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const user = generateRandomString();
-		const corId = generateRandomString();
-		const containers = [generateRandomString(), generateRandomString(), generateRandomString()];
+		const revId = generateUUID();
+		const containers = [
+			{ _id: generateUUID(), group: generateRandomString() },
+			{ _id: generateUUID(), group: generateRandomString() },
+			{ _id: generateUUID(), },
+			{ _id: generateUUID(), },
+		];
 		const modelType = modelTypes.FEDERATION;
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
+		test(`Updating the submodels of a federation should trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
 			async () => {
-				const resInfo = { ...getInfoFromCode(retVal), retVal };
-				const { success, userErr } = resInfo;
 				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
 				EventsManager.publish.mockClear();
-				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, resInfo, user,
-					containers.map((containerId) => ({ project: containerId })),
+				await expect(Model.updateModelSubModels(
+					teamspace, project, model, user, revId, containers,
 				)).resolves.toBe(undefined);
 
 				expect(DBHandler.updateOne.mock.calls.length).toBe(1);
 				const action = DBHandler.updateOne.mock.calls[0][3];
 				expect(action.$set.status).toBe(undefined);
 				expect(action.$set).toHaveProperty('timestamp');
-				expect(action.$set.subModels).toEqual(containers.map((containerId) => ({ _id: containerId })));
+				expect(action.$set.subModels).toEqual(containers);
 
-				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
+				const expectedData = {
+					status: processStatuses.OK,
+					containers,
+					timestamp: action.$set.timestamp
+				};
 
-				const expectedData = { ...action.$set };
-				expectedData.status = expectedData.status ?? processStatuses.OK;
-
-				if (expectedData.errorReason) {
-					expectedData.errorReason.userErr = userErr;
-				}
-				if (expectedData.subModels) {
-					expectedData.containers = expectedData.subModels;
-					delete expectedData.subModels;
-				}
-
-				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledTimes(2);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
 						project,
 						model,
-						revId: corId,
+						revId,
 						user,
 						modelType,
 						data: expectedData,
-					});
-			});
-
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event (with groups)`,
-			async () => {
-				const resInfo = { ...getInfoFromCode(retVal), retVal };
-				const { success } = resInfo;
-				const containerData = containers.map((containerId) => ({
-					project: containerId, group: generateRandomString() }));
-
-				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
-				EventsManager.publish.mockClear();
-				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, resInfo, user, containerData,
-				)).resolves.toBe(undefined);
-
-				expect(DBHandler.updateOne.mock.calls.length).toBe(1);
-				const action = DBHandler.updateOne.mock.calls[0][3];
-				expect(action.$set.status).toBe(undefined);
-				expect(action.$set).toHaveProperty('timestamp');
-				expect(action.$set.subModels).toEqual(containerData.map(({ project: _id, group }) => ({ _id, group })));
-
-				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
-
-				const expectedData = { ...action.$set };
-
-				expectedData.status = expectedData.status ?? processStatuses.OK;
-				if (expectedData.subModels) {
-					expectedData.containers = expectedData.subModels;
-					delete expectedData.subModels;
-				}
-
-				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
+					}
+				);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
 					{
 						teamspace,
 						project,
 						model,
-						revId: corId,
-						user,
 						modelType,
 						data: expectedData,
-					});
-			});
+					}
+				);
+			}
+		);
 	});
 
 	describe('Update with new revision when the model is already deleted', () => {
