@@ -194,8 +194,8 @@ Models.updateModelSubModels = async (teamspace, project, model, user, revId, con
 		timestamp: new Date(),
 	};
 
-	const updated = await updateOneModel(teamspace, query, { $set: set });
-	if (updated) {
+	const { matchedCount } = await updateOneModel(teamspace, query, { $set: set });
+	if (matchedCount) {
 		const data = {
 			timestamp: set.timestamp,
 			containers: set.subModels,

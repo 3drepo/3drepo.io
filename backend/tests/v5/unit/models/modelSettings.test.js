@@ -601,6 +601,23 @@ const testNewRevisionProcessed = () => {
 				);
 			},
 		);
+
+		test('should not trigger if model no longer exists', async () => {
+			DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 0 });
+			EventsManager.publish.mockClear();
+
+			await expect(Model.updateModelSubModels(
+				teamspace, project, model, user, revId, containers,
+			)).resolves.toBe(undefined);
+
+			expect(DBHandler.updateOne.mock.calls.length).toBe(1);
+			const action = DBHandler.updateOne.mock.calls[0][3];
+			expect(action.$set.status).toBe(undefined);
+			expect(action.$set).toHaveProperty('timestamp');
+			expect(action.$set.subModels).toEqual(containers);
+
+			expect(EventsManager.publish).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('Update with new revision when the model is already deleted', () => {
