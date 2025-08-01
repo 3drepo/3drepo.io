@@ -560,7 +560,7 @@ const testNewRevisionProcessed = () => {
 		const modelType = modelTypes.FEDERATION;
 		test(`Updating the submodels of a federation should trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
 			async () => {
-				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
+				DBHandler.updateOne.mockResolvedValueOnce(true);
 				EventsManager.publish.mockClear();
 				await expect(Model.updateModelSubModels(
 					teamspace, project, model, user, revId, containers,
@@ -603,7 +603,7 @@ const testNewRevisionProcessed = () => {
 		);
 
 		test('should not trigger if model no longer exists', async () => {
-			DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 0 });
+			DBHandler.updateOne.mockResolvedValueOnce(true);
 			EventsManager.publish.mockClear();
 
 			await expect(Model.updateModelSubModels(
