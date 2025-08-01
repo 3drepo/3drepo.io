@@ -15,8 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const FormData = require('form-data');
-const { createReadStream } = require('fs');
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList } = require('../../utils');
 
@@ -24,56 +22,41 @@ const FSHandler = require(`${v5Path}/handler/fs`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { fileExists } = require(`${v5Path}/services/filesManager`);
 const { getRefEntry } = require(`${v5Path}/models/fileRefs`);
-const { getUserByEmail } = require(`${v5Path}/models/users`);
+const { getUserByEmail, updateProfile } = require(`${v5Path}/models/users`);
 const { getTeamspaceRefId } = require(`${v5Path}/models/teamspaceSettings`);
 const { getTeamspaceInvites } = require(`${v5Path}/models/teamspaceSettings`);
 const { splitArrayIntoChunks } = require(`${v5Path}/utils/helper/arrays`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${v5Path}/models/users.constants`);
 const { getAllUsersInAccount, updateUserDetails, uploadAvatar } = require(`${v5Path}/services/sso/frontegg`);
 
-const migratedUsersAvatars = new Set();
-
-const migrateUserAvatar = async (membersChunk, refId) => {
+const migrateUserAvatar = async (membersChunk) => {
 	for (const member of membersChunk) {
-		if (!migratedUsersAvatars.has(member.id)) {
+		// eslint-disable-next-line no-await-in-loop
+		const { user, customData: { firstName, lastName, migrated } } = await getUserByEmail(member.email);
+
+		if (!migrated) {
 			try {
 				// eslint-disable-next-line no-await-in-loop
-				const { user, customData: { firstName, lastName } } = await getUserByEmail(member.email);
-				// eslint-disable-next-line no-await-in-loop
 				const hasAvatar = await fileExists(USERS_DB_NAME, AVATARS_COL_NAME, user);
-				const updateDetailsPayload = {};
-
-				if (member.name !== `${firstName} ${lastName}`) {
-					updateDetailsPayload.name = `${firstName} ${lastName}`;
-				} else {
-					updateDetailsPayload.name = member.name;
-				}
-
-				// eslint-disable-next-line no-await-in-loop
 				if (hasAvatar) {
-				// eslint-disable-next-line no-await-in-loop
-					const { size, mimeType, link } = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, user);
-					const path = FSHandler.getFullPath(link);
-
-					const formData = new FormData();
-					formData.append('image', createReadStream(path), {
-						contentType: mimeType,
-						knownLength: size,
-					});
 					// eslint-disable-next-line no-await-in-loop
-					updateDetailsPayload.profilePictureUrl = await uploadAvatar(
+					const { link, mimeType } = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, user);
+					const path = FSHandler.getFullPath(link);
+					// eslint-disable-next-line no-await-in-loop
+					await uploadAvatar(
 						member.id,
-						refId,
-						formData,
+						path,
+						{ contentType: mimeType },
 					);
 				}
+				if (member.name !== `${firstName} ${lastName}`) {
+					// eslint-disable-next-line no-await-in-loop
+					await updateUserDetails(member.id, { name: `${firstName} ${lastName}` });
+				}
 				// eslint-disable-next-line no-await-in-loop
-				await updateUserDetails(member.id, updateDetailsPayload);
-
-				migratedUsersAvatars.add(member.id);
+				await updateProfile(user, { migrated: true });
 			} catch (error) {
-				logger.logInfo(`Failed to migrate users because: ${error.message}`);
-				throw error;
+				logger.logError(`Failed to migrate users because: ${error.message}`);
 			}
 		}
 	}
@@ -90,7 +73,7 @@ const run = async () => {
 		const overlap = members.filter((member) => !invitations.some((invite) => invite._id === member.email));
 
 		// eslint-disable-next-line no-await-in-loop
-		await Promise.all(splitArrayIntoChunks(overlap, 5).map((chunk) => migrateUserAvatar(chunk, refId)));
+		await Promise.all(splitArrayIntoChunks(overlap, 10).map((chunk) => migrateUserAvatar(chunk)));
 	}
 };
 

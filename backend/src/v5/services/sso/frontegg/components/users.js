@@ -108,14 +108,14 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 	}
 };
 
-Users.uploadAvatar = async (userId, path) => {
+Users.uploadAvatar = async (userId, path, options = {}) => {
 	try {
 		const config = await getConfig();
 		const { tenantId } = await Users.getUserById(userId);
 		const pathToFile = Path.resolve(path);
 
 		const formData = new FormData();
-		formData.append('image', createReadStream(pathToFile));
+		formData.append('image', createReadStream(pathToFile), options);
 
 		const headers = {
 			...await getBearerHeader(),
