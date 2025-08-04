@@ -133,8 +133,8 @@ const modelUploadTest = () => {
 
 			const createFedRoute = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations`;
 			const createFedBody = {
-				unit: "mm",
-				name: "testFederation",
+				unit: 'mm',
+				name: 'testFederation',
 			};
 
 			const fedResponse = await agent.post(`${createFedRoute}?key=${user.apiKey}`)
@@ -144,8 +144,8 @@ const modelUploadTest = () => {
 				...data,
 				data: {
 					...createFedBody,
-					_id: fedResponse.body._id
-				}
+					_id: fedResponse.body._id,
+				},
 			});
 
 			socket.close();
@@ -184,7 +184,7 @@ const modelUploadTest = () => {
 
 			const revisionUpdate = await newRevisionPromise;
 
-			expect(isUUIDString(revisionUpdate.data._id)).toBe(true)
+			expect(isUUIDString(revisionUpdate.data._id)).toBe(true);
 			expect(revisionUpdate.data.author).toEqual(user.user);
 			expect(revisionUpdate.data.timestamp).toBeInstanceOf(Number);
 			expect(new Date(settingsUpdate.data.timestamp).getTime()).not.toBeNan();
