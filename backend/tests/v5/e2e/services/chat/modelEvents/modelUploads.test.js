@@ -176,7 +176,7 @@ const modelUploadTest = () => {
 
 			expect(settingsUpdate.data.status).toEqual('ok');
 			expect(settingsUpdate.data.containers).toEqual(containers);
-			expect(settingsUpdate.data.timestamp).toBeInstanceOf(String);
+			expect(typeof settingsUpdate.data.timestamp).toBe('string');
 			expect(new Date(settingsUpdate.data.timestamp).getTime()).not.toBeNan();
 			expect(settingsUpdate.model).toEqual(federation._id);
 			expect(settingsUpdate.project).toEqual(project.id);
@@ -186,7 +186,7 @@ const modelUploadTest = () => {
 
 			expect(isUUIDString(revisionUpdate.data._id)).toBe(true);
 			expect(revisionUpdate.data.author).toEqual(user.user);
-			expect(revisionUpdate.data.timestamp).toBeInstanceOf(Number);
+			expect(typeof revisionUpdate.data.timestamp).toBe('number');
 			expect(new Date(settingsUpdate.data.timestamp).getTime()).not.toBeNan();
 			expect(revisionUpdate.model).toEqual(federation._id);
 			expect(revisionUpdate.project).toEqual(project.id);
