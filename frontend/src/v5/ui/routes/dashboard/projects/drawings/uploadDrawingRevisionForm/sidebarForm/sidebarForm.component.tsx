@@ -29,6 +29,7 @@ import { MODEL_UNITS } from '../../../models.helpers';
 import { DoubleInputLineContainer } from '../../drawingDialogs/drawingForm.styles';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CALIBRATION_INVALID_RANGE_ERROR } from '@/v5/validation/drawingSchemes/drawingSchemes';
 
 export const SidebarForm = () => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -47,6 +48,7 @@ export const SidebarForm = () => {
 	const hasPendingRevisions = !!DrawingRevisionsHooksSelectors.selectRevisionsPending(drawingId);
 	const drawingRevisionsArePending = !!DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
 	const needsFetchingCalibration = hasActiveRevisions && (hasPendingRevisions || drawingRevisionsArePending) && !isNumber(verticalRange[0]);
+	const hideBottomExtentError = (errors.calibration?.verticalRange || []).some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
 
 	useEffect(() => {
 		if (get(dirtyFields, `${revisionPrefix}.calibration.verticalRange`)?.some((v) => v)) {
@@ -105,7 +107,7 @@ export const SidebarForm = () => {
 					id="drawing.uploads.sidebar.drawing.calibrationInformation"
 				/>
 			</Heading>
-			<DoubleInputLineContainer>
+			<DoubleInputLineContainer $hideBottomExtentError={hideBottomExtentError}>
 				<FormNumberField
 					name={`${revisionPrefix}.calibration.verticalRange.0`}
 					formError={getError('calibration.verticalRange.0')}
