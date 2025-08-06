@@ -80,7 +80,6 @@ export const Viewer = () => {
 	}, [project]);
 
 	useEffect(() => {
-		TicketsCardActionsDispatchers.resetFilters();
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
@@ -114,7 +113,7 @@ export const Viewer = () => {
 
 	return (
 		<>
-			<TicketFiltersSetter />
+			<TicketFiltersSetter key={revision} />
 			<OpenDrawingFromUrl />
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
