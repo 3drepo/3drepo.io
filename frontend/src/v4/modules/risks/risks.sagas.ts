@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit } from 'lodash';
 import * as queryString from 'query-string';
@@ -55,6 +54,7 @@ import { selectSelectedSequence, selectSelectedStartingDate, SequencesActions } 
 import { SnackbarActions } from '../snackbar';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
+import { RouterActions } from '../router/router.redux';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
 	selectActiveRiskDetails,
@@ -311,7 +311,7 @@ function* goToRisk({ risk }) {
 		query = '?' + query;
 	}
 
-	yield put(push(`${path}${query}`));
+	yield put(RouterActions.navigate(`${path}${query}`));
 }
 
 function* showDetails({ revision, riskId }) {

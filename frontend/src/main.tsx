@@ -46,6 +46,7 @@ import { initializeHotjar } from './v5/services/hotjar';
 import { dispatch } from './v5/helpers/redux.helpers';
 import { AUTH_PATH as V5_AUTH_PATH } from './v5/ui/routes/routes.constants';
 import { RouteTitle } from './v5/services/routing/routeTitle.component';
+import { InitializeConnectedRouter } from './v5/services/connectedRouter';
 
 window.UnityUtil = UnityUtil;
 
@@ -70,6 +71,7 @@ const render = () => {
 			<BrowserRouter>
 				<IntlProvider {...getIntl()}>
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
+						<InitializeConnectedRouter />
 						<Routes>
 							<Route path="/*" element={<Navigate to="v5/dashboard" />} />
 							<Route path={ROUTES.SIGN_UP} element={<Navigate to={{ pathname: V5_AUTH_PATH, search: window.location.search }} replace />} />

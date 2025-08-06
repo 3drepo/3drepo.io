@@ -20,22 +20,18 @@ import { matchPath } from 'react-router';
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
 
-export const selectRouterDomain = (state) => state.router || '';
+const selectRouterDomain = (state) => state.router || '';
 
-export const selectLocation = createSelector(
+const selectLocation = createSelector(
 	selectRouterDomain, (router) => router.location || ''
 );
 
-export const selectPathname = createSelector(
-	selectLocation, (location) => location.pathname
+export const selectNavigationTarget = createSelector(
+	selectRouterDomain, (router) => router.navigationTarget || ''
 );
 
-export const selectSearch = createSelector(
-	selectLocation, (location) => location.search
-);
-
-export const selectHash = createSelector(
-	selectLocation, (location) => location.hash
+export const selectGoBackRequested = createSelector(
+	selectRouterDomain, (router) => router.goBackRequested || false
 );
 
 const selectV4UrlParams = createSelector(
