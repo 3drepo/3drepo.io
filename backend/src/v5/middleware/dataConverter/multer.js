@@ -34,7 +34,17 @@ const singleFileMulterPromise = (req, fileName, fileFilter, maxSize,
 	if (storeInMemory) {
 		options.storage = Multer.memoryStorage();
 	} else {
-		options.dest = uploadConfig.uploadDir;
+		options.storage = Multer.diskStorage({
+			destination: (_req, _file, cb) => {
+				cb(null, uploadConfig.uploadDir);
+			},
+			filename: (_req, file, cb) => {
+				const ext = Path.extname(file.originalname);
+				const name = Path.basename(file.originalname, ext);
+				const uniqueName = `${name}_${Date.now()}${ext}`;
+				cb(null, uniqueName);
+			},
+		});
 	}
 
 	Multer(options).single(fileName)(req, null, (err) => {
@@ -69,9 +79,10 @@ const fileMatchesExt = async (buffer, fileName) => {
 MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.uploadSizeLimit, storeInMemory = false) => async (req, res, next) => {
 	try {
 		await singleFileMulterPromise(req, fileName, fileFilter, maxSize, storeInMemory);
+
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
-		if (!await fileMatchesExt(req.file.buffer, req.file.originalname)) {
+		if (req.file.buffer && !await fileMatchesExt(req.file.buffer, req.file.originalname)) {
 			throw templates.unsupportedFileFormat;
 		}
 		await next();
@@ -90,7 +101,7 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = upload
 	}
 };
 
-MulterHelper.singleImageUpload = (fileName) => MulterHelper.singleFileUpload(
-	fileName, imageFilter, uploadConfig.imageSizeLimit, true);
+MulterHelper.singleImageUpload = (fileName, storeInMemory = true) => MulterHelper.singleFileUpload(
+	fileName, imageFilter, uploadConfig.imageSizeLimit, storeInMemory);
 
 module.exports = MulterHelper;
