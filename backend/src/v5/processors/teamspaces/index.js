@@ -91,7 +91,7 @@ Teamspaces.initTeamspace = async (teamspaceName, owner, accountId) => {
 	}
 };
 
-Teamspaces.removeTeamspace = async (teamspace) => {
+Teamspaces.removeTeamspace = async (teamspace, removeAssociatedAccount = true) => {
 	const teamspaceRef = await getTeamspaceRefId(teamspace);
 	await Promise.all([
 		removeAllUsersFromTS(teamspace),
@@ -101,8 +101,8 @@ Teamspaces.removeTeamspace = async (teamspace) => {
 	await Promise.all([
 		dropDatabase(teamspace),
 		removeTeamspaceRole(teamspace),
-		removeAccount(teamspaceRef),
 	]);
+	if (removeAssociatedAccount) await removeAccount(teamspaceRef);
 };
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
