@@ -201,7 +201,7 @@
 		SUBSCRIPTION_NOT_ASSIGNED: { message: "This subscription is not assigned to any user", status: 400 },
 		USER_IN_COLLABORATOR_LIST: { message: "This user is currently in collaborator list of a model", status: 400 },
 		SUBSCRIPTION_CANNOT_REMOVE_SELF: { message: "You cannot remove yourself", status: 400 },
-		USER_NOT_ASSIGNED_JOB: { message: "Job must be assigned to user", status: 400 },
+		USER_NOT_ASSIGNED_ROLE: { message: "Role must be assigned to user", status: 400 },
 		USER_ALREADY_EXISTS: { message: "User already exists", status: 400 },
 
 		PAYMENT_TOKEN_ERROR: { message: "Payment token is invalid", status: 400 },
@@ -266,10 +266,10 @@
 		SEQ_TAG_NOT_FOUND: {message: "Sequence Tag not set", status: 404},
 		UNKNOWN_PAY_PLAN: { message: "Unknown paypal plan", status: 500},
 
-		JOB_NOT_FOUND:{ message: "Job not found", status: 404},
-		DUP_JOB: {message: "Duplicate job id", status: 400},
-		JOB_ASSIGNED: {message: "Cannot remove assigned job", status: 400},
-		JOB_ID_INVALID: { message: "Invalid job ID", status: 400},
+		ROLE_NOT_FOUND:{ message: "Role not found", status: 404},
+		DUP_ROLE: {message: "Duplicate role id", status: 400},
+		ROLE_ASSIGNED: {message: "Cannot remove assigned role", status: 400},
+		ROLE_ID_INVALID: { message: "Invalid role ID", status: 400},
 		DUP_PERM_TEMPLATE: {message: "Duplicate template ID", status: 400},
 		PERM_NOT_FOUND: {message: "Permission template not found", status: 404},
 		INVALID_PERM: {message: "Invalid permission", status: 400},

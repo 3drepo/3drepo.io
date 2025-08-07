@@ -64,7 +64,7 @@ const presetModules = createConstantMapping([
 ]);
 
 const presetEnumValues = createConstantMapping([
-	'jobsAndUsers',
+	'rolesAndUsers',
 	'riskCategories',
 ]);
 
@@ -160,7 +160,7 @@ const defaultProperties = [
 	createPropertyEntry('Default Image', propTypes.IMAGE, { [propOptions.AVAILABLE_IF]: ({ defaultImage }) => defaultImage }),
 	createPropertyEntry('Default View', propTypes.VIEW, { [propOptions.AVAILABLE_IF]: ({ defaultView }) => defaultView }),
 	createPropertyEntry('Priority', propTypes.ONE_OF, { [propOptions.VALUES]: ['None', 'Low', 'Medium', 'High'], [propOptions.DEFAULT]: 'None', [propOptions.AVAILABLE_IF]: ({ issueProperties }) => issueProperties }),
-	createPropertyEntry('Assignees', propTypes.MANY_OF, { [propOptions.VALUES]: presetEnumValues.JOBS_AND_USERS, [propOptions.AVAILABLE_IF]: ({ issueProperties }) => issueProperties }),
+	createPropertyEntry('Assignees', propTypes.MANY_OF, { [propOptions.VALUES]: presetEnumValues.ROLES_AND_USERS, [propOptions.AVAILABLE_IF]: ({ issueProperties }) => issueProperties }),
 	createPropertyEntry('Due Date', propTypes.DATE, { [propOptions.AVAILABLE_IF]: ({ issueProperties }) => issueProperties }),
 ];
 
