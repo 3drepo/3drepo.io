@@ -74,3 +74,5 @@ export type UploadItemFields = CreateDrawingRevisionBody & {
 	extension: string;
 	isMultiPagePdf?: boolean;
 };
+
+export type UploadDrawingFormType = { uploads: UploadItemFields[] };
