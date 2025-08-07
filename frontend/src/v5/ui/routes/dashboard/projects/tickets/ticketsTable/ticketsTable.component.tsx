@@ -44,19 +44,20 @@ import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
-import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { ResizableTableContext, ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsTableContext } from './ticketsTableContext/ticketsTableContext';
+import { TicketsTableContext, TicketsTableContextComponent } from './ticketsTableContext/ticketsTableContext';
 import { ticketIsCompleted } from '@controls/chip/statusChip/statusChip.helpers';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { selectTicketPropertyByName, selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { useWatchPropertyChange } from './useWatchPropertyChange';
 import { throttle } from 'lodash';
+import { getAvailableColumnsForTemplate } from './ticketsTableContext/ticketsTableContext.helpers';
 
 const paramToInputProps = (value, setter) => ({
 	value,
-	onChange: (ev: SelectChangeEvent<unknown>) =>  setter((ev.target as HTMLInputElement).value),
+	onChange: (ev: SelectChangeEvent<unknown>) => setter((ev.target as HTMLInputElement).value),
 });
 
 
@@ -72,8 +73,7 @@ export const TicketsTable = () => {
 
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
-	const [presetValue, setPresetValue] = useState('');
-	const [containerOrFederation,, setContainerOrFederation] = useSearchParam('containerOrFederation');
+	const [containerOrFederation, , setContainerOrFederation] = useSearchParam('containerOrFederation');
 	const models = useSelectedModels();
 
 	const setTemplate = useCallback((newTemplate) => {
@@ -82,26 +82,9 @@ export const TicketsTable = () => {
 		history.push(path);
 	}, [params]);
 
-	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
-		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
-		const newParams = { ...params, ticketId: id };
-		const search = '?' + setContainerOrFederation(modelId);
-		setPresetValue(groupByVal);
-		const path = generatePath(TICKETS_ROUTE + search, newParams);
-
-		if (replace) {
-			history.replace(path);
-		} else {
-			history.push(path);
-		}
-	}, [params]);
-
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
 	}, [ticketId]);
-
-	const isNewTicket = (ticketId || '').toLowerCase() === NEW_TICKET_ID;
-	const clearTicketId = () => setTicketValue();
 
 	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
@@ -112,17 +95,15 @@ export const TicketsTable = () => {
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-	
+
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = tickets.filter((t) => ticketIsCompleted(t, selectedTemplate) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);
 	}, [template, tickets, showCompleted]);
-	
-	const newTicketButtonIsDisabled = useMemo(() => 
-		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
-	[models, containerOrFederation]);
 
-	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
+	const newTicketButtonIsDisabled = useMemo(() =>
+		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
+		[models, containerOrFederation]);
 
 	const filterTickets = useCallback(throttle((items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
@@ -135,20 +116,9 @@ export const TicketsTable = () => {
 		return elementsToFilter.some((str = '') => str.toLowerCase().includes(query.toLowerCase()));
 	}, 100)), [templates]);
 
-	const getOpenInViewerLink = () => {
-		if (!containerOrFederation) return '';
-
-		const pathname = generatePath(VIEWER_ROUTE, {
-			teamspace,
-			project,
-			containerOrFederation: containerOrFederation || '',
-		});
-		return pathname + (ticketId ? `?ticketId=${ticketId}` : '');
-	};
-
 
 	useEffect(() => {
-		if (!models.length ) return;
+		if (!models.length) return;
 
 		containersAndFederations.forEach((modelId) => {
 			if (selectTicketsHaveBeenFetched(getState())(modelId)) return;
@@ -178,11 +148,6 @@ export const TicketsTable = () => {
 	}, []);
 
 	useEffect(() => {
-		if (containersAndFederations.includes(containerOrFederation)) return;
-		clearTicketId();
-	}, [containersAndFederations, containerOrFederation]);
-
-	useEffect(() => {
 		TicketsCardActionsDispatchers.setReadOnly(readOnly);
 	}, [readOnly]);
 
@@ -197,9 +162,9 @@ export const TicketsTable = () => {
 		}
 	}, [template]);
 
-	useEffect(() => {
-		setPresetValue('');
-	}, [groupBy]);
+	// useEffect(() => {
+	// 	setPresetValue('');
+	// }, [groupBy]);
 
 	useEffect(() => {
 		visibleSortedColumnsNames.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
@@ -208,6 +173,20 @@ export const TicketsTable = () => {
 			.filter((name) => !INITIAL_COLUMNS.includes(name))
 			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
 	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join('')]);
+
+	const setTicketValue = useCallback((modelId?: string, ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
+		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
+		const newParams = { ...params, ticketId: id };
+		const search = '?' + setContainerOrFederation(modelId);
+		// setPresetValue(groupByVal);
+		const path = generatePath(TICKETS_ROUTE + search, newParams);
+
+		if (replace) {
+			history.replace(path);
+		} else {
+			history.push(path);
+		}
+	}, [params]);
 
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
 	return (
@@ -236,7 +215,7 @@ export const TicketsTable = () => {
 					<SearchInput
 						placeholder={formatMessage({ id: 'ticketsTable.search.placeholder', defaultMessage: 'Search...' })}
 					/>
-					{!selectedTemplate.deprecated 
+					{!selectedTemplate.deprecated
 						&&
 						<NewTicketMenu
 							TriggerButton={(
@@ -253,35 +232,105 @@ export const TicketsTable = () => {
 				</FlexContainer>
 			</FiltersContainer>
 			<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} />
-			<SidePanel open={!!ticketId && !!models.length && !!containerOrFederation}>
-				<SlidePanelHeader>
-					<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
-						<OpenInViewerButton disabled={isNewTicket}>
-							<FormattedMessage
-								id="ticketsTable.button.openIn3DViewer"
-								defaultMessage="Open in 3D viewer"
-							/>
-						</OpenInViewerButton>
-					</Link>
-					<CircleButton onClick={clearTicketId}>
-						<ExpandIcon />
-					</CircleButton>
-				</SlidePanelHeader>
-				<MuiThemeProvider theme={theme}>
-					<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
-						{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate}  clearTicketId={clearTicketId} />)}
-						{isNewTicket && (
-							<NewTicketSlide
-								presetValue={{ key: groupBy, value: presetValue }}
-								template={selectedTemplate}
-								containerOrFederation={containerOrFederation}
-								onSave={onSaveTicket}
-								onDirtyStateChange={setIsNewTicketDirty}
-							/>
-						)}
-					</TicketContextComponent>
-				</MuiThemeProvider>
-			</SidePanel>
 		</SearchContextComponent>
+	);
+};
+
+const TabularViewTicketForm = ({ setIsNewTicketDirty }) => {
+	const history = useHistory();
+
+	const [presetValue, setPresetValue] = useState('');
+	const [containerOrFederation, , setContainerOrFederation] = useSearchParam('containerOrFederation');
+	const params = useParams<DashboardTicketsParams>();
+	const { ticketId, teamspace, project, template } = params
+	const isNewTicket = (ticketId || '').toLowerCase() === NEW_TICKET_ID;
+
+	const getOpenInViewerLink = () => {
+		if (!containerOrFederation) return '';
+
+		const pathname = generatePath(VIEWER_ROUTE, {
+			teamspace,
+			project,
+			containerOrFederation: containerOrFederation || '',
+		});
+		return pathname + (ticketId ? `?ticketId=${ticketId}` : '');
+	};
+
+	// useEffect(() => {
+	// 	if (containersAndFederations.includes(containerOrFederation)) return;
+	// 	clearTicketId();
+	// }, [containersAndFederations, containerOrFederation]);
+
+
+	const setTicketValue = useCallback((modelId?: string, ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
+		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
+		const newParams = { ...params, ticketId: id };
+		const search = '?' + setContainerOrFederation(modelId);
+		setPresetValue(groupByVal);
+		const path = generatePath(TICKETS_ROUTE + search, newParams);
+
+		if (replace) {
+			history.replace(path);
+		} else {
+			history.push(path);
+		}
+	}, [params]);
+
+	const clearTicketId = () => setTicketValue();
+
+	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
+	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+
+
+
+
+	return (<SidePanel open={!!ticketId && !!containerOrFederation}>
+		<SlidePanelHeader>
+			<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
+				<OpenInViewerButton disabled={isNewTicket}>
+					<FormattedMessage
+						id="ticketsTable.button.openIn3DViewer"
+						defaultMessage="Open in 3D viewer"
+					/>
+				</OpenInViewerButton>
+			</Link>
+			<CircleButton onClick={clearTicketId}>
+				<ExpandIcon />
+			</CircleButton>
+		</SlidePanelHeader>
+		<MuiThemeProvider theme={theme}>
+			<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
+				{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
+				{isNewTicket && (
+					<NewTicketSlide
+						// presetValue={{ key: groupBy, value: presetValue }}
+						presetValue={{ key: '', value: '' }}
+						template={selectedTemplate}
+						containerOrFederation={containerOrFederation}
+						onSave={onSaveTicket}
+						onDirtyStateChange={setIsNewTicketDirty}
+					/>
+				)}
+			</TicketContextComponent>
+		</MuiThemeProvider>
+	</SidePanel>
+	)
+
+}
+
+
+export const TabularView = () => {
+	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+	const templateHasBeenFetched = templateAlreadyFetched(template);
+	const columns = templateHasBeenFetched ? getAvailableColumnsForTemplate(template) : [];
+
+	return (
+		<TicketsTableContextComponent>
+			<ResizableTableContextComponent columns={columns} columnGap={1} key={templateId + templateHasBeenFetched}>
+				<TicketsTable />
+				<TabularViewTicketForm setIsNewTicketDirty={()=>{}}/>
+			</ResizableTableContextComponent>
+		</TicketsTableContextComponent>
 	);
 };
