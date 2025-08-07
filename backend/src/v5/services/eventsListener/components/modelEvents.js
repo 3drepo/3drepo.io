@@ -58,7 +58,7 @@ const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	}
 };
 
-const queueTasksCompleted = async ({ teamspace, model, value, corId, user, containers }) => {
+const queueTasksCompleted = async ({ teamspace, model, value, corId, user }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
 		const modelType = await getModelType(teamspace, model);
@@ -70,7 +70,7 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user, conta
 			// Revision status for drawings is tracked in the revision document - 3D will also move there eventually.
 			await onProcessingCompleted(teamspace, projectId, model, revId, errorInfo, modelType);
 		} else {
-			await newRevisionProcessed(teamspace, projectId, model, revId, errorInfo, user, containers);
+			await newRevisionProcessed(teamspace, projectId, model, revId, errorInfo, user);
 		}
 	} catch (err) {
 		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${err.message}`);
