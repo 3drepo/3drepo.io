@@ -49,7 +49,8 @@ export const SidebarForm = () => {
 	const hasPendingRevisions = !!DrawingRevisionsHooksSelectors.selectRevisionsPending(drawingId);
 	const drawingRevisionsArePending = !!DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
 	const needsFetchingCalibration = hasActiveRevisions && (hasPendingRevisions || drawingRevisionsArePending) && !isNumber(verticalRange[0]);
-	const hideBottomExtentError = (errors.uploads?.[selectedIndex]?.calibration?.verticalRange || []).some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
+	const hideBottomExtentError = (errors.uploads?.[selectedIndex]?.calibration?.verticalRange || [])
+		.some((e: FieldError) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
 
 	useEffect(() => {
 		if (get(dirtyFields, `${revisionPrefix}.calibration.verticalRange`)?.some((v) => v)) {
