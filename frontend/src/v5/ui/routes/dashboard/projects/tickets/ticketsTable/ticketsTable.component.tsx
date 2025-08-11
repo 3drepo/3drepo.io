@@ -26,8 +26,7 @@ import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { CircleButton } from '@controls/circleButton';
-import { ThemeProvider as MuiThemeProvider, SelectChangeEvent } from '@mui/material';
-import { theme } from '@/v5/ui/routes/viewer/theme';
+import { SelectChangeEvent } from '@mui/material';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
@@ -60,12 +59,10 @@ const paramToInputProps = (value, setter) => ({
 	onChange: (ev: SelectChangeEvent<unknown>) => setter((ev.target as HTMLInputElement).value),
 });
 
-
 export const TicketsTable = () => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
-
 
 	const { teamspace, project, template, ticketId } = params;
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
@@ -256,6 +253,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty }) => {
 		return pathname + (ticketId ? `?ticketId=${ticketId}` : '');
 	};
 
+
 	// useEffect(() => {
 	// 	if (containersAndFederations.includes(containerOrFederation)) return;
 	// 	clearTicketId();
@@ -281,10 +279,8 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty }) => {
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 
-
-
-
-	return (<SidePanel open={!!ticketId && !!containerOrFederation}>
+	return (
+	<SidePanel open={!!ticketId && !!containerOrFederation}>
 		<SlidePanelHeader>
 			<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
 				<OpenInViewerButton disabled={isNewTicket}>
@@ -298,25 +294,23 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty }) => {
 				<ExpandIcon />
 			</CircleButton>
 		</SlidePanelHeader>
-		<MuiThemeProvider theme={theme}>
-			<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
-				{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
-				{isNewTicket && (
-					<NewTicketSlide
-						// presetValue={{ key: groupBy, value: presetValue }}
-						presetValue={{ key: '', value: '' }}
-						template={selectedTemplate}
-						containerOrFederation={containerOrFederation}
-						onSave={onSaveTicket}
-						onDirtyStateChange={setIsNewTicketDirty}
-					/>
-				)}
-			</TicketContextComponent>
-		</MuiThemeProvider>
+		<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
+			{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
+			{isNewTicket && (
+				<NewTicketSlide
+					// presetValue={{ key: groupBy, value: presetValue }}
+					presetValue={{ key: '', value: '' }}
+					template={selectedTemplate}
+					containerOrFederation={containerOrFederation}
+					onSave={onSaveTicket}
+					onDirtyStateChange={setIsNewTicketDirty}
+				/>
+			)}
+		</TicketContextComponent>
 	</SidePanel>
 	)
-
 }
+
 
 
 export const TabularView = () => {

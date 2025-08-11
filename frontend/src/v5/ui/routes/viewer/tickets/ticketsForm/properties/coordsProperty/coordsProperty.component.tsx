@@ -43,18 +43,22 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const prevValue = useRef(undefined);
 	const { getValues } = useFormContext();
 	const ticket = getValues() as ITicket;
-	const selectedTemplateId = ticket?.type ?? TicketsCardHooksSelectors.selectSelectedTemplateId();
+	let selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+
+	if (!selectedTemplateId) {
+		selectedTemplateId = ticket?.type;
+	}
+
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 
 	let colorTriggerPropPath = '';
 	let colorTriggerPropValue = '';
 
-	// A weird bug appeared in prod if tabular view, using this would sometimes trigger an error in react useref would return
-	// a number instead of an object triggering an error inside usewatch
-	if (isViewer) {
-		colorTriggerPropPath = getColorTriggerPropName(name, template);
-		colorTriggerPropValue =  useWatch({ name: colorTriggerPropPath }) ?? get(ticket, colorTriggerPropPath);
+	colorTriggerPropPath = getColorTriggerPropName(name, template);
+	colorTriggerPropValue = useWatch({ name: colorTriggerPropPath });
+	if (!colorTriggerPropValue) {
+		colorTriggerPropValue = get(ticket, colorTriggerPropPath);
 	}
 
 	const isNewTicket = !ticket?._id;
