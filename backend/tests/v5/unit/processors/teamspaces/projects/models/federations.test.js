@@ -24,8 +24,7 @@ jest.mock('../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
-jest.mock('../../../../../../../src/v5/models/history');
-const History = require(`${src}/models/history`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
@@ -298,7 +297,7 @@ const testNewRevision = () => {
 	describe('Add new federation revision', () => {
 		test('should succeed', async () => {
 			ModelSettings.updateModelSubModels.mockResolvedValueOnce();
-			History.createRevision.mockResolvedValueOnce();
+			Revisions.addRevision.mockResolvedValueOnce();
 
 			const teamspace = generateRandomString();
 			const projectId = generateRandomString();
@@ -324,13 +323,16 @@ const testNewRevision = () => {
 
 			await Federations.newRevision(teamspace, projectId, model, info);
 
-			expect(History.createRevision).toHaveBeenCalledTimes(1);
-			const createRevisionArguments = History.createRevision.mock.calls[0];
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			const createRevisionArguments = Revisions.addRevision.mock.calls[0];
 
 			expect(createRevisionArguments[0]).toEqual(teamspace);
 			expect(createRevisionArguments[1]).toEqual(projectId);
 			expect(createRevisionArguments[2]).toEqual(model);
-			const revision = createRevisionArguments[3];
+			expect(createRevisionArguments[3]).toEqual(modelTypes.FEDERATION);
+			const revision = createRevisionArguments[4];
+			expect(revision.author).toEqual(info.owner);
+			expect(revision.containers).toEqual(info.containers);
 
 			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledWith(
