@@ -75,7 +75,8 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 	const { filteredItems } = useContext(SearchContext);
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
-		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
+		const presetValue = { key:groupBy, value: (groupByValue === UNSET) ? null : groupByValue };
+		setTicketValue(modelId, NEW_TICKET_ID, presetValue);
 	};
 
 	if (!groupBy) {

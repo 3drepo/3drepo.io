@@ -38,7 +38,7 @@ import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFede
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
 import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SearchInput, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, CompletedChip } from '../tickets.styles';
-import { INITIAL_COLUMNS, NEW_TICKET_ID } from './ticketsTable.helper';
+import { INITIAL_COLUMNS, NEW_TICKET_ID, PresetValue, SetTicketValue } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
@@ -59,7 +59,13 @@ const paramToInputProps = (value, setter) => ({
 	onChange: (ev: SelectChangeEvent<unknown>) => setter((ev.target as HTMLInputElement).value),
 });
 
-export const TicketsTable = () => {
+
+type TicketsTableProps = {
+	isNewTicketDirty: boolean,
+	setTicketValue: SetTicketValue,
+}
+
+export const TicketsTable = ({isNewTicketDirty, setTicketValue}: TicketsTableProps) => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
@@ -86,7 +92,6 @@ export const TicketsTable = () => {
 	const tickets = TicketsHooksSelectors.selectTicketsByContainersAndFederations(containersAndFederations);
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
-	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 
 	const readOnly = isFed(containerOrFederation)
@@ -159,9 +164,7 @@ export const TicketsTable = () => {
 		}
 	}, [template]);
 
-	// useEffect(() => {
-	// 	setPresetValue('');
-	// }, [groupBy]);
+
 
 	useEffect(() => {
 		visibleSortedColumnsNames.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
@@ -170,20 +173,6 @@ export const TicketsTable = () => {
 			.filter((name) => !INITIAL_COLUMNS.includes(name))
 			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
 	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join('')]);
-
-	const setTicketValue = useCallback((modelId?: string, ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
-		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
-		const newParams = { ...params, ticketId: id };
-		const search = '?' + setContainerOrFederation(modelId);
-		// setPresetValue(groupByVal);
-		const path = generatePath(TICKETS_ROUTE + search, newParams);
-
-		if (replace) {
-			history.replace(path);
-		} else {
-			history.push(path);
-		}
-	}, [params]);
 
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
 	return (
@@ -233,13 +222,12 @@ export const TicketsTable = () => {
 	);
 };
 
-const TabularViewTicketForm = ({ setIsNewTicketDirty }) => {
-	const history = useHistory();
-
-	const [presetValue, setPresetValue] = useState('');
-	const [containerOrFederation, , setContainerOrFederation] = useSearchParam('containerOrFederation');
+const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValue }) => {	
+	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const params = useParams<DashboardTicketsParams>();
 	const { ticketId, teamspace, project, template } = params
+	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY);
+
 	const isNewTicket = (ticketId || '').toLowerCase() === NEW_TICKET_ID;
 
 	const getOpenInViewerLink = () => {
@@ -253,26 +241,10 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty }) => {
 		return pathname + (ticketId ? `?ticketId=${ticketId}` : '');
 	};
 
-
-	// useEffect(() => {
-	// 	if (containersAndFederations.includes(containerOrFederation)) return;
-	// 	clearTicketId();
-	// }, [containersAndFederations, containerOrFederation]);
-
-
-	const setTicketValue = useCallback((modelId?: string, ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
-		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
-		const newParams = { ...params, ticketId: id };
-		const search = '?' + setContainerOrFederation(modelId);
-		setPresetValue(groupByVal);
-		const path = generatePath(TICKETS_ROUTE + search, newParams);
-
-		if (replace) {
-			history.replace(path);
-		} else {
-			history.push(path);
-		}
-	}, [params]);
+	useEffect(() => {
+		if (containersAndFederations.includes(containerOrFederation)) return;
+		clearTicketId();
+	}, [containersAndFederations, containerOrFederation]);
 
 	const clearTicketId = () => setTicketValue();
 
@@ -298,8 +270,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty }) => {
 			{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
 			{isNewTicket && (
 				<NewTicketSlide
-					// presetValue={{ key: groupBy, value: presetValue }}
-					presetValue={{ key: '', value: '' }}
+					presetValue={presetValue}
 					template={selectedTemplate}
 					containerOrFederation={containerOrFederation}
 					onSave={onSaveTicket}
@@ -311,20 +282,38 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty }) => {
 	)
 }
 
-
-
 export const TabularView = () => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const templateHasBeenFetched = templateAlreadyFetched(template);
 	const columns = templateHasBeenFetched ? getAvailableColumnsForTemplate(template) : [];
+	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
+	const params = useParams<DashboardTicketsParams>();
+
+	const history = useHistory();
+	const [,,setContainerOrFederation] = useSearchParam('containerOrFederation');
+
+	const [presetValue, setPresetValue] = useState<PresetValue>();
+	const setTicketValue = useCallback((modelId?: string, ticket_id?: string, presValue?: PresetValue, replace: boolean = false) => {
+		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
+		const newParams = { ...params, ticketId: id };
+		const search = '?' + setContainerOrFederation(modelId);
+		setPresetValue(presValue);
+		const path = generatePath(TICKETS_ROUTE + search, newParams);
+
+		if (replace) {
+			history.replace(path);
+		} else {
+			history.push(path);
+		}
+	}, [params]);
 
 	return (
 		<TicketsTableContextComponent>
 			<ResizableTableContextComponent columns={columns} columnGap={1} key={templateId + templateHasBeenFetched}>
-				<TicketsTable />
-				<TabularViewTicketForm setIsNewTicketDirty={()=>{}}/>
+				<TicketsTable isNewTicketDirty={isNewTicketDirty} setTicketValue={setTicketValue} />
 			</ResizableTableContextComponent>
+			<TabularViewTicketForm setIsNewTicketDirty={setIsNewTicketDirty} setTicketValue={setTicketValue} presetValue={presetValue}/>
 		</TicketsTableContextComponent>
 	);
 };

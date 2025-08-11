@@ -29,12 +29,11 @@ import { useParams, generatePath } from 'react-router-dom';
 import { isEmpty, merge, set } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from './newTicketSlide.styles';
-import { hasRequiredViewerProperties } from '../../ticketsTable/ticketsTable.helper';
+import { hasRequiredViewerProperties, PresetValue } from '../../ticketsTable/ticketsTable.helper';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { IssueProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketsTableContext } from '../../ticketsTable/ticketsTableContext/ticketsTableContext';
 
-type PresetValue = { key: string, value: string };
 type NewTicketSlideProps = {
 	template: ITemplate,
 	containerOrFederation: string,
@@ -42,7 +41,6 @@ type NewTicketSlideProps = {
 	onSave: (newTicketId: string) => void,
 	onDirtyStateChange: (isDirty: boolean) => void,
 };
-
 
 const toDefaultValue = ({ key, value }: PresetValue, propertyType: PropertyTypeDefinition) => {
 	if (!key || key === IssueProperties.DUE_DATE || !value) return;
