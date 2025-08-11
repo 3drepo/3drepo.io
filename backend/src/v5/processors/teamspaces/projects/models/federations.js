@@ -23,9 +23,7 @@ const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
-const { createRevision } = require('../../../../models/history');
-const { generateUUID } = require('../../../../utils/helper/uuids');
-const { getLatestRevision } = require('../../../../models/revisions');
+const { getLatestRevision, addRevision } = require('../../../../models/revisions');
 const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
@@ -65,14 +63,11 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 };
 
 Federations.newRevision = async (teamspace, project, federation, info) => {
-	const revisionId = generateUUID();
-	const revision = {
-		_id: revisionId,
-		author: info.owner,
-		timestamp: new Date(),
-		containers: info.containers,
-	};
-	await createRevision(teamspace, project, federation, revision); // Should await on this because updateModelSubModels is going to emit an event which will expect a revision node
+	const revisionId = await addRevision(teamspace, project, federation, modelTypes.FEDERATION, {
+			containers: info.containers,
+			author: info.owner,
+		}
+	);
 	await updateModelSubModels(teamspace, project, federation, info.owner, revisionId, info.containers);
 };
 
