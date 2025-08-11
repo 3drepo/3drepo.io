@@ -17,7 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
-import { PRIVACY_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { COOKIES_ROUTE, PRIVACY_ROUTE, TERMS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { FooterContainer, FooterItem, FooterItems, FooterLogo } from './dashboardFooter.styles';
 
 type IDashboardFooter = {
@@ -34,12 +34,12 @@ export const DashboardFooter = ({ variant = 'light' }: IDashboardFooter): JSX.El
 				</Link>
 			</FooterItem>
 			<FooterItem>
-				<Link to="/v5/terms" target="_blank">
+				<Link to={TERMS_ROUTE} target="_blank">
 					<FormattedMessage id="dashboardFooter.terms" defaultMessage="Terms" />
 				</Link>
 			</FooterItem>
 			<FooterItem>
-				<Link to="/v5/cookies" target="_blank">
+				<Link to={COOKIES_ROUTE} target="_blank">
 					<FormattedMessage id="dashboardFooter.cookies" defaultMessage="Cookies" />
 				</Link>
 			</FooterItem>

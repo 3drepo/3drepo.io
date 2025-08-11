@@ -46,7 +46,7 @@ export const DashboardProjectLayout = (): JSX.Element => {
 		}
 	}, [project]);
 
-	if (isLoadingPermissions) return;
+	if (isLoadingPermissions) return null;
 
 	return (
 		<>

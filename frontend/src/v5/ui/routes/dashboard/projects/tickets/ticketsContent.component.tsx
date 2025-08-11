@@ -26,7 +26,7 @@ import { TicketsSelection } from './ticketsSelection/ticketsSelection.component'
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 import { EmptyPageView } from '../../../../components/shared/emptyPageView/emptyPageView.styles';
-import { DashboardParams, TICKETS_ROUTE } from '../../../routes.constants';
+import { DashboardParams } from '../../../routes.constants';
 import { TicketsAndResizableTableProvider } from './ticketsTable/ticketsAndResizableTableProvider.component';
 
 export const TicketsContent = () => {
@@ -69,14 +69,12 @@ export const TicketsContent = () => {
 
 	return (
 		<Routes>
-			<Route path={TICKETS_ROUTE} element={
+			<Route path=":template/:ticketId?/*" element={
 				<TicketsAndResizableTableProvider>
 					<TicketsTable />
 				</TicketsAndResizableTableProvider>
 			} />
-			<Route path="*" element={
-				<TicketsSelection />
-			} />
+			<Route index element={<TicketsSelection />} />
 		</Routes>
 	);
 };

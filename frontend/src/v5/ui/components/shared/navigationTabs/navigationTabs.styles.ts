@@ -16,7 +16,6 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Link as LinkComponent } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 
 export const Container = styled.nav`

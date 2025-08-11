@@ -58,24 +58,24 @@ export const ProjectContent = () => {
 		<>
 			<Content>
 				<Routes>
-					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })}><Federations /></RouteTitle>} path={'/t/federations'} />
-					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })}><Containers /></RouteTitle>} path={'/t/containers'} />
-					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })}><Drawings /></RouteTitle>} path={'/t/drawings'} />
-					{(shouldRenderKanbanContent) && 
-						<Route path={'/t/board/:type/:containerOrFederation?'} element={issuesOrRisksEnabled && <Board />} />
+					<Route path="/t/federations" element={<RouteTitle title={formatMessage({ id: 'pageTitle.federations', defaultMessage: ':project - Federations' })}><Federations /></RouteTitle>} />
+					<Route path="/t/containers" element={<RouteTitle title={formatMessage({ id: 'pageTitle.containers', defaultMessage: ':project - Containers' })}><Containers /></RouteTitle>} />
+					<Route path="/t/drawings" element={<RouteTitle title={formatMessage({ id: 'pageTitle.drawings', defaultMessage: ':project - Drawings' })}><Drawings /></RouteTitle>} />
+					{(shouldRenderKanbanContent) &&
+						<Route path="/t/board/:type/:containerOrFederation?" element={issuesOrRisksEnabled && <Board />} />
 					}
 					{issuesEnabled && (
-						<Route element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/issues`} /></RouteTitle>} path={'/t/board'} />
+						<Route path="/t/board" element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/issues`} /></RouteTitle>} />
 					)}
 					{(!issuesEnabled && riskEnabled) && (
-						<Route element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/risks`} /></RouteTitle>} path={'/t/board'} />
+						<Route path="/t/board" element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/risks`} /></RouteTitle>} />
 					)}
-					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })}><TicketsContent /></RouteTitle>} path={'/t/tickets'} />
-					<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })}><ProjectSettings /></RouteTitle>} path={'/t/project_settings'} />
+					<Route path="t/tickets/*" element={<RouteTitle title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })}><TicketsContent /></RouteTitle>} />
+					<Route path="/t/project_settings" element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })}><ProjectSettings /></RouteTitle>} />
 					{hasPermissions && (
 						<>
-							<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })}><ProjectPermissions /></RouteTitle>} path={'/t/project_permissions'} />
-							<Route element={<RouteTitle title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })}><UserPermissions /></RouteTitle>} path={'/t/user_permissions'} />
+							<Route path="/t/project_permissions" element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectPermissions', defaultMessage: ':project - Project Permissions' })}><ProjectPermissions /></RouteTitle>} />
+							<Route path="/t/user_permissions" element={<RouteTitle title={formatMessage({ id: 'pageTitle.userPermissions', defaultMessage: ':project - User Permissions' })}><UserPermissions /></RouteTitle>} />
 						</>
 					)}
 					<Route index element={<Navigate to={`${discardSlash(pathname)}/federations`} replace />} />

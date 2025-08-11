@@ -101,13 +101,13 @@ export const AuthPage = () => {
 					<FormattedMessage
 						id="authPage.footer"
 						defaultMessage={`
-						By using this platform, you acknowledge that you have read and agree to our 
-						<TermsLink>Terms & Conditions</TermsLink>, <PrivacyLink>Privacy Policy</PrivacyLink>, and <CookieLink>Cookie Policy</CookieLink>.
-					`}
+							By using this platform, you acknowledge that you have read and agree to our 
+							<TermsLink>Terms & Conditions</TermsLink>, <PrivacyLink>Privacy Policy</PrivacyLink>, and <CookieLink>Cookie Policy</CookieLink>.
+						`}
 						values={{
 							TermsLink: (label) => <Link to={TERMS_ROUTE} target="_blank">{label}</Link>,
-							PrivacyLink: (label) => <Link to={{ pathname: PRIVACY_ROUTE }} target="_blank" rel="noopener noreferrer">{label}</Link>,
-							CookieLink: (label) => <Link to={{ pathname: COOKIES_ROUTE }} target="_blank" rel="noopener noreferrer">{label}</Link>,
+							PrivacyLink: (label) => <Link to={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">{label}</Link>,
+							CookieLink: (label) => <Link to={COOKIES_ROUTE} target="_blank" rel="noopener noreferrer">{label}</Link>,
 						}}
 					/>
 				</Footer>

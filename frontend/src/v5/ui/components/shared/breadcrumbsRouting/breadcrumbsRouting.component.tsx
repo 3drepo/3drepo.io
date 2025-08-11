@@ -31,6 +31,7 @@ import {
 	TICKETS_ROUTE,
 	ViewerParams,
 	DashboardParams,
+	VIEWER_REVISION_ROUTE,
 } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
@@ -55,6 +56,7 @@ export const BreadcrumbsRouting = () => {
 	const revisions = useSelector(selectRevisions);
 
 	const isFederation = federations.some(({ _id }) => _id === containerOrFederationId);
+	const viewerRoute = revision ? VIEWER_REVISION_ROUTE : VIEWER_ROUTE;
 
 	let breadcrumbs: BreadcrumbItemOrOptions[] = [];
 	let options: BreadcrumbItem[];
@@ -99,7 +101,7 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs.push({ options });
 	}
 
-	if (matchesPath(VIEWER_ROUTE, pathname)) {
+	if (matchesPath(viewerRoute, pathname)) {
 		breadcrumbs = [
 			{
 				title: teamspace,

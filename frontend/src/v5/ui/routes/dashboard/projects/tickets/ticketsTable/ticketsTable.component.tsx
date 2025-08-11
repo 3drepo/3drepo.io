@@ -78,7 +78,7 @@ export const TicketsTable = () => {
 	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
 		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
 		const newParams = { ...params, ticketId: id };
-		const search = '?' + setContainerOrFederation(modelId);
+		const search = '/?' + setContainerOrFederation(modelId);
 		setPresetValue(groupByVal);
 		const path = generatePath(TICKETS_ROUTE + search, newParams);
 

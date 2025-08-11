@@ -36,7 +36,6 @@ const cleanSSOParams = (location) => {
 };
 
 export const AuthenticationRedirect = () => {
-	console.log('@@ auth redirect?');
 	const navigate = useNavigate();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched = AuthHooksSelectors.selectAuthenticationFetched();
@@ -49,7 +48,6 @@ export const AuthenticationRedirect = () => {
 		AuthActionsDispatchers.setReturnUrl(cleanSSOParams(location));
 		if (!isAuthenticated && authenticationFetched) {
 			const url = ssoError ? pathName(addParams(AUTH_PATH, searchParams)) : AUTH_PATH;
-			console.log('@@ auth redirect!', url);
 
 			navigate(url, { replace: true });
 		}
@@ -72,7 +70,7 @@ export const AuthenticationRedirect = () => {
 	}, [isAuthenticated, teamspace, authenticatedTeamspace]);
 
 	if (!isAuthenticated) {
-		return (<> unauthed, m8</>);
+		return (<></>);
 	}
 
 	// Unauthenticate when session times out

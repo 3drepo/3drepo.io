@@ -109,7 +109,7 @@ export const MainRoute = () => {
 							{(!issuesEnabled && riskEnabled) && (
 								<Route path="board" element={<RouteTitle title={kanbanTitle}><Navigate to={`${discardSlash(pathname)}/risks`} /></RouteTitle>} />
 							)}
-							<Route path="tickets" element={<RouteTitle title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })}><TicketsContent /></RouteTitle>} />
+							<Route path="tickets/*" element={<RouteTitle title={formatMessage({ id: 'pageTitle.tickets', defaultMessage: ':project - Tickets' })}><TicketsContent /></RouteTitle>} />
 							<Route path="project_settings" element={<RouteTitle title={formatMessage({ id: 'pageTitle.projectSettings', defaultMessage: ':project - Project Settings' })}><ProjectSettings /></RouteTitle>} />
 							{hasPermissions && (
 								<>
@@ -121,7 +121,7 @@ export const MainRoute = () => {
 						</Route>
 					</Route>
 					<Route path="*" element={<RouteTitle title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })}><NotFound /></RouteTitle>} />
-					<Route path="viewer/:teamspace/:project/:containerOrFederation/" element={<DashboardViewerLayout />}>
+					<Route path="viewer/:teamspace/:project/:containerOrFederation/:revision?" element={<DashboardViewerLayout />}>
 						<Route index element={
 							<RouteTitle title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })}>
 								<Viewer />

@@ -52,8 +52,7 @@ export const TicketsSelection = () => {
 	const goToTableView = () => {
 		if (!isValid) return;
 
-		const route = TICKETS_ROUTE + `?models=${containersAndFederations.join(',')}`;
-		
+		const route = TICKETS_ROUTE + `/?models=${containersAndFederations.join(',')}`;
 		const path = generatePath(route, {
 			teamspace,
 			project,
