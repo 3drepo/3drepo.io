@@ -22,9 +22,13 @@ import { ROUTES } from '../../constants/routes';
 
 const selectRouterDomain = (state) => state.router || '';
 
-const selectLocation = createSelector(
+export const selectLocation = createSelector(
 	selectRouterDomain, (router) => router.location || ''
 );
+
+export const selectPathname = createSelector(
+	selectLocation, (location) => location.pathname
+)
 
 export const selectNavigationTarget = createSelector(
 	selectRouterDomain, (router) => router.navigationTarget || ''
@@ -55,7 +59,7 @@ const selectV5UrlParams = createSelector(
 		const boardParams = matchPath({ path: boardPath }, location.pathname);
 
 		const params = (viewerParams || boardParams || {}).params;
-
+		console.log('@@ v5Params', location, boardParams)
 		return params;
 	}
 );

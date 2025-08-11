@@ -37,7 +37,6 @@ import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.c
 import { NotificationsIconContainer, NotificationsList, NotificationWeekHeader } from './notifications.styles';
 
 interface IProps {
-	navigate: NavigateFunction;
 	notifications: INotification[];
 	unreadCount: number;
 	thisWeeksNotifications: INotification[];
@@ -60,6 +59,7 @@ interface IProps {
 	subscribeOnChanges: () => void;
 	unsubscribeFromChanges: () => void;
 	setDrawerPanelState: (open: boolean) => void;
+	navigate: (to: string) => void;
 }
 
 const NotificationButton = ({ unreadCount, onClick, id }) => (

@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { RouterActions } from '@/v4/modules/router/router.redux';
 import { selectCurrentUser } from '../../../modules/currentUser';
 import { selectDrawerOpenState, selectHasNotificationsLastWeek,
 	selectHasNotificationsThisWeek, selectHasNotificationsUntilLastWeekOnly, selectHasOlderNotifications,
@@ -51,7 +52,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	subscribeOnChanges: NotificationsActions.subscribeOnChanges,
 	unsubscribeFromChanges: NotificationsActions.unsubscribeFromChanges,
 	showUpdatedFailedError: NotificationsActions.showUpdatedFailedError,
-	setDrawerPanelState: NotificationsActions.setDrawerPanelState
+	setDrawerPanelState: NotificationsActions.setDrawerPanelState,
+	navigate: RouterActions.navigate
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(Notifications as any);
