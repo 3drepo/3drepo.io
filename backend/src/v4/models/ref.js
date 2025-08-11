@@ -35,14 +35,16 @@ Ref.getRefNodes = async (account, model, branch, revision, projection) => {
 Ref.getSubModels = async (account, model, branch, revision, callbackProm) => {
 	const settings = await ModelSetting.findModelSettingById(account, model);
 	const subModelArr = [];
-	for(let i = 0; i < settings.subModels.length; ++i) {
-		subModelArr.push({
-			account: account,
-			model: settings.subModels[i]._id,
-			branch: C.MASTER_BRANCH_NAME
-		});
-		if (callbackProm) {
-			await callbackProm(account, settings.subModels[i]._id, C.MASTER_BRANCH_NAME);
+	if(settings.subModels) {
+		for(let i = 0; i < settings.subModels.length; ++i) {
+			subModelArr.push({
+				account: account,
+				model: settings.subModels[i]._id,
+				branch: C.MASTER_BRANCH_NAME
+			});
+			if (callbackProm) {
+				await callbackProm(account, settings.subModels[i]._id, C.MASTER_BRANCH_NAME);
+			}
 		}
 	}
 
