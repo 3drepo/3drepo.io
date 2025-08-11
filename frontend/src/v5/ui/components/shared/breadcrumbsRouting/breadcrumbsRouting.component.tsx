@@ -56,7 +56,7 @@ export const BreadcrumbsRouting = () => {
 	const revisions = useSelector(selectRevisions);
 
 	const isFederation = federations.some(({ _id }) => _id === containerOrFederationId);
-	const viewerRoute = revision ? VIEWER_REVISION_ROUTE : VIEWER_ROUTE;
+	const viewerPath = revision ? VIEWER_REVISION_ROUTE : VIEWER_ROUTE;
 
 	let breadcrumbs: BreadcrumbItemOrOptions[] = [];
 	let options: BreadcrumbItem[];
@@ -101,7 +101,7 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs.push({ options });
 	}
 
-	if (matchesPath(viewerRoute, pathname)) {
+	if (matchesPath(viewerPath, pathname)) {
 		breadcrumbs = [
 			{
 				title: teamspace,
