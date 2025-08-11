@@ -31,15 +31,12 @@ export const TeamspaceContent = () => {
 
 	return (
 		<Routes>
-			<Route path="t">
-				<Route index element={<Navigate to="/projects" replace />} />
-				<Route path={'projects'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.projects', defaultMessage: ':teamspace - Projects' })}><ProjectsList /></RouteTitle>} />
-				<Route path={'jobs'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.jobs', defaultMessage: ':teamspace - Jobs' })}><Jobs /></RouteTitle>} />
-				<Route path={'settings'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.settings', defaultMessage: ':teamspace - Settings' })}><TeamspaceSettings /></RouteTitle>} />
-				<Route path={'users'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.users', defaultMessage: ':teamspace - Users' })}><UsersList /></RouteTitle>} />
-				<Route path="*" element={<Navigate to={NOT_FOUND_ROUTE_PATH} />} />
-			</Route>
-			<Route index element={<Navigate to="/t/projects" replace />} />
+			<Route index element={<Navigate to="projects" replace />} />
+			<Route path={'projects'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.projects', defaultMessage: ':teamspace - Projects' })}><ProjectsList /></RouteTitle>} />
+			<Route path={'jobs'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.jobs', defaultMessage: ':teamspace - Jobs' })}><Jobs /></RouteTitle>} />
+			<Route path={'settings'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.settings', defaultMessage: ':teamspace - Settings' })}><TeamspaceSettings /></RouteTitle>} />
+			<Route path={'users'} element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspace.users', defaultMessage: ':teamspace - Users' })}><UsersList /></RouteTitle>} />
+			<Route path="*" element={<Navigate to={NOT_FOUND_ROUTE_PATH} />} />
 		</Routes>
 	);
 };

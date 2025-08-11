@@ -23,10 +23,10 @@ export const TeamspaceNavigation = (): JSX.Element => {
 
 	return (
 		<Container>
-			<Link to="projects"><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
-			<Link to="jobs"><FormattedMessage id="teamspaceNavigation.jobs" defaultMessage="Jobs" /></Link>
-			<Link to="settings"><FormattedMessage id="teamspaceNavigation.settings" defaultMessage="Teamspace Settings" /></Link>
-			{isAdmin && <Link to="users"><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>}
+			<Link to="t/projects"><FormattedMessage id="teamspaceNavigation.projects" defaultMessage="Projects" /></Link>
+			<Link to="t/jobs"><FormattedMessage id="teamspaceNavigation.jobs" defaultMessage="Jobs" /></Link>
+			<Link to="t/settings"><FormattedMessage id="teamspaceNavigation.settings" defaultMessage="Teamspace Settings" /></Link>
+			{isAdmin && <Link to="t/users"><FormattedMessage id="teamspaceNavigation.users" defaultMessage="Users" /></Link>}
 		</Container>
 	);
 };

@@ -24,14 +24,9 @@ import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Outlet, useParams } from 'react-router-dom';
 import { ProjectNavigation } from '@components/shared/navigationTabs';
 import { DashboardFooter } from '@components/shared/dashboardFooter/dashboardFooter.component';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { isEmpty } from 'lodash';
 
 export const DashboardProjectLayout = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const isFetchingAddons = TeamspacesHooksSelectors.selectIsFetchingAddons();
-	const isFetchingProject = isEmpty(ProjectsHooksSelectors.selectCurrentProjectDetails());
-	const isLoadingPermissions = isFetchingAddons || isFetchingProject;
 
 	useEffect(() => {
 		if (teamspace) {
@@ -45,8 +40,6 @@ export const DashboardProjectLayout = (): JSX.Element => {
 			ProjectsActionsDispatchers.setCurrentProject(project);
 		}
 	}, [project]);
-
-	if (isLoadingPermissions) return null;
 
 	return (
 		<>
