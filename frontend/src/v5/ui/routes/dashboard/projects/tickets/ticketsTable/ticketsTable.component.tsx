@@ -34,7 +34,7 @@ import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.con
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { Transformers, useSearchParam } from '../../../../useSearchParam';
-import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../../routes.constants';
+import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
@@ -71,16 +71,17 @@ export const TicketsTable = () => {
 
 	const setTemplate = useCallback((newTemplate) => {
 		const newParams = { ...params, template: newTemplate };
-		const path = generatePath(TICKETS_ROUTE + window.location.search, newParams);
+		const ticketsPath = ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE
+		const path = generatePath(ticketsPath + '/' + window.location.search, newParams);
 		navigate(path, { replace: false });
 	}, [params, navigate]);
 
 	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
 		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
-		const newParams = { ...params, ticketId: id };
+		const newParams = { ...params, ticketId: id || '' };
 		const search = '/?' + setContainerOrFederation(modelId);
 		setPresetValue(groupByVal);
-		const path = generatePath(TICKETS_ROUTE + search, newParams);
+		const path = generatePath(TICKETS_ROUTE_WITH_TICKET + search, newParams);
 
 		if (replace) {
 			navigate(path, { replace: true });
