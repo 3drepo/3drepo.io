@@ -305,7 +305,7 @@ async function listSubModels(account, model) {
 	const subModels = [];
 	const proms = containers.map((container) => {
 		findModelSettingById(account, container.model, { name: 1 }).then(subModel => {
-			// TODO: Why would this return null?
+			// Check in case a container is somehow deleted while belonging to a federation
 			if (subModel) {
 				subModels.push({
 					database: account,
