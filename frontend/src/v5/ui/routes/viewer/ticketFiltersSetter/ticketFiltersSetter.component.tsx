@@ -108,6 +108,7 @@ export const TicketFiltersSetter = () => {
 
 	useEffect(() => {
 		if (templates.length) {
+			TicketsCardActionsDispatchers.resetFilters();
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
 			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : getNonCompletedTicketFilters();
 			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
