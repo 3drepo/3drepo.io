@@ -16,8 +16,7 @@
  */
 
 import { useEffect } from 'react';
-import { useParams } from 'react-router';
-import { useLocation, Routes, Route, Navigate } from 'react-router-dom';
+import { useLocation, Routes, Route, Navigate, useParams } from 'react-router-dom';
 
 import { DashboardParams, NOT_FOUND_ROUTE_PATH } from '@/v5/ui/routes/routes.constants';
 import { UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -35,7 +34,6 @@ import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
 import { RouteTitle } from '@/v5/services/routing/routeTitle.component';
-import { NotFound } from '../../../notFound';
 
 export const ProjectContent = () => {
 	const { teamspace } = useParams<DashboardParams>();

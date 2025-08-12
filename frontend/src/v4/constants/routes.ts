@@ -37,8 +37,8 @@ export const ROUTES = {
 	PROFILE: '/dashboard/profile',
 	BILLING: '/dashboard/billing',
 	BOARD_MAIN: '/dashboard/board',
-	BOARD_SPECIFIC: '/dashboard/board/:type(\\issues|risks)/:teamspace/:project?/:modelId?',
-	V5_BOARD_SPECIFIC: '/v5/dashboard/:teamspace/:project/t/board/:type(\\issues|risks)/:modelId?',
+	BOARD_SPECIFIC: '/dashboard/board/:type/:teamspace/:project?/:modelId?',
+	V5_BOARD_SPECIFIC: '/v5/dashboard/:teamspace/:project/t/board/:type/:modelId?',
 };
 
 export const PUBLIC_ROUTES = [
