@@ -25,8 +25,6 @@ import { renderWhenTrue } from '../../../../helpers/rendering';
 import { Container, DisplayedText, ProgressWrapper, StyledCircularProgress } from './revisionsSwitch.styles';
 
 interface IProps {
-	location: any;
-	navigate: NavigateFunction;
 	className?: string;
 	modelSettings?: any;
 	revisions?: any[];
@@ -78,13 +76,7 @@ export class RevisionsSwitch extends PureComponent<IProps, any> {
 	}
 
 	private setNewRevision = (revision) => {
-		const { pathname } = this.props.location;
-		const [, , , , currentRevisionInPath] = pathname.split('/');
-		const newPathnameBase = currentRevisionInPath ? pathname.substr(0, pathname.lastIndexOf('\/')) : pathname;
-		const newPathname = `${newPathnameBase}/${revision.tag || revision._id}`;
-
-		this.props.navigate(newPathname);
-		this.props.hideDialog();
+		// revisionSwitch is currently not being used. see Issue 3D-Repo-Product-Team #566
 	}
 
 	private handleClick = () => {
