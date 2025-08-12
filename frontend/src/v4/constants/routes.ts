@@ -24,7 +24,8 @@ export const ROUTES = {
 	REGISTER_REQUEST: '/register-request',
 	REGISTER_VERIFY: '/register-verify',
 	VIEWER: '/viewer',
-	MODEL_VIEWER: '/viewer/:teamspace/:model/:revision?',
+	MODEL_VIEWER: '/viewer/:teamspace/:model',
+	REVISION_VIEWER: '/viewer/:teamspace/:model/:revision',
 	V5_MODEL_VIEWER: '/v5/viewer/:teamspace/:project/:model',
 	V5_REVISION_VIEWER: '/v5/viewer/:teamspace/:project/:model/:revision',
 	DASHBOARD: '/dashboard',
@@ -37,8 +38,8 @@ export const ROUTES = {
 	PROFILE: '/dashboard/profile',
 	BILLING: '/dashboard/billing',
 	BOARD_MAIN: '/dashboard/board',
-	BOARD_SPECIFIC: '/dashboard/board/:type/:teamspace/:project?/:modelId?',
-	V5_BOARD_SPECIFIC: '/v5/dashboard/:teamspace/:project/t/board/:type/:modelId?',
+	BOARD_SPECIFIC: '/dashboard/board/:type/:teamspace/:project/:modelId',
+	V5_BOARD_SPECIFIC: '/v5/dashboard/:teamspace/:project/t/board/:type/:modelId',
 };
 
 export const PUBLIC_ROUTES = [

@@ -16,7 +16,7 @@
  */
 
 import * as queryString from 'query-string';
-import { matchPath } from 'react-router';
+import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
 import { ROUTES } from '../../constants/routes';
 
@@ -40,27 +40,31 @@ export const selectGoBackRequested = createSelector(
 
 const selectV4UrlParams = createSelector(
 	selectLocation, (location) => {
-		const viewerPath = ROUTES.MODEL_VIEWER;
+		const viewerModelPath = ROUTES.MODEL_VIEWER;
+		const viewerRevisionPath = ROUTES.REVISION_VIEWER;
 		const boardPath = ROUTES.BOARD_SPECIFIC;
 
-		const viewerParams = matchPath({ path: viewerPath, end: true }, location.pathname);
-		const boardParams = matchPath({ path: boardPath }, location.pathname);
+		const viewerModelMatch = matchPath({ path: viewerModelPath, end: true }, location.pathname);
+		const viewerRevisionMatch = matchPath({ path: viewerRevisionPath, end: true }, location.pathname);
+		const viewerMatch = viewerModelMatch || viewerRevisionMatch;
+		const boardMatch = matchPath({ path: boardPath }, location.pathname);
 
-		return (viewerParams || boardParams || {}).params;
+		return (viewerMatch || boardMatch || {}).params;
 	}
 );
 
 const selectV5UrlParams = createSelector(
 	selectLocation, (location) => {
-		const viewerPath = ROUTES.V5_MODEL_VIEWER;
+		const viewerModelPath = ROUTES.V5_MODEL_VIEWER;
+		const viewerRevisionPath = ROUTES.V5_REVISION_VIEWER;
 		const boardPath = ROUTES.V5_BOARD_SPECIFIC;
 
-		const viewerParams = matchPath({ path: viewerPath }, location.pathname);
-		const boardParams = matchPath({ path: boardPath }, location.pathname);
+		const viewerModelMatch = matchPath({ path: viewerModelPath }, location.pathname);
+		const viewerRevisionMatch = matchPath({ path: viewerRevisionPath }, location.pathname);
+		const viewerMatch = viewerModelMatch || viewerRevisionMatch
+		const boardMatch = matchPath({ path: boardPath }, location.pathname);
 
-		const params = (viewerParams || boardParams || {}).params;
-		console.log('@@ v5Params', location, boardParams)
-		return params;
+		return (viewerMatch || boardMatch || {}).params;
 	}
 );
 
