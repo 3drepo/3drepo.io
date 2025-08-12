@@ -25,7 +25,7 @@ export const { Types: RouterTypes, Creators: RouterActions } = createActions({
 }, { prefix: 'ROUTER/' });
 
 export const INITIAL_STATE = {
-    location: {},
+    location: { pathname: '' },
     navigationTarget: '',
     goBackRequested: false,
 };
