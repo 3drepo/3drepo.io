@@ -37,7 +37,7 @@ import { TicketsTableContext } from '../../ticketsTable/ticketsTableContext/tick
 type NewTicketSlideProps = {
 	template: ITemplate,
 	containerOrFederation: string,
-	presetValue: PresetValue,
+	presetValue: PresetValue |  undefined,
 	onSave: (newTicketId: string) => void,
 	onDirtyStateChange: (isDirty: boolean) => void,
 };
@@ -57,7 +57,7 @@ export const NewTicketSlide = ({ template, containerOrFederation, presetValue, o
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const { getPropertyType } = useContext(TicketsTableContext);
 	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
-	const preselectedDefaultValue = toDefaultValue(presetValue, getPropertyType(presetValue.key));
+	const preselectedDefaultValue = presetValue ? toDefaultValue(presetValue, getPropertyType(presetValue.key)) : null;
 	const defaultTicket = getDefaultTicket(template);
 	const defaultValues = preselectedDefaultValue ? merge(defaultTicket, preselectedDefaultValue) : defaultTicket;
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -102,7 +102,7 @@ export const NewTicketSlide = ({ template, containerOrFederation, presetValue, o
 	useEffect(() => {
 		if (isLoading) return;
 		reset(defaultValues);
-	}, [containerOrFederation, template, isLoading, presetValue.value]);
+	}, [containerOrFederation, template, isLoading, presetValue?.value]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));
