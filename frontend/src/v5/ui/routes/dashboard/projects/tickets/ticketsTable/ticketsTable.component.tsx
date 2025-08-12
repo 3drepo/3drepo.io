@@ -123,7 +123,7 @@ export const TicketsTable = ({isNewTicketDirty, setTicketValue}: TicketsTablePro
 		if (!models.length) return;
 
 		containersAndFederations.forEach((modelId) => {
-			if (selectTicketsHaveBeenFetched(getState())(modelId)) return;
+			if (selectTicketsHaveBeenFetched(getState(),modelId)) return;
 			const isFederation = isFed(modelId);
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFederation);
 			if (isFederation) {
@@ -163,8 +163,6 @@ export const TicketsTable = ({isNewTicketDirty, setTicketValue}: TicketsTablePro
 			ProjectsActionsDispatchers.fetchTemplate(teamspace, project, template);
 		}
 	}, [template]);
-
-
 
 	useEffect(() => {
 		visibleSortedColumnsNames.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));

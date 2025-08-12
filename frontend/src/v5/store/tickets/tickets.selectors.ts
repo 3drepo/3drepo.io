@@ -48,7 +48,8 @@ const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
 export const selectTicketsHaveBeenFetched = createSelector(
 	selectTicketsDomain,
-	(state): (modelId: string) => boolean => (modelId: string) => modelId in state.ticketsByModelId,
+	(state, modelId) => modelId,
+	(state, modelId) => modelId in state.ticketsByModelId,
 );
 
 const removeDeprecated = (template: ITemplate): ITemplate => {
