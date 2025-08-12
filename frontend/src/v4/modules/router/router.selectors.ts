@@ -38,6 +38,10 @@ export const selectGoBackRequested = createSelector(
 	selectRouterDomain, (router) => router.goBackRequested || false
 );
 
+export const selectSearchParamsToRemove = createSelector(
+	selectRouterDomain, (router) => router.searchParamsToRemove || []
+);
+
 const selectV4UrlParams = createSelector(
 	selectLocation, (location) => {
 		const viewerModelPath = ROUTES.MODEL_VIEWER;

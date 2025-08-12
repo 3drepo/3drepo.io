@@ -332,6 +332,11 @@ function* goToIssue({ issue }) {
 	const params = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
 
+	if (!issue) {
+		yield put(RouterActions.removeSearchParams(['issueId']))
+		return
+	}
+
 	// Im not longer in the viewer or board
 	// this happens when unmounting the card which
 	// makes sense when you close the card in the viewer and want to remove the selected risk
@@ -345,7 +350,7 @@ function* goToIssue({ issue }) {
 	const route = ROUTES.V5_MODEL_VIEWER;
 	const path = generatePath(route, params);
 
-	queryParams = issueId ?  {... queryParams, issueId} : omit(queryParams, 'issueId');
+	queryParams = {... queryParams, issueId};
 	let query = queryString.stringify(queryParams);
 	if (query) {
 		query = '?' + query;

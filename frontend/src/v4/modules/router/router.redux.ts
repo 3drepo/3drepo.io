@@ -22,12 +22,15 @@ export const { Types: RouterTypes, Creators: RouterActions } = createActions({
     navigate: ['to'],
     goBack: [],
     clearNavigation: [],
+    removeSearchParams: ['searchParams'],
+    resetSearchParamsToRemove: [],
 }, { prefix: 'ROUTER/' });
 
 export const INITIAL_STATE = {
     location: { pathname: '' },
     navigationTarget: '',
     goBackRequested: false,
+    searchParamsToRemove: [],
 };
 
 export const setLocation = (state = INITIAL_STATE, { location }) => ({
@@ -42,10 +45,18 @@ export const goBack = (state = INITIAL_STATE) => ({
 export const clearNavigation = (state = INITIAL_STATE) => ({
     ...state, navigationTarget: '', goBackRequested: false
 });
+export const removeSearchParams = (state = INITIAL_STATE, { searchParams }) => ({
+    ...state, searchParamsToRemove: searchParams
+});
+export const resetSearchParamsToRemove = (state = INITIAL_STATE) => ({
+    ...state, searchParamsToRemove: INITIAL_STATE.searchParamsToRemove
+});
 
 export const reducer = createReducer(INITIAL_STATE, {
     [RouterTypes.SET_LOCATION]: setLocation,
     [RouterTypes.NAVIGATE]: navigate,
     [RouterTypes.GO_BACK]: goBack,
     [RouterTypes.CLEAR_NAVIGATION]: clearNavigation,
+    [RouterTypes.REMOVE_SEARCH_PARAMS]: removeSearchParams,
+    [RouterTypes.RESET_SEARCH_PARAMS_TO_REMOVE]: resetSearchParamsToRemove,
 });

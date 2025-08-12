@@ -17,7 +17,7 @@
 
 import { RouterActions } from '@/v4/modules/router/router.redux';
 import { useDispatch } from 'react-redux';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { RouterHooksSelectors } from './selectorsHooks';
 import { useEffect } from 'react';
 
@@ -25,13 +25,23 @@ export const InitializeConnectedRouter = () => {
 	const location = useLocation();
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const [searchParams, setSearchParams] = useSearchParams();
 
 	const navigationTarget = RouterHooksSelectors.selectNavigationTarget();
 	const goBackRequested = RouterHooksSelectors.selectGoBackRequested();
+	const searchParamsToRemove = RouterHooksSelectors.selectSearchParamsToRemove();
+
+	useEffect(() => {
+		if (!searchParamsToRemove) return;
+		searchParamsToRemove.forEach((searchParam) => searchParams.delete(searchParam));
+		setSearchParams(searchParams);
+		dispatch(RouterActions.resetSearchParamsToRemove());
+	}, [searchParamsToRemove]);
 
 	useEffect(() => {
 		if (!navigationTarget) return;
 		navigate(navigationTarget);
+		dispatch(RouterActions.navigate(null));
 	}, [navigationTarget]);
 
 	useEffect(() => {

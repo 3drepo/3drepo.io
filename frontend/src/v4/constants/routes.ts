@@ -34,7 +34,7 @@ export const ROUTES = {
 	TEAMSPACE_SETTINGS: '/dashboard/teamspaces/:teamspace',
 	MODEL_SETTINGS: '/dashboard/teamspaces/:teamspace/models/:modelId',
 	USER_MANAGEMENT_MAIN: '/dashboard/user-management',
-	USER_MANAGEMENT_TEAMSPACE: '/dashboard/user-management/:teamspace/*',
+	USER_MANAGEMENT_TEAMSPACE: '/dashboard/user-management/:teamspace',
 	PROFILE: '/dashboard/profile',
 	BILLING: '/dashboard/billing',
 	BOARD_MAIN: '/dashboard/board',
