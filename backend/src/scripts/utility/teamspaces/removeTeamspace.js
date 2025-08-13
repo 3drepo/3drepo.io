@@ -46,13 +46,13 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 			demandOption: true,
 		}).option('removeAssociatedAccount',
 		{
-			describe: 'also remove associated account',
+			describe: 'also remove associated frontegg account',
 			type: 'boolean',
 			demandOption: false,
 			default: true,
 		});
 	return yargs.command(commandName,
-		'Remove a teamspace and the associated account',
+		'Remove a teamspace',
 		argsSpec,
 		(argv) => run(argv.accounts, argv.removeAssociatedAccount));
 };

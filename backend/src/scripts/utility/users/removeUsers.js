@@ -27,7 +27,7 @@ const { remove: deleteUser } = require(`${v5Path}/processors/users`);
 const run = async (users) => {
 	if (!users?.length) throw new Error('A list of users must be provided');
 	const userArr = users.split(',');
-	const removedUsers = await Promise.all(userArr.map(async (user) => {
+	await Promise.all(userArr.map(async (user) => {
 		// eslint-disable-next-line no-await-in-loop
 		const userRecord = await getUserByUsernameOrEmail(user.trim()).catch(() => false);
 		if (userRecord) {
@@ -47,13 +47,12 @@ const run = async (users) => {
 		logger.logInfo(`User ${user.trim()} not found, skipping...`);
 		return false;
 	}));
-	logger.logInfo(`Removed users: ${removedUsers.filter(Boolean).length} out of ${userArr.length}`);
 };
 
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('users', {
-		describe: 'users to remove (comma separated)',
+		describe: 'usersnames or emails to remove (comma separated)',
 		type: 'string',
 		demandOption: true,
 	});
