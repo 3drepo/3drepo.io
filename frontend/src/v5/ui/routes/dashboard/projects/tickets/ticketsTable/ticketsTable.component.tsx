@@ -70,23 +70,23 @@ export const TicketsTable = () => {
 	const models = useSelectedModels();
 
 	const setTemplate = useCallback((newTemplate) => {
-		const newParams = { ...params, template: newTemplate };
+		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
 		const ticketsPath = ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE
-		const path = generatePath(ticketsPath + '/' + window.location.search, newParams);
-		navigate(path, { replace: false });
+		const path = generatePath(ticketsPath, newParams);
+		navigate({ pathname: path, search: window.location.search }, { replace: false });
 	}, [params, navigate]);
 
 	const setTicketValue = useCallback((modelId?: string,  ticket_id?: string, groupByVal?: string, replace: boolean = false) => {
 		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
-		const newParams = { ...params, ticketId: id || '' };
-		const search = '/?' + setContainerOrFederation(modelId);
+		const newParams = { ...params, ticketId: id || '' } as Required<DashboardTicketsParams>;
+		const search = setContainerOrFederation(modelId);
 		setPresetValue(groupByVal);
-		const path = generatePath(TICKETS_ROUTE_WITH_TICKET + search, newParams);
+		const path = generatePath(TICKETS_ROUTE_WITH_TICKET, newParams);
 
 		if (replace) {
-			navigate(path, { replace: true });
+			navigate({ pathname: path, search }, { replace: true });
 		} else {
-			navigate(path, { replace: false });
+			navigate({ pathname: path, search }, { replace: false });
 		}
 	}, [params, navigate, setContainerOrFederation]);
 

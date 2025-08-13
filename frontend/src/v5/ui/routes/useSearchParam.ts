@@ -55,7 +55,7 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 			searchParams.delete(name);
 		}
 		return searchParams.toString();
-	}, [name, location.search, transformer]);
+	}, [name, location.search, transformer.to]);
 
 	const setParam = useCallback((newValue: T) => {
 		const search = getSearchParams(newValue);

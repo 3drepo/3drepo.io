@@ -63,7 +63,7 @@ interface IProps extends INotification {
 	sendDeleteNotification: (id: string) => void;
 	showUpdatedFailedError: (errorMessage: string) => void;
 	onClick?: (e: SyntheticEvent) => void;
-	navigate: (to: string) => void;
+	navigate: (to: any) => void;
 }
 
 interface IState {
@@ -184,7 +184,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 			pathname = viewerRoute(teamSpace, project, modelId, this.props.revision);
 		}
 
-		navigate(pathname + search)
+		navigate({ pathname, search })
 	}
 
 	public onClick = (e: SyntheticEvent) => {

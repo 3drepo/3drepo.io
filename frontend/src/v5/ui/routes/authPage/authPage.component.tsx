@@ -20,7 +20,7 @@ import { AuthTemplate } from '@components/authTemplate/authTemplate.component';
 import { Footer, Form, Heading, Link } from './authPage.styles';
 import { COOKIES_ROUTE, PRIVACY_ROUTE, RELEASE_NOTES_ROUTE, TERMS_ROUTE } from '../routes.constants';
 import { useSSOLogin } from '@/v5/services/sso.hooks';
-import { Navigate, useMatch } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { addParams } from '@/v5/helpers/url.helper';
 import { formatMessage } from '@/v5/services/intl';
@@ -36,8 +36,8 @@ const APP_VERSION = ClientConfig.VERSION;
 
 export const AuthPage = () => {
 	const [login] = useSSOLogin();
-	const match = useMatch('*');
-	const url = match?.pathname || '';
+	const location = useLocation();
+	const url = location.pathname || '';
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState();
 	

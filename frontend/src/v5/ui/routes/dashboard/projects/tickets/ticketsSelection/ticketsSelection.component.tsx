@@ -52,14 +52,14 @@ export const TicketsSelection = () => {
 	const goToTableView = () => {
 		if (!isValid) return;
 
-		const route = TICKETS_ROUTE + `/?models=${containersAndFederations.join(',')}`;
-		const path = generatePath(route, {
+		const search = `models=${containersAndFederations.join(',')}`;
+		const pathname = generatePath(TICKETS_ROUTE, {
 			teamspace,
 			project,
 			template,
 		});
 
-		navigate(path);
+		navigate({ pathname, search });
 	};
 
 	if (!teamspace || !project || !templates) return (<Loader />);

@@ -73,7 +73,7 @@ const render = () => {
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
 						<InitializeConnectedRouter />
 						<Routes>
-							<Route path="/*" element={<Navigate to="v5/dashboard" />} />
+							<Route index element={<Navigate to="v5/dashboard" />} />
 							<Route path={ROUTES.SIGN_UP} element={<Navigate to={{ pathname: V5_AUTH_PATH, search: window.location.search }} replace />} />
 							<Route path={ROUTES.LOGIN} element={<Navigate to={V5_AUTH_PATH} replace />} />
 							<Route path="/v5/*" element={<V5Root />} />
