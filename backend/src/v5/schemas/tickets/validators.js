@@ -53,7 +53,22 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 		[viewGroups.TRANSFORMED]: generateGroupArraySchema({
 			transformation: Yup.array().of(Yup.number()).length(16).required(),
 		}),
-	}).default(undefined), true);
+		[viewGroups.SELECTED]: generateGroupArraySchema({
+			color: types.color3Arr,
+			opacity: Yup.number().max(1).test('opacity value', 'Opacity value must be bigger than 0', (val) => val === undefined || val > 0),
+		}, (sch) => sch.test('color and opacity', 'Must define a colour or opacity override', ({ color, opacity }) => color || opacity)),
+		[viewGroups.SHOWN]: generateGroupArraySchema(),
+	}).test(
+		'hidden-shown-mutually-exclusive',
+		`${viewGroups.HIDDEN} and ${viewGroups.SHOWN} groups cannot both have data at the same time`,
+		(value) => {
+			const hidden = value?.[viewGroups.HIDDEN];
+			const shown = value?.[viewGroups.SHOWN];
+			const hasHidden = Array.isArray(hidden) && hidden.length > 0;
+			const hasShown = Array.isArray(shown) && shown.length > 0;
+			return !(hasHidden && hasShown);
+		},
+	).default(undefined), true);
 
 	const camera = imposeNullableRule(Yup.object({
 		type: Yup.string().oneOf([CameraType.PERSPECTIVE, CameraType.ORTHOGRAPHIC])
