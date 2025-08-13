@@ -24,12 +24,16 @@ import { get, isNumber } from 'lodash';
 import { Heading, Title, FlexContainer } from './sidebarForm.styles';
 import { useContext, useEffect } from 'react';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingRevisionsHooksSelectors, DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MODEL_UNITS } from '../../../models.helpers';
 import { DoubleInputLineContainer } from '../../drawingDialogs/drawingForm.styles';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
+import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { CALIBRATION_INVALID_RANGE_ERROR } from '@/v5/validation/drawingSchemes/drawingSchemes';
 
 export const SidebarForm = () => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const types = DrawingsHooksSelectors.selectTypes();
 	const { getValues, formState: { errors, dirtyFields }, trigger, watch } = useFormContext();
 	const { fields, selectedId } = useContext(UploadFilesContext);
@@ -40,6 +44,11 @@ export const SidebarForm = () => {
 	const disableDrawingFields = !(drawingName && !drawingId);
 	const getError = (field: string) => get(errors, `${revisionPrefix}.${field}`);
 	const verticalRange = watch(`${revisionPrefix}.calibration.verticalRange`);
+	const hasActiveRevisions = DrawingsHooksSelectors.selectRawDrawingById(drawingId).revisionsCount > 0;
+	const hasPendingRevisions = !!DrawingRevisionsHooksSelectors.selectRevisionsPending(drawingId);
+	const drawingRevisionsArePending = !!DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
+	const needsFetchingCalibration = hasActiveRevisions && (hasPendingRevisions || drawingRevisionsArePending) && !isNumber(verticalRange[0]);
+	const hideBottomExtentError = (errors.calibration?.verticalRange || []).some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
 
 	useEffect(() => {
 		if (get(dirtyFields, `${revisionPrefix}.calibration.verticalRange`)?.some((v) => v)) {
@@ -47,7 +56,21 @@ export const SidebarForm = () => {
 		}
 	}, [verticalRange?.[0], verticalRange?.[1]]);
 
-	if (drawingId && !isNumber(getValues(`${revisionPrefix}.calibration.verticalRange.0`))) return <Loader />;
+	useEffect(() => {
+		if (!needsFetchingCalibration || drawingRevisionsArePending) return;
+
+		if (!hasPendingRevisions) {
+			DrawingRevisionsActionsDispatchers.fetch(
+				teamspace,
+				project,
+				drawingId,
+			);
+			return;
+		}
+		DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawingId);
+	}, [drawingId, hasActiveRevisions, hasPendingRevisions, drawingRevisionsArePending, isNumber(verticalRange[0])]);
+
+	if (needsFetchingCalibration) return <Loader />;
 
 	return (
 		<>
@@ -84,7 +107,7 @@ export const SidebarForm = () => {
 					id="drawing.uploads.sidebar.drawing.calibrationInformation"
 				/>
 			</Heading>
-			<DoubleInputLineContainer>
+			<DoubleInputLineContainer $hideBottomExtentError={hideBottomExtentError}>
 				<FormNumberField
 					name={`${revisionPrefix}.calibration.verticalRange.0`}
 					formError={getError('calibration.verticalRange.0')}

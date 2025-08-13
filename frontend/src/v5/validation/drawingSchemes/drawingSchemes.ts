@@ -49,17 +49,16 @@ const number = Yup.string()
 		},
 	);
 
+export const CALIBRATION_INVALID_RANGE_ERROR = formatMessage({
+	id: 'validation.drawing.calibration.error.invalidRange',
+	defaultMessage: 'Bottom extent should be smaller than top',
+});
 const calibration = Yup.object().shape({
 	units: Yup.string().required(formatMessage({
 		id: 'validation.drawing.calibration.units.error.required',
 		defaultMessage: 'Units is a required field',
 	})),
-	verticalRange: numberRange(
-		formatMessage({
-			id: 'validation.drawing.calibration.error.invalidRange',
-			defaultMessage: 'Bottom extent should be smaller than top',
-		}),
-	),
+	verticalRange: numberRange(CALIBRATION_INVALID_RANGE_ERROR),
 });
 
 export const DrawingFormSchema =  Yup.object().shape({
@@ -123,6 +122,7 @@ export const SidebarSchema = Yup.object().shape({
 	),
 	drawingDesc: desc,
 	calibration,
+	revisionDesc: desc,
 });
 
 export const UploadsSchema = Yup.object().shape({

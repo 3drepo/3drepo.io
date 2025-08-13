@@ -23,15 +23,14 @@ import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tick
 import { AdditionalProperties } from '../../../tickets.constants';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 type ITicketItemThumbnail = {
 	ticket: ITicket;
-	selectTicket: (e) => void;
+	onClick: (e) => void;
 };
 
-export const TicketItemThumbnail = ({ ticket, selectTicket }: ITicketItemThumbnail) => {
-	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+export const TicketItemThumbnail = ({ ticket, onClick }: ITicketItemThumbnail) => {
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 
 	const defaultView = get(ticket.properties, AdditionalProperties.DEFAULT_VIEW);
@@ -41,13 +40,8 @@ export const TicketItemThumbnail = ({ ticket, selectTicket }: ITicketItemThumbna
 	const thumbnailSrc = resourceId ?
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, resourceId, isFederation) : null;
 
-	const goToViewpoint = async (event) => {
-		selectTicket(event);
-		TicketsActionsDispatchers.fetchTicketGroupsAndGoToView(teamspace, project, containerOrFederation, ticket._id, revision);
-	};
-
 	return (
-		<ThumbnailContainer onClick={goToViewpoint}>
+		<ThumbnailContainer onClick={onClick}>
 			<Thumbnail src={thumbnailSrc} />
 			{hasViewpoint && (
 				<ViewpointOverlay>

@@ -27,7 +27,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { SearchInput } from '@controls/search/searchInput';
 import { Display } from '@/v5/ui/themes/media';
-import { DEFAULT_SORT_CONFIG, useOrderedList } from '@components/dashboard/dashboardList/useOrderedList';
+import { DEFAULT_SORT_CONFIG, ISortConfig } from '@components/dashboard/dashboardList/useOrderedList';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { ButtonProps } from '@mui/material/Button';
 import { isEmpty } from 'lodash';
@@ -38,6 +38,9 @@ import { EditFederationContainersListItem, IconButtonProps } from './editFederat
 import { Container, ContainerListMainTitle, ContainerCount } from './editFederationContainersList.styles';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { EditFederationContainersListItemLoading } from './editFederationContainersListItem/editFederationContainersListItemLoading.component';
+import { EditFederationContext } from '../../editFederationContext';
+import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
+import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 
 export type ActionButtonProps = {
 	children: ReactNode;
@@ -73,11 +76,24 @@ export const EditFederationContainers = ({
 	const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 	const { items: containers, filteredItems, query } = useContext<SearchContextType<IContainer>>(SearchContext);
 	const hasContainers = containers.length > 0;
+	const { groupsByContainer } = useContext(EditFederationContext);
+	// const [groupValue, setGroupValue] = useState(groupsByContainer[container._id] || null);
+	const [sortedList, setSortedList] = useState<IContainer[]>(filteredItems);
+	const onSortingChange = useCallback((sortConfig: ISortConfig) => {
+		if (sortConfig.column[0] === 'group') {
+			setSortedList([...filteredItems].sort((containerA, containerB) => {
+				const groupA = groupsByContainer[containerA._id] || '';
+				const groupB = groupsByContainer[containerB._id] || '';
 
-	const { sortedList, setSortConfig } = useOrderedList(
-		filteredItems,
-		DEFAULT_SORT_CONFIG,
-	);
+				return  sortConfig.direction[0] === SortingDirection.ASCENDING ?  
+					groupA.localeCompare(groupB) :
+					groupB.localeCompare(groupA) ;
+			}));
+
+			return;
+		}
+		setSortedList([...filteredItems].sort(getSortingFunction(sortConfig)));
+	}, [filteredItems]);
 
 	const isListPending = ContainersHooksSelectors.selectIsListPending();
 	const areStatsPending = ContainersHooksSelectors.selectAreStatsPending();
@@ -111,7 +127,7 @@ export const EditFederationContainers = ({
 					</CollapseSideElementGroup>
 				)}
 			>
-				<DashboardListHeader onSortingChange={setSortConfig} defaultSortConfig={DEFAULT_SORT_CONFIG}>
+				<DashboardListHeader onSortingChange={onSortingChange} defaultSortConfig={DEFAULT_SORT_CONFIG}>
 					<DashboardListHeaderLabel name="name" minWidth={116}>
 						<FormattedMessage id="modal.editFederation.list.header.container" defaultMessage="Container" />
 					</DashboardListHeaderLabel>
