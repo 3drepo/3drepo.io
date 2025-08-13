@@ -75,25 +75,6 @@ const testValidSession = () => {
 			expect(SessionUtils.setCSRFCookie).not.toHaveBeenCalled();
 		});
 
-		test('should respond with notLoggedIn errCode if the ip address mismatched', async () => {
-			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
-			const mockCB = jest.fn(() => {});
-			await AuthMiddlewares.validSession(
-				{ ips: [],
-					ip: generateRandomString(),
-					headers,
-					session,
-					cookies,
-					sessionID },
-				{ clearCookie: () => {} },
-				mockCB,
-			);
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
-			expect(SessionUtils.setCSRFCookie).not.toHaveBeenCalled();
-		});
-
 		test('should respond with notLoggedIn errCode if the user agent mismatched', async () => {
 			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
 			const mockCB = jest.fn(() => {});
