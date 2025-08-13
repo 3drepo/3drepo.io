@@ -27,6 +27,7 @@ import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.type
 import { chunk } from 'lodash';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
 export interface TicketsTableType {
 	getPropertyType: (name: string) => PropertyTypeDefinition;
@@ -52,7 +53,7 @@ interface Props {
 	children: any;
 }
 export const TicketsTableContextComponent = ({ children }: Props) => {
-	const [groupBy, setGroupBy] = useState('');
+	const [groupBy, setGroupBy] = useState(NONE_OPTION);
 	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);

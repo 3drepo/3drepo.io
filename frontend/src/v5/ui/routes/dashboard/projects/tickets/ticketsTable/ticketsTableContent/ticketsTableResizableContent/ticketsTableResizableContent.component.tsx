@@ -29,6 +29,7 @@ import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
 type CollapsibleTicketsGroupProps = {
 	groupName: string;
@@ -79,7 +80,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 		setTicketValue(modelId, NEW_TICKET_ID, presetValue);
 	};
 
-	if (!groupBy) {
+	if (groupBy === NONE_OPTION) {
 		return (
 			<TicketsTableGroup
 				tickets={filteredItems}
