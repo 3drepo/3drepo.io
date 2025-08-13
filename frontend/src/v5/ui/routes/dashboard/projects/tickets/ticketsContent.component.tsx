@@ -24,13 +24,12 @@ import { discardSlash } from '@/v5/helpers/url.helper';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { TicketsTable } from './ticketsTable/ticketsTable.component';
+import { TabularView } from './ticketsTable/ticketsTable.component';
 import { TicketsSelection } from './ticketsSelection/ticketsSelection.component';
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 import { EmptyPageView } from '../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { DashboardParams, TICKETS_ROUTE } from '../../../routes.constants';
-import { TicketsAndResizableTableProvider } from './ticketsTable/ticketsAndResizableTableProvider.component';
 
 export const TicketsContent = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -76,9 +75,7 @@ export const TicketsContent = () => {
 	return (
 		<Switch>
 			<Route exact path={TICKETS_ROUTE}>
-				<TicketsAndResizableTableProvider>
-					<TicketsTable />
-				</TicketsAndResizableTableProvider>
+				<TabularView />
 			</Route>
 			<Route path={path}>
 				<TicketsSelection />
