@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import _ from 'lodash';
+import _, { Dictionary } from 'lodash';
 import { stripModuleOrPropertyPrefix } from './ticketsTable.helper';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectStatusConfigByTemplateId, selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
@@ -100,37 +100,41 @@ const groupByStatus = (tickets: ITicket[]) => {
 	return _.orderBy(Object.entries(ticketsByStatusDisplayValue), [toStatusTypeOrder, toStatusDisplayValue]) as Array<[string, ITicket[]]>;
 };
 
-const sortManyOfValues = (ticket: ITicket, groupBy: string) => {
-	const sortedValues = _.orderBy(
-		_.get(ticket, groupBy),
-		(value) => value.trim().toLowerCase(),
-	);
-	return _.set(_.cloneDeep(ticket), groupBy, sortedValues);
-};
 const groupByManyOfValues = (tickets: ITicket[], groupBy: string) => {
-	const [ticketsWithValue, ticketsWithUnsetValue] = _.partition(tickets, (ticket) => _.get(ticket, groupBy)?.length > 0);
-	const ticketsWithSortedValues = ticketsWithValue.map((ticket) => sortManyOfValues(ticket, groupBy));
-	const ticketsSortedByValues = _.orderBy(
-		ticketsWithSortedValues,
-		(ticket) => {
-			const values = _.get(ticket, groupBy).map((assignee) => assignee.trim().toLowerCase());
-			return _.orderBy(values).join();
-		},
-	);
+	const groups: Dictionary<ITicket[]> = {};
 
-	const groups = _.groupBy(ticketsSortedByValues, (ticket) => {
-		const values = _.get(ticket, groupBy);
-		return values.join(', ');
-	});
-	return { ...groups, [UNSET]: ticketsWithUnsetValue };
+	tickets.forEach((ticket) => {
+		const values = selectTicketPropertyByName(getState(), ticket._id, groupBy);
+		const key = values ? [...values].sort().join(',') : UNSET;
+
+		if (!groups[key]) {
+			groups[key] = [];
+		}
+		groups[key].push(ticket);
+	})
+
+	return groups;
 };
 
 const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => _.groupBy(tickets, 
 	(ticket) => selectTicketPropertyByName(getState(), ticket._id, groupBy) ?? UNSET);
 
-const sortSelectGroups = (groups: Record<string, ITicket[]>) => {
+const arrayAndStringCompare =(a,b) => {
+	const arrA = a.split(',');
+	const arrB = b.split(',');
+
+	if(arrA.length == arrB.length) {
+		return a.localeCompare(b);
+	}
+	return arrA.length - arrB.length;
+}	
+
+const sortSelectGroups = (groups: Dictionary<ITicket[]>) => {
 	const { [UNSET]: groupsWithUnsetValue, ...grouspWithSetValue } = groups;
-	const sortedGroups = _.orderBy(_.entries(grouspWithSetValue), ([groupName]) => groupName);
+	const sortedGroups:Array<[string, ITicket[]]> = Object.keys(grouspWithSetValue)
+		.sort(arrayAndStringCompare)     
+		.map((key) => [key, groups[key]]);
+
 	if (groupsWithUnsetValue?.length) {
 		sortedGroups.push([UNSET, groupsWithUnsetValue]);
 	}

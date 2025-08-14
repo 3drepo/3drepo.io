@@ -24,61 +24,42 @@ interface Props {
 }
 
 export const VirtualList = ({ items, itemHeight, itemContent }:Props) => { 
-	const elem = useRef<Element>();
+	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
 	const prevRect = useRef<DOMRect>();
-	const itemsHeight = useRef<Record<number, number>>({});
+	const prevInnerHeight = useRef(0);
 
+	const listHeight = items.length * itemHeight;
 
-	const [elemRect, setElemRect] = useState<DOMRect>({ x:0, y:0, width:0, height:0 } as DOMRect);
+	const [containerRect, setContainerRect] = useState<DOMRect>({ x:0, y:0, width:0, top:0, bottom: 0 , height:0 } as DOMRect);
 
 	let { innerHeight } = window;
+	const top = Math.min(Math.max(0, containerRect.top), innerHeight);
+	const bottom = Math.min(Math.max(0, containerRect.bottom), innerHeight);
+	const contentCount = Math.ceil(((bottom-top)) / itemHeight); 
 
-	const contentCount = Math.ceil((1.5 * innerHeight) / itemHeight);
-	// const contentCountPadding = Math.floor(contentCount / 2);
 	const getFirstItemIndex = (y) => {
-		let spacerHeight = 0;
-		let firstItemindex = 0; 
-		for (let i = 0; i < items.length; i++) {
-			const currentItemHeight = i ? itemsHeight.current[firstItemindex] || itemHeight : 0 ;
-			if (spacerHeight + currentItemHeight < y) {
-				spacerHeight += currentItemHeight;
-				firstItemindex = i;
-			}
-		}
-
+		let firstItemindex = Math.ceil(y/itemHeight); 
+		let spacerHeight = firstItemindex * itemHeight;
 		return { firstItemindex, spacerHeight };
 	};
 
 
-	const { firstItemindex, spacerHeight } =  getFirstItemIndex(Math.max(0, -elemRect.y));
+	const { firstItemindex, spacerHeight } =  getFirstItemIndex(Math.max(0, -containerRect.y));
 
 	const itemsSlice = items.slice(firstItemindex, Math.min(contentCount + firstItemindex, items.length));
-	const listHeight = items.reduce((partialSum, _, index) => (itemsHeight.current[index] || itemHeight) + partialSum, 0);
+	
 
 	let onScroll;
 	onScroll = () => {
-		if (!elem.current) return;
-		const rect = elem.current.getBoundingClientRect();
-		let shouldUpdate = rect.y !== prevRect.current?.y;
-
-		const { firstItemindex: first } =  getFirstItemIndex(Math.max(0, -prevRect.current?.y));
-		let i = 0;
-
-		for (let child of itemsContainer.current.children as any as Iterable<Element>) {
-			const height = child.getBoundingClientRect().height;
-		
-			if (!!height && itemsHeight.current[i + first] !== height) {
-				itemsHeight.current[i + first] = height;
-				shouldUpdate = true;
-			}
-		
-			i++;
-		}
+		if (!containerRef.current) return;
+		const rect = containerRef.current.getBoundingClientRect();
+		let shouldUpdate = rect.y !== prevRect.current?.y || prevInnerHeight.current !== window.innerHeight;
 
 		if (shouldUpdate) {
 			prevRect.current = rect; 
-			setElemRect(rect);
+			prevInnerHeight.current = window.innerHeight;
+			setContainerRect(rect);
 		}
 
 		window.requestAnimationFrame(onScroll);
@@ -87,9 +68,8 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 	useEffect(() => {
 		window.requestAnimationFrame(onScroll);
 	}, []);
-	
 
-	return (<div style={{ height: listHeight }} ref={elem as any} >
+	return (<div style={{ height: listHeight }} ref={containerRef as any} >
 		<div style={{ height: spacerHeight } }/>
 		<div ref={itemsContainer as any}>
 			{itemsSlice.map(itemContent)}
