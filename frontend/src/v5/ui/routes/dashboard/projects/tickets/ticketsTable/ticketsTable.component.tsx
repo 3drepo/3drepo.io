@@ -83,11 +83,7 @@ export const TicketsTable = () => {
 		setPresetValue(groupByVal);
 		const path = generatePath(TICKETS_ROUTE_WITH_TICKET, newParams);
 
-		if (replace) {
-			navigate({ pathname: path, search }, { replace: true });
-		} else {
-			navigate({ pathname: path, search }, { replace: false });
-		}
+		navigate({ pathname: path, search }, { replace });
 	}, [params, navigate, setContainerOrFederation]);
 
 	useEffect(() => {

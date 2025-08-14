@@ -25,11 +25,12 @@ import {
 	useParams,
 } from 'react-router-dom';
 import { Header, Title } from '../projects/projectsList.styles';
+import { TeamspaceParams } from '../../../routes.constants';
 
 export const TeamspaceSettings = () => {
 	const navigate = useNavigate();
 	const location = useLocation();
-	const { teamspace } = useParams<'teamspace'>();
+	const { teamspace } = useParams<TeamspaceParams>();
 
 	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 	return (
