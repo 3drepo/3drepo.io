@@ -27,7 +27,6 @@ const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
 const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
-const { isArray, isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { propTypes, viewGroups } = require('../../../../../schemas/tickets/templates.constants');
 const { removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
@@ -36,6 +35,7 @@ const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getFileWithMetaAsStream } = require('../../../../../services/filesManager');
 const { importComments } = require('./tickets.comments');
+const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
 
@@ -54,12 +54,12 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 
 	const updateReferences = (templateProperties, externalReferences, oldProperties = {}, updatedProperties = {}) => {
 		templateProperties.forEach(({ type, name }) => {
-			const processImageUpdate = (isArrayValue, field) => {
+			const processImageUpdate = (isArray, field) => {
 				const oldProp = field ? getNestedProperty(oldProperties[name], field) : oldProperties[name];
 				const newProp = field ? getNestedProperty(updatedProperties[name], field) : updatedProperties[name];
 
 				if (oldProp && newProp !== undefined) {
-					const idsToRemove = isArrayValue
+					const idsToRemove = isArray
 						? getArrayDifference(newProp?.map(UUIDToString), oldProp.map(UUIDToString)).map(stringToUUID)
 						: [oldProp];
 
@@ -77,7 +77,7 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 						return data;
 					};
 
-					if (isArrayValue) {
+					if (isArray) {
 						// eslint-disable-next-line no-param-reassign
 						updatedProperties[name] = newProp.map(getRefFromBuffer);
 					} else if (field) {
@@ -94,13 +94,11 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 			} else if (type === propTypes.VIEW) {
 				// Make constants out of these
 				processImageUpdate(false, 'screenshot');
-				processGroupsUpdate(oldProperties[name], updatedProperties[name], Object.values(viewGroups).map((groupName) => `state.${groupName}`), externalReferences.groups);
+				processGroupsUpdate(oldProperties[name], updatedProperties[name],
+					Object.values(viewGroups).map((groupName) => `state.${groupName}`),
+					externalReferences.groups);
 			} else if (type === propTypes.IMAGE_LIST) {
 				processImageUpdate(true);
-			} else if ((type === propTypes.ONE_OF || type === propTypes.MANY_OF) && updatedProperties[name]) {
-				const newValue = updatedProperties[name];
-				// eslint-disable-next-line no-param-reassign
-				updatedProperties[name] = isArray(newValue) ? newValue.map(stringToUUID) : stringToUUID(newValue);
 			}
 		});
 	};
