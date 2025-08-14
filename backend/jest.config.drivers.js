@@ -22,6 +22,7 @@ config.coveragePathIgnorePatterns = [
 	'^((?!handler).)*$',
 ];
 
+config.roots = ["./tests/v5/drivers"]
 config.testMatch = ['**/tests/**/drivers/**/*.test.[jt]s?(x)'];
 config.testSequencer = './jest.sequencer.drivers.js';
 

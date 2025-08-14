@@ -21,6 +21,7 @@ config.collectCoverageFrom = ['src/scripts/utility/**/*.js'];
 config.coveragePathIgnorePatterns = ['index.js', 'scheduler*'];
 config.setupFiles = ['./tests/v5/scripts/setup.js'];
 
+config.roots = ["./tests/v5/scripts"]
 config.testMatch = ['**/tests/**/scripts/**/*.test.[jt]s?(x)'];
 
 module.exports = config;
