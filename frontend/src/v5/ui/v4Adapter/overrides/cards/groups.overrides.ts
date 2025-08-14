@@ -39,7 +39,7 @@ import { Container as PreviewDetailsContainer,
 } from '@/v4/routes/viewerGui/components/previewDetails/previewDetails.styles';
 import { Container as FiltersContainer,
 	InputLabel,
-	SelectedCriteria,
+	Criteria,
 	FormContainer,
 	ButtonContainer,
 	FormControl,
@@ -257,7 +257,7 @@ const expandedGroupItem = css`
 					position: initial;
 				}
 
-				${SelectedCriteria} {
+				${Criteria} {
 					padding: 5px 15px 12px;
 					box-sizing: content-box;
 

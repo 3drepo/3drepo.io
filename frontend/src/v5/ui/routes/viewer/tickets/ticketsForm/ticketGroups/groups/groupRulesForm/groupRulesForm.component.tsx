@@ -26,7 +26,7 @@ import { IGroupRule } from '@/v5/store/tickets/tickets.types';
 import { formatMessage } from '@/v5/services/intl';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useEffect } from 'react';
-import { isEqual } from 'lodash';
+import { has, isEmpty, isEqual } from 'lodash';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
 import { IFormRule, formRuleToGroupRule, groupRuleToFormRule } from './groupRulesForm.helpers';
@@ -34,8 +34,9 @@ import { RuleFieldValues } from './groupRulesInputs/ruleFieldValues/ruleFieldVal
 import { RuleFieldOperator } from './groupRulesInputs/ruleFieldOperator/ruleFieldOperator.component';
 import { RuleOperator } from './groupRulesInputs/ruleOperator/ruleOperator.component';
 import { RuleValues } from './groupRulesInputs/ruleValues/ruleValues.component';
+import { mapArrayToFormArray } from '@/v5/helpers/form.helper';
 
-const DEFAULT_VALUES: IFormRule = {
+const DEFAULT_RULE: IGroupRule = {
 	name: '',
 	field: {
 		operator: 'IS',
@@ -45,16 +46,48 @@ const DEFAULT_VALUES: IFormRule = {
 	values: [],
 };
 
+const isNonEmptyElement = (item) => !(!item || (has(item, 'value') && !item.value)); 
+const getDirtyFields = (defaultValues: IFormRule, currentValues: IFormRule) => {
+	const dirtyFields = [];
+	const findDifferentFields = (defaultObj = {}, dirtyObj = {}, prefix = []) => {
+		Object.keys(defaultObj).forEach((key) => {
+			const defaultObjVal = defaultObj[key];
+			const dirtyObjVal = dirtyObj[key];
+			const currentPath = [...prefix, key];
+
+			switch (key) {
+				case 'field':
+					findDifferentFields(defaultObjVal, dirtyObjVal, currentPath);
+					break;
+				case 'values':
+					if (!isEqual(defaultObjVal.filter(isNonEmptyElement), dirtyObjVal.filter(isNonEmptyElement))) {
+						dirtyFields.push([currentPath.join('.'), mapArrayToFormArray(dirtyObjVal)]);
+					}
+					break;
+				default:
+					if (!isEqual(defaultObjVal, dirtyObjVal)) {
+						dirtyFields.push([currentPath.join('.'), dirtyObjVal]);
+					}
+			}
+		});
+	};
+	findDifferentFields(defaultValues, currentValues);
+	return dirtyFields;
+};
+
 type IGroupRules = {
 	containerOrFederation: string;
 	rule?: IGroupRule;
-	existingRules: IGroupRule[],
-	onSave: (rule: IGroupRule) => void;
-	onClose: () => void;
+	existingRules: IGroupRule[];
+	// An object that includes the fields to change as soon as the form is initiated to
+	// mark them as dirty 
+	dirtyRule?: IGroupRule;
+	onSubmit?: (rule: IGroupRule) => void;
+	onClose?: (currentFormValues: IGroupRule) => void;
 };
 
-export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [], containerOrFederation }: IGroupRules) => {
-	const defaultValues = rule ? groupRuleToFormRule(rule) : DEFAULT_VALUES;
+export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], containerOrFederation, dirtyRule }: IGroupRules) => {
+	const defaultValues = groupRuleToFormRule(rule ?? DEFAULT_RULE);
 
 	const formData = useForm<IFormRule>({
 		defaultValues,
@@ -71,26 +104,44 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [], cont
 		formState: { isValid, errors },
 		getValues,
 		reset,
+		setValue,
 	} = formData;
 
 	const getIsDirty = () => {
 		const formValues = getValues();
-		// @ts-ignore
-		formValues.field.values = formValues.field.values.map(({ value }) => ({ value }));
-		formValues.values = formValues.values.filter(({ value }) => value);
-		return !isEqual(defaultValues, formValues);
+		const cleanValuesForComparison = (obj: IFormRule) => ({
+			...obj,
+			field: {
+				...obj.field,
+				values: obj.field.values.map(({ value }) => ({ value })),
+			},
+			values: obj.values.filter(({ value }) => value),
+		});
+		return !isEqual(cleanValuesForComparison(defaultValues), cleanValuesForComparison(formValues));
 	};
 
-	const handleSave = (body: IFormRule) => onSave(formRuleToGroupRule(body));
+	const handleSave = (body: IFormRule) => onSubmit(formRuleToGroupRule(body));
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 		formData.handleSubmit(handleSave)(e);
-		onClose();
 	};
 
-	useEffect(() => { reset(defaultValues); }, [rule]);
+	useEffect(() => {
+		reset(defaultValues);
+	}, [rule]);
+
+	useEffect(() => {
+		if (isEmpty(dirtyRule)) return;
+		getDirtyFields(defaultValues, groupRuleToFormRule(dirtyRule)).forEach(([fieldName, fieldValue]: [any, any]) => {
+			setValue(fieldName, fieldValue, { shouldDirty: true, shouldValidate: true });
+		});
+	}, [JSON.stringify(dirtyRule)]);
+
+	useEffect(() => () => {
+		onClose?.(formRuleToGroupRule(getValues()));
+	}, []);
 
 	return (
 		<Form onSubmit={handleSubmit}>
@@ -111,7 +162,7 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [], cont
 				</InputsContainer>
 				<Buttons>
 					<ActionMenuItem>
-						<Button variant="text" color="secondary" onClick={onClose}>
+						<Button variant="text" color="secondary">
 							<FormattedMessage id="tickets.groups.filterPanel.cancel" defaultMessage="Cancel" />
 						</Button>
 					</ActionMenuItem>

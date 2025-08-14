@@ -16,42 +16,47 @@
  */
 
 import { GroupRulesForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketGroups/groups/groupRulesForm/groupRulesForm.component';
-import { useEffect, useState } from 'react';
-import _, { uniqueId } from 'lodash';
+import { omit } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { GroupsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { IGroupRule } from '@/v5/store/tickets/tickets.types';
+import { useState } from 'react';
 import { Container } from './newCriterionForm.styles';
 
 interface IProps {
-	criterion: any;
-	alreadySelectedFilters: any[];
-	onSubmit: (values) => void;
-	selectedCriterion: any;
+	selectedCriterion?: IGroupRule & { _id: string };
+	criteria: any[];
+	criterionForm?: IGroupRule;
+	onSubmit: (values: IGroupRule) => void;
+	onClose: (values: IGroupRule) => void;
 }
 
-export const NewCriterionForm = ({ criterion, onSubmit, alreadySelectedFilters = [] }: IProps) => {
-	// used to clear the form after saving
-	const [key, setKey] = useState(uniqueId());
-	const { containerOrFederation } = useParams<ViewerParams>()
+export const NewCriterionForm = ({ selectedCriterion, onSubmit, onClose, criteria = [], criterionForm }: IProps) => {
+	const [key, setKey] = useState(0);
+	const { containerOrFederation } = useParams<ViewerParams>();
+	const rule = selectedCriterion ? omit(selectedCriterion, '_id') : null;
 
 	const handleSubmit = (data) => {
-		setKey(uniqueId());
-		onSubmit(data);
+		const formToSubmit = { ...data };
+		if (selectedCriterion) {
+			formToSubmit._id = selectedCriterion._id;
+		}
+		onSubmit(formToSubmit);
+		setKey(key + 1);
+		GroupsActionsDispatchers.setCriteriaFieldState({ criterionForm: null });
 	};
-
-	useEffect(() => {
-		setKey(uniqueId());
-	}, [criterion?._id]);
 
 	return (
 		<Container>
 			<GroupRulesForm
 				key={key}
 				containerOrFederation={containerOrFederation}
-				rule={criterion}
-				existingRules={alreadySelectedFilters}
-				onSave={handleSubmit}
-				onClose={() => {}}
+				rule={rule}
+				existingRules={criteria}
+				onSubmit={handleSubmit}
+				onClose={onClose}
+				dirtyRule={criterionForm}
 			/>
 		</Container>
 	);

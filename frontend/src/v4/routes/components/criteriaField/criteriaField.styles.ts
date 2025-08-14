@@ -54,7 +54,7 @@ export const Placeholder = styled.div`
 	}
 `;
 
-export const SelectedCriteria = styled.div`
+export const Criteria = styled.div`
 	position: relative;
 	min-height: 40px;
 	padding: 5px 12px;
