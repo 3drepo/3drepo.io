@@ -15,29 +15,219 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../../helper/path');
 
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString, determineTestGroup, generateRandomDate } = require('../../../helper/services');
+const { templates } = require('../../../../../src/v5/utils/responseCodes');
+const User = require('../../../../../src/v5/models/users');
 
-jest.mock('../../../../../src/v5/models/roles');
-const RolesModel = require(`${src}/models/roles`);
+jest.mock('../../../../../src/v5/models/teamspaceSettings');
+const TeamspaceModel = require(`${src}/models/teamspaceSettings`);
+
+jest.mock('../../../../../src/v5/models/users');
+const UserModel = require(`${src}/models/users`);
+
+jest.mock('../../../../../src/v5/services/sso/frontegg');
+const Frontegg = require(`${src}/services/sso/frontegg`);
 
 const Roles = require(`${src}/processors/teamspaces/roles`);
 
 const testGetRoles = () => {
 	describe('Get roles', () => {
-		test('should call getRoles with the teamspace provided', async () => {
-			const teamspace = generateRandomString();
-			const data = generateRandomString();
-			RolesModel.getRoles.mockResolvedValueOnce(data);
-			await expect(Roles.getRoles(teamspace)).resolves.toEqual(data);
+		const teamspace = generateRandomString();
+		test('Should get the roles from Frontegg (no users)', async () => {
+			const teamspaceId = generateRandomString();
+			const groups = times(3, () => ({
+				id: generateRandomString(),
+				name: generateRandomString(),
+				color: generateRandomString(),
+			}));
 
-			expect(RolesModel.getRoles).toHaveBeenCalledTimes(1);
-			expect(RolesModel.getRoles).toHaveBeenCalledWith(teamspace);
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.getGroups.mockResolvedValueOnce(groups);
+
+			await expect(Roles.getRoles(teamspace)).resolves.toEqual(groups);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(Frontegg.getGroups).toHaveBeenCalledTimes(1);
+			expect(Frontegg.getGroups).toHaveBeenCalledWith(teamspaceId);
+
+			expect(UserModel.getUsersByQuery).not.toHaveBeenCalled();
+		});
+
+		test('Should get the roles from Frontegg and translate users to usernames', async () => {
+			const teamspaceId = generateRandomString();
+
+			const userNamesInGroups = times(3, () => times(5, () => generateRandomString()));
+
+			const groups = times(3, () => ({
+				id: generateRandomString(),
+				name: generateRandomString(),
+				color: generateRandomString(),
+				users: times(5, () => ({ email: generateRandomString() })),
+			}));
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.getGroups.mockResolvedValueOnce(groups);
+
+			userNamesInGroups.forEach((userNames) => {
+				UserModel.getUsersByQuery.mockResolvedValueOnce(userNames.map((user) => ({ user })));
+			});
+
+			await expect(Roles.getRoles(teamspace)).resolves.toEqual(groups.map((group, i) => ({
+				...group,
+				users: userNamesInGroups[i],
+			})));
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(Frontegg.getGroups).toHaveBeenCalledTimes(1);
+			expect(Frontegg.getGroups).toHaveBeenCalledWith(teamspaceId);
+
+			expect(UserModel.getUsersByQuery).toHaveBeenCalledTimes(groups.length);
+			groups.forEach(({ users }) => {
+				expect(UserModel.getUsersByQuery).toHaveBeenCalledWith({ 'customData.email': { $in: users.map(({ email }) => email) } }, { user: 1 });
+			});
+		});
+
+		test('Should return empty array if no groups were found', async () => {
+			const teamspaceId = generateRandomString();
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.getGroups.mockResolvedValueOnce([]);
+
+			await expect(Roles.getRoles(teamspace)).resolves.toEqual([]);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(Frontegg.getGroups).toHaveBeenCalledTimes(1);
+			expect(Frontegg.getGroups).toHaveBeenCalledWith(teamspaceId);
+
+			expect(UserModel.getUsersByQuery).not.toHaveBeenCalled();
 		});
 	});
 };
 
-describe('processors/teamspaces/roles', () => {
+const testGetRoleById = () => {
+	describe('Get role by ID', () => {
+		const teamspace = generateRandomString();
+		const roleId = generateRandomString();
+
+		test('Should get the role from Frontegg', async () => {
+			const teamspaceId = generateRandomString();
+			const group = {
+				id: roleId,
+				name: generateRandomString(),
+				color: generateRandomString(),
+			};
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.getGroupById.mockResolvedValueOnce(group);
+
+			await expect(Roles.getRoleById(teamspace, roleId)).resolves.toEqual(group);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(Frontegg.getGroupById).toHaveBeenCalledTimes(1);
+			expect(Frontegg.getGroupById).toHaveBeenCalledWith(teamspaceId, roleId, false);
+			expect(UserModel.getUsersByQuery).not.toHaveBeenCalled();
+		});
+
+		test('Should get the role from Frontegg and convert the users if available', async () => {
+			const teamspaceId = generateRandomString();
+			const userEmails = times(3, () => ({ email: generateRandomString() }));
+			const group = {
+				id: roleId,
+				name: generateRandomString(),
+				color: generateRandomString(),
+				users: userEmails,
+			};
+
+			const usernames = times(group.users.length, () => generateRandomString());
+
+			UserModel.getUsersByQuery.mockResolvedValueOnce(usernames.map((user) => ({ user })));
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.getGroupById.mockResolvedValueOnce(group);
+
+			await expect(Roles.getRoleById(teamspace, roleId, true)).resolves.toEqual(group);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(Frontegg.getGroupById).toHaveBeenCalledTimes(1);
+			expect(Frontegg.getGroupById).toHaveBeenCalledWith(teamspaceId, roleId, true);
+
+			expect(UserModel.getUsersByQuery).toHaveBeenCalledTimes(1);
+			expect(UserModel.getUsersByQuery).toHaveBeenCalledWith({ 'customData.email': { $in: userEmails.map(({ email }) => email) } }, { user: 1 });
+		});
+
+		test('Should return not found if role does not exist', async () => {
+			const teamspaceId = generateRandomString();
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.getGroupById.mockRejectedValueOnce(undefined);
+
+			await expect(Roles.getRoleById(teamspace, roleId)).rejects.toBe(templates.roleNotFound);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+
+			expect(Frontegg.getGroupById).toHaveBeenCalledTimes(1);
+			expect(Frontegg.getGroupById).toHaveBeenCalledWith(teamspaceId, roleId, false);
+			expect(UserModel.getUsersByQuery).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testGetRolesByUsers = () => {
+	describe('Get roles by users', () => {
+		const teamspace = generateRandomString();
+		const teamspaceId = generateRandomString();
+
+		const users = times(3, () => generateRandomString());
+		const userNamesInGroups = times(3, (i) => [...times(4, () => generateRandomString()), users[i]]);
+
+		const groups = times(3, () => ({
+			id: generateRandomString(),
+			name: generateRandomString(),
+			color: generateRandomString(),
+			users: times(5, () => ({ email: generateRandomString() })),
+		}));
+
+		test('Should get the roles for the user from Frontegg', async () => {
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.getGroups.mockResolvedValueOnce(groups);
+
+			userNamesInGroups.forEach((userNames) => {
+				UserModel.getUsersByQuery.mockResolvedValueOnce(userNames.map((user) => ({ user })));
+			});
+
+			await expect(Roles.getRolesByUsers(teamspace, [users[0], users[1]]))
+				.resolves.toEqual(groups.flatMap(({ id }, i) => (i === 2 ? [] : id)));
+		});
+
+		test('Should get no roles if the users do not belong to any groups', async () => {
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.getGroups.mockResolvedValueOnce(groups);
+
+			userNamesInGroups.forEach((userNames) => {
+				UserModel.getUsersByQuery.mockResolvedValueOnce(userNames.map((user) => ({ user })));
+			});
+
+			await expect(Roles.getRolesByUsers(teamspace, [generateRandomString()]))
+				.resolves.toEqual([]);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testGetRoles();
+	testGetRoleById();
+	testGetRolesByUsers();
 });
