@@ -31,15 +31,15 @@ export const selectPathname = createSelector(
 )
 
 export const selectNavigationTarget = createSelector(
-	selectRouterDomain, (router) => router.navigationTarget || ''
+	selectRouterDomain, (router) => router.requestedActions.navigationTarget || ''
 );
 
 export const selectGoBackRequested = createSelector(
-	selectRouterDomain, (router) => router.goBackRequested || false
+	selectRouterDomain, (router) => router.requestedActions.goBackRequested || false
 );
 
 export const selectSearchParamsToRemove = createSelector(
-	selectRouterDomain, (router) => router.searchParamsToRemove || []
+	selectRouterDomain, (router) => router.requestedActions.searchParamsToRemove || []
 );
 
 const selectV4UrlParams = createSelector(

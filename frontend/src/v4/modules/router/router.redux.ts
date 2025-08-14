@@ -28,28 +28,30 @@ export const { Types: RouterTypes, Creators: RouterActions } = createActions({
 
 export const INITIAL_STATE = {
     location: { pathname: '' },
-    navigationTarget: '',
-    goBackRequested: false,
-    searchParamsToRemove: [],
+    requestedActions: {
+        navigationTarget: '',
+        goBackRequested: false,
+        searchParamsToRemove: [],
+    }
 };
 
 export const setLocation = (state = INITIAL_STATE, { location }) => ({
     ...state, location
 });
 export const navigate = (state = INITIAL_STATE, { to }) => ({
-    ...state, navigationTarget: to, goBackRequested: false
+    ...state, requestedActions: { ...state.requestedActions, navigationTarget: to }
 });
 export const goBack = (state = INITIAL_STATE) => ({
-    ...state, goBackRequested: true, navigationTarget: ''
+    ...state, requestedActions: { ...state.requestedActions, goBackRequested: true, navigationTarget: '' }
 });
 export const clearNavigation = (state = INITIAL_STATE) => ({
-    ...state, navigationTarget: '', goBackRequested: false
+    ...state, requestedActions: { ...state.requestedActions, navigationTarget: '', goBackRequested: false }
 });
 export const removeSearchParams = (state = INITIAL_STATE, { searchParams }) => ({
-    ...state, searchParamsToRemove: searchParams
+    ...state, requestedActions: { ...state.requestedActions, searchParamsToRemove: searchParams }
 });
 export const resetSearchParamsToRemove = (state = INITIAL_STATE) => ({
-    ...state, searchParamsToRemove: INITIAL_STATE.searchParamsToRemove
+    ...state, requestedActions: { ...state.requestedActions, searchParamsToRemove: [] }
 });
 
 export const reducer = createReducer(INITIAL_STATE, {

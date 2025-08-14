@@ -32,7 +32,7 @@ export const InitializeConnectedRouter = () => {
 	const searchParamsToRemove = RouterHooksSelectors.selectSearchParamsToRemove();
 
 	useEffect(() => {
-		if (!searchParamsToRemove) return;
+		if (!searchParamsToRemove?.length) return;
 		searchParamsToRemove.forEach((searchParam) => searchParams.delete(searchParam));
 		setSearchParams(searchParams);
 		dispatch(RouterActions.resetSearchParamsToRemove());
