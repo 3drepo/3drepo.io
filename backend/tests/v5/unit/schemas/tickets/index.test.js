@@ -508,7 +508,7 @@ const testGroups = () => {
 					}],
 				},
 			}),
-			convertToTestParams('Selected groups no color or opacity', false, {
+			convertToTestParams('Selected groups no color or opacity', true, {
 				state: {
 					[viewGroups.SELECTED]: [{ group: generateGroup(false, { hasId: false }) }],
 				},
@@ -537,15 +537,9 @@ const testGroups = () => {
 					}],
 				},
 			}),
-			convertToTestParams('Selected groups - just opacity', true, {
+			convertToTestParams('Selected groups - just opacity', false, {
 				state: {
-					[viewGroups.SELECTED]: [{ group: generateGroup(false, { hasId: false }), opacity: 0.5 }],
-				},
-			}),
-			convertToTestParams('Selected groups - opacity is 0', false, {
-				state: {
-
-					[viewGroups.SELECTED]: [{ group: generateGroup(false, { hasId: false }), opacity: 0 }],
+					[viewGroups.SELECTED]: [{ opacity: 0.5 }],
 				},
 			}),
 

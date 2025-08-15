@@ -55,8 +55,7 @@ Validators.generateViewValidator = (isUpdate, required, isComment) => {
 		}),
 		[viewGroups.SELECTED]: generateGroupArraySchema({
 			color: types.color3Arr,
-			opacity: Yup.number().max(1).test('opacity value', 'Opacity value must be bigger than 0', (val) => val === undefined || val > 0),
-		}, (sch) => sch.test('color and opacity', 'Must define a colour or opacity override', ({ color, opacity }) => color || opacity)),
+		}),
 		[viewGroups.SHOWN]: generateGroupArraySchema(),
 	}).test(
 		'hidden-shown-mutually-exclusive',
