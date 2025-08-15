@@ -57,12 +57,12 @@ Audit.logPermissionsUpdated = async (teamspace, executor, users, permissions) =>
 	await logAction(teamspace, actions.PERMISSIONS_UPDATED, executor, { users, permissions });
 };
 
-Audit.logUserInvited = async (teamspace, executor, email, job, permissions) => {
-	await logAction(teamspace, actions.INVITATION_ADDED, executor, { email, job, permissions });
+Audit.logUserInvited = async (teamspace, executor, email, role, permissions) => {
+	await logAction(teamspace, actions.INVITATION_ADDED, executor, { email, role, permissions });
 };
 
-Audit.logUserUninvited = async (teamspace, executor, email, job, permissions) => {
-	await logAction(teamspace, actions.INVITATION_REVOKED, executor, { email, job, permissions });
+Audit.logUserUninvited = async (teamspace, executor, email, role, permissions) => {
+	await logAction(teamspace, actions.INVITATION_REVOKED, executor, { email, role, permissions });
 };
 
 module.exports = Audit;

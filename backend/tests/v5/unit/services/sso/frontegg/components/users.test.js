@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
 
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
@@ -154,9 +155,28 @@ const testTriggerPasswordReset = () => {
 	});
 };
 
+const testGetAccountsByUser = () => {
+	describe('Get accounts by user', () => {
+		test('Should return accounts for the user', async () => {
+			const userId = generateRandomString();
+			const res = { data: { tenantIds: times(3, () => generateRandomString()) } };
+
+			WebRequests.get.mockResolvedValueOnce(res);
+
+			await expect(Users.getAccountsByUser(userId)).resolves.toEqual(res.data.tenantIds);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetUserById();
 	testDoesUserExist();
 	testDestroyAllSessions();
 	testTriggerPasswordReset();
+	testGetAccountsByUser();
 });

@@ -18,8 +18,7 @@
 "use strict";
 
 const { v5Path } = require("../../interop");
-
-const { hasAccessToTeamspace } = require(`${v5Path}/models/teamspaceSettings`);
+const { isTeamspaceMember } = require(`${v5Path}/processors/teamspaces`);
 
 const AccountPermissions = require("../models/accountPermissions");
 const PermissionTemplates = require("../models/permissionTemplates");
@@ -47,19 +46,18 @@ const PermissionTemplates = require("../models/permissionTemplates");
 
 			accountLevel: async function(username) {
 
-				await hasAccessToTeamspace(account, username);
+				try {
+					if(await isTeamspaceMember(account, username)) {
+						const settings = await getTeamspaceSettings(account, { permissions: 1 });
+						const permission = AccountPermissions.findByUser(settings, username);
 
-				return getTeamspaceSettings(account, { permissions: 1 }).then(settings => {
-					const permission = AccountPermissions.findByUser(settings, username);
-
-					if(!permission) {
-						return [];
+						return permission ? permission.permissions : [];
 					}
-
-					return permission.permissions;
-				}).catch(() => {
 					throw ResponseCodes.RESOURCE_NOT_FOUND;
-				});
+				} catch (err) {
+					throw ResponseCodes.RESOURCE_NOT_FOUND;
+				}
+
 			},
 
 			projectLevel: function(username, modelName) {
