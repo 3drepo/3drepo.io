@@ -18,9 +18,11 @@
 const { times } = require('lodash');
 const { src } = require('../../../helper/path');
 
-const { generateRandomString, determineTestGroup, generateRandomDate } = require('../../../helper/services');
+const { generateRandomString, determineTestGroup, outOfOrderArrayEqual } = require('../../../helper/services');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
-const User = require('../../../../../src/v5/models/users');
+
+const { DEFAULT_ROLES, DEFAULT_OWNER_ROLE } = require('../../../../../src/v5/models/roles.constants');
+const { deleteIfUndefined } = require('../../../../../src/v5/utils/helper/objects');
 
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const TeamspaceModel = require(`${src}/models/teamspaceSettings`);
@@ -326,10 +328,243 @@ const testCreateRole = () => {
 	});
 };
 
+const testCreateDefaultRoles = () => {
+	describe('Create default roles', () => {
+		test('Should create default roles', async () => {
+			const teamspace = generateRandomString();
+			const teamspaceId = generateRandomString();
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.createGroup.mockResolvedValue();
+
+			await Roles.createDefaultRoles(teamspace);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+			expect(Frontegg.createGroup).toHaveBeenCalledTimes(DEFAULT_ROLES.length);
+			DEFAULT_ROLES.forEach(({ name, color }) => {
+				expect(Frontegg.createGroup).toHaveBeenCalledWith(teamspaceId, name, color, undefined);
+			});
+			expect(UserModel.getUserId).not.toHaveBeenCalled();
+		});
+
+		test('Should create default roles and assign admin role to the user provided', async () => {
+			const teamspace = generateRandomString();
+			const teamspaceId = generateRandomString();
+			const firstAdmin = generateRandomString();
+			const userId = generateRandomString();
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.createGroup.mockResolvedValue();
+			UserModel.getUserId.mockResolvedValueOnce(userId);
+
+			await Roles.createDefaultRoles(teamspace, firstAdmin);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+			expect(Frontegg.createGroup).toHaveBeenCalledTimes(DEFAULT_ROLES.length);
+			DEFAULT_ROLES.forEach(({ name, color }) => {
+				expect(Frontegg.createGroup).toHaveBeenCalledWith(teamspaceId, name, color,
+					name === DEFAULT_OWNER_ROLE ? [userId] : undefined);
+			});
+
+			expect(UserModel.getUserId).toHaveBeenCalledTimes(1);
+			expect(UserModel.getUserId).toHaveBeenCalledWith(firstAdmin);
+		});
+	});
+};
+
+const testCreateRoles = () => {
+	describe('Create multiple roles', () => {
+		test('Should convert all users to userIds and create roles', async () => {
+			const teamspace = generateRandomString();
+			const teamspaceId = generateRandomString();
+
+			const [user1, user2] = times(2, () => ({
+				username: generateRandomString(),
+				id: generateRandomString(),
+				email: generateRandomString(),
+			}));
+
+			const expectedData = [];
+
+			const roleData = times(2, (i) => {
+				const name = generateRandomString();
+				return deleteIfUndefined({
+					name,
+					color: generateRandomString(),
+					users: i === 0 ? [user1.username, user2.username] : undefined,
+				});
+			});
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			Frontegg.createGroup.mockImplementation((ts, name) => {
+				const id = generateRandomString();
+				expectedData.push({ id, name });
+				return id;
+			});
+
+			Frontegg.getAllUsersInAccount.mockResolvedValueOnce([user1, user2]);
+			UserModel.getUsersByQuery.mockResolvedValueOnce([user1, user2].map(
+				({ username, email }) => ({ user: username, customData: { email } })));
+
+			const returnedData = await Roles.createRoles(teamspace, roleData);
+			outOfOrderArrayEqual(expectedData, returnedData);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+			expect(Frontegg.createGroup).toHaveBeenCalledTimes(roleData.length);
+			roleData.forEach(({ name, color, users }) => {
+				expect(Frontegg.createGroup).toHaveBeenCalledWith(
+					teamspaceId, name, color, users?.length ? [user1.id, user2.id] : undefined);
+			});
+			expect(Frontegg.getAllUsersInAccount).toHaveBeenCalledTimes(1);
+			expect(Frontegg.getAllUsersInAccount).toHaveBeenCalledWith(teamspaceId);
+			expect(UserModel.getUsersByQuery).toHaveBeenCalledTimes(1);
+			expect(UserModel.getUsersByQuery).toHaveBeenCalledWith(
+				{ 'customData.email': { $in: [user1.email, user2.email] } }, { user: 1, 'customData.email': 1 });
+		});
+	});
+};
+
+const testUpdateRole = () => {
+	describe('Update role', () => {
+		test('should do nothing if the roleData is empty', async () => {
+			const teamspace = generateRandomString();
+			const roleId = generateRandomString();
+			const teamspaceId = generateRandomString();
+			const updatedData = {};
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+
+			await Roles.updateRole(teamspace, roleId, updatedData);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+			expect(Frontegg.updateGroup).not.toHaveBeenCalled();
+
+			expect(Frontegg.addUsersToGroup).not.toHaveBeenCalled();
+			expect(Frontegg.removeUsersFromGroup).not.toHaveBeenCalled();
+		});
+
+		test('Update role information (not users)', async () => {
+			const teamspace = generateRandomString();
+			const roleId = generateRandomString();
+			const teamspaceId = generateRandomString();
+			const updatedData = {
+				name: generateRandomString(),
+				color: generateRandomString(),
+			};
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+
+			await Roles.updateRole(teamspace, roleId, updatedData);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+			expect(Frontegg.updateGroup).toHaveBeenCalledTimes(1);
+			expect(Frontegg.updateGroup).toHaveBeenCalledWith(teamspaceId, roleId, updatedData);
+
+			expect(Frontegg.addUsersToGroup).not.toHaveBeenCalled();
+			expect(Frontegg.removeUsersFromGroup).not.toHaveBeenCalled();
+		});
+
+		const [user1, user2] = times(2, () => ({
+			username: generateRandomString(),
+			id: generateRandomString(),
+			email: generateRandomString(),
+		}));
+
+		describe.each([
+			['Add role users', [user1.username, user2.username], [], [user1.id, user2.id]],
+			['Remove role users', [], [{ id: user1.id }, { id: user2.id }], undefined, [user1.id, user2.id]],
+			['Both add/remove', [user1.username], [{ id: user2.id }], [user1.id], [user2.id]],
+			['Add role users and update role data', [user1.username, user2.username], [], [user1.id, user2.id], undefined, true],
+		])('Edit role users', (desc, updatedData, usersInGroup, toAdd, toRemove, updateOtherData) => {
+			test(desc, async () => {
+				const teamspace = generateRandomString();
+				const roleId = generateRandomString();
+				const teamspaceId = generateRandomString();
+				const roleData = {
+					users: updatedData,
+					...(updateOtherData ? {
+						name: generateRandomString(),
+						color: generateRandomString(),
+					} : {}),
+				};
+
+				TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+
+				Frontegg.getAllUsersInAccount.mockResolvedValueOnce([user1, user2]);
+				Frontegg.getGroupById.mockResolvedValueOnce({ users: usersInGroup });
+				UserModel.getUsersByQuery.mockResolvedValueOnce([user1, user2].map(
+					({ username, email }) => ({ user: username, customData: { email } })));
+
+				await Roles.updateRole(teamspace, roleId, roleData);
+
+				expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+				expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+				if (updateOtherData) {
+					expect(Frontegg.updateGroup).toHaveBeenCalledTimes(1);
+					const { users, ...otherData } = roleData;
+					expect(Frontegg.updateGroup).toHaveBeenCalledWith(teamspaceId, roleId, otherData);
+				} else {
+					expect(Frontegg.updateGroup).not.toHaveBeenCalled();
+				}
+				if (toAdd?.length) {
+					expect(Frontegg.addUsersToGroup).toHaveBeenCalledTimes(1);
+					expect(Frontegg.addUsersToGroup).toHaveBeenCalledWith(teamspaceId, roleId, toAdd);
+				} else {
+					expect(Frontegg.addUsersToGroup).not.toHaveBeenCalled();
+				}
+
+				if (toRemove?.length) {
+					expect(Frontegg.removeUsersFromGroup).toHaveBeenCalledTimes(1);
+					expect(Frontegg.removeUsersFromGroup).toHaveBeenCalledWith(teamspaceId, roleId, toRemove);
+				} else {
+					expect(Frontegg.removeUsersFromGroup).not.toHaveBeenCalled();
+				}
+
+				expect(Frontegg.getGroupById).toHaveBeenCalledTimes(1);
+				expect(Frontegg.getGroupById).toHaveBeenCalledWith(teamspaceId, roleId, true);
+
+				expect(Frontegg.getAllUsersInAccount).toHaveBeenCalledTimes(1);
+				expect(Frontegg.getAllUsersInAccount).toHaveBeenCalledWith(teamspaceId);
+				expect(UserModel.getUsersByQuery).toHaveBeenCalledTimes(1);
+				expect(UserModel.getUsersByQuery).toHaveBeenCalledWith(
+					{ 'customData.email': { $in: [user1.email, user2.email] } }, { user: 1, 'customData.email': 1 });
+			});
+		});
+	});
+};
+
+const testDeleteRole = () => {
+	describe('Delete role', () => {
+		test('should delete role', async () => {
+			const teamspace = generateRandomString();
+			const roleId = generateRandomString();
+			const teamspaceId = generateRandomString();
+
+			TeamspaceModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+
+			await Roles.deleteRole(teamspace, roleId);
+
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspaceModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+			expect(Frontegg.removeGroup).toHaveBeenCalledTimes(1);
+			expect(Frontegg.removeGroup).toHaveBeenCalledWith(teamspaceId, roleId);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetRoles();
 	testGetRoleById();
 	testGetRolesByUsers();
 	testIsRoleNameUsed();
 	testCreateRole();
+	testCreateRoles();
+	testCreateDefaultRoles();
+	testUpdateRole();
+	testDeleteRole();
 });

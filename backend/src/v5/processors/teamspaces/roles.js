@@ -103,18 +103,6 @@ const getUserIdMapping = async (teamspaceId) => {
 	return usernameToUserId;
 };
 
-Roles.createRole = async (teamspace, { name, color, users }) => {
-	const teamspaceId = await getTeamspaceRefId(teamspace);
-	let userIds;
-
-	if (users?.length) {
-		const usernameToUserId = await getUserIdMapping(teamspaceId);
-		userIds = users.flatMap((user) => usernameToUserId[user] || []);
-	}
-
-	return createGroup(teamspaceId, name, color, userIds);
-};
-
 Roles.createDefaultRoles = async (teamspace, firstAdmin) => {
 	const teamspaceId = await getTeamspaceRefId(teamspace);
 	let userId;
@@ -125,16 +113,23 @@ Roles.createDefaultRoles = async (teamspace, firstAdmin) => {
 
 Roles.createRoles = async (teamspace, roles) => {
 	const teamspaceId = await getTeamspaceRefId(teamspace);
-	const usernameToUserId = await getUserIdMapping(teamspaceId);
+	let usernameToUserId;
 
 	return Promise.all(roles.map(async ({ name, color, users }) => {
 		let userIds;
 		if (users?.length) {
+			usernameToUserId = usernameToUserId ?? await getUserIdMapping(teamspaceId);
 			userIds = users.flatMap((user) => usernameToUserId[user] || []);
 		}
 		const roleId = await createGroup(teamspaceId, name, color, userIds);
 		return { id: roleId, name };
 	}));
+};
+
+Roles.createRole = async (teamspace, roleData) => {
+	const [{ id }] = await Roles.createRoles(teamspace, [roleData]);
+
+	return id;
 };
 
 Roles.updateRole = async (teamspace, role, { users, ...others }) => {
@@ -163,10 +158,17 @@ Roles.updateRole = async (teamspace, role, { users, ...others }) => {
 			}
 		});
 
-		await Promise.all([
-			addUsersToGroup(teamspaceId, role, toAdd),
-			removeUsersFromGroup(teamspaceId, role, Object.keys(usersInRole)),
-		]);
+		const ops = [];
+
+		if (toAdd?.length) {
+			ops.push(addUsersToGroup(teamspaceId, role, toAdd));
+		}
+
+		if (Object.keys(usersInRole).length) {
+			ops.push(removeUsersFromGroup(teamspaceId, role, Object.keys(usersInRole)));
+		}
+
+		await Promise.all(ops);
 	}
 };
 
