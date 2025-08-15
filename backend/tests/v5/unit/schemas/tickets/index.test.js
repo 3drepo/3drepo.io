@@ -324,7 +324,7 @@ const testGroups = () => {
 		const testCases = [
 			convertToTestParams('Undefined state object', true, { state: undefined }),
 			convertToTestParams('Empty state object', true, { state: {} }),
-			convertToTestParams('Have all groups', true, {
+			convertToTestParams('Have all groups', false, {
 				state: {
 					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }) }],
 					[viewGroups.COLORED]: [{
@@ -335,6 +335,50 @@ const testGroups = () => {
 					[viewGroups.TRANSFORMED]: [{
 						group: generateGroup(false, { hasId: false }),
 						transformation: times(16, () => 0),
+					}],
+					[viewGroups.SHOWN]: [{ group: generateGroup(false, { hasId: false }) }],
+					[viewGroups.SELECTED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1,
+					}],
+				},
+			}),
+			convertToTestParams('Have shown but not hidden', true, {
+				state: {
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1,
+					}],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 0),
+					}],
+					[viewGroups.SHOWN]: [{ group: generateGroup(false, { hasId: false }) }],
+					[viewGroups.SELECTED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1,
+					}],
+				},
+			}),
+			convertToTestParams('Have hidden but not shown', true, {
+				state: {
+					[viewGroups.HIDDEN]: [{ group: generateGroup(false, { hasId: false }) }],
+					[viewGroups.COLORED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1,
+					}],
+					[viewGroups.TRANSFORMED]: [{
+						group: generateGroup(false, { hasId: false }),
+						transformation: times(16, () => 0),
+					}],
+					[viewGroups.SELECTED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+						opacity: 1,
 					}],
 				},
 			}),
@@ -462,6 +506,40 @@ const testGroups = () => {
 						group: generateGroup(false, { hasId: false }),
 						transformation: times(15, () => 1),
 					}],
+				},
+			}),
+			convertToTestParams('Selected groups no color or opacity', true, {
+				state: {
+					[viewGroups.SELECTED]: [{ group: generateGroup(false, { hasId: false }) }],
+				},
+			}),
+			convertToTestParams('Selected groups - just colours', true, {
+				state: {
+					[viewGroups.SELECTED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 0),
+					}],
+				},
+			}),
+			convertToTestParams('Selected groups - not enough elements in the color array', false, {
+				state: {
+					[viewGroups.SELECTED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(2, () => 0),
+					}],
+				},
+			}),
+			convertToTestParams('Selected groups - value too big', false, {
+				state: {
+					[viewGroups.SELECTED]: [{
+						group: generateGroup(false, { hasId: false }),
+						color: times(3, () => 1000),
+					}],
+				},
+			}),
+			convertToTestParams('Selected groups - just opacity', false, {
+				state: {
+					[viewGroups.SELECTED]: [{ opacity: 0.5 }],
 				},
 			}),
 
