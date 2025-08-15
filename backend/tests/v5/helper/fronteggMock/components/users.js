@@ -15,18 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const usersById = {};
-const usersByEmail = {};
+const newAvatar = 'newAvatarUrl';
+
+const UsersCache = require('./cache');
+
 const Users = {};
-Users.getUserById = (userId) => Promise.resolve(usersById[userId]);
+Users.getUserById = (userId) => Promise.resolve(UsersCache.getUserById(userId));
 
-Users.doesUserExist = (email) => {
-	const user = usersByEmail[email];
-
-	return Promise.resolve(user?.id ?? false);
+Users.getUserAvatarBuffer = (userId) => {
+	const { profilePictureUrl } = UsersCache.getUserById(userId);
+	return Promise.resolve(Buffer.from(profilePictureUrl || newAvatar));
 };
+
+Users.doesUserExist = (email) => Promise.resolve(UsersCache.doesUserExist(email));
 
 Users.destroyAllSessions = () => Promise.resolve();
 
 Users.triggerPasswordReset = process.env.NODE_ENV === 'testV5' ? jest.fn() : (() => {});
+
+Users.uploadAvatar = (userId) => Promise.resolve(UsersCache.updateUserById(userId, { profilePictureUrl: newAvatar }));
+
+Users.updateUserDetails = (userId, payload) => Promise.resolve(UsersCache.updateUserById(userId, payload));
+
 module.exports = Users;
