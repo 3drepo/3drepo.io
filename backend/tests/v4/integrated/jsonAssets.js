@@ -234,84 +234,50 @@ describe("JSON Assets", function () {
 				nodes: {
 					account: "project_username",
 					project: "b667ab4c-7e71-4db9-9f85-cb81437aaf43",
+					name: "Sample_Federation",
+					path: "2c7be33a-cb74-54d9-b9fd-f920cb330230",
+					_id: "2c7be33a-cb74-54d9-b9fd-f920cb330230",
+					shared_id: "d44c4085-b9ef-5a00-bfa7-8e52f4a5f587",
 					type: "transformation",
-					name: "<root>",
-					path: "d1fd4d49-f7f7-44ca-9363-de54862bd829",
-					_id: "d1fd4d49-f7f7-44ca-9363-de54862bd829",
-					shared_id: "f7ebe36c-6b48-42a7-99fd-628d8e8e4a59",
 					children: [
 						{
 							account: "project_username",
 							project: "b667ab4c-7e71-4db9-9f85-cb81437aaf43",
-							type: "transformation",
-							name: "project_username:58de3562-6755-44cf-90f4-860b20bb73b5",
-							path: "d1fd4d49-f7f7-44ca-9363-de54862bd829__42e0ef3e-4356-4efb-a62f-4dfd0c59b472",
-							_id: "42e0ef3e-4356-4efb-a62f-4dfd0c59b472",
-							shared_id: "75a1c45a-7a75-4423-a903-383c5c90a627",
-							children: [{
-								account: "project_username",
-								project: "b667ab4c-7e71-4db9-9f85-cb81437aaf43",
-								type: "ref",
-								name: "58de3562-6755-44cf-90f4-860b20bb73b5",
-								path: "d1fd4d49-f7f7-44ca-9363-de54862bd829__42e0ef3e-4356-4efb-a62f-4dfd0c59b472__f7cdf78d-728f-4eb3-b0ea-e549f4be3f52",
-								_id: "f7cdf78d-728f-4eb3-b0ea-e549f4be3f52",
-								shared_id: "edfa5f05-6dde-43f1-ae50-110d3b200065",
-								toggleState: "visible"
-							}],
+							type: "ref",
+							name: "2d4a6208-6847-4a25-9d9e-097a63f2de93",
+							path: "2c7be33a-cb74-54d9-b9fd-f920cb330230__a0c0ccc0-2446-53f3-b9da-f5c90d8e2259",
+							_id: "a0c0ccc0-2446-53f3-b9da-f5c90d8e2259",
+							shared_id: "1e8f24fa-ce1b-5ac8-9fd9-6b16d0a6d0b8",
 							toggleState: "visible"
 						},
 						{
 							account: "project_username",
 							project: "b667ab4c-7e71-4db9-9f85-cb81437aaf43",
-							type: "transformation",
-							name: "project_username:2d4a6208-6847-4a25-9d9e-097a63f2de93",
-							path: "d1fd4d49-f7f7-44ca-9363-de54862bd829__d55308e2-db8c-4cc5-bfa1-b37a8c6fae08",
-							_id: "d55308e2-db8c-4cc5-bfa1-b37a8c6fae08",
-							shared_id: "9e9e6678-c607-40d8-8906-cc86faf00b29",
-							children: [{
-								account: "project_username",
-								project: "b667ab4c-7e71-4db9-9f85-cb81437aaf43",
-								type: "ref",
-								name: "2d4a6208-6847-4a25-9d9e-097a63f2de93",
-								path: "d1fd4d49-f7f7-44ca-9363-de54862bd829__d55308e2-db8c-4cc5-bfa1-b37a8c6fae08__5e09a8c7-cb73-4f60-9ef2-df069ef393b6",
-								_id: "5e09a8c7-cb73-4f60-9ef2-df069ef393b6",
-								shared_id: "dab1cb6c-89b2-4f12-ac81-87d7cd519b43",
-								toggleState: "visible"
-							}],
+							type: "ref",
+							name: "58de3562-6755-44cf-90f4-860b20bb73b5",
+							path: "2c7be33a-cb74-54d9-b9fd-f920cb330230__dd719680-fc63-5ab7-9b63-c6c4b6763935",
+							_id: "dd719680-fc63-5ab7-9b63-c6c4b6763935",
+							shared_id: "54949b51-38c9-5080-b39e-a36f21fa790d",
 							toggleState: "visible"
 						}
-					],
-					toggleState: "parentOfInvisible"
+					]
 				},
 				idToName: {
-					"d1fd4d49-f7f7-44ca-9363-de54862bd829": "<root>",
-					"d55308e2-db8c-4cc5-bfa1-b37a8c6fae08": "project_username:2d4a6208-6847-4a25-9d9e-097a63f2de93",
-					"f7cdf78d-728f-4eb3-b0ea-e549f4be3f52": "58de3562-6755-44cf-90f4-860b20bb73b5",
-					"42e0ef3e-4356-4efb-a62f-4dfd0c59b472": "project_username:58de3562-6755-44cf-90f4-860b20bb73b5",
-					"5e09a8c7-cb73-4f60-9ef2-df069ef393b6": "2d4a6208-6847-4a25-9d9e-097a63f2de93"
-				},
-				idToPath: {
-					"d1fd4d49-f7f7-44ca-9363-de54862bd829": "d1fd4d49-f7f7-44ca-9363-de54862bd829",
-					"d55308e2-db8c-4cc5-bfa1-b37a8c6fae08":
-					"d1fd4d49-f7f7-44ca-9363-de54862bd829__d55308e2-db8c-4cc5-bfa1-b37a8c6fae08",
-					"f7cdf78d-728f-4eb3-b0ea-e549f4be3f52":
-					"d1fd4d49-f7f7-44ca-9363-de54862bd829__42e0ef3e-4356-4efb-a62f-4dfd0c59b472__f7cdf78d-728f-4eb3-b0ea-e549f4be3f52",
-					"42e0ef3e-4356-4efb-a62f-4dfd0c59b472":
-					"d1fd4d49-f7f7-44ca-9363-de54862bd829__42e0ef3e-4356-4efb-a62f-4dfd0c59b472",
-					"5e09a8c7-cb73-4f60-9ef2-df069ef393b6":
-					"d1fd4d49-f7f7-44ca-9363-de54862bd829__d55308e2-db8c-4cc5-bfa1-b37a8c6fae08__5e09a8c7-cb73-4f60-9ef2-df069ef393b6"
+					"2c7be33a-cb74-54d9-b9fd-f920cb330230": "Sample_Federation",
+					"a0c0ccc0-2446-53f3-b9da-f5c90d8e2259": "2d4a6208-6847-4a25-9d9e-097a63f2de93",
+					"dd719680-fc63-5ab7-9b63-c6c4b6763935": "58de3562-6755-44cf-90f4-860b20bb73b5"
 				}
 			},
 			subTrees: [
 				{
-					_id: "5e09a8c7-cb73-4f60-9ef2-df069ef393b6",
+					_id: "a0c0ccc0-2446-53f3-b9da-f5c90d8e2259",
 					rid: "cd561c86-de1a-482e-8f5d-89cfc49562e8",
 					teamspace: "project_username",
 					model: "2d4a6208-6847-4a25-9d9e-097a63f2de93",
 					url: "/project_username/2d4a6208-6847-4a25-9d9e-097a63f2de93/revision/cd561c86-de1a-482e-8f5d-89cfc49562e8/fulltree.json"
 				},
 				{
-					_id: "f7cdf78d-728f-4eb3-b0ea-e549f4be3f52",
+					_id: "dd719680-fc63-5ab7-9b63-c6c4b6763935",
 					rid: "f0fd8f0c-06e2-479b-b41a-a8873bc74dc9",
 					teamspace: "project_username",
 					model: "58de3562-6755-44cf-90f4-860b20bb73b5",

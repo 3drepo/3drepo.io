@@ -17,7 +17,7 @@
 
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
-const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
+const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
 const { createWriteStream, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
@@ -38,13 +38,12 @@ const ModelProcessing = {};
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
 const {
 	callback_queue: callbackq,
-	worker_queue: jobq,
 	model_queue: modelq,
 	drawing_queue: drawingq,
 	shared_storage: sharedDir,
 } = queueConfig;
 
-const onCallbackQMsg = async ({ content, properties }) => {
+const onCallbackQMsg = ({ content, properties }) => {
 	logger.logInfo(`[Received][${properties.correlationId}] ${content}`);
 	try {
 		const { status, database: teamspace, project: model, user, value, message } = JSON.parse(content);
@@ -52,18 +51,8 @@ const onCallbackQMsg = async ({ content, properties }) => {
 			publish(events.QUEUED_TASK_UPDATE,
 				{ teamspace, model, corId: properties.correlationId, status });
 		} else {
-			const fedDataPath = `${sharedDir}/${properties.correlationId}/obj.json`;
-
-			const isFed = !!await stat(fedDataPath).catch(() => false);
-			const fedData = { };
-			if (isFed) {
-				// eslint-disable-next-line
-				const { subProjects } = require(fedDataPath);
-				fedData.containers = subProjects;
-			}
-
 			publish(events.QUEUED_TASK_COMPLETED,
-				{ teamspace, model, corId: properties.correlationId, user, value, message, ...fedData });
+				{ teamspace, model, corId: properties.correlationId, user, value, message });
 		}
 	} catch (err) {
 		logger.logError(`[${properties.correlationId}] Failed to process message: ${err?.message}`);
@@ -161,43 +150,6 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 		}
 
 		logger.logError('Failed to queue model job', err?.message);
-		throw templates.queueInsertionFailed;
-	}
-};
-
-ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
-	const revId = generateUUIDString();
-	try {
-		const data = {
-			...info,
-			database: teamspace,
-			project: federation,
-			subProjects: info.containers.map(({ _id, group }) => ({ database: teamspace, project: _id, group })),
-			revId,
-		};
-		delete data.containers;
-
-		const filePath = `${SHARED_SPACE_TAG}/${revId}/obj.json`;
-
-		await mkdir(`${sharedDir}/${revId}`);
-		await writeFile(`${sharedDir}/${revId}/obj.json`, JSON.stringify(data));
-
-		await queueMessage(jobq, revId, `genFed ${filePath} ${teamspace}`);
-		publish(events.QUEUED_TASK_UPDATE, { teamspace,
-			model: federation,
-			corId: revId,
-			status: processStatuses.QUEUED });
-	} catch (err) {
-		// Clean up files we created
-		rm(`${sharedDir}/${revId}/obj.json`).catch((cleanUpErr) => {
-			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
-		});
-
-		if (err?.code && codeExists(err.code)) {
-			throw err;
-		}
-
-		logger.logError('Failed to queue federate job', err?.message);
 		throw templates.queueInsertionFailed;
 	}
 };
