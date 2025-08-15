@@ -32,7 +32,7 @@ Users.getUserById = async (userId) => {
 };
 
 Users.getAccountsByUser = async (userId) => {
-	const { data: tenantIds } = await Users.getUserById(userId);
+	const { tenantIds } = await Users.getUserById(userId);
 
 	return tenantIds;
 };
