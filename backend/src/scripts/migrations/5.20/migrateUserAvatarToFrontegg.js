@@ -29,8 +29,10 @@ const { splitArrayIntoChunks } = require(`${v5Path}/utils/helper/arrays`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${v5Path}/models/users.constants`);
 const { getAllUsersInAccount, updateUserDetails, uploadAvatar } = require(`${v5Path}/services/sso/frontegg`);
 
-const migrateUserAvatar = async (membersChunk) => {
-	for (const member of membersChunk) {
+const ACCEPTABLE_CHUNK_SIZE = 50;
+
+const migrateUserAvatar = (membersChunk) => {
+	membersChunk.map(async (member) => {
 		// eslint-disable-next-line no-await-in-loop
 		const { user, customData: { firstName, lastName, migrated } } = await getUserByEmail(member.email);
 
@@ -46,7 +48,7 @@ const migrateUserAvatar = async (membersChunk) => {
 					await uploadAvatar(
 						member.id,
 						path,
-						{ contentType: mimeType },
+						mimeType,
 					);
 				}
 				if (member.name !== `${firstName} ${lastName}`) {
@@ -59,7 +61,8 @@ const migrateUserAvatar = async (membersChunk) => {
 				logger.logError(`Failed to migrate users because: ${error.message}`);
 			}
 		}
-	}
+	},
+	);
 };
 
 const run = async () => {
@@ -71,9 +74,12 @@ const run = async () => {
 		// eslint-disable-next-line no-await-in-loop
 		const members = await getAllUsersInAccount(refId);
 		const overlap = members.filter((member) => !invitations.some((invite) => invite._id === member.email));
+		const chunks = splitArrayIntoChunks(overlap, ACCEPTABLE_CHUNK_SIZE);
 
-		// eslint-disable-next-line no-await-in-loop
-		await Promise.all(splitArrayIntoChunks(overlap, 10).map((chunk) => migrateUserAvatar(chunk)));
+		for (const chunk of chunks) {
+			// eslint-disable-next-line no-await-in-loop
+			await migrateUserAvatar(chunk);
+		}
 	}
 };
 

@@ -16,9 +16,9 @@
  */
 
 const { codeExists, createResponseCode, templates } = require('../../utils/responseCodes');
+const { fileExtensionFromBuffer, fileExtensionFromPath } = require('../../utils/helper/typeCheck');
 const Multer = require('multer');
 const Path = require('path');
-const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { respond } = require('../../utils/responder');
 const { fileUploads: uploadConfig } = require('../../utils/config');
 
@@ -68,12 +68,12 @@ const imageFilter = (req, file, cb) => {
 	cb(null, true);
 };
 
-const fileMatchesExt = async (buffer, fileName) => {
+const fileMatchesExt = async (buffer, fileName, path) => {
 	const fileExt = Path.extname(fileName).toLowerCase().substring(1);
-	const bufferType = await fileExtensionFromBuffer(buffer);
+	const fileType = buffer ? await fileExtensionFromBuffer(buffer) : await fileExtensionFromPath(path);
 	const extToCheck = [...uploadConfig.imageExtensions, 'pdf'];
 
-	return extToCheck.includes(fileExt) ? fileExt === bufferType : true;
+	return extToCheck.includes(fileExt) ? fileExt === fileType : true;
 };
 
 MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = uploadConfig.uploadSizeLimit, storeInMemory = false) => async (req, res, next) => {
@@ -82,9 +82,10 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = upload
 
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
-		if (req.file.buffer && !await fileMatchesExt(req.file.buffer, req.file.originalname)) {
+		if (!await fileMatchesExt(req.file?.buffer, req.file.originalname, req.file?.path)) {
 			throw templates.unsupportedFileFormat;
 		}
+
 		await next();
 	} catch (err) {
 		let response = err;

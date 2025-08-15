@@ -212,6 +212,24 @@ const testUploadAvatar = () => {
 			expect(Users.updateUserDetails).toHaveBeenCalledWith(userId, { profilePictureUrl: responseMock.data });
 		});
 
+		test('Should upload avatar for the user ID specified and add the mimeType if provided', async () => {
+			const userId = generateRandomString();
+			const userData = { tenantId: generateRandomString() };
+			const path = generateRandomString();
+			const responseMock = { data: generateRandomString() };
+			const mimeType = 'image/png';
+
+			jest.spyOn(Users, 'getUserById').mockReturnValueOnce(userData);
+			WebRequests.put.mockResolvedValueOnce(responseMock);
+			jest.spyOn(Users, 'updateUserDetails').mockResolvedValueOnce();
+
+			await expect(Users.uploadAvatar(userId, path, mimeType)).resolves.toEqual(undefined);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(Users.updateUserDetails).toHaveBeenCalledTimes(1);
+			expect(Users.updateUserDetails).toHaveBeenCalledWith(userId, { profilePictureUrl: responseMock.data });
+		});
+
 		test('Should throw error if it failed to upload avatar', async () => {
 			const userId = generateRandomString();
 			const userData = { tenantId: generateRandomString() };

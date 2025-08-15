@@ -22,6 +22,9 @@ const { src } = require('../../helper/path');
 const Users = require(`${src}/processors/users`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
+jest.mock('../../../../src/v5/handler/fs');
+const FSHandlerMock = require(`${src}/handler/fs`);
+
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
@@ -199,6 +202,7 @@ const testUploadAvatar = () => {
 			UsersModel.getUserId.mockResolvedValueOnce(userId);
 			FronteggService.uploadAvatar.mockResolvedValueOnce(undefined);
 			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
+			jest.spyOn(FSHandlerMock, 'removeFiles').mockImplementationOnce(() => {});
 			const avatarObject = {
 				path: 'avatar.png',
 				buffer: generateRandomString(),

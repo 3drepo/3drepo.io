@@ -108,11 +108,12 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 	}
 };
 
-Users.uploadAvatar = async (userId, path, options = {}) => {
+Users.uploadAvatar = async (userId, path, mimeType) => {
 	try {
 		const config = await getConfig();
 		const { tenantId } = await Users.getUserById(userId);
 		const pathToFile = Path.resolve(path);
+		const options = mimeType ? { contentType: mimeType } : {};
 
 		const formData = new FormData();
 		formData.append('image', createReadStream(pathToFile), options);
