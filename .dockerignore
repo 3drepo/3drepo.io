@@ -4,6 +4,9 @@
 # Ignore tests 
 backend/tests
 
+# frontend  
+frontend
+
 # Ignore local build output (if any)
 # **/dist
 # **/build
