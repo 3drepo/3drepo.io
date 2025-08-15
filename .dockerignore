@@ -1,0 +1,26 @@
+# Ignore node_modules here
+# **/node_modules
+
+# Ignore tests 
+tests
+**/tests
+
+# Ignore local build output (if any)
+# **/dist
+# **/build
+
+# Ignore test folder
+
+# Ignore VCS and config
+.git
+.gitignore
+.vscode
+*.log
+.env
+.DS_Store
+*.tgz
+*.swp
+
+# Ignore test/config files not needed in container
+docker-compose*
+README.md
