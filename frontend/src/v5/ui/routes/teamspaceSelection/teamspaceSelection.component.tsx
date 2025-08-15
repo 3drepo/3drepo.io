@@ -52,7 +52,7 @@ export const TeamspaceSelection = (): JSX.Element => {
 										<FormattedMessage id="teamspaces.welcome.noName" defaultMessage="Welcome back!" />
 									)
 								}
-								<PricingLink to={{ pathname: 'https://3drepo.com/pricing/' }}>
+								<PricingLink to="https://3drepo.com/pricing/">
 									<FormattedMessage id="teamspaces.welcome.addTeamspace" defaultMessage="Add new Teamspace" />
 								</PricingLink>
 							</WelcomeMessage>

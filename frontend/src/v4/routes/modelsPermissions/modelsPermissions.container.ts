@@ -16,7 +16,6 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
@@ -39,4 +38,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	onPermissionsChange: UserManagementActions.updateModelsPermissionsPre
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions));
+export default connect(mapStateToProps, mapDispatchToProps)(ModelsPermissions);

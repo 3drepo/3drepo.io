@@ -21,15 +21,16 @@ import { theme } from '@/v5/ui/routes/viewer/theme';
 import { AppBar } from '@components/shared/appBar';
 import { Content } from './dashboardViewerLayout.styles';
 import { ViewerCanvasesContextComponent } from '@/v5/ui/routes/viewer/viewerCanvases.context';
+import { Outlet } from 'react-router-dom';
 
-export const DashboardViewerLayout = ({ children }) => (
+export const DashboardViewerLayout = () => (
 	<>
 		<AppBar />
 		<Content>
 			<ViewerCanvasesContextComponent>
 				<ThemeProvider theme={theme}>
 					<MuiThemeProvider theme={theme}>
-						{children}
+						<Outlet />
 					</MuiThemeProvider>
 				</ThemeProvider>
 			</ViewerCanvasesContextComponent>

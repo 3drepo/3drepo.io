@@ -30,7 +30,7 @@ import { InputController } from '@controls/inputs/inputController.component';
 import { Gap } from '@controls/gap';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { projectTabRoute } from '@/v5/services/routing/routing';
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ProjectImageInput } from '../../projectSettings/projectImageInput/projectImageInput.component';
 
 interface CreateProjectModalProps {
@@ -46,7 +46,7 @@ interface IFormInput {
 export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalProps) => {
 	const currentTeamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const [existingNames, setExistingNames] = useState([]);
-	const history = useHistory();
+	const navigate = useNavigate();
 
 	const formData = useForm<IFormInput>({
 		mode: 'onChange',
@@ -86,7 +86,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 					id: 'project.creation.warning.imageNotSaved.openProject',
 					defaultMessage: 'Open Project',
 				}),
-				onClickSecondary: () => history.push(projectTabRoute(currentTeamspace, projectId, 'project_settings')),
+				onClickSecondary: () => navigate(projectTabRoute(currentTeamspace, projectId, 'project_settings')),
 			});
 		}
 	};

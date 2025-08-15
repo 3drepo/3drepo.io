@@ -59,7 +59,7 @@ export const createTestStore = () => {
 		return waitingActions.length === 0;
 	};
 
-	const mainReducer = createReducer({});
+	const mainReducer = createReducer();
 
 	let currentState;
 

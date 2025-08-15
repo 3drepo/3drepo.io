@@ -27,7 +27,6 @@ import PanoramaFishEye from '@mui/icons-material/PanoramaFishEye';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { viewerRoute } from '@/v5/services/routing/routing';
 
-import { FONT_WEIGHT } from '../../../../../styles';
 import { SmallIconButton } from '../../../../components/smallIconButon/smallIconButton.component';
 import { Container, Item, ItemSecondaryAction, ItemText } from './notificationItem.styles';
 
@@ -64,7 +63,7 @@ interface IProps extends INotification {
 	sendDeleteNotification: (id: string) => void;
 	showUpdatedFailedError: (errorMessage: string) => void;
 	onClick?: (e: SyntheticEvent) => void;
-	history: any;
+	navigate: (to: any) => void;
 }
 
 interface IState {
@@ -161,7 +160,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 			return;
 		}
 
-		const {teamSpace, project, modelId, history, issuesId} = this.props;
+		const {teamSpace, project, modelId, navigate, issuesId} = this.props;
 		let pathname = viewerRoute(teamSpace, project, modelId)
 		let search = '';
 
@@ -185,7 +184,7 @@ export class NotificationItem extends PureComponent<IProps, IState> {
 			pathname = viewerRoute(teamSpace, project, modelId, this.props.revision);
 		}
 
-		history.push({pathname, search});
+		navigate({ pathname, search })
 	}
 
 	public onClick = (e: SyntheticEvent) => {

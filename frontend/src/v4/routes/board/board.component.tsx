@@ -85,7 +85,7 @@ interface ILane {
 
 interface IProps {
 	currentTeamspace: string;
-	history: any;
+	navigate: (to: string, options?: { replace?: boolean }) => void;
 	location: any;
 	match: any;
 	lanes: ILane[];
@@ -247,18 +247,18 @@ export function Board(props: IProps) {
 
 	const handleTypeChange = (e) => {
 		const url = getPath({ typePath: e.target.value });
-		props.history.push(url);
+		props.navigate(url);
 		props.setBoardType(e.target.value);
 	};
 
 	const handleTeamspaceChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${type}/${e.target.value}`;
-		props.history.push(url);
+		props.navigate(url);
 	};
 
 	const handleProjectChange = (e) => {
 		const url = getPath({ projectPath: e.target.value });
-		props.history.push(url);
+		props.navigate(url);
 	};
 
 	useEffect(() => {
@@ -282,7 +282,7 @@ export function Board(props: IProps) {
 			props.subscribeOnIssueChanges(teamspace, newModelId);
 		}
 
-		props.history.push(url);
+		props.navigate(url);
 	};
 
 	const handleFilterClick = ({target: {value}}) => {

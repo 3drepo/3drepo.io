@@ -16,51 +16,59 @@
  */
 
 import * as queryString from 'query-string';
-import { matchPath } from 'react-router';
+import { matchPath } from 'react-router-dom';
 import { createSelector } from 'reselect';
-import { RouteParams, ROUTES } from '../../constants/routes';
+import { ROUTES } from '../../constants/routes';
 
-export const selectRouterDomain = (state) => state.router || '';
+const selectRouterDomain = (state) => state.router || {};
 
 export const selectLocation = createSelector(
-	selectRouterDomain, (router) => router.location || ''
+	selectRouterDomain, (router) => router.location || { pathname: '' }
 );
 
 export const selectPathname = createSelector(
 	selectLocation, (location) => location.pathname
+)
+
+export const selectNavigationTarget = createSelector(
+	selectRouterDomain, (router) => router.requestedActions.navigationTarget || ''
 );
 
-export const selectSearch = createSelector(
-	selectLocation, (location) => location.search
+export const selectGoBackRequested = createSelector(
+	selectRouterDomain, (router) => router.requestedActions.goBackRequested || false
 );
 
-export const selectHash = createSelector(
-	selectLocation, (location) => location.hash
+export const selectSearchParamsToRemove = createSelector(
+	selectRouterDomain, (router) => router.requestedActions.searchParamsToRemove || []
 );
 
 const selectV4UrlParams = createSelector(
 	selectLocation, (location) => {
-		const viewerPath = ROUTES.MODEL_VIEWER;
+		const viewerModelPath = ROUTES.MODEL_VIEWER;
+		const viewerRevisionPath = ROUTES.REVISION_VIEWER;
 		const boardPath = ROUTES.BOARD_SPECIFIC;
 
-		const viewerParams = matchPath<RouteParams>(location.pathname, { path: viewerPath });
-		const boardParams = matchPath<RouteParams>(location.pathname, { path: boardPath });
+		const viewerModelMatch = matchPath({ path: viewerModelPath, end: true }, location.pathname);
+		const viewerRevisionMatch = matchPath({ path: viewerRevisionPath, end: true }, location.pathname);
+		const viewerMatch = viewerModelMatch || viewerRevisionMatch;
+		const boardMatch = matchPath({ path: boardPath }, location.pathname);
 
-		return (viewerParams || boardParams || {}).params;
+		return (viewerMatch || boardMatch || {}).params;
 	}
 );
 
 const selectV5UrlParams = createSelector(
 	selectLocation, (location) => {
-		const viewerPath = ROUTES.V5_MODEL_VIEWER;
+		const viewerModelPath = ROUTES.V5_MODEL_VIEWER;
+		const viewerRevisionPath = ROUTES.V5_REVISION_VIEWER;
 		const boardPath = ROUTES.V5_BOARD_SPECIFIC;
 
-		const viewerParams = matchPath<RouteParams>(location.pathname, { path: viewerPath });
-		const boardParams = matchPath<RouteParams>(location.pathname, { path: boardPath });
+		const viewerModelMatch = matchPath({ path: viewerModelPath }, location.pathname);
+		const viewerRevisionMatch = matchPath({ path: viewerRevisionPath }, location.pathname);
+		const viewerMatch = viewerModelMatch || viewerRevisionMatch
+		const boardMatch = matchPath({ path: boardPath }, location.pathname);
 
-		const params: RouteParams = (viewerParams || boardParams || {}).params;
-
-		return params;
+		return (viewerMatch || boardMatch || {}).params;
 	}
 );
 

@@ -38,7 +38,7 @@ export const UnexpectedError = ({ error, className }: UnexpectedErrorProps) => (
 				defaultMessage="If the error persists, please {contactSupport}."
 				values={{
 					contactSupport: (
-						<Link to={{ pathname: 'https://3drepo.com/contact/' }}>
+						<Link to="https://3drepo.com/contact/">
 							<FormattedMessage
 								id="form.unexpectedError.contactSupport.link"
 								defaultMessage="contact the support"

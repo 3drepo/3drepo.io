@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit } from 'lodash';
 import * as queryString from 'query-string';
@@ -55,6 +54,7 @@ import { selectSelectedSequence, selectSelectedStartingDate, SequencesActions } 
 import { SnackbarActions } from '../snackbar';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
+import { RouterActions } from '../router/router.redux';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
 	selectActiveRiskDetails,
@@ -292,6 +292,11 @@ function* goToRisk({ risk }) {
 	const params = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
 
+	if (!risk) {
+		yield put(RouterActions.removeSearchParams(['riskId']))
+		return
+	}
+
 	// Im not longer in the viewer or board
 	// this happens when unmounting the card which
 	// makes sense when you close the card in the viewer and want to remove the selected risk
@@ -305,13 +310,13 @@ function* goToRisk({ risk }) {
 	const route = ROUTES.V5_MODEL_VIEWER;
 	const path = generatePath(route, params);
 
-	queryParams = riskId ?  {... queryParams, riskId} : omit(queryParams, 'riskId');
+	queryParams = {... queryParams, riskId};
 	let query = queryString.stringify(queryParams);
 	if (query) {
 		query = '?' + query;
 	}
 
-	yield put(push(`${path}${query}`));
+	yield put(RouterActions.navigate(`${path}${query}`));
 }
 
 function* showDetails({ revision, riskId }) {

@@ -17,7 +17,6 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { goBack } from 'connected-react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
@@ -45,6 +44,7 @@ import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { TreeActions } from '../tree';
 import { selectInitialView, selectViewpointsDomain, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { RouterActions } from '../router/router.redux';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClippingMode,
@@ -385,7 +385,7 @@ function* loadModel() {
 					' You will now be redirected to the previous page.'
 			})
 		yield put(DialogActions.showDialog({ title: formatMessage({id: 'viewerGui.loadModel.error.title', defaultMessage: 'Model Error'}), content }));
-		yield put(goBack());
+		yield put(RouterActions.goBack());
 	}
 }
 

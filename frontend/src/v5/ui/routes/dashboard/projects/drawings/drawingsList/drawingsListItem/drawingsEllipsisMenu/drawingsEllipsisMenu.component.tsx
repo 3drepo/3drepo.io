@@ -99,7 +99,7 @@ export const DrawingsEllipsisMenu = ({
 					defaultMessage: 'Edit Permissions',
 				})}
 				to={{
-					pathname: './user_permissions',
+					pathname: '../user_permissions',
 					search: `?modelId=${drawingId}`,
 				}}
 				hidden={!isProjectAdmin}
