@@ -19,7 +19,7 @@
 const { findModelSettingById } = require("./modelSetting");
 const { findNodesByType } = require("./scene");
 const C = require("../constants");
-const utils = require("../utils");
+const ModelSetting = require("./modelSetting");
 
 const Ref = {};
 
@@ -33,26 +33,19 @@ Ref.getRefNodes = async (account, model, branch, revision, projection) => {
 };
 
 Ref.getSubModels = async (account, model, branch, revision, callbackProm) => {
-	const refs = await Ref.getRefNodes(account, model, branch, revision, {owner: 1, project: 1, _rid: 1});
+	const settings = await ModelSetting.findModelSettingById(account, model);
 	const subModelArr = [];
-	for(let i = 0; i < refs.length; ++i) {
-		const {owner, project, _rid} = refs[i];
-		let refBranch, refRev;
-		if (utils.uuidToString(_rid) === C.MASTER_BRANCH) {
-			refBranch = C.MASTER_BRANCH_NAME;
-		} else {
-			refRev = utils.uuidToString(_rid);
+	if(settings.subModels) {
+		for(let i = 0; i < settings.subModels.length; ++i) {
+			subModelArr.push({
+				account: account,
+				model: settings.subModels[i]._id,
+				branch: C.MASTER_BRANCH_NAME
+			});
+			if (callbackProm) {
+				await callbackProm(account, settings.subModels[i]._id, C.MASTER_BRANCH_NAME);
+			}
 		}
-		subModelArr.push({
-			account: owner,
-			model: project,
-			branch: refBranch,
-			revision: refRev
-		});
-		if (callbackProm) {
-			await callbackProm(owner, project, refBranch, refRev);
-		}
-
 	}
 
 	return subModelArr;

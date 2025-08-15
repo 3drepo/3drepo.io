@@ -175,7 +175,6 @@ const testQueueTaskCompleted = () => {
 				corId: generateRandomString(),
 				value: 0,
 				user: generateRandomString(),
-				containers: [generateRandomString()],
 			};
 			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
 			const dataInfo = getInfoFromCode(data.value);
@@ -190,7 +189,7 @@ const testQueueTaskCompleted = () => {
 
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
-				data.corId, dataInfo, data.user, data.containers);
+				data.corId, dataInfo, data.user);
 
 			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
 		});
@@ -260,32 +259,6 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
-		});
-
-		test(`Should trigger newRevisionProcessed if there is a ${events.QUEUED_TASK_COMPLETED} (federation)`, async () => {
-			const project = generateRandomString();
-			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-
-			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				corId: generateRandomString(),
-				value: 1,
-				user: generateRandomString(),
-				containers: [generateRandomString()],
-			};
-
-			const dataInfo = getInfoFromCode(data.value);
-			dataInfo.retVal = data.value;
-			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
-
-			await waitOnEvent;
-			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
-			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
-			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
-				data.corId, dataInfo, data.user, data.containers);
 		});
 	});
 };
