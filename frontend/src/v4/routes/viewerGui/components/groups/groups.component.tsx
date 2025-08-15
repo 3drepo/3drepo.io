@@ -164,7 +164,7 @@ export class Groups extends PureComponent<IProps, IState> {
 	public renderGroupsList = renderWhenTrue(() =>
 		<GroupsListComponent
 			groups={this.state.groups}
-			collapse={[this.state.collapse, (collapse) => this.setState({ ...this.state, collapse })]}
+			collapse={[this.state.collapse, (collapse) => this.setState({ collapse })]}
 			disabled={!this.props.isModelLoaded}
 		/>
 	);
@@ -236,7 +236,7 @@ export class Groups extends PureComponent<IProps, IState> {
 		const { subscribeOnChanges, teamspace, model } = this.props;
 		this.toggleViewerEvents();
 		subscribeOnChanges(teamspace, model);
-		this.setState({ ...this.state, groups: getSortedGroups(this.props.groups) });
+		this.setState({ groups: getSortedGroups(this.props.groups) });
 	}
 
 	public componentDidUpdate(prevProps, prevState) {
@@ -245,7 +245,7 @@ export class Groups extends PureComponent<IProps, IState> {
 		const filtersChanged = prevProps.selectedFilters.length !== selectedFilters.length;
 
 		if (groupsChanged) {
-			this.setState({ ...this.state, groups: getSortedGroups(this.props.groups) });
+			this.setState({ groups: getSortedGroups(this.props.groups) });
 		}
 
 		if (filtersChanged && activeGroupId) {
@@ -278,11 +278,11 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	public handleCloseSearchMode = () => {
-		this.props.setState({ ...this.state, searchEnabled: false, selectedFilters: [] });
+		this.props.setState({ searchEnabled: false, selectedFilters: [] });
 	}
 
 	public handleOpenSearchMode = () => {
-		this.props.setState({ ...this.state, searchEnabled: true });
+		this.props.setState({ searchEnabled: true });
 	}
 
 	public renderTitleIcon = () => {
@@ -383,7 +383,7 @@ export class Groups extends PureComponent<IProps, IState> {
 	}
 
 	public handleFilterChange = (selectedFilters) => {
-		this.props.setState({ ...this.state, selectedFilters });
+		this.props.setState({ selectedFilters });
 	}
 
 	public handleSaveGroup = (teamspace, model, group) => {
