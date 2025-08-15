@@ -2,8 +2,7 @@
 # **/node_modules
 
 # Ignore tests 
-tests
-**/tests
+backend/tests
 
 # Ignore local build output (if any)
 # **/dist
