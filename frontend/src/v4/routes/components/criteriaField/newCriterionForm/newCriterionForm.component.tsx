@@ -56,7 +56,7 @@ export const NewCriterionForm = ({ selectedCriterion, onSubmit, onClose, criteri
 				existingRules={criteria}
 				onSubmit={handleSubmit}
 				onClose={onClose}
-				dirtyRule={criterionForm}
+				unsavedState={criterionForm}
 			/>
 		</Container>
 	);

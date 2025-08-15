@@ -26,7 +26,7 @@ import { IGroupRule } from '@/v5/store/tickets/tickets.types';
 import { formatMessage } from '@/v5/services/intl';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useEffect } from 'react';
-import { has, isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
 import { IFormRule, formRuleToGroupRule, groupRuleToFormRule } from './groupRulesForm.helpers';
@@ -34,7 +34,6 @@ import { RuleFieldValues } from './groupRulesInputs/ruleFieldValues/ruleFieldVal
 import { RuleFieldOperator } from './groupRulesInputs/ruleFieldOperator/ruleFieldOperator.component';
 import { RuleOperator } from './groupRulesInputs/ruleOperator/ruleOperator.component';
 import { RuleValues } from './groupRulesInputs/ruleValues/ruleValues.component';
-import { mapArrayToFormArray } from '@/v5/helpers/form.helper';
 
 const DEFAULT_RULE: IGroupRule = {
 	name: '',
@@ -46,47 +45,18 @@ const DEFAULT_RULE: IGroupRule = {
 	values: [],
 };
 
-const isNonEmptyElement = (item) => !(!item || (has(item, 'value') && !item.value)); 
-const getDirtyFields = (defaultValues: IFormRule, currentValues: IFormRule) => {
-	const dirtyFields = [];
-	const findDifferentFields = (defaultObj = {}, dirtyObj = {}, prefix = []) => {
-		Object.keys(defaultObj).forEach((key) => {
-			const defaultObjVal = defaultObj[key];
-			const dirtyObjVal = dirtyObj[key];
-			const currentPath = [...prefix, key];
-
-			switch (key) {
-				case 'field':
-					findDifferentFields(defaultObjVal, dirtyObjVal, currentPath);
-					break;
-				case 'values':
-					if (!isEqual(defaultObjVal.filter(isNonEmptyElement), dirtyObjVal.filter(isNonEmptyElement))) {
-						dirtyFields.push([currentPath.join('.'), mapArrayToFormArray(dirtyObjVal)]);
-					}
-					break;
-				default:
-					if (!isEqual(defaultObjVal, dirtyObjVal)) {
-						dirtyFields.push([currentPath.join('.'), dirtyObjVal]);
-					}
-			}
-		});
-	};
-	findDifferentFields(defaultValues, currentValues);
-	return dirtyFields;
-};
-
 type IGroupRules = {
 	containerOrFederation: string;
 	rule?: IGroupRule;
 	existingRules: IGroupRule[];
 	// An object that includes the fields to change as soon as the form is initiated to
 	// mark them as dirty 
-	dirtyRule?: IGroupRule;
+	unsavedState?: IGroupRule;
 	onSubmit?: (rule: IGroupRule) => void;
 	onClose?: (currentFormValues: IGroupRule) => void;
 };
 
-export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], containerOrFederation, dirtyRule }: IGroupRules) => {
+export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], containerOrFederation, unsavedState }: IGroupRules) => {
 	const defaultValues = groupRuleToFormRule(rule ?? DEFAULT_RULE);
 
 	const formData = useForm<IFormRule>({
@@ -104,7 +74,6 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 		formState: { isValid, errors },
 		getValues,
 		reset,
-		setValue,
 	} = formData;
 
 	const getIsDirty = () => {
@@ -129,15 +98,18 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 	};
 
 	useEffect(() => {
-		reset(defaultValues);
+		if (isEmpty(unsavedState)) {
+			reset(defaultValues);
+		}
 	}, [rule]);
 
 	useEffect(() => {
-		if (isEmpty(dirtyRule)) return;
-		getDirtyFields(defaultValues, groupRuleToFormRule(dirtyRule)).forEach(([fieldName, fieldValue]: [any, any]) => {
-			setValue(fieldName, fieldValue, { shouldDirty: true, shouldValidate: true });
-		});
-	}, [JSON.stringify(dirtyRule)]);
+		if (isEmpty(unsavedState)) return;
+		// Comment for Dan or Santiago
+		// I don't understand why this reset updates the values and seems to
+		// mark the different fields as dirty
+		reset(groupRuleToFormRule(unsavedState));
+	}, [JSON.stringify(unsavedState)]);
 
 	useEffect(() => () => {
 		onClose?.(formRuleToGroupRule(getValues()));
