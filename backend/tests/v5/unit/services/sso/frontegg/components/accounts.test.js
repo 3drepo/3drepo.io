@@ -603,6 +603,386 @@ const testGetClaimedDomains = () => {
 	});
 };
 
+const testAddUsersToGroup = () => {
+	describe('Add users to group', () => {
+		test('Should add users to group', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const users = times(3, () => generateRandomString());
+
+			await Accounts.addUsersToGroup(teamspace, groupId, users);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...postOptions.headers, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), {
+				userIds: users,
+			}, { headers });
+			expect(WebRequests.post.mock.calls[0][0]).toContain(groupId);
+		});
+
+		test('Should do nothing if the array is empty', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const users = [];
+
+			await Accounts.addUsersToGroup(teamspace, groupId, users);
+
+			expect(Connections.getBearerHeader).not.toHaveBeenCalled();
+			expect(Connections.getConfig).not.toHaveBeenCalled();
+
+			expect(WebRequests.post).not.toHaveBeenCalled();
+		});
+
+		test('Should throw if an error occured', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const users = times(3, () => generateRandomString());
+
+			WebRequests.post.mockRejectedValueOnce(new Error('Test error'));
+
+			await expect(Accounts.addUsersToGroup(teamspace, groupId, users)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...postOptions.headers, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), {
+				userIds: users,
+			}, { headers });
+			expect(WebRequests.post.mock.calls[0][0]).toContain(groupId);
+		});
+	});
+};
+
+const testRemoveUsersFromGroup = () => {
+	describe('Remove users from group', () => {
+		test('Should remove users from group', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const users = times(3, () => generateRandomString());
+
+			await Accounts.removeUsersFromGroup(teamspace, groupId, users);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...postOptions.headers, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), headers, {
+				userIds: users,
+			});
+			expect(WebRequests.delete.mock.calls[0][0]).toContain(groupId);
+		});
+
+		test('Should do nothing if the array is empty', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const users = [];
+
+			await Accounts.removeUsersFromGroup(teamspace, groupId, users);
+
+			expect(Connections.getBearerHeader).not.toHaveBeenCalled();
+			expect(Connections.getConfig).not.toHaveBeenCalled();
+
+			expect(WebRequests.delete).not.toHaveBeenCalled();
+		});
+
+		test('Should throw if an error occured', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const users = times(3, () => generateRandomString());
+
+			WebRequests.delete.mockRejectedValueOnce(new Error('Test error'));
+
+			await expect(Accounts.removeUsersFromGroup(teamspace, groupId, users)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...postOptions.headers, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), headers, {
+				userIds: users,
+			});
+			expect(WebRequests.delete.mock.calls[0][0]).toContain(groupId);
+		});
+	});
+};
+
+const testGetGroups = () => {
+	describe('Get groups', () => {
+		test('Should get groups', async () => {
+			const teamspace = generateRandomString();
+			const expectedGroups = [generateRandomString(), generateRandomString(), generateRandomString()];
+
+			WebRequests.get.mockResolvedValueOnce({ data: { groups: expectedGroups } });
+
+			await expect(Accounts.getGroups(teamspace)).resolves.toEqual(expectedGroups);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), headers);
+			expect(WebRequests.get.mock.calls[0][0]).toContain('?_groupsRelations=users');
+		});
+
+		test('Should get groups without users if getUsers is set to false ', async () => {
+			const teamspace = generateRandomString();
+			const expectedGroups = [generateRandomString(), generateRandomString(), generateRandomString()];
+
+			WebRequests.get.mockResolvedValueOnce({ data: { groups: expectedGroups } });
+
+			await expect(Accounts.getGroups(teamspace, false)).resolves.toEqual(expectedGroups);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), headers);
+			expect(WebRequests.get.mock.calls[0][0]).not.toContain('?_groupsRelations=users');
+		});
+
+		test('Should throw if an error occurs', async () => {
+			const teamspace = generateRandomString();
+
+			WebRequests.get.mockRejectedValueOnce(new Error('Test error'));
+
+			await expect(Accounts.getGroups(teamspace, false)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), headers);
+			expect(WebRequests.get.mock.calls[0][0]).not.toContain('?_groupsRelations=users');
+		});
+	});
+};
+
+const testGetGroupById = () => {
+	describe('Get group by ID', () => {
+		test('Should get group by ID without users by default', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const expectedGroup = { id: groupId, name: generateRandomString() };
+
+			WebRequests.get.mockResolvedValueOnce({ data: expectedGroup });
+
+			await expect(Accounts.getGroupById(teamspace, groupId)).resolves.toEqual(expectedGroup);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), headers);
+			expect(WebRequests.get.mock.calls[0][0]).toContain(groupId);
+			expect(WebRequests.get.mock.calls[0][0]).not.toContain('?_groupsRelations=users');
+		});
+
+		test('Should get group by ID with users if fetchUsers is set to true', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const expectedGroup = { id: groupId, name: generateRandomString() };
+
+			WebRequests.get.mockResolvedValueOnce({ data: expectedGroup });
+
+			await expect(Accounts.getGroupById(teamspace, groupId, true)).resolves.toEqual(expectedGroup);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), headers);
+			expect(WebRequests.get.mock.calls[0][0]).toContain(groupId);
+			expect(WebRequests.get.mock.calls[0][0]).toContain('?_groupsRelations=users');
+		});
+
+		test('Should throw if an error occurs', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+
+			WebRequests.get.mockRejectedValueOnce(new Error('Test error'));
+
+			await expect(Accounts.getGroupById(teamspace, groupId)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), headers);
+			expect(WebRequests.get.mock.calls[0][0]).toContain(groupId);
+			expect(WebRequests.get.mock.calls[0][0]).not.toContain('?_groupsRelations=users');
+		});
+	});
+};
+
+const testCreateGroup = () => {
+	describe('Create group', () => {
+		test('Should create a group', async () => {
+			const teamspace = generateRandomString();
+			const groupName = generateRandomString();
+			const color = generateRandomString();
+			const expectedGroup = { id: generateRandomString() };
+
+			WebRequests.post.mockResolvedValueOnce({ data: expectedGroup });
+
+			await expect(Accounts.createGroup(teamspace, groupName, color)).resolves.toEqual(expectedGroup.id);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), { name: groupName, color }, { headers });
+		});
+
+		test('Should create a group and add users', async () => {
+			const teamspace = generateRandomString();
+			const groupName = generateRandomString();
+			const color = generateRandomString();
+			const expectedGroup = { id: generateRandomString() };
+			const users = times(3, () => generateRandomString());
+
+			WebRequests.post.mockResolvedValueOnce({ data: expectedGroup });
+
+			await expect(Accounts.createGroup(teamspace, groupName, color, users)).resolves.toEqual(expectedGroup.id);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(2);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(2);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(2);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), { name: groupName, color }, { headers });
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), {
+				userIds: users,
+			}, { headers });
+		});
+
+		test('Should throw if an error occurs', async () => {
+			const teamspace = generateRandomString();
+			const groupName = generateRandomString();
+
+			WebRequests.post.mockRejectedValueOnce(new Error('Test error'));
+
+			await expect(Accounts.createGroup(teamspace, groupName)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.post).toHaveBeenCalledTimes(1);
+			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), { name: groupName }, { headers });
+		});
+	});
+};
+
+const testUpdateGroup = () => {
+	describe('Update group', () => {
+		test('Should update a group', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const groupName = generateRandomString();
+			const color = generateRandomString();
+
+			const groupData = { name: groupName, color };
+
+			await Accounts.updateGroup(teamspace, groupId, groupData);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.patch).toHaveBeenCalledTimes(1);
+			expect(WebRequests.patch).toHaveBeenCalledWith(expect.any(String), groupData, { headers });
+			expect(WebRequests.patch.mock.calls[0][0]).toContain(groupId);
+		});
+
+		test('Should throw error if error occured', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			const groupName = generateRandomString();
+			const color = generateRandomString();
+
+			const groupData = { name: groupName, color };
+
+			WebRequests.patch.mockRejectedValueOnce(new Error('Test error'));
+
+			await expect(Accounts.updateGroup(teamspace, groupId, groupData)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.patch).toHaveBeenCalledTimes(1);
+			expect(WebRequests.patch).toHaveBeenCalledWith(expect.any(String), groupData, { headers });
+			expect(WebRequests.patch.mock.calls[0][0]).toContain(groupId);
+		});
+	});
+};
+
+const testRemoveGroup = () => {
+	describe('Remove group', () => {
+		test('Should Remove a group', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+
+			await Accounts.removeGroup(teamspace, groupId);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), headers);
+			expect(WebRequests.delete.mock.calls[0][0]).toContain(groupId);
+		});
+
+		test('Should throw error if error occured', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+			WebRequests.delete.mockRejectedValueOnce(new Error('Test error'));
+
+			await expect(Accounts.removeGroup(teamspace, groupId)).rejects.not.toBeUndefined();
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			const headers = { ...bearerHeader, [HEADER_TENANT_ID]: teamspace };
+
+			expect(WebRequests.delete).toHaveBeenCalledTimes(1);
+			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), headers);
+			expect(WebRequests.delete.mock.calls[0][0]).toContain(groupId);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceByAccount();
 	testCreateAccount();
@@ -613,4 +993,11 @@ describe(determineTestGroup(__filename), () => {
 	testGetUserStatusInAccount();
 	testSetMFAPolicy();
 	testGetClaimedDomains();
+	testAddUsersToGroup();
+	testRemoveUsersFromGroup();
+	testGetGroups();
+	testGetGroupById();
+	testCreateGroup();
+	testUpdateGroup();
+	testRemoveGroup();
 });

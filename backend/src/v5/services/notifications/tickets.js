@@ -21,7 +21,6 @@ const {
 	insertTicketClosedNotifications,
 	insertTicketUpdatedNotifications,
 } = require('../../models/notifications');
-const { UUIDToString } = require('../../utils/helper/uuids');
 const { basePropertyLabels } = require('../../schemas/tickets/templates.constants');
 const { events } = require('../eventsManager/eventsManager.constants');
 const { getClosedStatuses } = require('../../schemas/tickets/templates');
