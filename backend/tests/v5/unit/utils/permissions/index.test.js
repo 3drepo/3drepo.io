@@ -17,7 +17,7 @@
 
 const { times } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString } = require('../../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../../helper/services');
 
 const Permissions = require(`${src}/utils/permissions`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
@@ -513,7 +513,7 @@ const testHasAdminAccessToFederation = () => {
 	});
 };
 
-describe('utils/permissions', () => {
+describe(determineTestGroup(__filename), () => {
 	testIsTeamspaceAdmin();
 	testIsProjectAdmin();
 	testHasProjectAdminPermissions();
