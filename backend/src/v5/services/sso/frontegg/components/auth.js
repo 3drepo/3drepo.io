@@ -60,13 +60,13 @@ Auth.generateAuthenticationCodeUrl = async ({ state, redirectURL, codeChallenge,
 	return `${config.appUrl}/oauth/authorize?${queryString.encode(qsObj)}`;
 };
 
-Auth.generateToken = async (urlUsed, code, challenge) => {
+Auth.generateToken = async (urlUsed, code, verifier) => {
 	const config = await getConfig();
 	const payload = {
 		grant_type: 'authorization_code',
 		code,
 		redirect_uri: urlUsed,
-		code_challenge: challenge,
+		code_verifier: verifier,
 	};
 
 	const { data } = await post(`${config.appUrl}/oauth/token`, payload, { headers: await getBasicHeader() });
