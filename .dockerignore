@@ -3,6 +3,7 @@
 
 # Ignore tests 
 backend/tests
+backend/node_modules
 
 # Ignore local build output (if any)
 # **/dist
