@@ -28,9 +28,67 @@ import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME } from '@/v5/store/user
 import { selectJobById } from '@/v4/modules/jobs/jobs.selectors';
 
 export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
+
+const arrayAndStringCompare =(a,b) => {
+	const arrA = a.split(',');
+	const arrB = b.split(',');
+
+	if(arrA.length == arrB.length) {
+		return a.localeCompare(b);
+	}
+	return arrA.length - arrB.length;
+}
+
+type TicketsGroup = {
+	groupName: string,
+	value: any, 
+	tickets: ITicket[]
+};
+
+type GroupDictionary = Dictionary<{tickets: ITicket[], value: any}>;
+
+const sortToTicketsGroups = (groups: GroupDictionary): TicketsGroup[] => {
+	const { [UNSET]: groupsWithUnsetValue, ...grouspWithSetValue } = groups;
+	const sortedGroups:TicketsGroup[] = Object.keys(grouspWithSetValue)
+		.sort(arrayAndStringCompare)     
+		.map((key) => ({ groupName: key, ...groups[key] }));
+	
+	if (groupsWithUnsetValue) {
+		sortedGroups.push({groupName: UNSET, ...groupsWithUnsetValue});
+	}
+
+	return sortedGroups;
+};
+
+const createGroups = (tickets: ITicket[], getKey:(ticket:ITicket) => any) => {
+	const groups: GroupDictionary = {};
+
+	tickets.forEach((ticket) => {
+		const key = getKey(ticket);
+		let name: string, value: any = undefined;
+
+		if(key.name) {
+			name = key.name;
+			value = key.value;
+		} else {
+			name = key.toString();
+			value = key;
+		}
+		
+		if (!groups[name]) {
+			groups[name] = { tickets: [], value };
+		}
+
+		groups[name].tickets.push(ticket);
+	})
+	
+	return sortToTicketsGroups(groups);
+};
+
 const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
 const OVERDUE = formatMessage({ id: 'groupBy.dueDate.overdue', defaultMessage: 'Overdue' });
-const getOptionsForGroupsWithDueDate = () => [
+const DUE_DATE_LABELS = [
+	NO_DUE_DATE,
 	OVERDUE,
 	formatMessage({ id: 'groupBy.dueDate.inOneWeek', defaultMessage: 'in 1 week' }),
 	formatMessage({ id: 'groupBy.dueDate.inTwoWeeks', defaultMessage: 'in 2 weeks' }),
@@ -39,29 +97,42 @@ const getOptionsForGroupsWithDueDate = () => [
 	formatMessage({ id: 'groupBy.dueDate.inFiveWeeks', defaultMessage: 'in 5 weeks' }),
 	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
 ];
-const groupByDate = (tickets: ITicket[]) => {
-	const groups = [];
-	// eslint-disable-next-line prefer-const
-	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
 
-	if (ticketsWithUnsetDueDate.length) {
-		groups.push([NO_DUE_DATE, ticketsWithUnsetDueDate]);
+const groupByDueDate = (tickets: ITicket[]) => {
+	const dueDatePropName = 'properties.' + IssueProperties.DUE_DATE
+	const startOfTheWeek = (new Date()).getTime();
+	const endOfWeeks = [];
+	for (let i = 1 ; i < 6 ; i++ ) {
+		endOfWeeks.push(startOfTheWeek + (i * 604800000)) // i * a week in milliseconds;
 	}
 
-	const dueDateOptions = getOptionsForGroupsWithDueDate();
-	const endOfCurrentWeek = new Date();
+	const groups = createGroups(tickets, (ticket) => { 
+		const dateValue = selectTicketPropertyByName(getState(), ticket._id, dueDatePropName);
+		let name = NO_DUE_DATE;
+		let value = dateValue;
 
-	const ticketDueDateIsPassed = (ticket: ITicket) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
+		if (dateValue && dateValue > startOfTheWeek) {
+			// If there is no end of the week < than the date means that is pass 6 weeks;
+			name = DUE_DATE_LABELS[DUE_DATE_LABELS.length-1]; 
+			for (let i = 0 ; i < 5 ; i++ ) {
+				if (dateValue < endOfWeeks[i]) {
+					name = DUE_DATE_LABELS[i+2];
+					value = endOfWeeks[i];
+					break;
+				}
+			}
+		}
 
-	let currentWeekTickets;
-	while (dueDateOptions.length) {
-		[currentWeekTickets, remainingTickets] = _.partition(remainingTickets, ticketDueDateIsPassed);
-		const currentDueDateOption = dueDateOptions.shift();
-		const ticketsWithCurrentDueDate = dueDateOptions.length ? currentWeekTickets : currentWeekTickets.concat(remainingTickets);
-		groups.push([currentDueDateOption, ticketsWithCurrentDueDate]);
-		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() + 7);
-	}
-	return groups;
+		if (dateValue && dateValue <= startOfTheWeek) {
+			name = OVERDUE;
+		}
+
+		return { name, value };
+	});
+
+	return groups.sort((a, b) => 
+		DUE_DATE_LABELS.indexOf(a.groupName) - DUE_DATE_LABELS.indexOf(b.groupName)
+	);
 };
 
 const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
@@ -74,7 +145,7 @@ export const getjobOrUserDisplayName = (assignee: string) => {
 	return JOB_OR_USER_NOT_FOUND_NAME;
 };
 
-export const sortAssignees = (ticket: ITicket): ITicket => {
+export const sortAssignees = (ticket: ITicket): ITicket => { // <--- ???
 	const sortedAssignees = _.orderBy(getAssigneesRaw(ticket), (assignee) => getjobOrUserDisplayName(assignee).trim().toLowerCase());
 	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
 };
@@ -84,103 +155,55 @@ export const getAssigneeDisplayNamesFromTicket = (ticket: ITicket): string[] => 
 const groupByStatus = (tickets: ITicket[]) => {
 	const statusPath = `properties.${BaseProperties.STATUS}`;
 	const statusConfigValues = (selectStatusConfigByTemplateId(getState(), tickets[0].type) || DEFAULT_STATUS_CONFIG).values;
+	const labels: Record<string, string> = {};
+	const index: Record<string, number> = {};
 	
-	const ticketsByStatus = _.groupBy(tickets, statusPath);
-	// handling formatting
-	const ticketsByStatusDisplayValue = _.mapKeys(ticketsByStatus, (tkts, status) => {
-		const value = statusConfigValues.find(({ name }) => name === status);
-		return value.label || value.name;
+	statusConfigValues.forEach(({name, label}, i)=>  {
+		labels[name] = label;
+		index[name] = i;
 	});
-	const statusOrder = Object.fromEntries(DEFAULT_STATUS_CONFIG.values.map(({ type }, index) => [type, index]));
-	const statusToOrder = Object.fromEntries(statusConfigValues.map(({ name, type }) => [name, statusOrder[type]]));
 
-	const toStatusTypeOrder = ([, [ticket]]) => statusToOrder[_.get(ticket, statusPath)];
-	const toStatusDisplayValue = ([statusDisplayValue]) => statusDisplayValue;
+	const groups = createGroups(tickets, (ticket) => {
+		const value = selectTicketPropertyByName(getState(), ticket._id, statusPath);
+		return { name:labels[value], value };
+	});
 
-	return _.orderBy(Object.entries(ticketsByStatusDisplayValue), [toStatusTypeOrder, toStatusDisplayValue]) as Array<[string, ITicket[]]>;
+	return groups.sort((a,b) => index[a.groupName] - index[b.groupName]);
 };
 
 const groupByManyOfValues = (tickets: ITicket[], groupBy: string) => {
-	const groups: Dictionary<ITicket[]> = {};
-
-	tickets.forEach((ticket) => {
-		const values = selectTicketPropertyByName(getState(), ticket._id, groupBy);
-		const key = values ? [...values].sort().join(',') : UNSET;
-
-		if (!groups[key]) {
-			groups[key] = [];
-		}
-		groups[key].push(ticket);
-	})
-
-	return groups;
+	return createGroups(tickets, (ticket) => {
+		const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
+		const name = value ? [...value].sort().join(',') : UNSET;
+		return { name, value };
+	});
 };
 
-const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => _.groupBy(tickets, 
+const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => createGroups(tickets, 
 	(ticket) => selectTicketPropertyByName(getState(), ticket._id, groupBy) ?? UNSET);
 
-const arrayAndStringCompare =(a,b) => {
-	const arrA = a.split(',');
-	const arrB = b.split(',');
-
-	if(arrA.length == arrB.length) {
-		return a.localeCompare(b);
-	}
-	return arrA.length - arrB.length;
-}	
-
-const sortSelectGroups = (groups: Dictionary<ITicket[]>) => {
-	const { [UNSET]: groupsWithUnsetValue, ...grouspWithSetValue } = groups;
-	const sortedGroups:Array<[string, ITicket[]]> = Object.keys(grouspWithSetValue)
-		.sort(arrayAndStringCompare)     
-		.map((key) => [key, groups[key]]);
-
-	if (groupsWithUnsetValue?.length) {
-		sortedGroups.push([UNSET, groupsWithUnsetValue]);
-	}
-	return sortedGroups;
-};
-
-const getJobsAndUsersValues = (ticket: ITicket, groupBy: string) => {
-	const propertyValue = _.get(ticket, groupBy);
-	if (!propertyValue) return [];
-	return Array.isArray(propertyValue) ? propertyValue : [propertyValue]; // handle both oneOf and manyOf properties
-};
-
 const groupByJobsAndUsers = (tickets: ITicket[], groupBy: string) => {
-	const groups: Record<string, ITicket[]> = {};
-	const unset: ITicket[] = [];
-
-	for (const ticket of tickets) {
-		const values = getJobsAndUsersValues(ticket, groupBy);
-		if (!values.length) {
-			unset.push(ticket);
-			continue;
-		}
-		const sortedValues = [...values].sort((a, b) => getjobOrUserDisplayName(a).localeCompare(getjobOrUserDisplayName(b)));
-		const key = sortedValues.join(', ');
-		if (!groups[key]) groups[key] = [];
-		groups[key].push(ticket);
-	}
-
-	if (unset.length) {
-		groups[UNSET] = unset;
-	}
-
-	return sortSelectGroups(groups);
+	return createGroups(tickets, (ticket) => {
+		const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
+		const values = Array.isArray(value) ? value : [value];
+		const name = values && value ? values.map(getjobOrUserDisplayName).sort().join(',') : UNSET;
+		return { name, value };
+	});
 };
 
 export const groupTickets = (
-	groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition, isJobAndUsersType: boolean): Array<[string, ITicket[]]> => {
+	groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition, isJobAndUsersType: boolean): TicketsGroup[] => {
+
 	if (isJobAndUsersType) return groupByJobsAndUsers(tickets, groupBy);
+
 	switch (stripModuleOrPropertyPrefix(groupBy)) {
 		case IssueProperties.DUE_DATE:
-			return groupByDate(tickets);
+			return groupByDueDate(tickets);
 		case BaseProperties.STATUS:
 			return groupByStatus(tickets);
 		default:
 			const isOneOf = propertyType === 'oneOf';
 			const selectGroups = isOneOf ? groupByOneOfValues(tickets, groupBy) : groupByManyOfValues(tickets, groupBy);
-			return sortSelectGroups(selectGroups);
+			return selectGroups;
 	}
 };
