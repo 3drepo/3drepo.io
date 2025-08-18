@@ -26,10 +26,17 @@ const { remove: deleteUser } = require(`${v5Path}/processors/users`);
 
 const run = async (users) => {
 	if (!users?.length) throw new Error('A list of users must be provided');
-	const userArr = users.split(',');
+	const userArr = users.split(',').flatMap((user) => {
+		const userTrimmed = user.trim();
+		return userTrimmed.length ? userTrimmed : [];
+	});
 	await Promise.all(userArr.map(async (user) => {
-		// eslint-disable-next-line no-await-in-loop
-		const userRecord = await getUserByUsernameOrEmail(user.trim()).catch(() => false);
+		let userRecord;
+		try {
+			userRecord = await getUserByUsernameOrEmail(user.trim());
+		} catch (error) {
+			userRecord = false;
+		}
 		if (userRecord) {
 			// eslint-disable-next-line no-await-in-loop
 			const teamspaces = await getTeamspaceListByUser(userRecord.user);
@@ -52,7 +59,7 @@ const run = async (users) => {
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('users', {
-		describe: 'usersnames or emails to remove (comma separated)',
+		describe: 'usernames or emails to remove (comma separated)',
 		type: 'string',
 		demandOption: true,
 	});

@@ -35,6 +35,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const generateData = () => ({
 	keep: times(8, () => generateUserCredentials()),
 	remove: times(15, () => generateUserCredentials()),
+	unrecognized: times(5, () => generateUserCredentials()),
 });
 
 const setupData = async (userList) => {
@@ -86,6 +87,13 @@ const runTest = () => {
 		});
 		test('should remove users from the system', async () => {
 			const usersToRemove = data.remove.map((user) => user.user).join(',');
+			await expect(RemoveUsers.run(usersToRemove)).resolves.toBeUndefined();
+			await checkUsers(data.keep, true);
+			await checkUsers(data.remove, false);
+		});
+		test('should remove users from the system but also catch unrecognized users', async () => {
+			let usersToRemove = data.remove.map((user) => user.user).join(',');
+			usersToRemove += `,${data.unrecognized.map((user) => user.user).join(',')}`;
 			await expect(RemoveUsers.run(usersToRemove)).resolves.toBeUndefined();
 			await checkUsers(data.keep, true);
 			await checkUsers(data.remove, false);
