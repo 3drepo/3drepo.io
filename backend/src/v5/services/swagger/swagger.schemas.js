@@ -549,6 +549,25 @@ Schemas.schemas.ticketCommentView = {
 				showHidden: {
 					type: 'boolean',
 				},
+				selected: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							color: {
+								type: 'array',
+								items: {
+									type: 'number',
+									minimum: 0,
+									maximum: 255,
+								},
+								minItems: 3,
+								maxItems: 3,
+							},
+							group: Schemas.schemas.ticketGroup,
+						},
+					},
+				},
 				colored: {
 					type: 'array',
 					items: {
@@ -574,6 +593,15 @@ Schemas.schemas.ticketCommentView = {
 					},
 				},
 				hidden: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							group: Schemas.schemas.ticketGroup,
+						},
+					},
+				},
+				shown: {
 					type: 'array',
 					items: {
 						type: 'object',
