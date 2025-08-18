@@ -22,9 +22,9 @@ const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
 	getUserId, removeUser, updatePassword, updateProfile } = require('../models/users');
 const { fileExists, removeFile } = require('../services/filesManager');
 const { getUserAvatarBuffer, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
-const FSHandler = require('../handler/fs');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
+const fs = require('fs/promises');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
 const { logger } = require('../utils/logger');
@@ -138,7 +138,9 @@ Users.uploadAvatar = async (username, avatarObject) => {
 	try {
 		await uploadAvatar(await getUserId(username), avatarObject.path);
 	} finally {
-		FSHandler.removeFiles([avatarObject.path]);
+		fs.rm(avatarObject.path).catch((err) => {
+			logger.logError(`Failed to remove temporary avatar file: ${err.message}`);
+		});
 	}
 };
 

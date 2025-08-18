@@ -31,39 +31,37 @@ const { getAllUsersInAccount, updateUserDetails, uploadAvatar } = require(`${v5P
 
 const ACCEPTABLE_CHUNK_SIZE = 50;
 
-const migrateUserAvatar = (membersChunk) => {
-	membersChunk.map(async (member) => {
-		// eslint-disable-next-line no-await-in-loop
-		const { user, customData: { firstName, lastName, migrated } } = await getUserByEmail(member.email);
+const migrateUserAvatar = (membersChunk) => Promise.all(membersChunk.map(async (member) => {
+	// eslint-disable-next-line no-await-in-loop
+	const { user, customData: { firstName, lastName, migrated } } = await getUserByEmail(member.email);
 
-		if (!migrated) {
-			try {
+	if (!migrated) {
+		try {
+			// eslint-disable-next-line no-await-in-loop
+			const hasAvatar = await fileExists(USERS_DB_NAME, AVATARS_COL_NAME, user);
+			if (hasAvatar) {
 				// eslint-disable-next-line no-await-in-loop
-				const hasAvatar = await fileExists(USERS_DB_NAME, AVATARS_COL_NAME, user);
-				if (hasAvatar) {
-					// eslint-disable-next-line no-await-in-loop
-					const { link, mimeType } = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, user);
-					const path = FSHandler.getFullPath(link);
-					// eslint-disable-next-line no-await-in-loop
-					await uploadAvatar(
-						member.id,
-						path,
-						mimeType,
-					);
-				}
-				if (member.name !== `${firstName} ${lastName}`) {
-					// eslint-disable-next-line no-await-in-loop
-					await updateUserDetails(member.id, { name: `${firstName} ${lastName}` });
-				}
+				const { link, mimeType } = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, user);
+				const path = FSHandler.getFullPath(link);
 				// eslint-disable-next-line no-await-in-loop
-				await updateProfile(user, { migrated: true });
-			} catch (error) {
-				logger.logError(`Failed to migrate users because: ${error.message}`);
+				await uploadAvatar(
+					member.id,
+					path,
+					mimeType,
+				);
 			}
+			if (member.name !== `${firstName} ${lastName}`) {
+				// eslint-disable-next-line no-await-in-loop
+				await updateUserDetails(member.id, { name: `${firstName} ${lastName}` });
+			}
+			// eslint-disable-next-line no-await-in-loop
+			await updateProfile(user, { migrated: true });
+		} catch (error) {
+			logger.logError(`Failed to migrate users because: ${error.message}`);
 		}
-	},
-	);
-};
+	}
+},
+));
 
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
