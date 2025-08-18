@@ -17,6 +17,7 @@
 
 const config = require('../../utils/config');
 const { generateUUIDString } = require('../../utils/helper/uuids');
+const { subtle } = require('crypto');
 
 const Sso = {};
 
@@ -32,11 +33,10 @@ const createRandomString = (length = 16) => {
 };
 
 const generateCodeChallenge = async (codeVerifier) => {
-	const digest = await crypto.subtle.digest('SHA-256',
+	const digest = await subtle.digest('SHA-256',
 		new TextEncoder().encode(codeVerifier));
 
-	// @ts-ignore
-	return btoa(String.fromCharCode(...new Uint8Array(digest)))
+	return Buffer.from(new Uint8Array(digest)).toString('base64')
 		.replace(/=/g, '')
 		.replace(/\+/g, '-')
 		.replace(/\//g, '_');
