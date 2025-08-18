@@ -25,7 +25,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
 import { useParams, generatePath } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
-import { BOARD_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { BOARD_ROUTE, BOARD_ROUTE_WITH_MODEL, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -238,12 +238,15 @@ export function Board(props: IProps) {
 
 	const teamspacesItems = useMemo(() => props.teamspaces.map(({ account }) => ({ value: account })), [props.teamspaces]);
 
-	const getPath = ({ typePath = type, modelPath = modelId }: any) => generatePath(BOARD_ROUTE, {
-		type: typePath,
-		containerOrFederation: modelPath,
-		project: projectId,
-		teamspace,
-	});
+	const getPath = ({ typePath = type, modelPath = modelId }: any) => {
+		const boardPath = modelPath ? BOARD_ROUTE_WITH_MODEL : BOARD_ROUTE;
+		return generatePath(boardPath, {
+			type: typePath,
+			containerOrFederation: modelPath,
+			project: projectId,
+			teamspace,
+		});
+	};
 
 	const handleTypeChange = (e) => {
 		const url = getPath({ typePath: e.target.value });

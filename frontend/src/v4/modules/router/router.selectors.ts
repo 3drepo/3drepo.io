@@ -46,12 +46,16 @@ const selectV4UrlParams = createSelector(
 	selectLocation, (location) => {
 		const viewerModelPath = ROUTES.MODEL_VIEWER;
 		const viewerRevisionPath = ROUTES.REVISION_VIEWER;
-		const boardPath = ROUTES.BOARD_SPECIFIC;
+		const boardMainPath = ROUTES.BOARD_MAIN;
+		const boardSpecificPath = ROUTES.BOARD_SPECIFIC;
 
 		const viewerModelMatch = matchPath({ path: viewerModelPath, end: true }, location.pathname);
 		const viewerRevisionMatch = matchPath({ path: viewerRevisionPath, end: true }, location.pathname);
 		const viewerMatch = viewerModelMatch || viewerRevisionMatch;
-		const boardMatch = matchPath({ path: boardPath }, location.pathname);
+
+		const boardMainMatch = matchPath({ path: boardMainPath }, location.pathname);
+		const boardSpecificMatch = matchPath({ path: boardSpecificPath }, location.pathname);
+		const boardMatch = boardMainMatch || boardSpecificMatch
 
 		return (viewerMatch || boardMatch || {}).params;
 	}
@@ -61,12 +65,16 @@ const selectV5UrlParams = createSelector(
 	selectLocation, (location) => {
 		const viewerModelPath = ROUTES.V5_MODEL_VIEWER;
 		const viewerRevisionPath = ROUTES.V5_REVISION_VIEWER;
-		const boardPath = ROUTES.V5_BOARD_SPECIFIC;
+		const boardMainPath = ROUTES.V5_BOARD_MAIN;
+		const boardSpecificPath = ROUTES.V5_BOARD_SPECIFIC;
 
 		const viewerModelMatch = matchPath({ path: viewerModelPath }, location.pathname);
 		const viewerRevisionMatch = matchPath({ path: viewerRevisionPath }, location.pathname);
 		const viewerMatch = viewerModelMatch || viewerRevisionMatch
-		const boardMatch = matchPath({ path: boardPath }, location.pathname);
+
+		const boardMainMatch = matchPath({ path: boardMainPath }, location.pathname);
+		const boardSpecificMatch = matchPath({ path: boardSpecificPath }, location.pathname);
+		const boardMatch = boardMainMatch || boardSpecificMatch;
 
 		return (viewerMatch || boardMatch || {}).params;
 	}

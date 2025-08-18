@@ -32,6 +32,7 @@ import {
 	ViewerParams,
 	DashboardParams,
 	VIEWER_REVISION_ROUTE,
+	BOARD_ROUTE_WITH_MODEL,
 } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
@@ -84,6 +85,9 @@ export const BreadcrumbsRouting = () => {
 		}
 		if (matchesPath(BOARD_ROUTE, pathname)) {
 			path = BOARD_ROUTE;
+		}
+		if (matchesPath(BOARD_ROUTE_WITH_MODEL, pathname)) {
+			path = BOARD_ROUTE_WITH_MODEL;
 		}
 		if (matchesPath(TICKETS_ROUTE, pathname)) {
 			path = TICKETS_ROUTE;

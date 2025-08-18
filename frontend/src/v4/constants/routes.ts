@@ -39,6 +39,7 @@ export const ROUTES = {
 	BILLING: '/dashboard/billing',
 	BOARD_MAIN: '/dashboard/board',
 	BOARD_SPECIFIC: '/dashboard/board/:type/:teamspace/:project/:modelId',
+	V5_BOARD_MAIN: '/v5/dashboard/:teamspace/:project/t/board/:type',
 	V5_BOARD_SPECIFIC: '/v5/dashboard/:teamspace/:project/t/board/:type/:modelId',
 };
 
