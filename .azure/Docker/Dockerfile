@@ -26,20 +26,22 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
     fi
 
 WORKDIR /home/node/3drepo.io/
-COPY --chown=root:node --from=builder /home/node/3drepo.io/backend /home/node/3drepo.io/backend
-COPY --chown=root:node --from=builder /home/node/3drepo.io/public /home/node/3drepo.io/public
-COPY --chown=root:node --from=builder /home/node/3drepo.io/config /home/node/3drepo.io/config
-COPY --chown=root:node --from=builder /home/node/3drepo.io/resources /home/node/3drepo.io/resources
-COPY --chown=root:node --from=builder /home/node/3drepo.io/run /home/node/3drepo.io/run
 
+COPY --chown=root:node --from=builder \
+    /home/node/3drepo.io/backend \
+    /home/node/3drepo.io/public \
+    /home/node/3drepo.io/config \
+    /home/node/3drepo.io/resources \
+    /home/node/3drepo.io/run \
+    ./
 
 ARG NODE_ENV=local
 ENV NODE_ENV ${NODE_ENV:-"production"}
 ENV NODE_CONFIG_DIR='./config'
 EXPOSE 8080 3000
 
-COPY .azure/Docker/src/init.sh /usr/local/bin/start.sh
-COPY .azure/Docker/src/getCustomLogins.py /usr/local/bin/getCustomLogins.py
+COPY .azure/Docker/src/init.sh .azure/Docker/src/getCustomLogins.py /usr/local/bin/
+
 RUN chmod +x /usr/local/bin/start.sh ; ln -s /usr/local/bin/start.sh /usr/local/bin/start
 
 WORKDIR /home/node/3drepo.io/
