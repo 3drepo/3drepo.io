@@ -197,7 +197,7 @@ const testGenerateToken = () => {
 				grant_type: 'authorization_code',
 				code,
 				redirect_uri: urlUsed,
-				code_challenge: challenge,
+				code_verifier: challenge,
 			};
 
 			expect(WebRequests.post).toHaveBeenCalledTimes(1);
