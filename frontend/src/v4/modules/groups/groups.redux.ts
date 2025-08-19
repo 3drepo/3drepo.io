@@ -62,6 +62,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	subscribeOnChanges: ['teamspace', 'modelId'],
 	unsubscribeFromChanges: ['teamspace', 'modelId'],
 	setCriteriaFieldState: ['criteriaFieldState'],
+	setSelectedCriterionId: ['selectedCriterionId'],
 	resetToSavedSelection: ['groupId'],
 	resetComponentState: [],
 	updateEditingGroup: ['properties'],
@@ -71,7 +72,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 export interface ICriteriaFieldState {
 	pastedCriteria: string;
 	isPasteEnabled: boolean;
-	selectedCriterion: string;
+	selectedCriterionId: string;
 	criterionForm: {
 		field: {
 			operator: string;
@@ -109,7 +110,7 @@ export interface IGroupState {
 export const INITIAL_CRITERIA_FIELD_STATE = {
 	pastedCriteria: '',
 	isPasteEnabled: false,
-	selectedCriterion: '',
+	selectedCriterionId: '',
 	criterionForm: null
 };
 
