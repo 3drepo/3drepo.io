@@ -56,7 +56,7 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 		const rect = containerRef.current.getBoundingClientRect();
 		let shouldUpdate = rect.y !== prevRect.current?.y || prevInnerHeight.current !== window.innerHeight;
 
-		if (shouldUpdate) {
+		if (shouldUpdate) { // TODO: dont update while an animation is playing
 			prevRect.current = rect; 
 			prevInnerHeight.current = window.innerHeight;
 			setContainerRect(rect);

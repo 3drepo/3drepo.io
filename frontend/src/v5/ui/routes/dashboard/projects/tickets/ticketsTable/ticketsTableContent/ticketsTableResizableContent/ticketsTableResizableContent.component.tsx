@@ -32,8 +32,8 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
 type CollapsibleTicketsGroupProps = {
+	propertyValue: string;
 	groupName: string;
-	groupNameDisplay: string;
 	tickets: ITicket[];
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
@@ -41,14 +41,14 @@ type CollapsibleTicketsGroupProps = {
 	propertyName: string;
 };
 
-const CollapsibleTicketsGroup = ({ groupName, groupNameDisplay, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: CollapsibleTicketsGroupProps) => {
+const CollapsibleTicketsGroup = ({ propertyValue, groupName: groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: CollapsibleTicketsGroupProps) => {
 	const ticketsIds = tickets.map(({ _id }) => _id);
 	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
 
 	return (<DashboardListCollapse
 		title={(
 			<>
-				<Title>{groupNameDisplay}</Title>
+				<Title>{groupName}</Title>
 				<CircledNumber disabled={!tickets.length || isLoading}>
 					{isLoading ? <Spinner /> : tickets.length}
 				</CircledNumber>
@@ -58,7 +58,7 @@ const CollapsibleTicketsGroup = ({ groupName, groupNameDisplay, tickets, setTick
 	>
 		<TicketsTableGroup
 			tickets={tickets}
-			onNewTicket={onNewTicket(groupName)}
+			onNewTicket={onNewTicket(propertyValue)}
 			onEditTicket={setTicketValue}
 			selectedTicketId={selectedTicketId}
 		/>
@@ -76,7 +76,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 	const { filteredItems } = useContext(SearchContext);
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
-		const presetValue = { key:groupBy, value: (groupByValue === UNSET) ? null : groupByValue };
+		const presetValue = { key: groupBy, value: (groupByValue === UNSET) ? null : groupByValue };
 		setTicketValue(modelId, NEW_TICKET_ID, presetValue);
 	};
 
@@ -94,21 +94,16 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
 	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
 
-	const getGroupDisplayName = (groupName: string) => {
-		if (groupName === UNSET || !isJobAndUsersType(groupBy)) return groupName;
-		const jobsAndUsernamesArray = groupName.split(',').map((user) => user.trim());
-		return jobsAndUsernamesArray.map(getjobOrUserDisplayName).join(', ');
-	};
 	return (
 		<Container>
-			{groups.map(([groupName, tickets]) => (
+			{groups.map(({groupName, value, tickets}) => (
 				<CollapsibleTicketsGroup
-					groupNameDisplay={getGroupDisplayName(groupName)}
 					groupName={groupName}
 					tickets={tickets}
 					setTicketValue={setTicketValue}
 					onNewTicket={onGroupNewTicket}
 					selectedTicketId={selectedTicketId}
+					propertyValue={value}
 					propertyName={propertyName}
 					key={groupBy + groupName + template + tickets}
 				/>
