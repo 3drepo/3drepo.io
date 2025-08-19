@@ -34,7 +34,6 @@ const Drawings = require('../../../../../processors/teamspaces/projects/models/d
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const ModelSettings = require('../../../../../processors/teamspaces/projects/models/commons/settings');
 const { Router } = require('express');
-const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');

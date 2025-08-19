@@ -21,13 +21,9 @@ const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
-const { determineTestGroup, generateRandomString, generateRandomNumber, generateUUID, outOfOrderArrayEqual, generateUUIDString } = require('../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
 const { deleteIfUndefined } = require('../../../../../src/v5/utils/helper/objects');
 const { membershipStatus } = require('../../../../../src/v5/services/sso/frontegg/frontegg.constants');
-
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
-
-const { DEFAULT_OWNER_ROLE } = require(`${src}/models/roles.constants`);
 
 const Teamspaces = require(`${src}/processors/teamspaces`);
 

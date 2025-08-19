@@ -18,7 +18,7 @@
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addUserToAccount, createAccount, getAccountsByUser, getAllUsersInAccount, getTeamspaceByAccount,
 	getUserStatusInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
-const { createDefaultRoles, getRoles, removeUserFromRoles } = require('./roles');
+const { createDefaultRoles, getRoles } = require('./roles');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
@@ -26,7 +26,6 @@ const {
 	getAddOns,
 	getTeamspaceInvites,
 	getTeamspaceRefId,
-	getTeamspaceSetting,
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');

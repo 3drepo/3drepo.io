@@ -40,7 +40,6 @@ const { contains: setContains } = require("./helper/set");
 
 const responseCodes = require("../response_codes.js");
 const { omit } = require("lodash");
-const { stringToUUID, UUIDToString } = require(`${v5Path}/utils/helper/uuids.js`);
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
@@ -95,7 +94,7 @@ const sendInvitationEmail = async (email, username, teamspace) => {
 	await addUserToAccount(refId, email, undefined, {teamspace, sender  });
 };
 
-invitations.create = async (email, teamspace, job, username, permissions = {}, checkLicenceLimit = true) => {
+invitations.create = async (email, teamspace, roleId, username, permissions = {}, checkLicenceLimit = true) => {
 	// 1 - find if there is already and invitation with that email
 	// 2 - if there is update the invitation with the new teamspace data
 	// 2.5 - if there is not, create an entry with that email and role/permission
@@ -105,7 +104,6 @@ invitations.create = async (email, teamspace, job, username, permissions = {}, c
 	const projectsPermissions = permissions.projects || [];
 
 	const projectIds = projectsPermissions.map(pr => pr.project);
-	const roleId = stringToUUID(role);
 
 	const [emailUser, teamspaceRole, projects] = await Promise.all([
 		User.findByEmail(email),
@@ -149,7 +147,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}, c
 				await User.hasReachedLicenceLimitCheck(teamspace);
 			}
 			await sendInvitationEmail(email, username, teamspace);
-			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, role, permissions});
+			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, role: roleId, permissions});
 		}
 		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
 		teamSpaces.push(teamspaceEntry);
@@ -162,12 +160,14 @@ invitations.create = async (email, teamspace, job, username, permissions = {}, c
 			await User.hasReachedLicenceLimitCheck(teamspace);
 		}
 		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
+
 		await sendInvitationEmail(email, username, teamspace);
+		await coll.insertOne(invitation);
 
 		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, role: roleId, permissions});
 	}
 
-	return {email, role, permissions};
+	return {email, role:roleId, permissions};
 };
 
 invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) => {
@@ -253,7 +253,7 @@ invitations.getInvitationsByTeamspace = async (teamspaceName) => {
 	return results.map(invitationEntry => {
 		const email = invitationEntry._id;
 		const teamspaceData =  omit(invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName), "teamspace");
-		return { email, ...teamspaceData, role: UUIDToString(teamspaceData.role) };
+		return { email, ...teamspaceData, role: teamspaceData.role };
 	});
 };
 

@@ -65,8 +65,8 @@ Accounts.removeAccount = (accountId) => {
 	delete teamspaceByAccount[accountId];
 };
 
-Accounts.addUsersToGroup =  (accountId, groupId, userIds) => {
-	if(groupsByAccount[accountId]?.[groupId]) {
+Accounts.addUsersToGroup = (accountId, groupId, userIds) => {
+	if (groupsByAccount[accountId]?.[groupId]) {
 		const group = groupsByAccount[accountId][groupId];
 		group.users = group.users || [];
 		group.users = [...group.users, ...userIds];
@@ -74,31 +74,29 @@ Accounts.addUsersToGroup =  (accountId, groupId, userIds) => {
 	} else {
 		throw new Error(`Group with ID ${groupId} not found in account: ${accountId}`);
 	}
-	
 };
 
 Accounts.removeUsersFromGroup = async (accountId, groupId, userIds) => {
-	if(groupsByAccount[accountId]?.[groupId]) {
-		groupsByAccount[accountId][groupId].users = groupsByAccount[accountId][groupId].users.filter((user) => !userIds.includes(user.id));
+	if (groupsByAccount[accountId]?.[groupId]) {
+		groupsByAccount[accountId][groupId].users = groupsByAccount[accountId][groupId]
+			.users.filter((user) => !userIds.includes(user.id));
 	} else {
 		throw new Error(`Group with ID ${groupId} not found in account: ${accountId}`);
 	}
-	
 };
 
-Accounts.getGroups = async (accountId, getUsers = true) => {
-	if(groupsByAccount[accountId]) {
+Accounts.getGroups = (accountId, getUsers = true) => {
+	if (groupsByAccount[accountId]) {
 		return Objects.values(groupsByAccount[accountId]).map((group) => {
 			if (getUsers) {
 				return group;
 			}
 			const { users, ...groupData } = group;
 			return groupData;
-		}
+		});
 	}
 
 	throw new Error(`No groups found for account: ${accountId}`);
-	
 };
 
 Accounts.getGroupById = (accountId, groupId, fetchUsers) => {

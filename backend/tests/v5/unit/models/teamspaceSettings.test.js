@@ -24,19 +24,13 @@ const { determineTestGroup, generateRandomString, generateRandomObject } = requi
 const Teamspace = require(`${src}/models/teamspaceSettings`);
 const { USERS_DB_NAME } = require(`${src}/models/users.constants`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
-const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const { TEAM_MEMBER } = require(`${src}/models/roles.constants`);
 const { ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 
-const USER_COL = 'system.users';
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
-
-jest.mock('../../../../src/v5/services/sso/frontegg');
-const FronteggService = require(`${src}/services/sso/frontegg`);
 
 const generateSecurityConfig = (sso, whiteList) => {
 	if (!sso && !whiteList) return {};
