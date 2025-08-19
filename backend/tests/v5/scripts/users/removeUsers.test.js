@@ -92,8 +92,7 @@ const runTest = () => {
 			await checkUsers(data.remove, false);
 		});
 		test('should remove users from the system but also catch unrecognized users', async () => {
-			let usersToRemove = data.remove.map((user) => user.user).join(',');
-			usersToRemove += `,${data.unrecognized.map((user) => user.user).join(',')}`;
+			const usersToRemove = [...data.remove, ...data.unrecognized].map(({ user }) => user).join(',');
 			await expect(RemoveUsers.run(usersToRemove)).resolves.toBeUndefined();
 			await checkUsers(data.keep, true);
 			await checkUsers(data.remove, false);

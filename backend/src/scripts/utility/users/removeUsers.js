@@ -31,28 +31,18 @@ const run = async (users) => {
 		return userTrimmed.length ? userTrimmed : [];
 	});
 	await Promise.all(userArr.map(async (user) => {
-		let userRecord;
 		try {
-			userRecord = await getUserByUsernameOrEmail(user.trim());
-		} catch (error) {
-			userRecord = false;
-		}
-		if (userRecord) {
-			// eslint-disable-next-line no-await-in-loop
+			const userRecord = await getUserByUsernameOrEmail(user);
 			const teamspaces = await getTeamspaceListByUser(userRecord.user);
 			if (teamspaces.length) {
 				await Promise.all(teamspaces.map(
 					({ name: teamspace }) => removeTeamspaceMember(teamspace, userRecord.user),
 				));
 			}
-			// eslint-disable-next-line no-await-in-loop
 			await deleteUser(userRecord.user);
-
-			return true;
+		} catch (error) {
+			logger.logInfo(`User ${user} not found, skipping...`);
 		}
-
-		logger.logInfo(`User ${user.trim()} not found, skipping...`);
-		return false;
 	}));
 };
 
