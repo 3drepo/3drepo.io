@@ -30,8 +30,8 @@ const NotificationModels = require(`${src}/models/notifications`);
 jest.mock('../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
 
-jest.mock('../../../../../src/v5/models/roles');
-const RolesModels = require(`${src}/models/roles`);
+jest.mock('../../../../../src/v5/processors/teamspaces/roles');
+const RolesProcessor = require(`${src}/processors/teamspaces/roles`);
 
 jest.mock('../../../../../src/v5/models/tickets.templates');
 const TicketTemplatesModel = require(`${src}/models/tickets.templates`);
@@ -77,7 +77,7 @@ const testOnNewTickets = (multipleTickets = false) => {
 			const ticketData = multipleTickets ? times(nTickets, () => {}) : {};
 			await eventCallbacks[eventToTrigger](createEventData(ticketData));
 
-			expect(RolesModels.getRolesToUsers).not.toHaveBeenCalled();
+			expect(RolesProcessor.getRoles).not.toHaveBeenCalled();
 			expect(SettingsProcessor.getUsersWithPermissions).not.toHaveBeenCalled();
 
 			expect(NotificationModels.insertTicketAssignedNotifications).not.toHaveBeenCalled();
@@ -86,7 +86,7 @@ const testOnNewTickets = (multipleTickets = false) => {
 		test(`should handle error gracefully if something went wrong during a message on ${eventToTrigger}`, async () => {
 			const ticketData = multipleTickets ? times(nTickets, () => generateTicket(owner, [owner]))
 				: generateTicket(owner, [owner]);
-			RolesModels.getRolesToUsers.mockRejectedValueOnce(new Error());
+			RolesProcessor.getRoles.mockRejectedValueOnce(new Error());
 
 			await eventCallbacks[eventToTrigger](createEventData(ticketData));
 
@@ -97,12 +97,12 @@ const testOnNewTickets = (multipleTickets = false) => {
 			const ticketData = multipleTickets ? times(nTickets, () => generateTicket(owner, [owner]))
 				: generateTicket(owner, [owner]);
 
-			RolesModels.getRolesToUsers.mockResolvedValueOnce([{ _id: role, users: [generateRandomString()] }]);
+			RolesProcessor.getRoles.mockResolvedValueOnce([{ id: role, users: [generateRandomString()] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([role, owner]);
 			await eventCallbacks[eventToTrigger](createEventData(ticketData));
 
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, project, model, false);
@@ -114,13 +114,13 @@ const testOnNewTickets = (multipleTickets = false) => {
 			const ticketData = multipleTickets ? times(nTickets, () => generateTicket(owner, [role]))
 				: generateTicket(owner, [role]);
 
-			RolesModels.getRolesToUsers.mockResolvedValueOnce([{ _id: role, users: [generateRandomString()] }]);
+			RolesProcessor.getRoles.mockResolvedValueOnce([{ id: role, users: [generateRandomString()] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce(times(10, () => generateRandomString()));
 
 			await eventCallbacks[eventToTrigger](createEventData(ticketData));
 
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, project, model, false);
@@ -137,7 +137,7 @@ const testOnNewTickets = (multipleTickets = false) => {
 				const assignedUsers = times(5, () => generateRandomString());
 				const [assignedUser1, assignedUser2, noPermUser1, ...users] = assignedUsers;
 				const assignedRole = generateRandomString();
-				roles.push({ _id: assignedRole, users: [noPermUser1, ...users] });
+				roles.push({ id: assignedRole, users: [noPermUser1, ...users] });
 				const ticketOwner = generateRandomString();
 				usersWithPermissions.push(assignedUser1, ...users);
 
@@ -152,13 +152,13 @@ const testOnNewTickets = (multipleTickets = false) => {
 				return ticket;
 			});
 
-			RolesModels.getRolesToUsers.mockResolvedValueOnce(roles);
+			RolesProcessor.getRoles.mockResolvedValueOnce(roles);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce(usersWithPermissions);
 
 			await eventCallbacks[eventToTrigger](createEventData(multipleTickets ? ticketData : ticketData[0]));
 
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, project, model, false);
@@ -178,7 +178,7 @@ const testOnNewTickets = (multipleTickets = false) => {
 				const assignedUsers = times(5, () => generateRandomString());
 				const [assignedUser1, assignedUser2, noPermUser1, ...users] = assignedUsers;
 				const assignedRole = generateRandomString();
-				roles.push({ _id: assignedRole, users: [assignedUser1, noPermUser1, ...users] });
+				roles.push({ id: assignedRole, users: [assignedUser1, noPermUser1, ...users] });
 				const ticketOwner = generateRandomString();
 				usersWithPermissions.push(assignedUser1, ...users);
 
@@ -193,13 +193,13 @@ const testOnNewTickets = (multipleTickets = false) => {
 				return ticket;
 			});
 
-			RolesModels.getRolesToUsers.mockResolvedValueOnce(roles);
+			RolesProcessor.getRoles.mockResolvedValueOnce(roles);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce(usersWithPermissions);
 
 			await eventCallbacks[eventToTrigger](createEventData(multipleTickets ? ticketData : ticketData[0]));
 
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, project, model, false);
@@ -247,13 +247,13 @@ const testOnUpdatedTicket = () => {
 			const owner = generateRandomString();
 
 			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(owner, []));
-			RolesModels.getRolesToUsers.mockResolvedValueOnce([{ _id: role, users: [generateRandomString()] }]);
+			RolesProcessor.getRoles.mockResolvedValueOnce([{ id: role, users: [generateRandomString()] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([owner]);
 
 			await eventCallbacks[events.UPDATE_TICKET](createEventData(owner));
 
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, project, model, false);
@@ -268,15 +268,15 @@ const testOnUpdatedTicket = () => {
 
 			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(owner,
 				[assigned1, assignedNoPerm, role]));
-			RolesModels.getRolesToUsers.mockResolvedValueOnce(
-				[{ _id: role, users: [assignedRoleNoPerm, ...roleMembers] }]);
+			RolesProcessor.getRoles.mockResolvedValueOnce(
+				[{ id: role, users: [assignedRoleNoPerm, ...roleMembers] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([owner, assigned1, ...roleMembers]);
 
 			const eventData = createEventData();
 			await eventCallbacks[events.UPDATE_TICKET](eventData);
 
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace, project, model, false);
@@ -304,7 +304,7 @@ const testOnUpdatedTicket = () => {
 
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author,
 					[...oldAssignees, ...newAssignees]));
-				RolesModels.getRolesToUsers.mockResolvedValueOnce([]);
+				RolesProcessor.getRoles.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...oldAssignees,
 					...newAssignees, removed1, removed2]);
 
@@ -320,8 +320,8 @@ const testOnUpdatedTicket = () => {
 				const eventData = createEventData(author, changes);
 				await eventCallbacks[events.UPDATE_TICKET](eventData);
 
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
@@ -355,7 +355,7 @@ const testOnUpdatedTicket = () => {
 
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author,
 					undefined));
-				RolesModels.getRolesToUsers.mockResolvedValueOnce([]);
+				RolesProcessor.getRoles.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...oldAssignees]);
 
 				const changes = {
@@ -370,8 +370,8 @@ const testOnUpdatedTicket = () => {
 				const eventData = createEventData(author, changes);
 				await eventCallbacks[events.UPDATE_TICKET](eventData);
 
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
@@ -396,7 +396,7 @@ const testOnUpdatedTicket = () => {
 					10, () => generateRandomString());
 
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, oldAssignees));
-				RolesModels.getRolesToUsers.mockResolvedValueOnce([]);
+				RolesProcessor.getRoles.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([
 					author, removed1, removed2, ...oldAssignees]);
 
@@ -412,8 +412,8 @@ const testOnUpdatedTicket = () => {
 				const eventData = createEventData(author, changes);
 				await eventCallbacks[events.UPDATE_TICKET](eventData);
 
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
@@ -437,7 +437,7 @@ const testOnUpdatedTicket = () => {
 				const newAssignees = times(3, () => generateRandomString());
 
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, ...newAssignees));
-				RolesModels.getRolesToUsers.mockResolvedValueOnce([]);
+				RolesProcessor.getRoles.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...newAssignees]);
 
 				const changes = {
@@ -452,8 +452,8 @@ const testOnUpdatedTicket = () => {
 				const eventData = createEventData(author, changes);
 				await eventCallbacks[events.UPDATE_TICKET](eventData);
 
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
@@ -477,7 +477,7 @@ const testOnUpdatedTicket = () => {
 
 			test('Should generate ticket closed notifications if the ticket is resolved', async () => {
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, assignees, template));
-				RolesModels.getRolesToUsers.mockResolvedValueOnce([]);
+				RolesProcessor.getRoles.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...assignees]);
 
 				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
@@ -496,8 +496,8 @@ const testOnUpdatedTicket = () => {
 				const eventData = createEventData(author, changes);
 				await eventCallbacks[events.UPDATE_TICKET](eventData);
 
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
@@ -520,7 +520,7 @@ const testOnUpdatedTicket = () => {
 
 			test('Should generate update notifications if the ticket is not resolved', async () => {
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, assignees, template));
-				RolesModels.getRolesToUsers.mockResolvedValueOnce([]);
+				RolesProcessor.getRoles.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...assignees]);
 
 				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
@@ -539,8 +539,8 @@ const testOnUpdatedTicket = () => {
 				const eventData = createEventData(author, changes);
 				await eventCallbacks[events.UPDATE_TICKET](eventData);
 
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
@@ -565,7 +565,7 @@ const testOnUpdatedTicket = () => {
 
 			test('Should generate update notifications if the ticket status is removed', async () => {
 				TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author, assignees, template));
-				RolesModels.getRolesToUsers.mockResolvedValueOnce([]);
+				RolesProcessor.getRoles.mockResolvedValueOnce([]);
 				SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([author, ...assignees]);
 
 				TicketTemplatesModel.getTemplateById.mockResolvedValueOnce({});
@@ -582,8 +582,8 @@ const testOnUpdatedTicket = () => {
 				const eventData = createEventData(author, changes);
 				await eventCallbacks[events.UPDATE_TICKET](eventData);
 
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-				expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+				expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 				expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
@@ -644,7 +644,7 @@ const testOnNewTicketComment = () => {
 
 			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author,
 				[role, assigneeNoPerm, commenter, ...assignees], template));
-			RolesModels.getRolesToUsers.mockResolvedValueOnce([{ _id: role, users: [roleMemNoPerm, ...roleMembers] }]);
+			RolesProcessor.getRoles.mockResolvedValueOnce([{ id: role, users: [roleMemNoPerm, ...roleMembers] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([
 				author, commenter, ...roleMembers, ...assignees]);
 
@@ -660,8 +660,8 @@ const testOnNewTicketComment = () => {
 			const eventData = createEventData(author, comment);
 			await eventCallbacks[events.NEW_COMMENT](eventData);
 
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,
@@ -686,7 +686,7 @@ const testOnNewTicketComment = () => {
 
 			TicketsModel.getTicketById.mockResolvedValueOnce(generateTicketInfo(author,
 				[], template));
-			RolesModels.getRolesToUsers.mockResolvedValueOnce([{ _id: role, users: [roleMemNoPerm, ...roleMembers] }]);
+			RolesProcessor.getRoles.mockResolvedValueOnce([{ id: role, users: [roleMemNoPerm, ...roleMembers] }]);
 			SettingsProcessor.getUsersWithPermissions.mockResolvedValueOnce([
 				author, commenter, ...roleMembers]);
 
@@ -702,8 +702,8 @@ const testOnNewTicketComment = () => {
 			const eventData = createEventData(author, comment);
 			await eventCallbacks[events.NEW_COMMENT](eventData);
 
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledTimes(1);
-			expect(RolesModels.getRolesToUsers).toHaveBeenCalledWith(teamspace);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledTimes(1);
+			expect(RolesProcessor.getRoles).toHaveBeenCalledWith(teamspace);
 
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledTimes(1);
 			expect(SettingsProcessor.getUsersWithPermissions).toHaveBeenCalledWith(teamspace,

@@ -27,7 +27,7 @@ jest.mock('../../../../src/v5/processors/teamspaces');
 const TeamspaceProcessor = require(`${src}/processors/teamspaces`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
 const testGetQuotaInfo = () => {
 	const tsWithExpiredQuota = 'expiredQuota';
@@ -250,7 +250,7 @@ const testGetCollaboratorsAssigned = () => {
 	});
 };
 
-describe('utils/quota', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetQuotaInfo();
 	testGetSpaceUsed();
 	testSufficientQuota();

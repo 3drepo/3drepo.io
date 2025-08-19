@@ -531,8 +531,8 @@ const insertTicketsTestHelper = (isImport) => {
 
 	const tickets = times(isImport ? 10 : 1, () => {
 		const ticket = generateTicket(template);
-		ticket.properties[oneOfProp] = generateUUID();
-		ticket.properties[manyOfProp] = times(5, () => generateUUID());
+		ticket.properties[oneOfProp] = generateRandomString();
+		ticket.properties[manyOfProp] = times(5, () => generateRandomString());
 		return ticket;
 	});
 
@@ -544,8 +544,8 @@ const insertTicketsTestHelper = (isImport) => {
 
 		const expectedOutput = tickets.map((ticketData) => {
 			const formattedData = { ...ticketData, _id: generateRandomString() };
-			formattedData.properties[oneOfProp] = stringToUUID(ticketData.properties[oneOfProp]);
-			formattedData.properties[manyOfProp] = ticketData.properties[manyOfProp].map(stringToUUID);
+			formattedData.properties[oneOfProp] = ticketData.properties[oneOfProp];
+			formattedData.properties[manyOfProp] = ticketData.properties[manyOfProp];
 			return formattedData;
 		});
 
