@@ -16,7 +16,7 @@
  */
 
 import { DEFAULT_ISSUES_FILTERS } from '@/v4/constants/issues';
-import { cloneDeep, isEmpty, keyBy } from 'lodash';
+import { cloneDeep, get, isEmpty, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
@@ -261,7 +261,12 @@ const removeResourceSuccess =  (state = INITIAL_STATE, { resource, issueId }) =>
 };
 
 const attachResourcesSuccess = (state = INITIAL_STATE, { resources, issueId }) => {
-	resources = resources.concat(state.issuesMap[issueId].resources || []);
+	const issue: any = get(state.issuesMap, issueId);
+	if (!issue) {
+		return state;
+	}
+
+	resources = resources.concat(issue.resources || []);
 	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
 	return { ...state, issuesMap};
 };
