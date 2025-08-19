@@ -17,13 +17,14 @@
 
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
-const { src } = require('../../helper/path');
+const { src, imagesFolder, image } = require('../../helper/path');
+const fs = require('fs/promises');
+const path = require('path');
+
+const { logger } = require(`${src}/utils/logger`);
 
 const Users = require(`${src}/processors/users`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-
-jest.mock('../../../../src/v5/handler/fs');
-const FSHandlerMock = require(`${src}/handler/fs`);
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -193,25 +194,48 @@ const testGetAvatarStream = () => {
 	});
 };
 
+const fileExists = (file) => fs.access(file).then(() => true).catch(() => false);
+
 const testUploadAvatar = () => {
+	const tempAvatar = path.join(imagesFolder, 'toRemove.png');
 	describe('Remove old avatar and upload a new one', () => {
-		test('should upload new avatar', async () => {
+		const avatarObject = {
+			path: tempAvatar,
+		};
+		test('should upload new avatar and remove the temporary file', async () => {
 			const username = generateRandomString();
 			const userId = generateRandomString();
 			const tenantId = generateRandomString();
+			await fs.copyFile(image, tempAvatar);
+
 			UsersModel.getUserId.mockResolvedValueOnce(userId);
 			FronteggService.uploadAvatar.mockResolvedValueOnce(undefined);
 			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
-			jest.spyOn(FSHandlerMock, 'removeFiles').mockImplementationOnce(() => {});
-			const avatarObject = {
-				path: 'avatar.png',
-				buffer: generateRandomString(),
-			};
+
 			await expect(Users.uploadAvatar(username, avatarObject)).resolves.toEqual(undefined);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
 				userId, avatarObject.path,
 			);
+			await expect(fileExists(tempAvatar)).resolves.toBe(false);
+		});
+		test('should fail removing the temporary avatar file', async () => {
+			const username = generateRandomString();
+			const userId = generateRandomString();
+			const tenantId = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.uploadAvatar.mockResolvedValueOnce(undefined);
+			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
+
+			jest.spyOn(logger, 'logError');
+
+			await expect(Users.uploadAvatar(username, avatarObject)).resolves.toEqual(undefined);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
+				userId, avatarObject.path,
+			);
+			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
 	});
 };

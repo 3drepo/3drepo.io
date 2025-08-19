@@ -135,13 +135,10 @@ Users.getAvatar = async (username) => {
 };
 
 Users.uploadAvatar = async (username, avatarObject) => {
-	try {
-		await uploadAvatar(await getUserId(username), avatarObject.path);
-	} finally {
-		fs.rm(avatarObject.path).catch((err) => {
+	await uploadAvatar(await getUserId(username), avatarObject.path)
+		.finally(() => fs.rm(avatarObject.path).catch((err) => {
 			logger.logError(`Failed to remove temporary avatar file: ${err.message}`);
-		});
-	}
+		}));
 };
 
 Users.generateApiKey = generateApiKey;
