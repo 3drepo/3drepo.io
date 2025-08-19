@@ -19,9 +19,12 @@ const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
-	removeUser, updatePassword, updateProfile } = require('../models/users');
-const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
+	getUserId, removeUser, updatePassword, updateProfile } = require('../models/users');
+const { fileExists, removeFile } = require('../services/filesManager');
+const { getUserAvatarBuffer, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
+const fs = require('fs/promises');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
 const { logger } = require('../utils/logger');
@@ -29,7 +32,6 @@ const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
 const { templates } = require('../utils/responseCodes');
-const { triggerPasswordReset } = require('../services/sso/frontegg');
 
 // This is used for the situation where a user has a record from
 // the IDP but we don't have a matching record in the db. We need
@@ -96,6 +98,9 @@ Users.getProfileByUsername = async (username) => {
 };
 
 Users.updateProfile = async (username, fieldsToUpdate) => {
+	const userId = await getUserId(username);
+
+	await updateUserDetails(userId, fieldsToUpdate);
 	await updateProfile(username, fieldsToUpdate);
 };
 
@@ -112,15 +117,35 @@ Users.resetPassword = async (user) => {
 	}
 };
 
+Users.getAvatar = async (username) => {
+	try {
+		const userId = await getUserId(username);
+		const avatarBuffer = await getUserAvatarBuffer(userId);
+		const fileExt = await fileExtensionFromBuffer(avatarBuffer);
+
+		return {
+			buffer: avatarBuffer,
+			extension: fileExt || 'png',
+		};
+	} catch (error) {
+		logger.logError(`Failed to fetch avatar from URL: ${error.message}`);
+
+		throw templates.unknown;
+	}
+};
+
+Users.uploadAvatar = async (username, avatarObject) => {
+	await uploadAvatar(await getUserId(username), avatarObject.path)
+		.finally(() => fs.rm(avatarObject.path).catch((err) => {
+			logger.logError(`Failed to remove temporary avatar file: ${err.message}`);
+		}));
+};
+
 Users.generateApiKey = generateApiKey;
 
 Users.deleteApiKey = deleteApiKey;
 
 Users.getUserByUsername = getUserByUsername;
-
-Users.getAvatar = (username) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
-
-Users.uploadAvatar = (username, avatarBuffer) => storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
 
 Users.updatePassword = updatePassword;
 
