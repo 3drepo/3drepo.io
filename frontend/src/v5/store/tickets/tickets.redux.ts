@@ -20,7 +20,7 @@ import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '../../helpers/actions.helper';
 import { ModelId, TeamspaceId, TeamspaceProjectAndModel } from '../store.types';
-import { ITemplate, ITicket, NewTicket, Group, CancellableWatch } from './tickets.types';
+import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
 import { mergeWithArray } from '../store.helpers';
 import { DEFAULT_TICKETS_SORTING, TicketsSorting, TicketsSortingOrder, TicketsSortingProperty } from './card/ticketsCard.types';
 import EventEmitter from 'eventemitter3';
