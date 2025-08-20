@@ -112,7 +112,7 @@ const groupByDueDate = (tickets: ITicket[]) => {
 		let value = dateValue;
 
 		if (dateValue && dateValue > startOfTheWeek) {
-			// If there is no end of the week < than the date means that is pass 6 weeks;
+			// If there is no end of the week < than the date, it means that is due pass 6 weeks;
 			name = DUE_DATE_LABELS[DUE_DATE_LABELS.length-1]; 
 			for (let i = 0 ; i < 5 ; i++ ) {
 				if (dateValue < endOfWeeks[i]) {

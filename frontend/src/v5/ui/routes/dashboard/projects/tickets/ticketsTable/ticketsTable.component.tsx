@@ -165,9 +165,7 @@ export const TicketsTable = ({isNewTicketDirty, setTicketValue}: TicketsTablePro
 	}, [template]);
 
 	useEffect(() => {
-		visibleSortedColumnsNames.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
-		let columnsToFetch = [...visibleSortedColumnsNames];
-		columnsToFetch
+		visibleSortedColumnsNames
 			.filter((name) => !INITIAL_COLUMNS.includes(name))
 			.forEach((name) => fetchColumn(name, ticketsFilteredByTemplate));
 	}, [ticketsFilteredByTemplate.length, visibleSortedColumnsNames.join('')]);

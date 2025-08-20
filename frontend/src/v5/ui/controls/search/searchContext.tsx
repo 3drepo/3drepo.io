@@ -42,9 +42,8 @@ export interface SearchContextProps<T> {
 export const SearchContextComponent = ({ items, children, fieldsToFilter, filteringFunction }: SearchContextProps<any>) => {
 	const [query, setQuery] = useState('');
 	const [refreshFlag, setRefreshFlag] = useState(false);
-	const [contextValue, setContextValue] = useState<SearchContextType<any>>({ items, filteredItems: items, query, setQuery });
-
 	const refresh = useCallback(() => setRefreshFlag(!refreshFlag), [refreshFlag]);
+	const [contextValue, setContextValue] = useState<SearchContextType<any>>({ items, filteredItems: items, query, setQuery, refresh });
 
 	useEffect(() => {
 		let filteredItems = items;

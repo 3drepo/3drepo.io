@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, cancel, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
@@ -35,6 +35,8 @@ import {
 	UpdateTicketGroupAction,
 	FetchTicketsPropertiesAction,
 	FetchTicketGroupsAndGoToView,
+	WatchPropertyUpdatesAction,
+	SetPropertiesFetchedAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
@@ -47,6 +49,7 @@ import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSele
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import EventEmitter from 'eventemitter3';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -317,10 +320,27 @@ export function* fetchTicketGroupsAndGoToView({ teamspace, projectId, modelId, t
 		}));
 	}
 }
+
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket, revision }: UpsertTicketAndFetchGroupsAction) {
 	addUpdatedAtTime(ticket);
 	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision));
+}
+
+function * watchFetchTicketProperties(propertyName,  watch: EventEmitter) {
+	while(true) {
+		const action:SetPropertiesFetchedAction = yield take(TicketsTypes.SET_PROPERTIES_FETCHED);
+
+		if (action.properties.includes(propertyName)) {
+			watch.emit('update');
+		}
+	}
+}
+
+export function* watchPropertyUpdates({propertyName, watch }: WatchPropertyUpdatesAction) {
+	const watchFetchTask = yield fork(watchFetchTicketProperties, propertyName, watch);
+	yield new Promise((accept) => watch.once('end', accept));
+	yield cancel(watchFetchTask);
 }
 
 export default function* ticketsSaga() {
@@ -336,4 +356,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
 	yield takeEvery(TicketsTypes.FETCH_TICKETS_PROPERTIES, fetchTicketsProperties);
+	yield takeEvery(TicketsTypes.WATCH_PROPERTY_UPDATES, watchPropertyUpdates);
 }
