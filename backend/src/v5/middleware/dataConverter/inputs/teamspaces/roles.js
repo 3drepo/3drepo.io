@@ -76,6 +76,7 @@ const validateRole = async (req, res, next) => {
 
 		req.body = await schema.validate(req.body);
 
+		// yup transform isn't being called for some reason, doing it manually here.
 		req.body.users = req.body.users ? uniqueElements(req.body.users) : req.body.users;
 
 		await next();
