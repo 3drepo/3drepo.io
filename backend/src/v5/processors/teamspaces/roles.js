@@ -95,10 +95,7 @@ const getUserIdMapping = async (teamspaceId) => {
 
 	const usersMatchedEmails = await getUsersByQuery({ 'customData.email': { $in: emails } }, { user: 1, 'customData.email': 1 });
 	usersMatchedEmails.forEach(({ user, customData: { email } }) => {
-		const id = emailToUserId[email];
-		if (id) {
-			usernameToUserId[user] = id;
-		}
+		usernameToUserId[user] = emailToUserId[email];
 	});
 	return usernameToUserId;
 };

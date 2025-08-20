@@ -51,7 +51,6 @@ const validateRole = async (req, res, next) => {
 					}
 				}),
 			users: Yup.array().of(types.strings.title)
-				.transform((v) => uniqueElements(v))
 				.test('check-users-teamspace-access', async (values, context) => {
 					if (values?.length) {
 						// test runs before transform
@@ -74,7 +73,10 @@ const validateRole = async (req, res, next) => {
 				(value) => Object.keys(value).length,
 			);
 		}
+
 		req.body = await schema.validate(req.body);
+
+		req.body.users = req.body.users ? uniqueElements(req.body.users) : req.body.users;
 
 		await next();
 	} catch (err) {

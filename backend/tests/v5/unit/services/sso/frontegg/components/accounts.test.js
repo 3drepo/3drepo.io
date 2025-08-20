@@ -922,6 +922,20 @@ const testUpdateGroup = () => {
 			expect(WebRequests.patch.mock.calls[0][0]).toContain(groupId);
 		});
 
+		test('Should do nothing if there\'s nothing to update', async () => {
+			const teamspace = generateRandomString();
+			const groupId = generateRandomString();
+
+			const groupData = { };
+
+			await Accounts.updateGroup(teamspace, groupId, groupData);
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.patch).not.toHaveBeenCalled();
+		});
+
 		test('Should throw error if error occured', async () => {
 			const teamspace = generateRandomString();
 			const groupId = generateRandomString();

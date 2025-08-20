@@ -34,8 +34,8 @@ const FS = require('fs');
 jest.mock('../../../../../src/v5/schemas/tickets/templates');
 const TemplateSchema = require(`${src}/schemas/tickets/templates`);
 
-jest.mock('../../../../../src/v5/models/roles');
-const RolesModel = require(`${src}/models/roles`);
+jest.mock('../../../../../src/v5/processors/teamspaces/roles');
+const RolesProcessor = require(`${src}/processors/teamspaces/roles`);
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/settings');
 const ModelSettingsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/settings`);
@@ -288,7 +288,7 @@ const testPresetValues = () => {
 
 			const roles = times(5, () => generateRandomString());
 			const users = times(5, () => generateRandomString());
-			RolesModel.getRolesByUsers.mockResolvedValue(roles);
+			RolesProcessor.getRolesByUsers.mockResolvedValue(roles);
 			ModelSettingsProcessor.getUsersWithPermissions.mockResolvedValue(users);
 
 			const testCases = [

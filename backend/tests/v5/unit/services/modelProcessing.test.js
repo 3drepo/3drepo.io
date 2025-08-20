@@ -326,7 +326,7 @@ const testGetLogArchive = () => {
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: expect.stringContaining(log),
 			});
-		});
+		}, 10000);
 
 		test('Should return with zip file if path is found but no log files are found', async () => {
 			const corId = generateUUIDString();

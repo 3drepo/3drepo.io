@@ -393,7 +393,7 @@ const testCreateRoles = () => {
 				return deleteIfUndefined({
 					name,
 					color: generateRandomString(),
-					users: i === 0 ? [user1.username, user2.username] : undefined,
+					users: i === 0 ? [user1.username, user2.username, generateRandomString()] : undefined,
 				});
 			});
 
@@ -476,7 +476,9 @@ const testUpdateRole = () => {
 		}));
 
 		describe.each([
-			['Add role users', [user1.username, user2.username], [], [user1.id, user2.id]],
+			['Add role users', [user1.username, user2.username], undefined, [user1.id, user2.id]],
+			['Users trying to add are already in the role', [user1.username, user2.username], [{ id: user1.id }, { id: user2.id }]],
+			['Could not map user to an ID', [generateRandomString()]],
 			['Remove role users', [], [{ id: user1.id }, { id: user2.id }], undefined, [user1.id, user2.id]],
 			['Both add/remove', [user1.username], [{ id: user2.id }], [user1.id], [user2.id]],
 			['Add role users and update role data', [user1.username, user2.username], [], [user1.id, user2.id], undefined, true],

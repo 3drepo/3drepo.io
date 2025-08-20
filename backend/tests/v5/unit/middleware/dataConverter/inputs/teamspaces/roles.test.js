@@ -70,22 +70,26 @@ const testRoleExists = () => {
 const commonTestCases = (data, takenName, userWithAccess) => ([
 	['With valid data', data, true],
 	['With name that is already taken', { ...data, name: takenName }],
+	['Errored when trying to figure out if a name is taken', data, false, undefined, true],
 	['With invalid users', { ...data, users: 123 }],
-	['With duplicate users', { ...data, users: [userWithAccess, userWithAccess] }, true],
+	['!With duplicate users', { ...data, users: [userWithAccess, userWithAccess] }, true],
 	['With users that have no access to teamspace', data, false, true],
 	['Without users', { ...data, users: undefined }, true],
 	['With invalid color', { ...data, color: generateRandomString() }],
 	['Without color', { ...data, color: undefined }, true],
 ]);
 
-const runValidateRoleDataTest = (isUpdate, takenName, existingRole) => (desc, body, success, userWithNoAccess) => {
+const runValidateRoleDataTest = (isUpdate, takenName, existingRole) => (
+	desc, body, success, userWithNoAccess, isRoleNameUsedErrors) => {
 	test(`${desc} should ${success ? 'succeed and next() should be called' : `fail with ${templates.invalidArguments.code}`}`, async () => {
 		const mockCB = jest.fn(() => {});
 		const req = { params: { teamspace: generateRandomString() }, body };
 
 		if (isUpdate) RolesProcessor.getRoleById.mockResolvedValueOnce(existingRole);
 
-		if (body.name === takenName) {
+		if (isRoleNameUsedErrors) {
+			RolesProcessor.isRoleNameUsed.mockRejectedValueOnce(new Error(generateRandomString()));
+		} else if (body.name === takenName) {
 			RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(true);
 		} else if (body.name) {
 			RolesProcessor.isRoleNameUsed.mockResolvedValueOnce(false);
@@ -99,6 +103,7 @@ const runValidateRoleDataTest = (isUpdate, takenName, existingRole) => (desc, bo
 		const fn = isUpdate ? Roles.validateUpdateRole : Roles.validateNewRole;
 
 		await fn(req, {}, mockCB);
+
 		if (success) {
 			expect(mockCB).toHaveBeenCalledTimes(1);
 		} else {

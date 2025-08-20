@@ -282,7 +282,7 @@ Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove, removePermiss
 	]);
 };
 
-Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck = false) => {
+Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck) => {
 	try {
 		const [accountId, userId] = await Promise.all([
 			getTeamspaceRefId(teamspace),
