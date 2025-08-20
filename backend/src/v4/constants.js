@@ -258,9 +258,6 @@
 	define("PERM_REVOKE_LICENCE","revoke_licence");
 	define("PERM_TEAMSPACE_ADMIN","teamspace_admin"); // have total control for projects and models under its teamspace
 	define("PERM_CREATE_PROJECT", "create_project");
-	define("PERM_CREATE_JOB","create_job");
-	define("PERM_DELETE_JOB","delete_job");
-	define("PERM_ASSIGN_JOB","assign_job");
 	define("PERM_VIEW_PROJECTS", "view_projects"),
 
 	// project level permission
@@ -298,9 +295,6 @@
 		module.exports.PERM_REVOKE_LICENCE,
 		module.exports.PERM_TEAMSPACE_ADMIN,
 		module.exports.PERM_CREATE_PROJECT,
-		module.exports.PERM_CREATE_JOB,
-		module.exports.PERM_DELETE_JOB,
-		module.exports.PERM_ASSIGN_JOB,
 		module.exports.PERM_VIEW_PROJECTS
 	]);
 
@@ -621,21 +615,6 @@
 		"model": data => `/viewer/${data.model}`,
 		"signup": () => "/sign-up"
 	});
-
-	define("DEFAULT_OWNER_JOB",  "Admin");
-
-	define("DEFAULT_JOBS",[
-		{ _id: "Admin", "color": "#f7f7b2" },
-		{ _id: "Client", "color": "#a6cee3" },
-		{ _id: "Architect", "color": "#213f99"},
-		{ _id: "Structural Engineer", "color" : "#33a02c"},
-		{ _id: "MEP Engineer", "color": "#fb9a99"},
-		{ _id: "Project Manager", "color": "#e31a1c"},
-		{ _id: "Quantity Surveyor", "color": "#ff7f00"},
-		{ _id: "Asset Manager", "color" : "#ffff99"},
-		{ _id: "Main Contractor", "color": "#b15928"},
-		{ _id: "Supplier", "color": "#6a3d9a"}
-	]);
 
 	define("ACCEPTED_IMAGE_FORMATS",  ["png", "jpg", "jpeg", "gif"]);
 

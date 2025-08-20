@@ -58,6 +58,28 @@ const testColorArr = () => {
 	});
 };
 
+const testRGBColor = () => {
+	describe.each([
+		['1', false],
+		[0, false],
+		[true, false],
+		[[], false],
+		['#000000', true],
+		['#FFFFFF', true],
+		['#FF5733', true],
+		['#123456', true],
+		['#ABCDEF', true],
+		['#ABCDEFAA', false],
+		['#ZZZZZZ', false],
+		['#12345G', false],
+		['#1234567', false],
+	])('RGB Colour validator', (data, res) => {
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.rgbColor.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
 const testUsername = () => {
 	describe.each([
 		['1', false],
@@ -180,4 +202,5 @@ describe('utils/helper/yup', () => {
 	testEmbeddedImage();
 	testEmbeddedImageOrRef();
 	testDateInThePast();
+	testRGBColor();
 });

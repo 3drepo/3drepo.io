@@ -31,6 +31,12 @@ Users.getUserById = async (userId) => {
 	}
 };
 
+Users.getAccountsByUser = async (userId) => {
+	const { tenantIds } = await Users.getUserById(userId);
+
+	return tenantIds;
+};
+
 Users.doesUserExist = async (email) => {
 	try {
 		const config = await getConfig();

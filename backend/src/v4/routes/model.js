@@ -675,23 +675,23 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
  *       },
  *       permissions: [
  *          {
- *             user: "viewerTeamspace1Model1JobA",
+ *             user: "viewerTeamspace1Model1RoleA",
  *             permission: "viewer"
  *          },
  *          {
- *             user: "commenterTeamspace1Model1JobA",
+ *             user: "commenterTeamspace1Model1RoleA",
  *             permission: "commenter"
  *          },
  *          {
- *             user: "collaboratorTeamspace1Model1JobA",
+ *             user: "collaboratorTeamspace1Model1RoleA",
  *             permission: "collaborator"
  *          },
  *          {
- *             user: "commenterTeamspace1Model1JobB",
+ *             user: "commenterTeamspace1Model1RoleB",
  *             permission: "commenter"
  *          },
  *          {
- *             user: "collaboratorTeamspace1Model1JobB",
+ *             user: "collaboratorTeamspace1Model1RoleB",
  *             permission: "collaborator"
  *          }
  *       ],
@@ -836,11 +836,11 @@ router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel,
  *       name: "Lego Tree",
  *       permissions: [
  *          {
- *             user: "collaboratorTeamspace1Model1JobA",
+ *             user: "collaboratorTeamspace1Model1RoleA",
  *             permission: "collaborator"
  *          },
  *          {
- *             user: "commenterTeamspace1Model1JobA",
+ *             user: "commenterTeamspace1Model1RoleA",
  *             permission: "commenter"
  *          },
  *          {
@@ -853,25 +853,25 @@ router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel,
  *             user: "teamSpace1"
  *          },
  *          {
- *             user: "unassignedTeamspace1UserJobA"
+ *             user: "unassignedTeamspace1UserRoleA"
  *          },
  *          {
- *             user: "viewerTeamspace1Model1JobA"
+ *             user: "viewerTeamspace1Model1RoleA"
  *          },
  *          {
- *             user: "viewerTeamspace1Model1JobB"
+ *             user: "viewerTeamspace1Model1RoleB"
  *          },
  *          {
- *             user: "commenterTeamspace1Model1JobB"
+ *             user: "commenterTeamspace1Model1RoleB"
  *          },
  *          {
- *             user: "collaboratorTeamspace1Model1JobB"
+ *             user: "collaboratorTeamspace1Model1RoleB"
  *          },
  *          {
- *             user: "adminTeamspace1JobA"
+ *             user: "adminTeamspace1RoleA"
  *          },
  *          {
- *             user: "adminTeamspace1JobB"
+ *             user: "adminTeamspace1RoleB"
  *          },
  *          {
  *             user: "weirdTeamspace"
@@ -886,23 +886,23 @@ router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel,
  *       name: "Full Logo ",
  *       permissions: [
  *          {
- *             user: "viewerTeamspace1Model1JobA",
+ *             user: "viewerTeamspace1Model1RoleA",
  *             permission: "viewer"
  *          },
  *          {
- *             user: "commenterTeamspace1Model1JobA",
+ *             user: "commenterTeamspace1Model1RoleA",
  *             permission: "viewer"
  *          },
  *          {
- *             user: "collaboratorTeamspace1Model1JobA",
+ *             user: "collaboratorTeamspace1Model1RoleA",
  *             permission: "commenter"
  *          },
  *          {
- *             user: "commenterTeamspace1Model1JobB",
+ *             user: "commenterTeamspace1Model1RoleB",
  *             permission: "commenter"
  *          },
  *          {
- *             user: "collaboratorTeamspace1Model1JobB",
+ *             user: "collaboratorTeamspace1Model1RoleB",
  *             permission: "collaborator"
  *          },
  *          {
@@ -916,16 +916,16 @@ router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel,
  *             user: "teamSpace1"
  *          },
  *          {
- *             user: "unassignedTeamspace1UserJobA"
+ *             user: "unassignedTeamspace1UserRoleA"
  *          },
  *          {
- *             user: "viewerTeamspace1Model1JobB"
+ *             user: "viewerTeamspace1Model1RoleB"
  *          },
  *          {
- *             user: "adminTeamspace1JobA"
+ *             user: "adminTeamspace1RoleA"
  *          },
  *          {
- *             user: "adminTeamspace1JobB"
+ *             user: "adminTeamspace1RoleB"
  *          },
  *          {
  *             user: "weirdTeamspace"
@@ -964,23 +964,23 @@ router.get("/models/permissions", middlewares.hasEditPermissionsAccessToMulitple
  * @apiSuccessExample {json} Success:
  * [
  *    {
- *       user: "viewerTeamspace1Model1JobA",
+ *       user: "viewerTeamspace1Model1RoleA",
  *       permission: "viewer"
  *    },
  *    {
- *       user: "commenterTeamspace1Model1JobA",
+ *       user: "commenterTeamspace1Model1RoleA",
  *       permission: "viewer"
  *    },
  *    {
- *       user: "collaboratorTeamspace1Model1JobA",
+ *       user: "collaboratorTeamspace1Model1RoleA",
  *       permission: "commenter"
  *    },
  *    {
- *       user: "commenterTeamspace1Model1JobB",
+ *       user: "commenterTeamspace1Model1RoleB",
  *       permission: "commenter"
  *    },
  *    {
- *       user: "collaboratorTeamspace1Model1JobB",
+ *       user: "collaboratorTeamspace1Model1RoleB",
  *       permission: "collaborator"
  *    },
  *    {
@@ -994,16 +994,16 @@ router.get("/models/permissions", middlewares.hasEditPermissionsAccessToMulitple
  *       user: "teamSpace1"
  *    },
  *    {
- *       user: "unassignedTeamspace1UserJobA"
+ *       user: "unassignedTeamspace1UserRoleA"
  *    },
  *    {
- *       user: "viewerTeamspace1Model1JobB"
+ *       user: "viewerTeamspace1Model1RoleB"
  *    },
  *    {
- *       user: "adminTeamspace1JobA"
+ *       user: "adminTeamspace1RoleA"
  *    },
  *    {
- *       user: "adminTeamspace1JobB"
+ *       user: "adminTeamspace1RoleB"
  *    },
  *    {
  *       user: "weirdTeamspace"

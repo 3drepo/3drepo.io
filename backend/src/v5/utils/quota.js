@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { createResponseCode, templates } = require('./responseCodes');
-const { getAllUsersInTeamspace, getSubscriptions } = require('../models/teamspaceSettings');
 const DBHandler = require('../handler/db');
 const config = require('./config');
+const { getAllMembersInTeamspace } = require('../processors/teamspaces');
 const { getInvitationsByTeamspace } = require('../models/invitations');
+const { getSubscriptions } = require('../models/teamspaceSettings');
 const { getTotalSize } = require('../models/fileRefs');
 
 const Quota = {};
@@ -79,7 +80,7 @@ Quota.getSpaceUsed = async (teamspace) => {
 
 Quota.getCollaboratorsAssigned = async (teamspace) => {
 	const [teamspaceUsers, teamspaceInvitations] = await Promise.all([
-		getAllUsersInTeamspace(teamspace),
+		getAllMembersInTeamspace(teamspace),
 		getInvitationsByTeamspace(teamspace, { _id: 1 }),
 	]);
 

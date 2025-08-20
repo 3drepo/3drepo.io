@@ -26,6 +26,7 @@ config.coveragePathIgnorePatterns = [
 	'users.constants.js',
 ];
 
+config.roots = ["./tests/v5/unit"]
 config.testMatch = ['**/tests/**/unit/**/*.test.[jt]s?(x)'];
 
 module.exports = config;
