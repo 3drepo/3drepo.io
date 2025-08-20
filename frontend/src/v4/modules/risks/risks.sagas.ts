@@ -367,10 +367,34 @@ const onCreateEvent = (createdRisk) => {
 	dispatch(RisksActions.saveRiskSuccess(createdRisk[0], false));
 };
 
+const onResourcesCreated = (resources) => {
+	resources = resources.filter((r) => r.issueIds );
+	if (!resources.length) {
+		return;
+	}
+	const currentState = getState();
+	const teamspace = selectCurrentModelTeamspace(currentState);
+	const model = selectCurrentModel(currentState);
+	const issueId =  resources[0].issueIds[0]; // The resource chat event is the same for issues and risks, therefore they both use 'issueId'
+	dispatch(RisksActions.attachResourcesSuccess(prepareResources(teamspace, model, resources), issueId));
+};
+
+const onResourceDeleted = (resource) => {
+	if (!resource.issueIds) {
+		return;
+	}
+
+	dispatch(RisksActions.removeResourceSuccess(resource, resource.issueIds[0]));
+};
+
 function* subscribeOnRiskChanges({ teamspace, modelId }) {
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, {
 		subscribeToUpdated: onUpdateEvent,
 		subscribeToCreated: onCreateEvent
+	}));
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+		subscribeToCreated: onResourcesCreated,
+		subscribeToDeleted: onResourceDeleted
 	}));
 }
 
@@ -378,6 +402,10 @@ function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, {
 		unsubscribeFromUpdated: onUpdateEvent,
 		unsubscribeFromCreated: onCreateEvent
+	}));
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+		unsubscribeFromCreated: onResourcesCreated,
+		unsubscribeFromDeleted: onResourceDeleted
 	}));
 }
 
