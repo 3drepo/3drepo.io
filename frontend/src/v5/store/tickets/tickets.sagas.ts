@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, cancel, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
@@ -33,13 +33,15 @@ import {
 	FetchTicketGroupsAction,
 	UpsertTicketAndFetchGroupsAction,
 	UpdateTicketGroupAction,
-	FetchTicketPropertiesAction,
+	FetchTicketsPropertiesAction,
 	FetchTicketGroupsAndGoToView,
+	WatchPropertyUpdatesAction,
+	SetPropertiesFetchedAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketById, selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
+import { selectTicketById, selectTicketByIdRaw, selectTicketsById, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { addUpdatedAtTime } from './tickets.helpers';
@@ -47,6 +49,7 @@ import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSele
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import EventEmitter from 'eventemitter3';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -72,40 +75,44 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets
 	)(teamspace, projectId, modelId, queryParams),
-	40,
+	20,
 	ExecutionStrategy.Fifo,
 );
 
 
-export function* fetchTicketProperties({
-	teamspace, projectId, modelId, ticketId,
+// The format of the propertiesToInclude is the propety name without property prefix, e.g. 'Assignees', 'Due Date', etc.
+// And with modules properties its the module name and property name separated by a dot, e.g. 'ModuleName.PropertyName' like
+// 'safetybase.Level Of Risk'.
+export function* fetchTicketsProperties({
+	teamspace, projectId, modelId, ticketIds,
 	templateCode, isFederation, propertiesToInclude,
-}: FetchTicketPropertiesAction) {
+}: FetchTicketsPropertiesAction) {
 	try {
-		yield put(TicketsActions.addFetchingTicketProperties(ticketId, propertiesToInclude));
-		const { number } = yield select(selectTicketById, modelId, ticketId);
+
+		const codes = (yield select(selectTicketsById, ticketIds)).map(({ number }) => `${templateCode}:${number}`);
 		const filterByTemplateCode = {
 			filter: {
 				operator: 'is',
-				values: [`${templateCode}:${number}`],
+				values: codes,
 			},
 			property: 'Ticket ID',
 			type: 'ticketCode',
 		} as any;
-		const [ticket] = yield ticketPropertiesQueue.addCall(
+	
+		const tickets = yield ticketPropertiesQueue.addCall(
 			isFederation,
 			teamspace,
 			projectId,
 			modelId,
 			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
 		);
-		yield put(TicketsActions.removeFetchingTicketProperties(ticketId, propertiesToInclude));
-		yield put(TicketsActions.upsertTicketSuccess(modelId, { ...ticket, _id: ticketId }));
-
+		
+		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
+		yield put(TicketsActions.setPropertiesFetched(ticketIds, propertiesToInclude, true));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketProperties.error', defaultMessage: 'trying to fetch {model} ticket properties' },
+				{ id: 'tickets.fetchTicketsProperties.error', defaultMessage: 'trying to fetch {model} tickets properties' },
 				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
@@ -313,10 +320,27 @@ export function* fetchTicketGroupsAndGoToView({ teamspace, projectId, modelId, t
 		}));
 	}
 }
+
 export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, ticket, revision }: UpsertTicketAndFetchGroupsAction) {
 	addUpdatedAtTime(ticket);
 	yield put(TicketsActions.upsertTicketSuccess(modelId, ticket));
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision));
+}
+
+function * watchFetchTicketProperties(propertyName,  watch: EventEmitter) {
+	while(true) {
+		const action:SetPropertiesFetchedAction = yield take(TicketsTypes.SET_PROPERTIES_FETCHED);
+
+		if (action.properties.includes(propertyName)) {
+			watch.emit('update');
+		}
+	}
+}
+
+export function* watchPropertyUpdates({propertyName, watch }: WatchPropertyUpdatesAction) {
+	const watchFetchTask = yield fork(watchFetchTicketProperties, propertyName, watch);
+	yield new Promise((accept) => watch.once('end', accept));
+	yield cancel(watchFetchTask);
 }
 
 export default function* ticketsSaga() {
@@ -331,5 +355,6 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS_AND_GO_TO_VIEW, fetchTicketGroupsAndGoToView);
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
-	yield takeEvery(TicketsTypes.FETCH_TICKET_PROPERTIES, fetchTicketProperties);
+	yield takeEvery(TicketsTypes.FETCH_TICKETS_PROPERTIES, fetchTicketsProperties);
+	yield takeEvery(TicketsTypes.WATCH_PROPERTY_UPDATES, watchPropertyUpdates);
 }
