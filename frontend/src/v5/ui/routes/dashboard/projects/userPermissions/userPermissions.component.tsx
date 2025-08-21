@@ -22,12 +22,13 @@ import { ProjectsHooksSelectors, CurrentUserHooksSelectors } from '@/v5/services
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Container, V4ModelsPermissions } from './userPermissions.styles';
 import { SuppressPermissionModalToggle } from '@components/shared/updatePermissionModal/suppressPermissionModalToggle.component';
+import { useLocation } from 'react-router-dom';
 
 export const UserPermissions = () => {
+	const location = useLocation();
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
 	const username = CurrentUserHooksSelectors.selectUsername();
-
 	useEffect(() => {
 		if (!username || !projectName) {
 			return;
@@ -45,7 +46,7 @@ export const UserPermissions = () => {
 	return (
 		<Container>
 			<SuppressPermissionModalToggle />
-			<V4ModelsPermissions />
+			<V4ModelsPermissions location={location} />
 		</Container>
 	);
 };

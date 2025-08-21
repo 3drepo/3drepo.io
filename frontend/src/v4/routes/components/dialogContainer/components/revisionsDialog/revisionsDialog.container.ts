@@ -16,7 +16,6 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
@@ -39,4 +38,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setModelRevisionState: ModelActions.setModelRevisionState,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog));
+export default connect(mapStateToProps, mapDispatchToProps)(RevisionsDialog);

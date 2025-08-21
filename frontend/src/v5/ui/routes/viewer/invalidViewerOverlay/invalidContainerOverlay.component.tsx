@@ -19,7 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { Button } from '@controls/button';
-import { useHistory, useParams, generatePath } from 'react-router-dom';
+import { useNavigate, useParams, generatePath } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { Heading, OverlayContainer, Subheading } from './invalidViewerOverlay.styles';
 import { CONTAINERS_ROUTE, DashboardParams } from '../../routes.constants';
@@ -29,9 +29,9 @@ type IInvalidContainer = {
 };
 
 export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
-	const history = useHistory();
-	const params = useParams<DashboardParams>();
-	const containersListRoute = generatePath(CONTAINERS_ROUTE, params);
+	const navigate = useNavigate();
+	const { teamspace, project } = useParams<DashboardParams>();
+	const containersListRoute = generatePath(CONTAINERS_ROUTE, { teamspace, project });
 
 	const message = canUploadToBackend(status) ? (
 		formatMessage({
@@ -45,7 +45,7 @@ export const InvalidContainerOverlay = ({ status }: IInvalidContainer) => {
 		})
 	);
 
-	const onClickBack = () => history.push(containersListRoute);
+	const onClickBack = () => navigate(containersListRoute);
 
 	return (
 		<OverlayContainer>

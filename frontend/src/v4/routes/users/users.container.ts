@@ -16,7 +16,6 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
@@ -68,9 +67,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	fetchQuotaAndInvitations: UserManagementActions.fetchQuotaAndInvitations
 }, dispatch);
 
-export default withRouter(
-	connect(
-		mapStateToProps,
-		mapDispatchToProps
-	)(Users)
-);
+export default connect(
+	mapStateToProps,
+	mapDispatchToProps
+)(Users)

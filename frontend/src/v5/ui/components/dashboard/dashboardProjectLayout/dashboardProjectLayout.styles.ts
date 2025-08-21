@@ -17,9 +17,16 @@
 
 import styled from 'styled-components';
 
-export const Content = styled.div`
+export const OuterContainer = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	overflow-y: auto;
 	flex-grow: 1;
 	height: 100%;
+`;
+
+export const InnerContainer = styled.div`
+	padding: 18px 75px;
+	height: auto;
+	min-height: calc(100% - 42px);
+	width: 100%;
 `;

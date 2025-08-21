@@ -16,15 +16,14 @@
  */
 
 import { VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { generatePath, RouteComponentProps } from 'react-router-dom';
+import { generatePath, useLocation } from 'react-router-dom';
 import OpenInBrowser from '@mui/icons-material/OpenInBrowser';
 import { memo } from 'react';
 
-import { ROUTES } from '../../../constants/routes';
 import { TooltipButton } from '../../teamspaces/components/tooltipButton/tooltipButton.component';
 import { ShowModelButtonContainer } from './openInViewerButton.styles';
 
-interface IProps extends RouteComponentProps<any> {
+interface IProps {
 	className?: string;
 	teamspace: string;
 	model: string;
@@ -33,9 +32,10 @@ interface IProps extends RouteComponentProps<any> {
 };
 
 export const OpenInViewerButton = memo((props: IProps) => {
+	const location = useLocation();
 	const handleGoToModel = (event) => {
 		event.stopPropagation();
-		const { teamspace, model, query, location } = props;
+		const { teamspace, model, query } = props;
 		let targetUrl = window.location.origin;
 		const project = location.pathname.split("/")[4];
 		const viewerParams = {
