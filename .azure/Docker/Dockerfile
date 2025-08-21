@@ -1,10 +1,11 @@
 ARG REBUILD_DATE=unknown
 FROM node:22 as builder
+# copy resources  to build 
 COPY . /home/node/3drepo.io
-
+#install dependencies
 RUN cd /home/node/3drepo.io/backend && yarn install --network-timeout 100000 && \
         cd ../frontend  && yarn install --network-timeout 100000 && yarn build
-
+#deploy
 FROM node:22 as deploy
 
 # Install minimal packages in one layer
@@ -25,10 +26,11 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
       usermod -G ${NODE_GID} ${NODE_USERNAME} ; \
     fi
 
+# Add only whats needed for image
 WORKDIR /home/node/3drepo.io/
 COPY --chown=root:node --from=builder /home/node/3drepo.io/backend /home/node/3drepo.io/backend
 COPY --chown=root:node --from=builder /home/node/3drepo.io/public /home/node/3drepo.io/public
-COPY --chown=root:node --from=builder /home/node/3drepo.io/config /home/node/3drepo.io/config
+COPY --chown=root:node --from=builder /home/node/3drepo.io/config/chart /home/node/3drepo.io/config/chart
 COPY --chown=root:node --from=builder /home/node/3drepo.io/resources /home/node/3drepo.io/resources
 COPY --chown=root:node --from=builder /home/node/3drepo.io/run /home/node/3drepo.io/run
 
@@ -39,7 +41,6 @@ ENV NODE_CONFIG_DIR='./config'
 EXPOSE 8080 3000
 
 COPY .azure/Docker/src/init.sh /usr/local/bin/start.sh
-COPY .azure/Docker/src/getCustomLogins.py /usr/local/bin/getCustomLogins.py
 RUN chmod +x /usr/local/bin/start.sh ; ln -s /usr/local/bin/start.sh /usr/local/bin/start
 
 WORKDIR /home/node/3drepo.io/
