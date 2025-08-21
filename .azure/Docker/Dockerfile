@@ -6,8 +6,6 @@ COPY . /home/node/3drepo.io
 RUN cd /home/node/3drepo.io/backend && yarn install --network-timeout 100000 && \
         cd ../frontend  && yarn install --network-timeout 100000 && yarn build
 
-RUN mkdir -p /home/node/3drepo.io/config/chart
-
 #deploy
 FROM node:22 as deploy
 
@@ -28,6 +26,9 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
       usermod -u ${NODE_UID} ${NODE_USERNAME} && \
       usermod -G ${NODE_GID} ${NODE_USERNAME} ; \
     fi
+
+    # Prepare config folder: remove any leftovers
+RUN rm -rf /home/node/3drepo.io/config && mkdir -p /home/node/3drepo.io/config
 
 # Add only whats needed for image
 WORKDIR /home/node/3drepo.io/
