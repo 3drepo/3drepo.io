@@ -5,6 +5,9 @@ COPY . /home/node/3drepo.io
 #install dependencies
 RUN cd /home/node/3drepo.io/backend && yarn install --network-timeout 100000 && \
         cd ../frontend  && yarn install --network-timeout 100000 && yarn build
+
+RUN mkdir -p /home/node/3drepo.io/config/chart
+
 #deploy
 FROM node:22 as deploy
 
