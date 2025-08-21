@@ -1,10 +1,15 @@
 ARG REBUILD_DATE=unknown
 FROM node:22 as builder
+# copy resources  to build 
 COPY . /home/node/3drepo.io
-
+#install dependencies
 RUN cd /home/node/3drepo.io/backend && yarn install --network-timeout 100000 && \
         cd ../frontend  && yarn install --network-timeout 100000 && yarn build
 
+#create chart dir before copy later
+RUN mkdir -p /home/node/3drepo.io/config/chart
+
+#deploy
 FROM node:22 as deploy
 
 # Install minimal packages in one layer
@@ -25,6 +30,7 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
       usermod -G ${NODE_GID} ${NODE_USERNAME} ; \
     fi
 
+# Add only whats needed for image
 WORKDIR /home/node/3drepo.io/
 COPY --chown=root:node --from=builder /home/node/3drepo.io/backend /home/node/3drepo.io/backend
 COPY --chown=root:node --from=builder /home/node/3drepo.io/public /home/node/3drepo.io/public
