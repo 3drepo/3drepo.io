@@ -1,15 +1,10 @@
 ARG REBUILD_DATE=unknown
 FROM node:22 as builder
-# copy resources  to build 
 COPY . /home/node/3drepo.io
-#install dependencies
+
 RUN cd /home/node/3drepo.io/backend && yarn install --network-timeout 100000 && \
         cd ../frontend  && yarn install --network-timeout 100000 && yarn build
 
-# Ensure config/chart exists (even if empty)
-RUN mkdir -p /home/node/3drepo.io/config/chart
-
-#deploy
 FROM node:22 as deploy
 
 # Install minimal packages in one layer
@@ -30,19 +25,12 @@ RUN if [ ${NODE_USERNAME} != "root" ] \
       usermod -G ${NODE_GID} ${NODE_USERNAME} ; \
     fi
 
-
 WORKDIR /home/node/3drepo.io/
-
-# Copy backend, public, resources, run
 COPY --chown=root:node --from=builder /home/node/3drepo.io/backend /home/node/3drepo.io/backend
 COPY --chown=root:node --from=builder /home/node/3drepo.io/public /home/node/3drepo.io/public
+COPY --chown=root:node --from=builder /home/node/3drepo.io/config/chart /home/node/3drepo.io/config/chart
 COPY --chown=root:node --from=builder /home/node/3drepo.io/resources /home/node/3drepo.io/resources
 COPY --chown=root:node --from=builder /home/node/3drepo.io/run /home/node/3drepo.io/run
-
-# Copy chart safely into a clean config folder
-COPY --chown=root:node --from=builder /home/node/3drepo.io/config/chart /tmp/chart
-RUN rm -rf /home/node/3drepo.io/config && mkdir -p /home/node/3drepo.io/config && mv /tmp/chart /home/node/3drepo.io/config/chart
-
 
 
 ARG NODE_ENV=local
