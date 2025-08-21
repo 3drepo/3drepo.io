@@ -26,12 +26,14 @@ import { InputContainer, Label } from './ticketImage.styles';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
+import { useOnBlurOnChange } from '../../properties.hooks';
 
 type TicketImageProps = FormInputProps & { onImageClick: () => void; inputRef? };
-export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, onImageClick, inputRef = undefined, ...props }: TicketImageProps) => {
+export const TicketImage = ({ value, onChange:onChangeProp, onBlur, disabled, label, helperText, onImageClick, inputRef = undefined, ...props }: TicketImageProps) => {
 	const imgSrc = getImgSrc(value);
 	const [imgInModal, setImgInModal] = useState(imgSrc);
 	const syncProps = useSyncProps({ images: [imgInModal] });
+	const onChange = useOnBlurOnChange(value, onChangeProp, onBlur);
 	
 	const handleImageClick = () => DialogsActionsDispatchers.open(ImagesModal, {
 		onAddMarkup: disabled
@@ -52,7 +54,6 @@ export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperTe
 		}, syncProps);
 	};
 
-	useEffect(() => onBlur?.(), [value]);
 	useEffect(() => { setImgInModal(imgSrc); }, [imgSrc]);
 
 	return (

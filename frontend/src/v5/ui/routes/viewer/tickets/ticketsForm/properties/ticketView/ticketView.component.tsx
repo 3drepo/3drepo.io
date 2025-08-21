@@ -19,7 +19,7 @@ import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import ViewpointIcon from '@assets/icons/outlined/aim-outlined.svg';
 import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
 import { stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { cloneDeep, isEmpty } from 'lodash';
 import { getImgSrc } from '@/v5/store/tickets/tickets.helpers';
@@ -40,6 +40,7 @@ import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.compon
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useOnBlurOnChange } from '../properties.hooks';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -55,7 +56,7 @@ type ITicketView = {
 export const TicketView = ({
 	value,
 	onBlur,
-	onChange,
+	onChange:onChangeProp,
 	disabled,
 	helperText,
 	label,
@@ -67,6 +68,7 @@ export const TicketView = ({
 	const imgSrc = getImgSrc(value?.screenshot);
 	const [imgInModal, setImgInModal] = useState(imgSrc);
 	const syncProps = useSyncProps({ images: [imgInModal] });
+	const onChange = useOnBlurOnChange(value, onChangeProp, onBlur);
 
 	// Image
 	const handleImageClick = () => DialogsActionsDispatchers.open(ImagesModal, {
@@ -129,7 +131,6 @@ export const TicketView = ({
 		onChange?.({ state, ...view });
 	};
 
-	useEffect(() => onBlur?.(), [value]);
 	useEffect(() => { setImgInModal(imgSrc); }, [imgSrc]);
 
 	const onGroupsClick = () => {
