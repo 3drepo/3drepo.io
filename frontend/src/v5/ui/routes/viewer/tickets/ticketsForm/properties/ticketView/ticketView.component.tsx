@@ -40,7 +40,7 @@ import { GroupsActionMenu } from './viewActionMenu/menus/groupsActionMenu.compon
 import { ViewerInputContainer } from '../viewerInputContainer/viewerInputContainer.component';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useOnBlurOnChange } from '../properties.hooks';
+import { useChangeAndBlur } from '../properties.hooks';
 
 type ITicketView = {
 	value: Viewpoint | undefined;
@@ -56,7 +56,7 @@ type ITicketView = {
 export const TicketView = ({
 	value,
 	onBlur,
-	onChange:onChangeProp,
+	onChange,
 	disabled,
 	helperText,
 	label,
@@ -68,13 +68,13 @@ export const TicketView = ({
 	const imgSrc = getImgSrc(value?.screenshot);
 	const [imgInModal, setImgInModal] = useState(imgSrc);
 	const syncProps = useSyncProps({ images: [imgInModal] });
-	const onChange = useOnBlurOnChange(value, onChangeProp, onBlur);
+	const onChangeAndBlur = useChangeAndBlur(value, onChange, onBlur);
 
 	// Image
 	const handleImageClick = () => DialogsActionsDispatchers.open(ImagesModal, {
 		onAddMarkup: disabled
 			? null
-			: (newValue) => onChange({ ...value, screenshot: stripBase64Prefix(newValue) }),
+			: (newValue) => onChangeAndBlur({ ...value, screenshot: stripBase64Prefix(newValue) }),
 	}, syncProps);
 
 	const handleNewImageUpload = (newImage, onSave) => {
@@ -87,11 +87,11 @@ export const TicketView = ({
 
 	const onUpdateImage = (newValue) => {
 		if (!newValue) {
-			onChange({ ...value, screenshot: null });
+			onChangeAndBlur({ ...value, screenshot: null });
 			return;
 		}
 
-		handleNewImageUpload(newValue, (newImage) => onChange({ ...value, screenshot: newImage }));
+		handleNewImageUpload(newValue, (newImage) => onChangeAndBlur({ ...value, screenshot: newImage }));
 	};
 
 	// Viewpoint
@@ -100,18 +100,18 @@ export const TicketView = ({
 		const screenshot = await ViewerService.getScreenshot();
 		const state = await getViewerState();
 
-		handleNewImageUpload(screenshot, (newImage) => onChange({ screenshot: newImage, ...currentCameraAndClipping, state }));
+		handleNewImageUpload(screenshot, (newImage) => onChangeAndBlur({ screenshot: newImage, ...currentCameraAndClipping, state }));
 	};
 
 	// Camera
 	const onUpdateCamera = async () => {
 		const currentCameraAndClipping = await ViewerService.getViewpoint();
-		onChange?.({ ...value, ...currentCameraAndClipping });
+		onChangeAndBlur?.({ ...value, ...currentCameraAndClipping });
 	};
 
 	const onDeleteCamera = async () => {
 		const { camera, ...view } = value || {};
-		onChange?.(isEmpty(view) ? null : view);
+		onChangeAndBlur?.(isEmpty(view) ? null : view);
 	};
 
 	const onGoToCamera = async () => {
@@ -128,7 +128,7 @@ export const TicketView = ({
 		state.colored = [];
 		state.hidden = [];
 		state.transformed = [];
-		onChange?.({ state, ...view });
+		onChangeAndBlur?.({ state, ...view });
 	};
 
 	useEffect(() => { setImgInModal(imgSrc); }, [imgSrc]);

@@ -41,7 +41,7 @@ import EmptyImageIcon from '@assets/icons/outlined/add_image_thin-outlined.svg';
 import { uploadImages } from '@controls/fileUploader/uploadImages';
 import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 import { ViewerCanvasesContext } from '../../../../viewerCanvases.context';
-import { useOnBlurOnChange } from '../properties.hooks';
+import { useChangeAndBlur } from '../properties.hooks';
 
 const EmptyImage = ({ disabled, onClick }) => (
 	<EmptyImageContainer disabled={disabled} onClick={onClick}>
@@ -66,17 +66,17 @@ const EnlargeImagesOverlay = ({ children, onClick }) => (
 	</OverlappingContainer>
 );
 
-export const TicketImageList = ({ value, onChange:onChangeProp, onBlur, disabled, label, helperText, inputRef, ...props }: FormInputProps) => {
+export const TicketImageList = ({ value, onChange, onBlur, disabled, label, helperText, inputRef, ...props }: FormInputProps) => {
 	const { isViewer } = useContext(TicketContext);
 	const { is2DOpen } = useContext(ViewerCanvasesContext);
 	const imgContext = getImgSrcContext();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const imgsSrcs = (value || []).map((img) => getImgSrc(img, imgContext));
 	const [imgsInModal, setImgsInModal] = useState(imgsSrcs);
-	const onChange = useOnBlurOnChange(value, onChangeProp, onBlur);
+	const onChangeAndBlur = useChangeAndBlur(value, onChange, onBlur);
 	
-	const onClose = () => onChange(imgsInModal?.length ? imgsInModal.map(getImgIdFromSrc) : null);
-	const onDeleteImages = () => onChange(null);
+	const onClose = () => onChangeAndBlur(imgsInModal?.length ? imgsInModal.map(getImgIdFromSrc) : null);
+	const onDeleteImages = () => onChangeAndBlur(null);
 	const onDeleteImage = (index) => setImgsInModal(imgsInModal.filter((img, i) => index !== i));
 	const onEditImage = (newValue, index) => {
 		if (newValue) {

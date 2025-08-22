@@ -17,7 +17,7 @@
 
 import { useRef, useEffect } from "react";
 
-export const useOnBlurOnChange = (value, onChange, onBlur) => {
+export const useChangeAndBlur = (value, onChange, onBlur) => {
 	const shouldBlur = useRef(false);
 
 	useEffect(() =>  {
