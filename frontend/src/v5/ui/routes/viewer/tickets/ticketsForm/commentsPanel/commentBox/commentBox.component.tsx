@@ -100,7 +100,7 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		return { ...image, src: getTicketResourceUrl(teamspace, project, containerOrFederation, ticketId, image.id, isFederation) };
 	});
 	
-	const { watch, reset, control } = useForm<{ message: string, images: File[] }>({
+	const { watch, reset, control } = useForm<{ message: string, images: string[] }>({
 		mode: 'all',
 		defaultValues: {
 			message: desanitiseMessage(message),

@@ -72,7 +72,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'drawings.edit.ok', defaultMessage: 'Save Drawing' })}
 			maxWidth="sm"
-			{...formState}
+			isSubmitting={formState.isSubmitting}
 			isValid={dirtyValuesChanged(formData, drawingId) && formState.isValid}
 		>
 			{drawing.calibration.units

@@ -57,7 +57,7 @@ export const NewTicketCard = () => {
 
 	const formData = useForm({
 		resolver: yupResolver(isLoading ? null : getTicketValidator(template)),
-		mode: 'onChange',
+		mode: 'all',
 		defaultValues: defaultTicket,
 	});
 
@@ -92,7 +92,7 @@ export const NewTicketCard = () => {
 		await promiseToResolve;
 	};
 
-	const updateUnsavedTicket = () => TicketsCardActionsDispatchers.setUnsavedTicket(formData.getValues());
+	const updateUnsavedTicket = () => TicketsCardActionsDispatchers.setUnsavedTicket(cloneDeep(formData.getValues()));
 
 	useEffect(() => {
 		if (!templateAlreadyFetched(template)) {
@@ -162,7 +162,6 @@ export const NewTicketCard = () => {
 									// Im not sure this is still needed here, because we are already depending on react-hook-form to fill the form
 									ticket={defaultTicket}
 									focusOnTitle
-									onPropertyBlur={updateUnsavedTicket}
 								/>
 							)}
 						</>

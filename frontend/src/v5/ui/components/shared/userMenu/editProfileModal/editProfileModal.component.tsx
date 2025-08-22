@@ -58,7 +58,7 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 
 	const defaultPersonalValues = defaults(
 		pick(omitBy(user, isNull), ['firstName', 'lastName', 'email', 'company', 'countryCode']),
-		{ company: '', avatarFile: '' },
+		{ company: '', avatarFile: undefined },
 	);
 
 	const onTabChange = (_, selectedTab) => setActiveTab(selectedTab);

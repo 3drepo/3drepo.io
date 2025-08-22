@@ -137,9 +137,12 @@ export const UploadListItem = ({
 	}, [drawingId, revCodeError]);
 
 	useEffect(() => {
-		setValue(revisionPrefix, sanitiseDrawing(selectedDrawing));
-	}, [JSON.stringify(selectedDrawing)]);
+		for (const [key, val] of Object.entries(sanitiseDrawing(selectedDrawing))) {
+			setValue(`${revisionPrefix}.${key}`, val);
+		}
 
+	}, [JSON.stringify(selectedDrawing)]);
+	
 	useEffect(() => {
 		if (selectedDrawing?._id) {
 			if (selectRevisionsPending(getState(), selectedDrawing._id)) {
