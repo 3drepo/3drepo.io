@@ -2663,4 +2663,14 @@ export class UnityUtil {
 	public static createWebRequestHandler(gameObjectName: string) {
 		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
 	}
+
+	/**
+	 * Sets the scale factor used by the Gizmos that determines how precise the user needs to be to select the axis arrow or arch.
+	 * Default scale is 1.0
+	 * @category Configurations
+	 * @param newScale 
+	 */
+	public static setGizmoSelectionScale(newScale: number) {
+		UnityUtil.toUnity('SetGizmoSelectionScale', UnityUtil.LoadingState.VIEWER_READY, newScale);
+	}
 }
