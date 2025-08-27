@@ -31,8 +31,8 @@ const {
 } = require('../../models/teamspaceSettings');
 const { deleteFavourites, getUserByUsername, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
 const { deleteIfUndefined, isEmpty } = require('../../utils/helper/objects');
-const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
+const { getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { COL_NAME } = require('../../models/projectSettings.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { createNewUserRecord } = require('../users');
@@ -221,7 +221,7 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 Teamspaces.getQuotaInfo = async (teamspace) => {
 	const quotaInfo = await getQuotaInfo(teamspace, true);
 	const spaceUsed = await getSpaceUsed(teamspace, true);
-	const collaboratorsUsed = await getCollaboratorsAssigned(teamspace);
+	const collaboratorsUsed = await Teamspaces.getCollaboratorsAssigned(teamspace);
 
 	return {
 		freeTier: quotaInfo.freeTier,
@@ -295,6 +295,15 @@ Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck) =>
 	} catch (err) {
 		return false;
 	}
+};
+
+Teamspaces.getCollaboratorsAssigned = async (teamspace) => {
+	const [teamspaceUsers, teamspaceInvitations] = await Promise.all([
+		Teamspaces.getAllMembersInTeamspace(teamspace),
+		Teamspaces.getInvitationsByTeamspace(teamspace, { _id: 1 }),
+	]);
+
+	return teamspaceUsers.length + teamspaceInvitations.length;
 };
 
 Teamspaces.getAddOns = getAddOns;

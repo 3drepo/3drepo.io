@@ -17,8 +17,6 @@
 const { createResponseCode, templates } = require('./responseCodes');
 const DBHandler = require('../handler/db');
 const config = require('./config');
-const { getAllMembersInTeamspace } = require('../processors/teamspaces');
-const { getInvitationsByTeamspace } = require('../models/invitations');
 const { getSubscriptions } = require('../models/teamspaceSettings');
 const { getTotalSize } = require('../models/fileRefs');
 
@@ -76,15 +74,6 @@ Quota.getSpaceUsed = async (teamspace) => {
 
 	const sizes = await Promise.all(promises);
 	return sizes.reduce((accum, val) => accum + val, 0);
-};
-
-Quota.getCollaboratorsAssigned = async (teamspace) => {
-	const [teamspaceUsers, teamspaceInvitations] = await Promise.all([
-		getAllMembersInTeamspace(teamspace),
-		getInvitationsByTeamspace(teamspace, { _id: 1 }),
-	]);
-
-	return teamspaceUsers.length + teamspaceInvitations.length;
 };
 
 Quota.sufficientQuota = async (teamspace, size) => {
