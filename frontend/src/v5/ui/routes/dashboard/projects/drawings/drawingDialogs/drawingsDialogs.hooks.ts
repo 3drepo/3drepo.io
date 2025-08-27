@@ -24,29 +24,39 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
-export const useDrawingForm = (defaultValues?: IDrawing) => {
+export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const types = DrawingsHooksSelectors.selectTypes();
 	const isTypesPending = DrawingsHooksSelectors.selectIsTypesPending();
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	
-	const drawingsNames = [];
-	const drawingNumbers = [];
 
-	DrawingsHooksSelectors.selectDrawings().forEach((d) => {
-		if (d._id === defaultValues?._id) return;
-		drawingsNames.push(d.name);
-		drawingNumbers.push(d.number);
-	});
-
-	const [alreadyExistingNames, setAlreadyExistingNames] = useState(drawingsNames);
-	const [alreadyExistingNumbers, setAlreadyExistingNumbers] = useState(drawingNumbers);
+	const allDrawings = DrawingsHooksSelectors.selectDrawings();
 	
+	// TODO: change type from array to set in every schema that uses name
+	const [existingNames, setExistingNames] = useState([]);  
+
+	const [existingNumbers, setExistingNumbers] = useState<Set<string>>(new Set()); 
+
+	useEffect(() => {
+		const names = [];
+		const numbers = new Set<string>();
+
+		allDrawings.forEach((d) => {
+			if (d._id === defaultValues?._id || !defaultValues) return;
+			names.push(d.name.toLowerCase());
+			numbers.add(d.number.toLowerCase());
+		});
+
+		setExistingNames(names);
+		setExistingNumbers(numbers)
+	}, [JSON.stringify(defaultValues), allDrawings]);
+
+
 	const formData = useForm<DrawingSettings>({
 		mode: 'onChange',
 		resolver: yupResolver(DrawingFormSchema),
-		context: { alreadyExistingNames, alreadyExistingNumbers },
+		context: { existingNames, existingNumbers },
 		defaultValues,
 	});
 
@@ -54,13 +64,13 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 	const verticalRange = watch('calibration.verticalRange');
 
 	const onSubmitError = (err) => {
-		if (nameAlreadyExists(err)) {
-			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
+		if (nameAlreadyExists(err)) {			
+			setExistingNames([getValues('name'), ...existingNames]);
 			trigger('name');
 		}
 
 		if (numberAlreadyExists(err)) {
-			setAlreadyExistingNumbers([getValues('number'), ...alreadyExistingNumbers]);
+			setExistingNumbers(existingNumbers.add(getValues('number')));
 			trigger('number');
 		}
 	};

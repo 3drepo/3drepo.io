@@ -45,7 +45,8 @@ const number = Yup.string()
 		}),
 		(value, testContext) => {
 			if (!testContext.options?.context) return true;
-			return !testContext.options.context.alreadyExistingNumbers?.map((n) => n.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
+			const { existingNumbers } = testContext.options?.context as {existingNumbers: Set<string>};
+			return !existingNumbers.has(value?.toLowerCase().trim());
 		},
 	);
 

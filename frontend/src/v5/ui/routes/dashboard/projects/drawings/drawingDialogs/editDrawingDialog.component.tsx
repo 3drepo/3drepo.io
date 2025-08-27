@@ -18,15 +18,15 @@
 import { formatMessage } from '@/v5/services/intl';
 import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
-import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useDrawingForm } from './drawingsDialogs.hooks';
 import { dirtyValuesChanged } from '@/v5/helpers/form.helper';
-import { pick } from 'lodash';
+import { pick, isEqual } from 'lodash';
 import { DrawingForm } from './drawingForm.component';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { DrawingSettings } from '@/v5/store/drawings/drawings.types';
+import { DrawingSettings, IDrawing } from '@/v5/store/drawings/drawings.types';
 
 interface Props { 
 	open: boolean; 
@@ -37,7 +37,7 @@ interface Props {
 export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
+	const [drawing, setDrawing] = useState<Partial<IDrawing>>();
 
 	const { onSubmitError, formData } = useDrawingForm(drawing);
 	const { handleSubmit, formState } = formData;
@@ -55,14 +55,27 @@ export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 	};
 
 	useEffect(() => {
+		let mounted = true;
+
 		DrawingsActionsDispatchers.fetchDrawingSettings(
 			teamspace,
 			project,
 			drawingId,
+			(requestedDrawing) => {
+				if (!mounted) return;
+				setDrawing(requestedDrawing);
+				formData.reset(requestedDrawing);
+			}			
 		);
+	
+		return () => { mounted = false; }
 	}, []);
 
-	useEffect(() => { formData.reset(drawing); }, [JSON.stringify(drawing)]);
+	useEffect(() => {
+		if (!drawing) return;
+		// Triggers the validation once the values are correctly set
+		formData.trigger();
+	}, [JSON.stringify(formData.getValues()) === JSON.stringify(drawing)]);
 
 	return (
 		<FormModal
@@ -75,7 +88,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 			{...formState}
 			isValid={dirtyValuesChanged(formData, drawingId) && formState.isValid}
 		>
-			{drawing.calibration.units
+			{drawing
 				? <DrawingForm formData={formData} drawing={drawing} />
 				: <Loader />
 			}
