@@ -1116,6 +1116,21 @@ export class UnityUtil {
 	}
 
 	/**
+	 * When true, moving the camera will push the clip gizmo around from the
+	 * edges of the screen so that it remains in view, so long as the clip plane
+	 * is in front of the camera, so it doesn't need to pulled around manually
+	 * during navigation. The gizmo will also be constrained to the bounds of
+	 * the model. This only takes effect in single-plane mode.
+	 */
+	public static setKeepClipGizmoInView(enable: boolean) {
+		if(enable) {
+			UnityUtil.toUnity('EnableKeepClipGizmoInView', UnityUtil.LoadingState.VIEWER_READY);
+		} else {
+			UnityUtil.toUnity('DisableKeepClipGizmoInView', UnityUtil.LoadingState.VIEWER_READY);
+		}
+	}
+
+	/**
 	 * Disable the Measuring tool.
 	 * @category Measuring tool
 	 */
