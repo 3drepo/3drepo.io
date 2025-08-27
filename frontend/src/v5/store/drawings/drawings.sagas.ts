@@ -93,10 +93,12 @@ export function* fetchCalibration({ teamspace, projectId, drawingId }: FetchCali
 	}
 }
 
-export function* fetchDrawingSettings({ teamspace, projectId, drawingId }: FetchDrawingSettingsAction) {
+export function* fetchDrawingSettings({ teamspace, projectId, drawingId, onSuccess, onError }: FetchDrawingSettingsAction) {
 	try {
 		const data = yield API.Drawings.fetchDrawingSettings(teamspace, projectId, drawingId);
 		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, data));
+
+		onSuccess?.(data);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'drawings.fetchSettings.error', defaultMessage: 'trying to fetch drawing settings' }),
