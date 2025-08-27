@@ -2673,4 +2673,34 @@ export class UnityUtil {
 	public static setGizmoSelectionScale(newScale: number) {
 		UnityUtil.toUnity('SetGizmoSelectionScale', UnityUtil.LoadingState.VIEWER_READY, newScale);
 	}
+
+	/**
+	 * Sets the size that the Gizmo will take up on the screen.
+	 * Default value is 80
+	 * @category Configurations
+	 * @param newSize 
+	 */
+	public static setGizmoSize(newSize: number) {
+		UnityUtil.toUnity('SetGizmoSize', UnityUtil.LoadingState.VIEWER_READY, newSize);
+	}
+
+	/**
+	 * Sets the size that the clip plane proxy in single plane mode will take up on the screen.
+	 * Default value is 180
+	 * @category Configurations
+	 * @param newSize 
+	 */
+	public static setClippingPlaneSize(newSize: number) {
+		UnityUtil.toUnity('SetClippingPlaneSize', UnityUtil.LoadingState.VIEWER_READY, newSize);
+	}
+
+	/**
+	 * Sets the scale factor that controls the thickness of the axis arrows or arches of the Gizmo.
+	 * Default scale is 1.0
+	 * @category Configurations
+	 * @param newScale 
+	 */
+	public static setGizmoAxisScale(newScale: number) {
+		UnityUtil.toUnity('SetGizmoAxisScale', UnityUtil.LoadingState.VIEWER_READY, newScale);
+	}
 }
