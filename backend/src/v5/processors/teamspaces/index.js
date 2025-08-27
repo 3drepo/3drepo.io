@@ -111,30 +111,37 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 };
 
 Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
+	const regexSplitForName = /\s(.*)/;
+
 	const membersInTeamspace = [];
 	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
 	const accountUsers = await getAllUsersInAccount(tenantId);
+
 	const projection = {
 		_id: 0,
 		user: 1,
-		'customData.email': 1,
 		'customData.userId': 1,
-		'customData.firstName': 1,
-		'customData.lastName': 1,
-		'customData.billing.billingInfo.company': 1,
 	};
 
 	const emailToUsers = {};
 
 	const emails = accountUsers.map((user) => {
 		const { email } = user;
-
 		emailToUsers[email] = user;
 
 		return email;
 	});
 
-	const rawData = await getUserInfoFromEmailArray(emails, projection);
+	const listOfUsersFromEmails = await getUserInfoFromEmailArray(emails, projection);
+
+	const rawData = listOfUsersFromEmails.map((user) => {
+		const { email, userId, name, metadata } = accountUsers.filter((u) => u.id === user.customData?.userId)[0];
+
+		const [firstName, lastName] = name?.split(regexSplitForName);
+		const company = metadata?.company;
+
+		return { email, userId, firstName, lastName, company, user: user.user };
+	});
 
 	const addUserToMemberList = ({ user, customData }) => {
 		const { firstName, lastName, billing, userId, email } = customData;
@@ -145,7 +152,7 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 
 	await Promise.all(rawData.map(
 		async (data) => {
-			const { userId, email } = addUserToMemberList(data);
+			const { userId, email } = addUserToMemberList({ user: data.user, customData: data });
 
 			const { id } = emailToUsers[email];
 

@@ -21,6 +21,7 @@ const { getBearerHeader, getConfig } = require('./connections');
 const FormData = require('form-data');
 const Path = require('path');
 const { createReadStream } = require('fs');
+const { splitName } = require('../../../../utils/helper/strings');
 
 const Users = {};
 
@@ -91,14 +92,13 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 		const headers = await getBearerHeader();
 		const url = `${config.vendorDomain}/identity/resources/users/v1/${userId}`;
 
-		const regexSplitForName = /\s(.*)/;
-
 		const user = await Users.getUserById(userId);
-		const [existingFirstName, existingLastName] = user.name?.split(regexSplitForName) ?? ['Anonymous', 'User'];
+		const [existingFirstName, existingLastName] = splitName(user.name);
 
 		const payload = {
 			name: `${firstName || existingFirstName} ${lastName || existingLastName}`.trim(),
-			metadata: JSON.stringify(metadata),
+			metadata: Object.keys(metadata).length
+				? JSON.stringify(metadata) : user.metadata,
 			profilePictureUrl: profilePictureUrl || user.profilePictureUrl,
 		};
 

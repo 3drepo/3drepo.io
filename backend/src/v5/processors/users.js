@@ -20,8 +20,7 @@ const Users = {};
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
 	getUserId, removeUser, updatePassword, updateProfile } = require('../models/users');
-const { fileExists, removeFile } = require('../services/filesManager');
-const { getUserAvatarBuffer, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
+const { getUserAvatarBuffer, getUserById, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const fs = require('fs/promises');
@@ -31,6 +30,8 @@ const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
+const { removeFile } = require('../services/filesManager');
+const { splitName } = require('../utils/helper/strings');
 const { templates } = require('../utils/responseCodes');
 
 // This is used for the situation where a user has a record from
@@ -70,29 +71,25 @@ Users.remove = async (username) => {
 Users.getProfileByUsername = async (username) => {
 	const user = await getUserByUsername(username, {
 		user: 1,
-		'customData.firstName': 1,
-		'customData.lastName': 1,
-		'customData.email': 1,
+		'customData.userId': 1,
 		'customData.apiKey': 1,
-		'customData.billing.billingInfo.company': 1,
-		'customData.billing.billingInfo.countryCode': 1,
 	});
-
+	const { name, email, profilePictureUrl, metadata } = await getUserById(user.customData.userId);
+	const [firstName, lastName] = await splitName(name);
+	const metadataObj = metadata ? JSON.parse(metadata) : {};
 	const { customData } = user;
-
-	const hasAvatar = await fileExists(USERS_DB_NAME, AVATARS_COL_NAME, username);
-
-	const intercomRef = generateUserHash(customData.email);
+	const hasAvatar = !!profilePictureUrl;
+	const intercomRef = generateUserHash(email);
 
 	return {
 		username: user.user,
-		firstName: customData.firstName,
-		lastName: customData.lastName,
-		email: customData.email,
+		firstName,
+		lastName,
+		email,
 		hasAvatar,
 		apiKey: customData.apiKey,
-		company: customData.billing?.billingInfo?.company,
-		countryCode: customData.billing?.billingInfo?.countryCode,
+		company: metadataObj?.company,
+		countryCode: metadataObj?.countryCode,
 		...(intercomRef ? { intercomRef } : {}),
 	};
 };
