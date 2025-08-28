@@ -97,6 +97,7 @@ export function* fetchDrawingSettings({ teamspace, projectId, drawingId, onSucce
 	try {
 		const data = yield API.Drawings.fetchDrawingSettings(teamspace, projectId, drawingId);
 		yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, data));
+		yield put(DrawingsActions.setFetchedStatus(projectId, drawingId, true));
 
 		onSuccess?.(data);
 	} catch (error) {

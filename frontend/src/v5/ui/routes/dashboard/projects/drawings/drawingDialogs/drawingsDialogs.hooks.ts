@@ -24,6 +24,7 @@ import { yupResolver } from '@hookform/resolvers/yup';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+
 export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
@@ -56,7 +57,7 @@ export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 	const formData = useForm<DrawingSettings>({
 		mode: 'onChange',
 		resolver: yupResolver(DrawingFormSchema),
-		context: { existingNames, existingNumbers },
+		context: { alreadyExistingNames: existingNames, existingNumbers },
 		defaultValues,
 	});
 

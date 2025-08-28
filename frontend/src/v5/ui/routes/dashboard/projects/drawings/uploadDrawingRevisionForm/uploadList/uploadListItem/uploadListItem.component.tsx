@@ -97,12 +97,17 @@ export const UploadListItem = ({
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 	const fileError = !!get(errors, `${revisionPrefix}.file`)?.message;
 	const disabled = fileError || isUploading;
+	const fetched = DrawingsHooksSelectors.selectDrawingFetched(drawingId);
+	const sidebarFormRequiredFields = ['drawingNumber', 'drawingType', 'calibration'].map((f) =>`${revisionPrefix}.${f}`);
 
 	const sanitiseDrawing = (drawing: IDrawing) => ({
 		drawingNumber: drawing?.number || '',
 		drawingDesc: drawing?.desc || '',
 		drawingType: drawing?.type || '',
-		calibration: drawing?.calibration || DEFAULT_SETTINGS_CALIBRATION,
+		calibration: {
+			units: drawing?.calibration?.units || DEFAULT_SETTINGS_CALIBRATION.units,
+			verticalRange: drawing?.calibration?.verticalRange || DEFAULT_SETTINGS_CALIBRATION.verticalRange
+		}
 	});
 
 	const revCodeError = get(errors, `${revisionPrefix}.revCode`)?.message;
@@ -166,6 +171,17 @@ export const UploadListItem = ({
 		}
 	}, []);
 	
+	useEffect(() => {
+		if (!drawingId) return;
+
+		if (fetched) {
+			trigger(sidebarFormRequiredFields);
+		} else {
+			DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, drawingId);
+		}
+	}, [drawingId, fetched])
+
+	const drawingError = sidebarFormRequiredFields.some((field) => get(errors, field));
 	return (
 		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
@@ -209,7 +225,7 @@ export const UploadListItem = ({
 					/>
 				) : (
 					<>
-						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit} disabled={disabled}>
+						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit} error={drawingError} disabled={disabled}>
 							<EditIcon />
 						</UploadListItemButton>
 						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickDelete}>
