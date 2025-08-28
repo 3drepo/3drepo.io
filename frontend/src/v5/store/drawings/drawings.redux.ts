@@ -18,7 +18,7 @@
 import { Constants } from '@/v5/helpers/actions.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
-import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks } from '../store.types';
+import { TeamspaceAndProjectId, ProjectId, ProjectAndDrawingId, TeamspaceProjectAndDrawingId, SuccessAndErrorCallbacks, DrawingId } from '../store.types';
 import { IDrawing, DrawingStats, NewDrawing, MinimumDrawing, Calibration } from './drawings.types';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { statsToDrawing } from './drawings.helpers';
@@ -44,6 +44,7 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	updateDrawing: ['teamspace', 'projectId', 'drawingId', 'drawing', 'onSuccess', 'onError'],
 	updateDrawingSuccess: ['projectId', 'drawingId', 'drawing'],
 	resetDrawingStatsQueue: [],
+	setFetchedStatus: ['projectId', 'drawingId', 'status']
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
 
 const getDrawingFromState = (state: DrawingsState, projectId, drawingId) => (
@@ -92,14 +93,21 @@ export const deleteDrawingSuccess = (state: DrawingsState, {
 		(drawing) => drawingId !== drawing._id,
 	);
 };
+
+export const setFetchedStatus = (state: DrawingsState, { projectId, drawingId, status }) => {
+	state.fetched[projectId + '.' + drawingId] = status;
+};
+
 export interface DrawingsState {
 	drawingsByProject: Record<string, Partial<IDrawing>[]>;
 	typesByProject: Record<string, string[]>;
+	fetched: Record<string, boolean>;
 }
 
 const INITIAL_STATE: DrawingsState = {
 	drawingsByProject: {},
 	typesByProject: {},
+	fetched:  {}
 };
 
 export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produceAll({
@@ -110,6 +118,7 @@ export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produ
 	[DrawingsTypes.FETCH_TYPES_SUCCESS]: fetchTypesSuccess,
 	[DrawingsTypes.CREATE_DRAWING_SUCCESS]: createDrawingSuccess,
 	[DrawingsTypes.UPDATE_DRAWING_SUCCESS]: updateDrawingSuccess,
+	[DrawingsTypes.SET_FETCHED_STATUS]: setFetchedStatus,
 })) as (state: DrawingsState, action: any) => DrawingsState;
 
 
@@ -133,6 +142,7 @@ export type CreateDrawingSuccessAction = Action<'CREATE_DRAWING_SUCCESS'> &  Pro
 export type UpdateDrawingAction = Action<'UPDATE_DRAWING'> & TeamspaceProjectAndDrawingId & SuccessAndErrorCallbacks & { drawing: Partial<MinimumDrawing> };
 export type UpdateDrawingSuccessAction = Action<'UPDATE_DRAWING_SUCCESS'> &  TeamspaceProjectAndDrawingId & { drawing: Partial<IDrawing> };
 export type ResetDrawingStatsQueueAction = Action<'RESET_CONTAINER_STATS_QUEUE'>;
+export type SetFetchedStatusAction = Action<'SET_FETCHED_STATUS'> & DrawingId & { status: boolean };
 
 export interface IDrawingsActionCreators {
 	addFavourite: (teamspace: string, projectId: string, drawingId: string) => AddFavouriteAction;
@@ -167,4 +177,5 @@ export interface IDrawingsActionCreators {
 	) => UpdateDrawingAction;
 	updateDrawingSuccess: (projectId: string, drawingId: string, drawing: Partial<IDrawing>) => UpdateDrawingSuccessAction;
 	resetDrawingStatsQueue: () => ResetDrawingStatsQueueAction;
+	setFetchedStatus: (projectId: string, drawingId: string, status: boolean) => SetFetchedStatusAction;
 }

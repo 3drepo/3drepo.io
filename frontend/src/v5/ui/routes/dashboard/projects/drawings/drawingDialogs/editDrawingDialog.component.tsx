@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { SubmitHandler } from 'react-hook-form';
 import { FormModal } from '@controls/formModal/formModal.component';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useDrawingForm } from './drawingsDialogs.hooks';
 import { dirtyValuesChanged } from '@/v5/helpers/form.helper';
@@ -37,7 +37,8 @@ interface Props {
 export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
-	const [drawing, setDrawing] = useState<Partial<IDrawing>>();
+	const fetched = DrawingsHooksSelectors.selectDrawingFetched(drawingId);
+	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
 
 	const { onSubmitError, formData } = useDrawingForm(drawing);
 	const { handleSubmit, formState } = formData;
@@ -55,21 +56,14 @@ export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 	};
 
 	useEffect(() => {
-		let mounted = true;
+		if (fetched) return;
 
 		DrawingsActionsDispatchers.fetchDrawingSettings(
 			teamspace,
 			project,
-			drawingId,
-			(requestedDrawing) => {
-				if (!mounted) return;
-				setDrawing(requestedDrawing);
-				formData.reset(requestedDrawing);
-			}			
-		);
-	
-		return () => { mounted = false; }
-	}, []);
+			drawingId);
+
+	}, [fetched]);
 
 	useEffect(() => {
 		if (!drawing) return;
@@ -88,7 +82,7 @@ export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 			{...formState}
 			isValid={dirtyValuesChanged(formData, drawingId) && formState.isValid}
 		>
-			{drawing
+			{fetched
 				? <DrawingForm formData={formData} drawing={drawing} />
 				: <Loader />
 			}

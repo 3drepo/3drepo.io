@@ -104,6 +104,15 @@ export const selectIsTypesPending = createSelector(
 	(state, currentProject) => !state.typesByProject[currentProject],
 );
 
+export const selectDrawingFetched = createSelector(
+	selectDrawingsDomain,
+	selectCurrentProject,
+	(state, drawingId) => drawingId,
+	// Checks if the settings for the drawing were fetched
+	(state, currentProject, drawingId) => !!state.fetched[currentProject + '.' + drawingId],
+);
+
+
 export const selectCalibration = createSelector(
 	selectDrawingById,
 	(state, drawingId, modelId) => selectContainerById(state, modelId) || selectFederationById(state, modelId),
