@@ -21,6 +21,7 @@ import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getViewpointWithGroups } from '@/v5/helpers/viewpoint.helpers';
 import { isEmpty } from 'lodash';
 import { selectHasViewerAccess } from '@/v5/store/containers/containers.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 
 import * as API from '../../services/api';
@@ -63,16 +64,10 @@ export function* fetchSequenceList() {
 
 		const { data: sequences } = yield API.getSequenceList(teamspace, model, revision);
 
-		const viewableSequences = [];
-		for (const sequence of sequences) {
-		    const hasPermissions = yield select((state) => selectHasViewerAccess(state, sequence.model));
-		    if (hasPermissions) {
-		        viewableSequences.push(sequence);
-		    }
-		}
+		const state = getState();
+		const viewableSequences = sequences.filter((sequence) =>  selectHasViewerAccess(state, sequence.model));
 
 		yield put(SequencesActions.fetchSequenceListSuccess(viewableSequences));
-
 	} catch (error) {
 		yield put(DialogActions.showEndpointErrorDialog('get', 'sequences', error));
 	}
