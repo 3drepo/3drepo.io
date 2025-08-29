@@ -16,6 +16,7 @@
  */
 
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
+const { addRevision, getLatestRevision } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainers, getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Comments = require('./commons/tickets.comments');
@@ -23,13 +24,12 @@ const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
-const { getLatestRevision } = require('../../../../models/revisions');
 const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { hasReadAccessToContainer } = require('../../../../utils/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
-const { queueFederationUpdate } = require('../../../../services/modelProcessing');
+const { updateModelSubModels } = require('../../../../models/modelSettings');
 
 const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
 
@@ -62,7 +62,13 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
 };
 
-Federations.newRevision = queueFederationUpdate;
+Federations.newRevision = async (teamspace, project, federation, info) => {
+	const revisionId = await addRevision(teamspace, project, federation, modelTypes.FEDERATION, {
+		containers: info.containers,
+		author: info.owner,
+	});
+	await updateModelSubModels(teamspace, project, federation, info.owner, revisionId, info.containers);
+};
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
 	const lastUpdates = [];
