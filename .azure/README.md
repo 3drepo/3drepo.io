@@ -20,6 +20,7 @@ NOTE: the `/azp run` deployment is defined by a combination of no specific PR de
 
 #### destroy
 - Description: Destroys the deployment
-- Trigger: It is observed that the deployments are destroyed when the PR is merged and closed. (CF) I'm struggling to find how it's exactly triggered at the moment, whoever finds the answer, please add it onto this readme!
+- Trigger: It is observed that the deployments are destroyed when the PR is merged and closed. This is driven by Github action https://github.com/3drepo/3drepo.io/blob/master/.github/workflows/onPRClose.yml#L50
+
 
 
