@@ -254,8 +254,9 @@ const hideCloseInfo = (state = INITIAL_STATE, { issueId }) => {
 const reset = () => cloneDeep(INITIAL_STATE);
 
 const removeResourceSuccess =  (state = INITIAL_STATE, { resource, issueId }) => {
-	const resources = state.issuesMap[issueId].resources.filter((r) => r._id !== resource._id);
-	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
+	const resources = get(state.issuesMap, [issueId, 'resources']) ?? [];
+	const updatedResources = resources.filter((r) => r._id !== resource._id);
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources: updatedResources });
 
 	return { ...state, issuesMap };
 };
@@ -272,7 +273,8 @@ const attachResourcesSuccess = (state = INITIAL_STATE, { resources, issueId }) =
 };
 
 const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, issueId }) => {
-	const resources = state.issuesMap[issueId].resources.map((resource) => {
+	const resources = get(state.issuesMap, [issueId, 'resources']) ?? [];
+	const updatedResources = resources.map((resource) => {
 		const updateIndex = resourcesIds.indexOf(resource._id);
 
 		if (updateIndex >= 0) {
@@ -282,7 +284,7 @@ const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, 
 		}
 	});
 
-	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources: updatedResources });
 	return { ...state, issuesMap};
 };
 
