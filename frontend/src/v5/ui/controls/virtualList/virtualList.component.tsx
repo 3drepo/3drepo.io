@@ -38,7 +38,7 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 	const prevInnerHeight = useRef(0);
 	const expandedItem = useRef({ index:0, height: itemHeight});
 	const [containerRect, setContainerRect] = useState<DOMRect>(emptyRect);
-
+	const firstElementIndex = useRef(0);
 
 	let { innerHeight } = window;
 	const top = Math.min(Math.max(0, containerRect.top), innerHeight);
@@ -78,8 +78,9 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 		return { firstItemindex, spacerStart };
 	};
 
-	const contentCount = Math.ceil(((bottom-top)) / itemHeight) + ((bottom-top) ? 1: 0); 
+	const contentCount = Math.ceil(((bottom-top)) / itemHeight) + ((bottom-top) > 0 ? 1: 0); 
 	const { firstItemindex, spacerStart } =  getFirstItemIndex(Math.max(0, -containerRect.y));
+	firstElementIndex.current = firstItemindex;
 	const lastIndex =  Math.min(contentCount + firstItemindex, items.length);
 	const itemsSlice = items.slice(firstItemindex, lastIndex);
 	const containerHeight = (items.length - 1) * itemHeight + expandedItem.current.height;
@@ -101,12 +102,12 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 		for (let i=0; i < children.length ; i++ ){
 			const elementHeight = children[i].clientHeight;	
 			if (!equalsHeight(elementHeight, itemHeight)) {
-				const {height, index} =  expandedItem.current;
-				if (index !== i || height !== elementHeight) {
+				const {height: expHeight, index: expIndex} =  expandedItem.current;
+				const itemIndex = i + firstElementIndex.current;
 
-
+				if (expIndex !== itemIndex || expHeight !== elementHeight) {
 					expandedItem.current = {
-						index: i,
+						index: itemIndex,
 						height: elementHeight
 					};
 				}
@@ -119,7 +120,6 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 			prevRect.current = rect; 
 			prevInnerHeight.current = window.innerHeight;
 			setContainerRect(rect);
-			// console.log('rect.y:' + rect.y);
 		}
 
 		window.requestAnimationFrame(onScroll);
@@ -129,17 +129,12 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 		window.requestAnimationFrame(onScroll);
 	}, []);
 
-	// console.log(JSON.stringify(expandedItem));
-	// console.log(containerHeight)
-
-	return (<div style={{ 
-			height: containerHeight, 
-			display:'block', 
-			overflowAnchor: 'none'
-			} } ref={containerRef as any} >
-		<div style={{ height: spacerStart } } id='startSpacer'/>
-		<div  ref={itemsContainer as any}   >
-		{itemsSlice.map(itemContent)}
+	return (
+		<div style={{ height: containerHeight,  display:'block'}} ref={containerRef as any} >
+			<div style={{ height: spacerStart } } id='startSpacer'/>
+			<div  ref={itemsContainer as any}   >
+			{itemsSlice.map(itemContent)}
+			</div>
 		</div>
-	</div>);
+	);
 };
