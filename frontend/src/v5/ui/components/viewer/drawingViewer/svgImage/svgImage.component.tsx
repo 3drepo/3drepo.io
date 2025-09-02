@@ -589,7 +589,9 @@ export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ on
 			svg.setAttribute('width', width.toString());
 			svg.setAttribute('height', height.toString());
 			svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
-			const binString = Array.from(new TextEncoder().encode(svg.outerHTML), (byte) => String.fromCodePoint(byte)).join('');
+
+
+			const binString = new TextDecoder().decode(new TextEncoder().encode(svg.outerHTML));
 			const base64 = btoa(binString);
 			pannableImage.current.src = `data:image/svg+xml;base64,${base64}`;
 			pannableImage.current.addEventListener('load', onLoad);
