@@ -41,7 +41,7 @@
 	"dependencies": {
 		"@date-io/dayjs": "1.1.0",
 		"@fortawesome/fontawesome-svg-core": "1.2.10",
-		"@fortawesome/free-solid-svg-icons": "5.6.1",
+		"@fortawesome/free-solid-svg-icons": "5.15.4",
 		"@fortawesome/react-fontawesome": "0.1.17",
 		"@hookform/resolvers": "2.8.5",
 		"@hotjar/browser": "1.0.9",
