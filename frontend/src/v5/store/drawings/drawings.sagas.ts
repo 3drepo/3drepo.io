@@ -101,6 +101,7 @@ export function* fetchDrawingSettings({ teamspace, projectId, drawingId, onSucce
 
 		onSuccess?.(data);
 	} catch (error) {
+		onError?.(error);
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'drawings.fetchSettings.error', defaultMessage: 'trying to fetch drawing settings' }),
 			error,

@@ -39,7 +39,6 @@ export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const fetched = DrawingsHooksSelectors.selectDrawingFetched(drawingId);
 	const drawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
-
 	const { onSubmitError, formData } = useDrawingForm(drawing);
 	const { handleSubmit, formState } = formData;
 
@@ -62,14 +61,19 @@ export const EditDrawingDialog = ({ open, onClickClose, drawingId }:Props) => {
 			teamspace,
 			project,
 			drawingId);
-
 	}, [fetched]);
 
 	useEffect(() => {
 		if (!drawing) return;
 		// Triggers the validation once the values are correctly set
+		formData.reset(drawing);
+	}, [drawing]);
+
+	useEffect(() => {
+		if (!drawing || !fetched ) return;
+		// Triggers the validation once the values are correctly set
 		formData.trigger();
-	}, [JSON.stringify(formData.getValues()) === JSON.stringify(drawing)]);
+	}, [fetched, JSON.stringify(formData.getValues()) === JSON.stringify(drawing)]);
 
 	return (
 		<FormModal
