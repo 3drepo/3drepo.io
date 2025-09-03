@@ -72,11 +72,6 @@ export const selectAreStatsPending = createSelector(
 	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
 );
 
-export const selectAreSettingsPending = createSelector(
-	selectRawDrawingById,
-	({ name, number, type, desc, calibration }) => [name, number, type, desc, calibration].includes(undefined),
-); 
-
 export const selectDrawingRole = createSelector(
 	selectDrawingById,
 	(drawing): Role | null => drawing?.role || null,

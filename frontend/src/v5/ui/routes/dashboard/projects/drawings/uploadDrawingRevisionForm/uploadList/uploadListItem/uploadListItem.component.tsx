@@ -38,7 +38,6 @@ import { get } from 'lodash';
 import { isUniqueRevisionStatusError } from '@/v5/validation/drawingSchemes/drawingSchemes';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectRevisionsPending } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
-import { selectAreSettingsPending } from '@/v5/store/drawings/drawings.selectors';
 import { uploadFile } from '@/v5/validation/shared/validators';
 
 const UNEXPETED_STATUS_ERROR = undefined;
@@ -146,18 +145,6 @@ export const UploadListItem = ({
 	}, [JSON.stringify(selectedDrawing)]);
 
 	useEffect(() => {
-		if (selectedDrawing?._id) {
-			if (selectRevisionsPending(getState(), selectedDrawing._id)) {
-				DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
-			}
-
-			if (selectAreSettingsPending(getState(), selectedDrawing._id)) {
-				DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, selectedDrawing._id);
-			}
-		}
-	}, [selectedDrawing?._id]);
-
-	useEffect(() => {
 		if (statusCode && revCode) {
 			trigger(`${revisionPrefix}.statusCode`);
 		}
@@ -182,7 +169,11 @@ export const UploadListItem = ({
 		} else {
 			DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, drawingId);
 		}
-	}, [drawingId, fetched])
+
+		if (selectRevisionsPending(getState(), drawingId)) {
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
+		}
+}, [drawingId, fetched])
 
 	const drawingError = sidebarFormRequiredFields.some((field) => get(errors, field));
 	return (
