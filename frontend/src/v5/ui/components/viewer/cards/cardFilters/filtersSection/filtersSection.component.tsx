@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardFilter } from '../cardFilters.types';
+import { TicketFilter } from '../cardFilters.types';
 import { FilterChip } from '../filterChip/filterChip.component';
 import { Section } from './filtersSection.styles';
 import { FilterForm } from '../filterForm/filterForm.component';
@@ -26,7 +26,7 @@ import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers'
 import { isEqual } from 'lodash';
 
 type FiltersSectionProps = {
-	filters: CardFilter[];
+	filters: TicketFilter[];
 };
 export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 	const [selectedFilter, setSelectedFilter] = useState({});

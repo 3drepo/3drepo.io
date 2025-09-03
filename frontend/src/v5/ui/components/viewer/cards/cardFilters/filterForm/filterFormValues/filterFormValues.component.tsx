@@ -22,7 +22,7 @@ import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, Form
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect, useRef } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
-import { CardFilterType } from '../../cardFilters.types';
+import { TicketFilterType } from '../../cardFilters.types';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -36,10 +36,10 @@ import { ArrayFields, Value } from './filterFormValues.styles';
 type FilterFormValuesProps = {
 	module: string,
 	property: string,
-	type: CardFilterType,
+	type: TicketFilterType,
 };
 
-const getInputField = (type: CardFilterType) => {
+const getInputField = (type: TicketFilterType) => {
 	if (type === 'number') return FormNumberField;
 	if (isDateType(type)) return FormDateTime;
 	return FormTextField;

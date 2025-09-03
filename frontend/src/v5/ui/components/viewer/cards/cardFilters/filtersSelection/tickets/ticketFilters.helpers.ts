@@ -24,11 +24,11 @@ import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { isString, sortBy, uniqBy, compact } from 'lodash';
-import { CardFilterType, BaseFilter, CardFilter, CardFilterOperator } from '../../cardFilters.types';
+import { TicketFilterType, BaseFilter, TicketFilter, TicketFilterOperator } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 
-export const TYPE_TO_ICON: Record<CardFilterType, any> = {
+export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
 	'title': TextIcon,
 	'ticketCode': TextIcon,
@@ -47,7 +47,7 @@ export const TYPE_TO_ICON: Record<CardFilterType, any> = {
 	'number': NumberIcon,
 };
 
-export const DEFAULT_FILTERS: CardFilter[] = [
+export const DEFAULT_FILTERS: TicketFilter[] = [
 	{ module: '', type: 'title', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.title' }) },
 	{ module: '', type: 'ticketCode', property: formatMessage({ defaultMessage: 'Ticket ID', id: 'viewer.card.filters.element.ticketCode' }) },
 	{ module: '', type: 'template', property: formatMessage({ defaultMessage: 'Ticket template', id: 'viewer.card.filters.element.template' }) },
@@ -61,20 +61,20 @@ export const DEFAULT_FILTERS: CardFilter[] = [
 export const isBaseProperty = (propertyType) => DEFAULT_FILTERS.some(({ type }) => type === propertyType);
 const isBasePropertyName = (name) => ['Owner', 'Created at', 'Updated at', 'Status'].includes(name);
 
-const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): CardFilter[] => properties
+const propertiesToValidFilters = (properties: { name: string, type: string }[], module: string = ''): TicketFilter[] => properties
 	.filter(({ name, type }) => !(!module && isBasePropertyName(name)) && Object.keys(TYPE_TO_ICON).includes(type))
 	.map(({ name, type }) => ({
 		module,
 		property: name,
 		type,
-	}) as CardFilter);
+	}) as TicketFilter);
 
-const templateToFilters = (template: ITemplate): CardFilter[] => [
+const templateToFilters = (template: ITemplate): TicketFilter[] => [
 	...propertiesToValidFilters(template.properties, ''),
 	...template.modules.flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
 ];
 
-export const templatesToFilters = (templates: ITemplate[]): CardFilter[] => {
+export const templatesToFilters = (templates: ITemplate[]): TicketFilter[] => {
 	let filters = templates.flatMap(templateToFilters);
 	filters = uniqBy(filters, (f) => f.module + f.property + f.type);
 	filters = sortBy(filters, 'module');
@@ -86,10 +86,10 @@ export const templatesToFilters = (templates: ITemplate[]): CardFilter[] => {
 
 const toTicketFilter = (modulePropertyAndType: string) => {
 	const [module, property, type] = modulePropertyAndType.split('.');
-	return { module, property, type } as CardFilter;
+	return { module, property, type } as TicketFilter;
 };
 
-export const toTicketCardFilter = (filters: Record<string, BaseFilter>): CardFilter[] => (
+export const toTicketCardFilter = (filters: Record<string, BaseFilter>): TicketFilter[] => (
 	Object.entries(filters)
 		.map(([modulePropertyAndType, filter]) => ({
 			...toTicketFilter(modulePropertyAndType),
@@ -117,32 +117,32 @@ const encodeRFC3986URIComponent = (str) => encodeURIComponent(str).replace(
 	(c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
 );
 
-const getFilterPropertyAsQuery = ({ module, property, type }: CardFilter) => {
+const getFilterPropertyAsQuery = ({ module, property, type }: TicketFilter) => {
 	if (['template', 'ticketCode', 'title'].includes(type)) return `$${type}`;
 	if (module) return `${module}:${property}`;
 	return property;
 };
 
-const valueToQueryValueFormat = (value, operator: CardFilterOperator) => {
+const valueToQueryValueFormat = (value, operator: TicketFilterOperator) => {
 	if (isString(value)) return wrapWith(value, '"');
 	if (isRangeOperator(operator)) return `[${value[0]},${value[1]}]`;
 	return value;
 };
 
-const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: CardFilter) => {
+const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: TicketFilter) => {
 	const query = [getFilterPropertyAsQuery(moduelPropertyAndType), operator];
 	if (values?.length) {
 		query.push(values?.map((v) => valueToQueryValueFormat(v, operator)).join(','));
 	}
 	return query.join('::');
 };
-export const filtersToQuery = (filters: CardFilter[]) => {
+export const filtersToQuery = (filters: TicketFilter[]) => {
 	if (!filters?.length) return '';
 	const query = filters.map(filterToQueryElement).join('&&');
 	return encodeRFC3986URIComponent(wrapWith(query, "'"));
 };
 
-export const getValidOperators = (type: CardFilterType): CardFilterOperator[] => {
+export const getValidOperators = (type: TicketFilterType): TicketFilterOperator[] => {
 	if (isTextType(type)) {
 		if (isBaseProperty(type)) return ['is', 'nis', 'ss', 'nss'];
 		return ['ex', 'nex', 'is', 'nis', 'ss', 'nss'];
@@ -157,5 +157,5 @@ export const getValidOperators = (type: CardFilterType): CardFilterOperator[] =>
 		if (isBaseProperty(type)) return ['is', 'nis'];
 		return ['ex', 'nex', 'is', 'nis'];
 	}
-	return Object.keys(FILTER_OPERATOR_LABEL) as CardFilterOperator[];
+	return Object.keys(FILTER_OPERATOR_LABEL) as TicketFilterOperator[];
 };
