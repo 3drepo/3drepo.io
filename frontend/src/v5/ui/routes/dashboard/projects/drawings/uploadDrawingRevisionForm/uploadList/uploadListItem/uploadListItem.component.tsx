@@ -87,7 +87,7 @@ export const UploadListItem = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { trigger, setValue, setError, formState: { errors } } = useFormContext();
+	const { trigger, clearErrors, setValue, setError, formState: { errors } } = useFormContext();
 	const drawingId = useWatch({ name: `${revisionPrefix}.drawingId` });
 	const statusCode = useWatch({ name: `${revisionPrefix}.statusCode` });
 	const revCode = useWatch({ name: `${revisionPrefix}.revCode` });
@@ -172,7 +172,10 @@ export const UploadListItem = ({
 	}, []);
 	
 	useEffect(() => {
-		if (!drawingId) return;
+		if (!drawingId) {
+			clearErrors(sidebarFormRequiredFields);
+			return;
+		}
 
 		if (fetched) {
 			trigger(sidebarFormRequiredFields);

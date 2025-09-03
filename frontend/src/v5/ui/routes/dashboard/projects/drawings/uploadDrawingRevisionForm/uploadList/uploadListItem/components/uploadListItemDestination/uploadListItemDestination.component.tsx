@@ -50,12 +50,6 @@ const EMPTY_OPTION = fullDrawing({
 	isFavourite: false,
 });
 
-const NEW_ID = 'new';
-
-const getFilteredDrawingsOptions = createFilterOptions<IDrawing>({ trim: true });
-
-const sortByName = (options) => orderBy(options, ({ name }) => name.toLowerCase());
-
 interface IUploadListItemDestination {
 	value?: string;
 	revisionPrefix: string;
@@ -83,8 +77,13 @@ export const UploadListItemDestination = memo(({
 	const { getValues, setValue, setError, clearErrors } = useFormContext();
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const drawingsByName =  {};
+	const drawingsNames = [];
 	const drawings = DrawingsHooksSelectors.selectDrawings();
-	const selectedDrawing = useMemo(() => drawings.find((c) => c.name === value), [drawings, value]);
+	drawings.forEach(({name, ...rest}) => {
+		drawingsNames.push(name);
+		drawingsByName[name.toLowerCase()] = {name, ...rest};
+	});
 
 	const [processingDrawingsNames, setProcessingDrawingsNames] = useState([]);
 	const [newDrawingsInModal, setNewDrawingsInModal] = useState([]);
@@ -110,7 +109,7 @@ export const UploadListItemDestination = memo(({
 				clearErrors(name);
 			}
 
-			setNewOrExisting(drawings.find((drawing) => drawing.name === trimmedValue) ? 'existing' : 'new');
+			setNewOrExisting(drawingsNames.find((name) => name === trimmedValue) ? 'existing' : 'new');
 		} catch (validationError) {
 			if (validationError.message !== helperText) {
 				setError(name, validationError);
@@ -120,64 +119,51 @@ export const UploadListItemDestination = memo(({
 		}
 	};
 
-	const getFilterOptions = (options: IDrawing[], params) => {
+	const getFilterOptions = (options: string[], params) => {
 		const inputValue = params.inputValue.trim();
-
+		
 		// filter out currently selected value and drawings with insufficient permissions
-		const filteredOptions = getFilteredDrawingsOptions(options, params)
-			.filter((option) => option.name !== value && isCollaboratorRole(option.role));
+		const filtered = (options).filter((option) => {
+			const drawing = drawingsByName[option.toLowerCase()];
+			return isCollaboratorRole(drawing.role) && option.toLowerCase().includes(inputValue.toLowerCase());
+		});
 
-		const drawingNameExists = options.some((option) => inputValue.toLowerCase() === (option.name || '').toLowerCase());
+		if (!drawingsByName[inputValue.toLowerCase()] && isProjectAdmin) {
+			filtered.unshift(inputValue);
+		} 
 
-		if (inputValue && !drawingNameExists && isProjectAdmin) {
-			// create an extra option to transform into a
-			// "add new drawing" OR "name already used" option
-			filteredOptions.unshift({
-				...EMPTY_OPTION,
-				name: inputValue.trim(),
-			});
-		}
-
-		return filteredOptions;
+		return filtered;
 	};
 
-	const nameIsTaken = (drawing) => takenDrawingNames.map((n) => n.toLowerCase()).includes(drawing.name.toLowerCase());
+	const nameIsTaken = (name) => takenDrawingNames.map((n) => n.toLowerCase()).includes(name.toLowerCase());
 
-	const renderOption = (optionProps, option: IDrawing) => {
-		if (!option._id) {
+	const renderOption = (optionProps, option: string) => {
+		const optionDrawing = drawings.find(({name}) => name.toLowerCase() === option.toLowerCase());
+
+		if (!optionDrawing) {
 			// option is an extra
 			if (nameIsTaken(option)) {
-				return (<AlreadyUsedName key={option.name} />);
+				return (<AlreadyUsedName key={option} />);
 			}
 
 			if (isProjectAdmin && !error) {
 				const message = formatMessage({
 					id: 'drawing.uploads.destination.addNewDestination',
 					defaultMessage: 'Add <Bold>{name}</Bold> as a new drawing',
-				}, { Bold: (val: string) => <b>{val}</b>, name: option.name });
+				}, { Bold: (val: string) => <b>{val}</b>, name: option });
 				return (<NewDestination message={message} {...optionProps} />);
 			}
-		}
-
-		// option is an existing drawing
-		if (option._id) {
-			if (option._id === NEW_ID) {
-				const message = formatMessage({
-					id: 'drawing.uploads.destination.newDrawing',
-					defaultMessage: ' <Bold>{name}</Bold> is a new drawing',
-				}, { Bold: (val: string) => <b>{val}</b>, name: option.name });
-				return (<NewDestinationInUse message={message} {...optionProps} />);
-			}
-
+		} else {
+			// option is an existing drawing
 			return (
 				<ExistingDestination
-					key={option.name}
+					key={option}
 					emptyLabel={formatMessage({ id: 'drawingsUploads.list.item.title.latestRevision.empty', defaultMessage: 'Drawing empty' })}
 					inUse={nameIsTaken(option)}
-					name={option.name}
-					latestRevision={option.latestRevision}
-					hasRevisions={!!option.revisionsCount}
-					status={option.status}
+					name={option}
+					latestRevision={optionDrawing.latestRevision}
+					hasRevisions={!!optionDrawing.revisionsCount}
+					status={optionDrawing.status}
 					{...optionProps}
 				/>
 			);
@@ -185,16 +171,18 @@ export const UploadListItemDestination = memo(({
 		return (<></>);
 	};
 
-	const onDestinationChange = (e, newVal: IDrawing | null) => {
-		setValue(`${revisionPrefix}.drawingName`, newVal?.name?.trim() || '');
-		setValue(`${revisionPrefix}.drawingId`, newVal?._id || '', { shouldValidate: true });
+	const onDestinationChange = (e, newVal: string | null = '') => {
+		console.log('newval:' + newVal);
+		const drawing = drawings.find(({name}) => name === newVal) || { _id : ''};
+		setValue(`${revisionPrefix}.drawingName`, newVal);
+		setValue(`${revisionPrefix}.drawingId`, drawing._id , { shouldValidate: true });
 	};
 
 	const onOpen = () => {
 		setNewDrawingsInModal(
 			getValues('uploads')
 				.filter(({ drawingId, drawingName }, i) => !drawingId && i !== index && !!drawingName)
-				.map(({ drawingName }) => ({ name: drawingName, _id: NEW_ID, role: Role.COLLABORATOR })),
+				.map(({ drawingName }) => drawingName),
 		);
 
 		setDrawingNamesInModal(
@@ -217,19 +205,21 @@ export const UploadListItemDestination = memo(({
 		}
 	}, [currentDrawingName]);
 
+	const options = [...drawingsNames, ...newDrawingsInModal];
+
 	return (
 		<DestinationAutocomplete
 			{...props}
-			value={selectedDrawing}
+			value={value}
 			filterOptions={getFilterOptions}
 			getOptionDisabled={nameIsTaken}
-			getOptionLabel={(option: IDrawing) => option.name || ''}
+			// getOptionLabel={(option: IDrawing) => option.name || ''}
 			ListboxComponent={OptionsBox}
 			noOptionsText={isProjectAdmin ? NO_OPTIONS_TEXT_ADMIN : NO_OPTIONS_TEXT_NON_ADMIN}
 			onInputChange={handleInputChange}
 			onChange={onDestinationChange}
 			onOpen={onOpen}
-			options={sortByName([...drawings, ...newDrawingsInModal])}
+			options={options}
 			renderOption={renderOption}
 			disableClearable={!value}
 			renderInput={({ InputProps, ...params }) => (
