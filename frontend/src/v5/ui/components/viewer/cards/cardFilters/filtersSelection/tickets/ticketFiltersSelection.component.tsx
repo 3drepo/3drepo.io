@@ -16,7 +16,6 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { CardAction } from '../../../cardAction/cardAction.styles';
 import { useState } from 'react';
@@ -28,10 +27,11 @@ import { TicketFilter } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useTicketFiltersContext } from '../../ticketsFilters.context';
 
 export const FilterSelection = () => {
 	const [selectedFilter, setSelectedFilter] = useState<TicketFilter>(null);
-	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters();
+	const unusedFilters = useTicketFiltersContext().choosablefilters;
 	const showFiltersList = !selectedFilter?.property;
 	const disabled = !unusedFilters.length;
 
