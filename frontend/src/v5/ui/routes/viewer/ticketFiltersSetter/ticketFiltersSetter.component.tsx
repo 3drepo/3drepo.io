@@ -22,7 +22,7 @@ import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ViewerParams } from '../../routes.constants';
 import { Transformers, useSearchParam } from '../../useSearchParam';
-import { CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { StatusValue } from '@/v5/store/tickets/tickets.types';
 import { TicketStatusDefaultValues, TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
@@ -49,7 +49,7 @@ export const TicketFiltersSetter = () => {
 	, [containerOrFederation, revision, isFed]);
 
 
-	const getTicketFiltersFromCodes = (values): CardFilter[] => [{
+	const getTicketFiltersFromCodes = (values): TicketFilter[] => [{
 		module: '',
 		property: 'Ticket ID',
 		type: 'ticketCode',
@@ -59,7 +59,7 @@ export const TicketFiltersSetter = () => {
 		},
 	}];
 	
-	const getNonCompletedTicketFiltersByStatus = (): CardFilter => {
+	const getNonCompletedTicketFiltersByStatus = (): TicketFilter => {
 		const isCompletedValue = ({ type }: StatusValue) => [TicketStatusTypes.DONE, TicketStatusTypes.VOID].includes(type);
 		const getValuesByTemplate = ({ _id }) => selectStatusConfigByTemplateId(getState(), containerOrFederation, _id).values;
 
@@ -84,7 +84,7 @@ export const TicketFiltersSetter = () => {
 			},
 		};
 	};
-	const getNonCompletedTicketFiltersBySafetibase = (): CardFilter => ({
+	const getNonCompletedTicketFiltersBySafetibase = (): TicketFilter => ({
 		module: 'safetibase',
 		property: 'Treatment Status',
 		type: 'oneOf',
@@ -97,7 +97,7 @@ export const TicketFiltersSetter = () => {
 		},
 	});
 
-	const getNonCompletedTicketFilters = (): CardFilter[] => {
+	const getNonCompletedTicketFilters = (): TicketFilter[] => {
 		let filters = [getNonCompletedTicketFiltersByStatus()];
 		const hasSafetibase = templates.some((t) => t?.modules?.some((module) => module.type === 'safetibase'));
 		if (hasSafetibase) {
@@ -110,7 +110,7 @@ export const TicketFiltersSetter = () => {
 		if (templates.length) {
 			TicketsCardActionsDispatchers.resetFilters();
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
-			const filters: CardFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : getNonCompletedTicketFilters();
+			const filters: TicketFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : getNonCompletedTicketFilters();
 			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
 
 			if (ticketCodes.length) {

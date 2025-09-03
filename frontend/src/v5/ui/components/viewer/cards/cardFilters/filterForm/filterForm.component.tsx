@@ -16,7 +16,7 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { CardFilterOperator, CardFilterValue, CardFilterType, BaseFilter, CardFilter } from '../cardFilters.types';
+import { TicketFilterOperator, TicketFilterValue, TicketFilterType, BaseFilter, TicketFilter } from '../cardFilters.types';
 import { amendDateUpperBounds, floorToMinute, getDefaultOperator, getFilterFormTitle, isDateType, isRangeOperator } from '../cardFilters.helpers';
 import { getValidOperators, getOptionFromValue } from '../filtersSelection/tickets/ticketFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
@@ -40,13 +40,13 @@ type Option = {
 	type: string
 };
 
-type FormType = { selectOptions?: Option[], values: { value: CardFilterValue, displayValue?: string }[], operator: CardFilterOperator };
+type FormType = { selectOptions?: Option[], values: { value: TicketFilterValue, displayValue?: string }[], operator: TicketFilterOperator };
 type FilterFormProps = {
 	module: string,
 	property: string,
-	type: CardFilterType,
+	type: TicketFilterType,
 	filter?: BaseFilter,
-	onSubmit: (newFilter: CardFilter) => void,
+	onSubmit: (newFilter: TicketFilter) => void,
 	onCancel: () => void,
 };
 
