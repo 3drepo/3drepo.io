@@ -37,6 +37,9 @@ const SettingsSchema = Yup.object().shape({
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
 	numCacheThreads: schema.integer(1, 15),
 	clipPlaneBorderWidth: schema.number(0, 1),
+	clipPlaneGizmoSize: schema.number(20, 1000), // this is in pixels
+	clipPlaneVisualSize: schema.number(100, 4000), // this is in pixels
+	clipPlaneAxisSize: schema.number(0.1, 100), // this is a scaling factor
 	memoryThreshold: schema.number(0, 2032),
 	fovWeight: schema.number(0, 10),
 	meshFactor: schema.number(1, Number.POSITIVE_INFINITY),
@@ -86,7 +89,7 @@ const BasicSettings = (props) => {
 			</FormListItem>
 			<V5Divider />
 			<FormListItem>
-				Clipping plane border width
+				Clipping plane border thickness
 				<Field name="clipPlaneBorderWidth" render={ ({ field, form }) => {
 					return (
 						<div>
@@ -105,6 +108,25 @@ const BasicSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
+				Clipping plane visual size (px)
+				<Field name="clipPlaneVisualSize" render={ ({ field, form }) => {
+					return (
+						<div>
+							<ErrorTooltip title={form.errors.clipPlaneVisualSize || ''} placement="bottom-end">
+								<ShortInput
+									error={Boolean(form.errors.clipPlaneVisualSize)}
+									{...field}
+									helpertext={form.errors.clipPlaneVisualSize}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.clipPlaneVisualSize}
+							</V5ErrorText>
+						</div>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
 				Clipping plane border color
 				<Field name="clipPlaneBorderColor" render={ ({ field }) => (
 					<ColorPicker {...field} onChange={(val) => {
@@ -113,6 +135,45 @@ const BasicSettings = (props) => {
 					}} />
 				)} />
 			</FormListItem>
+			<FormListItem>
+				Clipping plane gizmo size (px)
+				<Field name="clipPlaneGizmoSize" render={ ({ field, form }) => {
+					return (
+						<div>
+							<ErrorTooltip title={form.errors.clipPlaneGizmoSize || ''} placement="bottom-end">
+								<ShortInput
+									error={Boolean(form.errors.clipPlaneGizmoSize)}
+									{...field}
+									helpertext={form.errors.clipPlaneGizmoSize}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.clipPlaneGizmoSize}
+							</V5ErrorText>
+						</div>
+					);
+				}} />
+			</FormListItem>
+			<FormListItem>
+				Clipping plane axis size (px)
+				<Field name="clipPlaneAxisSize" render={ ({ field, form }) => {
+					return (
+						<div>
+							<ErrorTooltip title={form.errors.clipPlaneAxisSize || ''} placement="bottom-end">
+								<ShortInput
+									error={Boolean(form.errors.clipPlaneAxisSize)}
+									{...field}
+									helpertext={form.errors.clipPlaneAxisSize}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.clipPlaneAxisSize}
+							</V5ErrorText>
+						</div>
+					);
+				}} />
+			</FormListItem>
+
 		</List>
 	);
 };
