@@ -155,7 +155,7 @@ const BasicSettings = (props) => {
 				}} />
 			</FormListItem>
 			<FormListItem>
-				Clipping plane axis size (px)
+				Clipping plane axis scale factor
 				<Field name="clipPlaneAxisSize" render={ ({ field, form }) => {
 					return (
 						<div>
