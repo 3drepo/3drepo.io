@@ -1111,7 +1111,7 @@ export class UnityUtil {
 	 * @param newSize
 	 */
 	public static setClipGizmoSize(newSize: number) {
-		UnityUtil.toUnity('SetGizmoSize', UnityUtil.LoadingState.VIEWER_READY, newSize);
+		UnityUtil.toUnity('SetGizmoSize', UnityUtil.LoadingState.VIEWER_READY, Number(newSize));
 	}
 
 	/**
@@ -1121,7 +1121,7 @@ export class UnityUtil {
 	 * @param newSize
 	 */
 	public static setClipPlaneSize(newSize: number) {
-		UnityUtil.toUnity('SetClippingPlaneSize', UnityUtil.LoadingState.VIEWER_READY, newSize);
+		UnityUtil.toUnity('SetClippingPlaneSize', UnityUtil.LoadingState.VIEWER_READY, Number(newSize));
 	}
 
 	/**
@@ -1131,7 +1131,7 @@ export class UnityUtil {
 	 * @param newScale
 	 */
 	public static setClipGizmoAxisScale(newScale: number) {
-		UnityUtil.toUnity('SetGizmoAxisScale', UnityUtil.LoadingState.VIEWER_READY, newScale);
+		UnityUtil.toUnity('SetGizmoAxisScale', UnityUtil.LoadingState.VIEWER_READY, Number(newScale));
 	}
 
 	/**
