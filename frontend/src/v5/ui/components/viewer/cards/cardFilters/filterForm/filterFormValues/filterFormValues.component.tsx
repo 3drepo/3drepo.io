@@ -32,6 +32,7 @@ import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
+import { useTicketFiltersContext } from '../../ticketsFilters.context';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -47,6 +48,8 @@ const getInputField = (type: TicketFilterType) => {
 
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
+	const {templates} = useTicketFiltersContext();
+
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
@@ -60,7 +63,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
 	const selectOptions = type === 'template' ?
-		TicketsCardHooksSelectors.selectCurrentTemplates().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
+		templates.map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
 		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property) : [];
 
 	const arrayFieldsRef = useRef(null);

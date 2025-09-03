@@ -78,8 +78,12 @@ export const templatesToFilters = (templates: ITemplate[]): TicketFilter[] => {
 	let filters = templates.flatMap(templateToFilters);
 	filters = uniqBy(filters, (f) => f.module + f.property + f.type);
 	filters = sortBy(filters, 'module');
+
+	// If theres only one template passed then get rid of the filter for templates
+	const defFilters = templates.length > 1 ? DEFAULT_FILTERS : DEFAULT_FILTERS.filter(({ type }) => type !== 'template');
+
 	return [
-		...DEFAULT_FILTERS,
+		...defFilters,
 		...filters,
 	];
 };
