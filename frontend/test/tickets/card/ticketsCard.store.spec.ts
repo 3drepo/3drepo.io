@@ -2,7 +2,7 @@ import { TicketsCardActions } from "@/v5/store/tickets/card/ticketsCard.redux";
 import { selectAvailableTemplatesFilters, selectFilters, selectCardFilters, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
 import { TicketsCardViews } from "@/v5/ui/routes/viewer/tickets/tickets.constants";
 import { createTestStore } from "../../test.helpers";
-import { BaseFilter, CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { BaseFilter, TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { DEFAULT_FILTERS, templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 
@@ -74,9 +74,9 @@ describe('Tickets: store', () => {
 				operator: 'gt',
 				values: [2],
 			};
-			const ticketIdCardFilter: CardFilter = { ...ticketIdFilter, filter: baseFilter };
-			const ticketTitleCardFilter: CardFilter = { ...ticketTitleFilter, filter: baseFilter };
-			const updatedTicketTitleCardFilter: CardFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
+			const ticketIdCardFilter: TicketFilter = { ...ticketIdFilter, filter: baseFilter };
+			const ticketTitleCardFilter: TicketFilter = { ...ticketTitleFilter, filter: baseFilter };
+			const updatedTicketTitleCardFilter: TicketFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
 			
 			describe('existing filters', () => {
 				it('should add a filter', () => {
@@ -152,7 +152,7 @@ describe('Tickets: store', () => {
 				operator: 'is',
 				values: [],
 			};
-			const ticketTitleCardFilter: CardFilter = { ...ticketTitleFilter, filter: baseFilter };
+			const ticketTitleCardFilter: TicketFilter = { ...ticketTitleFilter, filter: baseFilter };
 			dispatch(TicketsCardActions.setSelectedTicket(ticketId));
 			dispatch(TicketsCardActions.setSelectedTemplate(templateId));
 			dispatch(TicketsCardActions.setSelectedTicketPin(pinId));

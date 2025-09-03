@@ -19,7 +19,7 @@ import { FormSelect } from '@controls/inputs/formInputs.component';
 import { FILTER_OPERATOR_ICON, getFilterOperatorLabels } from '../../../cardFilters.helpers';
 import { getValidOperators } from '../../../filtersSelection/tickets/ticketFilters.helpers';
 import { MenuItem } from '@mui/material';
-import { CardFilterOperator, CardFilterType } from '../../../cardFilters.types';
+import { TicketFilterOperator, TicketFilterType } from '../../../cardFilters.types';
 import { FilterIconContainer } from './filterFormOperators.styles';
 
 const MenuItemContent = ({ operator, type }) => {
@@ -36,11 +36,11 @@ const MenuItemContent = ({ operator, type }) => {
 	);
 };
 
-type FilterFormOperatorsProps = { type: CardFilterType };
+type FilterFormOperatorsProps = { type: TicketFilterType };
 export const FilterFormOperators = ({ type }: FilterFormOperatorsProps) => {
 	const operators = getValidOperators(type);
 
-	const renderValue = (op: CardFilterOperator) => getFilterOperatorLabels(type)[op];
+	const renderValue = (op: TicketFilterOperator) => getFilterOperatorLabels(type)[op];
 
 	return (
 		<FormSelect
