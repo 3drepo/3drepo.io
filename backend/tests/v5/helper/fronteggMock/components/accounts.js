@@ -39,15 +39,15 @@ Accounts.createAccount = (name) => {
 
 Accounts.getAllUsersInAccount = (accountId) => Promise.resolve(Cache.getAllUsersInAccount(accountId));
 
-Accounts.addUserToAccount = async (accountId, email) => {
+Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 	const data = await findOne(USERS_DB_NAME, USERS_COL, { 'customData.email': email });
 	const id = Cache.doesUserExist(email)
 		? Cache.doesUserExist(email)
 		: data?.customData?.userId || generateUUIDString();
 
-	Cache.addUserToAccount(accountId, { id, email });
-	Cache.updateUserByEmail(email, { id, tenantId: accountId });
-	Cache.updateUserById(id, { email, tenantId: accountId });
+	Cache.addUserToAccount(accountId, { id, email, name, emailData });
+	Cache.updateUserByEmail(email, { id, tenantId: accountId, name, emailData });
+	Cache.updateUserById(id, { email, tenantId: accountId, name, emailData });
 
 	return id;
 };

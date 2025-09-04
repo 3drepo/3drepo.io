@@ -93,7 +93,7 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 		const url = `${config.vendorDomain}/identity/resources/users/v1/${userId}`;
 
 		const user = await Users.getUserById(userId);
-		const [existingFirstName, existingLastName] = splitName(user.name);
+		const [existingFirstName, existingLastName] = await splitName(user.name);
 
 		const payload = {
 			name: `${firstName || existingFirstName} ${lastName || existingLastName}`.trim(),

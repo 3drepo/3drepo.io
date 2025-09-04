@@ -52,6 +52,7 @@ const { generateRandomString, determineTestGroup } = require('../../helper/servi
 const user = {
 	user: generateRandomString(),
 	customData: {
+		userId: generateRandomString(),
 		firstName: generateRandomString(),
 		lastName: generateRandomString(),
 		email: generateRandomString(),
@@ -72,6 +73,16 @@ const user = {
 	},
 };
 
+const ssoUser = {
+	name: `${user.customData.firstName} ${user.customData.lastName}`,
+	email: user.customData.email,
+	profilePictureUrl: generateRandomString(),
+	metadata: JSON.stringify({
+		company: user.customData.billing.billingInfo.company,
+		countryCode: user.customData.billing.billingInfo.countryCode,
+	}),
+};
+
 UsersModel.getUserByUsername.mockImplementation((username) => {
 	if (username === user.user) {
 		return user;
@@ -87,8 +98,8 @@ const formatUser = (userProfile, hasAvatar, hash) => ({
 	email: userProfile.customData.email,
 	hasAvatar,
 	apiKey: userProfile.customData.apiKey,
-	countryCode: userProfile.customData.billing.billingInfo.countryCode,
-	company: userProfile.customData.billing.billingInfo.company,
+	countryCode: userProfile.customData.billing?.billingInfo.countryCode,
+	company: userProfile.customData.billing?.billingInfo.company,
 	...(hash ? { intercomRef: hash } : {}),
 });
 
@@ -96,54 +107,80 @@ const tesGetProfileByUsername = () => {
 	describe('Get user profile by username', () => {
 		const projection = {
 			user: 1,
-			'customData.firstName': 1,
-			'customData.lastName': 1,
-			'customData.email': 1,
+			'customData.userId': 1,
 			'customData.apiKey': 1,
-			'customData.billing.billingInfo.countryCode': 1,
-			'customData.billing.billingInfo.company': 1,
 		};
 
 		test('should return user profile', async () => {
 			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
-			FilesManager.fileExists.mockResolvedValueOnce(false);
+			FronteggService.getUserById.mockResolvedValueOnce(ssoUser);
 
 			const res = await Users.getProfileByUsername(user.user);
-			expect(res).toEqual(formatUser(user, false));
+			expect(res).toEqual(formatUser(user, true));
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(user.customData.userId);
+		});
+
+		test('should return user profile with empty metadata if it does not exist', async () => {
+			const userWithoutMetadata = {
+				user: generateRandomString(),
+				customData: {
+					userId: generateRandomString(),
+					firstName: generateRandomString(),
+					lastName: generateRandomString(),
+					email: generateRandomString(),
+					avatar: true,
+					apiKey: 123,
+					resetPasswordToken: {
+						token: generateRandomString(),
+						expiredAt: new Date(2030, 1, 1),
+					},
+
+					mailListOptOut: false,
+				},
+			};
+			const ssoUserNoMeta = {
+				name: `${userWithoutMetadata.customData.firstName} ${userWithoutMetadata.customData.lastName}`,
+				email: userWithoutMetadata.customData.email,
+				profilePictureUrl: generateRandomString(),
+			};
+			UsersModel.getUserByUsername.mockResolvedValueOnce(userWithoutMetadata);
+			FronteggService.getUserById.mockResolvedValueOnce(ssoUserNoMeta);
+
+			const res = await Users.getProfileByUsername(userWithoutMetadata.user);
+			expect(res).toEqual(formatUser(userWithoutMetadata, true));
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(userWithoutMetadata.user, projection);
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(userWithoutMetadata.customData.userId);
 		});
 
 		test('should return user profile with intercom reference if configured', async () => {
 			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
-			FilesManager.fileExists.mockResolvedValueOnce(false);
+			FronteggService.getUserById.mockResolvedValueOnce(ssoUser);
 
 			const hash = generateRandomString();
 			Intercom.generateUserHash.mockReturnValueOnce(hash);
 			const res = await Users.getProfileByUsername(user.user);
-			expect(res).toEqual(formatUser(user, false, hash));
+			expect(res).toEqual(formatUser(user, true, hash));
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
-		});
-
-		test('should return user profile with avatar', async () => {
-			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
-			FilesManager.fileExists.mockResolvedValueOnce(true);
-
-			const res = await Users.getProfileByUsername(user.user);
-			expect(res).toEqual(formatUser(user, true));
-			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
-			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(user.customData.userId);
 		});
 
 		test('should return user profile with SSO user', async () => {
 			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
-			FilesManager.fileExists.mockResolvedValueOnce(true);
+			FronteggService.getUserById.mockResolvedValueOnce(ssoUser);
 
 			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user, true));
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(user.customData.userId);
 		});
 	});
 };

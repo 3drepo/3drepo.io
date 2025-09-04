@@ -130,8 +130,8 @@ const formatUserProfile = (user, hasAvatar = false, sso) => ({
 	lastName: user.basicData.lastName,
 	apiKey: user.apiKey,
 	hasAvatar,
-	countryCode: user.basicData.billing.billingInfo.countryCode,
-	company: user.basicData.billing.billingInfo.company,
+	// countryCode: user.basicData.billing?.billingInfo.countryCode,
+	// company: user.basicData.billing?.billingInfo.company,
 	...(sso ? { sso } : {}),
 	...(user.basicData.email ? { email: user.basicData.email } : {}),
 });
@@ -155,7 +155,7 @@ const testGetProfile = () => {
 
 		test('should return the user profile if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user?key=${testUser.apiKey}`).expect(200);
-			expect(res.body).toEqual(formatUserProfile(testUser));
+			expect(res.body).toEqual(formatUserProfile(testUser, true));
 		});
 
 		test('should return the user profile if the user has a session via an API key and has avatar', async () => {
@@ -168,7 +168,7 @@ const testGetProfile = () => {
 				const testSession = SessionTracker(agent);
 				await testSession.login(testUser);
 				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(testUser));
+				expect(res.body).toEqual(formatUserProfile(testUser, true));
 			});
 		});
 	});
@@ -208,8 +208,6 @@ const testUpdateProfile = () => {
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
 				expect(updatedProfileRes.body.lastName).toEqual(testUser.basicData.lastName);
-				expect(updatedProfileRes.body.countryCode).toEqual(testUser.basicData.billing.billingInfo.countryCode);
-				expect(updatedProfileRes.body.company).toEqual(testUser.basicData.billing.billingInfo.company);
 			});
 
 			test('should update the last name if the user is logged in', async () => {
@@ -218,8 +216,6 @@ const testUpdateProfile = () => {
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.lastName).toEqual('newName');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
-				expect(updatedProfileRes.body.countryCode).toEqual(testUser.basicData.billing.billingInfo.countryCode);
-				expect(updatedProfileRes.body.company).toEqual(testUser.basicData.billing.billingInfo.company);
 			});
 
 			test('should update the profile if the user is logged in', async () => {

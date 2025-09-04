@@ -279,6 +279,38 @@ const testUpdateUserDetails = () => {
 			);
 		});
 
+		test('Should autopopulate the metadata if available and not provided', async () => {
+			const userId = generateRandomString();
+			const metadataInfo = generateRandomObject();
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const profilePictureUrl = generateRandomString();
+			const existingUser = {
+				name: `${generateRandomString()} ${generateRandomString()}`,
+				profilePictureUrl: generateRandomString(),
+				metadata: JSON.stringify(metadataInfo),
+			};
+
+			const expectedPayload = {
+				name: `${firstName} ${lastName}`,
+				profilePictureUrl,
+				metadata: JSON.stringify(metadataInfo),
+			};
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce(existingUser);
+			WebRequests.put.mockResolvedValueOnce();
+
+			await expect(Users.updateUserDetails(
+				userId,
+				{ firstName, lastName, profilePictureUrl },
+			)).resolves.toEqual(undefined);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), expectedPayload, { headers: bearerHeader },
+			);
+		});
+
 		test('Should update user\'s first name only', async () => {
 			const userId = generateRandomString();
 			const metadataInfo = generateRandomObject();

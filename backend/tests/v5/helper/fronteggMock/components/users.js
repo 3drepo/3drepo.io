@@ -17,6 +17,10 @@
 
 const newAvatar = 'newAvatarUrl';
 
+const { src } = require('../../path');
+
+const { splitName } = require(`${src}/utils/helper/strings`);
+
 const UsersCache = require('./cache');
 
 const Users = {};
@@ -35,6 +39,19 @@ Users.triggerPasswordReset = process.env.NODE_ENV === 'testV5' ? jest.fn() : (()
 
 Users.uploadAvatar = (userId) => Promise.resolve(UsersCache.updateUserById(userId, { profilePictureUrl: newAvatar }));
 
-Users.updateUserDetails = (userId, payload) => Promise.resolve(UsersCache.updateUserById(userId, payload));
+Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUrl, ...metadata }) => {
+	const user = await Users.getUserById(userId);
+
+	const [existingFirstName, existingLastName] = await splitName(user.name);
+
+	const newPayload = {
+		name: `${firstName || existingFirstName} ${lastName || existingLastName}`.trim(),
+		metadata: Object.keys(metadata).length
+			? JSON.stringify(metadata) : user.metadata,
+		profilePictureUrl: profilePictureUrl || user.profilePictureUrl,
+	};
+
+	return Promise.resolve(UsersCache.updateUserById(userId, newPayload));
+};
 
 module.exports = Users;

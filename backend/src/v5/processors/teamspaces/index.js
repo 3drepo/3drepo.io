@@ -42,6 +42,7 @@ const { logger } = require('../../utils/logger');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
 const { removeUserFromAllModels } = require('../../models/modelSettings');
 const { removeUserFromAllProjects } = require('../../models/projectSettings');
+const { splitName } = require('../../utils/helper/strings');
 const { templates } = require('../../utils/responseCodes');
 
 const Teamspaces = {};
@@ -111,8 +112,6 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 };
 
 Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
-	const regexSplitForName = /\s(.*)/;
-
 	const membersInTeamspace = [];
 	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
 	const accountUsers = await getAllUsersInAccount(tenantId);
@@ -121,6 +120,7 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 		_id: 0,
 		user: 1,
 		'customData.userId': 1,
+		'customData.email': 1,
 	};
 
 	const emailToUsers = {};
@@ -135,27 +135,24 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 	const listOfUsersFromEmails = await getUserInfoFromEmailArray(emails, projection);
 
 	const rawData = listOfUsersFromEmails.map((user) => {
-		const { email, userId, name, metadata } = accountUsers.filter((u) => u.id === user.customData?.userId)[0];
+		const { email, name, metadata } = accountUsers.filter((u) => u.email === user.customData?.email)[0];
 
-		const [firstName, lastName] = name?.split(regexSplitForName);
+		const [firstName, lastName] = splitName(name);
 		const company = metadata?.company;
 
-		return { email, userId, firstName, lastName, company, user: user.user };
-	});
+		return { email, userId: user?.customData?.userId, firstName, lastName, company, user: user.user };
+	}).filter((u) => u !== undefined);
 
-	const addUserToMemberList = ({ user, customData }) => {
-		const { firstName, lastName, billing, userId, email } = customData;
+	const addUserToMemberList = ({ user, firstName, lastName, billing, userId, email, company }) => {
 		membersInTeamspace.push(deleteIfUndefined(
-			{ user, firstName, lastName, company: billing?.billingInfo?.company }));
-		return { email, userId };
+			{ user, firstName, lastName, company: billing?.billingInfo?.company || company }));
+		return { userId, email };
 	};
 
 	await Promise.all(rawData.map(
 		async (data) => {
-			const { userId, email } = addUserToMemberList({ user: data.user, customData: data });
-
+			const { userId, email } = addUserToMemberList(data);
 			const { id } = emailToUsers[email];
-
 			// update the mongo userId to match
 			if (userId !== id) await updateUserId(data.user, id);
 
@@ -179,7 +176,9 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 
 			await createNewUserRecord(userRec);
 			const newRawData = await getUserInfoFromEmailArray([email]);
-			addUserToMemberList(newRawData[0]);
+			addUserToMemberList(
+				newRawData.map(({ user, customData }) => ({ user, ...customData }))[0],
+			);
 		}));
 	}
 
@@ -235,7 +234,6 @@ Teamspaces.addTeamspaceMember = async (teamspace, userToAdd, invitedBy) => {
 	const emailData = invitedBy ? {
 		teamspace,
 		sender: [inviterDetails.firstName, inviterDetails.lastName].join(' '),
-
 	} : undefined;
 	const inviteeName = [inviteeDetails.firstName, inviteeDetails.lastName].join(' ');
 
