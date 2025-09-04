@@ -63,9 +63,9 @@ const paramToInputProps = (value, setter) => ({
 type TicketsTableProps = {
 	isNewTicketDirty: boolean,
 	setTicketValue: SetTicketValue,
-}
+};
 
-export const TicketsTable = ({isNewTicketDirty, setTicketValue}: TicketsTableProps) => {
+export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
 	const history = useHistory();
 	const params = useParams<DashboardTicketsParams>();
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
@@ -76,10 +76,11 @@ export const TicketsTable = ({isNewTicketDirty, setTicketValue}: TicketsTablePro
 
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [showCompleted, setShowCompleted] = useSearchParam('showCompleted', Transformers.BOOLEAN, true);
-	const [containerOrFederation, , setContainerOrFederation] = useSearchParam('containerOrFederation');
+	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const models = useSelectedModels();
 
 	const setTemplate = useCallback((newTemplate) => {
+		setTicketValue();
 		const newParams = { ...params, template: newTemplate };
 		const path = generatePath(TICKETS_ROUTE + window.location.search, newParams);
 		history.push(path);
@@ -105,7 +106,7 @@ export const TicketsTable = ({isNewTicketDirty, setTicketValue}: TicketsTablePro
 
 	const newTicketButtonIsDisabled = useMemo(() =>
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
-		[models, containerOrFederation]);
+	[models, containerOrFederation]);
 
 	const filterTickets = useCallback(throttle((items, query: string) => items.filter((ticket) => {
 		const templateCode = templates.find(({ _id }) => _id === ticket.type).code;
@@ -123,7 +124,7 @@ export const TicketsTable = ({isNewTicketDirty, setTicketValue}: TicketsTablePro
 		if (!models.length) return;
 
 		containersAndFederations.forEach((modelId) => {
-			if (selectTicketsHaveBeenFetched(getState(),modelId)) return;
+			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
 			const isFederation = isFed(modelId);
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFederation);
 			if (isFederation) {
@@ -218,10 +219,10 @@ export const TicketsTable = ({isNewTicketDirty, setTicketValue}: TicketsTablePro
 	);
 };
 
-const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValue }) => {	
+const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValue }) => {
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const params = useParams<DashboardTicketsParams>();
-	const { ticketId, teamspace, project, template } = params
+	const { ticketId, teamspace, project, template } = params;
 	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY);
 
 	const isNewTicket = (ticketId || '').toLowerCase() === NEW_TICKET_ID;
@@ -237,46 +238,47 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 		return pathname + (ticketId ? `?ticketId=${ticketId}` : '');
 	};
 
+	const clearTicketId = () => setTicketValue();
+
 	useEffect(() => {
 		if (containersAndFederations.includes(containerOrFederation)) return;
 		clearTicketId();
 	}, [containersAndFederations, containerOrFederation]);
 
-	const clearTicketId = () => setTicketValue();
 
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 
 	return (
-	<SidePanel open={!!ticketId && !!containerOrFederation}>
-		<SlidePanelHeader>
-			<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
-				<OpenInViewerButton disabled={isNewTicket}>
-					<FormattedMessage
-						id="ticketsTable.button.openIn3DViewer"
-						defaultMessage="Open in 3D viewer"
+		<SidePanel open={!!ticketId && !!containerOrFederation}>
+			<SlidePanelHeader>
+				<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
+					<OpenInViewerButton disabled={isNewTicket}>
+						<FormattedMessage
+							id="ticketsTable.button.openIn3DViewer"
+							defaultMessage="Open in 3D viewer"
+						/>
+					</OpenInViewerButton>
+				</Link>
+				<CircleButton onClick={clearTicketId}>
+					<ExpandIcon />
+				</CircleButton>
+			</SlidePanelHeader>
+			<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
+				{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
+				{isNewTicket && (
+					<NewTicketSlide
+						presetValue={presetValue}
+						template={selectedTemplate}
+						containerOrFederation={containerOrFederation}
+						onSave={onSaveTicket}
+						onDirtyStateChange={setIsNewTicketDirty}
 					/>
-				</OpenInViewerButton>
-			</Link>
-			<CircleButton onClick={clearTicketId}>
-				<ExpandIcon />
-			</CircleButton>
-		</SlidePanelHeader>
-		<TicketContextComponent isViewer={false} containerOrFederation={containerOrFederation}>
-			{!isNewTicket && (<TicketSlide ticketId={ticketId} template={selectedTemplate} clearTicketId={clearTicketId} />)}
-			{isNewTicket && (
-				<NewTicketSlide
-					presetValue={presetValue}
-					template={selectedTemplate}
-					containerOrFederation={containerOrFederation}
-					onSave={onSaveTicket}
-					onDirtyStateChange={setIsNewTicketDirty}
-				/>
-			)}
-		</TicketContextComponent>
-	</SidePanel>
-	)
-}
+				)}
+			</TicketContextComponent>
+		</SidePanel>
+	);
+};
 
 export const TabularView = () => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
