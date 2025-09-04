@@ -116,12 +116,11 @@ const testGetTeamspaceMembers = () => {
 			jobToUsers.forEach(({ _id, users }) => users.forEach((user) => { userToJob[user] = _id; }));
 
 			const expectedData = [testUser, ...members].map(({ user, basicData }) => {
-				const { firstName, lastName, billing } = basicData;
+				const { firstName, lastName } = basicData;
 				const data = {
 					firstName,
 					lastName,
 					user,
-					company: billing?.billingInfo?.company,
 				};
 
 				if (userToJob[user]) {
