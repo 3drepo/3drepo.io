@@ -20,20 +20,19 @@ import { FormattedMessage } from 'react-intl';
 import { useFormContext } from 'react-hook-form';
 import { MenuItem } from '@mui/material';
 import { FormNumberField, FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
-import { get, isNumber } from 'lodash';
+import { get } from 'lodash';
 import { Heading, Title, FlexContainer } from './sidebarForm.styles';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
-import { DrawingRevisionsHooksSelectors, DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MODEL_UNITS } from '../../../models.helpers';
 import { DoubleInputLineContainer } from '../../drawingDialogs/drawingForm.styles';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CALIBRATION_INVALID_RANGE_ERROR } from '@/v5/validation/drawingSchemes/drawingSchemes';
 
 export const SidebarForm = () => {
 	const types = DrawingsHooksSelectors.selectTypes();
-	const { getValues, formState: { errors, dirtyFields }, trigger, watch } = useFormContext();
+	const { getValues, formState: { errors } } = useFormContext();
 	const { fields, selectedId } = useContext(UploadFilesContext);
 	// @ts-ignore
 	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
@@ -88,7 +87,7 @@ export const SidebarForm = () => {
 				/>
 				<FormNumberField
 					name={`${revisionPrefix}.calibration.verticalRange.1`}
-					formError={getError('calibration.verticalRange.1') ? {} : ''}
+					formError={getError('calibration.verticalRange.1')}
 					label={formatMessage({ id: 'drawings.form.topExtent', defaultMessage: 'Top Extent' })}
 					required
 					defaultValue={1}
