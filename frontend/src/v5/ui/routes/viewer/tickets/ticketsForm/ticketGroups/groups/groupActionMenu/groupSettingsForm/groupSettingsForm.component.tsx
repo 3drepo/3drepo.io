@@ -133,6 +133,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		formState: { errors, isValid, isDirty },
 		setValue,
 		getValues,
+		trigger,
 	} = formData;
 
 	const getFormIsValid = () => {
@@ -221,6 +222,10 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		});
 	}, []);
 
+	useEffect(() => {
+		if (!isDirty) return;
+		trigger();
+	}, [isSmart, isDirty]);
 
 	useEffect(() => {
 		setCurrentPrefixes(mergePrefixes(prefixes, subPrefixes(newPrefix)));

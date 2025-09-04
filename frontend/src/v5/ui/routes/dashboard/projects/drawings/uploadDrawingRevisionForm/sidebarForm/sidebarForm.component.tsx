@@ -17,7 +17,7 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
-import { useFormContext } from 'react-hook-form';
+import { FieldError, useFormContext } from 'react-hook-form';
 import { MenuItem } from '@mui/material';
 import { FormNumberField, FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { get, isNumber } from 'lodash';
@@ -30,16 +30,17 @@ import { DoubleInputLineContainer } from '../../drawingDialogs/drawingForm.style
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CALIBRATION_INVALID_RANGE_ERROR } from '@/v5/validation/drawingSchemes/drawingSchemes';
+import { UploadDrawingFormType } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 
 export const SidebarForm = () => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const types = DrawingsHooksSelectors.selectTypes();
-	const { getValues, formState: { errors, dirtyFields }, trigger, watch } = useFormContext();
+	const { getValues, formState: { errors, dirtyFields }, trigger, watch } = useFormContext<UploadDrawingFormType>();
 	const { fields, selectedId } = useContext(UploadFilesContext);
 	// @ts-ignore
-	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
-	const revisionPrefix = `uploads.${selectedIndex}`;
+	const selectedIndex: number = fields.findIndex(({ uploadId }) => uploadId === selectedId);
+	const revisionPrefix = `uploads.${selectedIndex}` as `uploads.${number}`;
 	const [drawingId, drawingName] = getValues([`${revisionPrefix}.drawingId`, `${revisionPrefix}.drawingName`]);
 	const disableDrawingFields = !(drawingName && !drawingId);
 	const getError = (field: string) => get(errors, `${revisionPrefix}.${field}`);
@@ -48,7 +49,8 @@ export const SidebarForm = () => {
 	const hasPendingRevisions = !!DrawingRevisionsHooksSelectors.selectRevisionsPending(drawingId);
 	const drawingRevisionsArePending = !!DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
 	const needsFetchingCalibration = hasActiveRevisions && (hasPendingRevisions || drawingRevisionsArePending) && !isNumber(verticalRange[0]);
-	const hideBottomExtentError = (errors.calibration?.verticalRange || []).some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
+	const hideBottomExtentError = (errors.uploads?.[selectedIndex]?.calibration?.verticalRange || [])
+		.some((e: FieldError) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
 
 	useEffect(() => {
 		if (get(dirtyFields, `${revisionPrefix}.calibration.verticalRange`)?.some((v) => v)) {

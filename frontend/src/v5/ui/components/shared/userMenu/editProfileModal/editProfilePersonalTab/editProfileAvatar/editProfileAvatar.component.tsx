@@ -110,7 +110,7 @@ export const EditProfileAvatar = ({ user }: EditProfilePersonalTabProps) => {
 					/>
 				</UserInfo>
 			</Header>
-			{(fileSizeError || error) && <ErrorMessage title={fileSizeError || error.message} />}
+			{(fileSizeError || error) && <ErrorMessage title={fileSizeError || error.message?.toString()} />}
 		</>
 	);
 };

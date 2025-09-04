@@ -29,14 +29,14 @@ import {
 } from '@/v5/services/selectorsHooks';
 import { getSupportedDrawingRevisionsFileExtensions } from '@controls/fileUploader/uploadFile';
 import { UploadFiles } from '@components/shared/uploadFiles/uploadFiles.component';
-import { UploadFieldArray, UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
+import {  UploadFilesContextComponent } from '@components/shared/uploadFiles/uploadFilesContext';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
-import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
+import { UploadDrawingFormType } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 
 const REVISION_NAME_MAX_LENGTH = 50;
 
@@ -44,8 +44,6 @@ type UploadModalLabelTypes = {
 	isUploading: boolean;
 	fileCount: number;
 };
-type FormType = UploadFieldArray<UploadItemFields>;
-
 const uploadModalLabels = ({ isUploading, fileCount }: UploadModalLabelTypes) => (isUploading
 	? {
 		title: formatMessage({
@@ -94,7 +92,7 @@ export const UploadDrawingRevisionForm = ({
 	const [isPresetLoading, setIsPresetLoading] = useState(!!presetFile);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
-	const formData = useForm<FormType>({
+	const formData = useForm<UploadDrawingFormType>({
 		mode: 'onChange',
 		resolver: !isUploading ? yupResolver(UploadsSchema) : undefined,
 		context: {

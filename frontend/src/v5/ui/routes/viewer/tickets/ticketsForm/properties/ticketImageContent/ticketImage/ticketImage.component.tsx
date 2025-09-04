@@ -26,33 +26,34 @@ import { InputContainer, Label } from './ticketImage.styles';
 import { ImagesModal } from '@components/shared/modalsDispatcher/templates/imagesModal/imagesModal.component';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useSyncProps } from '@/v5/helpers/syncProps.hooks';
+import { useChangeAndBlur as useChangeAndBlur } from '../../properties.hooks';
 
 type TicketImageProps = FormInputProps & { onImageClick: () => void; inputRef? };
 export const TicketImage = ({ value, onChange, onBlur, disabled, label, helperText, onImageClick, inputRef = undefined, ...props }: TicketImageProps) => {
 	const imgSrc = getImgSrc(value);
 	const [imgInModal, setImgInModal] = useState(imgSrc);
 	const syncProps = useSyncProps({ images: [imgInModal] });
+	const onChangeAndBlur = useChangeAndBlur(value, onChange, onBlur);
 	
 	const handleImageClick = () => DialogsActionsDispatchers.open(ImagesModal, {
 		onAddMarkup: disabled
 			? null
-			: (newValue) => onChange(newValue ? stripBase64Prefix(newValue) : null),
+			: (newValue) => onChangeAndBlur(newValue ? stripBase64Prefix(newValue) : null),
 	}, syncProps);
 
 	const onUploadNewImage = (newValue) => {
 		if (!newValue) {
-			onChange(newValue);
+			onChangeAndBlur(newValue);
 			return;
 		}
 
 		setImgInModal(newValue);
 		DialogsActionsDispatchers.open(ImagesModal, {
-			onClose: (newImages) => onChange(stripBase64Prefix(newImages[0])),
+			onClose: (newImages) => onChangeAndBlur(stripBase64Prefix(newImages[0])),
 			onAddMarkup: setImgInModal,
 		}, syncProps);
 	};
 
-	useEffect(() => onBlur?.(), [value]);
 	useEffect(() => { setImgInModal(imgSrc); }, [imgSrc]);
 
 	return (
