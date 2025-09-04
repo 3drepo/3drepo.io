@@ -21,8 +21,8 @@ const { generateRandomString, determineTestGroup } = require('../../../helper/se
 
 const Permissions = require(`${src}/utils/permissions`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-jest.mock('../../../../../src/v5/models/teamspaceSettings');
-const Teamspaces = require(`${src}/models/teamspaceSettings`);
+jest.mock('../../../../../src/v5/processors/teamspaces');
+const Teamspaces = require(`${src}/processors/teamspaces`);
 jest.mock('../../../../../src/v5/models/projectSettings');
 const Projects = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../src/v5/models/modelSettings');
@@ -39,18 +39,29 @@ ModelSettings.getModelById.mockImplementation(() => (expectedSettings));
 ModelSettings.getContainerById.mockImplementation(() => (expectedSettings));
 ModelSettings.getFederationById.mockImplementation(() => (expectedSettings));
 ModelSettings.getDrawingById.mockImplementation(() => (expectedSettings));
-Teamspaces.getTeamspaceAdmins.mockImplementation(() => (['tsAdmin']));
 Projects.getProjectAdmins.mockImplementation(() => (['projAdmin']));
 
 const testIsTeamspaceAdmin = () => {
 	describe('Is teamspace admin', () => {
 		test('should return true if the user is an admin', async () => {
-			const res = await Permissions.isTeamspaceAdmin('abc', 'tsAdmin');
-			expect(res).toBeTruthy();
+			Teamspaces.getTeamspaceAdmins.mockResolvedValueOnce(true);
+			await expect(Permissions.isTeamspaceAdmin('abc', 'tsAdmin')).resolves.toBeTruthy();
 		});
 		test('should return false if the user is not an admin', async () => {
-			const res = await Permissions.isTeamspaceAdmin('abc', 'someoneElse');
-			expect(res).toBeFalsy();
+			Teamspaces.getTeamspaceAdmins.mockResolvedValueOnce(false);
+			await expect(Permissions.isTeamspaceAdmin('abc', 'someoneElse')).resolves.toBeFalsy();
+		});
+	});
+};
+const testIsTeamspaceMember = () => {
+	describe('Is teamspace member', () => {
+		test('should return true if the user is a member', async () => {
+			Teamspaces.getTeamspaceMembers.mockResolvedValueOnce(true);
+			await expect(Permissions.isTeamspaceMember('abc', 'tsMember')).resolves.toBeTruthy();
+		});
+		test('should return false if the user is not a member', async () => {
+			Teamspaces.getTeamspaceMembers.mockResolvedValueOnce(false);
+			await expect(Permissions.isTeamspaceMember('abc', 'someoneElse')).resolves.toBeFalsy();
 		});
 	});
 };
@@ -492,15 +503,16 @@ const testHasCommenterAccessToFederation = () => {
 
 const testHasAdminAccessToFederation = () => {
 	describe.each([
-		['a', false],
-		['b', false],
-		['c', false],
-		['projAdmin', true],
-		['tsAdmin', true],
-		['nobody', false],
-	])('Has admin access to federation', (user, result) => {
+		['a', false, false],
+		['b', false, false],
+		['c', false, false],
+		['projAdmin', true, true],
+		['tsAdmin', true, true],
+		['nobody', false, false],
+	])('Has admin access to federation', (user, adminAccess, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
+			Teamspaces.isTeamspaceAdmin.mockResolvedValueOnce(true);
 			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', 'model', user)).toBe(result);
 		});
 	});
@@ -508,6 +520,7 @@ const testHasAdminAccessToFederation = () => {
 	describe('Federation does not belong to the project', () => {
 		test('should return false if the federation does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
+			Teamspaces.isTeamspaceAdmin.mockResolvedValueOnce(true);
 			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', 'model', 'a')).toBe(false);
 		});
 	});
@@ -515,6 +528,7 @@ const testHasAdminAccessToFederation = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testIsTeamspaceAdmin();
+	testIsTeamspaceMember();
 	testIsProjectAdmin();
 	testHasProjectAdminPermissions();
 	testHasReadAccessToSomeModels();

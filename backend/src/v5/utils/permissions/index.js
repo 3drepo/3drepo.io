@@ -23,16 +23,12 @@ const {
 } = require('./permissions.constants');
 const { findModels, getContainerById, getDrawingById, getFederationById, getModelById } = require('../../models/modelSettings');
 const { getProjectAdmins, modelsExistInProject } = require('../../models/projectSettings');
-const { getTeamspaceAdmins } = require('../../models/teamspaceSettings');
-const { isTeamspaceMember } = require('../../processors/teamspaces');
+const { isTeamspaceAdmin, isTeamspaceMember } = require('../../processors/teamspaces');
 const { modelTypes } = require('../../models/modelSettings.constants');
 
 const Permissions = {};
 
-Permissions.isTeamspaceAdmin = async (teamspace, username) => {
-	const admins = await getTeamspaceAdmins(teamspace);
-	return admins.includes(username);
-};
+Permissions.isTeamspaceAdmin = isTeamspaceAdmin;
 
 Permissions.isProjectAdmin = async (teamspace, project, username) => {
 	const admins = await getProjectAdmins(teamspace, project);

@@ -24,7 +24,6 @@ const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revo
 const {
 	createTeamspaceSettings,
 	getAddOns,
-	getTeamspaceInvites,
 	getTeamspaceRefId,
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
@@ -36,7 +35,8 @@ const { getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { COL_NAME } = require('../../models/projectSettings.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { createNewUserRecord } = require('../users');
-const { isTeamspaceAdmin } = require('../../utils/permissions');
+const { getInvitationsByTeamspace } = require('../../models/invitations');
+const { getTeamspaceAdmins } = require('../../models/teamspaceSettings');
 const { logger } = require('../../utils/logger');
 const { membershipStatus } = require('../../services/sso/frontegg/frontegg.constants');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
@@ -105,6 +105,11 @@ Teamspaces.removeTeamspace = async (teamspace, removeAssociatedAccount = true) =
 	if (removeAssociatedAccount) await removeAccount(teamspaceRef);
 };
 
+Teamspaces.isTeamspaceAdmin = async (teamspace, username) => {
+	const admins = await getTeamspaceAdmins(teamspace);
+	return admins.includes(username);
+};
+
 Teamspaces.getTeamspaceListByUser = async (user) => {
 	const userId = await getUserId(user);
 
@@ -114,7 +119,7 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 		try {
 			const teamspace = await getTeamspaceByAccount(accountId);
 			if (teamspace) {
-				const isAdmin = await isTeamspaceAdmin(teamspace, user);
+				const isAdmin = await Teamspaces.isTeamspaceAdmin(teamspace, user);
 				return { name: teamspace, isAdmin };
 			}
 
@@ -131,6 +136,7 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 	const membersInTeamspace = [];
 	const tenantId = await getTeamspaceRefId(teamspace);
 	const accountUsers = await getAllUsersInAccount(tenantId);
+
 	const projection = {
 		_id: 0,
 		user: 1,
@@ -175,7 +181,7 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 
 	// check for unprocessed users
 	if (!isEmpty(emailToUsers)) {
-		const teamspaceInvites = await getTeamspaceInvites(teamspace);
+		const teamspaceInvites = await getInvitationsByTeamspace(teamspace);
 
 		// Invitees (i.e. emails with 3drepo invites stored in mongo) are currently not considered
 		// real users, disregard them
@@ -218,10 +224,21 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 	);
 };
 
+const getCollaboratorsAssigned = async (teamspace) => {
+	const [teamspaceUsers, teamspaceInvitations] = await Promise.all([
+		Teamspaces.getAllMembersInTeamspace(teamspace),
+		getInvitationsByTeamspace(teamspace, { _id: 1 }),
+	]);
+
+	return teamspaceUsers.length + teamspaceInvitations.length;
+};
+
 Teamspaces.getQuotaInfo = async (teamspace) => {
 	const quotaInfo = await getQuotaInfo(teamspace, true);
 	const spaceUsed = await getSpaceUsed(teamspace, true);
-	const collaboratorsUsed = await Teamspaces.getCollaboratorsAssigned(teamspace);
+	const collaboratorsUsed = await getCollaboratorsAssigned(teamspace);
+
+	console.log(quotaInfo, spaceUsed);
 
 	return {
 		freeTier: quotaInfo.freeTier,
@@ -295,15 +312,6 @@ Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck) =>
 	} catch (err) {
 		return false;
 	}
-};
-
-Teamspaces.getCollaboratorsAssigned = async (teamspace) => {
-	const [teamspaceUsers, teamspaceInvitations] = await Promise.all([
-		Teamspaces.getAllMembersInTeamspace(teamspace),
-		Teamspaces.getInvitationsByTeamspace(teamspace, { _id: 1 }),
-	]);
-
-	return teamspaceUsers.length + teamspaceInvitations.length;
 };
 
 Teamspaces.getAddOns = getAddOns;

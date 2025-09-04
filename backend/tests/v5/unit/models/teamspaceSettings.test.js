@@ -671,24 +671,6 @@ const testGetTeamspaceSetting = () => {
 	});
 };
 
-const testGetTeamspaceInvites = () => {
-	describe('Get a list of teamspace invitations', () => {
-		test('Should return a list of emails', async () => {
-			const ts = generateRandomString();
-			const fn = jest.spyOn(db, 'find');
-			await Teamspace.getTeamspaceInvites(ts);
-
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(
-				USERS_DB_NAME, 'invitations',
-				{ 'teamSpaces.teamspace': ts },
-				{ _id: 1 },
-				undefined,
-			);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testTeamspaceAdmins();
 	testGetSubscriptions();
@@ -709,5 +691,4 @@ describe(determineTestGroup(__filename), () => {
 	testSetTeamspaceRefId();
 	testGetTeamspaceRefId();
 	testGetTeamspaceSetting();
-	testGetTeamspaceInvites();
 });

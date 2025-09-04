@@ -207,9 +207,4 @@ TeamspaceSetting.getRiskCategories = async (teamspace) => {
 	return riskCategories;
 };
 
-TeamspaceSetting.getTeamspaceInvites = (teamspace, projection = { _id: 1 }) => {
-	const query = { 'teamSpaces.teamspace': teamspace };
-	return teamspaceInvitesQuery(query, projection);
-};
-
 module.exports = TeamspaceSetting;

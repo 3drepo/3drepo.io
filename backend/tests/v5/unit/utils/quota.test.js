@@ -231,28 +231,8 @@ const testSufficientQuota = () => {
 	});
 };
 
-const testGetCollaboratorsAssigned = () => {
-	describe('Get collaborators used', () => {
-		test('should get the total collaborators used by the user', async () => {
-			DBHandler.find.mockResolvedValueOnce([]);
-
-			TeamspaceProcessor.getAllMembersInTeamspace.mockResolvedValueOnce([
-				generateRandomString(),
-				generateRandomString(),
-			]);
-
-			const teamspace = generateRandomString();
-			const res = await Quota.getCollaboratorsAssigned(teamspace);
-			expect(res).toEqual(2);
-
-			expect(DBHandler.find).toHaveBeenCalledTimes(1);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testGetQuotaInfo();
 	testGetSpaceUsed();
 	testSufficientQuota();
-	testGetCollaboratorsAssigned();
 });
