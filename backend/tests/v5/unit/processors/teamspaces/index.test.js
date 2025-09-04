@@ -604,6 +604,59 @@ const testRemoveTeamspace = () => {
 			expect(FronteggService.removeAccount).toHaveBeenCalledTimes(1);
 			expect(FronteggService.removeAccount).toHaveBeenCalledWith(teamspaceId);
 		});
+		test('Should remove the teamspace but not the associated account', async () => {
+			const teamspaceId = generateRandomString();
+			TeamspacesModel.getTeamspaceRefId.mockResolvedValue(teamspaceId);
+			TeamspacesModel.getTeamspaceSetting.mockResolvedValue({ refId: teamspaceId });
+
+			const usersData = _.times(2, () => ({
+				user: generateRandomString(),
+				customData: {
+					firstName: generateRandomString(),
+					lastName: generateRandomString(),
+					billing: {
+						billingInfo: {
+							company: generateRandomString(),
+						},
+					},
+					userId: generateRandomString(),
+					email: generateRandomString(),
+				},
+			}));
+			const frontEggUsers = usersData.map(({ customData: { email, userId } }) => ({ email, id: userId }));
+
+			FronteggService.getAllUsersInAccount.mockResolvedValueOnce(frontEggUsers);
+			UsersModel.getUserInfoFromEmailArray.mockResolvedValueOnce(usersData);
+
+			const teamspace = generateRandomString();
+
+			await Teamspaces.removeTeamspace(teamspace, false);
+
+			expect(FronteggService.getAllUsersInAccount).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getAllUsersInAccount).toHaveBeenCalledWith(teamspaceId);
+
+			expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledTimes(frontEggUsers.length);
+			expect(UsersModel.deleteFavourites).toHaveBeenCalledTimes(frontEggUsers.length);
+
+			usersData.forEach((user) => {
+				expect(RolesModel.revokeTeamspaceRoleFromUser).toHaveBeenCalledWith(teamspace, user.user);
+				expect(UsersModel.deleteFavourites).toHaveBeenCalledWith(user.user, teamspace);
+			});
+
+			expect(FilesManager.removeAllFilesFromTeamspace).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeAllFilesFromTeamspace).toHaveBeenCalledWith(teamspace);
+
+			expect(RolesModel.removeTeamspaceRole).toHaveBeenCalledTimes(1);
+			expect(RolesModel.removeTeamspaceRole).toHaveBeenCalledWith(teamspace);
+
+			expect(NotificationsModel.removeAllTeamspaceNotifications).toHaveBeenCalledTimes(1);
+			expect(NotificationsModel.removeAllTeamspaceNotifications).toHaveBeenCalledWith(teamspace);
+
+			expect(DB.dropDatabase).toHaveBeenCalledTimes(1);
+			expect(DB.dropDatabase).toHaveBeenCalledWith(teamspace);
+
+			expect(FronteggService.removeAccount).not.toHaveBeenCalled();
+		});
 	});
 };
 
