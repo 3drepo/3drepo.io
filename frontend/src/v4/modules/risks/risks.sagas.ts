@@ -375,7 +375,9 @@ const onResourcesCreated = (resources) => {
 	const currentState = getState();
 	const teamspace = selectCurrentModelTeamspace(currentState);
 	const model = selectCurrentModel(currentState);
+	const activeRiskId = selectActiveRiskId(currentState);
 	const issueId =  resources[0].issueIds[0]; // The resource chat event is the same for issues and risks, therefore they both use 'issueId'
+	if (activeRiskId !== issueId) return;
 	dispatch(RisksActions.attachResourcesSuccess(prepareResources(teamspace, model, resources), issueId));
 };
 
