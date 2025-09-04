@@ -16,6 +16,7 @@
  */
 
 const { TEAM_MEMBER } = require('./roles.constants');
+
 const db = require('../handler/db');
 
 const Roles = {};

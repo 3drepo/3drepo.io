@@ -29,11 +29,12 @@ WebRequests.get = (uri, headers) => {
 	return axios.get(uri, options);
 };
 
-WebRequests.delete = (uri, headers) => {
+WebRequests.delete = (uri, headers, payload) => {
 	const options = {};
 
 	if (headers) {
 		options.headers = headers;
+		options.data = payload;
 	}
 
 	return axios.delete(uri, options);
@@ -41,5 +42,6 @@ WebRequests.delete = (uri, headers) => {
 
 WebRequests.post = axios.post;
 WebRequests.put = axios.put;
+WebRequests.patch = axios.patch;
 
 module.exports = WebRequests;

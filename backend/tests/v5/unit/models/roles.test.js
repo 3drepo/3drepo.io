@@ -17,7 +17,7 @@
 
 const { src } = require('../../helper/path');
 const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
 const Roles = require(`${src}/models/roles`);
 const db = require(`${src}/handler/db`);
@@ -75,7 +75,7 @@ const testRevokeTeamspaceRoleFromUser = () => {
 	});
 };
 
-describe('models/roles', () => {
+describe(determineTestGroup(__filename), () => {
 	testCreateTeamspaceRole();
 	testRemoveTeamspaceRole();
 	testGrantTeamspaceRoleToUser();
