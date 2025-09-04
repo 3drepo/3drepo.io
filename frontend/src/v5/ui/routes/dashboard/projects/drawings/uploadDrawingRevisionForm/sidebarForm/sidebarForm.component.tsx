@@ -29,10 +29,12 @@ import { MODEL_UNITS } from '../../../models.helpers';
 import { DoubleInputLineContainer } from '../../drawingDialogs/drawingForm.styles';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { CALIBRATION_INVALID_RANGE_ERROR } from '@/v5/validation/drawingSchemes/drawingSchemes';
+import { watchVerticalRange } from '../../drawingDialogs/drawingsDialogs.hooks';
 
 export const SidebarForm = () => {
 	const types = DrawingsHooksSelectors.selectTypes();
-	const { getValues, formState: { errors } } = useFormContext();
+	const formData = useFormContext();
+	const { getValues, formState: { errors } } = formData;
 	const { fields, selectedId } = useContext(UploadFilesContext);
 	// @ts-ignore
 	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
@@ -41,7 +43,8 @@ export const SidebarForm = () => {
 	const getError = (field: string) => get(errors, `${revisionPrefix}.${field}`);
 
 	const fetched = DrawingsHooksSelectors.selectDrawingFetched(drawingId);
-	const hideBottomExtentError = (errors.calibration?.verticalRange || []).some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
+	const hideBottomExtentError = getError('calibration.verticalRange')?.some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
+	watchVerticalRange(formData, revisionPrefix + '.');
 
 	if (!fetched && drawingId) return <Loader />;
 
