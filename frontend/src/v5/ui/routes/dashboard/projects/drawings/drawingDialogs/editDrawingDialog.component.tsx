@@ -22,11 +22,11 @@ import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelector
 import { DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useDrawingForm } from './drawingsDialogs.hooks';
 import { dirtyValuesChanged } from '@/v5/helpers/form.helper';
-import { pick, isEqual } from 'lodash';
+import { pick } from 'lodash';
 import { DrawingForm } from './drawingForm.component';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { DrawingSettings, IDrawing } from '@/v5/store/drawings/drawings.types';
+import { DrawingSettings } from '@/v5/store/drawings/drawings.types';
 
 interface Props { 
 	open: boolean; 

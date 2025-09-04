@@ -21,9 +21,21 @@ import { DrawingSettings, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingFormSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { get } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormReturn } from 'react-hook-form';
 
+export const watchVerticalRange = (formData:  UseFormReturn<any>, prefix: string = '') => {
+	const { trigger, watch, formState: { dirtyFields } } = formData;
+	let verticalRangeField =  prefix +  'calibration.verticalRange';
+	const verticalRange = watch(verticalRangeField);
+	
+	useEffect(() => {
+		if (get(dirtyFields, verticalRangeField)?.some((v) => v)) {
+			trigger(verticalRangeField);
+		}
+	}, [verticalRange?.[0], verticalRange?.[1], dirtyFields]);
+};
 
 export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -50,7 +62,7 @@ export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 		});
 
 		setExistingNames(names);
-		setExistingNumbers(numbers)
+		setExistingNumbers(numbers);
 	}, [JSON.stringify(defaultValues), allDrawings]);
 
 
@@ -61,11 +73,10 @@ export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 		defaultValues,
 	});
 
-	const { getValues, setValue, trigger, watch, formState: { dirtyFields } }  = formData;
-	const verticalRange = watch('calibration.verticalRange');
+	const { getValues, setValue, trigger }  = formData;
 
 	const onSubmitError = (err) => {
-		if (nameAlreadyExists(err)) {			
+		if (nameAlreadyExists(err)) {
 			setExistingNames([getValues('name'), ...existingNames]);
 			trigger('name');
 		}
@@ -76,6 +87,8 @@ export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 		}
 	};
 	
+	watchVerticalRange(formData);
+
 	useEffect(() => {
 		if (isTypesPending || !isAdmin) return;
 		if (!defaultValues?.type) {
@@ -88,11 +101,7 @@ export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
 	}, [isAdmin]);
 
-	useEffect(() => {
-		if (dirtyFields.calibration?.verticalRange.some((v) => v)) {
-			trigger('calibration.verticalRange');
-		}
-	}, [verticalRange?.[0], verticalRange?.[1]]);
-
 	return { onSubmitError, formData };
 };
+
+
