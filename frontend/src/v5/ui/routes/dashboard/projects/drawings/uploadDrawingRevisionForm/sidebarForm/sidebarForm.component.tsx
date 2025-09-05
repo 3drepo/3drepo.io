@@ -20,57 +20,33 @@ import { FormattedMessage } from 'react-intl';
 import { useFormContext } from 'react-hook-form';
 import { MenuItem } from '@mui/material';
 import { FormNumberField, FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
-import { get, isNumber } from 'lodash';
+import { get } from 'lodash';
 import { Heading, Title, FlexContainer } from './sidebarForm.styles';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
-import { DrawingRevisionsHooksSelectors, DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MODEL_UNITS } from '../../../models.helpers';
 import { DoubleInputLineContainer } from '../../drawingDialogs/drawingForm.styles';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { CALIBRATION_INVALID_RANGE_ERROR } from '@/v5/validation/drawingSchemes/drawingSchemes';
+import { watchVerticalRange } from '../../drawingDialogs/drawingsDialogs.hooks';
 
 export const SidebarForm = () => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const types = DrawingsHooksSelectors.selectTypes();
-	const { getValues, formState: { errors, dirtyFields }, trigger, watch } = useFormContext();
+	const formData = useFormContext();
+	const { getValues, formState: { errors } } = formData;
 	const { fields, selectedId } = useContext(UploadFilesContext);
 	// @ts-ignore
 	const selectedIndex = fields.findIndex(({ uploadId }) => uploadId === selectedId);
 	const revisionPrefix = `uploads.${selectedIndex}`;
 	const [drawingId, drawingName] = getValues([`${revisionPrefix}.drawingId`, `${revisionPrefix}.drawingName`]);
-	const disableDrawingFields = !(drawingName && !drawingId);
 	const getError = (field: string) => get(errors, `${revisionPrefix}.${field}`);
-	const verticalRange = watch(`${revisionPrefix}.calibration.verticalRange`);
-	const hasActiveRevisions = DrawingsHooksSelectors.selectRawDrawingById(drawingId).revisionsCount > 0;
-	const hasPendingRevisions = !!DrawingRevisionsHooksSelectors.selectRevisionsPending(drawingId);
-	const drawingRevisionsArePending = !!DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
-	const needsFetchingCalibration = hasActiveRevisions && (hasPendingRevisions || drawingRevisionsArePending) && !isNumber(verticalRange[0]);
-	const hideBottomExtentError = (errors.calibration?.verticalRange || []).some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
 
-	useEffect(() => {
-		if (get(dirtyFields, `${revisionPrefix}.calibration.verticalRange`)?.some((v) => v)) {
-			trigger(`${revisionPrefix}.calibration.verticalRange`);
-		}
-	}, [verticalRange?.[0], verticalRange?.[1]]);
+	const fetched = DrawingsHooksSelectors.selectDrawingFetched(drawingId);
+	const hideBottomExtentError = getError('calibration.verticalRange')?.some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
+	watchVerticalRange(formData, revisionPrefix + '.');
 
-	useEffect(() => {
-		if (!needsFetchingCalibration || drawingRevisionsArePending) return;
-
-		if (!hasPendingRevisions) {
-			DrawingRevisionsActionsDispatchers.fetch(
-				teamspace,
-				project,
-				drawingId,
-			);
-			return;
-		}
-		DrawingsActionsDispatchers.fetchCalibration(teamspace, project, drawingId);
-	}, [drawingId, hasActiveRevisions, hasPendingRevisions, drawingRevisionsArePending, isNumber(verticalRange[0])]);
-
-	if (needsFetchingCalibration) return <Loader />;
+	if (!fetched && drawingId) return <Loader />;
 
 	return (
 		<>
@@ -80,14 +56,12 @@ export const SidebarForm = () => {
 					name={`${revisionPrefix}.drawingNumber`}
 					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.drawingNumber', defaultMessage: 'Drawing Number' })}
 					formError={getError('drawingNumber')}
-					disabled={disableDrawingFields}
 					required
 				/>
 				<FormSelect
 					name={`${revisionPrefix}.drawingType`}
 					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.type', defaultMessage: 'Category' })}
 					formError={getError('drawingType')}
-					disabled={disableDrawingFields}
 					required
 				>
 					{types.map((type) => (
@@ -98,7 +72,6 @@ export const SidebarForm = () => {
 					name={`${revisionPrefix}.drawingDesc`}
 					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.description', defaultMessage: 'Description' })}
 					formError={getError('drawingDesc')}
-					disabled={disableDrawingFields}
 				/>
 			</FlexContainer>
 			<Heading>
@@ -113,15 +86,13 @@ export const SidebarForm = () => {
 					formError={getError('calibration.verticalRange.0')}
 					label={formatMessage({ id: 'drawings.form.bottomExtent', defaultMessage: 'Bottom Extent' })}
 					defaultValue={0}
-					disabled={disableDrawingFields}
 					required
 				/>
 				<FormNumberField
 					name={`${revisionPrefix}.calibration.verticalRange.1`}
-					formError={getError('calibration.verticalRange.1') ? {} : ''}
+					formError={getError('calibration.verticalRange.1')}
 					label={formatMessage({ id: 'drawings.form.topExtent', defaultMessage: 'Top Extent' })}
 					required
-					disabled={disableDrawingFields}
 					defaultValue={1}
 				/>
 			</DoubleInputLineContainer>
@@ -130,7 +101,6 @@ export const SidebarForm = () => {
 				formError={getError('units')}
 				label={formatMessage({ id: 'drawings.form.units', defaultMessage: 'Units' })}
 				defaultValue="mm"
-				disabled={disableDrawingFields}
 			>
 				{MODEL_UNITS.map(({ value, name }) => (
 					<MenuItem key={value} value={value}>{name}</MenuItem>

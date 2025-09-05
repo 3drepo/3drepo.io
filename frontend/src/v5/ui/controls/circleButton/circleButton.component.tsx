@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { PrimaryButton, SecondaryButton, ViewerButton } from './circleButton.styles';
+import { ErrorButton, PrimaryButton, SecondaryButton, ViewerButton } from './circleButton.styles';
 
 interface ICircleButton {
 	variant?: 'primary' | 'secondary' | 'viewer';
@@ -23,9 +23,11 @@ interface ICircleButton {
 	onClick?: (e) => void;
 	children: any;
 	selected?: boolean;
+	error?: boolean;
 }
 
-export const CircleButton = ({ variant = 'primary', ...props }: ICircleButton) => {
+export const CircleButton = ({ variant = 'primary', error, ...props }: ICircleButton) => {
+	if (error) return (<ErrorButton {...props} />)
 	if (variant === 'primary') return (<PrimaryButton {...props} />);
 	if (variant === 'viewer') return (<ViewerButton {...props} />);
 	return (<SecondaryButton {...props} />);
