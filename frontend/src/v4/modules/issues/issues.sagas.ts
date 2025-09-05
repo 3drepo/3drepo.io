@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit} from 'lodash';
 import { put, select, takeEvery, takeLatest, take  } from 'redux-saga/effects';
 
 import * as queryString from 'query-string';
-import { generatePath } from 'react-router';
+import { generatePath } from 'react-router-dom';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
@@ -55,6 +54,7 @@ import { SnackbarActions } from '../snackbar';
 import { selectTopicTypes } from '../teamspace';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
+import { RouterActions } from '../router/router.redux';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {
 	selectActiveIssueDetails,
@@ -332,6 +332,11 @@ function* goToIssue({ issue }) {
 	const params = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
 
+	if (!issue) {
+		yield put(RouterActions.removeSearchParams(['issueId']))
+		return
+	}
+
 	// Im not longer in the viewer or board
 	// this happens when unmounting the card which
 	// makes sense when you close the card in the viewer and want to remove the selected risk
@@ -345,13 +350,13 @@ function* goToIssue({ issue }) {
 	const route = ROUTES.V5_MODEL_VIEWER;
 	const path = generatePath(route, params);
 
-	queryParams = issueId ?  {... queryParams, issueId} : omit(queryParams, 'issueId');
+	queryParams = {... queryParams, issueId};
 	let query = queryString.stringify(queryParams);
 	if (query) {
 		query = '?' + query;
 	}
 
-	yield put(push(`${path}${query}`));
+	yield put(RouterActions.navigate(`${path}${query}`));
 }
 
 function* showDetails({ revision, issueId }) {

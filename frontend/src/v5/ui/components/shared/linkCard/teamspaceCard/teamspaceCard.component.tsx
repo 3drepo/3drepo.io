@@ -17,7 +17,7 @@
 
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { useRouteMatch } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { DEFAULT_TEAMSPACE_IMG_SRC, getTeamspaceImgSrc } from '@/v5/store/teamspaces/teamspaces.helpers';
 import { uriCombine } from '@/v5/helpers/url.helper';
 import { LinkCard } from '../linkCard.component';
@@ -31,8 +31,8 @@ export const TeamspaceCard = ({ teamspaceName, className }: ITeamspaceCard): JSX
 	const { username } = CurrentUserHooksSelectors.selectCurrentUser();
 
 	const isPersonalTeamspace = teamspaceName === username;
-	const { url } = useRouteMatch();
-	const to = uriCombine(url, teamspaceName || '');
+	const location = useLocation();
+	const to = uriCombine(location.pathname, teamspaceName || '');
 	const imgSrc = getTeamspaceImgSrc(teamspaceName);
 
 	return (
