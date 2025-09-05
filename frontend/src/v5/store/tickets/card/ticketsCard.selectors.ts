@@ -205,6 +205,7 @@ export const selectNewTicketPins = createSelector(
 	selectSelectedTicketPinId,
 	getTicketPins,
 );
+
 const selectJobsAndUsersByModelId = createSelector(
 	selectFederationById,
 	selectFederationJobs,
@@ -219,30 +220,40 @@ const selectJobsAndUsersByModelId = createSelector(
 	},
 );
 
-export const selectPropertyOptions = createSelector(
-	selectCurrentTemplates,
-	selectRiskCategories,
-	selectJobsAndUsersByModelId,
-	(state, modelId, module) => module,
-	(state, modelId, module, property) => property,
-	(templates, riskCategories, jobsAndUsers, module, property) => {
-		const allValues = [];
-		if (!module && property === 'Owner') return getFiltersFromJobsAndUsers(jobsAndUsers.filter((ju) => !!ju.firstName));
-		templates.forEach((template) => {
-			const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
-			const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
-			if (!matchingProperty) return;
-			switch (matchingProperty.values) {
-				case 'riskCategories':
-					allValues.push(...riskCategories.map((value) => ({ value, type: 'riskCategories' })));
-					break;
-				case 'jobsAndUsers':
-					allValues.push(...getFiltersFromJobsAndUsers(jobsAndUsers));
-					break;
-				default:
-					allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
-			}
-		});
-		return sortedUniqBy(sortBy(allValues, 'value'), 'value');
-	},
-);
+
+	// selectFederationJobs,
+	// selectContainerJobs,
+	// selectFederationUsers,
+	// selectContainerUsers,
+
+
+// export const selectPropertyOptions = createSelector(
+// 	selectCurrentTemplates,
+// 	selectRiskCategories,
+// 	selectJobsAndUsersByModelIds,
+// 	(state, templates, modelIds, module) => module,
+// 	(state, templates, modelIds, module, property) => property,
+// 	(templates, riskCategories, jobsAndUsers, module, property) => {
+// 		const allValues = [];
+
+
+// 		return allValues;
+// 		// if (!module && property === 'Owner') return getFiltersFromJobsAndUsers(jobsAndUsers.filter((ju) => !!ju.firstName));
+// 		// templates.forEach((template) => {
+// 		// 	const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
+// 		// 	const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
+// 		// 	if (!matchingProperty) return;
+// 		// 	switch (matchingProperty.values) {
+// 		// 		case 'riskCategories':
+// 		// 			allValues.push(...riskCategories.map((value) => ({ value, type: 'riskCategories' })));
+// 		// 			break;
+// 		// 		case 'jobsAndUsers':
+// 		// 			allValues.push(...getFiltersFromJobsAndUsers(jobsAndUsers));
+// 		// 			break;
+// 		// 		default:
+// 		// 			allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
+// 		// 	}
+// 		// });
+// 		// return sortedUniqBy(sortBy(allValues, 'value'), 'value');
+// 	},
+// );

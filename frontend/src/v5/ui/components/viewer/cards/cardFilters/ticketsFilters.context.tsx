@@ -26,12 +26,14 @@ export interface TicketsFiltersContextType {
 	choosablefilters:  TicketFilter[];
 	filters: TicketFiltersDict;
 	templates: ITemplate[];
+	modelsIds: string[];
 	setFilter: (filter:TicketFilter) => void;
 }
 
 const defaultValue: TicketsFiltersContextType = {
 	choosablefilters: [],
 	templates: [],
+	modelsIds: [],
 	filters: {},
 	setFilter: () => {},
 };
@@ -44,11 +46,17 @@ export const useTicketFiltersContext = () => useContext(TicketsFiltersContext);
 interface TicketsFiltersContextComponentProps {
 	children: any;
 	templates: ITemplate[];
+	modelsIds: string[];
 	presetFilters?: TicketFiltersDict;
 	onChange?: (filters: TicketFiltersDict) => void;
 }
 
-export const TicketsFiltersContextComponent = ({ children, templates, presetFilters = {}, onChange }: TicketsFiltersContextComponentProps) => {
+export const TicketsFiltersContextComponent = ({
+	children, 
+	templates, 
+	modelsIds, 
+	presetFilters = {}, 
+	onChange }: TicketsFiltersContextComponentProps) => {
 	const [filters, setFilters] = useState<TicketFiltersDict>(presetFilters);
 	const [choosablefilters, setChoosablefilters] = useState<TicketFilter[]>([]);
 
@@ -67,7 +75,7 @@ export const TicketsFiltersContextComponent = ({ children, templates, presetFilt
 	}, [filters, onChange]);
 
 	return (
-		<TicketsFiltersContext.Provider value={{ filters, setFilter, choosablefilters, templates }}>
+		<TicketsFiltersContext.Provider value={{ filters, setFilter, choosablefilters, templates, modelsIds }}>
 			{children}
 		</TicketsFiltersContext.Provider>
 	);

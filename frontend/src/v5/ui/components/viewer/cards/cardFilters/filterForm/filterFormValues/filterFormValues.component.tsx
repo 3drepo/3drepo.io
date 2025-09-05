@@ -24,8 +24,8 @@ import { useEffect, useRef } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { TicketFilterType } from '../../cardFilters.types';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+// import { useParams } from 'react-router-dom';
+// import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
@@ -33,6 +33,7 @@ import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
 import { useTicketFiltersContext } from '../../ticketsFilters.context';
+import { ITemplate } from '@/v5/store/tickets/tickets.types';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -46,11 +47,50 @@ const getInputField = (type: TicketFilterType) => {
 	return FormTextField;
 };
 
+
+const getSelectOptions = (templates, modelIds, module, property, type) => {
+	let options = [];
+	console.log(JSON.stringify({ module, property, type }));
+
+	// 	templates.forEach((template) => {
+	// 		const matchingModule = module ? template.modules.find((mod) => (mod.name || mod.type) === module)?.properties : template.properties;
+	// 		const matchingProperty = matchingModule?.find(({ name, type: t }) => (name === property) && (['manyOf', 'oneOf'].includes(t)));
+	// 		if (!matchingProperty) return;
+	// 		switch (matchingProperty.values) {
+	// 			case 'riskCategories':
+	// 				allValues.push(...riskCategories.map((value) => ({ value, type: 'riskCategories' })));
+	// 				break;
+	// 			case 'jobsAndUsers':
+	// 				allValues.push(...getFiltersFromJobsAndUsers(jobsAndUsers));
+	// 				break;
+	// 			default:
+	// 				allValues.push(...matchingProperty.values.map((value) => ({ value, type: 'default' })));
+	// 		}
+	// 	});
+
+	// switch (type) {
+	// 	case 'template':
+	// 		options =  templates.map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }));
+	// 		break
+	// 	default:
+	// 		options = ['an option', 'another option']
+	// 		break;
+	// }
+
+	return options;
+};
+
+
+const isJobsAndUsersProperty = (templates:ITemplate[], module:string, property:string) => {
+	
+
+
+	return false;
+};
+
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
-	const {templates} = useTicketFiltersContext();
-
-	const { containerOrFederation } = useParams<ViewerParams>();
+	const { templates, modelsIds } = useTicketFiltersContext();
 	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -62,10 +102,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
-	const selectOptions = type === 'template' ?
-		templates.map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
-		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property) : [];
-
+	const selectOptions = getSelectOptions(templates, modelsIds, module, property, type);
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
 
@@ -137,7 +174,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	}
 
 	if (isSelectType(type)) {
-		const allJobsAndUsers = selectOptions.every(({ type: t }) => t === 'jobsAndUsers');
+		const allJobsAndUsers = isJobsAndUsersProperty(templates, module, property);
 		if (allJobsAndUsers) return (
 			<FormJobsAndUsersSelect
 				multiple
