@@ -20,7 +20,8 @@ import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
 
-export type SetTicketValue =  (modelId: string, ticketId?: string, groupValue?: string) => void;
+export type PresetValue = { key: string, value: string }; 
+export type SetTicketValue =  (modelId?: string, ticket_id?: string, presValue?: PresetValue, replace?: boolean) => void;
 
 export const NEW_TICKET_ID = 'new';
 

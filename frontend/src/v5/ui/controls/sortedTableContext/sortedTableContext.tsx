@@ -23,6 +23,7 @@ export interface SortedTableType<T> {
 	onColumnClick: (col: string) => void;
 	sortingColumn: string;
 	isDescendingOrder: boolean;
+	refreshSorting?: () => void;
 }
 
 const defaultValue: SortedTableType<any> = { sortedItems: [], onColumnClick: () => {}, sortingColumn: '', isDescendingOrder: true };
@@ -31,7 +32,7 @@ SortedTableContext.displayName = 'SortedTable';
 
 export interface Props<T> {
 	items: T[];
-	customSortingFunctions?: Record<string, (items: T[], order: string, column: string, ) => any | any[]>;
+	customSortingFunctions?: (sortingColumn: string) => ((items: T[], order: 'asc' | 'desc', column: string) => T[]) | undefined;
 	sortingColumn?: string;
 	isDescendingOrder?: boolean;
 	children: any;
@@ -46,6 +47,7 @@ export const SortedTableComponent = <T,>({
 }: Props<T>) => {
 	const [isDescendingOrder, setIsDescendingOrder] = useState(initialIsDescendingOrder ?? true);
 	const [sortingColumn, setSortingColumn] = useState(initialSortingColumn || '');
+	const [refreshFlag, setRefreshFlag] = useState(false);
 
 	const onColumnClick = (col) => {
 		if (!col) return;
@@ -56,7 +58,7 @@ export const SortedTableComponent = <T,>({
 	const sortingOrder = isDescendingOrder ? 'desc' : 'asc';
 
 	const getSortedItems = () => {
-		const customSortingFn = customSortingFunctions[sortingColumn];
+		const customSortingFn = customSortingFunctions(sortingColumn);
 		if (customSortingFn) return customSortingFn(items, sortingOrder, sortingColumn);
 		return orderBy(
 			items as T[],
@@ -68,8 +70,12 @@ export const SortedTableComponent = <T,>({
 		);
 	};
 
+	const refreshSorting = () => {
+		setRefreshFlag(!refreshFlag);
+	};
+
 	return (
-		<SortedTableContext.Provider value={{ onColumnClick, sortingColumn, isDescendingOrder, sortedItems: getSortedItems() }}>
+		<SortedTableContext.Provider value={{ onColumnClick, sortingColumn, isDescendingOrder, sortedItems: getSortedItems(), refreshSorting }}>
 			{children}
 		</SortedTableContext.Provider>
 	);

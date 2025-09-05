@@ -19,32 +19,24 @@ import { formatMessage } from '@/v5/services/intl';
 import { getPropertyLabel } from '../ticketsTable/ticketsTable.helper';
 import { MenuItem } from './selectMenus.styles';
 import { Select } from '@controls/inputs/select/select.component';
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { TicketsTableContext } from '../ticketsTable/ticketsTableContext/ticketsTableContext';
-import { useParams } from 'react-router';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
-const NONE_OPTION = 'None';
-const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
+export const NONE_OPTION_MESSAGE = formatMessage({ id: 'tickets.selectOption.none', defaultMessage: 'None' });
 
 export const GroupBySelect = () => {
-	const { template } = useParams<DashboardTicketsParams>();
-	const { groupByProperties, groupBy, setGroupBy, getPropertyType } = useContext(TicketsTableContext);
+	const { groupByProperties, groupBy, setGroupBy } = useContext(TicketsTableContext);
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const items = groupByProperties.filter((property) => visibleSortedColumnsNames.includes(property));
-
-	useEffect(() => {
-		if (!getPropertyType(groupBy)) {
-			setGroupBy('');
-		}
-	}, [template, getPropertyType]);
 
 	return (
 		<Select
 			onChange={(e) => setGroupBy(e.target.value)}
-			value={groupBy || NONE_OPTION}
+			value={groupBy}
 			label={formatMessage({ id: 'ticketTable.groupBy.placeholder', defaultMessage: 'Group by:' })}
 			placeholder='none'
 			renderValue={(value: string) => (<b>{value === NONE_OPTION ? NONE_OPTION_MESSAGE : getPropertyLabel(value)}</b>)}
