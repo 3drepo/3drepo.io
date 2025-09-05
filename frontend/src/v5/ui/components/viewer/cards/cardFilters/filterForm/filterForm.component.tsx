@@ -80,7 +80,7 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 	const canSubmit = isValid && !isEmpty(dirtyFields);
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
-		let newValues = mapFormArrayToArray(filledForm.values)
+		let newValues:any = mapFormArrayToArray(filledForm.values as any)
 			.filter((x) => ![undefined, ''].includes(x as any));
 
 		// We need to adjust the upper bounds of date values since some dates (e.g. Created At) include milliseconds whereas the datePicker

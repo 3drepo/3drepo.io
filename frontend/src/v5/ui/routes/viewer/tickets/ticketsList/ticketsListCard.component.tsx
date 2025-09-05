@@ -29,15 +29,18 @@ import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSel
 import { TicketsEllipsisMenu } from '@components/viewer/cards/tickets/ticketsEllipsisMenu/ticketsEllipsisMenu.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
+import { useParams } from 'react-router';
+import { ViewerParams } from '../../../routes.constants';
 
 export const TicketsListCard = () => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	const templates = TicketsCardHooksSelectors.selectCurrentTemplates().slice(0, 2);
-
+	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
+	const { containerOrFederation } = useParams<ViewerParams>();
+	
 	return (
 		<CardContainer>
-			<TicketsFiltersContextComponent templates={templates}>
+			<TicketsFiltersContextComponent templates={templates} modelsIds={[containerOrFederation]}>
 				<CardHeader
 					icon={<TicketsIcon />}
 					title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}

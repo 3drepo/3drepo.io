@@ -17,22 +17,22 @@
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
-import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
+import { isRangeOperator, isTextType, isSelectType, isDateType, getTemplateProperty, useGetUsersAndJobs } from '../../cardFilters.helpers';
 import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField, FormJobsAndUsersSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect, useRef } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { TicketFilterType } from '../../cardFilters.types';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+// import { useParams } from 'react-router-dom';
+// import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
-import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
-import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
+import { mapFormArrayToArray, SelectOption } from '@/v5/helpers/form.helper';
+import { getOptionFromValue, getFilterFromEvent, getFiltersFromJobsAndUsers } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
 import { useTicketFiltersContext } from '../../ticketsFilters.context';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -46,11 +46,51 @@ const getInputField = (type: TicketFilterType) => {
 	return FormTextField;
 };
 
+const allValuesAre = (templates, module, property,  predefinedValues) => {
+	const properties = templates.map((template) => getTemplateProperty(template, module, property)).filter(Boolean);
+	return properties.length && properties.every(( { values } )=> values === predefinedValues );
+}; 
+
+export const isJobsAndUsersProperty = ( module, property, type) => {
+	const { templates } = useTicketFiltersContext();
+	return (type === 'owner') || allValuesAre(templates, module, property, 'jobsAndUsers' );
+};
+
+
+const getSelectOptions = (module, property, type): SelectOption[] => {
+	let options = [];
+	const { templates, modelsIds } = useTicketFiltersContext();
+
+	if (type === 'template') {
+		return templates.map((t) => ({ value: t.code, displayValue: t.name }));
+	}
+
+	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
+	const jobsAndUsers = getFiltersFromJobsAndUsers(useGetUsersAndJobs(modelsIds));
+
+	if (type === 'owner') return jobsAndUsers;
+
+	templates.forEach((template) => {
+		const matchingProperty =  getTemplateProperty(template, module, property);
+		if (!matchingProperty || !['manyOf', 'oneOf'].includes(matchingProperty.type)) return;
+		switch (matchingProperty.values) {
+			case 'riskCategories':
+				options.push(...riskCategories.map((value) => ({ value })));
+				break;
+			case 'jobsAndUsers':
+				options.push(...jobsAndUsers);
+				break;
+			default:
+				options.push(...matchingProperty.values.map((value) => ({ value })));
+		}
+	});
+
+	
+	return options;
+};
+
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
-	const {templates} = useTicketFiltersContext();
-
-	const { containerOrFederation } = useParams<ViewerParams>();
 	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -62,10 +102,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
-	const selectOptions = type === 'template' ?
-		templates.map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
-		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property) : [];
-
+	const selectOptions = getSelectOptions(module, property, type);
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
 
@@ -136,19 +173,22 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 		);
 	}
 
-	if (isSelectType(type)) {
-		const allJobsAndUsers = selectOptions.every(({ type: t }) => t === 'jobsAndUsers');
-		if (allJobsAndUsers) return (
+	if (isJobsAndUsersProperty(module, property, type))  {
+		return (
 			<FormJobsAndUsersSelect
 				multiple
-				excludeJobs={type === 'owner'}
 				maxItems={19}
 				name={name}
 				transformInputValue={(v) => compact(mapFormArrayToArray(v))}
-				transformOutputValue={(e) =>  getFilterFromEvent(e)}
+				transformOutputValue={(e) => getFilterFromEvent(e)}
 				formError={error?.[0]}
+				excludeJobs={(type === 'owner')}
+				usersAndJobs={selectOptions.map(({ value }) => value)}
 			/>
 		);
+	}
+
+	if (isSelectType(type)) {
 		return (
 			<FormMultiSelect
 				name={name}
