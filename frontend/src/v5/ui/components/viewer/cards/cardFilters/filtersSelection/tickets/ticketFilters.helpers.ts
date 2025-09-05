@@ -27,6 +27,7 @@ import { isString, sortBy, uniqBy, compact } from 'lodash';
 import { TicketFilterType, BaseFilter, TicketFilter, TicketFilterOperator } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
+import { SelectOption } from '@/v5/helpers/form.helper';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -101,7 +102,7 @@ export const toTicketCardFilter = (filters: Record<string, BaseFilter>): TicketF
 		}))
 );
 
-export const getOptionFromValue = (value, options) => options.find(({ value: optionValue }) => value === optionValue);
+export const getOptionFromValue = (value, options: SelectOption[]) => options.find(({ value: optionValue }) => value === optionValue);
 export const getFilterFromEvent = (event) => compact(event.target.value).map((value) => ({ value }));
 
 export const getFiltersFromJobsAndUsers = (jobsAndUsers) => jobsAndUsers.map((ju) => {
@@ -109,7 +110,6 @@ export const getFiltersFromJobsAndUsers = (jobsAndUsers) => jobsAndUsers.map((ju
 	return ({
 		value: isUser ? ju.user : ju._id,
 		displayValue: isUser ? getFullnameFromUser(ju) : null,
-		type: 'jobsAndUsers',
 	});
 });
 

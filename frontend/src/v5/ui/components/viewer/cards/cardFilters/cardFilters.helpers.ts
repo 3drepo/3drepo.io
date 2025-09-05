@@ -30,6 +30,13 @@ import NotContainIcon from '@assets/icons/filters/not_contain.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketFilterOperator, TicketFilterType } from './cardFilters.types';
 import { compact, floor } from 'lodash';
+import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { IUser } from '@/v5/store/users/users.redux';
+import { IJob } from '@/v5/store/jobs/jobs.types';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectFederationJobs, selectFederationUsers } from '@/v5/store/federations/federations.selectors';
+import { selectContainerJobs, selectContainerUsers } from '@/v5/store/containers/containers.selectors';
+import { FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const FILTER_OPERATOR_ICON: Record<TicketFilterOperator, any> = {
 	eq: EqualIcon,
@@ -93,4 +100,40 @@ export const getDefaultOperator = (type) => {
 	if (isTextType(type) || isSelectType(type)) return 'is';
 	if (isDateType(type)) return 'lte';
 	return 'eq';
+};
+
+const findByName = <T extends { name?:string }>(arr: T[], nameToFind) => arr?.find(( { name }) => name === nameToFind);
+
+export const getTemplateProperty = (template:ITemplate, module: string | undefined, propertyName: string) => {
+	return findByName((module ?  findByName(template.modules, module) : template)?.properties, propertyName);
+};
+
+
+// returns an array of all users_ids and jobs_ids from the passed containers and Federations 
+export const useGetUsersAndJobs = (containersAndFederations: string[]): IUser[] | IJob[] => {
+	// This is for triggering a new re render if these federations or containers change
+	// in order to have the latests users/jobs
+	FederationsHooksSelectors.selectFederations(); 
+	ContainersHooksSelectors.selectContainers(); 
+	 
+	const usersAndJobsSet = new Set<string>();
+	const usersAndJobs: IUser[] | IJob[] = [];
+
+	const addToUsersAndJobOnce = (arr: any[]) => {
+		arr.forEach((jobOrUser) => {
+			const id = jobOrUser._id || jobOrUser.user;
+			if (usersAndJobsSet.has((id))) return;
+			usersAndJobsSet.add(id);
+			usersAndJobs.push(jobOrUser);
+		});
+	};
+
+	containersAndFederations.forEach((containerOrFederation) => {
+		addToUsersAndJobOnce(selectFederationJobs(getState(), containerOrFederation));
+		addToUsersAndJobOnce(selectContainerJobs(getState(), containerOrFederation));
+		addToUsersAndJobOnce(selectFederationUsers(getState(), containerOrFederation));
+		addToUsersAndJobOnce(selectContainerUsers(getState(), containerOrFederation));
+	});
+
+	return usersAndJobs;
 };

@@ -128,5 +128,6 @@ export const diffObjects = (objec1, object2) => {
 	}, {});
 };
 
-export const mapArrayToFormArray = (arr = []) => arr.map((value) => ({ value }));
-export const mapFormArrayToArray = (arr = []) => arr.map((v) => v.value);
+export type SelectOption = { value: string, displayValue?:string };
+export const mapArrayToFormArray = (arr = []):SelectOption[] => arr.map((value) => ({ value }));
+export const mapFormArrayToArray = (arr: SelectOption[] = []) => arr.map((v) => v.value);
