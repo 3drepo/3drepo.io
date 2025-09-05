@@ -427,7 +427,9 @@ const onResourcesCreated = (resources) => {
 	const currentState = getState();
 	const teamspace = selectCurrentModelTeamspace(currentState);
 	const model = selectCurrentModel(currentState);
+	const activeIssueId = selectActiveIssueId(currentState);
 	const issueId =  resources[0].issueIds[0];
+	if (activeIssueId !== issueId) return;
 	dispatch(IssuesActions.attachResourcesSuccess(prepareResources(teamspace, model, resources), issueId));
 };
 
