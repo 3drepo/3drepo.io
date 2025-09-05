@@ -17,12 +17,11 @@
 
 import { useEffect } from 'react';
 import axios from 'axios';
-import { useHistory, useLocation, useParams } from 'react-router-dom';
+import { useNavigate, useLocation, useParams, Outlet } from 'react-router-dom';
 import { AuthActionsDispatchers, DialogsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isNotLoggedIn } from '@/v5/validation/errors.helpers';
 import { addParams, pathName } from '@/v5/helpers/url.helper';
-import { Route, RouteProps } from './route.component';
 import { useSSOParams } from '../sso.hooks';
 import { postActions } from '../api/sso';
 import { enableKickedOutEvent } from '../realtime/auth.events';
@@ -36,8 +35,8 @@ const cleanSSOParams = (location) => {
 	return { ...location, search: searchParams.toString() };
 };
 
-const WrapAuthenticationRedirect = ({ children }) => {
-	const history = useHistory();
+export const AuthenticationRedirect = () => {
+	const navigate = useNavigate();
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched = AuthHooksSelectors.selectAuthenticationFetched();
 	const authenticatedTeamspace = AuthHooksSelectors.selectAuthenticatedTeamspace();
@@ -49,7 +48,8 @@ const WrapAuthenticationRedirect = ({ children }) => {
 		AuthActionsDispatchers.setReturnUrl(cleanSSOParams(location));
 		if (!isAuthenticated && authenticationFetched) {
 			const url = ssoError ? pathName(addParams(AUTH_PATH, searchParams)) : AUTH_PATH;
-			history.replace(url);
+
+			navigate(url, { replace: true });
 		}
 	}, [isAuthenticated, authenticationFetched]);
 
@@ -82,9 +82,5 @@ const WrapAuthenticationRedirect = ({ children }) => {
 		},
 	);
 
-	return children;
+	return <Outlet />;
 };
-
-export const AuthenticatedRoute = ({ children, ...props }: RouteProps) => (
-	<Route {...props}><WrapAuthenticationRedirect>{children}</WrapAuthenticationRedirect></Route>
-);

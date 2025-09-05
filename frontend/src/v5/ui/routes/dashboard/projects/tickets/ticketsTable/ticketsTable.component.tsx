@@ -20,7 +20,7 @@ import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelec
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams, generatePath, useHistory } from 'react-router-dom';
+import { useParams, generatePath, useNavigate } from 'react-router-dom';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
@@ -33,7 +33,7 @@ import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.con
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
 import { Transformers, useSearchParam } from '../../../../useSearchParam';
-import { DashboardTicketsParams, TICKETS_ROUTE, VIEWER_ROUTE } from '../../../../routes.constants';
+import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
@@ -59,14 +59,13 @@ const paramToInputProps = (value, setter) => ({
 	onChange: (ev: SelectChangeEvent<unknown>) => setter((ev.target as HTMLInputElement).value),
 });
 
-
 type TicketsTableProps = {
 	isNewTicketDirty: boolean,
 	setTicketValue: SetTicketValue,
 };
 
 export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const params = useParams<DashboardTicketsParams>();
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
 
@@ -81,10 +80,11 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	const setTemplate = useCallback((newTemplate) => {
 		setTicketValue();
-		const newParams = { ...params, template: newTemplate };
-		const path = generatePath(TICKETS_ROUTE + window.location.search, newParams);
-		history.push(path);
-	}, [params]);
+		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
+		const ticketsPath = ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE;
+		const path = generatePath(ticketsPath, newParams);
+		navigate({ pathname: path, search: window.location.search }, { replace: false });
+	}, [params, navigate]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
@@ -287,24 +287,22 @@ export const TabularView = () => {
 	const columns = templateHasBeenFetched ? getAvailableColumnsForTemplate(template) : [];
 	const [isNewTicketDirty, setIsNewTicketDirty] = useState(false);
 	const params = useParams<DashboardTicketsParams>();
+	const navigate = useNavigate();
 
-	const history = useHistory();
 	const [,,setContainerOrFederation] = useSearchParam('containerOrFederation');
 
 	const [presetValue, setPresetValue] = useState<PresetValue>();
+
 	const setTicketValue = useCallback((modelId?: string, ticket_id?: string, presValue?: PresetValue, replace: boolean = false) => {
 		const id = (modelId && !ticket_id) ? NEW_TICKET_ID : ticket_id;
-		const newParams = { ...params, ticketId: id };
-		const search = '?' + setContainerOrFederation(modelId);
+		const newParams = { ...params, ticketId: id || '' } as Required<DashboardTicketsParams>;
+		const search = setContainerOrFederation(modelId);
 		setPresetValue(presValue);
-		const path = generatePath(TICKETS_ROUTE + search, newParams);
+		const path = generatePath(TICKETS_ROUTE_WITH_TICKET, newParams);
 
-		if (replace) {
-			history.replace(path);
-		} else {
-			history.push(path);
-		}
-	}, [params]);
+		navigate({ pathname: path, search }, { replace });
+	}, [params, navigate, setContainerOrFederation]);
+
 
 	return (
 		<TicketsTableContextComponent>

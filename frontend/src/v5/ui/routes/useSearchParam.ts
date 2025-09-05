@@ -16,7 +16,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 type Transformer<T> = {
 	from: (param: string) => T,
@@ -40,12 +40,12 @@ export const Transformers = {
 
 // @ts-ignore
 export const useSearchParam = <T = string>(name: string, transformer: Transformer<T> = Transformers.DEFAULT, pushInHistory?: boolean = false) => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const location = useLocation();
 	const unprocessedValue = new URLSearchParams(location.search).get(name);
-	
+
 	const value = useMemo(() => transformer.from(unprocessedValue), [unprocessedValue]);
-	
+
 	const getSearchParams = useCallback((newValue: T, search?: string) => {
 		const searchParams = new URLSearchParams(search || window.location.search);
 		const transformedNewValue = transformer.to(newValue);
@@ -54,19 +54,13 @@ export const useSearchParam = <T = string>(name: string, transformer: Transforme
 		} else {
 			searchParams.delete(name);
 		}
-
 		return searchParams.toString();
-	}, [name, history, location.search]);
+	}, [name, location.search, transformer.to]);
 
 	const setParam = useCallback((newValue: T) => {
 		const search = getSearchParams(newValue);
+		navigate({ search }, { replace: !pushInHistory });
+	}, [getSearchParams, navigate, pushInHistory]);
 
-		if (pushInHistory) {
-			history.push({ search });
-		} else {
-			history.replace({ search });
-		}
-	}, [getSearchParams]);
-
-	return [value, setParam, getSearchParams] as [T, (val?: T) => void,  (val?: T, search?: string) => string];
+	return [value, setParam, getSearchParams] as [T, (val?: T) => void, (val?: T, search?: string) => string];
 };
