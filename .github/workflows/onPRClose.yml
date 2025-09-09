@@ -2,6 +2,9 @@ name: On PR closed
 on:
   pull_request:
     types: [closed]
+permissions:
+  contents: read
+  issues: write
 jobs:
   get-details:
     name: Get Current Issue Details
@@ -24,11 +27,11 @@ jobs:
     steps:
       - name: Apply in staging label
         if: ${{github.event.pull_request.merged && github.event.pull_request.base.ref == 'staging'}}
-        uses: carmenfan/any-issue-labeller@v1.1
+        uses: carmenfan/any-issue-labeller@v1.2
         with:
           issue-number: ${{ needs.get-details.outputs.issue-number }}
           label: 'in staging'
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN}}
 
   update-project-status:
     name: Update status of the issue in the project
