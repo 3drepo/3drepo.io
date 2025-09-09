@@ -29,20 +29,18 @@ import { useParams, generatePath } from 'react-router-dom';
 import { isEmpty, merge, set } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from './newTicketSlide.styles';
-import { hasRequiredViewerProperties } from '../../ticketsTable/ticketsTable.helper';
+import { hasRequiredViewerProperties, PresetValue } from '../../ticketsTable/ticketsTable.helper';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { IssueProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TicketsTableContext } from '../../ticketsTable/ticketsTableContext/ticketsTableContext';
 
-type PresetValue = { key: string, value: string };
 type NewTicketSlideProps = {
 	template: ITemplate,
 	containerOrFederation: string,
-	presetValue: PresetValue,
+	presetValue: PresetValue |  undefined,
 	onSave: (newTicketId: string) => void,
 	onDirtyStateChange: (isDirty: boolean) => void,
 };
-
 
 const toDefaultValue = ({ key, value }: PresetValue, propertyType: PropertyTypeDefinition) => {
 	if (!key || key === IssueProperties.DUE_DATE || !value) return;
@@ -59,7 +57,7 @@ export const NewTicketSlide = ({ template, containerOrFederation, presetValue, o
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const { getPropertyType } = useContext(TicketsTableContext);
 	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
-	const preselectedDefaultValue = toDefaultValue(presetValue, getPropertyType(presetValue.key));
+	const preselectedDefaultValue = presetValue ? toDefaultValue(presetValue, getPropertyType(presetValue.key)) : null;
 	const defaultTicket = getDefaultTicket(template);
 	const defaultValues = preselectedDefaultValue ? merge(defaultTicket, preselectedDefaultValue) : defaultTicket;
 	const isFederation = modelIsFederation(containerOrFederation);
@@ -104,7 +102,7 @@ export const NewTicketSlide = ({ template, containerOrFederation, presetValue, o
 	useEffect(() => {
 		if (isLoading) return;
 		reset(defaultValues);
-	}, [containerOrFederation, template, isLoading, presetValue.value]);
+	}, [containerOrFederation, template, isLoading, presetValue?.value]);
 
 	useEffect(() => {
 		onDirtyStateChange(!isEmpty(dirtyFields));

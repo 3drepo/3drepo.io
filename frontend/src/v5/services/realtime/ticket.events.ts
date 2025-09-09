@@ -26,7 +26,6 @@ import { fetchTicketGroup } from '../api/tickets';
 
 export const ticketEvent = (isFed: boolean, eventType: string) => isFed ? `federation${eventType}` : `container${eventType}`;
 
-
 // Container ticket
 export const enableRealtimeUpdateTicket = (teamspace: string, project: string, containerId: string, isFed:boolean, revision?: string) => (
 	subscribeToRoomEvent(
