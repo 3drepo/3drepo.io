@@ -23,8 +23,6 @@ import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayF
 import { useEffect, useRef } from 'react';
 import { compact, isArray, isEmpty } from 'lodash';
 import { TicketFilterType } from '../../cardFilters.types';
-// import { useParams } from 'react-router-dom';
-// import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';

@@ -26,17 +26,18 @@ import { formatMessage } from '@/v5/services/intl';
 const DEFAULT_EMPTY_LIST_MESSAGE = formatMessage({ id: 'assignees.circleList.none', defaultMessage: 'None Selected' });
 
 export type AssigneesValuesDisplayProps = {
-	value: string[];
+	value: string | string[];
 	maxItems?: number;
 	onClear?: () => void;
 	emptyListMessage?: string;
 };
 export const AssigneesValuesDisplay = ({
-	value,
+	value: valueRaw,
 	maxItems = 3,
 	onClear,
 	emptyListMessage = DEFAULT_EMPTY_LIST_MESSAGE,
 }: AssigneesValuesDisplayProps) => {
+	const value = Array.isArray(valueRaw) ? valueRaw : [valueRaw].filter(Boolean);
 	// Using this logic instead of a simple partition because ExtraAssigneesCircle needs to occupy
 	// the last position when the overflow value is 2+. There is no point showing +1 overflow
 	// since the overflowing assignee could just be displayed instead
