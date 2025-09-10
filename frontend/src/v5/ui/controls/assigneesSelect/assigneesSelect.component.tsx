@@ -15,86 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useContext } from 'react';
-import { SelectProps } from '@controls/inputs/select/select.component';
-import { SearchContextComponent } from '@controls/search/searchContext';
-import { FormInputProps } from '@controls/inputs/inputController.component';
-import { AssigneesListContainer } from './assigneesSelect.styles';
-import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
 import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
-import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
 import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assignees.helpers';
+import { UsersAndJobsSelect, UsersAndJobsSelectProps } from '@controls/usersAndJobsSelect/usersAndJobsSelect.component';
 
-export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
-	maxItems?: number;
-	canClear?: boolean;
+export type AssigneesSelectProps = Omit<UsersAndJobsSelectProps, 'isValidItem' | 'usersAndJobs'> & {
 	excludeViewers?: boolean;
-	emptyListMessage?: string;
-	excludeJobs?: boolean;
-	onClear?: () => void;
 };
 
 export const AssigneesSelect = ({
-	value: valueRaw,
-	maxItems,
-	multiple,
-	className,
 	excludeViewers = false,
-	helperText,
-	onChange,
-	onClear,
-	canClear = false,
-	disabled,
-	emptyListMessage,
 	...props
 }: AssigneesSelectProps) => {
 	const { containerOrFederation } = useContext(TicketContext);
 	const { jobs, users } = getModelJobsAndUsers(containerOrFederation);
 
-	const emptyValue = multiple ? [] : '';
-	const value = valueRaw || emptyValue;
-	const valueAsArray = multiple ? value : [value].filter(Boolean);
+	const valueAsArray = props.multiple ? props.value : [props.value].filter(Boolean);
 	const validValues = getValidValues([...jobs, ...users], excludeViewers);
 	const invalidValues = getInvalidValues(valueAsArray, validValues);
 
-	const teamspaceJobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
-	const valueToJobOrUser = (val: string) => teamspaceJobsAndUsers[val];
-	const allJobsAndUsersToDisplay = [
-		...validValues.map(valueToJobOrUser),
-		...invalidValues.map((v) => valueToJobOrUser(v) || ({ notFoundName: v })),
-	];
+	const usersAndJobs = [...validValues, ...invalidValues];
 
-	const handleChange = (e) => {
-		if (!multiple) return onChange(e);
-		const validVals = e.target.value.filter((v) => !invalidValues.includes(v));
-		onChange({ target: { value: validVals } });
-	};
-
-	if (!users.length || !jobs.length) return (
-		<AssigneesListContainer className={className}>
-			<Spinner />
-		</AssigneesListContainer>
-	);
-	return (
-		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay}>
-			<AssigneesListContainer className={className}>
-				<AssigneesSelectMenu
-					value={value}
-					multiple={multiple}
-					isValidItem={(v) => !invalidValues.includes(v)}
-					onChange={handleChange}
-					disabled={disabled}
-					{...props}
-				/>
-				<AssigneesValuesDisplay
-					value={valueAsArray}
-					maxItems={maxItems}
-					onClear={canClear && !disabled && valueAsArray?.length ? onClear : undefined}
-					emptyListMessage={emptyListMessage}
-				/>
-			</AssigneesListContainer>
-		</SearchContextComponent>
-	);
+	const isValidItem = (v) => !invalidValues.includes(v);
+	return (<UsersAndJobsSelect isValidItem={isValidItem} usersAndJobs={usersAndJobs} {...props}/>);
 };
