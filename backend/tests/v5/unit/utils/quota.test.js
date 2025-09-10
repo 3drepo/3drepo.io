@@ -23,8 +23,11 @@ const Quota = require(`${src}/utils/quota`);
 jest.mock('../../../../src/v5/handler/db');
 const DBHandler = require(`${src}/handler/db`);
 
+jest.mock('../../../../src/v5/processors/teamspaces');
+const TeamspaceProcessor = require(`${src}/processors/teamspaces`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
 const testGetQuotaInfo = () => {
 	const tsWithExpiredQuota = 'expiredQuota';
@@ -228,28 +231,8 @@ const testSufficientQuota = () => {
 	});
 };
 
-const testGetCollaboratorsAssigned = () => {
-	describe('Get collaborators used', () => {
-		test('should get the total collaborators used by the user', async () => {
-			DBHandler.find.mockResolvedValueOnce([
-				{ user: generateRandomString() },
-				{ user: generateRandomString() },
-			]);
-
-			DBHandler.find.mockResolvedValueOnce([]);
-
-			const teamspace = generateRandomString();
-			const res = await Quota.getCollaboratorsAssigned(teamspace);
-			expect(res).toEqual(2);
-
-			expect(DBHandler.find).toHaveBeenCalledTimes(2);
-		});
-	});
-};
-
-describe('utils/quota', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetQuotaInfo();
 	testGetSpaceUsed();
 	testSufficientQuota();
-	testGetCollaboratorsAssigned();
 });

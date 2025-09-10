@@ -26,7 +26,7 @@ const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 const { templates } = require(`${v5Path}/utils/responseCodes`);
 const { create: createInvite } = require(`${v4Path}/models/invitations`);
 
-const { DEFAULT_OWNER_JOB } = require(`${v5Path}/models/jobs.constants`);
+const { DEFAULT_OWNER_ROLE } = require(`${v5Path}/models/roles.constants`);
 
 const run = async (teamspace, user, accountId) => {
 	logger.logInfo(`Checking ${user} information...`);
@@ -48,7 +48,7 @@ const run = async (teamspace, user, accountId) => {
 
 	await initTeamspace(teamspace, username, accountId);
 	if (!username) {
-		await createInvite(user, teamspace, DEFAULT_OWNER_JOB, undefined, { teamspace_admin: true }, false);
+		await createInvite(user, teamspace, DEFAULT_OWNER_ROLE, undefined, { teamspace_admin: true }, false);
 	}
 
 	logger.logInfo(`Teamspace ${teamspace} created.`);
