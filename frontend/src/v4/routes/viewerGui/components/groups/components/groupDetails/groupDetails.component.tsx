@@ -21,6 +21,7 @@ import SaveIcon from '@mui/icons-material/Save';
 
 import { isEqual } from 'lodash';
 import * as Yup from 'yup';
+import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { GROUP_PANEL_NAME, GROUP_TYPES_ICONS, GROUPS_TYPES } from '../../../../../../constants/groups';
 import { rulesAreEqual , stripGroupRules } from '../../../../../../helpers/groups';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -51,7 +52,8 @@ interface IProps {
 	createGroup: (teamspace: any, modelId: any, revision: any) => void;
 	updateGroup: (teamspace: any, modelId: any, revision: any, groupId: any) => void;
 	updateEditingGroup: (fields: any) => void;
-	setCriteriaState: (criteriaState: any) => void;
+	setCriteriaFieldState: (criteriFieldState: Partial<ICriteriaFieldState>) => any;
+	setSelectedCriterionId: (id) => void;
 	resetToSavedSelection: () => void;
 	isPending: boolean;
 	deleteGroup: (id: string | null) => void;
@@ -103,17 +105,28 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	public formRef = createRef<HTMLElement>() as any;
 	public panelRef = createRef<any>();
 
+	public handleCriteriaFieldClose = (criterionForm) => {
+		if (this.panelRef.current) {
+			// user changed group using arrows, so we don't save the form
+			return;
+		}
+		this.props.setCriteriaFieldState({ criterionForm });
+	}
+
 	public renderRulesField = renderWhenTrue(() => (
 		<CriteriaField
 			name="rules"
 			value={this.editingGroup.rules}
+			updateEditingGroup={this.props.updateEditingGroup}
 			{...this.props.criteriaFieldState}
 			onChange={this.handleFieldChange}
 			onCriterionSelect={this.handleCriterionSelect}
-			setState={this.props.setCriteriaState}
+			setCriteriaFieldState={this.props.setCriteriaFieldState}
+			setSelectedCriterionId={this.props.setSelectedCriterionId}
 			label="Filters"
 			placeholder="Select first filter"
 			disabled={!this.props.canUpdate || this.props.isReadOnly}
+			onClose={this.handleCriteriaFieldClose}
 		/>
 	));
 
@@ -137,7 +150,10 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	));
 
 	public componentDidMount() {
-		this.setState({ isFormDirty: this.isNewGroup, isFormValid: this.isNewGroup && this.objectsCount > 0 });
+		this.setState({
+			isFormDirty: this.isNewGroup,
+			isFormValid: this.isNewGroup && this.objectsCount > 0,
+		});
 	}
 
 	public componentDidUpdate(prevProps: Readonly<PropsWithChildren<IProps>>) {
@@ -194,7 +210,7 @@ export class GroupDetails extends PureComponent<IProps, IState> {
 	)
 
 	public handleCriterionSelect = (criterion: any) => {
-		this.props.setCriteriaState({ criterionForm: criterion });
+		this.props.setCriteriaFieldState({ selectedCriterionId: criterion._id });
 	}
 
 	public handlePanelScroll = (event: UIEvent) => {
