@@ -18,7 +18,6 @@ import { PureComponent, ReactNode, createRef } from 'react';
 import { Field, Formik } from 'formik';
 import { Tooltip } from '@mui/material';
 import * as Yup from 'yup';
-import { RouteComponentProps } from 'react-router';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { schema } from '../../../../services/validation';
 import { ActionMessage } from '../../../components/actionMessage/actionMessage.component';
@@ -44,7 +43,7 @@ import {
 	Grid
 } from './previewDetails.styles';
 
-interface IProps extends RouteComponentProps<any> {
+interface IProps {
 	className?: string;
 	roleColor: string;
 	type?: string;

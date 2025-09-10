@@ -20,11 +20,11 @@ import { formatMessage } from '@/v5/services/intl';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { useEffect } from 'react';
-import { useHistory, generatePath, useParams } from 'react-router-dom';
+import { useNavigate, generatePath, useParams } from 'react-router-dom';
 import { TEAMSPACE_ROUTE_BASE, ViewerParams } from '../../routes.constants';
 
 export const CheckLatestRevisionReadiness = (): JSX.Element => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const isContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isFederation = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
@@ -48,7 +48,7 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 					defaultMessage: 'Go back to Teamspace',
 				}),
 				onClickAction: () => {
-					history.push(generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }));
+					navigate(generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }));
 				},
 			});
 		}

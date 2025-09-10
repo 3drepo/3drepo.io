@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Outlet, useParams } from 'react-router-dom';
 import { AppBar } from '@components/shared/appBar';
 import { TeamspacesActionsDispatchers, ProjectsActionsDispatchers, UsersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TeamspaceNavigation } from '@components/shared/navigationTabs/teamspaceNavigation/teamspaceNavigation.component';
@@ -31,14 +31,12 @@ import { Container, TopBar, TeamspaceImage, TeamspaceInfo, Content } from './tea
 import { TeamspaceQuota } from './teamspaceQuota/teamspaceQuota.component';
 
 interface ITeamspaceLayout {
-	children: ReactNode;
 	className?: string;
 }
 
-export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.Element => {
+export const TeamspaceLayout = ({ className }: ITeamspaceLayout): JSX.Element => {
 	const { teamspace } = useParams<TeamspaceParams>();
 	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
-	
 
 	useEffect(() => {
 		if (teamspace) {
@@ -47,6 +45,8 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 			UsersActionsDispatchers.fetchUsers(teamspace);
 		}
 	}, [teamspace]);
+
+	useEffect(() => { ProjectsActionsDispatchers.setCurrentProject(''); }, []);
 
 	return (
 		<Container className={className}>
@@ -67,7 +67,7 @@ export const TeamspaceLayout = ({ children, className }: ITeamspaceLayout): JSX.
 			<TeamspaceNavigation />
 			<DashboardScrollArea>
 				<Content>
-					{children}
+					<Outlet />
 				</Content>
 				<DashboardFooter variant="light" />
 			</DashboardScrollArea>
