@@ -51,6 +51,7 @@ import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selector
 import { useSelector } from 'react-redux';
 import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import HomeIcon from '@assets/icons/viewer/home.svg';
+import { DrawingViewerApryse } from './drawingViewerApryse/drawingViewerApryse.component';
 
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
@@ -81,6 +82,7 @@ export const Viewer2D = () => {
 
 	const canCalibrate2D = isCalibrating && step === 1;
 	const showSVGImage = !isFirefox() && !plainSrc.toLowerCase().endsWith('.png');
+	const showPDFImage = true;
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -180,8 +182,9 @@ export const Viewer2D = () => {
 						<Loader />
 					</CentredContainer>
 				}
-				{showSVGImage && src && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
-				{!showSVGImage && src && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{showPDFImage && src && <DrawingViewerApryse ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!showPDFImage && showSVGImage && src && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{!showPDFImage && !showSVGImage && src && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
 				{!isLoading && (<ViewerLayer2D
 					viewBox={viewBox}
 					snapHandler={snapHandler}
