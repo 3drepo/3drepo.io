@@ -26,6 +26,7 @@ export interface TicketsFiltersContextType {
 	modelsIds: string[];
 	setFilter: (filter:TicketFilter) => void;
 	deleteFilter: (filter:TicketFilter) => void;
+	clearFilters: () => void;
 }
 
 const defaultValue: TicketsFiltersContextType = {
@@ -35,6 +36,7 @@ const defaultValue: TicketsFiltersContextType = {
 	filters: [],
 	setFilter: () => {},
 	deleteFilter: () => {},
+	clearFilters: () => {},
 };
 
 export const TicketsFiltersContext = createContext<TicketsFiltersContextType>(defaultValue);
@@ -91,8 +93,12 @@ export const TicketsFiltersContextComponent = ({
 		onChange?.(filters);
 	}, [JSON.stringify(filters)]);
 
+	const clearFilters = () => {
+		setFilters([]);
+	};
+
 	return (
-		<TicketsFiltersContext.Provider value={{ filters, setFilter, deleteFilter, choosablefilters, templates, modelsIds }}>
+		<TicketsFiltersContext.Provider value={{ filters, setFilter, deleteFilter, clearFilters, choosablefilters, templates, modelsIds }}>
 			{children}
 		</TicketsFiltersContext.Provider>
 	);

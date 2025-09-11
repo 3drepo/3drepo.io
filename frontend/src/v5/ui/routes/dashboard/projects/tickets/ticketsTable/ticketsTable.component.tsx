@@ -160,8 +160,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 
 	useEffect(() => {
-		console.log('fetchFiltered triggered, ', JSON.stringify(filters));
-		console.log(JSON.stringify(containersAndFederations));
+		let mounted = true;
 
 		(async () => {
 			const templateFilter:TicketFilter = {
@@ -177,10 +176,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
 				(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
 			);
+
+			if (!mounted) return;
 	
 			const newFiltered = tickets.filter(({ _id }) => idsSets.some((s) => s.has(_id)));
 			setFilteredTickets(newFiltered);
 		})();
+
+		return () => { mounted = false;};
 	}, [JSON.stringify(containersAndFederations), JSON.stringify(filters)]);
 
 
@@ -226,8 +229,9 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 							onContainerOrFederationClick={setTicketValue}
 						/>}
 				</FlexContainer>
+				<br />
+				<CardFilters />
 			</FiltersContainer>
-			<CardFilters />
 			<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
 		</TicketsFiltersContextComponent>
 	);
