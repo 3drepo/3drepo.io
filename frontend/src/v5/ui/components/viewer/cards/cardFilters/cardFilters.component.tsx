@@ -19,13 +19,13 @@ import { Fragment } from 'react';
 import { FiltersAccordion } from './filtersAccordion/filtersAccordion.component';
 import { ModuleTitle } from './cardFilters.styles';
 import { FiltersSection } from './filtersSection/filtersSection.component';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { groupBy } from 'lodash';
+import { useTicketFiltersContext } from './ticketsFilters.context';
 
 export const CardFilters = () => {
-	const filters = TicketsCardHooksSelectors.selectCardFilters();
-	const hasFilters = Object.keys(filters).length > 0;
+	const filters = useTicketFiltersContext().filters;
+	const hasFilters = filters.length > 0;
 
 	if (!hasFilters) return null;
 	

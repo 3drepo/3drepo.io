@@ -16,26 +16,25 @@
  */
 
 import { createContext, useCallback, useContext, useEffect, useState } from 'react';
-import { BaseFilter, TicketFilter } from './cardFilters.types';
-import { ITemplate, TicketFilterKey } from '@/v5/store/tickets/tickets.types';
+import { TicketFilter } from './cardFilters.types';
+import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { templatesToFilters } from './filtersSelection/tickets/ticketFilters.helpers';
-
-type TicketFiltersDict = Record<TicketFilterKey, BaseFilter>;
-
 export interface TicketsFiltersContextType {
 	choosablefilters:  TicketFilter[];
-	filters: TicketFiltersDict;
+	filters: TicketFilter[];
 	templates: ITemplate[];
 	modelsIds: string[];
 	setFilter: (filter:TicketFilter) => void;
+	deleteFilter: (filter:TicketFilter) => void;
 }
 
 const defaultValue: TicketsFiltersContextType = {
 	choosablefilters: [],
 	templates: [],
 	modelsIds: [],
-	filters: {},
+	filters: [],
 	setFilter: () => {},
+	deleteFilter: () => {},
 };
 
 export const TicketsFiltersContext = createContext<TicketsFiltersContextType>(defaultValue);
@@ -47,35 +46,53 @@ interface TicketsFiltersContextComponentProps {
 	children: any;
 	templates: ITemplate[];
 	modelsIds: string[];
-	presetFilters?: TicketFiltersDict;
-	onChange?: (filters: TicketFiltersDict) => void;
+	presetFilters?: TicketFilter[];
+	onChange?: (filters: TicketFilter[]) => void;
 }
+
+const findFilterIndex = (filters:TicketFilter[], filter:TicketFilter) =>
+	filters.findIndex((f) => f.module === filter.module && f.property === filter.property && f.type === filter.type);
 
 export const TicketsFiltersContextComponent = ({
 	children, 
 	templates, 
 	modelsIds, 
-	presetFilters = {}, 
+	presetFilters = [], 
 	onChange }: TicketsFiltersContextComponentProps) => {
-	const [filters, setFilters] = useState<TicketFiltersDict>(presetFilters);
+	const [filters, setFilters] = useState<TicketFilter[]>(presetFilters);
 	const [choosablefilters, setChoosablefilters] = useState<TicketFilter[]>([]);
 	
 	useEffect(() => {
+		const usedFilters = new Set(filters.map(({ module, property, type })=> `${module}.${property}.${type}`));
 		const newChoosableFilters = templatesToFilters(templates)
-			.filter(({ module, property, type }) =>!filters[`${module}.${property}.${type}`]);
+			.filter(({ module, property, type }) =>!usedFilters.has(`${module}.${property}.${type}`));
 		setChoosablefilters(newChoosableFilters);
 	}, [filters, templates]);
 	
-	const setFilter = useCallback(({ module, property, type, filter }: TicketFilter) => {
-		setFilters({ ...filters, [`${module}.${property}.${type}`]: filter });
+	const setFilter = useCallback((filter: TicketFilter) => {
+		const index = findFilterIndex(filters, filter);
+		const newFilters = [...filters];
+
+		if (index === -1) {
+			newFilters.push(filter);
+		} else {
+			newFilters[index] = filter;
+		} 
+
+		setFilters(newFilters);
 	}, [filters, setFilters]);
+
+	const deleteFilter = useCallback((filter:TicketFilter) => {
+		const index = findFilterIndex(filters, filter);
+		setFilters(filters.filter((f, i) => i !== index));
+	}, [filters]);
 	
 	useEffect(() => {
 		onChange?.(filters);
 	}, [filters, onChange]);
-	
+
 	return (
-		<TicketsFiltersContext.Provider value={{ filters, setFilter, choosablefilters, templates, modelsIds }}>
+		<TicketsFiltersContext.Provider value={{ filters, setFilter, deleteFilter, choosablefilters, templates, modelsIds }}>
 			{children}
 		</TicketsFiltersContext.Provider>
 	);

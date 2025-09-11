@@ -22,14 +22,15 @@ import { FilterForm } from '../filterForm/filterForm.component';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { CardFilterActionMenu } from '../filterForm/filterForm.styles';
 import { useState } from 'react';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { isEqual } from 'lodash';
+import { useTicketFiltersContext } from '../ticketsFilters.context';
 
 type FiltersSectionProps = {
 	filters: TicketFilter[];
 };
 export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 	const [selectedFilter, setSelectedFilter] = useState({});
+	const { deleteFilter, setFilter } = useTicketFiltersContext();
 
 	return (
 		<Section>
@@ -42,7 +43,7 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 						<FilterChip
 							{...filter as any}
 							selected={isEqual(selectedFilter, filter)}
-							onDelete={() => TicketsCardActionsDispatchers.deleteFilter(filter)}
+							onDelete={() => deleteFilter(filter)}
 						/>
 					)}
 				>
@@ -51,7 +52,7 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 							<FilterForm
 								{...filter as any}
 								onCancel={close}
-								onSubmit={TicketsCardActionsDispatchers.upsertFilter}
+								onSubmit={setFilter}
 							/>
 						)}
 					</ActionMenuContext.Consumer>

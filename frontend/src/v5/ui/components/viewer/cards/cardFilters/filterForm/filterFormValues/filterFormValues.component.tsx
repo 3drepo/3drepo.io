@@ -21,7 +21,7 @@ import { isRangeOperator, isTextType, isSelectType, isDateType, getTemplatePrope
 import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField, FormJobsAndUsersSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect, useRef } from 'react';
-import { compact, isArray, isEmpty } from 'lodash';
+import { compact, isArray, isEmpty, uniqBy } from 'lodash';
 import { TicketFilterType } from '../../cardFilters.types';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
@@ -84,7 +84,7 @@ const getSelectOptions = (module, property, type): SelectOption[] => {
 	});
 
 	
-	return options;
+	return uniqBy(options, (({ value }) => value) );
 };
 
 const name = 'values';
@@ -187,6 +187,8 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	}
 
 	if (isSelectType(type)) {
+
+
 		return (
 			<FormMultiSelect
 				name={name}

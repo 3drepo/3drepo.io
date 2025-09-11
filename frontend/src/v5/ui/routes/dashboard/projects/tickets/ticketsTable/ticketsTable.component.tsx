@@ -99,6 +99,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 
+
+	// This will be replaced by the filtered tickets
 	const ticketsFilteredByTemplate = useMemo(() => {
 		const ticketsToShow = tickets.filter((t) => ticketIsCompleted(t, selectedTemplate) === showCompleted);
 		return ticketsToShow.filter(({ type }) => type === template);

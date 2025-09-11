@@ -37,10 +37,15 @@ export const TicketsListCard = () => {
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const { containerOrFederation } = useParams<ViewerParams>();
-	
+	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
+
+	const onFiltersChange = (filters) => {
+		console.log('should update the filters in redux:' + filters);
+	};
+
 	return (
 		<CardContainer>
-			<TicketsFiltersContextComponent templates={templates} modelsIds={[containerOrFederation]}>
+			<TicketsFiltersContextComponent templates={templates} modelsIds={[containerOrFederation]} presetFilters={presetFilters} onChange={onFiltersChange}>
 				<CardHeader
 					icon={<TicketsIcon />}
 					title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}

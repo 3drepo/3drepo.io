@@ -26,12 +26,11 @@ import { SearchInput, TicketsFiltersModal, TicketsFiltersModalItem } from './tic
 import { TicketFilter } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useTicketFiltersContext } from '../../ticketsFilters.context';
 
 export const FilterSelection = () => {
 	const [selectedFilter, setSelectedFilter] = useState<TicketFilter>(null);
-	const unusedFilters = useTicketFiltersContext().choosablefilters;
+	const { choosablefilters: unusedFilters, setFilter } = useTicketFiltersContext();
 	const showFiltersList = !selectedFilter?.property;
 	const disabled = !unusedFilters.length;
 
@@ -63,7 +62,7 @@ export const FilterSelection = () => {
 					<TicketsFiltersModalItem $visible={!showFiltersList}>
 						<FilterForm
 							{...(selectedFilter || {} as any)}
-							onSubmit={TicketsCardActionsDispatchers.upsertFilter}
+							onSubmit={setFilter}
 							onCancel={clearFilter}
 						/>
 					</TicketsFiltersModalItem>
