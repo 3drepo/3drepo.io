@@ -17,7 +17,9 @@
 
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
+const { generateRandomString, generateCustomStatusValues, determineTestGroup } = require('../../../helper/services');
+const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
+const { read } = require('mongodb/lib/gridfs/grid_store');
 
 const { statusTypes, statuses } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -419,6 +421,49 @@ const testValidate = () => {
 				type: propTypes.BOOLEAN,
 				unique: true,
 			}] }, false],
+		['property is readOnly', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.BOOLEAN,
+				readOnly: true,
+			}] }, true],
+		['property is not readOnly but value is configured', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				value: generateRandomString(),
+			}] }, false],
+		['property is readOnly but value contains no placeholder', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				readOnly: true,
+				value: generateRandomString(),
+			}] }, true],
+		['property is readOnly but value contains unknown placeholder', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				readOnly: true,
+				value: `{${generateRandomString()}}`,
+			}] }, false],
+		['property is readOnly but value contains known placeholders', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				readOnly: true,
+				value: supportedPatterns.map((p) => `{${p}}${generateRandomString()}`).join(' '),
+			}] }, true],
 		['property is readOnlyOnUI', { name: generateRandomString(),
 			code: generateRandomString(3),
 			properties: [{
@@ -1122,7 +1167,7 @@ const testGetClosedStatuses = () => {
 	});
 };
 
-describe('schema/tickets/templates', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidate();
 	testGenerateFullSchema();
 	testGetClosedStatuses();

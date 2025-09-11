@@ -23,7 +23,8 @@ const {
 	presetModulesProperties,
 	propTypes,
 	statusTypes,
-	statuses } = require('./templates.constants');
+	statuses,
+	supportedPatterns } = require('./templates.constants');
 
 const { isArray, isString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
@@ -76,9 +77,25 @@ const propSchema = Yup.object().shape({
 	required: defaultFalse,
 	immutable: defaultFalse,
 	readOnlyOnUI: defaultFalse,
+	readOnly: defaultFalse,
 	unique: Yup.lazy((value) => Yup.boolean().strip(!value)
 		.when('type', (typeVal, schema) => schema.test('Unique check', `Unique attribute cannot be applied to properties of type: ${uniqueTypeBlackList.join(', ')}`,
 			(uniqueVal) => !(uniqueVal && uniqueTypeBlackList.includes(typeVal))))),
+	value: Yup.string().when('readOnly', (readOnlyVal, schema) => schema.test('ReadOnly check', 'Value configuration is only supported if the property is read-only', (v) => v === undefined || readOnlyVal)
+		.test('Pattern string check', `Value pattern contains unrecognised placeholders (accepted patterns: ${supportedPatterns.join(', ')})`, (pattern) => {
+			// string can contain pattern wrapped around {}, and they can only be of supported values
+			if (pattern === undefined) return true;
+			const regex = /\{(.*?)\}/g;
+			let match = regex.exec(pattern);
+
+			while (match !== null) {
+				if (!supportedPatterns.includes(match[1])) {
+					return false;
+				}
+				match = regex.exec(pattern);
+			}
+			return true;
+		})),
 	values: Yup.mixed().when('type', (val, schema) => {
 		if (val === propTypes.MANY_OF || val === propTypes.ONE_OF) {
 			return schema.test('Values check', 'Property values must of be an array of unique values or the name of a preset', (value) => {

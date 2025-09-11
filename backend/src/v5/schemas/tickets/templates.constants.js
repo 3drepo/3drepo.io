@@ -46,6 +46,7 @@ const propTypes = createConstantMapping([
 
 const propOptions = createConstantMapping([
 	'values',
+	'value',
 	'required',
 	'default',
 	'readOnly',
@@ -220,6 +221,11 @@ TemplateConstants.getApplicableDefaultProperties = (config, isImport) => [
 	),
 	...customisableProperties.flatMap((createFn) => processProperty(createFn(config), config, isImport),
 	),
+];
+TemplateConstants.supportedPatterns = [
+	'model-name',
+	'template-code',
+	'ticket-number',
 ];
 
 module.exports = TemplateConstants;
