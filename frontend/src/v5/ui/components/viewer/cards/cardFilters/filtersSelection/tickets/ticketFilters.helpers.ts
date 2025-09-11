@@ -71,8 +71,8 @@ const propertiesToValidFilters = (properties: { name: string, type: string }[], 
 	}) as TicketFilter);
 
 const templateToFilters = (template: ITemplate): TicketFilter[] => [
-	...propertiesToValidFilters(template.properties, ''),
-	...template.modules.flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
+	...propertiesToValidFilters(template.properties || [], ''),
+	...(template.modules || []).flatMap(({ properties, name, type }) => propertiesToValidFilters(properties, name || type)),
 ];
 
 export const templatesToFilters = (templates: ITemplate[]): TicketFilter[] => {

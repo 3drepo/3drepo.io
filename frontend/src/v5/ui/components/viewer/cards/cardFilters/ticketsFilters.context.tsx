@@ -67,7 +67,7 @@ export const TicketsFiltersContextComponent = ({
 		const newChoosableFilters = templatesToFilters(templates)
 			.filter(({ module, property, type }) =>!usedFilters.has(`${module}.${property}.${type}`));
 		setChoosablefilters(newChoosableFilters);
-	}, [filters, templates]);
+	}, [filters, JSON.stringify(templates)]);
 	
 	const setFilter = useCallback((filter: TicketFilter) => {
 		const index = findFilterIndex(filters, filter);
@@ -80,7 +80,7 @@ export const TicketsFiltersContextComponent = ({
 		} 
 
 		setFilters(newFilters);
-	}, [filters, setFilters]);
+	}, [filters]);
 
 	const deleteFilter = useCallback((filter:TicketFilter) => {
 		const index = findFilterIndex(filters, filter);
@@ -89,7 +89,7 @@ export const TicketsFiltersContextComponent = ({
 	
 	useEffect(() => {
 		onChange?.(filters);
-	}, [filters, onChange]);
+	}, [JSON.stringify(filters)]);
 
 	return (
 		<TicketsFiltersContext.Provider value={{ filters, setFilter, deleteFilter, choosablefilters, templates, modelsIds }}>
