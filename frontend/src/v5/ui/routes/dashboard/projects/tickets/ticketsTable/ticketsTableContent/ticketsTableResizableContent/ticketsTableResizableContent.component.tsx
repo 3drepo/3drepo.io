@@ -15,14 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SearchContext } from '@controls/search/searchContext';
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import { getjobOrUserDisplayName, groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
+import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
 import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
@@ -41,7 +40,9 @@ type CollapsibleTicketsGroupProps = {
 	propertyName: string;
 };
 
-const CollapsibleTicketsGroup = ({ propertyValue, groupName: groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName }: CollapsibleTicketsGroupProps) => {
+const CollapsibleTicketsGroup = ({ 
+	propertyValue, groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName 
+}: CollapsibleTicketsGroupProps) => {
 	const ticketsIds = tickets.map(({ _id }) => _id);
 	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
 
@@ -68,12 +69,12 @@ const CollapsibleTicketsGroup = ({ propertyValue, groupName: groupName, tickets,
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
+	tickets: ITicket[],
 };
 
-export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
+export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId, tickets: filteredItems }: TicketsTableResizableContentProps) => {
 	const { groupBy, getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const { template } = useParams<DashboardTicketsParams>();
-	const { filteredItems } = useContext(SearchContext);
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		const presetValue = { key: groupBy, value: (groupByValue === UNSET) ? null : groupByValue };
@@ -96,7 +97,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 
 	return (
 		<Container>
-			{groups.map(({groupName, value, tickets}) => (
+			{groups.map(({ groupName, value, tickets }) => (
 				<CollapsibleTicketsGroup
 					groupName={groupName}
 					tickets={tickets}

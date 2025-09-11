@@ -60,7 +60,7 @@ export function* fetchTicketsList({ teamspace, projectId, modelId, isFederation 
 	}
 }
 
-const apiFetchFilteredTickets = async (teamspace, projectId, modelId, isFederation, filters ): Promise<Set<string>> => {
+export const apiFetchFilteredTickets = async (teamspace, projectId, modelId, isFederation, filters ): Promise<Set<string>> => {
 	const fetchModelTickets = isFederation
 		? API.Tickets.fetchFederationTickets
 		: API.Tickets.fetchContainerTickets;
