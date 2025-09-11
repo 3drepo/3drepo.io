@@ -32,6 +32,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	upsertFilterSuccess: ['filter'],
 	upsertFilter: ['filter'],
 	deleteFilter: ['filter'],
+	setFilters:['filters'],
 	resetFilters: [],
 	setPinToDrop: ['pinToDrop'],
 	fetchTicketsList: ['teamspace', 'projectId', 'modelId', 'isFederation'],
