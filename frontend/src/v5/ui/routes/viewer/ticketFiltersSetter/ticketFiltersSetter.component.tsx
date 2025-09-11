@@ -111,7 +111,8 @@ export const TicketFiltersSetter = () => {
 			TicketsCardActionsDispatchers.resetFilters();
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
 			const filters: TicketFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : getNonCompletedTicketFilters();
-			filters.forEach(TicketsCardActionsDispatchers.upsertFilter);
+			
+			TicketsCardActionsDispatchers.setFilters(filters);
 
 			if (ticketCodes.length) {
 				ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);

@@ -20,18 +20,15 @@ import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Action } from 'redux';
 import { createActions, createReducer } from 'reduxsauce';
 import { Constants } from '@/v5/helpers/actions.helper';
-import { EditableTicket, OverridesDicts, TicketFilterKey } from '../tickets.types';
+import { EditableTicket, OverridesDicts } from '../tickets.types';
 import { TeamspaceProjectAndModel } from '../../store.types';
-import { BaseFilter, TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
 	setSelectedTicket: ['ticketId'],
 	setSelectedTemplate: ['templateId'],
 	setSelectedTicketPin: ['pinId'],
 	setFilteredTicketIds: ['ticketIds'],
-	upsertFilterSuccess: ['filter'],
-	upsertFilter: ['filter'],
-	deleteFilter: ['filter'],
 	setFilters:['filters'],
 	resetFilters: [],
 	setPinToDrop: ['pinToDrop'],
@@ -55,7 +52,7 @@ export interface ITicketsCardState {
 	selectedTemplateId: string | null,
 	selectedTicketPinId: string | null,
 	pinToDrop: string | null,
-	filters: Record<TicketFilterKey, BaseFilter>,
+	filters: TicketFilter[],
 	filteredTicketIds: Set<string>,
 	view: TicketsCardViews,
 	viewProps: any,
@@ -73,7 +70,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 	selectedTemplateId: null,
 	selectedTicketPinId: null,
 	pinToDrop: null,
-	filters: {},
+	filters: [],
 	filteredTicketIds: new Set(),
 	view: TicketsCardViews.List,
 	viewProps: null,
@@ -107,15 +104,8 @@ export const setPinToDrop = (state: ITicketsCardState, { pinToDrop }: SetPinToDr
 	state.pinToDrop = pinToDrop;
 };
 
-const getFilterKey = ({ module, property, type }: TicketFilter): TicketFilterKey => `${module}.${property}.${type}`;
-export const upsertFilterSuccess = (state: ITicketsCardState, { filter }: UpsertFilterSuccessAction) => {
-	const path = getFilterKey(filter);
-	state.filters[path] = filter.filter;
-};
-
-export const deleteFilter = (state: ITicketsCardState, { filter }: DeleteFilterAction) => {
-	const path = getFilterKey(filter);
-	delete state.filters[path];
+export const setFilters = (state: ITicketsCardState, { filters }: SetFiltersAction) => {
+	state.filters = filters;
 };
 
 export const resetFilters = (state: ITicketsCardState) => {
@@ -165,8 +155,6 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TICKET_PIN]: setSelectedTicketPin,
 	[TicketsCardTypes.SET_FILTERED_TICKET_IDS]: setFilteredTicketIds,
 	[TicketsCardTypes.SET_PIN_TO_DROP]: setPinToDrop,
-	[TicketsCardTypes.UPSERT_FILTER_SUCCESS]: upsertFilterSuccess,
-	[TicketsCardTypes.DELETE_FILTER]: deleteFilter,
 	[TicketsCardTypes.RESET_FILTERS]: resetFilters,
 	[TicketsCardTypes.SET_CARD_VIEW]: setCardView,
 	[TicketsCardTypes.SET_READ_ONLY]: setReadOnly,
@@ -176,6 +164,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_EDITING_GROUPS]: setEditingGroups,
 	[TicketsCardTypes.SET_IS_SHOWING_PINS]: setIsShowingPins,
 	[TicketsCardTypes.SET_FILTERING]: setFiltering,
+	[TicketsCardTypes.SET_FILTERS]: setFilters,
 }));
 
 export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
@@ -199,7 +188,7 @@ export type SetEditingGroupsAction = Action<'SET_EDITING_GROUPS'> & { isEditing:
 export type SetIsShowingPinsAction = Action<'SET_IS_SHOWING_PINS'> & { isShowing: boolean } ;
 export type SetFilteringAction = Action<'SET_FILTERING'> & { isFiltering: boolean } ;
 export type ApplyFilterForTicketAction = Action<'APPLY_FILTER_FOR_TICKET'> & TeamspaceProjectAndModel & { isFederation: boolean, ticketId: string } ;
-
+export type SetFiltersAction = Action<'SET_FILTERS'> & { filters: TicketFilter[] };
 
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
@@ -207,9 +196,7 @@ export interface ITicketsCardActionCreators {
 	setSelectedTicketPin: (pinId: string) => SetSelectedTicketPinAction,
 	setFilteredTicketIds: (ticketIds: Set<string>) => SetFilteredTicketIdsAction
 	setPinToDrop: (pinToDrop: string) => SetPinToDropAction,
-	upsertFilterSuccess: (filter: TicketFilter) => UpsertFilterSuccessAction,
-	upsertFilter: (filter: TicketFilter) => UpsertFilterAction,
-	deleteFilter: (filter: TicketFilter) => DeleteFilterAction,
+	setFilters: (filters: TicketFilter[]) => SetFiltersAction,
 	resetFilters: () => ResetFiltersAction,
 	fetchTicketsList: (
 		teamspace: string,

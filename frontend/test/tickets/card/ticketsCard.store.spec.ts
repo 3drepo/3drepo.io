@@ -156,7 +156,7 @@ describe('Tickets: store', () => {
 			dispatch(TicketsCardActions.setSelectedTicket(ticketId));
 			dispatch(TicketsCardActions.setSelectedTemplate(templateId));
 			dispatch(TicketsCardActions.setSelectedTicketPin(pinId));
-			dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
+			dispatch(TicketsCardActions.setFilters([ticketTitleCardFilter]));
 			dispatch(TicketsCardActions.resetFilters());
 			dispatch(TicketsCardActions.resetState());
 

@@ -24,7 +24,7 @@ import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { isString, sortBy, uniqBy, compact } from 'lodash';
-import { TicketFilterType, BaseFilter, TicketFilter, TicketFilterOperator } from '../../cardFilters.types';
+import { TicketFilterType, TicketFilter, TicketFilterOperator } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { SelectOption } from '@/v5/helpers/form.helper';
@@ -89,18 +89,6 @@ export const templatesToFilters = (templates: ITemplate[]): TicketFilter[] => {
 	];
 };
 
-const toTicketFilter = (modulePropertyAndType: string) => {
-	const [module, property, type] = modulePropertyAndType.split('.');
-	return { module, property, type } as TicketFilter;
-};
-
-export const toTicketCardFilter = (filters: Record<string, BaseFilter>): TicketFilter[] => (
-	Object.entries(filters)
-		.map(([modulePropertyAndType, filter]) => ({
-			...toTicketFilter(modulePropertyAndType),
-			filter,
-		}))
-);
 
 export const getOptionFromValue = (value, options: SelectOption[]) => options.find(({ value: optionValue }) => value === optionValue);
 export const getFilterFromEvent = (event) => compact(event.target.value).map((value) => ({ value }));

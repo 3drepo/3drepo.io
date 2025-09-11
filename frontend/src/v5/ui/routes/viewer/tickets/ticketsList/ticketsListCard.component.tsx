@@ -40,7 +40,7 @@ export const TicketsListCard = () => {
 	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
 
 	const onFiltersChange = (filters) => {
-		console.log('should update the filters in redux:' + filters);
+		TicketsCardActionsDispatchers.setFilters(filters);
 	};
 
 	return (
