@@ -146,7 +146,7 @@ const propSchema = Yup.object().shape({
 		return res;
 	}),
 
-});
+}).test('ReadOnly and required', 'A read-only property cannot be required', ({ readOnly, required }) => !(readOnly && required));
 
 const propertyArray = Yup.array().of(propSchema).default([]).test('Property names', 'Property names must be unique inside the same context', (arr) => {
 	const propNames = new Set();

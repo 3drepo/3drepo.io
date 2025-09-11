@@ -429,6 +429,15 @@ const testValidate = () => {
 				type: propTypes.BOOLEAN,
 				readOnly: true,
 			}] }, true],
+		['property is readOnly and required', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.BOOLEAN,
+				readOnly: true,
+				required: true,
+			}] }, false],
 		['property is not readOnly but value is configured', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
