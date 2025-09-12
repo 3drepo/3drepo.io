@@ -162,29 +162,32 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	useEffect(() => {
 		let mounted = true;
 
-		(async () => {
-			const templateFilter:TicketFilter = {
-				type:'template',
-				property:'',
-				filter: { operator:'is', 
-					values:[selectedTemplate.code],
-				}, 
-			};
-	
-			const allFilters = [...filters, templateFilter];
-	
-			const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
-				(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
-			);
+		setFilteredTickets(tickets.filter(({ type }) => type === template));
 
-			if (!mounted) return;
-	
-			const newFiltered = tickets.filter(({ _id }) => idsSets.some((s) => s.has(_id)));
-			setFilteredTickets(newFiltered);
-		})();
 
-		return () => { mounted = false;};
-	}, [JSON.stringify(containersAndFederations), JSON.stringify(filters)]);
+		// (async () => {
+		// 	const templateFilter:TicketFilter = {
+		// 		type:'template',
+		// 		property:'',
+		// 		filter: { operator:'is', 
+		// 			values:[selectedTemplate.code],
+		// 		}, 
+		// 	};
+	
+		// 	const allFilters = [...filters, templateFilter];
+	
+		// 	const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
+		// 		(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
+		// 	);
+
+		// 	if (!mounted) return;
+	
+		// 	const newFiltered = tickets.filter(({ _id }) => idsSets.some((s) => s.has(_id)));
+		// 	setFilteredTickets(newFiltered);
+		// })();
+
+		// return () => { mounted = false;};
+	}, [tickets, template, JSON.stringify(filters)]);
 
 
 	useEffect(() => {
@@ -330,9 +333,11 @@ export const TabularView = () => {
 		};
 	}, []);
 
+	console.log(columns);
+
 	return (
 		<TicketsTableContextComponent>
-			<ResizableTableContextComponent columns={columns} columnGap={1} key={templateId + templateHasBeenFetched}>
+			<ResizableTableContextComponent columns={columns} columnGap={1}>
 				<TicketsTable isNewTicketDirty={isNewTicketDirty} setTicketValue={setTicketValue} />
 			</ResizableTableContextComponent>
 			<TabularViewTicketForm setIsNewTicketDirty={setIsNewTicketDirty} setTicketValue={setTicketValue} presetValue={presetValue}/>
