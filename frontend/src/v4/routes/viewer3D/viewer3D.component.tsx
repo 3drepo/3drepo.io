@@ -282,7 +282,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	public render() {
 		return (
 			<ViewerContainer visible={this.shouldBeVisible} >
-				<Calibration3DInfoBox />
+				{this.props.isCalibrating && <Calibration3DInfoBox />}
 				<div ref={this.containerRef} className={this.props.className} />
 				{this.props.isCalibrating ? <CalibrationToolbar /> : <Toolbar />}
 			</ ViewerContainer>

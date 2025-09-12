@@ -15,17 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useState } from 'react';
-import { CalibrationContext } from '../calibrationContext';
-import { InfoBoxProps } from '@controls/infoBox/infoBox.component';
-import { InfoBox } from './calibrationInfoBox.styles';
+import { InfoBox } from '@controls/infoBox/infoBox.component';
+import styled from 'styled-components';
 
-type CalibrationInfoBoxProps = Omit<InfoBoxProps, 'onClickClose'>;
-export const CalibrationInfoBox = (props: CalibrationInfoBoxProps) => {
-	const [open, setOpen] = useState(true);
-	const { isCalibrating } = useContext(CalibrationContext);
-
-	if (!isCalibrating || !open) return null;
-
-	return (<InfoBox {...props} onClickClose={() => setOpen(false)} />);
-};
+export const DrawingInfoBox = styled(InfoBox)`
+	svg {
+		vertical-align: middle;
+		display: inline-block;
+	}
+`;
