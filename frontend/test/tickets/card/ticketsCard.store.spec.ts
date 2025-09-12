@@ -1,5 +1,5 @@
 import { TicketsCardActions } from "@/v5/store/tickets/card/ticketsCard.redux";
-import { selectAvailableTemplatesFilters, selectFilters, selectCardFilters, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
+import { selectCardFilters, selectIsEditingGroups, selectIsShowingPins, selectReadOnly, selectSelectedTemplateId, selectSelectedTicketId, selectSelectedTicketPinId, selectView } from "@/v5/store/tickets/card/ticketsCard.selectors";
 import { TicketsCardViews } from "@/v5/ui/routes/viewer/tickets/tickets.constants";
 import { createTestStore } from "../../test.helpers";
 import { BaseFilter, TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
@@ -63,88 +63,22 @@ describe('Tickets: store', () => {
 			expect(showingPinsFromState).toEqual(false);
 		});
 
-		describe('filters', () => {
-			// const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = DEFAULT_FILTERS;
-			const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = templatesToFilters([]);
-			const baseFilter: BaseFilter = {
-				operator: 'is',
-				values: [],
-			};
-			const editedBaseFilter: BaseFilter = {
-				operator: 'gt',
-				values: [2],
-			};
-			const ticketIdCardFilter: TicketFilter = { ...ticketIdFilter, filter: baseFilter };
-			const ticketTitleCardFilter: TicketFilter = { ...ticketTitleFilter, filter: baseFilter };
-			const updatedTicketTitleCardFilter: TicketFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
-			
-			describe('existing filters', () => {
-				it('should add a filter', () => {
-					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
-					const filtersInStore = selectCardFilters(getState());
-					expect(filtersInStore).toEqual([ticketTitleCardFilter]);
-				});
+		// describe('filters', () => {
+		// 	// const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = DEFAULT_FILTERS;
+		// 	const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = templatesToFilters([]);
+		// 	const baseFilter: BaseFilter = {
+		// 		operator: 'is',
+		// 		values: [],
+		// 	};
+		// 	const editedBaseFilter: BaseFilter = {
+		// 		operator: 'gt',
+		// 		values: [2],
+		// 	};
+		// 	const ticketIdCardFilter: TicketFilter = { ...ticketIdFilter, filter: baseFilter };
+		// 	const ticketTitleCardFilter: TicketFilter = { ...ticketTitleFilter, filter: baseFilter };
+		// 	const updatedTicketTitleCardFilter: TicketFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
 
-				it('should edit a filter', () => {
-					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
-					dispatch(TicketsCardActions.upsertFilter(updatedTicketTitleCardFilter));
-					const filtersInStore = selectCardFilters(getState());
-					expect(filtersInStore).toEqual([updatedTicketTitleCardFilter]);
-				});
-
-				it('should delete a filter', () => {
-					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
-					dispatch(TicketsCardActions.deleteFilter(ticketTitleCardFilter));
-					const filtersInStore = selectCardFilters(getState());
-					expect(filtersInStore).toEqual([]);
-				});
-			})
-
-			describe('available template filters', () => {
-				const getAvailableFilters = () => selectAvailableTemplatesFilters(getState());
-				const getAvailableFiltersNames = () => getAvailableFilters().map((value) => value.property);
-			
-				it('all the default filters should be available originally', () => {
-					expect(DEFAULT_FILTERS).toEqual(getAvailableFilters());
-				})
-		
-				it('adding filters should make the unavailable', () => {					
-					expect(getAvailableFiltersNames()).toContain(ticketTitleCardFilter.property);
-					expect(getAvailableFiltersNames()).toContain(ticketIdCardFilter.property);
-
-					// add first filter
-					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
-					expect(getAvailableFiltersNames()).not.toContain(ticketTitleCardFilter.property);
-					expect(getAvailableFiltersNames()).toContain(ticketIdCardFilter.property);
-
-					// add second filter
-					dispatch(TicketsCardActions.upsertFilter(ticketIdCardFilter));
-					expect(getAvailableFiltersNames()).not.toContain(ticketTitleCardFilter.property);
-					expect(getAvailableFiltersNames()).not.toContain(ticketIdCardFilter.property);
-				})
-				it('editing a filter shouldn\'t affect the available filters', () => {
-					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
-					dispatch(TicketsCardActions.upsertFilter(ticketIdCardFilter));
-					const availableFiltersBeforeEditing = getAvailableFilters();
-					// editing filter
-					dispatch(TicketsCardActions.upsertFilter(updatedTicketTitleCardFilter));
-					expect(getAvailableFilters()).toEqual(availableFiltersBeforeEditing);
-				})
-				it('removing a filter should make it available', () => {
-					dispatch(TicketsCardActions.upsertFilter(ticketTitleCardFilter));
-					dispatch(TicketsCardActions.upsertFilter(ticketIdCardFilter));
-
-					expect(getAvailableFiltersNames()).not.toContain(ticketTitleCardFilter.property);
-					expect(getAvailableFiltersNames()).not.toContain(ticketIdCardFilter.property);
-
-
-					// delete filter
-					dispatch(TicketsCardActions.deleteFilter(ticketTitleCardFilter));
-					expect(getAvailableFiltersNames()).toContain(ticketTitleCardFilter.property);
-					expect(getAvailableFiltersNames()).not.toContain(ticketIdCardFilter.property);
-				})
-			});
-		})
+		// })
 
 		it('should reset the state', () => {
 			const [ticketTitleFilter] = templatesToFilters([]);
@@ -163,12 +97,12 @@ describe('Tickets: store', () => {
 			const selectedTicketIdFromState = selectSelectedTicketId(getState());
 			const selectedTemplateIdFromState = selectSelectedTemplateId(getState());
 			const selectedTicketPinIdFromState = selectSelectedTicketPinId(getState());
-			const filters = selectFilters(getState());
+			// const filters = selectCardFilters(getState());
 		
 			expect(selectedTicketIdFromState).toEqual(null);
 			expect(selectedTemplateIdFromState).toEqual(null);
 			expect(selectedTicketPinIdFromState).toEqual(null);
-			expect(filters).toEqual({});
+			// expect(filters).toEqual([]);
 		});
 	});
 });

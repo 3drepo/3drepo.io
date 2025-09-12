@@ -36,24 +36,19 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	const edgeScrolling = useEdgeScrolling();
 	const {
 		stretchTable, getAllColumnsNames, subscribe, resetWidths,
-		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
+		setVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
 	const templateWasFetched = templateAlreadyFetched(template);
-	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
 
 	useEffect(() => {
+		if (!templateWasFetched) return;
 		const allColumns = getAllColumnsNames();
 		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
 		setVisibleSortedColumnsNames(initialVisibleColumns);
 		resetWidths();
-	}, [template]);
+		stretchTable(BaseProperties.TITLE);
+	}, [template, templateWasFetched]);
 	
-	useEffect(() => {
-		if (templateWasFetched && tableHasCompletedRendering) {
-			stretchTable(BaseProperties.TITLE);
-		}
-	}, [template, templateWasFetched, tableHasCompletedRendering]);
-
 	useEffect(() => {
 		const onMovingColumnChange = (movingColumn) => {
 			if (movingColumn) {
