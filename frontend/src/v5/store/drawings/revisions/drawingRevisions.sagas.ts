@@ -84,7 +84,19 @@ export function* createRevision({ teamspace, projectId, uploadId, body }: Create
 				error,
 			}));
 		}
+	} else {
+		try {
+			const drawing = createDrawingFromRevisionBody(body);
+			yield API.Drawings.updateDrawing(teamspace, projectId, drawingId, drawing);
+			yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, drawing));
+		} catch (error) {
+			yield put(DialogsActions.open('alert', {
+				currentActions: formatMessage({ id: 'revision.drawingsUpdate.error', defaultMessage: 'trying to update a drawing' }),
+				error,
+			}));
+		}
 	}
+
 	try {
 		if (!drawingId) {
 			yield put(DrawingRevisionsActions.setUploadComplete(uploadId, true,
