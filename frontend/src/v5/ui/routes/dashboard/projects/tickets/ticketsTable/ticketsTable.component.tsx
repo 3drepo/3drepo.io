@@ -79,7 +79,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const models = useSelectedModels();
-	const [filters, setFilters] = useState<TicketFilter[]>([]);
+	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 
 
@@ -165,7 +165,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	
 	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>(); 
 	useEffect(() => {
-		if (!presetFilters) return;
+		if (!filters) return;
 		let mounted = true;
 		(async () => {
 			const templateFilter:TicketFilter = {
@@ -194,7 +194,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		})();
 
 		return () => { mounted = false;};
-	}, [JSON.stringify(containersAndFederations), selectedTemplate.code, JSON.stringify(filters), presetFilters]);
+	}, [JSON.stringify(containersAndFederations), selectedTemplate.code, JSON.stringify(filters)]);
 
 	useEffect(() => {
 		const filtTickets = tickets.filter(({ _id }) => filteredTicketsIDs.has(_id));

@@ -59,13 +59,13 @@ export const TicketsFiltersContextComponent = ({
 	children, 
 	templates, 
 	modelsIds, 
-	filters: filtersProps, 
+	filters: filtersProps,
 	onChange }: TicketsFiltersContextComponentProps) => {
-	const [filters, setFilters] = useState<TicketFilter[]>([]);
+	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [choosablefilters, setChoosablefilters] = useState<TicketFilter[]>([]);
 	
 	useEffect(() => {
-		const usedFilters = new Set(filters.map(({ module, property, type })=> `${module}.${property}.${type}`));
+		const usedFilters = new Set((filters || []).map(({ module, property, type })=> `${module}.${property}.${type}`));
 		const newChoosableFilters = templatesToFilters(templates)
 			.filter(({ module, property, type }) =>!usedFilters.has(`${module}.${property}.${type}`));
 		setChoosablefilters(newChoosableFilters);
@@ -95,6 +95,7 @@ export const TicketsFiltersContextComponent = ({
 	}, [filtersProps]);
 	
 	useEffect(() => {
+		if (!filters) return;
 		onChange?.(filters);
 	}, [JSON.stringify(filters)]);
 
@@ -103,7 +104,7 @@ export const TicketsFiltersContextComponent = ({
 	};
 
 	return (
-		<TicketsFiltersContext.Provider value={{ filters, setFilter, deleteFilter, clearFilters, choosablefilters, templates, modelsIds }}>
+		<TicketsFiltersContext.Provider value={{ filters: filters || [], setFilter, deleteFilter, clearFilters, choosablefilters, templates, modelsIds }}>
 			{children}
 		</TicketsFiltersContext.Provider>
 	);
