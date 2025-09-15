@@ -38,7 +38,7 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { initialiseAutomatedProperties, onTemplateCodeUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
+const { initialiseAutomatedProperties, onTemplateCodeUpdated, onModelNameUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -172,8 +172,13 @@ const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, m
 		[modelTypes.DRAWING]: chatEvents.DRAWING_SETTINGS_UPDATE,
 	};
 
+
 	await createModelMessage(modelEvents[modelType], data, teamspace,
 		UUIDToString(project), model, sender);
+
+	if(data.name) {
+		await onModelNameUpdated(teamspace, project, model);
+	}
 };
 
 const revisionUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {

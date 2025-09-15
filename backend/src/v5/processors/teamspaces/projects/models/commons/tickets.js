@@ -435,16 +435,33 @@ const updatePropertiesWithAutomatedValue = async (teamspace, project, model, tic
 	return updatedTickets;
 };
 
-Tickets.onTemplateCodeUpdated = async (teamspace, project, model, template) => {
-	const propertiesToUpdate = findPropertiesToUpdate(template, [supportedPatterns.TEMPLATE_CODE]);
+const updatePropertiesWithPattern = async (teamspace, project, model, template, pattern) => {
+	const propertiesToUpdate = findPropertiesToUpdate(template, [pattern]);
 
 	if (propertiesToUpdate.length) {
 		const tickets = await getTicketsByQuery(teamspace, project, model,
 			{ type: template._id }, { _id: 1, number: 1 });
+
 		if (tickets.length) {
-			await updatePropertiesWithAutomatedValue(teamspace, project, model, tickets, template, propertiesToUpdate);
+			await updatePropertiesWithAutomatedValue(teamspace, project, model,
+				tickets, template, propertiesToUpdate);
 		}
 	}
+};
+
+Tickets.onModelNameUpdated = async (teamspace, project, model) => {
+	const templates = await getTemplatesByQuery(teamspace, { $or: [
+		{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+		{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+	] });
+
+	await Promise.all(templates.map(async (template) => {
+		await updatePropertiesWithPattern(teamspace, project, model, template, supportedPatterns.MODEL_NAME);
+	}));
+};
+
+Tickets.onTemplateCodeUpdated = async (teamspace, project, model, template) => {
+	await updatePropertiesWithPattern(teamspace, project, model, template, supportedPatterns.TEMPLATE_CODE);
 };
 
 Tickets.initialiseAutomatedProperties = async (teamspace, project, model, tickets, template) => {

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep, times, isBuffer, clone } = require('lodash');
+const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, determineTestGroup, generateUUIDString } = require('../../../../../../helper/services');
 const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
@@ -1287,11 +1287,12 @@ const testOnTemplateCodeUpdated = () => {
 	const ticketNum = generateRandomNumber();
 	const propName = generateRandomString();
 	describe.each([
-		['Should do nothing if there is no ticket associated with the template', { value: 'code{template_code}' }, undefined, false],
+		['Should do nothing if there is no ticket associated with the template', { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, undefined, false],
 		['Should do nothing if the template does not contain automated properties', { }, undefined],
 		['Should do nothing if the template automated property does not contain {template_code}', { value: 'xyz' }, undefined],
-		['Should update the field if it is automated (template code)', { value: 'code{template_code}' }, `code${temCode}`],
-		['Should update the field if it is automated (mutliple properties)', { value: '{model_name}:{template_code}:{ticket_number}' }, `${modelName}:${temCode}:${ticketNum}`],
+		[`Should update the field if it is automated (${supportedPatterns.TEMPLATE_CODE})`, { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, `code${temCode}`],
+		['Should update the field if it is automated (mutliple properties)',
+			{ value: `code{${supportedPatterns.MODEL_NAME}}:{${supportedPatterns.TEMPLATE_CODE}}:{${supportedPatterns.TICKET_NUMBER}}` }, `code${modelName}:${temCode}:${ticketNum}`],
 
 	])('On template code updated', (desc, config, value, hasTickets = true) => {
 		test(desc, async () => {
@@ -1330,7 +1331,7 @@ const testOnTemplateCodeUpdated = () => {
 				ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
 			}
 
-			const fetchedTickets = config.value?.includes('{template_code}');
+			const fetchedTickets = config.value?.includes(`{${supportedPatterns.TEMPLATE_CODE}}`);
 
 			if (fetchedTickets) {
 				TicketsModel.getTicketsByQuery.mockResolvedValueOnce(tickets);
@@ -1364,7 +1365,106 @@ const testOnTemplateCodeUpdated = () => {
 	});
 };
 
+const testOnModelNameUpdated = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const modelName = generateRandomString();
+	const moduleName = generateRandomString();
+	const propName = generateRandomString();
+	describe.each([
+		['Should do nothing if there is no ticket associated with the templates', { value: `code{${supportedPatterns.MODEL_NAME}}` }, undefined, true, false],
+		['Should do nothing if there is no templates', { value: `code{${supportedPatterns.MODEL_NAME}}` }, undefined, false, false],
+		['Should do nothing if the template does not contain automated properties', { }],
+		[`Should do nothing if the template automated property does not contain ${supportedPatterns.MODEL_NAME}`, { value: 'xyz' }],
+		[`Should update the field if it is automated (${supportedPatterns.MODEL_NAME})`, { value: `code{${supportedPatterns.MODEL_NAME}}` }, `code${modelName}`],
+	])('On model name updated', (desc, config, value, hasTemplates = true, hasTickets = true) => {
+		test(desc, async () => {
+			const property = { name: propName, type: propTypes.TEXT, ...config };
+			const templates = times(hasTemplates ? 2 : 0, () => ({
+				_id: generateUUIDString(),
+				name: generateRandomString(),
+				properties: [property],
+				modules: [{
+					name: moduleName,
+					properties: [property],
+				}],
+			}));
+			const nTickets = hasTickets ? 5 : 0;
+			const expectedData = [];
+			const tickets = times(nTickets, () => {
+				const ticket = {
+					title: generateRandomString(),
+					properties: {},
+					modules: { [moduleName]: {} },
+				};
+				const resTicket = cloneDeep(ticket);
+
+				if (value !== undefined) {
+					resTicket.properties[propName] = value;
+					resTicket.modules[moduleName][propName] = value;
+				}
+				expectedData.push(resTicket);
+
+				return ticket;
+			});
+			TemplatesModel.getTemplatesByQuery.mockResolvedValueOnce(templates);
+
+			if (value !== undefined) {
+				templates.forEach(() => {
+					ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+				});
+			}
+
+			const fetchedTickets = config.value?.includes(`{${supportedPatterns.MODEL_NAME}}`);
+
+			if (fetchedTickets) {
+				templates.forEach(() => {
+					TicketsModel.getTicketsByQuery.mockResolvedValueOnce(tickets);
+				});
+			}
+
+			await expect(Tickets.onModelNameUpdated(teamspace, project, model))
+				.resolves.toBeUndefined();
+
+			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledWith(teamspace,
+				{ $or: [
+					{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+					{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+				] });
+
+			if (fetchedTickets) {
+				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(templates.length);
+				templates.forEach((template) => {
+					expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, model,
+						{ type: template._id }, { number: 1, _id: 1 });
+				});
+			} else {
+				expect(TicketsModel.getTicketsByQuery).not.toHaveBeenCalled();
+			}
+
+			if (value === undefined) {
+				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+			} else {
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(templates.length);
+				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
+					tickets, times(tickets.length, () => ({
+						[`properties.${propName}`]: value,
+						[`modules.${moduleName}.${propName}`]: value,
+					})), 'system');
+
+				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(templates.length);
+				expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+			}
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
+	beforeEach(() => {
+		jest.resetAllMocks();
+	});
 	testAddTicket();
 	testImportTickets();
 	testGetTicketResourceAsStream();
@@ -1375,4 +1475,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetOpenTicketsCount();
 	testInitialiseAutomatedProperties();
 	testOnTemplateCodeUpdated();
+	testOnModelNameUpdated();
 });
