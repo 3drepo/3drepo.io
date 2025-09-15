@@ -45,7 +45,7 @@ export const TicketsListCard = () => {
 
 	return (
 		<CardContainer>
-			<TicketsFiltersContextComponent templates={templates} modelsIds={[containerOrFederation]} presetFilters={presetFilters} onChange={onFiltersChange}>
+			<TicketsFiltersContextComponent templates={templates} modelsIds={[containerOrFederation]} filters={presetFilters} onChange={onFiltersChange}>
 				<CardHeader
 					icon={<TicketsIcon />}
 					title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}

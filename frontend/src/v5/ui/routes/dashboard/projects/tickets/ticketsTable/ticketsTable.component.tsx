@@ -54,8 +54,6 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
-import { EmptyPageView } from '@components/shared/emptyPageView/emptyPageView.styles';
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { getNonCompletedTicketFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 const paramToInputProps = (value, setter) => ({
@@ -163,9 +161,12 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	}, [filteredTickets.length, visibleSortedColumnsNames.join('')]);
 
 
-	useEffect(() => {
-		let mounted = true;
 
+	
+	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>(); 
+	useEffect(() => {
+		if (!presetFilters) return;
+		let mounted = true;
 		(async () => {
 			const templateFilter:TicketFilter = {
 				type:'template',
@@ -193,7 +194,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		})();
 
 		return () => { mounted = false;};
-	}, [JSON.stringify(containersAndFederations), template, JSON.stringify(filters)]);
+	}, [JSON.stringify(containersAndFederations), selectedTemplate.code, JSON.stringify(filters), presetFilters]);
 
 	useEffect(() => {
 		const filtTickets = tickets.filter(({ _id }) => filteredTicketsIDs.has(_id));
@@ -202,16 +203,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
-	if (!templateAlreadyFetched(selectedTemplate)) {
-		return (<EmptyPageView>
-			<Spinner />
-		</EmptyPageView>);
-	}
-	
-	let presetFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
+
+	useEffect(() => {
+		if (!templateAlreadyFetched(selectedTemplate) || presetFilters) return;
+		setPresetFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
+	}, [selectedTemplate, presetFilters]);
 	
 	return (
-		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} presetFilters={presetFilters}>
+		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters}>
 			<FiltersContainer>
 				<FlexContainer>
 					<SelectorsContainer>

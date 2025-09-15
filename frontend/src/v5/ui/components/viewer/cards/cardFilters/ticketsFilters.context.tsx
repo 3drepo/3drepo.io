@@ -48,7 +48,7 @@ interface TicketsFiltersContextComponentProps {
 	children: any;
 	templates: ITemplate[];
 	modelsIds: string[];
-	presetFilters?: TicketFilter[];
+	filters?: TicketFilter[];
 	onChange?: (filters: TicketFilter[]) => void;
 }
 
@@ -59,9 +59,9 @@ export const TicketsFiltersContextComponent = ({
 	children, 
 	templates, 
 	modelsIds, 
-	presetFilters = [], 
+	filters: filtersProps, 
 	onChange }: TicketsFiltersContextComponentProps) => {
-	const [filters, setFilters] = useState<TicketFilter[]>(presetFilters);
+	const [filters, setFilters] = useState<TicketFilter[]>([]);
 	const [choosablefilters, setChoosablefilters] = useState<TicketFilter[]>([]);
 	
 	useEffect(() => {
@@ -88,6 +88,11 @@ export const TicketsFiltersContextComponent = ({
 		const index = findFilterIndex(filters, filter);
 		setFilters(filters.filter((f, i) => i !== index));
 	}, [filters]);
+
+	useEffect(() => {
+		if (!filtersProps) return;
+		setFilters(filtersProps);
+	}, [filtersProps]);
 	
 	useEffect(() => {
 		onChange?.(filters);
