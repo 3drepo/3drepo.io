@@ -557,7 +557,7 @@ export const pannableSVG = (container: HTMLElement, src: string) => {
 	};
 };
 
-export const SVGImage = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
+export const DrawingViewerSvg = forwardRef<ZoomableImage, DrawingViewerImageProps>(({ onLoad, src }, ref ) => {
 	const containerRef = useRef<HTMLElement>();
 	const pannableImage = useRef<ReturnType<typeof pannableSVG>>();
 

@@ -17,7 +17,7 @@
 
 import 'path-data-polyfill';
 import { Vector2, Vector2Like } from 'three';
-import { Line2, CubicBezier } from './types';
+import { Line2, CubicBezier, SnapResults } from './types';
 import { RTree, RTreeBuilder } from './rTree';
 import DOMPurify from 'dompurify';
 
@@ -207,20 +207,6 @@ class SvgParser {
 					break;
 			}
 		}
-	}
-}
-
-export class SnapResults {
-	closestEdge: Vector2;
-
-	closestNode: Vector2;
-
-	closestIntersection: Vector2;
-
-	constructor() {
-		this.closestEdge = null;
-		this.closestNode = null;
-		this.closestIntersection = null;
 	}
 }
 

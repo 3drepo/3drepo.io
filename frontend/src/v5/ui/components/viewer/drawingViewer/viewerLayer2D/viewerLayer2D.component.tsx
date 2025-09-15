@@ -23,7 +23,7 @@ import { Coord2D, ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibrat
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { SVGSnapHelper } from '../snapping/svgSnapHelper';
 import { Vector2 } from 'three';
-import { SnapType } from '../snapping/types';
+import { SnapType, ISnapHelper } from '../snapping/types';
 import { DrawingViewerService } from '../drawingViewer.service';
 import { CalibrationArrow } from './calibrationArrow/calibrationArrow.component';
 import { useSnapping } from '../drawingViewer.service.hooks';
@@ -39,11 +39,11 @@ import { addZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.
 type ViewerLayer2DProps = {
 	viewBox: ViewBoxType,
 	viewport: any, 
-	snapHandler: SVGSnapHelper,
+	snapHandler: ISnapHelper,
 	snapping?: boolean,
 };
 
-const snap = (mousePos:Coord2D, snapHandler: SVGSnapHelper, radius) => {
+const snap = (mousePos:Coord2D, snapHandler: ISnapHelper, radius) => {
 	const results = snapHandler?.snap(new Vector2(...mousePos), radius) || { closestNode: undefined, closestIntersection: undefined, closestEdge: undefined };
 	let snapType = SnapType.NONE;
 

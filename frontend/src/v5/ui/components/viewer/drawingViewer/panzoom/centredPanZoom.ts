@@ -29,6 +29,14 @@ export type PanZoomHandler = PanZoom & {
 
 export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH: number) => {
 	const targetContainer = target.getEventsEmitter();
+
+	if(!targetContainer) {
+		return null;
+	}
+
+	//#5660: integrate the pz controller with Apryse properly/make it conditional properly and remove the following...
+	return; // ignore pan zoom for Apryse
+
 	const naturalSize = target.getNaturalSize();
 	
 	const options = {
