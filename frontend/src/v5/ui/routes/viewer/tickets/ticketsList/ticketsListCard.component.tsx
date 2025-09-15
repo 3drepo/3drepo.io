@@ -52,7 +52,7 @@ export const TicketsListCard = () => {
 					actions={(
 						<>
 							{!readOnly && (<NewTicketMenu />)}
-							<FilterSelection />
+							<FilterSelection mode='card' />
 							<TicketsEllipsisMenu />
 						</>
 					)}

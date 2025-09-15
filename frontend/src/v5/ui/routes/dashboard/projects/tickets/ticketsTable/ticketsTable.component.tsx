@@ -242,8 +242,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 							onContainerOrFederationClick={setTicketValue}
 						/>}
 				</FlexContainer>
+				<CardFilters />
 			</FiltersContainer>
-			<CardFilters />
 			<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
 		</TicketsFiltersContextComponent>
 	);

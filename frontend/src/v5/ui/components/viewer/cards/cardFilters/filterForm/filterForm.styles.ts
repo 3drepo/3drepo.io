@@ -18,12 +18,20 @@
 import { ActionMenu } from '@controls/actionMenu';
 import { Button as ButtonBase } from '@controls/button';
 import { TextOverflow } from '@controls/textOverflow';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const CardFilterActionMenu = styled(ActionMenu)`
+
+export const FilterPaperStyleInCards = css`
+	margin-top: 13px;
+	max-height: calc(100% - 170px);
+	left: 88px !important;
+`; 
+
+
+export const CardFilterActionMenu = styled(ActionMenu)<{ mode?: string }>`
 	.MuiPaper-root {
-		left: 88px !important;
 		width: 365px;
+		${({ mode }) => ( mode === 'card') && FilterPaperStyleInCards}}
 	}
 `;
 

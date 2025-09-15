@@ -23,7 +23,7 @@ import { groupBy } from 'lodash';
 import { useTicketFiltersContext } from './ticketsFilters.context';
 
 export const CardFilters = () => {
-	const { filters, clearFilters }= useTicketFiltersContext();
+	const { filters, clearFilters } = useTicketFiltersContext();
 	const hasFilters = filters.length > 0;
 
 	if (!hasFilters) return null;
