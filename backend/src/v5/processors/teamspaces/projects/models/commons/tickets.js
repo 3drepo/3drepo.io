@@ -17,14 +17,15 @@
 
 const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, updateTickets } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, getTicketsByQuery, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
 	presetModules,
+	supportedPatterns,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
-const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
+const { cloneDeep, deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { propTypes, viewGroups } = require('../../../../../schemas/tickets/templates.constants');
@@ -38,6 +39,7 @@ const { importComments } = require('./tickets.comments');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
+const { getModelById } = require('../../../../../models/modelSettings');
 
 const Tickets = {};
 
@@ -374,6 +376,86 @@ Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
 	}
 
 	return openTicketsCount;
+};
+
+// placeholdersToFind should be left undfined if we want to replace all placeholders
+const findPropertiesToUpdate = (template, placeholdersToFind) => {
+	const propertiesToUpdate = [];
+
+	const findProps = (props, moduleName) => {
+		const modulePrefix = moduleName ? `modules.${moduleName}.` : 'properties.';
+		props.forEach(({ name, value }) => {
+			if (value !== undefined) {
+				if (placeholdersToFind) {
+					const found = placeholdersToFind.some((ph) => value.includes(`{${ph}}`));
+					if (found) {
+						propertiesToUpdate.push({ name: `${modulePrefix}${name}`, value });
+					}
+				} else {
+					propertiesToUpdate.push({ name: `${modulePrefix}${name}`, value });
+				}
+			}
+		});
+	};
+
+	findProps(template.properties);
+	template.modules.forEach(({ name, properties }) => {
+		findProps(properties, name);
+	});
+
+	return propertiesToUpdate;
+};
+
+const updatePropertiesWithAutomatedValue = async (teamspace, project, model, tickets, template, propertiesToUpdate) => {
+	const patternToVal = {};
+	const updatedTickets = tickets.map((ticket) => cloneDeep(ticket));
+
+	const { name: modelName } = await getModelById(teamspace, model, { name: 1 });
+
+	patternToVal[supportedPatterns.MODEL_NAME] = modelName;
+	patternToVal[supportedPatterns.TEMPLATE_CODE] = template.code;
+
+	const updateData = tickets.map((ticket, i) => {
+		const ticketData = {};
+		patternToVal[supportedPatterns.TICKET_NUMBER] = ticket.number;
+
+		propertiesToUpdate.forEach(({ name, value }) => {
+			ticketData[name] = value;
+			Object.keys(patternToVal).forEach((patternVal) => {
+				ticketData[name] = ticketData[name].replaceAll(`{${patternVal}}`, patternToVal[patternVal]);
+			});
+			setNestedProperty(updatedTickets[i], name, ticketData[name]);
+		});
+
+		return ticketData;
+	});
+
+	await updateTickets(teamspace, project, model, tickets, updateData, 'system');
+
+	return updatedTickets;
+};
+
+Tickets.onTemplateCodeUpdated = async (teamspace, project, model, template) => {
+	const propertiesToUpdate = findPropertiesToUpdate(template, [supportedPatterns.TEMPLATE_CODE]);
+
+	if (propertiesToUpdate.length) {
+		const tickets = await getTicketsByQuery(teamspace, project, model,
+			{ type: template._id }, { _id: 1, number: 1 });
+		if (tickets.length) {
+			await updatePropertiesWithAutomatedValue(teamspace, project, model, tickets, template, propertiesToUpdate);
+		}
+	}
+};
+
+Tickets.initialiseAutomatedProperties = async (teamspace, project, model, tickets, template) => {
+	const propertiesToUpdate = findPropertiesToUpdate(template);
+	if (propertiesToUpdate.length) {
+		const updatedTickets = await updatePropertiesWithAutomatedValue(
+			teamspace, project, model, tickets, template, propertiesToUpdate);
+		return updatedTickets;
+	}
+
+	return tickets;
 };
 
 module.exports = Tickets;

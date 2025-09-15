@@ -471,7 +471,7 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				readOnly: true,
-				value: supportedPatterns.map((p) => `{${p}}${generateRandomString()}`).join(' '),
+				value: Object.values(supportedPatterns).map((p) => `{${p}}${generateRandomString()}`).join(' '),
 			}] }, true],
 		['property is readOnlyOnUI', { name: generateRandomString(),
 			code: generateRandomString(3),

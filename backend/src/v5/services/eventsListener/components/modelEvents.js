@@ -38,6 +38,7 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
+const { initialiseAutomatedProperties, onTemplateCodeUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -205,6 +206,14 @@ const modelDeleted = async ({ teamspace, project, model, sender, modelType }) =>
 	await createModelMessage(modelEvents[modelType], {}, teamspace, project, model, sender);
 };
 
+const templateUpdated = async ({ teamspace, template: templateId, data }) => {
+	if (data.code) {
+		const template = await getTemplateById(teamspace, templateId);
+		await onTemplateCodeUpdated(teamspace, project, model, template);	
+	}
+
+});
+
 const ticketAdded = async ({ teamspace, project, model, ticket }) => {
 	const [isFed, template] = await Promise.all([
 		isFederationCheck(teamspace, model),
@@ -212,9 +221,10 @@ const ticketAdded = async ({ teamspace, project, model, ticket }) => {
 	]);
 
 	const fullTemplate = generateFullSchema(template);
+	const updatedTicket = await initialiseAutomatedProperties(teamspace, project, model, [ticket], fullTemplate);
 
 	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
-	const serialisedTicket = serialiseTicket(ticket, fullTemplate);
+	const serialisedTicket = serialiseTicket(updatedTicket, fullTemplate);
 	await createModelMessage(event, serialisedTicket, teamspace, project, model);
 };
 
@@ -226,8 +236,9 @@ const ticketsImported = async ({ teamspace, project, model, tickets }) => {
 	]);
 
 	const fullTemplate = generateFullSchema(template);
+	const updatedTickets = await initialiseAutomatedProperties(teamspace, project, model, tickets, fullTemplate);
 	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
-	await Promise.all(tickets.map(async (ticket) => {
+	await Promise.all(updatedTickets.map(async (ticket) => {
 		const serialisedTicket = serialiseTicket(ticket, fullTemplate);
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	}));
@@ -320,6 +331,7 @@ ModelEventsListener.init = () => {
 	subscribe(events.NEW_MODEL, modelAdded);
 	subscribe(events.DELETE_MODEL, modelDeleted);
 	subscribe(events.NEW_TICKET, ticketAdded);
+	subscribe(events.TICKET_TEMPLATE_UPDATED, templateUpdated);
 	subscribe(events.TICKETS_IMPORTED, ticketsImported);
 	subscribe(events.UPDATE_TICKET, ticketUpdated);
 	subscribe(events.NEW_COMMENT, ticketCommentAdded);

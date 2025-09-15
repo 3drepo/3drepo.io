@@ -222,10 +222,10 @@ TemplateConstants.getApplicableDefaultProperties = (config, isImport) => [
 	...customisableProperties.flatMap((createFn) => processProperty(createFn(config), config, isImport),
 	),
 ];
-TemplateConstants.supportedPatterns = [
-	'model-name',
-	'template-code',
-	'ticket-number',
-];
+TemplateConstants.supportedPatterns = createConstantMapping([
+	'model_name',
+	'template_code',
+	'ticket_number',
+]);
 
 module.exports = TemplateConstants;
