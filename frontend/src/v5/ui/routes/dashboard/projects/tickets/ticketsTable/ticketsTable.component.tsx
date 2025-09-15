@@ -54,6 +54,9 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
+import { EmptyPageView } from '@components/shared/emptyPageView/emptyPageView.styles';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import { getNonCompletedTicketFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -190,16 +193,25 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		})();
 
 		return () => { mounted = false;};
-	}, [tickets, template, JSON.stringify(filters)]);
+	}, [JSON.stringify(containersAndFederations), template, JSON.stringify(filters)]);
 
 	useEffect(() => {
 		const filtTickets = tickets.filter(({ _id }) => filteredTicketsIDs.has(_id));
 		setFilteredTickets(filtTickets);
 	}, [tickets, filteredTicketsIDs]);
 
+	
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
+	if (!templateAlreadyFetched(selectedTemplate)) {
+		return (<EmptyPageView>
+			<Spinner />
+		</EmptyPageView>);
+	}
+	
+	let presetFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
+	
 	return (
-		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations}>
+		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} presetFilters={presetFilters}>
 			<FiltersContainer>
 				<FlexContainer>
 					<SelectorsContainer>
@@ -231,9 +243,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 							onContainerOrFederationClick={setTicketValue}
 						/>}
 				</FlexContainer>
-				<br />
-				<CardFilters />
 			</FiltersContainer>
+			<CardFilters />
 			<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
 		</TicketsFiltersContextComponent>
 	);

@@ -16,18 +16,21 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, StatusValue } from '@/v5/store/tickets/tickets.types';
 import BooleanIcon from '@assets/icons/filters/boolean.svg';
 import ListIcon from '@assets/icons/filters/list.svg';
 import NumberIcon from '@assets/icons/filters/number.svg';
 import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
-import { isString, sortBy, uniqBy, compact } from 'lodash';
+import { isString, sortBy, uniqBy, compact, uniq } from 'lodash';
 import { TicketFilterType, TicketFilter, TicketFilterOperator } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { SelectOption } from '@/v5/helpers/form.helper';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
+import { TicketStatusTypes, TicketStatusDefaultValues, TreatmentStatuses } from '@controls/chip/chip.types';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -150,4 +153,54 @@ export const getValidOperators = (type: TicketFilterType): TicketFilterOperator[
 		return ['ex', 'nex', 'is', 'nis'];
 	}
 	return Object.keys(FILTER_OPERATOR_LABEL) as TicketFilterOperator[];
+};
+
+
+const getNonCompletedTicketFiltersByStatus = (templates: ITemplate[], containerOrFederation: string): TicketFilter => {
+	const isCompletedValue = ({ type }: StatusValue) => [TicketStatusTypes.DONE, TicketStatusTypes.VOID].includes(type);
+	const getValuesByTemplate = ({ _id }) => selectStatusConfigByTemplateId(getState(), containerOrFederation, _id).values;
+
+	const completedValueNames = templates
+		.flatMap(getValuesByTemplate)
+		.filter(isCompletedValue)
+		.map((v) => v.name);
+
+	const values = uniq([
+		TicketStatusDefaultValues.CLOSED,
+		TicketStatusDefaultValues.VOID,
+		...completedValueNames,
+	]);
+
+	return {
+		module: '',
+		property: 'Status',
+		type: 'status',
+		filter: {
+			operator: 'nis',
+			values,
+		},
+	};
+};
+const getNonCompletedTicketFiltersBySafetibase = (): TicketFilter => ({
+	module: 'safetibase',
+	property: 'Treatment Status',
+	type: 'oneOf',
+	filter: {
+		operator: 'nis',
+		values: [
+			TreatmentStatuses.REJECTED,
+			TreatmentStatuses.VOID,
+		],
+	},
+});
+
+export const getNonCompletedTicketFilters = (templates:ITemplate[], containerOrFederation:string): TicketFilter[] => {
+	let filters = [getNonCompletedTicketFiltersByStatus(templates, containerOrFederation)];
+	const hasSafetibase = templates.some((t) => t?.modules?.some((module) => module.type === 'safetibase'));
+	
+	if (hasSafetibase) {
+		filters.push(getNonCompletedTicketFiltersBySafetibase());
+	}
+
+	return filters;
 };

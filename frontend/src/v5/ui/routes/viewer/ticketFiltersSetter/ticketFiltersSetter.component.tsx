@@ -17,19 +17,15 @@
 
 import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { uniq } from 'lodash';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ViewerParams } from '../../routes.constants';
 import { Transformers, useSearchParam } from '../../useSearchParam';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
-import { StatusValue } from '@/v5/store/tickets/tickets.types';
-import { TicketStatusDefaultValues, TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
-import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
-import { getState } from '@/v5/helpers/redux.helpers';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
+import { getNonCompletedTicketFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
@@ -48,7 +44,6 @@ export const TicketFiltersSetter = () => {
 		enableRealtimeTickets(teamspace, project, containerOrFederation, isFed, revision)
 	, [containerOrFederation, revision, isFed]);
 
-
 	const getTicketFiltersFromCodes = (values): TicketFilter[] => [{
 		module: '',
 		property: 'Ticket ID',
@@ -58,59 +53,13 @@ export const TicketFiltersSetter = () => {
 			values,
 		},
 	}];
-	
-	const getNonCompletedTicketFiltersByStatus = (): TicketFilter => {
-		const isCompletedValue = ({ type }: StatusValue) => [TicketStatusTypes.DONE, TicketStatusTypes.VOID].includes(type);
-		const getValuesByTemplate = ({ _id }) => selectStatusConfigByTemplateId(getState(), containerOrFederation, _id).values;
-
-		const completedValueNames = templates
-			.flatMap(getValuesByTemplate)
-			.filter(isCompletedValue)
-			.map((v) => v.name);
-
-		const values = uniq([
-			TicketStatusDefaultValues.CLOSED,
-			TicketStatusDefaultValues.VOID,
-			...completedValueNames,
-		]);
-
-		return {
-			module: '',
-			property: 'Status',
-			type: 'status',
-			filter: {
-				operator: 'nis',
-				values,
-			},
-		};
-	};
-	const getNonCompletedTicketFiltersBySafetibase = (): TicketFilter => ({
-		module: 'safetibase',
-		property: 'Treatment Status',
-		type: 'oneOf',
-		filter: {
-			operator: 'nis',
-			values: [
-				TreatmentStatuses.REJECTED,
-				TreatmentStatuses.VOID,
-			],
-		},
-	});
-
-	const getNonCompletedTicketFilters = (): TicketFilter[] => {
-		let filters = [getNonCompletedTicketFiltersByStatus()];
-		const hasSafetibase = templates.some((t) => t?.modules?.some((module) => module.type === 'safetibase'));
-		if (hasSafetibase) {
-			filters.push(getNonCompletedTicketFiltersBySafetibase());
-		}
-		return filters;
-	};
 
 	useEffect(() => {
 		if (templates.length) {
 			TicketsCardActionsDispatchers.resetFilters();
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
-			const filters: TicketFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : getNonCompletedTicketFilters();
+			const filters: TicketFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : 
+				getNonCompletedTicketFilters(templates, containerOrFederation);
 			
 			TicketsCardActionsDispatchers.setFilters(filters);
 
