@@ -79,6 +79,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const models = useSelectedModels();
 	const [filters, setFilters] = useState<TicketFilter[]>([]);
+	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 
 
 	const setTemplate = useCallback((newTemplate) => {
@@ -162,41 +163,39 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	useEffect(() => {
 		let mounted = true;
 
-		setFilteredTickets(tickets.filter(({ type }) => type === template));
-
-
-		// (async () => {
-		// 	const templateFilter:TicketFilter = {
-		// 		type:'template',
-		// 		property:'',
-		// 		filter: { operator:'is', 
-		// 			values:[selectedTemplate.code],
-		// 		}, 
-		// 	};
+		(async () => {
+			const templateFilter:TicketFilter = {
+				type:'template',
+				property:'',
+				filter: { operator:'is', 
+					values:[selectedTemplate.code],
+				}, 
+			};
 	
-		// 	const allFilters = [...filters, templateFilter];
+			const allFilters = [...filters, templateFilter];
 	
-		// 	const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
-		// 		(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
-		// 	);
+			const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
+				(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
+			);
 
-		// 	if (!mounted) return;
-	
-		// 	const newFiltered = tickets.filter(({ _id }) => idsSets.some((s) => s.has(_id)));
-		// 	setFilteredTickets(newFiltered);
-		// })();
+			if (!mounted) return;
+			const idsSet = new Set<string>();
+			idsSets.forEach((idSetPerContainer) => {
+				for (let id of idSetPerContainer) {
+					idsSet.add(id);
+				}
+			});
 
-		// return () => { mounted = false;};
+			setFilteredTicketIds(idsSet);
+		})();
+
+		return () => { mounted = false;};
 	}, [tickets, template, JSON.stringify(filters)]);
 
-
 	useEffect(() => {
-		console.log('mounting tickets table');
-
-		return () => {
-			console.log('unmounting tickets table');
-		};
-	}, []);
+		const filtTickets = tickets.filter(({ _id }) => filteredTicketsIDs.has(_id));
+		setFilteredTickets(filtTickets);
+	}, [tickets, filteredTicketsIDs]);
 
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
 	return (
@@ -323,17 +322,6 @@ export const TabularView = () => {
 
 		navigate({ pathname: path, search }, { replace });
 	}, [params, navigate, setContainerOrFederation]);
-
-
-	useEffect(() => {
-		console.log('mounting TabularView');
-
-		return () => {
-			console.log('unmounting  TabularView');
-		};
-	}, []);
-
-	console.log(columns);
 
 	return (
 		<TicketsTableContextComponent>
