@@ -23,15 +23,18 @@ import styled, { css } from 'styled-components';
 
 export const FilterPaperStyleInCards = css`
 	left: 88px !important;
+	max-height: calc(100% - 170px);
 `; 
 
+export const FilterPaperStyleother = css`
+	max-height: calc(100% - 200px);
+`; 
 
 export const CardFilterActionMenu = styled(ActionMenu)<{ $displayMode?: string }>`
 	.MuiPaper-root {
 		width: 365px;
 		margin-top: 13px;
-		max-height: calc(100% - 170px);
-		${({ $displayMode: mode }) => ( mode === 'card') && FilterPaperStyleInCards}}
+		${({ $displayMode: mode }) => ( mode === 'card') ? FilterPaperStyleInCards : FilterPaperStyleother}}
 	}
 `;
 
