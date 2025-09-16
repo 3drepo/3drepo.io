@@ -21,7 +21,6 @@ import { isEqual } from 'lodash';
 import { SnapCursor } from './snapCursor/snapCursor.component';
 import { Coord2D, ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
-import { SVGSnapHelper } from '../snapping/svgSnapHelper';
 import { Vector2 } from 'three';
 import { SnapType, ISnapHelper, SnapResults } from '../snapping/types';
 import { DrawingViewerService } from '../drawingViewer.service';

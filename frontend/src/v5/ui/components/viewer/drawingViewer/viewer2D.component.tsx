@@ -88,14 +88,14 @@ export const Viewer2D = () => {
 	};
 
 	let viewerType: Viewer = Viewer.Img;
-	if(!isFirefox() && plainSrc.toLowerCase().endsWith('.svg')){
+	if(!isFirefox()){
 		viewerType = Viewer.Svg;
-	} else if (plainSrc.toLowerCase().endsWith('.pdf')) {
+	}
+	if (revision && revision.format === '.pdf') {
+		// Currently, the backend will return the rfile for pdfs. In the future
+		// we may want to consider making this explicit.
 		viewerType = Viewer.Pdf;
 	}
-
-	// for testing, always use pdf, as we haven't updated the backend yet..
-	viewerType = Viewer.Pdf;
 
 	const canCalibrate2D = isCalibrating && step === 1;
 

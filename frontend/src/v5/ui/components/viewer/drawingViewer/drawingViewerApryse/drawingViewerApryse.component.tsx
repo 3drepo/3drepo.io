@@ -138,7 +138,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			// This next snippet concerned with PDFNet initialises the fullAPI, which
 			// is required for snapping...
 
-			async function main(){
+			async function main() {
 				const doc = await Core.PDFNet.PDFDoc.create();
 				doc.initSecurityHandler();
 				// Locks all operations on the document
@@ -146,14 +146,14 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			}
 
 			const { apryseLicense } = clientConfigService;
-			if(!apryseLicense) {
-				console.error("Invalid licence for Apryse WebViewer. Cannot load PDF viewer.");
+			if (!apryseLicense) {
+				console.error('Invalid licence for Apryse WebViewer. Cannot load PDF viewer.');
 				return;
 			}
 
 			await Core.PDFNet.runWithCleanup(
 				main,
-				apryseLicense
+				apryseLicense,
 			);
 
 			// When using a custom UI, we must provide the DOM elements for the
@@ -247,7 +247,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 		// This section implements ZoomableImage
 
-		setTransform: ({scale, x, y}) => {
+		setTransform: (transform: Transform) => {
 			// Currently, there is no known way to set the transform of a document
 			// in the Apryse WebSDK, so navigation must be controlled by the
 			// Apryse viewer.
@@ -255,11 +255,11 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		},
 
 		getEventsEmitter: () => {
-				return scrollView.current;
+			return scrollView.current;
 		},
 
 		getBoundingClientRect: () => {
-				return pageContainer.current.getBoundingClientRect();
+			return pageContainer.current.getBoundingClientRect();
 		},
 
 		getNaturalSize: () => {

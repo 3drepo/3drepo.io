@@ -32,7 +32,7 @@ const DrawingViewerServiceCreator = () => {
 	let imgContainer = null;
 	let mousePosition = [0,  0];
 	let scale = 1;
-	let snapping = true; //#5660: snapping should be false unless in calibration - once snapping in Apryse is integrated, put this back to false.
+	let snapping = false;
 
 	const emitter = new EventEmitter();
 	const on = emitter.on.bind(emitter);
