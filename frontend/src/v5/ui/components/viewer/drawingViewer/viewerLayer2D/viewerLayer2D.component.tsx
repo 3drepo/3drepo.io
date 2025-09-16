@@ -23,7 +23,7 @@ import { Coord2D, ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibrat
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { SVGSnapHelper } from '../snapping/svgSnapHelper';
 import { Vector2 } from 'three';
-import { SnapType, ISnapHelper } from '../snapping/types';
+import { SnapType, ISnapHelper, SnapResults } from '../snapping/types';
 import { DrawingViewerService } from '../drawingViewer.service';
 import { CalibrationArrow } from './calibrationArrow/calibrationArrow.component';
 import { useSnapping } from '../drawingViewer.service.hooks';
@@ -43,8 +43,8 @@ type ViewerLayer2DProps = {
 	snapping?: boolean,
 };
 
-const snap = (mousePos:Coord2D, snapHandler: ISnapHelper, radius) => {
-	const results = snapHandler?.snap(new Vector2(...mousePos), radius) || { closestNode: undefined, closestIntersection: undefined, closestEdge: undefined };
+const snap = async (mousePos:Coord2D, snapHandler: ISnapHelper, radius) => {
+	const results = await snapHandler?.snap(new Vector2(...mousePos), radius) || new SnapResults();
 	let snapType = SnapType.NONE;
 
 	if (!!results.closestNode) {
@@ -86,7 +86,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 
 	const handleMouseDown = () => previousViewBox.current = viewBox;
 
-	const getCursorOffset = (e) => {
+	const getCursorOffset = async (e) => {
 		const rect = e.target.getBoundingClientRect();
 		const offsetX = e.clientX - rect.left;
 		const offsetY = e.clientY - rect.top;
@@ -94,7 +94,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 
 		if (snapping) {
 			const radius = 10 / viewBox.scale;
-			const res = snap(mousePosition, snapHandler, radius);
+			const res = await snap(mousePosition, snapHandler, radius);
 			mousePosition = res.mousePos;
 
 			if (snapType !== res.snapType) {
@@ -105,22 +105,22 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 		return mousePosition;
 	};
 
-	const handleMouseUp = (e) => {
+	const handleMouseUp = async (e) => {
 		// check if mouse up was fired after dragging or if it was an actual click
 		if (!isEqual(viewBox, previousViewBox.current)) return;
-		let mousePosition = getCursorOffset(e);
+		let mousePosition = await getCursorOffset(e);
 		DrawingViewerService.emitMouseClickEvent(mousePosition);
 
 		if (transform2DTo3D) {
-			const { x, y } = transform2DTo3D(getCursorOffset(e));
+			const { x, y } = transform2DTo3D(mousePosition);
 			const pin3D = addZ([x, y], verticalRange[0]);
 			DrawingViewerService.emitClickPointEvent(pin3D);
 		}
 
 	};
 
-	const handleMouseMove = (e) => {
-		let mousePos = getCursorOffset(e);
+	const handleMouseMove = async (e) => {
+		let mousePos = await getCursorOffset(e);
 		DrawingViewerService.setMousePosition(mousePos);
 	};
 

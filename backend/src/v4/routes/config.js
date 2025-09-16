@@ -57,6 +57,7 @@ function createClientConfig(serverConfig, req) {
 		"userNotice" : config.userNotice,
 		"customLogins" : config.customLogins,
 		"intercomLicense" : _.get(config, "intercom.license"),
+		"apryseLicense": _.get(config, "apryse.licenseKey"),
 		"resourceUploadSizeLimit" : config.resourceUploadSizeLimit,
 		"sequencesEnabled": true,
 		"presenterEnabled": true,
@@ -139,6 +140,8 @@ function createClientConfig(serverConfig, req) {
 	clientConfig.permissions = C.MODEL_PERM_OBJ;
 
 	clientConfig.impliedPermission = C.IMPLIED_PERM;
+
+	clientConfig.apryse = config.apryse;
 
 	return clientConfig;
 }

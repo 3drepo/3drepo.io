@@ -15,253 +15,315 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, useEffect, useRef, useState } from 'react';
-import { ZoomableImage } from '../zoomableImage.types';
+import { forwardRef, useEffect, useRef } from 'react';
+import { ZoomableImage, Transform } from '../zoomableImage.types';
 import { DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
-import { ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
-import { Core } from '@pdftron/webviewer'
-import { DrawingViewerService } from '../drawingViewer.service';
+import { Core } from '@pdftron/webviewer';
 import { ISnapHelper, SnapResults } from '../snapping/types';
 import { Vector2Like } from 'three';
+import { EventEmitter } from 'eventemitter3';
+import { Events } from '../panzoom/panzoom';
+import { PanZoomHandler } from '../panzoom/centredPanZoom';
+import { clientConfigService } from '@/v4/services/clientConfig';
 
 // (webviewer-core.min.js will load the Core library into window when it is
 // added)
 declare global {
-  interface Window {
-    Core: typeof Core;
-  }
+	interface Window {
+		Core: typeof Core;
+	}
 }
 
-// Unlike the SVG & Image viewers, the Apryse viewer will handle navigation and
-// publish the view box for the 2d overlays.
-export type DrawingViewerApryseProps = DrawingViewerImageProps & {
-	setViewBox: (ViewBoxType) => void,
-};
+export type DrawingViewerApryseType = ZoomableImage & ISnapHelper & PanZoomHandler;
 
-export type DrawingViewerApryseType = ZoomableImage & ISnapHelper;
+export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingViewerImageProps>(({ onLoad, src }, ref) => {
+	const viewer = useRef(null);
+	const scrollView = useRef(null);
+	const documentViewer = useRef(null);
+	const pageContainer = useRef(null);
+	const snapModes = useRef(null);
+	const emitter = useRef(new EventEmitter());
+	const minZoom = useRef(0.5);
+	const maxZoom = useRef(10);
 
-export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingViewerApryseProps>(({ onLoad, src, setViewBox }, ref) => {
-  const viewer = useRef(null);
-  const scrollView = useRef(null);
-  const _documentViewer = useRef(null);
-  const _pageContainer = useRef(null);
-  const _snapModes = useRef(null);
+	// Should be called from inside this Component whenever the Apryse navigation
+	// updates the display of the PDF.
 
-  // Should be called from inside this Component whenever the Apryse navigation
-  // updates the display of the PDF.
+	const emitTransformEvent = () => {
+		// When the document changes position in the viewer (including zooming),
+		// emit an event that notifies the 2D viewer it should update the
+		// 2d overlay.
+		// This is only required when using Apryse's navigation tools - if an
+		// external pan zoom handler is in use, this should be disabled.
 
-  const updateViewBox = () => {
-      // When the document changes position in the viewer (including zooming),
-      // update the viewbox for the 2d layer.
-      // This is only required when using Apryse's navigation tools - if
-      // setTransform is used then there is no need for this.
+		if (scrollView.current && pageContainer.current && documentViewer.current) {
+			emitter.current.emit(Events.transform);
+		}
+	};
 
-      const width = _documentViewer.current.getPageWidth(1);
-      const height = _documentViewer.current.getPageHeight(1);
+	const getTransform = (): Transform => {
+		const container = scrollView.current.getBoundingClientRect();
+		const rect = pageContainer.current.getBoundingClientRect();
+		return {
+			x: rect.left - container.left,
+			y: rect.top - container.top,
+			scale: documentViewer.current.getZoomLevel(),
+		};
+	};
 
-      const scale = _documentViewer.current.getZoomLevel();
+	const on = (event, fn) => {
+		emitter.current.on(event, fn);
+		emitTransformEvent();
+	};
 
-      const container = scrollView.current.getBoundingClientRect();
-      const rect = _pageContainer.current.getBoundingClientRect();
-      const x = rect.left - container.left;
-      const y = rect.top - container.top;
+	const off = (event, fn) => {
+		emitter.current.off(event, fn);
+	};
 
-      setViewBox({
-        width,
-        height,
-        scale,
-        x,
-        y
-      });
-  };
+	const throwPanZoomNotImplementedException = () => {
+		throw new Error('The inbuilt panzoom handler of DrawingViewerApryse is read only and this method is not supported.');
+	};
 
-  //#5660: integrate snapping properly with the member in ref after we sort out events
+	// For snapping, mousePos should be in viewer coordinates (i.e. coordinates
+	// within the 2D overlay). Currently, this means we do not support rotating
+	// pages, which is a feature of Apryse. To do this, we would need to introduce
+	// the concept of document coordinates vs mouse coordinates to the viewer2D
+	// component.
 
-  const onMouseMoveSnap = (e) => {
-    
-    // This snippet duplicates the logic inside viewerLayer2D, and is just for testing.
+	const snap = (mousePos: Vector2Like, radius: number): Promise<SnapResults> => {
 
-    const rect = _pageContainer.current.getBoundingClientRect();
-    const scale = _documentViewer.current.getZoomLevel();
-    const pagePoint = {
-      x: (e.clientX - rect.left) / scale, 
-      y: (e.clientY - rect.top) / scale
-    };
+		// mousePos should be in the space of the 2D overlay, which should be
+		// identical to Apryse's viewer coordinates.
+		// https://docs.apryse.com/web/guides/coordinates
 
-    const radius = 10 * scale;
+		return documentViewer.current.snapToNearest(1, mousePos.x, mousePos.y, snapModes.current).then((snapPos) => {
+			const results = new SnapResults();
+			// snapToNearest will consider the entire document, so filter
+			// the results by the radius to match the expected behaviour
+			// of the other viewers.
+			const d = (snapPos.x - mousePos.x) * (snapPos.x - mousePos.x) + (snapPos.y - mousePos.y) * (snapPos.y - mousePos.y);
+			if (d < (radius * radius)) {
+				if (snapPos.modeName == 'PATH_ENDPOINT') {
+					results.closestNode = snapPos;
+				} else if (snapPos.modeName == 'LINE_INTERSECTION') {
+					results.closestIntersection = snapPos;
+				} else if (snapPos.modeName == 'POINT_ON_LINE') {
+					results.closestEdge = snapPos;
+				}
+			}
+			return results;
+		});
+	};
 
-    _documentViewer.current.snapToNearest(1, pagePoint.x, pagePoint.y, _snapModes.current).then(snapPoint => {
+	const loadScript = async (uri) => {
+		const script = document.createElement('script');
+		script.src = uri;
+		document.body.appendChild(script);
+		return new Promise((resolve)=>{
+			script.onload = resolve;
+		});
+	};
 
-      console.log(snapPoint);
+	const loadDependencies = async () => {
+		// core defines a namespace that PDFNet depends on, so must be loaded first.
+		await loadScript('/lib/webviewer/core/webviewer-core.min.js');
+		await loadScript('/lib/webviewer/core/pdf/PDFNet.js');
+	};
 
-      // Todo; hook this up to the snap method in the returned ref.
+	useEffect(() => {
+		loadDependencies().then(async () => {
+			const Core = window.Core as typeof Core;
+			Core.setWorkerPath('/lib/webviewer/core');
 
-      const d = (snapPoint.x - pagePoint.x) * (snapPoint.x - pagePoint.x) + (snapPoint.y - pagePoint.y) * (snapPoint.y - pagePoint.y);
-      if (d < (radius * radius)) {
+			// This next snippet concerned with PDFNet initialises the fullAPI, which
+			// is required for snapping...
 
-      } else {
-        
-      }
+			async function main(){
+				const doc = await Core.PDFNet.PDFDoc.create();
+				doc.initSecurityHandler();
+				// Locks all operations on the document
+				doc.lock();
+			}
 
-      // The coordinates used by the snapping tool (Apryse 'viewer' coordinates)
-      // are in the same space as the overlay.
+			const { apryseLicense } = clientConfigService;
+			if(!apryseLicense) {
+				console.error("Invalid licence for Apryse WebViewer. Cannot load PDF viewer.");
+				return;
+			}
 
-      DrawingViewerService.setMousePosition([snapPoint.x, snapPoint.y]);
-    });
-  };
+			await Core.PDFNet.runWithCleanup(
+				main,
+				apryseLicense
+			);
 
-  const snap = (mousePos: Vector2Like, radius: number): SnapResults => {
-    return new SnapResults();
-  }
+			// When using a custom UI, we must provide the DOM elements for the
+			// (scrolling) container and the container of the document (which will
+			// be transformed underneath the scroll view). These are the ones we
+			// create for the Component.
 
-  const loadScript = async (src) => {
-    const script = document.createElement('script');
-    script.src = src;
-    document.body.appendChild(script);
-    return new Promise((resolve)=>{
-      script.onload = resolve;
-    });
-  }
+			// The scroll view should be the ImageContainer of the viewer2D component,
+			// so that the same container emits events for all viewers.
 
-  const loadDependencies = async () => {
-    return Promise.all([
-      loadScript("/lib/webviewer/core/webviewer-core.min.js"),
-      loadScript("/lib/webviewer/core/pdf/PDFNet.js"),
-    ]);
-  }
+			scrollView.current = viewer.current.parentElement;
 
-  useEffect(() => {
-    loadDependencies().then(async () => {
-      const Core = window.Core as typeof Core;
-      Core.setWorkerPath("/lib/webviewer/core");
+			// The scroll view must have the overflow mode set to hidden for the viewer
+			// to work correctly - if the element is created outside this component,
+			// ensure that this property is set..
 
-      // This next snippet concerned with PDFNet initialises the fullAPI, which
-      // is required for snapping...
+			scrollView.current.style.overflow = 'hidden';
 
-      async function main(){
-        const doc = await Core.PDFNet.PDFDoc.create();
-        doc.initSecurityHandler();
-        // Locks all operations on the document
-        doc.lock();
-      }
+			documentViewer.current = new Core.DocumentViewer();
+			documentViewer.current.setScrollViewElement(scrollView.current);
+			documentViewer.current.setViewerElement(viewer.current);
 
-      await Core.PDFNet.runWithCleanup(
-        main,
-        "licensekeyhere"
-      );
+			// At the moment, we must use Apryse's inbuilt navigation. The following
+			// snippet sets this up.
 
-      // When using a custom UI, we must provide the DOM elements for the
-      // (scrolling) container and the container of the document (which will
-      // be transformed underneath the scroll view). These are the ones we
-      // create for the Component.
+			const panTool = documentViewer.current.getTool(Core.Tools.ToolNames.PAN);
+			documentViewer.current.setToolMode(Core.Tools.ToolNames.PAN);
 
-      const documentViewer = new Core.DocumentViewer();
-      documentViewer.setScrollViewElement(scrollView.current);
-      documentViewer.setViewerElement(viewer.current);
+			// Forward events for the Pan Tool for Apryse's built in navigation
+			//#5660: do we instead want to use an alternative or modified panzoomhandler
+			// to send these events? and so have events handled elsewhere?
 
-      // At the moment, we must use Apryse's inbuilt navigation. The following
-      // snippet sets this up.
+			scrollView.current.addEventListener('mousedown', (e) => {
+				panTool.mouseLeftDown(e);
+			});
 
-      const panTool = documentViewer.getTool(Core.Tools.ToolNames.PAN);
-      documentViewer.setToolMode(Core.Tools.ToolNames.PAN);
+			scrollView.current.addEventListener('mousemove', (e) => {
+				panTool.mouseMove(e);
+			});
 
-      _documentViewer.current = documentViewer;
+			scrollView.current.addEventListener('mouseup', (e) => {
+				panTool.mouseLeftUp(e);
+			});
 
-      // Forward events for the Pan Tool for Apryse's built in navigation
-      // Todo: do we instead want to use an alternative or modified panzoomhandler
-      // to send these events? and so have events handled elsewhere?
+			scrollView.current.addEventListener('wheel', (e) => {
+				let scale = documentViewer.current.getZoomLevel();
+				if (e.wheelDelta > 0) {
+					scale = scale * 1.1;
+				} else {
+					scale = scale * 0.9;
+				}
+				const viewerRect = scrollView.current.getBoundingClientRect();
+				documentViewer.current.zoomToMouse(scale, viewerRect.left, viewerRect.top);
+			});
 
-      scrollView.current.addEventListener('mousedown', e => {
-        panTool.mouseLeftDown(e);
-      });
+			// When using Apryse's navigation, we must tell our 2d overlay where the
+			// viewBox is whenever it changes.
 
-      scrollView.current.addEventListener('mousemove', e => {
-        panTool.mouseMove(e);
-        onMouseMoveSnap(e);
-      });
+			documentViewer.current.addEventListener('zoomUpdated', emitTransformEvent);
+			scrollView.current.addEventListener('scroll', emitTransformEvent);
 
-      scrollView.current.addEventListener('mouseup', e => {
-        panTool.mouseLeftUp(e);
-      });
+			// When the drawing is zoomed, the DOM for the page may be recreated,
+			// so update the reference we have for this.
 
-      viewer.current.addEventListener('wheel',e => {
-        let scale = _documentViewer.current.getZoomLevel();
-        if (e.wheelDelta > 0) {
-          scale = scale * 1.1;
-        }
-        else{
-          scale = scale * 0.9;
-        }
-        const viewerRect = scrollView.current.getBoundingClientRect();
-        documentViewer.zoomToMouse(scale, viewerRect.left, viewerRect.top);
-      });
+			documentViewer.current.addEventListener('pageComplete', () => {
+				pageContainer.current = document.getElementById('pageContainer1');
+				emitTransformEvent();
+			});
 
-      // When using Apryse's navigation, we must tell our 2d overlay where the
-      // viewBox is whenever it changes.
+			// This simply initialises an array of snap modes, which we do not expect
+			// to change, but need the Core namespace to populate.
 
-      documentViewer.addEventListener('zoomUpdated', updateViewBox);
-      scrollView.current.addEventListener("scroll", updateViewBox);
+			snapModes.current = [
+			 documentViewer.current.SnapMode.PATH_ENDPOINT,
+			 documentViewer.current.SnapMode.LINE_INTERSECTION,
+			 documentViewer.current.SnapMode.POINT_ON_LINE,
+			];
 
-      // When the drawing is zoomed, the DOM for the page may be recreated,
-      // so update the reference we have for this.
+			// The pdf is loaded asynchronously. Apryse also has its own loading
+			// indicator so we could immediately call onLoad if we wanted and show
+			// that instead. However, this should not be done if using our own
+			// navigation, as some other references may not be set up yet...
 
-      documentViewer.addEventListener('pageComplete', () => {
-        _pageContainer.current = document.getElementById('pageContainer1');
-        updateViewBox();
-      });
+			documentViewer.current.loadDocument('/revit_house_floor2.pdf').then(()=>{
+				onLoad();
+			});
+		});
+	}, []);
 
-      // This simply initialises an array of snap modes, which we do not expect
-      // to change, but need the Core namespace to populate.
+	(ref as any).current = {
 
-      _snapModes.current = [
-       _documentViewer.current.SnapMode.PATH_ENDPOINT,
-       _documentViewer.current.SnapMode.LINE_INTERSECTION,
-       _documentViewer.current.SnapMode.POINT_ON_LINE
-      ];
+		// This section implements ZoomableImage
 
-      // The pdf is loaded asynchronously. Apryse also has its own loading
-      // indicator so we could immediately call onLoad if we wanted and show
-      // that instead. However, this should not be done if using our own
-      // navigation, as some other references may not be set up yet...
+		setTransform: ({scale, x, y}) => {
+			// Currently, there is no known way to set the transform of a document
+			// in the Apryse WebSDK, so navigation must be controlled by the
+			// Apryse viewer.
+			// See: https://community.apryse.com/t/simplest-way-to-set-the-exact-position-offset-of-a-page-within-the-scroll-view/11932
+		},
 
-      documentViewer.loadDocument('/revit_house_floor2.pdf').then(()=>{
-        onLoad();
-      });
-    });
-  }, []);
+		getEventsEmitter: () => {
+				return scrollView.current;
+		},
 
-  (ref as any).current = {
-    setTransform: ({scale, x, y}) => {
-        // Currently, there is no known way to set the transform of a document
-        // in the Apryse WebSDK, so navigation must be controlled by the
-        // Apryse viewer.
-        // See: https://community.apryse.com/t/simplest-way-to-set-the-exact-position-offset-of-a-page-within-the-scroll-view/11932
-    },
+		getBoundingClientRect: () => {
+				return pageContainer.current.getBoundingClientRect();
+		},
 
-    getEventsEmitter: () => {
-        return scrollView.current;
-    },
+		getNaturalSize: () => {
+			const width = documentViewer.current.getPageWidth(1);
+			const height = documentViewer.current.getPageHeight(1);
+			return { width, height };
+		},
 
-    getBoundingClientRect: () => {
-        return _pageContainer.current.getBoundingClientRect();
-    },
+		// This section implements ISnapHandler
 
-    getNaturalSize: () => {
-      const width = _documentViewer.current.getPageWidth(1);
-      const height = _documentViewer.current.getPageHeight(1);
-      return { width, height };
-    },
+		snap,
 
-    snap: (mousePos: Vector2Like, radius: number): SnapResults => {
-      return new SnapResults();
-    }
-  }
+		// This section implements PanZoom/PanZoomHandler. As the transform of the
+		// in-built handler is read-only, only a subset of methods are implemented,
+		// and attempting to call any outside of these will result in an exception.
 
-  // The two script tags below should go into the head of the document on-demand,
-  // and only be loaded once, since the async property is set.
-  return (
-    <div id='apryse-repo-scroll-view' ref={scrollView} className="webviewer" style={{height: "100%", overflow: "hidden"}}>
-      <div id='apryse-repo-viewer' ref={viewer}></div>
-    </div>
-  );
+		getTransform,
+		
+		on,
+		
+		off,
+
+		dispose: () => {},
+
+		smoothZoom: throwPanZoomNotImplementedException,
+
+		smoothSetTransform: throwPanZoomNotImplementedException,
+
+		moveTo: throwPanZoomNotImplementedException,
+
+		setMinZoom: throwPanZoomNotImplementedException,
+
+		getMinZoom: () => {
+			return minZoom.current;
+		},
+
+		getMaxZoom: () => {
+			return maxZoom.current;
+		},
+
+		zoom: (factor: number) => {
+			documentViewer.current.zoomTo(documentViewer.current.getZoomLevel() * factor);
+		},
+
+		zoomIn: () => {
+			documentViewer.current.zoomTo(documentViewer.current.getZoomLevel() * 1.5);
+		},
+
+		zoomOut: () => {
+			documentViewer.current.zoomTo(documentViewer.current.getZoomLevel() / 1.5);
+		},
+
+		getOriginalSize: () => {
+			const width = documentViewer.current.getPageWidth(1);
+			const height = documentViewer.current.getPageHeight(1);
+			return { width, height };
+		},
+
+		centreView: () => {
+			documentViewer.current.setFitMode(documentViewer.current.FitMode.FitPage);
+		},
+	};
+
+	 return (
+		<div id='apryse-repo-viewer' ref={viewer}></div>
+	);
 });

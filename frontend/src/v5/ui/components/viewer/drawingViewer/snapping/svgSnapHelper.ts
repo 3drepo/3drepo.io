@@ -282,21 +282,19 @@ export class SVGSnapHelper {
 	 * the provided search radius, and returns a structure with the closest
 	 * of each three types, individually.
 	 */
-	snap(position: Vector2, radius: number): SnapResults {
+	snap(position: Vector2, radius: number): Promise<SnapResults> {
 
 		const results = new SnapResults();
 
-		if (!this.rtree) { // The svg is loaded asynchronously, so if this is called before the tree has been built return an empty response
-			return results;
+		if (this.rtree) { // The svg is loaded asynchronously, so if this is called before the tree has been built return an empty response
+			const queryResults = this.rtree.query(position, radius);
+		
+			results.closestEdge = queryResults.closestEdge;
+			results.closestNode = queryResults.closestNode;
+			results.closestIntersection = queryResults.closestIntersection;
 		}
 
-		const queryResults = this.rtree.query(position, radius);
-
-		results.closestEdge = queryResults.closestEdge;
-		results.closestNode = queryResults.closestNode;
-		results.closestIntersection = queryResults.closestIntersection;
-
-		return results;
+		return Promise.resolve(results);
 	}
 }
 

@@ -132,8 +132,19 @@ export const Viewer2D = () => {
 				break;
 		}
 
-		const pz = centredPanZoom(imgViewerRef.current, 20, 20);
-		setZoomHandler(pz);
+		// The Svg and Img viewers use external pan-zoom handlers, including for
+		// re-centering (below). The Apryse viewer handles navigation internally.
+
+		switch(viewerType) {
+			case Viewer.Img:
+			case Viewer.Svg:
+				const pz = centredPanZoom(imgViewerRef.current, 20, 20);
+				setZoomHandler(pz);
+				break;
+			case Viewer.Pdf:
+				setZoomHandler(imgViewerRef.current as unknown as PanZoomHandler);
+				break;
+		};
 	};
 
 	const onCalibrationClick = () => setIsCalibrating2D(!isCalibrating2D);
