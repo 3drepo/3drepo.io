@@ -38,7 +38,7 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { initialiseAutomatedProperties, onTemplateCodeUpdated, onModelNameUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
+const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateCodeUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -166,87 +166,114 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 };
 
 const modelSettingsUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
-	const modelEvents = {
-		[modelTypes.CONTAINER]: chatEvents.CONTAINER_SETTINGS_UPDATE,
-		[modelTypes.FEDERATION]: chatEvents.FEDERATION_SETTINGS_UPDATE,
-		[modelTypes.DRAWING]: chatEvents.DRAWING_SETTINGS_UPDATE,
-	};
+	try {
+		const modelEvents = {
+			[modelTypes.CONTAINER]: chatEvents.CONTAINER_SETTINGS_UPDATE,
+			[modelTypes.FEDERATION]: chatEvents.FEDERATION_SETTINGS_UPDATE,
+			[modelTypes.DRAWING]: chatEvents.DRAWING_SETTINGS_UPDATE,
+		};
 
+		await createModelMessage(modelEvents[modelType], data, teamspace,
+			UUIDToString(project), model, sender);
 
-	await createModelMessage(modelEvents[modelType], data, teamspace,
-		UUIDToString(project), model, sender);
-
-	if(data.name) {
-		await onModelNameUpdated(teamspace, project, model);
+		if (data.name) {
+			await onModelNameUpdated(teamspace, project, model);
+		}
+	} catch (err) {
+		logger.logError(`Failed to send model settings updated event for ${teamspace}.${model}: ${err.message}`);
 	}
 };
 
 const revisionUpdated = async ({ teamspace, project, model, data, sender, modelType }) => {
-	const modelEvents = {
-		[modelTypes.CONTAINER]: chatEvents.CONTAINER_REVISION_UPDATE,
-		[modelTypes.DRAWING]: chatEvents.DRAWING_REVISION_UPDATE,
-	};
+	try {
+		const modelEvents = {
+			[modelTypes.CONTAINER]: chatEvents.CONTAINER_REVISION_UPDATE,
+			[modelTypes.DRAWING]: chatEvents.DRAWING_REVISION_UPDATE,
+		};
 
-	await createModelMessage(modelEvents[modelType], { ...data, _id: UUIDToString(data._id) },
-		teamspace, project, model, sender);
+		await createModelMessage(modelEvents[modelType], { ...data, _id: UUIDToString(data._id) },
+			teamspace, project, model, sender);
+	} catch (err) {
+		logger.logError(`Failed to send revision updated event for ${teamspace}.${model}: ${err.message}`);
+	}
 };
 
 const modelAdded = async ({ teamspace, project, model, data, sender, modelType }) => {
-	const modelEvents = {
-		[modelTypes.CONTAINER]: chatEvents.NEW_CONTAINER,
-		[modelTypes.FEDERATION]: chatEvents.NEW_FEDERATION,
-		[modelTypes.DRAWING]: chatEvents.NEW_DRAWING,
-	};
+	try {
+		const modelEvents = {
+			[modelTypes.CONTAINER]: chatEvents.NEW_CONTAINER,
+			[modelTypes.FEDERATION]: chatEvents.NEW_FEDERATION,
+			[modelTypes.DRAWING]: chatEvents.NEW_DRAWING,
+		};
 
-	await createProjectMessage(modelEvents[modelType], { ...data, _id: model }, teamspace, project, sender);
+		await createProjectMessage(modelEvents[modelType], { ...data, _id: model }, teamspace, project, sender);
+	} catch (err) {
+		logger.logError(`Failed to send model added event for ${teamspace}.${model}: ${err.message}`);
+	}
 };
 
 const modelDeleted = async ({ teamspace, project, model, sender, modelType }) => {
-	const modelEvents = {
-		[modelTypes.CONTAINER]: chatEvents.CONTAINER_REMOVED,
-		[modelTypes.FEDERATION]: chatEvents.FEDERATION_REMOVED,
-		[modelTypes.DRAWING]: chatEvents.DRAWING_REMOVED,
-	};
+	try {
+		const modelEvents = {
+			[modelTypes.CONTAINER]: chatEvents.CONTAINER_REMOVED,
+			[modelTypes.FEDERATION]: chatEvents.FEDERATION_REMOVED,
+			[modelTypes.DRAWING]: chatEvents.DRAWING_REMOVED,
+		};
 
-	await createModelMessage(modelEvents[modelType], {}, teamspace, project, model, sender);
+		await createModelMessage(modelEvents[modelType], {}, teamspace, project, model, sender);
+	} catch (err) {
+		logger.logError(`Failed to send model deleted event for ${teamspace}.${model}: ${err.message}`);
+	}
 };
 
 const templateUpdated = async ({ teamspace, template: templateId, data }) => {
-	if (data.code) {
-		const template = await getTemplateById(teamspace, templateId);
-		await onTemplateCodeUpdated(teamspace, project, model, template);	
+	try {
+		if (data.code) {
+			const template = await getTemplateById(teamspace, templateId);
+			await onTemplateCodeUpdated(teamspace, template);
+		}
+	} catch (err) {
+		logger.logError(`Failed to process template updated event ${err.message}`);
 	}
-
-});
+};
 
 const ticketAdded = async ({ teamspace, project, model, ticket }) => {
-	const [isFed, template] = await Promise.all([
-		isFederationCheck(teamspace, model),
-		getTemplateById(teamspace, ticket.type),
-	]);
+	try {
+		const [isFed, template] = await Promise.all([
+			isFederationCheck(teamspace, model),
+			getTemplateById(teamspace, ticket.type),
+		]);
 
-	const fullTemplate = generateFullSchema(template);
-	const updatedTicket = await initialiseAutomatedProperties(teamspace, project, model, [ticket], fullTemplate);
+		const fullTemplate = generateFullSchema(template);
+		const [updatedTicket] = await initialiseAutomatedProperties(teamspace, project, model, [ticket], fullTemplate);
 
-	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
-	const serialisedTicket = serialiseTicket(updatedTicket, fullTemplate);
-	await createModelMessage(event, serialisedTicket, teamspace, project, model);
+		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
+		const serialisedTicket = serialiseTicket(updatedTicket, fullTemplate);
+		await createModelMessage(event, serialisedTicket, teamspace, project, model);
+	} catch (err) {
+		console.log(err);
+		logger.logError(`Failed to process ticket added event ${err.message}`);
+	}
 };
 
 const ticketsImported = async ({ teamspace, project, model, tickets }) => {
-	const [isFed, template] = await Promise.all([
-		isFederationCheck(teamspace, model),
-		getTemplateById(teamspace, tickets[0].type),
-		addImportedLogs(teamspace, project, model, tickets),
-	]);
+	try {
+		const [isFed, template] = await Promise.all([
+			isFederationCheck(teamspace, model),
+			getTemplateById(teamspace, tickets[0].type),
+			addImportedLogs(teamspace, project, model, tickets),
+		]);
 
-	const fullTemplate = generateFullSchema(template);
-	const updatedTickets = await initialiseAutomatedProperties(teamspace, project, model, tickets, fullTemplate);
-	const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
-	await Promise.all(updatedTickets.map(async (ticket) => {
-		const serialisedTicket = serialiseTicket(ticket, fullTemplate);
-		await createModelMessage(event, serialisedTicket, teamspace, project, model);
-	}));
+		const fullTemplate = generateFullSchema(template);
+		const updatedTickets = await initialiseAutomatedProperties(teamspace, project, model, tickets, fullTemplate);
+		const event = isFed ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
+		await Promise.all(updatedTickets.map(async (ticket) => {
+			const serialisedTicket = serialiseTicket(ticket, fullTemplate);
+			await createModelMessage(event, serialisedTicket, teamspace, project, model);
+		}));
+	} catch (err) {
+		logger.logError(`Failed to process tickets imported event ${err.message}`);
+	}
 };
 
 const constructUpdatedObject = (changes) => {

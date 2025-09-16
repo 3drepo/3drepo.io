@@ -17,7 +17,7 @@
 
 const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, getTicketsByQuery, updateTickets } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -406,31 +406,49 @@ const findPropertiesToUpdate = (template, placeholdersToFind) => {
 	return propertiesToUpdate;
 };
 
-const updatePropertiesWithAutomatedValue = async (teamspace, project, model, tickets, template, propertiesToUpdate) => {
+const updatePropertiesWithAutomatedValue = async (teamspace, tickets, template, propertiesToUpdate) => {
 	const patternToVal = {};
 	const updatedTickets = tickets.map((ticket) => cloneDeep(ticket));
 
-	const { name: modelName } = await getModelById(teamspace, model, { name: 1 });
+	const modelIdToName = {};
+	const modelToUpdates = {};
 
-	patternToVal[supportedPatterns.MODEL_NAME] = modelName;
 	patternToVal[supportedPatterns.TEMPLATE_CODE] = template.code;
 
-	const updateData = tickets.map((ticket, i) => {
+	for (let i = 0; i < tickets.length; i++) {
+		const ticket = tickets[i];
 		const ticketData = {};
 		patternToVal[supportedPatterns.TICKET_NUMBER] = ticket.number;
+		if (!modelIdToName[ticket.model]) {
+			// eslint-disable-next-line no-await-in-loop
+			const model = await getModelById(teamspace, ticket.model, { name: 1 });
+
+			modelIdToName[ticket.model] = model.name;
+			modelToUpdates[ticket.model] = {
+				project: ticket.project,
+				model: ticket.model,
+				tickets: [],
+				update: [],
+			};
+		}
+		patternToVal[supportedPatterns.MODEL_NAME] = modelIdToName[ticket.model];
 
 		propertiesToUpdate.forEach(({ name, value }) => {
-			ticketData[name] = value;
+			let updatedVal = value;
 			Object.keys(patternToVal).forEach((patternVal) => {
-				ticketData[name] = ticketData[name].replaceAll(`{${patternVal}}`, patternToVal[patternVal]);
+				updatedVal = updatedVal.replaceAll(`{${patternVal}}`, patternToVal[patternVal]);
 			});
-			setNestedProperty(updatedTickets[i], name, ticketData[name]);
+			setNestedProperty(ticketData, name, updatedVal);
+			setNestedProperty(updatedTickets[i], name, updatedVal);
 		});
+		modelToUpdates[ticket.model].update.push(ticketData);
+		modelToUpdates[ticket.model].tickets.push(ticket);
+	}
 
-		return ticketData;
-	});
-
-	await updateTickets(teamspace, project, model, tickets, updateData, 'system');
+	await Promise.all(Object.values(modelToUpdates).map(
+		async ({ project, model, tickets: oldTickets, update: updateData }) => {
+			await updateTickets(teamspace, project, model, oldTickets, updateData, 'system');
+		}));
 
 	return updatedTickets;
 };
@@ -439,11 +457,17 @@ const updatePropertiesWithPattern = async (teamspace, project, model, template, 
 	const propertiesToUpdate = findPropertiesToUpdate(template, [pattern]);
 
 	if (propertiesToUpdate.length) {
-		const tickets = await getTicketsByQuery(teamspace, project, model,
-			{ type: template._id }, { _id: 1, number: 1 });
+		const projection = { _id: 1, number: 1, project: 1, model: 1 };
+		let tickets;
+		if (project && model) {
+			tickets = await getTicketsByQuery(teamspace, project, model,
+				{ type: template._id }, projection);
+		} else {
+			tickets = await getTicketsByTemplateId(teamspace, template._id, projection);
+		}
 
 		if (tickets.length) {
-			await updatePropertiesWithAutomatedValue(teamspace, project, model,
+			await updatePropertiesWithAutomatedValue(teamspace,
 				tickets, template, propertiesToUpdate);
 		}
 	}
@@ -460,15 +484,15 @@ Tickets.onModelNameUpdated = async (teamspace, project, model) => {
 	}));
 };
 
-Tickets.onTemplateCodeUpdated = async (teamspace, project, model, template) => {
-	await updatePropertiesWithPattern(teamspace, project, model, template, supportedPatterns.TEMPLATE_CODE);
+Tickets.onTemplateCodeUpdated = async (teamspace, template) => {
+	await updatePropertiesWithPattern(teamspace, undefined, undefined, template, supportedPatterns.TEMPLATE_CODE);
 };
 
 Tickets.initialiseAutomatedProperties = async (teamspace, project, model, tickets, template) => {
 	const propertiesToUpdate = findPropertiesToUpdate(template);
 	if (propertiesToUpdate.length) {
 		const updatedTickets = await updatePropertiesWithAutomatedValue(
-			teamspace, project, model, tickets, template, propertiesToUpdate);
+			teamspace, tickets.map((ticket) => ({ project, model, ...ticket })), template, propertiesToUpdate);
 		return updatedTickets;
 	}
 

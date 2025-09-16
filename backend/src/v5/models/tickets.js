@@ -162,6 +162,9 @@ Tickets.getTicketById = async (
 Tickets.getTicketsByQuery = (teamspace, project, model, query, projection) => DbHandler.find(teamspace,
 	TICKETS_COL, { teamspace, project, model, ...query }, projection);
 
+Tickets.getTicketsByTemplateId = (teamspace, templateId, projection) => DbHandler.find(teamspace,
+	TICKETS_COL, { teamspace, type: templateId }, projection);
+
 Tickets.getTicketsByFilter = (
 	teamspace,
 	project,
