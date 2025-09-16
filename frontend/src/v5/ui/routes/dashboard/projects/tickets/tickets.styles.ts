@@ -31,7 +31,7 @@ export const Link = styled(LinkBase)<{ disabled?: boolean }>`
 export const TicketsTableLayout = styled.div`
 	display: flex;
 	flex-flow: column;
-	height: '100%';
+	height: 100%;
 `;
 
 

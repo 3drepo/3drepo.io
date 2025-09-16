@@ -160,8 +160,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			.forEach((name) => fetchColumn(name, filteredTickets));
 	}, [filteredTickets.length, visibleSortedColumnsNames.join('')]);
 
-
-
 	
 	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>(); 
 	useEffect(() => {
@@ -201,7 +199,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		setFilteredTickets(filtTickets);
 	}, [tickets, filteredTicketsIDs]);
 
-	
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
 
 	useEffect(() => {
