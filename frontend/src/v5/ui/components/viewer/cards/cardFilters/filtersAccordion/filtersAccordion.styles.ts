@@ -26,6 +26,7 @@ export const CollapsibleContainer = styled.div<{ $collapsed: boolean }>`
 	overflow: hidden;
 	overflow-y: scroll;
 	max-height: ${({ $collapsed }) => $collapsed ? '56px' : 'calc(100% - 14px)'};
+	min-height: fit-content;
 	margin-bottom: 10px;
 	${isFirefox('padding-right: 13px;')}
 `;

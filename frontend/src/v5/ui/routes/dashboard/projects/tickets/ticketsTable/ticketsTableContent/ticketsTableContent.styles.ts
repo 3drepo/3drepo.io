@@ -19,13 +19,12 @@ import styled from 'styled-components';
 import { ControlsContainer as GroupCollapseHeader } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
 
 export const Container = styled.div`
-	margin-bottom: -30px;
 	overflow: auto;
 	position: relative;
-	height: calc(100vh - 287px);
 	width: 100vw;
 	margin-left: -75px;
 	padding: 0 64px 30px 75px;
+	flex: 1;
 
 	${GroupCollapseHeader} {
 		position: sticky;

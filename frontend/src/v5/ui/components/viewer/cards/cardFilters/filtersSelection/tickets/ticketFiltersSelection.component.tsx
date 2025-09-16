@@ -52,13 +52,9 @@ const FullTriggerButton = ({ disabled }) => (
 );
 
 
-
-type FilterSelectionMode = 'card' | 'other';
-
-
-export const FilterSelection = (props: { mode?: FilterSelectionMode }) => {
+export const FilterSelection = () => {
 	const [selectedFilter, setSelectedFilter] = useState<TicketFilter>(null);
-	const { choosablefilters: unusedFilters, setFilter } = useTicketFiltersContext();
+	const { choosablefilters: unusedFilters, displayMode, setFilter } = useTicketFiltersContext();
 	const showFiltersList = !selectedFilter?.property;
 	const disabled = !unusedFilters.length;
 
@@ -73,9 +69,9 @@ export const FilterSelection = (props: { mode?: FilterSelectionMode }) => {
 		vertical: 'top',
 		horizontal: 'right',
 	};
-			
-	const popoverProps: Partial<PopoverProps> = { anchorOrigin, transformOrigin };
-	const TriggerButton = props.mode === 'card' ? SmallTriggerButton : FullTriggerButton;
+
+	const popoverProps: Partial<PopoverProps> = { anchorOrigin, transformOrigin, marginThreshold: 20 };
+	const TriggerButton = displayMode === 'card' ? SmallTriggerButton : FullTriggerButton;
 
 	return (
 		<CardFilterActionMenu
@@ -83,7 +79,7 @@ export const FilterSelection = (props: { mode?: FilterSelectionMode }) => {
 			onClose={clearFilter}
 			disabled={disabled}
 			PopoverProps={popoverProps}
-			mode={props.mode}
+			$displayMode={displayMode}
 		>
 			<SearchContextComponent items={unusedFilters} fieldsToFilter={['property', 'module']}>
 				<TicketsFiltersModal $visibleIndex={showFiltersList ? 0 : 1}>

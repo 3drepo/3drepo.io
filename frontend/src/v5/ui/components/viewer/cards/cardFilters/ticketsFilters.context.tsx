@@ -19,6 +19,9 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { TicketFilter } from './cardFilters.types';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { templatesToFilters } from './filtersSelection/tickets/ticketFilters.helpers';
+
+
+type DisplayMode = 'card' | 'other';
 export interface TicketsFiltersContextType {
 	choosablefilters:  TicketFilter[];
 	filters: TicketFilter[];
@@ -27,6 +30,7 @@ export interface TicketsFiltersContextType {
 	setFilter: (filter:TicketFilter) => void;
 	deleteFilter: (filter:TicketFilter) => void;
 	clearFilters: () => void;
+	displayMode: DisplayMode;
 }
 
 const defaultValue: TicketsFiltersContextType = {
@@ -37,6 +41,7 @@ const defaultValue: TicketsFiltersContextType = {
 	setFilter: () => {},
 	deleteFilter: () => {},
 	clearFilters: () => {},
+	displayMode: 'other',
 };
 
 export const TicketsFiltersContext = createContext<TicketsFiltersContextType>(defaultValue);
@@ -50,6 +55,7 @@ interface TicketsFiltersContextComponentProps {
 	modelsIds: string[];
 	filters?: TicketFilter[];
 	onChange?: (filters: TicketFilter[]) => void;
+	displayMode?: DisplayMode;
 }
 
 const findFilterIndex = (filters:TicketFilter[], filter:TicketFilter) =>
@@ -60,6 +66,7 @@ export const TicketsFiltersContextComponent = ({
 	templates, 
 	modelsIds, 
 	filters: filtersProps,
+	displayMode,
 	onChange }: TicketsFiltersContextComponentProps) => {
 	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [choosablefilters, setChoosablefilters] = useState<TicketFilter[]>([]);
@@ -104,7 +111,16 @@ export const TicketsFiltersContextComponent = ({
 	};
 
 	return (
-		<TicketsFiltersContext.Provider value={{ filters: filters || [], setFilter, deleteFilter, clearFilters, choosablefilters, templates, modelsIds }}>
+		<TicketsFiltersContext.Provider value={{ 
+			displayMode, 
+			filters: filters || [], 
+			setFilter, 
+			deleteFilter, 
+			clearFilters, 
+			choosablefilters, 
+			templates, 
+			modelsIds, 
+		}}>
 			{children}
 		</TicketsFiltersContext.Provider>
 	);

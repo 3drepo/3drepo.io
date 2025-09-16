@@ -34,7 +34,7 @@ import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWE
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
-import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer } from '../tickets.styles';
+import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, TicketsTableLayout } from '../tickets.styles';
 import { INITIAL_COLUMNS, NEW_TICKET_ID, PresetValue, SetTicketValue } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
@@ -211,40 +211,42 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	
 	return (
 		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters}>
-			<FiltersContainer>
-				<FlexContainer>
-					<SelectorsContainer>
-						<ContainersAndFederationsSelect
-							isNewTicketDirty={isNewTicketDirty}
-							{...paramToInputProps(containersAndFederations, setContainersAndFederations)}
-						/>
-						<TemplateSelect
-							isNewTicketDirty={isNewTicketDirty}
-							{...paramToInputProps(template, setTemplate)}
-						/>
-						<GroupBySelect />
-					</SelectorsContainer>
-				</FlexContainer>
-				<FlexContainer>
-					<FilterSelection />
-					{!selectedTemplate.deprecated
-						&&
-						<NewTicketMenu
-							TriggerButton={(
-								<NewTicketButton
-									startIcon={<AddCircleIcon />}
-									disabled={newTicketButtonIsDisabled}
-								>
-									<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
-								</NewTicketButton>
-							)}
-							disabled={newTicketButtonIsDisabled}
-							onContainerOrFederationClick={setTicketValue}
-						/>}
-				</FlexContainer>
+			<TicketsTableLayout>
+				<FiltersContainer>
+					<FlexContainer>
+						<SelectorsContainer>
+							<ContainersAndFederationsSelect
+								isNewTicketDirty={isNewTicketDirty}
+								{...paramToInputProps(containersAndFederations, setContainersAndFederations)}
+							/>
+							<TemplateSelect
+								isNewTicketDirty={isNewTicketDirty}
+								{...paramToInputProps(template, setTemplate)}
+							/>
+							<GroupBySelect />
+						</SelectorsContainer>
+					</FlexContainer>
+					<FlexContainer>
+						<FilterSelection />
+						{!selectedTemplate.deprecated
+							&&
+							<NewTicketMenu
+								TriggerButton={(
+									<NewTicketButton
+										startIcon={<AddCircleIcon />}
+										disabled={newTicketButtonIsDisabled}
+									>
+										<FormattedMessage id="ticketsTable.button.newTicket" defaultMessage="New Ticket" />
+									</NewTicketButton>
+								)}
+								disabled={newTicketButtonIsDisabled}
+								onContainerOrFederationClick={setTicketValue}
+							/>}
+					</FlexContainer>
+				</FiltersContainer>
 				<CardFilters />
-			</FiltersContainer>
-			<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
+				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
+			</TicketsTableLayout>
 		</TicketsFiltersContextComponent>
 	);
 };

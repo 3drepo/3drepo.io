@@ -30,12 +30,13 @@ type FiltersSectionProps = {
 };
 export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 	const [selectedFilter, setSelectedFilter] = useState({});
-	const { deleteFilter, setFilter } = useTicketFiltersContext();
+	const { deleteFilter, setFilter, displayMode } = useTicketFiltersContext();
 
 	return (
 		<Section>
 			{filters.map((filter) => (
 				<CardFilterActionMenu
+					$displayMode={displayMode}
 					key={Object.keys(filter).join()}
 					onOpen={() => setSelectedFilter(filter)}
 					onClose={() => setSelectedFilter({})}

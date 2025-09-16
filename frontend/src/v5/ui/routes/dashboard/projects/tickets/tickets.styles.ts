@@ -28,6 +28,13 @@ export const Link = styled(LinkBase)<{ disabled?: boolean }>`
 	`}
 `;
 
+export const TicketsTableLayout = styled.div`
+	display: flex;
+	flex-flow: column;
+	height: '100%';
+`;
+
+
 export const FiltersContainer = styled.div`
 	width: 100%;
 	display: flex;

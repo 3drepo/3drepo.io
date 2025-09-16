@@ -45,14 +45,14 @@ export const TicketsListCard = () => {
 
 	return (
 		<CardContainer>
-			<TicketsFiltersContextComponent templates={templates} modelsIds={[containerOrFederation]} filters={presetFilters} onChange={onFiltersChange}>
+			<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]} filters={presetFilters} onChange={onFiltersChange}>
 				<CardHeader
 					icon={<TicketsIcon />}
 					title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
 					actions={(
 						<>
 							{!readOnly && (<NewTicketMenu />)}
-							<FilterSelection mode='card' />
+							<FilterSelection />
 							<TicketsEllipsisMenu />
 						</>
 					)}

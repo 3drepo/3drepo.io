@@ -26,7 +26,7 @@ export const OuterContainer = styled.div`
 
 export const InnerContainer = styled.div`
 	padding: 18px 75px;
-	height: auto;
-	min-height: calc(100% - 42px);
-	width: 100%;
+	height: calc(100% - 42px);
+    min-height: fit-content;
+ 	width: 100%;
 `;

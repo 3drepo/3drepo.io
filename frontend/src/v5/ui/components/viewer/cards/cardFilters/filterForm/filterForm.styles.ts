@@ -22,16 +22,16 @@ import styled, { css } from 'styled-components';
 
 
 export const FilterPaperStyleInCards = css`
-	margin-top: 13px;
-	max-height: calc(100% - 170px);
 	left: 88px !important;
 `; 
 
 
-export const CardFilterActionMenu = styled(ActionMenu)<{ mode?: string }>`
+export const CardFilterActionMenu = styled(ActionMenu)<{ $displayMode?: string }>`
 	.MuiPaper-root {
 		width: 365px;
-		${({ mode }) => ( mode === 'card') && FilterPaperStyleInCards}}
+		margin-top: 13px;
+		max-height: calc(100% - 170px);
+		${({ $displayMode: mode }) => ( mode === 'card') && FilterPaperStyleInCards}}
 	}
 `;
 
