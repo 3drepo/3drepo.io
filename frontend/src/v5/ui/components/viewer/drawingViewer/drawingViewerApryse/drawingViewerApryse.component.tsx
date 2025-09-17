@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { forwardRef, useEffect, useRef } from 'react';
+import { forwardRef, useEffect, useRef, useCallback } from 'react';
 import { ZoomableImage, Transform } from '../zoomableImage.types';
 import { DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
 import { Core } from '@pdftron/webviewer';
@@ -131,6 +131,20 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			return results;
 		});
 	};
+
+	const loadDocument = useCallback(()=>{
+		if (documentViewer.current) {
+			documentViewer.current.closeDocument();
+			if (src) {
+				// The pdf is loaded asynchronously. Apryse also has its own loading
+				// indicator so we could immediately call onLoad if we wanted and show
+				// that instead. However, this should not be done if using our own
+				// navigation, as some other references may not be set up yet...
+
+				documentViewer.current.loadDocument(src, { extension: 'pdf' }).then(onLoad);
+			}
+		}
+	}, [src, onLoad]);
 
 	const loadScript = async (uri) => {
 		if (document.querySelectorAll(`script[src='${uri}']`).length) {
@@ -260,31 +274,22 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			// to change, but need the Core namespace to populate.
 
 			snapModes.current = [
-			 documentViewer.current.SnapMode.PATH_ENDPOINT,
-			 documentViewer.current.SnapMode.LINE_INTERSECTION,
-			 documentViewer.current.SnapMode.POINT_ON_LINE,
+				documentViewer.current.SnapMode.PATH_ENDPOINT,
+				documentViewer.current.SnapMode.LINE_INTERSECTION,
+				documentViewer.current.SnapMode.POINT_ON_LINE,
 			];
 
-			// The pdf is loaded asynchronously. Apryse also has its own loading
-			// indicator so we could immediately call onLoad if we wanted and show
-			// that instead. However, this should not be done if using our own
-			// navigation, as some other references may not be set up yet...
-
-			//#5660 get pdf value..
-			const data = await fetch(src);
-			const txt = await data.text();
-
-
-			documentViewer.current.loadDocument(src, { extension: 'pdf' }).then(()=>{
-				onLoad();
-			});
+			loadDocument();
 		});
+
 		// Clean up function
 		return () => {
 			documentViewer.current.closeDocument();
 			documentViewer.current.dispose();
 		}
 	}, []);
+
+	useEffect(loadDocument, [src]);
 
 	(ref as any).current = {
 

@@ -124,8 +124,6 @@ export const Viewer2D = () => {
 		}
 	}, [src]);
 
-	console.log(`Render: ${drawingId} ${src} ${viewer.src} ${viewer.type} ${revision?.format}`);
-
 	const canCalibrate2D = isCalibrating && step === 1;
 
 	const onClickZoomIn = () => {
