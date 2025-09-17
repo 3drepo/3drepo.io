@@ -21,6 +21,7 @@ const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
+const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateCodeUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
@@ -38,7 +39,6 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateCodeUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -251,7 +251,6 @@ const ticketAdded = async ({ teamspace, project, model, ticket }) => {
 		const serialisedTicket = serialiseTicket(updatedTicket, fullTemplate);
 		await createModelMessage(event, serialisedTicket, teamspace, project, model);
 	} catch (err) {
-		console.log(err);
 		logger.logError(`Failed to process ticket added event ${err.message}`);
 	}
 };
