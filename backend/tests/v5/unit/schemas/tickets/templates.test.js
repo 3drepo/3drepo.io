@@ -19,7 +19,6 @@ const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateCustomStatusValues, determineTestGroup } = require('../../../helper/services');
 const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
-const { read } = require('mongodb/lib/gridfs/grid_store');
 
 const { statusTypes, statuses } = require(`${src}/schemas/tickets/templates.constants`);
 

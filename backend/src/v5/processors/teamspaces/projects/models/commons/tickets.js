@@ -24,8 +24,9 @@ const {
 	presetModules,
 	supportedPatterns,
 } = require('../../../../../schemas/tickets/templates.constants');
-const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
 const { cloneDeep, deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
+const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
+
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { propTypes, viewGroups } = require('../../../../../schemas/tickets/templates.constants');
@@ -35,11 +36,11 @@ const { generateFullSchema } = require('../../../../../schemas/tickets/templates
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getFileWithMetaAsStream } = require('../../../../../services/filesManager');
+const { getModelById } = require('../../../../../models/modelSettings');
 const { importComments } = require('./tickets.comments');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
-const { getModelById } = require('../../../../../models/modelSettings');
 
 const Tickets = {};
 
