@@ -153,6 +153,12 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			const Core = window.Core as typeof Core;
 			Core.setWorkerPath('/lib/webviewer/core');
 
+			// The Pan tool will try to load assets at this path - though
+			// they won't be visible by default, we still must change the
+			// cursor explicitly if desired.
+
+			Core.setResourcesPath('/lib/webviewer/core/assets');
+
 			// This next snippet concerned with PDFNet initialises the fullAPI, which
 			// is required for snapping...
 
@@ -200,9 +206,10 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			documentViewer.current.setToolMode(Core.Tools.ToolNames.PAN);
 			const panTool = documentViewer.current.getTool(Core.Tools.ToolNames.PAN);
 
-			// Forward events for the Pan Tool for Apryse's built in navigation
-			//#5660: do we instead want to use an alternative or modified panzoomhandler
-			// to send these events? and so have events handled elsewhere?
+			// Forward events for the Pan Tool for Apryse's built in navigation.
+			// Another possibility would be to have a modified panzoomhandler
+			// forward such events, though at the moment there is no need for that
+			// additional complexity.
 
 			scrollView.current.addEventListener('mousedown', (e) => {
 				panTool.mouseLeftDown(e);
@@ -219,9 +226,9 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			scrollView.current.addEventListener('wheel', (e) => {
 				let scale = documentViewer.current.getZoomLevel();
 				if (e.wheelDelta > 0) {
-					scale = scale * 1.5;
+					scale = scale * 1.1;
 				} else {
-					scale = scale / 1.5;
+					scale = scale / 1.1;
 				}
 				const viewerRect = scrollView.current.getBoundingClientRect();
 				documentViewer.current.zoomToMouse(scale, viewerRect.left, viewerRect.top);
