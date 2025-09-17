@@ -755,6 +755,28 @@ const testUpdateTickets = () => {
 	});
 };
 
+const testGetTicketsByTemplate = () => {
+	describe('Get tickets by template', () => {
+		const teamspace = generateRandomString();
+
+		const template = generateRandomString();
+
+		test('Should return whatever the query returns', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+			const projection = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByTemplate(teamspace, template, projection))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, type: template }, projection);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAddTicketsWithTemplate();
 	testRemoveAllTickets();
@@ -763,4 +785,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetAllTickets();
 	testGetTicketsByQuery();
 	testGetTicketsByFilter();
+	testGetTicketsByTemplate();
 });

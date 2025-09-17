@@ -19,6 +19,7 @@ const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, determineTestGroup, generateUUIDString } = require('../../../../../../helper/services');
 const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
+const { RFC_2822 } = require('moment');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
@@ -1237,6 +1238,8 @@ const testInitialiseAutomatedProperties = () => {
 			const expectedData = [];
 			const tickets = times(nTickets, () => {
 				const ticket = {
+					model,
+					project,
 					title: generateRandomString(),
 					number: ticketNum,
 					properties: {},
@@ -1260,15 +1263,17 @@ const testInitialiseAutomatedProperties = () => {
 			await expect(Tickets.initialiseAutomatedProperties(teamspace, project, model, tickets, template))
 				.resolves.toEqual(expectedData);
 
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value } },
+			};
+
 			if (value === undefined) {
 				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 			} else {
 				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
 				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
-					tickets, times(tickets.length, () => ({
-						[`properties.${propName}`]: value,
-						[`modules.${moduleName}.${propName}`]: value,
-					})), 'system');
+					tickets, times(tickets.length, () => updateData), 'system');
 
 				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(1);
 				expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
@@ -1279,8 +1284,6 @@ const testInitialiseAutomatedProperties = () => {
 
 const testOnTemplateCodeUpdated = () => {
 	const teamspace = generateRandomString();
-	const project = generateRandomString();
-	const model = generateRandomString();
 	const modelName = generateRandomString();
 	const moduleName = generateRandomString();
 	const temCode = generateRandomString(3);
@@ -1307,11 +1310,15 @@ const testOnTemplateCodeUpdated = () => {
 					properties: [property],
 				}],
 			};
-			const nTickets = hasTickets ? 5 : 0;
+			const project = generateRandomString();
+			const models = times(2, () => generateRandomString());
+			const nTickets = hasTickets ? 6 : 0;
 			const expectedData = [];
-			const tickets = times(nTickets, () => {
+			const tickets = times(nTickets, (i) => {
 				const ticket = {
 					title: generateRandomString(),
+					project,
+					model: models[i % 2],
 					number: ticketNum,
 					properties: {},
 					modules: { [moduleName]: {} },
@@ -1328,38 +1335,46 @@ const testOnTemplateCodeUpdated = () => {
 			});
 
 			if (value !== undefined) {
-				ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+				models.forEach(() => {
+					ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+				});
 			}
 
 			const fetchedTickets = config.value?.includes(`{${supportedPatterns.TEMPLATE_CODE}}`);
 
 			if (fetchedTickets) {
-				TicketsModel.getTicketsByQuery.mockResolvedValueOnce(tickets);
+				TicketsModel.getTicketsByTemplateId.mockResolvedValueOnce(tickets);
 			}
 
-			await expect(Tickets.onTemplateCodeUpdated(teamspace, project, model, template))
-				.resolves.toBeUndefined();
+			await Tickets.onTemplateCodeUpdated(teamspace, template);
 
 			if (fetchedTickets) {
-				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
-				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, model,
-					{ type: template._id }, { number: 1, _id: 1 });
+				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledWith(teamspace,
+					template._id, { number: 1, _id: 1, project: 1, model: 1 });
 			} else {
-				expect(TicketsModel.getTicketsByQuery).not.toHaveBeenCalled();
+				expect(TicketsModel.getTicketsByTemplateId).not.toHaveBeenCalled();
 			}
+
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value } },
+			};
 
 			if (value === undefined) {
 				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 			} else {
-				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
-				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
-					tickets, times(tickets.length, () => ({
-						[`properties.${propName}`]: value,
-						[`modules.${moduleName}.${propName}`]: value,
-					})), 'system');
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(models.length);
+				models.forEach((model) => {
+					expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace,
+						project, model, tickets.filter(({ model: ticketModel }) => model === ticketModel),
+						times(tickets.length / models.length, () => updateData), 'system');
+				});
 
-				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(1);
-				expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(models.length);
+				models.forEach((model) => {
+					expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+				});
 			}
 		});
 	});
@@ -1395,6 +1410,8 @@ const testOnModelNameUpdated = () => {
 			const tickets = times(nTickets, () => {
 				const ticket = {
 					title: generateRandomString(),
+					project,
+					model,
 					properties: {},
 					modules: { [moduleName]: {} },
 				};
@@ -1438,21 +1455,23 @@ const testOnModelNameUpdated = () => {
 				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(templates.length);
 				templates.forEach((template) => {
 					expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, model,
-						{ type: template._id }, { number: 1, _id: 1 });
+						{ type: template._id }, { number: 1, _id: 1, project: 1, model: 1 });
 				});
 			} else {
 				expect(TicketsModel.getTicketsByQuery).not.toHaveBeenCalled();
 			}
+
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value } },
+			};
 
 			if (value === undefined) {
 				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 			} else {
 				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(templates.length);
 				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
-					tickets, times(tickets.length, () => ({
-						[`properties.${propName}`]: value,
-						[`modules.${moduleName}.${propName}`]: value,
-					})), 'system');
+					tickets, times(tickets.length, () => updateData), 'system');
 
 				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(templates.length);
 				expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
