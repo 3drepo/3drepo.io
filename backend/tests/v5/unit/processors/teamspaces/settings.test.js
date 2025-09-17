@@ -53,9 +53,7 @@ const testUpdateTemplate = () => {
 			const teamspace = generateRandomString();
 			const data = { [generateRandomString()]: generateRandomString() };
 			const id = generateUUID();
-			const expectedOutput = generateRandomString();
-			TemplateModel.updateTemplate.mockResolvedValueOnce(expectedOutput);
-			await expect(Settings.updateTicketTemplate(teamspace, id, data)).resolves.toEqual(expectedOutput);
+			await Settings.updateTicketTemplate(teamspace, id, data);
 
 			expect(TemplateModel.updateTemplate).toHaveBeenCalledTimes(1);
 			expect(TemplateModel.updateTemplate).toHaveBeenCalledWith(teamspace, id, data);

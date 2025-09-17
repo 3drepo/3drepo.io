@@ -941,6 +941,28 @@ const testRevisionUpdated = () => {
 };
 const testNewModel = () => {
 	describe(events.NEW_MODEL, () => {
+		test('Should handle error gracefully', async () => {
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				modelType: modelTypes.FEDERATION,
+			};
+			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
+			ChatService.createProjectMessage.mockRejectedValueOnce(generateRandomString());
+			await EventsManager.publish(events.NEW_MODEL, data);
+			await waitOnEvent;
+			expect(ChatService.createProjectMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(
+				chatEvents.NEW_FEDERATION,
+				{ ...data.data, _id: data.model },
+				data.teamspace,
+				data.project,
+				undefined,
+			);
+		});
+
 		test(`Should create a ${chatEvents.NEW_FEDERATION} chat event if there is a ${events.NEW_MODEL} (federation)`, async () => {
 			const data = {
 				teamspace: generateRandomString(),

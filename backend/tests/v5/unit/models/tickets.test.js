@@ -767,7 +767,7 @@ const testGetTicketsByTemplate = () => {
 
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
 
-			await expect(Ticket.getTicketsByTemplate(teamspace, template, projection))
+			await expect(Ticket.getTicketsByTemplateId(teamspace, template, projection))
 				.resolves.toEqual(expectedOutput);
 
 			expect(fn).toHaveBeenCalledTimes(1);
