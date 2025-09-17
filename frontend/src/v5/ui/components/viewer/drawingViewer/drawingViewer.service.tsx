@@ -40,8 +40,18 @@ const DrawingViewerServiceCreator = () => {
 	const off = emitter.off.bind(emitter);
 	const emit = emitter.emit.bind(emitter);
 
-	//#5660 not taking into account scroll view
-	const getScreenshot: GetScreenshot = () => imgContainer ? domToPng(imgContainer) : null;
+	// The following options for domToPng ensure consistency between the viewers;
+	// restoreScrollPosition ensures renders take into account scrollLeft and
+	// scrollTop of any scroll view elements. We also filter out the the camera
+	// icons and other transient annotations.
+
+	const getScreenshot: GetScreenshot = () => imgContainer ? domToPng(imgContainer, {
+		features: {
+			restoreScrollPosition: true,
+		},
+		filter: (el: HTMLElement) => { return el.id != 'viewerLayer2d' && el.id != 'viewerLayer2dCameraOffSight'; }
+	} ) : null;
+
 	const setImgContainer = (newImgContainer) => { imgContainer = newImgContainer; };
 
 	// A callback that should be set by the viewer2d that resolves to a URL
