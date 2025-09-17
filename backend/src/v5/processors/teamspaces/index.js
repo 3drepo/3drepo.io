@@ -134,18 +134,21 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 
 	const listOfUsersFromEmails = await getUserInfoFromEmailArray(emails, projection);
 
+	// what if we map on accountUsers instead?
 	const rawData = listOfUsersFromEmails.map((user) => {
 		const { email, name, metadata } = accountUsers.filter((u) => u.email === user.customData?.email)[0];
+		const metadataObj = metadata ? JSON.parse(metadata) : {};
 
 		const [firstName, lastName] = splitName(name);
-		const company = metadata?.company;
+		const company = metadataObj?.company;
 
 		return { email, userId: user?.customData?.userId, firstName, lastName, company, user: user.user };
 	}).filter((u) => u !== undefined);
 
 	const addUserToMemberList = ({ user, firstName, lastName, billing, userId, email, company }) => {
 		membersInTeamspace.push(deleteIfUndefined(
-			{ user, firstName, lastName, company: billing?.billingInfo?.company || company }));
+			{ user, firstName, lastName, company: company || billing?.billingInfo?.company },
+		));
 		return { userId, email };
 	};
 
