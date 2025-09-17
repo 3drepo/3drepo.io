@@ -28,6 +28,7 @@ export const DRAWING_VIEWER_EVENTS = {
 };
 
 type GetScreenshot = () => null | Promise<string>;
+type GetDrawingSrc = () => Promise<string>;
 const DrawingViewerServiceCreator = () => {
 	let imgContainer = null;
 	let mousePosition = [0,  0];
@@ -39,8 +40,14 @@ const DrawingViewerServiceCreator = () => {
 	const off = emitter.off.bind(emitter);
 	const emit = emitter.emit.bind(emitter);
 
+	//#5660 not taking into account scroll view
 	const getScreenshot: GetScreenshot = () => imgContainer ? domToPng(imgContainer) : null;
 	const setImgContainer = (newImgContainer) => { imgContainer = newImgContainer; };
+
+	// A callback that should be set by the viewer2d that resolves to a URL
+	// representing the full image. This may a URI, or a Blob URL if the
+	// viewer needs to rasterise the drawing.
+	let getDrawingSrc: GetDrawingSrc = null;
 	
 	const setMousePosition = (mp: Coord2D) => {
 		mousePosition = mp ; 
@@ -107,6 +114,7 @@ const DrawingViewerServiceCreator = () => {
 		getClickPoint,
 		on,
 		off,
+		getDrawingSrc
 	};
 };
 export const DrawingViewerService = DrawingViewerServiceCreator();

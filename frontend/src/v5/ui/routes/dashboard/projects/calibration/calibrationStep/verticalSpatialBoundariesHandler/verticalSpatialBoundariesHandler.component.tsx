@@ -15,29 +15,26 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { Viewer } from '@/v4/services/viewer/viewer';
 import { VIEWER_EVENTS } from '@/v4/constants/viewer';
-import { getDrawingImageSrc } from '@/v5/store/drawings/revisions/drawingRevisions.helpers';
 import { CalibrationContext } from '../../calibrationContext';
 import { PlaneType, Vector1D } from '../../calibration.types';
 import { TreeActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getTransformationMatrix } from '../../calibration.helpers';
 import { Vector2 } from 'three';
 import { isNull } from 'lodash';
-import { useParams } from 'react-router';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { DrawingViewerService } from '@components/viewer/drawingViewer/drawingViewer.service';
 
 export const VerticalSpatialBoundariesHandler = () => {
 	const { verticalPlanes, setVerticalPlanes, vector3D, vector2D, isCalibratingPlanes, setIsCalibratingPlanes, drawingId,
 		setSelectedPlane, selectedPlane, isAlignPlaneActive } = useContext(CalibrationContext);
-	const { teamspace, project } = useParams<ViewerParams>();
-	const latestActiveRevision = DrawingRevisionsHooksSelectors.selectLatestActiveRevision(drawingId);
 	const planesRef = useRef(verticalPlanes); // ref needed to get plane values in useEffect without causing excessive retriggers
 	const planesAreSet = !verticalPlanes.some(isNull);
-	const src = useAuthenticatedImage(getDrawingImageSrc(teamspace, project, drawingId, latestActiveRevision._id));
+	const [src, setSrc] = useState(null);
+
+	DrawingViewerService.getDrawingSrc().then(setSrc);
+
 	const tMatrix = getTransformationMatrix(vector2D, vector3D);
 
 	const applyImageToPlane = () => {

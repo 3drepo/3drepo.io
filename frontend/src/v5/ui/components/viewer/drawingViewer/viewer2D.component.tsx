@@ -118,6 +118,16 @@ export const Viewer2D = () => {
 
 		switch(viewerType) {
 			case Viewer.Img:
+			case Viewer.Svg:
+				DrawingViewerService.getDrawingSrc = () => Promise.resolve(plainSrc);
+				break;
+			case Viewer.Pdf:
+				DrawingViewerService.getDrawingSrc = () => (imgViewerRef.current as any).getImageBlob().then((blob) => URL.createObjectURL(blob));
+				break;
+		}
+
+		switch(viewerType) {
+			case Viewer.Img:
 				setSnapHandler(undefined);
 				break;
 			case Viewer.Svg:

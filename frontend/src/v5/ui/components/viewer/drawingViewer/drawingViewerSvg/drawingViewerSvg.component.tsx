@@ -619,16 +619,6 @@ export const DrawingViewerSvg = forwardRef<ZoomableImage, DrawingViewerImageProp
 		getNaturalSize: () =>  {
 			return { width: pannableImage.current.naturalWidth, height: pannableImage.current.naturalHeight };
 		},
-
-		// Given a coordinate in the content rect of the container, get the
-		// position in the local coordinate space of the SVG viewbox.
-		getImagePosition(contentPosition: Vector2) {
-			return pannableImage.current.localToSvg(contentPosition);
-		},
-
-		getClientPosition(imagePosition: Vector2) {
-			return pannableImage.current.svgToLocal(imagePosition);
-		},
 	};
 
 	return (<div ref={containerRef as any} style={{ height:'100%', overflow:'hidden' }} />);

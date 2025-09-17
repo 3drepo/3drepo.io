@@ -84,6 +84,23 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		throw new Error('The inbuilt panzoom handler of DrawingViewerApryse is read only and this method is not supported.');
 	};
 
+	// Gets the image as a blob that can be loaded into another image source,
+	// regardless of the current transformation
+
+	const getImageBlob = async () => {
+		return new Promise((resolve) => {
+			documentViewer.current.getDocument().loadCanvas({
+				pageNumber: 1,
+				zoom: 1,
+				drawComplete: async (imageCanvas) => {
+					imageCanvas.toBlob( (blob) => {
+						resolve(blob);
+					});
+				},
+			});
+		});
+	};
+
 	// For snapping, mousePos should be in viewer coordinates (i.e. coordinates
 	// within the 2D overlay). Currently, this means we do not support rotating
 	// pages, which is a feature of Apryse. To do this, we would need to introduce
@@ -130,6 +147,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		await loadScript('/lib/webviewer/core/pdf/PDFNet.js');
 	};
 
+	//#5660 need to be able to reload a drawing multiple times...
 	useEffect(() => {
 		loadDependencies().then(async () => {
 			const Core = window.Core as typeof Core;
@@ -179,8 +197,8 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			// At the moment, we must use Apryse's inbuilt navigation. The following
 			// snippet sets this up.
 
-			const panTool = documentViewer.current.getTool(Core.Tools.ToolNames.PAN);
 			documentViewer.current.setToolMode(Core.Tools.ToolNames.PAN);
+			const panTool = documentViewer.current.getTool(Core.Tools.ToolNames.PAN);
 
 			// Forward events for the Pan Tool for Apryse's built in navigation
 			//#5660: do we instead want to use an alternative or modified panzoomhandler
@@ -201,9 +219,9 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			scrollView.current.addEventListener('wheel', (e) => {
 				let scale = documentViewer.current.getZoomLevel();
 				if (e.wheelDelta > 0) {
-					scale = scale * 1.1;
+					scale = scale * 1.5;
 				} else {
-					scale = scale * 0.9;
+					scale = scale / 1.5;
 				}
 				const viewerRect = scrollView.current.getBoundingClientRect();
 				documentViewer.current.zoomToMouse(scale, viewerRect.left, viewerRect.top);
@@ -237,7 +255,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			// that instead. However, this should not be done if using our own
 			// navigation, as some other references may not be set up yet...
 
-			documentViewer.current.loadDocument('/revit_house_floor2.pdf').then(()=>{
+			documentViewer.current.loadDocument(src, { extension: 'pdf' }).then(()=>{
 				onLoad();
 			});
 		});
@@ -321,6 +339,11 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		centreView: () => {
 			documentViewer.current.setFitMode(documentViewer.current.FitMode.FitPage);
 		},
+
+		// The following method is used to get the pdf as a blob for calibration
+		// purposes
+
+		getImageBlob,
 	};
 
 	 return (
