@@ -19,7 +19,6 @@ const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, determineTestGroup, generateUUIDString } = require('../../../../../../helper/services');
 const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
-const { RFC_2822 } = require('moment');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
