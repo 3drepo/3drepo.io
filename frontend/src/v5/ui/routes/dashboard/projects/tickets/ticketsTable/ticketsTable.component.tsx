@@ -54,7 +54,8 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
-import { getNonCompletedTicketFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { getNonCompletedTicketFilters, getTemplateFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { useRealtimeFiltering } from './useRealtimeFiltering';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -166,14 +167,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		if (!filters) return;
 		let mounted = true;
 		(async () => {
-			const templateFilter:TicketFilter = {
-				type:'template',
-				property:'',
-				filter: { operator:'is', 
-					values:[selectedTemplate.code],
-				}, 
-			};
-	
+			const templateFilter = getTemplateFilter(selectedTemplate.code);
 			const allFilters = [...filters, templateFilter];
 	
 			const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
@@ -200,6 +194,16 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	}, [tickets, filteredTicketsIDs]);
 
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
+
+	useRealtimeFiltering(teamspace, project, containersAndFederations, selectedTemplate, filters || [], 
+		(updatedTicketId, included) => {
+			// if nothing changed do nothing;
+			if (filteredTicketsIDs.has(updatedTicketId) === included) return;
+			const newFilteredIds = new Set(filteredTicketsIDs);
+			if (included) newFilteredIds.add(updatedTicketId);
+			else newFilteredIds.delete(updatedTicketId);
+			setFilteredTicketIds(newFilteredIds);
+		});
 
 	useEffect(() => {
 		if (!templateAlreadyFetched(selectedTemplate) || presetFilters) return;

@@ -25,7 +25,7 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
-import { getNonCompletedTicketFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { getNonCompletedTicketFilters, getTicketFilterFromCodes } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
@@ -44,21 +44,11 @@ export const TicketFiltersSetter = () => {
 		enableRealtimeTickets(teamspace, project, containerOrFederation, isFed, revision)
 	, [containerOrFederation, revision, isFed]);
 
-	const getTicketFiltersFromCodes = (values): TicketFilter[] => [{
-		module: '',
-		property: 'Ticket ID',
-		type: 'ticketCode',
-		filter: {
-			operator: 'is',
-			values,
-		},
-	}];
-
 	useEffect(() => {
 		if (templates.length) {
 			TicketsCardActionsDispatchers.resetFilters();
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
-			const filters: TicketFilter[] = ticketCodes.length ? getTicketFiltersFromCodes(ticketCodes) : 
+			const filters: TicketFilter[] = ticketCodes.length ? [getTicketFilterFromCodes(ticketCodes)] : 
 				getNonCompletedTicketFilters(templates, containerOrFederation);
 			
 			TicketsCardActionsDispatchers.setFilters(filters);

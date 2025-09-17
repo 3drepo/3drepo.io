@@ -204,3 +204,21 @@ export const getNonCompletedTicketFilters = (templates:ITemplate[], containerOrF
 
 	return filters;
 };
+
+export const getTicketFilterFromCodes = (values: string[]): TicketFilter => ({
+	module: '',
+	property: 'Ticket ID',
+	type: 'ticketCode',
+	filter: {
+		operator: 'is',
+		values,
+	},
+});
+
+export const getTemplateFilter = (templateCode: string): TicketFilter => ({
+	type:'template',
+	property:'',
+	filter: { operator:'is', 
+		values:[templateCode],
+	},
+});
