@@ -133,6 +133,9 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	};
 
 	const loadScript = async (uri) => {
+		if (document.querySelectorAll(`script[src='${uri}']`).length) {
+			return Promise.resolve();
+		}
 		const script = document.createElement('script');
 		script.src = uri;
 		document.body.appendChild(script);
@@ -148,37 +151,42 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	};
 
 	//#5660 need to be able to reload a drawing multiple times...
+	// react is going to re-render a bunch, so perhaps change this so we only
+	// re-render when the src changes...
 	useEffect(() => {
 		loadDependencies().then(async () => {
 			const Core = window.Core as typeof Core;
-			Core.setWorkerPath('/lib/webviewer/core');
+			if (!Core.PDFNetRunning) {
+				Core.setWorkerPath('/lib/webviewer/core');
 
-			// The Pan tool will try to load assets at this path - though
-			// they won't be visible by default, we still must change the
-			// cursor explicitly if desired.
+				// The Pan tool will try to load assets at this path - though
+				// they won't be visible by default, we still must change the
+				// cursor explicitly if desired.
 
-			Core.setResourcesPath('/lib/webviewer/core/assets');
+				Core.setResourcesPath('/lib/webviewer/core/assets');
 
-			// This next snippet concerned with PDFNet initialises the fullAPI, which
-			// is required for snapping...
+				// This next snippet concerned with PDFNet initialises the fullAPI, which
+				// is required for snapping...
 
-			async function main() {
-				const doc = await Core.PDFNet.PDFDoc.create();
-				doc.initSecurityHandler();
-				// Locks all operations on the document
-				doc.lock();
+				async function main() {
+					const doc = await Core.PDFNet.PDFDoc.create();
+					doc.initSecurityHandler();
+					// Locks all operations on the document
+					doc.lock();
+				}
+
+				const { apryseLicense } = clientConfigService;
+				if (!apryseLicense) {
+					console.error('Invalid licence for Apryse WebViewer. Cannot load PDF viewer.');
+					return;
+				}
+
+				await Core.PDFNet.runWithCleanup(
+					main,
+					apryseLicense,
+				);
+				Core.PDFNetRunning = true;
 			}
-
-			const { apryseLicense } = clientConfigService;
-			if (!apryseLicense) {
-				console.error('Invalid licence for Apryse WebViewer. Cannot load PDF viewer.');
-				return;
-			}
-
-			await Core.PDFNet.runWithCleanup(
-				main,
-				apryseLicense,
-			);
 
 			// When using a custom UI, we must provide the DOM elements for the
 			// (scrolling) container and the container of the document (which will
@@ -262,10 +270,20 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			// that instead. However, this should not be done if using our own
 			// navigation, as some other references may not be set up yet...
 
+			//#5660 get pdf value..
+			const data = await fetch(src);
+			const txt = await data.text();
+
+
 			documentViewer.current.loadDocument(src, { extension: 'pdf' }).then(()=>{
 				onLoad();
 			});
 		});
+		// Clean up function
+		return () => {
+			documentViewer.current.closeDocument();
+			documentViewer.current.dispose();
+		}
 	}, []);
 
 	(ref as any).current = {
@@ -329,6 +347,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			documentViewer.current.zoomTo(documentViewer.current.getZoomLevel() * factor);
 		},
 
+		//#5660 zooming does zoom to center of image atm.
 		zoomIn: () => {
 			documentViewer.current.zoomTo(documentViewer.current.getZoomLevel() * 1.5);
 		},

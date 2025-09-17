@@ -81,21 +81,50 @@ export const Viewer2D = () => {
 	const imgViewerRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
 
-	enum Viewer {
-		Img = 0,
-		Svg = 1,
-		Pdf = 2,
+	// The ImageReference state is updated based on the src property. The two
+	// members are held in the same object to ensure they are always updated
+	// together in the same frame.
+
+	enum ViewerType {
+		None = 0,
+		Img = 1,
+		Svg = 2,
+		Pdf = 3,
 	};
 
-	let viewerType: Viewer = Viewer.Img;
-	if(!isFirefox()){
-		viewerType = Viewer.Svg;
-	}
-	if (revision && revision.format === '.pdf') {
-		// Currently, the backend will return the rfile for pdfs. In the future
-		// we may want to consider making this explicit.
-		viewerType = Viewer.Pdf;
-	}
+	type ViewerAttributes = {
+		type: ViewerType,
+		src: string
+	};
+
+	const [viewer, setViewerAttributes] = useState<ViewerAttributes>({
+		type: ViewerType.None,
+		src: ''
+	});
+
+	useEffect(() => {
+		if (src){
+			// We are only interested in the headers for the blob, but the HEAD method
+			// is not supported for object URLs...
+			fetch(src).then((response) => {
+				const mimeType = response.headers.get('content-type');
+				const viewerSettings = {
+					type: ViewerType.None,
+					src: src
+				}
+				if (mimeType == 'application/pdf') {
+					viewerSettings.type = ViewerType.Pdf;
+				} else if (mimeType == 'image/svg+xml' && !isFirefox()) {
+					viewerSettings.type = ViewerType.Svg;
+				} else {
+					viewerSettings.type = ViewerType.Img;
+				}
+				setViewerAttributes(viewerSettings);
+			});
+		}
+	}, [src]);
+
+	console.log(`Render: ${drawingId} ${src} ${viewer.src} ${viewer.type} ${revision?.format}`);
 
 	const canCalibrate2D = isCalibrating && step === 1;
 
@@ -116,26 +145,26 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
-		switch(viewerType) {
-			case Viewer.Img:
-			case Viewer.Svg:
+		switch(viewer.type) {
+			case ViewerType.Img:
+			case ViewerType.Svg:
 				DrawingViewerService.getDrawingSrc = () => Promise.resolve(plainSrc);
 				break;
-			case Viewer.Pdf:
+			case ViewerType.Pdf:
 				DrawingViewerService.getDrawingSrc = () => (imgViewerRef.current as any).getImageBlob().then((blob) => URL.createObjectURL(blob));
 				break;
 		}
 
-		switch(viewerType) {
-			case Viewer.Img:
+		switch(viewer.type) {
+			case ViewerType.Img:
 				setSnapHandler(undefined);
 				break;
-			case Viewer.Svg:
+			case ViewerType.Svg:
 				const snap = new SVGSnapHelper();
 				snap.load(src);
 				setSnapHandler(snap);
 				break;
-			case Viewer.Pdf:
+			case ViewerType.Pdf:
 				// The Apryse viewer implements snapping itself. It exposes ISnapHelper in
 				// its returned object, though this is not expressed in ZoomableImage.
 				setSnapHandler(imgViewerRef.current as unknown as ISnapHelper);
@@ -145,13 +174,13 @@ export const Viewer2D = () => {
 		// The Svg and Img viewers use external pan-zoom handlers, including for
 		// re-centering (below). The Apryse viewer handles navigation internally.
 
-		switch(viewerType) {
-			case Viewer.Img:
-			case Viewer.Svg:
+		switch(viewer.type) {
+			case ViewerType.Img:
+			case ViewerType.Svg:
 				const pz = centredPanZoom(imgViewerRef.current, 20, 20);
 				setZoomHandler(pz);
 				break;
-			case Viewer.Pdf:
+			case ViewerType.Pdf:
 				setZoomHandler(imgViewerRef.current as unknown as PanZoomHandler);
 				break;
 		};
@@ -230,9 +259,9 @@ export const Viewer2D = () => {
 						<Loader />
 					</CentredContainer>
 				}
-				{viewerType == Viewer.Pdf && src && <DrawingViewerApryse ref={imgViewerRef} src={src} onLoad={onImageLoad} setViewBox={setViewBox} />}
-				{viewerType == Viewer.Svg && src && <DrawingViewerSvg ref={imgViewerRef} src={src} onLoad={onImageLoad} />}
-				{viewerType == Viewer.Img && src && <DrawingViewerImage ref={imgViewerRef} src={src} onLoad={onImageLoad} />}
+				{viewer.type == ViewerType.Pdf && <DrawingViewerApryse ref={imgViewerRef} src={viewer.src} onLoad={onImageLoad} setViewBox={setViewBox} />}
+				{viewer.type == ViewerType.Svg && <DrawingViewerSvg ref={imgViewerRef} src={viewer.src} onLoad={onImageLoad} />}
+				{viewer.type == ViewerType.Img && <DrawingViewerImage ref={imgViewerRef} src={viewer.src} onLoad={onImageLoad} />}
 				{!isLoading && (<ViewerLayer2D
 					viewBox={viewBox}
 					snapHandler={snapHandler}

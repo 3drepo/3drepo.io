@@ -154,6 +154,15 @@ function runServer() {
 	const cors = require("cors");
 	mainApp.use(cors({origin: true, credentials: true}));
 
+	//#5660 can we support this? at least livereload doesn't work when its on...
+	/*
+	mainApp.use((req,res,next) => {
+		res.setHeader('Cross-Origin-Opener-Policy','same-origin');
+		res.setHeader('Cross-Origin-Embedder-Policy','require-corp');
+		next();
+	})
+	*/
+
 	if(utils.hasField(config, "umask")) {
 		systemLogger.logInfo("Setting umask: " + config.umask);
 		process.umask(config.umask);
