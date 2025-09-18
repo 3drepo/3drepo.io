@@ -324,6 +324,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 				} else {
 					scale = scale / 1.1;
 				}
+				scale = Math.max(Math.min(scale, maxZoom.current), minZoom.current);
 				const viewerRect = scrollView.current.getBoundingClientRect();
 				documentViewer.current.zoomToMouse(scale, viewerRect.left, viewerRect.top);
 			});
