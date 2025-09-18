@@ -387,7 +387,6 @@ const testUpdateTickets = () => {
 					[propToUpdate]: newPropValue,
 					[basePropertyLabels.UPDATED_AT]: date,
 				},
-				modules: {},
 			});
 
 			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
