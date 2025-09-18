@@ -418,7 +418,6 @@ const testUpdateTickets = () => {
 		const changeSet = [];
 
 		times(ticketCount, () => {
-			const date = new Date();
 			const oldPropValue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const _id = generateRandomString();
@@ -426,7 +425,6 @@ const testUpdateTickets = () => {
 			const moduleName = generateRandomString();
 
 			updateData.push({
-				properties: { [basePropertyLabels.UPDATED_AT]: date },
 				modules: { [moduleName]: { [propToUpdate]: newPropValue } },
 			});
 
@@ -440,14 +438,13 @@ const testUpdateTickets = () => {
 				update: {
 					$set: {
 						[`modules.${moduleName}.${propToUpdate}`]: newPropValue,
-						[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
 					},
 				} } });
 
 			changeSet.push({
 				ticket: { _id, type },
 				author,
-				timestamp: date,
+				timestamp: expect.any(Date),
 				changes: {
 					modules: { [moduleName]: { [propToUpdate]: { from: oldPropValue, to: newPropValue } } },
 				} });

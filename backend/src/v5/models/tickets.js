@@ -68,9 +68,9 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 		const oldTicket = oldTickets[i];
 		const toUpdate = {};
 		const toUnset = {};
-		const { modules = {}, properties, ...rootProps } = updateData;
+		const { modules = {}, properties = {}, ...rootProps } = updateData;
 		const changes = {};
-		const determineUpdate = (obj = {}, prefix = '') => {
+		const determineUpdate = (obj, prefix = '') => {
 			Object.keys(obj).forEach((key) => {
 				const updateObjProp = `${prefix}${key}`;
 				const oldValue = getNestedProperty(oldTicket, updateObjProp);
@@ -115,7 +115,7 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 				ticket: { _id: oldTicket._id, type: oldTicket.type },
 				author,
 				changes,
-				timestamp: updateData.properties[basePropertyLabels.UPDATED_AT],
+				timestamp: updateData?.properties?.[basePropertyLabels.UPDATED_AT] ?? new Date(),
 			});
 			return { updateOne: {
 				filter: { _id: oldTicket._id, teamspace, project, model },
