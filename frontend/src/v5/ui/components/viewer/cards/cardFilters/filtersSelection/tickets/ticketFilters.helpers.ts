@@ -30,7 +30,7 @@ import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { SelectOption } from '@/v5/helpers/form.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
-import { TicketStatusTypes, TicketStatusDefaultValues, TreatmentStatuses } from '@controls/chip/chip.types';
+import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,

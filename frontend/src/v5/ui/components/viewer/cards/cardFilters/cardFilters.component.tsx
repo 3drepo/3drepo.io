@@ -28,15 +28,15 @@ export const CardFilters = () => {
 
 	if (!hasFilters) return null;
 	
-	const ticketsByModule = groupBy(filters, (f) => f.module);
-	const sortedModuleNames = Object.keys(ticketsByModule).sort((a, b) => a.localeCompare(b));
+	const filtersByModule = groupBy(filters, (f) => f.module);
+	const sortedModuleNames = Object.keys(filtersByModule).sort((a, b) => a.localeCompare(b));
 
 	return (
 		<FiltersAccordion onClear={clearFilters}>
 			{sortedModuleNames.map((module) => (
 				<Fragment key={module}>
 					{module && (<ModuleTitle>{module}</ModuleTitle>)}
-					<FiltersSection filters={ticketsByModule[module]} />
+					<FiltersSection filters={filtersByModule[module]} />
 				</Fragment>
 			))}
 		</FiltersAccordion>
