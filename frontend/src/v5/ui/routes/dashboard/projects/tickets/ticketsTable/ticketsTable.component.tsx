@@ -206,9 +206,9 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		});
 
 	useEffect(() => {
-		if (!templateAlreadyFetched(selectedTemplate) || presetFilters) return;
+		if (!templateAlreadyFetched(selectedTemplate)) return;
 		setPresetFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
-	}, [selectedTemplate, presetFilters]);
+	}, [selectedTemplate, JSON.stringify(presetFilters)]);
 	
 	return (
 		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters}>

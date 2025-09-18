@@ -165,11 +165,7 @@ const getNonCompletedTicketFiltersByStatus = (templates: ITemplate[], containerO
 		.filter(isCompletedValue)
 		.map((v) => v.name);
 
-	const values = uniq([
-		TicketStatusDefaultValues.CLOSED,
-		TicketStatusDefaultValues.VOID,
-		...completedValueNames,
-	]);
+	const values = uniq(completedValueNames);
 
 	return {
 		module: '',
