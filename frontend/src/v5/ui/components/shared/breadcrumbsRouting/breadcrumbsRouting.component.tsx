@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useParams, generatePath, matchPath } from 'react-router-dom';
+import { useParams, generatePath, matchPath, useLocation } from 'react-router-dom';
 import { TeamspacesHooksSelectors, ProjectsHooksSelectors, FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITeamspace } from '@/v5/store/teamspaces/teamspaces.redux';
 import { IProject } from '@/v5/store/projects/projects.types';
@@ -31,6 +31,8 @@ import {
 	TICKETS_ROUTE,
 	ViewerParams,
 	DashboardParams,
+	VIEWER_REVISION_ROUTE,
+	BOARD_ROUTE_WITH_MODEL,
 } from '@/v5/ui/routes/routes.constants';
 import { useSelector } from 'react-redux';
 import { selectRevisions } from '@/v4/modules/model/model.selectors';
@@ -42,8 +44,9 @@ import { sortBreadcrumbOptions } from '@controls/breadcrumbs/breadcrumbs.helpers
 import { viewerRoute } from '@/v5/services/routing/routing';
 
 export const BreadcrumbsRouting = () => {
+	const { pathname } = useLocation();
 	const params = useParams<ViewerParams>();
-	const { teamspace, revision, containerOrFederation: containerOrFederationId } = params;
+	const { teamspace = '', revision = '', containerOrFederation: containerOrFederationId = '' } = params;
 	const teamspaces: ITeamspace[] = TeamspacesHooksSelectors.selectTeamspaces();
 	const projects: IProject[] = ProjectsHooksSelectors.selectCurrentProjects();
 	const project: IProject = ProjectsHooksSelectors.selectCurrentProjectDetails();
@@ -54,11 +57,12 @@ export const BreadcrumbsRouting = () => {
 	const revisions = useSelector(selectRevisions);
 
 	const isFederation = federations.some(({ _id }) => _id === containerOrFederationId);
+	const viewerPath = revision ? VIEWER_REVISION_ROUTE : VIEWER_ROUTE;
 
 	let breadcrumbs: BreadcrumbItemOrOptions[] = [];
 	let options: BreadcrumbItem[];
 
-	if (matchesPath(TEAMSPACE_ROUTE)) {
+	if (matchesPath(TEAMSPACE_ROUTE, pathname)) {
 		options = teamspaces.map(({ name }) => ({
 			title: name,
 			to: generatePath(TEAMSPACE_ROUTE_BASE, { teamspace: name }),
@@ -68,7 +72,7 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs = [{ options }];
 	}
 
-	if (matchesSubPath(PROJECT_ROUTE_BASE_TAB)) {
+	if (matchesSubPath(PROJECT_ROUTE_BASE_TAB, pathname)) {
 		breadcrumbs = [
 			{
 				title: teamspace,
@@ -76,18 +80,21 @@ export const BreadcrumbsRouting = () => {
 			},
 		];
 		let path = PROJECT_ROUTE_BASE_TAB;
-		if (matchesPath(PROJECT_ROUTE)) {
+		if (matchesPath(PROJECT_ROUTE, pathname)) {
 			path = PROJECT_ROUTE;
 		}
-		if (matchesPath(BOARD_ROUTE)) {
+		if (matchesPath(BOARD_ROUTE, pathname)) {
 			path = BOARD_ROUTE;
 		}
-		if (matchesPath(TICKETS_ROUTE)) {
+		if (matchesPath(BOARD_ROUTE_WITH_MODEL, pathname)) {
+			path = BOARD_ROUTE_WITH_MODEL;
+		}
+		if (matchesPath(TICKETS_ROUTE, pathname)) {
 			path = TICKETS_ROUTE;
 		}
 
-		// eslint-disable-next-line no-restricted-globals
-		const { params: projectParams } = matchPath(location.pathname, { path });
+		const match = matchPath({ path, end: false }, location.pathname);
+		const projectParams = match?.params || {};
 
 		options = projects.map(({ name, _id }) => ({
 			title: name,
@@ -98,7 +105,7 @@ export const BreadcrumbsRouting = () => {
 		breadcrumbs.push({ options });
 	}
 
-	if (matchesPath(VIEWER_ROUTE)) {
+	if (matchesPath(viewerPath, pathname)) {
 		breadcrumbs = [
 			{
 				title: teamspace,
