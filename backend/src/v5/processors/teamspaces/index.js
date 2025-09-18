@@ -134,7 +134,6 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 
 	const listOfUsersFromEmails = await getUserInfoFromEmailArray(emails, projection);
 
-	// what if we map on accountUsers instead?
 	const rawData = listOfUsersFromEmails.map((user) => {
 		const { email, name, metadata } = accountUsers.filter((u) => u.email === user.customData?.email)[0];
 		const metadataObj = metadata ? JSON.parse(metadata) : {};
