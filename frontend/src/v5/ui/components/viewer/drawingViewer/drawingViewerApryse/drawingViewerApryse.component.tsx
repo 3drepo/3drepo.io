@@ -84,8 +84,8 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		throw new Error('The inbuilt panzoom handler of DrawingViewerApryse is read only and this method is not supported.');
 	};
 
-	// Gets the image as a blob that can be loaded into another image source,
-	// regardless of the current transformation
+	// Gets the full image as a blob that can be loaded into another image
+	// source, regardless of the current transformation.
 
 	const getImageBlob = async () => {
 		return new Promise((resolve) => {
@@ -100,6 +100,78 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			});
 		});
 	};
+
+	const getPageSize = () => {
+		return {
+			width: documentViewer.current.getPageWidth(1),
+			height: documentViewer.current.getPageHeight(1),
+		}
+	}
+
+	// Multiplies the scale by factor, while keeping the image centered (if taking
+	// up the whole view).
+
+	const zoom = (factor: number) => {
+
+		// The x,y coordinates provided to zoomTo are used to directly update
+		// the scrollLeft and scrollTop position of the document. Therefore all
+		// calculations should be done relative to this element (viewer), rather
+		// than say, pdf coordinates, or indeed the page container - as this may
+		// have padding.
+		// Additionally, the parameters are what the scroll position should be
+		// *after* scaling.
+
+		const container = scrollView.current.getBoundingClientRect();
+		const rect = viewer.current.getBoundingClientRect();
+
+		// The following snippet keeps the current point below the center of the
+		// viewer in the same place, where possible. It does this by getting the
+		// normalised position within the document that should remain stationary.
+		// After scaling the document, this can be used to get a new absolute
+		// positition from which the offset to the top-left can be determined.
+
+		const scroll = {
+			x: container.left - rect.left,
+			y: container.top - rect.top,
+		};
+
+		// (p is the focal point in container - the current implementation
+		// assumes it is always at the center, since scrolling with the mouse
+		// uses a different method, but we could place it elsewhere if desired.)
+
+		const p = {
+			x: container.width * 0.5,
+			y: container.height * 0.5,
+		};
+
+		// Normalised coordinates relative to rect
+
+		const n = {
+			x: (scroll.x + p.x) / rect.width,
+			y: (scroll.y + p.y) / rect.height,
+		};
+
+		const newScale = Math.max(Math.min(documentViewer.current.getZoomLevel() * factor, maxZoom.current), minZoom.current);
+
+		const scaleChange = newScale / documentViewer.current.getZoomLevel();
+
+		const expectedRect = {
+			width: rect.width * scaleChange,
+			height: rect.height * scaleChange,
+		};
+
+		// New absolute coordinates that should be under p. The offset from p
+		// gives the desired scroll position.
+
+		const x = (expectedRect.width * n.x) - p.x;
+		const y = (expectedRect.height * n.y) - p.y;
+
+		documentViewer.current.zoomTo(
+			newScale,
+			x,
+			y,
+		);
+	}
 
 	// For snapping, mousePos should be in viewer coordinates (i.e. coordinates
 	// within the 2D overlay). Currently, this means we do not support rotating
@@ -310,11 +382,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			return pageContainer.current.getBoundingClientRect();
 		},
 
-		getNaturalSize: () => {
-			const width = documentViewer.current.getPageWidth(1);
-			const height = documentViewer.current.getPageHeight(1);
-			return { width, height };
-		},
+		getNaturalSize: getPageSize,
 
 		// This section implements ISnapHandler
 
@@ -348,24 +416,18 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			return maxZoom.current;
 		},
 
-		zoom: (factor: number) => {
-			documentViewer.current.zoomTo(documentViewer.current.getZoomLevel() * factor);
-		},
+		zoom,
 
 		//#5660 zooming does zoom to center of image atm.
 		zoomIn: () => {
-			documentViewer.current.zoomTo(documentViewer.current.getZoomLevel() * 1.5);
+			zoom(1.5);
 		},
 
 		zoomOut: () => {
-			documentViewer.current.zoomTo(documentViewer.current.getZoomLevel() / 1.5);
+			zoom(1 / 1.5);
 		},
 
-		getOriginalSize: () => {
-			const width = documentViewer.current.getPageWidth(1);
-			const height = documentViewer.current.getPageHeight(1);
-			return { width, height };
-		},
+		getOriginalSize: getPageSize,
 
 		centreView: () => {
 			documentViewer.current.setFitMode(documentViewer.current.FitMode.FitPage);
