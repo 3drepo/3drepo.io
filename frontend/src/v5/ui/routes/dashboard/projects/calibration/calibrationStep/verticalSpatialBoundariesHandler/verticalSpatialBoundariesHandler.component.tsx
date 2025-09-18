@@ -33,8 +33,6 @@ export const VerticalSpatialBoundariesHandler = () => {
 	const planesAreSet = !verticalPlanes.some(isNull);
 	const [src, setSrc] = useState(null);
 
-	DrawingViewerService.getDrawingSrc().then(setSrc);
-
 	const tMatrix = getTransformationMatrix(vector2D, vector3D);
 
 	const applyImageToPlane = () => {
@@ -121,7 +119,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 	
 	useEffect(() => {
 		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
-
+		DrawingViewerService.getDrawingSrc().then(setSrc);
 		return () => {
 			Viewer.setCalibrationToolDrawing(null, [0, 0, 1, 0, 0, 1]);
 			setIsCalibratingPlanes(false);
