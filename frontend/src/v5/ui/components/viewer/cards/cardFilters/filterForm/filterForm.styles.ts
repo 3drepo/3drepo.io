@@ -34,7 +34,7 @@ export const CardFilterActionMenu = styled(ActionMenu)<{ $displayMode?: string }
 	.MuiPaper-root {
 		width: 365px;
 		margin-top: 13px;
-		${({ $displayMode: mode }) => ( mode === 'card') ? FilterPaperStyleInCards : FilterPaperStyleother}}
+		${({ $displayMode: mode }) => ( mode === 'card') ? FilterPaperStyleInCards : FilterPaperStyleother}
 	}
 `;
 
