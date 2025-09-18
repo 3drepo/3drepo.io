@@ -109,7 +109,7 @@ const testGetTeamspaceMembersInfo = () => {
 			{ _id: 'jobB', users: ['abcd', 'abcd2'] },
 		];
 		const frontEggData = goldenData.map(
-			({ customData: { email, userId, firstName, lastName, billing } }) => deleteIfUndefined({ email, id: userId, name: `${firstName} ${lastName}`, metadata: { company: billing?.billingInfo?.company } }));
+			({ customData: { email, userId, firstName, lastName, billing } }) => deleteIfUndefined({ email, id: userId, name: `${firstName} ${lastName}`, metadata: JSON.stringify({ company: billing?.billingInfo?.company }) }));
 
 		test('should give the list of members within the given teamspace with their details', async () => {
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce({ refId: tsTennatnWithExtraUser });
@@ -636,7 +636,7 @@ const testGetAllMembersInTeamspace = () => {
 
 		test('should return a list of teamspace members members', async () => {
 			const frontEggData = goldenData.map(
-				({ customData: { email, userId, firstName, lastName, billing } }) => deleteIfUndefined({ email, id: userId, name: `${firstName} ${lastName}`, metadata: { company: billing?.billingInfo?.company } }));
+				({ customData: { email, userId, firstName, lastName, billing } }) => deleteIfUndefined({ email, id: userId, name: `${firstName} ${lastName}`, metadata: JSON.stringify({ company: billing?.billingInfo?.company }) }));
 
 			const expectedRes = goldenData.map(({ user, customData: { firstName, lastName, billing } }) => {
 				const res = {
@@ -666,14 +666,16 @@ const testGetAllMembersInTeamspace = () => {
 							email,
 							id: newId,
 							name: `${firstName} ${lastName}`,
-							metadata: deleteIfUndefined({ company: billing?.billingInfo?.company }) });
+							metadata: JSON.stringify(deleteIfUndefined({ company: billing?.billingInfo?.company })),
+						});
 					}
 
 					return deleteIfUndefined({
 						email,
 						id: userId,
 						name: `${firstName} ${lastName}`,
-						metadata: { company: billing?.billingInfo?.company } });
+						metadata: JSON.stringify({ company: billing?.billingInfo?.company }),
+					});
 				});
 
 			const expectedRes = goldenData.map(({ user, customData: { firstName, lastName, billing } }) => {
@@ -727,14 +729,14 @@ const testGetAllMembersInTeamspace = () => {
 						email,
 						id: userId,
 						name: `${firstName} ${lastName}`,
-						metadata: deleteIfUndefined({ company: billing?.billingInfo?.company }),
+						metadata: JSON.stringify(deleteIfUndefined({ company: billing?.billingInfo?.company })),
 					})),
 				...extraUserData.map(
 					({ customData: { email, userId, firstName, lastName, billing } }) => ({
 						email,
 						id: userId,
 						name: `${firstName} ${lastName}`,
-						metadata: deleteIfUndefined({ company: billing?.billingInfo?.company }),
+						metadata: JSON.stringify(deleteIfUndefined({ company: billing?.billingInfo?.company })),
 					})),
 			];
 			const newGoldenData = [
@@ -780,7 +782,7 @@ const testGetAllMembersInTeamspace = () => {
 					email,
 					id: userId,
 					name: `${firstName} ${lastName}`,
-					metadata: deleteIfUndefined({ company: billing?.billingInfo?.company }),
+					metadata: JSON.stringify(deleteIfUndefined({ company: billing?.billingInfo?.company })),
 				})),
 				extraUserFrontEggData,
 			];

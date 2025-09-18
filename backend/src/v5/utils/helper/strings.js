@@ -43,7 +43,7 @@ StringHelper.formatPronouns = (str) => {
 
 StringHelper.splitName = (str) => {
 	const regexSplitForName = /\s(.*)/;
-	const [firstName, lastName] = str?.split(regexSplitForName);
+	const [firstName, lastName] = str?.split(regexSplitForName) ?? [];
 	return [firstName ?? 'Anonymous', lastName ?? 'User'];
 };
 

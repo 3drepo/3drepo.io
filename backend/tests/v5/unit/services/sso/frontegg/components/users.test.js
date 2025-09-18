@@ -379,7 +379,7 @@ const testUpdateUserDetails = () => {
 			const firstName = generateRandomString();
 			const lastName = generateRandomString();
 
-			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({});
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ name: [firstName, lastName].join(' ') });
 			WebRequests.put.mockRejectedValueOnce({ message: generateRandomString() });
 			await expect(Users.updateUserDetails(
 				userId,
