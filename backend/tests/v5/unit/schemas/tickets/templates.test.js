@@ -454,6 +454,15 @@ const testValidate = () => {
 				readOnly: true,
 				value: generateRandomString(),
 			}] }, true],
+		['property is readOnly but type is not supported', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.DATE,
+				readOnly: true,
+				value: generateRandomString(),
+			}] }, false],
 		['property is readOnly but value contains unknown placeholder', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -469,6 +478,15 @@ const testValidate = () => {
 			properties: [{
 				name: generateRandomString(),
 				type: propTypes.TEXT,
+				readOnly: true,
+				value: Object.values(supportedPatterns).map((p) => `{${p}}${generateRandomString()}`).join(' '),
+			}] }, true],
+		['property is readOnly but value contains known placeholders (long text)', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.LONG_TEXT,
 				readOnly: true,
 				value: Object.values(supportedPatterns).map((p) => `{${p}}${generateRandomString()}`).join(' '),
 			}] }, true],

@@ -81,7 +81,9 @@ const propSchema = Yup.object().shape({
 	unique: Yup.lazy((value) => Yup.boolean().strip(!value)
 		.when('type', (typeVal, schema) => schema.test('Unique check', `Unique attribute cannot be applied to properties of type: ${uniqueTypeBlackList.join(', ')}`,
 			(uniqueVal) => !(uniqueVal && uniqueTypeBlackList.includes(typeVal))))),
-	value: Yup.string().when('readOnly', (readOnlyVal, schema) => schema.test('ReadOnly check', 'Value configuration is only supported if the property is read-only', (v) => v === undefined || readOnlyVal)
+	value: Yup.string().when(['readOnly', 'type'], (readOnlyVal, propType, schema) => schema
+		.test('ReadOnly check', 'Value configuration is only supported if the property is read-only', (v) => v === undefined || readOnlyVal)
+		.test('text properties only', `Value configuration is only supported if the property type is ${propTypes.TEXT} or ${propTypes.LONG_TEXT}`, (v) => v === undefined || propType === propTypes.TEXT || propType === propTypes.LONG_TEXT)
 		.test('Pattern string check', `Value pattern contains unrecognised placeholders (accepted patterns: ${Object.values(supportedPatterns).join(', ')})`, (pattern) => {
 			// string can contain pattern wrapped around {}, and they can only be of supported values
 			if (pattern === undefined) return true;
