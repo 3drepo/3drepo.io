@@ -21,7 +21,7 @@ const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
-const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateCodeUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
+const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
@@ -230,7 +230,7 @@ const templateUpdated = async ({ teamspace, template: templateId, data }) => {
 	try {
 		if (data.code) {
 			const template = await getTemplateById(teamspace, templateId);
-			await onTemplateCodeUpdated(teamspace, template);
+			await onTemplateUpdated(teamspace, template);
 		}
 	} catch (err) {
 		logger.logError(`Failed to process template updated event ${err.message}`);

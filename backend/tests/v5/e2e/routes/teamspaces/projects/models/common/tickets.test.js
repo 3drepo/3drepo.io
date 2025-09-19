@@ -1356,7 +1356,7 @@ const testAutomatedProperties = () => {
 			await checkTicket(ticket);
 		});
 
-		test('!Should update automated values if the template property itself has been updated', async () => {
+		test('Should update automated values if the template property itself has been updated', async () => {
 			const route = `/v5/teamspaces/${teamspace}/settings/tickets/templates/${templateToAlter._id}${ServiceHelper.createQueryString({ key })}`;
 			const prefix = ServiceHelper.generateRandomString();
 			templateToAlter.properties[0].value = `${prefix}_{${supportedPatterns.MODEL_NAME}}`;

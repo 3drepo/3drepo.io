@@ -1281,7 +1281,7 @@ const testInitialiseAutomatedProperties = () => {
 	});
 };
 
-const testOnTemplateCodeUpdated = () => {
+const testOnTemplateUpdated = () => {
 	const teamspace = generateRandomString();
 	const modelName = generateRandomString();
 	const moduleName = generateRandomString();
@@ -1291,7 +1291,7 @@ const testOnTemplateCodeUpdated = () => {
 	describe.each([
 		['Should do nothing if there is no ticket associated with the template', { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, undefined, false],
 		['Should do nothing if the template does not contain automated properties', { }, undefined],
-		['Should do nothing if the template automated property does not contain {template_code}', { value: 'xyz' }, undefined],
+		['Should do nothing if the template automated property does not contain {template_code}', { value: 'xyz' }, 'xyz'],
 		[`Should update the field if it is automated (${supportedPatterns.TEMPLATE_CODE})`, { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, `code${temCode}`],
 		['Should update the field if it is automated (mutliple properties)',
 			{ value: `code{${supportedPatterns.MODEL_NAME}}:{${supportedPatterns.TEMPLATE_CODE}}:{${supportedPatterns.TICKET_NUMBER}}` }, `code${modelName}:${temCode}:${ticketNum}`],
@@ -1339,13 +1339,13 @@ const testOnTemplateCodeUpdated = () => {
 				});
 			}
 
-			const fetchedTickets = config.value?.includes(`{${supportedPatterns.TEMPLATE_CODE}}`);
+			const fetchedTickets = config.value?.includes(`{${supportedPatterns.TEMPLATE_CODE}}`) || value !== undefined;
 
 			if (fetchedTickets) {
 				TicketsModel.getTicketsByTemplateId.mockResolvedValueOnce(tickets);
 			}
 
-			await Tickets.onTemplateCodeUpdated(teamspace, template);
+			await Tickets.onTemplateUpdated(teamspace, template);
 
 			if (fetchedTickets) {
 				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledTimes(1);
@@ -1492,6 +1492,6 @@ describe(determineTestGroup(__filename), () => {
 	testGetTicketList();
 	testGetOpenTicketsCount();
 	testInitialiseAutomatedProperties();
-	testOnTemplateCodeUpdated();
+	testOnTemplateUpdated();
 	testOnModelNameUpdated();
 });

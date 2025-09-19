@@ -455,7 +455,7 @@ const updatePropertiesWithAutomatedValue = async (teamspace, tickets, template, 
 };
 
 const updatePropertiesWithPattern = async (teamspace, project, model, template, pattern) => {
-	const propertiesToUpdate = findPropertiesToUpdate(template, [pattern]);
+	const propertiesToUpdate = findPropertiesToUpdate(template, pattern ? [pattern] : undefined);
 
 	if (propertiesToUpdate.length) {
 		const projection = { _id: 1, number: 1, project: 1, model: 1 };
@@ -485,8 +485,8 @@ Tickets.onModelNameUpdated = async (teamspace, project, model) => {
 	}));
 };
 
-Tickets.onTemplateCodeUpdated = async (teamspace, template) => {
-	await updatePropertiesWithPattern(teamspace, undefined, undefined, template, supportedPatterns.TEMPLATE_CODE);
+Tickets.onTemplateUpdated = async (teamspace, template) => {
+	await updatePropertiesWithPattern(teamspace, undefined, undefined, template);
 };
 
 Tickets.initialiseAutomatedProperties = async (teamspace, project, model, tickets, template) => {
