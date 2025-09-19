@@ -1317,6 +1317,8 @@ const testAutomatedProperties = () => {
 
 		test('Should fill in automated values when a ticket is created', async () => {
 			const ticket = await createTicket();
+			// let event manager does the update - this happens after response is sent
+			await ServiceHelper.sleepMS(1000);
 			await checkTicket(ticket);
 		});
 
@@ -1326,7 +1328,8 @@ const testAutomatedProperties = () => {
 
 			const res = await agent.post(route).send({ tickets: payload }).expect(templates.ok.status);
 			const { tickets } = res.body;
-
+			// let event manager does the update - this happens after response is sent
+			await ServiceHelper.sleepMS(1000);
 			await Promise.all(tickets.map(async (ticketId) => {
 				await checkTicket(ticketId);
 			}));
@@ -1374,7 +1377,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
-	}, 20000);
+	});
 	afterAll(() => ServiceHelper.closeApp(server));
 	testGetAllTemplates();
 	testGetTemplateDetails();
