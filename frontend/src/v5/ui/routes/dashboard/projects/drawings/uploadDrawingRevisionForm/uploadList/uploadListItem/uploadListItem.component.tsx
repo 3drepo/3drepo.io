@@ -105,8 +105,8 @@ export const UploadListItem = ({
 		drawingType: drawing?.type || '',
 		calibration: {
 			units: drawing?.calibration?.units || DEFAULT_SETTINGS_CALIBRATION.units,
-			verticalRange: drawing?.calibration?.verticalRange || DEFAULT_SETTINGS_CALIBRATION.verticalRange
-		}
+			verticalRange: drawing?.calibration?.verticalRange || DEFAULT_SETTINGS_CALIBRATION.verticalRange,
+		},
 	});
 
 	const revCodeError = get(errors, `${revisionPrefix}.revCode`)?.message;
@@ -173,7 +173,7 @@ export const UploadListItem = ({
 		if (selectRevisionsPending(getState(), drawingId)) {
 			DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
 		}
-}, [drawingId, fetched])
+	}, [drawingId, fetched]);
 
 	const drawingError = sidebarFormRequiredFields.some((field) => get(errors, field));
 	return (
