@@ -1581,7 +1581,7 @@ const testTemplateUpdated = () => {
 
 			await waitOnEvent;
 			expect(TicketTemplates.getTemplateById).not.toHaveBeenCalled();
-			expect(TicketsProcessor.onTemplateCodeUpdated).not.toHaveBeenCalled();
+			expect(TicketsProcessor.onTemplateUpdated).not.toHaveBeenCalled();
 		});
 
 		test('Should handle errors gracefully', async () => {
@@ -1598,10 +1598,10 @@ const testTemplateUpdated = () => {
 			await waitOnEvent;
 			expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
 			expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.template);
-			expect(TicketsProcessor.onTemplateCodeUpdated).not.toHaveBeenCalled();
+			expect(TicketsProcessor.onTemplateUpdated).not.toHaveBeenCalled();
 		});
 
-		test('Should call onTemplateCodeUpdated if template code is updated', async () => {
+		test('Should call onTemplateUpdated if template code is updated', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.TICKET_TEMPLATE_UPDATED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -1616,8 +1616,8 @@ const testTemplateUpdated = () => {
 			await waitOnEvent;
 			expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
 			expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.template);
-			expect(TicketsProcessor.onTemplateCodeUpdated).toHaveBeenCalledTimes(1);
-			expect(TicketsProcessor.onTemplateCodeUpdated).toHaveBeenCalledWith(data.teamspace, templateObject);
+			expect(TicketsProcessor.onTemplateUpdated).toHaveBeenCalledTimes(1);
+			expect(TicketsProcessor.onTemplateUpdated).toHaveBeenCalledWith(data.teamspace, templateObject);
 		});
 	});
 };
