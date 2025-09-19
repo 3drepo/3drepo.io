@@ -18,7 +18,7 @@
 import { memo, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 import {
 	DashboardListItemButton,
@@ -48,9 +48,9 @@ export const FederationListItem = memo(({
 	federation,
 }: IFederationListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const history = useHistory();
+	const navigate = useNavigate();
 
-	const openTicketsPage = () => history.push(ticketsSelectionRoute(teamspace, project, federation._id));
+	const openTicketsPage = () => navigate(ticketsSelectionRoute(teamspace, project, federation._id));
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {

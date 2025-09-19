@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams, useHistory } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Stepper, Container, ButtonsContainer, ContrastButton, Connector, PrimaryButton, StepperWrapper } from './calibrationHeader.styles';
 import { Step, StepLabel } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
@@ -34,7 +34,7 @@ const STEPS = [
 ];
 
 export const CalibrationHeader = () => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const { step, setStep, vector2D, vector3D, drawingId, origin, verticalPlanes } = useContext(CalibrationContext);
 	const selectedModel = FederationsHooksSelectors.selectFederationById(containerOrFederation)
@@ -49,7 +49,7 @@ export const CalibrationHeader = () => {
 	};
 
 	const handleEndCalibration = () => {
-		history.push(origin);
+		navigate(origin);
 		setStep(0);
 	};
 
