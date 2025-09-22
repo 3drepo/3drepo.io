@@ -63,22 +63,33 @@ describe('Tickets: store', () => {
 			expect(showingPinsFromState).toEqual(false);
 		});
 
-		// describe('filters', () => {
-		// 	// const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = DEFAULT_FILTERS;
-		// 	const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = templatesToFilters([]);
-		// 	const baseFilter: BaseFilter = {
-		// 		operator: 'is',
-		// 		values: [],
-		// 	};
-		// 	const editedBaseFilter: BaseFilter = {
-		// 		operator: 'gt',
-		// 		values: [2],
-		// 	};
-		// 	const ticketIdCardFilter: TicketFilter = { ...ticketIdFilter, filter: baseFilter };
-		// 	const ticketTitleCardFilter: TicketFilter = { ...ticketTitleFilter, filter: baseFilter };
-		// 	const updatedTicketTitleCardFilter: TicketFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
+		it('filters should be set', () => {
+			const [ticketTitleFilter, ticketIdFilter, templateIdFilter, ownerFilter] = DEFAULT_FILTERS;
 
-		// })
+			const baseFilter: BaseFilter = {
+				operator: 'is',
+				values: [],
+			};
+			const editedBaseFilter: BaseFilter = {
+				operator: 'gt',
+				values: [2],
+			};
+
+			const ticketIdCardFilter: TicketFilter = { ...ticketIdFilter, filter: baseFilter };
+			const ticketTitleCardFilter: TicketFilter = { ...ticketTitleFilter, filter: baseFilter };
+			const updatedTicketTitleCardFilter: TicketFilter = { ...ticketTitleCardFilter, filter: editedBaseFilter };
+
+			const filters = [ticketIdCardFilter, ticketTitleCardFilter];
+			const modifiedFilters = [ticketIdCardFilter, ticketTitleCardFilter];
+			
+			dispatch(TicketsCardActions.setFilters(filters));
+			const selectedFilters = selectCardFilters(getState());
+			expect(selectedFilters).toEqual(filters);
+
+			dispatch(TicketsCardActions.setFilters(modifiedFilters));
+			const selectedModifiedFilters = selectCardFilters(getState());
+			expect(selectedModifiedFilters).toEqual(modifiedFilters);
+		})
 
 		it('should reset the state', () => {
 			const [ticketTitleFilter] = templatesToFilters([]);
@@ -97,12 +108,12 @@ describe('Tickets: store', () => {
 			const selectedTicketIdFromState = selectSelectedTicketId(getState());
 			const selectedTemplateIdFromState = selectSelectedTemplateId(getState());
 			const selectedTicketPinIdFromState = selectSelectedTicketPinId(getState());
-			// const filters = selectCardFilters(getState());
+			const filters = selectCardFilters(getState());
 		
 			expect(selectedTicketIdFromState).toEqual(null);
 			expect(selectedTemplateIdFromState).toEqual(null);
 			expect(selectedTicketPinIdFromState).toEqual(null);
-			// expect(filters).toEqual([]);
+			expect(filters).toEqual([]);
 		});
 	});
 });
