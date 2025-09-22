@@ -340,9 +340,13 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			documentViewer.current.setScrollViewElement(scrollView.current);
 			documentViewer.current.setViewerElement(viewer.current);
 
+			// placeholder stores the page section while the new canvases are
+			// being prepared. It cannot be left under the viewer element,
+			// because Apryse will delete everything under that at some point
+			// between the call to zoom and createPageSections.
+
 			placeholder.current = document.createElement('div');
 			placeholder.current.style = `position: absolute; width: 100%; height: 100%`;
-
 			scrollView.current.appendChild(placeholder.current);
 
 			createDisplayMode(Core, documentViewer.current);
@@ -404,10 +408,16 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 		// This section implements ZoomableImage
 
-		//5660: filter transforms that occur after document has gone away...
 		setTransform: (t: Transform) => {
 			offset.current.x = t.x;
 			offset.current.y = t.y;
+
+			// Due to effects such as inertia, we may still get a few setTransform
+			// events, after the viewer has been torn down...
+
+			if (!documentViewer.current.getDocument()) {
+				return;
+			}
 
 			const shouldScale = documentViewer.current.getZoomLevel() != t.scale;
 
