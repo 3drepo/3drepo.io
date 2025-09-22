@@ -21,8 +21,6 @@ import { DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImag
 import { Core } from '@pdftron/webviewer';
 import { ISnapHelper, SnapResults } from '../snapping/types';
 import { Vector2Like } from 'three';
-import { EventEmitter } from 'eventemitter3';
-import { Events } from '../panzoom/panzoom';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { clientConfigService } from '@/v4/services/clientConfig';
 
@@ -36,53 +34,58 @@ declare global {
 
 export type DrawingViewerApryseType = ZoomableImage & ISnapHelper & PanZoomHandler;
 
+// When a document zooms, the Apryse SDK will build a new canvas at the native
+// zoom level, append it to the page section created in createPageSections and
+// then call pageComplete. The following type tracks the page section(s) across
+// this process.
+
+class PageSectionReferences {
+	// The page section that is currently drawn on top - this is either the latest
+	// element rendered by the SDK, or the previous one that is acting as a
+	// placeholder while the new one is being drawn.
+
+	active: HTMLElement;
+
+	// The page section created to hold the render. This is updated between calls
+	// to zoom and the resulting pageComplete. It will eventually become the
+	// the active element.
+
+	pending: HTMLElement;
+
+	// The scale at which the active element was rendered at.
+
+	scale: number;
+
+	constructor() {
+		this.active = null;
+		this.pending = null;
+		this.scale = 1;
+	}
+
+	// Removes all sections and references - this should be called when the
+	// document is reloaded.
+
+	reset() {
+		if (this.active) {
+			this.active.remove();
+			this.active = null;
+		}
+		if (this.pending) {
+			this.pending.remove();
+			this.pending = null;
+		}
+	}
+}
+
 export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingViewerImageProps>(({ onLoad, src }, ref) => {
 	const viewer = useRef(null);
 	const scrollView = useRef(null);
 	const documentViewer = useRef(null);
-	const pageContainer = useRef(null);
+	const pageContainerRef = useRef(null);
+	const pageSectionReferences = useRef<PageSectionReferences>(new PageSectionReferences());
 	const snapModes = useRef(null);
-	const emitter = useRef(new EventEmitter());
-	const minZoom = useRef(0.5);
-	const maxZoom = useRef(10);
-
-	// Should be called from inside this Component whenever the Apryse navigation
-	// updates the display of the PDF.
-
-	const emitTransformEvent = () => {
-		// When the document changes position in the viewer (including zooming),
-		// emit an event that notifies the 2D viewer it should update the
-		// 2d overlay.
-		// This is only required when using Apryse's navigation tools - if an
-		// external pan zoom handler is in use, this should be disabled.
-
-		if (scrollView.current && pageContainer.current && documentViewer.current) {
-			emitter.current.emit(Events.transform);
-		}
-	};
-
-	const getTransform = (): Transform => {
-		const container = scrollView.current.getBoundingClientRect();
-		const rect = pageContainer.current.getBoundingClientRect();
-		return {
-			x: rect.left - container.left,
-			y: rect.top - container.top,
-			scale: documentViewer.current.getZoomLevel(),
-		};
-	};
-
-	const on = (event, fn) => {
-		emitter.current.on(event, fn);
-		emitTransformEvent();
-	};
-
-	const off = (event, fn) => {
-		emitter.current.off(event, fn);
-	};
-
-	const throwPanZoomNotImplementedException = () => {
-		throw new Error('The inbuilt panzoom handler of DrawingViewerApryse is read only and this method is not supported.');
-	};
+	const offset = useRef({x: 0, y: 0}); // Stores the offset of the document in the container. The scale should come from the documentviewer.
+	const placeholder = useRef<HTMLElement>();
 
 	// Gets the full image as a blob that can be loaded into another image
 	// source, regardless of the current transformation.
@@ -106,71 +109,6 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			width: documentViewer.current.getPageWidth(1),
 			height: documentViewer.current.getPageHeight(1),
 		}
-	}
-
-	// Multiplies the scale by factor, while keeping the image centered (if taking
-	// up the whole view).
-
-	const zoom = (factor: number) => {
-
-		// The x,y coordinates provided to zoomTo are used to directly update
-		// the scrollLeft and scrollTop position of the document. Therefore all
-		// calculations should be done relative to this element (viewer), rather
-		// than say, pdf coordinates, or indeed the page container - as this may
-		// have padding.
-		// Additionally, the parameters are what the scroll position should be
-		// *after* scaling.
-
-		const container = scrollView.current.getBoundingClientRect();
-		const rect = viewer.current.getBoundingClientRect();
-
-		// The following snippet keeps the current point below the center of the
-		// viewer in the same place, where possible. It does this by getting the
-		// normalised position within the document that should remain stationary.
-		// After scaling the document, this can be used to get a new absolute
-		// positition from which the offset to the top-left can be determined.
-
-		const scroll = {
-			x: container.left - rect.left,
-			y: container.top - rect.top,
-		};
-
-		// (p is the focal point in container - the current implementation
-		// assumes it is always at the center, since scrolling with the mouse
-		// uses a different method, but we could place it elsewhere if desired.)
-
-		const p = {
-			x: container.width * 0.5,
-			y: container.height * 0.5,
-		};
-
-		// Normalised coordinates relative to rect
-
-		const n = {
-			x: (scroll.x + p.x) / rect.width,
-			y: (scroll.y + p.y) / rect.height,
-		};
-
-		const newScale = Math.max(Math.min(documentViewer.current.getZoomLevel() * factor, maxZoom.current), minZoom.current);
-
-		const scaleChange = newScale / documentViewer.current.getZoomLevel();
-
-		const expectedRect = {
-			width: rect.width * scaleChange,
-			height: rect.height * scaleChange,
-		};
-
-		// New absolute coordinates that should be under p. The offset from p
-		// gives the desired scroll position.
-
-		const x = (expectedRect.width * n.x) - p.x;
-		const y = (expectedRect.height * n.y) - p.y;
-
-		documentViewer.current.zoomTo(
-			newScale,
-			x,
-			y,
-		);
 	}
 
 	// For snapping, mousePos should be in viewer coordinates (i.e. coordinates
@@ -204,9 +142,115 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		});
 	};
 
+	function createPageSection(docViewer: Core.DocumentViewer, pageNumber, pageHeight, pageWidth) {
+		const pageSection = document.createElement('div');
+		pageSection.id = `pageSection${pageNumber}`;
+		pageSection.style.width = `${Math.floor(pageWidth * docViewer.getZoomLevel())}px`;
+		pageSection.style.height = `${Math.floor(pageHeight * docViewer.getZoomLevel())}px`;
+		pageSection.style.margin = `${docViewer.getMargin()}px`;
+		pageSection.style.position = 'absolute';
+		pageSection.style.transform = `translateX(${offset.current.x}px) translateY(${offset.current.y}px)`;
+
+		pageSectionReferences.current.pending = pageSection;
+
+		const pageContainer = document.createElement('div');
+		pageContainer.id = `pageContainer${pageNumber}`;
+		pageContainer.classList.add('pageContainer');
+		pageContainer.style.zIndex = '1';
+		pageContainer.style.width = `${Math.floor(pageWidth * docViewer.getZoomLevel())}px`;
+		pageContainer.style.height = `${Math.floor(pageHeight * docViewer.getZoomLevel())}px`;
+
+		pageSection.appendChild(pageContainer);
+
+		pageContainerRef.current = pageContainer;
+
+		const viewerElement = docViewer.getViewerElement();
+		viewerElement.append(pageSection);
+	}
+
+	const getDrawingPositionInWindow = () => {
+		const rect = scrollView.current.getBoundingClientRect();
+		return {
+			x: window.pageXOffset + rect.left + offset.current.x,
+			y: window.pageYOffset + rect.top + offset.current.y,
+		};
+	}
+
+	const createDisplayMode = (core: typeof Core, docViewer: Core.DocumentViewer) => {
+		const displayMode = new core.DisplayMode(docViewer, core.DisplayModes.Custom, true);
+
+		docViewer.setMargin(0);
+
+		// @ts-ignore: setCustomFunctions type def doesn't currently have the argument
+		displayMode.setCustomFunctions({
+			pageToWindow: function(pagePt, pageNumber) {
+				const zoom = docViewer.getZoomLevel();
+
+				const scaledPt = {
+					x: pagePt.x * zoom,
+					y: pagePt.y * zoom,
+				};
+
+				const offset = getDrawingPositionInWindow();
+
+				const x = offset.x + scaledPt.x;
+				const y = offset.y + scaledPt.y;
+
+				return { x, y };
+			},
+
+			windowToPage: function(windowPt, pageNumber) {
+				const offset = getDrawingPositionInWindow();
+
+				const scaledPt = {
+					x: windowPt.x - offset.x,
+					y: windowPt.y - offset.y,
+				};
+
+				const zoom = docViewer.getZoomLevel();
+
+				return {
+					pageNumber,
+					x: scaledPt.x / zoom,
+					y: scaledPt.y / zoom,
+				};
+			},
+
+			getSelectedPages: function(mousePt1, mousePt2) {
+				return 1;
+			},
+
+			getVisiblePages: function() {
+				return [1];
+			},
+
+			getPageTransform: function(pageNumber) {
+				const page = docViewer.getDocument().getPageInfo(pageNumber);
+				return {
+					x: 0,
+					y: 0,
+					width: page.width,
+					height: page.height,
+				};
+			},
+
+			createPageSections: function() {
+				const doc = docViewer.getDocument();
+				const pageCount = docViewer.getPageCount();
+				for (let pageNum = 1; pageNum <= pageCount; pageNum++) {
+					const page = doc.getPageInfo(pageNum);
+					createPageSection(docViewer, pageNum, page.height, page.width);
+				}
+			},
+		});
+
+		docViewer.getDisplayModeManager().setDisplayMode(displayMode);
+	}
+
 	const loadDocument = useCallback(()=>{
 		if (documentViewer.current) {
 			documentViewer.current.closeDocument();
+			pageSectionReferences.current.reset();
 			if (src) {
 				// The pdf is loaded asynchronously. Apryse also has its own loading
 				// indicator so we could immediately call onLoad if we wanted and show
@@ -236,9 +280,6 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		await loadScript('/lib/webviewer/core/pdf/PDFNet.js');
 	};
 
-	//#5660 need to be able to reload a drawing multiple times...
-	// react is going to re-render a bunch, so perhaps change this so we only
-	// re-render when the src changes...
 	useEffect(() => {
 		loadDependencies().then(async () => {
 			const Core = window.Core as typeof Core;
@@ -294,53 +335,45 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			documentViewer.current.setScrollViewElement(scrollView.current);
 			documentViewer.current.setViewerElement(viewer.current);
 
-			// At the moment, we must use Apryse's inbuilt navigation. The following
-			// snippet sets this up.
+			placeholder.current = document.createElement('div');
+			placeholder.current.style = `position: absolute; width: 100%; height: 100%`;
 
-			documentViewer.current.setToolMode(Core.Tools.ToolNames.PAN);
-			const panTool = documentViewer.current.getTool(Core.Tools.ToolNames.PAN);
+			scrollView.current.appendChild(placeholder.current);
 
-			// Forward events for the Pan Tool for Apryse's built in navigation.
-			// Another possibility would be to have a modified panzoomhandler
-			// forward such events, though at the moment there is no need for that
-			// additional complexity.
+			createDisplayMode(Core, documentViewer.current);
 
-			scrollView.current.addEventListener('mousedown', (e) => {
-				panTool.mouseLeftDown(e);
-			});
+			const mode = documentViewer.current.getDisplayModeManager().getDisplayMode();
 
-			scrollView.current.addEventListener('mousemove', (e) => {
-				panTool.mouseMove(e);
-			});
-
-			scrollView.current.addEventListener('mouseup', (e) => {
-				panTool.mouseLeftUp(e);
-			});
-
+		/*	
 			scrollView.current.addEventListener('wheel', (e) => {
+
 				let scale = documentViewer.current.getZoomLevel();
 				if (e.wheelDelta > 0) {
 					scale = scale * 1.1;
 				} else {
 					scale = scale / 1.1;
 				}
-				scale = Math.max(Math.min(scale, maxZoom.current), minZoom.current);
 				const viewerRect = scrollView.current.getBoundingClientRect();
-				documentViewer.current.zoomToMouse(scale, viewerRect.left, viewerRect.top);
+				documentViewer.current.zoomTo(scale, viewerRect.left, viewerRect.top);
 			});
+		*/
 
-			// When using Apryse's navigation, we must tell our 2d overlay where the
-			// viewBox is whenever it changes.
-
-			documentViewer.current.addEventListener('zoomUpdated', emitTransformEvent);
-			scrollView.current.addEventListener('scroll', emitTransformEvent);
-
-			// When the drawing is zoomed, the DOM for the page may be recreated,
-			// so update the reference we have for this.
+			// This fires when the rendering is complete. When rendering is
+			// complete the new canvases will be attached, so we can delete
+			// the intermediate scaled elements.
 
 			documentViewer.current.addEventListener('pageComplete', () => {
-				pageContainer.current = document.getElementById('pageContainer1');
-				emitTransformEvent();
+
+				// If the page has only panned, we may not have a new canvas, in
+				// which case nothing needs to happen.
+
+				if (pageSectionReferences.current.active != pageSectionReferences.current.pending) {
+					if(pageSectionReferences.current.active){
+						pageSectionReferences.current.active.remove();
+					}
+					pageSectionReferences.current.active = pageSectionReferences.current.pending;
+					pageSectionReferences.current.scale = documentViewer.current.getZoomLevel();
+				}
 			});
 
 			// This simply initialises an array of snap modes, which we do not expect
@@ -368,11 +401,35 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 		// This section implements ZoomableImage
 
-		setTransform: (transform: Transform) => {
-			// Currently, there is no known way to set the transform of a document
-			// in the Apryse WebSDK, so navigation must be controlled by the
-			// Apryse viewer.
-			// See: https://community.apryse.com/t/simplest-way-to-set-the-exact-position-offset-of-a-page-within-the-scroll-view/11932
+		//5660: filter transforms that occur after document has gone away...
+		setTransform: (t: Transform) => {
+			offset.current.x = t.x;
+			offset.current.y = t.y;
+
+			const shouldScale = documentViewer.current.getZoomLevel() != t.scale;
+
+			if (shouldScale) {
+
+				// Zooming is going to prompt a re-render, which will delete the
+				// contents of viewer, so move the current page section if
+				// necessary.
+
+				if (pageSectionReferences.current.active && pageSectionReferences.current.active.parentElement != placeholder.current) {
+					placeholder.current.appendChild(pageSectionReferences.current.active);
+					pageSectionReferences.current.active.style.transformOrigin = `top left`;
+				}
+			}
+
+			if (pageSectionReferences.current.active) {
+				const scaleChange = t.scale / pageSectionReferences.current.scale;
+				pageSectionReferences.current.active.style.transform = `translateX(${offset.current.x}px) translateY(${offset.current.y}px) scale(${scaleChange})`;
+			}
+
+			if (shouldScale) {
+				documentViewer.current.zoomTo(t.scale);
+			} else {
+				documentViewer.current.updateView();
+			}
 		},
 
 		getEventsEmitter: () => {
@@ -380,7 +437,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		},
 
 		getBoundingClientRect: () => {
-			return pageContainer.current.getBoundingClientRect();
+			return pageContainerRef.current.getBoundingClientRect();
 		},
 
 		getNaturalSize: getPageSize,
@@ -389,51 +446,6 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 		snap,
 
-		// This section implements PanZoom/PanZoomHandler. As the transform of the
-		// in-built handler is read-only, only a subset of methods are implemented,
-		// and attempting to call any outside of these will result in an exception.
-
-		getTransform,
-		
-		on,
-		
-		off,
-
-		dispose: () => {},
-
-		smoothZoom: throwPanZoomNotImplementedException,
-
-		smoothSetTransform: throwPanZoomNotImplementedException,
-
-		moveTo: throwPanZoomNotImplementedException,
-
-		setMinZoom: throwPanZoomNotImplementedException,
-
-		getMinZoom: () => {
-			return minZoom.current;
-		},
-
-		getMaxZoom: () => {
-			return maxZoom.current;
-		},
-
-		zoom,
-
-		//#5660 zooming does zoom to center of image atm.
-		zoomIn: () => {
-			zoom(1.5);
-		},
-
-		zoomOut: () => {
-			zoom(1 / 1.5);
-		},
-
-		getOriginalSize: getPageSize,
-
-		centreView: () => {
-			documentViewer.current.setFitMode(documentViewer.current.FitMode.FitPage);
-		},
-
 		// The following method is used to get the pdf as a blob for calibration
 		// purposes
 
@@ -441,6 +453,6 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	};
 
 	 return (
-		<div id='apryse-repo-viewer' ref={viewer}></div>
+		<div id='apryse-repo-viewer' ref={viewer} style={{ width: '100%', height: '100%', position: 'absolute' }} />
 	);
 });
