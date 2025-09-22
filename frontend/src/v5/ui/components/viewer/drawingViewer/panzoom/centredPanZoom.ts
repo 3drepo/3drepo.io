@@ -29,7 +29,6 @@ export type PanZoomHandler = PanZoom & {
 
 export const centredPanZoom = (target: ZoomableImage, paddingW: number, paddingH: number) => {
 	const targetContainer = target.getEventsEmitter();
-
 	const naturalSize = target.getNaturalSize();
 	
 	const options = {
