@@ -84,7 +84,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	const pageContainerRef = useRef(null);
 	const pageSectionReferences = useRef<PageSectionReferences>(new PageSectionReferences());
 	const snapModes = useRef(null);
-	const offset = useRef({x: 0, y: 0}); // Stores the offset of the document in the container. The scale should come from the documentviewer.
+	const offset = useRef({ x: 0, y: 0 }); // Stores the offset of the document in the container. The scale should come from the documentviewer.
 	const placeholder = useRef<HTMLElement>();
 
 	// Gets the full image as a blob that can be loaded into another image
@@ -108,8 +108,8 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		return {
 			width: documentViewer.current.getPageWidth(1),
 			height: documentViewer.current.getPageHeight(1),
-		}
-	}
+		};
+	};
 
 	// For snapping, mousePos should be in viewer coordinates (i.e. coordinates
 	// within the 2D overlay). Currently, this means we do not support rotating
@@ -174,7 +174,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			x: window.pageXOffset + rect.left + offset.current.x,
 			y: window.pageYOffset + rect.top + offset.current.y,
 		};
-	}
+	};
 
 	const createDisplayMode = (core: typeof Core, docViewer: Core.DocumentViewer) => {
 		const displayMode = new core.DisplayMode(docViewer, core.DisplayModes.Custom, true);
@@ -183,7 +183,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 		// @ts-ignore: setCustomFunctions type def doesn't currently have the argument
 		displayMode.setCustomFunctions({
-			pageToWindow: function(pagePt, pageNumber) {
+			pageToWindow: function (pagePt) {
 				const zoom = docViewer.getZoomLevel();
 
 				const scaledPt = {
@@ -191,20 +191,20 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 					y: pagePt.y * zoom,
 				};
 
-				const offset = getDrawingPositionInWindow();
+				const windowPosition = getDrawingPositionInWindow();
 
-				const x = offset.x + scaledPt.x;
-				const y = offset.y + scaledPt.y;
+				const x = windowPosition.x + scaledPt.x;
+				const y = windowPosition.y + scaledPt.y;
 
 				return { x, y };
 			},
 
-			windowToPage: function(windowPt, pageNumber) {
-				const offset = getDrawingPositionInWindow();
+			windowToPage: function (windowPt, pageNumber) {
+				const windowPosition = getDrawingPositionInWindow();
 
 				const scaledPt = {
-					x: windowPt.x - offset.x,
-					y: windowPt.y - offset.y,
+					x: windowPt.x - windowPosition.x,
+					y: windowPt.y - windowPosition.y,
 				};
 
 				const zoom = docViewer.getZoomLevel();
@@ -216,15 +216,15 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 				};
 			},
 
-			getSelectedPages: function(mousePt1, mousePt2) {
+			getSelectedPages: function () {
 				return 1;
 			},
 
-			getVisiblePages: function() {
+			getVisiblePages: function () {
 				return [1];
 			},
 
-			getPageTransform: function(pageNumber) {
+			getPageTransform: function (pageNumber) {
 				const page = docViewer.getDocument().getPageInfo(pageNumber);
 				return {
 					x: 0,
@@ -234,7 +234,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 				};
 			},
 
-			createPageSections: function() {
+			createPageSections: function () {
 				const doc = docViewer.getDocument();
 				const pageCount = docViewer.getPageCount();
 				for (let pageNum = 1; pageNum <= pageCount; pageNum++) {
@@ -245,7 +245,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		});
 
 		docViewer.getDisplayModeManager().setDisplayMode(displayMode);
-	}
+	};
 
 	const loadDocument = useCallback(()=>{
 		if (documentViewer.current) {
@@ -274,29 +274,22 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		});
 	};
 
-	const loadDependencies = async () => {
-		// core defines a namespace that PDFNet depends on, so must be loaded first.
-		await loadScript('/lib/webviewer/core/webviewer-core.min.js');
-		await loadScript('/lib/webviewer/core/pdf/PDFNet.js');
-		await startLibraries();
-	};
-
 	const startLibraries = async () => {
-		const Core = window.Core as typeof Core;
-		if (!Core.PDFNetRunning) {
-			Core.setWorkerPath('/lib/webviewer/core');
+		const core = window.Core as typeof Core & { PDFNetRunning: boolean };
+		if (!core.PDFNetRunning) {
+			core.setWorkerPath('/lib/webviewer/core');
 
 			// The Pan tool will try to load assets at this path - though
 			// they won't be visible by default, we still must change the
 			// cursor explicitly if desired.
 
-			Core.setResourcesPath('/lib/webviewer/core/assets');
+			core.setResourcesPath('/lib/webviewer/core/assets');
 
 			// This next snippet concerned with PDFNet initialises the fullAPI, which
 			// is required for snapping...
 
 			async function main() {
-				const doc = await Core.PDFNet.PDFDoc.create();
+				const doc = await core.PDFNet.PDFDoc.create();
 				doc.initSecurityHandler();
 				// Locks all operations on the document
 				doc.lock();
@@ -308,17 +301,24 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 				return;
 			}
 
-			await Core.PDFNet.runWithCleanup(
+			await core.PDFNet.runWithCleanup(
 				main,
 				apryseLicense,
 			);
-			Core.PDFNetRunning = true;
+			core.PDFNetRunning = true;
 		}
-	}
+	};
+
+	const loadDependencies = async () => {
+		// core defines a namespace that PDFNet depends on, so must be loaded first.
+		await loadScript('/lib/webviewer/core/webviewer-core.min.js');
+		await loadScript('/lib/webviewer/core/pdf/PDFNet.js');
+		await startLibraries();
+	};
 
 	useEffect(() => {
 		loadDependencies().then(async () => {
-			const Core = window.Core as typeof Core;
+			const core = window.Core;
 
 			// When using a custom UI, we must provide the DOM elements for the
 			// (scrolling) container and the container of the document (which will
@@ -336,7 +336,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 			scrollView.current.style.overflow = 'hidden';
 
-			documentViewer.current = new Core.DocumentViewer();
+			documentViewer.current = new core.DocumentViewer();
 			documentViewer.current.setScrollViewElement(scrollView.current);
 			documentViewer.current.setViewerElement(viewer.current);
 
@@ -346,10 +346,10 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			// between the call to zoom and createPageSections.
 
 			placeholder.current = document.createElement('div');
-			placeholder.current.style = `position: absolute; width: 100%; height: 100%`;
+			placeholder.current.style = 'position: absolute; width: 100%; height: 100%';
 			scrollView.current.appendChild(placeholder.current);
 
-			createDisplayMode(Core, documentViewer.current);
+			createDisplayMode(core, documentViewer.current);
 
 			// This fires when the rendering is complete. When rendering is
 			// complete the new canvases will be attached, so we can delete
@@ -362,7 +362,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 				// which case nothing needs to happen.
 
 				if (pageSectionReferences.current.active != pageSectionReferences.current.pending) {
-					if(pageSectionReferences.current.active){
+					if (pageSectionReferences.current.active) {
 						pageSectionReferences.current.active.remove();
 					}
 					pageSectionReferences.current.active = pageSectionReferences.current.pending;
@@ -386,7 +386,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		return () => {
 			documentViewer.current.closeDocument();
 			documentViewer.current.dispose();
-		}
+		};
 	}, []);
 
 	useEffect(loadDocument, [src]);
@@ -416,7 +416,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 				if (pageSectionReferences.current.active && pageSectionReferences.current.active.parentElement != placeholder.current) {
 					placeholder.current.appendChild(pageSectionReferences.current.active);
-					pageSectionReferences.current.active.style.transformOrigin = `top left`;
+					pageSectionReferences.current.active.style.transformOrigin = 'top left';
 				}
 			}
 

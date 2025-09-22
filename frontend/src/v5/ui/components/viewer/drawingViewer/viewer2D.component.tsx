@@ -90,7 +90,7 @@ export const Viewer2D = () => {
 		Img = 1,
 		Svg = 2,
 		Pdf = 3,
-	};
+	}
 
 	type ViewerAttributes = {
 		type: ViewerType,
@@ -99,19 +99,19 @@ export const Viewer2D = () => {
 
 	const [viewer, setViewerAttributes] = useState<ViewerAttributes>({
 		type: ViewerType.None,
-		src: ''
+		src: '',
 	});
 
 	useEffect(() => {
-		if (src){
+		if (src) {
 			// We are only interested in the headers for the blob, but the HEAD method
 			// is not supported for object URLs...
 			fetch(src).then((response) => {
 				const mimeType = response.headers.get('content-type');
 				const viewerSettings = {
 					type: ViewerType.None,
-					src: src
-				}
+					src: src,
+				};
 				if (mimeType == 'application/pdf') {
 					viewerSettings.type = ViewerType.Pdf;
 				} else if (mimeType == 'image/svg+xml' && !isFirefox()) {
@@ -144,7 +144,7 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
-		switch(viewer.type) {
+		switch (viewer.type) {
 			case ViewerType.Img:
 			case ViewerType.Svg:
 				DrawingViewerService.getDrawingSrc = () => Promise.resolve(plainSrc);
@@ -154,7 +154,7 @@ export const Viewer2D = () => {
 				break;
 		}
 
-		switch(viewer.type) {
+		switch (viewer.type) {
 			case ViewerType.Img:
 				setSnapHandler(undefined);
 				break;

@@ -49,7 +49,7 @@ const DrawingViewerServiceCreator = () => {
 		features: {
 			restoreScrollPosition: true,
 		},
-		filter: (el: HTMLElement) => { return el.id != 'viewerLayer2d' && el.id != 'viewerLayer2dCameraOffSight'; }
+		filter: (el: HTMLElement) => { return el.id != 'viewerLayer2d' && el.id != 'viewerLayer2dCameraOffSight'; },
 	} ) : null;
 
 	const setImgContainer = (newImgContainer) => { imgContainer = newImgContainer; };
@@ -124,7 +124,7 @@ const DrawingViewerServiceCreator = () => {
 		getClickPoint,
 		on,
 		off,
-		getDrawingSrc
+		getDrawingSrc,
 	};
 };
 export const DrawingViewerService = DrawingViewerServiceCreator();
