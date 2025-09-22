@@ -29,11 +29,8 @@ import { AlreadyUsedName } from '@components/shared/uploadFiles/uploadList/uploa
 import { NewDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/newDestination/newDestination.component';
 import { NewDestinationInUse } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/newDestinationInUse/newDestinationInUse.component';
 import { ExistingDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/existingDestination/existingDestination.component';
-
-const NO_OPTIONS_TEXT_ADMIN = formatMessage({
-	id: 'drawing.uploads.destination.noOptions.admin',
-	defaultMessage: 'Start typing to create a new Drawing.',
-});
+import { ErrorOption } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/alreadyUsedName/alreadyUsedName.styles';
+import { DrawingUploadForm } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 
 const NO_OPTIONS_TEXT_NON_ADMIN = formatMessage({
 	id: 'drawing.uploads.destination.noOptions.nonAdmin',
@@ -47,12 +44,12 @@ const ALREADY_IN_USE = formatMessage({
 
 interface IUploadListItemDestination {
 	value?: string;
-	revisionPrefix: string;
+	revisionPrefix: `uploads.${number}`;
 	disabled?: boolean;
 	className?: string;
 	index: number;
 	onSelectNewDestination: () => void;
-	name: string,
+	name:  `uploads.${number}.name` |  `uploads.${number}.drawingName`,
 	inputRef?: any;
 	helperText?: string,
 	error?: boolean,
@@ -69,7 +66,12 @@ export const UploadListItemDestination = memo(({
 	...props
 }: IUploadListItemDestination): JSX.Element => {
 	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
-	const { getValues, setValue, setError, clearErrors } = useFormContext();
+	const { getValues, setValue, setError, clearErrors } = useFormContext<DrawingUploadForm>();
+
+	// The value that is typed in the input of the autocomplete is inconsistent
+	// Sometimes it can come empty (getFilteredOptions(,params), params.inputValue) even when 
+	// theres something in there
+	const [typedInVal, setTypedInVal] = useState(value);
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const drawingsByName =  {};
@@ -81,26 +83,30 @@ export const UploadListItemDestination = memo(({
 		drawingsByName[drawingName.toLowerCase()] = { name: drawingName, ...rest };
 	});
 
+	const getDrawing = (drawingName) =>  drawingsByName[drawingName.trim().toLowerCase()];
+
 	const [newDrawingsInModal, setNewDrawingsInModal] = useState([]);
-	const [takenDrawingNames, setTakenDrawingNames] = useState(new Set<string>());
-	const nameIsTaken = (drawingName: string) => takenDrawingNames.has(drawingName.toLowerCase());
-
-	const [currentDrawingId, currentDrawingName] = getValues([`${revisionPrefix}.drawingId`, `${revisionPrefix}.drawingName`]);
-
+	const [unavailableNames, setUnavailableNames] = useState(new Set<string>());
+	const nameIsTaken = (drawingName: string) => unavailableNames.has(drawingName.trim().toLowerCase());
 	const handleInputChange = (_, newValue: string) => {
 		const trimmedValue = newValue?.trim();
+		setTypedInVal(trimmedValue);
+
+		const drawing = getDrawing(typedInVal);
 
 		try {
-			drawingNameScheme.validateSync(
-				trimmedValue,
-				{ context: { alreadyExistingNames: [] } },
-			);
+			drawingNameScheme.validateSync(trimmedValue);
 
-			if (error) {
-				clearErrors(name);
+			if (nameIsTaken(trimmedValue)) {
+				throw (new Error(ALREADY_IN_USE));
 			}
 
-			setNewOrExisting(drawingsNames.find((drawingName) => drawingName === trimmedValue) ? 'existing' : 'new');
+			if (!isProjectAdmin && !drawing) {
+				throw (new Error(NO_OPTIONS_TEXT_NON_ADMIN));
+			}
+
+			clearErrors(name);
+			setNewOrExisting(!!drawing ? 'existing' : 'new');
 		} catch (validationError) {
 			if (validationError.message !== helperText) {
 				setError(name, validationError);
@@ -111,31 +117,35 @@ export const UploadListItemDestination = memo(({
 	};
 
 	// The options that will be displayed while typing in the input:
-	const getFilteredOptions = (options: string[], params) => {
-		// The typed in value
-		const inputValue = params.inputValue.trim();
-		
+	const getFilteredOptions = (options: string[]) => {
 		// Filter out currently selected value and drawings with insufficient permissions
 		const filtered = (options).filter((option) => {
-			const drawing = drawingsByName[option.toLowerCase()];
-			return (!drawing || isCollaboratorRole(drawing.role)) && option.toLowerCase().includes(inputValue.toLowerCase());
+			const drawing = getDrawing(option);
+			return (!drawing || isCollaboratorRole(drawing.role)) && option.toLowerCase().includes(typedInVal.toLowerCase());
 		});
-
 
 		// If the entered value in the input is not part of the options is a new drawing
 		// We add the new drawing as an option so that renderOption will show "Add XXXX as a new drawing"
 		// or "Already in use" if the drawing name is already taken
-		const inputInOptions = options.some((opt) => opt.toLowerCase() === inputValue.toLowerCase());
+		const inputInOptions = options.some((opt) => opt.toLowerCase() === typedInVal.toLowerCase());
 		
-		if (!inputInOptions && isProjectAdmin && inputValue) { // Needs to be a project admin to add a new drawing.
-			filtered.unshift(inputValue);
+		if (!inputInOptions && isProjectAdmin && typedInVal) { // Needs to be a project admin to add a new drawing.
+			filtered.unshift(typedInVal);
 		} 
+
+		if (!isProjectAdmin && typedInVal && !filtered.length) {
+			return [NO_OPTIONS_TEXT_NON_ADMIN];
+		}
 
 		return filtered;
 	};
 
 	const renderOption = (optionProps, option: string,  state: AutocompleteRenderOptionState) => {
-		const optionDrawing = drawingsByName[option.toLowerCase()];
+		const optionDrawing = getDrawing(option);
+
+		if (option === NO_OPTIONS_TEXT_NON_ADMIN) {
+			return (<ErrorOption key={option}>{option}</ErrorOption>);
+		}
 
 		if (!optionDrawing) { // Is a new drawing
 			// If the name is taken and it's the same name Im typing (option === state.inputValue)
@@ -180,46 +190,39 @@ export const UploadListItemDestination = memo(({
 		}
 	};
 
-	const onDestinationChange = (e, newVal: string | null = '') => {
-		const drawing = drawingsByName[newVal.toLowerCase()];
-		if (nameIsTaken(newVal)) {
-			setError(name, { message: ALREADY_IN_USE });
-			setValue(`${revisionPrefix}.drawingId`, '');
-			return;
-		} 
-
-		setValue(`${revisionPrefix}.drawingName`, newVal);
+	const onDestinationChange = () => {
+		const drawing = getDrawing(typedInVal);
+		setValue(name, typedInVal);
 		setValue(`${revisionPrefix}.drawingId`, drawing?._id, { shouldValidate: true });
 	};
 
 	const onOpen = () => {
+		const otherDrawingsInModal = getValues('uploads').filter(({ drawingName }, i) => i !== index && !!drawingName.trim());
+		
 		setNewDrawingsInModal(
-			getValues('uploads')
-				.filter(({ drawingId, drawingName }, i) => !drawingId && i !== index && !!drawingName)
+			otherDrawingsInModal
+				.filter(({ drawingId }) => !drawingId)
 				.map(({ drawingName }) => drawingName),
 		);
-		//
 		
-		const drawingNamesInModal = getValues('uploads')
-			.map(({ drawingName }) => (drawingName || '').toLowerCase())
-			.filter((drawingName) => drawingName !== value.toLowerCase())
-			.filter(Boolean);
+		const drawingNamesInModal = otherDrawingsInModal
+			.map(({ drawingName }) => drawingName);
 
 		const processingNames = drawings
 			.filter((drawing) => !canUploadToBackend(drawing.status))
 			.map((drawing) => drawing.name.toLowerCase());
 
 		// The taken drawing names are in lowercase to make the easier to compare
-		setTakenDrawingNames(new Set(drawingNamesInModal.concat(processingNames)));
+		setUnavailableNames(new Set(drawingNamesInModal.concat(processingNames)));
 	};
 
 	useEffect(() => {
-		if (currentDrawingName && !currentDrawingId) {
+		if (!getDrawing(value) && value && !error) {
 			onSelectNewDestination();
 		}
-	}, [currentDrawingName]);
+	}, [value, error]);
 
-	const options = [...drawingsNames, ...newDrawingsInModal];
+	const options = [...drawingsNames, ...newDrawingsInModal].sort();
 
 	return (
 		<DestinationAutocomplete
@@ -231,13 +234,12 @@ export const UploadListItemDestination = memo(({
 			getOptionDisabled={nameIsTaken}
 			getOptionLabel={(option:string) => option || ''}
 			ListboxComponent={OptionsBox}
-			noOptionsText={isProjectAdmin ? NO_OPTIONS_TEXT_ADMIN : NO_OPTIONS_TEXT_NON_ADMIN}
 			onInputChange={handleInputChange}
 			onChange={onDestinationChange}
 			onOpen={onOpen}
 			options={options}
 			renderOption={renderOption}
-			disableClearable={!value}
+			disableClearable={!typedInVal}
 			renderInput={({ InputProps, ...params }) => (
 				<DestinationInput
 					error={error}
@@ -250,6 +252,8 @@ export const UploadListItemDestination = memo(({
 					}}
 				/>
 			)}
+			autoHighlight={!!typedInVal}
+			autoSelect={!!typedInVal}
 		/>
 	);
 }, (prev, next) => (
