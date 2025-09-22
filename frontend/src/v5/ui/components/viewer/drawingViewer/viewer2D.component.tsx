@@ -246,7 +246,7 @@ export const Viewer2D = () => {
 						<Loader />
 					</CentredContainer>
 				}
-				{viewer.type == ViewerType.Pdf && <DrawingViewerApryse ref={imgViewerRef} src={viewer.src} onLoad={onImageLoad} setViewBox={setViewBox} />}
+				{viewer.type == ViewerType.Pdf && <DrawingViewerApryse ref={imgViewerRef as any} src={viewer.src} onLoad={onImageLoad} />}
 				{viewer.type == ViewerType.Svg && <DrawingViewerSvg ref={imgViewerRef} src={viewer.src} onLoad={onImageLoad} />}
 				{viewer.type == ViewerType.Img && <DrawingViewerImage ref={imgViewerRef} src={viewer.src} onLoad={onImageLoad} />}
 				{!isLoading && (<ViewerLayer2D

@@ -351,23 +351,10 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 			createDisplayMode(Core, documentViewer.current);
 
-		/*	
-			scrollView.current.addEventListener('wheel', (e) => {
-
-				let scale = documentViewer.current.getZoomLevel();
-				if (e.wheelDelta > 0) {
-					scale = scale * 1.1;
-				} else {
-					scale = scale / 1.1;
-				}
-				const viewerRect = scrollView.current.getBoundingClientRect();
-				documentViewer.current.zoomTo(scale, viewerRect.left, viewerRect.top);
-			});
-		*/
-
 			// This fires when the rendering is complete. When rendering is
 			// complete the new canvases will be attached, so we can delete
-			// the intermediate scaled elements.
+			// the scaled canvases from the previous render that are being used
+			// as intermediates.
 
 			documentViewer.current.addEventListener('pageComplete', () => {
 
