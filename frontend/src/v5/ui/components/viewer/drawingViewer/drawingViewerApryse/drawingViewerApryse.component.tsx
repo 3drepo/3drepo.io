@@ -143,11 +143,15 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	};
 
 	function createPageSection(docViewer: Core.DocumentViewer, pageNumber, pageHeight, pageWidth) {
+		// We ignore the margin set in the document viewer, because it resets
+		// when loading documents. If we start to use other transforms from the
+		// document viewer that include it, then we may need to add it to the
+		// pageSection and then take it into account in the window transforms.
+
 		const pageSection = document.createElement('div');
 		pageSection.id = `pageSection${pageNumber}`;
 		pageSection.style.width = `${Math.floor(pageWidth * docViewer.getZoomLevel())}px`;
 		pageSection.style.height = `${Math.floor(pageHeight * docViewer.getZoomLevel())}px`;
-		pageSection.style.margin = `${docViewer.getMargin()}px`;
 		pageSection.style.position = 'absolute';
 		pageSection.style.transform = `translateX(${offset.current.x}px) translateY(${offset.current.y}px)`;
 
@@ -178,8 +182,6 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 	const createDisplayMode = (core: typeof Core, docViewer: Core.DocumentViewer) => {
 		const displayMode = new core.DisplayMode(docViewer, core.DisplayModes.Custom, true);
-
-		docViewer.setMargin(0);
 
 		// @ts-ignore: setCustomFunctions type def doesn't currently have the argument
 		displayMode.setCustomFunctions({
