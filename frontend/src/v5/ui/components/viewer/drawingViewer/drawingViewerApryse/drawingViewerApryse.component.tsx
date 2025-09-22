@@ -93,14 +93,19 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	// Gets the full image as a blob that can be loaded into another image
 	// source, regardless of the current transformation.
 
-	const getImageBlob = async () => {
+	const getImageSrc = async () => {
 		return new Promise((resolve) => {
+			// The reason for building the response this way round is that the
+			// document may be unloaded while canvas is rasterised, so we can't
+			// guarantee we can get the width and height later.
+			const response = getPageSize() as any;
 			documentViewer.current.getDocument().loadCanvas({
 				pageNumber: 1,
 				zoom: 1,
 				drawComplete: async (imageCanvas) => {
 					imageCanvas.toBlob( (blob) => {
-						resolve(blob);
+						response.src = URL.createObjectURL(blob);
+						resolve(response);
 					});
 				},
 			});
@@ -464,7 +469,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		// The following method is used to get the pdf as a blob for calibration
 		// purposes
 
-		getImageBlob,
+		getImageSrc,
 	};
 
 	 return (

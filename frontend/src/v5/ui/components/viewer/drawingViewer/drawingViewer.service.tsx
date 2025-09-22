@@ -27,8 +27,14 @@ export const DRAWING_VIEWER_EVENTS = {
 	CLICK_POINT: 'CLICK_POINT',
 };
 
+export type ImageSrcReference = {
+	url: string,
+	width?: number,
+	height?: number,
+};
+
 type GetScreenshot = () => null | Promise<string>;
-type GetDrawingSrc = () => Promise<string>;
+type GetDrawingSrc = () => Promise<ImageSrcReference>;
 const DrawingViewerServiceCreator = () => {
 	let imgContainer = null;
 	let mousePosition = [0,  0];
