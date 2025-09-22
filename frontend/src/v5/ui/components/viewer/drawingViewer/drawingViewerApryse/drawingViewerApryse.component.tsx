@@ -358,7 +358,9 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			// until the new ones are ready.
 
 			placeholder.current = document.createElement('div');
-			placeholder.current.style = 'position: absolute; width: 100%; height: 100%';
+			placeholder.current.style.position = 'absolute';
+			placeholder.current.style.width = '100%';
+			placeholder.current.style.height = '100%';
 			scrollView.current.appendChild(placeholder.current);
 
 			createDisplayMode(core, documentViewer.current);
