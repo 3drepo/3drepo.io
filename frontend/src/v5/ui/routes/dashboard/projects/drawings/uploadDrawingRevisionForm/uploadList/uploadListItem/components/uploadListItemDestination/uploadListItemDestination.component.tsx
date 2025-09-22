@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useEffect,  useState } from 'react';
+import { memo,  useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ErrorTooltip } from '@controls/errorTooltip';
 import { AutocompleteRenderOptionState } from '@mui/material';
@@ -24,7 +24,7 @@ import { canUploadToBackend } from '@/v5/store/drawings/drawings.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
 import { name as drawingNameScheme } from '@/v5/validation/shared/validators';
-import { DestinationAutocomplete, DestinationInput, NewOrExisting, OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
+import { DestinationAutocomplete, DestinationInput, OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { AlreadyUsedName } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/alreadyUsedName/alreadyUsedName.component';
 import { NewDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/newDestination/newDestination.component';
 import { NewDestinationInUse } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/newDestinationInUse/newDestinationInUse.component';
@@ -65,13 +65,14 @@ export const UploadListItemDestination = memo(({
 	helperText,
 	...props
 }: IUploadListItemDestination): JSX.Element => {
-	const [newOrExisting, setNewOrExisting] = useState<NewOrExisting>('');
 	const { getValues, setValue, setError, clearErrors } = useFormContext<DrawingUploadForm>();
 
 	// The value that is typed in the input of the autocomplete is inconsistent
 	// Sometimes it can come empty (getFilteredOptions(,params), params.inputValue) even when 
 	// theres something in there
 	const [typedInVal, setTypedInVal] = useState(value);
+	const [newDrawingsInModal, setNewDrawingsInModal] = useState([]);
+	const [unavailableNames, setUnavailableNames] = useState(new Set<string>());
 
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const drawingsByName =  {};
@@ -83,16 +84,13 @@ export const UploadListItemDestination = memo(({
 		drawingsByName[drawingName.toLowerCase()] = { name: drawingName, ...rest };
 	});
 
-	const getDrawing = (drawingName) =>  drawingsByName[drawingName.trim().toLowerCase()];
+	const getDrawing = (drawingName: string = '') =>  drawingsByName[drawingName.trim().toLowerCase()];
+	const nameIsTaken = (drawingName: string = '') => unavailableNames.has(drawingName.trim().toLowerCase());
 
-	const [newDrawingsInModal, setNewDrawingsInModal] = useState([]);
-	const [unavailableNames, setUnavailableNames] = useState(new Set<string>());
-	const nameIsTaken = (drawingName: string) => unavailableNames.has(drawingName.trim().toLowerCase());
 	const handleInputChange = (_, newValue: string) => {
 		const trimmedValue = newValue?.trim();
 		setTypedInVal(trimmedValue);
-
-		const drawing = getDrawing(typedInVal);
+		const drawing = getDrawing(trimmedValue);
 
 		try {
 			drawingNameScheme.validateSync(trimmedValue);
@@ -106,34 +104,33 @@ export const UploadListItemDestination = memo(({
 			}
 
 			clearErrors(name);
-			setNewOrExisting(!!drawing ? 'existing' : 'new');
 		} catch (validationError) {
 			if (validationError.message !== helperText) {
 				setError(name, validationError);
 			}
-
-			setNewOrExisting('');
 		}
 	};
 
 	// The options that will be displayed while typing in the input:
-	const getFilteredOptions = (options: string[]) => {
+	const getFilteredOptions = (options: string[], params) => {
+		// The typed in value
+		const inputValue = params.inputValue.trim();
 		// Filter out currently selected value and drawings with insufficient permissions
 		const filtered = (options).filter((option) => {
 			const drawing = getDrawing(option);
-			return (!drawing || isCollaboratorRole(drawing.role)) && option.toLowerCase().includes(typedInVal.toLowerCase());
+			return (!drawing ||  isCollaboratorRole(drawing.role)) && option.toLowerCase().includes(inputValue.toLowerCase());
 		});
 
 		// If the entered value in the input is not part of the options is a new drawing
 		// We add the new drawing as an option so that renderOption will show "Add XXXX as a new drawing"
 		// or "Already in use" if the drawing name is already taken
-		const inputInOptions = options.some((opt) => opt.toLowerCase() === typedInVal.toLowerCase());
+		const inputInOptions = options.some((opt) => opt.toLowerCase() === inputValue.toLowerCase());
 		
-		if (!inputInOptions && isProjectAdmin && typedInVal) { // Needs to be a project admin to add a new drawing.
-			filtered.unshift(typedInVal);
+		if (!inputInOptions && isProjectAdmin && inputValue) { // Needs to be a project admin to add a new drawing.
+			filtered.unshift(inputValue);
 		} 
 
-		if (!isProjectAdmin && typedInVal && !filtered.length) {
+		if (!isProjectAdmin && inputValue && !filtered.length) {
 			return [NO_OPTIONS_TEXT_NON_ADMIN];
 		}
 
@@ -190,10 +187,18 @@ export const UploadListItemDestination = memo(({
 		}
 	};
 
-	const onDestinationChange = () => {
-		const drawing = getDrawing(typedInVal);
-		setValue(name, typedInVal);
+	const onDestinationChange = (
+		e, 
+		selectedOption: string, 
+	) => {
+		const newValue = selectedOption || '';
+		const drawing = getDrawing(newValue);
+		setValue(name, newValue);
 		setValue(`${revisionPrefix}.drawingId`, drawing?._id, { shouldValidate: true });
+
+		if (!!newValue && !error && !drawing) {
+			onSelectNewDestination();
+		}
 	};
 
 	const onOpen = () => {
@@ -216,14 +221,8 @@ export const UploadListItemDestination = memo(({
 		setUnavailableNames(new Set(drawingNamesInModal.concat(processingNames)));
 	};
 
-	useEffect(() => {
-		if (!getDrawing(value) && value && !error) {
-			onSelectNewDestination();
-		}
-	}, [value, error]);
-
 	const options = [...drawingsNames, ...newDrawingsInModal].sort();
-
+	const newOrExisting =  !typedInVal ? '' : !getDrawing(typedInVal) ? 'new' : 'existing';
 	return (
 		<DestinationAutocomplete
 			{...props}
