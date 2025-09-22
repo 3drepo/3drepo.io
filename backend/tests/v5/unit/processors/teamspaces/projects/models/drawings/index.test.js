@@ -404,7 +404,7 @@ const testGetImageByRevision = () => {
 			const revision = generateRandomString();
 			const output = generateRandomObject();
 
-			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef });
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef, format: '.dwg' });
 			FilesManager.getFileAsStream.mockResolvedValueOnce(output);
 
 			await expect(Drawings.getImageByRevision(teamspace, project, drawing, revision)).resolves.toEqual(output);
@@ -415,6 +415,28 @@ const testGetImageByRevision = () => {
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, imageRef);
+		});
+
+		test('should return original file if the latest revision is a pdf', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const drawing = generateRandomString();
+			const imageRef = generateRandomString();
+			const rFileRef = generateRandomString();
+			const revision = generateRandomString();
+			const output = generateRandomObject();
+
+			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef, format: '.pdf', rFile: [rFileRef] });
+			FilesManager.getFileAsStream.mockResolvedValueOnce(output);
+
+			await expect(Drawings.getImageByRevision(teamspace, project, drawing, revision)).resolves.toEqual(output);
+
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
+				revision, { image: 1, format: 1, rFile: 1 });
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, rFileRef);
 		});
 	});
 };
