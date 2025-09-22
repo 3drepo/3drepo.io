@@ -32,7 +32,7 @@ import { Camera } from './camera/camera.component';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { addZ } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.helpers';
 
 type ViewerLayer2DProps = {
@@ -69,6 +69,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 	const [cameraOnSight, setCameraOnSight] = useState(false);
 	const [snapType, setSnapType] = useState<SnapType>(SnapType.NONE);
 	const snapping = useSnapping();
+	const isOrthographic = ViewerGuiHooksSelectors.selectProjectionMode() === 'orthographic';
 
 	const [drawingId] = useSearchParam('drawingId');
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -138,7 +139,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 					{isCalibrating && <CalibrationArrow />}
 
 					{!isCalibrating && (<>
-						{cameraOnSight && <Camera scale={viewBox.scale} offsetRef={offsetRef} />}
+						{cameraOnSight && !isOrthographic && <Camera scale={viewBox.scale} offsetRef={offsetRef} />}
 						<PinsLayer scale={viewBox.scale} height={viewBox.height} width={viewBox.width} />
 					</>)}
 				</LayerLevel>
@@ -149,7 +150,7 @@ export const ViewerLayer2D = ({ viewBox, snapHandler, viewport }: ViewerLayer2DP
 					onMouseLeave={handleMouseLeave}
 				/>}
 			</Container>
-			{!isCalibrating && <CameraOffSight onCameraSightChanged={setCameraOnSight} viewbox={viewBox} viewport={viewport}/>}
+			{!isCalibrating && !isOrthographic && <CameraOffSight onCameraSightChanged={setCameraOnSight} viewbox={viewBox} viewport={viewport}/>}
 		</Viewport>
 	);
 };

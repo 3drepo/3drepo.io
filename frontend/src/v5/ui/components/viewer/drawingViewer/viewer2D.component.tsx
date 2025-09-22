@@ -29,7 +29,7 @@ import { DrawingViewerImage } from './drawingViewerImage/drawingViewerImage.comp
 import { CloseButton } from '@controls/button/closeButton/closeButton.component';
 import { ViewerCanvasesContext } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { DrawingViewerService } from './drawingViewer.service';
-import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
+import { DrawingInfoBox } from '@/v5/ui/routes/dashboard/projects/drawings/drawingDialogs/drawingInfoBox/drawingInfoBox.styles';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import { ViewerLayer2D } from './viewerLayer2D/viewerLayer2D.component';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
@@ -44,7 +44,7 @@ import { ZoomableImage } from './zoomableImage.types';
 import { SVGSnapHelper } from './snapping/svgSnapHelper';
 import { useParams } from 'react-router';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingRevisionsHooksSelectors, ViewerGuiHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useAuthenticatedImage } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selectors';
@@ -125,6 +125,7 @@ export const Viewer2D = () => {
 	}, [src]);
 
 	const canCalibrate2D = isCalibrating && step === 1;
+	const isOrthographic = ViewerGuiHooksSelectors.selectProjectionMode() === 'orthographic';
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -226,8 +227,17 @@ export const Viewer2D = () => {
 
 	return (
 		<ViewerContainer visible ref={containerRef}>
+			{isOrthographic && !isCalibrating && (
+				<DrawingInfoBox
+					title={formatMessage({ defaultMessage: 'Synchronised navigation unavailable', id: 'infoBox.orthoWarning.title' })}
+					description={formatMessage({
+						id: 'infoBox.orthoWarning.description',
+						defaultMessage: '2D/3D synchronised navigation is not available when the 3D model is in orthographic mode.',
+					})}
+				/>
+			)}
 			{step === 1 && (
-				<CalibrationInfoBox
+				<DrawingInfoBox
 					title={formatMessage({ defaultMessage: '2D Alignment', id: 'infoBox.2dAlignment.title' })}
 					description={formatMessage({
 						id: 'infoBox.2dAlignment.description',
