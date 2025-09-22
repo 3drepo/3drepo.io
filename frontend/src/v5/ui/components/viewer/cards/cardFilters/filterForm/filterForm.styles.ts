@@ -30,7 +30,22 @@ export const FilterPaperStyleother = css`
 	max-height: calc(100% - 200px);
 `; 
 
+// You can see here some basic values that should be in the theme. They are here because 
+// using the theme provider was incredibly slow in tabular view.
 export const CardFilterActionMenu = styled(ActionMenu)<{ $displayMode?: string }>`
+	.MuiInputBase-root input, .MuiSelect-select  {
+		height: 26px;
+		line-height: 26px;
+	}
+	
+	.MuiOutlinedInput-notchedOutline {
+		height: 100%;
+	}
+	
+	.MuiFormControl-root {
+		margin: 0;
+	}
+
 	.MuiPaper-root {
 		width: 365px;
 		margin-top: 13px;
