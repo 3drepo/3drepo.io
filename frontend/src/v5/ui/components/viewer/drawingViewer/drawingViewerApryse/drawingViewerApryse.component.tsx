@@ -278,42 +278,47 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		// core defines a namespace that PDFNet depends on, so must be loaded first.
 		await loadScript('/lib/webviewer/core/webviewer-core.min.js');
 		await loadScript('/lib/webviewer/core/pdf/PDFNet.js');
+		await startLibraries();
 	};
+
+	const startLibraries = async () => {
+		const Core = window.Core as typeof Core;
+		if (!Core.PDFNetRunning) {
+			Core.setWorkerPath('/lib/webviewer/core');
+
+			// The Pan tool will try to load assets at this path - though
+			// they won't be visible by default, we still must change the
+			// cursor explicitly if desired.
+
+			Core.setResourcesPath('/lib/webviewer/core/assets');
+
+			// This next snippet concerned with PDFNet initialises the fullAPI, which
+			// is required for snapping...
+
+			async function main() {
+				const doc = await Core.PDFNet.PDFDoc.create();
+				doc.initSecurityHandler();
+				// Locks all operations on the document
+				doc.lock();
+			}
+
+			const { apryseLicense } = clientConfigService;
+			if (!apryseLicense) {
+				console.error('Invalid licence for Apryse WebViewer. Cannot load PDF viewer.');
+				return;
+			}
+
+			await Core.PDFNet.runWithCleanup(
+				main,
+				apryseLicense,
+			);
+			Core.PDFNetRunning = true;
+		}
+	}
 
 	useEffect(() => {
 		loadDependencies().then(async () => {
 			const Core = window.Core as typeof Core;
-			if (!Core.PDFNetRunning) {
-				Core.setWorkerPath('/lib/webviewer/core');
-
-				// The Pan tool will try to load assets at this path - though
-				// they won't be visible by default, we still must change the
-				// cursor explicitly if desired.
-
-				Core.setResourcesPath('/lib/webviewer/core/assets');
-
-				// This next snippet concerned with PDFNet initialises the fullAPI, which
-				// is required for snapping...
-
-				async function main() {
-					const doc = await Core.PDFNet.PDFDoc.create();
-					doc.initSecurityHandler();
-					// Locks all operations on the document
-					doc.lock();
-				}
-
-				const { apryseLicense } = clientConfigService;
-				if (!apryseLicense) {
-					console.error('Invalid licence for Apryse WebViewer. Cannot load PDF viewer.');
-					return;
-				}
-
-				await Core.PDFNet.runWithCleanup(
-					main,
-					apryseLicense,
-				);
-				Core.PDFNetRunning = true;
-			}
 
 			// When using a custom UI, we must provide the DOM elements for the
 			// (scrolling) container and the container of the document (which will
@@ -341,8 +346,6 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			scrollView.current.appendChild(placeholder.current);
 
 			createDisplayMode(Core, documentViewer.current);
-
-			const mode = documentViewer.current.getDisplayModeManager().getDisplayMode();
 
 		/*	
 			scrollView.current.addEventListener('wheel', (e) => {
@@ -453,6 +456,6 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	};
 
 	 return (
-		<div id='apryse-repo-viewer' ref={viewer} style={{ width: '100%', height: '100%', position: 'absolute' }} />
+		<div ref={viewer} style={{ width: '100%', height: '100%', position: 'absolute' }} />
 	);
 });
