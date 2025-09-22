@@ -42,7 +42,7 @@ export type DrawingViewerApryseType = ZoomableImage & ISnapHelper & PanZoomHandl
 class PageSectionReferences {
 	// The page section that is currently drawn on top - this is either the latest
 	// element rendered by the SDK, or the previous one that is acting as a
-	// placeholder while the new one is being drawn.
+	// placeholder while the new one is being drawn. This is what the user sees.
 
 	active: HTMLElement;
 
@@ -52,7 +52,7 @@ class PageSectionReferences {
 
 	pending: HTMLElement;
 
-	// The scale at which the active element was rendered at.
+	// The scale at which the active element was originally rendered at.
 
 	scale: number;
 
@@ -63,7 +63,7 @@ class PageSectionReferences {
 	}
 
 	// Removes all sections and references - this should be called when the
-	// document is reloaded.
+	// document is unloaded/reloaded.
 
 	reset() {
 		if (this.active) {
@@ -76,6 +76,9 @@ class PageSectionReferences {
 		}
 	}
 }
+
+// Presents the Apryse viewer as a drawing viewer Component that can be
+// integrated into the 2D Viewer.
 
 export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingViewerImageProps>(({ onLoad, src }, ref) => {
 	const viewer = useRef(null);
@@ -111,18 +114,15 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		};
 	};
 
+	// snap is the implementation for ISnapHandler.
+
 	// For snapping, mousePos should be in viewer coordinates (i.e. coordinates
-	// within the 2D overlay). Currently, this means we do not support rotating
-	// pages, which is a feature of Apryse. To do this, we would need to introduce
-	// the concept of document coordinates vs mouse coordinates to the viewer2D
-	// component.
+	// within the 2D overlay). https://docs.apryse.com/web/guides/coordinates.
+	// Currently, this means we do not support rotating pages, which is a
+	// feature of Apryse. To do this, we would need to introduce the concept of
+	// document coordinates vs mouse coordinates to the viewer2D component.
 
 	const snap = (mousePos: Vector2Like, radius: number): Promise<SnapResults> => {
-
-		// mousePos should be in the space of the 2D overlay, which should be
-		// identical to Apryse's viewer coordinates.
-		// https://docs.apryse.com/web/guides/coordinates
-
 		return documentViewer.current.snapToNearest(1, mousePos.x, mousePos.y, snapModes.current).then((snapPos) => {
 			const results = new SnapResults();
 			// snapToNearest will consider the entire document, so filter
@@ -141,6 +141,11 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			return results;
 		});
 	};
+
+	// Creates the HTML Elements that will hold the canvas and other nodes
+	// built by Apryse to render the PDF. These elements must be parented
+	// and identified as follows, but otherwise have flexibility in their
+	// display.
 
 	function createPageSection(docViewer: Core.DocumentViewer, pageNumber, pageHeight, pageWidth) {
 		// We ignore the margin set in the document viewer, because it resets
@@ -179,6 +184,12 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			y: window.pageYOffset + rect.top + offset.current.y,
 		};
 	};
+
+	// In order to use our own navigation, we create a Custom Display Mode.
+	// A Custom Display Mode allows fine control over where the rendered PDF
+	// appears through a set of mapping functions & control over the page's
+	// elements. With this display mode, we can introduce our own offsets into
+	// these functions in order to set the position exactly.
 
 	const createDisplayMode = (core: typeof Core, docViewer: Core.DocumentViewer) => {
 		const displayMode = new core.DisplayMode(docViewer, core.DisplayModes.Custom, true);
@@ -264,6 +275,10 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		}
 	}, [src, onLoad]);
 
+	// The Apryse viewer has a number of dependencies that are loaded globally.
+	// These next functions take care of these and ensure they are only loaded
+	// once.
+
 	const loadScript = async (uri) => {
 		if (document.querySelectorAll(`script[src='${uri}']`).length) {
 			return Promise.resolve();
@@ -281,19 +296,12 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 		if (!core.PDFNetRunning) {
 			core.setWorkerPath('/lib/webviewer/core');
 
-			// The Pan tool will try to load assets at this path - though
-			// they won't be visible by default, we still must change the
-			// cursor explicitly if desired.
-
-			core.setResourcesPath('/lib/webviewer/core/assets');
-
-			// This next snippet concerned with PDFNet initialises the fullAPI, which
-			// is required for snapping...
+			// This next snippet is concerned with PDFNet initialises the
+			// fullAPI, which is required for snapping...
 
 			async function main() {
 				const doc = await core.PDFNet.PDFDoc.create();
 				doc.initSecurityHandler();
-				// Locks all operations on the document
 				doc.lock();
 			}
 
@@ -342,10 +350,12 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			documentViewer.current.setScrollViewElement(scrollView.current);
 			documentViewer.current.setViewerElement(viewer.current);
 
-			// placeholder stores the page section while the new canvases are
-			// being prepared. It cannot be left under the viewer element,
+			// placeholder stores the element holding the page while the new one
+			// is being prepared; it cannot be left under the viewer element,
 			// because Apryse will delete everything under that at some point
-			// between the call to zoom and createPageSections.
+			// between starting a render, and finalising the new elements. We
+			// put the previous elements under this so they continue to be visible
+			// until the new ones are ready.
 
 			placeholder.current = document.createElement('div');
 			placeholder.current.style = 'position: absolute; width: 100%; height: 100%';
@@ -354,14 +364,15 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			createDisplayMode(core, documentViewer.current);
 
 			// This fires when the rendering is complete. When rendering is
-			// complete the new canvases will be attached, so we can delete
-			// the scaled canvases from the previous render that are being used
+			// complete, the new canvases will be attached, so we can delete
+			// the scaled elements from the previous render that are being used
 			// as intermediates.
 
 			documentViewer.current.addEventListener('pageComplete', () => {
 
 				// If the page has only panned, we may not have a new canvas, in
-				// which case nothing needs to happen.
+				// which case nothing needs to happen as setTransform will have
+				// updated the offset already...
 
 				if (pageSectionReferences.current.active != pageSectionReferences.current.pending) {
 					if (pageSectionReferences.current.active) {
@@ -373,7 +384,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			});
 
 			// This simply initialises an array of snap modes, which we do not expect
-			// to change, but need the Core namespace to populate.
+			// to change, but need the Core namespace to populate...
 
 			snapModes.current = [
 				documentViewer.current.SnapMode.PATH_ENDPOINT,
@@ -413,7 +424,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			if (shouldScale) {
 
 				// Zooming is going to prompt a re-render, which will delete the
-				// contents of viewer, so move the current page section if
+				// contents of viewer, so move the current page elements if
 				// necessary.
 
 				if (pageSectionReferences.current.active && pageSectionReferences.current.active.parentElement != placeholder.current) {
