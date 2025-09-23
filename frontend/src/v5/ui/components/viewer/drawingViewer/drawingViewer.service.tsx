@@ -28,7 +28,7 @@ export const DRAWING_VIEWER_EVENTS = {
 };
 
 export type ImageSrcReference = {
-	url: string,
+	src: string,
 	width?: number,
 	height?: number,
 };
