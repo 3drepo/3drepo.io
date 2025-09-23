@@ -15,21 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { pdf } = require('pdf-to-img');
 const sharp = require('sharp');
 
 const ImageHelper = {};
 
-ImageHelper.createThumbnail = async (buffer, width = 600, density = 150) => {
+ImageHelper.createThumbnail = async (buffer, mimeType, width = 600, density = 150) => {
 	if (!buffer) throw new Error('Image not provided');
 
-	const jpgBuffer = await sharp(buffer, { density })
-		.flatten({ background: '#ffffff' })
-		.toFormat('jpeg')
-		.toBuffer();
+	let imgBuffer;
+	if (mimeType === 'application/pdf') {
+		const base64 = buffer.toString('base64');
+		const dataUrl = `data:${mimeType};base64,${base64}`;
+		const document = await pdf(dataUrl, { scale: 1 });
+		imgBuffer = await document.getPage(1);
+	} else {
+		imgBuffer = await sharp(buffer, { density })
+			.flatten({ background: '#ffffff' })
+			.toFormat('jpeg')
+			.toBuffer();
+	}
 
 	// (As far as I can tell) we have to export the buffer and re-import it for resize,
 	// otherwise it optimises out the density setting and we will miss out detailed lines.
-	return sharp(jpgBuffer)
+	return sharp(imgBuffer)
 		.resize(width, undefined, {
 			fit: 'outside',
 		}).toBuffer();
