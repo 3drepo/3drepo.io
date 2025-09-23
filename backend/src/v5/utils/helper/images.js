@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { pdf } = require('pdf-to-img');
+const { createCanvas } = require('canvas');
+const pdfJsLib = require('pdfjs-dist');
 const sharp = require('sharp');
 
 const ImageHelper = {};
@@ -25,10 +26,13 @@ ImageHelper.createThumbnail = async (buffer, mimeType, width = 600, density = 15
 
 	let imgBuffer;
 	if (mimeType === 'application/pdf') {
-		const base64 = buffer.toString('base64');
-		const dataUrl = `data:${mimeType};base64,${base64}`;
-		const document = await pdf(dataUrl, { scale: 1 });
-		imgBuffer = await document.getPage(1);
+		const document = await pdfJsLib.getDocument(buffer.buffer).promise;
+		const page = await document.getPage(1);
+		const viewport = page.getViewport({ scale: 1 });
+		const canvas = createCanvas(viewport.width, viewport.height);
+		const canvasContext = canvas.getContext('2d');
+		await page.render({ canvasContext, viewport }).promise;
+		imgBuffer = await canvas.toBuffer('image/jpeg');
 	} else {
 		imgBuffer = await sharp(buffer, { density })
 			.flatten({ background: '#ffffff' })
