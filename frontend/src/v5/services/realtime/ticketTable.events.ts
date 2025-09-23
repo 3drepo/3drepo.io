@@ -20,16 +20,29 @@ import { subscribeToRoomEvent } from './realtime.service';
 import { ticketEvent } from './ticket.events';
 import { get } from 'lodash';
 
-export const enableRealtimeWatchPropertyUpdateTicket = 
-	(teamspace: string, project: string, containerId: string, isFed:boolean, watchedProperty:string, callback: () => void) => (
+export const enableRealtimeWatchPropertiesUpdateTicket = 
+	(teamspace: string, project: string, modelId: string, isFed:boolean, properties:string[], callback: (...any) => void) => (
 		subscribeToRoomEvent(
-			{ teamspace, project, model: containerId },
+			{ teamspace, project, model: modelId },
 			ticketEvent(isFed, 'UpdateTicket'),
 			(ticket: Partial<EditableTicket>) => {
-				if (get(ticket, watchedProperty)) {
-					callback();
+				const aWatchedPropertyChanged = properties.some((watchedProperty) => get(ticket, watchedProperty));
+				if (aWatchedPropertyChanged) {
+					callback(teamspace, project, modelId, isFed, ticket);
 				}
 			},
 		)
 	);
+
+export const enableRealtimeWatchPropertiesNewTicket = 
+	(teamspace: string, project: string, containerId: string, isFed:boolean, callback: (...any) => void) => (
+		subscribeToRoomEvent(
+			{ teamspace, project, model: containerId },
+			ticketEvent(isFed, 'NewTicket'),
+			(ticket: Partial<EditableTicket>) => {
+				callback(teamspace, project, containerId, isFed, ticket);
+			},
+		)
+	);
+
 
