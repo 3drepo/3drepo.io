@@ -94,7 +94,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	// source, regardless of the current transformation.
 
 	const getImageSrc = async () => {
-		return new Promise((resolve) => {
+		const p = new Promise((resolve) => {
 			// The reason for building the response this way round is that the
 			// document may be unloaded while canvas is rasterised, so we can't
 			// guarantee we can get the width and height later.
@@ -110,6 +110,8 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 				},
 			});
 		});
+		documentViewer.current.pendingTasks.push(p);
+		return p;
 	};
 
 	const getPageSize = () => {
@@ -340,20 +342,29 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			// be transformed underneath the scroll view). These are the ones we
 			// create for the Component.
 
-			// The scroll view should be the ImageContainer of the viewer2D component,
-			// so that the same container emits events for all viewers.
+			// The scroll view should be the ImageContainer of the viewer2D
+			// component, so that the same container emits events for all viewers.
 
 			scrollView.current = viewer.current.parentElement;
 
-			// The scroll view must have the overflow mode set to hidden for the viewer
-			// to work correctly - if the element is created outside this component,
-			// ensure that this property is set..
+			// The scroll view must have the overflow mode set to hidden for the
+			// viewer to work correctly - if the element is created outside this
+			// component, ensure that this property is set...
 
 			scrollView.current.style.overflow = 'hidden';
 
 			documentViewer.current = new core.DocumentViewer();
 			documentViewer.current.setScrollViewElement(scrollView.current);
 			documentViewer.current.setViewerElement(viewer.current);
+
+			// When the effect is cleaned up, disposing of the documentViewer
+			// instance will wait on all the promises in this array. This allows
+			// long running tasks to hold that viewer open until they are done.
+			// It does not preserve documentViewer.current, or stop a new one
+			// being created though, and so does not mean it is still safe to
+			// call the exported methods.
+
+			documentViewer.current.pendingTasks = [];
 
 			// placeholder stores the element holding the page while the new one
 			// is being prepared; it cannot be left under the viewer element,
@@ -404,8 +415,9 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 
 		// Clean up function
 		return () => {
-			documentViewer.current.closeDocument();
-			documentViewer.current.dispose();
+			const docViewer = documentViewer.current;
+			Promise.all(docViewer.pendingTasks).then(() => docViewer.closeDocument()).then(() => docViewer.dispose());
+			documentViewer.current = null;
 		};
 	}, []);
 
@@ -422,7 +434,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			// Due to effects such as inertia, we may still get a few setTransform
 			// events, after the viewer has been torn down...
 
-			if (!documentViewer.current.getDocument()) {
+			if (!documentViewer.current || !documentViewer.current.getDocument()) {
 				return;
 			}
 
