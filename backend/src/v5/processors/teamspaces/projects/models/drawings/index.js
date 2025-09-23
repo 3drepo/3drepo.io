@@ -156,12 +156,12 @@ Drawings.getImageByRevision = async (teamspace, project, drawing, revision) => {
 			{ image: 1, format: 1, rFile: 1 },
 		);
 
-		if (!rev?.image) {
-			throw templates.fileNotFound;
-		}
-
 		if (rev.format === '.pdf') {
 			return getFileAsStream(teamspace, DRAWINGS_HISTORY_COL, rev.rFile[0]);
+		}
+
+		if (!rev?.image) {
+			throw templates.fileNotFound;
 		}
 
 		return getFileAsStream(teamspace, DRAWINGS_HISTORY_COL, rev.image);
