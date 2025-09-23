@@ -32,6 +32,7 @@ import { DrawingsActions } from '../drawings.redux';
 import { createDrawingFromRevisionBody, createFormDataFromRevisionBody } from './drawingRevisions.helpers';
 import { selectActiveRevisions, selectIsPending, selectStatusCodes } from './drawingRevisions.selectors';
 import { UploadStatus } from '../../containers/containers.types';
+import { selectIsProjectAdmin } from '../../projects/projects.selectors';
 
 export function* fetch({ teamspace, projectId, drawingId, onSuccess }: FetchAction) {
 	if (yield select(selectIsPending, drawingId)) return;
@@ -73,27 +74,32 @@ export function* setVoidStatus({ teamspace, projectId, drawingId, revisionId, is
 
 export function* createRevision({ teamspace, projectId, uploadId, body }: CreateRevisionAction) {
 	let { drawingId } = body;
-	if (!drawingId) {
-		try {
-			const newDrawing = createDrawingFromRevisionBody(body);
-			drawingId = yield API.Drawings.createDrawing(teamspace, projectId, newDrawing);
-			yield put(DrawingsActions.createDrawingSuccess(projectId, { _id: drawingId, ...newDrawing }));
-		} catch (error) {
-			yield put(DialogsActions.open('alert', {
-				currentActions: formatMessage({ id: 'revision.drawingsCreation.error', defaultMessage: 'trying to create drawing' }),
-				error,
-			}));
-		}
-	} else {
-		try {
-			const drawing = createDrawingFromRevisionBody(body);
-			yield API.Drawings.updateDrawing(teamspace, projectId, drawingId, drawing);
-			yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, drawing));
-		} catch (error) {
-			yield put(DialogsActions.open('alert', {
-				currentActions: formatMessage({ id: 'revision.drawingsUpdate.error', defaultMessage: 'trying to update a drawing' }),
-				error,
-			}));
+	const isProjectAdmin = yield select(selectIsProjectAdmin);
+
+	// If the user is not a project admin, they cannot create a new drawing or update it.
+	if (isProjectAdmin) {
+		if (!drawingId) {
+			try {
+				const newDrawing = createDrawingFromRevisionBody(body);
+				drawingId = yield API.Drawings.createDrawing(teamspace, projectId, newDrawing);
+				yield put(DrawingsActions.createDrawingSuccess(projectId, { _id: drawingId, ...newDrawing }));
+			} catch (error) {
+				yield put(DialogsActions.open('alert', {
+					currentActions: formatMessage({ id: 'revision.drawingsCreation.error', defaultMessage: 'trying to create drawing' }),
+					error,
+				}));
+			}
+		} else {
+			try {
+				const drawing = createDrawingFromRevisionBody(body);
+				yield API.Drawings.updateDrawing(teamspace, projectId, drawingId, drawing);
+				yield put(DrawingsActions.updateDrawingSuccess(projectId, drawingId, drawing));
+			} catch (error) {
+				yield put(DialogsActions.open('alert', {
+					currentActions: formatMessage({ id: 'revision.drawingsUpdate.error', defaultMessage: 'trying to update a drawing' }),
+					error,
+				}));
+			}
 		}
 	}
 

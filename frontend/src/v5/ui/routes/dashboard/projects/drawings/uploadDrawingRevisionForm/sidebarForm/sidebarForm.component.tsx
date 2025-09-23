@@ -20,19 +20,23 @@ import { FormattedMessage } from 'react-intl';
 import { useFormContext } from 'react-hook-form';
 import { MenuItem } from '@mui/material';
 import { FormNumberField, FormSelect, FormTextField } from '@controls/inputs/formInputs.component';
-import { get } from 'lodash';
+import { get, has } from 'lodash';
 import { Heading, Title, FlexContainer } from './sidebarForm.styles';
 import { useContext } from 'react';
 import { UploadFilesContext } from '@components/shared/uploadFiles/uploadFilesContext';
-import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DrawingsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MODEL_UNITS } from '../../../models.helpers';
 import { DoubleInputLineContainer } from '../../drawingDialogs/drawingForm.styles';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { CALIBRATION_INVALID_RANGE_ERROR } from '@/v5/validation/drawingSchemes/drawingSchemes';
 import { watchVerticalRange } from '../../drawingDialogs/drawingsDialogs.hooks';
+import { ErrorMessage } from '@controls/errorMessage/errorMessage.component';
+
+const FieldsForProjectAdministrators = ['drawingNumber', 'drawingType', 'drawingDesc', 'calibration'];
 
 export const SidebarForm = () => {
 	const types = DrawingsHooksSelectors.selectTypes();
+	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const formData = useFormContext();
 	const { getValues, formState: { errors } } = formData;
 	const { fields, selectedId } = useContext(UploadFilesContext);
@@ -41,6 +45,7 @@ export const SidebarForm = () => {
 	const revisionPrefix = `uploads.${selectedIndex}`;
 	const [drawingId, drawingName] = getValues([`${revisionPrefix}.drawingId`, `${revisionPrefix}.drawingName`]);
 	const getError = (field: string) => get(errors, `${revisionPrefix}.${field}`);
+	const hasAdministratorErrors =  FieldsForProjectAdministrators.some((field) => has(errors, `${revisionPrefix}.${field}`));
 
 	const fetched = DrawingsHooksSelectors.selectDrawingFetched(drawingId);
 	const hideBottomExtentError = getError('calibration.verticalRange')?.some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
@@ -51,18 +56,28 @@ export const SidebarForm = () => {
 	return (
 		<>
 			<Title>{drawingName}</Title>
+			{hasAdministratorErrors &&
+				<ErrorMessage>
+					<FormattedMessage
+						id="drawing.uploads.sidebar.drawing.errorFormCollaborator"
+						defaultMessage="There are some wrong values for this drawing. Please contact the project administrator to fix the problems."
+					/>
+				</ErrorMessage>
+			}
 			<FlexContainer>
 				<FormTextField
 					name={`${revisionPrefix}.drawingNumber`}
 					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.drawingNumber', defaultMessage: 'Drawing Number' })}
 					formError={getError('drawingNumber')}
 					required
+					disabled={!isProjectAdmin}
 				/>
 				<FormSelect
 					name={`${revisionPrefix}.drawingType`}
 					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.type', defaultMessage: 'Category' })}
 					formError={getError('drawingType')}
 					required
+					disabled={!isProjectAdmin}
 				>
 					{types.map((type) => (
 						<MenuItem key={type} value={type}> {type}</MenuItem>
@@ -72,6 +87,7 @@ export const SidebarForm = () => {
 					name={`${revisionPrefix}.drawingDesc`}
 					label={formatMessage({ id: 'drawing.uploads.sidebar.drawing.description', defaultMessage: 'Description' })}
 					formError={getError('drawingDesc')}
+					disabled={!isProjectAdmin}
 				/>
 			</FlexContainer>
 			<Heading>
@@ -87,6 +103,7 @@ export const SidebarForm = () => {
 					label={formatMessage({ id: 'drawings.form.bottomExtent', defaultMessage: 'Bottom Extent' })}
 					defaultValue={0}
 					required
+					disabled={!isProjectAdmin}
 				/>
 				<FormNumberField
 					name={`${revisionPrefix}.calibration.verticalRange.1`}
@@ -94,6 +111,7 @@ export const SidebarForm = () => {
 					label={formatMessage({ id: 'drawings.form.topExtent', defaultMessage: 'Top Extent' })}
 					required
 					defaultValue={1}
+					disabled={!isProjectAdmin}
 				/>
 			</DoubleInputLineContainer>
 			<FormSelect
@@ -101,6 +119,7 @@ export const SidebarForm = () => {
 				formError={getError('units')}
 				label={formatMessage({ id: 'drawings.form.units', defaultMessage: 'Units' })}
 				defaultValue="mm"
+				disabled={!isProjectAdmin}
 			>
 				{MODEL_UNITS.map(({ value, name }) => (
 					<MenuItem key={value} value={value}>{name}</MenuItem>
