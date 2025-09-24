@@ -152,13 +152,7 @@ Drawings.getLatestThumbnail = async (teamspace, project, drawing) => {
 
 Drawings.getImageByRevision = async (teamspace, project, drawing, revision) => {
 	try {
-		const rev = await getRevisionByIdOrTag(teamspace, drawing, modelTypes.DRAWING, revision,
-			{ image: 1, format: 1, rFile: 1 },
-		);
-
-		if (rev.format === '.pdf') {
-			return getFileAsStream(teamspace, DRAWINGS_HISTORY_COL, rev.rFile[0]);
-		}
+		const rev = await getRevisionByIdOrTag(teamspace, drawing, modelTypes.DRAWING, revision, { image: 1 });
 
 		if (!rev?.image) {
 			throw templates.fileNotFound;

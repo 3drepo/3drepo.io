@@ -494,7 +494,7 @@ ServiceHelper.generateRevisionEntry = (isVoid = false, hasFile = true, modelType
 		status,
 		statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
 		revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
-		format: modelType === modelTypes.DRAWING ? '.dwg' : undefined,
+		format: modelType === modelTypes.DRAWING ? '.pdf' : undefined,
 		author: ServiceHelper.generateRandomString(),
 		timestamp: timestamp || ServiceHelper.generateRandomDate(),
 		desc: ServiceHelper.generateRandomString(),

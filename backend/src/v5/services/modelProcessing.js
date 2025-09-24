@@ -99,8 +99,14 @@ ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo
 
 	const incomplete = format !== '.pdf';
 
+	if (incomplete) {
+		revData.incomplete = true;
+	} else {
+		revData.image = fileId;
+	}
+
 	const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
-		{ ...revData, author: owner, format, rFile: [fileId], ...incomplete && { incomplete } });
+		{ ...revData, author: owner, format, rFile: [fileId] });
 
 	const fileMeta = { name: file.originalname, rev_id, project, model };
 	await storeFile(teamspace, DRAWINGS_HISTORY_COL, fileId, file.buffer, fileMeta);
