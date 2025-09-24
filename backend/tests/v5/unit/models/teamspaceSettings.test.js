@@ -22,7 +22,6 @@ const { src } = require('../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
-const { USERS_DB_NAME } = require(`${src}/models/users.constants`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);

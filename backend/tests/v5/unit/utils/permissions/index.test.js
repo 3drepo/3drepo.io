@@ -283,7 +283,7 @@ const testHasCommenterAccessToContainer = () => {
 		['tsAdmin', undefined, true, true],
 		['nobody', false, false, false],
 		['nobody', true, false, false],
-	])('Has commenter access to container', (user, adminCheck, isAdmin,	result) => {
+	])('Has commenter access to container', (user, adminCheck, isAdmin, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
 			if (adminCheck || adminCheck === undefined) Teamspaces.isTeamspaceAdmin.mockResolvedValueOnce(isAdmin);

@@ -238,8 +238,6 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 	const spaceUsed = await getSpaceUsed(teamspace, true);
 	const collaboratorsUsed = await getCollaboratorsAssigned(teamspace);
 
-	console.log(quotaInfo, spaceUsed);
-
 	return {
 		freeTier: quotaInfo.freeTier,
 		expiryDate: quotaInfo.expiryDate,

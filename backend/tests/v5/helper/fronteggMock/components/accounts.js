@@ -76,7 +76,7 @@ Accounts.addUsersToGroup = (accountId, groupId, userIds) => {
 	}
 };
 
-Accounts.removeUsersFromGroup = async (accountId, groupId, userIds) => {
+Accounts.removeUsersFromGroup = (accountId, groupId, userIds) => {
 	if (groupsByAccount[accountId]?.[groupId]) {
 		groupsByAccount[accountId][groupId].users = groupsByAccount[accountId][groupId]
 			.users.filter((user) => !userIds.includes(user.id));

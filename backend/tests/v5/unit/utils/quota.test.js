@@ -23,9 +23,6 @@ const Quota = require(`${src}/utils/quota`);
 jest.mock('../../../../src/v5/handler/db');
 const DBHandler = require(`${src}/handler/db`);
 
-jest.mock('../../../../src/v5/processors/teamspaces');
-const TeamspaceProcessor = require(`${src}/processors/teamspaces`);
-
 const { templates } = require(`${src}/utils/responseCodes`);
 const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
