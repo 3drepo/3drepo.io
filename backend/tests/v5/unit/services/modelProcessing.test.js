@@ -230,18 +230,22 @@ const testProcessDrawingUpload = () => {
 			const project = generateUUID();
 			const model = generateRandomString();
 			const revInfo = generateRandomObject();
-			revInfo.owner = generateRandomString();
+			const owner = generateRandomString();
 			const file = { buffer: generateRandomString(), originalname: `${generateRandomString()}.pdf` };
 
 			const revId = generateUUID();
 
 			Revisions.addRevision.mockResolvedValueOnce(revId);
 
-			await ModelProcessing.processDrawingUpload(teamspace, project, model, revInfo, file);
+			await ModelProcessing.processDrawingUpload(teamspace, project, model, { owner, ...revInfo }, file);
 
 			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
 			expect(Revisions.addRevision).toHaveBeenCalledWith(teamspace, project, model, modelTypes.DRAWING,
-				expect.objectContaining(revInfo));
+				expect.objectContaining({
+					author: owner,
+					...revInfo,
+				}),
+			);
 			expect(Revisions.addRevision.mock.calls[0][4].incomplete).toBeUndefined();
 			expect(Revisions.addRevision.mock.calls[0][4].image).toBeDefined();
 

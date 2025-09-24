@@ -24,17 +24,17 @@ const ImgHelper = require(`${src}/utils/helper/images`);
 const testCreateThumbnail = () => {
 	describe('Create thumbnail', () => {
 		test('Should work with a raster image', async () => {
-			await ImgHelper.createThumbnail(readFileSync(image), 10);
+			await ImgHelper.createThumbnail(readFileSync(image), 'image/png', 10);
 			await expect(ImgHelper.createThumbnail(readFileSync(image), 10)).resolves.not.toBeUndefined();
 		});
 		test('Should work with a svg image', async () => {
-			await expect(ImgHelper.createThumbnail(readFileSync(svg))).resolves.not.toBeUndefined();
+			await expect(ImgHelper.createThumbnail(readFileSync(svg), 'image/svg+xml')).resolves.not.toBeUndefined();
 		});
 		test('Should work with a pdf document', async () => {
-			await expect(ImgHelper.createThumbnail(readFileSync(pdfModel))).resolves.not.toBeUndefined();
+			await expect(ImgHelper.createThumbnail(readFileSync(pdfModel), 'application/pdf')).resolves.not.toBeUndefined();
 		});
 		test('Should fail if it is not an image', async () => {
-			await expect(ImgHelper.createThumbnail(readFileSync(dwgModel))).rejects.not.toBeUndefined();
+			await expect(ImgHelper.createThumbnail(readFileSync(dwgModel), 'application/dwg')).rejects.not.toBeUndefined();
 		});
 		test('Should fail image is not passed in', async () => {
 			await expect(ImgHelper.createThumbnail(undefined)).rejects.not.toBeUndefined();
