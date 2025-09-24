@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { src, image, svg, dwgModel } = require('../../../helper/path');
+const { src, image, svg, pdfModel, dwgModel } = require('../../../helper/path');
 const { determineTestGroup } = require('../../../helper/services');
 const { readFileSync } = require('fs');
 
@@ -29,6 +29,9 @@ const testCreateThumbnail = () => {
 		});
 		test('Should work with a svg image', async () => {
 			await expect(ImgHelper.createThumbnail(readFileSync(svg))).resolves.not.toBeUndefined();
+		});
+		test('Should work with a pdf document', async () => {
+			await expect(ImgHelper.createThumbnail(readFileSync(pdfModel))).resolves.not.toBeUndefined();
 		});
 		test('Should fail if it is not an image', async () => {
 			await expect(ImgHelper.createThumbnail(readFileSync(dwgModel))).rejects.not.toBeUndefined();
