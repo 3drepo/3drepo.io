@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createCanvas } = require('canvas');
-const pdfJsLib = require('pdfjs-dist');
+const { createCanvas } = require('@napi-rs/canvas');
+// eslint-disable-next-line import/extensions
+const pdfJsLib = require('pdfjs-dist/legacy/build/pdf.mjs');
 const sharp = require('sharp');
 
 const ImageHelper = {};
