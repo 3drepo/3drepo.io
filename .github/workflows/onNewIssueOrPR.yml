@@ -31,6 +31,15 @@ jobs:
           content_id: ${{ github.event.issue.node_id}}
           field: Sprint
           value: 'Web'
+      - name: Set issue to Development
+        uses: 3drepo/update-project-action@2.0
+        with:
+          github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          organization: 3drepo
+          project_number: 22
+          content_id: ${{ github.event.issue.node_id}}
+          field: 'Feature Progress'
+          value: 'Development'
   update-pr:
     name: Update project fields (PR)
     runs-on: ubuntu-latest
