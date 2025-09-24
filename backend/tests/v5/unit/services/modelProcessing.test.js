@@ -74,12 +74,12 @@ const testQueueModelUpload = () => {
 			await fs.copyFile(objModel, fileCreated);
 			await expect(ModelProcessing.queueModelUpload(teamspace, model, data, file)).resolves.toBeUndefined();
 
-			expect(Queue.queueMessage).toBeCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 
 			const corId = Queue.queueMessage.mock.calls[0][1];
 
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model, corId, status: 'queued' });
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model, corId, status: 'queued' });
 		});
 	});
 
@@ -114,8 +114,8 @@ const testCallbackQueueConsumer = () => {
 				corId: properties.correlationId,
 				status: content.status,
 			};
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
 		});
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
@@ -142,8 +142,8 @@ const testCallbackQueueConsumer = () => {
 				user: content.user,
 			};
 
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
 		});
 
 		test('Should fail gracefully if the service failed to process the message', async () => {
@@ -154,7 +154,7 @@ const testCallbackQueueConsumer = () => {
 			const callbackFn = await getCallbackFn();
 			await callbackFn({ content: {}, properties });
 
-			expect(publishFn).not.toBeCalled();
+			expect(publishFn).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -187,8 +187,8 @@ const testProcessDrawingUpload = () => {
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.drawing_queue,
 				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
 
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, {
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, {
 				teamspace, model, corId: UUIDToString(revId), status: processStatuses.QUEUED,
 			});
 		});
@@ -220,7 +220,7 @@ const testProcessDrawingUpload = () => {
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.drawing_queue,
 				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
 
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, {
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
 				teamspace, model, corId: UUIDToString(revId), value: 4,
 			});
 		});
@@ -256,10 +256,10 @@ const testProcessDrawingUpload = () => {
 
 			expect(Revisions.addRevision.mock.calls[0][4].image).toEqual(FilesManager.storeFile.mock.calls[0][2]);
 
-			expect(Queue.queueMessage).not.toBeCalled();
+			expect(Queue.queueMessage).not.toHaveBeenCalled();
 
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, {
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
 				teamspace, model, corId: UUIDToString(revId), value: 0, user: owner,
 			});
 		});
