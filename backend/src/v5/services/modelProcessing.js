@@ -115,7 +115,7 @@ ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo
 		const queueMeta = { format, size: file.buffer.length, owner };
 		await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta, file.buffer);
 	} else {
-		publish(events.QUEUED_TASK_COMPLETED, { teamspace, model, corId: rev_id, value: 0, user: owner });
+		publish(events.QUEUED_TASK_COMPLETED, { teamspace, model, corId: UUIDToString(rev_id), value: 0, user: owner });
 	}
 };
 

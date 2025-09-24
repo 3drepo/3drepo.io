@@ -260,7 +260,7 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toBeCalledTimes(1);
 			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, {
-				teamspace, model, corId: UUIDToString(revId), value: 0, user: revInfo.owner,
+				teamspace, model, corId: UUIDToString(revId), value: 0, user: owner,
 			});
 		});
 	});
