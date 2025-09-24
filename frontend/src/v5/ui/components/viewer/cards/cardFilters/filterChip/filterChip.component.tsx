@@ -20,11 +20,11 @@ import { ChipContainer, DeleteButton, TextWrapper, OperatorIconContainer, Displa
 import { FILTER_OPERATOR_ICON, getFilterOperatorLabels } from '../cardFilters.helpers';
 import { Tooltip } from '@mui/material';
 import { FormattedMessage } from 'react-intl';
-import { CardFilterType, BaseFilter } from '../cardFilters.types';
+import { TicketFilterType, BaseFilter } from '../cardFilters.types';
 
 type FilterChipProps = {
 	property: string;
-	type: CardFilterType,
+	type: TicketFilterType,
 	filter: BaseFilter,
 	selected?: boolean;
 	onDelete: () => void;

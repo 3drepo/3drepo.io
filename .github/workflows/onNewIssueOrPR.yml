@@ -5,7 +5,8 @@ on:
     types: [opened]
   pull_request:
     types: [opened]
-
+permissions:
+  issues: write
 jobs:
   add-to-project:
     name: Add issue/PR to project
@@ -22,7 +23,7 @@ jobs:
     if: ${{github.event.issue.number}}
     steps:
       - name: Apply issue sprint to PR
-        uses: 3drepo/update-project-action@v1.1
+        uses: 3drepo/update-project-action@2.0
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
@@ -30,6 +31,15 @@ jobs:
           content_id: ${{ github.event.issue.node_id}}
           field: Sprint
           value: 'Web'
+      - name: Set issue to Development
+        uses: 3drepo/update-project-action@2.0
+        with:
+          github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
+          organization: 3drepo
+          project_number: 22
+          content_id: ${{ github.event.issue.node_id}}
+          field: 'Feature Progress'
+          value: 'Development'
   update-pr:
     name: Update project fields (PR)
     runs-on: ubuntu-latest
@@ -44,7 +54,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: Get issue sprint
         id: issue-sprint
-        uses: 3drepo/update-project-action@v1.1
+        uses: 3drepo/update-project-action@2.0
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
@@ -54,7 +64,7 @@ jobs:
           operation: read
       - name: Set issue to QA
         id: issue-to-qa
-        uses: 3drepo/update-project-action@v1.1
+        uses: 3drepo/update-project-action@2.0
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
@@ -63,7 +73,7 @@ jobs:
           field: 'Feature Progress'
           value: 'QA'
       - name: Apply issue sprint to PR
-        uses: 3drepo/update-project-action@update-PR
+        uses: 3drepo/update-project-action@2.0
         if: ${{steps.issue-sprint.outputs.field_read_value}}
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}

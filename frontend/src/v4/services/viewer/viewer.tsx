@@ -1325,6 +1325,18 @@ export class ViewerService {
 		UnityUtil.clipToolTranslate();
 	}
 
+	public setClipGizmoSize(nPixels: number) {
+		UnityUtil.setClipGizmoSize(nPixels);
+	}
+
+	public setClipPlaneSize(nPixels: number) {
+		UnityUtil.setClipPlaneSize(nPixels);
+	}
+
+	public setClipGizmoAxisScale(scale: number) {
+		UnityUtil.setClipGizmoAxisScale(scale);
+	}
+
 	public setNavigationOn() {
 		UnityUtil.setNavigationOn();
 	}
