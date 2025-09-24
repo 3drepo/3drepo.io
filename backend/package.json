@@ -70,7 +70,7 @@
     "nodemailer": "6.9.14",
     "openapi-schema-validator": "12.1.3",
     "paypal-rest-sdk": "1.8.1",
-    "pdfjs-dist": "4.2.67",
+    "pdfjs-dist": "^5.4.149",
     "pug": "3.0.3",
     "serialize-javascript": "6.0.2",
     "serve-favicon": "2.5.0",
