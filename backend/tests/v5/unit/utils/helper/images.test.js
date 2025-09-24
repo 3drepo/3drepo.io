@@ -33,6 +33,11 @@ const testCreateThumbnail = () => {
 		test('Should work with a pdf document', async () => {
 			await expect(ImgHelper.createThumbnail(readFileSync(pdfModel), 'application/pdf')).resolves.not.toBeUndefined();
 		});
+		// The pdfjs library loads dynamically, so make sure the cached version
+		// is used, and works, for subsequent conversions.
+		test('Should work with a pdf document for the second time', async () => {
+			await expect(ImgHelper.createThumbnail(readFileSync(pdfModel), 'application/pdf')).resolves.not.toBeUndefined();
+		});
 		test('Should fail if it is not an image', async () => {
 			await expect(ImgHelper.createThumbnail(readFileSync(dwgModel), 'application/dwg')).rejects.not.toBeUndefined();
 		});
