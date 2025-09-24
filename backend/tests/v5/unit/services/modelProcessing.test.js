@@ -161,7 +161,7 @@ const testCallbackQueueConsumer = () => {
 
 const testProcessDrawingUpload = () => {
 	describe('Process drawing upload', () => {
-		test('Should store the file and put a message on the queue', async () => {
+		test('Should store the file and put a message on the queue if it requires further processing', async () => {
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const model = generateRandomString();
@@ -222,6 +222,41 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, {
 				teamspace, model, corId: UUIDToString(revId), value: 4,
+			});
+		});
+
+		test('Should store the file and put the same reference into revision.image if no further processing is required', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const model = generateRandomString();
+			const revInfo = generateRandomObject();
+			revInfo.owner = generateRandomString();
+			const file = { buffer: generateRandomString(), originalname: `${generateRandomString()}.pdf` };
+
+			const revId = generateUUID();
+
+			Revisions.addRevision.mockResolvedValueOnce(revId);
+
+			await ModelProcessing.processDrawingUpload(teamspace, project, model, revInfo, file);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.addRevision).toHaveBeenCalledWith(teamspace, project, model, modelTypes.DRAWING,
+				expect.objectContaining(revInfo));
+			expect(Revisions.addRevision.mock.calls[0][4].incomplete).toBeUndefined();
+			expect(Revisions.addRevision.mock.calls[0][4].image).toBeDefined();
+
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`, expect.anything(), file.buffer, {
+				name: file.originalname, rev_id: revId, project, model,
+			});
+
+			expect(Revisions.addRevision.mock.calls[0][4].image).toEqual(FilesManager.storeFile.mock.calls[0][2]);
+
+			expect(Queue.queueMessage).notToHaveBeenCalled();
+
+			expect(publishFn).toBeCalledTimes(1);
+			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, {
+				teamspace, model, corId: UUIDToString(revId), value: 0, user: revInfo.owner,
 			});
 		});
 	});
