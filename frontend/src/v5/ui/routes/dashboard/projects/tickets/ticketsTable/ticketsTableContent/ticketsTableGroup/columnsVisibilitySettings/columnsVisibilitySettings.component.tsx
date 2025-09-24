@@ -18,7 +18,7 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { getPropertyLabel, stripModuleOrPropertyPrefix } from '../../../ticketsTable.helper';
+import { getPropertyLabel } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
@@ -106,7 +106,7 @@ export const ColumnsVisibilitySettings = () => {
 	);
 	const ticketsIds = tickets.map(({ _id }) => _id);
 
-	const orderingColumnPropertiesFetched = TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, stripModuleOrPropertyPrefix(sortingColumn));
+	const orderingColumnPropertiesFetched = TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, sortingColumn);
 
 	useEffect(() => {
 		if (!orderingColumnPropertiesFetched) return;

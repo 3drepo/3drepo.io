@@ -24,7 +24,7 @@ import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.compon
 import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
-import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
+import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
@@ -41,7 +41,7 @@ type CollapsibleTicketsGroupProps = {
 };
 
 const CollapsibleTicketsGroup = ({ 
-	propertyValue, groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName 
+	propertyValue, groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName,
 }: CollapsibleTicketsGroupProps) => {
 	const ticketsIds = tickets.map(({ _id }) => _id);
 	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
@@ -93,7 +93,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 	}
 
 	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
-	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
+	const propertyName = groupBy;
 
 	return (
 		<Container>

@@ -24,7 +24,6 @@ import { useSearchParam, Transformers } from '@/v5/ui/routes/useSearchParam';
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { EventEmitter } from 'eventemitter3';
-import { stripModuleOrPropertyPrefix } from './ticketsTable.helper';
 import { enableRealtimeWatchPropertiesUpdateTicket } from '@/v5/services/realtime/ticketTable.events';
 
 export const useWatchPropertiesChange = (properties, callback) => {
@@ -36,7 +35,7 @@ export const useWatchPropertiesChange = (properties, callback) => {
 		const watch = new EventEmitter();
 		watch.on('update', callback);
 
-		dispatch(TicketsActions.watchPropertiesUpdates(properties.map(stripModuleOrPropertyPrefix), watch));
+		dispatch(TicketsActions.watchPropertiesUpdates(properties, watch));
 
 		return () => {
 			watch.off('update', callback);
