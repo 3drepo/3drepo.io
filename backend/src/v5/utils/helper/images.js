@@ -20,11 +20,18 @@ const sharp = require('sharp');
 
 const ImageHelper = {};
 
+let pdfJsLibCache;
+
 const loadPdfJsDist = () => new Promise((resolve) => {
-	// eslint-disable-next-line node/no-unsupported-features/es-syntax, import/extensions
-	import('pdfjs-dist/legacy/build/pdf.mjs').then((pdfJsLib) => {
-		resolve(pdfJsLib);
-	});
+	if (!pdfJsLibCache) {
+		// eslint-disable-next-line node/no-unsupported-features/es-syntax, import/extensions
+		import('pdfjs-dist/legacy/build/pdf.mjs').then((pdfJsLib) => {
+			pdfJsLibCache = pdfJsLib;
+			resolve(pdfJsLibCache);
+		});
+	} else {
+		resolve(pdfJsLibCache);
+	}
 });
 
 ImageHelper.createThumbnail = async (buffer, mimeType, width = 600, density = 150) => {
@@ -33,7 +40,10 @@ ImageHelper.createThumbnail = async (buffer, mimeType, width = 600, density = 15
 	let imgBuffer;
 	if (mimeType === 'application/pdf') {
 		const pdfJsLib = await loadPdfJsDist();
-		const document = await pdfJsLib.getDocument(buffer.buffer).promise;
+		const document = await pdfJsLib.getDocument({
+			data: buffer.buffer,
+			standardFrontDataUrl: '../../../node_modules/pdfjs-dist/standard_fonts',
+		}).promise;
 		const page = await document.getPage(1);
 		const viewport = page.getViewport({ scale: 1 });
 		const canvas = createCanvas(viewport.width, viewport.height);
