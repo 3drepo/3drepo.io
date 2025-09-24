@@ -18,7 +18,6 @@
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
-import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { Chip } from '@controls/chip/chip.component';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
@@ -30,6 +29,7 @@ import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanS
 import { CellDate } from './ticketsTableCell.styles';
 import { Cell } from './cell/cell.component';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
+import { AssigneesValuesDisplay } from '@controls/assigneesSelect/assigneeValuesDisplay/assigneeValuesDisplay.component';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -80,7 +80,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 			case BaseProperties.OWNER:
 				return (
 					<Cell name={name}>
-						<AssigneesSelect value={value} disabled />
+						<AssigneesValuesDisplay value={value}/>
 					</Cell>
 				);
 			case IssueProperties.DUE_DATE:
@@ -109,10 +109,9 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	}
 
 	if (['oneOf', 'manyOf'].includes(propertyType) && isJobAndUsersType(name)) {
-		const multiple = propertyType === 'manyOf';
 		return (
 			<Cell name={name}>
-				{!!value?.length && (<AssigneesSelect value={value} multiple={multiple} disabled />)}
+				{!!value?.length && (<AssigneesValuesDisplay value={value} />)}
 			</Cell>
 		);
 	}
