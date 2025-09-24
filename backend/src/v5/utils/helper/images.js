@@ -16,17 +16,23 @@
  */
 
 const { createCanvas } = require('@napi-rs/canvas');
-// eslint-disable-next-line import/extensions
-const pdfJsLib = require('pdfjs-dist/legacy/build/pdf.mjs');
 const sharp = require('sharp');
 
 const ImageHelper = {};
+
+const loadPdfJsDist = () => new Promise((resolve) => {
+	// eslint-disable-next-line node/no-unsupported-features/es-syntax, import/extensions
+	import('pdfjs-dist/legacy/build/pdf.mjs').then((pdfJsLib) => {
+		resolve(pdfJsLib);
+	});
+});
 
 ImageHelper.createThumbnail = async (buffer, mimeType, width = 600, density = 150) => {
 	if (!buffer) throw new Error('Image not provided');
 
 	let imgBuffer;
 	if (mimeType === 'application/pdf') {
+		const pdfJsLib = await loadPdfJsDist();
 		const document = await pdfJsLib.getDocument(buffer.buffer).promise;
 		const page = await document.getPage(1);
 		const viewport = page.getViewport({ scale: 1 });
