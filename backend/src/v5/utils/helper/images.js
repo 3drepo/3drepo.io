@@ -40,15 +40,18 @@ ImageHelper.createThumbnail = async (buffer, mimeType, width = 600, density = 15
 	let imgBuffer;
 	if (mimeType === 'application/pdf') {
 		const pdfJsLib = await loadPdfJsDist();
-		const document = await pdfJsLib.getDocument({
+		const loadingTask = pdfJsLib.getDocument({
 			data: buffer.buffer,
 			standardFrontDataUrl: '../../../node_modules/pdfjs-dist/standard_fonts',
-		}).promise;
+		});
+		const document = await loadingTask.promise;
 		const page = await document.getPage(1);
 		const viewport = page.getViewport({ scale: 1 });
 		const canvas = createCanvas(viewport.width, viewport.height);
 		const canvasContext = canvas.getContext('2d');
 		await page.render({ canvasContext, viewport }).promise;
+		await document.destroy();
+		await loadingTask.destroy();
 		imgBuffer = await canvas.toBuffer('image/jpeg');
 	} else {
 		imgBuffer = await sharp(buffer, { density })
