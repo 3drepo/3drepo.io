@@ -81,9 +81,9 @@ export const Viewer2D = () => {
 	const imgViewerRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
 
-	// The ImageReference state is updated based on the src property. The two
-	// members are held in the same object to ensure they are always updated
-	// together in the same frame.
+	// The ViewerAttributes state is updated based on the src property. The type
+	// and src members are held in the same object to ensure they are always
+	// updated together in the same React render/frame.
 
 	enum ViewerType {
 		None = 0,
@@ -105,7 +105,8 @@ export const Viewer2D = () => {
 	useEffect(() => {
 		if (src) {
 			// We are only interested in the headers for the blob, but the HEAD method
-			// is not supported for object URLs...
+			// is not supported for Object URLs, so for now do a full fetch (which is
+			// not too bad because it will only ever be called on Object URLs).
 			fetch(src).then((response) => {
 				const mimeType = response.headers.get('content-type');
 				const viewerSettings = {
@@ -220,10 +221,6 @@ export const Viewer2D = () => {
 		if (revisionId) return;
 		DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawingId);
 	}, [revisionId]);
-
-	// For now, we hide the ViewerLayer2D in expectation of the Apryse viewer handling
-	// all the annotations in its own coordinate space, but we may want to reintroduce
-	// this (with the pointer events turned off...)
 
 	return (
 		<ViewerContainer visible ref={containerRef}>
