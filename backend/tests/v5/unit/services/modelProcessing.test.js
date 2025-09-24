@@ -256,7 +256,7 @@ const testProcessDrawingUpload = () => {
 
 			expect(Revisions.addRevision.mock.calls[0][4].image).toEqual(FilesManager.storeFile.mock.calls[0][2]);
 
-			expect(Queue.queueMessage).notToHaveBeenCalled();
+			expect(Queue.queueMessage).not.toBeCalled();
 
 			expect(publishFn).toBeCalledTimes(1);
 			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, {
