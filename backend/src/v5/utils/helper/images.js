@@ -15,8 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const MimeTypes = require('./mimeTypes');
 const { createCanvas } = require('@napi-rs/canvas');
 const sharp = require('sharp');
+
 const { v5Path } = require('../../../interop');
 
 const ImageHelper = {};
@@ -39,7 +41,7 @@ ImageHelper.createThumbnail = async (buffer, mimeType, width = 600, density = 15
 	if (!buffer) throw new Error('Image not provided');
 
 	let imgBuffer;
-	if (mimeType === 'application/pdf') {
+	if (mimeType === MimeTypes.PDF) {
 		const pdfJsLib = await loadPdfJsDist();
 		const loadingTask = pdfJsLib.getDocument({
 			data: buffer.buffer,

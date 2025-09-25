@@ -21,7 +21,8 @@ const { src } = require('../../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID,
 	generateUUIDString, generateRandomNumber,
 	generateRevisionEntry, generateRandomBuffer } = require('../../../../../../helper/services');
-const MimeTypes = require('../../../../../../../../src/v5/utils/helper/mimeTypes');
+
+const MimeTypes = require(`${src}/utils/helper/mimeTypes`);
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
