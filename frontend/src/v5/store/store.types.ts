@@ -24,7 +24,7 @@ export type TicketId = { ticketId: string };
 export type DrawingId = { drawingId: string };
 
 
-export type OnSuccess = { onSuccess: () => void };
+export type OnSuccess<T=void> = { onSuccess: (T?) => void };
 export type OnError = { onError: (error) => void };
 
 export type TeamspaceAndProjectId = TeamspaceId & ProjectId;
@@ -37,7 +37,7 @@ export type ProjectAndContainerId = ProjectId & ContainerId;
 
 export type ProjectAndFederationId = ProjectId & FederationId;
 
-export type SuccessAndErrorCallbacks = OnSuccess & OnError;
+export type SuccessAndErrorCallbacks<T=void> = OnSuccess<T> & OnError;
 
 export type TeamspaceProjectAndModel = TeamspaceId & ProjectId & ModelId;
 
