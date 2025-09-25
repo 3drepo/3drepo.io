@@ -22,15 +22,22 @@ import { sortByName } from '@/v5/store/store.helpers';
 import { openUnsavedNewTicketWarningModal } from './selectMenus.helpers';
 import { InputControllerProps, InputController } from '@controls/inputs/inputController.component';
 import { Select, SelectProps } from '@controls/inputs/select/select.component';
+import { useEffect } from 'react';
 
 type TemplateFormSelectProps = { isNewTicketDirty?: boolean } & SelectProps;
-export const TemplateSelect = ({ isNewTicketDirty, ...props }: TemplateFormSelectProps) => {
+export const TemplateSelect = ({ isNewTicketDirty, onChange, ...props }: TemplateFormSelectProps) => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const handleOpen = () => {
 		if (!isNewTicketDirty) return;
 		openUnsavedNewTicketWarningModal();
 	};
+
+	useEffect(() => {
+        if (templates.length === 1) {
+            onChange?.({ target: { value: templates[0]._id } });
+        }
+    }, [templates.length]);
 
 	return (
 		<Select
@@ -41,6 +48,7 @@ export const TemplateSelect = ({ isNewTicketDirty, ...props }: TemplateFormSelec
 				return (<b>{name}</b>);
 			}}
 			{...props}
+			onChange={onChange}
 			onOpen={handleOpen}
 		>
 			{sortByName(templates).map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}
