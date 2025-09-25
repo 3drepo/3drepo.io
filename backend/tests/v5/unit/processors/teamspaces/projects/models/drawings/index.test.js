@@ -21,6 +21,7 @@ const { src } = require('../../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID,
 	generateUUIDString, generateRandomNumber,
 	generateRevisionEntry, generateRandomBuffer } = require('../../../../../../helper/services');
+const MimeTypes = require('../../../../../../../../src/v5/utils/helper/mimeTypes');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
@@ -608,7 +609,7 @@ const testCreateDrawingThumbnail = () => {
 			const imageRef = generateUUID();
 			const imageBuffer = generateRandomBuffer();
 			const readStream = Readable.from(imageBuffer);
-			const mimeType = 'application/pdf';
+			const mimeType = MimeTypes.PDF;
 			const thumbnailBuffer = generateRandomString();
 
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef });
@@ -642,7 +643,7 @@ const testCreateDrawingThumbnail = () => {
 			const imageRef = generateUUID();
 			const imageBuffer = generateRandomBuffer();
 			const readStream = Readable.from(imageBuffer);
-			const mimeType = 'application/pdf';
+			const mimeType = MimeTypes.PDF;
 
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef });
 			FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream, mimeType });
