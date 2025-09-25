@@ -23,6 +23,7 @@ import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsV
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { TicketsTableHeaderFilter } from './ticketsTableHeaderFilter.component';
 
 const TableHeader = ({ name, children, disableSorting = false, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
@@ -54,6 +55,7 @@ export const TicketsTableHeaders = () => {
 			{visibleSortedColumnsNames.map((name) => (
 				<TableHeader key={name} name={name} disableSorting={name === 'id'}>
 					{getPropertyLabel(name)}
+					<TicketsTableHeaderFilter propertyName={name}/>
 				</TableHeader>
 			))}
 			<ColumnsVisibilitySettings />

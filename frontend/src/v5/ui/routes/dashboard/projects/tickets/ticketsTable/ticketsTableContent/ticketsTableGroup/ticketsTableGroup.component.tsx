@@ -115,8 +115,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 			items,
 			(item) => {
 				const sortingElement = selectTicketPropertyByName(getState(), item._id, column);
-		
-				return sortingElement?.toLowerCase?.() ?? sortingElement;
+				return sortingElement?.toLowerCase?.().trim?.() ?? sortingElement;
 			},
 			order,
 		);
