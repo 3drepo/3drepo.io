@@ -31,6 +31,12 @@ const findFilterByPropertyName = (filters: TicketFilter[], propertyName: string)
 
 	// if the propertyname is like title
 	if (chunks.length === 1) {
+		// In tickets table the property 'id' is refered to templatecode:ticketnumber
+		// in the filters this is of type 'ticketCode'
+		if (propertyName === 'id') {
+			chunks[0] = 'ticketCode';
+		}
+
 		return filters.find((f) => (f.property === chunks[0] || f.type === chunks[0]) && !f.module);
 	}
 
