@@ -141,8 +141,6 @@ function createClientConfig(serverConfig, req) {
 
 	clientConfig.impliedPermission = C.IMPLIED_PERM;
 
-	clientConfig.apryse = config.apryse;
-
 	return clientConfig;
 }
 
