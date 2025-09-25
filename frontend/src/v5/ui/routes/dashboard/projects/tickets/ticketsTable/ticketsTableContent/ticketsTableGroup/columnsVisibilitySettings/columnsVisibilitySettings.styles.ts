@@ -58,3 +58,8 @@ export const EmptyListMessageContainer = styled.div`
 	padding: 0 15px 15px;
 `;
 
+export const ActionButton = styled.div<{ disabled: boolean, onClick: () => void }>`
+	padding-left: 15px;
+	color: ${({ disabled, theme: { palette } }) => disabled ? palette.base.lightest : palette.secondary.main};
+	cursor: ${({ disabled }) => disabled ? 'default' : 'pointer'};
+`;

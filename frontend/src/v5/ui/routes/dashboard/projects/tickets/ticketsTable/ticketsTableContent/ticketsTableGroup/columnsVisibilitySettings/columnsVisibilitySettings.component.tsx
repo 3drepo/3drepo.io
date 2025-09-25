@@ -20,7 +20,7 @@ import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
 import { getPropertyLabel, stripModuleOrPropertyPrefix } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
-import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
+import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer, ActionButton } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
 import { useContext, useEffect } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
@@ -55,6 +55,14 @@ const List = () => {
 		return groups;
 	};
 
+	const clearAll = () => {
+		// The table needs to have at least one column
+		const retainFirst = groupedItems.selected.length === visibleSortedColumnsNames.length;
+		groupedItems.selected.slice(+retainFirst).forEach(hideColumn);
+	};
+
+	const selectAll = () => groupedItems.unselected.forEach(showColumn);
+
 	const groupedItems = groupBySelected();
 
 	if (!filteredItems.length) return (
@@ -73,6 +81,14 @@ const List = () => {
 
 	return (
 		<>
+			{!!groupedItems.selected.length && (
+				<ActionButton disabled={visibleSortedColumnsNames.length === 1} onClick={clearAll}>
+					<FormattedMessage
+						id="ticketsTable.columnVisibility.clearAll"
+						defaultMessage="Clear All"
+					/>
+				</ActionButton>
+			)}
 			{groupedItems.selected.map((columnName) => (
 				<MenuItem key={columnName}>
 					<Checkbox
@@ -83,7 +99,17 @@ const List = () => {
 					/>
 				</MenuItem>
 			))}
-			{groupedItems.unselected.length > 0 && <Divider />}
+			{!!groupedItems.unselected.length && !!groupedItems.selected.length && (
+				<Divider />
+			)}
+			{!!groupedItems.unselected.length && (
+				<ActionButton disabled={groupedItems.unselected.length === 0} onClick={selectAll}>
+					<FormattedMessage
+						id="ticketsTable.columnVisibility.selectAll"
+						defaultMessage="Select All"
+					/>
+				</ActionButton>
+			)}
 			{groupedItems.unselected.map((columnName) => (
 				<MenuItem key={columnName}>
 					<Checkbox
