@@ -39,7 +39,18 @@ const defaultTemplates = [
 					{ name: 'Resolved', type: statusTypes.DONE },
 				],
 				default: 'Active',
-
+			},
+			tabular: {
+				columns: [
+					{ property: '#ID' },
+					{ property: 'TITLE' },
+					{ property: 'FEDERATION/CONTAINER' },
+					{ property: 'CREATED AT' },
+					{ property: 'ASIGNEES' },
+					{ property: 'OWNER' },
+					{ property: 'DUE DATE' },
+					{ property: 'PRIORITY' },
+					{ property: 'STATUS' }],
 			},
 		},
 		modules: [

@@ -311,6 +311,103 @@ const testValidateUpdateTicketSchema = () => {
 			);
 		});
 
+		test('Should throw error if property name used in tabular config does not exist in properties', async () => {
+			const name = generateRandomString();
+			const code = generateRandomString(3);
+			const modules = [{ type: presetModules.SAFETIBASE, properties: ['Category'] }];
+			const newModules = [{ type: presetModules.SAFETIBASE, properties: ['Category', 'Subcategory'] }];
+			const oldPropName = generateRandomString();
+			const newPropName = generateRandomString();
+
+			const oldTemplate = {
+				name,
+				code,
+				properties: [oldPropName],
+				modules,
+				config: { tabular: { columns: [{ property: oldPropName }, { property: 'Category', module: presetModules.SAFETIBASE }] } },
+			};
+
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(oldTemplate);
+
+			const data = {
+				name,
+				code,
+				properties: [oldPropName],
+				modules: newModules,
+				config: { tabular: { columns: [
+					{ property: oldPropName },
+					{ property: newPropName },
+					{ property: 'Category', module: presetModules.SAFETIBASE },
+				] } },
+			};
+
+			const req = {
+				body: data,
+				params: { teamspace: generateRandomString(), template: generateRandomString() },
+			};
+
+			TicketTemplateSchema.validate.mockReturnValueOnce(req.body);
+
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req, res, createResponseCode(templates.invalidArguments, `Property "${newPropName}" not found in template.`),
+			);
+		});
+
+		test('Should throw error if module property name used in tabular config does not exist in modules', async () => {
+			const name = generateRandomString();
+			const code = generateRandomString(3);
+			const modules = [{ type: presetModules.SAFETIBASE, properties: ['Category'] }];
+			const oldPropName = generateRandomString();
+			const newPropName = generateRandomString();
+
+			const oldTemplate = {
+				name,
+				code,
+				properties: [oldPropName],
+				modules,
+				config: { tabular: { columns: [{ property: oldPropName }, { property: 'Category', module: presetModules.SAFETIBASE }] } },
+			};
+
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(oldTemplate);
+
+			const data = {
+				name,
+				code,
+				properties: [oldPropName],
+				modules,
+				config: { tabular: { columns: [
+					{ property: oldPropName },
+					{ property: 'Category', module: presetModules.SAFETIBASE },
+					{ property: 'Test', module: newPropName },
+				] } },
+			};
+
+			const req = {
+				body: data,
+				params: { teamspace: generateRandomString(), template: generateRandomString() },
+			};
+
+			TicketTemplateSchema.validate.mockReturnValueOnce(req.body);
+
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req, res, createResponseCode(templates.invalidArguments, `Module "${newPropName}" not found in template.`),
+			);
+		});
+
 		test('Should call next if there is no name or code clash', async () => {
 			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(
 				{ name: generateRandomString(), code: generateRandomString(), properties: [], modules: [] },
@@ -389,6 +486,54 @@ const testValidateUpdateTicketSchema = () => {
 
 			expect(next).toHaveBeenCalledTimes(1);
 			expect(req.body).toEqual(expectedOutput);
+			expect(Responder.respond).not.toHaveBeenCalled();
+		});
+
+		test('Should call next if the changes to tabular columns are valid', async () => {
+			const name = generateRandomString();
+			const code = generateRandomString(3);
+			const modules = [{ type: presetModules.SAFETIBASE, properties: ['Category'] }];
+			const newModules = [{ type: presetModules.SAFETIBASE, properties: ['Category', 'Subcategory'] }];
+			const oldPropName = generateRandomString();
+			const newPropName = generateRandomString();
+
+			const oldTemplate = {
+				name,
+				code,
+				properties: [oldPropName],
+				modules,
+				config: { tabular: { columns: [{ property: oldPropName }, { property: 'Category', module: presetModules.SAFETIBASE }] } },
+			};
+
+			TemplateModelSchema.getTemplateById.mockResolvedValueOnce(oldTemplate);
+
+			const data = {
+				name,
+				code,
+				properties: [oldPropName, newPropName],
+				modules: newModules,
+				config: { tabular: { columns: [
+					{ property: oldPropName },
+					{ property: newPropName },
+					{ property: 'Category', module: presetModules.SAFETIBASE },
+					{ property: 'Subcategory', module: presetModules.SAFETIBASE },
+				] } },
+			};
+
+			const req = {
+				body: data,
+				params: { teamspace: generateRandomString(), template: generateRandomString() },
+			};
+
+			TicketTemplateSchema.validate.mockReturnValueOnce(req.body);
+
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateUpdateTicketSchema(req, res, next);
+
+			expect(next).toHaveBeenCalledTimes(1);
+			expect(req.body).toEqual(data);
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 

@@ -885,6 +885,7 @@ const testValidate = () => {
 			config: {
 				defaultView: true,
 				defaultImage: true,
+				tabular: { columns: [] },
 			},
 			properties: [{
 				name: 'I am an apple',
@@ -914,7 +915,7 @@ const testValidate = () => {
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
 			{ ...mod, name, properties: [] }));
-		expectedData.config = { defaultView: true };
+		expectedData.config = { defaultView: true, tabular: { columns: [] } };
 		const output = TemplateSchema.validate(data);
 
 		expect(output).toEqual(expectedData);
@@ -925,6 +926,7 @@ const testValidate = () => {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
+				tabular: { columns: [] },
 			},
 			properties: [
 				{
@@ -962,6 +964,7 @@ const testValidate = () => {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
+				tabular: { columns: [] },
 			},
 			properties: [
 				{

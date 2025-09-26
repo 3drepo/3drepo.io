@@ -187,6 +187,13 @@ const configSchema = Yup.object().shape({
 			.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length),
 		default: Yup.mixed().when('values', (values) => (values ? Yup.string().oneOf(values.map(({ name }) => name)).required() : Yup.mixed())),
 	}).default(undefined),
+	tabular: Yup.object({
+		columns: Yup.array().of(Yup.object({
+			property: Yup.string().required(),
+			module: Yup.string().notRequired().default(undefined),
+		}),
+		),
+	}),
 }).default({});
 
 const pinMappingTest = (val, context) => {

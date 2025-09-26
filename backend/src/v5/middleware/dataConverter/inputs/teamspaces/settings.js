@@ -80,6 +80,33 @@ const validateUpdateTemplateSchema = async (req, res, next) => {
 			if (await codeExists(teamspace, data.code)) throw new Error('Code already in use');
 		}
 
+		const diffChecker = (existing, changes) => {
+			const key = (obj) => (obj.module ? obj.module : obj.property);
+			const existingSet = new Set(existing.map(key));
+			const changesSet = new Set(changes.map(key));
+
+			const added = changes.filter((obj) => !existingSet.has(key(obj)));
+			const removed = existing.filter((obj) => !changesSet.has(key(obj)));
+
+			return { added, removed };
+		};
+
+		const { added } = diffChecker(
+			oldTemplate.config?.tabular?.columns || [], data.config?.tabular?.columns || []);
+
+		if (added.length) {
+			const propertyNames = new Set(data.properties);
+			const moduleNames = new Set(data.modules);
+
+			added.forEach((col) => {
+				if (col.module && !moduleNames.has(col.module)) {
+					throw new Error(`Module "${col.module}" not found in template.`);
+				} else if (!propertyNames.has(col.property)) {
+					throw new Error(`Property "${col.property}" not found in template.`);
+				}
+			});
+		}
+
 		processTemplateUpdate(data, oldTemplate);
 		req.body = data;
 
