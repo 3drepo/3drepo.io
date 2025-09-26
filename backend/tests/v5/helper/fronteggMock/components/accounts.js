@@ -89,7 +89,7 @@ Accounts.removeUsersFromGroup = (accountId, groupId, userIds) => {
 
 Accounts.getGroups = (accountId, getUsers = true) => {
 	if (groupsByAccount[accountId]) {
-		return Objects.values(groupsByAccount[accountId]).map((group) => {
+		return Object.values(groupsByAccount[accountId]).map((group) => {
 			if (getUsers) {
 				return group;
 			}
