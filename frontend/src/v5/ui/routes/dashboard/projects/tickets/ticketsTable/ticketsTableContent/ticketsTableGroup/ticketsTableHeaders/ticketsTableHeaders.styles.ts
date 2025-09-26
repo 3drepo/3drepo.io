@@ -16,8 +16,9 @@
  */
 
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { TextOverflow } from '@controls/textOverflow';
+import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
@@ -26,15 +27,19 @@ export const Headers = styled(ResizableTableRow)`
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
 
-export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
-	${({ theme }) => theme.typography.kicker};
-	color: ${({ theme }) => theme.palette.base.main};
-	padding: 2px 0 8px 10px;
+export const HeaderCellText = styled(TextOverflow)`
 	text-align: start;
 	box-sizing: border-box;
-	user-select: none;
+	top: -2px;
+`;
 
-	${({ $selectable }) => $selectable && css`
+export const HeaderCell = styled(ResizableTableHeader)`
+	${({ theme }) => theme.typography.kicker};
+	color: ${({ theme }) => theme.palette.base.main};
+	user-select: none;
+    padding: 2px 10px 8px 10px;
+	
+	svg {
 		cursor: pointer;
-	`}
+	}
 `;

@@ -16,27 +16,26 @@
  */
 import { useContext } from 'react';
 import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
-import { Header, Headers } from './ticketsTableHeaders.styles';
+import { HeaderCell, HeaderCellText, Headers } from './ticketsTableHeaders.styles';
 import { getPropertyLabel } from '../../../ticketsTable.helper';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
-import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { TicketsTableHeaderFilter } from './ticketsTableHeaderFilter.component';
 
-const TableHeader = ({ name, ...props }) => {
+const TicketHeaderCell = ({ name, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
 	const isSelected = name === sortingColumn;
 
 	return (
-		<ResizableTableHeader name={name} onClick={() => onColumnClick(name)}>
-			<Header {...props} $selectable tooltipText='hello there'>
-				{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
+		<HeaderCell name={name} onClick={() => onColumnClick(name)}>
+			<HeaderCellText {...props}>
 				{getPropertyLabel(name)}
-			</Header>
+			</HeaderCellText>
+			{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
 			<TicketsTableHeaderFilter propertyName={name}/>
-		</ResizableTableHeader>
+		</HeaderCell>
 	);
 };
 
@@ -46,7 +45,7 @@ export const TicketsTableHeaders = () => {
 	return (
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
-				<TableHeader key={name} name={name} />
+				<TicketHeaderCell key={name} name={name} />
 			))}
 			<ColumnsVisibilitySettings />
 		</Headers>

@@ -19,8 +19,9 @@ import styled, { css } from 'styled-components';
 
 export const IconContainer = styled.div<{ $ascendingOrder?: boolean }>`
 	animation: all .2s;
-	display: inline-flex;
+	display: inline-block;
 	margin-right: 5px;
+    height: 8px;
 
 	${({ $ascendingOrder }) => $ascendingOrder && css`
 		transform: rotate(180deg);
