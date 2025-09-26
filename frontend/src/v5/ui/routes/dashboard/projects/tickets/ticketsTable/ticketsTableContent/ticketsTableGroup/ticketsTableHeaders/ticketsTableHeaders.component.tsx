@@ -25,15 +25,15 @@ import { ResizableTableHeader } from '@controls/resizableTableContext/resizableT
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { TicketsTableHeaderFilter } from './ticketsTableHeaderFilter.component';
 
-const TableHeader = ({ name, children, ...props }) => {
+const TableHeader = ({ name, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
 	const isSelected = name === sortingColumn;
 
 	return (
 		<ResizableTableHeader name={name} onClick={() => onColumnClick(name)}>
-			<Header {...props} $selectable>
+			<Header {...props} $selectable tooltipText='hello there'>
 				{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
-				{children}
+				{getPropertyLabel(name)}
 			</Header>
 			<TicketsTableHeaderFilter propertyName={name}/>
 		</ResizableTableHeader>
@@ -46,9 +46,7 @@ export const TicketsTableHeaders = () => {
 	return (
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
-				<TableHeader key={name} name={name} >
-					{getPropertyLabel(name)}
-				</TableHeader>
+				<TableHeader key={name} name={name} />
 			))}
 			<ColumnsVisibilitySettings />
 		</Headers>
