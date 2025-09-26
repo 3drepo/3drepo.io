@@ -110,13 +110,19 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 		[order, order],
 	);
 
-	const sortTicketsByProperty = (items: ITicket[], order, column: string) => {
+	const sortTicketsByProperty = (items: ITicket[], order, column: string) =>  orderBy(
+		items,
+		(item) => {
+			const sortingElement = selectTicketPropertyByName(getState(), item._id, column);
+			return sortingElement?.toLowerCase?.().trim?.() ?? sortingElement;
+		},
+		order,
+	);
+
+	const ticketCodeSort = (items: ITicket[], order) => {
 		return orderBy(
 			items,
-			(item) => {
-				const sortingElement = selectTicketPropertyByName(getState(), item._id, column);
-				return sortingElement?.toLowerCase?.().trim?.() ?? sortingElement;
-			},
+			(item) => selectTicketPropertyByName(getState(), item._id, 'number'),
 			order,
 		);
 	};
@@ -124,6 +130,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const customSortingFunctions = (column: string) => {
 		if (column === 'modelName') return null; // uses the default sorting function from srotcontext
 		if (column === `properties.${IssueProperties.ASSIGNEES}` ) return assigneesSort;
+		if (column === 'id') return ticketCodeSort;
 
 		return sortTicketsByProperty;
 	};
