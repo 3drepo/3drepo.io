@@ -53,7 +53,9 @@ Accounts.addUserToAccount = (accountId, email) => {
 	return id;
 };
 
-Accounts.getUserStatusInAccount = () => Promise.resolve(membershipStatus.ACTIVE);
+Accounts.getUserStatusInAccount = (accountId, userId) => (usersInAccount?.[accountId]?.some((u) => u.id === userId)
+	? Promise.resolve(membershipStatus.ACTIVE)
+	: Promise.resolve(membershipStatus.NOT_MEMBER));
 
 Accounts.removeUserFromAccount = (accountId, userId) => {
 	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
