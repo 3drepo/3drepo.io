@@ -16,7 +16,6 @@
  */
 
 const { uniqueElements } = require('../../../../../src/v5/utils/helper/arrays');
-const Objects = require('../../../../../src/v5/utils/helper/objects');
 const { deleteIfUndefined } = require('../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../path');
 
