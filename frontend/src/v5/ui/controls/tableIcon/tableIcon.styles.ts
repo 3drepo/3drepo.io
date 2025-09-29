@@ -15,14 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TableIconContainer } from '@controls/tableIcon/tableIcon.styles';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-export const IconContainer = styled(TableIconContainer)<{ $ascendingOrder?: boolean }>`
-	svg  {
-		transition: all 0.2s ease-out;
-		${({ $ascendingOrder }) => $ascendingOrder && css`
-			transform: rotate(180deg);
-		`}
+
+export const TableIconContainer  = styled.div<{ $active?: boolean }>`
+	width: 16px;
+	height: 16px;
+	border-radius: 16%;
+	border-width: 1px;
+	border-style: solid;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.secondary.lightest };
 	}
+
+	border-color: ${({ $active, theme }) => $active ? theme.palette.base.main : 'transparent'}};
 `;

@@ -30,7 +30,7 @@ export const PlaceholderForStickyFunctionality = styled(Headers)``;
 export const HeaderCellText = styled(TextOverflow)`
 	text-align: start;
 	box-sizing: border-box;
-	top: -2px;
+	height: auto;
 `;
 
 export const HeaderCell = styled(ResizableTableHeader)`
@@ -38,8 +38,10 @@ export const HeaderCell = styled(ResizableTableHeader)`
 	color: ${({ theme }) => theme.palette.base.main};
 	user-select: none;
     padding: 2px 10px 8px 10px;
-	
+	align-items: center;
+
 	svg {
+		width: 16px;
 		cursor: pointer;
 	}
 `;

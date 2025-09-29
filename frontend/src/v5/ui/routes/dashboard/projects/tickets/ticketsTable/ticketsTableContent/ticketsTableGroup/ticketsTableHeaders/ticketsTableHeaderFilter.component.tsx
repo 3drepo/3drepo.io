@@ -22,6 +22,8 @@ import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { PopoverOrigin } from '@mui/material';
 import SmallFunnel from '@assets/icons/filters/small_funnel.svg';
+import { useState } from 'react';
+import { TableIconContainer } from '@controls/tableIcon/tableIcon.styles';
 
 type FiltersSectionProps = {
 	propertyName: string;
@@ -62,6 +64,7 @@ const positioning = {
 export const TicketsTableHeaderFilter = ({ propertyName }: FiltersSectionProps) => {
 	const { setFilter, filters, choosablefilters } = useTicketFiltersContext();
 	const filter =  findFilterByPropertyName([...filters, ...choosablefilters], propertyName);
+	const [active, setActive] = useState(false);
 
 	if (!filter) {
 		return null;
@@ -69,7 +72,13 @@ export const TicketsTableHeaderFilter = ({ propertyName }: FiltersSectionProps) 
 
 	return (
 		<CardFilterActionMenu
-			TriggerButton={(<SmallFunnel filled={!!filter.filter}/>)}
+			onClose={() => setActive(false)}
+			onOpen={() => setActive(true)}
+			TriggerButton={(
+				<TableIconContainer $active={active}>
+					<SmallFunnel filled={!!filter.filter}/>
+				</TableIconContainer>
+			)}
 			PopoverProps={positioning}
 		>
 			<ActionMenuContext.Consumer>
