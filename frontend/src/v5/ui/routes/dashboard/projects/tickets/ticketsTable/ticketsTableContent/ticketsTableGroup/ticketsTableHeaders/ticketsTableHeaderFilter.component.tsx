@@ -53,7 +53,7 @@ const findFilterByPropertyName = (filters: TicketFilter[], propertyName: string)
 const positioning = {
 	anchorOrigin: {
 		vertical: 'bottom',
-		horizontal: 'center',
+		horizontal: 'left',
 	} as PopoverOrigin,
 	transformOrigin: {
 		vertical: 'top',

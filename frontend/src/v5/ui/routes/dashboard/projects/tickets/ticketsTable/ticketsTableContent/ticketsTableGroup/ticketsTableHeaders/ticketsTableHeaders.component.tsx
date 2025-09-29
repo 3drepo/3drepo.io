@@ -24,17 +24,21 @@ import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { TicketsTableHeaderFilter } from './ticketsTableHeaderFilter.component';
 
-const TicketHeaderCell = ({ name, ...props }) => {
+const TicketHeaderCell = ({ name, last, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
 	const isSelected = name === sortingColumn;
+	let iconsCount = 1;
+	if (isSelected) iconsCount ++;
+	if (last) iconsCount++;
 
 	return (
-		<HeaderCell name={name} onClick={() => onColumnClick(name)}>
+		<HeaderCell name={name} onClick={() => onColumnClick(name)} $iconsCount={iconsCount}>
 			<HeaderCellText {...props}>
 				{getPropertyLabel(name)}
 			</HeaderCellText>
 			{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
 			<TicketsTableHeaderFilter propertyName={name}/>
+			{last && <ColumnsVisibilitySettings />}
 		</HeaderCell>
 	);
 };
@@ -44,10 +48,9 @@ export const TicketsTableHeaders = () => {
 
 	return (
 		<Headers>
-			{visibleSortedColumnsNames.map((name) => (
-				<TicketHeaderCell key={name} name={name} />
+			{visibleSortedColumnsNames.map((name, i) => (
+				<TicketHeaderCell key={name} name={name} last={(i === visibleSortedColumnsNames.length - 1 )}/>
 			))}
-			<ColumnsVisibilitySettings />
 		</Headers>
 	);
 };

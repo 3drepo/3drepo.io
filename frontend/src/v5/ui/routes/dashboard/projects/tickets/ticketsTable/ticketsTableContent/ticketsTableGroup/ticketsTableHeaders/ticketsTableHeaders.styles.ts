@@ -31,6 +31,7 @@ export const HeaderCellText = styled(TextOverflow)`
 	text-align: start;
 	box-sizing: border-box;
 	height: auto;
+	cursor: pointer;
 `;
 
 export const HeaderCell = styled(ResizableTableHeader)`
@@ -43,5 +44,9 @@ export const HeaderCell = styled(ResizableTableHeader)`
 	svg {
 		width: 16px;
 		cursor: pointer;
+	}
+
+	&:last-child {
+		padding-right:0;
 	}
 `;
