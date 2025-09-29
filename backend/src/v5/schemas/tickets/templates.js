@@ -192,7 +192,7 @@ const configSchema = Yup.object().shape({
 			property: Yup.string().required(),
 			module: Yup.string().notRequired().default(undefined),
 		}),
-		),
+		).min(1).required(),
 	}),
 }).default({});
 
@@ -252,8 +252,62 @@ const schema = Yup.object().shape({
 
 		return true;
 	}),
+}).test(pinMappingTest)
+	.test('No deprecated properties if used in tabular',
+		(template, context) => {
+			const deprecatedProps = new Set(template.properties.filter((p) => p.deprecated).map((p) => p.name));
+			template.modules.forEach((mod) => {
+				mod.properties.filter((p) => p.deprecated).forEach((p) => {
+					deprecatedProps.add(`${mod.type}.${p.name}`);
+				});
+			});
+			const badColumns = [];
+			for (const column of template.config.tabular.columns) {
+				if (column.module && deprecatedProps.has(`${column.module}.${column.property}`)) {
+					badColumns.push(`${column.module}.${column.property}`);
+				} else if (!column.module && deprecatedProps.has(column.property)) {
+					badColumns.push(column.property);
+				}
+			}
+			if (badColumns.length) return context.createError({ message: `The following properties used in tabular have been deprecated: ${badColumns.join(',')}` });
+			return true;
+		},
+	)
+	.test('Ensure tabular columns refer to valid properties',
+		(val, context) => {
+			const basePropertiesNotToCheck = ['modules', 'properties', 'config'];
+			const template = TemplateSchema.generateFullSchema(val);
+			const activeProperties = new Set();
+			template.properties.forEach((p) => {
+				if (!p.deprecated) activeProperties.add(p.name);
+			});
+			template.modules.forEach((mod) => {
+				mod.properties.forEach((p) => {
+					// currently there are no deprecated properties in presentModules so we ignore the test
+					/* istanbul ignore next */
+					if (!p.deprecated) activeProperties.add(`${mod.type}.${p.name}`);
+				});
+			});
 
-}).test(pinMappingTest).noUnknown();
+			Object.keys(template).forEach((key) => {
+				if (!basePropertiesNotToCheck.includes(key)) activeProperties.add(key);
+			});
+
+			const badColumns = [];
+			for (const column of template.config.tabular.columns) {
+				if (column.module && !activeProperties.has(`${column.module}.${column.property}`)) {
+					badColumns.push(`${column.module}.${column.property}`);
+				} else if (!column.module && !activeProperties.has(column.property)) {
+					badColumns.push(column.property);
+				}
+			}
+
+			if (badColumns.length) return context.createError({ message: `The following properties used in tabular columns could not be found in the template: ${badColumns.join(',')}` });
+
+			return true;
+		},
+	)
+	.noUnknown();
 
 TemplateSchema.getClosedStatuses = (template) => {
 	if (template?.config?.status) {

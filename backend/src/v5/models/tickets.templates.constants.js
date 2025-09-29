@@ -42,15 +42,14 @@ const defaultTemplates = [
 			},
 			tabular: {
 				columns: [
-					{ property: '#ID' },
-					{ property: 'TITLE' },
-					{ property: 'FEDERATION/CONTAINER' },
-					{ property: 'CREATED AT' },
-					{ property: 'ASIGNEES' },
-					{ property: 'OWNER' },
-					{ property: 'DUE DATE' },
-					{ property: 'PRIORITY' },
-					{ property: 'STATUS' }],
+					{ property: 'name' },
+					{ property: 'Created at' },
+					{ property: 'Assignees' },
+					{ property: 'Owner' },
+					{ property: 'Due Date' },
+					{ property: 'Priority' },
+					{ property: 'Status' },
+				],
 			},
 		},
 		modules: [

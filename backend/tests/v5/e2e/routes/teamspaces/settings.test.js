@@ -66,7 +66,9 @@ const generateTemplate = () => ({
 	code: generateRandomString(3),
 	config: {
 		tabular: {
-			columns: [],
+			columns: [
+				{ property: 'name' },
+			],
 		},
 	},
 	properties: [
@@ -93,7 +95,7 @@ const testAddTemplate = () => {
 		['template is empty object', tsAdmin.apiKey, undefined, {}, false, templates.invalidArguments],
 		['template is invalid (invalid unique property)', tsAdmin.apiKey, undefined, { ...templateToUse, properties: [{ name: generateRandomString(), type: propTypes.LONG_TEXT, unique: true }] }, false, templates.invalidArguments],
 	])('Add template', (desc, key, ts, data, success, expectedRes) => {
-		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code} if`} ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : expectedRes.status;
 			const res = await agent.post(addTemplateRoute(key, ts)).send(data).expect(expectedStatus);
 			if (success) {
