@@ -24,7 +24,7 @@ import { canUploadToBackend } from '@/v5/store/drawings/drawings.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
 import { name as drawingNameScheme } from '@/v5/validation/shared/validators';
-import { DestinationAutocomplete, DestinationInput, OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
+import { DestinationAutocomplete, DestinationInput, NewOrExisting, OptionsBox } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/uploadListItemDestination.styles';
 import { AlreadyUsedName } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/alreadyUsedName/alreadyUsedName.component';
 import { NewDestination } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/newDestination/newDestination.component';
 import { NewDestinationInUse } from '@components/shared/uploadFiles/uploadList/uploadListItem/uploadListItemDestination/options/newDestinationInUse/newDestinationInUse.component';
@@ -222,7 +222,12 @@ export const UploadListItemDestination = memo(({
 	};
 
 	const options = [...drawingsNames, ...newDrawingsInModal].sort();
-	const newOrExisting =  !typedInVal ? '' : !getDrawing(typedInVal) ? 'new' : 'existing';
+	let newOrExisting: NewOrExisting = '';
+
+	if (Boolean(typedInVal)) {
+		newOrExisting = !getDrawing(typedInVal) ? 'new' : 'existing';
+	}
+	
 	return (
 		<DestinationAutocomplete
 			{...props}
