@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SearchContext } from '@controls/search/searchContext';
-import { useContext, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -32,31 +31,24 @@ import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { useWatchPropertyChange } from '../useWatchPropertyChange';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
-	const { filteredItems } = useContext(SearchContext);
 	const {
 		stretchTable, getAllColumnsNames, subscribe, resetWidths,
-		visibleSortedColumnsNames, setVisibleSortedColumnsNames,
+		setVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
 	const templateWasFetched = templateAlreadyFetched(template);
-	const tableHasCompletedRendering = visibleSortedColumnsNames.length > 0;
 
 	useEffect(() => {
+		if (!templateWasFetched) return;
 		const allColumns = getAllColumnsNames();
 		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
 		setVisibleSortedColumnsNames(initialVisibleColumns);
 		resetWidths();
-	}, [template]);
+		stretchTable(BaseProperties.TITLE);
+	}, [template, templateWasFetched]);
 	
-	useEffect(() => {
-		if (templateWasFetched && tableHasCompletedRendering) {
-			stretchTable(BaseProperties.TITLE);
-		}
-	}, [template, templateWasFetched, tableHasCompletedRendering]);
-
 	useEffect(() => {
 		const onMovingColumnChange = (movingColumn) => {
 			if (movingColumn) {
@@ -68,8 +60,6 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		return subscribe(['movingColumn'], onMovingColumnChange);
 	}, [edgeScrolling]);
 
-	const { refresh: refreshSearch } = useContext(SearchContext);
-	useWatchPropertyChange('title', refreshSearch);
 
 	if (!templateWasFetched) {
 		return (
@@ -78,7 +68,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 			</EmptyPageView>
 		);
 	}
-	if (!filteredItems.length) {
+	if (!props.tickets.length) {
 		return (
 			<EmptyPageView>
 				<FormattedMessage

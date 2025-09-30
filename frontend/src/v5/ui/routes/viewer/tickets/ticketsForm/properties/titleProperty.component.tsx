@@ -29,7 +29,7 @@ export const TitleProperty = forwardRef((props: any, ref: any) => {
 			onKeyDown={handleKeyDown}
 			placeholder={formatMessage({
 				id: 'customTicket.newTicket.titlePlaceholder',
-				defaultMessage: 'Ticket name (required)',
+				defaultMessage: 'Ticket title (required)',
 			})}
 			ref={ref}
 			{...props}
