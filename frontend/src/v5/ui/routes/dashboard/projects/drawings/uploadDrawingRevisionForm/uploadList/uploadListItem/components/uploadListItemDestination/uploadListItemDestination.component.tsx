@@ -84,7 +84,7 @@ export const UploadListItemDestination = memo(({
 		drawingsByName[drawingName.toLowerCase()] = { name: drawingName, ...rest };
 	});
 
-	const getDrawing = (drawingName: string = '') =>  drawingsByName[drawingName.trim().toLowerCase()];
+	const getDrawing = (drawingName: string = '') => drawingsByName[drawingName.trim().toLowerCase()];
 	const nameIsTaken = (drawingName: string = '') => unavailableNames.has(drawingName.trim().toLowerCase());
 
 	const handleInputChange = (_, newValue: string) => {
@@ -211,7 +211,7 @@ export const UploadListItemDestination = memo(({
 		);
 		
 		const drawingNamesInModal = otherDrawingsInModal
-			.map(({ drawingName }) => drawingName);
+			.map(({ drawingName }) => drawingName.toLowerCase());
 
 		const processingNames = drawings
 			.filter((drawing) => !canUploadToBackend(drawing.status))
