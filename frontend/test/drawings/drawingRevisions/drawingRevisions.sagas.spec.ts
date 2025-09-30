@@ -28,7 +28,7 @@ import { selectDrawingById } from '@/v5/store/drawings/drawings.selectors';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { isAdmin } from '@/v4/helpers/permissions';
-import { projectMockFactory } from 'test/projects/projects.fixtures';
+import { projectMockFactory } from '../../projects/projects.fixtures';
 
 describe('Drawing Revisions: sagas', () => {
 	const teamspace = 'teamspace';
