@@ -31,5 +31,5 @@ export const TableIconContainer  = styled.div<{ $active?: boolean }>`
 		background-color: ${({ theme }) => theme.palette.secondary.lightest };
 	}
 
-	border-color: ${({ $active, theme }) => $active ? theme.palette.base.main : 'transparent'}};
+	border-color: ${({ $active, theme }) => $active ? theme.palette.base.main : 'transparent'};
 `;
