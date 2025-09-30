@@ -41,14 +41,14 @@ jobs:
       - name: Update status in the Project
         if: ${{github.event.pull_request.merged}}
         id: update_status
-        uses: 3drepo/update-project-action@v1.1
+        uses: 3drepo/update-project-action@2.0
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
           project_number: 22
           content_id: ${{ needs.get-details.outputs.issue-content-id }}
           field: Status
-          value: Merged
+          value: Done
 
   destroy-deployed-branch:
     name: Call Azure Destroy Pipeline
