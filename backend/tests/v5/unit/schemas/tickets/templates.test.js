@@ -999,13 +999,20 @@ const testValidate = () => {
 		properties: times(3, () => ({ name: generateRandomString(), type: propTypes.TEXT })),
 	}];
 	const basicProperties = times(3, () => ({ name: generateRandomString(), type: propTypes.TEXT }));
-	const deprecatedModules = [{
+	const deprecatedModuleProperties = [{
 		name: generateRandomString(),
 		properties: times(3, (i) => {
 			if (i === 0) return { name: generateRandomString(), type: propTypes.TEXT, deprecated: true };
 			return { name: generateRandomString(), type: propTypes.TEXT };
 		}),
 	}];
+	const deprecatedModule = [
+		{
+			name: generateRandomString(),
+			deprecated: true,
+			properties: times(3, () => ({ name: generateRandomString(), type: propTypes.TEXT })),
+		},
+	];
 	const deprecatedProperties = times(3, (i) => {
 		if (i === 0) return { name: generateRandomString(), type: propTypes.TEXT, deprecated: true };
 		return { name: generateRandomString(), type: propTypes.TEXT };
@@ -1099,7 +1106,7 @@ const testValidate = () => {
 			), false],
 		['tabular column module property that is deprecated',
 			generateBasicSchema(
-				deprecatedModules,
+				deprecatedModuleProperties,
 				basicProperties,
 				{
 					tabular:
@@ -1107,8 +1114,25 @@ const testValidate = () => {
 						columns:
 							[
 								{
-									property: deprecatedModules[0].properties[0].name,
-									module: deprecatedModules[0].type,
+									property: deprecatedModuleProperties[0].properties[0].name,
+									module: deprecatedModuleProperties[0].name,
+								},
+							],
+					},
+				},
+			), false],
+		['tabular column module is deprecated',
+			generateBasicSchema(
+				deprecatedModule,
+				basicProperties,
+				{
+					tabular:
+					{
+						columns:
+							[
+								{
+									property: deprecatedModule[0].properties[0].name,
+									module: deprecatedModule[0].name,
 								},
 							],
 					},

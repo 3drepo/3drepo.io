@@ -241,9 +241,11 @@ const validTabularPropsTest = (val, context) => {
 	if (!template.config?.tabular?.columns) return true;
 
 	for (const column of template.config.tabular.columns) {
+		const propModule = column.module ? template.modules.find(
+			({ type, name }) => type === column.module || name === column.module) : {};
+
 		const propCollection = column.module
-			? template.modules.find(
-				({ type, name }) => type === column.module || name === column.module)?.properties
+			? propModule?.properties
 			// create the full list of properties to check against
 			: [
 				Object.keys(template)
@@ -263,7 +265,7 @@ const validTabularPropsTest = (val, context) => {
 
 		if (!prop) {
 			return context.createError({ message: `Property "${propPath}" could not be found in the template` });
-		} if (prop.deprecated) {
+		} if (prop.deprecated || propModule.deprecated) {
 			return context.createError({ message: `Property "${propPath}" has been deprecated` });
 		}
 	}
