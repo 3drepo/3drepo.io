@@ -93,7 +93,6 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 	}
 
 	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
-	const propertyName = groupBy;
 
 	return (
 		<Container>
@@ -105,7 +104,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 					onNewTicket={onGroupNewTicket}
 					selectedTicketId={selectedTicketId}
 					propertyValue={value}
-					propertyName={propertyName}
+					propertyName={groupBy}
 					key={groupBy + groupName + template + tickets}
 				/>
 			))}
