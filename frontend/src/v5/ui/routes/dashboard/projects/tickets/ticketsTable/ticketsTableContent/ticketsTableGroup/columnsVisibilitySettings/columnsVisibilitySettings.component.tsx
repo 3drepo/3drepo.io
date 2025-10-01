@@ -58,12 +58,11 @@ const List = () => {
 	const groupedItems = groupBySelected();
 
 	const clearAll = () => {
-		// User cannot remove column if it is the current grouping method
-		const removableColumns = groupedItems.selected.filter((columnName) => columnName !== groupBy);
-		// The table needs to have at least one column.
-		// If 'clear all' would delete all columns retain the first one in the list
-		const retainFirst = removableColumns.length === visibleSortedColumnsNames.length;
-		removableColumns.slice(+retainFirst).forEach(hideColumn);
+		// User cannot remove column if it is the current grouping method. The table needs to have
+		// at least one column. If 'clear all' would delete all columns retain the first one in the list
+		const selectedColumnsAreUnfiltered = groupedItems.selected.length === visibleSortedColumnsNames.length;
+		const columnToRetain = groupBy || (selectedColumnsAreUnfiltered && groupedItems.selected[0]);
+		groupedItems.selected.filter((columnName) => columnName !== columnToRetain).forEach(hideColumn);
 	};
 
 	const selectAll = () => groupedItems.unselected.forEach(showColumn);
