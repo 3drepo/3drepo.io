@@ -193,7 +193,7 @@ const configSchema = Yup.object().shape({
 			module: Yup.string().notRequired().default(undefined),
 		}),
 		).min(1).required(),
-	}),
+	}).default(undefined),
 }).default({});
 
 const pinMappingTest = (val, context) => {
@@ -233,6 +233,44 @@ const pinMappingTest = (val, context) => {
 	return true;
 };
 
+const validTabularPropsTest = (val, context) => {
+	const basePropertiesNotToCheck = ['modules', 'properties', 'config'];
+
+	const template = TemplateSchema.generateFullSchema(val);
+
+	if (!template.config?.tabular?.columns) return true;
+
+	for (const column of template.config.tabular.columns) {
+		const propCollection = column.module
+			? template.modules.find(
+				({ type, name }) => type === column.module || name === column.module)?.properties
+			// create the full list of properties to check against
+			: [
+				Object.keys(template)
+					.map((key) => {
+						if (!basePropertiesNotToCheck.includes(key)) return { name: key };
+						return null;
+					})
+					.filter((object) => object !== null),
+				template.properties,
+			].flat();
+
+		const prop = propCollection
+			? propCollection.find(({ name }) => name === column.property)
+			: undefined;
+
+		const propPath = column.module ? `${column.module}.${column.property}` : column.property;
+
+		if (!prop) {
+			return context.createError({ message: `Property "${propPath}" could not be found in the template` });
+		} if (prop.deprecated) {
+			return context.createError({ message: `Property "${propPath}" has been deprecated` });
+		}
+	}
+
+	return true;
+};
+
 const schema = Yup.object().shape({
 	name: nameSchema.required(),
 	code: Yup.string().length(3).required(),
@@ -253,60 +291,7 @@ const schema = Yup.object().shape({
 		return true;
 	}),
 }).test(pinMappingTest)
-	.test('No deprecated properties if used in tabular',
-		(template, context) => {
-			const deprecatedProps = new Set(template.properties.filter((p) => p.deprecated).map((p) => p.name));
-			template.modules.forEach((mod) => {
-				mod.properties.filter((p) => p.deprecated).forEach((p) => {
-					deprecatedProps.add(`${mod.type}.${p.name}`);
-				});
-			});
-			const badColumns = [];
-			for (const column of template.config.tabular.columns) {
-				if (column.module && deprecatedProps.has(`${column.module}.${column.property}`)) {
-					badColumns.push(`${column.module}.${column.property}`);
-				} else if (!column.module && deprecatedProps.has(column.property)) {
-					badColumns.push(column.property);
-				}
-			}
-			if (badColumns.length) return context.createError({ message: `The following properties used in tabular have been deprecated: ${badColumns.join(',')}` });
-			return true;
-		},
-	)
-	.test('Ensure tabular columns refer to valid properties',
-		(val, context) => {
-			const basePropertiesNotToCheck = ['modules', 'properties', 'config'];
-			const template = TemplateSchema.generateFullSchema(val);
-			const activeProperties = new Set();
-			template.properties.forEach((p) => {
-				if (!p.deprecated) activeProperties.add(p.name);
-			});
-			template.modules.forEach((mod) => {
-				mod.properties.forEach((p) => {
-					// currently there are no deprecated properties in presentModules so we ignore the test
-					/* istanbul ignore next */
-					if (!p.deprecated) activeProperties.add(`${mod.type}.${p.name}`);
-				});
-			});
-
-			Object.keys(template).forEach((key) => {
-				if (!basePropertiesNotToCheck.includes(key)) activeProperties.add(key);
-			});
-
-			const badColumns = [];
-			for (const column of template.config.tabular.columns) {
-				if (column.module && !activeProperties.has(`${column.module}.${column.property}`)) {
-					badColumns.push(`${column.module}.${column.property}`);
-				} else if (!column.module && !activeProperties.has(column.property)) {
-					badColumns.push(column.property);
-				}
-			}
-
-			if (badColumns.length) return context.createError({ message: `The following properties used in tabular columns could not be found in the template: ${badColumns.join(',')}` });
-
-			return true;
-		},
-	)
+	.test(validTabularPropsTest)
 	.noUnknown();
 
 TemplateSchema.getClosedStatuses = (template) => {

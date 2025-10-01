@@ -26,18 +26,17 @@ const { propTypes, getApplicableDefaultProperties, presetModules, presetEnumValu
 
 const testValidate = () => {
 	const statusValues = generateCustomStatusValues();
-	const basicConfig = { tabular: { columns: [{ property: 'name' }] } };
 
 	const nameTests = [
-		['the name is too long', { name: generateRandomString(121), code: generateRandomString(3), config: basicConfig }, false],
-		['the name is an empty string', { name: '', code: generateRandomString(3), config: basicConfig }, false],
-		['the name is not defined', { code: generateRandomString(3), config: basicConfig }, false],
+		['the name is too long', { name: generateRandomString(121), code: generateRandomString(3) }, false],
+		['the name is an empty string', { name: '', code: generateRandomString(3) }, false],
+		['the name is not defined', { code: generateRandomString(3) }, false],
 	];
 
 	const codeTests = [
-		['code is not defined', { name: generateRandomString(), config: basicConfig }, false],
-		['code is too long', { name: generateRandomString(), code: generateRandomString(4), config: basicConfig }, false],
-		['code is too short', { name: generateRandomString(), code: generateRandomString(2), config: basicConfig }, false],
+		['code is not defined', { name: generateRandomString() }, false],
+		['code is too long', { name: generateRandomString(), code: generateRandomString(4) }, false],
+		['code is too short', { name: generateRandomString(), code: generateRandomString(2) }, false],
 	];
 
 	const schemaFieldsTest = [
@@ -50,7 +49,7 @@ const testValidate = () => {
 				defaultView: true,
 				defaultImage: false,
 				pin: true,
-				...basicConfig,
+
 			},
 			deprecated: true,
 			properties: undefined,
@@ -61,7 +60,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			config: {
 				pin: { color: [50, 50, 50] },
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -74,7 +73,7 @@ const testValidate = () => {
 					color: [50, 50, 50],
 					icon: 'RISK',
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -87,7 +86,7 @@ const testValidate = () => {
 					color: [50, 50, 50],
 					icon: generateRandomString(),
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -116,7 +115,7 @@ const testValidate = () => {
 						],
 					},
 				},
-				...basicConfig,
+
 			},
 			properties: [{
 				name: 'fixedName',
@@ -149,7 +148,7 @@ const testValidate = () => {
 					},
 					icon: 'ISSUE',
 				},
-				...basicConfig,
+
 			},
 			properties: [{
 				name: 'fixedName',
@@ -182,7 +181,7 @@ const testValidate = () => {
 					},
 					icon: generateRandomString(),
 				},
-				...basicConfig,
+
 			},
 			properties: [{
 				name: 'fixedName',
@@ -211,7 +210,7 @@ const testValidate = () => {
 						],
 					},
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -235,7 +234,7 @@ const testValidate = () => {
 						],
 					},
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -265,7 +264,7 @@ const testValidate = () => {
 						],
 					},
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: [
@@ -286,7 +285,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			config: {
 				pin: { color: generateRandomString() },
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -296,7 +295,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			config: {
 				pin: {},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -306,7 +305,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			config: {
 				status: { default: generateRandomString() },
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -316,7 +315,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			config: {
 				status: { values: [], default: generateRandomString() },
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -326,7 +325,7 @@ const testValidate = () => {
 			code: generateRandomString(3),
 			config: {
 				status: { values: statusValues },
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -339,7 +338,7 @@ const testValidate = () => {
 					values: [...statusValues, { type: statusTypes.OPEN }],
 					default: statusValues[0].name,
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -352,7 +351,7 @@ const testValidate = () => {
 					values: [...statusValues, { name: generateRandomString() }],
 					default: statusValues[0].name,
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -365,7 +364,7 @@ const testValidate = () => {
 					values: [...statusValues, { name: generateRandomString(), type: generateRandomString() }],
 					default: statusValues[0].name,
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -378,7 +377,7 @@ const testValidate = () => {
 					values: statusValues,
 					default: generateRandomString(15),
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -391,7 +390,7 @@ const testValidate = () => {
 					values: [...statusValues, ...statusValues],
 					default: statusValues[0].name,
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
@@ -404,13 +403,13 @@ const testValidate = () => {
 					values: statusValues,
 					default: statusValues[0].name,
 				},
-				...basicConfig,
+
 			},
 			properties: undefined,
 			modules: undefined,
 		}, true],
-		['properties is an empty array', { name: generateRandomString(), code: generateRandomString(3), properties: [], config: basicConfig }, true],
-		['properties is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), properties: 'a', config: basicConfig }, false],
+		['properties is an empty array', { name: generateRandomString(), code: generateRandomString(3), properties: [] }, true],
+		['properties is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), properties: 'a' }, false],
 		['property name is used by a default property', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -418,16 +417,16 @@ const testValidate = () => {
 				name: basePropertyLabels.STATUS,
 				type: propTypes.TEXT,
 			}],
-			config: basicConfig,
+
 		}, false],
-		['modules is an empty array', { name: generateRandomString(), code: generateRandomString(3), modules: [], config: basicConfig }, true],
-		['modules is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), modules: 'a', config: basicConfig }, false],
+		['modules is an empty array', { name: generateRandomString(), code: generateRandomString(3), modules: [] }, true],
+		['modules is of the wrong type', { name: generateRandomString(), code: generateRandomString(3), modules: 'a' }, false],
 	];
 
 	const propertiesTest = [
-		['property is undefined', { name: generateRandomString(), code: generateRandomString(3), properties: [undefined], config: basicConfig }, false],
-		['property is not an object', { name: generateRandomString(), code: generateRandomString(3), properties: ['a'], config: basicConfig }, false],
-		['property is an empty object', { name: generateRandomString(), code: generateRandomString(3), properties: [{}], config: basicConfig }, false],
+		['property is undefined', { name: generateRandomString(), code: generateRandomString(3), properties: [undefined] }, false],
+		['property is not an object', { name: generateRandomString(), code: generateRandomString(3), properties: ['a'] }, false],
+		['property is an empty object', { name: generateRandomString(), code: generateRandomString(3), properties: [{}] }, false],
 		['property has an unknown type', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -435,7 +434,7 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: 'abc',
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property has all required properties', {
 			name: generateRandomString(),
@@ -444,7 +443,7 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property is unique', {
 			name: generateRandomString(),
@@ -454,7 +453,7 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 				unique: true,
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property is unique for unsupported type', {
 			name: generateRandomString(),
@@ -464,7 +463,7 @@ const testValidate = () => {
 				type: propTypes.BOOLEAN,
 				unique: true,
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property is readOnlyOnUI', {
 			name: generateRandomString(),
@@ -474,7 +473,7 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 				readOnlyOnUI: true,
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property is immutable', {
 			name: generateRandomString(),
@@ -484,7 +483,7 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 				immutable: true,
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property name contains fullstop', {
 			name: generateRandomString(),
@@ -493,7 +492,7 @@ const testValidate = () => {
 				name: `${generateRandomString()}.`,
 				type: propTypes.TEXT,
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property name starts with dollar sign', {
 			name: generateRandomString(),
@@ -502,7 +501,7 @@ const testValidate = () => {
 				name: `$${generateRandomString()}`,
 				type: propTypes.TEXT,
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property name contains colon', {
 			name: generateRandomString(),
@@ -511,7 +510,7 @@ const testValidate = () => {
 				name: `${generateRandomString()}:`,
 				type: propTypes.TEXT,
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property name contains double quotes', {
 			name: generateRandomString(),
@@ -520,7 +519,7 @@ const testValidate = () => {
 				name: `${generateRandomString()}"`,
 				type: propTypes.TEXT,
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property name contains square brackets', {
 			name: generateRandomString(),
@@ -529,7 +528,7 @@ const testValidate = () => {
 				name: `${generateRandomString()}[]`,
 				type: propTypes.TEXT,
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property with enum type without values', {
 			name: generateRandomString(),
@@ -538,7 +537,7 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.ONE_OF,
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property with enum type with duplicated values', {
 			name: generateRandomString(),
@@ -548,7 +547,7 @@ const testValidate = () => {
 				type: propTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString(), 'a', 'a'],
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property with enum type with duplicated values', {
 			name: generateRandomString(),
@@ -558,7 +557,7 @@ const testValidate = () => {
 				type: propTypes.MANY_OF,
 				values: [generateRandomString(), generateRandomString(), 'a', 'a'],
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property with enum type with values', {
 			name: generateRandomString(),
@@ -568,7 +567,7 @@ const testValidate = () => {
 				type: propTypes.ONE_OF,
 				values: [generateRandomString(), generateRandomString()],
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property with enum type with values where default value is not within the values provided', {
 			name: generateRandomString(),
@@ -579,7 +578,7 @@ const testValidate = () => {
 				values: [generateRandomString(), generateRandomString()],
 				default: generateRandomString(),
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property with enum type with values where default values are valid', {
 			name: generateRandomString(),
@@ -590,7 +589,7 @@ const testValidate = () => {
 				values: ['a', 'b'],
 				default: ['a', 'b'],
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property with enum type with values being the wrong type', {
 			name: generateRandomString(),
@@ -600,7 +599,7 @@ const testValidate = () => {
 				type: propTypes.MANY_OF,
 				values: [123, 12354],
 			}],
-			config: basicConfig,
+
 		}, false],
 
 		['property with enum type with values being the a preset list', {
@@ -611,7 +610,7 @@ const testValidate = () => {
 				type: propTypes.MANY_OF,
 				values: presetEnumValues.JOBS_AND_USERS,
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property with enum type with values is the wrong type', {
 			name: generateRandomString(),
@@ -622,7 +621,7 @@ const testValidate = () => {
 				values: [generateRandomString(), generateRandomString(), 'a'],
 				default: ['a'],
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property with enum type with values where default values are duplicated', {
 			name: generateRandomString(),
@@ -633,7 +632,7 @@ const testValidate = () => {
 				values: [generateRandomString(), generateRandomString(), 'a'],
 				default: ['a', 'a'],
 			}],
-			config: basicConfig,
+
 		}, false],
 		['property name is too long', {
 			name: generateRandomString(),
@@ -642,7 +641,7 @@ const testValidate = () => {
 				name: generateRandomString(121),
 				type: propTypes.TEXT,
 			}],
-			config: basicConfig,
+
 		}, false],
 		['all properties has all required properties', {
 			name: generateRandomString(),
@@ -655,7 +654,7 @@ const testValidate = () => {
 				type: propTypes.NUMBER,
 				default: 10,
 			}],
-			config: basicConfig,
+
 		}, true],
 		['one of the properties doesn\'t match the schema', {
 			name: generateRandomString(),
@@ -668,7 +667,7 @@ const testValidate = () => {
 				type: propTypes.NUMBER,
 				default: generateRandomString(),
 			}],
-			config: basicConfig,
+
 		}, false],
 		['more than one property has the same name', {
 			name: generateRandomString(),
@@ -680,7 +679,7 @@ const testValidate = () => {
 				name: 'A',
 				type: propTypes.NUMBER,
 			}],
-			config: basicConfig,
+
 		}, false],
 
 		['more than one property has the same name but different case', {
@@ -693,7 +692,7 @@ const testValidate = () => {
 				name: 'a',
 				type: propTypes.NUMBER,
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property default value type matches', {
 			name: generateRandomString(),
@@ -703,7 +702,7 @@ const testValidate = () => {
 				type: propTypes.TEXT,
 				default: generateRandomString(),
 			}],
-			config: basicConfig,
+
 		}, true],
 		['property default value type mismatches', {
 			name: generateRandomString(),
@@ -713,7 +712,7 @@ const testValidate = () => {
 				type: propTypes.NUMBER,
 				default: generateRandomString(),
 			}],
-			config: basicConfig,
+
 		}, false],
 		['Coord property with no colour', {
 			name: generateRandomString(),
@@ -722,7 +721,7 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.COORDS,
 			}],
-			config: basicConfig,
+
 		}, true],
 		['Coord property with color defined', {
 			name: generateRandomString(),
@@ -732,7 +731,7 @@ const testValidate = () => {
 				type: propTypes.COORDS,
 				color: [50, 50, 50],
 			}],
-			config: basicConfig,
+
 		}, true],
 		['Coord property with an invalid color defined', {
 			name: generateRandomString(),
@@ -742,7 +741,7 @@ const testValidate = () => {
 				type: propTypes.COORDS,
 				color: ['a', 'b', 'c'],
 			}],
-			config: basicConfig,
+
 		}, false],
 		['Coord property with color mapping defined', {
 			name: generateRandomString(),
@@ -774,7 +773,7 @@ const testValidate = () => {
 						],
 					},
 				}],
-			config: basicConfig,
+
 		}, true],
 		['Coord property with color mapping defined but referencing a deprecated field', {
 			name: generateRandomString(),
@@ -807,7 +806,7 @@ const testValidate = () => {
 						],
 					},
 				}],
-			config: basicConfig,
+
 		}, false],
 		['Coord property with color mapping defined but referencing a non existent field', {
 			name: generateRandomString(),
@@ -840,7 +839,7 @@ const testValidate = () => {
 						],
 					},
 				}],
-			config: basicConfig,
+
 		}, false],
 		['Coord property with color mapping defined (module property)', {
 			name: generateRandomString(),
@@ -875,7 +874,7 @@ const testValidate = () => {
 					type: propTypes.TEXT,
 				}],
 			}],
-			config: basicConfig,
+
 		}, true],
 		['Coord property with color mapping defined (no default)', {
 			name: generateRandomString(),
@@ -899,7 +898,7 @@ const testValidate = () => {
 					],
 				},
 			}],
-			config: basicConfig,
+
 		}, false],
 		['Coord property with color mapping defined (more than one default)', {
 			name: generateRandomString(),
@@ -929,7 +928,7 @@ const testValidate = () => {
 					],
 				},
 			}],
-			config: basicConfig,
+
 		}, false],
 		['Coord property with no mapping', {
 			name: generateRandomString(),
@@ -945,13 +944,13 @@ const testValidate = () => {
 					],
 				},
 			}],
-			config: basicConfig,
+
 		}, false],
 
 	];
 
 	const createSkeleton = (modules) => ({
-		name: generateRandomString(), code: generateRandomString(3), modules, config: basicConfig,
+		name: generateRandomString(), code: generateRandomString(3), modules,
 	});
 	const moduleSchemaTest = [
 		['module with all required properties filled in (custom module)', createSkeleton([{ name: generateRandomString() }]), true],
@@ -993,7 +992,7 @@ const testValidate = () => {
 		code: generateRandomString(3),
 		modules,
 		properties,
-		config: config ?? basicConfig,
+		config,
 	});
 	const basicModules = [{
 		type: presetModules.SAFETIBASE,
@@ -1001,7 +1000,7 @@ const testValidate = () => {
 	}];
 	const basicProperties = times(3, () => ({ name: generateRandomString(), type: propTypes.TEXT }));
 	const deprecatedModules = [{
-		type: generateRandomString(),
+		name: generateRandomString(),
 		properties: times(3, (i) => {
 			if (i === 0) return { name: generateRandomString(), type: propTypes.TEXT, deprecated: true };
 			return { name: generateRandomString(), type: propTypes.TEXT };
@@ -1012,18 +1011,115 @@ const testValidate = () => {
 		return { name: generateRandomString(), type: propTypes.TEXT };
 	});
 	const tabularColumnsTest = [
-		['tabular column with all required properties filled in', generateBasicSchema(basicModules, basicProperties), true],
-		['tabular column that is not in properties', generateBasicSchema(basicModules, basicProperties, { tabular: { columns: [{ property: generateRandomString() }] } }), false],
-		['tabular column module that is in module types', generateBasicSchema(basicModules, basicProperties, { tabular: { columns: [{ property: generateRandomString(), module: generateRandomString() }] } }), false],
-		['tabular column module property that is in module properties', generateBasicSchema(basicModules, basicProperties, { tabular: { columns: [{ property: generateRandomString(), module: presetModules.SAFETIBASE }] } }), false],
-		['tabular column property that is deprecated in properties', generateBasicSchema(basicModules, deprecatedProperties, { tabular: { columns: [{ property: deprecatedProperties[0].name }] } }), false],
-		['tabular column module property that is deprecated in module properties', generateBasicSchema(deprecatedModules, basicProperties, { tabular: { columns: [{ property: deprecatedModules[0].properties[0].name, module: deprecatedModules[0].type }] } }), false],
+		['tabular column with all required properties filled in',
+			generateBasicSchema(
+				basicModules,
+				basicProperties,
+				{
+					tabular:
+					{
+						columns:
+							[
+								{
+									property: basicProperties[0].name,
+								},
+								{
+									module: basicModules[0].type,
+									property: basicModules[0].properties[0].name,
+								},
+							],
+					},
+				},
+			), true],
+		['tabular column that is not in properties',
+			generateBasicSchema(
+				basicModules,
+				basicProperties,
+				{
+					tabular:
+					{
+						columns:
+							[
+								{
+									property: generateRandomString(),
+								},
+							],
+					},
+				},
+			), false],
+		['tabular column module that is in module types',
+			generateBasicSchema(
+				basicModules,
+				basicProperties,
+				{
+					tabular:
+					{
+						columns:
+							[
+								{
+									property: generateRandomString(),
+									module: generateRandomString(),
+								},
+							],
+					},
+				},
+			), false],
+		['tabular column module property that is in module properties',
+			generateBasicSchema(
+				basicModules,
+				basicProperties,
+				{
+					tabular:
+					{
+						columns:
+							[
+								{
+									property: generateRandomString(),
+									module: presetModules.SAFETIBASE,
+								},
+							],
+					},
+				},
+			), false],
+		['tabular column property that is deprecated',
+			generateBasicSchema(
+				basicModules,
+				deprecatedProperties,
+				{
+					tabular:
+					{
+						columns:
+							[
+								{
+									property: deprecatedProperties[0].name,
+								},
+							],
+					},
+				},
+			), false],
+		['tabular column module property that is deprecated',
+			generateBasicSchema(
+				deprecatedModules,
+				basicProperties,
+				{
+					tabular:
+					{
+						columns:
+							[
+								{
+									property: deprecatedModules[0].properties[0].name,
+									module: deprecatedModules[0].type,
+								},
+							],
+					},
+				},
+			), false],
 	];
 
 	describe.each([
 		['the template is undefined', undefined, false],
 		['the template is empty', {}, false],
-		['the template has all the required properties', { name: generateRandomString(), code: generateRandomString(3), config: basicConfig }, true],
+		['the template has all the required properties', { name: generateRandomString(), code: generateRandomString(3) }, true],
 		...nameTests,
 		...codeTests,
 		...schemaFieldsTest,
@@ -1046,7 +1142,7 @@ const testValidate = () => {
 			config: {
 				defaultView: true,
 				defaultImage: true,
-				...basicConfig,
+
 			},
 			properties: [{
 				name: 'I am an apple',
@@ -1076,7 +1172,7 @@ const testValidate = () => {
 		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
 			{ ...mod, name, properties: [] }));
-		expectedData.config = { defaultView: true, ...basicConfig };
+		expectedData.config = { defaultView: true };
 		const output = TemplateSchema.validate(data);
 
 		expect(output).toEqual(expectedData);
@@ -1087,7 +1183,7 @@ const testValidate = () => {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
-				...basicConfig,
+
 			},
 			properties: [
 				{
@@ -1125,7 +1221,7 @@ const testValidate = () => {
 			name: generateRandomString(),
 			code: generateRandomString(3),
 			config: {
-				...basicConfig,
+
 			},
 			properties: [
 				{

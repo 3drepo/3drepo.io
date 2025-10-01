@@ -40,17 +40,6 @@ const defaultTemplates = [
 				],
 				default: 'Active',
 			},
-			tabular: {
-				columns: [
-					{ property: 'name' },
-					{ property: 'Created at' },
-					{ property: 'Assignees' },
-					{ property: 'Owner' },
-					{ property: 'Due Date' },
-					{ property: 'Priority' },
-					{ property: 'Status' },
-				],
-			},
 		},
 		modules: [
 			{ type: presetModules.CLASH },
