@@ -55,6 +55,8 @@ const List = () => {
 		return groups;
 	};
 
+	const groupedItems = groupBySelected();
+
 	const clearAll = () => {
 		// User cannot remove column if it is the current grouping method
 		const removableColumns = groupedItems.selected.filter((columnName) => columnName !== groupBy);
@@ -65,8 +67,6 @@ const List = () => {
 	};
 
 	const selectAll = () => groupedItems.unselected.forEach(showColumn);
-
-	const groupedItems = groupBySelected();
 
 	if (!filteredItems.length) return (
 		<EmptyListMessageContainer>
