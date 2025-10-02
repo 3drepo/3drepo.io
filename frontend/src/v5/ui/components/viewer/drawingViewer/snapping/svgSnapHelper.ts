@@ -294,7 +294,7 @@ export class SVGSnapHelper {
 			results.closestIntersection = queryResults.closestIntersection;
 		}
 
-		return Promise.resolve(results);
+		return Promise.resolve(results); // The SnapHandler interface expects snap to be asynchronous, even though the SVG Snap Handler actually runs synchronously
 	}
 }
 
