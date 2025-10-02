@@ -280,6 +280,6 @@ export class SnapResults {
 	}
 }
 
-export interface ISnapHelper {
+export interface SnapHelper {
 	snap: (mousePos: Vector2Like, radius: number) => Promise<SnapResults>;
 }

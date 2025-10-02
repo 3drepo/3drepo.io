@@ -19,7 +19,7 @@ import { forwardRef, useEffect, useRef, useCallback } from 'react';
 import { ZoomableImage, Transform } from '../zoomableImage.types';
 import { DrawingViewerImageProps } from '../drawingViewerImage/drawingViewerImage.component';
 import { Core } from '@pdftron/webviewer';
-import { ISnapHelper, SnapResults } from '../snapping/types';
+import { SnapHelper, SnapResults } from '../snapping/types';
 import { Vector2Like } from 'three';
 import { PanZoomHandler } from '../panzoom/centredPanZoom';
 import { clientConfigService } from '@/v4/services/clientConfig';
@@ -32,7 +32,7 @@ declare global {
 	}
 }
 
-export type DrawingViewerApryseType = ZoomableImage & ISnapHelper & PanZoomHandler;
+export type DrawingViewerApryseType = ZoomableImage & SnapHelper & PanZoomHandler;
 
 // When a document zooms, the Apryse SDK will build a new canvas at the native
 // zoom level, append it to the page section created in createPageSections and

@@ -52,7 +52,7 @@ import { useSelector } from 'react-redux';
 import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import HomeIcon from '@assets/icons/viewer/home.svg';
 import { DrawingViewerApryse } from './drawingViewerApryse/drawingViewerApryse.component';
-import { ISnapHelper } from './snapping/types';
+import { SnapHelper } from './snapping/types';
 
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
@@ -71,7 +71,7 @@ export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const { isCalibrating, step, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
-	const [snapHandler, setSnapHandler] =  useState<ISnapHelper>();
+	const [snapHandler, setSnapHandler] =  useState<SnapHelper>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
@@ -165,9 +165,9 @@ export const Viewer2D = () => {
 				setSnapHandler(snap);
 				break;
 			case ViewerType.Pdf:
-				// The Apryse viewer implements snapping itself. It exposes ISnapHelper in
+				// The Apryse viewer implements snapping itself. It exposes SnapHelper in
 				// its returned object, though this is not expressed in ZoomableImage.
-				setSnapHandler(imgViewerRef.current as unknown as ISnapHelper);
+				setSnapHandler(imgViewerRef.current as unknown as SnapHelper);
 				break;
 		}
 
