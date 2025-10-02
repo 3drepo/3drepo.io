@@ -87,6 +87,7 @@ export const TicketsTableHeaderFilter = ({ propertyName }: FiltersSectionProps) 
 						{...filter as any}
 						onCancel={close}
 						onSubmit={setFilter}
+						cancelButton
 					/>
 				)}
 			</ActionMenuContext.Consumer>
