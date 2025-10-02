@@ -148,10 +148,10 @@ export const Viewer2D = () => {
 		switch (viewer.type) {
 			case ViewerType.Img:
 			case ViewerType.Svg:
-				DrawingViewerService.getDrawingSrc = () => Promise.resolve({ src });
+				DrawingViewerService.waitForDrawingSrc = () => Promise.resolve({ src });
 				break;
 			case ViewerType.Pdf:
-				DrawingViewerService.getDrawingSrc = (imgViewerRef.current as any).getImageSrc;
+				DrawingViewerService.waitForDrawingSrc = (imgViewerRef.current as any).getImageSrc;
 				break;
 		}
 

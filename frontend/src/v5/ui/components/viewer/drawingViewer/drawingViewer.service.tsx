@@ -63,7 +63,7 @@ const DrawingViewerServiceCreator = () => {
 	// A callback that should be set by the viewer2d that resolves to a URL
 	// representing the full image. This may a URI, or a Blob URL if the
 	// viewer needs to rasterise the drawing.
-	let getDrawingSrc: GetDrawingSrc = null;
+	let waitForDrawingSrc: GetDrawingSrc = null;
 	
 	const setMousePosition = (mp: Coord2D) => {
 		mousePosition = mp ; 
@@ -130,7 +130,7 @@ const DrawingViewerServiceCreator = () => {
 		getClickPoint,
 		on,
 		off,
-		getDrawingSrc,
+		waitForDrawingSrc,
 	};
 };
 export const DrawingViewerService = DrawingViewerServiceCreator();

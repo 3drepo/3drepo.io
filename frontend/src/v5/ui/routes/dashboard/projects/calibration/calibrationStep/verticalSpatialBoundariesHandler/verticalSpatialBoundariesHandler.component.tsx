@@ -119,7 +119,7 @@ export const VerticalSpatialBoundariesHandler = () => {
 	
 	useEffect(() => {
 		Viewer.setCalibrationToolVerticalPlanes(...verticalPlanes);
-		DrawingViewerService.getDrawingSrc().then(setSrcRef);
+		DrawingViewerService.waitForDrawingSrc().then(setSrcRef);
 		return () => {
 			Viewer.setCalibrationToolDrawing(null, [0, 0, 1, 0, 0, 1]);
 			setIsCalibratingPlanes(false);
