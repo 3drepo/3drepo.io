@@ -89,6 +89,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	const snapModes = useRef(null);
 	const offset = useRef({ x: 0, y: 0 }); // Stores the offset of the document in the container. The scale should come from the documentviewer.
 	const placeholder = useRef<HTMLElement>();
+	const snappingTask = useRef(null);
 
 	// Gets the full image as a blob that can be loaded into another image
 	// source, regardless of the current transformation.
@@ -130,23 +131,27 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 	// document coordinates vs mouse coordinates to the viewer2D component.
 
 	const snap = (mousePos: Vector2Like, radius: number): Promise<SnapResults> => {
-		return documentViewer.current.snapToNearest(1, mousePos.x, mousePos.y, snapModes.current).then((snapPos) => {
-			const results = new SnapResults();
-			// snapToNearest will consider the entire document, so filter
-			// the results by the radius to match the expected behaviour
-			// of the other viewers.
-			const d = (snapPos.x - mousePos.x) * (snapPos.x - mousePos.x) + (snapPos.y - mousePos.y) * (snapPos.y - mousePos.y);
-			if (d < (radius * radius)) {
-				if (snapPos.modeName == 'PATH_ENDPOINT') {
-					results.closestNode = snapPos;
-				} else if (snapPos.modeName == 'LINE_INTERSECTION') {
-					results.closestIntersection = snapPos;
-				} else if (snapPos.modeName == 'POINT_ON_LINE') {
-					results.closestEdge = snapPos;
+		if (!snappingTask.current) {
+			snappingTask.current = documentViewer.current.snapToNearest(1, mousePos.x, mousePos.y, snapModes.current).then((snapPos) => {
+				const results = new SnapResults();
+				// snapToNearest will consider the entire document, so filter
+				// the results by the radius to match the expected behaviour
+				// of the other viewers.
+				const d = (snapPos.x - mousePos.x) * (snapPos.x - mousePos.x) + (snapPos.y - mousePos.y) * (snapPos.y - mousePos.y);
+				if (d < (radius * radius)) {
+					if (snapPos.modeName == 'PATH_ENDPOINT') {
+						results.closestNode = snapPos;
+					} else if (snapPos.modeName == 'LINE_INTERSECTION') {
+						results.closestIntersection = snapPos;
+					} else if (snapPos.modeName == 'POINT_ON_LINE') {
+						results.closestEdge = snapPos;
+					}
 				}
-			}
-			return results;
-		});
+				snappingTask.current = null;
+				return results;
+			});
+		}
+		return snappingTask.current;
 	};
 
 	// Creates the HTML Elements that will hold the canvas and other nodes
@@ -418,6 +423,7 @@ export const DrawingViewerApryse = forwardRef<DrawingViewerApryseType, DrawingVi
 			const docViewer = documentViewer.current;
 			Promise.all(docViewer.pendingTasks).then(() => docViewer.closeDocument()).then(() => docViewer.dispose());
 			documentViewer.current = null;
+			snappingTask.current = null;
 		};
 	}, []);
 
