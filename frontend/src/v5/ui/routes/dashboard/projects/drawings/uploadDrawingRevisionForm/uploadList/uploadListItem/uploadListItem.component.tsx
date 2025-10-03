@@ -38,7 +38,6 @@ import { get } from 'lodash';
 import { isUniqueRevisionStatusError } from '@/v5/validation/drawingSchemes/drawingSchemes';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectRevisionsPending } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
-import { selectAreSettingsPending } from '@/v5/store/drawings/drawings.selectors';
 import { uploadFile } from '@/v5/validation/shared/validators';
 
 const UNEXPETED_STATUS_ERROR = undefined;
@@ -83,11 +82,11 @@ export const UploadListItem = ({
 	isUploading,
 	isMultiPagePdf,
 }: IUploadListItem): JSX.Element => {
-	const revisionPrefix = `uploads.${index}`;
+	const revisionPrefix:`uploads.${number}` = `uploads.${index}`;
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();
 	const uploadErrorMessage: string = DrawingRevisionsHooksSelectors.selectUploadError(uploadId);
-	const { trigger, setValue, setError, formState: { errors } } = useFormContext();
+	const { trigger, clearErrors, setValue, setError, formState: { errors } } = useFormContext();
 	const drawingId = useWatch({ name: `${revisionPrefix}.drawingId` });
 	const statusCode = useWatch({ name: `${revisionPrefix}.statusCode` });
 	const revCode = useWatch({ name: `${revisionPrefix}.revCode` });
@@ -97,12 +96,17 @@ export const UploadListItem = ({
 	const uploadStatus = getUploadStatus(progress, uploadErrorMessage);
 	const fileError = !!get(errors, `${revisionPrefix}.file`)?.message;
 	const disabled = fileError || isUploading;
+	const fetched = DrawingsHooksSelectors.selectDrawingFetched(drawingId);
+	const sidebarFormRequiredFields = ['drawingNumber', 'drawingType', 'calibration'].map((f) =>`${revisionPrefix}.${f}`);
 
 	const sanitiseDrawing = (drawing: IDrawing) => ({
 		drawingNumber: drawing?.number || '',
 		drawingDesc: drawing?.desc || '',
 		drawingType: drawing?.type || '',
-		calibration: drawing?.calibration || DEFAULT_SETTINGS_CALIBRATION,
+		calibration: {
+			units: drawing?.calibration?.units || DEFAULT_SETTINGS_CALIBRATION.units,
+			verticalRange: drawing?.calibration?.verticalRange || DEFAULT_SETTINGS_CALIBRATION.verticalRange,
+		},
 	});
 
 	const revCodeError = get(errors, `${revisionPrefix}.revCode`)?.message;
@@ -141,18 +145,6 @@ export const UploadListItem = ({
 	}, [JSON.stringify(selectedDrawing)]);
 
 	useEffect(() => {
-		if (selectedDrawing?._id) {
-			if (selectRevisionsPending(getState(), selectedDrawing._id)) {
-				DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
-			}
-
-			if (selectAreSettingsPending(getState(), selectedDrawing._id)) {
-				DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, selectedDrawing._id);
-			}
-		}
-	}, [selectedDrawing?._id]);
-
-	useEffect(() => {
 		if (statusCode && revCode) {
 			trigger(`${revisionPrefix}.statusCode`);
 		}
@@ -166,6 +158,24 @@ export const UploadListItem = ({
 		}
 	}, []);
 	
+	useEffect(() => {
+		if (!drawingId) {
+			clearErrors(sidebarFormRequiredFields);
+			return;
+		}
+
+		if (fetched) {
+			trigger(sidebarFormRequiredFields);
+		} else {
+			DrawingsActionsDispatchers.fetchDrawingSettings(teamspace, projectId, drawingId);
+		}
+
+		if (selectRevisionsPending(getState(), drawingId)) {
+			DrawingRevisionsActionsDispatchers.fetch(teamspace, projectId, selectedDrawing._id);
+		}
+	}, [drawingId, fetched]);
+
+	const drawingError = sidebarFormRequiredFields.some((field) => get(errors, field));
 	return (
 		<UploadListItemRow selected={isSelected}>
 			<UploadListItemFileIcon extension={fileData.extension} />
@@ -209,7 +219,7 @@ export const UploadListItem = ({
 					/>
 				) : (
 					<>
-						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit} disabled={disabled}>
+						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickEdit} error={drawingError} disabled={disabled}>
 							<EditIcon />
 						</UploadListItemButton>
 						<UploadListItemButton variant={isSelected ? 'secondary' : 'primary'} onClick={onClickDelete}>
