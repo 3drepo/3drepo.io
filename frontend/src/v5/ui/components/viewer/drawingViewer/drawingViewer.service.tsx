@@ -27,7 +27,14 @@ export const DRAWING_VIEWER_EVENTS = {
 	CLICK_POINT: 'CLICK_POINT',
 };
 
+export type ImageSrcReference = {
+	src: string,
+	width?: number,
+	height?: number,
+};
+
 type GetScreenshot = () => null | Promise<string>;
+type GetDrawingSrc = () => Promise<ImageSrcReference>;
 const DrawingViewerServiceCreator = () => {
 	let imgContainer = null;
 	let mousePosition = [0,  0];
@@ -39,8 +46,24 @@ const DrawingViewerServiceCreator = () => {
 	const off = emitter.off.bind(emitter);
 	const emit = emitter.emit.bind(emitter);
 
-	const getScreenshot: GetScreenshot = () => imgContainer ? domToPng(imgContainer) : null;
+	// The following options for domToPng ensure consistency between the viewers;
+	// restoreScrollPosition ensures renders take into account scrollLeft and
+	// scrollTop of any scroll view elements. We also filter out the the camera
+	// icons and other transient annotations.
+
+	const getScreenshot: GetScreenshot = () => imgContainer ? domToPng(imgContainer, {
+		features: {
+			restoreScrollPosition: true,
+		},
+		filter: (el: HTMLElement) => { return el.id != 'viewerLayer2d' && el.id != 'viewerLayer2dCameraOffSight'; },
+	} ) : null;
+
 	const setImgContainer = (newImgContainer) => { imgContainer = newImgContainer; };
+
+	// A callback that should be set by the viewer2d that resolves to a URL
+	// representing the full image. This may a URI, or a Blob URL if the
+	// viewer needs to rasterise the drawing.
+	let waitForDrawingSrc: GetDrawingSrc = null;
 	
 	const setMousePosition = (mp: Coord2D) => {
 		mousePosition = mp ; 
@@ -107,6 +130,7 @@ const DrawingViewerServiceCreator = () => {
 		getClickPoint,
 		on,
 		off,
+		waitForDrawingSrc,
 	};
 };
 export const DrawingViewerService = DrawingViewerServiceCreator();
