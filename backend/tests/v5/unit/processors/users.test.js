@@ -17,7 +17,11 @@
 
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
-const { src } = require('../../helper/path');
+const { src, imagesFolder, image } = require('../../helper/path');
+const fs = require('fs/promises');
+const path = require('path');
+
+const { logger } = require(`${src}/utils/logger`);
 
 const Users = require(`${src}/processors/users`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -48,6 +52,7 @@ const { generateRandomString, determineTestGroup } = require('../../helper/servi
 const user = {
 	user: generateRandomString(),
 	customData: {
+		userId: generateRandomString(),
 		firstName: generateRandomString(),
 		lastName: generateRandomString(),
 		email: generateRandomString(),
@@ -68,6 +73,16 @@ const user = {
 	},
 };
 
+const ssoUser = {
+	name: `${user.customData.firstName} ${user.customData.lastName}`,
+	email: user.customData.email,
+	profilePictureUrl: generateRandomString(),
+	metadata: JSON.stringify({
+		company: user.customData.billing.billingInfo.company,
+		countryCode: user.customData.billing.billingInfo.countryCode,
+	}),
+};
+
 UsersModel.getUserByUsername.mockImplementation((username) => {
 	if (username === user.user) {
 		return user;
@@ -83,8 +98,8 @@ const formatUser = (userProfile, hasAvatar, hash) => ({
 	email: userProfile.customData.email,
 	hasAvatar,
 	apiKey: userProfile.customData.apiKey,
-	countryCode: userProfile.customData.billing.billingInfo.countryCode,
-	company: userProfile.customData.billing.billingInfo.company,
+	countryCode: userProfile.customData.billing?.billingInfo.countryCode,
+	company: userProfile.customData.billing?.billingInfo.company,
 	...(hash ? { intercomRef: hash } : {}),
 });
 
@@ -92,54 +107,80 @@ const tesGetProfileByUsername = () => {
 	describe('Get user profile by username', () => {
 		const projection = {
 			user: 1,
-			'customData.firstName': 1,
-			'customData.lastName': 1,
-			'customData.email': 1,
+			'customData.userId': 1,
 			'customData.apiKey': 1,
-			'customData.billing.billingInfo.countryCode': 1,
-			'customData.billing.billingInfo.company': 1,
 		};
 
 		test('should return user profile', async () => {
 			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
-			FilesManager.fileExists.mockResolvedValueOnce(false);
+			FronteggService.getUserById.mockResolvedValueOnce(ssoUser);
 
 			const res = await Users.getProfileByUsername(user.user);
-			expect(res).toEqual(formatUser(user, false));
+			expect(res).toEqual(formatUser(user, true));
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(user.customData.userId);
+		});
+
+		test('should return user profile with empty metadata if it does not exist', async () => {
+			const userWithoutMetadata = {
+				user: generateRandomString(),
+				customData: {
+					userId: generateRandomString(),
+					firstName: generateRandomString(),
+					lastName: generateRandomString(),
+					email: generateRandomString(),
+					avatar: true,
+					apiKey: 123,
+					resetPasswordToken: {
+						token: generateRandomString(),
+						expiredAt: new Date(2030, 1, 1),
+					},
+
+					mailListOptOut: false,
+				},
+			};
+			const ssoUserNoMeta = {
+				name: `${userWithoutMetadata.customData.firstName} ${userWithoutMetadata.customData.lastName}`,
+				email: userWithoutMetadata.customData.email,
+				profilePictureUrl: generateRandomString(),
+			};
+			UsersModel.getUserByUsername.mockResolvedValueOnce(userWithoutMetadata);
+			FronteggService.getUserById.mockResolvedValueOnce(ssoUserNoMeta);
+
+			const res = await Users.getProfileByUsername(userWithoutMetadata.user);
+			expect(res).toEqual(formatUser(userWithoutMetadata, true));
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(userWithoutMetadata.user, projection);
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(userWithoutMetadata.customData.userId);
 		});
 
 		test('should return user profile with intercom reference if configured', async () => {
 			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
-			FilesManager.fileExists.mockResolvedValueOnce(false);
+			FronteggService.getUserById.mockResolvedValueOnce(ssoUser);
 
 			const hash = generateRandomString();
 			Intercom.generateUserHash.mockReturnValueOnce(hash);
 			const res = await Users.getProfileByUsername(user.user);
-			expect(res).toEqual(formatUser(user, false, hash));
+			expect(res).toEqual(formatUser(user, true, hash));
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
-		});
-
-		test('should return user profile with avatar', async () => {
-			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
-			FilesManager.fileExists.mockResolvedValueOnce(true);
-
-			const res = await Users.getProfileByUsername(user.user);
-			expect(res).toEqual(formatUser(user, true));
-			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
-			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(user.customData.userId);
 		});
 
 		test('should return user profile with SSO user', async () => {
 			UsersModel.getUserByUsername.mockResolvedValueOnce(user);
-			FilesManager.fileExists.mockResolvedValueOnce(true);
+			FronteggService.getUserById.mockResolvedValueOnce(ssoUser);
 
 			const res = await Users.getProfileByUsername(user.user);
 			expect(res).toEqual(formatUser(user, true));
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(user.user, projection);
+			expect(FronteggService.getUserById).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserById).toHaveBeenCalledWith(user.customData.userId);
 		});
 	});
 };
@@ -147,10 +188,17 @@ const tesGetProfileByUsername = () => {
 const tesUpdateProfile = () => {
 	describe('Update user profile by username', () => {
 		test('should update user profile', async () => {
-			const updatedProfile = { firstName: 'Nick' };
+			UsersModel.getUserId.mockResolvedValueOnce(user.user);
+			const updatedProfile = { firstName: 'Nick', lastName: 'Doe', countryCode: 'US', company: '3D Repo' };
+
 			await Users.updateProfile(user.user, updatedProfile);
+
 			expect(UsersModel.updateProfile.mock.calls.length).toBe(1);
+			expect(UsersModel.updateProfile.mock.calls[0][0]).toEqual(user.user);
 			expect(UsersModel.updateProfile.mock.calls[0][1]).toEqual(updatedProfile);
+			expect(FronteggService.updateUserDetails.mock.calls.length).toBe(1);
+			expect(FronteggService.updateUserDetails.mock.calls[0][0]).toEqual(user.user);
+			expect(FronteggService.updateUserDetails.mock.calls[0][1]).toEqual(updatedProfile);
 		});
 	});
 };
@@ -159,24 +207,72 @@ const testGetAvatarStream = () => {
 	describe('Get avatar stream', () => {
 		test('should get avatar stream', async () => {
 			const username = generateRandomString();
-			const stream = generateRandomString();
-			FilesManager.getFile.mockResolvedValueOnce(stream);
-			await Users.getAvatar(username);
-			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
+			const mockImageBuffer = generateRandomString();
+			const expectedPayload = { buffer: mockImageBuffer, extension: 'png' };
+
+			UsersModel.getUserId.mockResolvedValueOnce(username);
+			FronteggService.getUserAvatarBuffer.mockResolvedValueOnce(mockImageBuffer);
+
+			await expect(Users.getAvatar(username)).resolves.toEqual(expectedPayload);
+
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
+		});
+		test('should throw an error if something happens', async () => {
+			const username = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(username);
+			FronteggService.getUserAvatarBuffer.mockRejectedValueOnce(new Error('Failed to fetch avatar'));
+
+			await expect(Users.getAvatar(username)).rejects.toEqual(templates.unknown);
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
 		});
 	});
 };
 
+const fileExists = (file) => fs.access(file).then(() => true).catch(() => false);
+
 const testUploadAvatar = () => {
+	const tempAvatar = path.join(imagesFolder, 'toRemove.png');
 	describe('Remove old avatar and upload a new one', () => {
-		test('should upload new avatar', async () => {
+		const avatarObject = {
+			path: tempAvatar,
+		};
+		test('should upload new avatar and remove the temporary file', async () => {
 			const username = generateRandomString();
-			const avatarBuffer = generateRandomString();
-			await Users.uploadAvatar(username, avatarBuffer);
-			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.storeFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username,
-				avatarBuffer);
+			const userId = generateRandomString();
+			const tenantId = generateRandomString();
+			await fs.copyFile(image, tempAvatar);
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.uploadAvatar.mockResolvedValueOnce(undefined);
+			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
+
+			await expect(Users.uploadAvatar(username, avatarObject)).resolves.toEqual(undefined);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
+				userId, avatarObject.path,
+			);
+			await expect(fileExists(tempAvatar)).resolves.toBe(false);
+		});
+		test('should fail removing the temporary avatar file', async () => {
+			const username = generateRandomString();
+			const userId = generateRandomString();
+			const tenantId = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.uploadAvatar.mockResolvedValueOnce(undefined);
+			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
+
+			jest.spyOn(logger, 'logError');
+
+			await expect(Users.uploadAvatar(username, avatarObject)).resolves.toEqual(undefined);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
+				userId, avatarObject.path,
+			);
+			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
 	});
 };

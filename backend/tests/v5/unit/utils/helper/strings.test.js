@@ -154,6 +154,31 @@ const testFromBase64 = () => {
 	});
 };
 
+const testSplitName = () => {
+	describe('Split Name', () => {
+		test('with first and last name', () => {
+			const name = 'Will Smith';
+			const [firstName, lastName] = StringHelper.splitName(name);
+			expect(firstName).toEqual('Will');
+			expect(lastName).toEqual('Smith');
+		});
+
+		test('with single name', () => {
+			const name = 'Will';
+			const [firstName, lastName] = StringHelper.splitName(name);
+			expect(firstName).toEqual('Will');
+			expect(lastName).toEqual('');
+		});
+
+		test('with empty string', () => {
+			const name = '';
+			const [firstName, lastName] = StringHelper.splitName(name);
+			expect(firstName).toEqual('Anonymous');
+			expect(lastName).toEqual('User');
+		});
+	});
+};
+
 describe('utils/helper/strings', () => {
 	testGetURLDomain();
 	testToCamelCase();
@@ -164,4 +189,5 @@ describe('utils/helper/strings', () => {
 	testEscapeRegexChrs();
 	testToBase64();
 	testFromBase64();
+	testSplitName();
 });
