@@ -187,6 +187,13 @@ const configSchema = Yup.object().shape({
 			.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length),
 		default: Yup.mixed().when('values', (values) => (values ? Yup.string().oneOf(values.map(({ name }) => name)).required() : Yup.mixed())),
 	}).default(undefined),
+	tabular: Yup.object({
+		columns: Yup.array().of(Yup.object({
+			property: Yup.string().required(),
+			module: Yup.string().notRequired().default(undefined),
+		}),
+		).min(1).required(),
+	}).default(undefined),
 }).default({});
 
 const pinMappingTest = (val, context) => {
@@ -226,6 +233,46 @@ const pinMappingTest = (val, context) => {
 	return true;
 };
 
+const validTabularPropsTest = (val, context) => {
+	const basePropertiesNotToCheck = ['modules', 'properties', 'config'];
+
+	const template = TemplateSchema.generateFullSchema(val);
+
+	if (!template.config?.tabular?.columns) return true;
+
+	for (const column of template.config.tabular.columns) {
+		const propModule = column.module ? template.modules.find(
+			({ type, name }) => type === column.module || name === column.module) : {};
+
+		const propCollection = column.module
+			? propModule?.properties
+			// create the full list of properties to check against
+			: [
+				Object.keys(template)
+					.map((key) => {
+						if (!basePropertiesNotToCheck.includes(key)) return { name: key };
+						return null;
+					})
+					.filter((object) => object !== null),
+				template.properties,
+			].flat();
+
+		const prop = propCollection
+			? propCollection.find(({ name }) => name === column.property)
+			: undefined;
+
+		const propPath = column.module ? `${column.module}.${column.property}` : column.property;
+
+		if (!prop) {
+			return context.createError({ message: `Property "${propPath}" could not be found in the template` });
+		} if (prop.deprecated || propModule.deprecated) {
+			return context.createError({ message: `Property "${propPath}" has been deprecated` });
+		}
+	}
+
+	return true;
+};
+
 const schema = Yup.object().shape({
 	name: nameSchema.required(),
 	code: Yup.string().length(3).required(),
@@ -245,8 +292,9 @@ const schema = Yup.object().shape({
 
 		return true;
 	}),
-
-}).test(pinMappingTest).noUnknown();
+}).test(pinMappingTest)
+	.test(validTabularPropsTest)
+	.noUnknown();
 
 TemplateSchema.getClosedStatuses = (template) => {
 	if (template?.config?.status) {
