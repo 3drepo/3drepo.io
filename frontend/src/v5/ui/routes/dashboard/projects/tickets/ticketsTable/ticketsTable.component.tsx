@@ -54,7 +54,7 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
-import { getNonCompletedTicketFilters, getTemplateFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
 
 const paramToInputProps = (value, setter) => ({
@@ -210,6 +210,11 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		setPresetFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
 	}, [selectedTemplate, JSON.stringify(presetFilters)]);
 	
+	const serializeFilters = () => {
+		console.log('filters=' + encodeURIComponent(JSON.stringify(filters.map((f) => serializeFilter(f, selectedTemplate)))));
+		console.log(JSON.stringify(filters));
+	};
+
 	return (
 		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters}>
 			<TicketsTableLayout>
@@ -228,6 +233,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 						</SelectorsContainer>
 					</FlexContainer>
 					<FlexContainer>
+						<button onClick={serializeFilters}> Serialize Filters</button>
 						<FilterSelection />
 						{!selectedTemplate.deprecated
 							&&

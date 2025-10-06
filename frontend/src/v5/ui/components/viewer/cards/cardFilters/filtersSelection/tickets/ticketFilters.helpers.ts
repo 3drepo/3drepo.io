@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { ITemplate, StatusValue } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, PropertyDefinition, StatusValue, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import BooleanIcon from '@assets/icons/filters/boolean.svg';
 import ListIcon from '@assets/icons/filters/list.svg';
 import NumberIcon from '@assets/icons/filters/number.svg';
@@ -24,7 +24,7 @@ import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { isString, sortBy, uniqBy, compact, uniq } from 'lodash';
-import { TicketFilterType, TicketFilter, TicketFilterOperator } from '../../cardFilters.types';
+import { TicketFilterType, TicketFilter, TicketFilterOperator, TicketFilterOperatorEnum } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { SelectOption } from '@/v5/helpers/form.helper';
@@ -218,3 +218,57 @@ export const getTemplateFilter = (templateCode: string): TicketFilter => ({
 		values:[templateCode],
 	},
 });
+
+const escapeString = (str) => str;
+
+const unescapeString = (str) => str;
+
+
+
+const findByName = (propOrModule: PropertyDefinition[] | TemplateModule[], name:string) =>
+	propOrModule.find((p) => p.name === name);
+
+
+// NOTE: serialization assumes there are no name clashes: that means 
+// that one name refers to one property. Eg: lets say theres a property 'number of nodes' serialization
+// assumes theres only one 'number of nodes'. In practical terms this means that serialization works 
+// assuming the filters are for one template in particular
+export const serializeFilter = (ticketFilter: TicketFilter, template: ITemplate) => {
+	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
+	let values = ticketFilter.filter.values;
+
+	let filterKey = [ticketFilter.module];
+
+	if (ticketFilter.type === 'ticketCode') {
+		filterKey.push('');
+		filterKey.push(ticketFilter.type);
+	} else {
+		filterKey.push(ticketFilter.property);
+	}
+
+	let serializedFilter: any[] = [t];
+	if (values) {
+		let serializedValues = values.map(escapeString).join(',');
+		
+		if (['oneOf', 'manyOf', 'status'].includes(ticketFilter.type)) {
+			const propertiesDefinitions  = (findByName(template.modules, ticketFilter.module) as TemplateModule)?.properties || template.properties;  
+			const options = findByName(propertiesDefinitions, ticketFilter.property) as PropertyDefinition;
+
+			if (options.values !== 'jobsAndUsers' && options.values !== 'riskCategories') {
+				const indexes = values.map((val) => options.values.indexOf(val as any));
+				serializedValues = indexes.join(',');
+			}
+		}
+
+		serializedFilter.push(serializedValues);
+	}
+	
+	return filterKey.join('.') + ':' + serializedFilter.join('.');
+};
+
+// export const deserializeFilter = (str: string): TicketFilter => {
+// 	const [fields, filter] = str.split(':');
+// 	const [module, property, types] = fields.split('.');
+
+// 	return { module, property, type: types as TicketFilterType };
+// };
