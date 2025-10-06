@@ -15,16 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
+
+export const TableIconContainer  = styled.div<{ $active?: boolean }>`
+	width: 16px;
+	height: 16px;
+	border-radius: 16%;
+	border-width: 1px;
+	border-style: solid;
 	display: flex;
+	align-items: center;
+	justify-content: center;
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.secondary.lightest };
+	}
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
+	border-color: ${({ $active, theme }) => $active ? theme.palette.base.main : 'transparent'};
 `;

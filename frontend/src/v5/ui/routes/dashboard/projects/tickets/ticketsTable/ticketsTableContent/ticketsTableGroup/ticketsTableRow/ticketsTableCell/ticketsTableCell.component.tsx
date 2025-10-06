@@ -49,8 +49,7 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 	const number = TicketsHooksSelectors.selectTicketPropertyByName(ticketId, 'number') || 0;
 
 	// Check if this property is currently being loaded
-	const propertyName = name.replace(/properties\./, '').replace(/modules\./, '');
-	const propertyWasFetched = TicketsHooksSelectors.selectPropertyFetched(ticketId, propertyName);
+	const propertyWasFetched = TicketsHooksSelectors.selectPropertyFetched(ticketId, name);
 
 	const propertyType = getPropertyType(name);
 

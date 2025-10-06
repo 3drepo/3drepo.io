@@ -46,6 +46,7 @@ type FilterFormProps = {
 	property: string,
 	type: TicketFilterType,
 	filter?: BaseFilter,
+	cancelButton?: boolean,
 	onSubmit: (newFilter: TicketFilter) => void,
 	onCancel: () => void,
 };
@@ -56,7 +57,7 @@ const formatDateRange = ([from, to]) => formatMessage(
 	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
 );
 
-export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel }: FilterFormProps) => {
+export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel, cancelButton }: FilterFormProps) => {
 	const defaultValues: FormType = {
 		operator: filter?.operator || getDefaultOperator(type),
 		values: mapArrayToFormArray(filter?.values || DEFAULT_VALUES),
@@ -76,7 +77,6 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 		reset(defaultValues);
 	}
 
-	const isUpdatingFilter = !!filter;
 	const canSubmit = isValid && !isEmpty(dirtyFields);
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
@@ -132,14 +132,14 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel 
 				)}
 				<ButtonsContainer>
 					<Button onClick={handleCancel} color="secondary">
-						{isUpdatingFilter
+						{cancelButton
 							? <FormattedMessage id="viewer.card.tickets.filters.form.cancel" defaultMessage="Cancel" />
 							: <FormattedMessage id="viewer.card.tickets.filters.form.back" defaultMessage="Back" />
 						}
 					</Button>
 					<ActionMenuItem disabled={!canSubmit}>
 						<Button onClick={handleSubmit} color="primary" variant="contained" disabled={!canSubmit}>
-							{isUpdatingFilter
+							{cancelButton
 								? <FormattedMessage id="viewer.card.tickets.filters.form.update" defaultMessage="Update" />
 								: <FormattedMessage id="viewer.card.tickets.filters.form.apply" defaultMessage="Apply" />
 							}
