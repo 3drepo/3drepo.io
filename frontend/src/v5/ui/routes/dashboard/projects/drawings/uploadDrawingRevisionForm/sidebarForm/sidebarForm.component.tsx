@@ -56,7 +56,7 @@ export const SidebarForm = () => {
 	return (
 		<>
 			<Title>{drawingName}</Title>
-			{hasAdministratorErrors &&
+			{(hasAdministratorErrors && !isProjectAdmin) &&
 				<ErrorMessage>
 					<FormattedMessage
 						id="drawing.uploads.sidebar.drawing.errorFormCollaborator"
