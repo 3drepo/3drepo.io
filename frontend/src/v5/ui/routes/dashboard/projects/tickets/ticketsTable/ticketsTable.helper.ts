@@ -57,7 +57,7 @@ export const hasRequiredViewerProperties = (template) => {
 	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
 };
 
-export const INITIAL_COLUMNS = [
+export const DEFAULT_INITIAL_COLUMNS = [
 	'id',
 	BaseProperties.TITLE,
 	'modelName',

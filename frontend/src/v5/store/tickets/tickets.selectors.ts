@@ -27,7 +27,7 @@ import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketSortingProperty } from './card/ticketsCard.types';
-import { INITIAL_COLUMNS, stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { DEFAULT_INITIAL_COLUMNS, stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -220,7 +220,7 @@ export const selectPropertiesFetched = createSelector(
 	(state) => state.fetchedProperties || {},
 );
 
-const initialPropertiesFetched = new Set(INITIAL_COLUMNS.map(stripModuleOrPropertyPrefix));
+const initialPropertiesFetched = new Set(DEFAULT_INITIAL_COLUMNS.map(stripModuleOrPropertyPrefix));
 
 export const selectInitialTabularColumns = createSelector(
 	selectCurrentProjectTemplateById,
