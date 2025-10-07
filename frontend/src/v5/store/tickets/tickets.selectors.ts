@@ -222,9 +222,18 @@ export const selectPropertiesFetched = createSelector(
 
 const initialPropertiesFetched = new Set(INITIAL_COLUMNS.map(stripModuleOrPropertyPrefix));
 
-// The format of the propertiesToInclude is the propety name without property prefix, e.g. 'Assignees', 'Due Date', etc.
+export const selectInitialTabularColumns = createSelector(
+	selectCurrentProjectTemplateById,
+	(ticketTemplate) => {
+		const columnsFromConfig = get(ticketTemplate, 'config.tabular.columns');
+		if (!columnsFromConfig) return initialPropertiesFetched;
+		return new Set(columnsFromConfig.map(({ property, module }) => module ? `${module}.${property}` : `${property}`));
+	},
+);
+
+// The format of the propertiesToInclude is the property name without property prefix, e.g. 'Assignees', 'Due Date', etc.
 // And with modules properties its the module name and property name separated by a dot, e.g. 'ModuleName.PropertyName' like
-// 'safetybase.Level Of Risk'.
+// 'safetibase.Level Of Risk'.
 export const selectPropertyFetched = createSelector(
 	selectPropertiesFetched,
 	(state, ticketId: string, property: string) => ({ ticketId, property }),

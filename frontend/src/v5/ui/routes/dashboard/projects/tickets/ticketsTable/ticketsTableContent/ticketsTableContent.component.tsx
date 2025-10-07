@@ -21,7 +21,7 @@ import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
@@ -29,11 +29,12 @@ import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { Container } from './ticketsTableContent.styles';
 import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { INITIAL_COLUMNS } from '../ticketsTable.helper';
+import { stripModuleOrPropertyPrefix } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
+	const defaultColumns = TicketsHooksSelectors.selectInitialTabularColumns(template._id);
 	const {
 		stretchTable, getAllColumnsNames, subscribe, resetWidths,
 		setVisibleSortedColumnsNames,
@@ -43,11 +44,13 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	useEffect(() => {
 		if (!templateWasFetched) return;
 		const allColumns = getAllColumnsNames();
-		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
+		const initialVisibleColumns = allColumns.filter((name) => defaultColumns.has(stripModuleOrPropertyPrefix(name)));
 		setVisibleSortedColumnsNames(initialVisibleColumns);
 		resetWidths();
-		stretchTable(BaseProperties.TITLE);
-	}, [template, templateWasFetched]);
+		const columnToStretch = initialVisibleColumns.includes(BaseProperties.TITLE) ?
+			BaseProperties.TITLE : initialVisibleColumns[initialVisibleColumns.length - 1];
+		stretchTable(columnToStretch);
+	}, [template, templateWasFetched, defaultColumns]);
 	
 	useEffect(() => {
 		const onMovingColumnChange = (movingColumn) => {
