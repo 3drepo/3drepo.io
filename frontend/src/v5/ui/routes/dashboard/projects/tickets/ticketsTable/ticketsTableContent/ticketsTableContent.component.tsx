@@ -68,6 +68,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 			</EmptyPageView>
 		);
 	}
+
 	if (!props.tickets.length) {
 		return (
 			<EmptyPageView>

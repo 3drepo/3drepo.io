@@ -24,7 +24,7 @@ import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import { isString, sortBy, uniqBy, compact, uniq } from 'lodash';
-import { TicketFilterType, TicketFilter, TicketFilterOperator, TicketFilterOperatorEnum } from '../../cardFilters.types';
+import { TicketFilterType, TicketFilter, TicketFilterOperator, TicketFilterOperatorEnum, BaseFilter } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { SelectOption } from '@/v5/helpers/form.helper';
@@ -219,21 +219,24 @@ export const getTemplateFilter = (templateCode: string): TicketFilter => ({
 	},
 });
 
-const escapeString = (str) => str;
+const escapeString = (str: string) => str.replaceAll('.', '\\.').replaceAll(',', '\\,');
 
-const unescapeString = (str) => str;
+const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',');
 
+const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
+	propOrModule?.find((p) => p.name === name);
 
-
-const findByName = (propOrModule: PropertyDefinition[] | TemplateModule[], name:string) =>
-	propOrModule.find((p) => p.name === name);
+const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, template:ITemplate) => {
+	const propertiesDefinitions = (findByName(template.modules, ticketFilter.module) as TemplateModule)?.properties || template.properties;
+	return findByName(propertiesDefinitions, ticketFilter.property) as PropertyDefinition;
+};
 
 
 // NOTE: serialization assumes there are no name clashes: that means 
 // that one name refers to one property. Eg: lets say theres a property 'number of nodes' serialization
 // assumes theres only one 'number of nodes'. In practical terms this means that serialization works 
 // assuming the filters are for one template in particular
-export const serializeFilter = (ticketFilter: TicketFilter, template: ITemplate) => {
+export const serializeFilter = (template: ITemplate, ticketFilter: TicketFilter) => {
 	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
 	let values = ticketFilter.filter.values;
 
@@ -246,13 +249,14 @@ export const serializeFilter = (ticketFilter: TicketFilter, template: ITemplate)
 		filterKey.push(ticketFilter.property);
 	}
 
-	let serializedFilter: any[] = [t];
+	const serialized = [ filterKey.join('.'), t]
+
+	let serializedValues:string = undefined;
 	if (values) {
-		let serializedValues = values.map(escapeString).join(',');
+		serializedValues = values.map(escapeString).join(',');
 		
 		if (['oneOf', 'manyOf', 'status'].includes(ticketFilter.type)) {
-			const propertiesDefinitions  = (findByName(template.modules, ticketFilter.module) as TemplateModule)?.properties || template.properties;  
-			const options = findByName(propertiesDefinitions, ticketFilter.property) as PropertyDefinition;
+			const options = findPropertyDefinitionByFilter(ticketFilter, template);
 
 			if (options.values !== 'jobsAndUsers' && options.values !== 'riskCategories') {
 				const indexes = values.map((val) => options.values.indexOf(val as any));
@@ -260,15 +264,64 @@ export const serializeFilter = (ticketFilter: TicketFilter, template: ITemplate)
 			}
 		}
 
-		serializedFilter.push(serializedValues);
+		serialized.push(serializedValues);
+
 	}
-	
-	return filterKey.join('.') + ':' + serializedFilter.join('.');
+
+	return serialized.join(':');
 };
 
-// export const deserializeFilter = (str: string): TicketFilter => {
-// 	const [fields, filter] = str.split(':');
-// 	const [module, property, types] = fields.split('.');
+
+// Got to do a custom splitter other wise the ^\ part of the regex would eat up one character
+export const splitByNonEscaped = (str: string, char) =>  {
+	const res = [];
+	let index = str.indexOf(char);
+	let lastIndex = 0;
+
+	while (index >= 0 ) {
+		if (str[index-1] !== '\\') {
+			res.push(str.substring(lastIndex, index));
+			lastIndex = index + 1;
+		}
+		index = str.indexOf(char, index + 1);
+	}
+
+	res.push(str.substring(lastIndex));
+
+	return res;
+};
+
+export const deserializeFilter = (template:ITemplate, str: string): any => {
+	console.log(JSON.stringify({str}));
+
+	const splitPointField = str.indexOf(':');
+	const splitPointFilter = str.indexOf(':', splitPointField + 1);
+
+	const serialisedFields = str.substring(0, splitPointField);
+	const serializedOperator = str.substring(splitPointField+1, splitPointFilter);
+
+	const serialisedValue = str.substring(splitPointFilter + 1);
+	let [module, property, type] = serialisedFields.split('.');
+
+	const propertyDef = findPropertyDefinitionByFilter({ module, property }, template);
+
+	let filter: BaseFilter = {
+		operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
+		values: undefined,
+	};
+
+	if (propertyDef.values) {
+		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
+		filter.values = indexes.map((i) => propertyDef.values[i]);
+	}
+
+	if (propertyDef.type) {
+		type = propertyDef.type;
+	}
+
+	return ({ property, type, filter });
+	// 	const [fields, filter] = str.split(':');
+	// 	const [module, property, types] = fields.split('.');
 
 // 	return { module, property, type: types as TicketFilterType };
-// };
+};

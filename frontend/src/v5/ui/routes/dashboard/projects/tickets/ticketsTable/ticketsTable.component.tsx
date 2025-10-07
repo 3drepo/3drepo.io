@@ -54,7 +54,7 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
-import { getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
 
 const paramToInputProps = (value, setter) => ({
@@ -211,8 +211,12 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	}, [selectedTemplate, JSON.stringify(presetFilters)]);
 	
 	const serializeFilters = () => {
-		console.log('filters=' + encodeURIComponent(JSON.stringify(filters.map((f) => serializeFilter(f, selectedTemplate)))));
-		console.log(JSON.stringify(filters));
+		const serialized = filters.map(serializeFilter.bind(undefined, selectedTemplate));
+
+		console.log(JSON.stringify(serialized));
+		console.log(JSON.stringify(serialized.map(deserializeFilter.bind(undefined, selectedTemplate))));
+		// console.log('filters=' + encodeURIComponent(JSON.stringify(filters.map((f) => serializeFilter(f, selectedTemplate)))));
+		// console.log(JSON.stringify(filters));
 	};
 
 	return (
