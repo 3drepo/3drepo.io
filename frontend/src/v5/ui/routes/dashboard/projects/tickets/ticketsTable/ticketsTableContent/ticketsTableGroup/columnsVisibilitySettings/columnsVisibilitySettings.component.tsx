@@ -36,6 +36,7 @@ import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/conte
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
 const List = () => {
 	const { filteredItems, query } = useContext(SearchContext);
@@ -61,7 +62,12 @@ const List = () => {
 		// User cannot remove column if it is the current grouping method. The table needs to have
 		// at least one column. If 'clear all' would delete all columns retain the first one in the list
 		const selectedColumnsAreUnfiltered = groupedItems.selected.length === visibleSortedColumnsNames.length;
-		const columnToRetain = groupBy || (selectedColumnsAreUnfiltered && groupedItems.selected[0]);
+		let columnToRetain;
+		if (groupBy !== NONE_OPTION) {
+			columnToRetain = groupBy;
+		} else if (selectedColumnsAreUnfiltered) {
+			columnToRetain = groupedItems.selected[0];
+		}
 		groupedItems.selected.filter((columnName) => columnName !== columnToRetain).forEach(hideColumn);
 	};
 
