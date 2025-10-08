@@ -15,16 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+const MimeTypes = {};
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
-	display: flex;
+MimeTypes.PDF = 'application/pdf';
+MimeTypes.PNG = 'image/png';
+MimeTypes.SVG = 'image/svg+xml';
+MimeTypes.JPG = 'image/jpeg';
+MimeTypes.DWG = 'application/dwg';
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
-`;
+module.exports = MimeTypes;

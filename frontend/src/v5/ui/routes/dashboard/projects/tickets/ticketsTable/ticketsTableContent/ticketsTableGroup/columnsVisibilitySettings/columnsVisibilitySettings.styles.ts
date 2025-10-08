@@ -19,18 +19,6 @@ import { SearchInput as SearchInputBase } from '@controls/searchSelect/searchSel
 import { MenuItem as MenuItemBase } from '@mui/material';
 import styled from 'styled-components';
 
-export const IconContainer = styled.div`
-	cursor: pointer;
-	color: ${({ theme }) => theme.palette.base.main};
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	position: absolute;
-	right: -2px;
-	top: 0;
-	width: fit-content;
-	padding-left: 4px;
-	z-index: 11;
-`;
-
 export const SearchInput = styled(SearchInputBase)`
 	margin: 0;
 `;
