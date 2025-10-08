@@ -97,14 +97,26 @@ ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo
 	const fileId = generateUUID();
 	const { owner, ...revData } = revInfo;
 
+	const incomplete = format !== '.pdf';
+
+	if (incomplete) {
+		revData.incomplete = true;
+	} else {
+		revData.image = fileId;
+	}
+
 	const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
-		{ ...revData, author: owner, format, rFile: [fileId], incomplete: true });
+		{ ...revData, author: owner, format, rFile: [fileId] });
 
 	const fileMeta = { name: file.originalname, rev_id, project, model };
 	await storeFile(teamspace, DRAWINGS_HISTORY_COL, fileId, file.buffer, fileMeta);
 
-	const queueMeta = { format, size: file.buffer.length, owner };
-	await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta, file.buffer);
+	if (incomplete) {
+		const queueMeta = { format, size: file.buffer.length, owner };
+		await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta, file.buffer);
+	} else {
+		publish(events.QUEUED_TASK_COMPLETED, { teamspace, model, corId: UUIDToString(rev_id), value: 0, user: owner });
+	}
 };
 
 ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname, path }) => {
