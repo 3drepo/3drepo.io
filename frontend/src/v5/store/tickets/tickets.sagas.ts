@@ -50,6 +50,7 @@ import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions
 import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import EventEmitter from 'eventemitter3';
+import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -79,10 +80,6 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 	ExecutionStrategy.Fifo,
 );
 
-
-// The format of the propertiesToInclude is the propety name without property prefix, e.g. 'Assignees', 'Due Date', etc.
-// And with modules properties its the module name and property name separated by a dot, e.g. 'ModuleName.PropertyName' like
-// 'safetybase.Level Of Risk'.
 export function* fetchTicketsProperties({
 	teamspace, projectId, modelId, ticketIds,
 	templateCode, isFederation, propertiesToInclude,
@@ -99,12 +96,16 @@ export function* fetchTicketsProperties({
 			type: 'ticketCode',
 		} as any;
 	
+		// The format required in the query to fetch the tickets 
+		// is without the full path of the property so we strip that
+		const propertiesToIncludeParam = propertiesToInclude.map(stripModuleOrPropertyPrefix);
+
 		const tickets = yield ticketPropertiesQueue.addCall(
 			isFederation,
 			teamspace,
 			projectId,
 			modelId,
-			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
+			{ propertiesToInclude: propertiesToIncludeParam, filters: filtersToQuery([filterByTemplateCode]) },
 		);
 		
 		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
