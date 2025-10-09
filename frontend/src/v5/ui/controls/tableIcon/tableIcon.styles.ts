@@ -27,9 +27,19 @@ export const TableIconContainer  = styled.div<{ $active?: boolean }>`
 	display: flex;
 	align-items: center;
 	justify-content: center;
+	cursor: pointer;
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.secondary.lightest };
 	}
 
 	border-color: ${({ $active, theme }) => $active ? theme.palette.base.main : 'transparent'};
+`;
+
+export const GearIconContainer = styled(TableIconContainer)`
+	/* absolutely positioned to end of headers because adding it to the actual last
+	header cell causes settings menu to close whenever this last column is changed  */
+	position: absolute;
+	right: 0;
+
+	color: ${({ theme }) => theme.palette.base.main};
 `;
