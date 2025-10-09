@@ -27,7 +27,7 @@ import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketSortingProperty } from './card/ticketsCard.types';
-import { DEFAULT_INITIAL_COLUMNS, stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { DEFAULT_COLUMNS, INITIAL_COLUMNS_NO_OVERRIDES, stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -220,14 +220,15 @@ export const selectPropertiesFetched = createSelector(
 	(state) => state.fetchedProperties || {},
 );
 
-const initialPropertiesFetched = new Set(DEFAULT_INITIAL_COLUMNS.map(stripModuleOrPropertyPrefix));
+const initialPropertiesFetched = new Set(INITIAL_COLUMNS_NO_OVERRIDES.map(stripModuleOrPropertyPrefix));
 
 export const selectInitialTabularColumns = createSelector(
 	selectCurrentProjectTemplateById,
 	(ticketTemplate) => {
 		const columnsFromConfig = get(ticketTemplate, 'config.tabular.columns');
 		if (!columnsFromConfig) return initialPropertiesFetched;
-		return new Set(columnsFromConfig.map(({ property, module }) => module ? `${module}.${property}` : `${property}`));
+		// const foo = [...idTitleAndModelName, ...columnsFromConfig.map(({ property, module }) => module ? `${module}.${property}` : `${property}`)];
+		return new Set([...DEFAULT_COLUMNS, ...columnsFromConfig.map(({ property, module }) => module ? `${module}.${property}` : `${property}`)]);
 	},
 );
 
