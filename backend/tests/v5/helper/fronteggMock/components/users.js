@@ -44,10 +44,11 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 
 	const [existingFirstName, existingLastName] = await splitName(user.name);
 
+	const newMetadata = { ...JSON.parse(user.metadata || '{}'), ...metadata };
+
 	const newPayload = {
 		name: `${firstName || existingFirstName} ${lastName || existingLastName}`.trim(),
-		metadata: Object.keys(metadata).length
-			? JSON.stringify(metadata) : user.metadata,
+		metadata: newMetadata,
 		profilePictureUrl: profilePictureUrl || user.profilePictureUrl,
 	};
 

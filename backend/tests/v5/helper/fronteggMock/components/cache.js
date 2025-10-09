@@ -69,11 +69,12 @@ Cache.removeAllUsersFromAccount = (accountId) => {
 // Users by Id cache
 Cache.getUserById = (userId) => {
 	if (!usersById.has(userId)) return null;
-	const user = usersById.get(userId);
+	const { metadata, ...user } = usersById.get(userId);
 
 	return {
 		...user,
 		profilePictureUrl: user.profilePictureUrl || basicAvatar,
+		...metadata,	
 	};
 };
 
@@ -87,7 +88,8 @@ Cache.addUserById = (userId, userData) => {
 Cache.updateUserById = (userId, userData) => {
 	if (usersById.has(userId)) {
 		usersById.set(userId, { ...usersById.get(userId), ...userData });
-		return (userId);
+
+		return userId;
 	}
 	Cache.addUserById(userId, userData);
 	return userId;

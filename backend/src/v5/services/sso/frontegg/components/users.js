@@ -29,8 +29,9 @@ const Users = {};
 Users.getUserById = async (userId) => {
 	try {
 		const config = await getConfig();
-		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
-		return data;
+		const { data: {metadata, ...others} } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
+		const details = JSON.parse(metadata || '{}');
+		return {...details, ...others};
 	} catch (err) {
 		throw new Error(`Failed to get user(${userId}) from Users: ${err.message}`);
 	}
