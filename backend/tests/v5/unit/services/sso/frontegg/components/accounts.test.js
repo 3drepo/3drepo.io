@@ -135,7 +135,8 @@ const testGetAllUsersInAccount = () => {
 					id: generateRandomString(),
 					email: generateRandomString(),
 					name: generateRandomString(),
-					metadata: omitMetadata ? undefined : JSON.stringify({ countryCode: generateRandomString(), company: generateRandomString() }),
+					metadata: omitMetadata ? undefined
+						: JSON.stringify({ countryCode: generateRandomString(), company: generateRandomString() }),
 					createdAt: new Date().toISOString(),
 				})),
 				_links: { next: hasNext ? generateRandomString() : undefined },
