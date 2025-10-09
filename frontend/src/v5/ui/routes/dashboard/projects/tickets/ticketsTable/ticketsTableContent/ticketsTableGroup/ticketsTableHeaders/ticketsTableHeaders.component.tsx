@@ -16,33 +16,30 @@
  */
 import { useContext } from 'react';
 import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
-import { Header, Headers } from './ticketsTableHeaders.styles';
+import { HeaderCell, HeaderCellText, Headers } from './ticketsTableHeaders.styles';
 import { getPropertyLabel } from '../../../ticketsTable.helper';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
-import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { TicketsTableHeaderFilter } from './ticketsTableHeaderFilter.component';
 
-const TableHeader = ({ name, children, disableSorting = false, ...props }) => {
+const TicketHeaderCell = ({ name, last, ...props }) => {
 	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
 	const isSelected = name === sortingColumn;
-
-	if (disableSorting) return (
-		<ResizableTableHeader name={name}>
-			<Header {...props}>
-				{children}
-			</Header>
-		</ResizableTableHeader>
-	);
+	let iconsCount = 1;
+	if (isSelected) iconsCount ++;
+	if (last) iconsCount++;
 
 	return (
-		<ResizableTableHeader name={name} onClick={() => onColumnClick(name)}>
-			<Header {...props} $selectable>
-				{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
-				{children}
-			</Header>
-		</ResizableTableHeader>
+		<HeaderCell name={name} onClick={() => onColumnClick(name)} $iconsCount={iconsCount}>
+			<HeaderCellText {...props}>
+				{getPropertyLabel(name)}
+			</HeaderCellText>
+			{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
+			<TicketsTableHeaderFilter propertyName={name}/>
+			{last && <ColumnsVisibilitySettings />}
+		</HeaderCell>
 	);
 };
 
@@ -51,12 +48,9 @@ export const TicketsTableHeaders = () => {
 
 	return (
 		<Headers>
-			{visibleSortedColumnsNames.map((name) => (
-				<TableHeader key={name} name={name} disableSorting={name === 'id'}>
-					{getPropertyLabel(name)}
-				</TableHeader>
+			{visibleSortedColumnsNames.map((name, i) => (
+				<TicketHeaderCell key={name} name={name} last={(i === visibleSortedColumnsNames.length - 1 )}/>
 			))}
-			<ColumnsVisibilitySettings />
 		</Headers>
 	);
 };
