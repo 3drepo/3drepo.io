@@ -18,6 +18,7 @@
 const {
 	addTicket: addConTicket,
 	getTicketById: getConTicketById,
+	getTicketHistoryById: getConTicketHistoryById,
 	getTicketList: getConTicketList,
 	getTicketResourceAsStream: getConTicketResourceAsStream,
 	importTickets: importConTickets,
@@ -27,6 +28,7 @@ const {
 const {
 	addTicket: addFedTicket,
 	getTicketById: getFedTicketById,
+	getTicketHistoryById: getFedTicketHistoryById,
 	getTicketList: getFedTicketList,
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
 	importTickets: importFedTickets,
@@ -40,7 +42,7 @@ const {
 	hasReadAccessToFederation,
 } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
-const { serialiseFullTicketTemplate, serialiseTemplatesList, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
+const { serialiseFullTicketTemplate, serialiseTemplatesList, serialiseTicket, serialiseTicketHistory, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { templateExists, validateImportTickets, validateNewTicket, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
@@ -114,6 +116,20 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
 
 		req.tickets = await getTicketList(teamspace, project, model, req.listOptions);
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTicketHistory = (isFed) => async (req, res, next) => {
+	const { teamspace, project, model, ticket } = req.params;
+
+	try {
+		const getTicketHistoryById = isFed ? getFedTicketHistoryById : getConTicketHistoryById;
+		req.history = await getTicketHistoryById(teamspace, project, model, ticket);
+
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -870,6 +886,81 @@ const establishRoutes = (isFed) => {
 	 *
 	 */
 	router.get('/:ticket', hasReadAccess, getTicket(isFed), serialiseTicket);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/history:
+	 *   get:
+	 *     description: Get ticket history by ID
+	 *     tags: [Tickets]
+	 *     operationId: GetTicketHistory
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the ticket as a json object
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 history:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       author:
+	 *                         type: string
+	 *                         description: user that made the change
+	 *                         example: UserName1
+	 *                       timestamp:
+	 *                         type: number
+	 *                         description: serialized date and time of when the change was made
+	 *                         example: 1617187200000
+	 *                       changes:
+	 *                         type: object
+	 *                         description: object that describes what was changed schema depends on the type of change and template of the ticket
+	 *                         properties:
+	 *                           properties:
+	 *                             type: object
+	 *                             description: properties that were changed
+	 *
+	 */
+	router.get('/:ticket/history', hasReadAccess, getTicketHistory(isFed), serialiseTicketHistory);
 
 	/**
 	 * @openapi

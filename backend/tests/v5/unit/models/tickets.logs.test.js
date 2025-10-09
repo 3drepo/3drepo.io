@@ -114,8 +114,30 @@ const testAddImportedLog = () => {
 	});
 };
 
+const testGetTicketLogsById = () => {
+	describe('Get ticket logs by ID', () => {
+		test('Should return ticket logs', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ticketId = generateUUID();
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+
+			const result = await TicketLogs.getTicketLogsById(teamspace, project, model, ticketId);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
+				{ teamspace, project, model, ticket: ticketId },
+				{ _id: 0, teamspace: 0, project: 0, model: 0, ticket: 0 },
+				{ timestamp: 1 });
+			expect(result).toEqual([]);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAddTicketLog();
 	testAddGroupUpdateLog();
 	testAddImportedLog();
+	testGetTicketLogsById();
 });

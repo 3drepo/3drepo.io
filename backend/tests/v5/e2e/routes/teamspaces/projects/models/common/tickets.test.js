@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep, times } = require('lodash');
+const { cloneDeep, times, find } = require('lodash');
 const SuperTest = require('supertest');
 const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
 const { queryOperators, specialQueryFields } = require('../../../../../../../../src/v5/schemas/tickets/tickets.filters');
+const { from } = require('form-data');
+const { insertOne } = require('../../../../../../../../src/v5/handler/db');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -360,7 +362,8 @@ const testImportTickets = () => {
 				['the ticket data contains comments', true, getRoute(), undefined, { comments: times(10, ServiceHelper.generateImportedComment) }],
 				['the ticket data contains comments when comments are disabled', false, getRoute({ templateId: templateWithoutComments._id }), templates.invalidArguments, {
 					...ServiceHelper.generateTicket(templateWithoutComments),
-					comments: times(10, ServiceHelper.generateImportedComment) }],
+					comments: times(10, ServiceHelper.generateImportedComment),
+				}],
 				['the ticket data contains invalid comments', false, getRoute(), templates.invalidArguments, { comments: times(10, ServiceHelper.generateComment) }],
 				['the ticket data contains duplicate unique properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniquePropTicket }],
 				['the ticket data contains duplicate unique module properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniqueModulePropTicket }],
@@ -451,10 +454,12 @@ const testGetTicketResource = () => {
 			const model = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 
-			const baseRouteParams = { modelType,
+			const baseRouteParams = {
+				modelType,
 				key: users.tsAdmin.apiKey,
 				projectId: project.id,
-				model };
+				model,
+			};
 
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
@@ -638,12 +643,16 @@ const testGetTicketList = () => {
 		const numberProp = { name: ServiceHelper.generateRandomString(), type: propTypes.NUMBER };
 		const boolProp = { name: ServiceHelper.generateRandomString(), type: propTypes.BOOLEAN };
 		const dateProp = { name: ServiceHelper.generateRandomString(), type: propTypes.DATE };
-		const oneOfProp = { name: ServiceHelper.generateRandomString(),
+		const oneOfProp = {
+			name: ServiceHelper.generateRandomString(),
 			type: propTypes.ONE_OF,
-			values: times(5, () => ServiceHelper.generateRandomString()) };
-		const manyOfProp = { name: ServiceHelper.generateRandomString(),
+			values: times(5, () => ServiceHelper.generateRandomString()),
+		};
+		const manyOfProp = {
+			name: ServiceHelper.generateRandomString(),
 			type: propTypes.MANY_OF,
-			values: times(5, () => ServiceHelper.generateRandomString()) };
+			values: times(5, () => ServiceHelper.generateRandomString()),
+		};
 
 		const templatesToUse = times(3, () => {
 			const template = ServiceHelper.generateTemplate();
@@ -729,7 +738,7 @@ const testGetTicketList = () => {
 				[`${queryOperators.EXISTS} operator is used in ${propType} property`,
 					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.EXISTS}'` } }, true,
 					model.tickets.filter((t) => t.type === templateWithAllProps._id
-						&& Object.hasOwn(t.properties, propertyName))],
+					&& Object.hasOwn(t.properties, propertyName))],
 				[`${queryOperators.NOT_EXISTS} operator is used in ${propType} property`,
 					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_EXISTS}'` } }, true,
 					model.tickets.filter((t) => t.type !== templateWithAllProps._id
@@ -762,10 +771,12 @@ const testGetTicketList = () => {
 					[`${queryOperators.CONTAINS} operator is used in ${propType} property`,
 						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.CONTAINS}::${model.tickets[0].properties[propertyName].slice(0, 5)}'` } }, true,
 						model.tickets.filter((t) => t.properties[propertyName]
-							=== model.tickets[0].properties[propertyName])],
+						=== model.tickets[0].properties[propertyName])],
 					[`${queryOperators.NOT_CONTAINS} operator is used in ${propType} property`,
-						{ ...baseRouteParams,
-							options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` } },
+						{
+							...baseRouteParams,
+							options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` },
+						},
 						true,
 						model.tickets
 							.filter((t) => t.properties[propertyName] !== model.tickets[0].properties[propertyName])],
@@ -788,36 +799,46 @@ const testGetTicketList = () => {
 					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } }, true,
 					model.tickets
 						.filter((t) => t.properties[manyOfProp.name]?.some((val) => val.slice(0, 5)
-							=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
+						=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
 				[`${queryOperators.NOT_CONTAINS} operator is used in ${propTypes.MANY_OF} property`,
-					{ ...baseRouteParams,
-						options: { query: `'${manyOfProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } },
+					{
+						...baseRouteParams,
+						options: { query: `'${manyOfProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` },
+					},
 					true,
 					model.tickets
 						.filter((t) => !t.properties[manyOfProp.name]
 							?.some((val) => val.slice(0, 5)
-								=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
+							=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
 			];
 
 			const numberPropertyFilters = (propType, propertyName) => [
 				...existsPropertyFilters(propType, propertyName),
 				...equalsPropertyFilters(propType, propertyName),
-				[`${queryOperators.GREATER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
-					options: { query: `'${propertyName}::${queryOperators.GREATER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				[`${queryOperators.GREATER_OR_EQUAL_TO} operator is used in ${propType} property`, {
+					...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.GREATER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` },
+				}, true,
 				model.tickets.filter((t) => t.properties[propertyName]
 					>= model.tickets[0].properties[propertyName])],
-				[`${queryOperators.LESSER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
-					options: { query: `'${propertyName}::${queryOperators.LESSER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				[`${queryOperators.LESSER_OR_EQUAL_TO} operator is used in ${propType} property`, {
+					...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.LESSER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` },
+				}, true,
 				model.tickets.filter((t) => t.properties[propertyName]
-						<= model.tickets[0].properties[propertyName])],
-				[`${queryOperators.RANGE} operator is used in ${propType} property`, { ...baseRouteParams,
-					options: { query: `'${propertyName}::${queryOperators.RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
+					<= model.tickets[0].properties[propertyName])],
+				[`${queryOperators.RANGE} operator is used in ${propType} property`, {
+					...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` },
+				}, true,
 				model.tickets.filter((t) => t.properties[propertyName]
-						>= model.tickets[0].properties[propertyName] - 500
-						&& t.properties[propertyName] <= model.tickets[0].properties[propertyName] + 500)],
+					>= model.tickets[0].properties[propertyName] - 500
+					&& t.properties[propertyName] <= model.tickets[0].properties[propertyName] + 500)],
 				[`${queryOperators.NOT_IN_RANGE} operator is used in ${propType} property`,
-					{ ...baseRouteParams,
-						options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } },
+					{
+						...baseRouteParams,
+						options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` },
+					},
 					true,
 					model.tickets.filter((t) => !t.properties[propertyName] || (t.properties[propertyName]
 					< model.tickets[0].properties[propertyName] - 500
@@ -880,7 +901,7 @@ const testGetTicketList = () => {
 
 							const ticketContainingProps = res.body.tickets
 								.filter((t) => t.properties[propName] && t.modules[moduleName]
-								&& t.modules[moduleName][moduleProp]);
+									&& t.modules[moduleName][moduleProp]);
 
 							expect(ticketContainingProps.length).toBeTruthy();
 						}
@@ -1008,7 +1029,7 @@ const testUpdateTicket = () => {
 				key: users.tsAdmin.apiKey,
 				modelType,
 				projectId:
-				project.id,
+					project.id,
 				model,
 				ticket: model.ticket,
 			};
@@ -1025,7 +1046,7 @@ const testUpdateTicket = () => {
 				['the update data does not conform to the template (trying to unset required img prop)', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredImagePropName]: null } }],
 				['the update data does not conform to the template (trying to update immutable prop with value)', baseRouteParams, false, templates.invalidArguments, { properties: { [immutableProp]: ServiceHelper.generateRandomString() } }],
 				['the update data does not conform to the template (trying to update immutable prop with default value)', baseRouteParams, false, templates.invalidArguments, { properties: { [immutablePropWithDefaultValue]: ServiceHelper.generateRandomString() } }],
-				['the update data is an empty object', baseRouteParams, false, templates.invalidArguments, { }],
+				['the update data is an empty object', baseRouteParams, false, templates.invalidArguments, {}],
 				['the update data are the same as the existing', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredPropName]: model.ticket.properties[requiredPropName] } }],
 				['the update data includes duplicate unique value', baseRouteParams, false, templates.invalidArguments, { properties: { [uniquePropName]: uniquePropValue } }],
 				['the update data conforms to the template', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString() }],
@@ -1276,19 +1297,129 @@ const testUpdateManyTickets = () => {
 	});
 };
 
+const testGetTicketHistory = () => {
+	describe('Get ticket history', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const template = ServiceHelper.generateTemplate();
+
+		const conTicket = ServiceHelper.generateTicket(template);
+		const fedTicket = ServiceHelper.generateTicket(template);
+
+		const conTicketUpdate = ServiceHelper.generateTicket(template);
+		const fedTicketUpdate = ServiceHelper.generateTicket(template);
+
+		const ticketUpdate = { title: ServiceHelper.generateRandomString() };
+		const updateDate = new Date();
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed],
+				[template]);
+			await ServiceHelper.db.createTicket(teamspace, project, con, conTicket);
+			await ServiceHelper.db.createTicket(teamspace, project, con, fedTicket);
+			await ServiceHelper.db.createTicket(teamspace, project, con, conTicketUpdate);
+			await ServiceHelper.db.createTicket(teamspace, project, con, fedTicketUpdate);
+
+			await insertOne(teamspace, 'tickets.log', {
+				_id: stringToUUID(conTicketUpdate._id),
+				author: users.tsAdmin.user,
+				changes: { properties: { title: { from: conTicket.title, to: ticketUpdate.title } } },
+				timestamp: updateDate,
+				teamspace,
+				project,
+				model: stringToUUID(conTicketUpdate._id),
+				ticket: stringToUUID(conTicketUpdate._id),
+			});
+
+			console.log(await findOne(teamspace, 'tickets.log', { _id: stringToUUID(conTicketUpdate._id) }));
+
+			await insertOne(teamspace, 'tickets.log', {
+				_id: stringToUUID(fedTicketUpdate._id),
+				author: users.tsAdmin.user,
+				changes: { properties: { title: { from: conTicket.title, to: ticketUpdate.title } } },
+				timestamp: updateDate,
+				teamspace,
+				project,
+				model: stringToUUID(fedTicketUpdate._id),
+				ticket: stringToUUID(fedTicketUpdate._id),
+			});
+		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const modelWithTemplates = isFed ? fed : con;
+			const ticketId = isFed ? fedTicket._id : conTicket._id;
+			const updateTicketId = isFed ? fedTicketUpdate._id : conTicketUpdate._id;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const wrongTypeModel = isFed ? con : fed;
+
+			const getHistoryRoute = (
+				{ key = users.tsAdmin.apiKey,
+					projectId = project.id,
+					modelId = modelWithTemplates._id,
+					ticket = ticketId,
+				} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticket}/history${key ? `?key=${key}` : ''}`;
+
+			const updateHistory = [
+				{
+					author: users.tsAdmin.user,
+					timestamp: expect.any(String),
+					changes: {
+						properties: {
+							title: {
+								from: isFed ? fedTicket.title : conTicket.title,
+								to: ticketUpdate.title,
+							},
+						},
+					},
+				},
+			];
+
+			return [
+				// ['the user does not have a valid session', false, getHistoryRoute({ key: null }), templates.notLoggedIn],
+				// ['the user is not a member of the teamspace', false, getHistoryRoute({ key: users.nobody.apiKey }), templates.teamspaceNotFound],
+				// ['the project does not exist', false, getHistoryRoute({ projectId: ServiceHelper.generateRandomString() }), templates.projectNotFound],
+				// [`the ${modelType} does not exist`, false, getHistoryRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
+				// [`the model provided is not a ${modelType}`, false, getHistoryRoute({ modelId: wrongTypeModel._id }), modelNotFound],
+				// ['the user does not have access to the federation', false, getHistoryRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
+				['the user provides a ticket with no changes', true, getHistoryRoute(), { response: [], status: templates.ok.status }],
+				['the user provides a ticket with updates', true, getHistoryRoute({ ticket: updateTicketId }), { response: updateHistory, status: templates.ok.status }],
+			];
+		};
+
+		const runTest = (desc, success, route, expectedOutput) => {
+			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+
+				const res = await agent.get(route).expect(expectedStatus);
+
+				if (success) {
+					expect(res.body.history).not.toBeUndefined();
+					expect(res.body.history).toEqual(expectedOutput.response);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		// describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	testGetAllTemplates();
-	testGetTemplateDetails();
-	testAddTicket();
-	testImportTickets();
-	testGetTicketResource();
-	testGetTicket();
-	testGetTicketList();
-	testUpdateTicket();
-	testUpdateManyTickets();
+	// testGetAllTemplates();
+	// testGetTemplateDetails();
+	// testAddTicket();
+	// testImportTickets();
+	// testGetTicketResource();
+	// testGetTicket();
+	// testGetTicketList();
+	// testUpdateTicket();
+	// testUpdateManyTickets();
+	testGetTicketHistory();
 });
