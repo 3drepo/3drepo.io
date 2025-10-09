@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const migrateUsersAvatar = require('./migrateUserAvatarToFrontegg');
+const migrateUsersDetails = require('./migrateUserDetailsToFrontegg');
 
 const scripts = [
-	{ script: migrateUsersAvatar, desc: 'Migrate user avatars to Frontegg' },
+	{ script: migrateUsersDetails, desc: 'Copy user details to Frontegg' },
 ];
 
 module.exports = scripts;

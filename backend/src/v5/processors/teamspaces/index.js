@@ -23,9 +23,7 @@ const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revo
 const {
 	createTeamspaceSettings,
 	getAddOns,
-	getTeamspaceInvites,
 	getTeamspaceRefId,
-	getTeamspaceSetting,
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
@@ -37,6 +35,7 @@ const { COL_NAME } = require('../../models/projectSettings.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { createNewUserRecord } = require('../users');
+const { getInvitationsByTeamspace } = require('../../models/invitations');
 const { isTeamspaceAdmin } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
@@ -112,8 +111,7 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 };
 
 Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
-	const membersInTeamspace = [];
-	const { refId: tenantId } = await getTeamspaceSetting(teamspace, { refId: 1 });
+	const tenantId = await getTeamspaceRefId(teamspace);
 	const accountUsers = await getAllUsersInAccount(tenantId);
 
 	const projection = {
@@ -132,39 +130,31 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 		return email;
 	});
 
-	const listOfUsersFromEmails = await getUserInfoFromEmailArray(emails, projection);
+	const userEntryFromDB = await getUserInfoFromEmailArray(emails, projection);
 
-	const rawData = listOfUsersFromEmails.map((user) => {
-		const { email, name, metadata } = accountUsers.filter((u) => u.email === user.customData?.email)[0];
-		const metadataObj = metadata ? JSON.parse(metadata) : {};
+	const extractUserDetailsFromFronteggEntry = (entry) => {
+		const { name, id, company } = entry;
+		const [firstName, lastName] = splitName(name) ?? ['UnknownUser', ''];
 
-		const [firstName, lastName] = splitName(name);
-		const company = metadataObj?.company;
-
-		return { email, userId: user?.customData?.userId, firstName, lastName, company, user: user.user };
-	}).filter((u) => u !== undefined);
-
-	const addUserToMemberList = ({ user, firstName, lastName, billing, userId, email, company }) => {
-		membersInTeamspace.push(deleteIfUndefined(
-			{ user, firstName, lastName, company: company || billing?.billingInfo?.company },
-		));
-		return { userId, email };
+		return { id, firstName, lastName, company };
 	};
 
-	await Promise.all(rawData.map(
-		async (data) => {
-			const { userId, email } = addUserToMemberList(data);
-			const { id } = emailToUsers[email];
-			// update the mongo userId to match
-			if (userId !== id) await updateUserId(data.user, id);
+	const membersInTeamspace = await Promise.all(userEntryFromDB.map(async ({
+		user: username, customData: { email, userId: userIdInDB },
+	}) => {
+		const { id, ...details } = extractUserDetailsFromFronteggEntry(emailToUsers[email]);
 
-			delete emailToUsers[email];
-		},
-	));
+		if (userIdInDB !== id) await updateUserId(username, id);
+		delete emailToUsers[email];
+
+		return deleteIfUndefined(
+			{ user: username, ...details },
+		);
+	}));
 
 	// check for unprocessed users
 	if (!isEmpty(emailToUsers)) {
-		const teamspaceInvites = await getTeamspaceInvites(teamspace);
+		const teamspaceInvites = await getInvitationsByTeamspace(teamspace);
 
 		// Invitees (i.e. emails with 3drepo invites stored in mongo) are currently not considered
 		// real users, disregard them
@@ -173,14 +163,12 @@ Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
 		});
 
 		await Promise.all(Object.values(emailToUsers).map(async (userRec) => {
-			const { email, id } = userRec;
-			logger.logDebug(`User not found: ${id}, creating user based on info from IDP...`);
-
 			await createNewUserRecord(userRec);
-			const newRawData = await getUserInfoFromEmailArray([email]);
-			addUserToMemberList(
-				newRawData.map(({ user, customData }) => ({ user, ...customData }))[0],
-			);
+			const { id, ...details } = extractUserDetailsFromFronteggEntry(userRec);
+			logger.logDebug(`User not found: ${id}, creating user based on info from IDP...`);
+			membersInTeamspace.push(deleteIfUndefined(
+				{ user: id, ...details },
+			));
 		}));
 	}
 

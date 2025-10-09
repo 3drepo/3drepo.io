@@ -35,6 +35,9 @@ const Users = require(`${src}/processors/users`);
 jest.mock('../../../../../src/v5/models/users');
 const UsersModel = require(`${src}/models/users`);
 
+jest.mock('../../../../../src/v5/models/invitations');
+const InvitationsModel = require(`${src}/models/invitations`);
+
 jest.mock('../../../../../src/v5/models/jobs');
 const JobsModel = require(`${src}/models/jobs`);
 
@@ -109,7 +112,8 @@ const testGetTeamspaceMembersInfo = () => {
 			{ _id: 'jobB', users: ['abcd', 'abcd2'] },
 		];
 		const frontEggData = goldenData.map(
-			({ customData: { email, userId, firstName, lastName, billing } }) => deleteIfUndefined({ email, id: userId, name: `${firstName} ${lastName}`, metadata: JSON.stringify({ company: billing?.billingInfo?.company }) }));
+			({ customData: { email, userId, firstName, lastName, billing } }) => deleteIfUndefined({
+				email, id: userId, name: `${firstName} ${lastName}`, company: billing?.billingInfo?.company }));
 
 		test('should give the list of members within the given teamspace with their details', async () => {
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce({ refId: tsTennatnWithExtraUser });
@@ -636,7 +640,8 @@ const testGetAllMembersInTeamspace = () => {
 
 		test('should return a list of teamspace members members', async () => {
 			const frontEggData = goldenData.map(
-				({ customData: { email, userId, firstName, lastName, billing } }) => deleteIfUndefined({ email, id: userId, name: `${firstName} ${lastName}`, metadata: JSON.stringify({ company: billing?.billingInfo?.company }) }));
+				({ customData: { email, userId, firstName, lastName, billing } }) => deleteIfUndefined({
+					email, id: userId, name: `${firstName} ${lastName}`, company: billing?.billingInfo?.company }));
 
 			const expectedRes = goldenData.map(({ user, customData: { firstName, lastName, billing } }) => {
 				const res = {
@@ -666,7 +671,7 @@ const testGetAllMembersInTeamspace = () => {
 							email,
 							id: newId,
 							name: `${firstName} ${lastName}`,
-							metadata: JSON.stringify(deleteIfUndefined({ company: billing?.billingInfo?.company })),
+							company: billing?.billingInfo?.company,
 						});
 					}
 
@@ -674,7 +679,7 @@ const testGetAllMembersInTeamspace = () => {
 						email,
 						id: userId,
 						name: `${firstName} ${lastName}`,
-						metadata: JSON.stringify({ company: billing?.billingInfo?.company }),
+						company: billing?.billingInfo?.company,
 					});
 				});
 
@@ -702,7 +707,6 @@ const testGetAllMembersInTeamspace = () => {
 		});
 		test('should create new user records for any users in frontEgg but not in mongo', async () => {
 			const extraUserData = [{
-				user: 'extraUser1',
 				customData: {
 					firstName: generateRandomString(),
 					lastName: generateRandomString(),
@@ -715,7 +719,6 @@ const testGetAllMembersInTeamspace = () => {
 					email: generateRandomString(),
 				},
 			}, {
-				user: 'extraUser2',
 				customData: {
 					firstName: generateRandomString(),
 					lastName: generateRandomString(),
@@ -729,14 +732,14 @@ const testGetAllMembersInTeamspace = () => {
 						email,
 						id: userId,
 						name: `${firstName} ${lastName}`,
-						metadata: JSON.stringify(deleteIfUndefined({ company: billing?.billingInfo?.company })),
+						company: billing?.billingInfo?.company,
 					})),
 				...extraUserData.map(
 					({ customData: { email, userId, firstName, lastName, billing } }) => ({
 						email,
 						id: userId,
 						name: `${firstName} ${lastName}`,
-						metadata: JSON.stringify(deleteIfUndefined({ company: billing?.billingInfo?.company })),
+						company: billing?.billingInfo?.company,
 					})),
 			];
 			const newGoldenData = [
@@ -744,9 +747,9 @@ const testGetAllMembersInTeamspace = () => {
 				...extraUserData,
 			];
 			const expectedRes = newGoldenData.map(
-				({ user, customData: { firstName, lastName, billing } }) => {
+				({ user, customData: { firstName, lastName, billing, userId } }) => {
 					const res = {
-						user,
+						user: user ?? userId,
 						firstName,
 						lastName,
 					};
@@ -763,7 +766,7 @@ const testGetAllMembersInTeamspace = () => {
 				}
 				return goldenData;
 			});
-			TeamspacesModel.getTeamspaceInvites.mockResolvedValueOnce([]);
+			InvitationsModel.getInvitationsByTeamspace.mockResolvedValueOnce([]);
 			FronteggService.getUserById.mockResolvedValueOnce({});
 			const fn = jest.spyOn(Users, 'createNewUserRecord');
 
@@ -782,7 +785,7 @@ const testGetAllMembersInTeamspace = () => {
 					email,
 					id: userId,
 					name: `${firstName} ${lastName}`,
-					metadata: JSON.stringify(deleteIfUndefined({ company: billing?.billingInfo?.company })),
+					company: billing?.billingInfo?.company,
 				})),
 				extraUserFrontEggData,
 			];
@@ -800,7 +803,7 @@ const testGetAllMembersInTeamspace = () => {
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce(tsTenantId);
 			FronteggService.getAllUsersInAccount.mockResolvedValueOnce(frontEggData);
 			UsersModel.getUserInfoFromEmailArray.mockResolvedValueOnce(goldenData);
-			TeamspacesModel.getTeamspaceInvites.mockResolvedValueOnce([{ _id: extraUserFrontEggData.email }]);
+			InvitationsModel.getInvitationsByTeamspace.mockResolvedValueOnce([{ _id: extraUserFrontEggData.email }]);
 
 			const res = await Teamspaces.getAllMembersInTeamspace(tsWithUsers);
 

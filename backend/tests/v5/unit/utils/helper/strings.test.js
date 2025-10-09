@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../helper/path');
+const { determineTestGroup } = require('../../../helper/services');
 
 const StringHelper = require(`${src}/utils/helper/strings`);
 
@@ -155,31 +156,21 @@ const testFromBase64 = () => {
 };
 
 const testSplitName = () => {
-	describe('Split Name', () => {
-		test('with first and last name', () => {
-			const name = 'Will Smith';
-			const [firstName, lastName] = StringHelper.splitName(name);
-			expect(firstName).toEqual('Will');
-			expect(lastName).toEqual('Smith');
-		});
+	describe.each([
+		['Will Smith', ['Will', 'Smith']],
+		['Will Smith aaa', ['Will', 'Smith aaa']],
+		['Will', ['Will', '']],
+		['', undefined],
+		[undefined, undefined],
 
-		test('with single name', () => {
-			const name = 'Will';
-			const [firstName, lastName] = StringHelper.splitName(name);
-			expect(firstName).toEqual('Will');
-			expect(lastName).toEqual('');
-		});
-
-		test('with empty string', () => {
-			const name = '';
-			const [firstName, lastName] = StringHelper.splitName(name);
-			expect(firstName).toEqual('Anonymous');
-			expect(lastName).toEqual('User');
+	])('Split Name', (name, expected) => {
+		test(`${name ?? 'No name'} should return ${JSON.stringify(expected)}`, () => {
+			expect(StringHelper.splitName(name)).toEqual(expected);
 		});
 	});
 };
 
-describe('utils/helper/strings', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToConstantCase();

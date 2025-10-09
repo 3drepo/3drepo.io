@@ -72,19 +72,20 @@ const testGetUserAvatarBuffer = () => {
 		test('Should get user avatar buffer', async () => {
 			const userId = generateRandomString();
 			const profilePictureUrl = generateRandomString();
+			const data = generateRandomString();
 
 			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ profilePictureUrl });
-			jest.spyOn(global, 'fetch').mockResolvedValueOnce({
-				arrayBuffer: () => Promise.resolve(profilePictureUrl),
+			WebRequests.getArrayBuffer.mockResolvedValueOnce({
+				data,
 			});
 
-			await expect(Users.getUserAvatarBuffer(userId)).resolves.toEqual(Buffer.from(profilePictureUrl));
+			await expect(Users.getUserAvatarBuffer(userId)).resolves.toEqual(Buffer.from(data));
 
 			expect(Users.getUserById).toHaveBeenCalledTimes(1);
 			expect(Users.getUserById).toHaveBeenCalledWith(userId);
 
-			expect(global.fetch).toHaveBeenCalledTimes(1);
-			expect(global.fetch).toHaveBeenCalledWith(profilePictureUrl);
+			expect(WebRequests.getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(WebRequests.getArrayBuffer).toHaveBeenCalledWith(profilePictureUrl);
 		});
 
 		test('Should throw error if it failed', async () => {
@@ -93,15 +94,15 @@ const testGetUserAvatarBuffer = () => {
 			const errorMessage = generateRandomString();
 
 			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ profilePictureUrl });
-			jest.spyOn(global, 'fetch').mockRejectedValueOnce(new Error(errorMessage));
+			WebRequests.getArrayBuffer.mockRejectedValueOnce(new Error(errorMessage));
 
 			await expect(Users.getUserAvatarBuffer(userId)).rejects.not.toBeUndefined();
 
 			expect(Users.getUserById).toHaveBeenCalledTimes(1);
 			expect(Users.getUserById).toHaveBeenCalledWith(userId);
 
-			expect(global.fetch).toHaveBeenCalledTimes(1);
-			expect(global.fetch).toHaveBeenCalledWith(profilePictureUrl);
+			expect(WebRequests.getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(WebRequests.getArrayBuffer).toHaveBeenCalledWith(profilePictureUrl);
 		});
 	});
 };
@@ -303,6 +304,42 @@ const testUpdateUserDetails = () => {
 			await expect(Users.updateUserDetails(
 				userId,
 				{ firstName, lastName, profilePictureUrl },
+			)).resolves.toEqual(undefined);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), expectedPayload, { headers: bearerHeader },
+			);
+		});
+
+		test('Should merge the metadata if there is new and old', async () => {
+			const userId = generateRandomString();
+			const company = generateRandomString();
+			const countryCode = generateRandomString();
+			const metadataInfo = {
+				[generateRandomString()]: generateRandomString(), countryCode: generateRandomString(),
+			};
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const profilePictureUrl = generateRandomString();
+			const existingUser = {
+				name: `${generateRandomString()} ${generateRandomString()}`,
+				profilePictureUrl: generateRandomString(),
+				metadata: JSON.stringify(metadataInfo),
+			};
+
+			const expectedPayload = {
+				name: `${firstName} ${lastName}`,
+				profilePictureUrl,
+				metadata: JSON.stringify({ ...metadataInfo, company, countryCode }),
+			};
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce(existingUser);
+			WebRequests.put.mockResolvedValueOnce();
+
+			await expect(Users.updateUserDetails(
+				userId,
+				{ firstName, lastName, profilePictureUrl, company, countryCode },
 			)).resolves.toEqual(undefined);
 
 			expect(WebRequests.put).toHaveBeenCalledTimes(1);

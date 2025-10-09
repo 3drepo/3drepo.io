@@ -68,9 +68,10 @@ const imageFilter = (req, file, cb) => {
 	cb(null, true);
 };
 
-const fileMatchesExt = async (buffer, fileName, path) => {
+const fileMatchesExt = async (fileObj, fileName) => {
 	const fileExt = Path.extname(fileName).toLowerCase().substring(1);
-	const fileType = buffer ? await fileExtensionFromBuffer(buffer) : await fileExtensionFromPath(path);
+	const fileType = fileObj.buffer ? await fileExtensionFromBuffer(fileObj.buffer)
+		: await fileExtensionFromPath(fileObj.path);
 	const extToCheck = [...uploadConfig.imageExtensions, 'pdf'];
 
 	return extToCheck.includes(fileExt) ? fileExt === fileType : true;
@@ -82,7 +83,7 @@ MulterHelper.singleFileUpload = (fileName = 'file', fileFilter, maxSize = upload
 
 		if (!req.file) throw createResponseCode(templates.invalidArguments, 'A file must be provided');
 
-		if (!await fileMatchesExt(req.file?.buffer, req.file.originalname, req.file?.path)) {
+		if (!await fileMatchesExt(req.file, req.file.originalname)) {
 			throw templates.unsupportedFileFormat;
 		}
 

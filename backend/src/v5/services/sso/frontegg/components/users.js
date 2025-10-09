@@ -16,11 +16,12 @@
  */
 
 const { HEADER_APP_ID, HEADER_ENVIRONMENT_ID, HEADER_TENANT_ID, HEADER_USER_ID } = require('../frontegg.constants');
-const { delete: deleteReq, get, post, put } = require('../../../../utils/webRequests');
+const { delete: deleteReq, get, getArrayBuffer, post, put } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const FormData = require('form-data');
 const Path = require('path');
 const { createReadStream } = require('fs');
+const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const { splitName } = require('../../../../utils/helper/strings');
 
 const Users = {};
@@ -39,13 +40,9 @@ Users.getUserAvatarBuffer = async (userId) => {
 	try {
 		const { profilePictureUrl } = await Users.getUserById(userId);
 
-		const avatarStream = await fetch(profilePictureUrl);
+		const { data } = await getArrayBuffer(profilePictureUrl);
 
-		const arrayBuffer = await avatarStream.arrayBuffer();
-
-		const avatarBuffer = Buffer.from(arrayBuffer);
-
-		return avatarBuffer;
+		return Buffer.from(data);
 	} catch (err) {
 		throw new Error(`Failed to get avatar for (${userId}) from Users: ${err.message}`);
 	}
@@ -92,14 +89,15 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 		const headers = await getBearerHeader();
 		const url = `${config.vendorDomain}/identity/resources/users/v1/${userId}`;
 
-		const user = await Users.getUserById(userId);
-		const [existingFirstName, existingLastName] = await splitName(user.name);
+		const existingDetails = await Users.getUserById(userId);
+		const [existingFirstName, existingLastName] = splitName(existingDetails.name);
+
+		const newMetadata = { ...JSON.parse(existingDetails.metadata || '{}'), ...metadata };
 
 		const payload = {
 			name: `${firstName || existingFirstName} ${lastName || existingLastName}`.trim(),
-			metadata: Object.keys(metadata).length
-				? JSON.stringify(metadata) : user.metadata,
-			profilePictureUrl: profilePictureUrl || user.profilePictureUrl,
+			metadata: JSON.stringify(newMetadata),
+			profilePictureUrl: profilePictureUrl || existingDetails.profilePictureUrl,
 		};
 
 		await put(url, payload, { headers });
@@ -108,12 +106,12 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 	}
 };
 
-Users.uploadAvatar = async (userId, path, mimeType) => {
+Users.uploadAvatar = async (userId, path, contentType) => {
 	try {
 		const config = await getConfig();
 		const { tenantId } = await Users.getUserById(userId);
 		const pathToFile = Path.resolve(path);
-		const options = mimeType ? { contentType: mimeType } : {};
+		const options = deleteIfUndefined({ contentType });
 
 		const formData = new FormData();
 		formData.append('image', createReadStream(pathToFile), options);

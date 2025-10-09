@@ -77,10 +77,8 @@ const ssoUser = {
 	name: `${user.customData.firstName} ${user.customData.lastName}`,
 	email: user.customData.email,
 	profilePictureUrl: generateRandomString(),
-	metadata: JSON.stringify({
-		company: user.customData.billing.billingInfo.company,
-		countryCode: user.customData.billing.billingInfo.countryCode,
-	}),
+	company: user.customData.billing.billingInfo.company,
+	countryCode: user.customData.billing.billingInfo.countryCode,
 };
 
 UsersModel.getUserByUsername.mockImplementation((username) => {
@@ -340,8 +338,8 @@ const testCreateNewUserRecord = () => {
 				createdAt: Date.now(),
 				email: generateRandomString(),
 			};
-			const firstName = 'Anonymous';
-			const lastName = 'User';
+			const firstName = 'UnknownUser';
+			const lastName = '';
 
 			await expect(Users.createNewUserRecord(userData)).resolves.toEqual(userData.id);
 
@@ -360,7 +358,7 @@ const testCreateNewUserRecord = () => {
 				username: userData.id,
 				email: userData.email,
 				createdAt: new Date(userData.createdAt),
-				fullName: `${firstName} ${lastName}`,
+				fullName: [firstName, lastName].join(' ').trim(),
 			};
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
@@ -393,7 +391,7 @@ const testCreateNewUserRecord = () => {
 				username: userData.id,
 				email: userData.email,
 				createdAt: new Date(userData.createdAt),
-				fullName: `${firstName} `,
+				fullName: `${firstName}`,
 			};
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);

@@ -64,9 +64,9 @@ const getAvatar = async (req, res) => {
 const getTeamspaceMemberAvatar = async (req, res) => {
 	try {
 		const { member } = req.params;
-		const avatar = await Users.getAvatar(member);
-		req.params.format = avatar.extension;
-		respond(req, res, templates.ok, avatar.buffer);
+		const { extension, buffer } = await Users.getAvatar(member);
+		req.params.format = extension;
+		respond(req, res, templates.ok, buffer);
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);

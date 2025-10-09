@@ -15,10 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { count } = require('yargs');
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList } = require('../../utils');
 
 const FSHandler = require(`${v5Path}/handler/fs`);
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { fileExists } = require(`${v5Path}/services/filesManager`);
 const { getRefEntry } = require(`${v5Path}/models/fileRefs`);
@@ -31,53 +33,54 @@ const { getAllUsersInAccount, updateUserDetails, uploadAvatar } = require(`${v5P
 
 const ACCEPTABLE_CHUNK_SIZE = 50;
 
-const migrateUserAvatar = (membersChunk) => Promise.all(membersChunk.map(async (member) => {
-	// eslint-disable-next-line no-await-in-loop
-	const { user, customData: { firstName, lastName, migrated } } = await getUserByEmail(member.email);
+const updateUserDetailsOnFrontegg = async (member) => {
+	const { user, customData: { firstName, lastName, billing, migrated } } = await getUserByEmail(member.email,
+		{ user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing': 1, 'customData.migrated': 1 });
 
 	if (!migrated) {
 		try {
-			// eslint-disable-next-line no-await-in-loop
 			const hasAvatar = await fileExists(USERS_DB_NAME, AVATARS_COL_NAME, user);
 			if (hasAvatar) {
-				// eslint-disable-next-line no-await-in-loop
 				const { link, mimeType } = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, user);
 				const path = FSHandler.getFullPath(link);
-				// eslint-disable-next-line no-await-in-loop
+
 				await uploadAvatar(
 					member.id,
 					path,
 					mimeType,
 				);
 			}
-			if (member.name !== `${firstName} ${lastName}`) {
-				// eslint-disable-next-line no-await-in-loop
-				await updateUserDetails(member.id, { name: `${firstName} ${lastName}` });
-			}
-			// eslint-disable-next-line no-await-in-loop
+
+			const countryCode = billing?.billingInfo?.countryCode;
+			const company = billing?.billingInfo?.company;
+
+			await updateUserDetails(member.id, deleteIfUndefined({ firstName, lastName, countryCode, company }));
+
 			await updateProfile(user, { migrated: true });
 		} catch (error) {
 			logger.logError(`Failed to migrate users because: ${error.message}`);
 		}
 	}
-},
-));
+};
+
+const processTeamspace = async (teamspace) => {
+	logger.logInfo(`Migrating avatars for teamspace: ${teamspace}`);
+	const [refId, invitations] = await Promise.all([getTeamspaceRefId(teamspace), getTeamspaceInvites(teamspace)]);
+	const members = await getAllUsersInAccount(refId);
+	const activeMembers = members.filter((member) => !invitations.some((invite) => invite._id === member.email));
+	const chunks = splitArrayIntoChunks(activeMembers, ACCEPTABLE_CHUNK_SIZE);
+
+	for (const chunk of chunks) {
+		// eslint-disable-next-line no-await-in-loop
+		await Promise.all(chunk.map(updateUserDetailsOnFrontegg));
+	}
+};
 
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	for (const ts of teamspaces) {
-		logger.logInfo(`Migrating avatars for teamspace: ${ts}`);
 		// eslint-disable-next-line no-await-in-loop
-		const [refId, invitations] = await Promise.all([getTeamspaceRefId(ts), getTeamspaceInvites(ts)]);
-		// eslint-disable-next-line no-await-in-loop
-		const members = await getAllUsersInAccount(refId);
-		const overlap = members.filter((member) => !invitations.some((invite) => invite._id === member.email));
-		const chunks = splitArrayIntoChunks(overlap, ACCEPTABLE_CHUNK_SIZE);
-
-		for (const chunk of chunks) {
-			// eslint-disable-next-line no-await-in-loop
-			await migrateUserAvatar(chunk);
-		}
+		await processTeamspace(ts);
 	}
 };
 

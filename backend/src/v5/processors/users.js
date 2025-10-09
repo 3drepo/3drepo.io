@@ -21,6 +21,7 @@ const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants')
 const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
 	getUserId, removeUser, updatePassword, updateProfile } = require('../models/users');
 const { getUserAvatarBuffer, getUserById, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const fs = require('fs/promises');
@@ -40,8 +41,9 @@ const { templates } = require('../utils/responseCodes');
 // and also to store info such as API Key.
 Users.createNewUserRecord = async (idpUserData) => {
 	const { id, email, name, createdAt } = idpUserData;
-	const [firstName, ...remaining] = name?.split(' ') ?? ['Anonymous', 'User'];
-	const lastName = remaining?.join(' ');
+
+	// idp should always return the email as the firstname so the fall back should, in theory, never be used..
+	const [firstName, lastName] = splitName(name) ?? ['UnknownUser', ''];
 
 	const userData = {
 		username: id,
@@ -55,7 +57,7 @@ Users.createNewUserRecord = async (idpUserData) => {
 
 	await addUser(userData);
 
-	publish(events.USER_CREATED, { username: id, email, fullName: [firstName, remaining].join(' '), createdAt: userData.createdAt });
+	publish(events.USER_CREATED, { username: id, email, fullName: [firstName, lastName].join(' ').trim(), createdAt: userData.createdAt });
 	return id;
 };
 
@@ -69,36 +71,36 @@ Users.remove = async (username) => {
 };
 
 Users.getProfileByUsername = async (username) => {
-	const user = await getUserByUsername(username, {
+	const { user, customData: { userId, apiKey } } = await getUserByUsername(username, {
 		user: 1,
 		'customData.userId': 1,
 		'customData.apiKey': 1,
 	});
-	const { name, email, profilePictureUrl, metadata } = await getUserById(user.customData.userId);
-	const [firstName, lastName] = await splitName(name);
-	const metadataObj = metadata ? JSON.parse(metadata) : {};
-	const { customData } = user;
+	const { name, email, profilePictureUrl, company, countryCode } = await getUserById(userId);
+	const [firstName, lastName] = splitName(name);
 	const hasAvatar = !!profilePictureUrl;
 	const intercomRef = generateUserHash(email);
 
-	return {
-		username: user.user,
+	return deleteIfUndefined({
+		username: user,
 		firstName,
 		lastName,
 		email,
 		hasAvatar,
-		apiKey: customData.apiKey,
-		company: metadataObj?.company,
-		countryCode: metadataObj?.countryCode,
-		...(intercomRef ? { intercomRef } : {}),
-	};
+		apiKey,
+		company,
+		countryCode,
+		intercomRef,
+	});
 };
 
 Users.updateProfile = async (username, fieldsToUpdate) => {
 	const userId = await getUserId(username);
 
-	await updateUserDetails(userId, fieldsToUpdate);
-	await updateProfile(username, fieldsToUpdate);
+	await Promise.all([
+		updateUserDetails(userId, fieldsToUpdate),
+		updateProfile(username, fieldsToUpdate),
+	]);
 };
 
 Users.resetPassword = async (user) => {
@@ -132,7 +134,8 @@ Users.getAvatar = async (username) => {
 };
 
 Users.uploadAvatar = async (username, avatarObject) => {
-	await uploadAvatar(await getUserId(username), avatarObject.path)
+	const userId = await getUserId(username);
+	await uploadAvatar(userId, avatarObject.path)
 		.finally(() => fs.rm(avatarObject.path).catch((err) => {
 			logger.logError(`Failed to remove temporary avatar file: ${err.message}`);
 		}));

@@ -114,7 +114,8 @@ Accounts.getAllUsersInAccount = async (accountId) => {
 				header);
 
 			items.forEach(({ id, email, name, createdAt, metadata }) => {
-				entries.push({ id, email, name, createdAt, metadata });
+				const metaValues = JSON.parse(metadata || '{}');
+				entries.push({ id, email, name, createdAt, ...metaValues });
 			});
 			query = _links.next;
 		}

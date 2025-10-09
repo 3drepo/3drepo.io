@@ -19,15 +19,21 @@ const axios = require('axios');
 
 const WebRequests = {};
 
-WebRequests.get = (uri, headers) => {
+WebRequests.get = (uri, headers, responseType) => {
 	const options = {};
 
 	if (headers) {
 		options.headers = headers;
 	}
 
+	if (responseType) {
+		options.responseType = responseType;
+	}
+
 	return axios.get(uri, options);
 };
+
+WebRequests.getArrayBuffer = (uri, headers) => WebRequests.get(uri, headers, 'arraybuffer');
 
 WebRequests.delete = (uri, headers) => {
 	const options = {};
