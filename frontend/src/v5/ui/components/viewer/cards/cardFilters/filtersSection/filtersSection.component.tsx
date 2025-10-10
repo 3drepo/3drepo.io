@@ -54,6 +54,7 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 								{...filter as any}
 								onCancel={close}
 								onSubmit={setFilter}
+								cancelButton
 							/>
 						)}
 					</ActionMenuContext.Consumer>
