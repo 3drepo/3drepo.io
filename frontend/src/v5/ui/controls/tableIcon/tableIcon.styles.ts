@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,17 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext, useState } from 'react';
-import { CalibrationContext } from '../calibrationContext';
-import { InfoBoxProps } from '@controls/infoBox/infoBox.component';
-import { InfoBox } from './calibrationInfoBox.styles';
+import styled from 'styled-components';
 
-type CalibrationInfoBoxProps = Omit<InfoBoxProps, 'onClickClose'>;
-export const CalibrationInfoBox = (props: CalibrationInfoBoxProps) => {
-	const [open, setOpen] = useState(true);
-	const { isCalibrating } = useContext(CalibrationContext);
 
-	if (!isCalibrating || !open) return null;
+export const TableIconContainer  = styled.div<{ $active?: boolean }>`
+	width: 16px;
+	height: 16px;
+	border-radius: 16%;
+	border-width: 1px;
+	border-style: solid;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.secondary.lightest };
+	}
 
-	return (<InfoBox {...props} onClickClose={() => setOpen(false)} />);
-};
+	border-color: ${({ $active, theme }) => $active ? theme.palette.base.main : 'transparent'};
+`;

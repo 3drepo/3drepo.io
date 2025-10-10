@@ -138,5 +138,8 @@ module.exports = {
 		*/
 	    namespace: "" // namespace of deployment
     },
+	apryse: {
+		licenseKey: "" // License key for the Apryse WebViewer SDK for the PDF drawings viewer
+	},
 	termsUpdatedAt: 1520592720000,
 }

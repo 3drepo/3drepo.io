@@ -17,7 +17,6 @@
 
 import { dispatch } from '@/v5/helpers/redux.helpers';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeWatchPropertyUpdateTicket } from '@/v5/services/realtime/ticketTable.events';
 import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -25,10 +24,9 @@ import { useSearchParam, Transformers } from '@/v5/ui/routes/useSearchParam';
 import { useEffect } from 'react';
 import { useParams } from 'react-router';
 import { EventEmitter } from 'eventemitter3';
-import { stripModuleOrPropertyPrefix } from './ticketsTable.helper';
+import { enableRealtimeWatchPropertiesUpdateTicket } from '@/v5/services/realtime/ticketTable.events';
 
-
-export const useWatchPropertyChange = (property, callback) => {
+export const useWatchPropertiesChange = (properties, callback) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
@@ -37,17 +35,22 @@ export const useWatchPropertyChange = (property, callback) => {
 		const watch = new EventEmitter();
 		watch.on('update', callback);
 
-		dispatch(TicketsActions.watchPropertyUpdates(stripModuleOrPropertyPrefix(property), watch));
+		dispatch(TicketsActions.watchPropertiesUpdates(properties, watch));
 
 		return () => {
 			watch.off('update', callback);
 			watch.emit('end');
-		}
-	}, [property, callback]);
+		};
+	}, [properties, callback]);
 
 	useEffect(() => {
 		const subscriptions = containersAndFederations.map((modelId) => 
-			enableRealtimeWatchPropertyUpdateTicket(teamspace, project, modelId, isFed(modelId), property, callback));
+			enableRealtimeWatchPropertiesUpdateTicket(teamspace, project, modelId, isFed(modelId), properties, callback),
+		);
 		return combineSubscriptions(...subscriptions);
-	}, [teamspace, project, containersAndFederations, isFed, property, callback]);
+	}, [teamspace, project, containersAndFederations, isFed, properties, callback]);
+};
+
+export const useWatchPropertyChange = (property, callback) => {
+	useWatchPropertiesChange([property], callback);
 };

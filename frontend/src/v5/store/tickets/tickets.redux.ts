@@ -50,7 +50,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	setPropertiesFetched: ['ticketIds', 'properties', 'fetched'],
 	fetchTicketsProperties: ['teamspace', 'projectId', 'modelId', 'ticketIds', 'templateCode', 'isFederation', 'propertiesToInclude'],
 	upsertTicketsSuccess: ['modelId', 'tickets'],
-	watchPropertyUpdates: ['propertyName', 'watch'],
+	watchPropertiesUpdates: ['propertiesNames', 'watch'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -140,7 +140,6 @@ export const resetSorting = (state: ITicketsState) => {
 
 export const setPropertiesFetched = (state: ITicketsState, { ticketIds, properties, fetched }: SetPropertiesFetchedAction) => {
 	for (const property of properties) {
-
 		for (const ticketId of ticketIds) {
 			if (!state.fetchedProperties[ticketId]) {
 				state.fetchedProperties[ticketId] = {};
@@ -200,7 +199,7 @@ export type SetSortingAction = Action<'SET_SORTING'> & TicketsSorting;
 export type ResetSortingAction = Action<'RESET_SORTING'>;
 export type SetPropertiesFetchedAction = Action<'SET_PROPERTIES_FETCHED'> & { ticketIds: string[], properties: string[], fetched: boolean };
 export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & TeamspaceProjectAndModel & { ticketIds: string[], templateCode: string, isFederation: boolean, propertiesToInclude?: string[] };
-export type WatchPropertyUpdatesAction = Action<'WATCH_PROPERTY_UPDATES'> & { propertyName: string, watch: EventEmitter };
+export type WatchPropertiesUpdatesAction = Action<'WATCH_PROPERTIES_UPDATES'> & { propertiesNames: string[], watch: EventEmitter };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -308,5 +307,5 @@ export interface ITicketsActionCreators {
 	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
 	resetSorting: () => ResetSortingAction,
 	setPropertiesFetched: (ticketIds: string[], properties: string[], fetched: boolean) => SetPropertiesFetchedAction,
-	watchPropertyUpdates: (propertyName: string, watch: EventEmitter) => WatchPropertyUpdatesAction
+	watchPropertiesUpdates: (properties: string[], watch: EventEmitter) => WatchPropertiesUpdatesAction
 }

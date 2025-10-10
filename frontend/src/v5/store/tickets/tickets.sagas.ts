@@ -35,7 +35,7 @@ import {
 	UpdateTicketGroupAction,
 	FetchTicketsPropertiesAction,
 	FetchTicketGroupsAndGoToView,
-	WatchPropertyUpdatesAction,
+	WatchPropertiesUpdatesAction,
 	SetPropertiesFetchedAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
@@ -50,6 +50,7 @@ import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions
 import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import EventEmitter from 'eventemitter3';
+import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -79,10 +80,6 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 	ExecutionStrategy.Fifo,
 );
 
-
-// The format of the propertiesToInclude is the propety name without property prefix, e.g. 'Assignees', 'Due Date', etc.
-// And with modules properties its the module name and property name separated by a dot, e.g. 'ModuleName.PropertyName' like
-// 'safetybase.Level Of Risk'.
 export function* fetchTicketsProperties({
 	teamspace, projectId, modelId, ticketIds,
 	templateCode, isFederation, propertiesToInclude,
@@ -99,12 +96,16 @@ export function* fetchTicketsProperties({
 			type: 'ticketCode',
 		} as any;
 	
+		// The format required in the query to fetch the tickets 
+		// is without the full path of the property so we strip that
+		const propertiesToIncludeParam = propertiesToInclude.map(stripModuleOrPropertyPrefix);
+
 		const tickets = yield ticketPropertiesQueue.addCall(
 			isFederation,
 			teamspace,
 			projectId,
 			modelId,
-			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
+			{ propertiesToInclude: propertiesToIncludeParam, filters: filtersToQuery([filterByTemplateCode]) },
 		);
 		
 		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
@@ -327,19 +328,31 @@ export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, tic
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision));
 }
 
-function * watchFetchTicketProperties(propertyName,  watch: EventEmitter) {
-	while(true) {
-		const action:SetPropertiesFetchedAction = yield take(TicketsTypes.SET_PROPERTIES_FETCHED);
+function * watchFetchTicketProperties(propertiesNames: string[],  watch: EventEmitter) {
+	const propertiesNamesSet = new Set(propertiesNames);
 
-		if (action.properties.includes(propertyName)) {
+	while (true) {
+		const fetchedAction: SetPropertiesFetchedAction = yield take(TicketsTypes.SET_PROPERTIES_FETCHED);
+		if (fetchedAction.properties.some((p) => propertiesNamesSet.has(p))) {
 			watch.emit('update');
 		}
 	}
 }
 
-export function* watchPropertyUpdates({propertyName, watch }: WatchPropertyUpdatesAction) {
-	const watchFetchTask = yield fork(watchFetchTicketProperties, propertyName, watch);
-	yield new Promise((accept) => watch.once('end', accept));
+export function* watchPropertiesUpdates({ propertiesNames, watch }: WatchPropertiesUpdatesAction) {
+	const watchFetchTask = yield fork(watchFetchTicketProperties, propertiesNames, watch);
+	
+	// End the saga when the emitter watch emits 'end';
+	yield new Promise((accept) => {
+		// This means that there no listeners for the 'update' event
+		// which means the end event was already triggered;
+		if (!watch.eventNames().length) { 
+			accept('end');
+			return;
+		}
+		watch.once('end', accept);
+	});
+
 	yield cancel(watchFetchTask);
 }
 
@@ -356,5 +369,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
 	yield takeEvery(TicketsTypes.FETCH_TICKETS_PROPERTIES, fetchTicketsProperties);
-	yield takeEvery(TicketsTypes.WATCH_PROPERTY_UPDATES, watchPropertyUpdates);
+	yield takeEvery(TicketsTypes.WATCH_PROPERTIES_UPDATES, watchPropertiesUpdates);
 }

@@ -125,7 +125,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 		: undefined;
 
 	if (status === processStatuses.OK) {
-		revisionAdded({ teamspace, project, model, revId, modelType, calibration });
+		await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
 	} else if (!errorReason.userErr) {
 		try {
 			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
