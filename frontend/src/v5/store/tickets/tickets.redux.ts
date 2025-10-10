@@ -140,7 +140,6 @@ export const resetSorting = (state: ITicketsState) => {
 
 export const setPropertiesFetched = (state: ITicketsState, { ticketIds, properties, fetched }: SetPropertiesFetchedAction) => {
 	for (const property of properties) {
-
 		for (const ticketId of ticketIds) {
 			if (!state.fetchedProperties[ticketId]) {
 				state.fetchedProperties[ticketId] = {};

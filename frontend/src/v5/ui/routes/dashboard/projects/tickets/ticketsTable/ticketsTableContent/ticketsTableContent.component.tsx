@@ -44,7 +44,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	useEffect(() => {
 		if (!templateWasFetched) return;
 		const allColumns = getAllColumnsNames();
-		const initialVisibleColumns = allColumns.filter((name) => defaultColumns.has(stripModuleOrPropertyPrefix(name)));
+		const initialVisibleColumns = allColumns.filter((name) => defaultColumns.has(name));
 		setVisibleSortedColumnsNames(initialVisibleColumns);
 		resetWidths();
 		stretchTable(BaseProperties.TITLE);

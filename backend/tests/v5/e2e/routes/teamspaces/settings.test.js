@@ -64,13 +64,7 @@ const setupData = async () => {
 const generateTemplate = () => ({
 	name: generateRandomString(),
 	code: generateRandomString(3),
-	config: {
-		tabular: {
-			columns: [
-				{ property: 'name' },
-			],
-		},
-	},
+	config: {},
 	properties: [
 		{
 			name: generateRandomString(),

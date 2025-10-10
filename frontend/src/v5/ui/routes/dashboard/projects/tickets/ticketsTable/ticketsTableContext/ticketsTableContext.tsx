@@ -22,7 +22,6 @@ import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { stripModuleOrPropertyPrefix } from '../ticketsTable.helper';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { chunk } from 'lodash';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
@@ -66,7 +65,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 
 	const fetchColumn = (name, tickets: ITicket[]) => {
 		const idsByModelId = tickets
-			.filter(({ _id }) => !selectPropertyFetched(getState(), _id, stripModuleOrPropertyPrefix(name)))
+			.filter(({ _id }) => !selectPropertyFetched(getState(), _id, name))
 			.reduce((acc, { _id: ticketId, modelId }) => {
 				if (!acc[modelId]) {
 					acc[modelId] = [];
@@ -87,7 +86,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 					idsChunk,
 					template.code,
 					isFederation,
-					[stripModuleOrPropertyPrefix(name)],
+					[name],
 				);
 			});
 		});

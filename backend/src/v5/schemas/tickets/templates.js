@@ -234,8 +234,6 @@ const pinMappingTest = (val, context) => {
 };
 
 const validTabularPropsTest = (val, context) => {
-	const basePropertiesNotToCheck = ['modules', 'properties', 'config'];
-
 	const template = TemplateSchema.generateFullSchema(val);
 
 	if (!template.config?.tabular?.columns) return true;
@@ -244,18 +242,7 @@ const validTabularPropsTest = (val, context) => {
 		const propModule = column.module ? template.modules.find(
 			({ type, name }) => type === column.module || name === column.module) : {};
 
-		const propCollection = column.module
-			? propModule?.properties
-			// create the full list of properties to check against
-			: [
-				Object.keys(template)
-					.map((key) => {
-						if (!basePropertiesNotToCheck.includes(key)) return { name: key };
-						return null;
-					})
-					.filter((object) => object !== null),
-				template.properties,
-			].flat();
+		const propCollection = column.module ? propModule?.properties : template.properties;
 
 		const prop = propCollection
 			? propCollection.find(({ name }) => name === column.property)
