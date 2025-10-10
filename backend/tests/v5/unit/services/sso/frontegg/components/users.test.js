@@ -42,9 +42,9 @@ const testGetUserById = () => {
 			const userId = generateRandomString();
 			const metadata = generateRandomObject();
 			const mockedRetVal = generateRandomObject();
-			const expectedData = {...mockedRetVal, ...metadata, metadata};
+			const expectedData = { ...mockedRetVal, ...metadata, metadata };
 
-			WebRequests.get.mockResolvedValueOnce({ data: {...mockedRetVal, metadata: JSON.stringify(metadata)} });
+			WebRequests.get.mockResolvedValueOnce({ data: { ...mockedRetVal, metadata: JSON.stringify(metadata) } });
 
 			await expect(Users.getUserById(userId)).resolves.toEqual(expectedData);
 
@@ -60,7 +60,7 @@ const testGetUserById = () => {
 
 			WebRequests.get.mockResolvedValueOnce({ data: res });
 
-			await expect(Users.getUserById(userId)).resolves.toEqual({...res, metadata: {}});
+			await expect(Users.getUserById(userId)).resolves.toEqual({ ...res, metadata: {} });
 
 			expect(WebRequests.get).toHaveBeenCalledTimes(1);
 			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
@@ -215,8 +215,9 @@ const testUploadAvatar = () => {
 		test('Should upload avatar for the user ID specified', async () => {
 			const userId = generateRandomString();
 			const userData = { tenantId: generateRandomString() };
-			const fileObj = { buffer: generateRandomString(), 
-				originalname: generateRandomString(), mimetype: generateRandomString() };
+			const fileObj = { buffer: generateRandomString(),
+				originalname: generateRandomString(),
+				mimetype: generateRandomString() };
 			const responseMock = { data: generateRandomString() };
 
 			jest.spyOn(Users, 'getUserById').mockReturnValueOnce(userData);
@@ -233,8 +234,9 @@ const testUploadAvatar = () => {
 		test('Should throw error if it failed to upload avatar', async () => {
 			const userId = generateRandomString();
 			const userData = { tenantId: generateRandomString() };
-			const fileObj = { buffer: generateRandomString(), 
-				originalname: generateRandomString(), mimetype: generateRandomString() };
+			const fileObj = { buffer: generateRandomString(),
+				originalname: generateRandomString(),
+				mimetype: generateRandomString() };
 			jest.spyOn(Users, 'getUserById').mockReturnValueOnce(userData);
 
 			const mockResponse = { message: generateRandomString() };

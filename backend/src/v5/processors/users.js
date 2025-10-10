@@ -24,7 +24,6 @@ const { getUserAvatarBuffer, getUserById, triggerPasswordReset, updateUserDetail
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
 const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
-const fs = require('fs/promises');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
 const { logger } = require('../utils/logger');
@@ -136,7 +135,6 @@ Users.getAvatar = async (username) => {
 Users.uploadAvatar = async (username, fileObj) => {
 	const userId = await getUserId(username);
 	await uploadAvatar(userId, fileObj);
-		
 };
 
 Users.generateApiKey = generateApiKey;

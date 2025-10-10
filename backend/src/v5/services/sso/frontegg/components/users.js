@@ -19,21 +19,18 @@ const { HEADER_APP_ID, HEADER_ENVIRONMENT_ID, HEADER_TENANT_ID, HEADER_USER_ID }
 const { delete: deleteReq, get, getArrayBuffer, post, put } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const FormData = require('form-data');
-const Path = require('path');
-const { createReadStream } = require('fs');
-const { deleteIfUndefined } = require('../../../../utils/helper/objects');
-const { splitName } = require('../../../../utils/helper/strings');
 const { Readable } = require('stream');
+const { splitName } = require('../../../../utils/helper/strings');
 
 const Users = {};
 
 Users.getUserById = async (userId) => {
 	try {
 		const config = await getConfig();
-		const { data: {metadata, ...others} } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
+		const { data: { metadata, ...others } } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
 		const details = JSON.parse(metadata || '{}');
 		// keep a copy of the metadata at the top level for easier access
-		return {...details, ...others, metadata: details};
+		return { ...details, ...others, metadata: details };
 	} catch (err) {
 		throw new Error(`Failed to get user(${userId}) from Users: ${err.message}`);
 	}
@@ -114,8 +111,8 @@ Users.uploadAvatar = async (userId, fileObj) => {
 		const { tenantId } = await Users.getUserById(userId);
 
 		const formData = new FormData();
-		formData.append('image', Readable.from(fileObj.buffer), 
-		{ filename: fileObj.originalname, contentType: fileObj.mimetype });
+		formData.append('image', Readable.from(fileObj.buffer),
+			{ filename: fileObj.originalname, contentType: fileObj.mimetype });
 
 		const headers = {
 			...await getBearerHeader(),

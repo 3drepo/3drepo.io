@@ -74,7 +74,7 @@ Cache.getUserById = (userId) => {
 	return {
 		...user,
 		profilePictureUrl: user.profilePictureUrl || basicAvatar,
-		...metadata,	
+		...metadata,
 	};
 };
 

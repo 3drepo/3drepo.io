@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { count } = require('yargs');
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList } = require('../../utils');
 

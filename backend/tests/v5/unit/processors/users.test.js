@@ -17,11 +17,7 @@
 
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
-const { src, imagesFolder, image } = require('../../helper/path');
-const fs = require('fs/promises');
-const path = require('path');
-
-const { logger } = require(`${src}/utils/logger`);
+const { src } = require('../../helper/path');
 
 const Users = require(`${src}/processors/users`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -229,10 +225,7 @@ const testGetAvatarStream = () => {
 	});
 };
 
-const fileExists = (file) => fs.access(file).then(() => true).catch(() => false);
-
 const testUploadAvatar = () => {
-	const tempAvatar = path.join(imagesFolder, 'toRemove.png');
 	describe('Remove old avatar and upload a new one', () => {
 		const avatarObject = generateRandomObject();
 		test('should upload new avatar and remove the temporary file', async () => {
