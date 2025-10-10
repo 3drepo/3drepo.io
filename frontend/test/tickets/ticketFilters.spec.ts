@@ -80,7 +80,6 @@ describe('Tickets: filters', () => {
     const risks = mockRiskCategories();
 
     describe('helpers', () => {
-
         it('split by non escaped characters should work', () => {
             let str = 'b\\,lack,sil\\ver,gray';
             let arr = splitByNonEscaped(str, ',');
@@ -107,7 +106,7 @@ describe('Tickets: filters', () => {
 
     describe('serialization', () => {
         // Containers
-        it('should work for property of type manyOf', async () => {
+        it('should work for property of type manyOf', () => {
             const filter:TicketFilter = {
                 type:'manyOf',
                 property: 'Colours',
@@ -121,7 +120,7 @@ describe('Tickets: filters', () => {
             expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
 
-        it('should work for general jobsAndUsers', async () => {
+        it('should work for general jobsAndUsers', () => {
             const filter:TicketFilter = {
                 type:'manyOf',
                 property: 'Assignees',
@@ -136,7 +135,7 @@ describe('Tickets: filters', () => {
             expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
 
-        it('should work for jobsAndUsers in a module', async () => {
+        it('should work for jobsAndUsers in a module', () => {
             const filter:TicketFilter = {
                 type:'oneOf',
                 property: 'Cool users',
@@ -152,7 +151,7 @@ describe('Tickets: filters', () => {
             expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
 
-        it('should work for type owner', async () => {
+        it('should work for type owner', () => {
             const filter:TicketFilter = {
                 type:'owner',
                 property: 'Owner',
@@ -167,7 +166,7 @@ describe('Tickets: filters', () => {
             expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
 
-        it('should work for type risks', async () => {
+        it('should work for type risks', () => {
             const filter:TicketFilter = {
                 type: 'oneOf',
                 property: 'Risky risks',
@@ -178,6 +177,23 @@ describe('Tickets: filters', () => {
             }
 
             const serialized = serializeFilter(template, risks, filter);            
+            expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+        });
+
+        it('should work with createad at type', () => {
+            const filter:TicketFilter = {
+                property: 'Created at',
+                type: 'createdAt',
+                filter: {
+                    operator: 'lte',
+                    values: [1759273259999],
+                    displayValues: '01/10/2025'
+                }
+            };
+
+            const serialized = serializeFilter(template, risks, filter);
+            console.log(serialized);
+            
             expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
     })

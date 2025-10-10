@@ -44,7 +44,7 @@ import { ResizableTableContext, ResizableTableContextComponent } from '@controls
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableContext, TicketsTableContextComponent } from './ticketsTableContext/ticketsTableContext';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
+import { selectRiskCategories, selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { useWatchPropertyChange } from './useWatchPropertyChange';
 import { getAvailableColumnsForTemplate } from './ticketsTableContext/ticketsTableContext.helpers';
@@ -56,6 +56,7 @@ import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSel
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
+import { selectCurrentTeamspaceUsers } from '@/v5/store/users/users.selectors';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -221,10 +222,15 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	}, [selectedTemplate, JSON.stringify(filters)]);
 	
 	const serializeFilters = () => {
-		const serialized = filters.map(serializeFilter.bind(undefined, selectedTemplate));
+		const users = selectCurrentTeamspaceUsers(getState());
+		const riskCategories = selectRiskCategories(getState());
+
+		console.log(JSON.stringify(filters));
+
+		const serialized = filters.map(serializeFilter.bind(undefined, selectedTemplate, riskCategories));
 
 		console.log(JSON.stringify(serialized));
-		console.log(JSON.stringify(serialized.map(deserializeFilter.bind(undefined, selectedTemplate))));
+		console.log(JSON.stringify(serialized.map(deserializeFilter.bind(undefined, selectedTemplate, users, riskCategories))));
 		// console.log('filters=' + encodeURIComponent(JSON.stringify(filters.map((f) => serializeFilter(f, selectedTemplate)))));
 		// console.log(JSON.stringify(filters));
 	};

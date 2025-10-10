@@ -23,7 +23,7 @@ import NumberIcon from '@assets/icons/filters/number.svg';
 import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
-import { isString, sortBy, uniqBy, compact, uniq } from 'lodash';
+import { isString, sortBy, uniqBy, compact, uniq, parseInt } from 'lodash';
 import { TicketFilterType, TicketFilter, TicketFilterOperator, TicketFilterOperatorEnum, BaseFilter } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
@@ -33,6 +33,7 @@ import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selec
 import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
 import { IUser } from '@/v5/store/users/users.redux';
 import { toDictionary } from '@/v5/helpers/toDictionary.helper';
+import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -248,7 +249,7 @@ export const serializeFilter = (template: ITemplate, riskCategories: string[], t
 
 	let serializedValues:string = undefined;
 	if (values) {
-		serializedValues = values.map(escapeString).join(',');
+		serializedValues = values.map((v) => isString(v) ? escapeString(v) : v).join(',');
 		
 		if (['oneOf', 'manyOf', 'status'].includes(ticketFilter.type)) {
 			let options = findPropertyDefinitionByFilter(ticketFilter, template).values;
@@ -292,8 +293,6 @@ export const splitByNonEscaped = (str: string, char) =>  {
 
 export const deserializeFilter = (template:ITemplate, users: IUser[], riskCategories: string[], str: string): any => {
 	const userByUserName = toDictionary(users, (u) => u.user);
-	
-	
 	const splitPointField = str.indexOf(':');
 	const splitPointFilter = str.indexOf(':', splitPointField + 1);
 
@@ -310,21 +309,25 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 		values: undefined,
 	};
 
-	if (propertyDef?.values === 'jobsAndUsers' || type === 'owner') {
-		filter.values = splitByNonEscaped(serialisedValue, ',');
-		filter.displayValues = (filter.values as string[]).map((u) => {
-			if (userByUserName[u]) return getFullnameFromUser(userByUserName[u]);
-			return u;
-		}).join(',');
+	if (['manyOf', 'oneOf'].includes(propertyDef?.type) || type === 'owner') {
+		if (propertyDef?.values === 'jobsAndUsers' || type === 'owner' ) {
+			filter.values = splitByNonEscaped(serialisedValue, ',');
+			filter.displayValues = (filter.values as string[]).map((u) => {
+				if (userByUserName[u]) return getFullnameFromUser(userByUserName[u]);
+				return u;
+			}).join(',');
+		} else {
+			const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
+			const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
+			filter.values = indexes.map((i) => options[i]);
+		}
+	} else {
+		if (isDateType(type)) {
+			filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
+			filter.displayValues = filter.values.map((d) => formatSimpleDate(new Date(d as number))).join(',');
+		}
 	}
 
-	if (propertyDef?.values && propertyDef?.values !== 'jobsAndUsers') {
-		const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
-		console.log(JSON.stringify({propertyDef, riskCategories}));
-
-		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
-		filter.values = indexes.map((i) => options[i]);
-	}
 	const fullFilter: TicketFilter = { property, type, filter };
 
 	if (module) {
