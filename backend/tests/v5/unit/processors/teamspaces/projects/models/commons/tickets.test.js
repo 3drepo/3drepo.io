@@ -1231,9 +1231,14 @@ const testInitialiseAutomatedProperties = () => {
 				modules: [{
 					name: moduleName,
 					properties: [property],
-				}],
+				},
+				{
+					type: presetModules.SAFETIBASE,
+					properties: [property],
+				},
+				],
 			};
-			const nTickets = 5;
+			const nTickets = 1;
 			const expectedData = [];
 			const tickets = times(nTickets, () => {
 				const ticket = {
@@ -1242,13 +1247,14 @@ const testInitialiseAutomatedProperties = () => {
 					title: generateRandomString(),
 					number: ticketNum,
 					properties: {},
-					modules: { [moduleName]: {} },
+					modules: { [moduleName]: {}, [presetModules.SAFETIBASE]: {} },
 				};
 				const resTicket = cloneDeep(ticket);
 
 				if (value !== undefined) {
 					resTicket.properties[propName] = value;
 					resTicket.modules[moduleName][propName] = value;
+					resTicket.modules[presetModules.SAFETIBASE][propName] = value;
 				}
 				expectedData.push(resTicket);
 
@@ -1264,7 +1270,8 @@ const testInitialiseAutomatedProperties = () => {
 
 			const updateData = {
 				properties: { [propName]: value },
-				modules: { [moduleName]: { [propName]: value } },
+				modules: { [moduleName]: { [propName]: value }, [presetModules.SAFETIBASE]: { [propName]: value } },
+
 			};
 
 			if (value === undefined) {

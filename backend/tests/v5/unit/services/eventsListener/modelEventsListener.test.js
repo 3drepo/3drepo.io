@@ -1569,21 +1569,6 @@ const testUpdateTicketGroup = () => {
 
 const testTemplateUpdated = () => {
 	describe(events.TICKET_TEMPLATE_UPDATED, () => {
-		test('Should do nothing if template code is not updated', async () => {
-			const waitOnEvent = eventTriggeredPromise(events.TICKET_TEMPLATE_UPDATED);
-			const data = {
-				teamspace: generateRandomString(),
-				template: generateRandomString(),
-				data: { [generateRandomString()]: generateRandomString() },
-			};
-
-			EventsManager.publish(events.TICKET_TEMPLATE_UPDATED, data);
-
-			await waitOnEvent;
-			expect(TicketTemplates.getTemplateById).not.toHaveBeenCalled();
-			expect(TicketsProcessor.onTemplateUpdated).not.toHaveBeenCalled();
-		});
-
 		test('Should handle errors gracefully', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.TICKET_TEMPLATE_UPDATED);
 			const data = {

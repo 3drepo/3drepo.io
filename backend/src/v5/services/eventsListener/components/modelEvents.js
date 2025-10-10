@@ -226,12 +226,10 @@ const modelDeleted = async ({ teamspace, project, model, sender, modelType }) =>
 	}
 };
 
-const templateUpdated = async ({ teamspace, template: templateId, data }) => {
+const templateUpdated = async ({ teamspace, template: templateId }) => {
 	try {
-		if (data.code) {
-			const template = await getTemplateById(teamspace, templateId);
-			await onTemplateUpdated(teamspace, template);
-		}
+		const template = await getTemplateById(teamspace, templateId);
+		await onTemplateUpdated(teamspace, template);
 	} catch (err) {
 		logger.logError(`Failed to process template updated event ${err.message}`);
 	}

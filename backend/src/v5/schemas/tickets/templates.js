@@ -84,17 +84,17 @@ const propSchema = Yup.object().shape({
 	value: Yup.string().when(['readOnly', 'type'], (readOnlyVal, propType, schema) => schema
 		.test('ReadOnly check', 'Value configuration is only supported if the property is read-only', (v) => v === undefined || readOnlyVal)
 		.test('text properties only', `Value configuration is only supported if the property type is ${propTypes.TEXT} or ${propTypes.LONG_TEXT}`, (v) => v === undefined || propType === propTypes.TEXT || propType === propTypes.LONG_TEXT)
-		.test('Pattern string check', `Value pattern contains unrecognised placeholders (accepted patterns: ${Object.values(supportedPatterns).join(', ')})`, (pattern) => {
+		.test('Pattern string check', `Value contains unrecognised placeholders (accepted patterns: ${Object.values(supportedPatterns).join(', ')})`, (value) => {
 			// string can contain pattern wrapped around {}, and they can only be of supported values
-			if (pattern === undefined) return true;
+			if (value === undefined) return true;
 			const regex = /\{(.*?)\}/g;
-			let match = regex.exec(pattern);
+			let match = regex.exec(value);
 
 			while (match !== null) {
 				if (!Object.values(supportedPatterns).includes(match[1])) {
 					return false;
 				}
-				match = regex.exec(pattern);
+				match = regex.exec(value);
 			}
 			return true;
 		})),

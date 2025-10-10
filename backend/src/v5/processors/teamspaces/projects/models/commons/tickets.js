@@ -400,8 +400,8 @@ const findPropertiesToUpdate = (template, placeholdersToFind) => {
 	};
 
 	findProps(template.properties);
-	template.modules.forEach(({ name, properties }) => {
-		findProps(properties, name);
+	template.modules.forEach(({ type, name, properties }) => {
+		findProps(properties, type ?? name);
 	});
 
 	return propertiesToUpdate;
