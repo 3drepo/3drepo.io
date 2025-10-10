@@ -60,6 +60,14 @@ describe('Tickets: filters', () => {
                 name: 'Risky risks',
                 type: 'oneOf',
                 values: 'riskCategories'
+            },
+            {
+                name: 'Birthday',
+                type: 'pastDate',
+            },
+            {
+                name: 'Expiration',
+                type: 'date',
             }
         ],
         modules: [
@@ -72,7 +80,7 @@ describe('Tickets: filters', () => {
                         values: 'jobsAndUsers',
                     }
                 ]
-            }
+            },
         ]
     }
 
@@ -180,7 +188,37 @@ describe('Tickets: filters', () => {
             expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
 
-        it('should work with createad at type', () => {
+        it('should work with general date', () => {
+            const filter:TicketFilter = {
+                property: 'Expiration',
+                type: 'date',
+                filter: {
+                    operator: 'gte',
+                    values: [2004782460000],
+                    displayValues: '12/07/2033'
+                }
+            };
+
+            const serialized = serializeFilter(template, risks, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+        });
+
+        it('should work with general past date', () => {
+            const filter:TicketFilter = {
+                property: 'Birthday',
+                type: 'pastDate',
+                filter: {
+                    operator: 'lte',
+                    values: [1735689600000],
+                    displayValues: '01/01/2025'
+                }
+            };
+
+            const serialized = serializeFilter(template, risks, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+        });
+
+        it('should work with create at type', () => {
             const filter:TicketFilter = {
                 property: 'Created at',
                 type: 'createdAt',
@@ -192,8 +230,6 @@ describe('Tickets: filters', () => {
             };
 
             const serialized = serializeFilter(template, risks, filter);
-            console.log(serialized);
-            
             expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
     })
