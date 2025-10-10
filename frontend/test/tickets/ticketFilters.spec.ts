@@ -232,6 +232,24 @@ describe('Tickets: filters', () => {
             const serialized = serializeFilter(template, risks, filter);
             expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
+
+        it('should work with range in type', () => {
+            const filter:TicketFilter ={
+                property:'Expiration',
+                type:'date',
+                filter:{
+                    'operator':'rng',
+                    values:[
+                        [1601553593000,1761782459999],
+                        [1767225600000,1774911719999]],
+                    displayValues:'01/10/2020 to 30/10/2025, 01/01/2026 to 31/03/2026'
+                }
+            };
+
+            const serialized = serializeFilter(template, risks, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+        });
+
     })
 
 });

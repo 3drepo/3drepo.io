@@ -23,8 +23,8 @@ import NumberIcon from '@assets/icons/filters/number.svg';
 import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
-import { isString, sortBy, uniqBy, compact, uniq, parseInt } from 'lodash';
-import { TicketFilterType, TicketFilter, TicketFilterOperator, TicketFilterOperatorEnum, BaseFilter } from '../../cardFilters.types';
+import { isString, sortBy, uniqBy, compact, uniq, parseInt, chunk } from 'lodash';
+import { TicketFilterType, TicketFilter, TicketFilterOperator, TicketFilterOperatorEnum, BaseFilter, ValueType } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { SelectOption } from '@/v5/helpers/form.helper';
@@ -53,6 +53,14 @@ export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'boolean': BooleanIcon,
 	'number': NumberIcon,
 };
+
+export const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
+export const formatDateRange = ([from, to]) => formatMessage(
+	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
+	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
+);
+
+
 
 export const DEFAULT_FILTERS: TicketFilter[] = [
 	{ module: '', type: 'title', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.title' }) },
@@ -224,7 +232,7 @@ export const getTemplateFilter = (templateCode: string): TicketFilter => ({
 
 const escapeString = (str: string) => str.replaceAll('.', '\\.').replaceAll(',', '\\,');
 
-const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',');
+// const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',');
 
 const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
 	propOrModule?.find((p) => p.name === name);
@@ -324,7 +332,13 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 	} else {
 		if (isDateType(type)) {
 			filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
-			filter.displayValues = filter.values.map((d) => formatSimpleDate(new Date(d as number))).join(',');
+						
+			if (filter.operator === 'rng' || filter.operator === 'nrng') {
+				filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
+				filter.displayValues = filter.values.map(formatDateRange).join(', ');
+			} else {
+				filter.displayValues = filter.values.map(valueToDisplayDate).join(', ');
+			}
 		}
 	}
 
@@ -335,8 +349,4 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 	}
 
 	return fullFilter;
-	// 	const [fields, filter] = str.split(':');
-	// 	const [module, property, types] = fields.split('.');
-
-// 	return { module, property, type: types as TicketFilterType };
 };
