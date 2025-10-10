@@ -197,9 +197,9 @@ const tesUpdateProfile = () => {
 	});
 };
 
-const testGetAvatarStream = () => {
-	describe('Get avatar stream', () => {
-		test('should get avatar stream', async () => {
+const testGetAvatar = () => {
+	describe('Get avatar', () => {
+		test('should get avatar', async () => {
 			const username = generateRandomString();
 			const mockImageBuffer = generateRandomString();
 			const expectedPayload = { buffer: mockImageBuffer, extension: 'png' };
@@ -211,6 +211,25 @@ const testGetAvatarStream = () => {
 
 			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
 			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
+
+			expect(FilesManager.getFile).not.toHaveBeenCalled();
+		});
+		test('should fallback and get the image from db if avatar is not found', async () => {
+			const username = generateRandomString();
+			const mockImageBuffer = generateRandomString();
+			const expectedPayload = { buffer: mockImageBuffer, extension: 'png' };
+
+			UsersModel.getUserId.mockResolvedValueOnce(username);
+			FronteggService.getUserAvatarBuffer.mockResolvedValueOnce(null);
+			FilesManager.getFile.mockResolvedValueOnce(mockImageBuffer);
+
+			await expect(Users.getAvatar(username)).resolves.toEqual(expectedPayload);
+
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
+
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
 		});
 		test('should throw an error if something happens', async () => {
 			const username = generateRandomString();
@@ -218,9 +237,10 @@ const testGetAvatarStream = () => {
 			UsersModel.getUserId.mockResolvedValueOnce(username);
 			FronteggService.getUserAvatarBuffer.mockRejectedValueOnce(new Error('Failed to fetch avatar'));
 
-			await expect(Users.getAvatar(username)).rejects.toEqual(templates.unknown);
+			await expect(Users.getAvatar(username)).rejects.toEqual(templates.fileNotFound);
 			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
 			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
+			expect(FilesManager.getFile).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -419,7 +439,7 @@ const testResetPassword = () => {
 describe(determineTestGroup(__filename), () => {
 	tesGetProfileByUsername();
 	tesUpdateProfile();
-	testGetAvatarStream();
+	testGetAvatar();
 	testUploadAvatar();
 	testRemoveUser();
 	testCreateNewUserRecord();

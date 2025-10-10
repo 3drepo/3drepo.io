@@ -43,8 +43,8 @@ Users.getUserAvatarBuffer = async (userId) => {
 			// this is not an generated avatar, so we should not try to fetch it
 			return null;
 		}
-		const { data } = await getArrayBuffer(profilePictureUrl);
 
+		const { data } = await getArrayBuffer(profilePictureUrl);
 		return Buffer.from(data);
 	} catch (err) {
 		throw new Error(`Failed to get avatar for (${userId}) from Users: ${err.message}`);

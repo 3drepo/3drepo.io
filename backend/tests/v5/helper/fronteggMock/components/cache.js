@@ -119,8 +119,8 @@ Cache.addUserByEmail = (email, userData) => {
 
 Cache.updateUserByEmail = (userEmail, userData) => {
 	if (usersByEmail.has(userEmail)) {
-		usersByEmail.set(userEmail, { ...usersById.get(userEmail), ...userData });
-		return (userEmail);
+		usersByEmail.set(userEmail, { ...usersByEmail.get(userEmail), ...userData });
+		return userEmail;
 	}
 	Cache.addUserByEmail(userEmail, userData);
 	return userEmail;
