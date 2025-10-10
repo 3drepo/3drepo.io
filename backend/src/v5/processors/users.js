@@ -20,6 +20,7 @@ const Users = {};
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
 	getUserId, removeUser, updatePassword, updateProfile } = require('../models/users');
+const { getFile, removeFile, storeFile } = require('../services/filesManager');
 const { getUserAvatarBuffer, getUserById, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
 const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
@@ -30,7 +31,6 @@ const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
-const { removeFile } = require('../services/filesManager');
 const { splitName } = require('../utils/helper/strings');
 const { templates } = require('../utils/responseCodes');
 
@@ -118,7 +118,11 @@ Users.resetPassword = async (user) => {
 Users.getAvatar = async (username) => {
 	try {
 		const userId = await getUserId(username);
-		const avatarBuffer = await getUserAvatarBuffer(userId);
+		let avatarBuffer = await getUserAvatarBuffer(userId);
+		if (!avatarBuffer) {
+			// this means the avatar is not a generated one, so we don't have it cached
+			avatarBuffer = await getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
+		}
 		const fileExt = await fileExtensionFromBuffer(avatarBuffer);
 
 		return {
@@ -126,15 +130,16 @@ Users.getAvatar = async (username) => {
 			extension: fileExt || 'png',
 		};
 	} catch (error) {
-		logger.logError(`Failed to fetch avatar from URL: ${error.message}`);
-
-		throw templates.unknown;
+		throw templates.fileNotFound;
 	}
 };
 
 Users.uploadAvatar = async (username, fileObj) => {
 	const userId = await getUserId(username);
-	await uploadAvatar(userId, fileObj);
+	await Promise.all([
+		uploadAvatar(userId, fileObj),
+		storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, fileObj.buffer),
+	]);
 };
 
 Users.generateApiKey = generateApiKey;

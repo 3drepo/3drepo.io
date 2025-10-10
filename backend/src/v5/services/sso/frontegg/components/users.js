@@ -18,9 +18,9 @@
 const { HEADER_APP_ID, HEADER_ENVIRONMENT_ID, HEADER_TENANT_ID, HEADER_USER_ID } = require('../frontegg.constants');
 const { delete: deleteReq, get, getArrayBuffer, post, put } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
+const { getURLDomain, splitName } = require('../../../../utils/helper/strings');
 const FormData = require('form-data');
 const { Readable } = require('stream');
-const { splitName } = require('../../../../utils/helper/strings');
 
 const Users = {};
 
@@ -39,6 +39,10 @@ Users.getUserById = async (userId) => {
 Users.getUserAvatarBuffer = async (userId) => {
 	try {
 		const { profilePictureUrl } = await Users.getUserById(userId);
+		if (!getURLDomain(profilePictureUrl).includes('frontegg')) {
+			// this is not an generated avatar, so we should not try to fetch it
+			return null;
+		}
 		const { data } = await getArrayBuffer(profilePictureUrl);
 
 		return Buffer.from(data);
