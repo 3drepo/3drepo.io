@@ -47,7 +47,7 @@ const Intercom = require(`${src}/services/intercom`);
 jest.mock('../../../../src/v5/services/sso/frontegg');
 const FronteggService = require(`${src}/services/sso/frontegg`);
 
-const { generateRandomString, determineTestGroup } = require('../../helper/services');
+const { generateRandomString, generateRandomObject, determineTestGroup } = require('../../helper/services');
 
 const user = {
 	user: generateRandomString(),
@@ -234,14 +234,11 @@ const fileExists = (file) => fs.access(file).then(() => true).catch(() => false)
 const testUploadAvatar = () => {
 	const tempAvatar = path.join(imagesFolder, 'toRemove.png');
 	describe('Remove old avatar and upload a new one', () => {
-		const avatarObject = {
-			path: tempAvatar,
-		};
+		const avatarObject = generateRandomObject();
 		test('should upload new avatar and remove the temporary file', async () => {
 			const username = generateRandomString();
 			const userId = generateRandomString();
 			const tenantId = generateRandomString();
-			await fs.copyFile(image, tempAvatar);
 
 			UsersModel.getUserId.mockResolvedValueOnce(userId);
 			FronteggService.uploadAvatar.mockResolvedValueOnce(undefined);
@@ -250,9 +247,8 @@ const testUploadAvatar = () => {
 			await expect(Users.uploadAvatar(username, avatarObject)).resolves.toEqual(undefined);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
-				userId, avatarObject.path,
+				userId, avatarObject,
 			);
-			await expect(fileExists(tempAvatar)).resolves.toBe(false);
 		});
 		test('should fail removing the temporary avatar file', async () => {
 			const username = generateRandomString();
@@ -263,14 +259,11 @@ const testUploadAvatar = () => {
 			FronteggService.uploadAvatar.mockResolvedValueOnce(undefined);
 			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
 
-			jest.spyOn(logger, 'logError');
-
 			await expect(Users.uploadAvatar(username, avatarObject)).resolves.toEqual(undefined);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
-				userId, avatarObject.path,
+				userId, avatarObject,
 			);
-			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
 	});
 };

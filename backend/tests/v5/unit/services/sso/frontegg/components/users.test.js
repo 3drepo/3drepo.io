@@ -40,11 +40,27 @@ const testGetUserById = () => {
 	describe('Get user by ID', () => {
 		test('Should get user information', async () => {
 			const userId = generateRandomString();
+			const metadata = generateRandomObject();
+			const mockedRetVal = generateRandomObject();
+			const expectedData = {...mockedRetVal, ...metadata, metadata};
+
+			WebRequests.get.mockResolvedValueOnce({ data: {...mockedRetVal, metadata: JSON.stringify(metadata)} });
+
+			await expect(Users.getUserById(userId)).resolves.toEqual(expectedData);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+
+		test('Should get user information (no metadata)', async () => {
+			const userId = generateRandomString();
 			const res = generateRandomObject();
 
 			WebRequests.get.mockResolvedValueOnce({ data: res });
 
-			await expect(Users.getUserById(userId)).resolves.toEqual(res);
+			await expect(Users.getUserById(userId)).resolves.toEqual({...res, metadata: {}});
 
 			expect(WebRequests.get).toHaveBeenCalledTimes(1);
 			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
@@ -199,32 +215,15 @@ const testUploadAvatar = () => {
 		test('Should upload avatar for the user ID specified', async () => {
 			const userId = generateRandomString();
 			const userData = { tenantId: generateRandomString() };
-			const path = generateRandomString();
+			const fileObj = { buffer: generateRandomString(), 
+				originalname: generateRandomString(), mimetype: generateRandomString() };
 			const responseMock = { data: generateRandomString() };
 
 			jest.spyOn(Users, 'getUserById').mockReturnValueOnce(userData);
 			WebRequests.put.mockResolvedValueOnce(responseMock);
 			jest.spyOn(Users, 'updateUserDetails').mockResolvedValueOnce();
 
-			await expect(Users.uploadAvatar(userId, path)).resolves.toEqual(undefined);
-
-			expect(WebRequests.put).toHaveBeenCalledTimes(1);
-			expect(Users.updateUserDetails).toHaveBeenCalledTimes(1);
-			expect(Users.updateUserDetails).toHaveBeenCalledWith(userId, { profilePictureUrl: responseMock.data });
-		});
-
-		test('Should upload avatar for the user ID specified and add the mimeType if provided', async () => {
-			const userId = generateRandomString();
-			const userData = { tenantId: generateRandomString() };
-			const path = generateRandomString();
-			const responseMock = { data: generateRandomString() };
-			const mimeType = 'image/png';
-
-			jest.spyOn(Users, 'getUserById').mockReturnValueOnce(userData);
-			WebRequests.put.mockResolvedValueOnce(responseMock);
-			jest.spyOn(Users, 'updateUserDetails').mockResolvedValueOnce();
-
-			await expect(Users.uploadAvatar(userId, path, mimeType)).resolves.toEqual(undefined);
+			await expect(Users.uploadAvatar(userId, fileObj)).resolves.toEqual(undefined);
 
 			expect(WebRequests.put).toHaveBeenCalledTimes(1);
 			expect(Users.updateUserDetails).toHaveBeenCalledTimes(1);
@@ -234,13 +233,14 @@ const testUploadAvatar = () => {
 		test('Should throw error if it failed to upload avatar', async () => {
 			const userId = generateRandomString();
 			const userData = { tenantId: generateRandomString() };
-			const path = generateRandomString();
+			const fileObj = { buffer: generateRandomString(), 
+				originalname: generateRandomString(), mimetype: generateRandomString() };
 			jest.spyOn(Users, 'getUserById').mockReturnValueOnce(userData);
 
 			const mockResponse = { message: generateRandomString() };
 
 			WebRequests.put.mockRejectedValueOnce(mockResponse);
-			await expect(Users.uploadAvatar(userId, path)).rejects.not.toBeUndefined();
+			await expect(Users.uploadAvatar(userId, fileObj)).rejects.not.toBeUndefined();
 
 			expect(WebRequests.put).toHaveBeenCalledTimes(1);
 		});
@@ -289,7 +289,7 @@ const testUpdateUserDetails = () => {
 			const existingUser = {
 				name: `${generateRandomString()} ${generateRandomString()}`,
 				profilePictureUrl: generateRandomString(),
-				metadata: JSON.stringify(metadataInfo),
+				metadata: metadataInfo,
 			};
 
 			const expectedPayload = {
@@ -325,7 +325,7 @@ const testUpdateUserDetails = () => {
 			const existingUser = {
 				name: `${generateRandomString()} ${generateRandomString()}`,
 				profilePictureUrl: generateRandomString(),
-				metadata: JSON.stringify(metadataInfo),
+				metadata: metadataInfo,
 			};
 
 			const expectedPayload = {
