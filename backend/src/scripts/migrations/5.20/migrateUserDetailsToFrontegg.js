@@ -16,12 +16,12 @@
  */
 
 const { v5Path } = require('../../../interop');
+const { fileExtensionFromBuffer } = require('../../../v5/utils/helper/typeCheck');
 const { getTeamspaceList } = require('../../utils');
 
-const FSHandler = require(`${v5Path}/handler/fs`);
+const { fileExists, getFile } = require(`${v5Path}/services/filesManager`);
 const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 const { logger } = require(`${v5Path}/utils/logger`);
-const { fileExists } = require(`${v5Path}/services/filesManager`);
 const { getRefEntry } = require(`${v5Path}/models/fileRefs`);
 const { getUserByEmail, updateProfile } = require(`${v5Path}/models/users`);
 const { getTeamspaceRefId } = require(`${v5Path}/models/teamspaceSettings`);
@@ -40,13 +40,17 @@ const updateUserDetailsOnFrontegg = async (member) => {
 		try {
 			const hasAvatar = await fileExists(USERS_DB_NAME, AVATARS_COL_NAME, user);
 			if (hasAvatar) {
-				const { link, mimeType } = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, user);
-				const path = FSHandler.getFullPath(link);
+				const { mimeType } = await getRefEntry(USERS_DB_NAME, AVATARS_COL_NAME, user);
+				const buffer = await getFile(USERS_DB_NAME, AVATARS_COL_NAME, user);
+				const fileObj = {
+					buffer,
+					mimetype: mimeType,
+					originalname: `avatar.${await fileExtensionFromBuffer(buffer) || 'png'}`,
+				};
 
 				await uploadAvatar(
 					member.id,
-					path,
-					mimeType,
+					fileObj,
 				);
 			}
 
