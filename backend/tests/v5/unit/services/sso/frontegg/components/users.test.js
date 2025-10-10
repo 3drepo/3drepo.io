@@ -87,7 +87,7 @@ const testGetUserAvatarBuffer = () => {
 	describe('Get user avatar buffer', () => {
 		test('Should get user avatar buffer', async () => {
 			const userId = generateRandomString();
-			const profilePictureUrl = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
 			const data = generateRandomString();
 
 			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ profilePictureUrl });
@@ -104,9 +104,23 @@ const testGetUserAvatarBuffer = () => {
 			expect(WebRequests.getArrayBuffer).toHaveBeenCalledWith(profilePictureUrl);
 		});
 
+		test('Should return null if a placeholder url is returned', async () => {
+			const userId = generateRandomString();
+			const profilePictureUrl = `https://abc/${generateRandomString()}`;
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ profilePictureUrl });
+
+			await expect(Users.getUserAvatarBuffer(userId)).resolves.toEqual(null);
+
+			expect(Users.getUserById).toHaveBeenCalledTimes(1);
+			expect(Users.getUserById).toHaveBeenCalledWith(userId);
+
+			expect(WebRequests.getArrayBuffer).not.toHaveBeenCalled();
+		});
+
 		test('Should throw error if it failed', async () => {
 			const userId = generateRandomString();
-			const profilePictureUrl = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
 			const errorMessage = generateRandomString();
 
 			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ profilePictureUrl });
@@ -256,7 +270,7 @@ const testUpdateUserDetails = () => {
 			const metadataInfo = generateRandomObject();
 			const firstName = generateRandomString();
 			const lastName = generateRandomString();
-			const profilePictureUrl = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
 			const existingUser = {
 				name: `${generateRandomString()} ${generateRandomString()}`,
 				profilePictureUrl: generateRandomString(),
@@ -287,7 +301,7 @@ const testUpdateUserDetails = () => {
 			const metadataInfo = generateRandomObject();
 			const firstName = generateRandomString();
 			const lastName = generateRandomString();
-			const profilePictureUrl = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
 			const existingUser = {
 				name: `${generateRandomString()} ${generateRandomString()}`,
 				profilePictureUrl: generateRandomString(),
@@ -323,7 +337,7 @@ const testUpdateUserDetails = () => {
 			};
 			const firstName = generateRandomString();
 			const lastName = generateRandomString();
-			const profilePictureUrl = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
 			const existingUser = {
 				name: `${generateRandomString()} ${generateRandomString()}`,
 				profilePictureUrl: generateRandomString(),
@@ -354,7 +368,7 @@ const testUpdateUserDetails = () => {
 			const userId = generateRandomString();
 			const metadataInfo = generateRandomObject();
 			const firstName = generateRandomString();
-			const profilePictureUrl = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
 			const existingLastName = generateRandomString();
 			const existingUser = {
 				name: `${generateRandomString()} ${existingLastName}`,
@@ -385,7 +399,7 @@ const testUpdateUserDetails = () => {
 			const userId = generateRandomString();
 			const metadataInfo = generateRandomObject();
 			const lastName = generateRandomString();
-			const profilePictureUrl = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
 			const existingFirstName = generateRandomString();
 			const existingUser = {
 				name: `${existingFirstName} ${generateRandomString()}`,
