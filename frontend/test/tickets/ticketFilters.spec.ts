@@ -16,8 +16,11 @@
  */
 
 import { ITemplate } from "@/v5/store/tickets/tickets.types";
+import { getFullnameFromUser } from "@/v5/store/users/users.helpers";
 import { TicketFilter } from "@components/viewer/cards/cardFilters/cardFilters.types";
 import { deserializeFilter, serializeFilter, splitByNonEscaped } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
+import { userWithoutAvatarMockFactory } from "../users/users.fixtures";
+import { pick, times } from 'lodash';
 
 describe('Tickets: filters', () => {
     const template: ITemplate = {
@@ -47,8 +50,10 @@ describe('Tickets: filters', () => {
                     'aqua'
                 ]
             }
-        ]
+        ],
     }
+
+    const users = times(5, () => userWithoutAvatarMockFactory());
 
     describe('helpers', () => {
         
@@ -88,10 +93,25 @@ describe('Tickets: filters', () => {
                 }
             }
 
-            console.log(template); 
             const serialized = serializeFilter(template, filter);
-            expect(filter).toEqual(deserializeFilter(template, serialized));
+            expect(filter).toEqual(deserializeFilter(template, users, serialized));
         });
+        
+        it('should work for type owner', async () => {
+            const filter:TicketFilter = {
+                type:'owner',
+                property: 'Owner',
+                filter: {
+                    operator: 'eq',
+                    values: [users[0].user, 'Architect', users[3].user],
+                    displayValues: [getFullnameFromUser(users[0]), 'Architect', getFullnameFromUser(users[3])].join(',')
+                }
+            }
+
+            const serialized = serializeFilter(template, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, serialized));        
+        });
+
     })
 
 

@@ -31,6 +31,8 @@ import { SelectOption } from '@/v5/helpers/form.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
+import { IUser } from '@/v5/store/users/users.redux';
+import { toDictionary } from '@/v5/helpers/toDictionary.helper';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -228,7 +230,7 @@ const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:
 
 const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, template:ITemplate) => {
 	const propertiesDefinitions = (findByName(template.modules, ticketFilter.module) as TemplateModule)?.properties || template.properties;
-	return findByName(propertiesDefinitions, ticketFilter.property) as PropertyDefinition;
+	return (findByName(propertiesDefinitions, ticketFilter.property) || findByName(propertiesDefinitions, ticketFilter.type)) as PropertyDefinition;
 };
 
 
@@ -240,16 +242,9 @@ export const serializeFilter = (template: ITemplate, ticketFilter: TicketFilter)
 	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
 	let values = ticketFilter.filter.values;
 
-	let filterKey = [ticketFilter.module];
+	let filterKey = [ticketFilter.module, ticketFilter.property, ticketFilter.type].join('.');
 
-	if (ticketFilter.type === 'ticketCode') {
-		filterKey.push('');
-		filterKey.push(ticketFilter.type);
-	} else {
-		filterKey.push(ticketFilter.property);
-	}
-
-	const serialized = [ filterKey.join('.'), t]
+	const serialized = [ filterKey, t];
 
 	let serializedValues:string = undefined;
 	if (values) {
@@ -272,14 +267,14 @@ export const serializeFilter = (template: ITemplate, ticketFilter: TicketFilter)
 };
 
 
-// Got to do a custom splitter other wise the ^\ part of the regex would eat up one character
+// Custom splitter other wise the ^\ part of the regex would eat up one character
 export const splitByNonEscaped = (str: string, char) =>  {
 	const res = [];
 	let index = str.indexOf(char);
 	let lastIndex = 0;
 
 	while (index >= 0 ) {
-		if (str[index-1] !== '\\') {
+		if (str[index - 1] !== '\\') {
 			res.push(str.substring(lastIndex, index));
 			lastIndex = index + 1;
 		}
@@ -291,32 +286,39 @@ export const splitByNonEscaped = (str: string, char) =>  {
 	return res;
 };
 
-export const deserializeFilter = (template:ITemplate, str: string): any => {
-	console.log(JSON.stringify({str}));
-
+export const deserializeFilter = (template:ITemplate, users: IUser[], str: string): any => {
+	const userByUserName = toDictionary(users, (u) => u.user);
+	
+	
 	const splitPointField = str.indexOf(':');
 	const splitPointFilter = str.indexOf(':', splitPointField + 1);
 
 	const serialisedFields = str.substring(0, splitPointField);
-	const serializedOperator = str.substring(splitPointField+1, splitPointFilter);
+	const serializedOperator = str.substring(splitPointField + 1, splitPointFilter);
 
 	const serialisedValue = str.substring(splitPointFilter + 1);
-	let [module, property, type] = serialisedFields.split('.');
+	let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
 
-	const propertyDef = findPropertyDefinitionByFilter({ module, property }, template);
+
+	const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
 
 	let filter: BaseFilter = {
 		operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
 		values: undefined,
 	};
 
-	if (propertyDef.values) {
-		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
-		filter.values = indexes.map((i) => propertyDef.values[i]);
+
+	if (propertyDef?.values === 'jobsAndUsers' || type === 'owner') {
+		filter.values = splitByNonEscaped(serialisedValue, ',');
+		filter.displayValues = (filter.values as string[]).map((u) => {
+			if (userByUserName[u]) return getFullnameFromUser(userByUserName[u]);
+			return u;
+		}).join(',');
 	}
 
-	if (propertyDef.type) {
-		type = propertyDef.type;
+	if (propertyDef?.values && propertyDef?.values !== 'jobsAndUsers') {
+		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
+		filter.values = indexes.map((i) => propertyDef.values[i]);
 	}
 
 	return ({ property, type, filter });

@@ -29,7 +29,7 @@ import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/servic
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
-import { Transformers, useSearchParam } from '../../../../useSearchParam';
+import { SearchParamTransformer, Transformers, useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
@@ -67,6 +67,16 @@ type TicketsTableProps = {
 	setTicketValue: SetTicketValue,
 };
 
+const jsonTransformer: SearchParamTransformer<TicketFilter[]> =  {
+	from: (param) => {
+		if (!param) return [];
+		return JSON.parse(decodeURIComponent(param));
+	},
+	to: (filters: TicketFilter[]) => {
+		return encodeURIComponent(JSON.stringify(filters));
+	}
+}
+
 export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
 	const navigate = useNavigate();
 	const params = useParams<DashboardTicketsParams>();
@@ -80,9 +90,9 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const models = useSelectedModels();
-	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 
+	const [filters, setFilters] = useSearchParam<TicketFilter[]>('filters', jsonTransformer, true);
 
 	const setTemplate = useCallback((newTemplate) => {
 		setTicketValue();
@@ -161,8 +171,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			.forEach((name) => fetchColumn(name, filteredTickets));
 	}, [filteredTickets.length, visibleSortedColumnsNames.join('')]);
 
-	
-	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>(); 
 	useEffect(() => {
 		if (!filters) return;
 		let mounted = true;
@@ -207,8 +215,10 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	useEffect(() => {
 		if (!templateAlreadyFetched(selectedTemplate)) return;
-		setPresetFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
-	}, [selectedTemplate, JSON.stringify(presetFilters)]);
+		if (!filters) {
+			setFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
+		}
+	}, [selectedTemplate, JSON.stringify(filters)]);
 	
 	const serializeFilters = () => {
 		const serialized = filters.map(serializeFilter.bind(undefined, selectedTemplate));
@@ -220,7 +230,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	};
 
 	return (
-		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters}>
+		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters}>
 			<TicketsTableLayout>
 				<FiltersContainer>
 					<FlexContainer>
