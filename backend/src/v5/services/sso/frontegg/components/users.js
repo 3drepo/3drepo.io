@@ -23,6 +23,7 @@ const Path = require('path');
 const { createReadStream } = require('fs');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const { splitName } = require('../../../../utils/helper/strings');
+const { Readable } = require('stream');
 
 const Users = {};
 
@@ -107,15 +108,14 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 	}
 };
 
-Users.uploadAvatar = async (userId, path, contentType) => {
+Users.uploadAvatar = async (userId, fileObj) => {
 	try {
 		const config = await getConfig();
 		const { tenantId } = await Users.getUserById(userId);
-		const pathToFile = Path.resolve(path);
-		const options = deleteIfUndefined({ contentType });
 
 		const formData = new FormData();
-		formData.append('image', createReadStream(pathToFile), options);
+		formData.append('image', Readable.from(fileObj.buffer), 
+		{ filename: fileObj.originalname, contentType: fileObj.mimetype });
 
 		const headers = {
 			...await getBearerHeader(),

@@ -334,7 +334,7 @@ const establishRoutes = () => {
 	*       200:
 	*         description: Uploads a new avatar for the user
 	*/
-	router.put('/user/avatar', isLoggedIn, singleImageUpload('file', false), uploadAvatar);
+	router.put('/user/avatar', isLoggedIn, singleImageUpload('file'), uploadAvatar);
 
 	/**
 	* @openapi
