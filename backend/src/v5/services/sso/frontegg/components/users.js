@@ -31,7 +31,8 @@ Users.getUserById = async (userId) => {
 		const config = await getConfig();
 		const { data: {metadata, ...others} } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
 		const details = JSON.parse(metadata || '{}');
-		return {...details, ...others};
+		// keep a copy of the metadata at the top level for easier access
+		return {...details, ...others, metadata: details};
 	} catch (err) {
 		throw new Error(`Failed to get user(${userId}) from Users: ${err.message}`);
 	}
@@ -40,7 +41,6 @@ Users.getUserById = async (userId) => {
 Users.getUserAvatarBuffer = async (userId) => {
 	try {
 		const { profilePictureUrl } = await Users.getUserById(userId);
-
 		const { data } = await getArrayBuffer(profilePictureUrl);
 
 		return Buffer.from(data);
@@ -93,7 +93,7 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 		const existingDetails = await Users.getUserById(userId);
 		const [existingFirstName, existingLastName] = splitName(existingDetails.name);
 
-		const newMetadata = { ...JSON.parse(existingDetails.metadata || '{}'), ...metadata };
+		const newMetadata = { ...existingDetails.metadata, ...metadata };
 
 		const payload = {
 			name: `${firstName || existingFirstName} ${lastName || existingLastName}`.trim(),
