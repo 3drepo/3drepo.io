@@ -49,8 +49,27 @@ describe('Tickets: filters', () => {
                     'teal',
                     'aqua'
                 ]
+            },
+            {
+                name:'Assignees',
+                type:'manyOf',
+                values: 'jobsAndUsers'
             }
         ],
+        modules: [
+            {
+                name:'Users module',
+                properties: [
+                    {
+                        name:'Handsome users',
+                        type:'oneOf',
+                        values: 'jobsAndUsers',
+                    }
+                ]
+            }
+        ]
+
+
     }
 
     const users = times(5, () => userWithoutAvatarMockFactory());
@@ -96,7 +115,38 @@ describe('Tickets: filters', () => {
             const serialized = serializeFilter(template, filter);
             expect(filter).toEqual(deserializeFilter(template, users, serialized));
         });
-        
+
+        it('should work for general jobsAndUsers', async () => {
+            const filter:TicketFilter = {
+                type:'manyOf',
+                property: 'Assignees',
+                filter: {
+                    operator: 'eq',
+                    values: [users[2].user, 'Techinician', users[1].user],
+                    displayValues: [getFullnameFromUser(users[2]), 'Techinician', getFullnameFromUser(users[1])].join(',')
+                }
+            }
+
+            const serialized = serializeFilter(template, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, serialized));        
+        });
+
+        it('should work for jobsAndUsers in a module', async () => {
+            const filter:TicketFilter = {
+                type:'oneOf',
+                property: 'Handsome users',
+                module: 'Users module',
+                filter: {
+                    operator: 'eq',
+                    values: ['Electrician', users[4].user, users[2].user],
+                    displayValues: ['Electrician', getFullnameFromUser(users[4]), getFullnameFromUser(users[2])].join(',')
+                }
+            }
+
+            const serialized = serializeFilter(template, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, serialized));        
+        });
+
         it('should work for type owner', async () => {
             const filter:TicketFilter = {
                 type:'owner',

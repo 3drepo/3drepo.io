@@ -307,7 +307,6 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], str: strin
 		values: undefined,
 	};
 
-
 	if (propertyDef?.values === 'jobsAndUsers' || type === 'owner') {
 		filter.values = splitByNonEscaped(serialisedValue, ',');
 		filter.displayValues = (filter.values as string[]).map((u) => {
@@ -320,8 +319,13 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], str: strin
 		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
 		filter.values = indexes.map((i) => propertyDef.values[i]);
 	}
+	const fullFilter: TicketFilter = { property, type, filter };
 
-	return ({ property, type, filter });
+	if (module) {
+		fullFilter.module = module;
+	}
+
+	return fullFilter;
 	// 	const [fields, filter] = str.split(':');
 	// 	const [module, property, types] = fields.split('.');
 
