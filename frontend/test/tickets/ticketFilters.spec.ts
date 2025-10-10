@@ -21,6 +21,7 @@ import { TicketFilter } from "@components/viewer/cards/cardFilters/cardFilters.t
 import { deserializeFilter, serializeFilter, splitByNonEscaped } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
 import { userWithoutAvatarMockFactory } from "../users/users.fixtures";
 import { pick, times } from 'lodash';
+import { mockRiskCategories } from "./tickets.fixture";
 
 describe('Tickets: filters', () => {
     const template: ITemplate = {
@@ -54,6 +55,11 @@ describe('Tickets: filters', () => {
                 name:'Assignees',
                 type:'manyOf',
                 values: 'jobsAndUsers'
+            },
+            {
+                name: 'Risky risks',
+                type: 'oneOf',
+                values: 'riskCategories'
             }
         ],
         modules: [
@@ -61,21 +67,20 @@ describe('Tickets: filters', () => {
                 name:'Users module',
                 properties: [
                     {
-                        name:'Handsome users',
+                        name:'Cool users',
                         type:'oneOf',
                         values: 'jobsAndUsers',
                     }
                 ]
             }
         ]
-
-
     }
 
     const users = times(5, () => userWithoutAvatarMockFactory());
+    const risks = mockRiskCategories();
 
     describe('helpers', () => {
-        
+
         it('split by non escaped characters should work', () => {
             let str = 'b\\,lack,sil\\ver,gray';
             let arr = splitByNonEscaped(str, ',');
@@ -112,8 +117,8 @@ describe('Tickets: filters', () => {
                 }
             }
 
-            const serialized = serializeFilter(template, filter);
-            expect(filter).toEqual(deserializeFilter(template, users, serialized));
+            const serialized = serializeFilter(template, risks, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
 
         it('should work for general jobsAndUsers', async () => {
@@ -127,14 +132,14 @@ describe('Tickets: filters', () => {
                 }
             }
 
-            const serialized = serializeFilter(template, filter);
-            expect(filter).toEqual(deserializeFilter(template, users, serialized));        
+            const serialized = serializeFilter(template, risks, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
 
         it('should work for jobsAndUsers in a module', async () => {
             const filter:TicketFilter = {
                 type:'oneOf',
-                property: 'Handsome users',
+                property: 'Cool users',
                 module: 'Users module',
                 filter: {
                     operator: 'eq',
@@ -143,8 +148,8 @@ describe('Tickets: filters', () => {
                 }
             }
 
-            const serialized = serializeFilter(template, filter);
-            expect(filter).toEqual(deserializeFilter(template, users, serialized));        
+            const serialized = serializeFilter(template, risks, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
 
         it('should work for type owner', async () => {
@@ -158,11 +163,23 @@ describe('Tickets: filters', () => {
                 }
             }
 
-            const serialized = serializeFilter(template, filter);
-            expect(filter).toEqual(deserializeFilter(template, users, serialized));        
+            const serialized = serializeFilter(template, risks, filter);
+            expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
         });
 
-    })
+        it('should work for type risks', async () => {
+            const filter:TicketFilter = {
+                type: 'oneOf',
+                property: 'Risky risks',
+                filter: {
+                    operator: 'eq',
+                    values: [risks[1], risks[3], risks[2]],
+                }
+            }
 
+            const serialized = serializeFilter(template, risks, filter);            
+            expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+        });
+    })
 
 });

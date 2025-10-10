@@ -238,7 +238,7 @@ const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, tem
 // that one name refers to one property. Eg: lets say theres a property 'number of nodes' serialization
 // assumes theres only one 'number of nodes'. In practical terms this means that serialization works 
 // assuming the filters are for one template in particular
-export const serializeFilter = (template: ITemplate, ticketFilter: TicketFilter) => {
+export const serializeFilter = (template: ITemplate, riskCategories: string[], ticketFilter: TicketFilter) => {
 	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
 	let values = ticketFilter.filter.values;
 
@@ -251,10 +251,14 @@ export const serializeFilter = (template: ITemplate, ticketFilter: TicketFilter)
 		serializedValues = values.map(escapeString).join(',');
 		
 		if (['oneOf', 'manyOf', 'status'].includes(ticketFilter.type)) {
-			const options = findPropertyDefinitionByFilter(ticketFilter, template);
+			let options = findPropertyDefinitionByFilter(ticketFilter, template).values;
 
-			if (options.values !== 'jobsAndUsers' && options.values !== 'riskCategories') {
-				const indexes = values.map((val) => options.values.indexOf(val as any));
+			if (options !== 'jobsAndUsers') {
+				if (options === 'riskCategories') {
+					options = riskCategories;
+				}
+				
+				const indexes = values.map((val) => options.indexOf(val as any));
 				serializedValues = indexes.join(',');
 			}
 		}
@@ -286,7 +290,7 @@ export const splitByNonEscaped = (str: string, char) =>  {
 	return res;
 };
 
-export const deserializeFilter = (template:ITemplate, users: IUser[], str: string): any => {
+export const deserializeFilter = (template:ITemplate, users: IUser[], riskCategories: string[], str: string): any => {
 	const userByUserName = toDictionary(users, (u) => u.user);
 	
 	
@@ -298,7 +302,6 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], str: strin
 
 	const serialisedValue = str.substring(splitPointFilter + 1);
 	let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
-
 
 	const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
 
@@ -316,8 +319,11 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], str: strin
 	}
 
 	if (propertyDef?.values && propertyDef?.values !== 'jobsAndUsers') {
+		const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
+		console.log(JSON.stringify({propertyDef, riskCategories}));
+
 		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
-		filter.values = indexes.map((i) => propertyDef.values[i]);
+		filter.values = indexes.map((i) => options[i]);
 	}
 	const fullFilter: TicketFilter = { property, type, filter };
 
