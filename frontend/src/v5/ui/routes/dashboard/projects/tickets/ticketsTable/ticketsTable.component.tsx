@@ -70,7 +70,7 @@ type TicketsTableProps = {
 
 const filtersTransformer = (selectedTemplate: ITemplate, users: IUser[], riskCategories: string[]): ParamTransformer<TicketFilter[]> => ({
 	from: (param) => {
-		if (!param) return [];
+		if (!param) return undefined;
 
 		try {
 			return JSON.parse(param)
@@ -235,8 +235,12 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		}
 	}, [selectedTemplate, JSON.stringify(filters)]);
 
+	const onChangeFilters = (ticketFilters) => {
+		console.log(JSON.stringify({ ticketFilters }));
+	};
+
 	return (
-		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters}>
+		<TicketsFiltersContextComponent onChange={onChangeFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters}>
 			<TicketsTableLayout>
 				<FiltersContainer>
 					<FlexContainer>

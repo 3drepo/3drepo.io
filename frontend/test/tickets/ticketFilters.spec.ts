@@ -72,7 +72,21 @@ describe('Tickets: filters', () => {
 			{
 				name: 'long text',
 				type: 'longText'
+			},
+			{
+				name: 'Cool text',
+				type: 'text'
+			}, {
+				name: 'Weird, options',
+				type: 'manyOf',
+				values: [
+					'E.M.H.-stuff',
+					'Another one',
+					'Gray, John',
+					'Ye:asda',
+				]
 			}
+
 		],
 		modules: [
 			{
@@ -117,7 +131,6 @@ describe('Tickets: filters', () => {
 	});
 
 	describe('serialization', () => {
-		// Containers
 		it('should work for property of type manyOf', () => {
 			const filter:TicketFilter = {
 				module: '',
@@ -167,6 +180,7 @@ describe('Tickets: filters', () => {
 
 		it('should work for type owner', () => {
 			const filter: TicketFilter = {
+				module: '',
 				type:'owner',
 				property: 'Owner',
 				filter: {
@@ -307,6 +321,7 @@ describe('Tickets: filters', () => {
 			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 
 			filter = {
+				module: '',
 				property: 'boolean',
 				type: 'boolean',
 				filter:  {
@@ -379,6 +394,37 @@ describe('Tickets: filters', () => {
 				}
 			};
 	
+			const serialized = serializeFilter(template, risks, filter);
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+		});
+
+		it('should support filters with "." and "," characters with text', () => {
+			const filter: TicketFilter = {
+				module: '',
+				property: 'Cool text',
+				type: 'text',
+				filter: {
+					operator: 'is',
+					values: ['a.an:d,value'],
+					displayValues: 'a.an:d,value'
+				}
+			};
+	
+			const serialized = serializeFilter(template, risks, filter);
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+		});
+
+		it('should support filters with "." and "," characters in select options', () => {
+			const filter: TicketFilter = {
+				type:'manyOf',
+				property: 'Weird, options',
+				module: '',
+				filter: {
+					operator: 'eq',
+					values: ['E.M.H.-stuff', 'Gray, John','Ye:asda']
+				}
+			}
+
 			const serialized = serializeFilter(template, risks, filter);
 			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});

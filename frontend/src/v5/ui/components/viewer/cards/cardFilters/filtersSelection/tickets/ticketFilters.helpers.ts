@@ -231,9 +231,9 @@ export const getTemplateFilter = (templateCode: string): TicketFilter => ({
 	},
 });
 
-const escapeString = (str: string) => str.replaceAll('.', '\\.').replaceAll(',', '\\,');
+const escapeString = (str: string) => str.replaceAll('.', '\\.').replaceAll(',', '\\,').replaceAll(':', '\\:');
 
-const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',');
+const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',').replaceAll('\\:', ':');
 
 const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
 	propOrModule?.find((p) => p.name === name);
@@ -285,8 +285,7 @@ export const serializeFilter = (template: ITemplate, riskCategories: string[], t
 	return serialized.join(':');
 };
 
-
-// Custom splitter other wise the ^\ part of the regex would eat up one character
+// Custom splitter otherwise the ^\ part of the regex would eat up one character
 export const splitByNonEscaped = (str: string, char) =>  {
 	const res = [];
 	let index = str.indexOf(char);
@@ -308,13 +307,8 @@ export const splitByNonEscaped = (str: string, char) =>  {
 export const deserializeFilter = (template:ITemplate, users: IUser[], riskCategories: string[], str: string): TicketFilter => {
 	try {
 		const userByUserName = toDictionary(users, (u) => u.user);
-		const splitPointField = str.indexOf(':');
-		const splitPointFilter = str.indexOf(':', splitPointField + 1);
+		const [serialisedFields, serializedOperator, serialisedValue] = splitByNonEscaped(str, ':');
 
-		const serialisedFields = str.substring(0, splitPointField);
-		const serializedOperator = str.substring(splitPointField + 1, splitPointFilter);
-
-		const serialisedValue = str.substring(splitPointFilter + 1);
 		let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
 
 		const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
@@ -334,12 +328,13 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 			} else {
 				const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
 				const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
-				filter.values = indexes.map((i) => options[i]);
+
+				filter.values = indexes.map((i) => options[i] || i);
 			}
 		}
 	
 		if (isDateType(type)) {
-			filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
+			filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
 					
 			if (filter.operator === 'rng' || filter.operator === 'nrng') {
 				filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
@@ -350,17 +345,17 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 		}
 
 		if (type === 'boolean') {
-			filter.values = serialisedValue.split(',').map((v) => v !== '0' );
+			filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => v !== '0' );
 			filter.displayValues = arrToDisplayValue(filter.values.map((v) => v ? TRUE_LABEL : FALSE_LABEL));
 		}
 
 		if (type === 'number') {
-			filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
+			filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
 			filter.displayValues = arrToDisplayValue(filter.values);
 		}
 
 		if (isTextType(type)) {
-			filter.values = serialisedValue.split(',').map((v) => unescapeString(v));
+			filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => unescapeString(v));
 			filter.displayValues = arrToDisplayValue(filter.values);
 		}
 
