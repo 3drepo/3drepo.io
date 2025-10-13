@@ -326,10 +326,10 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 	if (['manyOf', 'oneOf'].includes(propertyDef?.type) || type === 'owner') {
 		if (propertyDef?.values === 'jobsAndUsers' || type === 'owner' ) {
 			filter.values = splitByNonEscaped(serialisedValue, ',');
-			filter.displayValues = (filter.values as string[]).map((u) => {
+			filter.displayValues = arrToDisplayValue((filter.values as string[]).map((u) => {
 				if (userByUserName[u]) return getFullnameFromUser(userByUserName[u]);
 				return u;
-			}).join(',');
+			}));
 		} else {
 			const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
 			const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));

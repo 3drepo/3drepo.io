@@ -68,6 +68,10 @@ describe('Tickets: filters', () => {
 			{
 				name: 'Expiration',
 				type: 'date',
+			},
+			{
+				name: 'long text',
+				type: 'longText'
 			}
 		],
 		modules: [
@@ -135,12 +139,12 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator: 'eq',
 					values: [users[2].user, 'Techinician', users[1].user],
-					displayValues: [getFullnameFromUser(users[2]), 'Techinician', getFullnameFromUser(users[1])].join(',')
+					displayValues: [getFullnameFromUser(users[2]), 'Techinician', getFullnameFromUser(users[1])].join(', ')
 				}
 			}
 
 			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
 		it('should work for jobsAndUsers in a module', () => {
@@ -151,12 +155,12 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator: 'eq',
 					values: ['Electrician', users[4].user, users[2].user],
-					displayValues: ['Electrician', getFullnameFromUser(users[4]), getFullnameFromUser(users[2])].join(',')
+					displayValues: ['Electrician', getFullnameFromUser(users[4]), getFullnameFromUser(users[2])].join(', ')
 				}
 			}
 
 			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
 		it('should work for type owner', () => {
@@ -166,12 +170,12 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator: 'eq',
 					values: [users[0].user, 'Architect', users[3].user],
-					displayValues: [getFullnameFromUser(users[0]), 'Architect', getFullnameFromUser(users[3])].join(',')
+					displayValues: [getFullnameFromUser(users[0]), 'Architect', getFullnameFromUser(users[3])].join(', ')
 				}
 			}
 
 			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
 		it('should work for type risks', () => {
@@ -185,7 +189,7 @@ describe('Tickets: filters', () => {
 			}
 
 			const serialized = serializeFilter(template, risks, filter);            
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
 		it('should work with general date', () => {
@@ -200,7 +204,7 @@ describe('Tickets: filters', () => {
 			};
 
 			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
 		it('should work with general past date', () => {
@@ -215,7 +219,7 @@ describe('Tickets: filters', () => {
 			};
 
 			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
 		it('should work with create at type', () => {
@@ -230,7 +234,7 @@ describe('Tickets: filters', () => {
 			};
 
 			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
 		it('should work with range in type', () => {
@@ -263,7 +267,7 @@ describe('Tickets: filters', () => {
 			};
 			
 			let serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 
 			filter = {
 				module: 'sequencing',
@@ -277,8 +281,7 @@ describe('Tickets: filters', () => {
 			};
 			
 			serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
-
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
 		it('should work with boolean values', () => {
@@ -293,8 +296,7 @@ describe('Tickets: filters', () => {
 			}
 			
 			let serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
-
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 
 			filter = {
 				property: 'boolean',
@@ -307,7 +309,7 @@ describe('Tickets: filters', () => {
 			}
 			
 			serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
 		it('should work with number values', () => {
@@ -322,23 +324,51 @@ describe('Tickets: filters', () => {
 			};
 
 			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
-
 
 		it('should work with tickecode values', () => {
 			const filter: TicketFilter = {
-				"property":"Ticket ID",
-				"type":"ticketCode",
-				"filter":{
-					"operator":"ss",
-					"values":["10"],
-					"displayValues":"10"
+				property: 'Ticket ID',
+				type: 'ticketCode',
+				filter:{
+					operator: 'ss',
+					values: ['10'],
+					displayValues: '10'
 				}
 			};
 
 			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+		});
+
+		it('should work with title values', () => {
+			const filter: TicketFilter = {
+				property:"Ticket title",
+				type:"title",
+				filter:{"operator":"ss",
+					values:["leo"],
+					displayValues:"leo"
+				}
+			}
+	
+			const serialized = serializeFilter(template, risks, filter);
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+		});
+
+		it('should work with general text values', () => {
+			const filter: TicketFilter = {
+				property: 'long text',
+				type: 'longText',
+				filter: {
+					operator: 'is',
+					values: ['asdasd'],
+					displayValues: 'asdasd'
+				}
+			};
+	
+			const serialized = serializeFilter(template, risks, filter);
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 	})
 });
