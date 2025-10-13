@@ -44,6 +44,16 @@ export const PrimaryButton = styled(BaseCircleButton)`
 	}
 `;
 
+export const ErrorButton = styled(BaseCircleButton)`
+	color: ${({ theme }) => theme.palette.error.dark};
+	background-color: ${({ theme }) => theme.palette.error.lightest};
+
+	&:hover, &.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.error.light};
+	}
+`;
+
+
 export const SecondaryButton = styled(BaseCircleButton)`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 

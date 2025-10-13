@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FormattedMessage } from 'react-intl';
-import { ErrorOption } from './alreadyUsedName.styles';
+const migrateUsersDetails = require('./migrateUserDetailsToFrontegg');
 
-export const AlreadyUsedName = () => (
-	<ErrorOption>
-		<FormattedMessage
-			id="uploads.destination.name.error.alreadyExists"
-			defaultMessage="This name is already used within this project"
-		/>
-	</ErrorOption>
-);
+const scripts = [
+	{ script: migrateUsersDetails, desc: 'Copy user details to Frontegg' },
+];
+
+module.exports = scripts;
