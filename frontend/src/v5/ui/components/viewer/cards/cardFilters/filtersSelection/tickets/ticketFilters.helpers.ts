@@ -353,7 +353,13 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 		filter.displayValues = arrToDisplayValue(filter.values.map((v) => v ? TRUE_LABEL : FALSE_LABEL));
 	}
 
+	if (type === 'number') {
+		filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
+		filter.displayValues = arrToDisplayValue(filter.values);
+	}
 
+
+	
 	const fullFilter: TicketFilter = { property, type, filter };
 
 	if (module) {

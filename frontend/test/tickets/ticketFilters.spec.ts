@@ -310,34 +310,35 @@ describe('Tickets: filters', () => {
 			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
 		});
 
-		// it('should work with number values', () => {
-		// 	let filter: TicketFilter ={
-		// 		property: 'boolean',
-		// 		type: 'boolean',
-		// 		filter:  {
-		// 			operator: 'eq',
-		// 			values: [true],
-		// 			displayValues: 'True'
-		// 		}
-		// 	}
-			
-		// 	let serialized = serializeFilter(template, risks, filter);
-		// 	expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+		it('should work with number values', () => {
+			const filter: TicketFilter = {
+				property: 'number',
+				type: 'number',
+				filter: {
+					operator: 'eq',
+					values: [1,3,98,2],
+					displayValues: '1, 3, 98, 2'
+				}
+			};
+
+			const serialized = serializeFilter(template, risks, filter);
+			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+		});
 
 
-		// 	filter = {
-		// 		property: 'boolean',
-		// 		type: 'boolean',
-		// 		filter:  {
+		// it('should work with tickecode values', () => {
+		// 	const filter: TicketFilter = {
+		// 		property: 'number',
+		// 		type: 'number',
+		// 		filter: {
 		// 			operator: 'eq',
-		// 			values: [false],
-		// 			displayValues: 'False'
+		// 			values: [1,3,98,2],
+		// 			displayValues: '1, 3, 98, 2'
 		// 		}
-		// 	}
-			
-		// 	serialized = serializeFilter(template, risks, filter);
+		// 	};
+
+		// 	const serialized = serializeFilter(template, risks, filter);
 		// 	expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
 		// });
-
 	})
 });
