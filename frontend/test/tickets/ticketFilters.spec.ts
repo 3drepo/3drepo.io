@@ -326,19 +326,19 @@ describe('Tickets: filters', () => {
 		});
 
 
-		// it('should work with tickecode values', () => {
-		// 	const filter: TicketFilter = {
-		// 		property: 'number',
-		// 		type: 'number',
-		// 		filter: {
-		// 			operator: 'eq',
-		// 			values: [1,3,98,2],
-		// 			displayValues: '1, 3, 98, 2'
-		// 		}
-		// 	};
+		it('should work with tickecode values', () => {
+			const filter: TicketFilter = {
+				"property":"Ticket ID",
+				"type":"ticketCode",
+				"filter":{
+					"operator":"ss",
+					"values":["10"],
+					"displayValues":"10"
+				}
+			};
 
-		// 	const serialized = serializeFilter(template, risks, filter);
-		// 	expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
-		// });
+			const serialized = serializeFilter(template, risks, filter);
+			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+		});
 	})
 });

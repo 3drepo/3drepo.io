@@ -233,7 +233,7 @@ export const getTemplateFilter = (templateCode: string): TicketFilter => ({
 
 const escapeString = (str: string) => str.replaceAll('.', '\\.').replaceAll(',', '\\,');
 
-// const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',');
+const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',');
 
 const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
 	propOrModule?.find((p) => p.name === name);
@@ -358,8 +358,11 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 		filter.displayValues = arrToDisplayValue(filter.values);
 	}
 
+	if (isTextType(type)) {
+		filter.values = serialisedValue.split(',').map((v) => unescapeString(v));
+		filter.displayValues = arrToDisplayValue(filter.values);
+	}
 
-	
 	const fullFilter: TicketFilter = { property, type, filter };
 
 	if (module) {
