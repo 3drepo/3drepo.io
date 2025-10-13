@@ -18,7 +18,7 @@
 import { FormattedMessage } from 'react-intl';
 import { TicketFilterOperator, TicketFilterValue, TicketFilterType, BaseFilter, TicketFilter } from '../cardFilters.types';
 import { amendDateUpperBounds, floorToMinute, getDefaultOperator, getFilterFormTitle, isDateType, isRangeOperator } from '../cardFilters.helpers';
-import { getValidOperators, getOptionFromValue, formatDateRange, valueToDisplayDate } from '../filtersSelection/tickets/ticketFilters.helpers';
+import { getValidOperators, getOptionFromValue, formatDateRange, valueToDisplayDate, arrToDisplayValue } from '../filtersSelection/tickets/ticketFilters.helpers';
 import { Container, ButtonsContainer, Button, TitleContainer } from './filterForm.styles';
 import { FormProvider, useForm } from 'react-hook-form';
 import { isBoolean, isEmpty } from 'lodash';
@@ -94,7 +94,7 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel,
 			}
 		}
 		const isRange = isRangeOperator(filledForm.operator);
-		const displayValues = newValues.map((newVal) => {
+		const displayValues = arrToDisplayValue(newValues.map((newVal) => {
 			const option = getOptionFromValue(newVal, filledForm.selectOptions);
 			if (isDateType(type)) return (isRange ? formatDateRange(newVal) : valueToDisplayDate(newVal));
 			if (type === 'boolean' && isBoolean(newValues[0])) return newValues[0] ? TRUE_LABEL : FALSE_LABEL; 
@@ -103,7 +103,8 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel,
 				return `[${a}, ${b}]`;
 			}
 			return option?.displayValue ?? newVal;
-		}).join(', ');
+		}));
+		
 		onSubmit({ module, property, type, filter: { operator: filledForm.operator, values: newValues, displayValues } });
 	});
 

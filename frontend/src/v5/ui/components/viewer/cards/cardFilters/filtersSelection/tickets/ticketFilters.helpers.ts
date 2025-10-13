@@ -23,7 +23,7 @@ import NumberIcon from '@assets/icons/filters/number.svg';
 import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
-import { isString, sortBy, uniqBy, compact, uniq, parseInt, chunk } from 'lodash';
+import { isString, sortBy, uniqBy, compact, uniq, parseInt, chunk, isBoolean } from 'lodash';
 import { TicketFilterType, TicketFilter, TicketFilterOperator, TicketFilterOperatorEnum, BaseFilter, ValueType } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
@@ -34,6 +34,7 @@ import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types'
 import { IUser } from '@/v5/store/users/users.redux';
 import { toDictionary } from '@/v5/helpers/toDictionary.helper';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
+import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -54,12 +55,12 @@ export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'number': NumberIcon,
 };
 
+export const arrToDisplayValue = (arr: any[]) => arr.join(', ');
 export const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
 export const formatDateRange = ([from, to]) => formatMessage(
 	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
 	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
 );
-
 
 
 export const DEFAULT_FILTERS: TicketFilter[] = [
@@ -257,7 +258,13 @@ export const serializeFilter = (template: ITemplate, riskCategories: string[], t
 
 	let serializedValues:string = undefined;
 	if (values) {
-		serializedValues = values.map((v) => isString(v) ? escapeString(v) : v).join(',');
+		const serializeValue = (value) => {
+			if (isString(value)) return escapeString(value);
+			if (isBoolean(value)) return +value;
+			return value;
+		};
+
+		serializedValues = values.map(serializeValue).join(',');
 		
 		if (['oneOf', 'manyOf', 'status'].includes(ticketFilter.type)) {
 			let options = findPropertyDefinitionByFilter(ticketFilter, template).values;
@@ -273,7 +280,6 @@ export const serializeFilter = (template: ITemplate, riskCategories: string[], t
 		}
 
 		serialized.push(serializedValues);
-
 	}
 
 	return serialized.join(':');
@@ -329,18 +335,24 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 			const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
 			filter.values = indexes.map((i) => options[i]);
 		}
-	} else {
-		if (isDateType(type)) {
-			filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
-						
-			if (filter.operator === 'rng' || filter.operator === 'nrng') {
-				filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
-				filter.displayValues = filter.values.map(formatDateRange).join(', ');
-			} else {
-				filter.displayValues = filter.values.map(valueToDisplayDate).join(', ');
-			}
+	}
+	
+	if (isDateType(type)) {
+		filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
+					
+		if (filter.operator === 'rng' || filter.operator === 'nrng') {
+			filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
+			filter.displayValues = arrToDisplayValue(filter.values.map(formatDateRange));
+		} else {
+			filter.displayValues = arrToDisplayValue(filter.values.map(valueToDisplayDate));
 		}
 	}
+
+	if (type === 'boolean') {
+		filter.values = serialisedValue.split(',').map((v) => v !== '0' );
+		filter.displayValues = arrToDisplayValue(filter.values.map((v) => v ? TRUE_LABEL : FALSE_LABEL));
+	}
+
 
 	const fullFilter: TicketFilter = { property, type, filter };
 

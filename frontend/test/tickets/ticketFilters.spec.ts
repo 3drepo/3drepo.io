@@ -281,8 +281,63 @@ describe('Tickets: filters', () => {
 
 		});
 
+		it('should work with boolean values', () => {
+			let filter: TicketFilter ={
+				property: 'boolean',
+				type: 'boolean',
+				filter:  {
+					operator: 'eq',
+					values: [true],
+					displayValues: 'True'
+				}
+			}
+			
+			let serialized = serializeFilter(template, risks, filter);
+			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
 
 
+			filter = {
+				property: 'boolean',
+				type: 'boolean',
+				filter:  {
+					operator: 'eq',
+					values: [false],
+					displayValues: 'False'
+				}
+			}
+			
+			serialized = serializeFilter(template, risks, filter);
+			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+		});
+
+		// it('should work with number values', () => {
+		// 	let filter: TicketFilter ={
+		// 		property: 'boolean',
+		// 		type: 'boolean',
+		// 		filter:  {
+		// 			operator: 'eq',
+		// 			values: [true],
+		// 			displayValues: 'True'
+		// 		}
+		// 	}
+			
+		// 	let serialized = serializeFilter(template, risks, filter);
+		// 	expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+
+
+		// 	filter = {
+		// 		property: 'boolean',
+		// 		type: 'boolean',
+		// 		filter:  {
+		// 			operator: 'eq',
+		// 			values: [false],
+		// 			displayValues: 'False'
+		// 		}
+		// 	}
+			
+		// 	serialized = serializeFilter(template, risks, filter);
+		// 	expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+		// });
 
 	})
 });
