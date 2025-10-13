@@ -44,7 +44,9 @@ module.exports = (options) => ({
 				{ from: 'unity/default/unity/Build/unity.loader.js', to: '../unity/Build/UnityLoader.js' },
 				{ from: 'assets/manifest-icons/*', to: '../' },
 				{ context: '../resources', from: '**/*.html', to: '../templates' },
-				{ context: '../resources', from: '**/*.csv', to: '../templates' }
+				{ context: '../resources', from: '**/*.csv', to: '../templates' },
+				//Apryse/PDFTron static assets
+				{ from: 'node_modules/@pdftron/webviewer/public/', to: '../lib/webviewer/'}
 			]
 		}),
 		new HTMLWebpackPlugin({

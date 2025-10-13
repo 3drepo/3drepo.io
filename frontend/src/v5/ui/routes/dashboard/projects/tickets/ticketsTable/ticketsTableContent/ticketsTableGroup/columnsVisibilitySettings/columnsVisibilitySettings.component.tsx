@@ -18,35 +18,30 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { getPropertyLabel, INITIAL_COLUMNS } from '../../../ticketsTable.helper';
+import { getPropertyLabel } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
-import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
+import { MenuItem, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
-import { useContext } from 'react';
+import { useContext, useEffect } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Divider } from '@mui/material';
 import { TextOverflow } from '@controls/textOverflow';
-import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
+import { SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { TableIconContainer } from '@controls/tableIcon/tableIcon.styles';
 
 const List = () => {
-	const { sortedItems: tickets } = useContext(SortedTableContext);
 	const { filteredItems, query } = useContext(SearchContext);
 	const { visibleSortedColumnsNames, hideColumn, showColumn, isVisible } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
-	const { fetchColumn, groupBy } = useContext(TicketsTableContext);
-
-	const onShowColumn = (name) => {
-		if (!INITIAL_COLUMNS.includes(name)) {
-			fetchColumn(name, tickets);
-		}
-		showColumn(name);
-	};
+	const { groupBy } = useContext(TicketsTableContext);
 
 	const groupBySelected = () => {
 		const groups = { selected: [], unselected: [] };
@@ -93,7 +88,7 @@ const List = () => {
 			{groupedItems.unselected.map((columnName) => (
 				<MenuItem key={columnName}>
 					<Checkbox
-						onChange={() => onShowColumn(columnName)}
+						onChange={() => showColumn(columnName)}
 						value={false}
 						label={<TextOverflow>{getPropertyLabel(columnName)}</TextOverflow>}
 					/>
@@ -105,17 +100,26 @@ const List = () => {
 export const ColumnsVisibilitySettings = () => {
 	const { getAllColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const columnsNames = getAllColumnsNames();
+	const { sortedItems: tickets, sortingColumn, refreshSorting } = useContext(SortedTableContext as React.Context<SortedTableType<ITicket>>);
 
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getPropertyLabel(col), query))
 	);
+	const ticketsIds = tickets.map(({ _id }) => _id);
+
+	const orderingColumnPropertiesFetched = TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, sortingColumn);
+
+	useEffect(() => {
+		if (!orderingColumnPropertiesFetched) return;
+		refreshSorting();
+	}, [orderingColumnPropertiesFetched]);
 
 	return (
 		<ActionMenu
 			TriggerButton={(
-				<IconContainer>
+				<TableIconContainer>
 					<GearIcon />
-				</IconContainer>
+				</TableIconContainer>
 			)}
 			PopoverProps={{
 				transformOrigin: {

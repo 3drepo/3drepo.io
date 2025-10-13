@@ -14,16 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRouteMatch } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
-import { discardSlash, discardUrlComponent } from '@/v5/helpers/url.helper';
 import { Container, Link } from '../navigationTabs.styles';
 import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
 export const ProjectNavigation = (): JSX.Element => {
-	let { url } = useRouteMatch();
-	url = discardSlash(url);
 	const { linkLabel, shouldRenderLink } = useKanbanNavigationData();
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const permissionsOnUIDisabled = TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();
@@ -31,14 +27,14 @@ export const ProjectNavigation = (): JSX.Element => {
 
 	return (
 		<Container>
-			<Link to={`${url}/t/federations`}><FormattedMessage id="projectNavigation.federations" defaultMessage="Federations" /></Link>
-			<Link to={`${url}/t/containers`}><FormattedMessage id="projectNavigation.containers" defaultMessage="Containers" /></Link>
-			<Link to={`${url}/t/drawings`}><FormattedMessage id="projectNavigation.drawings" defaultMessage="Drawings" /></Link>
-			{shouldRenderLink &&  <Link to={`${url}/t/board`}>{linkLabel}</Link> }
-			<Link to={`${url}/t/tickets`}><FormattedMessage id="projectNavigation.tickets" defaultMessage="Tickets" /></Link>
-			<Link to={`${discardUrlComponent(url, 'settings')}/t/project_settings`}><FormattedMessage id="projectNavigation.settings" defaultMessage="Project settings" /></Link>
-			{hasPermissions && <Link to={`${url}/t/project_permissions`}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link> }
-			{hasPermissions && <Link to={`${url}/t/user_permissions`}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link> }
+			<Link to={'t/federations'}><FormattedMessage id="projectNavigation.federations" defaultMessage="Federations" /></Link>
+			<Link to={'t/containers'}><FormattedMessage id="projectNavigation.containers" defaultMessage="Containers" /></Link>
+			<Link to={'t/drawings'}><FormattedMessage id="projectNavigation.drawings" defaultMessage="Drawings" /></Link>
+			{shouldRenderLink &&  <Link to={'t/board'}>{linkLabel}</Link> }
+			<Link to={'t/tickets'}><FormattedMessage id="projectNavigation.tickets" defaultMessage="Tickets" /></Link>
+			<Link to={'t/project_settings'}><FormattedMessage id="projectNavigation.settings" defaultMessage="Project settings" /></Link>
+			{hasPermissions && <Link to={'t/project_permissions'}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link> }
+			{hasPermissions && <Link to={'t/user_permissions'}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link> }
 		</Container>
 	);
 };

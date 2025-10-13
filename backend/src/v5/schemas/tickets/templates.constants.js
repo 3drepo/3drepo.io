@@ -72,6 +72,8 @@ const viewGroups = createConstantMapping([
 	'colored',
 	'hidden',
 	'transformed',
+	'selected',
+	'shown',
 ]);
 
 const riskLevelsArr = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];

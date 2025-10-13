@@ -15,24 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRouteMatch } from 'react-router-dom';
+import { Outlet, useParams } from 'react-router-dom';
 
 import { LegalContent, Container } from './legalLayout.styles';
 import { LegalAppBar } from './legalAppBar/legalAppBar.component';
 import { LegalPageParams } from '@/v5/ui/routes/routes.constants';
 
-type ILegalLayout = {
-	children: any;
-};
-
-export const LegalLayout = ({ children }: ILegalLayout) => {
-	const { params: { legalPage } } = useRouteMatch<LegalPageParams>('/v5/:legalPage');
+export const LegalLayout = () => {
+	const { legalPage } = useParams<LegalPageParams>();
 	return (
 		<>
 			<LegalAppBar activePage={legalPage} />
 			<Container>
 				<LegalContent>
-					{children}
+					<Outlet />
 				</LegalContent>
 			</Container>
 		</>

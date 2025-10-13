@@ -16,38 +16,70 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { CardAction } from '../../../cardAction/cardAction.styles';
 import { useState } from 'react';
-import FunnelIcon from '@assets/icons/filters/funnel.svg';
-import { Tooltip } from '@mui/material';
+
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
 import { SearchInput, TicketsFiltersModal, TicketsFiltersModalItem } from './ticketFiltersSelection.styles';
-import { CardFilter } from '../../cardFilters.types';
+import { TicketFilter } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useTicketFiltersContext } from '../../ticketsFilters.context';
+import { PopoverOrigin, PopoverProps, Tooltip } from '@mui/material';
+import { CardAction } from '@components/viewer/cards/cardAction/cardAction.styles';
+import FunnelIcon from '@assets/icons/filters/funnel.svg';
+import { Button } from '@controls/button/button.component';
+import { FormattedMessage } from 'react-intl';
+
+const SmallTriggerButton = ({ disabled }) =>
+	(<Tooltip title={disabled ? '' : formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
+		<CardAction disabled={disabled}>
+			<FunnelIcon />
+		</CardAction>
+	</Tooltip>
+	);
+
+const FullTriggerButton = ({ disabled }) => (
+	<Button
+		startIcon={<FunnelIcon />}
+		variant="outlined"
+		color="secondary"
+		disabled={disabled}
+	>
+		<FormattedMessage id="filterSelection.AddFilter" defaultMessage="Add filter" />
+	</Button>
+
+);
+
 
 export const FilterSelection = () => {
-	const [selectedFilter, setSelectedFilter] = useState<CardFilter>(null);
-	const unusedFilters = TicketsCardHooksSelectors.selectAvailableTemplatesFilters();
+	const [selectedFilter, setSelectedFilter] = useState<TicketFilter>(null);
+	const { choosablefilters: unusedFilters, displayMode, setFilter } = useTicketFiltersContext();
 	const showFiltersList = !selectedFilter?.property;
 	const disabled = !unusedFilters.length;
 
 	const clearFilter = () => setSelectedFilter(null);
+	
+	const anchorOrigin: PopoverOrigin = {
+		vertical: 'bottom',
+		horizontal: 'right',
+	};
+			
+	const transformOrigin: PopoverOrigin = {
+		vertical: 'top',
+		horizontal: 'right',
+	};
+
+	const popoverProps: Partial<PopoverProps> = { anchorOrigin, transformOrigin, marginThreshold: 20 };
+	const TriggerButton = displayMode === 'card' ? SmallTriggerButton : FullTriggerButton;
 
 	return (
 		<CardFilterActionMenu
-			TriggerButton={(
-				<Tooltip title={disabled ? '' : formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
-					<CardAction disabled={disabled}>
-						<FunnelIcon />
-					</CardAction>
-				</Tooltip>
-			)}
+			TriggerButton={<TriggerButton disabled={disabled} />}
 			onClose={clearFilter}
 			disabled={disabled}
+			PopoverProps={popoverProps}
+			$displayMode={displayMode}
 		>
 			<SearchContextComponent items={unusedFilters} fieldsToFilter={['property', 'module']}>
 				<TicketsFiltersModal $visibleIndex={showFiltersList ? 0 : 1}>
@@ -63,7 +95,7 @@ export const FilterSelection = () => {
 					<TicketsFiltersModalItem $visible={!showFiltersList}>
 						<FilterForm
 							{...(selectedFilter || {} as any)}
-							onSubmit={TicketsCardActionsDispatchers.upsertFilter}
+							onSubmit={setFilter}
 							onCancel={clearFilter}
 						/>
 					</TicketsFiltersModalItem>

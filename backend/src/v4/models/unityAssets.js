@@ -20,27 +20,20 @@
 const History = require("./history");
 const middlewares = require("../middlewares/middlewares");
 const utils = require("../utils");
-const { getRefNodes } = require("./ref");
-const C = require("../constants");
 const db = require("../handler/db");
 const {v5Path} = require("../../interop");
 const responseCodes = require("../response_codes");
 const FilesManager = require(`${v5Path}/services/filesManager`);
+const { getSubModels } = require("./ref");
 
 const UnityAssets = {};
 
-async function getAssetListFromRef(ref, username, legacy) {
-	const granted = await middlewares.hasReadAccessToModelHelper(username, ref.owner, ref.project);
-
+async function getAssetListForSubModel(teamspace, container, username) {
+	const granted = await middlewares.hasReadAccessToModelHelper(username, teamspace, container);
 	if(granted) {
-		const revId = utils.uuidToString(ref._rid);
-
-		const revInfo =  revId === C.MASTER_BRANCH ?
-			await History.findLatest(ref.owner, ref.project, {_id: 1}) :
-			{_id : ref._rid};
-
+		const revInfo = await History.findLatest(teamspace, container, {_id: 1});
 		if (revInfo) {
-			return await  getAssetListEntry(ref.owner, ref.project, revInfo._id, legacy);
+			return await getAssetListEntry(teamspace, container, revInfo._id);
 		}
 	}
 }
@@ -49,34 +42,30 @@ async function getAssetListFromRef(ref, username, legacy) {
 // are not available. If the legacy flag is set, the method will only return
 // AssetBundles.
 
-async function getAssetListEntry(account, model, revId, legacy) {
+async function getAssetListEntry(account, model, revId) {
 	const assets = await db.findOne(account, model + ".stash.repobundles", {_id: revId});
-	if(assets && !legacy) {
+	if(assets) {
 		return Promise.resolve(assets);
 	}else {
 		return db.findOne(account, model + ".stash.unity3d", {_id: revId});
 	}
 }
 
-UnityAssets.getAssetList = function(account, model, branch, rev, username, legacy) {
-	return History.getHistory(account, model , branch, rev).then((history) => {
-		return getRefNodes(account, model, branch, rev).then((subModelRefs) => {
-			const fetchPromise = [];
-			if(subModelRefs.length) {
-				// This is a federation, get asset lists from subModels and merge them
-				subModelRefs.forEach((ref) => {
-					fetchPromise.push(getAssetListFromRef(ref, username, legacy));
-				});
-			} else {
-				// Not a federation, get it's own assetList.
-				fetchPromise.push(getAssetListEntry(account, model, history._id, legacy));
-			}
-
-			return Promise.all(fetchPromise).then((assetLists) => {
-				return {models: assetLists.filter((list) => list)};
-			});
-
+UnityAssets.getAssetList = async function(account, model, branch, rev, username) {
+	const subModels = await getSubModels(account, model);
+	const fetchPromise = [];
+	if(subModels.length) { // This is implicitly a federation
+		// This is a federation, get asset lists from subModels and merge them
+		subModels.forEach((container) => {
+			fetchPromise.push(getAssetListForSubModel(account, container.model, username));
 		});
+	} else {
+		// Not a federation, get it's own assetList.
+		const history = await History.getHistory(account, model, branch, rev);
+		fetchPromise.push(getAssetListEntry(account, model, history._id));
+	}
+	return Promise.all(fetchPromise).then((assetLists) => {
+		return {models: assetLists.filter((list) => list)};
 	});
 };
 

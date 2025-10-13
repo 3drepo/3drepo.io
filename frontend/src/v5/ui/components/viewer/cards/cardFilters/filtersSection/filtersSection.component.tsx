@@ -15,26 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardFilter } from '../cardFilters.types';
+import { TicketFilter } from '../cardFilters.types';
 import { FilterChip } from '../filterChip/filterChip.component';
 import { Section } from './filtersSection.styles';
 import { FilterForm } from '../filterForm/filterForm.component';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { CardFilterActionMenu } from '../filterForm/filterForm.styles';
 import { useState } from 'react';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { isEqual } from 'lodash';
+import { useTicketFiltersContext } from '../ticketsFilters.context';
 
 type FiltersSectionProps = {
-	filters: CardFilter[];
+	filters: TicketFilter[];
 };
 export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 	const [selectedFilter, setSelectedFilter] = useState({});
+	const { deleteFilter, setFilter, displayMode } = useTicketFiltersContext();
 
 	return (
 		<Section>
 			{filters.map((filter) => (
 				<CardFilterActionMenu
+					$displayMode={displayMode}
 					key={Object.keys(filter).join()}
 					onOpen={() => setSelectedFilter(filter)}
 					onClose={() => setSelectedFilter({})}
@@ -42,7 +44,7 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 						<FilterChip
 							{...filter as any}
 							selected={isEqual(selectedFilter, filter)}
-							onDelete={() => TicketsCardActionsDispatchers.deleteFilter(filter)}
+							onDelete={() => deleteFilter(filter)}
 						/>
 					)}
 				>
@@ -51,7 +53,8 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 							<FilterForm
 								{...filter as any}
 								onCancel={close}
-								onSubmit={TicketsCardActionsDispatchers.upsertFilter}
+								onSubmit={setFilter}
+								cancelButton
 							/>
 						)}
 					</ActionMenuContext.Consumer>
