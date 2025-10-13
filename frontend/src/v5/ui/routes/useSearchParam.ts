@@ -18,7 +18,7 @@
 import { useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-type ParamTransformer<T> = {
+export type ParamTransformer<T> = {
 	from: (param: string) => T,
 	to: (param: T) => string,
 };

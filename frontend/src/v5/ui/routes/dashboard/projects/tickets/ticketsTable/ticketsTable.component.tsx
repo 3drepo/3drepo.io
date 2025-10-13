@@ -16,7 +16,7 @@
  */
 
 import { ContainersActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams, generatePath, useNavigate } from 'react-router-dom';
@@ -29,7 +29,7 @@ import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/servic
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
-import { SearchParamTransformer, Transformers, useSearchParam } from '../../../../useSearchParam';
+import { ParamTransformer, Transformers, useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
@@ -44,19 +44,19 @@ import { ResizableTableContext, ResizableTableContextComponent } from '@controls
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableContext, TicketsTableContextComponent } from './ticketsTableContext/ticketsTableContext';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { selectRiskCategories, selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
+import { selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { useWatchPropertyChange } from './useWatchPropertyChange';
 import { getAvailableColumnsForTemplate } from './ticketsTableContext/ticketsTableContext.helpers';
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { apiFetchFilteredTickets } from '@/v5/store/tickets/card/ticketsCard.sagas';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
-import { selectCurrentTeamspaceUsers } from '@/v5/store/users/users.selectors';
+import { IUser } from '@/v5/store/users/users.redux';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -68,15 +68,27 @@ type TicketsTableProps = {
 	setTicketValue: SetTicketValue,
 };
 
-const jsonTransformer: SearchParamTransformer<TicketFilter[]> =  {
+const filtersTransformer = (selectedTemplate: ITemplate, users: IUser[], riskCategories: string[]): ParamTransformer<TicketFilter[]> => ({
 	from: (param) => {
 		if (!param) return [];
-		return JSON.parse(decodeURIComponent(param));
+
+		try {
+			return JSON.parse(param)
+				.map((v) => deserializeFilter(selectedTemplate, users, riskCategories, v)).filter(Boolean);
+		} catch (e) {
+			console.error('Error transforming filters from url to ticket filters');
+			console.error(e);
+			return [];
+		}
 	},
 	to: (filters: TicketFilter[]) => {
-		return encodeURIComponent(JSON.stringify(filters));
-	}
-}
+		const param = JSON.stringify(
+			filters.map((v) => serializeFilter(selectedTemplate, riskCategories, v)),
+		);
+
+		return param;
+	},
+});
 
 export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
 	const navigate = useNavigate();
@@ -93,8 +105,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const models = useSelectedModels();
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 
-	const [filters, setFilters] = useSearchParam<TicketFilter[]>('filters', jsonTransformer, true);
-
+	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
+	const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
 	const setTemplate = useCallback((newTemplate) => {
 		setTicketValue();
 		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
@@ -111,6 +123,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
+
+	const [filters, setFilters] = useSearchParam<TicketFilter[]>('filters', filtersTransformer(selectedTemplate, users, riskCategories), true);
 
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -220,20 +234,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			setFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
 		}
 	}, [selectedTemplate, JSON.stringify(filters)]);
-	
-	const serializeFilters = () => {
-		const users = selectCurrentTeamspaceUsers(getState());
-		const riskCategories = selectRiskCategories(getState());
-
-		console.log(JSON.stringify(filters));
-
-		const serialized = filters.map(serializeFilter.bind(undefined, selectedTemplate, riskCategories));
-
-		console.log(JSON.stringify(serialized));
-		console.log(JSON.stringify(serialized.map(deserializeFilter.bind(undefined, selectedTemplate, users, riskCategories))));
-		// console.log('filters=' + encodeURIComponent(JSON.stringify(filters.map((f) => serializeFilter(f, selectedTemplate)))));
-		// console.log(JSON.stringify(filters));
-	};
 
 	return (
 		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters}>
@@ -253,7 +253,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 						</SelectorsContainer>
 					</FlexContainer>
 					<FlexContainer>
-						<button onClick={serializeFilters}> Serialize Filters</button>
 						<FilterSelection />
 						{!selectedTemplate.deprecated
 							&&

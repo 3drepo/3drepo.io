@@ -305,69 +305,69 @@ export const splitByNonEscaped = (str: string, char) =>  {
 	return res;
 };
 
-export const deserializeFilter = (template:ITemplate, users: IUser[], riskCategories: string[], str: string): any => {
-	const userByUserName = toDictionary(users, (u) => u.user);
-	const splitPointField = str.indexOf(':');
-	const splitPointFilter = str.indexOf(':', splitPointField + 1);
+export const deserializeFilter = (template:ITemplate, users: IUser[], riskCategories: string[], str: string): TicketFilter => {
+	try {
+		const userByUserName = toDictionary(users, (u) => u.user);
+		const splitPointField = str.indexOf(':');
+		const splitPointFilter = str.indexOf(':', splitPointField + 1);
 
-	const serialisedFields = str.substring(0, splitPointField);
-	const serializedOperator = str.substring(splitPointField + 1, splitPointFilter);
+		const serialisedFields = str.substring(0, splitPointField);
+		const serializedOperator = str.substring(splitPointField + 1, splitPointFilter);
 
-	const serialisedValue = str.substring(splitPointFilter + 1);
-	let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
+		const serialisedValue = str.substring(splitPointFilter + 1);
+		let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
 
-	const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
+		const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
 
-	let filter: BaseFilter = {
-		operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
-		values: undefined,
-	};
+		let filter: BaseFilter = {
+			operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
+			values: undefined,
+		};
 
-	if (['manyOf', 'oneOf'].includes(propertyDef?.type) || type === 'owner') {
-		if (propertyDef?.values === 'jobsAndUsers' || type === 'owner' ) {
-			filter.values = splitByNonEscaped(serialisedValue, ',');
-			filter.displayValues = arrToDisplayValue((filter.values as string[]).map((u) => {
-				if (userByUserName[u]) return getFullnameFromUser(userByUserName[u]);
-				return u;
-			}));
-		} else {
-			const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
-			const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
-			filter.values = indexes.map((i) => options[i]);
+		if (['manyOf', 'oneOf'].includes(propertyDef?.type) || type === 'owner') {
+			if (propertyDef?.values === 'jobsAndUsers' || type === 'owner' ) {
+				filter.values = splitByNonEscaped(serialisedValue, ',');
+				filter.displayValues = arrToDisplayValue((filter.values as string[]).map((u) => {
+					if (userByUserName[u]) return getFullnameFromUser(userByUserName[u]);
+					return u;
+				}));
+			} else {
+				const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
+				const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
+				filter.values = indexes.map((i) => options[i]);
+			}
 		}
-	}
 	
-	if (isDateType(type)) {
-		filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
+		if (isDateType(type)) {
+			filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
 					
-		if (filter.operator === 'rng' || filter.operator === 'nrng') {
-			filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
-			filter.displayValues = arrToDisplayValue(filter.values.map(formatDateRange));
-		} else {
-			filter.displayValues = arrToDisplayValue(filter.values.map(valueToDisplayDate));
+			if (filter.operator === 'rng' || filter.operator === 'nrng') {
+				filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
+				filter.displayValues = arrToDisplayValue(filter.values.map(formatDateRange));
+			} else {
+				filter.displayValues = arrToDisplayValue(filter.values.map(valueToDisplayDate));
+			}
 		}
+
+		if (type === 'boolean') {
+			filter.values = serialisedValue.split(',').map((v) => v !== '0' );
+			filter.displayValues = arrToDisplayValue(filter.values.map((v) => v ? TRUE_LABEL : FALSE_LABEL));
+		}
+
+		if (type === 'number') {
+			filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
+			filter.displayValues = arrToDisplayValue(filter.values);
+		}
+
+		if (isTextType(type)) {
+			filter.values = serialisedValue.split(',').map((v) => unescapeString(v));
+			filter.displayValues = arrToDisplayValue(filter.values);
+		}
+
+		return { module, property, type, filter };
+	} catch (e) {
+		console.error('There was an error trying to deserialize the filter:');
+		console.error(e);
+		return undefined;
 	}
-
-	if (type === 'boolean') {
-		filter.values = serialisedValue.split(',').map((v) => v !== '0' );
-		filter.displayValues = arrToDisplayValue(filter.values.map((v) => v ? TRUE_LABEL : FALSE_LABEL));
-	}
-
-	if (type === 'number') {
-		filter.values = serialisedValue.split(',').map((v) => parseInt(v, 10));
-		filter.displayValues = arrToDisplayValue(filter.values);
-	}
-
-	if (isTextType(type)) {
-		filter.values = serialisedValue.split(',').map((v) => unescapeString(v));
-		filter.displayValues = arrToDisplayValue(filter.values);
-	}
-
-	const fullFilter: TicketFilter = { property, type, filter };
-
-	if (module) {
-		fullFilter.module = module;
-	}
-
-	return fullFilter;
 };

@@ -120,6 +120,7 @@ describe('Tickets: filters', () => {
 		// Containers
 		it('should work for property of type manyOf', () => {
 			const filter:TicketFilter = {
+				module: '',
 				type:'manyOf',
 				property: 'Colours',
 				filter: {
@@ -136,6 +137,7 @@ describe('Tickets: filters', () => {
 			const filter: TicketFilter = {
 				type:'manyOf',
 				property: 'Assignees',
+				module: '',
 				filter: {
 					operator: 'eq',
 					values: [users[2].user, 'Techinician', users[1].user],
@@ -180,6 +182,7 @@ describe('Tickets: filters', () => {
 
 		it('should work for type risks', () => {
 			const filter: TicketFilter = {
+				module: '',
 				type: 'oneOf',
 				property: 'Risky risks',
 				filter: {
@@ -194,6 +197,7 @@ describe('Tickets: filters', () => {
 
 		it('should work with general date', () => {
 			const filter: TicketFilter = {
+				module: '',
 				property: 'Expiration',
 				type: 'date',
 				filter: {
@@ -209,6 +213,7 @@ describe('Tickets: filters', () => {
 
 		it('should work with general past date', () => {
 			const filter: TicketFilter = {
+				module: '',
 				property: 'Birthday',
 				type: 'pastDate',
 				filter: {
@@ -224,6 +229,7 @@ describe('Tickets: filters', () => {
 
 		it('should work with create at type', () => {
 			const filter: TicketFilter = {
+				module: '',
 				property: 'Created at',
 				type: 'createdAt',
 				filter: {
@@ -239,6 +245,7 @@ describe('Tickets: filters', () => {
 
 		it('should work with range in type', () => {
 			const filter: TicketFilter ={
+				module: '',
 				property:'Expiration',
 				type:'date',
 				filter:{
@@ -286,6 +293,7 @@ describe('Tickets: filters', () => {
 
 		it('should work with boolean values', () => {
 			let filter: TicketFilter ={
+				module: '',
 				property: 'boolean',
 				type: 'boolean',
 				filter:  {
@@ -314,6 +322,7 @@ describe('Tickets: filters', () => {
 
 		it('should work with number values', () => {
 			const filter: TicketFilter = {
+				module: '',
 				property: 'number',
 				type: 'number',
 				filter: {
@@ -329,6 +338,7 @@ describe('Tickets: filters', () => {
 
 		it('should work with tickecode values', () => {
 			const filter: TicketFilter = {
+				module: '',
 				property: 'Ticket ID',
 				type: 'ticketCode',
 				filter:{
@@ -344,6 +354,7 @@ describe('Tickets: filters', () => {
 
 		it('should work with title values', () => {
 			const filter: TicketFilter = {
+				module: '',
 				property:"Ticket title",
 				type:"title",
 				filter:{"operator":"ss",
@@ -358,6 +369,7 @@ describe('Tickets: filters', () => {
 
 		it('should work with general text values', () => {
 			const filter: TicketFilter = {
+				module: '',
 				property: 'long text',
 				type: 'longText',
 				filter: {
