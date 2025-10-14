@@ -60,7 +60,6 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		return subscribe(['movingColumn'], onMovingColumnChange);
 	}, [edgeScrolling]);
 
-
 	if (!templateWasFetched) {
 		return (
 			<EmptyPageView>

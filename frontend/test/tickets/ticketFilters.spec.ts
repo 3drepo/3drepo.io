@@ -305,7 +305,7 @@ describe('Tickets: filters', () => {
 			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
-		it('should work with general past date', () => {
+		it('should work with past date', () => {
 			const filter: TicketFilter = {
 				module: '',
 				property: 'Birthday',
@@ -506,7 +506,6 @@ describe('Tickets: filters', () => {
 			}
 
 			const serialized = serializeFilter(template, risks, filter);
-			console.log(JSON.stringify({serialized}));
 			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
@@ -525,7 +524,7 @@ describe('Tickets: filters', () => {
 		});
 
 		it('should throw an error when deserializing if a property doesnt exist in the template', () => {
-				const serialized = "NonModule.Non existent:4:0,2,3";
+			const serialized = "NonModule.Non existent:4:0,2,3";
 			expect(() => deserializeFilter(template, users, risks, serialized)).toThrowError(InvalidPropertyOrTemplateError);
 		});
 

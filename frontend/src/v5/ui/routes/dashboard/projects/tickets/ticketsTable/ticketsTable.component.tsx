@@ -29,7 +29,7 @@ import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/servic
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isCommenterRole } from '@/v5/store/store.helpers';
 import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
-import { ParamTransformer, Transformers, useSearchParam } from '../../../../useSearchParam';
+import { Transformers, useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
@@ -51,12 +51,12 @@ import { getAvailableColumnsForTemplate } from './ticketsTableContext/ticketsTab
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { apiFetchFilteredTickets } from '@/v5/store/tickets/card/ticketsCard.sagas';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
-import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
-import { IUser } from '@/v5/store/users/users.redux';
+import { isEqual } from 'lodash';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -67,28 +67,6 @@ type TicketsTableProps = {
 	isNewTicketDirty: boolean,
 	setTicketValue: SetTicketValue,
 };
-
-const filtersTransformer = (selectedTemplate: ITemplate, users: IUser[], riskCategories: string[]): ParamTransformer<TicketFilter[]> => ({
-	from: (param) => {
-		if (!param) return undefined;
-
-		try {
-			return JSON.parse(param)
-				.map((v) => deserializeFilter(selectedTemplate, users, riskCategories, v)).filter(Boolean);
-		} catch (e) {
-			console.error('Error transforming filters from url to ticket filters');
-			console.error(e);
-			return [];
-		}
-	},
-	to: (filters: TicketFilter[]) => {
-		const param = JSON.stringify(
-			filters.map((v) => serializeFilter(selectedTemplate, riskCategories, v)),
-		);
-
-		return param;
-	},
-});
 
 export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
 	const navigate = useNavigate();
@@ -124,7 +102,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 
-	const [filters, setFilters] = useSearchParam<TicketFilter[]>('filters', filtersTransformer(selectedTemplate, users, riskCategories), true);
+	const [paramFilters, setParamFilters] = useSearchParam<string>('filters', undefined, true);
+	const [filters, setFilters] = useState<TicketFilter[]>();
 
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -228,19 +207,45 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			setFilteredTicketIds(newFilteredIds);
 		});
 
+	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>([]);
+
 	useEffect(() => {
 		if (!templateAlreadyFetched(selectedTemplate)) return;
-		if (!filters) {
-			setFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
-		}
-	}, [selectedTemplate, JSON.stringify(filters)]);
+		if (!!paramFilters) return;
+		setPresetFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
+	}, [JSON.stringify(selectedTemplate), paramFilters]);
 
-	const onChangeFilters = (ticketFilters) => {
-		console.log(JSON.stringify({ ticketFilters }));
-	};
+	useEffect(() => { 
+		if (!paramFilters) return;
+		if (!templateAlreadyFetched(selectedTemplate) || !riskCategories.length || !users.length) return;
+		try {
+			// Dont blank the page if the url param has the wrong format
+			const newFilters = JSON.parse(paramFilters).map((f) =>  
+				deserializeFilter(selectedTemplate, users, riskCategories, f),
+			);
+			if (isEqual(newFilters, filters)) return;
+			setPresetFilters(newFilters);
+		} catch (e) {
+			console.error('Error parsing the url filter param');
+			console.error(e);
+		}
+	}, [selectedTemplate, paramFilters, filters, users]);
+
+	useEffect(() => {
+		const defaultFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
+		if (isEqual(defaultFilters, filters)) return;
+		if (!templateAlreadyFetched(selectedTemplate)) return;
+		if (!filters.length) return;
+
+		const param = JSON.stringify(filters.map((f) => 
+			serializeFilter(selectedTemplate, riskCategories, f),
+		));
+
+		setParamFilters(param);
+	}, [filters, selectedTemplate, containerOrFederation]);
 
 	return (
-		<TicketsFiltersContextComponent onChange={onChangeFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters}>
+		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters}>
 			<TicketsTableLayout>
 				<FiltersContainer>
 					<FlexContainer>
@@ -303,10 +308,9 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	const clearTicketId = () => setTicketValue();
 
 	useEffect(() => {
-		if (containersAndFederations.includes(containerOrFederation)) return;
+		if (!containerOrFederation || containersAndFederations.includes(containerOrFederation))  return;
 		clearTicketId();
 	}, [containersAndFederations, containerOrFederation]);
-
 
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
