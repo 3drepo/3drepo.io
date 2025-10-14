@@ -18,9 +18,7 @@
 import { ITemplate } from "@/v5/store/tickets/tickets.types";
 import { getFullnameFromUser } from "@/v5/store/users/users.helpers";
 import { TicketFilter } from "@components/viewer/cards/cardFilters/cardFilters.types";
-import { deserializeFilter, serializeFilter, splitByNonEscaped } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
-import { userWithoutAvatarMockFactory } from "../users/users.fixtures";
-import { pick, times } from 'lodash';
+import { deserializeFilter, InvalidPropertyOrTemplateError, serializeFilter, splitByNonEscaped } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
 import { mockRiskCategories } from "./tickets.fixture";
 
 describe('Tickets: filters', () => {
@@ -72,6 +70,14 @@ describe('Tickets: filters', () => {
 			{
 				name: 'long text',
 				type: 'longText'
+			}, 
+			{
+				name: 'Boolean property',
+				type: 'boolean'
+			},
+			{
+				name: 'A number property',
+				type: 'number',
 			},
 			{
 				name: 'Cool text',
@@ -99,10 +105,84 @@ describe('Tickets: filters', () => {
 					}
 				]
 			},
+			{
+				type: "sequencing",
+				properties: [
+					{
+						name: 'Start Time',
+						type: 'date'
+					},
+					{
+						name: 'End Time',
+						type: 'date'
+					},
+					{
+						name: 'Sequence type',
+						type: 'oneOf',
+						values: [
+							'Draft',
+							'Normal',
+							'Detailed'
+						]
+					}
+				]
+			}
 		]
 	}
 
-	const users = times(5, () => userWithoutAvatarMockFactory());
+	const users =   [
+        {
+                "user": "quantify",
+                "firstName": "overriding",
+                "lastName": "Credit",
+                "company": "bypassing",
+                "job": "Rustic",
+                "email": "Wilma54@yahoo.com",
+                "hasAvatar": false,
+                "avatarUrl": ""
+        },
+        {
+                "user": "Sleek",
+                "firstName": "Account",
+                "lastName": "infomediaries",
+                "company": "Global",
+                "job": "Computer",
+                "email": "Rosa_Abernathy@hotmail.com",
+                "hasAvatar": false,
+                "avatarUrl": ""
+        },
+        {
+                "user": "Optional",
+                "firstName": "Supervisor",
+                "lastName": "Chicken",
+                "company": "Automated",
+                "job": "front-end",
+                "email": "Michaela_Hackett@gmail.com",
+                "hasAvatar": false,
+                "avatarUrl": ""
+        },
+        {
+                "user": "PNG",
+                "firstName": "hub",
+                "lastName": "Refined",
+                "company": "Beauty",
+                "job": "Supervisor",
+                "email": "Ray.Ziemann@gmail.com",
+                "hasAvatar": false,
+                "avatarUrl": ""
+        },
+        {
+                "user": "convergence",
+                "firstName": "copying",
+                "lastName": "hacking",
+                "company": "calculate",
+                "job": "transmitting",
+                "email": "Fern43@gmail.com",
+                "hasAvatar": false,
+                "avatarUrl": ""
+        }
+    ];
+
 	const risks = mockRiskCategories();
 
 	describe('helpers', () => {
@@ -308,7 +388,7 @@ describe('Tickets: filters', () => {
 		it('should work with boolean values', () => {
 			let filter: TicketFilter ={
 				module: '',
-				property: 'boolean',
+				property: 'Boolean property',
 				type: 'boolean',
 				filter:  {
 					operator: 'eq',
@@ -322,7 +402,7 @@ describe('Tickets: filters', () => {
 
 			filter = {
 				module: '',
-				property: 'boolean',
+				property: 'Boolean property',
 				type: 'boolean',
 				filter:  {
 					operator: 'eq',
@@ -338,7 +418,7 @@ describe('Tickets: filters', () => {
 		it('should work with number values', () => {
 			const filter: TicketFilter = {
 				module: '',
-				property: 'number',
+				property: 'A number property',
 				type: 'number',
 				filter: {
 					operator: 'eq',
@@ -426,7 +506,28 @@ describe('Tickets: filters', () => {
 			}
 
 			const serialized = serializeFilter(template, risks, filter);
+			console.log(JSON.stringify({serialized}));
 			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
+
+		it('should throw an error when serializing if a property doesnt exist in the template', () => {
+			const filter: TicketFilter = {
+				type:'manyOf',
+				property: 'Non existing',
+				module: '',
+				filter: {
+					operator: 'eq',
+					values: ['non', 'existing']
+				}
+			}
+
+			expect(() => serializeFilter(template, risks, filter)).toThrowError(InvalidPropertyOrTemplateError);
+		});
+
+		it('should throw an error when deserializing if a property doesnt exist in the template', () => {
+				const serialized = "NonModule.Non existent:4:0,2,3";
+			expect(() => deserializeFilter(template, users, risks, serialized)).toThrowError(InvalidPropertyOrTemplateError);
+		});
+
 	})
 });
