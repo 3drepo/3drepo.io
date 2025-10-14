@@ -116,12 +116,11 @@ const testGetTeamspaceMembers = () => {
 			jobToUsers.forEach(({ _id, users }) => users.forEach((user) => { userToJob[user] = _id; }));
 
 			const expectedData = [testUser, ...members].map(({ user, basicData }) => {
-				const { firstName, lastName, billing } = basicData;
+				const { firstName, lastName } = basicData;
 				const data = {
 					firstName,
 					lastName,
 					user,
-					company: billing?.billingInfo?.company,
 				};
 
 				if (userToJob[user]) {
@@ -367,7 +366,6 @@ const testGetMemberAvatar = () => {
 			['the teamspace does not exist', route(userNoAccess.apiKey, ServiceHelper.generateRandomString()), false, templates.teamspaceNotFound],
 			['the user does not have access to the teamspace', route(userNoAccess.apiKey), false, templates.teamspaceNotFound],
 			['the user requested does not have access to the teamspace', route(testUser.apiKey, userNoAccess.user), false, templates.userNotFound],
-			['the user requested does not have an avatar', route(testUser.apiKey, userNotAdmin.user), false, templates.fileNotFound],
 			['the user has an avatar (admin requested)', route(testUser.apiKey, userWithAvatar.user), true, Buffer.from(avatar)],
 			['the user has an avatar (team member requested)', route(userNotAdmin.apiKey, userWithAvatar.user), true, Buffer.from(avatar)],
 		])('', (desc, url, success, expectedData) => {

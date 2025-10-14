@@ -17,7 +17,8 @@
 
 const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
+const { generateRandomString, generateCustomStatusValues, determineTestGroup } = require('../../../helper/services');
+const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { statusTypes, statuses } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -462,9 +463,78 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.BOOLEAN,
 				unique: true,
-			}],
 
-		}, false],
+			}] }, false],
+		['property is readOnly', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.BOOLEAN,
+				readOnly: true,
+			}] }, true],
+		['property is readOnly and required', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.BOOLEAN,
+				readOnly: true,
+				required: true,
+			}] }, false],
+		['property is not readOnly but value is configured', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				value: generateRandomString(),
+			}] }, false],
+		['property is readOnly but value contains no placeholder', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				readOnly: true,
+				value: generateRandomString(),
+			}] }, true],
+		['property is readOnly but type is not supported', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.DATE,
+				readOnly: true,
+				value: generateRandomString(),
+			}] }, false],
+		['property is readOnly but value contains unknown placeholder', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				readOnly: true,
+				value: `{${generateRandomString()}}`,
+			}] }, false],
+		['property is readOnly but value contains known placeholders', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				readOnly: true,
+				value: Object.values(supportedPatterns).map((p) => `{${p}}${generateRandomString()}`).join(' '),
+			}] }, true],
+		['property is readOnly but value contains known placeholders (long text)', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.LONG_TEXT,
+				readOnly: true,
+				value: Object.values(supportedPatterns).map((p) => `{${p}}${generateRandomString()}`).join(' '),
+			}] }, true],
 		['property is readOnlyOnUI', {
 			name: generateRandomString(),
 			code: generateRandomString(3),
@@ -1406,7 +1476,7 @@ const testGetClosedStatuses = () => {
 	});
 };
 
-describe('schema/tickets/templates', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidate();
 	testGenerateFullSchema();
 	testGetClosedStatuses();
