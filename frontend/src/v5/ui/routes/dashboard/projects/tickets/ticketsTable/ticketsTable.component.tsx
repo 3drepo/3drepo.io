@@ -90,7 +90,9 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
 		const ticketsPath = ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE;
 		const path = generatePath(ticketsPath, newParams);
-		navigate({ pathname: path, search: window.location.search }, { replace: false });
+		const search = new URLSearchParams(location.search);
+		search.delete('filters');
+		navigate({ pathname: path, search: search.toString() }, { replace: false });
 	}, [params, navigate]);
 
 	useEffect(() => {
@@ -207,6 +209,11 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			setFilteredTicketIds(newFilteredIds);
 		});
 
+	/**
+	 * This part react to the filters in the url being changed and
+	 * set the actual filters.
+	 * If there is no filters in the url it sets the default filters
+	 */
 	useEffect(() => { 
 		if (!templateAlreadyFetched(selectedTemplate)) return;
 		
@@ -231,11 +238,13 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		}
 	}, [selectedTemplate, paramFilters, filters, users]);
 	
+	/**
+	 * When the filter objects are changed this bit changes
+	 * the url search param.
+	 */
 	const onChangeFilters = (newFilters) => {
 		if (!newFilters && !paramFilters) return;
-
 		if (!templateAlreadyFetched(selectedTemplate)) return;
-
 
 		const defaultFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
 
@@ -243,6 +252,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			serializeFilter(selectedTemplate, riskCategories, f),
 		));
 
+		// When there are no paramFilters that means the defaultfilters are there so no need to update the url
 		if (isEqual(defaultFilters, newFilters) && !paramFilters) return;
 		if (paramFilters === param) return;
 		setParamFilters(param);
