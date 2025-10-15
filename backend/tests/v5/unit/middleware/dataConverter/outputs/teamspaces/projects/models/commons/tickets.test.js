@@ -440,9 +440,47 @@ const testSerialiseTicketList = () => {
 	});
 };
 
+const testSerialiseTicketHistory = () => {
+	describe('Serialise ticket history', () => {
+		const history = times(5, () => ({
+			author: generateRandomString(),
+			changes: {
+				[generateRandomString()]: {
+					from: generateRandomString(),
+					to: generateRandomString(),
+				},
+			},
+			timestamp: generateRandomDate(),
+		}));
+
+		test('Should respond with the correct format', () => {
+			const req = { history };
+
+			const templateData = history.map((h) => ({
+				...h,
+				timestamp: h.timestamp.getTime(),
+			}));
+
+			TicketOutputMiddleware.serialiseTicketHistory(req, {});
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { history: templateData });
+		});
+
+		test(`Should respond with ${templates.unknown.code} if an error has been thrown`, () => {
+			const req = { history: undefined };
+
+			TicketOutputMiddleware.serialiseTicketHistory(req, {});
+
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
+		});
+	});
+};
+
 describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets', () => {
 	testSerialiseTicketTemplate();
 	testSerialiseTicket();
 	testSerialiseTicketList();
 	testSerialiseTemplatesList();
+	testSerialiseTicketHistory();
 });

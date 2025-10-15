@@ -59,4 +59,13 @@ TicketLogs.addGroupUpdateLog = async (teamspace, project, model, ticket, groupId
 TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => DB.insertOne(teamspace,
 	TICKET_LOGS_COL, { ...ticketLog, _id: generateUUID(), teamspace, project, model, ticket });
 
+TicketLogs.getTicketLogsById = (
+	teamspace,
+	project,
+	model,
+	ticket,
+	projection = { _id: 0, teamspace: 0, project: 0, model: 0, ticket: 0 },
+	sort = { timestamp: 1 },
+) => DB.find(teamspace, TICKET_LOGS_COL, { teamspace, project, model, ticket }, projection, sort);
+
 module.exports = TicketLogs;
