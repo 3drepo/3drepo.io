@@ -15,12 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { modelTypes } = require('../../../../../../src/v5/models/modelSettings.constants');
 const { COL_NAME } = require('../../../../../../src/v5/models/projectSettings.constants');
 const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
 
 jest.mock('../../../../../../src/v5/models/projectSettings');
 const ProjectsModel = require(`${src}/models/projectSettings`);
+
+jest.mock('../../../../../../src/v5/models/modelSettings');
+const ModelSettingsModel = require(`${src}/models/modelSettings`);
+
+jest.mock('../../../../../../src/v5/processors/teamspaces/projects/models/drawings');
+const DrawingsModel = require(`${src}/processors/teamspaces/projects/models/drawings`);
 
 jest.mock('../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
@@ -49,11 +56,9 @@ const modelReadPermissions = {
 };
 
 ProjectsModel.getProjectList.mockImplementation(() => projectList);
-const deleteProjectMock = ProjectsModel.deleteProject.mockImplementation(() => {});
 const createProjectMock = ProjectsModel.createProject.mockImplementation(() => {});
 const getProjectByIdMock = ProjectsModel.getProjectById
 	.mockImplementation((teamspace, projectId) => projectList.find((p) => p._id === projectId));
-const removeModelDataMock = ModelHelper.removeModelData.mockImplementation(() => {});
 
 // Permissions mock
 jest.mock('../../../../../../src/v5/utils/permissions', () => ({
@@ -99,28 +104,44 @@ const testGetProjectList = () => {
 
 const testDeleteProject = () => {
 	describe('Delete a project', () => {
-		test('should delete a project with no models', async () => {
-			await Projects.deleteProject('teamspace', '3');
-			expect(getProjectByIdMock.mock.calls.length).toEqual(1);
-			expect(getProjectByIdMock.mock.calls[0][0]).toEqual('teamspace');
-			expect(getProjectByIdMock.mock.calls[0][1]).toEqual('3');
-			expect(getProjectByIdMock.mock.calls[0][2]).toEqual({ models: 1 });
-			expect(removeModelDataMock.mock.calls.length).toEqual(0);
-			expect(deleteProjectMock.mock.calls.length).toEqual(1);
-			expect(deleteProjectMock.mock.calls[0][0]).toEqual('teamspace');
-			expect(deleteProjectMock.mock.calls[0][1]).toEqual('3');
+		test('should delete a project with models', async () => {
+			const teamspace = generateRandomString();
+			const projectId = generateRandomString();
+			const contId = generateRandomString();
+			const drawId = generateRandomString();
+			ProjectsModel.getProjectById.mockImplementationOnce(() => ({ models: [contId, drawId] }));
+			ModelSettingsModel.getModelById.mockImplementationOnce(() => ({ modelType: modelTypes.CONTAINER }));
+			ModelSettingsModel.getModelById.mockImplementationOnce(() => ({ modelType: modelTypes.DRAWING }));
+
+			await Projects.deleteProject(teamspace, projectId);
+
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledTimes(1);
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledWith(teamspace, projectId, { models: 1 });
+			expect(ModelSettingsModel.getModelById).toHaveBeenCalledTimes(2);
+			expect(ModelSettingsModel.getModelById).toHaveBeenCalledWith(teamspace, contId, { modelType: 1 });
+			expect(ModelSettingsModel.getModelById).toHaveBeenCalledWith(teamspace, drawId, { modelType: 1 });
+			expect(ModelHelper.removeModelData).toHaveBeenCalledTimes(1);
+			expect(ModelHelper.removeModelData).toHaveBeenCalledWith(teamspace, projectId, contId);
+			expect(DrawingsModel.deleteDrawing).toHaveBeenCalledTimes(1);
+			expect(DrawingsModel.deleteDrawing).toHaveBeenCalledWith(teamspace, projectId, drawId);
+			expect(ProjectsModel.deleteProject).toHaveBeenCalledTimes(1);
+			expect(ProjectsModel.deleteProject).toHaveBeenCalledWith(teamspace, projectId);
 		});
 
 		test('should delete a project with no models', async () => {
-			await Projects.deleteProject('teamspace', '1');
-			expect(getProjectByIdMock.mock.calls.length).toEqual(1);
-			expect(getProjectByIdMock.mock.calls[0][0]).toEqual('teamspace');
-			expect(getProjectByIdMock.mock.calls[0][1]).toEqual('1');
-			expect(getProjectByIdMock.mock.calls[0][2]).toEqual({ models: 1 });
-			expect(removeModelDataMock.mock.calls.length).toEqual(1);
-			expect(deleteProjectMock.mock.calls.length).toEqual(1);
-			expect(deleteProjectMock.mock.calls[0][0]).toEqual('teamspace');
-			expect(deleteProjectMock.mock.calls[0][1]).toEqual('1');
+			const teamspace = generateRandomString();
+			const projectId = generateRandomString();
+			ProjectsModel.getProjectById.mockImplementationOnce(() => ({ models: [] }));
+
+			await Projects.deleteProject(teamspace, projectId);
+
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledTimes(1);
+			expect(ProjectsModel.getProjectById).toHaveBeenCalledWith(teamspace, projectId, { models: 1 });
+			expect(ModelSettingsModel.getModelById).not.toHaveBeenCalled();
+			expect(ModelHelper.removeModelData).not.toHaveBeenCalled();
+			expect(DrawingsModel.deleteDrawing).not.toHaveBeenCalled();
+			expect(ProjectsModel.deleteProject).toHaveBeenCalledTimes(1);
+			expect(ProjectsModel.deleteProject).toHaveBeenCalledWith(teamspace, projectId);
 		});
 	});
 };
