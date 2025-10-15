@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { cloneDeep, times, find } = require('lodash');
+const { cloneDeep, times } = require('lodash');
 const SuperTest = require('supertest');
 const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
 const { queryOperators, specialQueryFields } = require('../../../../../../../../src/v5/schemas/tickets/tickets.filters');
-const { from } = require('form-data');
-const { insertOne } = require('../../../../../../../../src/v5/handler/db');
+const { find: query, insertOne } = require('../../../../../../../../src/v5/handler/db');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -1315,31 +1314,31 @@ const testGetTicketHistory = () => {
 			await setupBasicData(users, teamspace, project, [con, fed],
 				[template]);
 			await ServiceHelper.db.createTicket(teamspace, project, con, conTicket);
-			await ServiceHelper.db.createTicket(teamspace, project, con, fedTicket);
+			await ServiceHelper.db.createTicket(teamspace, project, fed, fedTicket);
 			await ServiceHelper.db.createTicket(teamspace, project, con, conTicketUpdate);
-			await ServiceHelper.db.createTicket(teamspace, project, con, fedTicketUpdate);
+			await ServiceHelper.db.createTicket(teamspace, project, fed, fedTicketUpdate);
 
-			await insertOne(teamspace, 'tickets.log', {
-				_id: stringToUUID(conTicketUpdate._id),
+			// Simulate ticket update and log entry for conTicket
+			await insertOne(teamspace, 'tickets.logs', {
+				_id: ServiceHelper.generateUUIDString(),
 				author: users.tsAdmin.user,
 				changes: { properties: { title: { from: conTicket.title, to: ticketUpdate.title } } },
 				timestamp: updateDate,
 				teamspace,
-				project,
-				model: stringToUUID(conTicketUpdate._id),
+				project: stringToUUID(project.id),
+				model: con._id,
 				ticket: stringToUUID(conTicketUpdate._id),
 			});
 
-			console.log(await findOne(teamspace, 'tickets.log', { _id: stringToUUID(conTicketUpdate._id) }));
-
-			await insertOne(teamspace, 'tickets.log', {
-				_id: stringToUUID(fedTicketUpdate._id),
+			// Simulate ticket update and log entry for fedTicket
+			await insertOne(teamspace, 'tickets.logs', {
+				_id: ServiceHelper.generateUUID(),
 				author: users.tsAdmin.user,
-				changes: { properties: { title: { from: conTicket.title, to: ticketUpdate.title } } },
+				changes: { properties: { title: { from: fedTicket.title, to: ticketUpdate.title } } },
 				timestamp: updateDate,
 				teamspace,
-				project,
-				model: stringToUUID(fedTicketUpdate._id),
+				project: stringToUUID(project.id),
+				model: fed._id,
 				ticket: stringToUUID(fedTicketUpdate._id),
 			});
 		});
@@ -1362,7 +1361,7 @@ const testGetTicketHistory = () => {
 			const updateHistory = [
 				{
 					author: users.tsAdmin.user,
-					timestamp: expect.any(String),
+					timestamp: expect.any(Number),
 					changes: {
 						properties: {
 							title: {
@@ -1375,12 +1374,12 @@ const testGetTicketHistory = () => {
 			];
 
 			return [
-				// ['the user does not have a valid session', false, getHistoryRoute({ key: null }), templates.notLoggedIn],
-				// ['the user is not a member of the teamspace', false, getHistoryRoute({ key: users.nobody.apiKey }), templates.teamspaceNotFound],
-				// ['the project does not exist', false, getHistoryRoute({ projectId: ServiceHelper.generateRandomString() }), templates.projectNotFound],
-				// [`the ${modelType} does not exist`, false, getHistoryRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
-				// [`the model provided is not a ${modelType}`, false, getHistoryRoute({ modelId: wrongTypeModel._id }), modelNotFound],
-				// ['the user does not have access to the federation', false, getHistoryRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
+				['the user does not have a valid session', false, getHistoryRoute({ key: null }), templates.notLoggedIn],
+				['the user is not a member of the teamspace', false, getHistoryRoute({ key: users.nobody.apiKey }), templates.teamspaceNotFound],
+				['the project does not exist', false, getHistoryRoute({ projectId: ServiceHelper.generateRandomString() }), templates.projectNotFound],
+				[`the ${modelType} does not exist`, false, getHistoryRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
+				[`the model provided is not a ${modelType}`, false, getHistoryRoute({ modelId: wrongTypeModel._id }), modelNotFound],
+				['the user does not have access to the federation', false, getHistoryRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
 				['the user provides a ticket with no changes', true, getHistoryRoute(), { response: [], status: templates.ok.status }],
 				['the user provides a ticket with updates', true, getHistoryRoute({ ticket: updateTicketId }), { response: updateHistory, status: templates.ok.status }],
 			];
@@ -1401,7 +1400,7 @@ const testGetTicketHistory = () => {
 			});
 		};
 
-		// describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData(true))('Federations', runTest);
 		describe.each(generateTestData())('Containers', runTest);
 	});
 };
@@ -1412,14 +1411,14 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	// testGetAllTemplates();
-	// testGetTemplateDetails();
-	// testAddTicket();
-	// testImportTickets();
-	// testGetTicketResource();
-	// testGetTicket();
-	// testGetTicketList();
-	// testUpdateTicket();
-	// testUpdateManyTickets();
+	testGetAllTemplates();
+	testGetTemplateDetails();
+	testAddTicket();
+	testImportTickets();
+	testGetTicketResource();
+	testGetTicket();
+	testGetTicketList();
+	testUpdateTicket();
+	testUpdateManyTickets();
 	testGetTicketHistory();
 });
