@@ -18,9 +18,9 @@
 import GearIcon from '@assets/icons/outlined/gear-outlined.svg';
 import { ActionMenu } from '@controls/actionMenu';
 import { SearchContext, SearchContextComponent } from '@controls/search/searchContext';
-import { getPropertyLabel, stripModuleOrPropertyPrefix } from '../../../ticketsTable.helper';
+import { getPropertyLabel } from '../../../ticketsTable.helper';
 import { SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
-import { MenuItem, IconContainer, SearchInput, EmptyListMessageContainer } from './columnsVisibilitySettings.styles';
+import { MenuItem, SearchInput, EmptyListMessageContainer, ActionButton } from './columnsVisibilitySettings.styles';
 import { Checkbox } from '@controls/inputs/checkbox/checkbox.component';
 import { useContext, useEffect } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
@@ -36,6 +36,8 @@ import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/conte
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { GearIconContainer } from '@controls/tableIcon/tableIcon.styles';
 
 const List = () => {
 	const { filteredItems, query } = useContext(SearchContext);
@@ -57,6 +59,21 @@ const List = () => {
 
 	const groupedItems = groupBySelected();
 
+	const clearAll = () => {
+		// User cannot remove column if it is the current grouping method. The table needs to have
+		// at least one column. If 'clear all' would delete all columns retain the first one in the list
+		const selectedColumnsAreUnfiltered = groupedItems.selected.length === visibleSortedColumnsNames.length;
+		let columnToRetain;
+		if (groupBy !== NONE_OPTION) {
+			columnToRetain = groupBy;
+		} else if (selectedColumnsAreUnfiltered) {
+			columnToRetain = groupedItems.selected[0];
+		}
+		groupedItems.selected.filter((columnName) => columnName !== columnToRetain).forEach(hideColumn);
+	};
+
+	const selectAll = () => groupedItems.unselected.forEach(showColumn);
+
 	if (!filteredItems.length) return (
 		<EmptyListMessageContainer>
 			<EmptyListMessage>
@@ -73,6 +90,14 @@ const List = () => {
 
 	return (
 		<>
+			{!!groupedItems.selected.length && (
+				<ActionButton disabled={visibleSortedColumnsNames.length === 1} onClick={clearAll}>
+					<FormattedMessage
+						id="ticketsTable.columnVisibility.clearAll"
+						defaultMessage="Clear All"
+					/>
+				</ActionButton>
+			)}
 			{groupedItems.selected.map((columnName) => (
 				<MenuItem key={columnName}>
 					<Checkbox
@@ -83,7 +108,17 @@ const List = () => {
 					/>
 				</MenuItem>
 			))}
-			{groupedItems.unselected.length > 0 && <Divider />}
+			{!!groupedItems.unselected.length && !!groupedItems.selected.length && (
+				<Divider />
+			)}
+			{!!groupedItems.unselected.length && (
+				<ActionButton disabled={groupedItems.unselected.length === 0} onClick={selectAll}>
+					<FormattedMessage
+						id="ticketsTable.columnVisibility.selectAll"
+						defaultMessage="Select All"
+					/>
+				</ActionButton>
+			)}
 			{groupedItems.unselected.map((columnName) => (
 				<MenuItem key={columnName}>
 					<Checkbox
@@ -106,7 +141,7 @@ export const ColumnsVisibilitySettings = () => {
 	);
 	const ticketsIds = tickets.map(({ _id }) => _id);
 
-	const orderingColumnPropertiesFetched = TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, stripModuleOrPropertyPrefix(sortingColumn));
+	const orderingColumnPropertiesFetched = TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, sortingColumn);
 
 	useEffect(() => {
 		if (!orderingColumnPropertiesFetched) return;
@@ -116,9 +151,9 @@ export const ColumnsVisibilitySettings = () => {
 	return (
 		<ActionMenu
 			TriggerButton={(
-				<IconContainer>
+				<GearIconContainer>
 					<GearIcon />
-				</IconContainer>
+				</GearIconContainer>
 			)}
 			PopoverProps={{
 				transformOrigin: {

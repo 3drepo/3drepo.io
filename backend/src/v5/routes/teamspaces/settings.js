@@ -103,7 +103,7 @@ const establishRoutes = () => {
 	* @openapi
 	* /teamspaces/{teamspace}/settings/tickets/templates:
 	*   post:
-	*     description: Add a new ticket tempate to the teamspace
+	*     description: Add a new ticket template to the teamspace
 	*     tags: [Teamspaces]
 	*     parameters:
 	*       - name: teamspace

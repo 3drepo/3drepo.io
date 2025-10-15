@@ -2134,6 +2134,11 @@
   dependencies:
     pako "^1.0.10"
 
+"@pdftron/webviewer@11.7.1":
+  version "11.7.1"
+  resolved "https://registry.npmjs.org/@pdftron/webviewer/-/webviewer-11.7.1.tgz#a4ad0eb80e99a3a25959a03d7f25a6dbaff635d5"
+  integrity sha512-CgX2XdraSz9jIX3I+sHkU3Dq4tvIr+ZHBJjujiipGdGTprgeA5ym03YwNlMVLq1q+kK2jVtG2ri9drN71q6hvQ==
+
 "@pkgjs/parseargs@^0.11.0":
   version "0.11.0"
   resolved "https://registry.yarnpkg.com/@pkgjs/parseargs/-/parseargs-0.11.0.tgz#a77ea742fab25775145434eb1d2328cf5013ac33"

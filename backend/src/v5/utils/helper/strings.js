@@ -41,6 +41,12 @@ StringHelper.formatPronouns = (str) => {
 	return strArr.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
+StringHelper.splitName = (str) => {
+	if (!str) return undefined;
+	const [firstName, ...lastName] = str?.split(' ');
+	return [firstName, lastName.join(' ')];
+};
+
 StringHelper.escapeRegexChrs = (text) => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
 
 module.exports = StringHelper;

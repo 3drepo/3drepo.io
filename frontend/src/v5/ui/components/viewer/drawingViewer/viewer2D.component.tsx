@@ -36,7 +36,7 @@ import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibratio
 import { ViewBoxType } from '@/v5/ui/routes/dashboard/projects/calibration/calibration.types';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getDrawingImageSrc } from '@/v5/store/drawings/revisions/drawingRevisions.helpers';
-import { SVGImage } from './svgImage/svgImage.component';
+import { DrawingViewerSvg } from './drawingViewerSvg/drawingViewerSvg.component';
 import { CentredContainer } from '@controls/centredContainer/centredContainer.component';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { isFirefox } from '@/v5/helpers/browser.helper';
@@ -51,6 +51,8 @@ import { selectViewerBackgroundColor } from '@/v4/modules/viewer/viewer.selector
 import { useSelector } from 'react-redux';
 import { CalibrationStatus } from '@/v5/store/drawings/drawings.types';
 import HomeIcon from '@assets/icons/viewer/home.svg';
+import { DrawingViewerApryse } from './drawingViewerApryse/drawingViewerApryse.component';
+import { SnapHelper } from './snapping/types';
 
 
 const DEFAULT_VIEWBOX = { scale: 1, x: 0, y: 0, width: 0, height: 0 };
@@ -69,19 +71,62 @@ export const Viewer2D = () => {
 	const { close2D } = useContext(ViewerCanvasesContext);
 	const { isCalibrating, step, isCalibrating2D, setIsCalibrating2D } = useContext(CalibrationContext);
 	const [zoomHandler, setZoomHandler] = useState<PanZoomHandler>();
-	const [snapHandler, setSnapHandler] =  useState<SVGSnapHelper>();
+	const [snapHandler, setSnapHandler] =  useState<SnapHelper>();
 	const [viewBox, setViewBox] = useState<ViewBoxType>(DEFAULT_VIEWBOX);
 	const [isMinZoom, setIsMinZoom] = useState(false);
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
 	const [viewport, setViewport] = useState({ left:0, right: 0, top: 0, bottom:0 });
 	const [isLoading, setIsLoading] = useState(false);
 	const containerRef = useRef();
-	const imgRef = useRef<ZoomableImage>();
+	const imgViewerRef = useRef<ZoomableImage>();
 	const imgContainerRef = useRef();
+
+	// The ViewerAttributes state is updated based on the src property. The type
+	// and src members are held in the same object to ensure they are always
+	// updated together in the same React render/frame.
+
+	enum ViewerType {
+		None = 0,
+		Img = 1,
+		Svg = 2,
+		Pdf = 3,
+	}
+
+	type ViewerAttributes = {
+		type: ViewerType,
+		src: string
+	};
+
+	const [viewer, setViewerAttributes] = useState<ViewerAttributes>({
+		type: ViewerType.None,
+		src: '',
+	});
+
+	useEffect(() => {
+		if (src) {
+			// We are only interested in the headers for the blob, but the HEAD method
+			// is not supported for Object URLs, so for now do a full fetch (which is
+			// not too bad because it will only ever be called on Object URLs).
+			fetch(src).then((response) => {
+				const mimeType = response.headers.get('content-type');
+				const viewerSettings = {
+					type: ViewerType.None,
+					src: src,
+				};
+				if (mimeType == 'application/pdf') {
+					viewerSettings.type = ViewerType.Pdf;
+				} else if (mimeType == 'image/svg+xml' && !isFirefox()) {
+					viewerSettings.type = ViewerType.Svg;
+				} else {
+					viewerSettings.type = ViewerType.Img;
+				}
+				setViewerAttributes(viewerSettings);
+			});
+		}
+	}, [src]);
 
 	const canCalibrate2D = isCalibrating && step === 1;
 	const isOrthographic = ViewerGuiHooksSelectors.selectProjectionMode() === 'orthographic';
-	const showSVGImage = !isFirefox() && !plainSrc.toLowerCase().endsWith('.png');
 
 	const onClickZoomIn = () => {
 		zoomHandler.zoomIn();
@@ -100,15 +145,33 @@ export const Viewer2D = () => {
 
 		DrawingViewerService.setImgContainer(imgContainerRef.current);
 
-		if (showSVGImage) {
-			const snap = new SVGSnapHelper();
-			snap.load(src);
-			setSnapHandler(snap);
-		} else {
-			setSnapHandler(undefined);
+		switch (viewer.type) {
+			case ViewerType.Img:
+			case ViewerType.Svg:
+				DrawingViewerService.waitForDrawingSrc = () => Promise.resolve({ src });
+				break;
+			case ViewerType.Pdf:
+				DrawingViewerService.waitForDrawingSrc = (imgViewerRef.current as any).getImageSrc;
+				break;
 		}
 
-		const pz = centredPanZoom(imgRef.current, 20, 20);
+		switch (viewer.type) {
+			case ViewerType.Img:
+				setSnapHandler(undefined);
+				break;
+			case ViewerType.Svg:
+				const snap = new SVGSnapHelper();
+				snap.load(src);
+				setSnapHandler(snap);
+				break;
+			case ViewerType.Pdf:
+				// The Apryse viewer implements snapping itself. It exposes SnapHelper in
+				// its returned object, though this is not expressed in ZoomableImage.
+				setSnapHandler(imgViewerRef.current as unknown as SnapHelper);
+				break;
+		}
+
+		const pz = centredPanZoom(imgViewerRef.current, 20, 20);
 		setZoomHandler(pz);
 	};
 
@@ -190,8 +253,9 @@ export const Viewer2D = () => {
 						<Loader />
 					</CentredContainer>
 				}
-				{showSVGImage && src && <SVGImage ref={imgRef} src={src} onLoad={onImageLoad} />}
-				{!showSVGImage && src && <DrawingViewerImage ref={imgRef} src={src} onLoad={onImageLoad} />}
+				{viewer.type == ViewerType.Pdf && <DrawingViewerApryse ref={imgViewerRef as any} src={viewer.src} onLoad={onImageLoad} />}
+				{viewer.type == ViewerType.Svg && <DrawingViewerSvg ref={imgViewerRef} src={viewer.src} onLoad={onImageLoad} />}
+				{viewer.type == ViewerType.Img && <DrawingViewerImage ref={imgViewerRef} src={viewer.src} onLoad={onImageLoad} />}
 				{!isLoading && (<ViewerLayer2D
 					viewBox={viewBox}
 					snapHandler={snapHandler}

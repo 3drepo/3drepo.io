@@ -22,7 +22,8 @@ const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
 const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
 const { queryOperators, specialQueryFields } = require('../../../../../../../../src/v5/schemas/tickets/tickets.filters');
-const { find: query, insertOne } = require('../../../../../../../../src/v5/handler/db');
+const { insertOne } = require('../../../../../../../../src/v5/handler/db');
+const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -1405,6 +1406,102 @@ const testGetTicketHistory = () => {
 	});
 };
 
+const testAutomatedProperties = () => {
+	describe('Automated properties', () => {
+		const { users, teamspace, project, fed } = generateBasicData();
+		const automatedPropName = ServiceHelper.generateRandomString();
+		const key = users.tsAdmin.apiKey;
+		const [template, templateToAlter] = times(2, () => ({
+			_id: ServiceHelper.generateUUIDString(),
+			code: ServiceHelper.generateRandomString(3),
+			name: ServiceHelper.generateRandomString(),
+			config: {},
+			properties: [
+				{
+					name: automatedPropName,
+					type: propTypes.TEXT,
+					readOnly: true,
+					value: `{${supportedPatterns.MODEL_NAME}}_{${supportedPatterns.TEMPLATE_CODE}}_{${supportedPatterns.TICKET_NUMBER}}`,
+				},
+			],
+			modules: [],
+		}));
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [fed], [template, templateToAlter]);
+		});
+		const getTicketRoute = (ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${fed._id}/tickets/${ticketId}${key ? `?key=${key}` : ''}`;
+		const checkTicket = async (ticketId, valueOverride) => {
+			const { body: ticketToCheck } = await agent.get(getTicketRoute(ticketId)).expect(templates.ok.status);
+			expect(ticketToCheck.properties[automatedPropName])
+				.toBe(valueOverride ?? `${fed.name}_${template.code}_${ticketToCheck.number}`);
+		};
+
+		const createTicket = async (templateToUse = template) => {
+			const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${fed._id}/tickets${key ? `?key=${key}` : ''}`;
+			const payload = ServiceHelper.generateTicket(templateToUse);
+
+			const res = await agent.post(route).send(payload).expect(templates.ok.status);
+			return res.body._id;
+		};
+
+		test('Should fill in automated values when a ticket is created', async () => {
+			const ticket = await createTicket();
+			// let event manager does the update - this happens after response is sent
+			await ServiceHelper.sleepMS(1000);
+			await checkTicket(ticket);
+		});
+
+		test('Should fill in automated values when a ticket is imported', async () => {
+			const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${fed._id}/tickets/import${ServiceHelper.createQueryString({ key, template: template._id })}`;
+			const payload = times(3, () => ServiceHelper.generateTicket(template));
+
+			const res = await agent.post(route).send({ tickets: payload }).expect(templates.ok.status);
+			const { tickets } = res.body;
+			// let event manager does the update - this happens after response is sent
+			await ServiceHelper.sleepMS(1000);
+			await Promise.all(tickets.map(async (ticketId) => {
+				await checkTicket(ticketId);
+			}));
+		});
+
+		test('Should update automated values if the model name has been updated', async () => {
+			const route = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${fed._id}${ServiceHelper.createQueryString({ key })}`;
+			const newName = ServiceHelper.generateRandomString();
+			fed.name = newName;
+			const ticket = await createTicket();
+			await agent.patch(route).send({ name: newName }).expect(templates.ok.status);
+
+			// let event manager does the update - this happens after response is sent
+			await ServiceHelper.sleepMS(1000);
+			await checkTicket(ticket);
+		});
+
+		test('Should update automated values if the template code has been updated', async () => {
+			const route = `/v5/teamspaces/${teamspace}/settings/tickets/templates/${template._id}${ServiceHelper.createQueryString({ key })}`;
+			const newCode = ServiceHelper.generateRandomString(3);
+			template.code = newCode;
+			const ticket = await createTicket();
+			await agent.put(route).send({ code: newCode, ...template }).expect(templates.ok.status);
+
+			// let event manager does the update - this happens after response is sent
+			await ServiceHelper.sleepMS(1000);
+			await checkTicket(ticket);
+		});
+
+		test('Should update automated values if the template property itself has been updated', async () => {
+			const route = `/v5/teamspaces/${teamspace}/settings/tickets/templates/${templateToAlter._id}${ServiceHelper.createQueryString({ key })}`;
+			const prefix = ServiceHelper.generateRandomString();
+			templateToAlter.properties[0].value = `${prefix}_{${supportedPatterns.MODEL_NAME}}`;
+			const ticket = await createTicket(templateToAlter);
+			await agent.put(route).send(templateToAlter).expect(templates.ok.status);
+
+			// let event manager does the update - this happens after response is sent
+			await ServiceHelper.sleepMS(1000);
+			await checkTicket(ticket, `${prefix}_${fed.name}`);
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
@@ -1421,4 +1518,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testUpdateTicket();
 	testUpdateManyTickets();
 	testGetTicketHistory();
+	testAutomatedProperties();
 });
