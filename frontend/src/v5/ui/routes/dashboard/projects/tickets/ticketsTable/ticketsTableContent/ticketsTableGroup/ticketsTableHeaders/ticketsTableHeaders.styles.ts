@@ -44,10 +44,9 @@ export const HeaderCell = styled(ResizableTableHeader)`
 
 	svg {
 		width: 16px;
-		cursor: pointer;
 	}
 
-	&:last-child {
-		padding-right:0;
+	&:last-of-type {
+		padding-right: 20px;
 	}
 `;
