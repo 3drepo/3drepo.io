@@ -207,45 +207,49 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			setFilteredTicketIds(newFilteredIds);
 		});
 
-	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>([]);
-
-	useEffect(() => {
-		if (!templateAlreadyFetched(selectedTemplate)) return;
-		if (!!paramFilters) return;
-		setPresetFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
-	}, [JSON.stringify(selectedTemplate), paramFilters]);
-
 	useEffect(() => { 
-		if (!paramFilters) return;
-		if (!templateAlreadyFetched(selectedTemplate) || !riskCategories.length || !users.length) return;
+		if (!templateAlreadyFetched(selectedTemplate)) return;
+		
+		if (!paramFilters) {
+			const newFilters  = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
+			if (isEqual(newFilters, filters)) return;
+			setFilters(newFilters);
+			return;
+		}
+	
+	 	if (!riskCategories.length || !users.length) return;
 		try {
 			// Dont blank the page if the url param has the wrong format
 			const newFilters = JSON.parse(paramFilters).map((f) =>  
 				deserializeFilter(selectedTemplate, users, riskCategories, f),
 			);
 			if (isEqual(newFilters, filters)) return;
-			setPresetFilters(newFilters);
+			setFilters(newFilters);
 		} catch (e) {
 			console.error('Error parsing the url filter param');
 			console.error(e);
 		}
 	}, [selectedTemplate, paramFilters, filters, users]);
+	
+	const onChangeFilters = (newFilters) => {
+		if (!newFilters && !paramFilters) return;
 
-	useEffect(() => {
-		const defaultFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
-		if (isEqual(defaultFilters, filters)) return;
 		if (!templateAlreadyFetched(selectedTemplate)) return;
-		if (!filters.length) return;
 
-		const param = JSON.stringify(filters.map((f) => 
+
+		const defaultFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
+
+		let param = JSON.stringify(newFilters.map((f) => 
 			serializeFilter(selectedTemplate, riskCategories, f),
 		));
 
+		if (isEqual(defaultFilters, newFilters) && !paramFilters) return;
+		if (paramFilters === param) return;
 		setParamFilters(param);
-	}, [filters, selectedTemplate, containerOrFederation]);
+	};
 
 	return (
-		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters}>
+		<TicketsFiltersContextComponent onChange={onChangeFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters}>
 			<TicketsTableLayout>
 				<FiltersContainer>
 					<FlexContainer>
