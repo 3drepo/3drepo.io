@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useState } from 'react';
+import { createContext } from 'react';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useParams } from 'react-router';

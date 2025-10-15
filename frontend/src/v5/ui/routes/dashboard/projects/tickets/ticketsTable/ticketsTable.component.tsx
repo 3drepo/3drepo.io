@@ -88,12 +88,11 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const setTemplate = useCallback((newTemplate) => {
 		setTicketValue();
 		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
-		const ticketsPath = ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE;
+		const ticketsPath = TICKETS_ROUTE;
 		const path = generatePath(ticketsPath, newParams);
-		const search = new URLSearchParams(location.search);
-		search.delete('filters');
-		navigate({ pathname: path, search: search.toString() }, { replace: false });
-	}, [params, navigate]);
+		const search = 'models=' + encodeURIComponent(Transformers.STRING_ARRAY.to(containersAndFederations));
+		navigate({ pathname: path, search }, { replace: false });
+	}, [params, navigate, containersAndFederations]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
