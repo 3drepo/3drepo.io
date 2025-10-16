@@ -27,7 +27,7 @@ import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketSortingProperty } from './card/ticketsCard.types';
-import { INITIAL_COLUMNS } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { DEFAULT_COLUMNS, INITIAL_COLUMNS_NO_OVERRIDES } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -217,8 +217,20 @@ export const selectPropertiesFetched = createSelector(
 	(state) => state.fetchedProperties || {},
 );
 
-const initialPropertiesFetched = new Set(INITIAL_COLUMNS);
+const initialPropertiesFetched = new Set(INITIAL_COLUMNS_NO_OVERRIDES);
 
+export const selectInitialTabularColumns = createSelector(
+	selectCurrentProjectTemplateById,
+	(ticketTemplate) => {
+		const columnsFromConfig = get(ticketTemplate, 'config.tabular.columns');
+		if (!columnsFromConfig) return initialPropertiesFetched;
+		return new Set([...DEFAULT_COLUMNS, ...columnsFromConfig.map(({ property, module }) => module ? `modules.${module}.${property}` : `properties.${property}`)]);
+	},
+);
+
+// The format of the propertiesToInclude is the property name without property prefix, e.g. 'Assignees', 'Due Date', etc.
+// And with modules properties its the module name and property name separated by a dot, e.g. 'ModuleName.PropertyName' like
+// 'safetibase.Level Of Risk'.
 export const selectPropertyFetched = createSelector(
 	selectPropertiesFetched,
 	(state, ticketId: string, property: string) => ({ ticketId, property }),
