@@ -29,8 +29,8 @@ import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { Container } from './ticketsTableContent.styles';
 import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { stripModuleOrPropertyPrefix } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { intersection } from 'lodash';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
@@ -44,7 +44,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	useEffect(() => {
 		if (!templateWasFetched) return;
 		const allColumns = getAllColumnsNames();
-		const initialVisibleColumns = allColumns.filter((name) => defaultColumns.has(name));
+		const initialVisibleColumns = intersection([...defaultColumns], allColumns);
 		setVisibleSortedColumnsNames(initialVisibleColumns);
 		resetWidths();
 		stretchTable(BaseProperties.TITLE);
