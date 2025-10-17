@@ -33,6 +33,10 @@ export const GroupBySelect = () => {
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const items = groupByProperties.filter((property) => visibleSortedColumnsNames.includes(property));
 
+	if (!items.length) {
+		return null;
+	}
+
 	return (
 		<Select
 			onChange={(e) => setGroupBy(e.target.value)}

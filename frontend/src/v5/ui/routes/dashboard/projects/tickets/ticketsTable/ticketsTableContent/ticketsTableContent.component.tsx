@@ -31,24 +31,54 @@ import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { isEqual } from 'lodash';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
 	const {
 		stretchTable, getAllColumnsNames, subscribe, resetWidths,
 		setVisibleSortedColumnsNames,
+		getVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
 	const templateWasFetched = templateAlreadyFetched(template);
+	const ignoreColumnChange = useRef(false);
+	const [colsParam, setColsParams] = useSearchParam('cols', Transformers.STRING_ARRAY, true);
+
+	const setVisibleColumn = () => {
+		ignoreColumnChange.current = true;
+		
+		if (!colsParam.length) {
+			const allColumns = getAllColumnsNames();
+			const initialColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
+
+			if (!isEqual(getVisibleSortedColumnsNames(), initialColumns)) {
+				setVisibleSortedColumnsNames(initialColumns);
+				resetWidths();
+				stretchTable(BaseProperties.TITLE);
+			}
+		} else {
+			if (!isEqual(getVisibleSortedColumnsNames(), colsParam)) {
+				setVisibleSortedColumnsNames(colsParam);
+			}
+		}
+
+		ignoreColumnChange.current = false;
+	};
 
 	useEffect(() => {
 		if (!templateWasFetched) return;
-		const allColumns = getAllColumnsNames();
-		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
-		setVisibleSortedColumnsNames(initialVisibleColumns);
-		resetWidths();
-		stretchTable(BaseProperties.TITLE);
+		setVisibleColumn();
+		return subscribe(['visibleSortedColumnsNames'], (cols) => {
+			if (ignoreColumnChange.current) return;
+			setColsParams(cols);
+		});
 	}, [template, templateWasFetched]);
-	
+
+	useEffect(() => {
+		setVisibleColumn();
+	}, [colsParam]);
+
 	useEffect(() => {
 		const onMovingColumnChange = (movingColumn) => {
 			if (movingColumn) {
@@ -60,7 +90,6 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		return subscribe(['movingColumn'], onMovingColumnChange);
 	}, [edgeScrolling]);
 
-
 	if (!templateWasFetched) {
 		return (
 			<EmptyPageView>
@@ -68,6 +97,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 			</EmptyPageView>
 		);
 	}
+
 	if (!props.tickets.length) {
 		return (
 			<EmptyPageView>

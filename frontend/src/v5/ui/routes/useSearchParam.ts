@@ -18,7 +18,7 @@
 import { useCallback, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
-type Transformer<T> = {
+export type ParamTransformer<T> = {
 	from: (param: string) => T,
 	to: (param: T) => string,
 };
@@ -39,7 +39,7 @@ export const Transformers = {
 };
 
 // @ts-ignore
-export const useSearchParam = <T = string>(name: string, transformer: Transformer<T> = Transformers.DEFAULT, pushInHistory?: boolean = false) => {
+export const useSearchParam = <T = string>(name: string, transformer: ParamTransformer<T> = Transformers.DEFAULT, pushInHistory?: boolean = false) => {
 	const navigate = useNavigate();
 	const location = useLocation();
 	const unprocessedValue = new URLSearchParams(location.search).get(name);

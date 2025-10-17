@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useState } from 'react';
+import { createContext } from 'react';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useParams } from 'react-router';
@@ -27,6 +27,7 @@ import { chunk } from 'lodash';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export interface TicketsTableType {
 	getPropertyType: (name: string) => PropertyTypeDefinition;
@@ -52,7 +53,7 @@ interface Props {
 	children: any;
 }
 export const TicketsTableContextComponent = ({ children }: Props) => {
-	const [groupBy, setGroupBy] = useState(NONE_OPTION);
+	const [groupBy, setGroupBy] = useSearchParam('groupBy');
 	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
@@ -108,7 +109,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 			getPropertyType,
 			isJobAndUsersType,
 			groupByProperties,
-			groupBy,
+			groupBy: groupBy || NONE_OPTION,
 			setGroupBy,
 			fetchColumn,
 		}}>

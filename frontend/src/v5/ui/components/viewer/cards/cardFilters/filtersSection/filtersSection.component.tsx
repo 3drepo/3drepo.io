@@ -37,7 +37,7 @@ export const FiltersSection = ({ filters }: FiltersSectionProps) => {
 			{filters.map((filter) => (
 				<CardFilterActionMenu
 					$displayMode={displayMode}
-					key={Object.keys(filter).join()}
+					key={filter.module + '.' + filter.property + '.' + filter.type}
 					onOpen={() => setSelectedFilter(filter)}
 					onClose={() => setSelectedFilter({})}
 					TriggerButton={(
