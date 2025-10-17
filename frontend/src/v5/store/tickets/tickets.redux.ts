@@ -24,6 +24,7 @@ import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
 import { mergeWithArray } from '../store.helpers';
 import { DEFAULT_TICKETS_SORTING, TicketsSorting, TicketsSortingOrder, TicketsSortingProperty } from './card/ticketsCard.types';
 import EventEmitter from 'eventemitter3';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation', 'propertiesToInclude'],
@@ -51,6 +52,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchTicketsProperties: ['teamspace', 'projectId', 'modelId', 'ticketIds', 'templateCode', 'isFederation', 'propertiesToInclude'],
 	upsertTicketsSuccess: ['modelId', 'tickets'],
 	watchPropertiesUpdates: ['propertiesNames', 'watch'],
+	setTabularViewParams: ['params', 'search'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -61,6 +63,7 @@ export const INITIAL_STATE: ITicketsState = {
 	riskCategories: [],
 	sorting: DEFAULT_TICKETS_SORTING,
 	fetchedProperties: {}, // This is used to track which properties have been fetched for each ticket
+	tabularViewParams: { params: {}, search:'' },
 };
 
 export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: FetchTicketsSuccessAction) => {
@@ -150,6 +153,10 @@ export const setPropertiesFetched = (state: ITicketsState, { ticketIds, properti
 	}
 };
 
+export const setTabularViewParams = (state: ITicketsState, { params, search }: SetTabularViewParamsAction) => {
+	state.tabularViewParams = { params, search };
+};
+
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
@@ -163,6 +170,7 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.SET_SORTING]: setSorting,
 	[TicketsTypes.RESET_SORTING]: resetSorting,
 	[TicketsTypes.SET_PROPERTIES_FETCHED]: setPropertiesFetched,
+	[TicketsTypes.SET_TABULAR_VIEW_PARAMS]: setTabularViewParams,
 }));
 
 export interface ITicketsState {
@@ -173,6 +181,7 @@ export interface ITicketsState {
 	groupsByGroupId: Record<string, Group>,
 	sorting: TicketsSorting,
 	fetchedProperties: Record<string, Record<string, boolean>>, // Tracks which properties have been fetched for each ticket
+	tabularViewParams: { params: Partial<DashboardTicketsParams>, search: string }
 }
 
 export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[] };
@@ -200,7 +209,7 @@ export type ResetSortingAction = Action<'RESET_SORTING'>;
 export type SetPropertiesFetchedAction = Action<'SET_PROPERTIES_FETCHED'> & { ticketIds: string[], properties: string[], fetched: boolean };
 export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & TeamspaceProjectAndModel & { ticketIds: string[], templateCode: string, isFederation: boolean, propertiesToInclude?: string[] };
 export type WatchPropertiesUpdatesAction = Action<'WATCH_PROPERTIES_UPDATES'> & { propertiesNames: string[], watch: EventEmitter };
-
+export type SetTabularViewParamsAction = Action<'SET_TABULAR_VIEW_PARAMS'> & { params: DashboardTicketsParams, search: string };
 export interface ITicketsActionCreators {
 	fetchTickets: (
 		teamspace: string,
@@ -307,5 +316,6 @@ export interface ITicketsActionCreators {
 	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
 	resetSorting: () => ResetSortingAction,
 	setPropertiesFetched: (ticketIds: string[], properties: string[], fetched: boolean) => SetPropertiesFetchedAction,
-	watchPropertiesUpdates: (properties: string[], watch: EventEmitter) => WatchPropertiesUpdatesAction
+	watchPropertiesUpdates: (properties: string[], watch: EventEmitter) => WatchPropertiesUpdatesAction,
+	setTabularViewParams: (params: Partial<DashboardTicketsParams>, search: string) => SetTabularViewParamsAction
 }
