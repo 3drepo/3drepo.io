@@ -31,7 +31,7 @@ import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { Transformers } from '@/v5/ui/routes/useSearchParam';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isEqual } from 'lodash';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
@@ -42,14 +42,13 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		getVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
 	const templateWasFetched = templateAlreadyFetched(template);
-	const navigate = useNavigate();
 	const ignoreColumnChange = useRef(false);
+	const [colsParam, setColsParams] = useSearchParam('cols', Transformers.STRING_ARRAY, true);
 
 	const setVisibleColumn = () => {
-		const colParam = new URLSearchParams(document.location.search).get('cols');
 		ignoreColumnChange.current = true;
 		
-		if (!colParam) {
+		if (!colsParam.length) {
 			const allColumns = getAllColumnsNames();
 			const initialColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
 
@@ -59,9 +58,8 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 				stretchTable(BaseProperties.TITLE);
 			}
 		} else {
-			const initialColumns = Transformers.STRING_ARRAY.from(colParam);
-			if (!isEqual(getVisibleSortedColumnsNames(), initialColumns)) {
-				setVisibleSortedColumnsNames(initialColumns);
+			if (!isEqual(getVisibleSortedColumnsNames(), colsParam)) {
+				setVisibleSortedColumnsNames(colsParam);
 			}
 		}
 
@@ -70,18 +68,28 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 
 	useEffect(() => {
 		if (!templateWasFetched) return;
-		return subscribe(['visibleSortedColumnsNames'], (cols) => {
+		setVisibleColumn();
+		const unsubscribe =  subscribe(['visibleSortedColumnsNames'], (cols) => {
 			if (ignoreColumnChange.current) return;
-			const searchParams = new URLSearchParams(document.location.search);
-			searchParams.set('cols', Transformers.STRING_ARRAY.to(cols));
-			navigate({  search: searchParams.toString() }, { replace: false });
+			setColsParams(cols);
+			// const searchParams = new URLSearchParams(document.location.search);
+			// searchParams.set('cols', Transformers.STRING_ARRAY.to(cols));
+			// navigate({  search: searchParams.toString() }, { replace: false });
 		});
+		
+		return () => {
+			unsubscribe();
+		};
 	}, [template, templateWasFetched]);
 
 
-	if (templateWasFetched) {
+	useEffect(() => {
 		setVisibleColumn();
-	}
+	}, [colsParam]);
+
+	// if (templateWasFetched) {
+		// setVisibleColumn();
+	// }
 
 	useEffect(() => {
 		const onMovingColumnChange = (movingColumn) => {
