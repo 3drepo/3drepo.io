@@ -17,7 +17,7 @@
 
 import { useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
@@ -69,27 +69,15 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	useEffect(() => {
 		if (!templateWasFetched) return;
 		setVisibleColumn();
-		const unsubscribe =  subscribe(['visibleSortedColumnsNames'], (cols) => {
+		return subscribe(['visibleSortedColumnsNames'], (cols) => {
 			if (ignoreColumnChange.current) return;
 			setColsParams(cols);
-			// const searchParams = new URLSearchParams(document.location.search);
-			// searchParams.set('cols', Transformers.STRING_ARRAY.to(cols));
-			// navigate({  search: searchParams.toString() }, { replace: false });
 		});
-		
-		return () => {
-			unsubscribe();
-		};
 	}, [template, templateWasFetched]);
-
 
 	useEffect(() => {
 		setVisibleColumn();
 	}, [colsParam]);
-
-	// if (templateWasFetched) {
-		// setVisibleColumn();
-	// }
 
 	useEffect(() => {
 		const onMovingColumnChange = (movingColumn) => {
