@@ -20,6 +20,7 @@ import { getFullnameFromUser } from "@/v5/store/users/users.helpers";
 import { TicketFilter } from "@components/viewer/cards/cardFilters/cardFilters.types";
 import { deserializeFilter, InvalidPropertyOrTemplateError, serializeFilter, splitByNonEscaped } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
 import { mockRiskCategories } from "./tickets.fixture";
+import { initializeIntl } from "@/v5/services/intl";
 
 describe('Tickets: filters', () => {
 	const template: ITemplate = {
@@ -184,6 +185,8 @@ describe('Tickets: filters', () => {
     ];
 
 	const risks = mockRiskCategories();
+
+	initializeIntl('en-GB');
 
 	describe('helpers', () => {
 		it('split by non escaped characters should work', () => {
