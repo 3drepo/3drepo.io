@@ -86,7 +86,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
 	const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
 	const setTemplate = useCallback((newTemplate) => {
-		setTicketValue();
 		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
 		const ticketsPath = TICKETS_ROUTE;
 		const path = generatePath(ticketsPath, newParams);

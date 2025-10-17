@@ -17,7 +17,7 @@
 
 import { useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
@@ -31,24 +31,58 @@ import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { Transformers } from '@/v5/ui/routes/useSearchParam';
+import { isEqual } from 'lodash';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
 	const {
 		stretchTable, getAllColumnsNames, subscribe, resetWidths,
 		setVisibleSortedColumnsNames,
+		getVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
 	const templateWasFetched = templateAlreadyFetched(template);
+	const navigate = useNavigate();
+	const ignoreColumnChange = useRef(false);
+
+	const setVisibleColumn = () => {
+		const colParam = new URLSearchParams(document.location.search).get('cols');
+		ignoreColumnChange.current = true;
+		
+		if (!colParam) {
+			const allColumns = getAllColumnsNames();
+			const initialColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
+
+			if (!isEqual(getVisibleSortedColumnsNames(), initialColumns)) {
+				setVisibleSortedColumnsNames(initialColumns);
+				resetWidths();
+				stretchTable(BaseProperties.TITLE);
+			}
+		} else {
+			const initialColumns = Transformers.STRING_ARRAY.from(colParam);
+			if (!isEqual(getVisibleSortedColumnsNames(), initialColumns)) {
+				setVisibleSortedColumnsNames(initialColumns);
+			}
+		}
+
+		ignoreColumnChange.current = false;
+	};
 
 	useEffect(() => {
 		if (!templateWasFetched) return;
-		const allColumns = getAllColumnsNames();
-		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
-		setVisibleSortedColumnsNames(initialVisibleColumns);
-		resetWidths();
-		stretchTable(BaseProperties.TITLE);
+		return subscribe(['visibleSortedColumnsNames'], (cols) => {
+			if (ignoreColumnChange.current) return;
+			const searchParams = new URLSearchParams(document.location.search);
+			searchParams.set('cols', Transformers.STRING_ARRAY.to(cols));
+			navigate({  search: searchParams.toString() }, { replace: false });
+		});
 	}, [template, templateWasFetched]);
-	
+
+
+	if (templateWasFetched) {
+		setVisibleColumn();
+	}
+
 	useEffect(() => {
 		const onMovingColumnChange = (movingColumn) => {
 			if (movingColumn) {
