@@ -56,7 +56,7 @@ export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 };
 
 export const arrToDisplayValue = (arr: any[]) => arr.join(', ');
-export const valueToDisplayDate = (value) => formatSimpleDate(value);
+export const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
 export const formatDateRange = ([from, to]) => formatMessage(
 	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
 	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },

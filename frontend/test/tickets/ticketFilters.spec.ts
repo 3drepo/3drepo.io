@@ -18,7 +18,7 @@
 import { ITemplate } from "@/v5/store/tickets/tickets.types";
 import { getFullnameFromUser } from "@/v5/store/users/users.helpers";
 import { TicketFilter } from "@components/viewer/cards/cardFilters/cardFilters.types";
-import { deserializeFilter, InvalidPropertyOrTemplateError, serializeFilter, splitByNonEscaped } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
+import { arrToDisplayValue, deserializeFilter, formatDateRange, InvalidPropertyOrTemplateError, serializeFilter, splitByNonEscaped, valueToDisplayDate } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
 import { mockRiskCategories } from "./tickets.fixture";
 import { initializeIntl } from "@/v5/services/intl";
 
@@ -300,7 +300,7 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator: 'gte',
 					values: [2004782460000],
-					displayValues: '12/07/2033'
+					displayValues: valueToDisplayDate(2004782460000)
 				}
 			};
 
@@ -316,7 +316,7 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator: 'lte',
 					values: [1735689600000],
-					displayValues: '01/01/2025'
+					displayValues: valueToDisplayDate(1735689600000)
 				}
 			};
 
@@ -332,7 +332,7 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator: 'lte',
 					values: [1759273259999],
-					displayValues: '01/10/2025'
+					displayValues: valueToDisplayDate(1759273259999)
 				}
 			};
 
@@ -350,7 +350,10 @@ describe('Tickets: filters', () => {
 					values:[
 						[1601553593000,1761782459999],
 						[1767225600000,1774911719999]],
-					displayValues:'01/10/2020 to 30/10/2025, 01/01/2026 to 31/03/2026'
+					displayValues: arrToDisplayValue([
+						formatDateRange([1601553593000,1761782459999]),
+						formatDateRange([1767225600000,1774911719999])
+					])
 				}
 			};
 
@@ -366,7 +369,7 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator:'rng',
 					values:[[1759273200000,1760742059999]],
-					displayValues:'01/10/2025 to 18/10/2025'
+					displayValues: formatDateRange([1759273200000,1760742059999])
 				}
 			};
 			
@@ -380,7 +383,7 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator:'gte',
 					values: [1759532400000],
-					displayValues: '04/10/2025'
+					displayValues: valueToDisplayDate(1759532400000)
 				}
 			};
 			
