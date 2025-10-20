@@ -22,7 +22,7 @@ import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
-import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
+import { selectCurrentProject, selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -240,9 +240,10 @@ export const selectPropertyFetchedForTickets = createSelector(
 
 export const selectTicketsTableLink = createSelector(
 	selectTicketsDomain,
-	(state) => {
+	selectCurrentProject,
+	(state, project) => {
 		const { params, search } = state.tabularViewParams;
-		if (isEmpty(params)) {
+		if (isEmpty(params) || params.project !== project) {
 			return 't/tickets';
 		}
 
