@@ -16,7 +16,7 @@
  */
 
 import { createSelector } from 'reselect';
-import { orderBy, get } from 'lodash';
+import { orderBy, get, isEmpty } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
@@ -28,6 +28,8 @@ import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketSortingProperty } from './card/ticketsCard.types';
 import { INITIAL_COLUMNS } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { TICKETS_ROUTE_WITH_TICKET, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { generatePath } from 'react-router';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -234,3 +236,18 @@ export const selectPropertyFetchedForTickets = createSelector(
 		initialPropertiesFetched.has(property) || 
 		ticketIds.every((ticketId) => (propertiesFetched[ticketId] || {}) [property] || false),
 ) as (state: any, ticketIds: string[], property: string) => boolean;
+
+
+export const selectTicketsTableLink = createSelector(
+	selectTicketsDomain,
+	(state) => {
+		const { params, search } = state.tabularViewParams;
+		if (isEmpty(params)) {
+			return 't/tickets';
+		}
+
+		const ticketsPath = params.ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE;
+		const pathname = generatePath(ticketsPath, params as any);
+		return ({ pathname, search });
+	},
+);
