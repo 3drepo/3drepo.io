@@ -81,6 +81,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const models = useSelectedModels();
 	const [filters, setFilters] = useState<TicketFilter[]>();
+	const [isFiltering, setIsFiltering] = useState<boolean>(true);
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 
 
@@ -164,7 +165,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	
 	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>(); 
 	useEffect(() => {
-		TicketsCardActionsDispatchers.setFiltering(true)
+		setIsFiltering(true);
 
 		if (!filters) return;
 		let mounted = true;
@@ -185,7 +186,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			});
 
 			setFilteredTicketIds(idsSet);
-			TicketsCardActionsDispatchers.setFiltering(false);
+			setIsFiltering(false);
 		})();
 
 		return () => { mounted = false;};
@@ -214,7 +215,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	}, [selectedTemplate, JSON.stringify(presetFilters)]);
 
 	return (
-		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters}>
+		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters} isFiltering={isFiltering}>
 			<TicketsTableLayout>
 				<FiltersContainer>
 					<FlexContainer>

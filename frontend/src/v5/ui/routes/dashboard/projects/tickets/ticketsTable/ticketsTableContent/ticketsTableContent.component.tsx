@@ -15,13 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ProjectsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
@@ -30,6 +30,7 @@ import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { TicketsFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
@@ -37,8 +38,8 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		stretchTable, getAllColumnsNames, subscribe, resetWidths,
 		setVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
+	const { isFiltering } = useContext(TicketsFiltersContext)
 	const templateWasFetched = templateAlreadyFetched(template);
-	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
 
 	useEffect(() => {
 		if (!templateWasFetched) return;
