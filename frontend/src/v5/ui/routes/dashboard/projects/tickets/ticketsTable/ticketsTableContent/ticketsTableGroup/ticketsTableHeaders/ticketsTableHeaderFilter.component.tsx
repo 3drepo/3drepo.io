@@ -47,7 +47,7 @@ const findFilterByPropertyName = (filters: TicketFilter[], propertyName: string)
 		return filters.find((f) => f.property === chunks[1] && !f.module);
 	}
 
-	return filters.find((f) => f.property === chunks[2] && f.module === chunks[0]);
+	return filters.find((f) => f.property === chunks[2] && f.module === chunks[1]);
 };
 
 const positioning = {
@@ -63,7 +63,7 @@ const positioning = {
 
 export const TicketsTableHeaderFilter = ({ propertyName }: FiltersSectionProps) => {
 	const { setFilter, filters, choosablefilters } = useTicketFiltersContext();
-	const filter =  findFilterByPropertyName([...filters, ...choosablefilters], propertyName);
+	const filter = findFilterByPropertyName([...filters, ...choosablefilters], propertyName);
 	const [active, setActive] = useState(false);
 
 	if (!filter) {
