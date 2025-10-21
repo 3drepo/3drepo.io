@@ -15,18 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const usersById = {};
-const usersByEmail = {};
+const newAvatar = 'newAvatarUrl';
+
+const { src } = require('../../path');
+
+const { splitName } = require(`${src}/utils/helper/strings`);
+
+const UsersCache = require('./cache');
+
 const Users = {};
-Users.getUserById = (userId) => Promise.resolve(usersById[userId]);
+Users.getUserById = (userId) => Promise.resolve(UsersCache.getUserById(userId));
 
-Users.doesUserExist = (email) => {
-	const user = usersByEmail[email];
-
-	return Promise.resolve(user?.id ?? false);
+Users.getUserAvatarBuffer = (userId) => {
+	const { profilePictureUrl } = UsersCache.getUserById(userId);
+	return Promise.resolve(Buffer.from(profilePictureUrl || newAvatar));
 };
+
+Users.doesUserExist = (email) => Promise.resolve(UsersCache.doesUserExist(email));
 
 Users.destroyAllSessions = () => Promise.resolve();
 
 Users.triggerPasswordReset = process.env.NODE_ENV === 'testV5' ? jest.fn() : (() => {});
+
+Users.uploadAvatar = (userId) => Promise.resolve(UsersCache.updateUserById(userId, { profilePictureUrl: newAvatar }));
+
+Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUrl, ...metadata }) => {
+	const user = await Users.getUserById(userId);
+
+	const [existingFirstName, existingLastName] = await splitName(user.name);
+
+	const newMetadata = { ...JSON.parse(user.metadata || '{}'), ...metadata };
+
+	const newPayload = {
+		name: `${firstName || existingFirstName} ${lastName || existingLastName}`.trim(),
+		metadata: newMetadata,
+		profilePictureUrl: profilePictureUrl || user.profilePictureUrl,
+	};
+
+	return Promise.resolve(UsersCache.updateUserById(userId, newPayload));
+};
+
 module.exports = Users;

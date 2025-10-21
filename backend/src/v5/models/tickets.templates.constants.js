@@ -39,7 +39,6 @@ const defaultTemplates = [
 					{ name: 'Resolved', type: statusTypes.DONE },
 				],
 				default: 'Active',
-
 			},
 		},
 		modules: [

@@ -52,7 +52,7 @@ export const AutocompleteInput = styled(TextField)`
 export type NewOrExisting = '' | 'new' | 'existing';
 export const DestinationInput = styled(AutocompleteInput)<{ neworexisting: NewOrExisting }>`
 	& > .MuiInputBase-root {
-		${({ neworexisting, theme }) => neworexisting === 'new' && css`
+		${({ neworexisting, theme, error }) => neworexisting === 'new' && !error && css`
 			color: ${theme.palette.primary.main};
 			background-color: ${theme.palette.primary.lightest};
 
@@ -65,7 +65,7 @@ export const DestinationInput = styled(AutocompleteInput)<{ neworexisting: NewOr
 			}
 		`}
 
-		${({ neworexisting, theme }) => neworexisting === 'existing' && css`
+		${({ neworexisting, theme, error }) => neworexisting === 'existing' && !error && css`
 			color: ${theme.palette.secondary.main};
 			background-color: ${theme.palette.tertiary.lightest};
 
