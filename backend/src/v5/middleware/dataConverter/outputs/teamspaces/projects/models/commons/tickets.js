@@ -98,4 +98,17 @@ Tickets.serialiseTicketList = async (req, res) => {
 	}
 };
 
+Tickets.serialiseTicketHistory = (req, res) => {
+	try {
+		const history = req.history.map((h) => ({
+			...h,
+			timestamp: h.timestamp.getTime(),
+		}));
+
+		respond(req, res, templates.ok, { history });
+	} catch (err) {
+		respond(req, res, templates.unknown);
+	}
+};
+
 module.exports = Tickets;
