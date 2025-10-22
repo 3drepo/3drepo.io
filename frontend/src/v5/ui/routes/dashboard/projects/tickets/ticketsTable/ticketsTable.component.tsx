@@ -81,6 +81,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const models = useSelectedModels();
+	const [filters, setFilters] = useState<TicketFilter[]>();
+	const [isFiltering, setIsFiltering] = useState<boolean>(true);
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
@@ -103,7 +105,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 
 	const [paramFilters, setParamFilters] = useSearchParam<string>('filters', undefined, true);
-	const [filters, setFilters] = useState<TicketFilter[]>();
 
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -166,12 +167,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	}, [filteredTickets.length, visibleSortedColumnsNames.join('')]);
 
 	useEffect(() => {
+		setIsFiltering(true);
+
 		if (!filters) return;
 		let mounted = true;
 		(async () => {
 			const templateFilter = getTemplateFilter(selectedTemplate.code);
 			const allFilters = [...filters, templateFilter];
-	
+
 			const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
 				(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
 			);
@@ -185,6 +188,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			});
 
 			setFilteredTicketIds(idsSet);
+			setIsFiltering(false);
 		})();
 
 		return () => { mounted = false;};
@@ -257,7 +261,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	};
 
 	return (
-		<TicketsFiltersContextComponent onChange={onChangeFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters}>
+		// eslint-disable-next-line max-len
+		<TicketsFiltersContextComponent onChange={onChangeFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters} isFiltering={isFiltering}>
 			<TicketsTableLayout>
 				<FiltersContainer>
 					<FlexContainer>
