@@ -44,22 +44,27 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	const { isFiltering } = useContext(TicketsFiltersContext);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const ignoreColumnChange = useRef(false);
+	
 	const [colsParam, setColsParams] = useSearchParam('cols', Transformers.STRING_ARRAY, true);
 
 	const setVisibleColumn = () => {
 		ignoreColumnChange.current = true;
+		const columnsRendered =  [...getVisibleSortedColumnsNames()];
 		
 		if (!colsParam.length) {
 			const allColumns = getAllColumnsNames();
 			const initialVisibleColumns = intersection([...defaultColumns], allColumns);
-			if (!isEqual(getVisibleSortedColumnsNames(), initialVisibleColumns)) {
+			if (!isEqual(columnsRendered, initialVisibleColumns)) {
 				setVisibleSortedColumnsNames(initialVisibleColumns);
 				resetWidths();
 				stretchTable(BaseProperties.TITLE);
 			}
 		} else {
-			if (!isEqual(getVisibleSortedColumnsNames(), colsParam)) {
+			if (!isEqual(columnsRendered, colsParam)) {
 				setVisibleSortedColumnsNames(colsParam);
+				if (!columnsRendered.length) {
+					stretchTable(BaseProperties.TITLE);
+				}
 			}
 		}
 
