@@ -82,6 +82,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const models = useSelectedModels();
+	// These are the modelIds which are validated
+	const modelsIds = models.map(({ _id }) => _id);
 	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [isFiltering, setIsFiltering] = useState<boolean>(true);
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
@@ -118,8 +120,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	useEffect(() => {
 		if (!models.length) return;
-		const modelsIds =  models.map((m) => m._id);
-
+		
 		modelsIds.forEach((modelId) => {
 			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
 			const isFederation = isFed(modelId);
@@ -176,8 +177,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			const templateFilter = getTemplateFilter(selectedTemplate.code);
 			const allFilters = [...filters, templateFilter];
 
-			const idsSets:Set<string>[] =  await Promise.all(models.map(
-				({ _id }) => apiFetchFilteredTickets(teamspace, project, _id, isFed(_id), allFilters)),
+			const idsSets:Set<string>[] =  await Promise.all(modelsIds.map(
+				(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
 			);
 
 			if (!mounted) return;
@@ -247,8 +248,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			console.error(e);
 			return undefined;
 		}
-
-
 	}, [selectedTemplate, paramFilters, filters, users]);
 	
 	/**
@@ -326,7 +325,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const params = useParams<DashboardTicketsParams>();
 	const { ticketId, teamspace, project, template } = params;
-	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY);
+	const models = useSelectedModels();
 
 	const isNewTicket = (ticketId || '').toLowerCase() === NEW_TICKET_ID;
 
@@ -343,16 +342,12 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 
 	const clearTicketId = () => setTicketValue();
 
-	useEffect(() => {
-		if (!containerOrFederation || containersAndFederations.includes(containerOrFederation))  return;
-		clearTicketId();
-	}, [containersAndFederations, containerOrFederation]);
-
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+	const haveValidContainerOrFederation = models.some(({ _id }) => _id === containerOrFederation);
 
 	return (
-		<SidePanel open={!!ticketId && !!containerOrFederation}>
+		<SidePanel open={!!ticketId && haveValidContainerOrFederation}>
 			<SlidePanelHeader>
 				<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
 					<OpenInViewerButton disabled={isNewTicket}>
