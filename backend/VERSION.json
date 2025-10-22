@@ -4,16 +4,16 @@
 	"supported": []
   },
   "civil" :{
-	"current" : "5.18.0",
-	"supported": ["5.16.0","5.16.1"]
+	"current" : "5.20.0",
+	"supported": ["5.18.0","5.16.0","5.16.1"]
   },
   "navis" :{
-	"current" : "5.18.0",
-	"supported": ["5.16.0","5.16.1"]
+	"current" : "5.20.0",
+	"supported": ["5.18.0","5.16.0","5.16.1"]
   },
    "revit" :{
-	"current" : "5.18.0",
-	"supported": ["5.16.0","5.16.1"]
+	"current" : "5.20.0",
+	"supported": ["5.18.0","5.16.0","5.16.1"]
   },
   "unitydll" : {
 	"current": "5.4.0",
