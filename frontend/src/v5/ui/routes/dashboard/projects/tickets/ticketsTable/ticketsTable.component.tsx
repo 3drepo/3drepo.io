@@ -35,7 +35,7 @@ import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFede
 import { GroupBySelect } from '../selectMenus/groupBySelect.component';
 import { TemplateSelect } from '../selectMenus/templateFormSelect.component';
 import { Link, FiltersContainer, NewTicketButton, SelectorsContainer, SidePanel, SlidePanelHeader, OpenInViewerButton, FlexContainer, TicketsTableLayout } from '../tickets.styles';
-import { INITIAL_COLUMNS, NEW_TICKET_ID, PresetValue, SetTicketValue } from './ticketsTable.helper';
+import { INITIAL_COLUMNS_NO_OVERRIDES, NEW_TICKET_ID, PresetValue, SetTicketValue } from './ticketsTable.helper';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
 import { NewTicketSlide } from '../ticketsList/slides/newTicketSlide.component';
 import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
@@ -163,9 +163,9 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	useEffect(() => {
 		visibleSortedColumnsNames
-			.filter((name) => !INITIAL_COLUMNS.includes(name))
+			.filter((name) => !INITIAL_COLUMNS_NO_OVERRIDES.includes(name))
 			.forEach((name) => fetchColumn(name, filteredTickets));
-	}, [filteredTickets.length, visibleSortedColumnsNames.join('')]);
+	}, [filteredTickets.map(({ _id }) => _id).join(), visibleSortedColumnsNames.join()]);
 
 	useEffect(() => {
 		setIsFiltering(true);
@@ -228,17 +228,27 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		}
 	
 	 	if (!riskCategories.length || !users.length) return;
+		
 		try {
-			// Dont blank the page if the url param has the wrong format
-			const newFilters = JSON.parse(paramFilters).map((f) =>  
-				deserializeFilter(selectedTemplate, users, riskCategories, f),
-			);
+		// Dont blank the page if the url param has the wrong format
+			const newFilters = JSON.parse(paramFilters).map((f) => {
+				try {
+					return deserializeFilter(selectedTemplate, users, riskCategories, f);
+				} catch (e) {
+					console.error('Error parsing the url filter param');
+					console.error(e);
+					return undefined;
+				}
+			}).filter(Boolean);
 			if (isEqual(newFilters, filters)) return;
 			setFilters(newFilters);
 		} catch (e) {
 			console.error('Error parsing the url filter param');
 			console.error(e);
+			return undefined;
 		}
+
+
 	}, [selectedTemplate, paramFilters, filters, users]);
 	
 	/**
