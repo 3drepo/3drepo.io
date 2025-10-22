@@ -21,21 +21,21 @@ import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { Container, TicketsTableSpinner } from './ticketsTableContent.styles';
 import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { isEqual } from 'lodash';
+import { isEqual, intersection } from 'lodash';
 import { TicketsFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
+	const defaultColumns = TicketsHooksSelectors.selectInitialTabularColumns(template._id);
 	const {
 		stretchTable, getAllColumnsNames, subscribe, resetWidths,
 		setVisibleSortedColumnsNames,
@@ -51,10 +51,9 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		
 		if (!colsParam.length) {
 			const allColumns = getAllColumnsNames();
-			const initialColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
-
-			if (!isEqual(getVisibleSortedColumnsNames(), initialColumns)) {
-				setVisibleSortedColumnsNames(initialColumns);
+			const initialVisibleColumns = intersection([...defaultColumns], allColumns);
+			if (!isEqual(getVisibleSortedColumnsNames(), initialVisibleColumns)) {
+				setVisibleSortedColumnsNames(initialVisibleColumns);
 				resetWidths();
 				stretchTable(BaseProperties.TITLE);
 			}
@@ -74,7 +73,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 			if (ignoreColumnChange.current) return;
 			setColsParams(cols);
 		});
-	}, [template, templateWasFetched]);
+	}, [template, templateWasFetched, defaultColumns]);
 
 	useEffect(() => {
 		if (!templateWasFetched) return;
