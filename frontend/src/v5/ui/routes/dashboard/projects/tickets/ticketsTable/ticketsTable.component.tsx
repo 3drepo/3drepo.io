@@ -160,7 +160,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		visibleSortedColumnsNames
 			.filter((name) => !INITIAL_COLUMNS_NO_OVERRIDES.includes(name))
 			.forEach((name) => fetchColumn(name, filteredTickets));
-	}, [filteredTickets.map(({ _id }) => _id), visibleSortedColumnsNames.join('')]);
+	}, [filteredTickets.map(({ _id }) => _id).join(), visibleSortedColumnsNames.join()]);
 
 	
 	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>(); 
