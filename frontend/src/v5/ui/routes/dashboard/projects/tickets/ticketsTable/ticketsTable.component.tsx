@@ -81,6 +81,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const models = useSelectedModels();
 	const [filters, setFilters] = useState<TicketFilter[]>();
+	const [isFiltering, setIsFiltering] = useState<boolean>(true);
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 
 
@@ -164,12 +165,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	
 	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>(); 
 	useEffect(() => {
+		setIsFiltering(true);
+
 		if (!filters) return;
 		let mounted = true;
 		(async () => {
 			const templateFilter = getTemplateFilter(selectedTemplate.code);
 			const allFilters = [...filters, templateFilter];
-	
+
 			const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
 				(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
 			);
@@ -183,6 +186,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			});
 
 			setFilteredTicketIds(idsSet);
+			setIsFiltering(false);
 		})();
 
 		return () => { mounted = false;};
@@ -209,9 +213,9 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		if (!templateAlreadyFetched(selectedTemplate)) return;
 		setPresetFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
 	}, [selectedTemplate, JSON.stringify(presetFilters)]);
-	
+
 	return (
-		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters}>
+		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters} isFiltering={isFiltering}>
 			<TicketsTableLayout>
 				<FiltersContainer>
 					<FlexContainer>

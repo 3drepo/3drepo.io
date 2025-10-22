@@ -50,7 +50,7 @@
 		"@mui/material": "5.16.7",
 		"@mui/system": "5.16.7",
 		"@mui/x-date-pickers": "5.0.3",
-		"@pdftron/webviewer": "^11.7.1",
+		"@pdftron/webviewer": "11.7.1",
 		"@popperjs/core": "2.6.0",
 		"@types/three": "0.167.1",
 		"@webscopeio/react-textarea-autocomplete": "4.9.0",
