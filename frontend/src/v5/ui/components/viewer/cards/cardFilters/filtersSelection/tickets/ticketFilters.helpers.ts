@@ -248,9 +248,9 @@ const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, tem
 };
 
 export class InvalidPropertyOrTemplateError extends Error {
-	constructor(propertyname: string, templateName: string) {
+	constructor(propertyname: string, type: string, templateName: string) {
 		// Need to pass `options` as the second parameter to install the "cause" property.
-		super('There was an error deserializing the filter the property "' + propertyname + '" was not found in the provided template "' + templateName + '"');
+		super('There was an error deserializing the filter the property "' + propertyname + '" of type "' + type + '" for the template "' + templateName + '"');
 		this.name = 'InvalidPropertyOrTemplateError';
 	}
 }
@@ -281,7 +281,7 @@ export const serializeFilter = (template: ITemplate, riskCategories: string[], t
 		
 			const propertyDef = findPropertyDefinitionByFilter(ticketFilter, template);
 			if (!propertyDef && !isBaseProperty(ticketFilter.type) ) {
-				throw (new InvalidPropertyOrTemplateError(ticketFilter.property, template.name));
+				throw (new InvalidPropertyOrTemplateError(ticketFilter.property, ticketFilter.type, template.name));
 			}
 
 			let options = propertyDef.values;
@@ -334,8 +334,8 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 		values: undefined,
 	};
 
-	if (!propertyDef && !isBaseProperty(type) ) {
-		throw (new InvalidPropertyOrTemplateError(property, template.name));
+	if (!isBaseProperty(type) && (!propertyDef || propertyDef.type !== type) ) {
+		throw (new InvalidPropertyOrTemplateError(property, type, template.name));
 	}
 
 	if (['manyOf', 'oneOf'].includes(propertyDef?.type) || type === 'owner') {
@@ -348,7 +348,10 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 		} else {
 			const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
 			const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
-			filter.values = indexes.map((i) => options[i] || i);
+			filter.values = indexes.filter((i) => options[i]).map((i) => options[i]);
+			if (!filter.values) {
+				throw (new InvalidPropertyOrTemplateError(property, type, template.name));
+			}
 		}
 	}
 

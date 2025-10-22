@@ -227,17 +227,27 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		}
 	
 	 	if (!riskCategories.length || !users.length) return;
+		
 		try {
-			// Dont blank the page if the url param has the wrong format
-			const newFilters = JSON.parse(paramFilters).map((f) =>  
-				deserializeFilter(selectedTemplate, users, riskCategories, f),
-			);
+		// Dont blank the page if the url param has the wrong format
+			const newFilters = JSON.parse(paramFilters).map((f) => {
+				try {
+					return deserializeFilter(selectedTemplate, users, riskCategories, f);
+				} catch (e) {
+					console.error('Error parsing the url filter param');
+					console.error(e);
+					return undefined;
+				}
+			}).filter(Boolean);
 			if (isEqual(newFilters, filters)) return;
 			setFilters(newFilters);
 		} catch (e) {
 			console.error('Error parsing the url filter param');
 			console.error(e);
+			return undefined;
 		}
+
+
 	}, [selectedTemplate, paramFilters, filters, users]);
 	
 	/**
