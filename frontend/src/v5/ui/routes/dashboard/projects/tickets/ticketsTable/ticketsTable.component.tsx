@@ -77,7 +77,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	const paramsToSave = useRef({ search: window.location.search, params });
-
+	
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
@@ -85,7 +85,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [isFiltering, setIsFiltering] = useState<boolean>(true);
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
-
+	
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
 	const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
 	const setTemplate = useCallback((newTemplate) => {
@@ -118,8 +118,9 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	useEffect(() => {
 		if (!models.length) return;
+		const modelsIds =  models.map((m) => m._id);
 
-		containersAndFederations.forEach((modelId) => {
+		modelsIds.forEach((modelId) => {
 			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
 			const isFederation = isFed(modelId);
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFederation);
@@ -131,15 +132,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 				ContainersActionsDispatchers.fetchContainerJobs(teamspace, project, modelId);
 			}
 		});
-
-		const subscriptions = containersAndFederations.flatMap((modelId) => {
+		const subscriptions = modelsIds.flatMap((modelId) => {
 			return [
 				enableRealtimeNewTicket(teamspace, project, modelId, isFed(modelId)),
 				enableRealtimeUpdateTicket(teamspace, project, modelId, isFed(modelId)),
 			];
 		});
 		return combineSubscriptions(...subscriptions);
-	}, [!models.length, containersAndFederations]);
+	}, [models]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
@@ -176,8 +176,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			const templateFilter = getTemplateFilter(selectedTemplate.code);
 			const allFilters = [...filters, templateFilter];
 
-			const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
-				(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
+			const idsSets:Set<string>[] =  await Promise.all(models.map(
+				({ _id }) => apiFetchFilteredTickets(teamspace, project, _id, isFed(_id), allFilters)),
 			);
 
 			if (!mounted) return;
@@ -193,7 +193,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		})();
 
 		return () => { mounted = false;};
-	}, [JSON.stringify(containersAndFederations), selectedTemplate.code, JSON.stringify(filters)]);
+	}, [models,  selectedTemplate.code, JSON.stringify(filters)]);
 
 	useEffect(() => {
 		const filtTickets = tickets.filter(({ _id }) => filteredTicketsIDs.has(_id));

@@ -34,10 +34,11 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, onChange, ...
 	const containersAndFederations = [...containers, ...federations];
 
 	const getRenderText = (ids: any[] | null = []) => {
-		const itemsLength = ids.length;
+		const selectedContainresOrFederations = containersAndFederations.filter(({ _id }) => ids.includes(_id));
+		const itemsLength = selectedContainresOrFederations.length;
+
 		if (itemsLength === 1) {
-			const [id] = ids;
-			return (containersAndFederations.find(({ _id }) => _id === id) || {}).name;
+			return selectedContainresOrFederations[0].name;
 		}
 
 		return formatMessage({
