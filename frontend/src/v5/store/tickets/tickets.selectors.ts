@@ -16,17 +16,19 @@
  */
 
 import { createSelector } from 'reselect';
-import { orderBy, get } from 'lodash';
+import { orderBy, get, isEmpty } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
-import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
+import { selectCurrentProject, selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketSortingProperty } from './card/ticketsCard.types';
+import { TICKETS_ROUTE_WITH_TICKET, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { generatePath } from 'react-router';
 import { DEFAULT_COLUMNS, INITIAL_COLUMNS_NO_OVERRIDES } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
@@ -246,3 +248,19 @@ export const selectPropertyFetchedForTickets = createSelector(
 		initialPropertiesFetched.has(property) || 
 		ticketIds.every((ticketId) => (propertiesFetched[ticketId] || {}) [property] || false),
 ) as (state: any, ticketIds: string[], property: string) => boolean;
+
+
+export const selectTicketsTableLink = createSelector(
+	selectTicketsDomain,
+	selectCurrentProject,
+	(state, project) => {
+		const { params, search } = state.tabularViewParams;
+		if (isEmpty(params) || params.project !== project) {
+			return 't/tickets';
+		}
+
+		const ticketsPath = params.ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE;
+		const pathname = generatePath(ticketsPath, params as any);
+		return ({ pathname, search });
+	},
+);

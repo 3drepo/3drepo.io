@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { FormattedMessage } from 'react-intl';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, Link } from '../navigationTabs.styles';
 import { useKanbanNavigationData } from '@/v5/helpers/kanban.hooks';
 
@@ -24,6 +24,7 @@ export const ProjectNavigation = (): JSX.Element => {
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 	const permissionsOnUIDisabled = TeamspacesHooksSelectors.selectPermissionsOnUIDisabled();
 	const hasPermissions = !permissionsOnUIDisabled && isProjectAdmin;
+	const tableLink = TicketsHooksSelectors.selectTicketsTableLink();
 
 	return (
 		<Container>
@@ -31,7 +32,7 @@ export const ProjectNavigation = (): JSX.Element => {
 			<Link to={'t/containers'}><FormattedMessage id="projectNavigation.containers" defaultMessage="Containers" /></Link>
 			<Link to={'t/drawings'}><FormattedMessage id="projectNavigation.drawings" defaultMessage="Drawings" /></Link>
 			{shouldRenderLink &&  <Link to={'t/board'}>{linkLabel}</Link> }
-			<Link to={'t/tickets'}><FormattedMessage id="projectNavigation.tickets" defaultMessage="Tickets" /></Link>
+			<Link to={tableLink}><FormattedMessage id="projectNavigation.tickets" defaultMessage="Tickets" /></Link>
 			<Link to={'t/project_settings'}><FormattedMessage id="projectNavigation.settings" defaultMessage="Project settings" /></Link>
 			{hasPermissions && <Link to={'t/project_permissions'}><FormattedMessage id="projectNavigation.projectPermissions" defaultMessage="Project permissions" /></Link> }
 			{hasPermissions && <Link to={'t/user_permissions'}><FormattedMessage id="projectNavigation.userPermission" defaultMessage="User permissions" /></Link> }

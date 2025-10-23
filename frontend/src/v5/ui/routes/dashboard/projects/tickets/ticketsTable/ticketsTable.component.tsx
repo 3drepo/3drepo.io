@@ -17,7 +17,7 @@
 
 import { ContainersActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams, generatePath, useNavigate } from 'react-router-dom';
 import ExpandIcon from '@assets/icons/outlined/expand_panel-outlined.svg';
@@ -72,19 +72,22 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const navigate = useNavigate();
 	const params = useParams<DashboardTicketsParams>();
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
-
 	const { teamspace, project, template, ticketId } = params;
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 
+	const paramsToSave = useRef({ search: window.location.search, params });
+	
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
 	const models = useSelectedModels();
+	// These are the modelIds which are validated
+	const modelsIds = models.map(({ _id }) => _id);
 	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [isFiltering, setIsFiltering] = useState<boolean>(true);
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
-
+	
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
 	const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
 	const setTemplate = useCallback((newTemplate) => {
@@ -117,8 +120,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	useEffect(() => {
 		if (!models.length) return;
-
-		containersAndFederations.forEach((modelId) => {
+		
+		modelsIds.forEach((modelId) => {
 			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
 			const isFederation = isFed(modelId);
 			TicketsActionsDispatchers.fetchTickets(teamspace, project, modelId, isFederation);
@@ -130,15 +133,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 				ContainersActionsDispatchers.fetchContainerJobs(teamspace, project, modelId);
 			}
 		});
-
-		const subscriptions = containersAndFederations.flatMap((modelId) => {
+		const subscriptions = modelsIds.flatMap((modelId) => {
 			return [
 				enableRealtimeNewTicket(teamspace, project, modelId, isFed(modelId)),
 				enableRealtimeUpdateTicket(teamspace, project, modelId, isFed(modelId)),
 			];
 		});
 		return combineSubscriptions(...subscriptions);
-	}, [!models.length, containersAndFederations]);
+	}, [models]);
 
 	useEffect(() => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
@@ -175,7 +177,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			const templateFilter = getTemplateFilter(selectedTemplate.code);
 			const allFilters = [...filters, templateFilter];
 
-			const idsSets:Set<string>[] =  await Promise.all(containersAndFederations.map(
+			const idsSets:Set<string>[] =  await Promise.all(modelsIds.map(
 				(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
 			);
 
@@ -192,7 +194,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		})();
 
 		return () => { mounted = false;};
-	}, [JSON.stringify(containersAndFederations), selectedTemplate.code, JSON.stringify(filters)]);
+	}, [models,  selectedTemplate.code, JSON.stringify(filters)]);
 
 	useEffect(() => {
 		const filtTickets = tickets.filter(({ _id }) => filteredTicketsIDs.has(_id));
@@ -246,8 +248,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			console.error(e);
 			return undefined;
 		}
-
-
 	}, [selectedTemplate, paramFilters, filters, users]);
 	
 	/**
@@ -269,6 +269,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		if (paramFilters === param) return;
 		setParamFilters(param);
 	};
+
+	useEffect(() => {
+		return () => {
+			TicketsActionsDispatchers.setTabularViewParams(paramsToSave.current.params, paramsToSave.current.search);
+		};
+	}, []);
+
+	paramsToSave.current = { search: window.location.search, params };
 
 	return (
 		// eslint-disable-next-line max-len
@@ -317,7 +325,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const params = useParams<DashboardTicketsParams>();
 	const { ticketId, teamspace, project, template } = params;
-	const [containersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY);
+	const models = useSelectedModels();
 
 	const isNewTicket = (ticketId || '').toLowerCase() === NEW_TICKET_ID;
 
@@ -334,16 +342,12 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 
 	const clearTicketId = () => setTicketValue();
 
-	useEffect(() => {
-		if (!containerOrFederation || containersAndFederations.includes(containerOrFederation))  return;
-		clearTicketId();
-	}, [containersAndFederations, containerOrFederation]);
-
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
+	const haveValidContainerOrFederation = models.some(({ _id }) => _id === containerOrFederation);
 
 	return (
-		<SidePanel open={!!ticketId && !!containerOrFederation}>
+		<SidePanel open={!!ticketId && haveValidContainerOrFederation}>
 			<SlidePanelHeader>
 				<Link to={getOpenInViewerLink()} target="_blank" disabled={isNewTicket}>
 					<OpenInViewerButton disabled={isNewTicket}>
