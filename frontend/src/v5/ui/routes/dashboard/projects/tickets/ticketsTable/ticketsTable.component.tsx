@@ -16,7 +16,7 @@
  */
 
 import { ContainersActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams, generatePath, useNavigate } from 'react-router-dom';
@@ -54,8 +54,9 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
-import { getNonCompletedTicketFilters, getTemplateFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
+import { isEqual } from 'lodash';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -84,14 +85,15 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [isFiltering, setIsFiltering] = useState<boolean>(true);
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 
-
+	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
+	const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
 	const setTemplate = useCallback((newTemplate) => {
-		setTicketValue();
 		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
-		const ticketsPath = ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE;
+		const ticketsPath = TICKETS_ROUTE;
 		const path = generatePath(ticketsPath, newParams);
-		navigate({ pathname: path, search: window.location.search }, { replace: false });
-	}, [params, navigate]);
+		const search = 'models=' + encodeURIComponent(Transformers.STRING_ARRAY.to(containersAndFederations));
+		navigate({ pathname: path, search }, { replace: false });
+	}, [params, navigate, containersAndFederations]);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.setSelectedTicket(ticketId);
@@ -101,6 +103,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
+
+	const [paramFilters, setParamFilters] = useSearchParam<string>('filters', undefined, true);
 
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -162,8 +166,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			.forEach((name) => fetchColumn(name, filteredTickets));
 	}, [filteredTickets.map(({ _id }) => _id).join(), visibleSortedColumnsNames.join()]);
 
-	
-	const [presetFilters, setPresetFilters] = useState<TicketFilter[]>(); 
 	useEffect(() => {
 		setIsFiltering(true);
 
@@ -209,13 +211,68 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			setFilteredTicketIds(newFilteredIds);
 		});
 
-	useEffect(() => {
+	/**
+	 * This part react to the filters in the url being changed and
+	 * set the actual filters.
+	 * If there is no filters in the url it sets the default filters
+	 */
+	useEffect(() => { 
 		if (!templateAlreadyFetched(selectedTemplate)) return;
-		setPresetFilters(getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]));
-	}, [selectedTemplate, JSON.stringify(presetFilters)]);
+		
+		if (!paramFilters) {
+			const newFilters  = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
+			if (isEqual(newFilters, filters)) return;
+			setFilters(newFilters);
+			return;
+		}
+	
+	 	if (!riskCategories.length || !users.length) return;
+		
+		try {
+		// Dont blank the page if the url param has the wrong format
+			const newFilters = JSON.parse(paramFilters).map((f) => {
+				try {
+					return deserializeFilter(selectedTemplate, users, riskCategories, f);
+				} catch (e) {
+					console.error('Error parsing the url filter param');
+					console.error(e);
+					return undefined;
+				}
+			}).filter(Boolean);
+			if (isEqual(newFilters, filters)) return;
+			setFilters(newFilters);
+		} catch (e) {
+			console.error('Error parsing the url filter param');
+			console.error(e);
+			return undefined;
+		}
+
+
+	}, [selectedTemplate, paramFilters, filters, users]);
+	
+	/**
+	 * When the filter objects are changed this bit changes
+	 * the url search param.
+	 */
+	const onChangeFilters = (newFilters) => {
+		if (!newFilters && !paramFilters) return;
+		if (!templateAlreadyFetched(selectedTemplate)) return;
+
+		const defaultFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
+
+		let param = JSON.stringify(newFilters.map((f) => 
+			serializeFilter(selectedTemplate, riskCategories, f),
+		));
+
+		// When there are no paramFilters that means the defaultfilters are there so no need to update the url
+		if (isEqual(defaultFilters, newFilters) && !paramFilters) return;
+		if (paramFilters === param) return;
+		setParamFilters(param);
+	};
 
 	return (
-		<TicketsFiltersContextComponent onChange={setFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={presetFilters} isFiltering={isFiltering}>
+		// eslint-disable-next-line max-len
+		<TicketsFiltersContextComponent onChange={onChangeFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters} isFiltering={isFiltering}>
 			<TicketsTableLayout>
 				<FiltersContainer>
 					<FlexContainer>
@@ -278,10 +335,9 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	const clearTicketId = () => setTicketValue();
 
 	useEffect(() => {
-		if (containersAndFederations.includes(containerOrFederation)) return;
+		if (!containerOrFederation || containersAndFederations.includes(containerOrFederation))  return;
 		clearTicketId();
 	}, [containersAndFederations, containerOrFederation]);
-
 
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);

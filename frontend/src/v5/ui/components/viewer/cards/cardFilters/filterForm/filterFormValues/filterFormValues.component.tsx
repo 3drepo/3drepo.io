@@ -27,7 +27,7 @@ import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMen
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
 import { mapFormArrayToArray, SelectOption } from '@/v5/helpers/form.helper';
-import { getOptionFromValue, getFilterFromEvent, getFiltersFromJobsAndUsers } from '../../filtersSelection/tickets/ticketFilters.helpers';
+import { getOptionFromValue, getFilterFromEvent, getFiltersFromJobsAndUsers, arrToDisplayValue } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
 import { useTicketFiltersContext } from '../../ticketsFilters.context';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -194,7 +194,7 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 				name={name}
 				transformInputValue={mapFormArrayToArray}
 				transformOutputValue={(e) => getFilterFromEvent(e)}
-				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
+				renderValue={(values: string[]) => arrToDisplayValue(values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value))}
 				formError={error?.[0]}
 			>
 				{selectOptions.map(

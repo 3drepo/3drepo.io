@@ -16,9 +16,26 @@
  */
 
 export type TicketFilterOperator = 'ex' | 'nex' | 'is' | 'nis' | 'eq' | 'neq' | 'ss' | 'nss' | 'rng' | 'nrng' | 'gt' | 'gte' | 'lt' | 'lte';
+
+export enum TicketFilterOperatorEnum {
+	'ex' = 0,
+	'nex' = 1,
+	'is' = 2,
+	'nis' = 3,
+	'eq' = 4,
+	'neq' = 5,
+	'ss' = 6,
+	'nss' = 7,
+	'rng' = 8,
+	'nrng' = 9,
+	'gt' = 10,
+	'gte' = 11,
+	'lt' = 12,
+	'lte' = 13,
+}
 export type TicketFilterType = 'text' | 'longText' | 'date' | 'sequencing' | 'pastDate' | 'createdAt' | 'updatedAt' | 'oneOf' | 'manyOf' | 'status' | 'boolean' | 'number' | 'title' | 'ticketCode' | 'template' | 'owner';
-type ValueType = string | number | Date;
-export type TicketFilterValue = ValueType | ValueType[];
+export type ValueType = string | number | Date | boolean;
+export type TicketFilterValue = ValueType | ValueType[] | [ValueType, ValueType][]; // last one is for the range operator
 export type BaseFilter = { operator: TicketFilterOperator, values: TicketFilterValue[], displayValues?: string };
 
 export type TicketFilter = {
