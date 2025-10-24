@@ -19,6 +19,7 @@ const usersById = new Map();
 const usersByEmail = new Map();
 const teamspaceByAccount = new Map();
 const usersInAccount = new Map();
+const tenantsByUsers = {};
 
 const basicAvatar = 'basicAvatarUrl';
 
@@ -39,11 +40,16 @@ Cache.removeAccount = (accountId) => {
 };
 
 // Users in account cache
-Cache.addUserToAccount = (accountId, userId) => {
+Cache.addUserToAccount = (accountId, userEntry) => {
 	if (!usersInAccount.has(accountId)) {
-		usersInAccount.set(accountId, [userId]);
+		usersInAccount.set(accountId, [userEntry]);
 	}
-	usersInAccount.set(accountId, [...usersInAccount.get(accountId), userId]);
+	usersInAccount.set(accountId, [...usersInAccount.get(accountId), userEntry]);
+	const userId = userEntry.id;
+	tenantsByUsers[userId] = tenantsByUsers[userId] || [];
+	if (!tenantsByUsers[userId].includes(accountId)) {
+		tenantsByUsers[userId].push(accountId);
+	}
 };
 
 Cache.getAllUsersInAccount = (accountId) => {
@@ -58,10 +64,16 @@ Cache.removeUserFromAccount = (accountId, userId) => {
 	if (!usersInAccount.has(accountId)) return;
 	// const users = usersInAccount.get(accountId);
 	usersInAccount.set(accountId, usersInAccount.get(accountId).filter((u) => u.id !== userId));
+	const userTenants = tenantsByUsers[userId] || [];
+	tenantsByUsers[userId] = userTenants.filter((t) => t !== accountId);
 };
 
 Cache.removeAllUsersFromAccount = (accountId) => {
 	if (usersInAccount.has(accountId)) {
+		usersInAccount.get(accountId).forEach((userId) => {
+			tenantsByUsers[userId] = tenantsByUsers[userId] || [];
+			tenantsByUsers[userId] = tenantsByUsers[userId].filter((t) => t !== accountId);
+		});
 		usersInAccount.delete(accountId);
 	}
 };
@@ -70,11 +82,11 @@ Cache.removeAllUsersFromAccount = (accountId) => {
 Cache.getUserById = (userId) => {
 	if (!usersById.has(userId)) return null;
 	const { metadata, ...user } = usersById.get(userId);
-
 	return {
 		...user,
 		profilePictureUrl: user.profilePictureUrl || basicAvatar,
 		...metadata,
+		tenantIds: tenantsByUsers[userId] || [],
 	};
 };
 
@@ -104,9 +116,11 @@ Cache.getUserByEmail = (email) => {
 	if (!usersByEmail.has(email)) return null;
 
 	const user = usersByEmail.get(email);
+
 	return {
 		...user,
 		profilePictureUrl: user.profilePictureUrl || basicAvatar,
+		tenantIds: tenantsByUsers[user.id] || [],
 	};
 };
 
