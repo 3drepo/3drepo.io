@@ -17,7 +17,7 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount, getAllUsersInAccount, getTeamspaceByAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, getAllUsersInAccount, getTeamspaceByAccount, getUserStatusInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
@@ -43,6 +43,7 @@ const { removeUserFromAllModels } = require('../../models/modelSettings');
 const { removeUserFromAllProjects } = require('../../models/projectSettings');
 const { splitName } = require('../../utils/helper/strings');
 const { templates } = require('../../utils/responseCodes');
+const { membershipStatus } = require('../../services/sso/frontegg/frontegg.constants');
 
 const Teamspaces = {};
 
@@ -252,6 +253,23 @@ Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove, removePermiss
 		removeUserFromAccount(accountId, userId),
 		revokeTeamspaceRoleFromUser(teamspace, userToRemove),
 	]);
+};
+
+Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck) => {
+	try {
+		console.log('hi', teamspace);
+		const [accountId, userId] = await Promise.all([
+			getTeamspaceRefId(teamspace),
+			getUserId(username),
+		]);
+		const memStatus = await getUserStatusInAccount(accountId, userId);
+		console.log(username, teamspace, memStatus, bypassStatusCheck);
+		return bypassStatusCheck ? memStatus !== membershipStatus.NOT_MEMBER
+			: memStatus === membershipStatus.ACTIVE || memStatus === membershipStatus.PENDING_LOGIN;
+	} catch (err) {
+		console.log(err);
+		return false;
+	}
 };
 
 Teamspaces.getAddOns = getAddOns;
