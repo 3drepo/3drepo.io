@@ -136,7 +136,7 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Prop
 	}
 
 	return (
-		<CameraOffSightContainer style={{ transform: `translate(${position.x}px, ${position.y}px) ` }} 
+		<CameraOffSightContainer id='viewerLayer2dCameraOffSight' style={{ transform: `translate(${position.x}px, ${position.y}px) ` }} 
 			onMouseDown={onMouseDown}>
 			{!camInSight.current && <CameraOffSightIcon arrowAngle={angle}/>}
 		</CameraOffSightContainer>

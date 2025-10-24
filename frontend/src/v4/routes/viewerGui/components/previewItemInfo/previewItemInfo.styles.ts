@@ -21,7 +21,7 @@ import Typography from '@mui/material/Typography';
 
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { COLOR } from '../../../../styles';
-import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
+import { OpenInViewerButton as BaseOpenInViewerButton } from '../../../components/openInViewerButton/openInViewerButton.component';
 
 export const Container = styled.div`
 	min-width: 0;
@@ -79,7 +79,7 @@ export const ExtraInfo = styled.span`
 	color: ${COLOR.BLACK_60};
 `;
 
-export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
+export const OpenInViewerButton = styled(BaseOpenInViewerButton)`
 	&& {
 		position: relative;
 		display: flex;

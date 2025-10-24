@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 import { Button, Breadcrumbs } from '@mui/material';
-import { Link } from 'react-router-dom';
+import { Link, LinkProps } from 'react-router-dom';
 import { TextOverflow } from '@controls/textOverflow';
 import { FONT_WEIGHT } from '@/v5/ui/themes/theme';
 
@@ -81,9 +81,9 @@ const BasicBreadcrumb = styled(Button).attrs({
 `;
 
 
-export const Breadcrumb: typeof Link = styled(BasicBreadcrumb).attrs({
+export const Breadcrumb = styled(BasicBreadcrumb).attrs({
 	component: Link,
-})``;
+})<LinkProps>``;
 
 export const InteractiveBreadcrumb = styled(BasicBreadcrumb)<{ $secondary: boolean }>`
 	&& {

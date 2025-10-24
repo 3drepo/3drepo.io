@@ -28,34 +28,46 @@ import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { TicketsEllipsisMenu } from '@components/viewer/cards/tickets/ticketsEllipsisMenu/ticketsEllipsisMenu.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
+import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
+import { useParams } from 'react-router';
+import { ViewerParams } from '../../../routes.constants';
 
 export const TicketsListCard = () => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
-	
+	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
+	const { containerOrFederation } = useParams<ViewerParams>();
+	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
+
+	const onFiltersChange = (filters) => {
+		TicketsCardActionsDispatchers.setFilters(filters);
+	};
+
 	return (
 		<CardContainer>
-			<CardHeader
-				icon={<TicketsIcon />}
-				title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
-				actions={(
-					<>
-						{!readOnly && (<NewTicketMenu />)}
-						<FilterSelection />
-						<TicketsEllipsisMenu />
-					</>
-				)}
-			/>
-			<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
-				<CardFilters />
-				{tickets.length ? (
-					<TicketsList />
-				) : (
-					<EmptyListMessage>
-						<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />
-					</EmptyListMessage>
-				)}
-			</CardContent>
+			<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]} filters={presetFilters} onChange={onFiltersChange}>
+				<CardHeader
+					icon={<TicketsIcon />}
+					title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
+					actions={(
+						<>
+							{!readOnly && (<NewTicketMenu />)}
+							<FilterSelection />
+							<TicketsEllipsisMenu />
+						</>
+					)}
+				/>
+				<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
+					<CardFilters />
+					{tickets.length ? (
+						<TicketsList />
+					) : (
+						<EmptyListMessage>
+							<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />
+						</EmptyListMessage>
+					)}
+				</CardContent>
+			</TicketsFiltersContextComponent>
 		</CardContainer>
 	);
 };

@@ -213,7 +213,7 @@ const subscribeToV5Events = () => {
 		if(importData.status === processStatuses.OK) {
 			const rev = await findLatest(teamspace, model, {tag: 1});
 			if(rev) {
-				const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, rev.tag || corId);
+				const notes = await notifications.upsertModelUpdatedNotifications(teamspace, model, rev.tag || corId || rev._id);
 				notes.forEach((note) => upsertedNotification(null, note));
 			}
 		}

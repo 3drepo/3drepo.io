@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../../../../helper/path');
-const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber, outOfOrderArrayEqual } = require('../../../../../helper/services');
+const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber, outOfOrderArrayEqual, generateUUIDString } = require('../../../../../helper/services');
 
 const CryptoJs = require('crypto-js');
 
@@ -24,6 +24,7 @@ jest.mock('../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
@@ -292,6 +293,60 @@ const testAddFederation = () => {
 	});
 };
 
+const testNewRevision = () => {
+	describe('Add new federation revision', () => {
+		test('should succeed', async () => {
+			ModelSettings.updateModelSubModels.mockResolvedValueOnce();
+			Revisions.addRevision.mockResolvedValueOnce();
+
+			const teamspace = generateRandomString();
+			const projectId = generateRandomString();
+			const model = generateRandomString();
+			const owner = generateRandomString();
+			const containers = [
+				{
+					_id: generateUUIDString(),
+					group: generateRandomString(),
+				},
+				{
+					_id: generateUUIDString(),
+					group: generateRandomString(),
+				},
+				{
+					_id: generateUUIDString(),
+				},
+			];
+			const info = {
+				owner,
+				containers,
+			};
+
+			await Federations.newRevision(teamspace, projectId, model, info);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			const createRevisionArguments = Revisions.addRevision.mock.calls[0];
+
+			expect(createRevisionArguments[0]).toEqual(teamspace);
+			expect(createRevisionArguments[1]).toEqual(projectId);
+			expect(createRevisionArguments[2]).toEqual(model);
+			expect(createRevisionArguments[3]).toEqual(modelTypes.FEDERATION);
+			const revision = createRevisionArguments[4];
+			expect(revision.author).toEqual(info.owner);
+			expect(revision.containers).toEqual(info.containers);
+
+			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledWith(
+				teamspace,
+				projectId,
+				model,
+				owner,
+				revision._id,
+				containers,
+			);
+		});
+	});
+};
+
 const testDeleteFederation = () => {
 	describe('Delete federation', () => {
 		test('should succeed', async () => {
@@ -479,6 +534,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetFederationStats();
 	testAddFederation();
 	testDeleteFederation();
+	testNewRevision();
 	testGetSettings();
 	testGetTicketGroupById();
 	testGetMD5Hash();

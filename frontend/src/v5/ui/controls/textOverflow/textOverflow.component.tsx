@@ -19,7 +19,8 @@ import { ReactNode, useCallback, useEffect, useState, useRef } from 'react';
 import { WindowEventListener } from '@/v4/helpers/windowEventListener';
 import { onlyText } from 'react-children-utilities';
 
-import { Container, Tooltip } from './textOverflow.styles';
+import { Container } from './textOverflow.styles';
+import { Tooltip } from '@mui/material';
 
 interface ITextOverflow {
 	lines?: number;
@@ -56,7 +57,7 @@ export const TextOverflow = ({ children, className, tooltipText, lines }: ITextO
 
 	return (
 		<>
-			<Tooltip title={tooltipTitle} placement="bottom">
+			<Tooltip title={tooltipTitle} placement="bottom" slotProps={{ tooltip: { sx: { maxWidth: '600px' } } } } >
 				<Container
 					ref={ref}
 					lines={lines}

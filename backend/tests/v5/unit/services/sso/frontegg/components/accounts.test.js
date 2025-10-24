@@ -129,12 +129,28 @@ const testCreateAccount = () => {
 
 const testGetAllUsersInAccount = () => {
 	describe('Get all users in account', () => {
-		const generateResponse = (nItems, hasNext) => ({
+		const generateResponse = (nItems, hasNext, omitMetadata) => ({
 			data: {
-				items: times(nItems, () => ({ id: generateRandomString(), email: generateRandomString() })),
+				items: times(nItems, () => ({
+					id: generateRandomString(),
+					email: generateRandomString(),
+					name: generateRandomString(),
+					metadata: omitMetadata ? undefined
+						: JSON.stringify({ countryCode: generateRandomString(), company: generateRandomString() }),
+					createdAt: new Date().toISOString(),
+				})),
 				_links: { next: hasNext ? generateRandomString() : undefined },
 			},
 		});
+
+		const generateExpectedDataFromResponse = (res) => res.data.items.map(
+			({ id, email, name, metadata, createdAt }) => ({
+				id,
+				email,
+				name,
+				createdAt,
+				...JSON.parse(metadata || '{}'),
+			}));
 
 		test('Should return empty array if there are no users', async () => {
 			const accountId = generateRandomString();
@@ -157,6 +173,28 @@ const testGetAllUsersInAccount = () => {
 			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), expectedHeader);
 		});
 
+		test('Should not fail if metadata has no value', async () => {
+			const accountId = generateRandomString();
+
+			const expectedHeader = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+
+			};
+			const webRes = generateResponse(10, false, true);
+			WebRequests.get.mockResolvedValueOnce(webRes);
+
+			const users = await Accounts.getAllUsersInAccount(accountId);
+
+			expect(users).toEqual(generateExpectedDataFromResponse(webRes));
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), expectedHeader);
+		});
+
 		test('Should return list of users (no pagination)', async () => {
 			const accountId = generateRandomString();
 
@@ -170,7 +208,7 @@ const testGetAllUsersInAccount = () => {
 
 			const users = await Accounts.getAllUsersInAccount(accountId);
 
-			expect(users).toEqual(webRes.data.items);
+			expect(users).toEqual(generateExpectedDataFromResponse(webRes));
 
 			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
 			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
@@ -196,7 +234,8 @@ const testGetAllUsersInAccount = () => {
 
 			const users = await Accounts.getAllUsersInAccount(accountId);
 
-			const expectedUsers = [...webRes1.data.items, ...webRes2.data.items, ...webRes3.data.items];
+			const expectedUsers = [...generateExpectedDataFromResponse(webRes1),
+				...generateExpectedDataFromResponse(webRes2), ...generateExpectedDataFromResponse(webRes3)];
 
 			expect(users).toEqual(expectedUsers);
 

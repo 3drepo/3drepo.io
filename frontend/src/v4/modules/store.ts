@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { routerMiddleware } from 'connected-react-router';
 import { createBrowserHistory } from 'history';
 import { applyMiddleware, compose, createStore } from 'redux';
 
@@ -31,11 +30,6 @@ const initialState = {};
 export const history = createBrowserHistory();
 
 function configureStore() {
-	const middlewares = [
-		sagaMiddleware,
-		routerMiddleware(history)
-	];
-
 	const enhancers = [];
 
 	if (IS_DEVELOPMENT && window.__REDUX_DEVTOOLS_EXTENSION__) {
@@ -47,11 +41,11 @@ function configureStore() {
 			if (action.type === 'RESET_APP') {
 				state = undefined;
 			}
-			return createReducer(history)(state as any, action);
+			return createReducer()(state as any, action);
 		},
 		initialState,
 		compose(
-			applyMiddleware(...middlewares),
+			applyMiddleware(sagaMiddleware),
 			...enhancers
 		)
 	);

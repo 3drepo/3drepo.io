@@ -46,6 +46,7 @@ const propTypes = createConstantMapping([
 
 const propOptions = createConstantMapping([
 	'values',
+	'value',
 	'required',
 	'default',
 	'readOnly',
@@ -72,6 +73,8 @@ const viewGroups = createConstantMapping([
 	'colored',
 	'hidden',
 	'transformed',
+	'selected',
+	'shown',
 ]);
 
 const riskLevelsArr = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
@@ -219,5 +222,10 @@ TemplateConstants.getApplicableDefaultProperties = (config, isImport) => [
 	...customisableProperties.flatMap((createFn) => processProperty(createFn(config), config, isImport),
 	),
 ];
+TemplateConstants.supportedPatterns = createConstantMapping([
+	'model_name',
+	'template_code',
+	'ticket_number',
+]);
 
 module.exports = TemplateConstants;

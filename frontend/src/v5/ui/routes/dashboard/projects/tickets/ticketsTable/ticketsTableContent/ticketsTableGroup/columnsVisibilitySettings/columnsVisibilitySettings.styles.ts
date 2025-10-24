@@ -19,26 +19,18 @@ import { SearchInput as SearchInputBase } from '@controls/searchSelect/searchSel
 import { MenuItem as MenuItemBase } from '@mui/material';
 import styled from 'styled-components';
 
-export const IconContainer = styled.div`
-	cursor: pointer;
-	color: ${({ theme }) => theme.palette.base.main};
-	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
-	position: absolute;
-	right: -2px;
-	top: 0;
-	width: fit-content;
-	padding-left: 4px;
-	z-index: 11;
-`;
-
 export const SearchInput = styled(SearchInputBase)`
 	margin: 0;
 `;
 
 export const MenuItem = styled(MenuItemBase)`
-	padding: 0;
-	padding-right: 10px;
+	height: 34px;
+	padding: 0 10px 0 4px;
 	max-width: 600px;
+	
+	.MuiButtonBase-root {
+		padding: 0;
+	}
 
 	label {
 		margin: 0;
@@ -58,3 +50,13 @@ export const EmptyListMessageContainer = styled.div`
 	padding: 0 15px 15px;
 `;
 
+export const ActionButton = styled.div<{ disabled: boolean, onClick: () => void }>`
+	${({ theme }) => theme.typography.body2};
+	padding: 2px 12px;
+	color: ${({ disabled, theme: { palette } }) => disabled ? palette.base.lightest : palette.base.main};
+	cursor: ${({ disabled }) => disabled ? 'default' : 'pointer'};
+
+	:hover {
+		color: ${({ disabled, theme: { palette } }) => disabled ? palette.base.lightest : palette.secondary.main};
+	}
+`;

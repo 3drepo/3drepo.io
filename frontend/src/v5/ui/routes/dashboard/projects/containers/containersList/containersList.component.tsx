@@ -133,7 +133,7 @@ export const ContainersList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						<VirtualList items={sortedList} itemHeight={81} itemContent={
+						<VirtualList items={sortedList} itemHeight={80} itemContent={
 							(container, index) => (
 								container.hasStatsPending ? (
 									<ContainerListItemLoading  delay={index / 10} container={container} key={container._id} />

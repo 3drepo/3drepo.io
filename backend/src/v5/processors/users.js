@@ -19,17 +19,20 @@ const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
 const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
-	removeUser, updatePassword, updateProfile } = require('../models/users');
-const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
+	getUserId, removeUser, updatePassword, updateProfile } = require('../models/users');
+const { getFile, removeFile, storeFile } = require('../services/filesManager');
+const { getUserAvatarBuffer, getUserById, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
 const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
+const { splitName } = require('../utils/helper/strings');
 const { templates } = require('../utils/responseCodes');
-const { triggerPasswordReset } = require('../services/sso/frontegg');
 
 // This is used for the situation where a user has a record from
 // the IDP but we don't have a matching record in the db. We need
@@ -37,8 +40,9 @@ const { triggerPasswordReset } = require('../services/sso/frontegg');
 // and also to store info such as API Key.
 Users.createNewUserRecord = async (idpUserData) => {
 	const { id, email, name, createdAt } = idpUserData;
-	const [firstName, ...remaining] = name?.split(' ') ?? ['Anonymous', 'User'];
-	const lastName = remaining?.join(' ');
+
+	// idp should always return the email as the firstname so the fall back should, in theory, never be used..
+	const [firstName, lastName] = splitName(name) ?? ['UnknownUser', ''];
 
 	const userData = {
 		username: id,
@@ -52,7 +56,7 @@ Users.createNewUserRecord = async (idpUserData) => {
 
 	await addUser(userData);
 
-	publish(events.USER_CREATED, { username: id, email, fullName: [firstName, remaining].join(' '), createdAt: userData.createdAt });
+	publish(events.USER_CREATED, { username: id, email, fullName: [firstName, lastName].join(' ').trim(), createdAt: userData.createdAt });
 	return id;
 };
 
@@ -66,37 +70,36 @@ Users.remove = async (username) => {
 };
 
 Users.getProfileByUsername = async (username) => {
-	const user = await getUserByUsername(username, {
+	const { user, customData: { userId, apiKey } } = await getUserByUsername(username, {
 		user: 1,
-		'customData.firstName': 1,
-		'customData.lastName': 1,
-		'customData.email': 1,
+		'customData.userId': 1,
 		'customData.apiKey': 1,
-		'customData.billing.billingInfo.company': 1,
-		'customData.billing.billingInfo.countryCode': 1,
 	});
+	const { name, email, profilePictureUrl, company, countryCode } = await getUserById(userId);
+	const [firstName, lastName] = splitName(name);
+	const hasAvatar = !!profilePictureUrl;
+	const intercomRef = generateUserHash(email);
 
-	const { customData } = user;
-
-	const hasAvatar = await fileExists(USERS_DB_NAME, AVATARS_COL_NAME, username);
-
-	const intercomRef = generateUserHash(customData.email);
-
-	return {
-		username: user.user,
-		firstName: customData.firstName,
-		lastName: customData.lastName,
-		email: customData.email,
+	return deleteIfUndefined({
+		username: user,
+		firstName,
+		lastName,
+		email,
 		hasAvatar,
-		apiKey: customData.apiKey,
-		company: customData.billing?.billingInfo?.company,
-		countryCode: customData.billing?.billingInfo?.countryCode,
-		...(intercomRef ? { intercomRef } : {}),
-	};
+		apiKey,
+		company,
+		countryCode,
+		intercomRef,
+	});
 };
 
 Users.updateProfile = async (username, fieldsToUpdate) => {
-	await updateProfile(username, fieldsToUpdate);
+	const userId = await getUserId(username);
+
+	await Promise.all([
+		updateUserDetails(userId, fieldsToUpdate),
+		updateProfile(username, fieldsToUpdate),
+	]);
 };
 
 Users.resetPassword = async (user) => {
@@ -112,15 +115,38 @@ Users.resetPassword = async (user) => {
 	}
 };
 
+Users.getAvatar = async (username) => {
+	try {
+		const userId = await getUserId(username);
+		let avatarBuffer = await getUserAvatarBuffer(userId);
+		if (!avatarBuffer) {
+			// this means the avatar is not a generated one, so we don't have it cached
+			avatarBuffer = await getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
+		}
+		const fileExt = await fileExtensionFromBuffer(avatarBuffer);
+
+		return {
+			buffer: avatarBuffer,
+			extension: fileExt || 'png',
+		};
+	} catch (error) {
+		throw templates.fileNotFound;
+	}
+};
+
+Users.uploadAvatar = async (username, fileObj) => {
+	const userId = await getUserId(username);
+	await Promise.all([
+		uploadAvatar(userId, fileObj),
+		storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, fileObj.buffer),
+	]);
+};
+
 Users.generateApiKey = generateApiKey;
 
 Users.deleteApiKey = deleteApiKey;
 
 Users.getUserByUsername = getUserByUsername;
-
-Users.getAvatar = (username) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
-
-Users.uploadAvatar = (username, avatarBuffer) => storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
 
 Users.updatePassword = updatePassword;
 

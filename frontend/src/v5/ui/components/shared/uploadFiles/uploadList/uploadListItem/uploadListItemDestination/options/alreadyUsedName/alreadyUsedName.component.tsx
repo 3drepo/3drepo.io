@@ -16,13 +16,13 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { AlreadyUsedNameContainer } from './alreadyUsedName.styles';
+import { ErrorOption } from './alreadyUsedName.styles';
 
 export const AlreadyUsedName = () => (
-	<AlreadyUsedNameContainer>
+	<ErrorOption>
 		<FormattedMessage
 			id="uploads.destination.name.error.alreadyExists"
 			defaultMessage="This name is already used within this project"
 		/>
-	</AlreadyUsedNameContainer>
+	</ErrorOption>
 );

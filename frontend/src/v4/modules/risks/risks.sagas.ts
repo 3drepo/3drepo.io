@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { push } from 'connected-react-router';
 import filesize from 'filesize';
 import { isEmpty, isEqual, map, omit } from 'lodash';
 import * as queryString from 'query-string';
@@ -55,6 +54,7 @@ import { selectSelectedSequence, selectSelectedStartingDate, SequencesActions } 
 import { SnackbarActions } from '../snackbar';
 import { TreeActions } from '../tree';
 import { ViewpointsActions } from '../viewpoints';
+import { RouterActions } from '../router/router.redux';
 import { RisksActions, RisksTypes } from './risks.redux';
 import {
 	selectActiveRiskDetails,
@@ -292,6 +292,11 @@ function* goToRisk({ risk }) {
 	const params = yield select(selectUrlParams);
 	let queryParams =  yield select(selectQueryParams);
 
+	if (!risk) {
+		yield put(RouterActions.removeSearchParams(['riskId']))
+		return
+	}
+
 	// Im not longer in the viewer or board
 	// this happens when unmounting the card which
 	// makes sense when you close the card in the viewer and want to remove the selected risk
@@ -305,13 +310,13 @@ function* goToRisk({ risk }) {
 	const route = ROUTES.V5_MODEL_VIEWER;
 	const path = generatePath(route, params);
 
-	queryParams = riskId ?  {... queryParams, riskId} : omit(queryParams, 'riskId');
+	queryParams = {... queryParams, riskId};
 	let query = queryString.stringify(queryParams);
 	if (query) {
 		query = '?' + query;
 	}
 
-	yield put(push(`${path}${query}`));
+	yield put(RouterActions.navigate(`${path}${query}`));
 }
 
 function* showDetails({ revision, riskId }) {
@@ -367,10 +372,36 @@ const onCreateEvent = (createdRisk) => {
 	dispatch(RisksActions.saveRiskSuccess(createdRisk[0], false));
 };
 
+const onResourcesCreated = (resources) => {
+	resources = resources.filter((r) => r.issueIds );
+	if (!resources.length) {
+		return;
+	}
+	const currentState = getState();
+	const teamspace = selectCurrentModelTeamspace(currentState);
+	const model = selectCurrentModel(currentState);
+	const activeRiskId = selectActiveRiskId(currentState);
+	const issueId =  resources[0].issueIds[0]; // The resource chat event is the same for issues and risks, therefore they both use 'issueId'
+	if (activeRiskId !== issueId) return;
+	dispatch(RisksActions.attachResourcesSuccess(prepareResources(teamspace, model, resources), issueId));
+};
+
+const onResourceDeleted = (resource) => {
+	if (!resource.issueIds) {
+		return;
+	}
+
+	dispatch(RisksActions.removeResourceSuccess(resource, resource.issueIds[0]));
+};
+
 function* subscribeOnRiskChanges({ teamspace, modelId }) {
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, {
 		subscribeToUpdated: onUpdateEvent,
 		subscribeToCreated: onCreateEvent
+	}));
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+		subscribeToCreated: onResourcesCreated,
+		subscribeToDeleted: onResourceDeleted
 	}));
 }
 
@@ -378,6 +409,10 @@ function* unsubscribeOnRiskChanges({ teamspace, modelId }) {
 	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RISKS, teamspace, modelId, {
 		unsubscribeFromUpdated: onUpdateEvent,
 		unsubscribeFromCreated: onCreateEvent
+	}));
+	yield put(ChatActions.callChannelActions(CHAT_CHANNELS.RESOURCES, teamspace, modelId, {
+		unsubscribeFromCreated: onResourcesCreated,
+		unsubscribeFromDeleted: onResourceDeleted
 	}));
 }
 

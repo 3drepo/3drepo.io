@@ -16,14 +16,11 @@
  */
 
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { getPropertiesInCamelCase } from '@/v5/store/tickets/tickets.helpers';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
-import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
 import { DueDate } from '@controls/dueDate/dueDate.component';
 import { Chip } from '@controls/chip/chip.component';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
-import { get } from 'lodash';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useContext } from 'react';
 import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
@@ -31,6 +28,8 @@ import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 import { CellDate } from './ticketsTableCell.styles';
 import { Cell } from './cell/cell.component';
+import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
+import { AssigneesValuesDisplay } from '@controls/assigneesSelect/assigneeValuesDisplay/assigneeValuesDisplay.component';
 
 const PROPERTIES_NAME_PREFIX = 'properties.';
 type TicketsTableCellProps = {
@@ -39,33 +38,36 @@ type TicketsTableCellProps = {
 	ticket: ITicket,
 };
 export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProps) => {
-	const { title, properties, number, type: templateId } = ticket;
+	const {  type: templateId, _id: ticketId } = ticket;
 	const { getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
 	const container = ContainersHooksSelectors.selectContainerById(modelId);
 	const federation = FederationsHooksSelectors.selectFederationById(modelId);
 	const { name: modelName } = container || federation || {};
-	const value = get(ticket, name);
-	
-	const {
-		owner,
-		priority,
-		status,
-		dueDate,
-	} = getPropertiesInCamelCase(properties);
+	const value = TicketsHooksSelectors.selectTicketPropertyByName(ticketId, name);
+	const number = TicketsHooksSelectors.selectTicketPropertyByName(ticketId, 'number') || 0;
+
+	// Check if this property is currently being loaded
+	const propertyWasFetched = TicketsHooksSelectors.selectPropertyFetched(ticketId, name);
+
 	const propertyType = getPropertyType(name);
+
+	// Show loading skeleton if property is being loaded and value is undefined/null
+	if (!propertyWasFetched) {
+		return (
+			<Cell name={name}>
+				<SkeletonBlock width="80%" />
+			</Cell>
+		);
+	}
 
 	if (name === 'id') return (
 		<Cell name={name}>
 			{`${template.code}:${number}`}
 		</Cell>
 	);
-	if (name === BaseProperties.TITLE) return (
-		<Cell name={name}>
-			{title}
-		</Cell>
-	);
+
 	if (name === 'modelName') return (
 		<Cell name={name}>
 			{modelName}
@@ -77,15 +79,15 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 			case BaseProperties.OWNER:
 				return (
 					<Cell name={name}>
-						<AssigneesSelect value={owner} disabled />
+						<AssigneesValuesDisplay value={value}/>
 					</Cell>
 				);
 			case IssueProperties.DUE_DATE:
 				return (
 					<CellDate>
 						<Cell name={name}>
-							{!!dueDate && (
-								<DueDate value={dueDate} disabled />
+							{!!value && (
+								<DueDate value={value} disabled />
 							)}
 						</Cell>
 					</CellDate>
@@ -93,23 +95,22 @@ export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProp
 			case IssueProperties.PRIORITY:
 				return (
 					<Cell name={name}>
-						<Chip {...PRIORITY_LEVELS_MAP[priority]} variant="text" />
+						<Chip {...PRIORITY_LEVELS_MAP[value]} variant="text" />
 					</Cell>
 				);
 			case BaseProperties.STATUS:
 				return (
 					<Cell name={name}>
-						<Chip {...getChipPropsFromConfig(statusConfig, status)} />
+						<Chip {...getChipPropsFromConfig(statusConfig, value)} />
 					</Cell>
 				);
 		}
 	}
 
 	if (['oneOf', 'manyOf'].includes(propertyType) && isJobAndUsersType(name)) {
-		const multiple = propertyType === 'manyOf';
 		return (
 			<Cell name={name}>
-				{!!value?.length && (<AssigneesSelect value={value} multiple={multiple} disabled />)}
+				{!!value?.length && (<AssigneesValuesDisplay value={value} />)}
 			</Cell>
 		);
 	}

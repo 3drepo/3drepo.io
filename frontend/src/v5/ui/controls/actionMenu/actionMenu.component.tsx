@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { ReactNode, useState } from 'react';
-import { Popover } from '@mui/material';
+import { Popover, PopoverProps as PopoverPropsType } from '@mui/material';
 import { Menu, Container } from './actionMenu.styles';
 import { ActionMenuContext } from './actionMenuContext';
 
@@ -23,7 +23,7 @@ export type ActionMenuProps = {
 	className?: string;
 	children: ReactNode;
 	TriggerButton: any;
-	PopoverProps?: any;
+	PopoverProps?: Partial<PopoverPropsType>;
 	onOpen?: () => void;
 	onClose?: () => void;
 	disabled?: boolean;
@@ -56,7 +56,7 @@ export const ActionMenu = ({
 		onClose?.();
 	};
 
-	const handlePopoverClick = (e: Event) => {
+	const handlePopoverClick = (e) => {
 		e.stopPropagation();
 		e.preventDefault();
 		PopoverProps?.onClick?.(e);

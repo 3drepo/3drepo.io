@@ -16,10 +16,13 @@
  */
 
 const { times } = require('lodash');
+const { Readable } = require('stream');
 const { src } = require('../../../../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID,
 	generateUUIDString, generateRandomNumber,
-	generateRevisionEntry } = require('../../../../../../helper/services');
+	generateRevisionEntry, generateRandomBuffer } = require('../../../../../../helper/services');
+
+const MimeTypes = require(`${src}/utils/helper/mimeTypes`);
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
@@ -605,10 +608,13 @@ const testCreateDrawingThumbnail = () => {
 	describe('Create drawing thumbnail', () => {
 		test('Should store the thumbnail if it has been successfully generated', async () => {
 			const imageRef = generateUUID();
-			const imageBuffer = generateRandomString();
+			const imageBuffer = generateRandomBuffer();
+			const readStream = Readable.from(imageBuffer);
+			const mimeType = MimeTypes.PDF;
 			const thumbnailBuffer = generateRandomString();
+
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef });
-			FilesManager.getFile.mockResolvedValueOnce(imageBuffer);
+			FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream, mimeType });
 			ImageHelper.createThumbnail.mockResolvedValueOnce(thumbnailBuffer);
 
 			await Drawings.createDrawingThumbnail(teamspace, project, model, revision);
@@ -617,11 +623,11 @@ const testCreateDrawingThumbnail = () => {
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, model,
 				modelTypes.DRAWING, revision, { image: 1 });
 
-			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, imageRef);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, imageRef);
 
 			expect(ImageHelper.createThumbnail).toHaveBeenCalledTimes(1);
-			expect(ImageHelper.createThumbnail).toHaveBeenCalledWith(imageBuffer);
+			expect(ImageHelper.createThumbnail).toHaveBeenCalledWith(imageBuffer, mimeType);
 
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL,
@@ -636,9 +642,12 @@ const testCreateDrawingThumbnail = () => {
 
 		test('Should not store the thumbnail it has not been successfully generated', async () => {
 			const imageRef = generateUUID();
-			const imageBuffer = generateRandomString();
+			const imageBuffer = generateRandomBuffer();
+			const readStream = Readable.from(imageBuffer);
+			const mimeType = MimeTypes.PDF;
+
 			Revisions.getRevisionByIdOrTag.mockResolvedValueOnce({ image: imageRef });
-			FilesManager.getFile.mockResolvedValueOnce(imageBuffer);
+			FilesManager.getFileAsStream.mockResolvedValueOnce({ readStream, mimeType });
 			ImageHelper.createThumbnail.mockResolvedValueOnce();
 
 			await Drawings.createDrawingThumbnail(teamspace, project, model, revision);
@@ -647,11 +656,11 @@ const testCreateDrawingThumbnail = () => {
 			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(teamspace, model,
 				modelTypes.DRAWING, revision, { image: 1 });
 
-			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, imageRef);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, imageRef);
 
 			expect(ImageHelper.createThumbnail).toHaveBeenCalledTimes(1);
-			expect(ImageHelper.createThumbnail).toHaveBeenCalledWith(imageBuffer);
+			expect(ImageHelper.createThumbnail).toHaveBeenCalledWith(imageBuffer, mimeType);
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 			expect(Revisions.addDrawingThumbnailRef).not.toHaveBeenCalled();

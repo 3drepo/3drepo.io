@@ -15,19 +15,39 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { HEADER_APP_ID, HEADER_USER_ID } = require('../frontegg.constants');
-const { delete: deleteReq, get, post } = require('../../../../utils/webRequests');
+const { HEADER_APP_ID, HEADER_ENVIRONMENT_ID, HEADER_TENANT_ID, HEADER_USER_ID } = require('../frontegg.constants');
+const { delete: deleteReq, get, getArrayBuffer, post, put } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
+const { getURLDomain, splitName } = require('../../../../utils/helper/strings');
+const FormData = require('form-data');
+const { Readable } = require('stream');
 
 const Users = {};
 
 Users.getUserById = async (userId) => {
 	try {
 		const config = await getConfig();
-		const { data } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
-		return data;
+		const { data: { metadata, ...others } } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
+		const details = JSON.parse(metadata || '{}');
+		// keep a copy of the metadata at the top level for easier access
+		return { ...details, ...others, metadata: details };
 	} catch (err) {
 		throw new Error(`Failed to get user(${userId}) from Users: ${err.message}`);
+	}
+};
+
+Users.getUserAvatarBuffer = async (userId) => {
+	try {
+		const { profilePictureUrl } = await Users.getUserById(userId);
+		if (!getURLDomain(profilePictureUrl).includes('frontegg')) {
+			// this is not an generated avatar, so we should not try to fetch it
+			return null;
+		}
+
+		const { data } = await getArrayBuffer(profilePictureUrl);
+		return Buffer.from(data);
+	} catch (err) {
+		throw new Error(`Failed to get avatar for (${userId}) from Users: ${err.message}`);
 	}
 };
 
@@ -64,6 +84,55 @@ Users.triggerPasswordReset = async (email) => {
 		[HEADER_APP_ID]: config.appId,
 	};
 	await post(url, { email }, { headers });
+};
+
+Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUrl, ...metadata }) => {
+	try {
+		const config = await getConfig();
+		const headers = await getBearerHeader();
+		const url = `${config.vendorDomain}/identity/resources/users/v1/${userId}`;
+
+		const existingDetails = await Users.getUserById(userId);
+		const [existingFirstName, existingLastName] = splitName(existingDetails.name);
+
+		const newMetadata = { ...existingDetails.metadata, ...metadata };
+
+		const payload = {
+			name: `${firstName || existingFirstName} ${lastName || existingLastName}`.trim(),
+			metadata: JSON.stringify(newMetadata),
+			profilePictureUrl: profilePictureUrl || existingDetails.profilePictureUrl,
+		};
+
+		await put(url, payload, { headers });
+	} catch (err) {
+		throw new Error(`Failed to update user(${userId}) from Users: ${err.message}`);
+	}
+};
+
+Users.uploadAvatar = async (userId, fileObj) => {
+	try {
+		const config = await getConfig();
+		const { tenantId } = await Users.getUserById(userId);
+
+		const formData = new FormData();
+		formData.append('image', Readable.from(fileObj.buffer),
+			{ filename: fileObj.originalname, contentType: fileObj.mimetype });
+
+		const headers = {
+			...await getBearerHeader(),
+			...formData.getHeaders(),
+			[HEADER_ENVIRONMENT_ID]: config.clientId,
+			[HEADER_TENANT_ID]: tenantId,
+			[HEADER_USER_ID]: userId,
+		};
+		const url = `${config.vendorDomain}/team/resources/profile/me/image/v1`;
+
+		const { data } = await put(url, formData, { headers });
+
+		await Users.updateUserDetails(userId, { profilePictureUrl: data });
+	} catch (err) {
+		throw new Error(`Failed to upload avatar for user(${userId}) from Users: ${err.message}`);
+	}
 };
 
 module.exports = Users;

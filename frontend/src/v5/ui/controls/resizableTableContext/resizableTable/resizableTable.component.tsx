@@ -28,6 +28,7 @@ export const ResizableTable = ({ className = '', children }) => {
 	const key = useRef(+new Date());
 	const [tableNode, setTableNode] = useState(null);
 	const gridClassName = `ResizableTableTemplateColumns_${key.current}`;
+	const columns = getVisibleSortedColumnsNames();
 
 	useEffect(() => {
 		if (!tableNode) return;
@@ -36,7 +37,7 @@ export const ResizableTable = ({ className = '', children }) => {
 		document.head.appendChild(styleTag);
 
 		const setGridTemplateColumns = () => {
-			const gridTemplateColumns = getVisibleSortedColumnsNames()
+			const gridTemplateColumns = columns
 				.map((column) => `${getWidth(column)}px`)
 				.join(' ');
 
@@ -56,7 +57,7 @@ export const ResizableTable = ({ className = '', children }) => {
 			unsubscribe();
 			document.head.removeChild(styleTag);
 		};
-	}, [tableNode]);
+	}, [tableNode, columns]);
 
 	return (
 		<Table className={className}>

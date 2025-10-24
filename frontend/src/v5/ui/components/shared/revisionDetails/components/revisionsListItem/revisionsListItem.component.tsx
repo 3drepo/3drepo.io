@@ -40,8 +40,6 @@ export const RevisionsListItem = ({
 	children,
 	target,
 }: IRevisionsListItem): JSX.Element => {
-	const disabled = voidStatus;
-
 	const toggleVoidStatus = (e: SyntheticEvent) => {
 		e.preventDefault();
 		e.stopPropagation();
@@ -54,7 +52,7 @@ export const RevisionsListItem = ({
 	};
 
 	return (
-		<Container to={disabled ? undefined : redirectTo} disabled={disabled} target={target}>
+		<Container to={redirectTo} target={target} disabled={voidStatus}>
 			{children}
 			<RevisionsListItemButton onClick={toggleVoidStatus} status={voidStatus} disabled={!hasPermission} />
 			{hasPermission && (
