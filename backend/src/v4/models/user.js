@@ -21,7 +21,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
 const utils = require("../utils");
-const { findJobByUser, usersWithJob, addUserToJob } = require("./job");
+const { usersWithJob, addUserToJob } = require("./job");
 
 const TeamspaceSettings = require("./teamspaceSetting");
 

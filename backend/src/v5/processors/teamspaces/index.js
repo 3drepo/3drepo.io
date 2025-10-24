@@ -17,7 +17,7 @@
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../models/users.constants');
 const { addDefaultJobs, assignUserToJob, getJobsToUsers, removeUserFromJobs } = require('../../models/jobs');
-const { addUserToAccount, createAccount, getAllUsersInAccount, getTeamspaceByAccount, getUserStatusInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
+const { addUserToAccount, createAccount, getAccountsByUser, getAllUsersInAccount, getTeamspaceByAccount, getUserStatusInAccount, removeAccount, removeUserFromAccount } = require('../../services/sso/frontegg');
 const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
@@ -27,7 +27,7 @@ const {
 	grantAdminToUser,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
-const { deleteFavourites, getAccessibleTeamspaces, getUserByUsername, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
+const { deleteFavourites, getUserByUsername, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
 const { deleteIfUndefined, isEmpty } = require('../../utils/helper/objects');
 const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
@@ -38,12 +38,12 @@ const { createNewUserRecord } = require('../users');
 const { getInvitationsByTeamspace } = require('../../models/invitations');
 const { isTeamspaceAdmin } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
+const { membershipStatus } = require('../../services/sso/frontegg/frontegg.constants');
 const { removeAllTeamspaceNotifications } = require('../../models/notifications');
 const { removeUserFromAllModels } = require('../../models/modelSettings');
 const { removeUserFromAllProjects } = require('../../models/projectSettings');
 const { splitName } = require('../../utils/helper/strings');
 const { templates } = require('../../utils/responseCodes');
-const { membershipStatus } = require('../../services/sso/frontegg/frontegg.constants');
 
 const Teamspaces = {};
 
@@ -107,8 +107,25 @@ Teamspaces.removeTeamspace = async (teamspace, removeAssociatedAccount = true) =
 };
 
 Teamspaces.getTeamspaceListByUser = async (user) => {
-	const tsList = await getAccessibleTeamspaces(user);
-	return Promise.all(tsList.map(async (ts) => ({ name: ts, isAdmin: await isTeamspaceAdmin(ts, user) })));
+	const userId = await getUserId(user);
+
+	const accountIds = await getAccountsByUser(userId);
+
+	const teamspaceInfo = await Promise.all(accountIds.map(async (accountId) => {
+		try {
+			const teamspace = await getTeamspaceByAccount(accountId);
+			if (teamspace) {
+				const isAdmin = await isTeamspaceAdmin(teamspace, user);
+				return { name: teamspace, isAdmin };
+			}
+
+			return undefined;
+		} catch (err) {
+			return undefined;
+		}
+	}));
+
+	return teamspaceInfo.filter((info) => !!info);
 };
 
 Teamspaces.getAllMembersInTeamspace = async (teamspace) => {
@@ -257,17 +274,14 @@ Teamspaces.removeTeamspaceMember = async (teamspace, userToRemove, removePermiss
 
 Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck) => {
 	try {
-		console.log('hi', teamspace);
 		const [accountId, userId] = await Promise.all([
 			getTeamspaceRefId(teamspace),
 			getUserId(username),
 		]);
 		const memStatus = await getUserStatusInAccount(accountId, userId);
-		console.log(username, teamspace, memStatus, bypassStatusCheck);
 		return bypassStatusCheck ? memStatus !== membershipStatus.NOT_MEMBER
 			: memStatus === membershipStatus.ACTIVE || memStatus === membershipStatus.PENDING_LOGIN;
 	} catch (err) {
-		console.log(err);
 		return false;
 	}
 };
