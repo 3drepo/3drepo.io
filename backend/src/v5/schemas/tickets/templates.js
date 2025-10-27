@@ -70,6 +70,12 @@ const uniqueTypeBlackList = [
 	propTypes.COORDS,
 ];
 
+const complexTypes = new Set([
+	propTypes.IMAGE,
+	propTypes.IMAGE_LIST,
+	propTypes.VIEW,
+]);
+
 const propSchema = Yup.object().shape({
 	name: types.strings.title.required().min(1).matches(blackListedChrsRegex),
 	type: Yup.string().oneOf(Object.values(propTypes)).required(),
@@ -125,7 +131,7 @@ const propSchema = Yup.object().shape({
 	color: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinColSchema : schema.strip())),
 	icon: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinIconSchema : schema.strip())),
 
-	default: Yup.mixed().when(['type', 'values'], (type, values) => {
+	default: Yup.mixed().when(['type', 'values'], (type, values, context) => {
 		const res = propTypesToValidator(type);
 		if (type === propTypes.MANY_OF) {
 			return res.test('Default values check', 'provided values cannot be duplicated and must be one of the values provided', (defaultValues) => {
@@ -143,7 +149,7 @@ const propSchema = Yup.object().shape({
 
 		if (type === propTypes.ANY_OF) return res.oneOf(values);
 
-		// if (type === propTypes.IMAGE || type === propTypes.IMAGE_LIST) return Yup.mixed().strip();
+		if (complexTypes.has(type)) return Yup.mixed();
 
 		return res;
 	}),
@@ -284,25 +290,18 @@ const noDefaultsOnComplexTypesTest = (val, context) => {
 
 	const template = TemplateSchema.generateFullSchema(val);
 
-	const complexTypes = new Set([
-		propTypes.IMAGE,
-		propTypes.IMAGE_LIST,
-		propTypes.VIEW,
-	]);
-
-	console.log('here');
-	console.dir(template, { depth: null });
-
 	for (const prop of template.properties) {
 		if (propertyCheck(complexTypes, prop)) {
-			return context.createError({ message: `Property type "${prop.type}" for "${prop.name}" does not support a default value` });
+			return context.createError({ message: `Property type "${prop.type}" for "${prop.name}" property does not support a default value` });
 		}
 	}
 
 	for (const mod of template.modules) {
+		// console.log(mod);
 		for (const prop of mod.properties) {
+			// console.log(prop);
 			if (propertyCheck(complexTypes, prop)) {
-				return context.createError({ message: `Property type "${prop.type}" for "${mod.name || mod.type}.${prop.name}" does not support a default value` });
+				return context.createError({ message: `Property type "${prop.type}" for "${mod.name || mod.type}.${prop.name}" property does not support a default value` });
 			}
 		}
 	}
@@ -330,8 +329,8 @@ const schema = Yup.object().shape({
 		return true;
 	}),
 }).test(pinMappingTest)
-	.test(validTabularPropsTest)
 	.test(noDefaultsOnComplexTypesTest)
+	.test(validTabularPropsTest)
 	.noUnknown();
 
 TemplateSchema.getClosedStatuses = (template) => {

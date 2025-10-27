@@ -1236,7 +1236,7 @@ const testValidate = () => {
 	})));
 	const defaultOnModuleImageProperty = [
 		{
-			name: generateRandomString(),
+			type: generateRandomString(),
 			properties: times(5, (i) => (i % 3 === 0 ? ({
 				name: generateRandomString(),
 				type: propTypes.IMAGE,
@@ -1276,23 +1276,23 @@ const testValidate = () => {
 
 	const complexTypesDefaultTest = [
 		['image property type with default true', generateBasicSchema([], defaultOnImageProperty, {}), false],
-		// ['view property type with default true', generateBasicSchema([], defaultOnViewProperty, {}), false],
+		['view property type with default true', generateBasicSchema([], defaultOnViewProperty, {}), false],
 		['image list property type with default true', generateBasicSchema([], defaultOnImageListProperty, {}), false],
-		// ['module image property type with default true', generateBasicSchema(defaultOnModuleImageProperty, {}, {}), false],
-		// ['module view property type with default true', generateBasicSchema(defaultOnModuleViewProperty, {}, {}), false],
-		// ['module image list property type with default true', generateBasicSchema(defaultOnModuleImageListProperty, {}, {}), false],
+		['module image property type with default true', generateBasicSchema(defaultOnModuleImageProperty, [], {}), false],
+		['module view property type with default true', generateBasicSchema(defaultOnModuleViewProperty, [], {}), false],
+		['module image list property type with default true', generateBasicSchema(defaultOnModuleImageListProperty, [], {}), false],
 	];
 
 	describe.each([
-		// ['the template is undefined', undefined, false],
-		// ['the template is empty', {}, false],
-		// ['the template has all the required properties', { name: generateRandomString(), code: generateRandomString(3) }, true],
-		// ...nameTests,
-		// ...codeTests,
-		// ...schemaFieldsTest,
-		// ...propertiesTest,
-		// ...moduleSchemaTest,
-		// ...tabularColumnsTest,
+		['the template is undefined', undefined, false],
+		['the template is empty', {}, false],
+		['the template has all the required properties', { name: generateRandomString(), code: generateRandomString(3) }, true],
+		...nameTests,
+		...codeTests,
+		...schemaFieldsTest,
+		...propertiesTest,
+		...moduleSchemaTest,
+		...tabularColumnsTest,
 		...complexTypesDefaultTest,
 
 	])('Validate ticket template', (desc, data, output) => {
@@ -1303,124 +1303,48 @@ const testValidate = () => {
 		});
 	});
 
-	// test('Any unknown properties should be stripped from the schema and necessary properties filled in', () => {
-	// 	const data = {
-	// 		name: generateRandomString(),
-	// 		code: generateRandomString(3),
-	// 		config: {
-	// 			defaultView: true,
-	// 			defaultImage: true,
+	test('Any unknown properties should be stripped from the schema and necessary properties filled in', () => {
+		const data = {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			config: {
+				defaultView: true,
+				defaultImage: true,
 
-	// 		},
-	// 		properties: [{
-	// 			name: 'I am an apple',
-	// 			type: propTypes.NUMBER,
-	// 		},
-	// 		{
-	// 			name: generateRandomString(),
-	// 			type: propTypes.TEXT,
-	// 			deprecated: true,
-	// 		},
-	// 		{
-	// 			name: generateRandomString(),
-	// 			type: propTypes.DATE,
-	// 			default: Date.now(),
-	// 		},
-	// 		],
-	// 		modules: [{
-	// 			name: generateRandomString(),
-	// 		}, {
-	// 			name: 'ANOTHER CASE CHECK',
-	// 		}, {
-	// 			type: presetModules.SAFETIBASE,
-	// 			deprecated: true,
-	// 		}],
-	// 	};
-	// 	const expectedData = cloneDeep(data);
-	// 	expectedData.properties[2].default = new Date(expectedData.properties[2].default);
-	// 	expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
-	// 		{ ...mod, name, properties: [] }));
-	// 	expectedData.config = { defaultView: true };
-	// 	const output = TemplateSchema.validate(data);
+			},
+			properties: [{
+				name: 'I am an apple',
+				type: propTypes.NUMBER,
+			},
+			{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				deprecated: true,
+			},
+			{
+				name: generateRandomString(),
+				type: propTypes.DATE,
+				default: Date.now(),
+			},
+			],
+			modules: [{
+				name: generateRandomString(),
+			}, {
+				name: 'ANOTHER CASE CHECK',
+			}, {
+				type: presetModules.SAFETIBASE,
+				deprecated: true,
+			}],
+		};
+		const expectedData = cloneDeep(data);
+		expectedData.properties[2].default = new Date(expectedData.properties[2].default);
+		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
+			{ ...mod, name, properties: [] }));
+		expectedData.config = { defaultView: true };
+		const output = TemplateSchema.validate(data);
 
-	// 	expect(output).toEqual(expectedData);
-	// });
-
-	// test('Image field will have the default field stripped if provided', () => {
-	// 	const data = {
-	// 		name: generateRandomString(),
-	// 		code: generateRandomString(3),
-	// 		config: {
-
-	// 		},
-	// 		properties: [
-	// 			{
-	// 				name: generateRandomString(),
-	// 				type: propTypes.IMAGE,
-	// 				default: generateRandomString(),
-	// 			},
-
-	// 		],
-	// 		modules: [
-	// 			{
-	// 				type: presetModules.SAFETIBASE,
-	// 				properties: [
-	// 					{
-	// 						name: generateRandomString(),
-	// 						type: propTypes.IMAGE,
-	// 						default: generateRandomString(),
-	// 					}],
-	// 			}],
-	// 	};
-	// 	const expectedData = cloneDeep(data);
-	// 	delete expectedData.properties[0].default;
-	// 	delete expectedData.modules[0].properties[0].default;
-
-	// 	data[generateRandomString()] = generateRandomString();
-	// 	data.properties[0][generateRandomString()] = generateRandomString();
-	// 	data.modules[0][generateRandomString()] = generateRandomString();
-	// 	const output = TemplateSchema.validate(data);
-
-	// 	expect(output).toEqual(expectedData);
-	// });
-
-	// test('Image List field will have the default field stripped if provided', () => {
-	// 	const data = {
-	// 		name: generateRandomString(),
-	// 		code: generateRandomString(3),
-	// 		config: {
-
-	// 		},
-	// 		properties: [
-	// 			{
-	// 				name: generateRandomString(),
-	// 				type: propTypes.IMAGE_LIST,
-	// 				default: generateRandomString(),
-	// 			},
-
-	// 		],
-	// 		modules: [
-	// 			{
-	// 				type: presetModules.SAFETIBASE,
-	// 				properties: [
-	// 					{
-	// 						name: generateRandomString(),
-	// 						type: propTypes.IMAGE_LIST,
-	// 						default: generateRandomString(),
-	// 					}],
-	// 			}],
-	// 	};
-	// 	const expectedData = cloneDeep(data);
-	// 	delete expectedData.properties[0].default;
-	// 	delete expectedData.modules[0].properties[0].default;
-
-	// 	data[generateRandomString()] = generateRandomString();
-	// 	data.properties[0][generateRandomString()] = generateRandomString();
-	// 	data.modules[0][generateRandomString()] = generateRandomString();
-	// 	const output = TemplateSchema.validate(data);
-
-	// 	expect(output).toEqual(expectedData);
-	// });
+		expect(output).toEqual(expectedData);
+	});
 };
 
 const testGenerateFullSchema = () => {
@@ -1552,6 +1476,6 @@ const testGetClosedStatuses = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testValidate();
-	// testGenerateFullSchema();
-	// testGetClosedStatuses();
+	testGenerateFullSchema();
+	testGetClosedStatuses();
 });
