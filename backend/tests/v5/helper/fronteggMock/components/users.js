@@ -27,9 +27,12 @@ const Users = {};
 Users.getUserById = (userId) => Promise.resolve(UsersCache.getUserById(userId));
 
 Users.getAccountsByUser = async (userId) => {
-	const { tenantIds } = await Users.getUserById(userId);
+	const userData = await Users.getUserById(userId);
+	if (userData === null) {
+		throw new Error(`Failed to get user(${userId}) from Users: User not found`);
+	}
 
-	return tenantIds;
+	return userData.tenantIds;
 };
 
 Users.getUserAvatarBuffer = (userId) => {
