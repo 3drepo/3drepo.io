@@ -24,7 +24,7 @@ import { DashboardSkeletonList } from '@components/dashboard/dashboardList/dashb
 import { Button } from '@controls/button';
 import { CreateContainerForm } from '@/v5/ui/routes/dashboard/projects/containers/createContainerForm/createContainerForm.component';
 import { FormattedMessage } from 'react-intl';
-import { enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
+import { enableRealtimeContainerRemoved, enableRealtimeContainerUpdateSettings, enableRealtimeNewContainer } from '@/v5/services/realtime/container.events';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -33,7 +33,8 @@ import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
 import { DashboardParams } from '../../../routes.constants';
-import { IsMainList } from './mainList.context';
+import { enableRealtimeContainerRevisionUpdate, enableRealtimeNewContainerRevisionUpdate } from '@/v5/services/realtime/containerRevision.events';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
@@ -45,14 +46,30 @@ export const Containers = (): JSX.Element => {
 	} = useContainersData();
 
 	const onClickCreate = () => DialogsActionsDispatchers.open(CreateContainerForm);
-
-	useEffect(() => enableRealtimeNewContainer(teamspace, project), [project]);
+	
+	useEffect(() => {
+		if (!project || !isProjectAdmin ) return;
+		return enableRealtimeNewContainer(teamspace, project);
+	}, [project, isProjectAdmin]);
+	
 	useEffect(() => () => {ContainersActionsDispatchers.resetContainerStatsQueue();}, [] );
+
+	const containersIds = containers.map(({ _id }) => _id);
+
+	useEffect(() => {
+		const subscriptions = containersIds.flatMap((id) => [
+			enableRealtimeContainerRemoved(teamspace, project, id),
+			enableRealtimeContainerUpdateSettings(teamspace, project, id),
+			enableRealtimeContainerRevisionUpdate(teamspace, project, id),
+			enableRealtimeNewContainerRevisionUpdate(teamspace, project, id),
+		]);
+
+		return combineSubscriptions(...subscriptions);
+	}, [containersIds.join()]);
 
 	if (isListPending) {
 		return (<DashboardSkeletonList itemComponent={<SkeletonListItem />} />);
 	}
-
 	return (
 		<>
 			<SearchContextComponent items={favouriteContainers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
@@ -79,40 +96,38 @@ export const Containers = (): JSX.Element => {
 				/>
 			</SearchContextComponent>
 			<Divider />
-			<IsMainList.Provider value>
-				<SearchContextComponent items={containers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
-					<ContainersList
-						title={(
-							<FormattedMessage
-								id="containers.all.collapseTitle"
-								defaultMessage="All Containers"
-							/>
-						)}
-						titleTooltips={{
-							collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
-							visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
-						}}
-						onClickCreate={onClickCreate}
-						emptyMessage={(
-							<>
-								<DashboardListEmptyText>
-									<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
-								</DashboardListEmptyText>
-								{ isProjectAdmin && (
-									<Button
-										startIcon={<AddCircleIcon />}
-										variant="contained"
-										color="primary"
-										onClick={onClickCreate}
-									>
-										<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
-									</Button>
-								)}
-							</>
-						)}
-					/>
-				</SearchContextComponent>
-			</IsMainList.Provider>
+			<SearchContextComponent items={containers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
+				<ContainersList
+					title={(
+						<FormattedMessage
+							id="containers.all.collapseTitle"
+							defaultMessage="All Containers"
+						/>
+					)}
+					titleTooltips={{
+						collapsed: <FormattedMessage id="containers.all.collapse.tooltip.show" defaultMessage="Show all" />,
+						visible: <FormattedMessage id="containers.all.collapse.tooltip.hide" defaultMessage="Hide all" />,
+					}}
+					onClickCreate={onClickCreate}
+					emptyMessage={(
+						<>
+							<DashboardListEmptyText>
+								<FormattedMessage id="containers.all.emptyMessage" defaultMessage="You haven’t created any Containers." />
+							</DashboardListEmptyText>
+							{ isProjectAdmin && (
+								<Button
+									startIcon={<AddCircleIcon />}
+									variant="contained"
+									color="primary"
+									onClick={onClickCreate}
+								>
+									<FormattedMessage id="containers.all.newContainer" defaultMessage="New Container" />
+								</Button>
+							)}
+						</>
+					)}
+				/>
+			</SearchContextComponent>
 		</>
 	);
 };
