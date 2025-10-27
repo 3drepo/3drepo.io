@@ -110,11 +110,11 @@ const generateEmails = (data, dataRef, usersToUserInfo) => Promise.all(
 			const tickets = {};
 			const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
 
-			notifData.forEach(({ type, tickets: ticketsArr, count }) => {
-				const ticketCodes = uniqueElements(ticketsArr.flatMap(
-					(ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []));
+			notifData.forEach(({ type, tickets: ticketsArr }) => {
+				const ticketCodes = ticketsArr.flatMap(
+					(ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []);
 				if (!ticketCodes.length) return;
-				const ticketData = { count, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
+				const ticketData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
 				switch (type) {
 				case notificationTypes.TICKET_UPDATED:
 					tickets.updated = ticketData;
