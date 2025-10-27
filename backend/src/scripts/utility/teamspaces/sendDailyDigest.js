@@ -31,7 +31,6 @@ const { getUsersByQuery } = require(`${v5Path}/models/users`);
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
-const { uniqueElements } = require(`${v5Path}/utils/helper/arrays`);
 
 const { sendEmail } = require(`${v5Path}/services/mailer`);
 const { templates } = require(`${v5Path}/services/mailer/mailer.constants`);
