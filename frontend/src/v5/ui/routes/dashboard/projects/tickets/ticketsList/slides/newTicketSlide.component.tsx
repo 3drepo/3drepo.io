@@ -43,7 +43,8 @@ type NewTicketSlideProps = {
 };
 
 const toDefaultValue = ({ key, value }: PresetValue, propertyType: PropertyTypeDefinition) => {
-	if (!key || key === IssueProperties.DUE_DATE || !value) return;
+	if (!key || key === IssueProperties.DUE_DATE) return;
+	if (!value) return set({}, key, '');
 
 	let val: string | string[] = value;
 	if (propertyType === 'manyOf') {
