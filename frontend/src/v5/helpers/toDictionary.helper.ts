@@ -15,31 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { ControlsContainer as GroupCollapseHeader } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
-
-export const Container = styled.div`
-	overflow: auto;
-	position: relative;
-	width: 100vw;
-	margin-left: -75px;
-	padding: 0 64px 30px 75px;
-	flex: 1;
-
-	${GroupCollapseHeader} {
-		position: sticky;
-		left: 0;
-		overflow: unset;
-		width: calc(100vw - 161px);
-		margin-right: 0;
-	}
-`;
-
-export const TicketsTableSpinner = styled(Spinner).attrs({
-	borderSize: 4,
-})`
-	height: 60px;
-	width: 60px;
-	margin: 20px auto;
-`;
+export const toDictionary = <T, K extends keyof any>(arr: T[], indexBy: (elem: T) => K): Record<K, T> => {
+	const dict: Record<K, T> = {} as Record<K, T>;
+	arr.forEach((elem) => dict[indexBy(elem)] = elem);
+	return dict;
+};

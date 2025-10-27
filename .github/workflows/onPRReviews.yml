@@ -1,14 +1,9 @@
 name: On review update
 on:
-  pull_request:
-    types: [ready_for_review, review_requested, review_request_removed]
   pull_request_review:
-    types: [submitted]
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-permissions:
-  issues: read
 
 jobs:
   get-details:
@@ -22,7 +17,7 @@ jobs:
         uses: 3drepo/extract-pr-information@v1
         with:
           pr: ${{ github.event.pull_request.number }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PROJ_MANAGEMENT_TOKEN}}
         id: commitMsgParser
 
   check-merge-ready:
@@ -36,7 +31,7 @@ jobs:
         uses: 3drepo/all-reviewers-approved@v1
         with:
           pr: ${{ github.event.pull_request.number }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PROJ_MANAGEMENT_TOKEN}}
 
 #  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
   update-project-issue-status:

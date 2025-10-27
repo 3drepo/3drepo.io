@@ -15,40 +15,76 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
-import { Container } from './ticketsTableContent.styles';
+import { Container, TicketsTableSpinner } from './ticketsTableContent.styles';
 import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { INITIAL_COLUMNS } from '../ticketsTable.helper';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { isEqual, intersection } from 'lodash';
+import { TicketsFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
+	const defaultColumns = TicketsHooksSelectors.selectInitialTabularColumns(template._id);
 	const {
 		stretchTable, getAllColumnsNames, subscribe, resetWidths,
 		setVisibleSortedColumnsNames,
+		getVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
+	const { isFiltering } = useContext(TicketsFiltersContext);
 	const templateWasFetched = templateAlreadyFetched(template);
+	const ignoreColumnChange = useRef(false);
+	
+	const [colsParam, setColsParams] = useSearchParam('cols', Transformers.STRING_ARRAY, true);
+
+	const setVisibleColumn = () => {
+		ignoreColumnChange.current = true;
+		const columnsRendered =  [...getVisibleSortedColumnsNames()];
+		
+		if (!colsParam.length) {
+			const allColumns = getAllColumnsNames();
+			const initialVisibleColumns = intersection([...defaultColumns], allColumns);
+			if (!isEqual(columnsRendered, initialVisibleColumns)) {
+				setVisibleSortedColumnsNames(initialVisibleColumns);
+				resetWidths();
+				stretchTable(BaseProperties.TITLE);
+			}
+		} else {
+			if (!isEqual(columnsRendered, colsParam)) {
+				setVisibleSortedColumnsNames(colsParam);
+				if (!columnsRendered.length) {
+					stretchTable(BaseProperties.TITLE);
+				}
+			}
+		}
+
+		ignoreColumnChange.current = false;
+	};
 
 	useEffect(() => {
 		if (!templateWasFetched) return;
-		const allColumns = getAllColumnsNames();
-		const initialVisibleColumns = INITIAL_COLUMNS.filter((name) => allColumns.includes(name));
-		setVisibleSortedColumnsNames(initialVisibleColumns);
-		resetWidths();
-		stretchTable(BaseProperties.TITLE);
-	}, [template, templateWasFetched]);
-	
+		setVisibleColumn();
+		return subscribe(['visibleSortedColumnsNames'], (cols) => {
+			if (ignoreColumnChange.current) return;
+			setColsParams(cols);
+		});
+	}, [template, templateWasFetched, defaultColumns]);
+
+	useEffect(() => {
+		if (!templateWasFetched) return;
+		setVisibleColumn();
+	}, [colsParam]);
+
 	useEffect(() => {
 		const onMovingColumnChange = (movingColumn) => {
 			if (movingColumn) {
@@ -60,14 +96,18 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		return subscribe(['movingColumn'], onMovingColumnChange);
 	}, [edgeScrolling]);
 
-
-	if (!templateWasFetched) {
+	if (!templateWasFetched || isFiltering) {
 		return (
 			<EmptyPageView>
-				<Spinner />
+				<TicketsTableSpinner />
+				<FormattedMessage
+					id="ticketTable.emptyView"
+					defaultMessage="We're currently searching for tickets that match your criteria."
+				/>
 			</EmptyPageView>
 		);
 	}
+
 	if (!props.tickets.length) {
 		return (
 			<EmptyPageView>
