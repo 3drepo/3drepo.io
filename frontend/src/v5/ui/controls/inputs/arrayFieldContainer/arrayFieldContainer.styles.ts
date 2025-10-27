@@ -28,7 +28,6 @@ export const Container = styled.div`
 		max-height: unset;
 		height: auto;
 		margin-top: 2px;
-		margin-bottom: -6px;
 	}
 `;
 
