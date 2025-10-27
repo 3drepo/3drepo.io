@@ -176,8 +176,9 @@ const groupByStatus = (tickets: ITicket[]) => {
 const groupByManyOfValues = (tickets: ITicket[], groupBy: string) => {
 	return createGroups(tickets, (ticket) => {
 		const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
-		const name = value ? [...value].sort().join(',') : UNSET;
-		return { name, value };
+		if (!value) return { name: UNSET, value: '' };
+		const valueAsString = [...value].sort().join(',');
+		return { name: valueAsString, value: valueAsString };
 	});
 };
 

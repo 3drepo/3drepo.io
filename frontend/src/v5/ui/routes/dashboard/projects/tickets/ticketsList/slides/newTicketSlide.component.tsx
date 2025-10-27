@@ -60,7 +60,9 @@ export const NewTicketSlide = ({ template, containerOrFederation, presetValue, o
 	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
 	const preselectedDefaultValue = presetValue ? toDefaultValue(presetValue, getPropertyType(presetValue.key)) : null;
 	const defaultTicket = getDefaultTicket(template);
-	const defaultValues = preselectedDefaultValue ? merge(defaultTicket, preselectedDefaultValue) : defaultTicket;
+	const defaultValues = preselectedDefaultValue
+		? merge({}, defaultTicket, preselectedDefaultValue)
+		: defaultTicket;
 	const isFederation = modelIsFederation(containerOrFederation);
 	
 	const formData = useForm({
