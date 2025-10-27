@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import _, { Dictionary } from 'lodash';
+import _, { Dictionary, isArray } from 'lodash';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectStatusConfigByTemplateId, selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -186,10 +186,13 @@ const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => createGroups
 
 const groupByJobsAndUsers = (tickets: ITicket[], groupBy: string) => {
 	return createGroups(tickets, (ticket) => {
-		const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
-		const values = Array.isArray(value) ? value : [value];
-		const name = values && value ? values.map(getjobOrUserDisplayName).sort().join(',') : UNSET;
-		return { name, value };
+		const valueRaw = selectTicketPropertyByName(getState(), ticket._id, groupBy);
+		if (!valueRaw) return { name: UNSET, value: '' };
+		const valueRawAsArray = isArray(valueRaw) ? [...valueRaw].sort() : [valueRaw];
+		const valueRawAsString = valueRawAsArray.join(',');
+		// users are stored as ids, need to get their display names
+		const name = valueRaw ? valueRawAsArray.map(getjobOrUserDisplayName).sort().join(',') : UNSET;
+		return { name, value: valueRawAsString };
 	});
 };
 
