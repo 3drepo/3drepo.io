@@ -57,7 +57,7 @@ Cache.getAllUsersInAccount = (accountId) => {
 		usersInAccount.set(accountId, []);
 		return [];
 	}
-	return usersInAccount.get(accountId).map(({ id }) => Cache.getUserById(id));
+	return usersInAccount.get(accountId).map(({ id }) => ({ ...Cache.getUserById(id), id }));
 };
 
 Cache.removeUserFromAccount = (accountId, userId) => {
