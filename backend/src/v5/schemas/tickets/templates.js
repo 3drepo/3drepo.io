@@ -131,7 +131,7 @@ const propSchema = Yup.object().shape({
 	color: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinColSchema : schema.strip())),
 	icon: Yup.mixed().when('type', (val, schema) => (val === propTypes.COORDS ? pinIconSchema : schema.strip())),
 
-	default: Yup.mixed().when(['type', 'values'], (type, values, context) => {
+	default: Yup.mixed().when(['type', 'values'], (type, values) => {
 		const res = propTypesToValidator(type);
 		if (type === propTypes.MANY_OF) {
 			return res.test('Default values check', 'provided values cannot be duplicated and must be one of the values provided', (defaultValues) => {
