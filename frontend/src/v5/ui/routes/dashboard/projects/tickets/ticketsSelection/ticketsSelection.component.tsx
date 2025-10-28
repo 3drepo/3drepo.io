@@ -16,9 +16,9 @@
  */
 
 import { DashboardParams, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
-import { generatePath, useParams, useHistory } from 'react-router-dom';
+import { generatePath, useParams, useNavigate } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
@@ -33,13 +33,17 @@ type FormType = {
 };
 export const TicketsSelection = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const [models] = useSearchParam('models', Transformers.STRING_ARRAY);
-	const history = useHistory();
+	const navigate = useNavigate();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
+
+	const containers = ContainersHooksSelectors.selectContainers();
+	const federations = FederationsHooksSelectors.selectFederations();
+	const AllContainersAndFederations = [...containers, ...federations];
+	const defaultContainerOrFederation = AllContainersAndFederations.length === 1 ? [AllContainersAndFederations[0]._id]: [];
 
 	const formData = useForm<FormType>({
 		defaultValues: {
-			containersAndFederations: models,
+			containersAndFederations: defaultContainerOrFederation,
 			template: '',
 		},
 	});
@@ -52,15 +56,14 @@ export const TicketsSelection = () => {
 	const goToTableView = () => {
 		if (!isValid) return;
 
-		const route = TICKETS_ROUTE + `?models=${containersAndFederations.join(',')}`;
-		
-		const path = generatePath(route, {
+		const search = `models=${containersAndFederations.join(',')}`;
+		const pathname = generatePath(TICKETS_ROUTE, {
 			teamspace,
 			project,
 			template,
 		});
 
-		history.push(path);
+		navigate({ pathname, search });
 	};
 
 	if (!teamspace || !project || !templates) return (<Loader />);

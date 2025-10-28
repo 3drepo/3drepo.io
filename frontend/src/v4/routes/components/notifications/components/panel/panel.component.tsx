@@ -20,6 +20,7 @@ import { NotificationsPanelHeader } from '../panelHeader/panelHeader.component';
 import { List, Container, NotificationsPanelItem } from './panel.styles';
 
 interface IProps {
+	navigate: (to: string) => void;
 	labelLeft?: string;
 	labelRight?: string;
 	notifications: INotification[];

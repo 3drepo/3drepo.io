@@ -108,7 +108,6 @@ db.createUser = async (userCredentials, tsList = [], customData = {}) => {
 
 	await DbHandler.createUser(user, password, {
 		billing: { billingInfo: {} },
-		userId: user,
 		...basicData,
 		...customData,
 		apiKey,

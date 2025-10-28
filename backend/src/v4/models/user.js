@@ -21,7 +21,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
 const utils = require("../utils");
-const { findJobByUser, usersWithJob, addUserToJob } = require("./job");
+const { usersWithJob, addUserToJob } = require("./job");
 
 const TeamspaceSettings = require("./teamspaceSetting");
 
@@ -44,14 +44,9 @@ const { publish } = require(`${v5Path}/services/eventsManager/eventsManager.js`)
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
-const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces`);
-const { getTeamspaceMembersInfo } = require(`${v5Path}/processors/teamspaces`);
+const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser, getTeamspaceMembersInfo, isTeamspaceMember} = require(`${v5Path}/processors/teamspaces`);
 
 const COLL_NAME = "system.users";
-
-const isMemberOfTeamspace = function (user, teamspace) {
-	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
-};
 
 const hasReachedLicenceLimit = async function (teamspace) {
 	const Invitations = require("./invitations");
@@ -545,7 +540,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 		throw (responseCodes.USER_NOT_ASSIGNED_JOB);
 	}
 
-	if (isMemberOfTeamspace(userEntry, teamspace)) {
+	if (await isTeamspaceMember(teamspace, userToAdd, true)) {
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
@@ -629,35 +624,15 @@ User.findUsersInTeamspace =  async function (teamspace, fields) {
 };
 
 User.teamspaceMemberCheck = async function (user, teamspace) {
-	const userEntry = await User.findByUserName(user, {roles: 1});
-
-	if (!userEntry) {
-		throw (responseCodes.USER_NOT_FOUND);
-	}
-
-	if (!isMemberOfTeamspace(userEntry, teamspace)) {
+	const isMember = await isTeamspaceMember(teamspace, user, true);
+	if (!isMember) {
 		throw (responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 	}
 };
 
 User.getTeamMemberInfo = async function(teamspace, user) {
-	const userEntry = await User.findByUserName(user);
-	if(!userEntry || !isMemberOfTeamspace(userEntry,teamspace)) {
-		throw responseCodes.USER_NOT_FOUND;
-	} else {
-		const job = await findJobByUser(teamspace, user);
-		const result = {
-			user,
-			firstName: userEntry.customData.firstName,
-			lastName: userEntry.customData.lastName,
-			company: _.get(userEntry.customData, "billing.billingInfo.company", null)
-		};
-
-		if(job) {
-			result.job = {_id: job._id, color: job.color};
-		}
-		return result;
-	}
+	const membersInfo = await getTeamspaceMembersInfo(teamspace);
+	return membersInfo.find(member => member.user === user);
 };
 
 User.findByUserName = async function (username, projection) {
