@@ -168,16 +168,12 @@ export const UpdateImageButton = forwardRef(({ hasImage, disabled, ...props }: I
 });
 
 export const ImageButton = ({ hasNoPermission, ...props }: IProps) => {
-	let title = '';
-	if (props.disabled) {
-		title = 'Sorry, this cannot be edited on a closed item.';
+	if (hasNoPermission) {
+		return null;
 	}
 
-	if (hasNoPermission) {
-		title = 'Sorry, You do not have enough permissions to do this.';
-	}
 	return (
-		<Tooltip title={title}>
+		<Tooltip title={props.disabled ? 'Sorry, this cannot be edited on a closed item.' : ''}>
 			<UpdateImageButton {...props} />
 		</Tooltip>
 	);
