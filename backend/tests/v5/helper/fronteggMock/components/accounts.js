@@ -53,7 +53,7 @@ Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 };
 
 Accounts.getUserStatusInAccount = (accountId, userId) => {
-	const isMember = Cache.getAllUsersInAccount(accountId).find((user) => user.id === userId);
+	const isMember = Cache.getAllUsersInAccount(accountId).some((user) => user.id === userId);
 	return Promise.resolve(isMember ? membershipStatus.ACTIVE : membershipStatus.NOT_MEMBER);
 };
 
