@@ -274,10 +274,7 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 			} else toUnset[key] = 1;
 		} else if (value !== undefined) {
 			if (key === 'unit' || key === 'code') {
-				if (!toUpdate.properties) {
-					toUpdate.properties = {};
-				}
-				toUpdate.properties[key] = value;
+				toUpdate[`properties.${key}`] = value;
 			} else {
 				toUpdate[key] = value;
 			}
