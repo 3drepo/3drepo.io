@@ -21,7 +21,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
 const utils = require("../utils");
-const { usersWithJob, addUserToJob } = require("./job");
+const { usersWithJob, addUserToJob, findByJob } = require("./job");
 
 const TeamspaceSettings = require("./teamspaceSetting");
 
@@ -632,7 +632,18 @@ User.teamspaceMemberCheck = async function (user, teamspace) {
 
 User.getTeamMemberInfo = async function(teamspace, user) {
 	const membersInfo = await getTeamspaceMembersInfo(teamspace);
-	return membersInfo.find(member => member.user === user);
+	const userData =  membersInfo.find(member => member.user === user);
+	if(!userData) {
+		throw responseCodes.USER_NOT_FOUND;
+	}
+	if(userData?.job) {
+		// eslint-disable-next-line no-unused-vars
+		const {users, __v, ...job} = await findByJob(teamspace, userData.job);
+		userData.job = job;
+	}
+
+	return userData;
+
 };
 
 User.findByUserName = async function (username, projection) {
