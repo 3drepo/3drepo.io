@@ -24,12 +24,15 @@ const Frontegg = { ...Auth, ...Users, ...Accounts };
 
 Frontegg.init = () => Promise.resolve();
 
-// NOTE: this file cannot import any source code from v4/v5 otherwise the original frontegg service will be used.
+// NOTE: this file cannot import any source code from v4/v5 otherwise the original frontegg service will be used (due to the imports at the beginning of those files).
 const v4ImportUsers = async (teamspaceToAccountId) => {
 	const users = await find('admin', 'system.users', { 'customData.email': { $exists: true } },
-		{ user: 1, 'customData.email': 1, 'customData.firstName': 1, 'customData.lastName': 1, roles: 1 });
-	await Promise.all(users.map(async ({ user, customData: { email, firstName, lastName }, roles }) => {
-		const fullName = `${firstName || ''} ${lastName || ''}`.trim();
+		{ user: 1, customData: 1, roles: 1 });
+	await Promise.all(users.map(async ({ user, customData: { email, firstName = 'name', lastName = 'name', billing }, roles }) => {
+		const fullName = `${firstName} ${lastName}`.trim();
+		const company = billing?.billingInfo?.company;
+		const countryCode = billing?.billingInfo?.countryCode;
+
 		let firstTime = true;
 		await Promise.all(roles.map(async ({ db, role }) => {
 			const accountId = teamspaceToAccountId[db];
@@ -40,7 +43,12 @@ const v4ImportUsers = async (teamspaceToAccountId) => {
 			const userId = await Accounts.addUserToAccount(accountId, email, fullName);
 			if (firstTime) {
 				firstTime = false;
-				updateOne('admin', 'system.users', { user }, { $set: { 'customData.userId': userId } });
+				// updating the names as well as v4 data is incomplete and sometimes does not contain a name.
+				await updateOne('admin', 'system.users', { user }, { $set: { 'customData.userId': userId, 'customData.firstName': firstName, 'customData.lastName': lastName } });
+
+				if (company || countryCode) {
+					await Users.updateUserDetails(userId, { company, countryCode });
+				}
 			}
 		}));
 	}));
