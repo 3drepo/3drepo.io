@@ -52,7 +52,10 @@ Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 	return id;
 };
 
-Accounts.getUserStatusInAccount = () => Promise.resolve(membershipStatus.ACTIVE);
+Accounts.getUserStatusInAccount = (accountId, userId) => {
+	const isMember = Cache.getAllUsersInAccount(accountId).some((user) => user.id === userId);
+	return Promise.resolve(isMember ? membershipStatus.ACTIVE : membershipStatus.NOT_MEMBER);
+};
 
 Accounts.removeUserFromAccount = (accountId, userId) => Cache.removeUserFromAccount(accountId, userId);
 

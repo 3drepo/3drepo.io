@@ -106,7 +106,7 @@ export const desc = Yup.lazy((value) => (
 			formatMessage({
 				id: 'validation.model.description.error.max',
 				defaultMessage: 'Description is limited to 660 characters',
-			}))
+			})).transform((v) => v || null).nullable()
 ));
 
 export const INVALID_DATE_RANGE_MESSAGE = formatMessage({
