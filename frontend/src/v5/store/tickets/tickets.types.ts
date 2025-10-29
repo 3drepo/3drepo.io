@@ -88,6 +88,14 @@ export type IStatusConfig = {
 	default?: string;
 };
 
+type ITabularColumn = {
+	module?: string;
+	property: string;
+};
+
+type ITabularConfig = {
+	columns: ITabularColumn[];
+};
 export interface ITemplate {
 	_id: string;
 	name: string;
@@ -101,6 +109,7 @@ export interface ITemplate {
 		issueProperties?: boolean;
 		pin?: boolean | PinConfig;
 		status?: IStatusConfig;
+		tabular?: ITabularConfig;
 	};
 }
 
