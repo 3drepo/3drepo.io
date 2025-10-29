@@ -543,7 +543,7 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 		throw (responseCodes.USER_NOT_ASSIGNED_JOB);
 	}
 
-	if (await isTeamspaceMember(teamspace, userToAdd, true)) {
+	if (await isTeamspaceMember(teamspace, userEntry.user, true)) {
 		throw (responseCodes.USER_ALREADY_ASSIGNED);
 	}
 
