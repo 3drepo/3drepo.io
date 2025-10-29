@@ -16,7 +16,7 @@
  */
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
-import { isNull, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import * as Yup from 'yup';
 
 export const ERROR_REQUIRED_FIELD_MESSAGE = formatMessage({
