@@ -35,15 +35,17 @@ export const TicketsSelection = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
 	const navigate = useNavigate();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
+	const [models] = useSearchParam('models', Transformers.STRING_ARRAY);
+
 
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 	const AllContainersAndFederations = [...containers, ...federations];
-	const defaultContainerOrFederation = AllContainersAndFederations.length === 1 ? [AllContainersAndFederations[0]._id]: [];
+	const defaultContainerOrFederations = AllContainersAndFederations.length === 1 ? [AllContainersAndFederations[0]._id] : models;
 
 	const formData = useForm<FormType>({
 		defaultValues: {
-			containersAndFederations: defaultContainerOrFederation,
+			containersAndFederations: defaultContainerOrFederations,
 			template: '',
 		},
 	});
