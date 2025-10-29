@@ -29,10 +29,8 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const { TEAM_MEMBER } = require(`${src}/models/roles.constants`);
 const { ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 
-const USER_COL = 'system.users';
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 jest.mock('../../../../src/v5/services/sso/frontegg');
@@ -520,40 +518,6 @@ const testCreateTeamspaceSettings = () => {
 	});
 };
 
-const testGetAllUsersInTeamspace = () => {
-	describe('Get all users in teamspace', () => {
-		test('should get all users in a teamspace', async () => {
-			const teamspace = generateRandomString();
-			const users = [
-				{ id: generateRandomString(), user: generateRandomString() },
-				{ id: generateRandomString(), user: generateRandomString() },
-			];
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
-			const res = await Teamspace.getAllUsersInTeamspace(teamspace);
-			expect(res).toEqual(users);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', USER_COL, { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
-				{ user: 1 }, undefined);
-		});
-
-		test('should get all users in a teamspace (with projection)', async () => {
-			const teamspace = generateRandomString();
-			const users = [
-				{ id: generateRandomString(), user: generateRandomString() },
-				{ id: generateRandomString(), user: generateRandomString() },
-			];
-
-			const projection = { [generateRandomString()]: 1 };
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
-			const res = await Teamspace.getAllUsersInTeamspace(teamspace, projection);
-			expect(res).toEqual(users);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', USER_COL, { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
-				projection, undefined);
-		});
-	});
-};
-
 const testRemoveUserFromAdminPrivileges = () => {
 	describe('Remove user from admin privileges', () => {
 		test('Should trigger a query to remove user from admin permissions array', async () => {
@@ -849,7 +813,6 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateAddOns();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
-	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
 	testGetTeamspaceActiveLicenses();
 	testGetTeamspaceExpiredLicenses();

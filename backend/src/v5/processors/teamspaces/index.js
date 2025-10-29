@@ -29,8 +29,8 @@ const {
 } = require('../../models/teamspaceSettings');
 const { deleteFavourites, getUserByUsername, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
 const { deleteIfUndefined, isEmpty } = require('../../utils/helper/objects');
-const { getCollaboratorsAssigned, getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
+const { getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { COL_NAME } = require('../../models/projectSettings.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
@@ -206,6 +206,15 @@ Teamspaces.getTeamspaceMembersInfo = async (teamspace) => {
 	return membersList.map(
 		(member) => (usersToJob[member.user] ? { ...member, job: usersToJob[member.user] } : member),
 	);
+};
+
+const getCollaboratorsAssigned = async (teamspace) => {
+	const [teamspaceUsers, teamspaceInvitations] = await Promise.all([
+		Teamspaces.getAllMembersInTeamspace(teamspace),
+		getInvitationsByTeamspace(teamspace, { _id: 1 }),
+	]);
+
+	return teamspaceUsers.length + teamspaceInvitations.length;
 };
 
 Teamspaces.getQuotaInfo = async (teamspace) => {

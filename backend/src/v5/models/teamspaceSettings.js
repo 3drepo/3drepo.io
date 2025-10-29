@@ -24,7 +24,6 @@ const {
 	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
-const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
 const { getUserStatusInAccount } = require('../services/sso/frontegg');
@@ -251,11 +250,6 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 
 TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
 	username, TEAMSPACE_ADMIN);
-
-TeamspaceSetting.getAllUsersInTeamspace = (teamspace, projection = { user: 1 }) => {
-	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
-	return findMany(query, projection);
-};
 
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
 	await teamspaceSettingUpdate(teamspace, { _id: teamspace }, { $pull: { permissions: { user } } });

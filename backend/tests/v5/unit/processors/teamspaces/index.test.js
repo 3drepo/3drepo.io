@@ -76,6 +76,9 @@ const Quota = require(`${src}/utils/quota`);
 jest.mock('../../../../../src/v5/handler/db');
 const DB = require(`${src}/handler/db`);
 
+jest.mock('../../../../../src/v5/models/invitations');
+const Invitations = require(`${src}/models/invitations`);
+
 const testGetTeamspaceListByUser = () => {
 	describe('Get Teamspace list by user', () => {
 		test('should give the expected list of teamspaces', async () => {
@@ -361,6 +364,14 @@ const testInitTeamspace = () => {
 
 const testGetQuotaInfo = () => {
 	describe('Get quota info', () => {
+		test('should return error if a method called throws an exception', async () => {
+			const getQuotaInfoMock = Quota.getQuotaInfo.mockRejectedValueOnce(templates.licenceExpired);
+			const teamspace = generateRandomString();
+			await expect(Teamspaces.getQuotaInfo(teamspace)).rejects.toEqual(templates.licenceExpired);
+			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
+			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
+		});
+
 		test('should return quota info', async () => {
 			const quotaInfo = {
 				freeTier: false,
@@ -369,42 +380,36 @@ const testGetQuotaInfo = () => {
 				collaborators: generateRandomNumber(0),
 			};
 			const spaceUsed = generateRandomNumber(0);
-			const collabsUsed = generateRandomNumber(0);
+			const collabsUsed = 0;
+
+			const expected = {
+				freeTier: quotaInfo.freeTier,
+				expiryDate: quotaInfo.expiryDate,
+				data: {
+					available: quotaInfo.data,
+					used: spaceUsed,
+				},
+				seats: {
+					available: quotaInfo.collaborators,
+					used: collabsUsed,
+				},
+			};
+
+			TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(generateRandomString());
+			FronteggService.getAllUsersInAccount.mockResolvedValueOnce([]);
+			UsersModel.getUserInfoFromEmailArray.mockResolvedValueOnce([]);
+			Invitations.getInvitationsByTeamspace.mockResolvedValueOnce([]);
+
 			Quota.getQuotaInfo.mockResolvedValueOnce(quotaInfo);
 			Quota.getSpaceUsed.mockResolvedValueOnce(spaceUsed);
-			Quota.getCollaboratorsAssigned.mockResolvedValueOnce(collabsUsed);
 			const teamspace = generateRandomString();
 			const res = await Teamspaces.getQuotaInfo(teamspace);
-			expect(res).toEqual(
-				{
-					freeTier: quotaInfo.freeTier,
-					expiryDate: quotaInfo.expiryDate,
-					data: {
-						available: quotaInfo.data,
-						used: spaceUsed,
-					},
-					seats: {
-						available: quotaInfo.collaborators,
-						used: collabsUsed,
-					},
-				},
-			);
+
+			expect(res).toEqual(expected);
 			expect(Quota.getQuotaInfo).toHaveBeenCalledTimes(1);
 			expect(Quota.getQuotaInfo).toHaveBeenCalledWith(teamspace, true);
 			expect(Quota.getSpaceUsed).toHaveBeenCalledTimes(1);
 			expect(Quota.getSpaceUsed).toHaveBeenCalledWith(teamspace, true);
-			expect(Quota.getCollaboratorsAssigned).toHaveBeenCalledTimes(1);
-			expect(Quota.getCollaboratorsAssigned).toHaveBeenCalledWith(teamspace);
-		});
-
-		test('should return error if a method called throws an exception', async () => {
-			const getQuotaInfoMock = Quota.getQuotaInfo.mockImplementationOnce(() => {
-				throw templates.licenceExpired;
-			});
-			const teamspace = generateRandomString();
-			await expect(Teamspaces.getQuotaInfo(teamspace)).rejects.toEqual(templates.licenceExpired);
-			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
-			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
 		});
 	});
 };

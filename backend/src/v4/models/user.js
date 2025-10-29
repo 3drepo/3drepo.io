@@ -44,7 +44,7 @@ const { publish } = require(`${v5Path}/services/eventsManager/eventsManager.js`)
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
-const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser, getTeamspaceMembersInfo, isTeamspaceMember} = require(`${v5Path}/processors/teamspaces`);
+const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser, getTeamspaceMembersInfo, getAllMembersInTeamspace, isTeamspaceMember} = require(`${v5Path}/processors/teamspaces`);
 
 const COLL_NAME = "system.users";
 
@@ -189,14 +189,17 @@ User.deleteApiKey = (username) => UserProcessorV5.deleteApiKey(username);
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
 	const regex = new RegExp(`^${searchString}$`, "i");
-	const notMembers = await db.find("admin", COLL_NAME, {
+	const [allUsers, members] = await Promise.all([db.find("admin", COLL_NAME, {
 		$or: [
 			{"customData.email": regex},
 			{"user": regex}
 		],
-		"customData.inactive": { "$exists": false },
-		"roles.db": {$ne: teamspace }
-	});
+		"customData.inactive": { "$exists": false }
+	}),
+	User.getAllUsersInTeamspace(teamspace)
+	]);
+
+	const notMembers = allUsers.filter(({user}) => !members.includes(user));
 
 	return notMembers.map(({user, customData }) => {
 		return {
@@ -614,13 +617,8 @@ User.getMembers = async function (teamspace) {
 };
 
 User.getAllUsersInTeamspace = async function (teamspace) {
-	const users =  await User.findUsersInTeamspace(teamspace, {user: 1});
+	const users =  await getAllMembersInTeamspace(teamspace);
 	return users.map(({user}) => user);
-};
-
-User.findUsersInTeamspace =  async function (teamspace, fields) {
-	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
-	return await db.find("admin", COLL_NAME, query, fields);
 };
 
 User.teamspaceMemberCheck = async function (user, teamspace) {
