@@ -59,8 +59,8 @@ export const useSearchParam = <T = string>(name: string, transformer: ParamTrans
 
 	const setParam = useCallback((newValue: T) => {
 		const search = getSearchParams(newValue);
-		navigate({ ...location,  search }, { replace: !pushInHistory });
-	}, [getSearchParams, navigate, pushInHistory, location]);
+		navigate({ search }, { replace: !pushInHistory });
+	}, [getSearchParams, navigate, pushInHistory]);
 
 	return [value, setParam, getSearchParams] as [T, (val?: T) => void, (val?: T, search?: string) => string];
 };
