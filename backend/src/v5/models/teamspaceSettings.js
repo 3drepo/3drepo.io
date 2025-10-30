@@ -163,27 +163,16 @@ TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
 };
 
 TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username, bypassStatusCheck = false) => {
-	const query = { user: username, 'roles.db': teamspace };
+	const query = { user: username };
 	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1, userId: 1 } });
 	if (!userDoc) return false;
+	const teamspaceId = await TeamspaceSetting.getTeamspaceRefId(teamspace);
 
+	const memStatus = await getUserStatusInAccount(teamspaceId, userDoc.customData.userId);
+	if (memStatus === membershipStatus.NOT_MEMBER) {
+		return false;
+	}
 	if (!bypassStatusCheck) {
-		const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
-
-		if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
-			const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
-			if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
-				throw templates.domainRestricted;
-			}
-		}
-
-		const teamspaceId = await TeamspaceSetting.getTeamspaceRefId(teamspace);
-
-		const memStatus = await getUserStatusInAccount(teamspaceId, userDoc.customData.userId);
-		if (memStatus === membershipStatus.NOT_MEMBER) {
-			return false;
-		}
-
 		if (memStatus === membershipStatus.INACTIVE) {
 			throw templates.membershipInactive;
 		}
@@ -193,7 +182,7 @@ TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username, bypassStatus
 		}
 	}
 
-	return !!userDoc;
+	return true;
 };
 
 TeamspaceSetting.getMembersInfo = async (teamspace) => {

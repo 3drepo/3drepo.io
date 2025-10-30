@@ -524,8 +524,8 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, 
 
 };
 
-User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor, bypassQuotaCheck = false) {
-	if(!bypassQuotaCheck) {
+User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor, fromInvite = false) {
+	if(!fromInvite) {
 		await hasReachedLicenceLimit(teamspace);
 	}
 	let userEntry = null;
@@ -543,11 +543,13 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 		throw (responseCodes.USER_NOT_ASSIGNED_JOB);
 	}
 
-	if (await isTeamspaceMember(teamspace, userEntry.user, true)) {
-		throw (responseCodes.USER_ALREADY_ASSIGNED);
-	}
+	if(!fromInvite) {
+		if (await isTeamspaceMember(teamspace, userEntry.user, true)) {
+			throw (responseCodes.USER_ALREADY_ASSIGNED);
+		}
 
-	await addTeamspaceMember(teamspace, userEntry.user, executor);
+		await addTeamspaceMember(teamspace, userEntry.user, executor);
+	}
 	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];
