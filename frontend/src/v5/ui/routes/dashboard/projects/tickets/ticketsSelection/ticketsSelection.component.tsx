@@ -37,16 +37,16 @@ export const TicketsSelection = () => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const [models] = useSearchParam('models', Transformers.STRING_ARRAY);
 
-
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
 	const AllContainersAndFederations = [...containers, ...federations];
 	const defaultContainerOrFederations = AllContainersAndFederations.length === 1 ? [AllContainersAndFederations[0]._id] : models;
+	const defaultTemplate = templates.length === 1 ? templates[0]._id : '';
 
 	const formData = useForm<FormType>({
 		defaultValues: {
 			containersAndFederations: defaultContainerOrFederations,
-			template: '',
+			template: defaultTemplate,
 		},
 	});
 
