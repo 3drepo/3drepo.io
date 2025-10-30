@@ -25,6 +25,7 @@ const utils = require("../utils");
 const db = require("../handler/db");
 const systemLogger = require("../logger.js").systemLogger;
 const PermissionTemplates = require("./permissionTemplates");
+const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings.js`);
 const { findProjectByModelId } = require(`${v5Path}/models/projectSettings.js`);
 const { cloneDeep } = require(`${v5Path}/utils/helper/objects.js`);
 const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
@@ -335,23 +336,27 @@ ModelSetting.getSingleModelPermissions = async function(account, model) {
  * @param {Object} teamspaces an object which keys are teamspaces ids and values are an array of modelids
  * @returns {Object} which contains the models data
   */
-ModelSetting.getModelsData = function(teamspaces) {
-	return Promise.all(
-		Object.keys(teamspaces).map((account) => {
-			const modelsIds = teamspaces[account];
+ModelSetting.getModelsData = async function(teamspaces) {
+	const res = {};
+	await Promise.all(
+		Object.keys(teamspaces).map(async (account) => {
+			try {
+				await getTeamspaceSetting(account); // just to make sure teamspace exists
+				const modelsIds = teamspaces[account];
+				const models = await db.find(account, MODELS_COLL, {_id: {$in:modelsIds}}, { name: 1, federate: 1, _id: 1});
+				const indexedModels = models.reduce((ac,c) => {
+					const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
+				} ,{});
+				res[account] = indexedModels;
+			} catch (err) {
+			// if the teamspace no longer exists, don't add an entry
 
-			return db.find(account, MODELS_COLL, {_id: {$in:modelsIds}}, { name: 1, federate: 1, _id: 1})
-				.then((models) => {
-					const res = {};
-					const indexedModels = models.reduce((ac,c) => {
-						const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
-					} ,{});
-					res[account] = indexedModels;
+			}
 
-					return res;
-				});
 		})
-	).then((modelData) => modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
+	);
+
+	return res;
 };
 
 ModelSetting.isFederation = async function(account, model) {
