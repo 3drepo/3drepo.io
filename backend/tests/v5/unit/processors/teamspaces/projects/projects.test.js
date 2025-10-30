@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { modelTypes } = require('../../../../../../src/v5/models/modelSettings.constants');
-const { COL_NAME } = require('../../../../../../src/v5/models/projectSettings.constants');
 const { src } = require('../../../../helper/path');
+
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
+
 const { generateRandomString } = require('../../../../helper/services');
 
 jest.mock('../../../../../../src/v5/models/projectSettings');
