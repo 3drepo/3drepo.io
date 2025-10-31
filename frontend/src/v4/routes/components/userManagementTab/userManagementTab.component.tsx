@@ -22,7 +22,7 @@ import { Container, Content, Footer } from './userManagementTab.styles';
 
 interface IProps {
 	children: ReactChild;
-	footerLabel?: string | ReactNode[];
+	footerLabel?: string | JSX.Element;
 	withHeader?: boolean;
 	className?: string;
 }
@@ -39,7 +39,7 @@ export const UserManagementTab = (props: IProps) => {
 			className={props.className}
 		>
 			<Content item header={props.withHeader}>{children}</Content>
-			{footerLabel && (<Footer item>{footerLabel}</Footer>)}
+			{!!footerLabel && (<Footer item>{footerLabel}</Footer>)}
 		</Container>
 	);
 };
