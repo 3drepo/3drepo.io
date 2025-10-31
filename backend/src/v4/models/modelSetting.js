@@ -26,6 +26,7 @@ const db = require("../handler/db");
 const systemLogger = require("../logger.js").systemLogger;
 const PermissionTemplates = require("./permissionTemplates");
 const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings.js`);
+const { getAllMembersInTeamspace } = require(`${v5Path}/processors/teamspaces`);
 const { findProjectByModelId } = require(`${v5Path}/models/projectSettings.js`);
 const { cloneDeep } = require(`${v5Path}/utils/helper/objects.js`);
 const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
@@ -463,11 +464,17 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 };
 
 ModelSetting.updatePermissions = async function(account, model, permissions = [], executor) {
-	const { teamspaceMemberCheck } = require("./user");
 
 	if (!Array.isArray(permissions)) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
+
+	const members = await getAllMembersInTeamspace(account);
+	const isMember = {};
+
+	members.forEach(({ user }) => {
+		isMember[user] = true;
+	});
 
 	const setting = await ModelSetting.findModelSettingById(account, model);
 	const initialPermissions = { model, permissions: cloneDeep(setting.permissions) };
@@ -482,7 +489,9 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 		checkPermissionIsValid(permission);
 		checkUserHasPermissionTemplate(permission);
 
-		await teamspaceMemberCheck(permission.user, account);
+		if(!isMember[permission.user]) {
+			return;
+		}
 		const index = setting.permissions.findIndex(x => x.user === permission.user);
 		if (index !== -1) {
 			if (permission.permission) {
