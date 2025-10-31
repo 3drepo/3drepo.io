@@ -40,7 +40,7 @@ const TicketOutputMiddleware = require(`${src}/middleware/dataConverter/outputs/
 const testSerialiseTemplatesList = () => {
 	describe('Serialise templates list', () => {
 		test('should not show all fields if getDetails is not set to true', () => {
-			const req = { templates: times(10, () => generateTemplate()), query: { } };
+			const req = { templates: times(10, () => generateTemplate()), query: {} };
 
 			TicketOutputMiddleware.serialiseTemplatesList(req, {});
 
@@ -54,8 +54,10 @@ const testSerialiseTemplatesList = () => {
 		});
 
 		test('should show all fields if getDetails is set to true', () => {
-			const req = { templates: times(10, () => generateTemplate()),
-				query: { getDetails: 'true' } };
+			const req = {
+				templates: times(10, () => generateTemplate()),
+				query: { getDetails: 'true' },
+			};
 
 			const serialisedTemplateData = generateTemplate();
 
@@ -442,24 +444,74 @@ const testSerialiseTicketList = () => {
 
 const testSerialiseTicketHistory = () => {
 	describe('Serialise ticket history', () => {
-		const history = times(5, () => ({
-			author: generateRandomString(),
-			changes: {
-				[generateRandomString()]: {
-					from: generateRandomString(),
-					to: generateRandomString(),
+		const history = times(5, (i) => {
+			if (i % 2 === 0) {
+				return ({
+					author: generateRandomString(),
+					changes: {
+						[generateRandomString()]: {
+							from: null,
+							to: new Date(),
+						},
+					},
+					timestamp: generateRandomDate(),
+				});
+			}
+			return ({
+				author: generateRandomString(),
+				changes: {
+					[generateRandomString()]: {
+						from: generateRandomString(),
+						to: generateRandomString(),
+					},
 				},
-			},
-			timestamp: generateRandomDate(),
-		}));
+				timestamp: generateRandomDate(),
+			});
+		});
 
 		test('Should respond with the correct format', () => {
 			const req = { history };
 
-			const templateData = history.map((h) => ({
-				...h,
-				timestamp: h.timestamp.getTime(),
-			}));
+			const templateData = history.map((h, i) => {
+				if (i % 2 === 0) {
+					return ({
+						...h,
+						changes: {
+							...h.changes,
+							[Object.keys(h.changes)[0]]: {
+								...h.changes[Object.keys(h.changes)[0]],
+								to: h.changes[Object.keys(h.changes)[0]].to.getTime(),
+							},
+						},
+						timestamp: h.timestamp.getTime(),
+					});
+				}
+				return ({
+					...h,
+					timestamp: h.timestamp.getTime(),
+				});
+			});
+
+			TicketOutputMiddleware.serialiseTicketHistory(req, {});
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, { history: templateData });
+		});
+
+		test('Should respond with empty changes if the ticket has no changes(imported)', () => {
+			const req = { history: history.map((h, i) => {
+				if (i % 2 === 0) {
+					return ({ ...h, changes: null });
+				}
+				return h;
+			}) };
+
+			const templateData = history.map((h, i) => {
+				if (i % 2 === 0) {
+					return ({ ...h, changes: {}, timestamp: h.timestamp.getTime() });
+				}
+				return { ...h, timestamp: h.timestamp.getTime() };
+			});
 
 			TicketOutputMiddleware.serialiseTicketHistory(req, {});
 

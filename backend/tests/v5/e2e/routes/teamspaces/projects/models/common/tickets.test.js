@@ -1299,6 +1299,19 @@ const testUpdateManyTickets = () => {
 
 const testGetTicketHistory = () => {
 	describe('Get ticket history', () => {
+		const updateTicketLogs = async (teamspace, users, updateDate, model, project, ticket, update) => {
+			await insertOne(teamspace, 'tickets.logs', {
+				_id: ServiceHelper.generateUUIDString(),
+				author: users.tsAdmin.user,
+				changes: { properties: { title: { from: ticket.title, to: update.title } } },
+				timestamp: updateDate,
+				teamspace,
+				project: stringToUUID(project.id),
+				model: model._id,
+				ticket: stringToUUID(ticket._id),
+			});
+		};
+
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = ServiceHelper.generateTemplate();
 
@@ -1314,34 +1327,18 @@ const testGetTicketHistory = () => {
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed],
 				[template]);
-			await ServiceHelper.db.createTicket(teamspace, project, con, conTicket);
-			await ServiceHelper.db.createTicket(teamspace, project, fed, fedTicket);
-			await ServiceHelper.db.createTicket(teamspace, project, con, conTicketUpdate);
-			await ServiceHelper.db.createTicket(teamspace, project, fed, fedTicketUpdate);
+			await Promise.all([
+				ServiceHelper.db.createTicket(teamspace, project, con, conTicket),
+				ServiceHelper.db.createTicket(teamspace, project, fed, fedTicket),
+				ServiceHelper.db.createTicket(teamspace, project, con, conTicketUpdate),
+				ServiceHelper.db.createTicket(teamspace, project, fed, fedTicketUpdate),
+			]);
 
-			// Simulate ticket update and log entry for conTicket
-			await insertOne(teamspace, 'tickets.logs', {
-				_id: ServiceHelper.generateUUIDString(),
-				author: users.tsAdmin.user,
-				changes: { properties: { title: { from: conTicket.title, to: ticketUpdate.title } } },
-				timestamp: updateDate,
-				teamspace,
-				project: stringToUUID(project.id),
-				model: con._id,
-				ticket: stringToUUID(conTicketUpdate._id),
-			});
-
-			// Simulate ticket update and log entry for fedTicket
-			await insertOne(teamspace, 'tickets.logs', {
-				_id: ServiceHelper.generateUUID(),
-				author: users.tsAdmin.user,
-				changes: { properties: { title: { from: fedTicket.title, to: ticketUpdate.title } } },
-				timestamp: updateDate,
-				teamspace,
-				project: stringToUUID(project.id),
-				model: fed._id,
-				ticket: stringToUUID(fedTicketUpdate._id),
-			});
+			// Simulate ticket update and log entry for conTicket and fedTicket
+			await Promise.all([
+				updateTicketLogs(teamspace, users, updateDate, con, project, conTicketUpdate, ticketUpdate),
+				updateTicketLogs(teamspace, users, updateDate, fed, project, fedTicketUpdate, ticketUpdate),
+			]);
 		});
 
 		const generateTestData = (isFed) => {
@@ -1366,7 +1363,7 @@ const testGetTicketHistory = () => {
 					changes: {
 						properties: {
 							title: {
-								from: isFed ? fedTicket.title : conTicket.title,
+								from: isFed ? fedTicketUpdate.title : conTicketUpdate.title,
 								to: ticketUpdate.title,
 							},
 						},

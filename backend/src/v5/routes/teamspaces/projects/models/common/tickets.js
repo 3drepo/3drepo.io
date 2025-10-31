@@ -892,7 +892,7 @@ const establishRoutes = (isFed) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/history:
 	 *   get:
-	 *     description: Get ticket history by ID
+	 *     description: Get ticket history
 	 *     tags: [Tickets]
 	 *     operationId: GetTicketHistory
 	 *     parameters:
@@ -933,7 +933,7 @@ const establishRoutes = (isFed) => {
 	 *       404:
 	 *         $ref: "#/components/responses/teamspaceNotFound"
 	 *       200:
-	 *         description: returns the ticket as a json object
+	 *         description: returns the ticket history
 	 *         content:
 	 *           application/json:
 	 *             schema:
@@ -954,7 +954,7 @@ const establishRoutes = (isFed) => {
 	 *                         example: 1617187200000
 	 *                       changes:
 	 *                         type: object
-	 *                         description: object that describes what was changed schema depends on the type of change and template of the ticket
+	 *                         description: object that describes what was changed. The schema depends on the type of change and template of the ticket
 	 *                         properties:
 	 *                           properties:
 	 *                             type: object

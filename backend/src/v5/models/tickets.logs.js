@@ -64,7 +64,7 @@ TicketLogs.getTicketLogsById = (
 	project,
 	model,
 	ticket,
-	projection = { _id: 0, teamspace: 0, project: 0, model: 0, ticket: 0 },
+	projection = { _id: 0, author: 1, changes: 1, timestamp: 1 },
 	sort = { timestamp: 1 },
 ) => DB.find(teamspace, TICKET_LOGS_COL, { teamspace, project, model, ticket }, projection, sort);
 

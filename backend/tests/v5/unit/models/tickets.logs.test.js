@@ -22,6 +22,8 @@ const { generateUUID, generateRandomString, determineTestGroup, generateRandomOb
 const TicketLogs = require(`${src}/models/tickets.logs`);
 const db = require(`${src}/handler/db`);
 
+const TICKET_LOGS_COL = 'tickets.logs';
+
 const testAddTicketLog = () => {
 	describe('Add ticket log', () => {
 		test('Should add a new ticket log', async () => {
@@ -34,7 +36,7 @@ const testAddTicketLog = () => {
 
 			await TicketLogs.addTicketLog(teamspace, project, model, ticket, ticketLog);
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
+			expect(fn).toHaveBeenCalledWith(teamspace, TICKET_LOGS_COL,
 				{ ...ticketLog, _id: fn.mock.calls[0][2]._id, teamspace, project, model, ticket });
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 		});
@@ -73,7 +75,7 @@ const testAddGroupUpdateLog = () => {
 			};
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
+			expect(fn).toHaveBeenCalledWith(teamspace, TICKET_LOGS_COL,
 				{ ...expectedDoc, _id: fn.mock.calls[0][2]._id });
 			expect(fn.mock.calls[0][2]).toHaveProperty('_id');
 		});
@@ -108,7 +110,7 @@ const testAddImportedLog = () => {
 			}));
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
+			expect(fn).toHaveBeenCalledWith(teamspace, TICKET_LOGS_COL,
 				expectedDocs);
 		});
 	});
@@ -121,16 +123,23 @@ const testGetTicketLogsById = () => {
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const ticketId = generateUUID();
-			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+
+			const mockLogs = times(5, () => generateRandomObject());
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(mockLogs);
+
+			const expectedDoc = {
+				teamspace, project, model, ticket: ticketId,
+			};
 
 			const result = await TicketLogs.getTicketLogsById(teamspace, project, model, ticketId);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
-				{ teamspace, project, model, ticket: ticketId },
-				{ _id: 0, teamspace: 0, project: 0, model: 0, ticket: 0 },
+			expect(fn).toHaveBeenCalledWith(teamspace, TICKET_LOGS_COL,
+				{ ...expectedDoc },
+				{ _id: 0, author: 1, changes: 1, timestamp: 1 },
 				{ timestamp: 1 });
-			expect(result).toEqual([]);
+			expect(result).toEqual(mockLogs);
 		});
 	});
 };

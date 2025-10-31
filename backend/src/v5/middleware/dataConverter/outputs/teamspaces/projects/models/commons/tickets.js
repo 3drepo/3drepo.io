@@ -18,6 +18,7 @@
 const { getTemplateById, getTemplatesByQuery } = require('../../../../../../../models/tickets.templates');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
+const { isUUID } = require('../../../../../../../utils/helper/typeCheck');
 const { respond } = require('../../../../../../../utils/responder');
 const { serialiseTicket } = require('../../../../../../../schemas/tickets');
 const { serialiseTicketTemplate } = require('../../../../common/tickets.templates');
@@ -99,12 +100,20 @@ Tickets.serialiseTicketList = async (req, res) => {
 };
 
 Tickets.serialiseTicketHistory = (req, res) => {
+	const serializeDates = (obj) => {
+		const returnObj = { ...obj };
+		for (const [key, value] of Object.entries(obj)) {
+			if (value instanceof Object) returnObj[key] = serializeDates(value);
+			if (value instanceof Date) returnObj[key] = value.getTime();
+		}
+		return returnObj;
+	};
 	try {
-		const history = req.history.map((h) => ({
-			...h,
-			timestamp: h.timestamp.getTime(),
-		}));
-
+		const history = req.history.map((h) => {
+			const serialisedHistory = serializeDates(h);
+			if (!serialisedHistory.changes) serialisedHistory.changes = {};
+			return serialisedHistory;
+		});
 		respond(req, res, templates.ok, { history });
 	} catch (err) {
 		respond(req, res, templates.unknown);
