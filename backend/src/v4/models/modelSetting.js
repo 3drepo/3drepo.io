@@ -464,7 +464,6 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 };
 
 ModelSetting.updatePermissions = async function(account, model, permissions = [], executor) {
-
 	if (!Array.isArray(permissions)) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
@@ -602,8 +601,13 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 };
 
 ModelSetting.removePermissionsFromModels = async (account, models, userToRemove) => {
-	await Promise.all(models.map((model)=> {
-		ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ""}]);
+	const modelsWithUserPerm = await db.find(account, MODELS_COLL, {
+		_id: { $in: models },
+		"permissions.user": userToRemove
+	}, { _id: 1});
+
+	await Promise.all(modelsWithUserPerm.map(({_id: model})=> {
+		return ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ""}]);
 	}));
 };
 

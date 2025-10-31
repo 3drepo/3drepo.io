@@ -168,7 +168,6 @@ TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username, bypassStatus
 	if (!userDoc) return false;
 	const teamspaceId = await TeamspaceSetting.getTeamspaceRefId(teamspace);
 
-	console.trace('@hasAccessToTeamspace', teamspace, username);
 	const memStatus = await getUserStatusInAccount(teamspaceId, userDoc.customData.userId);
 	if (memStatus === membershipStatus.NOT_MEMBER) {
 		return false;
