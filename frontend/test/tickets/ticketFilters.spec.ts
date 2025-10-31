@@ -409,7 +409,6 @@ describe('Tickets: filters', () => {
 			};
 			
 			let serialized = serializeFilter(template, risks, filter);
-			console.log(JSON.stringify({serialized}));
 			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
