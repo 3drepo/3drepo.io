@@ -32,6 +32,7 @@ interface IProps {
 	onInvitationOpen: (email, job, isAdmin, permissions) => void;
 	removeInvitation: (email) => void;
 	handleClose: () => void;
+	limitReached: boolean;
 }
 
 const getPermissions = (savedPermissions) => {
@@ -106,6 +107,7 @@ export const InvitationsDialog = (props: IProps) => {
 							variant="contained"
 							color="secondary"
 							onClick={handleInvitationClick({})}
+							disabled={props.limitReached}
 						>
 							Add
 						</Button>
