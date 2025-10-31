@@ -480,6 +480,7 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
+	memberRecords = memberRecords || await getIsMemberMap(account);
 	for (let i = 0; i < permissions.length; i++) {
 		// ensure users are members of the teamspace
 		if(!memberRecords || !memberRecords[permissions[i].user]) {
