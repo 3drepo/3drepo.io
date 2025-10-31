@@ -117,12 +117,13 @@ Users.resetPassword = async (user) => {
 
 Users.getAvatar = async (username) => {
 	try {
-		const userId = await getUserId(username);
-		let avatarBuffer = await getUserAvatarBuffer(userId);
-		if (!avatarBuffer) {
-			// this means the avatar is not a generated one, so we don't have it cached
-			avatarBuffer = await getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
-		}
+		// NOTE: commenting out the ability to get avatar from IDP for now - we're hitting rate limiting issues.
+		// const userId = await getUserId(username);
+		// let avatarBuffer = await getUserAvatarBuffer(userId);
+		// if (!avatarBuffer) {
+		// this means the avatar is not a generated one, so we don't have it cached
+		const avatarBuffer = await getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
+		// }
 		const fileExt = await fileExtensionFromBuffer(avatarBuffer);
 
 		return {

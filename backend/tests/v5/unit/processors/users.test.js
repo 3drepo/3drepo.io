@@ -199,34 +199,34 @@ const tesUpdateProfile = () => {
 
 const testGetAvatar = () => {
 	describe('Get avatar', () => {
-		test('should get avatar', async () => {
-			const username = generateRandomString();
-			const mockImageBuffer = generateRandomString();
-			const expectedPayload = { buffer: mockImageBuffer, extension: 'png' };
+		// test('should get avatar', async () => {
+		// 	const username = generateRandomString();
+		// 	const mockImageBuffer = generateRandomString();
+		// 	const expectedPayload = { buffer: mockImageBuffer, extension: 'png' };
 
-			UsersModel.getUserId.mockResolvedValueOnce(username);
-			FronteggService.getUserAvatarBuffer.mockResolvedValueOnce(mockImageBuffer);
+		// 	UsersModel.getUserId.mockResolvedValueOnce(username);
+		// 	FronteggService.getUserAvatarBuffer.mockResolvedValueOnce(mockImageBuffer);
 
-			await expect(Users.getAvatar(username)).resolves.toEqual(expectedPayload);
+		// 	await expect(Users.getAvatar(username)).resolves.toEqual(expectedPayload);
 
-			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
-			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
+		// 	expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
+		// 	expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
 
-			expect(FilesManager.getFile).not.toHaveBeenCalled();
-		});
+		// 	expect(FilesManager.getFile).not.toHaveBeenCalled();
+		// });
 		test('should fallback and get the image from db if avatar is not found', async () => {
 			const username = generateRandomString();
 			const mockImageBuffer = generateRandomString();
 			const expectedPayload = { buffer: mockImageBuffer, extension: 'png' };
 
-			UsersModel.getUserId.mockResolvedValueOnce(username);
-			FronteggService.getUserAvatarBuffer.mockResolvedValueOnce(null);
+			// UsersModel.getUserId.mockResolvedValueOnce(username);
+			// FronteggService.getUserAvatarBuffer.mockResolvedValueOnce(null);
 			FilesManager.getFile.mockResolvedValueOnce(mockImageBuffer);
 
 			await expect(Users.getAvatar(username)).resolves.toEqual(expectedPayload);
 
-			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
-			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
+			// expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
+			// expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
 
 			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
@@ -234,13 +234,16 @@ const testGetAvatar = () => {
 		test('should throw an error if something happens', async () => {
 			const username = generateRandomString();
 
-			UsersModel.getUserId.mockResolvedValueOnce(username);
-			FronteggService.getUserAvatarBuffer.mockRejectedValueOnce(new Error('Failed to fetch avatar'));
+			// UsersModel.getUserId.mockResolvedValueOnce(username);
+			// FronteggService.getUserAvatarBuffer.mockRejectedValueOnce(new Error('Failed to fetch avatar'));
+			FilesManager.getFile.mockRejectedValueOnce(new Error('Failed to fetch avatar'));
 
 			await expect(Users.getAvatar(username)).rejects.toEqual(templates.fileNotFound);
-			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
-			expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
-			expect(FilesManager.getFile).not.toHaveBeenCalled();
+			// expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledTimes(1);
+			// expect(FronteggService.getUserAvatarBuffer).toHaveBeenCalledWith(username);
+			// expect(FilesManager.getFile).not.toHaveBeenCalled();
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(USERS_DB_NAME, AVATARS_COL_NAME, username);
 		});
 	});
 };
