@@ -29,12 +29,12 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ContainersActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ContainersList } from './containersList';
 import { SkeletonListItem } from './containersList/skeletonListItem';
 import { useContainersData } from './containers.hooks';
 import { DashboardParams } from '../../../routes.constants';
 import { enableRealtimeContainerRevisionUpdate, enableRealtimeNewContainerRevisionUpdate } from '@/v5/services/realtime/containerRevision.events';
 import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { ContainersList } from './containersList/containersList.component';
 
 export const Containers = (): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
