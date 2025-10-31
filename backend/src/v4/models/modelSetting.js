@@ -36,6 +36,16 @@ const MODELS_COLL = "settings";
 
 const MODEL_CODE_REGEX = /^[a-zA-Z0-9]{0,50}$/;
 
+const getIsMemberMap = async (account) => {
+	const isMember = {};
+	const memData = await getAllMembersInTeamspace(account);
+
+	memData.forEach(({ user }) => {
+		isMember[user] = true;
+	});
+	return isMember;
+};
+
 function clean(setting) {
 	if (setting) {
 		if (!setting.id) {
@@ -110,8 +120,10 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	if(!batchPermissions.length) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
+	const members = await getIsMemberMap(account);
 
-	const updatePromises = batchPermissions.map((update) => ModelSetting.updatePermissions(account, update.model, update.permissions));
+	const updatePromises = batchPermissions.map((update) => ModelSetting.updatePermissions(
+		account, update.model, update.permissions, undefined, members));
 	const [updateResponses, { _id: projectId }] = await Promise.all([
 		Promise.all(updatePromises),
 		findProjectByModelId(account, batchPermissions[0].model, { _id: 1 })
@@ -463,21 +475,14 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 	return ModelSetting.updateModelSetting(account, model, {heliSpeed: newSpeed});
 };
 
-ModelSetting.updatePermissions = async function(account, model, permissions = [], executor) {
+ModelSetting.updatePermissions = async function(account, model, permissions = [], executor, memberRecords) {
 	if (!Array.isArray(permissions)) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
 
-	const members = await getAllMembersInTeamspace(account);
-	const isMember = {};
-
-	members.forEach(({ user }) => {
-		isMember[user] = true;
-	});
-
 	for (let i = 0; i < permissions.length; i++) {
 		// ensure users are members of the teamspace
-		if(!isMember[permissions[i].user]) {
+		if(!memberRecords || !memberRecords[permissions[i].user]) {
 			throw responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE;
 		}
 
@@ -496,7 +501,7 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 		checkPermissionIsValid(permission);
 		checkUserHasPermissionTemplate(permission);
 
-		if(!isMember[permission.user]) {
+		if(!memberRecords[permission.user]) {
 			return;
 		}
 		const index = setting.permissions.findIndex(x => x.user === permission.user);
@@ -614,8 +619,10 @@ ModelSetting.removePermissionsFromModels = async (account, models, userToRemove)
 		"permissions.user": userToRemove
 	}, { _id: 1});
 
+	const isMemberMap = await getIsMemberMap(account, [userToRemove]);
+
 	await Promise.all(modelsWithUserPerm.map(({_id: model})=> {
-		return ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ""}]);
+		return ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ""}], undefined, isMemberMap);
 	}));
 };
 
