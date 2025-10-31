@@ -475,6 +475,14 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 		isMember[user] = true;
 	});
 
+	for (let i = 0; i < permissions.length; i++) {
+		// ensure users are members of the teamspace
+		if(!isMember[permissions[i].user]) {
+			throw responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE;
+		}
+
+	}
+
 	const setting = await ModelSetting.findModelSettingById(account, model);
 	const initialPermissions = { model, permissions: cloneDeep(setting.permissions) };
 
