@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2019 3D Repo Ltd
+ *  Copyright (C) 2024 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,7 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { withRouter } from 'react-router-dom';
-import { OpenInViewerButton } from './openInViewerButton.component';
+import { InfoBox } from '@controls/infoBox/infoBox.component';
+import styled from 'styled-components';
 
-export default withRouter(OpenInViewerButton);
+export const DrawingInfoBox = styled(InfoBox)`
+	svg {
+		vertical-align: middle;
+		display: inline-block;
+	}
+`;

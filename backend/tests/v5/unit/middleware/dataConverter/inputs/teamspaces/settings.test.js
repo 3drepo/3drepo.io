@@ -46,8 +46,23 @@ const testValidateNewTicketSchema = () => {
 			TemplateModelSchema.getTemplateByCode.mockRejectedValueOnce({});
 			const name = generateRandomString();
 			const code = generateRandomString();
+			const properties = times(3, () => ({ name: generateRandomString() }));
+			const modules = [
+				{
+					type: presetModules.SAFETIBASE,
+					properties: times(2, () => ({ name: generateRandomString() })),
+				},
+			];
+			const config = {
+				tabular: {
+					columns: [
+						{ property: properties[0].name },
+						{ property: modules[0].properties[0].name, module: modules[0].type },
+					],
+				},
+			};
 			const teamspace = generateRandomString();
-			const req = { body: { name, code }, params: { teamspace } };
+			const req = { body: { name, code, properties, modules, config }, params: { teamspace } };
 			const res = {};
 			const next = jest.fn();
 

@@ -19,6 +19,7 @@ const { canRemoveTeamspaceMember, memberExists } = require('../../middleware/dat
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces');
+const Users = require('../../processors/users');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 const { respond } = require('../../utils/responder');
@@ -63,9 +64,8 @@ const getAvatar = async (req, res) => {
 const getTeamspaceMemberAvatar = async (req, res) => {
 	try {
 		const { member } = req.params;
-		const buffer = await Teamspaces.getAvatar(member);
-		const fileExt = await fileExtensionFromBuffer(buffer);
-		req.params.format = fileExt || 'png';
+		const { extension, buffer } = await Users.getAvatar(member);
+		req.params.format = extension;
 		respond(req, res, templates.ok, buffer);
 	} catch (err) {
 		/* istanbul ignore next */

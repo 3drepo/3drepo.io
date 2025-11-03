@@ -19,7 +19,7 @@ const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -44,8 +44,17 @@ const CommentSchemas = require(`${src}/schemas/tickets/tickets.comments`);
 jest.mock('../../../../../src/v5/schemas/tickets/tickets.groups');
 const TicketGroupSchemas = require(`${src}/schemas/tickets/tickets.groups`);
 
+jest.mock('../../../../../src/v5/schemas/tickets/templates');
+const TemplateSchema = require(`${src}/schemas/tickets/templates`);
+
+jest.mock('../../../../../src/v5/schemas/tickets');
+const TicketSchema = require(`${src}/schemas/tickets`);
+
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings');
 const DrawingProcessor = require(`${src}/processors/teamspaces/projects/models/drawings`);
+
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets');
+const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
@@ -66,6 +75,9 @@ const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
+
+TemplateSchema.generateFullSchema.mockImplementation((t) => t);
+TicketSchema.serialiseTicket.mockImplementation((t) => t);
 
 const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
@@ -175,7 +187,6 @@ const testQueueTaskCompleted = () => {
 				corId: generateRandomString(),
 				value: 0,
 				user: generateRandomString(),
-				containers: [generateRandomString()],
 			};
 			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
 			const dataInfo = getInfoFromCode(data.value);
@@ -190,7 +201,7 @@ const testQueueTaskCompleted = () => {
 
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
-				data.corId, dataInfo, data.user, data.containers);
+				data.corId, dataInfo, data.user);
 
 			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
 		});
@@ -260,32 +271,6 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
-		});
-
-		test(`Should trigger newRevisionProcessed if there is a ${events.QUEUED_TASK_COMPLETED} (federation)`, async () => {
-			const project = generateRandomString();
-			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-
-			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				corId: generateRandomString(),
-				value: 1,
-				user: generateRandomString(),
-				containers: [generateRandomString()],
-			};
-
-			const dataInfo = getInfoFromCode(data.value);
-			dataInfo.retVal = data.value;
-			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
-
-			await waitOnEvent;
-			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
-			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
-			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
-				data.corId, dataInfo, data.user, data.containers);
 		});
 	});
 };
@@ -744,6 +729,33 @@ const testModelProcessingCompleted = () => {
 
 const testModelSettingsUpdate = () => {
 	describe(events.MODEL_SETTINGS_UPDATE, () => {
+		test('Should handle errors gracefully', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				modelType: modelTypes.FEDERATION,
+			};
+
+			ChatService.createModelMessage.mockRejectedValueOnce(generateRandomString());
+
+			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.FEDERATION_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
+
+			expect(TicketsProcessor.onModelNameUpdated).not.toHaveBeenCalled();
+		});
 		test(`Should create a ${chatEvents.FEDERATION_SETTINGS_UPDATE} chat event if there is a ${events.MODEL_SETTINGS_UPDATE} (federation)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
 			const data = {
@@ -765,6 +777,34 @@ const testModelSettingsUpdate = () => {
 				data.model,
 				undefined,
 			);
+
+			expect(TicketsProcessor.onModelNameUpdated).not.toHaveBeenCalled();
+		});
+
+		test('Should call onModelNameUpdated if the name has changed (federation)', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { name: generateRandomString() },
+				modelType: modelTypes.FEDERATION,
+			};
+			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.FEDERATION_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
+
+			expect(TicketsProcessor.onModelNameUpdated).toHaveBeenCalledTimes(1);
+			expect(TicketsProcessor.onModelNameUpdated).toHaveBeenCalledWith(data.teamspace, data.project, data.model);
 		});
 
 		test(`Should create a ${chatEvents.CONTAINER_SETTINGS_UPDATE} chat event if there is a ${events.MODEL_SETTINGS_UPDATE} (container)`, async () => {
@@ -788,12 +828,67 @@ const testModelSettingsUpdate = () => {
 				data.model,
 				undefined,
 			);
+			expect(TicketsProcessor.onModelNameUpdated).not.toHaveBeenCalled();
+		});
+
+		test('Should call onModelNameUpdated if the name has changed (container)', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.MODEL_SETTINGS_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { name: generateRandomString() },
+				modelType: modelTypes.CONTAINER,
+			};
+			EventsManager.publish(events.MODEL_SETTINGS_UPDATE, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.CONTAINER_SETTINGS_UPDATE,
+				data.data,
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
+
+			expect(TicketsProcessor.onModelNameUpdated).toHaveBeenCalledTimes(1);
+			expect(TicketsProcessor.onModelNameUpdated).toHaveBeenCalledWith(data.teamspace, data.project, data.model);
 		});
 	});
 };
 
 const testRevisionUpdated = () => {
 	describe(events.REVISION_UPDATED, () => {
+		test('Should handle error gracefully', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.REVISION_UPDATED);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				data: { _id: generateUUID() },
+				modelType: modelTypes.CONTAINER,
+			};
+
+			ChatService.createModelMessage.mockRejectedValueOnce(generateRandomString());
+
+			EventsManager.publish(events.REVISION_UPDATED, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.CONTAINER_REVISION_UPDATE,
+				{ ...data.data, _id: UUIDToString(data.data._id) },
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
+
+			expect(CalibrationProcessor.getCalibrationStatus).not.toHaveBeenCalled();
+		});
+
 		test(`Should create a ${chatEvents.CONTAINER_REVISION_UPDATE} chat event if there is a ${events.REVISION_UPDATED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.REVISION_UPDATED);
 			const data = {
@@ -846,6 +941,28 @@ const testRevisionUpdated = () => {
 };
 const testNewModel = () => {
 	describe(events.NEW_MODEL, () => {
+		test('Should handle error gracefully', async () => {
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				model: generateRandomString(),
+				data: { [generateRandomString()]: generateRandomString() },
+				modelType: modelTypes.FEDERATION,
+			};
+			const waitOnEvent = eventTriggeredPromise(events.NEW_MODEL);
+			ChatService.createProjectMessage.mockRejectedValueOnce(generateRandomString());
+			await EventsManager.publish(events.NEW_MODEL, data);
+			await waitOnEvent;
+			expect(ChatService.createProjectMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createProjectMessage).toHaveBeenCalledWith(
+				chatEvents.NEW_FEDERATION,
+				{ ...data.data, _id: data.model },
+				data.teamspace,
+				data.project,
+				undefined,
+			);
+		});
+
 		test(`Should create a ${chatEvents.NEW_FEDERATION} chat event if there is a ${events.NEW_MODEL} (federation)`, async () => {
 			const data = {
 				teamspace: generateRandomString(),
@@ -892,6 +1009,28 @@ const testNewModel = () => {
 };
 const testDeleteModel = () => {
 	describe(events.DELETE_MODEL, () => {
+		test('Should handle error gracefully', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
+			const data = {
+				teamspace: generateRandomString(),
+				model: generateRandomString(),
+				project: generateRandomString(),
+				modelType: modelTypes.FEDERATION,
+			};
+			ChatService.createModelMessage.mockRejectedValueOnce(generateRandomString());
+			EventsManager.publish(events.DELETE_MODEL, data);
+
+			await waitOnEvent;
+			expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+				chatEvents.FEDERATION_REMOVED,
+				{},
+				data.teamspace,
+				data.project,
+				data.model,
+				undefined,
+			);
+		});
 		test(`Should create a ${chatEvents.FEDERATION_REMOVED} chat event if there is a ${events.DELETE_MODEL} (federation)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.DELETE_MODEL);
 			const data = {
@@ -963,6 +1102,7 @@ const testUpdateTicket = () => {
 		expect(TicketLogs.addTicketLog).toHaveBeenCalledTimes(1);
 		expect(TicketLogs.addTicketLog).toHaveBeenCalledWith(data.teamspace, data.project, data.model,
 			data.ticket._id, { author: data.author, changes: data.changes, timestamp: data.timestamp });
+		expect(TicketSchema.serialiseTicket).toHaveBeenCalledTimes(1);
 		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
 		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
 			event,
@@ -1034,7 +1174,7 @@ const testUpdateTicket = () => {
 			await updateTicketTest(true, changes, expectedData);
 		});
 
-		test(`Should serialise date values into timestamps and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
+		test(`!Should serialise date values into timestamps and create a ${chatEvents.CONTAINER_UPDATE_TICKET} if there
 				is a ${events.UPDATE_TICKET} and a module default date prop has been updated (Container)`, async () => {
 			TicketTemplates.getTemplateById.mockResolvedValueOnce({ ...generateTemplate(), modules: [{ type: 'sequencing', properties: [] }] });
 			const changes = {
@@ -1044,112 +1184,173 @@ const testUpdateTicket = () => {
 					},
 				},
 			};
-			const expectedData = { modules: { sequencing: { 'Start Time': changes.modules.sequencing['Start Time'].to.getTime() } } };
+			const expectedData = { modules: { sequencing: { 'Start Time': changes.modules.sequencing['Start Time'].to } } };
 			await updateTicketTest(false, changes, expectedData);
 		});
 	});
 };
 
 const testNewTicket = () => {
-	const addTicketTest = async (isFederation) => {
-		const waitOnEvent = eventTriggeredPromise(events.NEW_TICKET);
-		const template = generateTemplate();
-		const data = {
-			teamspace: generateRandomString(),
-			project: generateRandomString(),
-			model: generateRandomString(),
-			ticket: {
-				type: generateRandomString(),
-				[generateRandomString()]: generateRandomString(),
-			},
-		};
-
-		TicketTemplates.getTemplateById.mockResolvedValueOnce(template);
-		ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
-		const event = isFederation ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
-		EventsManager.publish(events.NEW_TICKET, data);
-		expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
-		expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
-
-		await waitOnEvent;
-
-		expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
-		expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
-		expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-			event,
-			data.ticket,
-			data.teamspace,
-			data.project,
-			data.model,
-		);
-	};
-
-	const importTicketsTest = async (isFederation) => {
-		const waitOnEvent = eventTriggeredPromise(events.TICKETS_IMPORTED);
-		const template = generateTemplate();
-		const type = generateRandomString();
-		const data = {
-			teamspace: generateRandomString(),
-			project: generateRandomString(),
-			model: generateRandomString(),
-			tickets: times(10, () => ({
-				type,
-				...generateRandomObject(),
-			})),
-		};
-
-		TicketTemplates.getTemplateById.mockResolvedValueOnce(template);
-		ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
-		const event = isFederation ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
-		EventsManager.publish(events.TICKETS_IMPORTED, data);
-		expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
-		expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
-
-		expect(TicketLogs.addImportedLogs).toHaveBeenCalledTimes(1);
-		expect(TicketLogs.addImportedLogs).toHaveBeenCalledWith(
-			data.teamspace,
-			data.project,
-			data.model,
-			data.tickets,
-		);
-
-		await waitOnEvent;
-
-		expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
-		expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, type);
-		expect(ChatService.createModelMessage).toHaveBeenCalledTimes(data.tickets.length);
-
-		data.tickets.forEach((ticket) => {
-			expect(ChatService.createModelMessage).toHaveBeenCalledWith(
-				event,
-				ticket,
-				data.teamspace,
-				data.project,
-				data.model,
-			);
-		});
-	};
-
 	describe(events.NEW_TICKET, () => {
-		test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET} if there
-					is a ${events.NEW_TICKET} (Container)`, async () => {
-			await addTicketTest(false);
-		});
+		times(2, (i) => {
+			const isFederation = i === 1;
+			test(`Should create a ${chatEvents.CONTAINER_NEW_TICKET} if there
+					is a ${events.NEW_TICKET} (${isFederation ? 'Federation' : 'Container'})`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.NEW_TICKET);
+				const template = generateTemplate();
+				const data = {
+					teamspace: generateRandomString(),
+					project: generateRandomString(),
+					model: generateRandomString(),
+					ticket: {
+						type: template._id,
+						[generateRandomString()]: generateRandomString(),
+					},
+				};
 
-		test(`Should create a ${chatEvents.FEDERATION_NEW_TICKET} if there
-					is a ${events.NEW_TICKET} (Federation)`, async () => {
-			await addTicketTest(true);
-		});
+				TicketTemplates.getTemplateById.mockResolvedValueOnce(template);
+				ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+				TicketsProcessor.initialiseAutomatedProperties.mockResolvedValueOnce([data.ticket]);
 
-		test(`Should create ${chatEvents.CONTAINER_NEW_TICKET} events if there
-					is a ${events.TICKETS_IMPORTED} (Container)`, async () => {
-			await importTicketsTest(false);
-		});
+				const event = isFederation ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
 
-		test(`Should create ${chatEvents.FEDERATION_NEW_TICKET} events if there
-					is a ${events.TICKETS_IMPORTED} (Federation)`, async () => {
-			await importTicketsTest(true);
+				EventsManager.publish(events.NEW_TICKET, data);
+
+				await waitOnEvent;
+
+				expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+				expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+
+				expect(TicketsProcessor.initialiseAutomatedProperties).toHaveBeenCalledTimes(1);
+				expect(TicketsProcessor.initialiseAutomatedProperties).toHaveBeenCalledWith(
+					data.teamspace,
+					data.project,
+					data.model,
+					[data.ticket],
+					template,
+				);
+
+				expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
+				expect(ChatService.createModelMessage).toHaveBeenCalledTimes(1);
+				expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+					event,
+					data.ticket,
+					data.teamspace,
+					data.project,
+					data.model,
+				);
+			});
+
+			test(`Should create ${chatEvents.CONTAINER_NEW_TICKET} events if there
+					is a ${events.TICKETS_IMPORTED} (${isFederation ? 'Federation' : 'Container'})`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.TICKETS_IMPORTED);
+				const template = generateTemplate();
+				const type = template._id;
+				const data = {
+					teamspace: generateRandomString(),
+					project: generateRandomString(),
+					model: generateRandomString(),
+					tickets: times(10, () => ({
+						type,
+						...generateRandomObject(),
+					})),
+				};
+
+				TicketTemplates.getTemplateById.mockResolvedValueOnce(template);
+				ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+				TicketsProcessor.initialiseAutomatedProperties.mockResolvedValueOnce(data.tickets);
+				const event = isFederation ? chatEvents.FEDERATION_NEW_TICKET : chatEvents.CONTAINER_NEW_TICKET;
+				EventsManager.publish(events.TICKETS_IMPORTED, data);
+				await waitOnEvent;
+				expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+				expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+
+				expect(TicketLogs.addImportedLogs).toHaveBeenCalledTimes(1);
+				expect(TicketLogs.addImportedLogs).toHaveBeenCalledWith(
+					data.teamspace,
+					data.project,
+					data.model,
+					data.tickets,
+				);
+
+				expect(TicketsProcessor.initialiseAutomatedProperties).toHaveBeenCalledTimes(1);
+				expect(TicketsProcessor.initialiseAutomatedProperties).toHaveBeenCalledWith(
+					data.teamspace,
+					data.project,
+					data.model,
+					data.tickets,
+					template,
+				);
+
+				expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, type);
+				expect(ChatService.createModelMessage).toHaveBeenCalledTimes(data.tickets.length);
+
+				data.tickets.forEach((ticket) => {
+					expect(ChatService.createModelMessage).toHaveBeenCalledWith(
+						event,
+						ticket,
+						data.teamspace,
+						data.project,
+						data.model,
+					);
+				});
+			});
+
+			test(`Should fail gracefully on error if there is an ${events.NEW_TICKET} event (${isFederation ? 'Federation' : 'Container'})`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.NEW_TICKET);
+				const template = generateTemplate();
+				const data = {
+					teamspace: generateRandomString(),
+					project: generateRandomString(),
+					model: generateRandomString(),
+					ticket: {
+						type: template._id,
+						[generateRandomString()]: generateRandomString(),
+					},
+				};
+
+				TicketTemplates.getTemplateById.mockResolvedValueOnce(template);
+				ModelSettings.isFederation.mockRejectedValueOnce(generateRandomString());
+				EventsManager.publish(events.NEW_TICKET, data);
+				await waitOnEvent;
+
+				expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+				expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+
+				expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.ticket.type);
+				expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
+			});
+
+			test(`Should fail gracefully on error if there is an ${events.TICKETS_IMPORTED} event (${isFederation ? 'Federation' : 'Container'})`, async () => {
+				const waitOnEvent = eventTriggeredPromise(events.TICKETS_IMPORTED);
+				const template = generateTemplate();
+				const type = template._id;
+				const data = {
+					teamspace: generateRandomString(),
+					project: generateRandomString(),
+					model: generateRandomString(),
+					tickets: times(10, () => ({
+						type,
+						...generateRandomObject(),
+					})),
+				};
+
+				TicketTemplates.getTemplateById.mockRejectedValueOnce(generateRandomString());
+				ModelSettings.isFederation.mockResolvedValueOnce(isFederation);
+				EventsManager.publish(events.TICKETS_IMPORTED, data);
+				await waitOnEvent;
+				expect(ModelSettings.isFederation).toHaveBeenCalledTimes(1);
+				expect(ModelSettings.isFederation).toHaveBeenCalledWith(data.teamspace, data.model);
+
+				expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+				expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, template._id);
+				expect(ChatService.createModelMessage).not.toHaveBeenCalled();
+				expect(TicketsProcessor.initialiseAutomatedProperties).not.toHaveBeenCalled();
+			});
 		});
 	});
 };
@@ -1366,8 +1567,49 @@ const testUpdateTicketGroup = () => {
 	});
 };
 
-describe('services/eventsListener/eventsListener', () => {
+const testTemplateUpdated = () => {
+	describe(events.TICKET_TEMPLATE_UPDATED, () => {
+		test('Should handle errors gracefully', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.TICKET_TEMPLATE_UPDATED);
+			const data = {
+				teamspace: generateRandomString(),
+				template: generateRandomString(),
+				data: { code: generateRandomString() },
+			};
+			TicketTemplates.getTemplateById.mockRejectedValueOnce(generateRandomString());
+
+			EventsManager.publish(events.TICKET_TEMPLATE_UPDATED, data);
+
+			await waitOnEvent;
+			expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.template);
+			expect(TicketsProcessor.onTemplateUpdated).not.toHaveBeenCalled();
+		});
+
+		test('Should call onTemplateUpdated if template code is updated', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.TICKET_TEMPLATE_UPDATED);
+			const data = {
+				teamspace: generateRandomString(),
+				template: generateRandomString(),
+				data: { code: generateRandomString() },
+			};
+			const templateObject = generateRandomObject();
+			TicketTemplates.getTemplateById.mockResolvedValueOnce(templateObject);
+
+			EventsManager.publish(events.TICKET_TEMPLATE_UPDATED, data);
+
+			await waitOnEvent;
+			expect(TicketTemplates.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TicketTemplates.getTemplateById).toHaveBeenCalledWith(data.teamspace, data.template);
+			expect(TicketsProcessor.onTemplateUpdated).toHaveBeenCalledTimes(1);
+			expect(TicketsProcessor.onTemplateUpdated).toHaveBeenCalledWith(data.teamspace, templateObject);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	EventsListener.init();
+
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();
 	testModelSettingsUpdate();
@@ -1375,9 +1617,10 @@ describe('services/eventsListener/eventsListener', () => {
 	testRevisionUpdated();
 	testNewModel();
 	testDeleteModel();
-	testUpdateTicket();
 	testNewTicket();
 	testNewComment();
 	testUpdateComment();
 	testUpdateTicketGroup();
+	testTemplateUpdated();
+	testUpdateTicket();
 });

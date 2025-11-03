@@ -16,10 +16,11 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectCurrentTeamspace } from '@/v5/store/teamspaces/teamspaces.selectors';
+import { selectCurrentProject } from '@/v5/store/projects/projects.selectors';
 import { selectSettings } from '../../../../../../modules/model';
 import {
 	selectDataRevision,
@@ -33,7 +34,9 @@ const mapStateToProps = createStructuredSelector({
 	settings: selectSettings,
 	visibilityMap: selectVisibilityMap,
 	selectionMap: selectSelectionMap,
-	rev: selectDataRevision
+	rev: selectDataRevision,
+	teamspace: selectCurrentTeamspace,
+	project: selectCurrentProject
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
@@ -45,4 +48,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	zoomToHighlightedNodes: TreeActions.zoomToHighlightedNodes
 }, dispatch);
 
-export default connect(mapStateToProps, mapDispatchToProps)(withRouter(TreeNode));
+export default connect(mapStateToProps, mapDispatchToProps)(TreeNode);

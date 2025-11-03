@@ -19,14 +19,13 @@ const { src } = require('../../path');
 
 const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
+const { findOne } = require(`${src}/handler/db`);
+const { USERS_DB_NAME, USERS_COL } = require(`${src}/models/users.constants`);
+
+const Cache = require('./cache');
 
 const Accounts = {};
-
-const teamspaceByAccount = {};
-const usersInAccount = {};
-const emailToUser = {};
-
-Accounts.getTeamspaceByAccount = (accountId) => teamspaceByAccount[accountId];
+Accounts.getTeamspaceByAccount = (accountId) => Cache.getTeamspaceByAccount(accountId);
 
 Accounts.setMFAPolicy = () => Promise.resolve();
 
@@ -34,30 +33,34 @@ Accounts.getClaimedDomains = () => Promise.resolve([]);
 
 Accounts.createAccount = (name) => {
 	const accountId = generateUUIDString();
-	teamspaceByAccount[accountId] = name;
 
-	return Promise.resolve(accountId);
+	return Promise.resolve(Cache.addAccount(accountId, name));
 };
 
-Accounts.getAllUsersInAccount = (accountId) => Promise.resolve(usersInAccount[accountId] ?? []);
+Accounts.getAllUsersInAccount = (accountId) => Promise.resolve(Cache.getAllUsersInAccount(accountId));
 
-Accounts.addUserToAccount = (accountId, email) => {
-	const id = emailToUser[email] ?? generateUUIDString();
-	emailToUser[email] = id;
-	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
-	usersInAccount[accountId].push({ id, email });
+Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
+	const data = await findOne(USERS_DB_NAME, USERS_COL, { 'customData.email': email });
+	const id = Cache.doesUserExist(email)
+		? Cache.doesUserExist(email)
+		: data?.customData?.userId || generateUUIDString();
+
+	Cache.addUserToAccount(accountId, { id, email, name, emailData });
+	Cache.updateUserByEmail(email, { id, tenantId: accountId, name, emailData });
+	Cache.updateUserById(id, { email, tenantId: accountId, name, emailData });
+
 	return id;
 };
 
-Accounts.getUserStatusInAccount = () => Promise.resolve(membershipStatus.ACTIVE);
-
-Accounts.removeUserFromAccount = (accountId, userId) => {
-	usersInAccount[accountId] = usersInAccount[accountId] ?? [];
-	usersInAccount[accountId] = usersInAccount[accountId].filter((u) => u.id !== userId);
+Accounts.getUserStatusInAccount = (accountId, userId) => {
+	const isMember = Cache.getAllUsersInAccount(accountId).some((user) => user.id === userId);
+	return Promise.resolve(isMember ? membershipStatus.ACTIVE : membershipStatus.NOT_MEMBER);
 };
 
+Accounts.removeUserFromAccount = (accountId, userId) => Cache.removeUserFromAccount(accountId, userId);
+
 Accounts.removeAccount = (accountId) => {
-	delete usersInAccount[accountId];
-	delete teamspaceByAccount[accountId];
+	Cache.removeAccount(accountId);
+	Cache.removeAllUsersFromAccount(accountId);
 };
 module.exports = Accounts;

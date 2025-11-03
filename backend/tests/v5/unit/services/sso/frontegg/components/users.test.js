@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../../../helper/path');
+const { times } = require('lodash');
 
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
 
@@ -40,11 +41,27 @@ const testGetUserById = () => {
 	describe('Get user by ID', () => {
 		test('Should get user information', async () => {
 			const userId = generateRandomString();
+			const metadata = generateRandomObject();
+			const mockedRetVal = generateRandomObject();
+			const expectedData = { ...mockedRetVal, ...metadata, metadata };
+
+			WebRequests.get.mockResolvedValueOnce({ data: { ...mockedRetVal, metadata: JSON.stringify(metadata) } });
+
+			await expect(Users.getUserById(userId)).resolves.toEqual(expectedData);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+
+		test('Should get user information (no metadata)', async () => {
+			const userId = generateRandomString();
 			const res = generateRandomObject();
 
 			WebRequests.get.mockResolvedValueOnce({ data: res });
 
-			await expect(Users.getUserById(userId)).resolves.toEqual(res);
+			await expect(Users.getUserById(userId)).resolves.toEqual({ ...res, metadata: {} });
 
 			expect(WebRequests.get).toHaveBeenCalledTimes(1);
 			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
@@ -63,6 +80,60 @@ const testGetUserById = () => {
 			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
 
 			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+	});
+};
+
+const testGetUserAvatarBuffer = () => {
+	describe('Get user avatar buffer', () => {
+		test('Should get user avatar buffer', async () => {
+			const userId = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
+			const data = generateRandomString();
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ profilePictureUrl });
+			WebRequests.getArrayBuffer.mockResolvedValueOnce({
+				data,
+			});
+
+			await expect(Users.getUserAvatarBuffer(userId)).resolves.toEqual(Buffer.from(data));
+
+			expect(Users.getUserById).toHaveBeenCalledTimes(1);
+			expect(Users.getUserById).toHaveBeenCalledWith(userId);
+
+			expect(WebRequests.getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(WebRequests.getArrayBuffer).toHaveBeenCalledWith(profilePictureUrl);
+		});
+
+		test('Should return null if a placeholder url is returned', async () => {
+			const userId = generateRandomString();
+			const profilePictureUrl = `https://abc/${generateRandomString()}`;
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ profilePictureUrl });
+
+			await expect(Users.getUserAvatarBuffer(userId)).resolves.toEqual(null);
+
+			expect(Users.getUserById).toHaveBeenCalledTimes(1);
+			expect(Users.getUserById).toHaveBeenCalledWith(userId);
+
+			expect(WebRequests.getArrayBuffer).not.toHaveBeenCalled();
+		});
+
+		test('Should throw error if it failed', async () => {
+			const userId = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
+			const errorMessage = generateRandomString();
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ profilePictureUrl });
+			WebRequests.getArrayBuffer.mockRejectedValueOnce(new Error(errorMessage));
+
+			await expect(Users.getUserAvatarBuffer(userId)).rejects.not.toBeUndefined();
+
+			expect(Users.getUserById).toHaveBeenCalledTimes(1);
+			expect(Users.getUserById).toHaveBeenCalledWith(userId);
+
+			expect(WebRequests.getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(WebRequests.getArrayBuffer).toHaveBeenCalledWith(profilePictureUrl);
 		});
 	});
 };
@@ -154,9 +225,251 @@ const testTriggerPasswordReset = () => {
 	});
 };
 
+const testUploadAvatar = () => {
+	describe('Upload avatar', () => {
+		test('Should upload avatar for the user ID specified', async () => {
+			const userId = generateRandomString();
+			const userData = { tenantId: generateRandomString() };
+			const fileObj = { buffer: generateRandomString(),
+				originalname: generateRandomString(),
+				mimetype: generateRandomString() };
+			const responseMock = { data: generateRandomString() };
+
+			jest.spyOn(Users, 'getUserById').mockReturnValueOnce(userData);
+			WebRequests.put.mockResolvedValueOnce(responseMock);
+			jest.spyOn(Users, 'updateUserDetails').mockResolvedValueOnce();
+
+			await expect(Users.uploadAvatar(userId, fileObj)).resolves.toEqual(undefined);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(Users.updateUserDetails).toHaveBeenCalledTimes(1);
+			expect(Users.updateUserDetails).toHaveBeenCalledWith(userId, { profilePictureUrl: responseMock.data });
+		});
+
+		test('Should throw error if it failed to upload avatar', async () => {
+			const userId = generateRandomString();
+			const userData = { tenantId: generateRandomString() };
+			const fileObj = { buffer: generateRandomString(),
+				originalname: generateRandomString(),
+				mimetype: generateRandomString() };
+			jest.spyOn(Users, 'getUserById').mockReturnValueOnce(userData);
+
+			const mockResponse = { message: generateRandomString() };
+
+			WebRequests.put.mockRejectedValueOnce(mockResponse);
+			await expect(Users.uploadAvatar(userId, fileObj)).rejects.not.toBeUndefined();
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+		});
+	});
+};
+
+const testUpdateUserDetails = () => {
+	describe('Update user details', () => {
+		test('Should update user details', async () => {
+			const userId = generateRandomString();
+			const metadataInfo = generateRandomObject();
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
+			const existingUser = {
+				name: `${generateRandomString()} ${generateRandomString()}`,
+				profilePictureUrl: generateRandomString(),
+			};
+
+			const expectedPayload = {
+				name: `${firstName} ${lastName}`,
+				profilePictureUrl,
+				metadata: JSON.stringify(metadataInfo),
+			};
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce(existingUser);
+			WebRequests.put.mockResolvedValueOnce();
+
+			await expect(Users.updateUserDetails(
+				userId,
+				{ firstName, lastName, profilePictureUrl, ...metadataInfo },
+			)).resolves.toEqual(undefined);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), expectedPayload, { headers: bearerHeader },
+			);
+		});
+
+		test('Should autopopulate the metadata if available and not provided', async () => {
+			const userId = generateRandomString();
+			const metadataInfo = generateRandomObject();
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
+			const existingUser = {
+				name: `${generateRandomString()} ${generateRandomString()}`,
+				profilePictureUrl: generateRandomString(),
+				metadata: metadataInfo,
+			};
+
+			const expectedPayload = {
+				name: `${firstName} ${lastName}`,
+				profilePictureUrl,
+				metadata: JSON.stringify(metadataInfo),
+			};
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce(existingUser);
+			WebRequests.put.mockResolvedValueOnce();
+
+			await expect(Users.updateUserDetails(
+				userId,
+				{ firstName, lastName, profilePictureUrl },
+			)).resolves.toEqual(undefined);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), expectedPayload, { headers: bearerHeader },
+			);
+		});
+
+		test('Should merge the metadata if there is new and old', async () => {
+			const userId = generateRandomString();
+			const company = generateRandomString();
+			const countryCode = generateRandomString();
+			const metadataInfo = {
+				[generateRandomString()]: generateRandomString(), countryCode: generateRandomString(),
+			};
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
+			const existingUser = {
+				name: `${generateRandomString()} ${generateRandomString()}`,
+				profilePictureUrl: generateRandomString(),
+				metadata: metadataInfo,
+			};
+
+			const expectedPayload = {
+				name: `${firstName} ${lastName}`,
+				profilePictureUrl,
+				metadata: JSON.stringify({ ...metadataInfo, company, countryCode }),
+			};
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce(existingUser);
+			WebRequests.put.mockResolvedValueOnce();
+
+			await expect(Users.updateUserDetails(
+				userId,
+				{ firstName, lastName, profilePictureUrl, company, countryCode },
+			)).resolves.toEqual(undefined);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), expectedPayload, { headers: bearerHeader },
+			);
+		});
+
+		test('Should update user\'s first name only', async () => {
+			const userId = generateRandomString();
+			const metadataInfo = generateRandomObject();
+			const firstName = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
+			const existingLastName = generateRandomString();
+			const existingUser = {
+				name: `${generateRandomString()} ${existingLastName}`,
+				profilePictureUrl: generateRandomString(),
+			};
+
+			const expectedPayload = {
+				name: `${firstName} ${existingLastName}`,
+				profilePictureUrl,
+				metadata: JSON.stringify(metadataInfo),
+			};
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce(existingUser);
+			WebRequests.put.mockResolvedValueOnce();
+
+			await expect(Users.updateUserDetails(
+				userId,
+				{ firstName, profilePictureUrl, ...metadataInfo },
+			)).resolves.toEqual(undefined);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), expectedPayload, { headers: bearerHeader },
+			);
+		});
+
+		test('Should update user\'s first name only', async () => {
+			const userId = generateRandomString();
+			const metadataInfo = generateRandomObject();
+			const lastName = generateRandomString();
+			const profilePictureUrl = `https://frontegg/${generateRandomString()}`;
+			const existingFirstName = generateRandomString();
+			const existingUser = {
+				name: `${existingFirstName} ${generateRandomString()}`,
+				profilePictureUrl: generateRandomString(),
+			};
+
+			const expectedPayload = {
+				name: `${existingFirstName} ${lastName}`,
+				profilePictureUrl,
+				metadata: JSON.stringify(metadataInfo),
+			};
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce(existingUser);
+			WebRequests.put.mockResolvedValueOnce();
+
+			await expect(Users.updateUserDetails(
+				userId,
+				{ lastName, profilePictureUrl, ...metadataInfo },
+			)).resolves.toEqual(undefined);
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(WebRequests.put).toHaveBeenCalledWith(
+				expect.any(String), expectedPayload, { headers: bearerHeader },
+			);
+		});
+
+		test('Should throw error if it failed to update user details', async () => {
+			const userId = generateRandomString();
+			const metadataInfo = generateRandomObject();
+			const firstName = generateRandomString();
+			const lastName = generateRandomString();
+
+			jest.spyOn(Users, 'getUserById').mockResolvedValueOnce({ name: [firstName, lastName].join(' ') });
+			WebRequests.put.mockRejectedValueOnce({ message: generateRandomString() });
+			await expect(Users.updateUserDetails(
+				userId,
+				{ firstName, lastName, ...metadataInfo },
+			)).rejects.not.toBeUndefined();
+
+			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+		});
+	});
+};
+
+const testGetAccountsByUser = () => {
+	describe('Get accounts by user', () => {
+		test('Should return accounts for the user', async () => {
+			const userId = generateRandomString();
+			const res = { data: { tenantIds: times(3, () => generateRandomString()) } };
+
+			WebRequests.get.mockResolvedValueOnce(res);
+
+			await expect(Users.getAccountsByUser(userId)).resolves.toEqual(res.data.tenantIds);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetUserById();
+	testGetUserAvatarBuffer();
 	testDoesUserExist();
 	testDestroyAllSessions();
 	testTriggerPasswordReset();
+	testUploadAvatar();
+	testUpdateUserDetails();
+	testGetAccountsByUser();
 });

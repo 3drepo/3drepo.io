@@ -16,7 +16,6 @@
  */
 
 import { RgbArray } from '@/v5/helpers/colors.helper';
-import { CardFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { TicketStatusTypes } from '@controls/chip/chip.types';
 
 export type PropertyTypeDefinition = 'text' | 'longText' | 'boolean' | 'number' | 'pastDate' | 'date' | 'view' | 'manyOf' | 'oneOf' | 'image' | 'imageList' | 'coords';
@@ -89,6 +88,14 @@ export type IStatusConfig = {
 	default?: string;
 };
 
+type ITabularColumn = {
+	module?: string;
+	property: string;
+};
+
+type ITabularConfig = {
+	columns: ITabularColumn[];
+};
 export interface ITemplate {
 	_id: string;
 	name: string;
@@ -102,6 +109,7 @@ export interface ITemplate {
 		issueProperties?: boolean;
 		pin?: boolean | PinConfig;
 		status?: IStatusConfig;
+		tabular?: ITabularConfig;
 	};
 }
 
@@ -215,5 +223,3 @@ export type OverridesDicts = {
 	overrides: MeshIdColorDict,
 	transparencies: MeshIdTransparencyDict,
 };
-
-export type TicketFilterKey = `${string}.${string}.${CardFilterType}`;

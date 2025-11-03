@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,4 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { ContainersList } from './containersList.component';
+const migrateUsersDetails = require('./migrateUserDetailsToFrontegg');
+
+const scripts = [
+	{ script: migrateUsersDetails, desc: 'Copy user details to Frontegg' },
+];
+
+module.exports = scripts;

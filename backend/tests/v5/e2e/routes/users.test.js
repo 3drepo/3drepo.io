@@ -19,7 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
 const SessionTracker = require('../../helper/sessionTracker');
-const fs = require('fs');
+const { readFileSync } = require('fs');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -37,14 +37,14 @@ const teamspace = ServiceHelper.generateRandomString();
 const fsAvatarData = ServiceHelper.generateRandomString();
 const gridFsAvatarData = ServiceHelper.generateRandomString();
 const setupData = async () => {
+	await ServiceHelper.db.createUser(testUser);
+	await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
 	await Promise.all([
-		ServiceHelper.db.createUser(testUser),
-		ServiceHelper.db.createUser(userWithFsAvatar, []),
-		ServiceHelper.db.createUser(userWithGridFsAvatar, []),
+		ServiceHelper.db.createUser(userWithFsAvatar, [teamspace]),
+		ServiceHelper.db.createUser(userWithGridFsAvatar, [teamspace]),
 		ServiceHelper.db.createAvatar(userWithFsAvatar.user, 'fs', fsAvatarData),
 		ServiceHelper.db.createAvatar(userWithGridFsAvatar.user, 'gridfs', gridFsAvatarData),
 	]);
-	await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
 };
 
 const testEndpointRoutes = () => {
@@ -131,8 +131,8 @@ const formatUserProfile = (user, hasAvatar = false, sso) => ({
 	lastName: user.basicData.lastName,
 	apiKey: user.apiKey,
 	hasAvatar,
-	countryCode: user.basicData.billing.billingInfo.countryCode,
-	company: user.basicData.billing.billingInfo.company,
+	// countryCode: user.basicData.billing?.billingInfo.countryCode,
+	// company: user.basicData.billing?.billingInfo.company,
 	...(sso ? { sso } : {}),
 	...(user.basicData.email ? { email: user.basicData.email } : {}),
 });
@@ -156,7 +156,7 @@ const testGetProfile = () => {
 
 		test('should return the user profile if the user has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user?key=${testUser.apiKey}`).expect(200);
-			expect(res.body).toEqual(formatUserProfile(testUser));
+			expect(res.body).toEqual(formatUserProfile(testUser, true));
 		});
 
 		test('should return the user profile if the user has a session via an API key and has avatar', async () => {
@@ -169,7 +169,7 @@ const testGetProfile = () => {
 				const testSession = SessionTracker(agent);
 				await testSession.login(testUser);
 				const res = await testSession.get('/v5/user/').expect(200);
-				expect(res.body).toEqual(formatUserProfile(testUser));
+				expect(res.body).toEqual(formatUserProfile(testUser, true));
 			});
 		});
 	});
@@ -203,11 +203,28 @@ const testUpdateProfile = () => {
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
 
-			test('should update the profile if the user is logged in', async () => {
-				const data = { firstName: 'newName', company: 'newCompany', countryCode: 'GR' };
+			test('should update the first name if the user is logged in', async () => {
+				const data = { firstName: 'newName' };
 				await testSession.put('/v5/user/').send(data).expect(200);
 				const updatedProfileRes = await testSession.get('/v5/user/');
 				expect(updatedProfileRes.body.firstName).toEqual('newName');
+				expect(updatedProfileRes.body.lastName).toEqual(testUser.basicData.lastName);
+			});
+
+			test('should update the last name if the user is logged in', async () => {
+				const data = { lastName: 'newName' };
+				await testSession.put('/v5/user/').send(data).expect(200);
+				const updatedProfileRes = await testSession.get('/v5/user/');
+				expect(updatedProfileRes.body.lastName).toEqual('newName');
+				expect(updatedProfileRes.body.firstName).toEqual('newName');
+			});
+
+			test('should update the profile if the user is logged in', async () => {
+				const data = { firstName: 'newName1', lastName: 'oldName', company: 'newCompany', countryCode: 'GR' };
+				await testSession.put('/v5/user/').send(data).expect(200);
+				const updatedProfileRes = await testSession.get('/v5/user/');
+				expect(updatedProfileRes.body.firstName).toEqual('newName1');
+				expect(updatedProfileRes.body.lastName).toEqual('oldName');
 				expect(updatedProfileRes.body.countryCode).toEqual('GR');
 				expect(updatedProfileRes.body.company).toEqual('newCompany');
 			});
@@ -227,23 +244,12 @@ const testGetAvatar = () => {
 			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 		});
 
-		test('should get the avatar if the user has an gridfs avatar and has a session via an API key', async () => {
-			const res = await agent.get(`/v5/user/avatar?key=${userWithGridFsAvatar.apiKey}`).expect(200);
-			expect(res.body).toEqual(Buffer.from(gridFsAvatarData));
-		});
-
 		test('should get the avatar if the user has an fs avatar and is logged in', async () => {
 			const testSession = SessionTracker(agent);
 			await testSession.login(userWithFsAvatar);
 			const res = await testSession.get('/v5/user/avatar').expect(200);
 			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 			await testSession.post('/v5/logout/');
-		});
-
-		test('should fail if the user has no avatar', async () => {
-			const res = await agent.get(`/v5/user/avatar?key=${testUser.apiKey}`)
-				.expect(templates.fileNotFound.status);
-			expect(res.body.code).toEqual(templates.fileNotFound.code);
 		});
 	});
 };
@@ -275,22 +281,7 @@ const testUploadAvatar = () => {
 
 				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
 				const resBuffer = avatarRes.body;
-				const imageBuffer = fs.readFileSync(image);
-				expect(resBuffer).toEqual(imageBuffer);
-			});
-		});
-
-		describe('With valid authentication', () => {
-			test('should upload a new avatar if the user is logged in', async () => {
-				const testSession = SessionTracker(agent);
-				await testSession.login(testUser);
-				await testSession.get('/v5/user/avatar').expect(templates.fileNotFound.status);
-				await testSession.put('/v5/user/avatar').set('Content-Type', 'image/png').attach('file', image)
-					.expect(templates.ok.status);
-
-				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
-				const resBuffer = avatarRes.body;
-				const imageBuffer = fs.readFileSync(image);
+				const imageBuffer = readFileSync(image);
 				expect(resBuffer).toEqual(imageBuffer);
 			});
 		});

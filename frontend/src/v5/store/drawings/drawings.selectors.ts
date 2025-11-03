@@ -72,11 +72,6 @@ export const selectAreStatsPending = createSelector(
 	(drawings) => drawings.some(({ hasStatsPending }) => hasStatsPending),
 );
 
-export const selectAreSettingsPending = createSelector(
-	selectRawDrawingById,
-	({ name, number, type, desc, calibration }) => [name, number, type, desc, calibration].includes(undefined),
-); 
-
 export const selectDrawingRole = createSelector(
 	selectDrawingById,
 	(drawing): Role | null => drawing?.role || null,
@@ -103,6 +98,15 @@ export const selectIsTypesPending = createSelector(
 	// Checks if the types for the project have been fetched
 	(state, currentProject) => !state.typesByProject[currentProject],
 );
+
+export const selectDrawingFetched = createSelector(
+	selectDrawingsDomain,
+	selectCurrentProject,
+	(state, drawingId) => drawingId,
+	// Checks if the settings for the drawing were fetched
+	(state, currentProject, drawingId) => !!state.fetched[currentProject + '.' + drawingId],
+);
+
 
 export const selectCalibration = createSelector(
 	selectDrawingById,

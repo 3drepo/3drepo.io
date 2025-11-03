@@ -49,14 +49,6 @@ describe("Job", function () {
 		agent = SessionTracker(request(server));
 		await agent.login(username, password);
 
-		const mockEndTennantId  = await createAccount(username);
-		DbHandler.updateOne(username,"teamspace",{ _id: username }, { $set: { refId: mockEndTennantId}})
-
-		const jobUser = addUserToAccount(mockEndTennantId, "test-job@3drepo.org")
-		const user1 = addUserToAccount(mockEndTennantId, "test-user1@3drepo.org")
-
-		DbHandler.updateOne("admin","system.users",{ user: username }, { $set: { "customData.userId": jobUser}})
-		DbHandler.updateOne("admin","system.users",{ user: "user1" }, { $set: { "customData.userId": user1}})
 	});
 
 	after(function(done) {

@@ -146,7 +146,6 @@ export const SettingsModal = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 
-	const containerOrFederationName = isContainer ? 'Container' : 'Federation';
 	const EMPTY_GIS_VALUES = { latitude: undefined, longitude: undefined, angleFromNorth: undefined };
 
 	const getGisValues = (obj) => defaults(pick(
@@ -180,7 +179,7 @@ export const SettingsModal = ({
 		code,
 		...rest
 	}) => {
-		const settings = { ...rest, angleFromNorth, code } as ContainerSettings | FederationSettings;
+		const settings = { ...rest, angleFromNorth, code: code ?? null } as ContainerSettings | FederationSettings;
 		if (isNumber(latitude)) {
 			settings.surveyPoint = {
 				latLong: [latitude, longitude],
@@ -208,21 +207,21 @@ export const SettingsModal = ({
 
 	useEffect(() => { setIsValid(formState.isValid && fieldsHaveChanged()); }, [watch()]);
 
+	const title =  isContainer ? formatMessage({ id: 'settings.containerTitle', defaultMessage: 'Container settings' }) :
+			 formatMessage({ id: 'settings.federationTitle', defaultMessage: 'Federation settings' });
+	const informationTitle =  isContainer ? formatMessage({ id: 'settings.contInformationTitle', defaultMessage: 'Container information' }) :
+			 formatMessage({ id: 'settings.fedInformationTitle', defaultMessage: 'Federation information' });
+
 	return (
 		<FormModal
 			open={open}
-			title={formatMessage({ id: 'settings.title', defaultMessage: `${containerOrFederationName} settings` })}
+			title={title}
 			onClickClose={onClickClose}
 			onSubmit={handleSubmit(onSubmit)}
 			confirmLabel={formatMessage({ id: 'settings.ok', defaultMessage: 'Save Changes' })}
 			isValid={isValid}
 		>
-			<SectionTitle>
-				<FormattedMessage
-					id="settings.form.informationTitle"
-					defaultMessage={`${containerOrFederationName} information`}
-				/>
-			</SectionTitle>
+			<SectionTitle>{informationTitle}</SectionTitle>
 			<ShareTextField
 				label="ID"
 				value={containerOrFederation._id}

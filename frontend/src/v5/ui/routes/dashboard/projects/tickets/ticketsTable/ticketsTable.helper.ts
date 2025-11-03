@@ -20,7 +20,8 @@ import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
 import { RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
 
-export type SetTicketValue =  (modelId: string, ticketId?: string, groupValue?: string) => void;
+export type PresetValue = { key: string, value: string }; 
+export type SetTicketValue =  (modelId?: string, ticket_id?: string, presValue?: PresetValue, replace?: boolean) => void;
 
 export const NEW_TICKET_ID = 'new';
 
@@ -56,10 +57,16 @@ export const hasRequiredViewerProperties = (template) => {
 	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
 };
 
-export const INITIAL_COLUMNS = [
+// These columns should always be included in the table when a template is selected
+export const DEFAULT_COLUMNS = [
 	'id',
 	BaseProperties.TITLE,
 	'modelName',
+];
+
+// These are the columns that are initially shown if no override exists in the template config
+export const INITIAL_COLUMNS_NO_OVERRIDES = [
+	...DEFAULT_COLUMNS,
 	`properties.${BaseProperties.CREATED_AT}`,
 	`properties.${IssueProperties.ASSIGNEES}`, 
 	`properties.${BaseProperties.OWNER}`,

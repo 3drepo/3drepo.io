@@ -29,7 +29,6 @@ import {
 } from 'lodash';
 import ReactDOM from 'react-dom';
 
-import { RouteComponentProps } from 'react-router';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -47,7 +46,7 @@ import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { LoaderContainer } from '../userManagement/userManagement.styles';
-import { PendingInvites } from './users.styles';
+import { PendingInvitesLink } from './users.styles';
 
 const USERS_TABLE_CELLS = [
 	{
@@ -80,7 +79,7 @@ const getPreparedJobs = (jobs) => {
 	return jobs.map(({ _id: name, color }) => ({ name, color, value: name }));
 };
 
-interface IProps extends RouteComponentProps<any> {
+interface IProps {
 	users: any[];
 	usersSuggestions: any[];
 	projects: any[];
@@ -90,7 +89,7 @@ interface IProps extends RouteComponentProps<any> {
 	licencesCount: number;
 	invitationsCount: number;
 	userNotExists?: boolean;
-	currentTeamspace?: string;
+	currentTeamspace: string;
 	selectedTeamspace: string;
 	usersProvisionedEnabled: boolean;
 	permissionsOnUIDisabled: boolean;
@@ -122,6 +121,44 @@ const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
 		value
 	})
 );
+
+const PendingInvites = ({ invitationsCount, showDialog, projects, currentTeamspace, onInvitationOpen, limitReached }) => {
+	const onClick = (e: any) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		showDialog({
+			title: 'Invitations',
+			template: InvitationsDialog,
+			data: {
+				onInvitationOpen,
+				projects: filter(projects, ({ teamspace }) => teamspace === currentTeamspace),
+				limitReached
+			}
+		});
+	};
+
+	return <>(<PendingInvitesLink key="pending" onClick={onClick}>{invitationsCount ?? 0} pending</PendingInvitesLink>)</>;
+}
+
+type AssignedLicensesProps = {
+	licencesCount: number,
+	usersCount: number,
+	limit: number | string,
+	children?: JSX.Element
+};
+
+const AssignedLicenses = ({ licencesCount, usersCount, limit, children}: AssignedLicensesProps ) => {
+	if (!licencesCount) {
+		return <></>;
+	}
+
+	const limitValue = limit !== 'unlimited' ? limit || 0 : 'unlimited';
+
+	return (<>
+		Assigned licences: {usersCount} {children} out of {limitValue}
+	</>);
+}
 
 export class Users extends PureComponent<IProps, IState> {
 	public formRef = createRef<any>();
@@ -271,11 +308,11 @@ export class Users extends PureComponent<IProps, IState> {
 	}
 
 	public renderNewUserFormPanel = ({ closePanel }) => {
-		const { usersSuggestions, clearUsersSuggestions, onUsersSearch } = this.props;
+		const { usersSuggestions, clearUsersSuggestions, onUsersSearch, licencesCount, limit, users } = this.props;
 
 		const formProps = {
 			ref: this.formRef,
-			title: this.getFooterLabel(),
+			title: <AssignedLicenses licencesCount={licencesCount} limit={limit} usersCount={users.length} />,
 			jobs: this.state.jobs,
 			users: usersSuggestions,
 			usersProvisionedEnabled: this.props.usersProvisionedEnabled,
@@ -314,43 +351,6 @@ export class Users extends PureComponent<IProps, IState> {
 		);
 	}
 
-	public renderPendingInvites = () => {
-		const { invitationsCount, showDialog } = this.props;
-		const onClick = (e: any) => {
-			e.preventDefault();
-			e.stopPropagation();
-			showDialog({
-				title: 'Invitations',
-				template: InvitationsDialog,
-				data: {
-					onInvitationOpen: this.handleInvitationOpen,
-					projects: filter(this.props.projects, ({ teamspace }) => teamspace === this.props.currentTeamspace),
-				}
-			});
-		};
-		return ['(', <PendingInvites key="pending" disabled={!invitationsCount} onClick={onClick}>{invitationsCount} pending</PendingInvites>, ')'];
-	}
-
-	/**
-	 * Generate licences summary
-	 */
-	public getFooterLabel = (withInvitations = false) => {
-		const { licencesCount, users } = this.props;
-		const { limit } = this.state;
-
-		if (!licencesCount) {
-			return '';
-		}
-
-		const limitValue = limit !== 'unlimited' ? limit || 0 : 'unlimited';
-
-		return [
-			`Assigned licences: ${users.length} `,
-			withInvitations ? this.renderPendingInvites() : null,
-			` out of ${limitValue}`
-		];
-	}
-
 	public render() {
 		const { isPending, selectedTeamspace, usersProvisionedEnabled } = this.props;
 		const { rows, containerElement } = this.state;
@@ -375,9 +375,15 @@ export class Users extends PureComponent<IProps, IState> {
 			return null;
 		}
 
+		const {licencesCount, limit, users } = this.props;
+		const limitReached =  (limit || 0) as number <= users.length;
+
 		return (
 			<>
-				<UserManagementTab footerLabel={this.getFooterLabel(true)} className={this.props.className}>
+				<UserManagementTab footerLabel={
+					<AssignedLicenses licencesCount={licencesCount} limit={limit} usersCount={users.length} >
+						<PendingInvites {...this.props} onInvitationOpen={this.handleInvitationOpen} limitReached={limitReached} />
+					</AssignedLicenses>} className={this.props.className}>
 					<CustomTable cells={cells} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}

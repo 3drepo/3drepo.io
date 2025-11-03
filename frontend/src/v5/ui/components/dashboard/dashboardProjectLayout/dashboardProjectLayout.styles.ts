@@ -15,11 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { FOOTER_HEIGHT } from '@components/shared/dashboardFooter/dashboardFooter.styles';
 import styled from 'styled-components';
 
-export const Content = styled.div`
+export const OuterContainer = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	overflow-y: auto;
 	flex-grow: 1;
-	height: 100%;
+	display: grid;
+	grid-template-columns: 100%;
+	grid-template-rows: auto ${FOOTER_HEIGHT}px;
+`;
+
+export const InnerContainer = styled.div`
+	padding: 18px 75px;
 `;

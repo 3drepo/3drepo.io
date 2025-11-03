@@ -34,6 +34,7 @@ export const fetchDrawings = async (teamspace, projectId): Promise<AxiosResponse
 
 export const fetchDrawingsStats = async (teamspace, projectId, drawingId): Promise<DrawingStats> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/drawings/${drawingId}/stats`);
+
 	return data;
 };
 

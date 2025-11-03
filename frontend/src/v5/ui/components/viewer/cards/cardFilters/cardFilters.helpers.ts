@@ -28,10 +28,17 @@ import NotExistIcon from '@assets/icons/filters/not_exist.svg';
 import ContainIcon from '@assets/icons/filters/contain.svg';
 import NotContainIcon from '@assets/icons/filters/not_contain.svg';
 import { formatMessage } from '@/v5/services/intl';
-import { CardFilterOperator, CardFilterType } from './cardFilters.types';
+import { TicketFilterOperator, TicketFilterType } from './cardFilters.types';
 import { compact, floor } from 'lodash';
+import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { IUser } from '@/v5/store/users/users.redux';
+import { IJob } from '@/v5/store/jobs/jobs.types';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectFederationJobs, selectFederationUsers } from '@/v5/store/federations/federations.selectors';
+import { selectContainerJobs, selectContainerUsers } from '@/v5/store/containers/containers.selectors';
+import { FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 
-export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
+export const FILTER_OPERATOR_ICON: Record<TicketFilterOperator, any> = {
 	eq: EqualIcon,
 	neq: NotEqualIcon,
 	is: EqualIcon,
@@ -48,7 +55,7 @@ export const FILTER_OPERATOR_ICON: Record<CardFilterOperator, any> = {
 	nss: NotContainIcon,
 } as const;
 
-export const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
+export const FILTER_OPERATOR_LABEL: Record<TicketFilterOperator, string> = {
 	ex: formatMessage({ id: 'cardFilter.operator.exists', defaultMessage: 'Exists' }),
 	nex: formatMessage({ id: 'cardFilter.operator.doesNotExist', defaultMessage: 'Does not exist' }),
 	eq: formatMessage({ id: 'cardFilter.operator.equals', defaultMessage: 'Equals' }),
@@ -65,17 +72,17 @@ export const FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
 	nss: formatMessage({ id: 'cardFilter.operator.notContain', defaultMessage: 'Does not contain' }),
 };
 
-const DATE_FILTER_OPERATOR_LABEL: Record<CardFilterOperator, string> = {
+const DATE_FILTER_OPERATOR_LABEL: Record<TicketFilterOperator, string> = {
 	...FILTER_OPERATOR_LABEL,
 	gte: formatMessage({ id: 'cardFilter.date.operator.onOrAfter', defaultMessage: 'On or after' }),
 	lte: formatMessage({ id: 'cardFilter.date.operator.onOrBefore', defaultMessage: 'On or before' }),
 };
 
-export const isDateType = (type: CardFilterType) => ['date', 'pastDate', 'createdAt', 'updatedAt', 'sequencing'].includes(type);
-export const isTextType = (type: CardFilterType) => ['ticketCode', 'title', 'text', 'longText'].includes(type);
-export const isSelectType = (type: CardFilterType) => ['template', 'oneOf', 'manyOf', 'owner', 'status'].includes(type);
+export const isDateType = (type: TicketFilterType) => ['date', 'pastDate', 'createdAt', 'updatedAt', 'sequencing'].includes(type);
+export const isTextType = (type: TicketFilterType) => ['ticketCode', 'title', 'text', 'longText'].includes(type);
+export const isSelectType = (type: TicketFilterType) => ['template', 'oneOf', 'manyOf', 'owner', 'status'].includes(type);
 
-export const getFilterOperatorLabels = (type: CardFilterType) => isDateType(type) ? DATE_FILTER_OPERATOR_LABEL : FILTER_OPERATOR_LABEL;
+export const getFilterOperatorLabels = (type: TicketFilterType) => isDateType(type) ? DATE_FILTER_OPERATOR_LABEL : FILTER_OPERATOR_LABEL;
 
 export const getFilterFormTitle = (elements: string[]) => compact(elements).join(' : ');
 
@@ -87,10 +94,48 @@ export const amendDateUpperBounds = (bounds) => {
 	});
 };
 
-export const isRangeOperator = (operator: CardFilterOperator) => ['rng', 'nrng'].includes(operator);
+export const isRangeOperator = (operator: TicketFilterOperator) => ['rng', 'nrng'].includes(operator);
 	
 export const getDefaultOperator = (type) => {
 	if (isTextType(type) || isSelectType(type)) return 'is';
 	if (isDateType(type)) return 'lte';
 	return 'eq';
+};
+
+const findByNameOrType = <T extends { name?:string, type?:string }>(arr: T[], nameToFind, typeToFind?) => 
+	arr?.find(( { name, type }) =>
+		name === nameToFind || (typeToFind ? type === typeToFind : false));
+
+export const getTemplateProperty = (template:ITemplate, module: string | undefined, propertyName: string) => {
+	return findByNameOrType((module ?  findByNameOrType(template.modules, module, module) : template)?.properties, propertyName);
+};
+
+
+// returns an array of all users_ids and jobs_ids from the passed containers and Federations 
+export const useGetUsersAndJobs = (containersAndFederations: string[]): IUser[] | IJob[] => {
+	// This is for triggering a new re render if these federations or containers change
+	// in order to have the latests users/jobs
+	FederationsHooksSelectors.selectFederations(); 
+	ContainersHooksSelectors.selectContainers(); 
+	 
+	const usersAndJobsSet = new Set<string>();
+	const usersAndJobs: IUser[] | IJob[] = [];
+
+	const addToUsersAndJobOnce = (arr: any[]) => {
+		arr.forEach((jobOrUser) => {
+			const id = jobOrUser._id || jobOrUser.user;
+			if (usersAndJobsSet.has((id))) return;
+			usersAndJobsSet.add(id);
+			usersAndJobs.push(jobOrUser);
+		});
+	};
+
+	containersAndFederations.forEach((containerOrFederation) => {
+		addToUsersAndJobOnce(selectFederationJobs(getState(), containerOrFederation));
+		addToUsersAndJobOnce(selectContainerJobs(getState(), containerOrFederation));
+		addToUsersAndJobOnce(selectFederationUsers(getState(), containerOrFederation));
+		addToUsersAndJobOnce(selectContainerUsers(getState(), containerOrFederation));
+	});
+
+	return usersAndJobs;
 };

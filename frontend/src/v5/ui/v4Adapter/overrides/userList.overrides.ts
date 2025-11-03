@@ -20,7 +20,7 @@ import { FloatingButton, FloatingButtonContainer } from '@/v4/routes/components/
 import { Content as LoadingText } from '@/v4/routes/components/loader/loader.styles';
 import { Container as UserTable, Footer as LicencesFooter } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
 import { LoaderContainer } from '@/v4/routes/userManagement/userManagement.styles';
-import { PendingInvites } from '@/v4/routes/users/users.styles';
+import { PendingInvitesLink } from '@/v4/routes/users/users.styles';
 import styled, { css } from 'styled-components';
 
 const AddUserButton = css`
@@ -185,7 +185,7 @@ export const V5UserListOverrides = styled.div`
 		padding: 10px 0;
 		align-items: baseline;
 		height: 26px;
-		${PendingInvites} {
+		${PendingInvitesLink} {
 			cursor: pointer;
 			margin: 0;
 			text-decoration: none;

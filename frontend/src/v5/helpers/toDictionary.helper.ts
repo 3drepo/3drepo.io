@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,5 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export { CookiesLegalPaper } from './cookies.component';
-export { TermsLegalPaper } from './terms.component';
+export const toDictionary = <T, K extends keyof any>(arr: T[], indexBy: (elem: T) => K): Record<K, T> => {
+	const dict: Record<K, T> = {} as Record<K, T>;
+	arr.forEach((elem) => dict[indexBy(elem)] = elem);
+	return dict;
+};
