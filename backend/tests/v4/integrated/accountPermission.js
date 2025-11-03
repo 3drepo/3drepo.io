@@ -59,8 +59,8 @@ describe("Account permission::", function () {
 	it("should fail to assign permissions to a user that doesnt exist", function(done) {
 		testSession.post(`/${username}/permissions`)
 			.send({ user: "nonsense", permissions: ["create_project"]})
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+			.expect(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.status, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});
 	});
@@ -68,7 +68,7 @@ describe("Account permission::", function () {
 	it("should fail to assign non team space permissions to a user", function(done) {
 		testSession.post(`/${username}/permissions`)
 			.send({ user: "issue_username", permissions: ["create_project"]})
-			.expect(400, function(err, res) {
+			.expect(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.status, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});

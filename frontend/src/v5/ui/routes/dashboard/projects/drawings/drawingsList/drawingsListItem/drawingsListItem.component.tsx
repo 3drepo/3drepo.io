@@ -73,6 +73,8 @@ export const DrawingsListItem = memo(({
 
 	useEffect(() => {
 		if (isMainList) {
+			
+
 			return combineSubscriptions(
 				enableRealtimeDrawingRemoved(teamspace, project, drawing._id),
 				enableRealtimeDrawingUpdate(teamspace, project, drawing._id),

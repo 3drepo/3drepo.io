@@ -29,10 +29,8 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const { TEAM_MEMBER } = require(`${src}/models/roles.constants`);
 const { ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 
-const USER_COL = 'system.users';
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 jest.mock('../../../../src/v5/services/sso/frontegg');
@@ -73,23 +71,18 @@ const testHasAccessToTeamspace = () => {
 		});
 
 		describe.each([
-			['user has access to a teamspace with no restriction', genUserData(), {}, true, undefined, true],
-			['user has access to the teamspace and is in whitelist domain', genUserData({ inDomain: true }), generateSecurityConfig(false, [domain]), false, membershipStatus.ACTIVE, true],
-			['user has access to the teamspace but is not in whitelist domain but status check is bypassed', genUserData({ }), generateSecurityConfig(false, [domain]), true, undefined, true],
-			['user has access to the teamspace but is not in whitelist domain', genUserData({ }), generateSecurityConfig(false, [domain]), false, undefined, false, templates.domainRestricted],
-			['user has access to a teamspace but membershipStatus is inactive', genUserData(), {}, false, membershipStatus.INACTIVE, false, templates.membershipInactive],
-			['user has access to a teamspace but membershipStatus is pending invite', genUserData(), {}, false, membershipStatus.PENDING_INVITE, false, templates.pendingInviteAcceptance],
-			['user has access to a teamspace but membershipStatus is empty', genUserData(), {}, false, membershipStatus.NOT_MEMBER, false, false],
-		])('', (desc, userData, teamspaceSettings, bypassStatus, memStatus, success, retVal) => {
+			['user has access to a teamspace with no restriction (bypassStatusCheck: false)', genUserData(), false, undefined, true],
+			['user has access to a teamspace with no restriction (bypassStatusCheck: true)', genUserData(), true, undefined, true],
+			['user has access to a teamspace but membershipStatus is inactive (bypassStatusCheck: false)', genUserData(), false, membershipStatus.INACTIVE, false, templates.membershipInactive],
+			['user has access to a teamspace but membershipStatus is inactive (bypassStatusCheck: true)', genUserData(), {}, true, membershipStatus.INACTIVE, true],
+			['user has access to a teamspace but membershipStatus is pending invite (bypassStatusCheck: false)', genUserData(), false, membershipStatus.PENDING_INVITE, false, templates.pendingInviteAcceptance],
+			['user has access to a teamspace but membershipStatus is pending invite (bypassStatusCheck: true)', genUserData(), true, membershipStatus.PENDING_INVITE, true],
+			['user has access to a teamspace but membershipStatus is empty', genUserData(), false, membershipStatus.NOT_MEMBER, false, false],
+		])('', (desc, userData, bypassStatusCheck, memStatus = membershipStatus.ACTIVE, success, retVal) => {
 			test(`Should ${success ? 'return true' : `throw with ${retVal?.code}`} if ${desc}`, async () => {
 				const findFn = jest.spyOn(db, 'findOne');
 				// first call fetches the user data
 				findFn.mockResolvedValueOnce(userData);
-
-				if (!bypassStatus) {
-					// second call fetches teamspace settings
-					findFn.mockResolvedValueOnce(teamspaceSettings);
-				}
 
 				const refId = generateRandomString();
 
@@ -99,7 +92,7 @@ const testHasAccessToTeamspace = () => {
 					FronteggService.getUserStatusInAccount.mockResolvedValueOnce(memStatus);
 				}
 
-				const test = expect(Teamspace.hasAccessToTeamspace(teamspace, user, bypassStatus));
+				const test = expect(Teamspace.hasAccessToTeamspace(teamspace, user, bypassStatusCheck));
 
 				if (success) {
 					await test.resolves.toBeTruthy();
@@ -109,12 +102,7 @@ const testHasAccessToTeamspace = () => {
 					await test.rejects.toEqual(retVal);
 				}
 
-				let expectedCalls = 1;
-
-				if (!bypassStatus) ++expectedCalls;
-				if (memStatus !== undefined) ++expectedCalls;
-
-				expect(findFn).toHaveBeenCalledTimes(expectedCalls);
+				expect(findFn).toHaveBeenCalledTimes(2);
 			});
 		});
 	});
@@ -520,40 +508,6 @@ const testCreateTeamspaceSettings = () => {
 	});
 };
 
-const testGetAllUsersInTeamspace = () => {
-	describe('Get all users in teamspace', () => {
-		test('should get all users in a teamspace', async () => {
-			const teamspace = generateRandomString();
-			const users = [
-				{ id: generateRandomString(), user: generateRandomString() },
-				{ id: generateRandomString(), user: generateRandomString() },
-			];
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
-			const res = await Teamspace.getAllUsersInTeamspace(teamspace);
-			expect(res).toEqual(users);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', USER_COL, { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
-				{ user: 1 }, undefined);
-		});
-
-		test('should get all users in a teamspace (with projection)', async () => {
-			const teamspace = generateRandomString();
-			const users = [
-				{ id: generateRandomString(), user: generateRandomString() },
-				{ id: generateRandomString(), user: generateRandomString() },
-			];
-
-			const projection = { [generateRandomString()]: 1 };
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
-			const res = await Teamspace.getAllUsersInTeamspace(teamspace, projection);
-			expect(res).toEqual(users);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', USER_COL, { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
-				projection, undefined);
-		});
-	});
-};
-
 const testRemoveUserFromAdminPrivileges = () => {
 	describe('Remove user from admin privileges', () => {
 		test('Should trigger a query to remove user from admin permissions array', async () => {
@@ -849,7 +803,6 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateAddOns();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
-	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
 	testGetTeamspaceActiveLicenses();
 	testGetTeamspaceExpiredLicenses();

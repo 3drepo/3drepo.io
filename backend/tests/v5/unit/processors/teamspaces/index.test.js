@@ -15,13 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const _ = require('lodash');
+const { times } = require('lodash');
 
 const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
 const { determineTestGroup, generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
+
+const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
@@ -74,21 +76,57 @@ const Quota = require(`${src}/utils/quota`);
 jest.mock('../../../../../src/v5/handler/db');
 const DB = require(`${src}/handler/db`);
 
+jest.mock('../../../../../src/v5/models/invitations');
+const Invitations = require(`${src}/models/invitations`);
+
 const testGetTeamspaceListByUser = () => {
 	describe('Get Teamspace list by user', () => {
 		test('should give the expected list of teamspaces', async () => {
 			const goldenData = [
-				{ name: 'ts1', isAdmin: false },
-				{ name: 'ts2', isAdmin: false },
-				{ name: 'ts3', isAdmin: true },
-				{ name: 'ts4', isAdmin: true },
-				{ name: 'ts5', isAdmin: false },
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: false },
 			];
+			const userId = generateRandomString();
+			const username = generateRandomString();
 
-			UsersModel.getAccessibleTeamspaces.mockImplementation(() => goldenData.map(({ name }) => name));
-			Permissions.isTeamspaceAdmin.mockImplementation((ts) => goldenData.find(({ name }) => name === ts).isAdmin);
-			const res = await Teamspaces.getTeamspaceListByUser('abc');
-			expect(res).toEqual(goldenData);
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+
+			FronteggService.getAccountsByUser.mockResolvedValueOnce(
+				times(goldenData.length + 1, () => generateRandomString()));
+
+			goldenData.forEach(({ name }) => {
+				FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(name);
+			});
+
+			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(undefined);
+			Permissions.isTeamspaceAdmin.mockImplementation(
+				(ts) => goldenData.find(({ name }) => name === ts).isAdmin);
+
+			const res = await Teamspaces.getTeamspaceListByUser(username);
+			outOfOrderArrayEqual(goldenData, res);
+
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledWith(userId);
+
+			expect(UsersModel.getUserId).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
+
+			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(goldenData.length + 1);
+		});
+		test('Should return undefined if unknown error occured', async () => {
+			const userId = generateRandomString();
+			const username = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.getAccountsByUser.mockResolvedValueOnce(
+				[{ name: generateRandomString(), isAdmin: false }]);
+
+			FronteggService.getTeamspaceByAccount.mockRejectedValueOnce(undefined);
+
+			await expect(Teamspaces.getTeamspaceListByUser(username)).resolves.toEqual([]);
 		});
 	});
 };
@@ -326,6 +364,14 @@ const testInitTeamspace = () => {
 
 const testGetQuotaInfo = () => {
 	describe('Get quota info', () => {
+		test('should return error if a method called throws an exception', async () => {
+			const getQuotaInfoMock = Quota.getQuotaInfo.mockRejectedValueOnce(templates.licenceExpired);
+			const teamspace = generateRandomString();
+			await expect(Teamspaces.getQuotaInfo(teamspace)).rejects.toEqual(templates.licenceExpired);
+			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
+			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
+		});
+
 		test('should return quota info', async () => {
 			const quotaInfo = {
 				freeTier: false,
@@ -334,42 +380,36 @@ const testGetQuotaInfo = () => {
 				collaborators: generateRandomNumber(0),
 			};
 			const spaceUsed = generateRandomNumber(0);
-			const collabsUsed = generateRandomNumber(0);
+			const collabsUsed = 0;
+
+			const expected = {
+				freeTier: quotaInfo.freeTier,
+				expiryDate: quotaInfo.expiryDate,
+				data: {
+					available: quotaInfo.data,
+					used: spaceUsed,
+				},
+				seats: {
+					available: quotaInfo.collaborators,
+					used: collabsUsed,
+				},
+			};
+
+			TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(generateRandomString());
+			FronteggService.getAllUsersInAccount.mockResolvedValueOnce([]);
+			UsersModel.getUserInfoFromEmailArray.mockResolvedValueOnce([]);
+			Invitations.getInvitationsByTeamspace.mockResolvedValueOnce([]);
+
 			Quota.getQuotaInfo.mockResolvedValueOnce(quotaInfo);
 			Quota.getSpaceUsed.mockResolvedValueOnce(spaceUsed);
-			Quota.getCollaboratorsAssigned.mockResolvedValueOnce(collabsUsed);
 			const teamspace = generateRandomString();
 			const res = await Teamspaces.getQuotaInfo(teamspace);
-			expect(res).toEqual(
-				{
-					freeTier: quotaInfo.freeTier,
-					expiryDate: quotaInfo.expiryDate,
-					data: {
-						available: quotaInfo.data,
-						used: spaceUsed,
-					},
-					seats: {
-						available: quotaInfo.collaborators,
-						used: collabsUsed,
-					},
-				},
-			);
+
+			expect(res).toEqual(expected);
 			expect(Quota.getQuotaInfo).toHaveBeenCalledTimes(1);
 			expect(Quota.getQuotaInfo).toHaveBeenCalledWith(teamspace, true);
 			expect(Quota.getSpaceUsed).toHaveBeenCalledTimes(1);
 			expect(Quota.getSpaceUsed).toHaveBeenCalledWith(teamspace, true);
-			expect(Quota.getCollaboratorsAssigned).toHaveBeenCalledTimes(1);
-			expect(Quota.getCollaboratorsAssigned).toHaveBeenCalledWith(teamspace);
-		});
-
-		test('should return error if a method called throws an exception', async () => {
-			const getQuotaInfoMock = Quota.getQuotaInfo.mockImplementationOnce(() => {
-				throw templates.licenceExpired;
-			});
-			const teamspace = generateRandomString();
-			await expect(Teamspaces.getQuotaInfo(teamspace)).rejects.toEqual(templates.licenceExpired);
-			expect(getQuotaInfoMock).toHaveBeenCalledTimes(1);
-			expect(getQuotaInfoMock).toHaveBeenCalledWith(teamspace, true);
 		});
 	});
 };
@@ -521,7 +561,7 @@ const testRemoveTeamspace = () => {
 			TeamspacesModel.getTeamspaceRefId.mockResolvedValue(teamspaceId);
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValue({ refId: teamspaceId });
 
-			const usersData = _.times(2, () => ({
+			const usersData = times(2, () => ({
 				user: generateRandomString(),
 				customData: {
 					firstName: generateRandomString(),
@@ -575,7 +615,7 @@ const testRemoveTeamspace = () => {
 			TeamspacesModel.getTeamspaceRefId.mockResolvedValue(teamspaceId);
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValue({ refId: teamspaceId });
 
-			const usersData = _.times(2, () => ({
+			const usersData = times(2, () => ({
 				user: generateRandomString(),
 				customData: {
 					firstName: generateRandomString(),
@@ -813,10 +853,55 @@ const testGetAllMembersInTeamspace = () => {
 	});
 };
 
+const testIsTeamspaceMember = () => {
+	describe.each([
+		['membership is active', membershipStatus.ACTIVE, false, true],
+		['membership is inactive', membershipStatus.INACTIVE, false, false],
+		['membership is pending login', membershipStatus.PENDING_LOGIN, false, true],
+		['membership is pending invite', membershipStatus.PENDING_INVITE, false, false],
+		['membership is not a member', membershipStatus.NOT_MEMBER, false, false],
+		['membership is active but membership check is bypassed', membershipStatus.ACTIVE, true, true],
+		['membership is inactive but membership check is bypassed', membershipStatus.INACTIVE, true, true],
+		['membership is pending login but membership check is bypassed', membershipStatus.PENDING_LOGIN, true, true],
+		['membership is pending invite but membership check is bypassed', membershipStatus.PENDING_INVITE, true, true],
+		['membership is not a member but membership check is bypassed', membershipStatus.NOT_MEMBER, true, false],
+		['unexpected error occured', membershipStatus.NOT_MEMBER, false, false, true],
+	])('Is teamspace member', (desc, memStatus, byPassStatusCheck, expectedRes, isError) => {
+		const teamspace = generateRandomString();
+		const user = generateRandomString();
+		test(`Returns ${expectedRes} if ${desc}`, async () => {
+			const teamspaceRef = generateRandomString();
+			const userId = generateRandomString();
+			if (isError) {
+				TeamspacesModel.getTeamspaceRefId.mockRejectedValueOnce(new Error('Unexpected error'));
+			} else {
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceRef);
+				UsersModel.getUserId.mockResolvedValueOnce(userId);
+
+				FronteggService.getUserStatusInAccount.mockResolvedValueOnce(memStatus);
+			}
+
+			await expect(Teamspaces.isTeamspaceMember(teamspace, user, byPassStatusCheck)).resolves.toBe(expectedRes);
+
+			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
+			if (isError) {
+				expect(FronteggService.getUserStatusInAccount).not.toHaveBeenCalled();
+			} else {
+				expect(UsersModel.getUserId).toHaveBeenCalledTimes(1);
+				expect(UsersModel.getUserId).toHaveBeenCalledWith(user);
+				expect(FronteggService.getUserStatusInAccount).toHaveBeenCalledTimes(1);
+				expect(FronteggService.getUserStatusInAccount).toHaveBeenCalledWith(teamspaceRef, userId);
+			}
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceListByUser();
 	testGetTeamspaceMembersInfo();
 	testInitTeamspace();
+	testIsTeamspaceMember();
 	testAddTeamspaceMember();
 	testRemoveTeamspaceMember();
 	testGetAvatarStream();

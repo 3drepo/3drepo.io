@@ -78,7 +78,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 			if (ignoreColumnChange.current) return;
 			setColsParams(cols);
 		});
-	}, [template, templateWasFetched, defaultColumns]);
+	}, [template, templateWasFetched, defaultColumns, setColsParams]);
 
 	useEffect(() => {
 		if (!templateWasFetched) return;

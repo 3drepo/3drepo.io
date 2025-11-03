@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "5.19.1",
+  "version": "5.20.0",
   "engines": {
     "node": "22.x.x"
   },

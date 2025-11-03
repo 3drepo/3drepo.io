@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../../../helper/path');
+const { times } = require('lodash');
 
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
 
@@ -444,6 +445,24 @@ const testUpdateUserDetails = () => {
 	});
 };
 
+const testGetAccountsByUser = () => {
+	describe('Get accounts by user', () => {
+		test('Should return accounts for the user', async () => {
+			const userId = generateRandomString();
+			const res = { data: { tenantIds: times(3, () => generateRandomString()) } };
+
+			WebRequests.get.mockResolvedValueOnce(res);
+
+			await expect(Users.getAccountsByUser(userId)).resolves.toEqual(res.data.tenantIds);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetUserById();
 	testGetUserAvatarBuffer();
@@ -452,4 +471,5 @@ describe(determineTestGroup(__filename), () => {
 	testTriggerPasswordReset();
 	testUploadAvatar();
 	testUpdateUserDetails();
+	testGetAccountsByUser();
 });

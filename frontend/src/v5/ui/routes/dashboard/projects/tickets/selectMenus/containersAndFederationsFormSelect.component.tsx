@@ -25,7 +25,6 @@ import { InputControllerProps, InputController } from '@controls/inputs/inputCon
 import { FormattedMessage } from 'react-intl';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { ListSubheader } from './selectMenus.styles';
-import { useEffect } from 'react';
 
 type ContainersAndFederationsSelectProps = { isNewTicketDirty?: boolean } & SelectProps;
 export const ContainersAndFederationsSelect = ({ isNewTicketDirty, onChange, ...props }: ContainersAndFederationsSelectProps) => {
@@ -41,6 +40,10 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, onChange, ...
 			return selectedContainersOrFederations[0].name;
 		}
 
+		if (itemsLength === 0) {
+			return undefined;
+		}
+
 		return formatMessage({
 			id: 'ticketTable.modelSelection.selected',
 			defaultMessage: '{itemsLength} selected',
@@ -51,12 +54,6 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, onChange, ...
 		if (!isNewTicketDirty) return;
 		openUnsavedNewTicketWarningModal();
 	};
-
-	useEffect(() => {
-		if (containersAndFederations.length === 1) {
-			onChange?.({ target: { value: [containersAndFederations[0]._id] } });
-		}
-	}, [containersAndFederations.length]);
 
 	return (
 		<SearchSelect

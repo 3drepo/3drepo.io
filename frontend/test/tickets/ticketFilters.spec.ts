@@ -222,6 +222,7 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator: 'is',
 					values: ['black', 'green', 'red'],
+					displayValues: 'black, green, red'
 				}
 			}
 
@@ -285,6 +286,7 @@ describe('Tickets: filters', () => {
 				filter: {
 					operator: 'eq',
 					values: [risks[1], risks[3], risks[2]],
+					displayValues: `${risks[1]}, ${risks[3]}, ${risks[2]}`
 				}
 			}
 
@@ -388,6 +390,25 @@ describe('Tickets: filters', () => {
 			};
 			
 			serialized = serializeFilter(template, risks, filter);
+			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+		}); 
+
+		it('should work with sequencing module options', () => {
+			let filter: TicketFilter = {
+				module: 'sequencing',
+				property: 'Sequence type',
+				type: 'oneOf',
+					filter: {
+						operator: 'is',
+						values: [
+							'Detailed',
+							'Draft'
+						],
+						displayValues: 'Detailed, Draft'
+					}
+			};
+			
+			let serialized = serializeFilter(template, risks, filter);
 			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
 		});
 
@@ -507,7 +528,8 @@ describe('Tickets: filters', () => {
 				module: '',
 				filter: {
 					operator: 'eq',
-					values: ['E.M.H.-stuff', 'Gray, John','Ye:asda']
+					values: ['E.M.H.-stuff', 'Gray, John','Ye:asda'],
+					displayValues: 'E.M.H.-stuff, Gray, John, Ye:asda'
 				}
 			}
 

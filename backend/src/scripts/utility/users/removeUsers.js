@@ -24,6 +24,17 @@ const { getUserByUsernameOrEmail } = require(`${v5Path}/models/users`);
 const { getTeamspaceListByUser, removeTeamspaceMember } = require(`${v5Path}/processors/teamspaces`);
 const { remove: deleteUser } = require(`${v5Path}/processors/users`);
 
+const removeUserFromTeamspaces = async (user) => {
+	try {
+		const teamspaces = await getTeamspaceListByUser(user);
+		await Promise.all(teamspaces.map(
+			({ name: teamspace }) => removeTeamspaceMember(teamspace, user),
+		));
+	} catch (error) {
+		logger.logError(`Failed to remove user ${user} from teamspaces: ${error.message}`);
+	}
+};
+
 const run = async (users) => {
 	if (!users?.length) throw new Error('A list of users must be provided');
 	const userArr = users.split(',').flatMap((user) => {
@@ -33,12 +44,7 @@ const run = async (users) => {
 	await Promise.all(userArr.map(async (user) => {
 		try {
 			const userRecord = await getUserByUsernameOrEmail(user);
-			const teamspaces = await getTeamspaceListByUser(userRecord.user);
-			if (teamspaces.length) {
-				await Promise.all(teamspaces.map(
-					({ name: teamspace }) => removeTeamspaceMember(teamspace, userRecord.user),
-				));
-			}
+			await removeUserFromTeamspaces(userRecord.user);
 			await deleteUser(userRecord.user);
 		} catch (error) {
 			logger.logInfo(`User ${user} not found, skipping...`);
