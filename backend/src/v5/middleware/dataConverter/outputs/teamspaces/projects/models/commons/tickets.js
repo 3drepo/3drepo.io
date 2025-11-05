@@ -18,7 +18,6 @@
 const { getTemplateById, getTemplatesByQuery } = require('../../../../../../../models/tickets.templates');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
-const { isUUID } = require('../../../../../../../utils/helper/typeCheck');
 const { respond } = require('../../../../../../../utils/responder');
 const { serialiseTicket } = require('../../../../../../../schemas/tickets');
 const { serialiseTicketTemplate } = require('../../../../common/tickets.templates');
