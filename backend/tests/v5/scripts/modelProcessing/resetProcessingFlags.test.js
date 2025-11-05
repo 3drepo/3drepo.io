@@ -17,20 +17,26 @@
 
 const {
 	determineTestGroup,
-	db: { reset: resetDB, createModel },
+	db: { reset: resetDB, createModel, createRevision },
 	generateRandomString,
 	generateRandomModel,
+	generateRevisionEntry,
 } = require('../../helper/services');
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
+const { stringToUUID } = require('../../../../src/v5/utils/helper/uuids');
 
 const { findModels } = require(`${src}/models/modelSettings`);
+const { getRevisionByIdOrTag } = require(`${src}/models/revisions`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { disconnect } = require(`${src}/handler/db`);
+
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 const ResetProcessingFlags = require(`${utilScripts}/modelProcessing/resetProcessingFlags`);
 
 const modelStates = ['ok', 'failed', 'processing', 'queued'];
+const project = generateRandomString();
 
 const setupData = () => {
 	const modelProms = times(2, async () => {
@@ -42,19 +48,46 @@ const setupData = () => {
 			await createModel(teamspace, _id, name, properties);
 			return _id;
 		}));
+		const drawings = await Promise.all(times(modelStates.length, async (n) => {
+			const revision = generateRevisionEntry(false, true, modelTypes.DRAWING, null, modelStates[n]);
+			await createRevision(
+				teamspace, project, revision._id, { ...revision, model: revision._id }, modelTypes.DRAWING);
+			return revision._id;
+		}));
 
-		return { teamspace, models };
+		return { teamspace, models, drawings };
 	});
 	return Promise.all(modelProms);
 };
 
-const checkModelsStatus = async (teamspace, models, expectReset) => {
-	const data = await findModels(teamspace, { _id: { $in: models } }, { _id: 1, status: 1 });
+const checkModelsStatus = async (teamspace, models, drawings, expectReset, index) => {
+	const modelsData = await findModels(teamspace, { _id: { $in: models } }, { _id: 1, status: 1 });
 
-	const expectedData = models.map((_id, ind) => ({ _id, status: expectReset ? undefined : modelStates[ind] }));
+	const expectedModelsData = models.map((_id, ind) => ({ _id, status: expectReset ? undefined : modelStates[ind] }));
 
-	expect(data.length).toBe(expectedData.length);
-	expect(data).toEqual(expect.arrayContaining(expectedData));
+	const drawingsData = await Promise.all(
+		drawings.map((_id) => getRevisionByIdOrTag(
+			teamspace,
+			_id,
+			modelTypes.DRAWING,
+			stringToUUID(_id),
+			{ model: 1, status: 1, _id: 0 },
+			{ includeVoid: false, includeFailed: true, includeIncomplete: false },
+		)));
+
+	const expectedDrawingsData = drawings.map((_id, ind) => ({
+		model: _id,
+		status: expectReset && (modelStates[ind] === 'queued' || modelStates[index] === 'queued')
+			? 'failed' : modelStates[ind],
+	}));
+
+	expect(modelsData.length).toBe(expectedModelsData.length);
+	expect(modelsData).toEqual(expect.arrayContaining(expectedModelsData));
+
+	expect(drawingsData.length).toBe(expectedDrawingsData.length);
+	expect(
+		drawingsData)
+		.toEqual(expect.arrayContaining(expectedDrawingsData));
 };
 
 const runTest = () => {
@@ -64,16 +97,20 @@ const runTest = () => {
 			await resetDB();
 			data = await setupData();
 		});
+
 		test('Should throw an error if model is provided but not teamspace', async () => {
 			const error = new Error('Teamspace must be provided if model is defined');
 			await expect(ResetProcessingFlags.run(undefined, generateRandomString())).rejects.toEqual(error);
-			await Promise.all(data.map(({ teamspace, models }) => checkModelsStatus(teamspace, models, false)));
+			await Promise.all(
+				data.map(
+					({ teamspace, models, drawings }) => checkModelsStatus(teamspace, models, drawings, false),
+				));
 		});
 
 		test('Should only process the predefined teamspace if it is defined', async () => {
 			await ResetProcessingFlags.run(data[0].teamspace);
 			await Promise.all(data.map(
-				({ teamspace, models }, ind) => checkModelsStatus(teamspace, models, ind === 0),
+				({ teamspace, models, drawings }, ind) => checkModelsStatus(teamspace, models, drawings, ind === 0),
 			));
 		});
 
@@ -82,32 +119,52 @@ const runTest = () => {
 			await ResetProcessingFlags.run(data[0].teamspace, data[0].models[lastInd]);
 			await Promise.all([
 				...data.map(
-					({ teamspace, models }, ind) => checkModelsStatus(
-						teamspace, ind === 0 ? models.slice(0, -1) : models, false,
+					({ teamspace, models, drawings }, ind) => checkModelsStatus(
+						teamspace,
+						ind === 0 ? models.slice(0, -1) : models,
+						ind === 0 ? drawings.slice(0, -1) : drawings,
+						false,
 					),
 				),
-				checkModelsStatus(data[0].teamspace, [data[0].models[lastInd]], true),
+				checkModelsStatus(data[0].teamspace, [data[0].models[lastInd]], [], true),
+			]);
+		});
+
+		test('Should only process the predefined drawing if it is defined', async () => {
+			const lastInd = data[0].models.length - 1;
+			await ResetProcessingFlags.run(data[0].teamspace, data[0].drawings[lastInd]);
+			await Promise.all([
+				...data.map(
+					({ teamspace, models, drawings }, ind) => checkModelsStatus(
+						teamspace,
+						ind === 0 ? models.slice(0, -1) : models,
+						ind === 0 ? drawings.slice(0, -1) : drawings,
+						false,
+						lastInd,
+					),
+				),
+				checkModelsStatus(data[0].teamspace, [], [data[0].drawings[lastInd]], true, lastInd),
 			]);
 		});
 
 		test('Should process all models if no parameters are provided', async () => {
 			await ResetProcessingFlags.run();
 			await Promise.all(data.map(
-				({ teamspace, models }) => checkModelsStatus(teamspace, models, true),
+				({ teamspace, models, drawings }) => checkModelsStatus(teamspace, models, drawings, true),
 			));
 		});
 
 		test('Should do nothing if teamspace is not found', async () => {
 			await ResetProcessingFlags.run(generateRandomString());
 			await Promise.all(data.map(
-				({ teamspace, models }) => checkModelsStatus(teamspace, models, false),
+				({ teamspace, models, drawings }) => checkModelsStatus(teamspace, models, drawings, false),
 			));
 		});
 
 		test('Should do nothing if model is not found', async () => {
 			await ResetProcessingFlags.run(data[0].teamspace, generateRandomString());
 			await Promise.all(data.map(
-				({ teamspace, models }) => checkModelsStatus(teamspace, models, false),
+				({ teamspace, models, drawings }) => checkModelsStatus(teamspace, models, drawings, false),
 			));
 		});
 	});
