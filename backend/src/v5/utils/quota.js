@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { createResponseCode, templates } = require('./responseCodes');
-const { getAllUsersInTeamspace, getSubscriptions } = require('../models/teamspaceSettings');
 const DBHandler = require('../handler/db');
 const config = require('./config');
-const { getInvitationsByTeamspace } = require('../models/invitations');
+const { getSubscriptions } = require('../models/teamspaceSettings');
 const { getTotalSize } = require('../models/fileRefs');
 
 const Quota = {};
@@ -75,15 +74,6 @@ Quota.getSpaceUsed = async (teamspace) => {
 
 	const sizes = await Promise.all(promises);
 	return sizes.reduce((accum, val) => accum + val, 0);
-};
-
-Quota.getCollaboratorsAssigned = async (teamspace) => {
-	const [teamspaceUsers, teamspaceInvitations] = await Promise.all([
-		getAllUsersInTeamspace(teamspace),
-		getInvitationsByTeamspace(teamspace, { _id: 1 }),
-	]);
-
-	return teamspaceUsers.length + teamspaceInvitations.length;
 };
 
 Quota.sufficientQuota = async (teamspace, size) => {

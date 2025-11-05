@@ -30,6 +30,7 @@ export interface TicketsFiltersContextType {
 	setFilter: (filter:TicketFilter) => void;
 	deleteFilter: (filter:TicketFilter) => void;
 	clearFilters: () => void;
+	isFiltering: boolean;
 	displayMode: DisplayMode;
 }
 
@@ -41,6 +42,7 @@ const defaultValue: TicketsFiltersContextType = {
 	setFilter: () => {},
 	deleteFilter: () => {},
 	clearFilters: () => {},
+	isFiltering: false,
 	displayMode: 'other',
 };
 
@@ -54,6 +56,7 @@ interface TicketsFiltersContextComponentProps {
 	templates: ITemplate[];
 	modelsIds: string[];
 	filters?: TicketFilter[];
+	isFiltering?: boolean;
 	onChange?: (filters: TicketFilter[]) => void;
 	displayMode?: DisplayMode;
 }
@@ -66,6 +69,7 @@ export const TicketsFiltersContextComponent = ({
 	templates, 
 	modelsIds, 
 	filters: filtersProps,
+	isFiltering,
 	displayMode,
 	onChange }: TicketsFiltersContextComponentProps) => {
 	const [filters, setFilters] = useState<TicketFilter[]>();
@@ -117,7 +121,8 @@ export const TicketsFiltersContextComponent = ({
 			setFilter, 
 			deleteFilter, 
 			clearFilters, 
-			choosablefilters, 
+			choosablefilters,
+			isFiltering,
 			templates, 
 			modelsIds, 
 		}}>

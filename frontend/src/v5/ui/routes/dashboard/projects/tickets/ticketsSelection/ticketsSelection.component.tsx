@@ -18,7 +18,7 @@
 import { DashboardParams, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { generatePath, useParams, useNavigate } from 'react-router-dom';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { SubmitButton } from '@controls/submitButton';
@@ -33,14 +33,20 @@ type FormType = {
 };
 export const TicketsSelection = () => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const [models] = useSearchParam('models', Transformers.STRING_ARRAY);
 	const navigate = useNavigate();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
+	const [models] = useSearchParam('models', Transformers.STRING_ARRAY);
+
+	const containers = ContainersHooksSelectors.selectContainers();
+	const federations = FederationsHooksSelectors.selectFederations();
+	const AllContainersAndFederations = [...containers, ...federations];
+	const defaultContainerOrFederations = AllContainersAndFederations.length === 1 ? [AllContainersAndFederations[0]._id] : models;
+	const defaultTemplate = templates.length === 1 ? templates[0]._id : '';
 
 	const formData = useForm<FormType>({
 		defaultValues: {
-			containersAndFederations: models,
-			template: '',
+			containersAndFederations: defaultContainerOrFederations,
+			template: defaultTemplate,
 		},
 	});
 

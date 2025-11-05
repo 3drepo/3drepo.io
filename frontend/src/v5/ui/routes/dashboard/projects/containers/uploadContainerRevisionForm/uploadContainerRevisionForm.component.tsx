@@ -89,7 +89,7 @@ export const UploadContainerRevisionForm = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = ContainerRevisionsHooksSelectors.selectUploadIsComplete();
-	const revisionsArePending = ContainerRevisionsHooksSelectors.selectRevisionsPending(presetContainerId);
+	const revisionsArePending = ContainerRevisionsHooksSelectors.selectRevisionsNotFetched(presetContainerId);
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 

@@ -83,8 +83,6 @@ export const VirtualList = ({ items, itemHeight, itemContent }:Props) => {
 	const itemsSlice = items.slice(firstItemindex, lastIndex);
 	const containerHeight = (items.length - 1) * itemHeight + expandedItem.current.height;
 	
-	// console.log(JSON.stringify({top, bottom, innerHeight, contentCount}));
-
 	useEffect(()=> {
 		prevInnerHeight.current = 0;
 	}, [items]);

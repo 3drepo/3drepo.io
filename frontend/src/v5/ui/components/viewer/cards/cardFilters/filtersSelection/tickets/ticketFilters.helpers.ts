@@ -16,21 +16,25 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { ITemplate, StatusValue } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, PropertyDefinition, StatusValue, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import BooleanIcon from '@assets/icons/filters/boolean.svg';
 import ListIcon from '@assets/icons/filters/list.svg';
 import NumberIcon from '@assets/icons/filters/number.svg';
 import TemplateIcon from '@assets/icons/filters/template.svg';
 import TextIcon from '@assets/icons/filters/text.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
-import { isString, sortBy, uniqBy, compact, uniq } from 'lodash';
-import { TicketFilterType, TicketFilter, TicketFilterOperator } from '../../cardFilters.types';
+import { isString, sortBy, uniqBy, compact, uniq, parseInt, chunk, isBoolean } from 'lodash';
+import { TicketFilterType, TicketFilter, TicketFilterOperator, TicketFilterOperatorEnum, BaseFilter, ValueType } from '../../cardFilters.types';
 import { FILTER_OPERATOR_LABEL, isDateType, isRangeOperator, isSelectType, isTextType } from '../../cardFilters.helpers';
 import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 import { SelectOption } from '@/v5/helpers/form.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
+import { IUser } from '@/v5/store/users/users.redux';
+import { toDictionary } from '@/v5/helpers/toDictionary.helper';
+import { formatSimpleDate } from '@/v5/helpers/intl.helper';
+import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -50,6 +54,14 @@ export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'boolean': BooleanIcon,
 	'number': NumberIcon,
 };
+
+export const arrToDisplayValue = (arr: any[]) => arr.join(', ');
+export const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
+export const formatDateRange = ([from, to]) => formatMessage(
+	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
+	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
+);
+
 
 export const DEFAULT_FILTERS: TicketFilter[] = [
 	{ module: '', type: 'title', property: formatMessage({ defaultMessage: 'Ticket title', id: 'viewer.card.filters.element.title' }) },
@@ -218,3 +230,156 @@ export const getTemplateFilter = (templateCode: string): TicketFilter => ({
 		values:[templateCode],
 	},
 });
+
+const escapeString = (str: string) => str.replaceAll('.', '\\.').replaceAll(',', '\\,').replaceAll(':', '\\:');
+
+const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',').replaceAll('\\:', ':');
+
+const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
+	propOrModule?.find((p) => p.name === name);
+
+const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
+	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype); 
+
+const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, template:ITemplate) => {
+	const propertiesDefinitions = (findModuleByNameOrType(template.modules, ticketFilter.module) as TemplateModule)?.properties || template.properties;
+	return (findByName(propertiesDefinitions, ticketFilter.property) || findByName(propertiesDefinitions, ticketFilter.type)) as PropertyDefinition;
+};
+
+export class InvalidPropertyOrTemplateError extends Error {
+	constructor(propertyname: string, type: string, templateName: string) {
+		// Need to pass `options` as the second parameter to install the "cause" property.
+		super('There was an error deserializing the filter the property "' + propertyname + '" of type "' + type + '" for the template "' + templateName + '"');
+		this.name = 'InvalidPropertyOrTemplateError';
+	}
+}
+
+// NOTE: serialization assumes there are no name clashes: that means 
+// that one name refers to one property. Eg: lets say theres a property 'number of nodes' serialization
+// assumes theres only one 'number of nodes'. In practical terms this means that serialization works 
+// assuming the filters are for one template in particular
+export const serializeFilter = (template: ITemplate, riskCategories: string[], ticketFilter: TicketFilter) => {
+	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
+	let values = ticketFilter.filter.values;
+
+	let filterKey = [ticketFilter.module, ticketFilter.property, ticketFilter.type].join('.');
+
+	const serialized = [ filterKey, t];
+
+	let serializedValues:string = undefined;
+	if (values) {
+		const serializeValue = (value) => {
+			if (isString(value)) return escapeString(value);
+			if (isBoolean(value)) return +value;
+			return value;
+		};
+
+		serializedValues = values.map(serializeValue).join(',');
+		
+		if (['oneOf', 'manyOf', 'status'].includes(ticketFilter.type)) {
+		
+			const propertyDef = findPropertyDefinitionByFilter(ticketFilter, template);
+			if (!propertyDef && !isBaseProperty(ticketFilter.type) ) {
+				throw (new InvalidPropertyOrTemplateError(ticketFilter.property, ticketFilter.type, template.name));
+			}
+
+			let options = propertyDef.values;
+
+			if (options !== 'jobsAndUsers') {
+				if (options === 'riskCategories') {
+					options = riskCategories;
+				}
+				
+				const indexes = values.map((val) => options.indexOf(val as any));
+				serializedValues = indexes.join(',');
+			}
+		}
+
+		serialized.push(serializedValues);
+	}
+
+	return serialized.join(':');
+};
+
+// Custom splitter otherwise the ^\ part of the regex would eat up one character
+export const splitByNonEscaped = (str: string, char) =>  {
+	const res = [];
+	let index = str.indexOf(char);
+	let lastIndex = 0;
+
+	while (index >= 0 ) {
+		if (str[index - 1] !== '\\') {
+			res.push(str.substring(lastIndex, index));
+			lastIndex = index + 1;
+		}
+		index = str.indexOf(char, index + 1);
+	}
+
+	res.push(str.substring(lastIndex));
+
+	return res;
+};
+
+export const deserializeFilter = (template:ITemplate, users: IUser[], riskCategories: string[], str: string): TicketFilter => {
+	const userByUserName = toDictionary(users, (u) => u.user);
+	const [serialisedFields, serializedOperator, serialisedValue] = splitByNonEscaped(str, ':');
+
+	let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
+
+	const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
+
+	let filter: BaseFilter = {
+		operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
+		values: undefined,
+	};
+
+	if (!isBaseProperty(type) && (!propertyDef || propertyDef.type !== type) ) {
+		throw (new InvalidPropertyOrTemplateError(property, type, template.name));
+	}
+
+	if (['manyOf', 'oneOf'].includes(propertyDef?.type) || type === 'owner') {
+		if (propertyDef?.values === 'jobsAndUsers' || type === 'owner' ) {
+			filter.values = splitByNonEscaped(serialisedValue, ',');
+			filter.displayValues = arrToDisplayValue((filter.values as string[]).map((u) => {
+				if (userByUserName[u]) return getFullnameFromUser(userByUserName[u]);
+				return u;
+			}));
+		} else {
+			const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
+			const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
+			filter.values = indexes.filter((i) => options[i]).map((i) => options[i]);
+			filter.displayValues = arrToDisplayValue(filter.values);
+			if (!filter.values) {
+				throw (new InvalidPropertyOrTemplateError(property, type, template.name));
+			}
+		}
+	}
+
+	if (isDateType(type)) {
+		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
+				
+		if (filter.operator === 'rng' || filter.operator === 'nrng') {
+			filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
+			filter.displayValues = arrToDisplayValue(filter.values.map(formatDateRange));
+		} else {
+			filter.displayValues = arrToDisplayValue(filter.values.map(valueToDisplayDate));
+		}
+	}
+
+	if (type === 'boolean') {
+		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => v !== '0' );
+		filter.displayValues = arrToDisplayValue(filter.values.map((v) => v ? TRUE_LABEL : FALSE_LABEL));
+	}
+
+	if (type === 'number') {
+		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
+		filter.displayValues = arrToDisplayValue(filter.values);
+	}
+
+	if (isTextType(type)) {
+		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => unescapeString(v));
+		filter.displayValues = arrToDisplayValue(filter.values);
+	}
+
+	return { module, property, type, filter };
+};

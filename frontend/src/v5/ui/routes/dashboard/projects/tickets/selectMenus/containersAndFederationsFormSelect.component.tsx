@@ -25,7 +25,6 @@ import { InputControllerProps, InputController } from '@controls/inputs/inputCon
 import { FormattedMessage } from 'react-intl';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { ListSubheader } from './selectMenus.styles';
-import { useEffect } from 'react';
 
 type ContainersAndFederationsSelectProps = { isNewTicketDirty?: boolean } & SelectProps;
 export const ContainersAndFederationsSelect = ({ isNewTicketDirty, onChange, ...props }: ContainersAndFederationsSelectProps) => {
@@ -34,10 +33,15 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, onChange, ...
 	const containersAndFederations = [...containers, ...federations];
 
 	const getRenderText = (ids: any[] | null = []) => {
-		const itemsLength = ids.length;
+		const selectedContainersOrFederations = containersAndFederations.filter(({ _id }) => ids.includes(_id));
+		const itemsLength = selectedContainersOrFederations.length;
+
 		if (itemsLength === 1) {
-			const [id] = ids;
-			return (containersAndFederations.find(({ _id }) => _id === id) || {}).name;
+			return selectedContainersOrFederations[0].name;
+		}
+
+		if (itemsLength === 0) {
+			return undefined;
 		}
 
 		return formatMessage({
@@ -50,12 +54,6 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, onChange, ...
 		if (!isNewTicketDirty) return;
 		openUnsavedNewTicketWarningModal();
 	};
-
-	useEffect(() => {
-		if (containersAndFederations.length === 1) {
-			onChange?.({ target: { value: [containersAndFederations[0]._id] } });
-		}
-	}, [containersAndFederations.length]);
 
 	return (
 		<SearchSelect

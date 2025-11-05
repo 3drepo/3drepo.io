@@ -24,7 +24,6 @@ const {
 	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
-const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
 const { getUserStatusInAccount } = require('../services/sso/frontegg');
@@ -164,27 +163,16 @@ TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
 };
 
 TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username, bypassStatusCheck = false) => {
-	const query = { user: username, 'roles.db': teamspace };
+	const query = { user: username };
 	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1, userId: 1 } });
 	if (!userDoc) return false;
+	const teamspaceId = await TeamspaceSetting.getTeamspaceRefId(teamspace);
 
+	const memStatus = await getUserStatusInAccount(teamspaceId, userDoc.customData.userId);
+	if (memStatus === membershipStatus.NOT_MEMBER) {
+		return false;
+	}
 	if (!bypassStatusCheck) {
-		const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
-
-		if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
-			const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
-			if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
-				throw templates.domainRestricted;
-			}
-		}
-
-		const teamspaceId = await TeamspaceSetting.getTeamspaceRefId(teamspace);
-
-		const memStatus = await getUserStatusInAccount(teamspaceId, userDoc.customData.userId);
-		if (memStatus === membershipStatus.NOT_MEMBER) {
-			return false;
-		}
-
 		if (memStatus === membershipStatus.INACTIVE) {
 			throw templates.membershipInactive;
 		}
@@ -194,7 +182,7 @@ TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username, bypassStatus
 		}
 	}
 
-	return !!userDoc;
+	return true;
 };
 
 TeamspaceSetting.getMembersInfo = async (teamspace) => {
@@ -251,11 +239,6 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 
 TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
 	username, TEAMSPACE_ADMIN);
-
-TeamspaceSetting.getAllUsersInTeamspace = (teamspace, projection = { user: 1 }) => {
-	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
-	return findMany(query, projection);
-};
 
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
 	await teamspaceSettingUpdate(teamspace, { _id: teamspace }, { $pull: { permissions: { user } } });
