@@ -842,6 +842,8 @@ const testUpdateModelSettings = () => {
 					['the defaultLegend is set to a valid legend', getRoute(), true, { defaultLegend: UUIDToString(model.legend._id) }],
 					['the defaultView is set to null', getRoute(), true, { defaultView: null }],
 					['the defaultLegend is set to null', getRoute(), true, { defaultLegend: null }],
+					['the code and units are updated', getRoute(), true, { code: ServiceHelper.generateRandomString(), unit: 'm' }],
+					['the code is unset and units are updated', getRoute(), true, { code: null, unit: 'm' }],
 				] : []),
 				...(modelType === modelTypes.FEDERATION ? [
 					['the user tries to edit submodel array', getRoute(), false, { subModels: [con._id] }, templates.invalidArguments],

@@ -102,10 +102,12 @@ export const getDefaultOperator = (type) => {
 	return 'eq';
 };
 
-const findByName = <T extends { name?:string }>(arr: T[], nameToFind) => arr?.find(( { name }) => name === nameToFind);
+const findByNameOrType = <T extends { name?:string, type?:string }>(arr: T[], nameToFind, typeToFind?) => 
+	arr?.find(( { name, type }) =>
+		name === nameToFind || (typeToFind ? type === typeToFind : false));
 
 export const getTemplateProperty = (template:ITemplate, module: string | undefined, propertyName: string) => {
-	return findByName((module ?  findByName(template.modules, module) : template)?.properties, propertyName);
+	return findByNameOrType((module ?  findByNameOrType(template.modules, module, module) : template)?.properties, propertyName);
 };
 
 

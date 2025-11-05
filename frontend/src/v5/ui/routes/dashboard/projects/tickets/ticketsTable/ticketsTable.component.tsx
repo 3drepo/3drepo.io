@@ -107,6 +107,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 
+
 	const [paramFilters, setParamFilters] = useSearchParam<string>('filters', undefined, true);
 
 	const readOnly = isFed(containerOrFederation)
@@ -194,7 +195,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		})();
 
 		return () => { mounted = false;};
-	}, [models,  selectedTemplate.code, JSON.stringify(filters)]);
+	}, [models,  selectedTemplate?.code, JSON.stringify(filters)]);
 
 	useEffect(() => {
 		const filtTickets = tickets.filter(({ _id }) => filteredTicketsIDs.has(_id));
@@ -278,6 +279,12 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	paramsToSave.current = { search: window.location.search, params };
 
+	// If the template id in the url is wrong default to the first template
+	if (!selectedTemplate) {
+		setTemplate(templates[0]._id);
+		return null;
+	}
+
 	return (
 		// eslint-disable-next-line max-len
 		<TicketsFiltersContextComponent onChange={onChangeFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters} isFiltering={isFiltering}>
@@ -345,6 +352,7 @@ const TabularViewTicketForm = ({ setIsNewTicketDirty, setTicketValue, presetValu
 	const onSaveTicket = (_id: string) => setTicketValue(containerOrFederation, _id, null, true);
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const haveValidContainerOrFederation = models.some(({ _id }) => _id === containerOrFederation);
+
 
 	return (
 		<SidePanel open={!!ticketId && haveValidContainerOrFederation}>

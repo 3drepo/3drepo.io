@@ -668,9 +668,7 @@ const testUpdateModelSettings = () => {
 
 			const updateObject = {
 				$set: {
-					properties: {
-						unit: data.unit,
-					},
+					'properties.unit': data.unit,
 					name: data.name,
 				},
 				$unset: {
@@ -703,10 +701,8 @@ const testUpdateModelSettings = () => {
 
 			const updateObject = {
 				$set: {
-					properties: {
-						unit: data.unit,
-						code: data.code,
-					},
+					'properties.unit': data.unit,
+					'properties.code': data.code,
 					name: data.name,
 					defaultView: data.defaultView,
 				},

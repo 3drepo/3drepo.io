@@ -26,6 +26,7 @@ const _ = require("lodash");
 const User = require("./user");
 
 const {v5Path} = require("../../interop");
+const { getTeamspaceSettingsCollection } = require("./teamspaceSetting");
 const { INTERNAL_DB } = require(`${v5Path}/handler/db.constants`);
 
 const types = {
@@ -109,15 +110,21 @@ const extractTeamSpaceInfo = function(notifications) {
 const getModelToProject = async (teamspaces) => {
 	const modelToProject = {};
 	await Promise.all(teamspaces.map(async teamspace => {
-		modelToProject[teamspace] = {};
-		const projects = await listProjects(teamspace, {}, {models : 1});
+		try {
+			await getTeamspaceSettingsCollection(teamspace);
+			modelToProject[teamspace] = {};
+			const projects = await listProjects(teamspace, {}, {models : 1});
 
-		projects.forEach(({_id, models}) => {
-			const projectId = utils.uuidToString(_id);
-			models.forEach((model) => {
-				modelToProject[teamspace][model] = projectId;
+			projects.forEach(({_id, models}) => {
+				const projectId = utils.uuidToString(_id);
+				models.forEach((model) => {
+					modelToProject[teamspace][model] = projectId;
+				});
 			});
-		});
+		} catch (e) {
+			// if the teamspace does not exist just skip it
+
+		}
 
 	}));
 	return modelToProject;
@@ -438,11 +445,12 @@ module.exports = {
 	 * @param {string} username The username of the user which the notificatons belongs to
 	 * @returns {Promise<Notification[]>} It contains the notifications for the user passed through parameter
  	 */
-	getNotifications: function(user, criteria = {}) {
+	getNotifications: async function(user, criteria = {}) {
 		if (criteria._id) {
 			criteria._id = utils.stringToUUID(criteria._id);
 		}
+		const data = await db.find(INTERNAL_DB, NOTIFICATIONS_COLL, { user, type: {$in: Object.values(types)}, ...criteria }, undefined, {timestamp: -1});
+		return fillModelData(data);
 
-		return db.find(INTERNAL_DB, NOTIFICATIONS_COLL, { user, type: {$in: Object.values(types)}, ...criteria }, undefined, {timestamp: -1}).then(fillModelData);
 	}
 };

@@ -36,6 +36,11 @@ Users.getUserById = async (userId) => {
 	}
 };
 
+Users.getAccountsByUser = async (userId) => {
+	const { tenantIds } = await Users.getUserById(userId);
+	return tenantIds;
+};
+
 Users.getUserAvatarBuffer = async (userId) => {
 	try {
 		const { profilePictureUrl } = await Users.getUserById(userId);

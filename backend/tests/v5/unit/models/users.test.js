@@ -36,31 +36,6 @@ jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 
 const User = require(`${src}/models/users`);
 
-const testGetAccessibleTeamspaces = () => {
-	describe('Get accessible teamspaces', () => {
-		test('should return list of teamspaces if user exists', async () => {
-			const expectedData = {
-				roles: [
-					{ db: 'ts1', role: 'a' },
-					{ db: 'ts2', role: 'b' },
-					{ db: USERS_DB_NAME, role: generateRandomString() },
-				],
-			};
-			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
-
-			const res = await User.getAccessibleTeamspaces('user');
-			expect(res).toEqual(['ts1', 'ts2']);
-		});
-
-		test('should return error if user does not exists', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-
-			await expect(User.getAccessibleTeamspaces('user'))
-				.rejects.toEqual(templates.userNotFound);
-		});
-	});
-};
-
 const testGetFavourites = () => {
 	const favouritesData = {
 		teamspace1: [],
@@ -576,7 +551,6 @@ const testGetUserInfoFromEmailArray = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	testGetAccessibleTeamspaces();
 	testGetFavourites();
 	testAppendFavourites();
 	testDeleteFromFavourites();

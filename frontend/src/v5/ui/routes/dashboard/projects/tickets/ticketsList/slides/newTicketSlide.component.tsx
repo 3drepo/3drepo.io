@@ -17,7 +17,7 @@
 
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { filterEmptyTicketValues, getDefaultTicket, getEditableProperties, modelIsFederation, sanitizeViewVals, templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
-import { ITemplate, ITicket, NewTicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket, NewTicket } from '@/v5/store/tickets/tickets.types';
 import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
@@ -42,24 +42,22 @@ type NewTicketSlideProps = {
 	onDirtyStateChange: (isDirty: boolean) => void,
 };
 
-const toDefaultValue = ({ key, value }: PresetValue, propertyType: PropertyTypeDefinition) => {
-	if (!key || key === IssueProperties.DUE_DATE || !value) return;
+const toDefaultValue = ({ key, value }: PresetValue) => {
+	if (!key || key === IssueProperties.DUE_DATE) return;
+	if (!value) return set({}, key, '');
 
-	let val: string | string[] = value;
-	if (propertyType === 'manyOf') {
-		val = value.split(',').map((v) => v.trim());
-	}
-
-	return set({}, key, val);
+	return set({}, key, value);
 };
 
 export const NewTicketSlide = ({ template, containerOrFederation, presetValue, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
 	const { getPropertyType } = useContext(TicketsTableContext);
 	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
-	const preselectedDefaultValue = presetValue ? toDefaultValue(presetValue, getPropertyType(presetValue.key)) : null;
+	const preselectedDefaultValue = presetValue ? toDefaultValue(presetValue) : null;
 	const defaultTicket = getDefaultTicket(template);
-	const defaultValues = preselectedDefaultValue ? merge(defaultTicket, preselectedDefaultValue) : defaultTicket;
+	const defaultValues = preselectedDefaultValue
+		? merge({}, defaultTicket, preselectedDefaultValue)
+		: defaultTicket;
 	const isFederation = modelIsFederation(containerOrFederation);
 	
 	const formData = useForm({

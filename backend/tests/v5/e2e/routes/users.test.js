@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
 const SessionTracker = require('../../helper/sessionTracker');
+const { readFileSync } = require('fs');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -240,14 +241,14 @@ const testGetAvatar = () => {
 
 		test('should get the avatar if the user has an fs avatar and has a session via an API key', async () => {
 			const res = await agent.get(`/v5/user/avatar?key=${userWithFsAvatar.apiKey}`).expect(200);
-			expect(res.body).toEqual(Buffer.from('basicAvatarUrl'));
+			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 		});
 
 		test('should get the avatar if the user has an fs avatar and is logged in', async () => {
 			const testSession = SessionTracker(agent);
 			await testSession.login(userWithFsAvatar);
 			const res = await testSession.get('/v5/user/avatar').expect(200);
-			expect(res.body).toEqual(Buffer.from('basicAvatarUrl'));
+			expect(res.body).toEqual(Buffer.from(fsAvatarData));
 			await testSession.post('/v5/logout/');
 		});
 	});
@@ -280,7 +281,8 @@ const testUploadAvatar = () => {
 
 				const avatarRes = await testSession.get('/v5/user/avatar').expect(templates.ok.status);
 				const resBuffer = avatarRes.body;
-				expect(resBuffer).toEqual(Buffer.from('newAvatarUrl'));
+				const imageBuffer = readFileSync(image);
+				expect(resBuffer).toEqual(imageBuffer);
 			});
 		});
 	});
