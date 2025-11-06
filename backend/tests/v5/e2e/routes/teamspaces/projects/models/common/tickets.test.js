@@ -1299,11 +1299,19 @@ const testUpdateManyTickets = () => {
 
 const testGetTicketHistory = () => {
 	describe('Get ticket history', () => {
-		const updateTicketLogs = async (teamspace, users, updateDate, model, project, ticket, update) => {
+		const updateTicketLogs = async (
+			teamspace, users, updateDate, model, project, ticket, updateParam, updateValue,
+		) => {
 			await insertOne(teamspace, 'tickets.logs', {
 				_id: ServiceHelper.generateUUIDString(),
 				author: users.tsAdmin.user,
-				changes: { properties: { title: { from: ticket.title, to: update.title } } },
+				changes: {
+					properties: {
+						[updateParam]: {
+							from: ticket[updateParam] ?? ticket.properties[updateParam], to: updateValue,
+						},
+					},
+				},
 				timestamp: updateDate,
 				teamspace,
 				project: stringToUUID(project.id),
@@ -1318,10 +1326,12 @@ const testGetTicketHistory = () => {
 		const conTicket = ServiceHelper.generateTicket(template);
 		const fedTicket = ServiceHelper.generateTicket(template);
 
+		const datePropName = template.properties.find((p) => p.type === propTypes.DATE).name;
 		const conTicketUpdate = ServiceHelper.generateTicket(template);
 		const fedTicketUpdate = ServiceHelper.generateTicket(template);
 
-		const ticketUpdate = { title: ServiceHelper.generateRandomString() };
+		const ticketTitleUpdateUpdate = ServiceHelper.generateRandomString();
+		const ticketDueDateUpdate = ServiceHelper.generateRandomDate();
 		const updateDate = new Date();
 
 		beforeAll(async () => {
@@ -1336,8 +1346,18 @@ const testGetTicketHistory = () => {
 
 			// Simulate ticket update and log entry for conTicket and fedTicket
 			await Promise.all([
-				updateTicketLogs(teamspace, users, updateDate, con, project, conTicketUpdate, ticketUpdate),
-				updateTicketLogs(teamspace, users, updateDate, fed, project, fedTicketUpdate, ticketUpdate),
+				updateTicketLogs(
+					teamspace, users, updateDate, con, project, conTicketUpdate, 'title', ticketTitleUpdateUpdate,
+				),
+				updateTicketLogs(
+					teamspace, users, updateDate, con, project, conTicketUpdate, datePropName, ticketDueDateUpdate,
+				),
+				updateTicketLogs(
+					teamspace, users, updateDate, fed, project, fedTicketUpdate, 'title', ticketTitleUpdateUpdate,
+				),
+				updateTicketLogs(
+					teamspace, users, updateDate, fed, project, fedTicketUpdate, datePropName, ticketDueDateUpdate,
+				),
 			]);
 		});
 
@@ -1359,12 +1379,26 @@ const testGetTicketHistory = () => {
 			const updateHistory = [
 				{
 					author: users.tsAdmin.user,
-					timestamp: expect.any(Number),
+					timestamp: updateDate.getTime(),
+					changes: {
+						properties: {
+							[datePropName]: {
+								from: isFed
+									? conTicketUpdate.properties[datePropName]
+									: fedTicketUpdate.properties[datePropName],
+								to: ticketDueDateUpdate.getTime(),
+							},
+						},
+					},
+				},
+				{
+					author: users.tsAdmin.user,
+					timestamp: updateDate.getTime(),
 					changes: {
 						properties: {
 							title: {
 								from: isFed ? fedTicketUpdate.title : conTicketUpdate.title,
-								to: ticketUpdate.title,
+								to: ticketTitleUpdateUpdate,
 							},
 						},
 					},
@@ -1391,7 +1425,7 @@ const testGetTicketHistory = () => {
 
 				if (success) {
 					expect(res.body.history).not.toBeUndefined();
-					expect(res.body.history).toEqual(expectedOutput.response);
+					ServiceHelper.outOfOrderArrayEqual(res.body.history, expectedOutput.response);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
