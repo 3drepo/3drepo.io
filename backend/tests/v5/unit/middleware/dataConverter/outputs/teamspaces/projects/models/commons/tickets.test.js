@@ -457,6 +457,18 @@ const testSerialiseTicketHistory = () => {
 					timestamp: generateRandomDate(),
 				});
 			}
+			if (i % 3 === 0) {
+				return ({
+					author: generateRandomString(),
+					changes: {
+						[generateRandomString()]: {
+							from: null,
+							to: generateUUID(),
+						},
+					},
+					timestamp: generateRandomDate(),
+				});
+			}
 			return ({
 				author: generateRandomString(),
 				changes: {
@@ -477,10 +489,21 @@ const testSerialiseTicketHistory = () => {
 					return ({
 						...h,
 						changes: {
-							...h.changes,
 							[Object.keys(h.changes)[0]]: {
-								...h.changes[Object.keys(h.changes)[0]],
+								from: h.changes[Object.keys(h.changes)[0]].from,
 								to: h.changes[Object.keys(h.changes)[0]].to.getTime(),
+							},
+						},
+						timestamp: h.timestamp.getTime(),
+					});
+				}
+				if (i % 3 === 0) {
+					return ({
+						...h,
+						changes: {
+							[Object.keys(h.changes)[0]]: {
+								from: h.changes[Object.keys(h.changes)[0]].from,
+								to: UUIDToString(h.changes[Object.keys(h.changes)[0]].to),
 							},
 						},
 						timestamp: h.timestamp.getTime(),
@@ -499,15 +522,17 @@ const testSerialiseTicketHistory = () => {
 		});
 
 		test('Should respond with empty changes if the ticket has no changes(imported)', () => {
-			const req = { history: history.map((h, i) => {
-				if (i % 2 === 0) {
-					return ({ ...h, changes: null });
-				}
-				return h;
-			}) };
+			const req = {
+				history: history.map((h, i) => {
+					if (i % 2 === 0 || i % 3 === 0) {
+						return ({ ...h, changes: null });
+					}
+					return h;
+				}),
+			};
 
 			const templateData = history.map((h, i) => {
-				if (i % 2 === 0) {
+				if (i % 2 === 0 || i % 3 === 0) {
 					return ({ ...h, changes: {}, timestamp: h.timestamp.getTime() });
 				}
 				return { ...h, timestamp: h.timestamp.getTime() };

@@ -22,6 +22,7 @@ const { respond } = require('../../../../../../../utils/responder');
 const { serialiseTicket } = require('../../../../../../../schemas/tickets');
 const { serialiseTicketTemplate } = require('../../../../common/tickets.templates');
 const { templates } = require('../../../../../../../utils/responseCodes');
+const { isUUID } = require('../../../../../../../utils/helper/typeCheck');
 
 const Tickets = {};
 
@@ -98,12 +99,14 @@ Tickets.serialiseTicketList = async (req, res) => {
 	}
 };
 
+// check if uuid and convert to string
 Tickets.serialiseTicketHistory = (req, res) => {
 	const serializeDates = (obj) => {
 		const returnObj = { ...obj };
 		for (const [key, value] of Object.entries(obj)) {
 			if (value instanceof Object) returnObj[key] = serializeDates(value);
 			if (value instanceof Date) returnObj[key] = value.getTime();
+			if (isUUID(value)) returnObj[key] = UUIDToString(value);
 		}
 		return returnObj;
 	};
