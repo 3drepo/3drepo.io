@@ -120,77 +120,53 @@ const testGetProjectList = () => {
 	});
 };
 
-const testCreateProject = () => {
-	describe('Create project', () => {
+const testCreateProject = (internalService) => {
+	describe('!Create Project', () => {
+		const route = (ts, key) => `/v5/teamspaces/${ts}/projects?key=${key}`;
 		const basicData = generateBasicData();
 		const { users, teamspace, projects } = basicData;
-
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 		});
+		describe.each([
+			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['user is not admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
+			['project name is not valid', { projectName: 123 }, false, templates.invalidArguments],
+			['project name is already taken', { projectName: projects.testProject.name }, false, templates.invalidArguments],
+			['project name is already taken (case insensitive)', { projectName: projects.testProject.name.toUpperCase() }, false, templates.invalidArguments],
+			['project name is already taken', { projectName: projects.testProject.name }, false, templates.invalidArguments],
+			['user has rights and project name is not taken', { }, true],
 
-		const route = (ts = teamspace, key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects?key=${key}`;
-
-		test('should fail without a valid session', async () => {
-			const res = await agent.post(route(teamspace, ServiceHelper.generateRandomString()))
-				.expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
-
-		test('should fail without a valid teamspace', async () => {
-			const res = await agent.post(route(ServiceHelper.generateRandomString()))
-				.expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail if the user is not teamspace admin', async () => {
-			const res = await agent.post(route(teamspace, users.nonAdminUser.apiKey))
-				.expect(templates.notAuthorized.status);
-			expect(res.body.code).toEqual(templates.notAuthorized.code);
-		});
-
-		test('should fail if the new project data are not valid', async () => {
-			const res = await agent.post(route())
-				.send({ name: 123 }).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the new project name is taken by another project', async () => {
-			const res = await agent.post(route())
-				.send({ name: projects.testProject.name }).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
-		});
-
-		test('should fail if the new project name is taken by another project (case insensitive)', async () => {
-			const res = await agent.post(route())
-				.send({ name: projects.testProject.name.toUpperCase() }).expect(templates.invalidArguments.status);
-			expect(res.body.code).toEqual(templates.invalidArguments.code);
+		])('', (desc,
+			{ ts = teamspace, key = users.tsAdmin.apiKey, projectName = ServiceHelper.generateRandomString() },
+			success, expectedRes = templates.ok) => {
+			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const res = await agent.post(route(ts, key))
+					.send({ name: projectName })
+					.expect(expectedRes.status);
+				if (success) {
+					const projectsRes = await agent.get(
+						route(teamspace, users.tsAdmin.apiKey)).expect(templates.ok.status);
+					expect(projectsRes.body.projects.find((p) => p.name === projectName)).not.toBe(undefined);
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
 		});
 
 		test('should fail if multiple projects are being sent at similar times with the same name', async () => {
 			const payload = { name: ServiceHelper.generateRandomString() };
-			const prom1 = agent.post(route()).send(payload);
+			const prom1 = agent.post(route(teamspace, users.tsAdmin.apiKey)).send(payload);
 			const [res1, res2, res3] = await Promise.all([
 				prom1,
-				...times(2, () => agent.post(route()).send(payload))]);
+				...times(2, () => agent.post(route(teamspace, users.tsAdmin.apiKey)).send(payload))]);
 
 			expect(res1.statusCode).toBe(templates.ok.status);
 			expect(res2.statusCode).toBe(templates.invalidArguments.status);
 			expect(res2.body.code).toBe(templates.invalidArguments.code);
 			expect(res3.statusCode).toBe(templates.invalidArguments.status);
 			expect(res3.body.code).toBe(templates.invalidArguments.code);
-		});
-
-		test('should create new project if new project data are valid', async () => {
-			const res = await agent.post(route())
-				.send({ name: 'Valid Name' }).expect(templates.ok.status);
-
-			const projectsRes = await agent.get(route(teamspace, users.tsAdmin.apiKey)).expect(templates.ok.status);
-			expect(projectsRes.body.projects.find((p) => p.name === 'Valid Name')).not.toBe(undefined);
-
-			// Delete project afterwards
-			await agent.delete(`/v5/teamspaces/${teamspace}/projects/${res.body._id}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.ok.status);
 		});
 	});
 };
@@ -615,20 +591,32 @@ const testGetStatusCodes = () => {
 };
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
-	beforeAll(async () => {
-		server = await ServiceHelper.app();
-		agent = await SuperTest(server);
+	describe('External Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app();
+			agent = await SuperTest(server);
+		});
+
+		afterAll(() => ServiceHelper.closeApp(server));
+		testGetProjectList();
+		testCreateProject();
+		testUpdateProject();
+		testDeleteProject();
+		testGetProject();
+		testGetProjectImage();
+		testUpdateProjectImage();
+		testDeleteProjectImage();
+		testGetDrawingCategories();
+		testGetStatusCodes();
 	});
 
-	afterAll(() => ServiceHelper.closeApp(server));
-	testGetProjectList();
-	testCreateProject();
-	testUpdateProject();
-	testDeleteProject();
-	testGetProject();
-	testGetProjectImage();
-	testUpdateProjectImage();
-	testDeleteProjectImage();
-	testGetDrawingCategories();
-	testGetStatusCodes();
+	// describe('Internal Service', () => {
+	// 	beforeAll(async () => {
+	// 		server = await ServiceHelper.app(false);
+	// 		agent = await SuperTest(server);
+	// 	});
+
+	// 	afterAll(() => ServiceHelper.closeApp(server));
+	// 	testCreateProject(true);
+	// });
 });
