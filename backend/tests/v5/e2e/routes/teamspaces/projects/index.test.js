@@ -73,71 +73,75 @@ const generateBasicData = () => {
 	});
 };
 
-const testGetProjectList = () => {
+const testGetProjectList = (internalService) => {
 	describe('Get project list', () => {
+		const route = (ts, key) => `/v5/teamspaces/${ts}/projects${internalService ? '' : `?key=${key}`}`;
 		const basicData = generateBasicData();
 		const { users, teamspace, projects } = basicData;
-
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 		});
 
-		const route = (ts = teamspace, key = users.tsAdmin.apiKey) => `/v5/teamspaces/${ts}/projects?key=${key}`;
+		const externalTests = [
+			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+			['user has a valid session and has access to a project', { key: users.modelPermUser.apiKey }, true, projects.testProject],
+		];
 
-		test('should fail without a valid session', async () => {
-			const res = await agent.get(route(teamspace, ServiceHelper.generateRandomString()))
-				.expect(templates.notLoggedIn.status);
-			expect(res.body.code).toEqual(templates.notLoggedIn.code);
-		});
+		const generalTests = [
+			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['user has a valid session and is teamspace admin', {}, true],
+		];
 
-		test('should fail without a valid teamspace', async () => {
-			const res = await agent.get(route(ServiceHelper.generateRandomString()))
-				.expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should fail without a valid teamspace licence', async () => {
-			const res = await agent.get(route(teamspace, users.unlicencedUser.apiKey))
-				.expect(templates.teamspaceNotFound.status);
-			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
-		});
-
-		test('should return a project list if the user has a valid session and is admin of teamspace', async () => {
-			const res = await agent.get(route()).expect(templates.ok.status);
-			expect(res.body).toEqual({
-				projects: Object.keys(projects).map((p) => (
-					{ _id: projects[p].id, name: projects[p].name, isAdmin: true })),
-			});
-		});
-
-		test('should return a project list if the user has a valid session and has access to a model within one of the project', async () => {
-			const res = await agent.get(route(teamspace, users.modelPermUser.apiKey)).expect(templates.ok.status);
-			expect(res.body).toEqual({
-				projects:
-					[{ _id: projects.testProject.id, name: projects.testProject.name, isAdmin: false }],
+		describe.each([
+			...(internalService ? [] : externalTests),
+			...generalTests,
+		])('', (desc, { ts = teamspace, key = users.tsAdmin.apiKey }, success, expectedRes) => {
+			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const res = await agent.get(route(ts, key))
+					.expect(expectedRes?.status || templates.ok.status);
+				if (success) {
+					const expectedData = expectedRes ? [{ _id: expectedRes.id, name: expectedRes.name, isAdmin: false }]
+						: Object.keys(projects).map((p) => (
+							{ _id: projects[p].id, name: projects[p].name, isAdmin: true }));
+					expect(res.body).toEqual({
+						projects: expectedData,
+					});
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
 			});
 		});
 	});
 };
 
 const testCreateProject = (internalService) => {
-	describe('!Create Project', () => {
-		const route = (ts, key) => `/v5/teamspaces/${ts}/projects?key=${key}`;
+	describe('Create Project', () => {
+		const route = (ts, key) => `/v5/teamspaces/${ts}/projects${internalService ? '' : `?key=${key}`}`;
 		const basicData = generateBasicData();
 		const { users, teamspace, projects } = basicData;
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 		});
-		describe.each([
+
+		const externalTestCases = [
 			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
 			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
 			['user is not admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
+
+		];
+		const generalTestCases = [
+			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
 			['project name is not valid', { projectName: 123 }, false, templates.invalidArguments],
 			['project name is already taken', { projectName: projects.testProject.name }, false, templates.invalidArguments],
 			['project name is already taken (case insensitive)', { projectName: projects.testProject.name.toUpperCase() }, false, templates.invalidArguments],
 			['project name is already taken', { projectName: projects.testProject.name }, false, templates.invalidArguments],
 			['user has rights and project name is not taken', { }, true],
+		];
 
+		describe.each([
+			...(internalService ? [] : externalTestCases),
+			...generalTestCases,
 		])('', (desc,
 			{ ts = teamspace, key = users.tsAdmin.apiKey, projectName = ServiceHelper.generateRandomString() },
 			success, expectedRes = templates.ok) => {
@@ -148,7 +152,8 @@ const testCreateProject = (internalService) => {
 				if (success) {
 					const projectsRes = await agent.get(
 						route(teamspace, users.tsAdmin.apiKey)).expect(templates.ok.status);
-					expect(projectsRes.body.projects.find((p) => p.name === projectName)).not.toBe(undefined);
+
+					expect(projectsRes.body.projects.some((p) => p.name === projectName)).toBe(true);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -591,13 +596,14 @@ const testGetStatusCodes = () => {
 };
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
+	afterEach(() => server.close());
+	afterAll(() => ServiceHelper.closeApp(server));
 	describe('External Service', () => {
 		beforeAll(async () => {
 			server = await ServiceHelper.app();
 			agent = await SuperTest(server);
 		});
 
-		afterAll(() => ServiceHelper.closeApp(server));
 		testGetProjectList();
 		testCreateProject();
 		testUpdateProject();
@@ -610,13 +616,13 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		testGetStatusCodes();
 	});
 
-	// describe('Internal Service', () => {
-	// 	beforeAll(async () => {
-	// 		server = await ServiceHelper.app(false);
-	// 		agent = await SuperTest(server);
-	// 	});
+	describe('Internal Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app(true);
+			agent = await SuperTest(server);
+		});
 
-	// 	afterAll(() => ServiceHelper.closeApp(server));
-	// 	testCreateProject(true);
-	// });
+		testCreateProject(true);
+		testGetProjectList(true);
+	});
 });
