@@ -836,7 +836,7 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = async () => (await createServer()).listen(8080);
+ServiceHelper.app = async (bypassAuth = false) => (await createServer({ BYPASS_AUTH: bypassAuth })).listen(8080);
 
 ServiceHelper.frontend = () => createFrontend().listen(8080);
 
