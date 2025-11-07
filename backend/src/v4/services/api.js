@@ -30,6 +30,7 @@ const keyAuthentication =  require("../middlewares/keyAuthentication");
 const { respond } = require(`${v5Path}/utils/responder`);
 const { templates } = require(`${v5Path}/utils/responseCodes`);
 const { initialiseSystem } = require(`${v5Path}/services/initialiser`);
+const { BYPASS_AUTH } = require(`${v5Path}/utils/config.constants`);
 
 const APIService = {};
 
@@ -107,6 +108,7 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 	if (config && !config.using_ssl && config.public_protocol === "https") {
 		app.set("trust proxy", 1);
 	}
+	app.set(BYPASS_AUTH, !!config[BYPASS_AUTH]);
 
 	app.disable("etag");
 
@@ -171,7 +173,7 @@ APIService.createApp = (config, v5Init = true) => {
 	if (config && !config.using_ssl && config.public_protocol === "https") {
 		app.set("trust proxy", 1);
 	}
-
+	app.set(BYPASS_AUTH, !!config[BYPASS_AUTH]);
 	app.disable("etag");
 
 	// Session middlewares
