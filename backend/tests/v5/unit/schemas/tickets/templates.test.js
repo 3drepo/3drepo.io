@@ -1210,77 +1210,22 @@ const testValidate = () => {
 			), false],
 	];
 
-	const defaultOnImageProperty = times(5, (i) => (i % 3 === 0 ? ({
+	const createPropertyObject = (numberOfItems, typeOfProp) => times(numberOfItems, (i) => (i % 3 === 0 ? ({
 		name: generateRandomString(),
-		default: true,
-		type: propTypes.IMAGE,
-	}) : ({
-		name: generateRandomString(),
-		type: propTypes.TEXT,
-	})));
-	const defaultOnViewProperty = times(5, (i) => (i % 4 === 0 ? ({
-		name: generateRandomString(),
-		type: propTypes.VIEW,
+		type: typeOfProp,
 		default: true,
 	}) : ({
 		name: generateRandomString(),
-		type: propTypes.TEXT,
+		type: typeOfProp,
 	})));
-	const defaultOnImageListProperty = times(5, (i) => (i % 2 === 0 ? ({
-		name: generateRandomString(),
-		type: propTypes.IMAGE_LIST,
-		default: true,
-	}) : ({
-		name: generateRandomString(),
-		type: propTypes.TEXT,
-	})));
-	const defaultOnModuleImageProperty = [
-		{
-			type: generateRandomString(),
-			properties: times(5, (i) => (i % 3 === 0 ? ({
-				name: generateRandomString(),
-				type: propTypes.IMAGE,
-				default: true,
-			}) : ({
-				name: generateRandomString(),
-				type: propTypes.TEXT,
-			}))),
-		},
-	];
-	const defaultOnModuleViewProperty = [
-		{
-			name: generateRandomString(),
-			properties: times(5, (i) => (i % 3 === 0 ? ({
-				name: generateRandomString(),
-				type: propTypes.VIEW,
-				default: true,
-			}) : ({
-				name: generateRandomString(),
-				type: propTypes.TEXT,
-			}))),
-		},
-	];
-	const defaultOnModuleImageListProperty = [
-		{
-			name: generateRandomString(),
-			properties: times(5, (i) => (i % 3 === 0 ? ({
-				name: generateRandomString(),
-				type: propTypes.IMAGE_LIST,
-				default: true,
-			}) : ({
-				name: generateRandomString(),
-				type: propTypes.TEXT,
-			}))),
-		},
-	];
 
 	const complexTypesDefaultTest = [
-		['image property type with default true', generateBasicSchema([], defaultOnImageProperty, {}), false],
-		['view property type with default true', generateBasicSchema([], defaultOnViewProperty, {}), false],
-		['image list property type with default true', generateBasicSchema([], defaultOnImageListProperty, {}), false],
-		['module image property type with default true', generateBasicSchema(defaultOnModuleImageProperty, [], {}), false],
-		['module view property type with default true', generateBasicSchema(defaultOnModuleViewProperty, [], {}), false],
-		['module image list property type with default true', generateBasicSchema(defaultOnModuleImageListProperty, [], {}), false],
+		['image property type with default true', generateBasicSchema([], createPropertyObject(5, propTypes.IMAGE), {}), false],
+		['view property type with default true', generateBasicSchema([], createPropertyObject(5, propTypes.VIEW), {}), false],
+		['image list property type with default true', generateBasicSchema([], createPropertyObject(5, propTypes.IMAGE_LIST), {}), false],
+		['module image property type with default true', generateBasicSchema([{ type: generateRandomString(), properties: createPropertyObject(5, propTypes.IMAGE) }], [], {}), false],
+		['module view property type with default true', generateBasicSchema([{ type: generateRandomString(), properties: createPropertyObject(5, propTypes.VIEW) }], [], {}), false],
+		['module image list property type with default true', generateBasicSchema([{ type: generateRandomString(), properties: createPropertyObject(5, propTypes.IMAGE_LIST) }], [], {}), false],
 	];
 
 	describe.each([

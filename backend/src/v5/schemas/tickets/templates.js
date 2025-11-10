@@ -70,11 +70,11 @@ const uniqueTypeBlackList = [
 	propTypes.COORDS,
 ];
 
-const complexTypes = new Set([
+const complexTypes = [
 	propTypes.IMAGE,
 	propTypes.IMAGE_LIST,
 	propTypes.VIEW,
-]);
+];
 
 const propSchema = Yup.object().shape({
 	name: types.strings.title.required().min(1).matches(blackListedChrsRegex),
@@ -149,7 +149,7 @@ const propSchema = Yup.object().shape({
 
 		if (type === propTypes.ANY_OF) return res.oneOf(values);
 
-		if (complexTypes.has(type)) return Yup.mixed();
+		if (complexTypes.includes(type)) return Yup.mixed().test('invalid-default', `Default value cannot be set for property type "${type}"`, (value) => !value);
 
 		return res;
 	}),
@@ -285,30 +285,6 @@ const validTabularPropsTest = (val, context) => {
 	return true;
 };
 
-const noDefaultsOnComplexTypesTest = (val, context) => {
-	const propertyCheck = (listOfProps, prop) => listOfProps.has(prop.type) && prop.default !== undefined;
-
-	const template = TemplateSchema.generateFullSchema(val);
-
-	for (const prop of template.properties) {
-		if (propertyCheck(complexTypes, prop)) {
-			return context.createError({ message: `Property type "${prop.type}" for "${prop.name}" property does not support a default value` });
-		}
-	}
-
-	for (const mod of template.modules) {
-		// console.log(mod);
-		for (const prop of mod.properties) {
-			// console.log(prop);
-			if (propertyCheck(complexTypes, prop)) {
-				return context.createError({ message: `Property type "${prop.type}" for "${mod.name || mod.type}.${prop.name}" property does not support a default value` });
-			}
-		}
-	}
-
-	return true;
-};
-
 const schema = Yup.object().shape({
 	name: nameSchema.required(),
 	code: Yup.string().length(3).required(),
@@ -329,7 +305,6 @@ const schema = Yup.object().shape({
 		return true;
 	}),
 }).test(pinMappingTest)
-	.test(noDefaultsOnComplexTypesTest)
 	.test(validTabularPropsTest)
 	.noUnknown();
 
