@@ -238,7 +238,6 @@ const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\
 const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
 	propOrModule?.find((p) => p.name === name);
 
-
 const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
 	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype); 
 
@@ -349,6 +348,7 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 			const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
 			const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
 			filter.values = indexes.filter((i) => options[i]).map((i) => options[i]);
+			filter.displayValues = arrToDisplayValue(filter.values);
 			if (!filter.values) {
 				throw (new InvalidPropertyOrTemplateError(property, type, template.name));
 			}

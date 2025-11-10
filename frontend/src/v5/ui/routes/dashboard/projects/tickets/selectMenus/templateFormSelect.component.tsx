@@ -22,7 +22,6 @@ import { sortByName } from '@/v5/store/store.helpers';
 import { openUnsavedNewTicketWarningModal } from './selectMenus.helpers';
 import { InputControllerProps, InputController } from '@controls/inputs/inputController.component';
 import { Select, SelectProps } from '@controls/inputs/select/select.component';
-import { useEffect } from 'react';
 
 type TemplateFormSelectProps = { isNewTicketDirty?: boolean } & SelectProps;
 export const TemplateSelect = ({ isNewTicketDirty, onChange, ...props }: TemplateFormSelectProps) => {
@@ -33,19 +32,13 @@ export const TemplateSelect = ({ isNewTicketDirty, onChange, ...props }: Templat
 		openUnsavedNewTicketWarningModal();
 	};
 
-	useEffect(() => {
-        if (templates.length === 1) {
-            onChange?.({ target: { value: templates[0]._id } });
-        }
-    }, [templates.length]);
-
 	return (
 		<Select
 			label={formatMessage({ id: 'tickets.select.template', defaultMessage: 'Select Ticket type' })}
 			renderValue={(val) => {
-				if (!val) return '';
-				const { name } = templates.find(({ _id }) => _id === val);
-				return (<b>{name}</b>);
+				const template = templates.find(({ _id }) => _id === val);
+				if (!template) return '';
+				return (<b>{template.name}</b>);
 			}}
 			{...props}
 			onChange={onChange}

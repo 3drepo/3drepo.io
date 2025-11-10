@@ -80,7 +80,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 	unsavedTicket: null,
 	isEditingGroups: false,
 	isShowingPins: true,
-	isFiltering: true,
+	isFiltering: false,
 };
 
 export const setSelectedTicket = (state: ITicketsCardState, { ticketId }: SetSelectedTicketAction) => {

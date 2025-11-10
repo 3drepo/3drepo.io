@@ -26,6 +26,15 @@ const UsersCache = require('./cache');
 const Users = {};
 Users.getUserById = (userId) => Promise.resolve(UsersCache.getUserById(userId));
 
+Users.getAccountsByUser = async (userId) => {
+	const userData = await Users.getUserById(userId);
+	if (userData === null) {
+		throw new Error(`Failed to get user(${userId}) from Users: User not found`);
+	}
+
+	return userData.tenantIds;
+};
+
 Users.getUserAvatarBuffer = (userId) => {
 	const { profilePictureUrl } = UsersCache.getUserById(userId);
 	return Promise.resolve(Buffer.from(profilePictureUrl || newAvatar));

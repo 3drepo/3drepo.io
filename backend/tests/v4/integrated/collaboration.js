@@ -492,8 +492,8 @@ describe('Sharing/Unsharing a model', () => {
 
 			agent.patch(`/${username}/${model}/permissions`)
 				.send(permissions)
-				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+				.expect(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.status, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 					done(err);
 				});
 		});
