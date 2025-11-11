@@ -18,36 +18,23 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList } = require('../../utils');
 
-const { deleteDrawingCalibrations } = require(`${v5Path}/models/calibrations`);
-const { modelTypes } = require(`${v5Path}/models/modelSettings.constants`);
-const { deleteModelRevisions } = require(`${v5Path}/models/revisions`);
 const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
-const { aggregate } = require(`${v5Path}/handler/db`);
-const { getProjectById } = require(`${v5Path}/models/projectSettings`);
+const { find, deleteMany } = require(`${v5Path}/handler/db`);
 const { DRAWINGS_HISTORY_COL } = require(`${v5Path}/models/revisions.constants`);
+const { CALIBRATIONS_COL } = require(`${v5Path}/models/calibrations.constants`);
 const { logger } = require(`${v5Path}/utils/logger`);
-
-const processDrawingRecords = async (teamspace, project, drawing) => {
-	const projectExists = await getProjectById(teamspace, project, { _id: 1 }).catch(() => false);
-
-	if (!projectExists) {
-		await removeFilesWithMeta(teamspace, DRAWINGS_HISTORY_COL, { model: drawing });
-
-		await Promise.all([
-			deleteModelRevisions(teamspace, project, drawing, modelTypes.DRAWING),
-			deleteDrawingCalibrations(teamspace, project, drawing),
-		]);
-	}
-};
 
 const processTeamspace = async (teamspace) => {
 	logger.logInfo(`Removing orphaned drawing records for teamspace: ${teamspace}`);
-	const drawingRecords = (await aggregate(teamspace, DRAWINGS_HISTORY_COL, [
-		{ $group: { _id: { model: '$model', project: '$project' } } },
-		{ $project: { _id: 0, model: '$_id.model', project: '$_id.project' } },
-	]));
 
-	await Promise.all(drawingRecords.map(({ model, project }) => processDrawingRecords(teamspace, project, model)));
+	const drawings = await find(teamspace, 'settings', { modelType: 'drawing' }, { _id: 1 });
+	const drawingIds = drawings.map(({ _id }) => _id);
+
+	await removeFilesWithMeta(teamspace, DRAWINGS_HISTORY_COL, { model: { $nin: drawingIds } });
+	await Promise.all([
+		deleteMany(teamspace, DRAWINGS_HISTORY_COL, { model: { $nin: drawingIds } }),
+		deleteMany(teamspace, CALIBRATIONS_COL, { drawing: { $nin: drawingIds } }),
+	]);
 };
 
 const run = async () => {
