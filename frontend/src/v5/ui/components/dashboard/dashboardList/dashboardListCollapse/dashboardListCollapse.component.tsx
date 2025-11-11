@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactNode, useState } from 'react';
+import { ReactNode, useEffect, useState } from 'react';
 import { Collapse, Tooltip } from '@mui/material';
 import { ButtonContainer, ControlsContainer, CollapsedItemContainer, Title, ChevronButton, Container } from './dashboardListCollapse.styles';
 
@@ -31,6 +31,7 @@ export type IDashboardListCollapse = {
 	isLoading?: boolean;
 	interactableWhileLoading?: boolean;
 	defaultExpanded?: boolean;
+	unmountHidden?: boolean;
 };
 
 export const DashboardListCollapse = ({
@@ -42,13 +43,25 @@ export const DashboardListCollapse = ({
 	defaultExpanded = true,
 	sideElement,
 	interactableWhileLoading,
+	unmountHidden,
 }: IDashboardListCollapse): JSX.Element => {
 	const [isExpanded, setIsExpanded] = useState(defaultExpanded);
+	const [unmountChildren, setUnmountChildren] = useState(!defaultExpanded);
+
+	const onTransitionEnd = () => {
+		if (!unmountHidden) return;
+		setUnmountChildren(!isExpanded);
+	};
 
 	return (
 		<Container className={className} $isLoading={!interactableWhileLoading && isLoading}>
 			<ControlsContainer>
-				<ButtonContainer onClick={() => setIsExpanded((state) => !state)}>
+				<ButtonContainer onClick={() => {
+					setIsExpanded((state) => !state);
+					if (!isExpanded && unmountHidden) {
+						setUnmountChildren(false);
+					}
+				}}>
 					<Tooltip title={(isExpanded ? tooltipTitles?.visible : tooltipTitles?.collapsed) ?? ''}>
 						<ChevronButton isOn={isExpanded} isLoading={isLoading} />
 					</Tooltip>
@@ -56,9 +69,9 @@ export const DashboardListCollapse = ({
 				</ButtonContainer>
 				{sideElement}
 			</ControlsContainer>
-			<Collapse in={isExpanded}>
+			<Collapse in={isExpanded} onTransitionEnd={onTransitionEnd} >
 				<CollapsedItemContainer>
-					{children}
+					{!unmountChildren  && children}
 				</CollapsedItemContainer>
 			</Collapse>
 		</Container>
