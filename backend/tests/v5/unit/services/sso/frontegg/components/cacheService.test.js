@@ -19,7 +19,6 @@ const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
 
 const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../helper/services');
-const Frontegg = require('../../../../../../../src/v5/services/sso/frontegg');
 
 jest.mock('../../../../../../../src/v5/models/frontegg.cache');
 const FronteggCache = require(`${src}/models/frontegg.cache`);
