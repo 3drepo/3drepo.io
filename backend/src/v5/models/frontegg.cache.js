@@ -24,6 +24,7 @@ const Cache = {};
 const CACHE_COL = 'frontegg.cache';
 
 const CACHE_LIFETIME_MINUTES = 1;
+let intervalId;
 
 const getDateTimeWithinLifeSpan = () => {
 	const date = new Date();
@@ -66,7 +67,18 @@ Cache.initialise = async () => {
 		{ key: { created: -1 } },
 	]);
 
-	setInterval(purgeCache, 5 * 60 * 1000); // every 5 minutes
+	Cache.stopPurge();
+
+	intervalId = setInterval(purgeCache, 5 * 60 * 1000); // every 5 minutes
+};
+
+// Designed to be called by tests so we can exit cleanly
+/* istanbul ignore next */
+Cache.stopPurge = () => {
+	if (intervalId) {
+		clearInterval(intervalId);
+		intervalId = null;
+	}
 };
 
 module.exports = Cache;
