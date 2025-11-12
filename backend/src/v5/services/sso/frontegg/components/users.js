@@ -17,13 +17,11 @@
 
 const { HEADER_APP_ID, HEADER_ENVIRONMENT_ID, HEADER_TENANT_ID, HEADER_USER_ID } = require('../frontegg.constants');
 const { delete: deleteReq, get, getArrayBuffer, post, put } = require('../../../../utils/webRequests');
-const { generateKey, getCached } = require('./cacheService');
+const { generateKey, getCached, removeCache } = require('./cacheService');
 const { getBearerHeader, getConfig } = require('./connections');
 const { getURLDomain, splitName } = require('../../../../utils/helper/strings');
 const FormData = require('form-data');
 const { Readable } = require('stream');
-
-const { purgeCacheWithKeyContaining } = require('../../../../models/frontegg.cache');
 
 const Users = {};
 
@@ -120,7 +118,7 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 		};
 
 		await put(url, payload, { headers });
-		await purgeCacheWithKeyContaining(generateKey({ userId }));
+		await removeCache(generateKey({ userId }));
 	} catch (err) {
 		throw new Error(`Failed to update user(${userId}) from Users: ${err.message}`);
 	}

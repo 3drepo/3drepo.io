@@ -301,6 +301,8 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should autopopulate the metadata if available and not provided', async () => {
@@ -333,6 +335,7 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should merge the metadata if there is new and old', async () => {
@@ -369,6 +372,7 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should update user\'s first name only', async () => {
@@ -400,6 +404,7 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should update user\'s first name only', async () => {
@@ -431,6 +436,7 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should throw error if it failed to update user details', async () => {
@@ -447,6 +453,7 @@ const testUpdateUserDetails = () => {
 			)).rejects.not.toBeUndefined();
 
 			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(removeCache).not.toHaveBeenCalled();
 		});
 	});
 };
