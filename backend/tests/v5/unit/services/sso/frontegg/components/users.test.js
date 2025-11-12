@@ -453,7 +453,7 @@ const testUpdateUserDetails = () => {
 			)).rejects.not.toBeUndefined();
 
 			expect(WebRequests.put).toHaveBeenCalledTimes(1);
-			expect(removeCache).not.toHaveBeenCalled();
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 	});
 };
