@@ -192,6 +192,7 @@ Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 
 		const res = await post(`${config.vendorDomain}/identity/resources/users/v2`, payload, { headers });
 		await removeCache(generateKey({ accountId }));
+		await removeCache(generateKey({ userId: res.data.id }));
 		return res.data.id;
 	} catch (err) {
 		const errCode = err?.response?.data?.errorCode;
@@ -235,6 +236,7 @@ Accounts.removeUserFromAccount = async (accountId, userId) => {
 
 		await httpDelete(`${config.vendorDomain}/identity/resources/users/v1/${userId}`, headers);
 		await removeCache(generateKey({ accountId }));
+		await removeCache(generateKey({ userId }));
 	} catch (err) {
 		const errCode = err?.response?.data?.errorCode;
 

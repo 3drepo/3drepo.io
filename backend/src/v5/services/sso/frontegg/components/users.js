@@ -40,8 +40,8 @@ Users.getUserById = (userId) => getCached(generateKey({ userId, context: 'userBy
 });
 
 Users.getAccountsByUser = (userId) => getCached(generateKey({ userId, context: 'accountsByUser' }), async () => {
-	const { tenantIds } = await Users.getUserById(userId);
-	return tenantIds;
+	const { tenantIds, tenantId } = await Users.getUserById(userId);
+	return tenantIds ?? [tenantId];
 });
 
 Users.getUserAvatarBuffer = (userId) => getCached(generateKey({ userId, context: 'userAvatarBuffer' }), async () => {

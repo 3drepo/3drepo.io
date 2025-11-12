@@ -100,11 +100,11 @@ const testGenerateKey = () => {
 		['with userId', { userId }, `user_${userId}:${context}`],
 		['with accountId and userId', { accountId, userId }, `account_${accountId}:user_${userId}:${context}`],
 		['with nothing', {}, `${context}`],
-		['with empty context', { accountId, userId, context: '' }, 'Error'],
+		['with empty context', { }, 'Error'],
 	])('Generate Key', (desc, input, expected) => {
 		test(`Should generate key ${desc}`, () => {
 			if (expected === 'Error') {
-				expect(() => CacheService.generateKey({ ...input, context: '' })).toThrow('Context must be a non-empty string');
+				expect(() => CacheService.generateKey({ })).toThrow('Context must be a non-empty string');
 			} else {
 				expect(CacheService.generateKey({ ...input, context })).toBe(expected);
 			}

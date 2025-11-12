@@ -466,6 +466,19 @@ const testGetAccountsByUser = () => {
 
 			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
 		});
+
+		test('Should return tenantId instead if tenantIds is not available', async () => {
+			const userId = generateRandomString();
+			const res = { data: { tenantId: generateRandomString() } };
+
+			WebRequests.get.mockResolvedValueOnce(res);
+
+			await expect(Users.getAccountsByUser(userId)).resolves.toEqual([res.data.tenantId]);
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
 	});
 };
 
