@@ -48,7 +48,7 @@ Cache.purgeCacheWithKeyContaining = async (key) => {
 	try {
 		await deleteMany(INTERNAL_DB, CACHE_COL, { _id: { $regex: key } });
 	} catch (err) {
-		logger.logError(`Error purging Frontegg cache:${err.message}`);
+		logger.logError(`Error purging Frontegg cache: ${err.message}`);
 	}
 };
 
@@ -56,7 +56,7 @@ const purgeCache = async () => {
 	try {
 		await deleteMany(INTERNAL_DB, CACHE_COL, { created: { $lt: getDateTimeWithinLifeSpan() } });
 	} catch (err) {
-		logger.logError(`Error purging Frontegg cache:${err.message}`);
+		logger.logError(`Error purging Frontegg cache: ${err.message}`);
 	}
 };
 
