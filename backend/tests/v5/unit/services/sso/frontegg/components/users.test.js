@@ -37,6 +37,12 @@ const postOptions = { headers: bearerHeader };
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
 Connections.getConfig.mockResolvedValue({});
 
+jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/cacheService');
+const CacheService = require(`${src}/services/sso/frontegg/components/cacheService`);
+
+CacheService.getCached.mockImplementation((key, fetchFn) => fetchFn());
+CacheService.generateKey.mockReturnValue(generateRandomString());
+
 const testGetUserById = () => {
 	describe('Get user by ID', () => {
 		test('Should get user information', async () => {

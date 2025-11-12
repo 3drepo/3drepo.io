@@ -16,6 +16,7 @@
  */
 
 const { HEADER_APP_ID, HEADER_TENANT_ID, META_LABEL_TEAMSPACE, membershipStatus, mfaPolicy } = require('../frontegg.constants');
+const { generateKey, getCached, removeCache } = require('./cacheService');
 const { get, delete: httpDelete, post, put } = require('../../../../utils/webRequests');
 const { getBearerHeader, getConfig } = require('./connections');
 const { errCodes } = require('../frontegg.constants');
@@ -24,7 +25,7 @@ const { logger } = require('../../../../utils/logger');
 
 const Accounts = {};
 
-Accounts.getTeamspaceByAccount = async (accountId) => {
+Accounts.getTeamspaceByAccount = (accountId) => getCached(generateKey({ accountId, context: 'teamspaceByAccount' }), async () => {
 	try {
 		const { vendorDomain } = await getConfig();
 		const { data: { metadata } } = await get(`${vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
@@ -37,7 +38,7 @@ Accounts.getTeamspaceByAccount = async (accountId) => {
 		logger.logError(`Failed to get account(${accountId}) from Accounts: ${err.message}`);
 		return undefined;
 	}
-};
+});
 
 Accounts.setMFAPolicy = async (accountId, policySetting) => {
 	try {
@@ -89,7 +90,7 @@ Accounts.createAccount = async (name) => {
 	}
 };
 
-Accounts.getAllUsersInAccount = async (accountId) => {
+Accounts.getAllUsersInAccount = (accountId) => getCached(generateKey({ accountId, context: 'allUsersInAccount' }), async () => {
 	try {
 		const config = await getConfig();
 		const header = {
@@ -124,45 +125,46 @@ Accounts.getAllUsersInAccount = async (accountId) => {
 	} catch (err) {
 		throw new Error(`Failed to get users from account(${accountId}) from Accounts: ${err.message}`);
 	}
-};
+});
 
-Accounts.getUserStatusInAccount = async (accountId, userId) => {
-	try {
-		const config = await getConfig();
+Accounts.getUserStatusInAccount = (accountId, userId) => getCached(generateKey({ accountId, userId, context: 'userStatusInAccount' }),
+	async () => {
+		try {
+			const config = await getConfig();
 
-		const { data } = await get(`${config.vendorDomain}/identity/resources/tenants/users/v1/statuses?userIds=${userId}`, await getBearerHeader());
+			const { data } = await get(`${config.vendorDomain}/identity/resources/tenants/users/v1/statuses?userIds=${userId}`, await getBearerHeader());
 
-		if (!data?.length) return membershipStatus.NOT_MEMBER;
+			if (!data?.length) return membershipStatus.NOT_MEMBER;
 
-		const tenantStatus = data[0]?.tenantsStatuses?.find(({ tenantId }) => tenantId === accountId);
+			const tenantStatus = data[0]?.tenantsStatuses?.find(({ tenantId }) => tenantId === accountId);
 
-		if (tenantStatus) {
-			switch (tenantStatus.status) {
-			case 'PendingInvitation':
-				return membershipStatus.PENDING_INVITE;
-			case 'PendingLogin':
-				return membershipStatus.PENDING_LOGIN;
-			case 'Activated':
-				return membershipStatus.ACTIVE;
-			case 'NotActivated':
-				return membershipStatus.INACTIVE;
-			default:
-				logger.logError(`Unrecognised membership status: ${tenantStatus.status}`);
+			if (tenantStatus) {
+				switch (tenantStatus.status) {
+				case 'PendingInvitation':
+					return membershipStatus.PENDING_INVITE;
+				case 'PendingLogin':
+					return membershipStatus.PENDING_LOGIN;
+				case 'Activated':
+					return membershipStatus.ACTIVE;
+				case 'NotActivated':
+					return membershipStatus.INACTIVE;
+				default:
+					logger.logError(`Unrecognised membership status: ${tenantStatus.status}`);
+					return membershipStatus.NOT_MEMBER;
+				}
+			}
+
+			return membershipStatus.NOT_MEMBER;
+		} catch (err) {
+			const errCode = err?.response?.data?.errorCode;
+
+			if (errCode === errCodes.USER_NOT_FOUND) {
 				return membershipStatus.NOT_MEMBER;
 			}
+			logger.logError(`Failed to get user status: ${JSON.stringify(err?.response?.data)} `);
+			throw new Error(`Failed to get user status  ${userId}: ${err.message}`);
 		}
-
-		return membershipStatus.NOT_MEMBER;
-	} catch (err) {
-		const errCode = err?.response?.data?.errorCode;
-
-		if (errCode === errCodes.USER_NOT_FOUND) {
-			return membershipStatus.NOT_MEMBER;
-		}
-		logger.logError(`Failed to get user status: ${JSON.stringify(err?.response?.data)} `);
-		throw new Error(`Failed to get user status  ${userId}: ${err.message}`);
-	}
-};
+	});
 
 Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 	try {
@@ -189,6 +191,7 @@ Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 		};
 
 		const res = await post(`${config.vendorDomain}/identity/resources/users/v2`, payload, { headers });
+		await removeCache(generateKey({ accountId }));
 		return res.data.id;
 	} catch (err) {
 		const errCode = err?.response?.data?.errorCode;
@@ -231,6 +234,7 @@ Accounts.removeUserFromAccount = async (accountId, userId) => {
 		};
 
 		await httpDelete(`${config.vendorDomain}/identity/resources/users/v1/${userId}`, headers);
+		await removeCache(generateKey({ accountId }));
 	} catch (err) {
 		const errCode = err?.response?.data?.errorCode;
 
@@ -247,6 +251,7 @@ Accounts.removeAccount = async (accountId) => {
 	try {
 		const config = await getConfig();
 		await httpDelete(`${config.vendorDomain}/tenants/resources/tenants/v1/${accountId}`, await getBearerHeader());
+		await removeCache(generateKey({ accountId }));
 	} catch (err) {
 		if (err.response.status !== 404) {
 			logger.logError(`Failed to remove account: ${JSON.stringify(err?.response?.data)} `);

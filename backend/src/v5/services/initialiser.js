@@ -19,6 +19,7 @@ const { init: initFrontegg } = require('./sso/frontegg');
 const { initialise: initInvites } = require('../models/invitations');
 const { init: initJournalingService } = require('./journaling');
 const { initialise: initLoginRecs } = require('../models/loginRecords');
+const { initialise: initFronteggCache } = require('../models/frontegg.cache');
 const { init: initNotificationService } = require('./notifications');
 
 const Initialiser = {};
@@ -29,6 +30,7 @@ Initialiser.initialiseSystem = () => Promise.all([
 	initJournalingService(),
 	initNotificationService(),
 	initFrontegg(),
+	initFronteggCache(),
 ]);
 
 module.exports = Initialiser;

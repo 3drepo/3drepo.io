@@ -17,14 +17,17 @@
 
 const { HEADER_APP_ID, HEADER_ENVIRONMENT_ID, HEADER_TENANT_ID, HEADER_USER_ID } = require('../frontegg.constants');
 const { delete: deleteReq, get, getArrayBuffer, post, put } = require('../../../../utils/webRequests');
+const { generateKey, getCached } = require('./cacheService');
 const { getBearerHeader, getConfig } = require('./connections');
 const { getURLDomain, splitName } = require('../../../../utils/helper/strings');
 const FormData = require('form-data');
 const { Readable } = require('stream');
 
+const { purgeCacheWithKeyContaining } = require('../../../../models/frontegg.cache');
+
 const Users = {};
 
-Users.getUserById = async (userId) => {
+Users.getUserById = (userId) => getCached(generateKey({ userId, context: 'userById' }), async () => {
 	try {
 		const config = await getConfig();
 		const { data: { metadata, ...others } } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
@@ -34,14 +37,14 @@ Users.getUserById = async (userId) => {
 	} catch (err) {
 		throw new Error(`Failed to get user(${userId}) from Users: ${err.message}`);
 	}
-};
+});
 
-Users.getAccountsByUser = async (userId) => {
+Users.getAccountsByUser = (userId) => getCached(generateKey({ userId, context: 'accountsByUser' }), async () => {
 	const { tenantIds } = await Users.getUserById(userId);
 	return tenantIds;
-};
+});
 
-Users.getUserAvatarBuffer = async (userId) => {
+Users.getUserAvatarBuffer = (userId) => getCached(generateKey({ userId, context: 'userAvatarBuffer' }), async () => {
 	try {
 		const { profilePictureUrl } = await Users.getUserById(userId);
 		if (!getURLDomain(profilePictureUrl).includes('frontegg')) {
@@ -54,7 +57,7 @@ Users.getUserAvatarBuffer = async (userId) => {
 	} catch (err) {
 		throw new Error(`Failed to get avatar for (${userId}) from Users: ${err.message}`);
 	}
-};
+});
 
 Users.doesUserExist = async (email) => {
 	try {
@@ -109,6 +112,7 @@ Users.updateUserDetails = async (userId, { firstName, lastName, profilePictureUr
 		};
 
 		await put(url, payload, { headers });
+		await purgeCacheWithKeyContaining(generateKey({ userId }));
 	} catch (err) {
 		throw new Error(`Failed to update user(${userId}) from Users: ${err.message}`);
 	}
