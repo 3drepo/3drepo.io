@@ -104,7 +104,7 @@ const testGenerateKey = () => {
 	])('Generate Key', (desc, input, expected) => {
 		test(`Should generate key ${desc}`, () => {
 			if (expected === 'Error') {
-				expect(() => CacheService.generateKey({ })).toThrow('Context must be a non-empty string');
+				expect(() => CacheService.generateKey({ })).toThrow('Key cannot be empty');
 			} else {
 				expect(CacheService.generateKey({ ...input, context })).toBe(expected);
 			}

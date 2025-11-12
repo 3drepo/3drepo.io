@@ -55,7 +55,7 @@ CacheService.generateKey = ({ accountId, userId, context }) => {
 	}
 
 	if (keyParts.length === 0) {
-		throw new Error('Context must be a non-empty string');
+		throw new Error('Key cannot be empty');
 	}
 
 	return keyParts.join(':');
