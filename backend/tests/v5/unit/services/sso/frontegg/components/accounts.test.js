@@ -306,7 +306,7 @@ const testAddUserToAccount = () => {
 				expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
 					{ headers: expectedHeader });
 
-				expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
+				expect(CacheService.removeCache).toHaveBeenCalledTimes(2);
 			});
 		});
 
@@ -401,7 +401,7 @@ const testRemoveUserFromAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
-			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(2);
 		});
 
 		test('Should throw error if delete request failed', async () => {
