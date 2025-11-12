@@ -43,6 +43,9 @@ CacheService.removeCache = async (key) => {
 };
 
 CacheService.generateKey = ({ accountId, userId, context }) => {
+	if (context?.length === 0) {
+		throw new Error('Context must be a non-empty string');
+	}
 	const keyParts = [];
 	if (accountId) {
 		keyParts.push(`account_${accountId}`);
