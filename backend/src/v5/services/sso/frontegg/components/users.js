@@ -27,7 +27,13 @@ const { purgeCacheWithKeyContaining } = require('../../../../models/frontegg.cac
 
 const Users = {};
 
-Users.getUserById = (userId) => getCached(generateKey({ userId, context: 'userById' }), async () => {
+const contextLabels = {
+	userById: 'userById',
+	accountsByUser: 'accountsByUser',
+	userAvatarBuffer: 'userAvatarBuffer',
+};
+
+Users.getUserById = (userId) => getCached(generateKey({ userId, context: contextLabels.userById }), async () => {
 	try {
 		const config = await getConfig();
 		const { data: { metadata, ...others } } = await get(`${config.vendorDomain}/identity/resources/vendor-only/users/v1/${userId}`, await getBearerHeader());
@@ -39,25 +45,27 @@ Users.getUserById = (userId) => getCached(generateKey({ userId, context: 'userBy
 	}
 });
 
-Users.getAccountsByUser = (userId) => getCached(generateKey({ userId, context: 'accountsByUser' }), async () => {
+Users.getAccountsByUser = (userId) => getCached(generateKey(
+	{ userId, context: contextLabels.accountsByUser }), async () => {
 	const { tenantIds, tenantId } = await Users.getUserById(userId);
 	return tenantIds ?? [tenantId];
 });
 
-Users.getUserAvatarBuffer = (userId) => getCached(generateKey({ userId, context: 'userAvatarBuffer' }), async () => {
-	try {
-		const { profilePictureUrl } = await Users.getUserById(userId);
-		if (!getURLDomain(profilePictureUrl).includes('frontegg')) {
+Users.getUserAvatarBuffer = (userId) => getCached(
+	generateKey({ userId, context: contextLabels.userAvatarBuffer }), async () => {
+		try {
+			const { profilePictureUrl } = await Users.getUserById(userId);
+			if (!getURLDomain(profilePictureUrl).includes('frontegg')) {
 			// this is not an generated avatar, so we should not try to fetch it
-			return null;
-		}
+				return null;
+			}
 
-		const { data } = await getArrayBuffer(profilePictureUrl);
-		return Buffer.from(data);
-	} catch (err) {
-		throw new Error(`Failed to get avatar for (${userId}) from Users: ${err.message}`);
-	}
-});
+			const { data } = await getArrayBuffer(profilePictureUrl);
+			return Buffer.from(data);
+		} catch (err) {
+			throw new Error(`Failed to get avatar for (${userId}) from Users: ${err.message}`);
+		}
+	});
 
 Users.doesUserExist = async (email) => {
 	try {

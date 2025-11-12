@@ -25,20 +25,29 @@ const { logger } = require('../../../../utils/logger');
 
 const Accounts = {};
 
-Accounts.getTeamspaceByAccount = (accountId) => getCached(generateKey({ accountId, context: 'teamspaceByAccount' }), async () => {
-	try {
-		const { vendorDomain } = await getConfig();
-		const { data: { metadata } } = await get(`${vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
-		const metaJson = JSON.parse(metadata);
-		return metaJson[META_LABEL_TEAMSPACE];
-	} catch (err) {
+const contextLabels = {
+	teamspaceByAccount: 'teamspaceByAccount',
+	allUsersInAccount: 'allUsersInAccount',
+	userStatusInAccount: 'userStatusInAccount',
+
+};
+
+Accounts.getTeamspaceByAccount = (accountId) => getCached(
+	generateKey({ accountId, context: contextLabels.teamspaceByAccount }),
+	async () => {
+		try {
+			const { vendorDomain } = await getConfig();
+			const { data: { metadata } } = await get(`${vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
+			const metaJson = JSON.parse(metadata);
+			return metaJson[META_LABEL_TEAMSPACE];
+		} catch (err) {
 		// I've seen frontegg to be in a state where it's giving me account ID that no longer exist, we also
 		// could possibly run into a race condition where the account has been deleted since we've got this ID
 		// So just return undefined instead of causing trouble elsewhere.
-		logger.logError(`Failed to get account(${accountId}) from Accounts: ${err.message}`);
-		return undefined;
-	}
-});
+			logger.logError(`Failed to get account(${accountId}) from Accounts: ${err.message}`);
+			return undefined;
+		}
+	});
 
 Accounts.setMFAPolicy = async (accountId, policySetting) => {
 	try {
@@ -90,44 +99,47 @@ Accounts.createAccount = async (name) => {
 	}
 };
 
-Accounts.getAllUsersInAccount = (accountId) => getCached(generateKey({ accountId, context: 'allUsersInAccount' }), async () => {
-	try {
-		const config = await getConfig();
-		const header = {
-			...await getBearerHeader(),
-			[HEADER_TENANT_ID]: accountId,
+Accounts.getAllUsersInAccount = (accountId) => getCached(
+	generateKey({ accountId, context: contextLabels.allUsersInAccount }),
+	async () => {
+		try {
+			const config = await getConfig();
+			const header = {
+				...await getBearerHeader(),
+				[HEADER_TENANT_ID]: accountId,
 
-		};
+			};
 
-		const initialQuery = {
-			_limit: 200,
-			_offset: 0,
-			_sortBy: 'email',
-			_order: 'ASC',
-		};
+			const initialQuery = {
+				_limit: 200,
+				_offset: 0,
+				_sortBy: 'email',
+				_order: 'ASC',
+			};
 
-		let query = new URLSearchParams(initialQuery).toString();
-		const entries = [];
+			let query = new URLSearchParams(initialQuery).toString();
+			const entries = [];
 
-		while (query?.length) {
+			while (query?.length) {
 			// eslint-disable-next-line no-await-in-loop
-			const { data: { items, _links } } = await get(`${config.vendorDomain}/identity/resources/users/v3?${query}`,
-				header);
+				const { data: { items, _links } } = await get(`${config.vendorDomain}/identity/resources/users/v3?${query}`,
+					header);
 
-			items.forEach(({ id, email, name, createdAt, metadata }) => {
-				const metaValues = JSON.parse(metadata || '{}');
-				entries.push({ id, email, name, createdAt, ...metaValues });
-			});
-			query = _links.next;
+				items.forEach(({ id, email, name, createdAt, metadata }) => {
+					const metaValues = JSON.parse(metadata || '{}');
+					entries.push({ id, email, name, createdAt, ...metaValues });
+				});
+				query = _links.next;
+			}
+
+			return entries;
+		} catch (err) {
+			throw new Error(`Failed to get users from account(${accountId}) from Accounts: ${err.message}`);
 		}
+	});
 
-		return entries;
-	} catch (err) {
-		throw new Error(`Failed to get users from account(${accountId}) from Accounts: ${err.message}`);
-	}
-});
-
-Accounts.getUserStatusInAccount = (accountId, userId) => getCached(generateKey({ accountId, userId, context: 'userStatusInAccount' }),
+Accounts.getUserStatusInAccount = (accountId, userId) => getCached(
+	generateKey({ accountId, userId, context: contextLabels.userStatusInAccount }),
 	async () => {
 		try {
 			const config = await getConfig();
@@ -191,8 +203,10 @@ Accounts.addUserToAccount = async (accountId, email, name, emailData) => {
 		};
 
 		const res = await post(`${config.vendorDomain}/identity/resources/users/v2`, payload, { headers });
-		await removeCache(generateKey({ accountId }));
-		await removeCache(generateKey({ userId: res.data.id }));
+		await Promise.all([
+			removeCache(generateKey({ accountId })),
+			removeCache(generateKey({ userId: res.data.id })),
+		]);
 		return res.data.id;
 	} catch (err) {
 		const errCode = err?.response?.data?.errorCode;
@@ -235,8 +249,10 @@ Accounts.removeUserFromAccount = async (accountId, userId) => {
 		};
 
 		await httpDelete(`${config.vendorDomain}/identity/resources/users/v1/${userId}`, headers);
-		await removeCache(generateKey({ accountId }));
-		await removeCache(generateKey({ userId }));
+		await Promise.all([
+			removeCache(generateKey({ accountId })),
+			removeCache(generateKey({ userId })),
+		]);
 	} catch (err) {
 		const errCode = err?.response?.data?.errorCode;
 
