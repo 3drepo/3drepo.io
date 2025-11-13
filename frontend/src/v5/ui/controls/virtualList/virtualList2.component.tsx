@@ -37,6 +37,8 @@ const lineInRange = (line, top, bottom) => top <= line && line <= bottom;
 type VerticalRange  = { top: number, bottom: number };
 
 const intersects = (a:VerticalRange, b: VerticalRange) => {
+	if (!a || !b) return false;
+
 	return lineInRange(a.top, b.top, b.bottom) || lineInRange(a.bottom, b.top, b.bottom) || 
 		lineInRange(b.top, a.top, a.bottom) || lineInRange(b.bottom, a.top, a.bottom);
 };
@@ -139,7 +141,6 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 	initialized.current = !!containerRef.current;
 
 	const onFrame = () => {
-		// console.log('onframe');
 		if (!containerRef.current) return;
 		const { first, last }  = sliceIndexes.current;
 		
@@ -157,8 +158,8 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 			scrolled = scrolldDiff > Math.min(firstHeight, lasttHeight);
 		}
 
-		const wasScrolledOut = !intersects({top:0, bottom: renderInnerHeight.current},  renderContainerRect.current);
-		const scrolledIn =  intersects({top:0, bottom: innerHeight},  containerRect) && wasScrolledOut;
+		const wasScrolledOut = !intersects({ top:0, bottom: renderInnerHeight.current },  renderContainerRect.current);
+		const scrolledIn =  intersects({ top:0, bottom: innerHeight },  containerRect) && wasScrolledOut;
 
 		const children = itemsContainer.current.children;
 		
@@ -205,29 +206,19 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 		itemsHeight.current = {};
 	}, [items]);
 
-	const recalc = () => {
-		setRedraw((v) => !v);
-	};
-
 	return (
-		<div style={{
-			height: containerHeight, 
-			border: 0, 
-			boxSizing:'border-box',  
-			display:'block', 
-			background: 'linear-gradient(352deg,rgba(207, 48, 48, 1) 0%, rgba(10, 48, 173, 1) 100%)' }}
-			ref={containerRef as any} 
+		<div style={
+			{
+				height: containerHeight, 
+				border: 0, 
+				boxSizing:'border-box',  
+				display:'block', 
+			}} ref={containerRef as any}
 		>
 			<div style={{ height: spacerStart } } id='startSpacer'/>
 			<div ref={itemsContainer as any}   >
 				{itemsSlice.map(ItemComponent)}
 			</div>
-			<button style={{
-				position: 'relative',
-				top: 0,
-				left: '12px',
-				backgroundColor: 'aquamarine',
-			}} onClick={recalc}>click me</button>
 		</div>
 	);
 };

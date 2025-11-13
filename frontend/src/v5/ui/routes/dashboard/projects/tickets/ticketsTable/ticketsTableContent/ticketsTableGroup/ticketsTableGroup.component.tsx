@@ -29,11 +29,11 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
 import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.component';
-import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { useWatchPropertyChange } from '../../useWatchPropertyChange';
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
+import { VirtualList2 } from '@controls/virtualList/virtualList2.component';
 
 type TicketsTableGroupContentProps = {
 	tickets: ITicket[];
@@ -64,10 +64,10 @@ const TicketsTableGroupContent = ({
 		<>
 			{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
 			<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
-				<VirtualList
+				<VirtualList2
 					items={sortedItems}
 					itemHeight={37}
-					itemContent={(ticket: ITicket) => (
+					ItemComponent={(ticket: ITicket) => (
 						<TicketsTableRow
 							key={ticket._id}
 							ticket={ticket}

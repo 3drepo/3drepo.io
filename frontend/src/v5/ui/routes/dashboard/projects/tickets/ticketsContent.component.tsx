@@ -27,21 +27,8 @@ import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
 import { EmptyPageView } from '../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { DashboardParams } from '../../../routes.constants';
-import { VirtualList2 } from '@controls/virtualList/virtualList2.component';
 
 export const TicketsContent = () => {
-	const items = Array(500).fill(0).map((v, index) => index);
-	const colors = ['red', 'green', 'blue'];
-
-	return (
-		<VirtualList2 
-			items={items}
-			ItemComponent={({ value:v }) => <div style={{ height:  (v * 5 + 40 ) + 'px', border:'10px solid ' + colors[v % 3], boxSizing: 'border-box' }}> A guy {v}</div>}
-			itemHeight={40}
-		/>
-	);
-
-
 	const { teamspace, project } = useParams<DashboardParams>();
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const templatesArePending = ProjectsHooksSelectors.selectTemplatesArePending();

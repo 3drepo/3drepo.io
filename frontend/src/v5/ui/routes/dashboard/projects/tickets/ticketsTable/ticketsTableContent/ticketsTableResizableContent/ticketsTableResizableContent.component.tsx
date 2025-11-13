@@ -29,6 +29,7 @@ import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { VirtualList2 } from '@controls/virtualList/virtualList2.component';
 
 type CollapsibleTicketsGroupProps = {
 	propertyValue: string;
@@ -96,18 +97,23 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 
 	return (
 		<Container>
-			{groups.map(({ groupName, value, tickets }) => (
-				<CollapsibleTicketsGroup
-					groupName={groupName}
-					tickets={tickets}
-					setTicketValue={setTicketValue}
-					onNewTicket={onGroupNewTicket}
-					selectedTicketId={selectedTicketId}
-					propertyValue={value}
-					propertyName={groupBy}
-					key={groupBy + groupName + template + tickets}
-				/>
-			))}
+			<VirtualList2
+				items={groups}
+				itemHeight={45}
+				ItemComponent={({ groupName, value, tickets }) => (
+					<CollapsibleTicketsGroup
+						groupName={groupName}
+						tickets={tickets}
+						setTicketValue={setTicketValue}
+						onNewTicket={onGroupNewTicket}
+						selectedTicketId={selectedTicketId}
+						propertyValue={value}
+						propertyName={groupBy}
+						key={groupBy + groupName + template + tickets}
+					/>
+				)} 
+			/>
+			
 		</Container>
 	);
 };
