@@ -23,7 +23,7 @@ type ItemComponentProps = {
 interface Props {
 	items: any[];
 	itemHeight: number;
-	ItemComponent:  (props: ItemComponentProps) => JSX.Element;
+	ItemComponent: (value: any, index: number, array: any[]) => JSX.Element;
 	itemBorder?: number;
 }
 
@@ -92,7 +92,7 @@ const getlastItem = (items: any[],
 
 const getContainerHeight = (items: any[], heights: Record<any, number>, defaultHeight: number) => {
 	let totalHeight = 0;
-	items.forEach((item) => totalHeight += heights[item] || defaultHeight);
+	items.forEach((_, index) => totalHeight += heights[index] || defaultHeight);
 	return totalHeight;
 };
 
@@ -150,13 +150,15 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 		const containerRect = containerRef.current?.getBoundingClientRect();
 		let scrolled = false;
 
-		if (initialized.current && first >= 0 && last >= 0) {
+		if (initialized.current && first >= 0 && last >= 0) { //TODO: rethink this strategy
 			let scrolldDiff = Math.abs(containerRect.y - renderContainerRect.current.y);
 			let firstHeight = itemsHeight.current[first] || itemHeight;
 			let lasttHeight = itemsHeight.current[last] || itemHeight;
 			scrolled = scrolldDiff > Math.min(firstHeight, lasttHeight);
 		}
 
+		const wasScrolledOut = !intersects({top:0, bottom: renderInnerHeight.current},  renderContainerRect.current);
+		const scrolledIn =  intersects({top:0, bottom: innerHeight},  containerRect) && wasScrolledOut;
 
 		const children = itemsContainer.current.children;
 		
@@ -182,11 +184,12 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 		}
 
 		// Redraw when:
-		// - havent been initialized
-		// - the size of an item changes => needs ref for items height
-		// - scroll and first/last changes => needs ref for prevScroll
-		// - the size of the windows changes => needs ref for windows
-		if (itemsHeightChanged || !initialized.current || indexChanged || scrolled) {
+		// - Havent been initialized
+		// - The size of an item changes => needs ref for items height
+		// - Scroll and first/last changes => needs ref for prevScroll
+		// - The size of the windows changes => needs ref for windows
+		// - When it scrolls into view in the window after being scrolled out
+		if (itemsHeightChanged || !initialized.current || indexChanged || scrolled || scrolledIn) {
 			setRedraw((v) => !v);
 		}
 
@@ -207,14 +210,21 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 	};
 
 	return (
-		<div style={{ height: containerHeight, border: 0, boxSizing:'border-box',  display:'block', background: 'linear-gradient(352deg,rgba(207, 48, 48, 1) 0%, rgba(181, 20, 255, 1) 100%)' }} ref={containerRef as any} >
+		<div style={{
+			height: containerHeight, 
+			border: 0, 
+			boxSizing:'border-box',  
+			display:'block', 
+			background: 'linear-gradient(352deg,rgba(207, 48, 48, 1) 0%, rgba(10, 48, 173, 1) 100%)' }}
+			ref={containerRef as any} 
+		>
 			<div style={{ height: spacerStart } } id='startSpacer'/>
 			<div ref={itemsContainer as any}   >
-				{itemsSlice.map((value, index) =>(<ItemComponent key={index} value={value} />))}
+				{itemsSlice.map(ItemComponent)}
 			</div>
 			<button style={{
-				position: 'absolute',
-				top: '119px',
+				position: 'relative',
+				top: 0,
 				left: '12px',
 				backgroundColor: 'aquamarine',
 			}} onClick={recalc}>click me</button>

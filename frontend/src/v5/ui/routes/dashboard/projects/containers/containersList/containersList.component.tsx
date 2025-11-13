@@ -42,7 +42,7 @@ import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { Container, CollapseSideElementGroup } from './containersList.styles';
 import { UploadContainerRevisionForm } from '../uploadContainerRevisionForm/uploadContainerRevisionForm.component';
 import { ContainerListItemLoading } from './containerListItem/containerListItemLoading.component';
-import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { VirtualList2 } from '@controls/virtualList/virtualList2.component';
 
 interface IContainersList {
 	emptyMessage: ReactNode;
@@ -133,7 +133,7 @@ export const ContainersList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						<VirtualList items={sortedList} itemHeight={80} itemContent={
+						<VirtualList2 items={sortedList} itemHeight={80} ItemComponent={
 							(container, index) => (
 								container.hasStatsPending ? (
 									<ContainerListItemLoading  delay={index / 10} container={container} key={container._id} />
