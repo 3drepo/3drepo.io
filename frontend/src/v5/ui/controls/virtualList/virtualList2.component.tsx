@@ -164,7 +164,7 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 				scrolled = elementScrolledOut || elementScrolledIn;
 			}
 
-			if (i == children.length - 1 && elementBounding.bottom < innerHeight && last !== itemIndex) {
+			if (i == children.length - 1 && elementBounding.bottom < innerHeight && last !== (itemsRef.current.length - 1)) {
 				scrolled = true;
 			}
 
@@ -174,7 +174,7 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 			itemsHeightChanged = true;
 		}
 
-		if (windowHeightChanged || itemsHeightChanged) {
+		if (windowHeightChanged && !itemsHeightChanged) {
 			const nextFirst = getFirstItem(items, itemsHeight.current, itemHeight, containerRect, innerHeight);
 			let nextLast = nextFirst?.first;
 			
@@ -192,9 +192,9 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 		// - Scroll and first/last changes
 		// - The size of the windows changes
 		// - When it scrolls into view in the window after being scrolled out
-		if (!initialized.current || indexChanged || scrolled || scrolledIn) {
+		if (!initialized.current || indexChanged || scrolled || scrolledIn || itemsHeightChanged) {
 			console.log('redraw reason:');
-			console.log(JSON.stringify({ initialized: !initialized.current, indexChanged, scrolled, scrolledIn }, null, '\t'));
+			console.log(JSON.stringify({ initialized: !initialized.current, indexChanged, scrolled, scrolledIn, itemsHeightChanged }, null, '\t'));
 			setRedraw((v) => !v);
 		}
 
