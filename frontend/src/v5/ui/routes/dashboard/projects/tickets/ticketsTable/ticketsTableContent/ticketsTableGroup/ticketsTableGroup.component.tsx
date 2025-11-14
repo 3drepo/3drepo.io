@@ -23,7 +23,7 @@ import { Table, Group, PlaceholderForStickyFunctionality } from './ticketsTableG
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue } from '../../ticketsTable.helper';
-import { orderBy } from 'lodash';
+import { orderBy, chunk } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
@@ -33,7 +33,6 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { useWatchPropertyChange } from '../../useWatchPropertyChange';
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
-import { VirtualList2 } from '@controls/virtualList/virtualList2.component';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 type TicketsTableGroupContentProps = {
@@ -48,6 +47,7 @@ type TicketsTableGroupContentProps = {
 	hideNewticketButton: boolean;
 };
 
+const chunkSize = 10;
 const TicketsTableGroupContent = ({ 
 	tickets, 
 	sortedItems,
@@ -65,28 +65,22 @@ const TicketsTableGroupContent = ({
 		<>
 			{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
 			<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
-				{sortedItems.map((ticket: ITicket) => (
-					<TicketsTableRow
-						key={ticket._id}
-						ticket={ticket}
-						modelId={ticket.modelId}
-						onClick={onEditTicket}
-						selected={selectedTicketId === ticket._id}
-					/>
-				))}
-				{/* <VirtualList
-					items={sortedItems}
-					itemHeight={37}
-					itemContent={(ticket: ITicket) => (
-						<TicketsTableRow
-							key={ticket._id}
-							ticket={ticket}
-							modelId={ticket.modelId}
-							onClick={onEditTicket}
-							selected={selectedTicketId === ticket._id}
-						/>
+				<VirtualList
+					items={chunk(sortedItems, chunkSize)}
+					itemHeight={37 * chunkSize}
+					ItemComponent={(ticketsChunk: ITicket[]) => (
+						<div key={ticketsChunk[0]._id}>
+							{ticketsChunk.map((ticket) => (
+								<TicketsTableRow
+									key={ticket._id}
+									ticket={ticket}
+									modelId={ticket.modelId}
+									onClick={onEditTicket}
+									selected={selectedTicketId === ticket._id}
+								/>))}
+						</div>
 					)}
-				/> */}
+				/>
 				{!hideNewticketButton &&
 				<NewTicketRowButton
 					onNewTicket={onNewTicket}
