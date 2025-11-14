@@ -14,10 +14,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+const { CALIBRATIONS_COL } = require('./calibrations.constants');
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
-
-const CALIBRATIONS_COL = 'drawings.calibrations';
 
 const Calibrations = {};
 
