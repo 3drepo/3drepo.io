@@ -30,6 +30,8 @@ const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 const { stopPurge } = require('../../../src/v5/models/frontegg.cache');
 
+const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
+
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -837,7 +839,7 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = async () => (await createServer()).listen(8080);
+ServiceHelper.app = async (bypassAuth = false) => (await createServer({ [BYPASS_AUTH]: bypassAuth })).listen(8080);
 
 ServiceHelper.frontend = () => createFrontend().listen(8080);
 

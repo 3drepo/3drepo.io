@@ -16,6 +16,7 @@
  */
 
 const { isBuffer, isString } = require('./helper/typeCheck');
+const { BYPASS_AUTH } = require('./config.constants');
 const { createActivityRecord } = require('../services/elastic');
 const { createResponseCode } = require('./responseCodes');
 const { deleteIfUndefined } = require('./helper/objects');
@@ -30,14 +31,22 @@ const Responder = {};
 
 const constructApiInfo = ({ method, originalUrl }) => `${method} ${originalUrl}`;
 
-const genResponseLogging = ({ status, code }, contentLength, { session, startTime, method, originalUrl } = {}) => {
-	const user = session?.user ? session.user.username : 'unknown';
+const genResponseLogging = ({ status, code }, contentLength, { session, startTime, method, originalUrl, app } = {}) => {
+	const isInternal = !!app?.get(BYPASS_AUTH);
+	let user;
+	if (session?.user) user = session.user.username;
+	else if (isInternal) {
+		user = 'internal-service';
+	} else {
+		user = 'unknown';
+	}
+
 	const currentTime = Date.now();
 	const latency = startTime ? `${currentTime - startTime}` : '???';
 
 	createActivityRecord(status, code, latency, contentLength, user, method, originalUrl);
 
-	return logger.formatResponseMsg({ status, code, latency, contentLength, user, method, originalUrl });
+	return logger.formatResponseMsg({ status, code, latency, contentLength, user, method, originalUrl, isInternal });
 };
 
 const createErrorResponse = (req, res, resCode) => {

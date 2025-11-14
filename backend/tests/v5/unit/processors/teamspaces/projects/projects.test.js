@@ -85,6 +85,11 @@ const testGetProjectList = () => {
 			const expectedRes = projectList.map(({ _id, name }) => ({ _id, name, isAdmin: true }));
 			expect(res).toEqual(expectedRes);
 		});
+		test('should return the whole list if auth is bypassed', async () => {
+			const res = await Projects.getProjectList('teamspace', undefined, true);
+			const expectedRes = projectList.map(({ _id, name }) => ({ _id, name, isAdmin: true }));
+			expect(res).toEqual(expectedRes);
+		});
 		test('should return a partial list if the user is a project admin in some projects', async () => {
 			const res = await Projects.getProjectList('teamspace', 'projAdmin');
 			expect(res).toEqual(determineProjectListResult('projAdmin'));

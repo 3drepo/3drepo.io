@@ -39,12 +39,13 @@ Permissions.isTeamspaceAdmin.mockImplementation((teamspace) => teamspace === 'ts
 Sessions.isSessionValid.mockImplementation((session) => !!session);
 Sessions.getUserFromSession.mockImplementation(({ user }) => user?.username);
 
+const app = { get: () => false };
 const testIsTeamspaceMember = () => {
 	describe('isTeamspaceMember', () => {
 		const teamspace = generateRandomString();
 		const username = generateRandomString();
 		const request = {
-			params: { teamspace }, session: { user: { username } },
+			params: { teamspace }, session: { user: { username } }, app,
 		};
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
@@ -57,6 +58,17 @@ const testIsTeamspaceMember = () => {
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
 			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, username, true);
+		});
+
+		test('next() should be called if auth bypassed is enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await TSMiddlewares.isTeamspaceMember(
+				{ ...request, app: { get: () => true } },
+				{},
+				mockCB,
+			);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Permissions.hasAccessToTeamspace).not.toHaveBeenCalled();
 		});
 
 		test('should respond with teamspace not found if the user has no access', async () => {
@@ -92,7 +104,7 @@ const testIsActiveTeamspaceMember = () => {
 		const teamspace = generateRandomString();
 		const username = generateRandomString();
 		const request = {
-			params: { teamspace }, session: { user: { username } },
+			params: { teamspace }, session: { user: { username } }, app,
 		};
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
@@ -105,6 +117,17 @@ const testIsActiveTeamspaceMember = () => {
 			expect(mockCB).toHaveBeenCalledTimes(1);
 			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledTimes(1);
 			expect(Permissions.hasAccessToTeamspace).toHaveBeenCalledWith(teamspace, username, true);
+		});
+
+		test('next() should be called if auth bypassed is enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await TSMiddlewares.isTeamspaceMember(
+				{ ...request, app: { get: () => true } },
+				{},
+				mockCB,
+			);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Permissions.hasAccessToTeamspace).not.toHaveBeenCalled();
 		});
 
 		test('should respond with teamspace not found if the user has no access', async () => {
@@ -140,7 +163,17 @@ const testIsTeamspaceAdmin = () => {
 		test('next() should be called if the user is admin', async () => {
 			const mockCB = jest.fn(() => {});
 			await TSMiddlewares.isTeamspaceAdmin(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } }, app },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('next() should be called if the auth bypass is enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await TSMiddlewares.isTeamspaceAdmin(
+				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } }, app: { get: () => true } },
 				{},
 				mockCB,
 			);
@@ -150,11 +183,11 @@ const testIsTeamspaceAdmin = () => {
 		test('should respond with not authorized if the user is not admin', async () => {
 			const mockCB = jest.fn(() => {});
 			await TSMiddlewares.isTeamspaceAdmin(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } }, app },
 				{},
 				mockCB,
 			);
-			expect(mockCB.mock.calls.length).toBe(0);
+			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond.mock.calls.length).toBe(1);
 			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
 		});

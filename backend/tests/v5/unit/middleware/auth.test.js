@@ -45,6 +45,7 @@ const sessionID = generateRandomString();
 const session = { user: { referer: 'http://abc.com', userAgent }, id: sessionID, token, ipAddress, destroy: (callback) => { callback(); } };
 const cookies = { [CSRF_COOKIE]: token };
 const headers = { referer: 'http://abc.com/', [CSRF_HEADER]: token, [USER_AGENT_HEADER]: userAgent };
+const app = { get: () => false };
 
 const testValidSession = () => {
 	describe('Valid sessions', () => {
@@ -53,7 +54,7 @@ const testValidSession = () => {
 			const mockCB = jest.fn(() => {});
 			const res = {};
 			await AuthMiddlewares.validSession(
-				{ ips: [ipAddress], headers, session, cookies },
+				{ ips: [ipAddress], headers, session, cookies, app },
 				res,
 				mockCB,
 			);
@@ -67,11 +68,23 @@ const testValidSession = () => {
 			const mockCB = jest.fn(() => {});
 			SessionUtils.isSessionValid.mockResolvedValueOnce(true);
 			await AuthMiddlewares.validSession(
-				{ headers, session: { user: { referer: 'http://abc.com', isAPIKey: true }, ipAddress } },
+				{ headers, session: { user: { referer: 'http://abc.com', isAPIKey: true }, ipAddress }, app },
 				{},
 				mockCB,
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(SessionUtils.setCSRFCookie).not.toHaveBeenCalled();
+		});
+		test('next() should be called if there is no session and bypass auth is enabled', async () => {
+			const mockCB = jest.fn(() => {});
+
+			await AuthMiddlewares.validSession(
+				{ headers, session: { user: { referer: 'http://abc.com', isAPIKey: true }, ipAddress }, app: { get: () => true } },
+				{},
+				mockCB,
+			);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(SessionUtils.isSessionValid).not.toHaveBeenCalled();
 			expect(SessionUtils.setCSRFCookie).not.toHaveBeenCalled();
 		});
 
@@ -86,6 +99,7 @@ const testValidSession = () => {
 					session,
 					cookies,
 					sessionID,
+					app,
 				},
 				{ clearCookie: () => {} },
 				mockCB,
@@ -129,7 +143,7 @@ const testNotLoggedIn = () => {
 
 const testIsLoggedIn = () => {
 	describe('Is logged in middleware', () => {
-		const req = { ips: [ipAddress], headers, session, cookies };
+		const req = { ips: [ipAddress], headers, session, cookies, app };
 		const res = {};
 		test('next() should be called if the session is valid', async () => {
 			const mockCB = jest.fn(() => {});

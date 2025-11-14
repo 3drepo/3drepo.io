@@ -17,6 +17,7 @@
 
 const { hasAccessToTeamspace, isAdminToProject, isTeamspaceAdmin } = require('../../../middleware/permissions');
 const { projectExists, validateProjectData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects');
+const { BYPASS_AUTH } = require('../../../utils/config.constants');
 const Projects = require('../../../processors/teamspaces/projects');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
@@ -32,7 +33,7 @@ const getProjectList = async (req, res) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace } = req.params;
 	try {
-		const projects = await Projects.getProjectList(teamspace, user);
+		const projects = await Projects.getProjectList(teamspace, user, req.app.get(BYPASS_AUTH));
 		respond(req, res, templates.ok, { projects: projects.map(serialiseProject) });
 	} catch (err) {
 		// istanbul ignore next
