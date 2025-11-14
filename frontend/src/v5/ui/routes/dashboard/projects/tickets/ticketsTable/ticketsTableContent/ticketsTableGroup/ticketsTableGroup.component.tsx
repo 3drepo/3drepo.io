@@ -34,6 +34,7 @@ import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors
 import { useWatchPropertyChange } from '../../useWatchPropertyChange';
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
 import { VirtualList2 } from '@controls/virtualList/virtualList2.component';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 type TicketsTableGroupContentProps = {
 	tickets: ITicket[];
@@ -64,10 +65,10 @@ const TicketsTableGroupContent = ({
 		<>
 			{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
 			<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
-				<VirtualList2
+				<VirtualList
 					items={sortedItems}
 					itemHeight={37}
-					ItemComponent={(ticket: ITicket) => (
+					itemContent={(ticket: ITicket) => (
 						<TicketsTableRow
 							key={ticket._id}
 							ticket={ticket}
