@@ -18,6 +18,7 @@
 const { getTemplateById, getTemplatesByQuery } = require('../../../../../../../models/tickets.templates');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
+const { isUUID } = require('../../../../../../../utils/helper/typeCheck');
 const { respond } = require('../../../../../../../utils/responder');
 const { serialiseTicket } = require('../../../../../../../schemas/tickets');
 const { serialiseTicketTemplate } = require('../../../../common/tickets.templates');
@@ -93,6 +94,28 @@ Tickets.serialiseTicketList = async (req, res) => {
 			ticket, templateLUT[UUIDToString(ticket.type)], true,
 		));
 		respond(req, res, templates.ok, { tickets: await Promise.all(outputProms) });
+	} catch (err) {
+		respond(req, res, templates.unknown);
+	}
+};
+
+Tickets.serialiseTicketHistory = (req, res) => {
+	const serializeData = (obj) => {
+		const returnObj = { ...obj };
+		for (const [key, value] of Object.entries(obj)) {
+			if (value instanceof Date) {
+				returnObj[key] = value.getTime();
+			} else if (isUUID(value)) {
+				returnObj[key] = UUIDToString(value);
+			} else if (value instanceof Object) {
+				returnObj[key] = serializeData(value);
+			}
+		}
+		return returnObj;
+	};
+	try {
+		const history = req.history.map(serializeData);
+		respond(req, res, templates.ok, { history });
 	} catch (err) {
 		respond(req, res, templates.unknown);
 	}
