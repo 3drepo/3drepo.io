@@ -99,23 +99,22 @@ Tickets.serialiseTicketList = async (req, res) => {
 	}
 };
 
-// check if uuid and convert to string
 Tickets.serialiseTicketHistory = (req, res) => {
-	const serializeDates = (obj) => {
+	const serializeData = (obj) => {
 		const returnObj = { ...obj };
 		for (const [key, value] of Object.entries(obj)) {
-			if (value instanceof Object) returnObj[key] = serializeDates(value);
-			if (value instanceof Date) returnObj[key] = value.getTime();
-			if (isUUID(value)) returnObj[key] = UUIDToString(value);
+			if (value instanceof Date) {
+				returnObj[key] = value.getTime();
+			} else if (isUUID(value)) {
+				returnObj[key] = UUIDToString(value);
+			} else if (value instanceof Object) {
+				returnObj[key] = serializeData(value);
+			}
 		}
 		return returnObj;
 	};
 	try {
-		const history = req.history.map((h) => {
-			const serialisedHistory = serializeDates(h);
-			if (!serialisedHistory.changes) serialisedHistory.changes = {};
-			return serialisedHistory;
-		});
+		const history = req.history.map(serializeData);
 		respond(req, res, templates.ok, { history });
 	} catch (err) {
 		respond(req, res, templates.unknown);

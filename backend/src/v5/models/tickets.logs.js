@@ -64,8 +64,9 @@ TicketLogs.getTicketLogsById = (
 	project,
 	model,
 	ticket,
-	projection = { _id: 0, author: 1, changes: 1, timestamp: 1 },
+	projection = { _id: 0, author: 1, changes: 1, timestamp: 1, imported: 1 },
 	sort = { timestamp: 1 },
-) => DB.find(teamspace, TICKET_LOGS_COL, { teamspace, project, model, ticket }, projection, sort);
+) => DB.find(
+	teamspace, TICKET_LOGS_COL, { teamspace, project, model, ticket }, projection, sort);
 
 module.exports = TicketLogs;

@@ -37,6 +37,8 @@ const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 let server;
 let agent;
 
+const TICKET_HISTORY_COL = 'tickets.logs';
+
 const generateBasicData = () => ({
 	users: {
 		tsAdmin: ServiceHelper.generateUserCredentials(),
@@ -1014,7 +1016,7 @@ const testUpdateTicket = () => {
 		});
 
 		const checkTicketLogByDate = async (updatedDate) => {
-			const ticketLog = await findOne(teamspace, 'tickets.logs', { timestamp: new Date(updatedDate) });
+			const ticketLog = await findOne(teamspace, TICKET_HISTORY_COL, { timestamp: new Date(updatedDate) });
 			expect(ticketLog).not.toBeUndefined();
 		};
 
@@ -1184,7 +1186,7 @@ const testUpdateManyTickets = () => {
 		});
 
 		const checkTicketLogByDate = async (updatedDate) => {
-			const ticketLog = await findOne(teamspace, 'tickets.logs', { timestamp: new Date(updatedDate) });
+			const ticketLog = await findOne(teamspace, TICKET_HISTORY_COL, { timestamp: new Date(updatedDate) });
 			expect(ticketLog).not.toBeUndefined();
 		};
 
@@ -1299,24 +1301,72 @@ const testUpdateManyTickets = () => {
 
 const testGetTicketHistory = () => {
 	describe('Get ticket history', () => {
-		const updateTicketLogs = async (
-			teamspace, users, updateDate, model, project, ticket, updateParam, updateValue,
-		) => {
-			await insertOne(teamspace, 'tickets.logs', {
-				_id: ServiceHelper.generateUUIDString(),
-				author: users.tsAdmin.user,
-				changes: {
-					properties: {
-						[updateParam]: {
-							from: ticket[updateParam] ?? ticket.properties[updateParam], to: updateValue,
+		const CHANGE_DEPTH_ENUM = Object.freeze({
+			BASE: 'base',
+			PROPERTIES: 'properties',
+			MODULES: 'modules',
+		});
+
+		const createChangeLog = (ticket, changeDepth, moduleName, propertyName, updateValue) => {
+			switch (changeDepth) {
+			case CHANGE_DEPTH_ENUM.BASE:
+				return {
+					[propertyName]: {
+						from: ticket[propertyName], to: updateValue,
+					},
+				};
+			case CHANGE_DEPTH_ENUM.PROPERTIES:
+				return {
+					[changeDepth]: {
+						[propertyName]: {
+							from: ticket[changeDepth][propertyName], to: updateValue,
 						},
 					},
-				},
+				};
+			case CHANGE_DEPTH_ENUM.MODULES:
+				return {
+					[changeDepth]: {
+						[moduleName]: {
+							[propertyName]: {
+								from: ticket[changeDepth][moduleName][propertyName], to: updateValue,
+							},
+						},
+					},
+				};
+			default:
+				throw new Error(`Unknown change depth: ${changeDepth}`);
+			}
+		};
+
+		const insertTicketLogs = async (
+			teamspace,
+			users,
+			updateDate,
+			model,
+			project,
+			ticket,
+			isImport,
+
+			changeDepth,
+			moduleName,
+			propertyName,
+			updateValue,
+		) => {
+			await insertOne(teamspace, TICKET_HISTORY_COL, {
+				_id: ServiceHelper.generateUUIDString(),
+				author: isImport ? null : users.tsAdmin.user,
 				timestamp: updateDate,
 				teamspace,
 				project: stringToUUID(project.id),
 				model: model._id,
 				ticket: stringToUUID(ticket._id),
+				[isImport ? 'imported' : 'changes']: isImport
+					? {
+						modules: ticket.modules,
+						properties: ticket.properties,
+						title: ticket.title,
+					}
+					: createChangeLog(ticket, changeDepth, moduleName, propertyName, updateValue),
 			});
 		};
 
@@ -1327,12 +1377,17 @@ const testGetTicketHistory = () => {
 		const fedTicket = ServiceHelper.generateTicket(template);
 
 		const datePropName = template.properties.find((p) => p.type === propTypes.DATE).name;
+		const moduleName = template.modules.find((m) => !m.deprecated).name;
+		const modulePropName = template
+			.modules.find((m) => m.name === moduleName)
+			.properties.find((p) => p.type === propTypes.TEXT).name;
 		const conTicketUpdate = ServiceHelper.generateTicket(template);
 		const fedTicketUpdate = ServiceHelper.generateTicket(template);
 
 		const ticketTitleUpdateUpdate = ServiceHelper.generateRandomString();
 		const ticketDueDateUpdate = ServiceHelper.generateRandomDate();
 		const updateDate = new Date();
+		const modulePropUpdateValue = ServiceHelper.generateRandomString();
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed],
@@ -1344,19 +1399,105 @@ const testGetTicketHistory = () => {
 				ServiceHelper.db.createTicket(teamspace, project, fed, fedTicketUpdate),
 			]);
 
-			// Simulate ticket update and log entry for conTicket and fedTicket
 			await Promise.all([
-				updateTicketLogs(
-					teamspace, users, updateDate, con, project, conTicketUpdate, 'title', ticketTitleUpdateUpdate,
+				// Simulate ticket update and log entry for container ticket
+				insertTicketLogs(
+					teamspace,
+					users,
+					updateDate,
+					con,
+					project,
+					conTicketUpdate,
+					false,
+					CHANGE_DEPTH_ENUM.BASE,
+					undefined,
+					'title',
+					ticketTitleUpdateUpdate,
 				),
-				updateTicketLogs(
-					teamspace, users, updateDate, con, project, conTicketUpdate, datePropName, ticketDueDateUpdate,
+				insertTicketLogs(
+					teamspace,
+					users,
+					updateDate,
+					con,
+					project,
+					conTicketUpdate,
+					false,
+					CHANGE_DEPTH_ENUM.PROPERTIES,
+					undefined,
+					datePropName,
+					ticketDueDateUpdate,
 				),
-				updateTicketLogs(
-					teamspace, users, updateDate, fed, project, fedTicketUpdate, 'title', ticketTitleUpdateUpdate,
+				insertTicketLogs(
+					teamspace,
+					users,
+					updateDate,
+					con,
+					project,
+					conTicketUpdate,
+					false,
+					CHANGE_DEPTH_ENUM.MODULES,
+					moduleName,
+					modulePropName,
+					modulePropUpdateValue,
 				),
-				updateTicketLogs(
-					teamspace, users, updateDate, fed, project, fedTicketUpdate, datePropName, ticketDueDateUpdate,
+				insertTicketLogs(
+					teamspace,
+					users,
+					updateDate,
+					con,
+					project,
+					conTicketUpdate,
+					true,
+				),
+
+				// Simulate ticket update and log entry for federation ticket
+				insertTicketLogs(
+					teamspace,
+					users,
+					updateDate,
+					fed,
+					project,
+					fedTicketUpdate,
+					false,
+					CHANGE_DEPTH_ENUM.BASE,
+					undefined,
+					'title',
+					ticketTitleUpdateUpdate,
+				),
+				insertTicketLogs(
+					teamspace,
+					users,
+					updateDate,
+					fed,
+					project,
+					fedTicketUpdate,
+					false,
+					CHANGE_DEPTH_ENUM.PROPERTIES,
+					undefined,
+					datePropName,
+					ticketDueDateUpdate,
+				),
+				insertTicketLogs(
+					teamspace,
+					users,
+					updateDate,
+					fed,
+					project,
+					fedTicketUpdate,
+					false,
+					CHANGE_DEPTH_ENUM.MODULES,
+					moduleName,
+					modulePropName,
+					modulePropUpdateValue,
+				),
+				insertTicketLogs(
+					teamspace,
+					users,
+					updateDate,
+					fed,
+					project,
+					fedTicketUpdate,
+					true,
 				),
 			]);
 		});
@@ -1381,11 +1522,21 @@ const testGetTicketHistory = () => {
 					author: users.tsAdmin.user,
 					timestamp: updateDate.getTime(),
 					changes: {
+						title: {
+							from: isFed ? fedTicketUpdate.title : conTicketUpdate.title,
+							to: ticketTitleUpdateUpdate,
+						},
+					},
+				},
+				{
+					author: users.tsAdmin.user,
+					timestamp: updateDate.getTime(),
+					changes: {
 						properties: {
 							[datePropName]: {
 								from: isFed
-									? conTicketUpdate.properties[datePropName]
-									: fedTicketUpdate.properties[datePropName],
+									? fedTicketUpdate.properties[datePropName]
+									: conTicketUpdate.properties[datePropName],
 								to: ticketDueDateUpdate.getTime(),
 							},
 						},
@@ -1395,12 +1546,25 @@ const testGetTicketHistory = () => {
 					author: users.tsAdmin.user,
 					timestamp: updateDate.getTime(),
 					changes: {
-						properties: {
-							title: {
-								from: isFed ? fedTicketUpdate.title : conTicketUpdate.title,
-								to: ticketTitleUpdateUpdate,
+						modules: {
+							[moduleName]: {
+								[modulePropName]: {
+									from: isFed
+										? fedTicketUpdate.modules[moduleName][modulePropName]
+										: conTicketUpdate.modules[moduleName][modulePropName],
+									to: modulePropUpdateValue,
+								},
 							},
 						},
+					},
+				},
+				{
+					author: null,
+					timestamp: updateDate.getTime(),
+					imported: {
+						modules: isFed ? fedTicketUpdate.modules : conTicketUpdate.modules,
+						properties: isFed ? fedTicketUpdate.properties : conTicketUpdate.properties,
+						title: isFed ? fedTicketUpdate.title : conTicketUpdate.title,
 					},
 				},
 			];

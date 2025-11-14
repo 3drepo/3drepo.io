@@ -137,7 +137,7 @@ const testGetTicketLogsById = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TICKET_LOGS_COL,
 				{ ...expectedDoc },
-				{ _id: 0, author: 1, changes: 1, timestamp: 1 },
+				{ _id: 0, author: 1, changes: 1, timestamp: 1, imported: 1 },
 				{ timestamp: 1 });
 			expect(result).toEqual(mockLogs);
 		});
