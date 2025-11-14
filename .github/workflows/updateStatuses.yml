@@ -1,11 +1,13 @@
-name: On review update
+name: Review PR status
 on:
-  pull_request_review:
+  pull_request:
+    types: [ready_for_review, review_requested, review_request_removed]
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 permissions:
   issues: write
+
 jobs:
   get-details:
     name: Get PR and Issue Details
@@ -21,28 +23,14 @@ jobs:
           github-token: ${{ secrets.PROJ_MANAGEMENT_TOKEN}}
         id: commitMsgParser
 
-  check-merge-ready:
-    name: Ensure all reviewers have approved the PR
-    runs-on: ubuntu-latest
-    outputs:
-      approved: ${{ steps.checkReviews.outputs.approved }}
-    steps:
-      - name: Check reviews
-        id: checkReviews
-        uses: 3drepo/all-reviewers-approved@v1
-        with:
-          pr: ${{ github.event.pull_request.number }}
-          github-token: ${{ secrets.PROJ_MANAGEMENT_TOKEN}}
-
 #  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
   update-project-issue-status:
     name: Update Project Issue Status
-    if: ${{ always() && needs.check-merge-ready.outputs.approved == '' }} # if not reviewer approved let's modify the status.
     runs-on: ubuntu-latest
     outputs:
       issue-content-id: ${{ needs.get-details.outputs.issue-content-id }}
       status: ${{ steps.setStatusOutputIssue.outputs.status }}
-    needs: [ get-details, check-merge-ready ]
+    needs: [ get-details ]
     steps:
       - name: getStatus
         uses: haya14busa/action-cond@v1
