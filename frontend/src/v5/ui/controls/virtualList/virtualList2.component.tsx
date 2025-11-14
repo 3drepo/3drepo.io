@@ -16,10 +16,6 @@
  */
 import { useRef, useState, useEffect } from 'react';
 
-type ItemComponentProps = {
-	value?: any, index?: number
-};
-
 interface Props {
 	items: any[];
 	itemHeight: number;
@@ -105,7 +101,6 @@ const getContainerHeight = (items: any[], heights: Record<any, number>, defaultH
 // Scroll
 // Resize window
 // Test with overscan? (x less, y more)
- 
 export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => { 
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
@@ -151,21 +146,26 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 		const containerRect = containerRef.current?.getBoundingClientRect();
 		let scrolled = false;
 
-		if (initialized.current && first >= 0 && last >= 0) { //TODO: rethink this strategy
-			let scrolldDiff = Math.abs(containerRect.y - renderContainerRect.current.y);
-			let firstHeight = itemsHeight.current[first] || itemHeight;
-			let lasttHeight = itemsHeight.current[last] || itemHeight;
-			scrolled = scrolldDiff > Math.min(firstHeight, lasttHeight);
-		}
-
 		const wasScrolledOut = !intersects({ top:0, bottom: renderInnerHeight.current },  renderContainerRect.current);
 		const scrolledIn =  intersects({ top:0, bottom: innerHeight },  containerRect) && wasScrolledOut;
-
+		
 		const children = itemsContainer.current.children;
 		
 		for (let i = 0; i < children.length ; i++ ) {
-			const elementHeight = children[i].getBoundingClientRect().height;
+			const elementBounding = children[i].getBoundingClientRect();
+			const elementHeight = elementBounding.height;
 			const itemIndex = i + first;
+
+			if (i == 0) {
+				const elementScrolledOut = elementBounding.bottom < 0;
+				const elementScrolledIn = elementBounding.top > 0 && itemIndex !== 0;
+				scrolled = elementScrolledOut || elementScrolledIn;
+			}
+
+			if (i == children.length - 1 && elementBounding.bottom < innerHeight && last !== itemIndex) {
+				scrolled = true;
+			}
+
 			if (equalsHeight(elementHeight, itemHeight) && !itemsHeight.current[itemIndex]) continue;
 			if (equalsHeight(elementHeight, itemsHeight.current[itemIndex])) continue;
 			itemsHeight.current[itemIndex] = elementHeight;
@@ -186,9 +186,9 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 
 		// Redraw when:
 		// - Havent been initialized
-		// - The size of an item changes => needs ref for items height
-		// - Scroll and first/last changes => needs ref for prevScroll
-		// - The size of the windows changes => needs ref for windows
+		// - The size of an item changes
+		// - Scroll and first/last changes
+		// - The size of the windows changes
 		// - When it scrolls into view in the window after being scrolled out
 		if (itemsHeightChanged || !initialized.current || indexChanged || scrolled || scrolledIn) {
 			setRedraw((v) => !v);
@@ -212,7 +212,7 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 				height: containerHeight, 
 				border: 0, 
 				boxSizing:'border-box',  
-				display:'block', 
+				display:'block',
 			}} ref={containerRef as any}
 		>
 			<div style={{ height: spacerStart } } id='startSpacer'/>
