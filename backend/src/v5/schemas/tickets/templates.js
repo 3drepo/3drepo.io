@@ -70,6 +70,12 @@ const uniqueTypeBlackList = [
 	propTypes.COORDS,
 ];
 
+const complexTypes = [
+	propTypes.IMAGE,
+	propTypes.IMAGE_LIST,
+	propTypes.VIEW,
+];
+
 const propSchema = Yup.object().shape({
 	name: types.strings.title.required().min(1).matches(blackListedChrsRegex),
 	type: Yup.string().oneOf(Object.values(propTypes)).required(),
@@ -143,7 +149,7 @@ const propSchema = Yup.object().shape({
 
 		if (type === propTypes.ANY_OF) return res.oneOf(values);
 
-		if (type === propTypes.IMAGE || type === propTypes.IMAGE_LIST) return Yup.mixed().strip();
+		if (complexTypes.includes(type)) return Yup.mixed().test('invalid-default', `Default value cannot be set for property type "${type}"`, (value) => !value);
 
 		return res;
 	}),
