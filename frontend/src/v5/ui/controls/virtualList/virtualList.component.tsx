@@ -19,7 +19,8 @@ import { useRef, useState, useEffect } from 'react';
 interface Props {
 	items: any[];
 	itemHeight: number;
-	itemContent:  (value: any, index: number, array: any[]) => JSX.Element;
+	ItemComponent: (value: any, index: number, array: any[]) => JSX.Element;
+	itemBorder?: number;
 }
 
 const emptyRect = { x:0, y:0, width:0, top:0, bottom: 0, height:0 } as DOMRect;
@@ -29,108 +30,186 @@ const equalsHeight = (a, b) =>  Math.abs(a - b) < HeightTolerance;
 
 const lineInRange = (line, top, bottom) => top <= line && line <= bottom;
 
-export const VirtualList = ({ items, itemHeight, itemContent }:Props) => { 
+type VerticalRange  = { top: number, bottom: number };
+
+const intersects = (a:VerticalRange, b: VerticalRange) => {
+	if (!a || !b) return false;
+
+	return lineInRange(a.top, b.top, b.bottom) || lineInRange(a.bottom, b.top, b.bottom) || 
+		lineInRange(b.top, a.top, a.bottom) || lineInRange(b.bottom, a.top, a.bottom);
+};
+
+const getFirstItem = (items: any[], heights: Record<any, number>, defaultHeight: number,  containerSize?: VerticalRange, windowHeight?: number): 
+{ first: number, size: VerticalRange } => {
+	if (!containerSize) return undefined;
+
+	let first = 0;
+	let top = containerSize.top;
+	let bottom = (heights[first] || defaultHeight) + top;
+
+	if (top > windowHeight ) return undefined;
+	if (top <= 0 && bottom > windowHeight) return { first: first, size: { top, bottom } };
+
+	const windowRange:VerticalRange = { top:0, bottom:windowHeight };
+
+	while (!intersects(windowRange, { top, bottom })  && first < items.length) {
+		first++;
+		top = bottom;
+		bottom = (heights[first] || defaultHeight) + top;
+	}
+
+	if (first === items.length) {
+		return undefined;
+	}
+
+	return { first, size: { top, bottom } };
+};
+
+const getlastItem = (items: any[], 
+	first: number, 
+	firstSize: VerticalRange,
+	heights: Record<any, number>, 
+	defaultHeight: number, 
+	windowHeight: number,
+) => {
+	if (first == undefined) return undefined;
+	let index = first + 1;
+	let { bottom: Firstbottom } = firstSize;
+	let top = Firstbottom;
+	let bottom = (heights[index] || defaultHeight) + top;
+	const windowRange:VerticalRange = { top:0, bottom:windowHeight };
+
+	while (intersects(windowRange, { top, bottom }) && index < items.length) {
+		index++;
+		top = bottom;
+		bottom = (heights[index] || defaultHeight) + top;
+	}
+
+	return Math.min(index, items.length - 1);
+};
+
+const getContainerHeight = (items: any[], heights: Record<any, number>, defaultHeight: number) => {
+	let totalHeight = 0;
+	items.forEach((_, index) => totalHeight += heights[index] || defaultHeight);
+	return totalHeight;
+};
+
+export const VirtualList = ({ items, itemHeight, ItemComponent }:Props) => { 
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
-	const prevRect = useRef<DOMRect>();
-	const prevInnerHeight = useRef(0);
-	const expandedItem = useRef({ index:0, height: itemHeight });
-	const [containerRect, setContainerRect] = useState<DOMRect>(emptyRect);
-	const firstElementIndex = useRef(0);
+	const [, setRedraw] = useState(false);
+	const sliceIndexes = useRef({ first:-1, last:-1 });
+	const itemsRef = useRef(items);
+	const initialized = useRef(true);
 
-	let { innerHeight } = window;
-	const top = Math.min(Math.max(0, containerRect.top), innerHeight);
-	const bottom = Math.min(Math.max(0, containerRect.bottom), innerHeight);
+	const renderInnerHeight = useRef(0);
+	renderInnerHeight.current = window.innerHeight;
+
+	const itemsHeight = useRef<Record<any, number>>({}); // get rid of the elements that get deleted
+	const renderContainerRect = useRef(emptyRect);
 	
-	const getFirstItemIndex = (y) => {
-		let firstItemindex =  Math.ceil(y / itemHeight);
-		let spacerStart = firstItemindex * itemHeight;
-		
-		const y2 = -containerRect.y;
-		const topExp = (expandedItem.current.index * itemHeight) - y2 ;
-		const bottomExp = topExp + expandedItem.current.height ;
+	renderContainerRect.current = containerRef.current?.getBoundingClientRect();
 
-		if (lineInRange(0, topExp, bottomExp) || 
-			lineInRange(bottom, topExp, bottomExp) || 
-			lineInRange(topExp, 0, bottom) || 
-			lineInRange(bottomExp, 0, bottom) ) {
+	const res = getFirstItem(items, itemsHeight.current, itemHeight, renderContainerRect.current, renderInnerHeight.current);
+	let spacerStart = 0;
+	let itemsSlice = [];
+	let containerHeight = getContainerHeight(items, itemsHeight.current, itemHeight);
+	sliceIndexes.current.first = res?.first;
 
- 			// If the expanded item is visible and the top line is before the viewport start
-			// that means is the first item 
-			//
-			if ( topExp <= 0 ) {
-				firstItemindex = expandedItem.current.index;
-				spacerStart = firstItemindex * itemHeight;
-			}
-		} else {
+	if (res) {
+		const { first, size } = res;
+		const last = getlastItem(items, first, size, itemsHeight.current, itemHeight, renderInnerHeight.current);
+		spacerStart = size.top - renderContainerRect.current.top;
+		sliceIndexes.current.last = last;
 
-			// If its not visible and the first item is passed the expanded item
-			// then the first item might be further down the list because expanded item
-			// might take up space for many items
-			if (firstItemindex > expandedItem.current.index) {
-				firstItemindex = Math.ceil(-bottomExp / itemHeight) + expandedItem.current.index;
-				spacerStart = (firstItemindex - 1) * itemHeight + expandedItem.current.height;
-			}
-		}
+		itemsSlice = items.slice(first, last + 1);
+	} 
 
-		return { firstItemindex, spacerStart };
-	};
+	initialized.current = !!containerRef.current;
 
-	const contentCount = Math.ceil(((bottom - top)) / itemHeight) + ((bottom - top) > 0 ? 1 : 0); 
-	const { firstItemindex, spacerStart } =  getFirstItemIndex(Math.max(0, -containerRect.y));
-	firstElementIndex.current = firstItemindex;
-	const lastIndex =  Math.min(contentCount + firstItemindex, items.length);
-	const itemsSlice = items.slice(firstItemindex, lastIndex);
-	const containerHeight = (items.length - 1) * itemHeight + expandedItem.current.height;
-	
-	useEffect(()=> {
-		prevInnerHeight.current = 0;
-	}, [items]);
-
-	let onScroll;
-	onScroll = () => {
+	const onFrame = () => {
 		if (!containerRef.current) return;
-		const rect = containerRef.current.getBoundingClientRect();
-		let shouldUpdate = rect.y !== prevRect.current?.y || prevInnerHeight.current !== window.innerHeight;
+		const { first, last }  = sliceIndexes.current;
+		
+		let itemsHeightChanged = false;
+		const { innerHeight } = window;
+		const windowHeightChanged = innerHeight !== renderInnerHeight.current;
+		let indexChanged = false;
+		const containerRect = containerRef.current?.getBoundingClientRect();
+		let scrolled = false;
 
+		const wasScrolledOut = !intersects({ top:0, bottom: renderInnerHeight.current },  renderContainerRect.current);
+		const scrolledIn =  intersects({ top:0, bottom: innerHeight },  containerRect) && wasScrolledOut;
+		
 		const children = itemsContainer.current.children;
-		const { height: expHeight, index: expIndex } =  expandedItem.current;
-
+		
 		for (let i = 0; i < children.length ; i++ ) {
-			const elementHeight = children[i].clientHeight;
-			const itemIndex = i + firstElementIndex.current;
-			if (!equalsHeight(elementHeight, itemHeight) || (itemIndex === expIndex &&  !equalsHeight(elementHeight, expHeight))) {
-				if (expIndex !== itemIndex || expHeight !== elementHeight) {
-					expandedItem.current = {
-						index: itemIndex,
-						height: elementHeight,
-					};
+			const elementBounding = children[i].getBoundingClientRect();
+			const elementHeight = elementBounding.height;
+			const itemIndex = i + first;
 
-					shouldUpdate = true;
-				}
+			if (i == 0) {
+				const elementScrolledOut = elementBounding.bottom < 0;
+				const elementScrolledIn = elementBounding.top > 0 && itemIndex !== 0;
+				scrolled = elementScrolledOut || elementScrolledIn;
+			}
 
-				break;
+			if (i == children.length - 1 && elementBounding.bottom < innerHeight && last !== (itemsRef.current.length - 1)) {
+				scrolled = true;
+			}
+
+			if (equalsHeight(elementHeight, itemHeight) && !itemsHeight.current[itemIndex]) continue;
+			if (equalsHeight(elementHeight, itemsHeight.current[itemIndex])) continue;
+			itemsHeight.current[itemIndex] = elementHeight;
+			itemsHeightChanged = true;
+		}
+
+		if (windowHeightChanged && !itemsHeightChanged) {
+			const nextFirst = getFirstItem(items, itemsHeight.current, itemHeight, containerRect, innerHeight);
+			let nextLast = nextFirst?.first;
+			
+			if (nextFirst) {
+				nextLast = getlastItem(items, nextFirst.first, nextFirst.size, itemsHeight.current, itemHeight, innerHeight);
+				indexChanged = nextFirst.first !== first || nextLast !== last;
+			} else {
+				indexChanged = first !== undefined;
 			}
 		}
 
-		if (shouldUpdate) { // TODO: dont update while an animation is playing
-			prevRect.current = rect; 
-			prevInnerHeight.current = window.innerHeight;
-			setContainerRect(rect);
+		// Redraw when:
+		// - Havent been initialized
+		// - The size of an item changes
+		// - Scroll and first/last changes
+		// - The size of the windows changes
+		// - When it scrolls into view in the window after being scrolled out
+		if (!initialized.current || indexChanged || scrolled || scrolledIn || itemsHeightChanged) {
+			setRedraw((v) => !v);
 		}
 
-		window.requestAnimationFrame(onScroll);
+		window.requestAnimationFrame(onFrame);
 	};
-	
+    
 	useEffect(() => {
-		window.requestAnimationFrame(onScroll);
+		window.requestAnimationFrame(onFrame);
 	}, []);
 
+	useEffect(() => {
+		itemsRef.current = items;
+		itemsHeight.current = {};
+	}, [items]);
+
 	return (
-		<div style={{ height: containerHeight,  display:'block' }} ref={containerRef as any} >
+		<div style={
+			{
+				height: containerHeight, 
+				border: 0, 
+				boxSizing:'border-box',  
+				display:'block',
+			}} ref={containerRef as any}
+		>
 			<div style={{ height: spacerStart } } id='startSpacer'/>
-			<div  ref={itemsContainer as any}   >
-				{itemsSlice.map(itemContent)}
+			<div ref={itemsContainer as any}   >
+				{itemsSlice.map(ItemComponent)}
 			</div>
 		</div>
 	);

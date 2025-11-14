@@ -118,7 +118,7 @@ export const DrawingsList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						<VirtualList items={sortedList} itemHeight={81} itemContent={
+						<VirtualList items={sortedList} itemHeight={81} ItemComponent={
 							(drawing, index) => (
 								drawing.hasStatsPending ? (
 									<DrawingListItemLoading  delay={index / 10} drawing={drawing} key={drawing._id} />
