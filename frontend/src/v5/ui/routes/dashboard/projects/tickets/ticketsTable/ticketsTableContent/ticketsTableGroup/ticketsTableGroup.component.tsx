@@ -65,7 +65,16 @@ const TicketsTableGroupContent = ({
 		<>
 			{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
 			<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
-				<VirtualList
+				{sortedItems.map((ticket: ITicket) => (
+					<TicketsTableRow
+						key={ticket._id}
+						ticket={ticket}
+						modelId={ticket.modelId}
+						onClick={onEditTicket}
+						selected={selectedTicketId === ticket._id}
+					/>
+				))}
+				{/* <VirtualList
 					items={sortedItems}
 					itemHeight={37}
 					itemContent={(ticket: ITicket) => (
@@ -77,7 +86,7 @@ const TicketsTableGroupContent = ({
 							selected={selectedTicketId === ticket._id}
 						/>
 					)}
-				/>
+				/> */}
 				{!hideNewticketButton &&
 				<NewTicketRowButton
 					onNewTicket={onNewTicket}

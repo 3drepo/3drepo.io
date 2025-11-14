@@ -77,7 +77,7 @@ export const DashboardListCollapse = ({
 			</ControlsContainer>
 			<Collapse in={isExpanded} onTransitionEnd={onTransitionEnd} >
 				<CollapsedItemContainer>
-					{!unmountChildren  && children}
+					{(!unmountChildren || !unmountHidden)  && children}
 				</CollapsedItemContainer>
 			</Collapse>
 		</Container>

@@ -60,6 +60,7 @@ const CollapsibleTicketsGroup = ({
 		)}
 		defaultExpanded={expanded}
 		onChangeCollapse={onChangeCollapse}
+		unmountHidden
 	>
 		<TicketsTableGroup
 			tickets={tickets}

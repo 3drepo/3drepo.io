@@ -85,7 +85,7 @@ const getlastItem = (items: any[],
 		bottom = (heights[index] || defaultHeight) + top;
 	}
 
-	return index + 1;
+	return Math.min(index, items.length - 1);
 };
 
 const getContainerHeight = (items: any[], heights: Record<any, number>, defaultHeight: number) => {
@@ -101,6 +101,8 @@ const getContainerHeight = (items: any[], heights: Record<any, number>, defaultH
 // Scroll
 // Resize window
 // Test with overscan? (x less, y more)
+
+let renderCount = 0;
 export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => { 
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
@@ -130,7 +132,7 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 		spacerStart = size.top - renderContainerRect.current.top;
 		sliceIndexes.current.last = last;
 
-		itemsSlice = items.slice(first, last);
+		itemsSlice = items.slice(first, last + 1);
 	} 
 
 	initialized.current = !!containerRef.current;
@@ -172,7 +174,7 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 			itemsHeightChanged = true;
 		}
 
-		if (windowHeightChanged && !itemsHeightChanged) { // dont check if its going to get rerender already
+		if (windowHeightChanged || itemsHeightChanged) {
 			const nextFirst = getFirstItem(items, itemsHeight.current, itemHeight, containerRect, innerHeight);
 			let nextLast = nextFirst?.first;
 			
@@ -190,7 +192,9 @@ export const VirtualList2 = ({ items, itemHeight, ItemComponent }:Props) => {
 		// - Scroll and first/last changes
 		// - The size of the windows changes
 		// - When it scrolls into view in the window after being scrolled out
-		if (itemsHeightChanged || !initialized.current || indexChanged || scrolled || scrolledIn) {
+		if (!initialized.current || indexChanged || scrolled || scrolledIn) {
+			console.log('redraw reason:');
+			console.log(JSON.stringify({ initialized: !initialized.current, indexChanged, scrolled, scrolledIn }, null, '\t'));
 			setRedraw((v) => !v);
 		}
 
