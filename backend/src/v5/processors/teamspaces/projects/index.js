@@ -32,10 +32,10 @@ const Projects = {};
 Projects.getProjectList = async (teamspace, user, bypassAuth) => {
 	const [projects, tsAdmin] = await Promise.all([
 		getProjectList(teamspace, { _id: 1, name: 1, permissions: 1, models: 1 }),
-		bypassAuth ? Promise.resolve() : isTeamspaceAdmin(teamspace, user),
+		bypassAuth ? Promise.resolve(true) : isTeamspaceAdmin(teamspace, user),
 	]);
 	return (await Promise.all(projects.map(async ({ _id, name, permissions, models }) => {
-		const isAdmin = bypassAuth || tsAdmin || hasProjectAdminPermissions(permissions, user);
+		const isAdmin = tsAdmin || hasProjectAdminPermissions(permissions, user);
 		const hasAccess = isAdmin || await hasReadAccessToSomeModels(teamspace, _id, models, user);
 		return hasAccess ? { _id, name, isAdmin } : [];
 	}))).flat();

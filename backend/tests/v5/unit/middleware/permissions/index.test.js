@@ -41,15 +41,15 @@ Sessions.validSession.mockImplementation(async (req, res, next) => {
 	else Responder.respond(req, res, templates.notLoggedIn);
 });
 const app = { get: () => false };
+const ipAddress = generateRandomString();
+const reqSample = { ips: [ipAddress],
+	params: { teamspace: authenticatedTeamspace },
+	headers: { referer: 'http://abc.com/' },
+	session: { ipAddress, user: { auth: { authenticatedTeamspace }, username: 'hi', referer: 'http://abc.com' } },
+	app,
+};
 
 const testHasAccessToTeamspace = () => {
-	const ipAddress = generateRandomString();
-	const reqSample = { ips: [ipAddress],
-		params: { teamspace: authenticatedTeamspace },
-		headers: { referer: 'http://abc.com/' },
-		session: { ipAddress, user: { auth: { authenticatedTeamspace }, username: 'hi', referer: 'http://abc.com' } },
-		app,
-	};
 	describe.each([
 		['user has access', reqSample, true, true],
 		['user does not have access', reqSample, false, false, templates.teamspaceNotFound],
@@ -91,13 +91,6 @@ const testHasAccessToTeamspace = () => {
 };
 
 const testIsMemberOfTeamspace = () => {
-	const ipAddress = generateRandomString();
-	const reqSample = { ips: [ipAddress],
-		params: { teamspace: authenticatedTeamspace },
-		headers: { referer: 'http://abc.com/' },
-		session: { ipAddress, user: { auth: { authenticatedTeamspace }, username: 'hi', referer: 'http://abc.com' } },
-		app,
-	};
 	describe.each([
 		['user has access', reqSample, true, true],
 		['session is invalid', { ...reqSample, session: undefined }, undefined, false, templates.notLoggedIn],
