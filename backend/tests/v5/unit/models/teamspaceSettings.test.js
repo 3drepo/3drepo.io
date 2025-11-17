@@ -74,7 +74,7 @@ const testHasAccessToTeamspace = () => {
 
 		describe.each([
 			['user has access to a teamspace with no restriction (bypassStatusCheck: false)', genUserData(), false, undefined, true],
-			['!user has access to a teamspace with no restriction (bypassStatusCheck: true)', genUserData(), true, undefined, true],
+			['user has access to a teamspace with no restriction (bypassStatusCheck: true)', genUserData(), true, undefined, true],
 			['user has access to a teamspace but membershipStatus is inactive (bypassStatusCheck: false)', genUserData(), false, membershipStatus.INACTIVE, false, templates.membershipInactive],
 			['user has access to a teamspace but membershipStatus is inactive (bypassStatusCheck: true)', genUserData(), {}, true, membershipStatus.INACTIVE, true],
 			['user has access to a teamspace but membershipStatus is pending invite (bypassStatusCheck: false)', genUserData(), false, membershipStatus.PENDING_INVITE, false, templates.pendingInviteAcceptance],
