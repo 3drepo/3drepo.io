@@ -23,10 +23,10 @@ const {
 	SECURITY_SETTINGS,
 	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
+const { getAllUsersInAccount, getUserStatusInAccount } = require('../services/sso/frontegg');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
-const { getUserStatusInAccount } = require('../services/sso/frontegg');
 const { membershipStatus } = require('../services/sso/frontegg/frontegg.constants');
 const { templates } = require('../utils/responseCodes');
 
@@ -168,18 +168,24 @@ TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username, bypassStatus
 	if (!userDoc) return false;
 	const teamspaceId = await TeamspaceSetting.getTeamspaceRefId(teamspace);
 
+	if (bypassStatusCheck) {
+		// It is better to use this call only when we don't care about the status of the membership
+		// as this is often cached.
+		const members = await getAllUsersInAccount(teamspaceId);
+		return members.some((member) => member.email === userDoc.customData.email);
+	}
+
 	const memStatus = await getUserStatusInAccount(teamspaceId, userDoc.customData.userId);
 	if (memStatus === membershipStatus.NOT_MEMBER) {
 		return false;
 	}
-	if (!bypassStatusCheck) {
-		if (memStatus === membershipStatus.INACTIVE) {
-			throw templates.membershipInactive;
-		}
 
-		if (memStatus === membershipStatus.PENDING_INVITE) {
-			throw templates.pendingInviteAcceptance;
-		}
+	if (memStatus === membershipStatus.INACTIVE) {
+		throw templates.membershipInactive;
+	}
+
+	if (memStatus === membershipStatus.PENDING_INVITE) {
+		throw templates.pendingInviteAcceptance;
 	}
 
 	return true;

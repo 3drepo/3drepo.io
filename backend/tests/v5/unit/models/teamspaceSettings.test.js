@@ -50,6 +50,7 @@ const testHasAccessToTeamspace = () => {
 	describe('Has access to teamspace', () => {
 		const teamspace = generateRandomString();
 		const user = generateRandomString();
+		const userId = generateRandomString();
 		const domain = `${generateRandomString()}.com`;
 
 		test('should return false if the user do not have access to teamspace', async () => {
@@ -67,12 +68,13 @@ const testHasAccessToTeamspace = () => {
 			customData: {
 				email: `${generateRandomString()}@${inDomain ? domain : `${generateRandomString()}.com`}`,
 				sso: sso ? { something: 1 } : undefined,
+				userId,
 			},
 		});
 
 		describe.each([
 			['user has access to a teamspace with no restriction (bypassStatusCheck: false)', genUserData(), false, undefined, true],
-			['user has access to a teamspace with no restriction (bypassStatusCheck: true)', genUserData(), true, undefined, true],
+			['!user has access to a teamspace with no restriction (bypassStatusCheck: true)', genUserData(), true, undefined, true],
 			['user has access to a teamspace but membershipStatus is inactive (bypassStatusCheck: false)', genUserData(), false, membershipStatus.INACTIVE, false, templates.membershipInactive],
 			['user has access to a teamspace but membershipStatus is inactive (bypassStatusCheck: true)', genUserData(), {}, true, membershipStatus.INACTIVE, true],
 			['user has access to a teamspace but membershipStatus is pending invite (bypassStatusCheck: false)', genUserData(), false, membershipStatus.PENDING_INVITE, false, templates.pendingInviteAcceptance],
@@ -85,10 +87,14 @@ const testHasAccessToTeamspace = () => {
 				findFn.mockResolvedValueOnce(userData);
 
 				const refId = generateRandomString();
-
-				if (memStatus !== undefined) {
-					// third call fetches refId
-					findFn.mockResolvedValueOnce({ customData: { refId } });
+				// second call fetches the teamspace settings
+				findFn.mockResolvedValueOnce({ refId });
+				if (bypassStatusCheck) {
+					const dataToReturn = memStatus === membershipStatus.NOT_MEMBER ? [] : [
+						{ email: userData.customData.email },
+					];
+					FronteggService.getAllUsersInAccount.mockResolvedValueOnce(dataToReturn);
+				} else {
 					FronteggService.getUserStatusInAccount.mockResolvedValueOnce(memStatus);
 				}
 
@@ -100,6 +106,16 @@ const testHasAccessToTeamspace = () => {
 					await test.resolves.toBeFalsy();
 				} else {
 					await test.rejects.toEqual(retVal);
+				}
+
+				if (bypassStatusCheck) {
+					expect(FronteggService.getAllUsersInAccount).toHaveBeenCalledTimes(1);
+					expect(FronteggService.getAllUsersInAccount).toHaveBeenCalledWith(refId);
+					expect(FronteggService.getUserStatusInAccount).not.toHaveBeenCalled();
+				} else {
+					expect(FronteggService.getUserStatusInAccount).toHaveBeenCalledTimes(1);
+					expect(FronteggService.getUserStatusInAccount).toHaveBeenCalledWith(refId, userId);
+					expect(FronteggService.getAllUsersInAccount).not.toHaveBeenCalled();
 				}
 
 				expect(findFn).toHaveBeenCalledTimes(2);
