@@ -294,8 +294,7 @@ Teamspaces.isTeamspaceMember = async (teamspace, username, bypassStatusCheck) =>
 			return members.some((member) => member.id === userId);
 		}
 		const memStatus = await getUserStatusInAccount(accountId, userId);
-		return bypassStatusCheck ? memStatus !== membershipStatus.NOT_MEMBER
-			: memStatus === membershipStatus.ACTIVE || memStatus === membershipStatus.PENDING_LOGIN;
+		return memStatus === membershipStatus.ACTIVE || memStatus === membershipStatus.PENDING_LOGIN;
 	} catch (err) {
 		return false;
 	}
