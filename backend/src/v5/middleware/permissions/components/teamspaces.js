@@ -17,10 +17,12 @@
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
 const { getAddOns, isAddOnModuleEnabled } = require('../../../models/teamspaceSettings');
-const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../../utils/permissions');
+
 const { getUserFromSession } = require('../../../utils/sessions');
+const { isTeamspaceAdmin } = require('../../../utils/permissions');
 const { respond } = require('../../../utils/responder');
 const { ADD_ONS: { USERS_PROVISIONED } } = require('../../../models/teamspaces.constants');
+const { isTeamspaceMember } = require('../../../processors/teamspaces');
 
 const TeamspacePerms = {};
 
@@ -50,7 +52,7 @@ const checkTeamspaceMembership = (bypassStatusCheck) => async (req, res, next) =
 	const { teamspace } = params;
 
 	try {
-		const hasAccess = await hasAccessToTeamspace(teamspace, user, bypassStatusCheck);
+		const hasAccess = await isTeamspaceMember(teamspace, user, bypassStatusCheck);
 		if (teamspace && user && hasAccess) {
 			await next();
 		} else {
