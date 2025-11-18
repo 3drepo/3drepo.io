@@ -16,7 +16,7 @@
  */
 "use strict";
 
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppSync } = require("../../../src/v4/services/api.js");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const async = require("async");
@@ -24,6 +24,7 @@ const { expect } = require("chai");
 
 
 const loginUsers = async (usernames, passwords) => {
+	const app =  await createAppSync();
 	const server = await new Promise((resolve, reject) => {
 		const res = {};
 		res.val = app.listen(8080, () => {

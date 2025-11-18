@@ -21,7 +21,7 @@ const SessionTracker = require("../../v4/helpers/sessionTracker")
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppSync } = require("../../../src/v4/services/api.js");
 
 describe("JSON Assets", function () {
 	let server;
@@ -35,6 +35,7 @@ describe("JSON Assets", function () {
 		const revId = "b74ba13b-71db-4fcc-9ff8-7f640aa3dec2";
 
 		before(async function() {
+			const app = await createAppSync();
 			await new Promise((resolve) => {
 				server = app.listen(8080, () => {
 					console.log("API test server is listening on port 8080!");

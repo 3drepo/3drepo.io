@@ -21,7 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 
 const SessionTracker = require("../../v4/helpers/sessionTracker");
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppSync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -39,7 +39,8 @@ describe("Account permission::", function () {
 	const model = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
 	let testSession;
 
-	before(function(done) {
+	before(async (done) => {
+		const app = await createAppSync();
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
 

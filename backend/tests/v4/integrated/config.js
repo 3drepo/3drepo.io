@@ -19,13 +19,14 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/frontend.js").createApp();
+const { createAppSync } = require("../../../src/v4/services/api.js");
 
 describe("Config", function () {
 	let server;
+	
 
-	before(function(done) {
-
+	before(async function() {
+		const app = await createAppSync();	
 		server = app.listen(8080, function () {
 			done();
 		});

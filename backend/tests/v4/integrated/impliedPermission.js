@@ -12,7 +12,7 @@ describe("Implied permission::", function () {
 	let server;
 	let agent;
 
-	const app = require("../../../src/v4/services/api.js").createApp();
+	const { createAppSync } = require("../../../src/v4/services/api.js");
 	const sharedTeamspace = "imsharedTeamspace";
 	const C = require("../../../src/v4/constants");
 	const request = require("supertest");
@@ -56,7 +56,8 @@ describe("Implied permission::", function () {
 		}
 	};
 
-	before(function(done) {
+	before(async (done) => {
+		const app = await createAppSync();
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");
 			done();

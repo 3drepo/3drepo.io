@@ -20,7 +20,7 @@
 const request = require('supertest');
 const SessionTracker = require('../../v4/helpers/sessionTracker');
 const { expect } = require('chai');
-const app = require('../../../src/v4/services/api.js').createApp();
+const { createAppSync } = require("../../../src/v4/services/api.js");
 const logger = require('../../../src/v4/logger.js');
 
 const { systemLogger } = logger;
@@ -133,6 +133,7 @@ describe('Projects', () => {
 	const goldenFullModelList = [...goldenTestModelList, ...goldenRandomNameList];
 
 	before(async () => {
+		const app = await createAppSync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log('API test server is listening on port 8080!');

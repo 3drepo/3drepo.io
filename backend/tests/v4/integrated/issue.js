@@ -20,7 +20,7 @@
 const request = require('supertest');
 const SessionTracker = require('../helpers/sessionTracker');
 const { Assertion, assert, expect, should } = require('chai');
-const app = require('../../../src/v4/services/api.js').createApp();
+const { createAppSync } = require("../../../src/v4/services/api.js");
 const responseCodes = require('../../../src/v4/response_codes.js');
 const { templates: responseCodesV5 } = require('../../../src/v5/utils/responseCodes');
 const async = require('async');
@@ -85,6 +85,7 @@ describe('Issues', () => {
 	};
 
 	before(async () => {
+		const app = await createAppSync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log('API test server is listening on port 8080!');
