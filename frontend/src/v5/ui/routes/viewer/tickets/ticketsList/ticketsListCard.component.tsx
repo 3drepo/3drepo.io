@@ -31,6 +31,41 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
+import { MenuItem } from '@mui/material';
+import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
+import { uniq } from 'lodash';
+import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { useState } from 'react';
+
+const GroupBySelect = ({ value:valueProp, onChange }) => {
+	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
+	const definitions = uniq(templates.flatMap(getTemplatePropertiesDefinitions));
+	const items = uniq(groupByProperties(definitions)).map((value) => ({ value, name: getPropertyLabel(value) }))
+		.sort((a, b) => {
+			const fieldsCountA = a.name.split(':').length;
+			const fieldsCountB = b.name.split(':').length;
+			
+			if (fieldsCountA !== fieldsCountB) {
+				return fieldsCountA - fieldsCountB;
+			}
+			
+			return a.name.localeCompare(b.name);
+		});
+
+	const onChangeHandler = (e) => {
+		onChange(e.target.value);
+	};
+
+	return (<SearchSelect value={valueProp} onChange={onChangeHandler}>
+		<MenuItem key='none' value='none'>None</MenuItem>
+		{(items).map((item) => (
+			<MenuItem key={item.value} value={item.value}>
+				{item.name}
+			</MenuItem>
+		))}
+	</SearchSelect>);
+};
 
 export const TicketsListCard = () => {
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
@@ -38,10 +73,12 @@ export const TicketsListCard = () => {
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
-
+	
 	const onFiltersChange = (filters) => {
 		TicketsCardActionsDispatchers.setFilters(filters);
 	};
+
+	const [groupBy, setGroupby] = useState('none');
 
 	return (
 		<CardContainer>
@@ -52,6 +89,7 @@ export const TicketsListCard = () => {
 					actions={(
 						<>
 							{!readOnly && (<NewTicketMenu />)}
+							<GroupBySelect value={groupBy} onChange={setGroupby}/>
 							<FilterSelection />
 							<TicketsEllipsisMenu />
 						</>
@@ -60,7 +98,7 @@ export const TicketsListCard = () => {
 				<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
 					<CardFilters />
 					{tickets.length ? (
-						<TicketsList />
+						<TicketsList groupBy={groupBy}/>
 					) : (
 						<EmptyListMessage>
 							<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />
