@@ -99,7 +99,7 @@ const addV4Routes = (app) => {
 	});
 };
 
-APIService.createAppAsync = async (config, v5Init = true) => {
+APIService.createAppAsync = async (config = {}, v5Init = true) => {
 	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
 	// Express app
 	const app = express();
@@ -109,7 +109,7 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 		app.set("trust proxy", 1);
 	}
 
-	const internalService = !!config?.[BYPASS_AUTH];
+	const internalService = !!config.[BYPASS_AUTH];
 	app.set(BYPASS_AUTH, internalService);
 
 	app.disable("etag");

@@ -39,14 +39,16 @@ describe("Account permission::", function () {
 	const model = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
 	let testSession;
 
-	before(async (done) => {
+	before(async () => {
 		const app = await createAppAsync();
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
+		await new Promise((resolve) => {
+			server = app.listen(8080, function () {
+				console.log("API test server is listening on port 8080!");
 
-			agent = request(server);
-			testSession = SessionTracker(agent);
-			testSession.login(username, password).then(()=> {done()});
+				agent = request(server);
+				testSession = SessionTracker(agent);
+				testSession.login(username, password).then(() => {resolve()});
+			});
 		});
 	});
 

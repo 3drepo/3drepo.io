@@ -30,6 +30,7 @@ const async = require("async");
 const User = require("../../../src/v4/models/user");
 const config = require("../../../src/v4/config");
 const fs = require("fs");
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 
 describe("Revision", function () {
 

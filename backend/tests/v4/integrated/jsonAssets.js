@@ -126,6 +126,7 @@ describe("JSON Assets", function () {
 		const existingFed = "b667ab4c-7e71-4db9-9f85-cb81437aaf43";
 
 		before(async function() {
+			const app = await createAppAsync();
 			await new Promise((resolve) => {
 				server = app.listen(8080, () => {
 					console.log("API test server is listening on port 8080!");
@@ -304,6 +305,7 @@ describe("JSON Assets", function () {
 		const existingFed = "b667ab4c-7e71-4db9-9f85-cb81437aaf43";
 
 		before(async function() {
+			const app = await createAppAsync();
 			await new Promise((resolve) => {
 				server = app.listen(8080, () => {
 					console.log("API test server is listening on port 8080!");
@@ -380,6 +382,7 @@ describe("JSON Assets", function () {
 		const existingModel = "58de3562-6755-44cf-90f4-860b20bb73b5";
 
 		before(async function() {
+			const app = await createAppAsync();
 			await new Promise((resolve) => {
 				server = app.listen(8080, () => {
 					console.log("API test server is listening on port 8080!");

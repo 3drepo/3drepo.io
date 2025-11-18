@@ -135,10 +135,12 @@ describe("Sequences", function () {
 	before(async function() {
 		const app = await createAppAsync();
 
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-			agent = request.agent(server);
-			done();
+		await new Promise((resolve) => {
+			server = app.listen(8080, function () {
+				console.log("API test server is listening on port 8080!");
+				agent = request.agent(server);
+				resolve();
+				});
 		});
 
 	});

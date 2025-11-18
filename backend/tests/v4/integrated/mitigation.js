@@ -218,13 +218,15 @@ describe("Mitigations", function () {
 		]
 	};
 
-	before(async function(done) {
+	before(async function() {
 		const app = await createAppAsync();
 
-		server = app.listen(8080, function () {
-			agent = request.agent(server);
-			console.log("API test server is listening on port 8080!");
-			done();
+		await new Promise((resolve) => {
+			server = app.listen(8080, function () {
+				agent = request.agent(server);
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 		});
 	});
 
