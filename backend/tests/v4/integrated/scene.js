@@ -32,7 +32,7 @@ describe("Meshes", function () {
 	const existingModel = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 
 	before(async function() {
-		const { createAppSync } = require("../../../src/v4/services/api.js");
+		const { createAppAsync } = require("../../../src/v4/services/api.js");
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");

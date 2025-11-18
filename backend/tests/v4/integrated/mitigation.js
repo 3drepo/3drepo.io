@@ -23,7 +23,7 @@ const chai = require("chai");
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
 chai.use(deepEqualInAnyOrder);
 const { expect } = chai;
-const { createAppSync } = require("../../../src/v4/services/api.js");
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const async = require("async");
 const responseCodes = require("../../../src/v4/response_codes");
 const { templates : responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
@@ -219,7 +219,7 @@ describe("Mitigations", function () {
 	};
 
 	before(async function(done) {
-		const app = await createAppSync();
+		const app = await createAppAsync();
 
 		server = app.listen(8080, function () {
 			agent = request.agent(server);

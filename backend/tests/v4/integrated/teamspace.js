@@ -21,7 +21,7 @@ const async = require("async");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
-const { createAppSync } = require("../../../src/v4/services/api.js");
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes");
 const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
 
@@ -126,7 +126,7 @@ describe("Teamspace", function() {
 	const bigMitigationsFile = "/../statics/mitigations/big.csv";
 
 	before(async function() {
-		const app = await createAppSync();
+		const app = await createAppAsync();
 		server = app.listen(8080, function () {
 			agent = request.agent(server);
 			console.log("API test server is listening on port 8080!");

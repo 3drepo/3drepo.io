@@ -19,7 +19,7 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const { createAppSync } = require("../../../src/v4/services/api.js");
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
 
@@ -133,7 +133,7 @@ describe("Sequences", function () {
 	const customSequenceId = customGoldenData._id;
 
 	before(async function() {
-		const app = await createAppSync();
+		const app = await createAppAsync();
 
 		server = app.listen(8080, function () {
 			console.log("API test server is listening on port 8080!");

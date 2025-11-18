@@ -22,7 +22,7 @@ const SessionTracker = require("../../v4/helpers/sessionTracker")
 const { queue: {purgeQueues}} = require("../../v5/helper/services");
 const request = require("supertest");
 const expect = require("chai").expect;
-const { createAppSync } = require("../../../src/v4/services/api.js");
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
 describe("Model", function () {
@@ -40,7 +40,7 @@ describe("Model", function () {
 
 
 	before(async function() {
-		const app = await createAppSync();
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");

@@ -54,7 +54,7 @@ describe("Revision", function () {
 	}
 
 	before(async function() {
-		const app = await createAppSync();
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");
