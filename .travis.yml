@@ -22,9 +22,15 @@ matrix:
 
       before_install:
         - sudo apt-get -y install gnupg curl expect
-        - curl -s https://packagecloud.io/install/repositories/cloudamqp/rabbitmq/script.deb.sh?any=true | sudo bash
-        - sudo apt-get -y --allow-downgrades install rabbitmq-server=4.0.8-1
-        - sudo systemctl start rabbitmq-server
+        # Free port 5672
+        - sudo lsof -i :5672 || true
+        - sudo fuser -k 5672/tcp || true
+        - sudo service rabbitmq-server stop || true
+        - sudo systemctl stop rabbitmq-server || true
+        # Start RabbitMQ
+        - docker rm -f rabbit || true
+        - docker pull rabbitmq:4.0-management
+        - docker run -d --name rabbit -p 5672:5672 rabbitmq:4.0-management
         - sudo apt remove mongodb && sudo apt purge mongodb && sudo apt autoremove && sudo rm -rf /var/lib/mongodb
         - curl -fsSL https://www.mongodb.org/static/pgp/server-8.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-8.0.gpg --dearmor
         - echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-8.0.gpg ] https://repo.mongodb.org/apt/ubuntu noble/mongodb-org/8.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-8.0.list
