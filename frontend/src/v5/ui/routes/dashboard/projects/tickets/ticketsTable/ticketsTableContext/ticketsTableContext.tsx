@@ -101,7 +101,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 
 	const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
 	const groupByProperties = definitionsAsArray
-		.filter((definition) => ['manyOf', 'oneOf'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
+		.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
 		.map((definition) => definition.name);
 	
 	return (
