@@ -252,18 +252,24 @@ function createChat(serverConfig) {
 
 let firstAPIServer = true;
 
-function createService(subDomainApp, serverConfig) {
+async function createService(subDomainApp, serverConfig) {
 	const service = `./services/${serverConfig.service}.js`;
 	// This is a dirty hack to ensure we don't init v5 multiple times.
 	// But we need v5 to be initialised on the api server for testing.
 	// We should rethink this when we migrate this file to v5.
 	const isAPI = serverConfig.service === "api";
-	const app = require(service).createApp(serverConfig, isAPI && firstAPIServer);
-	if(isAPI) {
-		firstAPIServer = false;
-	}
 
+	const appService = require(service);
+	let app;
+	if(isAPI) {
+		app = await appService.createAppAsync(serverConfig, firstAPIServer);
+		firstAPIServer = false;
+
+	} else {
+		app = appService.createApp(serverConfig);
+	}
 	subDomainApp.use(serverConfig.host_dir, app);
+
 }
 
 function serverStartFunction(serverHost, serverPort) {

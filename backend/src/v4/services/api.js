@@ -108,72 +108,10 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 	if (!config?.using_ssl && config?.public_protocol === "https") {
 		app.set("trust proxy", 1);
 	}
-	app.set(BYPASS_AUTH, !!config[BYPASS_AUTH]);
 
-	app.disable("etag");
+	const internalService = !!config[BYPASS_AUTH];
+	app.set(BYPASS_AUTH, internalService);
 
-	// Session middlewares
-	app.use(keyAuthentication, manageSessions);
-
-	app.use(cors({ origin: true, credentials: true }));
-
-	app.use(bodyParser.urlencoded({
-		extended: true
-	}));
-
-	app.set("views", "./resources/pug");
-	app.set("view_engine", "pug");
-
-	app.use(bodyParser.json({ limit: "50mb" }));
-	app.use(bodyParserErrorHandler());
-	app.use(compress({ level: 9 }));
-
-	app.use(function (req, res, next) {
-		// record start time of the request
-		req.startTime = Date.now();
-		// intercept OPTIONS method
-		if ("OPTIONS" === req.method) {
-			res.sendStatus(200);
-		} else {
-			next();
-		}
-	});
-
-	if(v5Init) {
-		await Promise.all([
-			require(`${v5Path}/services/eventsListener/eventsListener`).init(),
-			require("../models/chatEvent").subscribeToV5Events(),
-			require("../models/intercom").subscribeToV5Events(),
-			require("../handler/elastic").subscribeToV5Events(),
-			require(`${v5Path}/services/modelProcessing`).init(),
-			initialiseSystem()
-		]);
-	}
-	require(`${v5Path}/routes/routesManager`).init(app);
-	addV4Routes(app);
-
-	app.use(function(err, req, res, next) {
-		if(err) {
-			responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-		}
-
-		err.stack && systemLogger.logError(err.stack);
-		// next(err);
-	});
-
-	return app;
-};
-
-APIService.createApp = (config, v5Init = true) => {
-	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
-	// Express app
-	const app = express();
-	app.use(cookieParser());
-
-	if (!config?.using_ssl && config?.public_protocol === "https") {
-		app.set("trust proxy", 1);
-	}
-	app.set(BYPASS_AUTH, !!config[BYPASS_AUTH]);
 	app.disable("etag");
 
 	// Session middlewares
@@ -205,12 +143,14 @@ APIService.createApp = (config, v5Init = true) => {
 	});
 
 	if(v5Init) {
-		require(`${v5Path}/services/eventsListener/eventsListener`).init();
-		require("../models/chatEvent").subscribeToV5Events();
-		require("../models/intercom").subscribeToV5Events();
-		require("../handler/elastic").subscribeToV5Events();
-		require(`${v5Path}/services/modelProcessing`).init();
-		initialiseSystem();
+		await Promise.all([
+			require(`${v5Path}/services/eventsListener/eventsListener`).init(),
+			require("../models/chatEvent").subscribeToV5Events(),
+			require("../models/intercom").subscribeToV5Events(),
+			require("../handler/elastic").subscribeToV5Events(),
+			require(`${v5Path}/services/modelProcessing`).init(),
+			initialiseSystem()
+		]);
 	}
 	require(`${v5Path}/routes/routesManager`).init(app);
 	addV4Routes(app);
