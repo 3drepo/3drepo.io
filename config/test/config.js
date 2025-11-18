@@ -115,7 +115,7 @@ module.exports = {
 		register: true
 	},	crossOrigin: true,
 	cn_queue: {
-		host: 'amqp://localhost:5672',
+		host: 'amqp://localhost:5673',
 		worker_queue: 'jobq',
 		model_queue: 'modelq',
 		callback_queue: 'callbackq',
