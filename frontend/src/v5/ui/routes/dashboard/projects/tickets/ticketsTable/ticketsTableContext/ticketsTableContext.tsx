@@ -16,8 +16,6 @@
  */
 
 import { createContext } from 'react';
-import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
-import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -28,6 +26,7 @@ import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
 
 export interface TicketsTableType {
 	getPropertyType: (name: string) => PropertyTypeDefinition;
@@ -99,16 +98,11 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		|| ['properties.Owner', 'properties.Assignees'].includes(name)
 	);
 
-	const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
-	const groupByProperties = definitionsAsArray
-		.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
-		.map((definition) => definition.name);
-	
 	return (
 		<TicketsTableContext.Provider value={{
 			getPropertyType,
 			isJobAndUsersType,
-			groupByProperties,
+			groupByProperties: groupByProperties(definitionsAsArray),
 			groupBy: groupBy || NONE_OPTION,
 			setGroupBy,
 			fetchColumn,

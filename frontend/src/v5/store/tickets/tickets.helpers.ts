@@ -26,8 +26,8 @@ import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
 import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { TicketBaseKeys, SequencingProperties, BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
+import { TicketBaseKeys, SequencingProperties, BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint, PropertyDefinition } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
@@ -311,4 +311,17 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 };
 
 export const addUpdatedAtTime = (ticket) => set(ticket, `properties.${BaseProperties.UPDATED_AT}`, +new Date());
+
+export const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
+export const groupByProperties = (definitionsAsArray: PropertyDefinition[]) => definitionsAsArray
+	.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
+	.map((definition) => definition.name);
+
+export const getTemplatePropertiesDefinitions = (template: ITemplate): PropertyDefinition[] => {
+	if (!template.properties) return [];
+	return [
+		...template.properties?.map((property) => ({ ...property, name: `properties.${property.name}` })),
+		...template.modules?.flatMap((module) => module.properties.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
+	];
+};
 

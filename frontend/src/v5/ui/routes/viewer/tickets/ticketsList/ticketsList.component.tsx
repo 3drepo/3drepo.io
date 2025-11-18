@@ -22,7 +22,7 @@ import { List, ListContainer, Loader } from './ticketsList.styles';
 import { TableVirtuoso } from 'react-virtuoso';
 import { useEffect, useRef } from 'react';
 
-export const TicketsList = () => {
+export const TicketsList = ({groupBy}) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
@@ -58,7 +58,9 @@ export const TicketsList = () => {
 
 	return (
 		<ListContainer >
-			{shouldShowLoader && <Loader />}
+
+			
+			{/* {shouldShowLoader && <Loader />}
 			<TableVirtuoso
 				ref={virtuosoRef}
 				data={filteredTickets}
@@ -71,7 +73,7 @@ export const TicketsList = () => {
 				itemContent={(index, ticket) => (
 					<TicketItem ticket={ticket} key={ticket._id} />
 				)}
-			/>
+			/> */}
 		</ListContainer>
 	);
 };
