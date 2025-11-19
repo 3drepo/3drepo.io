@@ -17,14 +17,19 @@
 
 const { src } = require('../../../helper/path');
 
+const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
 jest.mock('../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-jest.mock('../../../../../src/v5/utils/permissions');
-const Permissions = require(`${src}/utils/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../src/v5/middleware/auth');
 const Sessions = require(`${src}/middleware/auth`);
+
+jest.mock('../../../../../src/v5/middleware/permissions/components/teamspaces');
+const TSPermMiddleware = require(`${src}/middleware/permissions/components/teamspaces`);
+jest.mock('../../../../../src/v5/processors/teamspaces');
+const TeamspacesProcessor = require(`${src}/processors/teamspaces`);
+
 const PermMiddlewares = require(`${src}/middleware/permissions`);
 const { determineTestGroup, generateRandomString } = require('../../../helper/services');
 
@@ -32,31 +37,51 @@ const authenticatedTeamspace = generateRandomString();
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
-Permissions.hasAccessToTeamspace.mockImplementation((teamspace) => teamspace === authenticatedTeamspace);
-Permissions.hasReadAccessToContainer.mockImplementation((teamspace, project) => project === 'ok');
+TeamspacesProcessor.isTeamspaceMember.mockImplementation((teamspace) => teamspace === authenticatedTeamspace);
+
 Sessions.validSession.mockImplementation(async (req, res, next) => {
-	if (req.session) await next();
+	if (req.app.get(BYPASS_AUTH) || req.session) await next();
 	else Responder.respond(req, res, templates.notLoggedIn);
 });
+const app = { get: () => false };
+const ipAddress = generateRandomString();
+const reqSample = { ips: [ipAddress],
+	params: { teamspace: authenticatedTeamspace },
+	headers: { referer: 'http://abc.com/' },
+	session: { ipAddress, user: { auth: { authenticatedTeamspace }, username: 'hi', referer: 'http://abc.com' } },
+	app,
+};
 
 const testHasAccessToTeamspace = () => {
-	const ipAddress = generateRandomString();
-	const reqSample = { ips: [ipAddress], params: { teamspace: authenticatedTeamspace }, headers: { referer: 'http://abc.com/' }, session: { ipAddress, user: { auth: { authenticatedTeamspace }, username: 'hi', referer: 'http://abc.com' } } };
 	describe.each([
-		['user has access', reqSample, true],
-		['session is invalid', { ...reqSample, session: undefined }, false, templates.notLoggedIn],
-		['user does not have access', { ...reqSample, params: { teamspace: generateRandomString() } }, false, templates.teamspaceNotFound],
-		['user is not authenticated to the teamspace', { ...reqSample, session: { ...reqSample.session, user: { ...reqSample.session.user, auth: { authenticatedTeamspace: generateRandomString() } } } }, false, templates.notAuthenticatedAgainstTeamspace],
-		['user is using API Key', { ...reqSample, session: { ...reqSample.session, user: { isAPIKey: true, ...reqSample.session.user, auth: undefined } } }, true],
-	])('Has access to teamspace', (desc, req, success, expectedErr) => {
+		['user has access', reqSample, true, true],
+		['user does not have access', reqSample, false, false, templates.teamspaceNotFound],
+		['session is invalid', { ...reqSample, session: undefined }, undefined, false, templates.notLoggedIn],
+		['auth bypass is enabled', { ...reqSample, session: undefined, app: { get: () => true } }, true, true],
+		['user is not authenticated to the teamspace', { ...reqSample, session: { ...reqSample.session, user: { ...reqSample.session.user, auth: { authenticatedTeamspace: generateRandomString() } } } }, true, false, templates.notAuthenticatedAgainstTeamspace],
+		['user is using API Key', { ...reqSample, session: { ...reqSample.session, user: { isAPIKey: true, ...reqSample.session.user, auth: undefined } } }, true, true],
+	])('Has access to teamspace', (desc, req, isMember, success, expectedErr) => {
 		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});
 			const res = {};
+			if (isMember !== undefined) {
+				TSPermMiddleware.isTeamspaceMember.mockImplementationOnce(async (r, s, next) => {
+					if (isMember) await next();
+					else Responder.respond(r, s, templates.teamspaceNotFound);
+				});
+			}
+
 			await PermMiddlewares.hasAccessToTeamspace(
 				req,
 				{},
 				mockCB,
 			);
+
+			if (isMember === undefined) {
+				expect(TSPermMiddleware.isTeamspaceMember).not.toHaveBeenCalled();
+			} else {
+				expect(TSPermMiddleware.isTeamspaceMember).toHaveBeenCalledTimes(1);
+			}
 
 			if (success) expect(mockCB).toHaveBeenCalledTimes(1);
 			else {
@@ -69,23 +94,34 @@ const testHasAccessToTeamspace = () => {
 };
 
 const testIsMemberOfTeamspace = () => {
-	const ipAddress = generateRandomString();
-	const reqSample = { ips: [ipAddress], params: { teamspace: authenticatedTeamspace }, headers: { referer: 'http://abc.com/' }, session: { ipAddress, user: { auth: { authenticatedTeamspace }, username: 'hi', referer: 'http://abc.com' } } };
 	describe.each([
-		['user has access', reqSample, true],
-		['session is invalid', { ...reqSample, session: undefined }, false, templates.notLoggedIn],
-		['user does not have access', { ...reqSample, params: { teamspace: generateRandomString() } }, false, templates.teamspaceNotFound],
-		['user is not authenticated to the teamspace', { ...reqSample, session: { ...reqSample.session, user: { ...reqSample.session.user, auth: { authenticatedTeamspace: generateRandomString() } } } }, true],
-		['user is using API Key', { ...reqSample, session: { ...reqSample.session, user: { ...reqSample.session.user, auth: undefined } } }, true],
-	])('Is member of teamspace', (desc, req, success, expectedErr) => {
+		['user has access', reqSample, true, true],
+		['session is invalid', { ...reqSample, session: undefined }, undefined, false, templates.notLoggedIn],
+		['user does not have access', reqSample, false, false, templates.teamspaceNotFound],
+		['user is not authenticated to the teamspace', { ...reqSample, session: { ...reqSample.session, user: { ...reqSample.session.user, auth: { authenticatedTeamspace: generateRandomString() } } } }, true, true],
+		['user is using API Key', { ...reqSample, session: { ...reqSample.session, user: { ...reqSample.session.user, auth: undefined } } }, true, true],
+	])('Is member of teamspace', (desc, req, isMember, success, expectedErr) => {
 		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});
 			const res = {};
+			if (isMember !== undefined) {
+				TSPermMiddleware.isTeamspaceMember.mockImplementationOnce(async (r, s, next) => {
+					if (isMember) await next();
+					else Responder.respond(r, s, templates.teamspaceNotFound);
+				});
+			}
+
 			await PermMiddlewares.isMemberOfTeamspace(
 				req,
 				{},
 				mockCB,
 			);
+
+			if (isMember === undefined) {
+				expect(TSPermMiddleware.isTeamspaceMember).not.toHaveBeenCalled();
+			} else {
+				expect(TSPermMiddleware.isTeamspaceMember).toHaveBeenCalledTimes(1);
+			}
 			if (success) expect(mockCB).toHaveBeenCalledTimes(1);
 			else {
 				expect(mockCB).not.toHaveBeenCalled();
@@ -95,61 +131,8 @@ const testIsMemberOfTeamspace = () => {
 		});
 	});
 };
-const testHasReadAccessToContainer = () => {
-	describe('HasReadAccessToContainer', () => {
-		const ipAddress = generateRandomString();
-		const session = { ipAddress, user: { auth: { authenticatedTeamspace }, username: 'hi', referer: 'http://abc.com' } };
-
-		test('next() should be called if the user has access', async () => {
-			const mockCB = jest.fn(() => {});
-			await PermMiddlewares.hasReadAccessToContainer(
-				{ ips: [ipAddress], params: { teamspace: authenticatedTeamspace, project: 'ok' }, headers: { referer: 'http://abc.com/' }, session },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with notAuthorized if the user has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			await PermMiddlewares.hasReadAccessToContainer(
-				{ ips: [ipAddress], params: { teamspace: authenticatedTeamspace, project: 'nope' }, headers: { referer: 'http://abc.com/' }, session },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
-		});
-
-		test('should respond with notLoggedIn errCode if the session is invalid', async () => {
-			const mockCB = jest.fn(() => {});
-			await PermMiddlewares.hasReadAccessToContainer(
-				{ ips: [ipAddress], params: { teamspace: authenticatedTeamspace }, headers: { referer: 'http://xyz.com' } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notLoggedIn);
-		});
-
-		test('should respond with teamspace not found if the user has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			await PermMiddlewares.hasReadAccessToContainer(
-				{ ips: [ipAddress], params: { teamspace: 'ts1' }, headers: { referer: 'http://xyz.com' }, session },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.teamspaceNotFound);
-		});
-	});
-};
 
 describe(determineTestGroup(__filename), () => {
 	testHasAccessToTeamspace();
 	testIsMemberOfTeamspace();
-	testHasReadAccessToContainer();
 });
