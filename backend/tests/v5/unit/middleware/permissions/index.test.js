@@ -27,6 +27,8 @@ const Sessions = require(`${src}/middleware/auth`);
 
 jest.mock('../../../../../src/v5/middleware/permissions/components/teamspaces');
 const TSPermMiddleware = require(`${src}/middleware/permissions/components/teamspaces`);
+jest.mock('../../../../../src/v5/processors/teamspaces');
+const TeamspacesProcessor = require(`${src}/processors/teamspaces`);
 
 const PermMiddlewares = require(`${src}/middleware/permissions`);
 const { determineTestGroup, generateRandomString } = require('../../../helper/services');
@@ -35,6 +37,7 @@ const authenticatedTeamspace = generateRandomString();
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
+TeamspacesProcessor.isTeamspaceMember.mockImplementation((teamspace) => teamspace === authenticatedTeamspace);
 
 Sessions.validSession.mockImplementation(async (req, res, next) => {
 	if (req.app.get(BYPASS_AUTH) || req.session) await next();
