@@ -23,7 +23,7 @@ import { TableVirtuoso } from 'react-virtuoso';
 import { useEffect, useRef } from 'react';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 
-export const TicketsList = ({groupBy}) => {
+export const TicketsList = ({ groupBy }) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
@@ -58,13 +58,23 @@ export const TicketsList = ({groupBy}) => {
 
 	return (
 		<ListContainer >
-			<List>
-				<VirtualList 
-					items={filteredTickets}
-					itemHeight={30}
-					ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}
-				/>
-			</List>
+			<div style={{
+				overflowY: 'auto',
+    			position: 'relative',
+    			height: '100%',
+			}}>
+				<div
+					style={{ position:'absolute' }}
+				>
+					<List>
+						<VirtualList 
+							items={filteredTickets}
+							itemHeight={30}
+							ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}
+						/>
+					</List>
+				</div>
+			</div>
 		</ListContainer>
 	);
 };
