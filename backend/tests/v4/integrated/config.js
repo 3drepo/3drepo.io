@@ -19,21 +19,19 @@
 
 const request = require("supertest");
 const expect = require("chai").expect;
-const { createAppAsync } = require("../../../src/v4/services/api.js");
+const app = require("../../../src/v4/services/frontend.js").createApp();
 
 describe("Config", function () {
 	let server;
 	
 
-	before(async function() {
-		const app = await createAppAsync();	
-		await new Promise((resolve) => {
-			server = app.listen(8080, function () {
-				resolve();
-			});
-		});
+	before(function(done) {
 
+		server = app.listen(8080, function () {
+			done();
+		});
 	});
+
 
 	after(function(done) {
 		server.close(function() {
@@ -49,6 +47,7 @@ describe("Config", function () {
 			const agent = request.agent(server);
 			agent.get("/config/version.json")
 				.expect(200, function(err, res) {
+					console.log(res.body);
 					expect(typeof res).to.equal("object");
 					expect(typeof res.body.VERSION).to.equal("string");
 					expect(res.body.VERSION.split(".").length - 1).to.equal(2);
