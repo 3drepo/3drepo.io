@@ -20,15 +20,14 @@ const SuperTest = require('supertest');
 const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
-const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
-const { queryOperators, specialQueryFields } = require('../../../../../../../../src/v5/schemas/tickets/tickets.filters');
-const { insertOne } = require('../../../../../../../../src/v5/handler/db');
-const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
+
+const { serialiseTicketTemplate } = require(`${src}/middleware/dataConverter/outputs/common/tickets.templates`);
+const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
-const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
-const { updateOne, findOne } = require(`${src}/handler/db`);
+const { basePropertyLabels, propTypes, presetEnumValues, presetModules, supportedPatterns } = require(`${src}/schemas/tickets/templates.constants`);
+const { updateOne, findOne, insertOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { templates } = require(`${src}/utils/responseCodes`);

@@ -35,8 +35,6 @@ const TemplateModel = require(`${src}/models/tickets.templates`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
-const { isUUID } = require(`${src}/utils/helper/typeCheck`);
-
 const TicketOutputMiddleware = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets`);
 
 const testSerialiseTemplatesList = () => {

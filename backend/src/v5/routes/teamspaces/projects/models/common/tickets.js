@@ -46,6 +46,7 @@ const { serialiseFullTicketTemplate, serialiseTemplatesList, serialiseTicket, se
 const { templateExists, validateImportTickets, validateNewTicket, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
+const { checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -961,7 +962,7 @@ const establishRoutes = (isFed) => {
 	 *                             description: properties that were changed
 	 *
 	 */
-	router.get('/:ticket/history', hasReadAccess, getTicketHistory(isFed), serialiseTicketHistory);
+	router.get('/:ticket/history', hasReadAccess, checkTicketExists, getTicketHistory(isFed), serialiseTicketHistory);
 
 	/**
 	 * @openapi
