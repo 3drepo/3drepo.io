@@ -35,64 +35,66 @@ const { BYPASS_AUTH } = require(`${v5Path}/utils/config.constants`);
 const APIService = {};
 
 const addV4Routes = (app) => {
-	app.use("/", require("../routes/user"));
+	if(!app.get(BYPASS_AUTH)) {
+		app.use("/", require("../routes/user"));
 
-	app.use("/:account", require("../routes/job"));
+		app.use("/:account", require("../routes/job"));
 
-	app.use("/", require("../routes/plan"));
+		app.use("/", require("../routes/plan"));
 
-	app.use("/", require("../routes/auth"));
+		app.use("/", require("../routes/auth"));
 
-	// notifications handler
-	app.use("/notifications", require("../routes/notification"));
+		// notifications handler
+		app.use("/notifications", require("../routes/notification"));
 
-	// subscriptions handler
-	app.use("/:account", require("../routes/subscriptions"));
-	// maps handler
-	app.use("/:account", require("../routes/maps"));
+		// subscriptions handler
+		app.use("/:account", require("../routes/subscriptions"));
+		// maps handler
+		app.use("/:account", require("../routes/maps"));
 
-	app.use("/:account", require("../routes/teamspace"));
-	app.use("/:account", require("../routes/permissionTemplate"));
-	app.use("/:account", require("../routes/accountPermission"));
+		app.use("/:account", require("../routes/teamspace"));
+		app.use("/:account", require("../routes/permissionTemplate"));
+		app.use("/:account", require("../routes/accountPermission"));
 
-	app.use("/:account", require("../routes/invitations"));
+		app.use("/:account", require("../routes/invitations"));
 
-	// projects handlers
-	app.use("/:account", require("../routes/project"));
+		// projects handlers
+		app.use("/:account", require("../routes/project"));
 
-	// models handlers
-	app.use("/:account", require("../routes/model"));
+		// models handlers
+		app.use("/:account", require("../routes/model"));
 
-	// risk mitigation handlers
-	app.use("/:account", require("../routes/mitigation"));
+		// risk mitigation handlers
+		app.use("/:account", require("../routes/mitigation"));
 
-	// metadata handler
-	app.use("/:account/:model", require("../routes/meta"));
+		// metadata handler
+		app.use("/:account/:model", require("../routes/meta"));
 
-	// groups handler
-	app.use("/:account/:model", require("../routes/group"));
+		// groups handler
+		app.use("/:account/:model", require("../routes/group"));
 
-	// views handler
-	app.use("/:account/:model", require("../routes/view"));
+		// views handler
+		app.use("/:account/:model", require("../routes/view"));
 
-	// issues handler
-	app.use("/:account/:model", require("../routes/issue"));
+		// issues handler
+		app.use("/:account/:model", require("../routes/issue"));
 
-	// resources handler
-	app.use("/:account/:model", require("../routes/resources"));
+		// resources handler
+		app.use("/:account/:model", require("../routes/resources"));
 
-	// risks handler
-	app.use("/:account/:model", require("../routes/risk"));
+		// risks handler
+		app.use("/:account/:model", require("../routes/risk"));
 
-	// sequences handler
-	app.use("/:account/:model", require("../routes/sequence"));
+		// sequences handler
+		app.use("/:account/:model", require("../routes/sequence"));
 
-	// history handler
-	app.use("/:account/:model", require("../routes/history"));
+		// history handler
+		app.use("/:account/:model", require("../routes/history"));
 
-	// presentation handler
-	app.use("/:account/:model", require("../routes/presentation"));
+		// presentation handler
+		app.use("/:account/:model", require("../routes/presentation"));
 
+	}
 	// If the route is not matched by any of the endpoints
 	app.use((req, res) => {
 		respond(req, res, templates.pageNotFound);
@@ -153,6 +155,7 @@ APIService.createAppAsync = async (config = {}, v5Init = true) => {
 		]);
 	}
 	require(`${v5Path}/routes/routesManager`).init(app);
+
 	addV4Routes(app);
 
 	app.use(function(err, req, res, next) {
@@ -161,7 +164,6 @@ APIService.createAppAsync = async (config = {}, v5Init = true) => {
 		}
 
 		err.stack && systemLogger.logError(err.stack);
-		// next(err);
 	});
 
 	return app;
