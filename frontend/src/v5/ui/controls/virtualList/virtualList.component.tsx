@@ -94,6 +94,8 @@ const getContainerHeight = (items: any[], heights: Record<any, number>, defaultH
 	return totalHeight;
 };
 
+// Todo: pass a viewport
+// TODO: itemheight should be average?
 export const VirtualList = ({ items, itemHeight, ItemComponent }:Props) => { 
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
@@ -160,6 +162,9 @@ export const VirtualList = ({ items, itemHeight, ItemComponent }:Props) => {
 
 			if (equalsHeight(elementHeight, itemHeight) && !itemsHeight.current[itemIndex]) continue;
 			if (equalsHeight(elementHeight, itemsHeight.current[itemIndex])) continue;
+			// TODO: Check if items didnt cover the thing
+			// make itemheight optional for this
+			// Can use binary search to find the actual height?
 			itemsHeight.current[itemIndex] = elementHeight;
 			itemsHeightChanged = true;
 		}
