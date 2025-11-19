@@ -182,7 +182,7 @@ const groupByManyOfValues = (tickets: ITicket[], groupBy: string) => {
 	});
 };
 
-const groupByOneOfValues = (tickets: ITicket[], groupBy: string) => createGroups(tickets, 
+const groupBySingleValue = (tickets: ITicket[], groupBy: string) => createGroups(tickets, 
 	(ticket) => selectTicketPropertyByName(getState(), ticket._id, groupBy) ?? UNSET);
 
 const groupByJobsAndUsers = (tickets: ITicket[], groupBy: string) => {
@@ -198,15 +198,8 @@ export const groupTickets = (
 	groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition, isJobAndUsersType: boolean): TicketsGroup[] => {
 
 	if (isJobAndUsersType) return groupByJobsAndUsers(tickets, groupBy);
-
-	switch (groupBy) {
-		case `properties.${IssueProperties.DUE_DATE}`:
-			return groupByDueDate(tickets);
-		case `properties.${BaseProperties.STATUS}`:
-			return groupByStatus(tickets);
-		default:
-			const isOneOf = propertyType === 'oneOf';
-			const selectGroups = isOneOf ? groupByOneOfValues(tickets, groupBy) : groupByManyOfValues(tickets, groupBy);
-			return selectGroups;
-	}
+	if (groupBy === `properties.${IssueProperties.DUE_DATE}`) return groupByDueDate(tickets);
+	if (groupBy === `properties.${BaseProperties.STATUS}`) return groupByStatus(tickets);
+	if (['text', 'oneOf'].includes(propertyType)) return groupBySingleValue(tickets, groupBy);
+	if (propertyType === 'manyOf') return groupByManyOfValues(tickets, groupBy);
 };

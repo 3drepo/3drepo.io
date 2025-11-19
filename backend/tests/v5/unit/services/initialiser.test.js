@@ -34,6 +34,9 @@ const FronteggService = require(`${src}/services/sso/frontegg`);
 jest.mock('../../../../src/v5/models/invitations');
 const Invitations = require(`${src}/models/invitations`);
 
+jest.mock('../../../../src/v5/models/frontegg.cache');
+const FronteggCache = require(`${src}/models/frontegg.cache`);
+
 const Initialiser = require(`${src}/services/initialiser`);
 
 const testInitialiseSystem = () => {
@@ -46,6 +49,7 @@ const testInitialiseSystem = () => {
 			expect(JournalingService.init).toHaveBeenCalledTimes(1);
 			expect(NotificationService.init).toHaveBeenCalledTimes(1);
 			expect(FronteggService.init).toHaveBeenCalledTimes(1);
+			expect(FronteggCache.initialise).toHaveBeenCalledTimes(1);
 		});
 	});
 };
