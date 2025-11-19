@@ -21,12 +21,12 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer, Loader } from './ticketsList.styles';
 import { TableVirtuoso } from 'react-virtuoso';
 import { useEffect, useRef } from 'react';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 export const TicketsList = ({groupBy}) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
-	const shouldShowLoader = filteredTickets.length >= 10;
 	const virtuosoRef = useRef<any>();
 	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
 	
@@ -58,22 +58,13 @@ export const TicketsList = ({groupBy}) => {
 
 	return (
 		<ListContainer >
-
-			
-			{/* {shouldShowLoader && <Loader />}
-			<TableVirtuoso
-				ref={virtuosoRef}
-				data={filteredTickets}
-				followOutput={() => true}
-				components={{
-					Table: List,
-				}}
-				increaseViewportBy={400}
-				style={{ position: 'relative', top: (shouldShowLoader ? '-100%' : 0) }}
-				itemContent={(index, ticket) => (
-					<TicketItem ticket={ticket} key={ticket._id} />
-				)}
-			/> */}
+			<List>
+				<VirtualList 
+					items={filteredTickets}
+					itemHeight={30}
+					ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}
+				/>
+			</List>
 		</ListContainer>
 	);
 };
