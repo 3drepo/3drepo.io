@@ -18,7 +18,7 @@
 const {
 	addTicket: addConTicket,
 	getTicketById: getConTicketById,
-	getTicketHistoryById: getConTicketHistoryById,
+	getTicketHistory: getConTicketHistory,
 	getTicketList: getConTicketList,
 	getTicketResourceAsStream: getConTicketResourceAsStream,
 	importTickets: importConTickets,
@@ -28,7 +28,7 @@ const {
 const {
 	addTicket: addFedTicket,
 	getTicketById: getFedTicketById,
-	getTicketHistoryById: getFedTicketHistoryById,
+	getTicketHistory: getFedTicketHistory,
 	getTicketList: getFedTicketList,
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
 	importTickets: importFedTickets,
@@ -128,8 +128,8 @@ const getTicketHistory = (isFed) => async (req, res, next) => {
 	const { teamspace, project, model, ticket } = req.params;
 
 	try {
-		const getTicketHistoryById = isFed ? getFedTicketHistoryById : getConTicketHistoryById;
-		req.history = await getTicketHistoryById(teamspace, project, model, ticket);
+		const getHistory = isFed ? getFedTicketHistory : getConTicketHistory;
+		req.history = await getHistory(teamspace, project, model, ticket);
 
 		await next();
 	} catch (err) {

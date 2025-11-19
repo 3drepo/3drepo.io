@@ -59,7 +59,7 @@ TicketLogs.addGroupUpdateLog = async (teamspace, project, model, ticket, groupId
 TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => DB.insertOne(teamspace,
 	TICKET_LOGS_COL, { ...ticketLog, _id: generateUUID(), teamspace, project, model, ticket });
 
-TicketLogs.getTicketLogsById = (
+TicketLogs.getTicketLogs = (
 	teamspace,
 	project,
 	model,

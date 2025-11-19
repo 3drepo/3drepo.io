@@ -1301,273 +1301,108 @@ const testUpdateManyTickets = () => {
 
 const testGetTicketHistory = () => {
 	describe('Get ticket history', () => {
-		const CHANGE_DEPTH_ENUM = Object.freeze({
-			BASE: 'base',
-			PROPERTIES: 'properties',
-			MODULES: 'modules',
-		});
-
-		const createChangeLog = (ticket, changeDepth, moduleName, propertyName, updateValue) => {
-			switch (changeDepth) {
-			case CHANGE_DEPTH_ENUM.BASE:
-				return {
-					[propertyName]: {
-						from: ticket[propertyName], to: updateValue,
-					},
-				};
-			case CHANGE_DEPTH_ENUM.PROPERTIES:
-				return {
-					[changeDepth]: {
-						[propertyName]: {
-							from: ticket[changeDepth][propertyName], to: updateValue,
-						},
-					},
-				};
-			case CHANGE_DEPTH_ENUM.MODULES:
-				return {
-					[changeDepth]: {
-						[moduleName]: {
-							[propertyName]: {
-								from: ticket[changeDepth][moduleName][propertyName], to: updateValue,
-							},
-						},
-					},
-				};
-			default:
-				throw new Error(`Unknown change depth: ${changeDepth}`);
-			}
-		};
-
-		const insertTicketLogs = async (
-			teamspace,
-			users,
-			updateDate,
-			model,
-			project,
-			ticket,
-			isImport,
-
-			changeDepth,
-			moduleName,
-			propertyName,
-			updateValue,
-		) => {
-			await insertOne(teamspace, TICKET_HISTORY_COL, {
-				_id: ServiceHelper.generateUUIDString(),
-				author: isImport ? null : users.tsAdmin.user,
-				timestamp: updateDate,
-				teamspace,
-				project: stringToUUID(project.id),
-				model: model._id,
-				ticket: stringToUUID(ticket._id),
-				[isImport ? 'imported' : 'changes']: isImport
-					? {
-						modules: ticket.modules,
-						properties: ticket.properties,
-						title: ticket.title,
-					}
-					: createChangeLog(ticket, changeDepth, moduleName, propertyName, updateValue),
-			});
-		};
-
 		const { users, teamspace, project, con, fed } = generateBasicData();
 		const template = ServiceHelper.generateTemplate();
 
+		const moduleName = template.modules[1].name;
+		const modulePropName = template.modules[1].properties[0].name;
+		const propName = template.properties[2].name;
+
 		const conTicket = ServiceHelper.generateTicket(template);
+		conTicket.model = con._id;
+
 		const fedTicket = ServiceHelper.generateTicket(template);
+		fedTicket.model = fed._id;
 
-		const datePropName = template.properties.find((p) => p.type === propTypes.DATE).name;
-		const moduleName = template.modules.find((m) => !m.deprecated).name;
-		const modulePropName = template
-			.modules.find((m) => m.name === moduleName)
-			.properties.find((p) => p.type === propTypes.TEXT).name;
-		const conTicketUpdate = ServiceHelper.generateTicket(template);
-		const fedTicketUpdate = ServiceHelper.generateTicket(template);
+		const textPropUpdate = ServiceHelper.generateRandomString();
+		const numPropUpdate = ServiceHelper.generateRandomNumber();
+		const titleUpdate = ServiceHelper.generateRandomString();
+		const timestamp = new Date();
 
-		const ticketTitleUpdateUpdate = ServiceHelper.generateRandomString();
-		const ticketDueDateUpdate = ServiceHelper.generateRandomDate();
-		const updateDate = new Date();
-		const modulePropUpdateValue = ServiceHelper.generateRandomString();
+		const getChangesObj = (ticket) => ({
+			changes: {
+				title: { from: ticket.title, to: titleUpdate },
+				properties: {
+					[propName]: { from: ticket.properties[propName], to: numPropUpdate },
+				},
+				modules: {
+					[moduleName]: {
+						[modulePropName]: { from: ticket.modules[moduleName][modulePropName], to: textPropUpdate },
+					},
+				},
+			},
+		});
+
+		const insertTicketLogs = async (ticket, author, updatedValue) => {
+			await insertOne(teamspace, TICKET_HISTORY_COL, {
+				_id: ServiceHelper.generateUUIDString(),
+				author,
+				timestamp,
+				teamspace,
+				project: stringToUUID(project.id),
+				model: ticket.model,
+				ticket: stringToUUID(ticket._id),
+				...updatedValue,
+			});
+		};
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con, fed],
-				[template]);
+			await setupBasicData(users, teamspace, project, [con, fed], [template]);
 			await Promise.all([
-				ServiceHelper.db.createTicket(teamspace, project, con, conTicket),
-				ServiceHelper.db.createTicket(teamspace, project, fed, fedTicket),
-				ServiceHelper.db.createTicket(teamspace, project, con, conTicketUpdate),
-				ServiceHelper.db.createTicket(teamspace, project, fed, fedTicketUpdate),
+				ServiceHelper.db.createTicket(teamspace, project.id, con._id, conTicket),
+				ServiceHelper.db.createTicket(teamspace, project.id, fed._id, fedTicket),
 			]);
 
-			await Promise.all([
-				// Simulate ticket update and log entry for container ticket
-				insertTicketLogs(
-					teamspace,
-					users,
-					updateDate,
-					con,
-					project,
-					conTicketUpdate,
-					false,
-					CHANGE_DEPTH_ENUM.BASE,
-					undefined,
-					'title',
-					ticketTitleUpdateUpdate,
-				),
-				insertTicketLogs(
-					teamspace,
-					users,
-					updateDate,
-					con,
-					project,
-					conTicketUpdate,
-					false,
-					CHANGE_DEPTH_ENUM.PROPERTIES,
-					undefined,
-					datePropName,
-					ticketDueDateUpdate,
-				),
-				insertTicketLogs(
-					teamspace,
-					users,
-					updateDate,
-					con,
-					project,
-					conTicketUpdate,
-					false,
-					CHANGE_DEPTH_ENUM.MODULES,
-					moduleName,
-					modulePropName,
-					modulePropUpdateValue,
-				),
-				insertTicketLogs(
-					teamspace,
-					users,
-					updateDate,
-					con,
-					project,
-					conTicketUpdate,
-					true,
-				),
-
-				// Simulate ticket update and log entry for federation ticket
-				insertTicketLogs(
-					teamspace,
-					users,
-					updateDate,
-					fed,
-					project,
-					fedTicketUpdate,
-					false,
-					CHANGE_DEPTH_ENUM.BASE,
-					undefined,
-					'title',
-					ticketTitleUpdateUpdate,
-				),
-				insertTicketLogs(
-					teamspace,
-					users,
-					updateDate,
-					fed,
-					project,
-					fedTicketUpdate,
-					false,
-					CHANGE_DEPTH_ENUM.PROPERTIES,
-					undefined,
-					datePropName,
-					ticketDueDateUpdate,
-				),
-				insertTicketLogs(
-					teamspace,
-					users,
-					updateDate,
-					fed,
-					project,
-					fedTicketUpdate,
-					false,
-					CHANGE_DEPTH_ENUM.MODULES,
-					moduleName,
-					modulePropName,
-					modulePropUpdateValue,
-				),
-				insertTicketLogs(
-					teamspace,
-					users,
-					updateDate,
-					fed,
-					project,
-					fedTicketUpdate,
-					true,
-				),
-			]);
+			await Promise.all([conTicket, fedTicket].flatMap((ticket) => [
+				insertTicketLogs(ticket, users.tsAdmin.user, getChangesObj(ticket)),
+				insertTicketLogs(ticket, null,
+					{ imported: { title: ticket.title, properties: ticket.properties, modules: ticket.modules } }),
+			]));
 		});
 
 		const generateTestData = (isFed) => {
 			const modelType = isFed ? 'federation' : 'container';
-			const modelWithTemplates = isFed ? fed : con;
-			const ticketId = isFed ? fedTicket._id : conTicket._id;
-			const updateTicketId = isFed ? fedTicketUpdate._id : conTicketUpdate._id;
+			const model = isFed ? fed : con;
+			const ticket = isFed ? fedTicket : conTicket;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 			const wrongTypeModel = isFed ? con : fed;
 
-			const getHistoryRoute = (
-				{ key = users.tsAdmin.apiKey,
-					projectId = project.id,
-					modelId = modelWithTemplates._id,
-					ticket = ticketId,
-				} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticket}/history${key ? `?key=${key}` : ''}`;
-
-			const updateHistory = [
+			const expectedLogs = [
 				{
-					author: users.tsAdmin.user,
-					timestamp: updateDate.getTime(),
-					changes: {
-						title: {
-							from: isFed ? fedTicketUpdate.title : conTicketUpdate.title,
-							to: ticketTitleUpdateUpdate,
-						},
+					imported: {
+						title: ticket.title,
+						properties: ticket.properties,
+						modules: ticket.modules,
 					},
+					author: null,
+					timestamp: timestamp.getTime(),
 				},
 				{
-					author: users.tsAdmin.user,
-					timestamp: updateDate.getTime(),
 					changes: {
+						title: { from: ticket.title, to: titleUpdate },
 						properties: {
-							[datePropName]: {
-								from: isFed
-									? fedTicketUpdate.properties[datePropName]
-									: conTicketUpdate.properties[datePropName],
-								to: ticketDueDateUpdate.getTime(),
-							},
+							[propName]: { from: ticket.properties[propName], to: numPropUpdate },
 						},
-					},
-				},
-				{
-					author: users.tsAdmin.user,
-					timestamp: updateDate.getTime(),
-					changes: {
 						modules: {
 							[moduleName]: {
 								[modulePropName]: {
-									from: isFed
-										? fedTicketUpdate.modules[moduleName][modulePropName]
-										: conTicketUpdate.modules[moduleName][modulePropName],
-									to: modulePropUpdateValue,
+									from: ticket.modules[moduleName][modulePropName],
+									to: textPropUpdate,
 								},
 							},
 						},
 					},
-				},
-				{
-					author: null,
-					timestamp: updateDate.getTime(),
-					imported: {
-						modules: isFed ? fedTicketUpdate.modules : conTicketUpdate.modules,
-						properties: isFed ? fedTicketUpdate.properties : conTicketUpdate.properties,
-						title: isFed ? fedTicketUpdate.title : conTicketUpdate.title,
-					},
+					author: users.tsAdmin.user,
+					timestamp: timestamp.getTime(),
 				},
 			];
+
+			const getHistoryRoute = (
+				{ key = users.tsAdmin.apiKey,
+					projectId = project.id,
+					modelId = model._id,
+					ticketId = ticket._id,
+				} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/history${key ? `?key=${key}` : ''}`;
 
 			return [
 				['the user does not have a valid session', false, getHistoryRoute({ key: null }), templates.notLoggedIn],
@@ -1575,21 +1410,19 @@ const testGetTicketHistory = () => {
 				['the project does not exist', false, getHistoryRoute({ projectId: ServiceHelper.generateRandomString() }), templates.projectNotFound],
 				[`the ${modelType} does not exist`, false, getHistoryRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
 				[`the model provided is not a ${modelType}`, false, getHistoryRoute({ modelId: wrongTypeModel._id }), modelNotFound],
+				['the ticket does not exist', false, getHistoryRoute({ ticketId: ServiceHelper.generateRandomString() }), templates.ticketNotFound],
 				['the user does not have access to the federation', false, getHistoryRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
-				['the user provides a ticket with no changes', true, getHistoryRoute(), { response: [], status: templates.ok.status }],
-				['the user provides a ticket with updates', true, getHistoryRoute({ ticket: updateTicketId }), { response: updateHistory, status: templates.ok.status }],
+				['the user provides a ticket with updates', true, getHistoryRoute(), expectedLogs],
 			];
 		};
 
 		const runTest = (desc, success, route, expectedOutput) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-
 				const res = await agent.get(route).expect(expectedStatus);
 
 				if (success) {
-					expect(res.body.history).not.toBeUndefined();
-					ServiceHelper.outOfOrderArrayEqual(res.body.history, expectedOutput.response);
+					ServiceHelper.outOfOrderArrayEqual(res.body.history, expectedOutput);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}

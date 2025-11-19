@@ -116,8 +116,8 @@ const testAddImportedLog = () => {
 	});
 };
 
-const testGetTicketLogsById = () => {
-	describe('Get ticket logs by ID', () => {
+const testGetTicketLogs = () => {
+	describe('Get ticket logs', () => {
 		test('Should return ticket logs', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
@@ -132,7 +132,7 @@ const testGetTicketLogsById = () => {
 				teamspace, project, model, ticket: ticketId,
 			};
 
-			const result = await TicketLogs.getTicketLogsById(teamspace, project, model, ticketId);
+			const result = await TicketLogs.getTicketLogs(teamspace, project, model, ticketId);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TICKET_LOGS_COL,
@@ -148,5 +148,5 @@ describe(determineTestGroup(__filename), () => {
 	testAddTicketLog();
 	testAddGroupUpdateLog();
 	testAddImportedLog();
-	testGetTicketLogsById();
+	testGetTicketLogs();
 });
