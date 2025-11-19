@@ -109,7 +109,7 @@ APIService.createAppAsync = async (config = {}, v5Init = true) => {
 		app.set("trust proxy", 1);
 	}
 
-	const internalService = !!config.[BYPASS_AUTH];
+	const internalService = !!config[BYPASS_AUTH];
 	app.set(BYPASS_AUTH, internalService);
 
 	app.disable("etag");
