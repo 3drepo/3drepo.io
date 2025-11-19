@@ -71,7 +71,7 @@ const testIsTeamspaceMember = () => {
 				mockCB,
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(Permissions.hasAccessToTeamspace).not.toHaveBeenCalled();
+			expect(TeamspacesProcessor.isTeamspaceMember).not.toHaveBeenCalled();
 		});
 
 		test('should respond with teamspace not found if the user has no access', async () => {
@@ -130,7 +130,7 @@ const testIsActiveTeamspaceMember = () => {
 				mockCB,
 			);
 			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(Permissions.hasAccessToTeamspace).not.toHaveBeenCalled();
+			expect(TeamspacesProcessor.isTeamspaceMember).not.toHaveBeenCalled();
 		});
 
 		test('should respond with teamspace not found if the user has no access', async () => {
