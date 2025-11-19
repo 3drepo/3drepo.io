@@ -443,45 +443,16 @@ const testSerialiseTicketList = () => {
 };
 
 const testSerialiseTicketHistory = () => {
-	const createValidQuiery = (valueType) => {
-		switch (valueType) {
-		case 'date':
-			return { date: generateRandomDate() };
-		case 'uuid':
-			return { uuid: generateUUID() };
-		case 'object':
-			return {
-				changes: { from: generateRandomString(), to: generateRandomString() },
-			};
-		default:
-			return { [generateRandomString()]: generateRandomString() };
-		}
-	};
-	const createValidReqsponse = (validQuery) => {
-		const res = { ...validQuery };
-		Object.entries(validQuery).forEach(([key, value]) => {
-			if (value instanceof Date) {
-				res[key] = value.getTime();
-			} else if (isUUID(value)) {
-				res[key] = UUIDToString(value);
-			} else if (value instanceof Object) {
-				res[key] = createValidReqsponse(value);
-			}
-		});
-		return res;
-	};
-	const validQueryTypes = ['date', 'uuid', 'object'];
-
-	const queryiesAndAnswers = validQueryTypes.map((type) => {
-		const query = createValidQuiery(type);
-		const answer = createValidReqsponse(query);
-		return [`history has a ${type} property`, [query], true, [answer]];
-	});
+	const date = generateRandomDate();
+	const uuid = generateUUID();
+	const text = generateRandomString();
 
 	describe.each([
 		['there is no history property', undefined, false, {}],
 		['history is empty', [], true, []],
-		...queryiesAndAnswers,
+		['history entry has a date type', [{ date }], true, [{ date: date.getTime() }]],
+		['history entry has a uuid type', [{ uuid }], true, [{ uuid: UUIDToString(uuid) }]],
+		['history entry has an object', [{ changes: { uuidProp: uuid, dateProp: date, txtProp: text } }], true, [{ changes: { uuidProp: UUIDToString(uuid), dateProp: date.getTime(), txtProp: text } }]],
 	])('Validate serialize ticket history query', (description, history, succeed, expectedOutcome) => {
 		test(`Should ${succeed ? 'succeed' : 'fail'} if ${description}`, async () => {
 			const req = { history };
