@@ -451,6 +451,14 @@ const testSerialiseTicketHistory = () => {
 		['history entry has a date type', [{ date }], true, [{ date: date.getTime() }]],
 		['history entry has a uuid type', [{ uuid }], true, [{ uuid: UUIDToString(uuid) }]],
 		['history entry has an object', [{ changes: { uuidProp: uuid, dateProp: date, txtProp: text } }], true, [{ changes: { uuidProp: UUIDToString(uuid), dateProp: date.getTime(), txtProp: text } }]],
+		['history entry has an array', [{ changes: { arrayProp: times(10, () => ({ uuidProp: uuid, dateProp: date, txtProp: text })) } }], true,
+			[
+				{
+					changes: { arrayProp: times(10, () => ({
+						uuidProp: UUIDToString(uuid), dateProp: date.getTime(), txtProp: text }
+					)) },
+				},
+			]],
 	])('Validate serialize ticket history query', (description, history, succeed, expectedOutcome) => {
 		test(`Should ${succeed ? 'succeed' : 'fail'} if ${description}`, async () => {
 			const req = { history };

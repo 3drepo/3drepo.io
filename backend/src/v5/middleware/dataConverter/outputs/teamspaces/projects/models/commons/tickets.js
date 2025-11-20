@@ -16,7 +16,7 @@
  */
 
 const { getTemplateById, getTemplatesByQuery } = require('../../../../../../../models/tickets.templates');
-const { isDate, isObject, isUUID } = require('../../../../../../../utils/helper/typeCheck');
+const { isArray, isDate, isObject, isUUID } = require('../../../../../../../utils/helper/typeCheck');
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
 const { generateFullSchema } = require('../../../../../../../schemas/tickets/templates');
 const { respond } = require('../../../../../../../utils/responder');
@@ -107,6 +107,8 @@ Tickets.serialiseTicketHistory = (req, res) => {
 				returnObj[key] = value.getTime();
 			} else if (isUUID(value)) {
 				returnObj[key] = UUIDToString(value);
+			} else if (isArray(value)) {
+				returnObj[key] = value.map((entry) => serializeData(entry));
 			} else if (isObject(value)) {
 				returnObj[key] = serializeData(value);
 			}
