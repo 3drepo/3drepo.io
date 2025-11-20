@@ -30,6 +30,7 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList } = require('../../utils');
 
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 const { DRAWINGS_HISTORY_COL } = require(`${v5Path}/models/revisions.constants`);
 const { updateMany } = require(`${v5Path}/handler/db`);
 const { SETTINGS_COL, processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
@@ -46,11 +47,8 @@ const processTeamspace = async (teamspace, model) => {
 		},
 	};
 
-	const modelQuery = model ? { _id: model } : {};
-	const drawingQuery = model ? {
-		model,
-		...drawingStatusQuery,
-	} : drawingStatusQuery;
+	const modelQuery = deleteIfUndefined({ _id: model });
+	const drawingQuery = deleteIfUndefined({ model, ...drawingStatusQuery });
 
 	const modelAction = { $unset: { status: 1 } };
 	const drawingAction = { $set: { status: processStatuses.FAILED } };
