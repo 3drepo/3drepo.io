@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useContext, useRef } from 'react';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
@@ -87,6 +87,14 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 		setTicketValue(modelId, NEW_TICKET_ID, presetValue);
 	};
 
+	const onChangeCollapse = useCallback((groupVal, collapse) => {
+		collapsedGroups.current[groupVal] = collapse;
+	}, [collapsedGroups.current]);
+
+	useEffect(() => {
+		collapsedGroups.current = {};
+	}, [groupBy]);
+
 	if (groupBy === NONE_OPTION) {
 		return (
 			<TicketsTableGroup
@@ -97,12 +105,8 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 			/>
 		);
 	}
-
+	
 	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
-
-	const onChangeCollapse = useCallback((groupVal, collapse) => {
-		collapsedGroups.current[groupVal] = collapse;
-	}, [collapsedGroups.current]);
 
 	return (
 		<Container>
