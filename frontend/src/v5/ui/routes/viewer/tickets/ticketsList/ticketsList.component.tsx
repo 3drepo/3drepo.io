@@ -18,10 +18,30 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List, ListContainer, Loader } from './ticketsList.styles';
-import { TableVirtuoso } from 'react-virtuoso';
+import { List, ListContainer } from './ticketsList.styles';
 import { useEffect, useRef } from 'react';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { groupTickets } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
+import { DashboardListCollapse } from '@components/dashboard/dashboardList';
+
+const TicketsCardGroup = ({tickets, groupName}) => {
+	return (<DashboardListCollapse
+		title={(
+			<h1>
+				{groupName}
+			</h1>
+		)}
+		defaultExpanded
+	>
+		<List>
+			<VirtualList 
+				items={tickets}
+				itemHeight={30}
+				ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}
+			/>
+		</List>
+	</DashboardListCollapse>);
+};
 
 export const TicketsList = ({ groupBy }) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
@@ -53,6 +73,34 @@ export const TicketsList = ({ groupBy }) => {
 			<EmptyListMessage>
 				<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
 			</EmptyListMessage>
+		);
+	}
+
+	console.log(JSON.stringify({ groupBy }, null, '\t'));
+
+	if (groupBy !== 'none') {
+		const groups = groupTickets(groupBy, filteredTickets);
+
+		return (
+			<ListContainer >
+				<div style={{
+					overflowY: 'auto',
+					position: 'relative',
+					height: '100%',
+				}}>
+					<div
+						style={{ position:'absolute' }}
+					>
+						<VirtualList 
+							items={groups}
+							itemHeight={30}
+							ItemComponent={(group) => 
+								<TicketsCardGroup {...group}/>
+							}
+						/>
+					</div>
+				</div>
+			</ListContainer>
 		);
 	}
 

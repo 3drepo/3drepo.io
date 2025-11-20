@@ -18,13 +18,17 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import _, { Dictionary } from 'lodash';
+import _, { Dictionary, get } from 'lodash';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
-import { selectStatusConfigByTemplateId, selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
+import { selectStatusConfigByTemplateId, selectTemplateById, selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selectors';
 import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME } from '@/v5/store/users/users.helpers';
 import { selectJobById } from '@/v4/modules/jobs/jobs.selectors';
+import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
+import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
+
+
 
 export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 
@@ -38,7 +42,24 @@ const arrayAndStringCompare = (a, b) => {
 	return arrA.length - arrB.length;
 };
 
-type TicketsGroup = {
+const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
+const getAssigneesRaw = (t: ITicket) => (_.get(t, ASSIGNEES_PATH) ?? []);
+export const getjobOrUserDisplayName = (assignee: string) => {
+	const job = selectJobById(getState(), assignee);
+	if (job) return job._id;
+	const user = selectCurrentTeamspaceUsersByIds(getState())[assignee];
+	if (user) return getFullnameFromUser(user);
+	return JOB_OR_USER_NOT_FOUND_NAME;
+};
+
+export const sortAssignees = (ticket: ITicket): ITicket => { // <--- ???
+	const sortedAssignees = _.orderBy(getAssigneesRaw(ticket), (assignee) => getjobOrUserDisplayName(assignee).trim().toLowerCase());
+	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
+};
+
+export const getAssigneeDisplayNamesFromTicket = (ticket: ITicket): string[] => getAssigneesRaw(ticket).map(getjobOrUserDisplayName);
+
+export type TicketsGroup = {
 	groupName: string,
 	value: any, 
 	tickets: ITicket[]
@@ -59,11 +80,121 @@ const sortToTicketsGroups = (groups: GroupDictionary): TicketsGroup[] => {
 	return sortedGroups;
 };
 
-const createGroups = (tickets: ITicket[], getKey:(ticket:ITicket) => any) => {
-	const groups: GroupDictionary = {};
+const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
+const OVERDUE = formatMessage({ id: 'groupBy.dueDate.overdue', defaultMessage: 'Overdue' });
+const DUE_DATE_LABELS = [
+	NO_DUE_DATE,
+	OVERDUE,
+	formatMessage({ id: 'groupBy.dueDate.inOneWeek', defaultMessage: 'in 1 week' }),
+	formatMessage({ id: 'groupBy.dueDate.inTwoWeeks', defaultMessage: 'in 2 weeks' }),
+	formatMessage({ id: 'groupBy.dueDate.inThreeWeeks', defaultMessage: 'in 3 weeks' }),
+	formatMessage({ id: 'groupBy.dueDate.inFourWeeks', defaultMessage: 'in 4 weeks' }),
+	formatMessage({ id: 'groupBy.dueDate.inFiveWeeks', defaultMessage: 'in 5 weeks' }),
+	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
+];
 
+
+// const groupByStatus = (tickets: ITicket[]) => {
+// 	const statusPath = `properties.${BaseProperties.STATUS}`;
+// 	const statusConfigValues = (selectStatusConfigByTemplateId(getState(), tickets[0].type) || DEFAULT_STATUS_CONFIG).values;
+// 	const labels: Record<string, string> = {};
+// 	const index: Record<string, number> = {};
+	
+// 	statusConfigValues.forEach(({ name, label }, i)=>  {
+// 		// Takes in consideration the default statuses that can have translations
+// 		labels[name] = label || name;
+		
+// 		// For sorting  of the groups purposes, first  open, then in progress, etc. 
+// 		index[name] = i;
+// 	});
+
+// 	const groups = createGroups(tickets, (ticket) => {
+// 		const value = selectTicketPropertyByName(getState(), ticket._id, statusPath);
+// 		return { name:labels[value], value };
+// 	});
+
+// 	return groups.sort((a, b) => index[a.groupName] - index[b.groupName]);
+// };
+
+const getKeyByDueDate  = (ticket) => {
+	const dueDatePropName = 'properties.' + IssueProperties.DUE_DATE;
+	const startOfTheWeek = (new Date()).getTime();
+	const endOfWeeks = [];
+	for (let i = 1 ; i < 6 ; i++ ) {
+		endOfWeeks.push(startOfTheWeek + (i * 604800000)); // i * a week in milliseconds;
+	}
+
+	const dateValue = selectTicketPropertyByName(getState(), ticket._id, dueDatePropName);
+	let name = NO_DUE_DATE;
+	let value = dateValue;
+
+	if (dateValue && dateValue > startOfTheWeek) {
+		// If there is no end of the week < than the date, it means that is due pass 6 weeks;
+		name = DUE_DATE_LABELS[DUE_DATE_LABELS.length - 1]; 
+		for (let i = 0 ; i < 5 ; i++ ) {
+			if (dateValue < endOfWeeks[i]) {
+				name = DUE_DATE_LABELS[i + 2];
+				value = endOfWeeks[i];
+				break;
+			}
+		}
+	}
+
+	if (dateValue && dateValue <= startOfTheWeek) {
+		name = OVERDUE;
+	}
+
+	return { name, value };
+};
+
+const getKeyByStatus = (labels) => (ticket, groupBy) => {
+	const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
+	return { name:labels[value], value };
+};
+
+const getKeyManyValues = (ticket, groupBy) => {
+	const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
+	if (!value) return { name: UNSET, value: '' };
+	const valueAsString = [...value].sort().join(',');
+	return { name: valueAsString, value };
+};
+
+const getKeyBySingleValue = (ticket: ITicket, groupBy: string) =>
+	(selectTicketPropertyByName(getState(), ticket._id, groupBy) ?? UNSET);
+
+const getkeyByJobsAndUsers = (ticket: ITicket, groupBy: string) => {
+	const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
+	const values = Array.isArray(value) ? value : [value];
+	const name = values && value ? values.map(getjobOrUserDisplayName).sort().join(',') : UNSET;
+	return { name, value };
+};
+
+const getKey = (ticket: ITicket, groupBy: string) => {
+	const state = getState();
+	const templateId = ticket.type;
+
+	// This is using one or the other because by some reason we save the templates
+	// in the projects state in the dashboard and the templates in models state in
+	// the viewer
+	const template = selectCurrentProjectTemplateById(state, templateId) || selectTemplateById( state, ticket.modelId, templateId);
+	const propertyDefinition = findPropertyDefinition(template, groupBy);
+
+	if (!propertyDefinition) {
+		return  { name: UNSET, value: '' };
+	}
+	const propertyType = propertyDefinition.type;
+	
+	if (propertyDefinition.values === 'jobsAndUsers') return getkeyByJobsAndUsers(ticket, groupBy);
+	if (groupBy === `properties.${IssueProperties.DUE_DATE}`) return getKeyByDueDate(ticket);
+	if (groupBy === `properties.${BaseProperties.STATUS}`) return getKeyByStatus({})(ticket, groupBy);
+	if (['text', 'oneOf'].includes(propertyType)) return getKeyBySingleValue(ticket, groupBy);
+	if (propertyType === 'manyOf') return getKeyManyValues(ticket, groupBy);
+};
+
+export const groupTickets = (groupBy: string, tickets: ITicket[]): TicketsGroup[] => {
+	const groups: GroupDictionary = {};
 	tickets.forEach((ticket) => {
-		const key = getKey(ticket);
+		const key = getKey(ticket, groupBy);
 		let name: string, value: any = undefined;
 
 		if (key.name) {
@@ -80,126 +211,6 @@ const createGroups = (tickets: ITicket[], getKey:(ticket:ITicket) => any) => {
 
 		groups[name].tickets.push(ticket);
 	});
-	
+
 	return sortToTicketsGroups(groups);
-};
-
-const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
-const OVERDUE = formatMessage({ id: 'groupBy.dueDate.overdue', defaultMessage: 'Overdue' });
-const DUE_DATE_LABELS = [
-	NO_DUE_DATE,
-	OVERDUE,
-	formatMessage({ id: 'groupBy.dueDate.inOneWeek', defaultMessage: 'in 1 week' }),
-	formatMessage({ id: 'groupBy.dueDate.inTwoWeeks', defaultMessage: 'in 2 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inThreeWeeks', defaultMessage: 'in 3 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inFourWeeks', defaultMessage: 'in 4 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inFiveWeeks', defaultMessage: 'in 5 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
-];
-
-const groupByDueDate = (tickets: ITicket[]) => {
-	const dueDatePropName = 'properties.' + IssueProperties.DUE_DATE;
-	const startOfTheWeek = (new Date()).getTime();
-	const endOfWeeks = [];
-	for (let i = 1 ; i < 6 ; i++ ) {
-		endOfWeeks.push(startOfTheWeek + (i * 604800000)); // i * a week in milliseconds;
-	}
-
-	const groups = createGroups(tickets, (ticket) => { 
-		const dateValue = selectTicketPropertyByName(getState(), ticket._id, dueDatePropName);
-		let name = NO_DUE_DATE;
-		let value = dateValue;
-
-		if (dateValue && dateValue > startOfTheWeek) {
-			// If there is no end of the week < than the date, it means that is due pass 6 weeks;
-			name = DUE_DATE_LABELS[DUE_DATE_LABELS.length - 1]; 
-			for (let i = 0 ; i < 5 ; i++ ) {
-				if (dateValue < endOfWeeks[i]) {
-					name = DUE_DATE_LABELS[i + 2];
-					value = endOfWeeks[i];
-					break;
-				}
-			}
-		}
-
-		if (dateValue && dateValue <= startOfTheWeek) {
-			name = OVERDUE;
-		}
-
-		return { name, value };
-	});
-
-	return groups.sort((a, b) => 
-		DUE_DATE_LABELS.indexOf(a.groupName) - DUE_DATE_LABELS.indexOf(b.groupName),
-	);
-};
-
-const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
-const getAssigneesRaw = (t: ITicket) => (_.get(t, ASSIGNEES_PATH) ?? []);
-export const getjobOrUserDisplayName = (assignee: string) => {
-	const job = selectJobById(getState(), assignee);
-	if (job) return job._id;
-	const user = selectCurrentTeamspaceUsersByIds(getState())[assignee];
-	if (user) return getFullnameFromUser(user);
-	return JOB_OR_USER_NOT_FOUND_NAME;
-};
-
-export const sortAssignees = (ticket: ITicket): ITicket => { // <--- ???
-	const sortedAssignees = _.orderBy(getAssigneesRaw(ticket), (assignee) => getjobOrUserDisplayName(assignee).trim().toLowerCase());
-	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
-};
-
-export const getAssigneeDisplayNamesFromTicket = (ticket: ITicket): string[] => getAssigneesRaw(ticket).map(getjobOrUserDisplayName);
-
-const groupByStatus = (tickets: ITicket[]) => {
-	const statusPath = `properties.${BaseProperties.STATUS}`;
-	const statusConfigValues = (selectStatusConfigByTemplateId(getState(), tickets[0].type) || DEFAULT_STATUS_CONFIG).values;
-	const labels: Record<string, string> = {};
-	const index: Record<string, number> = {};
-	
-	statusConfigValues.forEach(({ name, label }, i)=>  {
-		// Takes in consideration the default statuses that can have translations
-		labels[name] = label || name;
-		
-		// For sorting  of the groups purposes, first  open, then in progress, etc. 
-		index[name] = i;
-	});
-
-	const groups = createGroups(tickets, (ticket) => {
-		const value = selectTicketPropertyByName(getState(), ticket._id, statusPath);
-		return { name:labels[value], value };
-	});
-
-	return groups.sort((a, b) => index[a.groupName] - index[b.groupName]);
-};
-
-const groupByManyOfValues = (tickets: ITicket[], groupBy: string) => {
-	return createGroups(tickets, (ticket) => {
-		const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
-		if (!value) return { name: UNSET, value: '' };
-		const valueAsString = [...value].sort().join(',');
-		return { name: valueAsString, value };
-	});
-};
-
-const groupBySingleValue = (tickets: ITicket[], groupBy: string) => createGroups(tickets, 
-	(ticket) => selectTicketPropertyByName(getState(), ticket._id, groupBy) ?? UNSET);
-
-const groupByJobsAndUsers = (tickets: ITicket[], groupBy: string) => {
-	return createGroups(tickets, (ticket) => {
-		const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
-		const values = Array.isArray(value) ? value : [value];
-		const name = values && value ? values.map(getjobOrUserDisplayName).sort().join(',') : UNSET;
-		return { name, value };
-	});
-};
-
-export const groupTickets = (
-	groupBy: string, tickets: ITicket[], propertyType: PropertyTypeDefinition, isJobAndUsersType: boolean): TicketsGroup[] => {
-
-	if (isJobAndUsersType) return groupByJobsAndUsers(tickets, groupBy);
-	if (groupBy === `properties.${IssueProperties.DUE_DATE}`) return groupByDueDate(tickets);
-	if (groupBy === `properties.${BaseProperties.STATUS}`) return groupByStatus(tickets);
-	if (['text', 'oneOf'].includes(propertyType)) return groupBySingleValue(tickets, groupBy);
-	if (propertyType === 'manyOf') return groupByManyOfValues(tickets, groupBy);
 };
