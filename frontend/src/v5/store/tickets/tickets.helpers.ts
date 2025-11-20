@@ -27,7 +27,7 @@ import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
 import { TicketBaseKeys, SequencingProperties, BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint, PropertyDefinition } from './tickets.types';
+import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint, PropertyDefinition, TemplateModule } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
@@ -324,5 +324,25 @@ export const getTemplatePropertiesDefinitions = (template: ITemplate): PropertyD
 		...template.modules?.flatMap((module) => module.properties.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
 	];
 };
+
+export const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
+	propOrModule?.find((p) => p.name === name);
+
+export const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
+	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype);
+
+export const findPropertyDefinition = (template:ITemplate,  property:string) => {
+	const propertyChunks = property.split('.');
+
+	if (propertyChunks[0] === 'modules') {
+		const module = findModuleByNameOrType(template.modules, propertyChunks[1]);
+		return findByName(module.properties, propertyChunks[2]) as PropertyDefinition;
+	}
+
+	if (propertyChunks[0] === 'properties') {
+		return findByName(template?.properties, propertyChunks[1]) as PropertyDefinition;
+	}
+};
+
 
 

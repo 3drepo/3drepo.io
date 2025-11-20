@@ -35,6 +35,7 @@ import { IUser } from '@/v5/store/users/users.redux';
 import { toDictionary } from '@/v5/helpers/toDictionary.helper';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
+import { findByName, findModuleByNameOrType } from '@/v5/store/tickets/tickets.helpers';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -234,12 +235,6 @@ export const getTemplateFilter = (templateCode: string): TicketFilter => ({
 const escapeString = (str: string) => str.replaceAll('.', '\\.').replaceAll(',', '\\,').replaceAll(':', '\\:');
 
 const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',').replaceAll('\\:', ':');
-
-const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
-	propOrModule?.find((p) => p.name === name);
-
-const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
-	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype); 
 
 const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, template:ITemplate) => {
 	const propertiesDefinitions = (findModuleByNameOrType(template.modules, ticketFilter.module) as TemplateModule)?.properties || template.properties;
