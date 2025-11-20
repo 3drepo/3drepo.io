@@ -34,6 +34,7 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { useWatchPropertyChange } from '../../useWatchPropertyChange';
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
+import { TicketsTableSelectionColumn } from './ticketsTableSelectionColumn/ticketsTableSelectionColumn.component';
 
 type TicketsTableGroupContentProps = {
 	tickets: ITicket[];
@@ -136,24 +137,27 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	};
 
 	return (
-		<Table $empty={!tickets.length} $canCreateTicket={!newTicketButtonIsDisabled}>
-			<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
-				<SortedTableContext.Consumer>
-					{({ refreshSorting, sortedItems, sortingColumn }: SortedTableType<ITicket>) => (
-						<TicketsTableGroupContent
-							tickets={tickets}
-							selectedTicketId={selectedTicketId}
-							onEditTicket={onEditTicket}
-							onNewTicket={onNewTicket}
-							newTicketButtonIsDisabled={newTicketButtonIsDisabled}
-							hideNewticketButton={hideNewticketButton}
-							sortedItems={sortedItems}
-							sortingColumn={sortingColumn}
-							refreshSorting={refreshSorting}
-						/>
-					)}
-				</SortedTableContext.Consumer>
-			</SortedTableComponent>
-		</Table>
+		<div style={{ display: "inline-flex" }}>
+			<TicketsTableSelectionColumn tickets={tickets} />
+			<Table $empty={!tickets.length} $canCreateTicket={!newTicketButtonIsDisabled}>
+				<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
+					<SortedTableContext.Consumer>
+						{({ refreshSorting, sortedItems, sortingColumn }: SortedTableType<ITicket>) => (
+							<TicketsTableGroupContent
+								tickets={tickets}
+								selectedTicketId={selectedTicketId}
+								onEditTicket={onEditTicket}
+								onNewTicket={onNewTicket}
+								newTicketButtonIsDisabled={newTicketButtonIsDisabled}
+								hideNewticketButton={hideNewticketButton}
+								sortedItems={sortedItems}
+								sortingColumn={sortingColumn}
+								refreshSorting={refreshSorting}
+							/>
+						)}
+					</SortedTableContext.Consumer>
+				</SortedTableComponent>
+			</Table>
+		</ div>
 	);
 };

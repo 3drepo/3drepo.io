@@ -31,7 +31,7 @@ export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) 
 		curr.visibleSortedColumnsNames.includes(name) !== prev.visibleSortedColumnsNames.includes(name)
 	));
 
-	if (!isVisible(name)) return null;
+	if (name !== 'select' &&!isVisible(name)) return null; // TODO do something better than === 'select
 
 	return (<Item $isMoving={movingColumn === name} $index={getIndex(name)} {...props} />);
 };
