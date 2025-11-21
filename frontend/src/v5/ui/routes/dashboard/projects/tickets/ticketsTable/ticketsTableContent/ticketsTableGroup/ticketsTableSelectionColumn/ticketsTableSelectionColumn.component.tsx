@@ -28,10 +28,12 @@ import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
+	selectedTicketId: string;
 };
 
 export const TicketsTableSelectionColumn = ({ 
 	tickets,
+	selectedTicketId,
 }: TicketsTableSelectionColumnProps) => {
 	const { selectedIds, setSelectedIds } = useTicketFiltersContext();
 	const onCheck = (e, ticket) => {
@@ -61,7 +63,7 @@ export const TicketsTableSelectionColumn = ({
 				items={tickets}
 				itemHeight={TICKET_TABLE_ROW_HEIGHT}
 				itemContent={(ticket: ITicket) => (
-					<Row key={ticket._id}>
+					<Row key={ticket._id} $selected={selectedTicketId === ticket._id}>
 						<CellContainer alwaysVisible>
 							<Checkbox checked={selectedIds.includes(ticket._id)} onClick={(e) => onCheck(e, ticket)} />
 						</CellContainer>
