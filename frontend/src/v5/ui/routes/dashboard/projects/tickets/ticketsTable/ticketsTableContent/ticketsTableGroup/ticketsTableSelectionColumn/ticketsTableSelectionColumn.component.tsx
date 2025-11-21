@@ -21,8 +21,8 @@ import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
 import { CheckboxHeaderCell, Checkbox, SelectionColumnContainer } from './ticketsTableSelectionColumn.styles';
 import { CellContainer } from '../ticketsTableRow/ticketsTableCell/cell/cell.styles';
 import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
-import { useState } from 'react';
 import { Gap } from '@controls/gap';
+import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 
 type TicketsTableSelectionColumnProps = {
     tickets: ITicket[];
@@ -31,7 +31,7 @@ type TicketsTableSelectionColumnProps = {
 export const TicketsTableSelectionColumn = ({ 
     tickets,
 }: TicketsTableSelectionColumnProps) => {
-    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const { selectedIds, setSelectedIds } = useTicketFiltersContext();
     const onCheck = (e, ticket) => {
         if (e.target.checked) {
             setSelectedIds((prev) => [...prev, ticket._id])

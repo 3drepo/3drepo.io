@@ -57,6 +57,7 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
 import { isEqual } from 'lodash';
+import { BulkEditButton } from './bulkEditButton.component';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -301,6 +302,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 								{...paramToInputProps(template, setTemplate)}
 							/>
 							<GroupBySelect />
+							<BulkEditButton />
 						</SelectorsContainer>
 					</FlexContainer>
 					<FlexContainer>

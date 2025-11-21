@@ -32,6 +32,9 @@ export interface TicketsFiltersContextType {
 	clearFilters: () => void;
 	isFiltering: boolean;
 	displayMode: DisplayMode;
+	setSelectedIds: (ids: string[]) => void;
+	selectedIds: string[];
+	onBulkEdit: () => void;
 }
 
 const defaultValue: TicketsFiltersContextType = {
@@ -44,6 +47,9 @@ const defaultValue: TicketsFiltersContextType = {
 	clearFilters: () => {},
 	isFiltering: false,
 	displayMode: 'other',
+	setSelectedIds: () => {},
+	selectedIds: [],
+	onBulkEdit: () => {},
 };
 
 export const TicketsFiltersContext = createContext<TicketsFiltersContextType>(defaultValue);
@@ -74,6 +80,7 @@ export const TicketsFiltersContextComponent = ({
 	onChange }: TicketsFiltersContextComponentProps) => {
 	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [choosablefilters, setChoosablefilters] = useState<TicketFilter[]>([]);
+	const [selectedIds, setSelectedIds] = useState<string[]>([]);
 	
 	useEffect(() => {
 		const usedFilters = new Set((filters || []).map(({ module, property, type })=> `${module}.${property}.${type}`));
@@ -100,6 +107,11 @@ export const TicketsFiltersContextComponent = ({
 		setFilters(filters.filter((f, i) => i !== index));
 	}, [filters]);
 
+	const onBulkEdit = useCallback(() => {
+		// eslint-disable-next-line no-console
+		console.log('Editting these ids...', selectedIds);
+	}, [selectedIds]);
+
 	useEffect(() => {
 		if (!filtersProps) return;
 		setFilters(filtersProps);
@@ -124,7 +136,10 @@ export const TicketsFiltersContextComponent = ({
 			choosablefilters,
 			isFiltering,
 			templates, 
-			modelsIds, 
+			modelsIds,
+			setSelectedIds,
+			selectedIds,
+			onBulkEdit,
 		}}>
 			{children}
 		</TicketsFiltersContext.Provider>
