@@ -204,34 +204,25 @@ jest.mock('../../../../../../../src/v5/utils/permissions', () => ({
 	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
 }));
 
-const determineResults = (username) => modelList.flatMap(({ permissions, _id, name }) => {
-	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
+const determineResults = (username, bypass) => modelList.flatMap(({ permissions, _id, name }) => {
+	const isAdmin = bypass || username === 'projAdmin' || username === 'tsAdmin';
 	const hasModelPerm = permissions && permissions.find((entry) => entry.user === username);
-	const isFavourite = username === 'user1' && user1Favourites.includes(_id);
+	const isFavourite = !bypass && username === 'user1' && user1Favourites.includes(_id);
 	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
 });
 
 const testGetContainerList = () => {
-	describe('Get container list by user', () => {
-		test('should return the whole list if the user is a teamspace admin', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'tsAdmin');
-			expect(res).toEqual(determineResults('tsAdmin'));
-		});
-		test('should return the whole list if the user is a project admin', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'projAdmin');
-			expect(res).toEqual(determineResults('projAdmin'));
-		});
-		test('should return a partial list if the user has model access in some containers', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'user1');
-			expect(res).toEqual(determineResults('user1'));
-		});
-		test('should return a partial list if the user has model access in some containers (2)', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'user2');
-			expect(res).toEqual(determineResults('user2'));
-		});
-		test('should return empty array if the user has no access', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'nobody');
-			expect(res).toEqual([]);
+	describe.each([
+		['the whole list if auth bypassed', undefined, true],
+		['the whole list if the user is a teamspace admin', 'tsAdmin', false],
+		['the whole list if the user is a project admin', 'projAdmin', false],
+		['a partial list if the user has model access in some containers', 'user1', false],
+		['a partial list if the user has model access in some containers (2)', 'user2', false],
+		['an empty list if the user has no access', 'nobody', false],
+	])('Get container list by user', (desc, username, bypass) => {
+		test(`should return ${desc}`, async () => {
+			const res = await Containers.getContainerList('teamspace', 'xxx', username, bypass);
+			expect(res).toEqual(determineResults(username, bypass));
 		});
 	});
 };

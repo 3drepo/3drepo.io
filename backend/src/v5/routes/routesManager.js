@@ -41,6 +41,7 @@ const { modelTypes } = require('../models/modelSettings.constants');
 RoutesManager.init = (app) => {
 	const internal = app.get(BYPASS_AUTH);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes(internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER, internal));
 	if (!internal) {
 	// Auth
 		app.use('/v5/', UserRoutes);
@@ -55,7 +56,6 @@ RoutesManager.init = (app) => {
 		app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
 
 		// Containers
-		app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets', CreateTicketRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/comments', CreateTicketCommentsRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes());
@@ -65,7 +65,7 @@ RoutesManager.init = (app) => {
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
 
 		// Federations
-		app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION));
+		app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION, internal));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets', CreateTicketRoutes(true));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets/:ticket/comments', CreateTicketCommentsRoutes(true));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes(true));
@@ -75,7 +75,7 @@ RoutesManager.init = (app) => {
 		app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/files', FederationFilesRoutes);
 
 		// Drawings
-		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));
+		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING, internal));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.DRAWING));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:drawing/revisions/:revision/calibrations', CalibrationRoutes);
 	}

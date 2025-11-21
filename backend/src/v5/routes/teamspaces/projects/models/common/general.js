@@ -38,6 +38,7 @@ const { canDeleteContainer } = require('../../../../../middleware/dataConverter/
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
+const { BYPASS_AUTH } = require('../../../../../utils/config.constants');
 
 const getThumbnail = async (req, res) => {
 	const { teamspace, project, drawing } = req.params;
@@ -96,7 +97,7 @@ const getModelList = (modelType) => async (req, res) => {
 	};
 
 	try {
-		const models = await fn[modelType](teamspace, project, user);
+		const models = await fn[modelType](teamspace, project, user, req.app.get(BYPASS_AUTH));
 		respond(req, res, templates.ok, { [`${modelType}s`]: models });
 	} catch (err) {
 		respond(req, res, err);
@@ -227,7 +228,7 @@ const getJobsWithAccess = async (req, res) => {
 	}
 };
 
-const establishRoutes = (modelType) => {
+const establishRoutes = (modelType, internal) => {
 	const router = Router({ mergeParams: true });
 
 	const hasAdminAccessToModel = {
@@ -459,6 +460,7 @@ const establishRoutes = (modelType) => {
 	 */
 	router.get('/', hasAccessToTeamspace, getModelList(modelType));
 
+	if (!internal) {
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
@@ -518,9 +520,9 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: adds the models found in the request body to the user's favourites list
 	 */
-	router.patch('/favourites', hasAccessToTeamspace, appendFavourites(modelType));
+		router.patch('/favourites', hasAccessToTeamspace, appendFavourites(modelType));
 
-	/**
+		/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
 	 *   delete:
@@ -561,9 +563,9 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: removes the models found in the request body from the user's favourites list
 	 */
-	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(modelType));
+		router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(modelType));
 
-	/**
+		/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/stats:
 	 *   get:
@@ -676,9 +678,9 @@ const establishRoutes = (modelType) => {
 	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
 	 *                   calibration: uncalibrated
 	 */
-	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
+		router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
 
-	/**
+		/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   delete:
@@ -719,9 +721,9 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: Model removed.
 	 */
-	router.delete('/:model', hasAdminAccessToModel[modelType], canDeleteModel[modelType], deleteModel(modelType));
+		router.delete('/:model', hasAdminAccessToModel[modelType], canDeleteModel[modelType], deleteModel(modelType));
 
-	/**
+		/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   patch:
@@ -835,9 +837,9 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: updates the settings of the model
 	 */
-	router.patch('/:model', hasAdminAccessToModel[modelType], validateUpdateSettingsData(modelType), updateModelSettings(modelType));
+		router.patch('/:model', hasAdminAccessToModel[modelType], validateUpdateSettingsData(modelType), updateModelSettings(modelType));
 
-	/**
+		/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   get:
@@ -923,9 +925,9 @@ const establishRoutes = (modelType) => {
 	 *                   desc: The Drawing of the Lego House
 	 *                   calibration: { verticalRange: [0,10], units: m }
 	 */
-	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
+		router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
 
-	/**
+		/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/members:
 	 *   get:
@@ -982,9 +984,9 @@ const establishRoutes = (modelType) => {
 	 *                     type: string
 	 *                     example: user1
 	 */
-	router.get('/:model/members', hasReadAccessToModel[modelType], getUsersWithPermissions);
+		router.get('/:model/members', hasReadAccessToModel[modelType], getUsersWithPermissions);
 
-	/**
+		/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
 	 *   get:
@@ -1041,10 +1043,10 @@ const establishRoutes = (modelType) => {
 	 *                     type: string
 	 *                     example: Architect
 	 */
-	router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
+		router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
 
-	if (modelType === modelTypes.DRAWING) {
-	/**
+		if (modelType === modelTypes.DRAWING) {
+			/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/thumbnail:
 	 *   get:
@@ -1078,9 +1080,9 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: returns a raster image of the thumbnail
 	 */
-		router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
+			router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
+		}
 	}
-
 	return router;
 };
 

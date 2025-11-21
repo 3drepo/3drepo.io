@@ -40,11 +40,11 @@ Containers.addContainer = addModel;
 
 Containers.deleteContainer = deleteModel;
 
-Containers.getContainerList = async (teamspace, project, user) => {
+Containers.getContainerList = async (teamspace, project, user, bypassPerms) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 	const modelSettings = await getContainers(teamspace, models, { _id: 1, name: 1, permissions: 1 });
 
-	return getModelList(teamspace, project, user, modelSettings);
+	return getModelList(teamspace, project, user, modelSettings, bypassPerms);
 };
 
 Containers.getContainerStats = async (teamspace, project, container) => {

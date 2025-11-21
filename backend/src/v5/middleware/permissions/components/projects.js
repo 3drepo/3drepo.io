@@ -16,6 +16,7 @@
  */
 
 const { isProjectAdmin, isTeamspaceAdmin } = require('../../../utils/permissions');
+const { BYPASS_AUTH } = require('../../../utils/config.constants');
 const { getProjectById } = require('../../../models/projectSettings');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
@@ -30,7 +31,9 @@ ProjectPerms.isProjectAdmin = async (req, res, next) => {
 
 	try {
 		await getProjectById(teamspace, project);
-		const isAdmin = await isTeamspaceAdmin(teamspace, user) || await isProjectAdmin(teamspace, project, user);
+		const isAdmin = req.app.get(BYPASS_AUTH)
+			|| await isTeamspaceAdmin(teamspace, user)
+			|| await isProjectAdmin(teamspace, project, user);
 
 		if (isAdmin) {
 			next();
