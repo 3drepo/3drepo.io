@@ -164,7 +164,7 @@ APIService.createAppAsync = async (config, v5Init = true) => {
 	return app;
 };
 
-APIService.createApp = (config, v5Init = true) => {
+APIService.createApp = (config = {}, v5Init = true) => {
 	const { manageSessions } = require(`${v5Path}/middleware/sessions`);
 	// Express app
 	const app = express();
