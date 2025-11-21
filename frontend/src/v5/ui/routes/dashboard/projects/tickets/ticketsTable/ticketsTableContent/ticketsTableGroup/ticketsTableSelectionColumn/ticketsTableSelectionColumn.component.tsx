@@ -27,48 +27,48 @@ import { uniq } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 
 type TicketsTableSelectionColumnProps = {
-    tickets: ITicket[];
+	tickets: ITicket[];
 };
 
 export const TicketsTableSelectionColumn = ({ 
-    tickets,
+	tickets,
 }: TicketsTableSelectionColumnProps) => {
-    const { selectedIds, setSelectedIds } = useTicketFiltersContext();
-    const onCheck = (e, ticket) => {
-        if (e.target.checked) {
-            setSelectedIds([...selectedIds, ticket._id])
-            return;
-        }
-        setSelectedIds(selectedIds.filter((id) => id !== ticket._id));
-    }
-    const onCheckAll = (e) => {
-        if (e.target.checked) {
-            setSelectedIds(uniq([...selectedIds, ...tickets.map((t) => t._id)]))
-            return;
-        }
-        setSelectedIds(selectedIds.filter((id) => !tickets.map((t) => t._id).includes(id)));
-    }
+	const { selectedIds, setSelectedIds } = useTicketFiltersContext();
+	const onCheck = (e, ticket) => {
+		if (e.target.checked) {
+			setSelectedIds([...selectedIds, ticket._id])
+			return;
+		}
+		setSelectedIds(selectedIds.filter((id) => id !== ticket._id));
+	}
+	const onCheckAll = (e) => {
+		if (e.target.checked) {
+			setSelectedIds(uniq([...selectedIds, ...tickets.map((t) => t._id)]))
+			return;
+		}
+		setSelectedIds(selectedIds.filter((id) => !tickets.map((t) => t._id).includes(id)));
+	}
 
-    const allSelected = tickets.every(({ _id }) => selectedIds.includes(_id)) && tickets.length > 0;
-    return (
-        <SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
-            <Headers>
-                <CheckboxHeaderCell alwaysVisible>
-                    <Checkbox checked={allSelected} onClick={onCheckAll} />
-                </CheckboxHeaderCell>
-            </Headers>
-            <VirtualList
-                items={tickets}
-                itemHeight={TICKET_TABLE_ROW_HEIGHT}
-                itemContent={(ticket: ITicket) => (
-                    <Row key={ticket._id}>
-                        <CellContainer alwaysVisible>
-                            <Checkbox checked={selectedIds.includes(ticket._id)} onClick={(e) => onCheck(e, ticket)} />
-                        </CellContainer>
-                    </Row>
-                )}
-            />
-            <Gap $height={`${TICKET_TABLE_ROW_HEIGHT}px`} />
-        </SelectionColumnContainer>
-    );
+	const allSelected = tickets.every(({ _id }) => selectedIds.includes(_id)) && tickets.length > 0;
+	return (
+		<SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
+			<Headers>
+				<CheckboxHeaderCell alwaysVisible>
+					<Checkbox checked={allSelected} onClick={onCheckAll} />
+				</CheckboxHeaderCell>
+			</Headers>
+			<VirtualList
+				items={tickets}
+				itemHeight={TICKET_TABLE_ROW_HEIGHT}
+				itemContent={(ticket: ITicket) => (
+					<Row key={ticket._id}>
+						<CellContainer alwaysVisible>
+							<Checkbox checked={selectedIds.includes(ticket._id)} onClick={(e) => onCheck(e, ticket)} />
+						</CellContainer>
+					</Row>
+				)}
+			/>
+			<Gap $height={`${TICKET_TABLE_ROW_HEIGHT}px`} />
+		</SelectionColumnContainer>
+	);
 };

@@ -27,7 +27,7 @@ export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	display: grid;
 	position: relative;
 	/* Selection column is actually in a separate table, so offset is needed to make it all seem like one table*/
-    right: ${SELECTION_COLUMN_WIDTH}px;
+	right: ${SELECTION_COLUMN_WIDTH}px;
 	z-index: 11;
 
 	${({ disabled }) => disabled && css`
