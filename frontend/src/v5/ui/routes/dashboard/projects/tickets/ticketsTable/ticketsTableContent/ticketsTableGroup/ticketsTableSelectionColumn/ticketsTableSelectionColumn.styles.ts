@@ -27,7 +27,9 @@ export const Checkbox = styled(CheckboxBase)`
 	padding: 0;
 `;
 
-export const CheckboxHeaderCell = styled(HeaderCell)`
+export const CheckboxHeaderCell = styled(HeaderCell).attrs({
+	draggable: false,
+})`
     height: 16px;
     overflow: visible;
 	&:last-of-type {
