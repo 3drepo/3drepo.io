@@ -24,6 +24,7 @@ import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { Gap } from '@controls/gap';
 import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { uniq } from 'lodash';
+import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 
 type TicketsTableSelectionColumnProps = {
     tickets: ITicket[];
@@ -58,7 +59,7 @@ export const TicketsTableSelectionColumn = ({
             </Headers>
             <VirtualList
                 items={tickets}
-                itemHeight={37}
+                itemHeight={TICKET_TABLE_ROW_HEIGHT}
                 itemContent={(ticket: ITicket) => (
                     <Row key={ticket._id}>
                         <CellContainer name="select">
@@ -67,7 +68,7 @@ export const TicketsTableSelectionColumn = ({
                     </Row>
                 )}
             />
-            <Gap $height="37px" />
+            <Gap $height={`${TICKET_TABLE_ROW_HEIGHT}px`} />
         </SelectionColumnContainer>
     );
 };

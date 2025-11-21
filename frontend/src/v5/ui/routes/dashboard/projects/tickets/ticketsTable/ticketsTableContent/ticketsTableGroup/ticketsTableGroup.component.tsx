@@ -22,7 +22,7 @@ import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/t
 import { Table, Group, PlaceholderForStickyFunctionality } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
-import { SetTicketValue } from '../../ticketsTable.helper';
+import { SetTicketValue, TICKET_TABLE_ROW_HEIGHT } from '../../ticketsTable.helper';
 import { orderBy } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -67,7 +67,7 @@ const TicketsTableGroupContent = ({
 			<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
 				<VirtualList
 					items={sortedItems}
-					itemHeight={37}
+					itemHeight={TICKET_TABLE_ROW_HEIGHT}
 					itemContent={(ticket: ITicket) => (
 						<TicketsTableRow
 							key={ticket._id}
