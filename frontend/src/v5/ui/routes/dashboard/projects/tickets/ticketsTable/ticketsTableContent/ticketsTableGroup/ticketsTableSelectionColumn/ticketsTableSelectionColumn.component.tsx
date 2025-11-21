@@ -23,6 +23,7 @@ import { CellContainer } from '../ticketsTableRow/ticketsTableCell/cell/cell.sty
 import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { Gap } from '@controls/gap';
 import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
+import { uniq } from 'lodash';
 
 type TicketsTableSelectionColumnProps = {
     tickets: ITicket[];
@@ -34,14 +35,20 @@ export const TicketsTableSelectionColumn = ({
     const { selectedIds, setSelectedIds } = useTicketFiltersContext();
     const onCheck = (e, ticket) => {
         if (e.target.checked) {
-            setSelectedIds((prev) => [...prev, ticket._id])
+            setSelectedIds([...selectedIds, ticket._id])
             return;
         }
-        setSelectedIds((prev) => prev.filter((id) => id !== ticket._id));
+        setSelectedIds(selectedIds.filter((id) => id !== ticket._id));
     }
-    const onCheckAll = (e) => setSelectedIds(e.target.checked ? tickets.map((t) => t._id) : []);
+    const onCheckAll = (e) => {
+        if (e.target.checked) {
+            setSelectedIds(uniq([...selectedIds, ...tickets.map((t) => t._id)]))
+            return;
+        }
+        setSelectedIds(selectedIds.filter((id) => !tickets.map((t) => t._id).includes(id)));
+    }
 
-    const allSelected = tickets?.length && selectedIds.length === tickets.length;
+    const allSelected = tickets.every(({ _id }) => selectedIds.includes(_id)) && tickets.length > 0;
     return (
         <SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
             <Headers>
