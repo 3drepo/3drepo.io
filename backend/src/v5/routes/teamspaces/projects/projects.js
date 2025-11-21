@@ -149,8 +149,346 @@ const getStatusCodes = (req, res) => {
 	}
 };
 
-const establishRoutes = () => {
+const establishRoutes = (isInternal) => {
 	const router = Router({ mergeParams: true });
+
+	if (!isInternal) {
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}:
+		 *   get:
+		 *     description: Gets a project
+		 *     tags: [Projects]
+		 *     operationId: getProjectSettings
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Id of the project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       200:
+		 *         description: returns a project
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 name:
+		 *                   type: string
+		 *                   description: Name of the project
+		 *                   example: project1
+		 */
+		router.get('/:project', hasAccessToTeamspace, getProject);
+
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}:
+		 *   delete:
+		 *     description: Deletes a project
+		 *     tags: [Projects]
+		 *     operationId: deleteProject
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Id of the project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       200:
+		 *         description: Delete a project
+		 */
+		router.delete('/:project', isTeamspaceAdmin, deleteProject);
+
+		/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}:
+	 *   patch:
+	 *     description: Edits a project
+	 *     tags: [Projects]
+	 *     operationId: updateProject
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               name:
+	 *                 type: string
+	 *                 description: The new name of the project
+	 *                 example: project 1
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Update the project settings
+	 */
+		router.patch('/:project', isAdminToProject, validateProjectData, updateProject);
+
+		/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/image:
+	 *   get:
+	 *     description: Gets a project image
+	 *     tags: [Projects]
+	 *     operationId: getProjectImage
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: returns a project image
+	 *         content:
+	 *           image/png:
+	 *             schema:
+	 *               type: string
+	 *               format: binary
+	 */
+		router.get('/:project/image', hasAccessToTeamspace, projectExists, getImage);
+
+		/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/image:
+	 *   put:
+	 *     description: Upload a project image
+	 *     tags: [Projects]
+	 *     operationId: uploadProjectImage
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     requestBody:
+	 *       content:
+	 *         multipart/form-data:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               file:
+	 *                 type: string
+	 *                 format: binary
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         $ref: "#/components/responses/ok"
+	 */
+		router.put('/:project/image', isAdminToProject, singleImageUpload('file'), updateImage);
+
+		/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/image:
+	 *   delete:
+	 *     description: Deletes a project image
+	 *     tags: [Projects]
+	 *     operationId: deleteProjectImage
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         $ref: "#/components/responses/ok"
+	 */
+		router.delete('/:project/image', isAdminToProject, deleteImage);
+
+		/**
+	* @openapi
+	* /teamspaces/{teamspace}/projects/{project}/settings/drawingCategories:
+	*   get:
+	*     description: Get the list of drawing categories available within the project
+	*     tags: [Projects]
+	*     operationId: getDrawingCategories
+	*     parameters:
+	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*       - name: project
+	*         description: Id of the project
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*           format: uuid
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: returns the array of drawing categories
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 drawingCategories:
+	*                   type: array
+	*                   items:
+	*                     type: string
+	*                   example: ["Architectural", "Existing", "GIS"]
+	*/
+		router.get('/:project/settings/drawingCategories', isAdminToProject, getDrawingCategories);
+
+		/**
+	* @openapi
+	* /teamspaces/{teamspace}/projects/{project}/settings/statusCodes:
+	*   get:
+	*     description: Get the list of status codes available within the project
+	*     tags: [Projects]
+	*     operationId: getStatusCodes
+	*     parameters:
+	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*       - name: project
+	*         description: Id of the project
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*           format: uuid
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: returns the array of status codes
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 statusCodes:
+	*                   type: array
+	*                   items:
+	*                     type: object
+	*                     properties:
+	*                       code:
+	*                         type: string
+	*                         description: The status code
+	*                         example: S1
+	*                       description:
+	*                         type: string
+	*                         description: Suitable for coordinationn
+	*                         example: S1
+	*             example: [ { code: "S0", description: "Initial status" }, { code: "S1", description: "Suitable for coordination" }]
+	*/
+		router.get('/:project/settings/statusCodes', hasAccessToTeamspace, projectExists, getStatusCodes);
+	}
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects:
+	 *   post:
+	 *     description: Creates a new project
+	 *     tags: [Projects]
+	 *     operationId: createProject
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               name:
+	 *                 type: string
+	 *                 description: The name of the new project
+	 *                 example: project 1
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Create a new project
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: The id of the new project
+	 *                   example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 */
+	router.post('/', isTeamspaceAdmin, validateProjectData, createProject);
 
 	/**
 	 * @openapi
@@ -199,343 +537,7 @@ const establishRoutes = () => {
 	 */
 	router.get('/', hasAccessToTeamspace, getProjectList);
 
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects:
-	 *   post:
-	 *     description: Creates a new project
-	 *     tags: [Projects]
-	 *     operationId: createProject
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               name:
-	 *                 type: string
-	 *                 description: The name of the new project
-	 *                 example: project 1
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         description: Create a new project
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 _id:
-	 *                   type: string
-	 *                   format: uuid
-	 *                   description: The id of the new project
-	 *                   example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
-	 */
-	router.post('/', isTeamspaceAdmin, validateProjectData, createProject);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}:
-	 *   delete:
-	 *     description: Deletes a project
-	 *     tags: [Projects]
-	 *     operationId: deleteProject
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Id of the project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         description: Delete a project
-	 */
-	router.delete('/:project', isTeamspaceAdmin, deleteProject);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}:
-	 *   patch:
-	 *     description: Edits a project
-	 *     tags: [Projects]
-	 *     operationId: updateProject
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Id of the project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               name:
-	 *                 type: string
-	 *                 description: The new name of the project
-	 *                 example: project 1
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         description: Update the project settings
-	 */
-	router.patch('/:project', isAdminToProject, validateProjectData, updateProject);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}:
-	 *   get:
-	 *     description: Gets a project
-	 *     tags: [Projects]
-	 *     operationId: getProjectSettings
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Id of the project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         description: returns a project
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 name:
-	 *                   type: string
-	 *                   description: Name of the project
-	 *                   example: project1
-	 */
-	router.get('/:project', hasAccessToTeamspace, getProject);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/image:
-	 *   get:
-	 *     description: Gets a project image
-	 *     tags: [Projects]
-	 *     operationId: getProjectImage
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Id of the project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         description: returns a project image
-	 *         content:
-	 *           image/png:
-	 *             schema:
-	 *               type: string
-	 *               format: binary
-	 */
-	router.get('/:project/image', hasAccessToTeamspace, projectExists, getImage);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/image:
-	 *   put:
-	 *     description: Upload a project image
-	 *     tags: [Projects]
-	 *     operationId: uploadProjectImage
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Id of the project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     requestBody:
-	 *       content:
-	 *         multipart/form-data:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               file:
-	 *                 type: string
-	 *                 format: binary
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         $ref: "#/components/responses/ok"
-	 */
-	router.put('/:project/image', isAdminToProject, singleImageUpload('file'), updateImage);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/image:
-	 *   delete:
-	 *     description: Deletes a project image
-	 *     tags: [Projects]
-	 *     operationId: deleteProjectImage
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Id of the project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         $ref: "#/components/responses/ok"
-	 */
-	router.delete('/:project/image', isAdminToProject, deleteImage);
-
-	/**
-	* @openapi
-	* /teamspaces/{teamspace}/projects/{project}/settings/drawingCategories:
-	*   get:
-	*     description: Get the list of drawing categories available within the project
-	*     tags: [Projects]
-	*     operationId: getDrawingCategories
-	*     parameters:
-	*       - name: teamspace
-	*         description: name of teamspace
-	*         in: path
-	*         required: true
-	*         schema:
-	*           type: string
-	*       - name: project
-	*         description: Id of the project
-	*         in: path
-	*         required: true
-	*         schema:
-	*           type: string
-	*           format: uuid
-	*     responses:
-	*       401:
-	*         $ref: "#/components/responses/notLoggedIn"
-	*       200:
-	*         description: returns the array of drawing categories
-	*         content:
-	*           application/json:
-	*             schema:
-	*               type: object
-	*               properties:
-	*                 drawingCategories:
-	*                   type: array
-	*                   items:
-	*                     type: string
-	*                   example: ["Architectural", "Existing", "GIS"]
-	*/
-	router.get('/:project/settings/drawingCategories', isAdminToProject, getDrawingCategories);
-
-	/**
-	* @openapi
-	* /teamspaces/{teamspace}/projects/{project}/settings/statusCodes:
-	*   get:
-	*     description: Get the list of status codes available within the project
-	*     tags: [Projects]
-	*     operationId: getStatusCodes
-	*     parameters:
-	*       - name: teamspace
-	*         description: name of teamspace
-	*         in: path
-	*         required: true
-	*         schema:
-	*           type: string
-	*       - name: project
-	*         description: Id of the project
-	*         in: path
-	*         required: true
-	*         schema:
-	*           type: string
-	*           format: uuid
-	*     responses:
-	*       401:
-	*         $ref: "#/components/responses/notLoggedIn"
-	*       200:
-	*         description: returns the array of status codes
-	*         content:
-	*           application/json:
-	*             schema:
-	*               type: object
-	*               properties:
-	*                 statusCodes:
-	*                   type: array
-	*                   items:
-	*                     type: object
-	*                     properties:
-	*                       code:
-	*                         type: string
-	*                         description: The status code
-	*                         example: S1
-	*                       description:
-	*                         type: string
-	*                         description: Suitable for coordinationn
-	*                         example: S1
-	*             example: [ { code: "S0", description: "Initial status" }, { code: "S1", description: "Suitable for coordination" }]
-	*/
-	router.get('/:project/settings/statusCodes', hasAccessToTeamspace, projectExists, getStatusCodes);
-
 	return router;
 };
 
-module.exports = establishRoutes();
+module.exports = establishRoutes;
