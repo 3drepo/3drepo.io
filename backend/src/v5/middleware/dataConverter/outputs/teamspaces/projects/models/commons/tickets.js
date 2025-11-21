@@ -100,20 +100,22 @@ Tickets.serialiseTicketList = async (req, res) => {
 };
 
 Tickets.serialiseTicketHistory = (req, res) => {
-	const serializeData = (obj) => {
-		const returnObj = { ...obj };
-		for (const [key, value] of Object.entries(obj)) {
-			if (isDate(value)) {
-				returnObj[key] = value.getTime();
-			} else if (isUUID(value)) {
-				returnObj[key] = UUIDToString(value);
-			} else if (isArray(value)) {
-				returnObj[key] = value.map((entry) => serializeData(entry));
-			} else if (isObject(value)) {
-				returnObj[key] = serializeData(value);
+	const serializeData = (value) => {
+		if (isDate(value)) {
+			return value.getTime();
+		} if (isUUID(value)) {
+			return UUIDToString(value);
+		} if (isArray(value)) {
+			return value.map((entry) => serializeData(entry));
+		} if (isObject(value)) {
+			const retVal = {};
+			for (const [key, val] of Object.entries(value)) {
+				retVal[key] = serializeData(val);
 			}
+
+			return retVal;
 		}
-		return returnObj;
+		return value;
 	};
 	try {
 		const history = req.history.map(serializeData);

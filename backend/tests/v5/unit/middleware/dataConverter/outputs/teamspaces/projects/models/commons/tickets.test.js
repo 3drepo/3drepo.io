@@ -451,7 +451,8 @@ const testSerialiseTicketHistory = () => {
 		['history entry has a date type', [{ date }], true, [{ date: date.getTime() }]],
 		['history entry has a uuid type', [{ uuid }], true, [{ uuid: UUIDToString(uuid) }]],
 		['history entry has an object', [{ changes: { uuidProp: uuid, dateProp: date, txtProp: text } }], true, [{ changes: { uuidProp: UUIDToString(uuid), dateProp: date.getTime(), txtProp: text } }]],
-		['history entry has an array', [{ changes: { arrayProp: times(10, () => ({ uuidProp: uuid, dateProp: date, txtProp: text })) } }], true,
+		['history entry has a simple array', [{ arr: [1.0, 2.0, 3.0] }], true, [{ arr: [1.0, 2.0, 3.0] }]],
+		['history entry has a complex  array', [{ changes: { arrayProp: times(10, () => ({ uuidProp: uuid, dateProp: date, txtProp: text })) } }], true,
 			[
 				{
 					changes: { arrayProp: times(10, () => ({
