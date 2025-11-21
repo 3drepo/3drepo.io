@@ -53,7 +53,7 @@ export const TicketsTableSelectionColumn = ({
     return (
         <SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
             <Headers>
-                <CheckboxHeaderCell name="select">
+                <CheckboxHeaderCell alwaysVisible>
                     <Checkbox checked={allSelected} onClick={onCheckAll} />
                 </CheckboxHeaderCell>
             </Headers>
@@ -62,7 +62,7 @@ export const TicketsTableSelectionColumn = ({
                 itemHeight={TICKET_TABLE_ROW_HEIGHT}
                 itemContent={(ticket: ITicket) => (
                     <Row key={ticket._id}>
-                        <CellContainer name="select">
+                        <CellContainer alwaysVisible>
                             <Checkbox checked={selectedIds.includes(ticket._id)} onClick={(e) => onCheck(e, ticket)} />
                         </CellContainer>
                     </Row>

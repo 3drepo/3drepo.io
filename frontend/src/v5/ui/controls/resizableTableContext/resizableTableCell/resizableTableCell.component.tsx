@@ -21,17 +21,18 @@ import { Item } from './resizableTableCell.styles';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export type ResizableTableCellProps = HTMLAttributes<HTMLDivElement> & {
-	name: string;
+	name?: string;
+	alwaysVisible?: boolean;
 	className?: string;
 	onClick?: () => void;
 };
-export const ResizableTableCell = ({ name, ...props }: ResizableTableCellProps) => {
+export const ResizableTableCell = ({ name, alwaysVisible, ...props }: ResizableTableCellProps) => {
 	const { movingColumn, getIndex } = useContextWithCondition(ResizableTableContext, ['movingColumn']);
 	const { isVisible } = useContextWithCondition(ResizableTableContext, (['visibleSortedColumnsNames']), (curr, prev) => (
 		curr.visibleSortedColumnsNames.includes(name) !== prev.visibleSortedColumnsNames.includes(name)
 	));
 
-	if (name !== 'select' &&!isVisible(name)) return null; // TODO do something better than === 'select
+	if (!alwaysVisible && !isVisible(name)) return null;
 
 	return (<Item $isMoving={movingColumn === name} $index={getIndex(name)} {...props} />);
 };
