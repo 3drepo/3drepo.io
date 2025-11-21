@@ -47,7 +47,6 @@ describe("Config", function () {
 			const agent = request.agent(server);
 			agent.get("/config/version.json")
 				.expect(200, function(err, res) {
-					console.log(res.body);
 					expect(typeof res).to.equal("object");
 					expect(typeof res.body.VERSION).to.equal("string");
 					expect(res.body.VERSION.split(".").length - 1).to.equal(2);
