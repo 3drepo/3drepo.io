@@ -21,27 +21,35 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer } from './ticketsList.styles';
 import { useEffect, useRef } from 'react';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
-import { groupTickets } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
+import { groupTickets, TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
 
-const TicketsCardGroup = ({tickets, groupName}) => {
-	return (<DashboardListCollapse
+
+type IdsToNumber = { idsToNumber: any };
+
+const TicketsCardGroup = ({ tickets, groupName, idsToNumber } : TicketsGroup & IdsToNumber) => {
+	return (<div data-name={groupName} ><DashboardListCollapse
 		title={(
 			<h1>
-				{groupName}
+				{groupName} ({tickets.length})
 			</h1>
 		)}
 		defaultExpanded
 	>
 		<List>
 			<VirtualList 
+				id='tickets-list'
 				items={tickets}
 				itemHeight={30}
-				ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}
+				ItemComponent={(ticket: ITicket) => 
+					<TicketItem ticket={{ ...ticket, title: idsToNumber[ticket._id]  + ' - ' + ticket.title }} key={ticket._id} />}
 			/>
 		</List>
-	</DashboardListCollapse>);
+	</DashboardListCollapse></div>);
 };
+
+
 
 export const TicketsList = ({ groupBy }) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
@@ -76,14 +84,21 @@ export const TicketsList = ({ groupBy }) => {
 		);
 	}
 
-	console.log(JSON.stringify({ groupBy }, null, '\t'));
 
 	if (groupBy !== 'none') {
 		const groups = groupTickets(groupBy, filteredTickets);
+		const idsToNumber = {};
+		let c = 0;
+
+		groups.forEach((g)=> {
+			g.tickets.forEach((t) => {
+				idsToNumber[t._id] = c++;
+			});
+		});
 
 		return (
 			<ListContainer >
-				<div style={{
+				<div id='groups-scroller' style={{
 					overflowY: 'auto',
 					position: 'relative',
 					height: '100%',
@@ -91,11 +106,12 @@ export const TicketsList = ({ groupBy }) => {
 					<div
 						style={{ position:'absolute' }}
 					>
-						<VirtualList 
+						<VirtualList
+							id='groups-list'
 							items={groups}
 							itemHeight={30}
-							ItemComponent={(group) => 
-								<TicketsCardGroup {...group}/>
+							ItemComponent={(group: TicketsGroup) => 
+								<TicketsCardGroup key={group.groupName} {...group} idsToNumber={idsToNumber} />
 							}
 						/>
 					</div>
