@@ -71,4 +71,12 @@ AuthMiddleware.notLoggedIn = async (req, res, next) => {
 	}
 };
 
+AuthMiddleware.isBypassAuthEnabled = async (req, res, next) => {
+	if (req.app.get(BYPASS_AUTH)) {
+		await next();
+	} else {
+		respond(req, res, templates.bypassAuthNotEnabled);
+	}
+};
+
 module.exports = AuthMiddleware;

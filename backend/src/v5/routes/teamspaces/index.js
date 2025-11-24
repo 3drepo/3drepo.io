@@ -15,16 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { canRemoveTeamspaceMember, memberExists } = require('../../middleware/dataConverter/inputs/teamspaces');
+const { canRemoveTeamspaceMember, memberExists, validateUpdateQuota } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
+const { isBypassAuthEnabled, validSession } = require('../../middleware/auth');
+
 const { Router } = require('express');
+const { SUBSCRIPTION_TYPES } = require('../../models/teamspaces.constants');
 const Teamspaces = require('../../processors/teamspaces');
 const Users = require('../../processors/users');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
-const { validSession } = require('../../middleware/auth');
 
 const getTeamspaceList = async (req, res) => {
 	const user = req.session.user.username;
@@ -103,6 +105,26 @@ const getAddOns = async (req, res) => {
 	try {
 		const addOns = await Teamspaces.getAddOns(teamspace);
 		respond(req, res, templates.ok, addOns);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const updateQuota = async (req, res) => {
+	try {
+		await Teamspaces.updateQuota(req.params.teamspace, SUBSCRIPTION_TYPES.ENTERPRISE, req.body);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const removeQuota = async (req, res) => {
+	try {
+		await Teamspaces.removeQuota(req.params.teamspace);
+		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -396,6 +418,68 @@ const establishRoutes = () => {
 	*                   example: [issues, risks]
 	*/
 	router.get('/:teamspace/addOns', hasAccessToTeamspace, getAddOns);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/quota:
+	*   put:
+	*     description: Updates the quota of a teamspace
+	*     tags: [Teamspaces]
+	*     operationId: updateQuota
+	*     parameters:
+   	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     requestBody:
+	*       content:
+	*         application/json:
+	*           schema:
+	*             type: object
+	*             properties:
+	*               expiryDate:
+	*                 type: string
+	*                 description: The expiry date of the quota
+	*                 example: 12/20/2030
+	*               collaborators:
+	*                 type: integer
+	*                 description: The number of collaborators
+	*                 example: 10
+	*               data:
+	*                 type: integer
+	*                 description: The data allowance of the quota
+	*                 example: 100
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: quota has been successfully updated
+	*/
+	router.put('/:teamspace/quota', isBypassAuthEnabled, isMemberOfTeamspace, validateUpdateQuota, updateQuota);
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/quota:
+	*   delete:
+	*     description: Removes the quota of a teamspace
+	*     tags: [Teamspaces]
+	*     operationId: removeQuota
+	*     parameters:
+   	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: quota has been removed
+	*/
+	router.delete('/:teamspace/quota', isBypassAuthEnabled, isMemberOfTeamspace, removeQuota);
 
 	return router;
 };

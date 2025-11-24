@@ -71,7 +71,7 @@ const testSubscriptionSchema = () => {
 
 const testIsValidType = () => {
 	describe.each([
-		...SUBSCRIPTION_TYPES.map((type) => [type, true]),
+		...Object.values(SUBSCRIPTION_TYPES).map((type) => [type, true]),
 		[generateRandomString(), false],
 		[undefined, false],
 		[null, false],

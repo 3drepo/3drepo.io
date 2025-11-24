@@ -32,11 +32,10 @@ const schema = Yup.object().shape({
 	data: Yup.number().min(0),
 	expiryDate: Yup.date().min(new Date()).nullable().transform((v, o) => (o !== null ? new Date(o) : null)),
 }).required().noUnknown(true)
-	.test('Empty object test', 'Data must contain at least one of the specified fields', (obj) => obj.collaborators !== undefined
-			|| obj.data !== undefined
-			|| obj.expiryDate !== undefined);
+	.test('Empty object test', 'Data must contain either collaborators or data',
+		(obj) => obj.collaborators !== undefined || obj.data !== undefined);
 
-const typeSchema = Yup.object().shape({ type: Yup.string().oneOf(SUBSCRIPTION_TYPES).required() });
+const typeSchema = Yup.object().shape({ type: Yup.string().oneOf(Object.values(SUBSCRIPTION_TYPES)).required() });
 
 Subscription.validateSchema = async (type, data) => {
 	const [, output] = await Promise.all([
