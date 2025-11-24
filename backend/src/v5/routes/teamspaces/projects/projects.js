@@ -453,7 +453,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces/{teamspace}/projects:
 	 *   post:
 	 *     description: Creates a new project
-	 *     tags: [v:external, Projects]
+	 *     tags: [v:external, v:internal,Projects]
 	 *     operationId: createProject
 	 *     parameters:
 	 *       - name: teamspace
@@ -495,7 +495,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces/{teamspace}/projects:
 	 *   get:
 	 *     description: Get a list of projects within the specified teamspace the user has access to
-	 *     tags: [v:external, Projects]
+	 *     tags: [v:external, v:internal, Projects]
 	 *     operationId: getProjectList
 	 *     parameters:
 	 *       - name: teamspace
