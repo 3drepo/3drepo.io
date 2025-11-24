@@ -15,16 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useTicketFiltersContext } from "@components/viewer/cards/cardFilters/ticketsFilters.context";
-import { Button } from "@controls/button";
+import { Button } from '@controls/button';
+import { useContext } from 'react';
+import { TicketsTableContext } from './ticketsTableContext/ticketsTableContext';
 
 // This is a temporary component
 // It is just used to check the ticket IDs are correctly selected
 export const BulkEditButton = () => {
-    const { selectedIds, onBulkEdit } = useTicketFiltersContext();
-    return (
-        <Button variant="contained" onClick={onBulkEdit} disabled={selectedIds.length === 0}>
-            Bulk Edit
-        </Button>
-    )
-}
+	const { selectedIds, onBulkEdit } = useContext(TicketsTableContext);
+	return (
+		<Button variant="contained" onClick={onBulkEdit} disabled={selectedIds.length === 0}>
+			Bulk Edit
+		</Button>
+	);
+};

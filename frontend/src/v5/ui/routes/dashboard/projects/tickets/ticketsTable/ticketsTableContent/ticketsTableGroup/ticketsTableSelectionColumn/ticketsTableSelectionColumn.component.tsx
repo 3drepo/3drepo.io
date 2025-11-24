@@ -22,9 +22,10 @@ import { CheckboxHeaderCell, Checkbox, SelectionColumnContainer } from './ticket
 import { CellContainer } from '../ticketsTableRow/ticketsTableCell/cell/cell.styles';
 import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { Gap } from '@controls/gap';
-import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { uniq } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
+import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { useContext } from 'react';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
@@ -35,21 +36,21 @@ export const TicketsTableSelectionColumn = ({
 	tickets,
 	selectedTicketId,
 }: TicketsTableSelectionColumnProps) => {
-	const { selectedIds, setSelectedIds } = useTicketFiltersContext();
+	const { selectedIds, setSelectedIds } = useContext(TicketsTableContext);
 	const onCheck = (e, ticket) => {
 		if (e.target.checked) {
-			setSelectedIds([...selectedIds, ticket._id])
+			setSelectedIds([...selectedIds, ticket._id]);
 			return;
 		}
 		setSelectedIds(selectedIds.filter((id) => id !== ticket._id));
-	}
+	};
 	const onCheckAll = (e) => {
 		if (e.target.checked) {
-			setSelectedIds(uniq([...selectedIds, ...tickets.map((t) => t._id)]))
+			setSelectedIds(uniq([...selectedIds, ...tickets.map((t) => t._id)]));
 			return;
 		}
 		setSelectedIds(selectedIds.filter((id) => !tickets.map((t) => t._id).includes(id)));
-	}
+	};
 
 	const allSelected = tickets.every(({ _id }) => selectedIds.includes(_id)) && tickets.length > 0;
 	return (
