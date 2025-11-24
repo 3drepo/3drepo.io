@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../../helper/path');
+const { determineTestGroup } = require('../../../../helper/services');
 
 jest.mock('../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -315,7 +316,7 @@ const testHasAdminAccessToDrawing = () => {
 	});
 };
 
-describe('middleware/permissions/components/models', () => {
+describe(determineTestGroup(__filename), () => {
 	testHasReadAccessToContainer();
 	testHasWriteAccessToContainer();
 	testHasCommenterAccessToContainer();
