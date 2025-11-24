@@ -16,10 +16,13 @@
  */
 
 const { src } = require('../../../../helper/path');
-const { determineTestGroup } = require('../../../../helper/services');
+const { determineTestGroup, generateRandomString } = require('../../../../helper/services');
+
+const { isBool } = require(`${src}/utils/helper/typeCheck`);
 
 jest.mock('../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
+
 jest.mock('../../../../../../src/v5/utils/permissions');
 const Permissions = require(`${src}/utils/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -48,282 +51,106 @@ Permissions.hasReadAccessToFederation.mockImplementation(mockImp);
 Permissions.hasWriteAccessToFederation.mockImplementation(mockImp);
 Permissions.hasCommenterAccessToFederation.mockImplementation(mockImp);
 
-Sessions.getUserFromSession.mockImplementation(() => 'hi');
-
-const testHasReadAccessToContainer = () => {
-	describe('hasReadAccessToContainer', () => {
-		test('next() should be called if the user has access', async () => {
+const testHelper = (label, testFn, mockedFn) => {
+	describe.each([
+		['user has access', true, true],
+		['byPass is enabled', true, null, true],
+		['the user has no access', false, false, false, templates.notAuthorized],
+		[`${label} threw ${templates.projectNotFound.code}`, false, templates.projectNotFound, false, templates.projectNotFound],
+	])(label, (desc, success, mockVal, byPass, expectedRes) => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+		const user = generateRandomString();
+		test(` ${success ? 'next() ' : 'respond() '}should be called if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasReadAccessToContainer(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+			const req = {
+				params: { teamspace, project, model },
+				session: { user: { username: user } },
+				app: { get: () => byPass },
+			};
+
+			Sessions.getUserFromSession.mockReturnValueOnce(user);
+
+			if (mockVal !== null) {
+				if (isBool(mockVal)) {
+					mockedFn.mockResolvedValueOnce(mockVal);
+				} else {
+					mockedFn.mockRejectedValueOnce(mockVal);
+				}
+			}
+
+			await testFn(
+				req,
 				{},
 				mockCB,
 			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
 
-		test('should respond with not authorised if the user has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasReadAccessToContainer(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
-		});
+			if (success) {
+				expect(mockCB).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).not.toHaveBeenCalled();
+			} else {
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, {}, expectedRes);
+				expect(mockCB).not.toHaveBeenCalledTimes(1);
+			}
 
-		test('should respond with projectNotFound error if hasReadAccessToContainer threw projectNotFound', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasReadAccessToContainer(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
+			if (mockVal !== null) {
+				expect(mockedFn).toHaveBeenCalledTimes(1);
+				expect(mockedFn).toHaveBeenCalledWith(teamspace, project, model, user);
+			} else {
+				expect(mockedFn).not.toHaveBeenCalled();
+			}
 		});
 	});
+};
+
+const testHasReadAccessToContainer = () => {
+	testHelper('hasReadAccessToContainer', ModelMiddleware.hasReadAccessToContainer, Permissions.hasReadAccessToContainer);
 };
 
 const testHasWriteAccessToContainer = () => {
-	describe('hasWriteAccessToContainer', () => {
-		test('next() should be called if the user has access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasWriteAccessToContainer(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with not authorised if the user has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasWriteAccessToContainer(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
-		});
-
-		test('should respond with projectNotFound error if hasReadAccessToContainer threw projectNotFound', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasWriteAccessToContainer(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
-		});
-	});
+	testHelper('hasWriteAccessToContainer', ModelMiddleware.hasWriteAccessToContainer, Permissions.hasWriteAccessToContainer);
 };
 
 const testHasCommenterAccessToContainer = () => {
-	describe('hasCommenterAccessToContainer', () => {
-		test('next() should be called if the user has access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasCommenterAccessToContainer(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with not authorised if the user has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasCommenterAccessToContainer(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
-		});
-
-		test('should respond with projectNotFound error if hasReadAccessToContainer threw projectNotFound', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasCommenterAccessToContainer(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
-		});
-	});
+	testHelper('hasCommenterAccessToContainer', ModelMiddleware.hasCommenterAccessToContainer, Permissions.hasCommenterAccessToContainer);
 };
 
 const testHasReadAccessToFederation = () => {
-	describe('hasReadAccessToFederation', () => {
-		test('next() should be called if the user has access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasReadAccessToFederation(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with not authorised if the user has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasReadAccessToFederation(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
-		});
-
-		test('should respond with projectNotFound error if hasReadAccessToFederation threw projectNotFound', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasReadAccessToFederation(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
-		});
-	});
+	testHelper('hasReadAccessToFederation', ModelMiddleware.hasReadAccessToFederation, Permissions.hasReadAccessToFederation);
 };
 
 const testHasWriteAccessToFederation = () => {
-	describe('hasWriteAccessToFederation', () => {
-		test('next() should be called if the user has access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasWriteAccessToFederation(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with not authorised if the user has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasWriteAccessToFederation(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
-		});
-
-		test('should respond with projectNotFound error if hasReadAccessToFederation threw projectNotFound', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasWriteAccessToFederation(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
-		});
-	});
+	testHelper('hasWriteAccessToFederation', ModelMiddleware.hasWriteAccessToFederation, Permissions.hasWriteAccessToFederation);
 };
 
 const testHasCommenterAccessToFederation = () => {
-	describe('hasCommenterAccessToFederation', () => {
-		test('next() should be called if the user has access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasCommenterAccessToFederation(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
+	testHelper('hasCommenterAccessToFederation', ModelMiddleware.hasCommenterAccessToFederation, Permissions.hasCommenterAccessToFederation);
+};
 
-		test('should respond with not authorised if the user has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasCommenterAccessToFederation(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
-		});
+const testHasAdminAccessToContainer = () => {
+	testHelper('hasAdminAccessToContainer', ModelMiddleware.hasAdminAccessToContainer, Permissions.hasAdminAccessToContainer);
+};
 
-		test('should respond with projectNotFound error if hasReadAccessToFederation threw projectNotFound', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasCommenterAccessToFederation(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
-		});
-	});
+const testHasAdminAccessToFederation = () => {
+	testHelper('hasAdminAccessToFederation', ModelMiddleware.hasAdminAccessToFederation, Permissions.hasAdminAccessToFederation);
 };
 
 const testHasAdminAccessToDrawing = () => {
-	describe('hasAdminAccessToDrawing', () => {
-		test('next() should be called if the user has access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasAdminAccessToDrawing(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(1);
-		});
-
-		test('should respond with not authorised if the user has no access', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasAdminAccessToDrawing(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.notAuthorized);
-		});
-
-		test('should respond with projectNotFound error if hasReadAccessToDrawing threw projectNotFound', async () => {
-			const mockCB = jest.fn(() => {});
-			await ModelMiddleware.hasAdminAccessToDrawing(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
-				{},
-				mockCB,
-			);
-			expect(mockCB.mock.calls.length).toBe(0);
-			expect(Responder.respond.mock.calls.length).toBe(1);
-			expect(Responder.respond.mock.results[0].value).toEqual(templates.projectNotFound);
-		});
-	});
+	testHelper('hasAdminAccessToDrawing', ModelMiddleware.hasAdminAccessToDrawing, Permissions.hasAdminAccessToDrawing);
 };
 
 describe(determineTestGroup(__filename), () => {
 	testHasReadAccessToContainer();
 	testHasWriteAccessToContainer();
 	testHasCommenterAccessToContainer();
-
-	testHasAdminAccessToDrawing();
+	testHasAdminAccessToContainer();
 
 	testHasReadAccessToFederation();
 	testHasWriteAccessToFederation();
 	testHasCommenterAccessToFederation();
+	testHasAdminAccessToFederation();
+
+	testHasAdminAccessToDrawing();
 });

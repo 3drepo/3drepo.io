@@ -151,7 +151,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
 	 *   post:
 	 *     description: Create a new revision.
-	 *     tags: [v:external, Revisions]
+	 *     tags: [v:external, v:internal, Revisions]
 	 *     operationId: createNewModelRevision
 	 *     parameters:
 	 *       - name: teamspace
