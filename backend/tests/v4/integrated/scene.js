@@ -21,7 +21,7 @@ const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
 const responseCodes = require("../../../src/v4/response_codes.js");
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 
 describe("Meshes", function () {
 	let server;
@@ -33,6 +33,7 @@ describe("Meshes", function () {
 	const existingModel = "5bfc11fa-50ac-b7e7-4328-83aa11fa50ac";
 
 	before(async function() {
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");
