@@ -46,9 +46,9 @@ const groupPathsByVersion = ({ paths }) => {
 	for (const [route, defs] of Object.entries(paths)) {
 		for (const [verb, funcSpec] of Object.entries(defs)) {
 			const { tags = [], ...rest } = funcSpec;
-			const tagsNotVersion = tags.filter((tag) => !tag.startsWith(prefix));
-			if (tagsNotVersion.length === 0) {
-				// 	throw new Error(`Route ${verb.toUpperCase()} ${route} is missing x-version tag`);
+			const otherTags = tags.filter((tag) => !tag.startsWith(prefix));
+			if (otherTags.length === tags.length) {
+				throw new Error(`Route ${verb.toUpperCase()} ${route} is missing "${prefix}" tag`);
 			}
 			tags.forEach((element) => {
 				if (element.startsWith(prefix)) {
@@ -59,7 +59,7 @@ const groupPathsByVersion = ({ paths }) => {
 					if (!pathsByVersion[version][route]) {
 						pathsByVersion[version][route] = {};
 					}
-					pathsByVersion[version][route][verb] = { tagsNotVersion, ...rest };
+					pathsByVersion[version][route][verb] = { tags: otherTags, ...rest };
 				}
 			});
 		}
