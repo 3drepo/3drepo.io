@@ -22,6 +22,8 @@ const { logger } = require('../../utils/logger');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
+const DEFAULT_VERSION = 'external';
+
 const options = {
 	definition: {
 		openapi: '3.0.0',
@@ -53,13 +55,14 @@ const groupPathsByVersion = ({ paths }) => {
 			tags.forEach((element) => {
 				if (element.startsWith(prefix)) {
 					const version = element.split(prefix)[1].trim().toLowerCase();
-					if (!pathsByVersion[version]) {
-						pathsByVersion[version] = {};
+					const prefixPath = version === DEFAULT_VERSION ? '/docs' : `/docs-${version}`;
+					if (!pathsByVersion[prefixPath]) {
+						pathsByVersion[prefixPath] = {};
 					}
-					if (!pathsByVersion[version][route]) {
-						pathsByVersion[version][route] = {};
+					if (!pathsByVersion[prefixPath][route]) {
+						pathsByVersion[prefixPath][route] = {};
 					}
-					pathsByVersion[version][route][verb] = { tags: otherTags, ...rest };
+					pathsByVersion[prefixPath][route][verb] = { tags: otherTags, ...rest };
 				}
 			});
 		}
@@ -68,31 +71,27 @@ const groupPathsByVersion = ({ paths }) => {
 };
 
 const setupDocEndpoint = (app) => {
-	try {
-		const docs = swaggerJsdoc(options);
-		docs.components = docs.components || {};
-		docs.components = { ...docs.components, ...Schemas };
-		const uiOptions = {
-			explorer: true,
-		};
-		const pathsByGroups = groupPathsByVersion(docs);
+	const docs = swaggerJsdoc(options);
+	docs.components = docs.components || {};
+	docs.components = { ...docs.components, ...Schemas };
+	const uiOptions = {
+		explorer: true,
+	};
+	const pathsByGroups = groupPathsByVersion(docs);
 
-		const generateDocWithVersion = (route, filteredDoc) => {
-			logger.logInfo(`Setting up Swagger doc endpoint at ${route}`);
-			app.use(`${route}/openapi.json`, (req, res) => res.json(filteredDoc));
-			app.use(
-				route,
-				swaggerUi.serve,
-				swaggerUi.setup(filteredDoc, uiOptions),
-			);
-		};
+	const generateDocWithVersion = (route, filteredDoc) => {
+		logger.logInfo(`Setting up Swagger doc endpoint at ${route}`);
+		app.use(`${route}/openapi.json`, (req, res) => res.json(filteredDoc));
+		app.use(
+			route,
+			swaggerUi.serve,
+			swaggerUi.setup(filteredDoc, uiOptions),
+		);
+	};
 
-		for (const [version, paths] of Object.entries(pathsByGroups)) {
-			const routePath = version === 'external' ? '/docs' : `/docs-${version}`;
-			generateDocWithVersion(routePath, { ...docs, paths });
-		}
-	} catch (err) {
-		console.log(err);
+	app.use('/docs-list', (req, res) => res.json({ uri: Object.keys(pathsByGroups) }));
+	for (const [version, paths] of Object.entries(pathsByGroups)) {
+		generateDocWithVersion(version, { ...docs, paths });
 	}
 };
 
