@@ -104,7 +104,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates:
 	*   post:
 	*     description: Add a new ticket template to the teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -139,7 +139,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates:
 	*   get:
 	*     description: Get the list of templates within this teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -185,7 +185,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates/{template}:
 	*   put:
 	*     description: Updates an existing ticket template
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -220,7 +220,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates/{template}:
 	*   get:
 	*     description: Get a ticket template
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -253,7 +253,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/riskCategories:
 	*   get:
 	*     description: Get the list of risk categories
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -285,7 +285,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/settings/activities/archive:
 	 *   get:
 	 *     description: Get an encrypted zip file containing the requested audit logs. The password to unlock the file will be sent to the user via email
-	 *     tags: [Teamspaces]
+	 *     tags: [v:external, Teamspaces]
 	 *     operationId: getAuditLogArchive
 	 *     parameters:
 	 *       - name: teamspace

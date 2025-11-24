@@ -254,7 +254,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}:
 	 *   post:
 	 *     description: Add a new model to the specified project the user is admin of
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: addModel
 	 *     parameters:
 	 *       - name: teamspace
@@ -392,7 +392,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}:
 	 *   get:
 	 *     description: Get a list of models within the specified project the user has access to
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: getModelList
 	 *     parameters:
 	 *       - name: teamspace
@@ -466,7 +466,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
 	 *   patch:
 	 *     description: Add models to the user's favourites list
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: appendModels
 	 *     parameters:
 	 *       - name: teamspace
@@ -527,7 +527,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
 	 *   delete:
 	 *     description: Remove models from the user's favourites list
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: deleteModels
 	 *     parameters:
 	 *       - name: teamspace
@@ -570,7 +570,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/stats:
 	 *   get:
 	 *     description: Get the statistics and general information about a model
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: getModelStats
 	 *     parameters:
 	 *       - name: teamspace
@@ -685,7 +685,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   delete:
 	 *     description: Delete model from project the user is admin of
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: deleteModel
 	 *     parameters:
 	 *       - name: teamspace
@@ -728,7 +728,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   patch:
 	 *     description: Updates the settings of a model
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: updateModelSettings
 	 *     parameters:
 	 *       - name: teamspace
@@ -844,7 +844,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   get:
 	 *     description: Get the model settings of model
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: getModelSettings
 	 *     parameters:
 	 *       - name: teamspace
@@ -932,7 +932,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/members:
 	 *   get:
 	 *     description: Get the name of the users who have access to the model
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: getUsersWithPermissions
 	 *     parameters:
 	 *       - name: teamspace
@@ -991,7 +991,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
 	 *   get:
 	 *     description: Get the names of the jobs that are associated with users who have access to the model
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: getJobsWithAccess
 	 *     parameters:
 	 *       - name: teamspace
@@ -1051,7 +1051,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/thumbnail:
 	 *   get:
 	 *     description: Fetches the thumbnail for a drawing.
-	 *     tags: [Models]
+	 *     tags: [v:external, Models]
 	 *     operationId: getThumbnail
 	 *     parameters:
 	 *       - name: teamspace

@@ -18,8 +18,11 @@ const Schemas = require('./swagger.schemas');
 
 const { VERSION } = require('../../../../VERSION.json');
 const { createEndpointURL } = require('../../utils/config');
+const { logger } = require('../../utils/logger');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+
+const DEFAULT_VERSION = 'external';
 
 const options = {
 	definition: {
@@ -38,6 +41,35 @@ const options = {
 	apis: [`${__dirname}/../../routes/**/*.js`], // files containing annotations as above
 };
 
+const groupPathsByVersion = ({ paths }) => {
+	const pathsByVersion = {};
+	const prefix = 'v:';
+
+	for (const [route, defs] of Object.entries(paths)) {
+		for (const [verb, funcSpec] of Object.entries(defs)) {
+			const { tags = [], ...rest } = funcSpec;
+			const otherTags = tags.filter((tag) => !tag.startsWith(prefix));
+			if (otherTags.length === tags.length) {
+				throw new Error(`Route ${verb.toUpperCase()} ${route} is missing "${prefix}" tag`);
+			}
+			tags.forEach((element) => {
+				if (element.startsWith(prefix)) {
+					const version = element.split(prefix)[1].trim().toLowerCase();
+					const prefixPath = version === DEFAULT_VERSION ? '/docs' : `/docs-${version}`;
+					if (!pathsByVersion[prefixPath]) {
+						pathsByVersion[prefixPath] = {};
+					}
+					if (!pathsByVersion[prefixPath][route]) {
+						pathsByVersion[prefixPath][route] = {};
+					}
+					pathsByVersion[prefixPath][route][verb] = { tags: otherTags, ...rest };
+				}
+			});
+		}
+	}
+	return pathsByVersion;
+};
+
 const setupDocEndpoint = (app) => {
 	const docs = swaggerJsdoc(options);
 	docs.components = docs.components || {};
@@ -45,9 +77,22 @@ const setupDocEndpoint = (app) => {
 	const uiOptions = {
 		explorer: true,
 	};
+	const pathsByGroups = groupPathsByVersion(docs);
 
-	app.use('/docs/openapi.json', (req, res) => res.json(docs));
-	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
+	const generateDocWithVersion = (route, filteredDoc) => {
+		logger.logInfo(`Setting up Swagger doc endpoint at ${route}`);
+		app.use(`${route}/openapi.json`, (req, res) => res.json(filteredDoc));
+		app.use(
+			route,
+			swaggerUi.serve,
+			swaggerUi.setup(filteredDoc, uiOptions),
+		);
+	};
+
+	app.use('/docs-list', (req, res) => res.json({ uri: Object.keys(pathsByGroups) }));
+	for (const [version, paths] of Object.entries(pathsByGroups)) {
+		generateDocWithVersion(version, { ...docs, paths });
+	}
 };
 
 module.exports = setupDocEndpoint;
