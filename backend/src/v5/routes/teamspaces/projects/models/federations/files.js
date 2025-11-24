@@ -43,7 +43,7 @@ const establishRoutes = () => {
      * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/files/original/info:
      *   get:
      *     description: Get the details of the original files uploaded to that federation
-     *     tags: [Files]
+     *     tags: [v:external, Files]
      *     operationId: getFederationMD5Hash
      *     parameters:
      *       - name: teamspace

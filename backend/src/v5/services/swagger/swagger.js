@@ -18,6 +18,7 @@ const Schemas = require('./swagger.schemas');
 
 const { VERSION } = require('../../../../VERSION.json');
 const { createEndpointURL } = require('../../utils/config');
+const { logger } = require('../../utils/logger');
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
 
@@ -38,16 +39,61 @@ const options = {
 	apis: [`${__dirname}/../../routes/**/*.js`], // files containing annotations as above
 };
 
-const setupDocEndpoint = (app) => {
-	const docs = swaggerJsdoc(options);
-	docs.components = docs.components || {};
-	docs.components = { ...docs.components, ...Schemas };
-	const uiOptions = {
-		explorer: true,
-	};
+const groupPathsByVersion = ({ paths }) => {
+	const pathsByVersion = {};
+	const prefix = 'v:';
 
-	app.use('/docs/openapi.json', (req, res) => res.json(docs));
-	app.use('/docs', swaggerUi.serve, swaggerUi.setup(docs, uiOptions));
+	for (const [route, defs] of Object.entries(paths)) {
+		for (const [verb, funcSpec] of Object.entries(defs)) {
+			const { tags = [], ...rest } = funcSpec;
+			const tagsNotVersion = tags.filter((tag) => !tag.startsWith(prefix));
+			if (tagsNotVersion.length === 0) {
+				// 	throw new Error(`Route ${verb.toUpperCase()} ${route} is missing x-version tag`);
+			}
+			tags.forEach((element) => {
+				if (element.startsWith(prefix)) {
+					const version = element.split(prefix)[1].trim().toLowerCase();
+					if (!pathsByVersion[version]) {
+						pathsByVersion[version] = {};
+					}
+					if (!pathsByVersion[version][route]) {
+						pathsByVersion[version][route] = {};
+					}
+					pathsByVersion[version][route][verb] = { tagsNotVersion, ...rest };
+				}
+			});
+		}
+	}
+	return pathsByVersion;
+};
+
+const setupDocEndpoint = (app) => {
+	try {
+		const docs = swaggerJsdoc(options);
+		docs.components = docs.components || {};
+		docs.components = { ...docs.components, ...Schemas };
+		const uiOptions = {
+			explorer: true,
+		};
+		const pathsByGroups = groupPathsByVersion(docs);
+
+		const generateDocWithVersion = (route, filteredDoc) => {
+			logger.logInfo(`Setting up Swagger doc endpoint at ${route}`);
+			app.use(`${route}/openapi.json`, (req, res) => res.json(filteredDoc));
+			app.use(
+				route,
+				swaggerUi.serve,
+				swaggerUi.setup(filteredDoc, uiOptions),
+			);
+		};
+
+		for (const [version, paths] of Object.entries(pathsByGroups)) {
+			const routePath = version === 'external' ? '/docs' : `/docs-${version}`;
+			generateDocWithVersion(routePath, { ...docs, paths });
+		}
+	} catch (err) {
+		console.log(err);
+	}
 };
 
 module.exports = setupDocEndpoint;
