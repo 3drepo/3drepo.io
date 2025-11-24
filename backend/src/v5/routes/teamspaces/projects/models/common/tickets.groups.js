@@ -81,7 +81,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/groups/{group}:
 	 *   get:
 	 *     description: Get the details of a group associated to a ticket
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getGroup
 	 *     parameters:
 	 *       - name: teamspace
@@ -150,7 +150,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/groups/{group}:
 	 *   patch:
 	 *     description: Update a group
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: updateGroup
 	 *     parameters:
 	 *       - name: teamspace

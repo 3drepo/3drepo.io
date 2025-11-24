@@ -151,7 +151,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
 	 *   post:
 	 *     description: Create a new revision.
-	 *     tags: [Revisions]
+	 *     tags: [v:external, Revisions]
 	 *     operationId: createNewModelRevision
 	 *     parameters:
 	 *       - name: teamspace
@@ -238,7 +238,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
 	 *   get:
 	 *     description: Get a list of revisions of a model
-	 *     tags: [Revisions]
+	 *     tags: [v:external, Revisions]
 	 *     operationId: getModelRevisions
 	 *     parameters:
 	 *       - name: teamspace
@@ -255,7 +255,7 @@ const establishRoutes = (modelType, internal) => {
 	 *           type: string
 	 *           format: uuid
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -344,7 +344,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions/{revision}:
 	 *   patch:
 	 *     description: Update a revision. Currently only the void status can be updated.
-	 *     tags: [Revisions]
+	 *     tags: [v:external, Revisions]
 	 *     operationId: updateModelRevisionStatus
 	 *     parameters:
 	 *       - name: teamspace
@@ -406,7 +406,7 @@ const establishRoutes = (modelType, internal) => {
 		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
 		 *   get:
 		 *     description: Downloads the container files of the selected revision
-		 *     tags: [Revisions]
+		 *     tags: [v:external, Revisions]
 		 *     operationId: downloadContainerRevisionFiles
 		 *     parameters:
 		 *       - name: teamspace
@@ -455,7 +455,7 @@ const establishRoutes = (modelType, internal) => {
 		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files/original/info:
 		 *   get:
 		 *     description: Get the details of the original file uploaded to that revision of the container
-		 *     tags: [Revisions]
+		 *     tags: [v:external, Revisions]
 		 *     operationId: getRevisionMD5Hash
 		 *     parameters:
 		 *       - name: teamspace
@@ -529,7 +529,7 @@ const establishRoutes = (modelType, internal) => {
 		 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/original:
 		 *   get:
 		 *     description: Downloads the drawing files of the selected revision
-		 *     tags: [Revisions]
+		 *     tags: [v:external, Revisions]
 		 *     operationId: downloadDrawingRevisionFiles
 		 *     parameters:
 		 *       - name: teamspace
@@ -579,7 +579,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/image:
 	 *   get:
 	 *     description: Fetches the image for a drawing.
-	 *     tags: [Revisions]
+	 *     tags: [v:external, Revisions]
 	 *     operationId: getImage
 	 *     parameters:
 	 *       - name: teamspace
