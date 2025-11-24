@@ -15,6 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { memo, useCallback, useContext } from 'react';
+
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
@@ -25,25 +27,41 @@ import { Gap } from '@controls/gap';
 import { uniq } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
-import { useContext } from 'react';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
 	selectedTicketId: string;
 };
 
+type SelectionRowType = {
+	ticketId: string;
+	selected: boolean;
+	onCheck: (e: any, ticketId: string) => void;
+	selectedTicketId: string;
+}
+const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId }: SelectionRowType) => (
+	<Row key={ticketId} $selected={selectedTicketId === ticketId}>
+		<CellContainer alwaysVisible>
+			<Checkbox checked={selected} onClick={(e) => onCheck(e, ticketId)} />
+		</CellContainer>
+	</Row>
+));
+
 export const TicketsTableSelectionColumn = ({ 
 	tickets,
 	selectedTicketId,
 }: TicketsTableSelectionColumnProps) => {
 	const { selectedIds, setSelectedIds } = useContext(TicketsTableContext);
-	const onCheck = (e, ticket) => {
+	const allSelected = tickets.every(({ _id }) => selectedIds.includes(_id)) && tickets.length > 0;
+
+	const onCheck = useCallback((e, ticketId) => {
 		if (e.target.checked) {
-			setSelectedIds([...selectedIds, ticket._id]);
+			setSelectedIds([...selectedIds, ticketId]);
 			return;
 		}
-		setSelectedIds(selectedIds.filter((id) => id !== ticket._id));
-	};
+		setSelectedIds(selectedIds.filter((id) => id !== ticketId));
+	}, [selectedIds]);
+
 	const onCheckAll = (e) => {
 		if (e.target.checked) {
 			setSelectedIds(uniq([...selectedIds, ...tickets.map((t) => t._id)]));
@@ -52,7 +70,6 @@ export const TicketsTableSelectionColumn = ({
 		setSelectedIds(selectedIds.filter((id) => !tickets.map((t) => t._id).includes(id)));
 	};
 
-	const allSelected = tickets.every(({ _id }) => selectedIds.includes(_id)) && tickets.length > 0;
 	return (
 		<SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
 			<Headers>
@@ -63,12 +80,13 @@ export const TicketsTableSelectionColumn = ({
 			<VirtualList
 				items={tickets}
 				itemHeight={TICKET_TABLE_ROW_HEIGHT}
-				itemContent={(ticket: ITicket) => (
-					<Row key={ticket._id} $selected={selectedTicketId === ticket._id}>
-						<CellContainer alwaysVisible>
-							<Checkbox checked={selectedIds.includes(ticket._id)} onClick={(e) => onCheck(e, ticket)} />
-						</CellContainer>
-					</Row>
+				itemContent={({ _id }: ITicket) => (
+					<SelectionRow
+						ticketId={_id}
+						selected={selectedIds.includes(_id)}
+						onCheck={onCheck}
+						selectedTicketId={selectedTicketId}
+					/>
 				)}
 			/>
 			<Gap $height={`${TICKET_TABLE_ROW_HEIGHT}px`} />
