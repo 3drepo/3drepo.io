@@ -70,7 +70,7 @@ Teamspaces.memberExists = async (req, res, next) => {
 
 Teamspaces.validateUpdateQuota = async (req, res, next) => {
 	try {
-		req.body = await validateSchema(SUBSCRIPTION_TYPES.ENTERPRISE, req.body);
+		req.body = await validateSchema(SUBSCRIPTION_TYPES.ENTERPRISE, req.body, true);
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

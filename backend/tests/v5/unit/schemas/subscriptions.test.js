@@ -36,34 +36,34 @@ const formatData = (data) => {
 };
 
 const testSubscriptionSchema = () => {
-	const dummyData = {
-		collaborators: 1,
-		data: 10,
-		expiryDate: new Date(Date.now() + 1000),
-	};
+	const dummyData = { collaborators: 1, data: 10, expiryDate: new Date(Date.now() + 1000) };
+
 	describe.each([
-		['correct full data', 'enterprise', dummyData, true],
-		['undefined data', 'enterprise', undefined, false],
-		['empty data', 'enterprise', {}, false],
-		['unknown values', 'enterprise', { [generateRandomString()]: generateRandomString() }, false],
+		['correct full data', SUBSCRIPTION_TYPES.ENTERPRISE, dummyData, true],
+		['undefined data', SUBSCRIPTION_TYPES.ENTERPRISE, undefined, false],
+		['empty data', SUBSCRIPTION_TYPES.ENTERPRISE, {}, false],
+		['unknown values', SUBSCRIPTION_TYPES.ENTERPRISE, { [generateRandomString()]: generateRandomString() }, false],
 		['unrecognised sub type', generateRandomString(), dummyData, false],
-		['only collaborators', 'enterprise', { collaborators: 1 }, true],
-		['unlimited collaborators', 'enterprise', { collaborators: 'unlimited' }, true],
-		['negative collaborators', 'enterprise', { collaborators: -1 }, false],
-		['random string as collaborators', 'enterprise', { collaborators: generateRandomString() }, false],
-		['numer string as collaborators', 'enterprise', { collaborators: '100' }, true],
-		['only data', 'enterprise', { data: 1 }, true],
-		['negative data', 'enterprise', { data: -1 }, false],
-		['just expiryDate', 'enterprise', { expiryDate: new Date(Date.now() + 1000) }, true],
-		['expiryDate in timestamp', 'enterprise', { expiryDate: Date.now() + 1000 }, true],
-		['null date', 'enterprise', { expiryDate: null }, true],
-		['expiryDate in the past', 'enterprise', { expiryDate: Date.now() - 1000 }, false],
-	])('Subscription schema test', (desc, type, data, pass) => {
+		['only collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: 1 }, true],
+		['unlimited collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: 'unlimited' }, true],
+		['negative collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: -1 }, false],
+		['random string as collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: generateRandomString() }, false],
+		['numer string as collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: '100' }, true],
+		['only data', SUBSCRIPTION_TYPES.ENTERPRISE, { data: 1 }, true],
+		['negative data', SUBSCRIPTION_TYPES.ENTERPRISE, { data: -1 }, false],
+		['just expiryDate', SUBSCRIPTION_TYPES.ENTERPRISE, { expiryDate: new Date(Date.now() + 1000) }, true],
+		['just expiryDate (requireDataOrCollaborators set to true)', SUBSCRIPTION_TYPES.ENTERPRISE, { expiryDate: new Date(Date.now() + 1000) }, false, true],
+		['expiryDate in timestamp', SUBSCRIPTION_TYPES.ENTERPRISE, { expiryDate: Date.now() + 1000 }, true],
+		['null date', SUBSCRIPTION_TYPES.ENTERPRISE, { expiryDate: null }, true],
+		['expiryDate in the past', SUBSCRIPTION_TYPES.ENTERPRISE, { expiryDate: Date.now() - 1000 }, false],
+	])('Subscription schema test', (desc, type, data, pass, requireDataOrCollaborators) => {
 		test(`Subscription with ${desc} should ${pass ? 'pass' : 'fail'}`, async () => {
 			if (pass) {
-				await expect(SubscriptionSchema.validateSchema(type, data)).resolves.toEqual(formatData(data));
+				await expect(SubscriptionSchema.validateSchema(type, data, requireDataOrCollaborators))
+					.resolves.toEqual(formatData(data));
 			} else {
-				await expect(() => SubscriptionSchema.validateSchema(type, data)).rejects.toThrow();
+				await expect(() => SubscriptionSchema.validateSchema(type, data, requireDataOrCollaborators))
+					.rejects.toThrow();
 			}
 		});
 	});

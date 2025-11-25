@@ -17,7 +17,6 @@
 
 const { canRemoveTeamspaceMember, memberExists, validateUpdateQuota } = require('../../middleware/dataConverter/inputs/teamspaces');
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
-const { isBypassAuthEnabled, validSession } = require('../../middleware/auth');
 
 const { Router } = require('express');
 const { SUBSCRIPTION_TYPES } = require('../../models/teamspaces.constants');
@@ -27,6 +26,7 @@ const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
+const { validSession } = require('../../middleware/auth');
 
 const getTeamspaceList = async (req, res) => {
 	const user = req.session.user.username;
@@ -131,7 +131,7 @@ const removeQuota = async (req, res) => {
 	}
 };
 
-const establishRoutes = () => {
+const establishRoutes = (isInternal) => {
 	const router = Router({ mergeParams: true });
 
 	/**
@@ -419,69 +419,71 @@ const establishRoutes = () => {
 	*/
 	router.get('/:teamspace/addOns', hasAccessToTeamspace, getAddOns);
 
-	/**
-	* @openapi
-	* /teamspaces/{teamspace}/quota:
-	*   put:
-	*     description: Updates the quota of a teamspace
-	*     tags: [Teamspaces]
-	*     operationId: updateQuota
-	*     parameters:
-   	*       - name: teamspace
-	*         description: name of teamspace
-	*         in: path
-	*         required: true
-	*         schema:
-	*           type: string
-	*     requestBody:
-	*       content:
-	*         application/json:
-	*           schema:
-	*             type: object
-	*             properties:
-	*               expiryDate:
-	*                 type: string
-	*                 description: The expiry date of the quota
-	*                 example: 12/20/2030
-	*               collaborators:
-	*                 type: integer
-	*                 description: The number of collaborators
-	*                 example: 10
-	*               data:
-	*                 type: integer
-	*                 description: The data allowance of the quota
-	*                 example: 100
-	*     responses:
-	*       401:
-	*         $ref: "#/components/responses/notLoggedIn"
-	*       200:
-	*         description: quota has been successfully updated
-	*/
-	router.put('/:teamspace/quota', isBypassAuthEnabled, isMemberOfTeamspace, validateUpdateQuota, updateQuota);
+	if (isInternal) {
+		/**
+		* @openapi
+		* /teamspaces/{teamspace}/quota:
+		*   put:
+		*     description: Updates the quota of a teamspace
+		*     tags: [Teamspaces]
+		*     operationId: updateQuota
+		*     parameters:
+		*       - name: teamspace
+		*         description: name of teamspace
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*     requestBody:
+		*       content:
+		*         application/json:
+		*           schema:
+		*             type: object
+		*             properties:
+		*               expiryDate:
+		*                 type: string
+		*                 description: The expiry date of the quota
+		*                 example: 12/20/2030
+		*               collaborators:
+		*                 type: integer
+		*                 description: The number of collaborators
+		*                 example: 10
+		*               data:
+		*                 type: integer
+		*                 description: The data allowance of the quota
+		*                 example: 100
+		*     responses:
+		*       401:
+		*         $ref: "#/components/responses/notLoggedIn"
+		*       200:
+		*         description: quota has been successfully updated
+		*/
+		router.put('/:teamspace/quota', isMemberOfTeamspace, validateUpdateQuota, updateQuota);
 
-	/**
-	* @openapi
-	* /teamspaces/{teamspace}/quota:
-	*   delete:
-	*     description: Removes the quota of a teamspace
-	*     tags: [Teamspaces]
-	*     operationId: removeQuota
-	*     parameters:
-   	*       - name: teamspace
-	*         description: name of teamspace
-	*         in: path
-	*         required: true
-	*         schema:
-	*           type: string
-	*     responses:
-	*       401:
-	*         $ref: "#/components/responses/notLoggedIn"
-	*       200:
-	*         description: quota has been removed
-	*/
-	router.delete('/:teamspace/quota', isBypassAuthEnabled, isMemberOfTeamspace, removeQuota);
+		/**
+		* @openapi
+		* /teamspaces/{teamspace}/quota:
+		*   delete:
+		*     description: Removes the quota of a teamspace
+		*     tags: [Teamspaces]
+		*     operationId: removeQuota
+		*     parameters:
+		*       - name: teamspace
+		*         description: name of teamspace
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*     responses:
+		*       401:
+		*         $ref: "#/components/responses/notLoggedIn"
+		*       200:
+		*         description: quota has been removed
+		*/
+		router.delete('/:teamspace/quota', isMemberOfTeamspace, removeQuota);
+	}
 
 	return router;
 };
 
-module.exports = establishRoutes();
+module.exports = establishRoutes;

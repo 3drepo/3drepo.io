@@ -20,7 +20,7 @@ const Yup = require('yup');
 
 const Subscription = {};
 
-const schema = Yup.object().shape({
+const schema = (requireDataOrCollaborators) => Yup.object().shape({
 	collaborators: Yup.lazy((value) => {
 		let dataType = Yup.number().min(0);
 		if (value !== undefined && Number.isNaN(parseInt(value, 10))) {
@@ -32,15 +32,24 @@ const schema = Yup.object().shape({
 	data: Yup.number().min(0),
 	expiryDate: Yup.date().min(new Date()).nullable().transform((v, o) => (o !== null ? new Date(o) : null)),
 }).required().noUnknown(true)
-	.test('Empty object test', 'Data must contain either collaborators or data',
-		(obj) => obj.collaborators !== undefined || obj.data !== undefined);
+	.test('required properties test', (obj, context) => {
+		if (obj.collaborators === undefined && obj.data === undefined && obj.expiryDate === undefined) {
+			return context.createError({ message: 'Data must contain at least one of the specified fields' });
+		}
+
+		if (requireDataOrCollaborators && !obj.collaborators && !obj.data) {
+			return context.createError({ message: 'Data must contain either collaborators or data' });
+		}
+
+		return true;
+	});
 
 const typeSchema = Yup.object().shape({ type: Yup.string().oneOf(Object.values(SUBSCRIPTION_TYPES)).required() });
 
-Subscription.validateSchema = async (type, data) => {
+Subscription.validateSchema = async (type, data, requireDataOrCollaborators) => {
 	const [, output] = await Promise.all([
 		typeSchema.validate({ type }),
-		schema.validate(data),
+		schema(requireDataOrCollaborators).validate(data),
 	]);
 
 	return output;
