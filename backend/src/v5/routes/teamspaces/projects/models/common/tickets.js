@@ -211,7 +211,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/templates:
 	 *   get:
 	 *     description: Get the the available ticket templates for this model
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getModelTicketTemplates
 	 *     parameters:
 	 *       - name: teamspace
@@ -286,7 +286,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/templates/{template}:
 	 *   get:
 	 *     description: Get the full definition of a template
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getModelTicketTemplateDetails
 	 *     parameters:
 	 *       - name: teamspace
@@ -346,7 +346,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/import:
 	 *   post:
 	 *     description: Import multiple existing tickets into the model
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: importTickets
 	 *     parameters:
 	 *       - name: teamspace
@@ -475,7 +475,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
 	 *   post:
 	 *     description: Create a ticket. The Schema of the payload depends on the ticket template being used
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: createTicket
 	 *     parameters:
 	 *       - name: teamspace
@@ -567,7 +567,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
 	 *   get:
 	 *     description: Get all tickets within the model
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: GetTicketList
 	 *     parameters:
 	 *       - name: teamspace
@@ -688,7 +688,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
 	 *   patch:
 	 *     description: Update multiple tickets
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: updateManyTickets
 	 *     parameters:
 	 *       - name: teamspace
@@ -807,7 +807,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}:
 	 *   get:
 	 *     description: Get ticket by ID
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: GetTicket
 	 *     parameters:
 	 *       - name: teamspace
@@ -893,7 +893,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/history:
 	 *   get:
 	 *     description: Get ticket history
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: GetTicketHistory
 	 *     parameters:
 	 *       - name: teamspace
@@ -968,7 +968,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/resources/{resource}:
 	 *   get:
 	 *     description: Get the binary resource associated with the given ticket
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getTicketResource
 	 *     parameters:
 	 *       - name: teamspace
@@ -1028,7 +1028,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}:
 	 *   patch:
 	 *     description: Update a ticket. The Schema of the payload depends on the ticket template being used
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: updateTicket
 	 *     parameters:
 	 *       - name: teamspace

@@ -24,13 +24,17 @@ let agent;
 
 const testSwaggerDocumentation = () => {
 	describe('Check swagger documentation for errors and warnings', () => {
-		test('Open API schema should not contain any errors', async () => {
-			const res = await agent.get('/docs/openapi.json');
+		test('All Open API schema should not contain any errors', async () => {
+			const { body: { uri } } = await agent.get('/docs-list');
+			expect(uri).toEqual(['/docs', '/docs-internal']);
 
-			const OpenAPISchemaValidator = schemaValidator.default;
-			const validator = new OpenAPISchemaValidator({ version: 3 });
-			const validation = validator.validate(res.body);
-			expect(validation.errors.length).toEqual(0);
+			await Promise.all(uri.map(async (docPath) => {
+				const res = await agent.get(`${docPath}/openapi.json`);
+				const OpenAPISchemaValidator = schemaValidator.default;
+				const validator = new OpenAPISchemaValidator({ version: 3 });
+				const validation = validator.validate(res.body);
+				expect(validation.errors.length).toEqual(0);
+			}));
 		});
 	});
 };
