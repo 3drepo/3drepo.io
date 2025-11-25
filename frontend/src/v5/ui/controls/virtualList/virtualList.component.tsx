@@ -14,13 +14,14 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, createContext, useContext } from 'react';
 
 interface Props {
 	items: any[];
 	itemHeight: number;
 	ItemComponent: (value: any, index: number, array: any[]) => JSX.Element;
 	itemBorder?: number;
+	id?: string;
 }
 
 const emptyRect = { x:0, y:0, width:0, top:0, bottom: 0, height:0 } as DOMRect;
@@ -85,7 +86,7 @@ const getlastItem = (items: any[],
 		bottom = (heights[index] || defaultHeight) + top;
 	}
 
-	return Math.min(index, items.length - 1);
+	return Math.min(index - 1, items.length - 1);
 };
 
 const getContainerHeight = (items: any[], heights: Record<any, number>, defaultHeight: number) => {
@@ -94,7 +95,51 @@ const getContainerHeight = (items: any[], heights: Record<any, number>, defaultH
 	return totalHeight;
 };
 
-export const VirtualList = ({ items, itemHeight, ItemComponent }:Props) => { 
+
+const VirtualListContext = createContext(undefined);
+VirtualListContext.displayName = 'VirtualListContext';
+
+
+const NestedListsContext = ({ children }) => {
+	const root = useContext(VirtualListContext);
+	const refsDict = useRef<Record<any, any>>({}); 
+
+	const getRef = (items, defaultVal) => {
+		const value = refsDict.current[items];
+		if (!value) {
+			refsDict.current[items] = defaultVal;
+		}
+
+		return refsDict.current[items];
+	};
+
+
+	if (root) return <>{children}</>; 
+
+	return (
+		<VirtualListContext.Provider value={{ getRef  }}>
+			{children}
+		</VirtualListContext.Provider>
+	);
+};
+
+
+function useVRef<T>(key, defaultVal) {
+	const vContext = useContext(VirtualListContext);
+	const ref = useRef<T>(defaultVal);
+
+	if (vContext) {
+		ref.current = vContext.getRef(key, defaultVal);
+	}
+	
+	return ref;
+}
+
+
+// Todo: pass a viewport
+// TODO: itemheight should be average?
+// ItemComponent must create an item which bottom is the top of the next item. In other words no gutters are allowed.
+export const VirtualList = ({ items, itemHeight, ItemComponent, id }:Props) => { 
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
 	const [, setRedraw] = useState(false);
@@ -105,7 +150,7 @@ export const VirtualList = ({ items, itemHeight, ItemComponent }:Props) => {
 	const renderInnerHeight = useRef(0);
 	renderInnerHeight.current = window.innerHeight;
 
-	const itemsHeight = useRef<Record<any, number>>({}); // get rid of the elements that get deleted
+	const itemsHeight = useVRef<Record<any, number>>((items),  {}); // get rid of the elements that get deleted
 	const renderContainerRect = useRef(emptyRect);
 	
 	renderContainerRect.current = containerRef.current?.getBoundingClientRect();
@@ -160,6 +205,9 @@ export const VirtualList = ({ items, itemHeight, ItemComponent }:Props) => {
 
 			if (equalsHeight(elementHeight, itemHeight) && !itemsHeight.current[itemIndex]) continue;
 			if (equalsHeight(elementHeight, itemsHeight.current[itemIndex])) continue;
+			// TODO: Check if items didnt cover the thing
+			// make itemheight optional for this
+			// Can use binary search to find the actual height?
 			itemsHeight.current[itemIndex] = elementHeight;
 			itemsHeightChanged = true;
 		}
@@ -199,18 +247,22 @@ export const VirtualList = ({ items, itemHeight, ItemComponent }:Props) => {
 	}, [items]);
 
 	return (
-		<div style={
-			{
-				height: containerHeight, 
-				border: 0, 
-				boxSizing:'border-box',  
-				display:'block',
-			}} ref={containerRef as any}
-		>
-			<div style={{ height: spacerStart } } id='startSpacer'/>
-			<div ref={itemsContainer as any}   >
-				{itemsSlice.map(ItemComponent)}
+		<NestedListsContext>
+			<div
+				id={id}
+				style={
+					{
+						height: containerHeight, 
+						border: 0, 
+						boxSizing:'border-box',  
+						display:'block',
+					}} ref={containerRef as any}
+			>
+				<div style={{ height: spacerStart } } id='startSpacer'/>
+				<div ref={itemsContainer as any}   >
+					{itemsSlice.map(ItemComponent)}
+				</div>
 			</div>
-		</div>
+		</NestedListsContext>
 	);
 };
