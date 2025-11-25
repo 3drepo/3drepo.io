@@ -81,12 +81,15 @@ const setupDocEndpoint = (app) => {
 
 	const generateDocWithVersion = (route, filteredDoc) => {
 		logger.logInfo(`Setting up Swagger doc endpoint at ${route}`);
-		app.use(`${route}/openapi.json`, (req, res) => res.json(filteredDoc));
-		app.use(
-			route,
-			swaggerUi.serve,
-			swaggerUi.setup(filteredDoc, uiOptions),
-		);
+
+		app.get(`${route}/openapi.json`, (req, res) => {
+			res.json(filteredDoc);
+		});
+
+		app.use(route, swaggerUi.serve, (req, res, next) => {
+			const ui = swaggerUi.setup(filteredDoc, uiOptions);
+			ui(req, res, next);
+		});
 	};
 
 	app.use('/docs-list', (req, res) => res.json({ uri: Object.keys(pathsByGroups) }));
