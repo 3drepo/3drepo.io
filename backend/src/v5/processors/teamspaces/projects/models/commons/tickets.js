@@ -37,6 +37,7 @@ const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getFileWithMetaAsStream } = require('../../../../../services/filesManager');
 const { getModelById } = require('../../../../../models/modelSettings');
+const { getTicketLogs } = require('../../../../../models/tickets.logs');
 const { importComments } = require('./tickets.comments');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
@@ -257,6 +258,8 @@ Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource
 );
 
 Tickets.getTicketById = getTicketById;
+
+Tickets.getTicketHistory = getTicketLogs;
 
 const propertyToFilterName = (property) => {
 	if (property.includes('.')) {
