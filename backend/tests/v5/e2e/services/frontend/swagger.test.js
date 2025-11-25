@@ -26,7 +26,7 @@ const testSwaggerDocumentation = () => {
 	describe('Check swagger documentation for errors and warnings', () => {
 		test('All Open API schema should not contain any errors', async () => {
 			const { body: { uri } } = await agent.get('/docs-list');
-			expect(uri?.length).toBeGreaterThan(0);
+			expect(uri).toEqual(['/docs', '/docs-internal']);
 
 			await Promise.all(uri.map(async (docPath) => {
 				const res = await agent.get(`${docPath}/openapi.json`);
