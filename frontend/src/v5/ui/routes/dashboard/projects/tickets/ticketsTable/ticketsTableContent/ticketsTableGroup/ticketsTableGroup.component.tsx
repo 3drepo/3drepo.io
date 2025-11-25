@@ -137,7 +137,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	};
 
 	return (
-		<div style={{ display: "inline-flex" }}>
+		<div style={{ display: 'inline-flex' }}>
 			<TicketsTableSelectionColumn tickets={tickets} selectedTicketId={selectedTicketId} />
 			<Table $empty={!tickets.length} $canCreateTicket={!newTicketButtonIsDisabled}>
 				<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>

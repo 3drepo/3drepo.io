@@ -285,8 +285,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		const prevModelIds = prevModelIdsRef.current;
 		const removedModelIds = prevModelIds.filter((id) => !containersAndFederations.includes(id));
 		if (removedModelIds.length > 0) {
-			const ticketIdsToRemove = removedModelIds.flatMap((id) => ticketsByModelId[id])
-			setSelectedIds(selectedIds.filter((id) => !ticketIdsToRemove.includes(id)))
+			const ticketIdsToRemove = removedModelIds.flatMap((id) => ticketsByModelId[id]);
+			setSelectedIds(selectedIds.filter((id) => !ticketIdsToRemove.includes(id)));
 		}
 		prevModelIdsRef.current = containersAndFederations;
 	}, [containersAndFederations]);

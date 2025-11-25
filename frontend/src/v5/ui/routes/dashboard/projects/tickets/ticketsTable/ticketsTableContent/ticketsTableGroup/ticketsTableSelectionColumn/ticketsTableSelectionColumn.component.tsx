@@ -38,7 +38,7 @@ type SelectionRowType = {
 	selected: boolean;
 	onCheck: (e: any, ticketId: string) => void;
 	selectedTicketId: string;
-}
+};
 const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId }: SelectionRowType) => (
 	<Row key={ticketId} $selected={selectedTicketId === ticketId}>
 		<CellContainer alwaysVisible>
