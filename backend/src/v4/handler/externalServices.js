@@ -31,7 +31,7 @@ const ExternalServices = {};
 const getDefaultStorageType = () => config.defaultStorage || (config.fs ? "fs" : null) || "gridfs";
 
 const fsHandlerPromise = null;
-const getFSHandler = async () => {
+const getFSHandler =  () => {
 	if(!fsHandlerPromise) {
 		fsHandlerPromise = FSHandlerBase({...config.fs, name:"fs"});
 	};

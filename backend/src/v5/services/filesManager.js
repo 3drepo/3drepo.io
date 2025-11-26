@@ -26,8 +26,9 @@ const {
 	updateRef,
 } = require('../models/fileRefs');
 const CryptoJs = require('crypto-js');
-const FSHandler = require('../handler/fs');
+const FSHandlerBase = require('../handler/fs');
 const GridFSHandler = require('../handler/gridfs');
+const MimeTypes = require('../utils/helper/mimeTypes');
 const config = require('../utils/config');
 const { fileMimeFromBuffer } = require('../utils/helper/typeCheck');
 const { listCollections } = require('../handler/db');
@@ -36,7 +37,15 @@ const { templates } = require('../utils/responseCodes');
 
 const FilesManager = {};
 
-const DEFAULT_MIME_TYPE = 'application/octet-stream';
+let fsHandlerPromise = null;
+const getFSHandler = () => {
+	if (!fsHandlerPromise) {
+		fsHandlerPromise = FSHandlerBase({ ...config.fs, name: 'fs' });
+	}
+	return fsHandlerPromise;
+};
+
+const DEFAULT_MIME_TYPE = MimeTypes.BINARY;
 
 FilesManager.fileExists = async (teamspace, collection, filename) => {
 	try {
@@ -47,10 +56,10 @@ FilesManager.fileExists = async (teamspace, collection, filename) => {
 	}
 };
 
-const removeFilesByStorageType = (teamspace, collection, storageType, links) => {
+const removeFilesByStorageType = async (teamspace, collection, storageType, links) => {
 	switch (storageType) {
 	case 'fs':
-		return FSHandler.removeFiles(links);
+		return (await getFSHandler()).removeFiles(links);
 	case 'gridfs':
 		return GridFSHandler.removeFiles(teamspace, collection, links);
 	default:
@@ -121,7 +130,7 @@ FilesManager.getFile = async (teamspace, collection, fileName) => {
 
 	switch (type) {
 	case 'fs':
-		return FSHandler.getFile(link);
+		return (await getFSHandler()).getFile(link);
 	case 'gridfs':
 		return GridFSHandler.getFile(teamspace, collection, link);
 	default:
@@ -136,7 +145,7 @@ const getFileAsStream = async (teamspace, collection, refEntry, chunkInfo) => {
 
 	switch (type) {
 	case 'fs':
-		readStream = await FSHandler.getFileStream(link, chunkInfo);
+		readStream = await (await getFSHandler()).getFileStream(link, chunkInfo);
 		break;
 	case 'gridfs':
 		readStream = await GridFSHandler.getFileStream(teamspace, collection, link, chunkInfo);
@@ -177,7 +186,7 @@ FilesManager.storeFiles = async (teamspace, collection, dataEntry) => {
 		let refInfo;
 		switch (config.defaultStorage) {
 		case 'fs':
-			refInfo = await FSHandler.storeFile(data);
+			refInfo = await (await getFSHandler()).storeFile(data);
 			break;
 		case 'gridfs':
 			refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
@@ -201,7 +210,7 @@ FilesManager.storeFileStream = async (teamspace, collection, id, dataStream, met
 
 	switch (config.defaultStorage) {
 	case 'fs':
-		refInfo = await FSHandler.storeFileStream(dataStream);
+		refInfo = await (await getFSHandler()).storeFileStream(dataStream);
 		break;
 	case 'gridfs':
 		logger.logError('storeFileStream is not supported on GridFS services');
