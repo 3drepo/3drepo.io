@@ -115,10 +115,6 @@ Scene.findMetadataNodesByFields = async function (account, model, branch, revisi
 	return cleanAll(await db.aggregate(account, getSceneCollectionName(model), [query, projection]));
 };
 
-Scene.getGridfsFileStream = async function (account, model, filename) {
-	return ExternalServices.getFileStream(account, getSceneCollectionName(model), "gridfs", filename);
-};
-
 Scene.getNodeById = async function (account, model, id, projection = {}) {
 	return clean(await db.findOne(account, getSceneCollectionName(model), { _id: id }, projection));
 };
