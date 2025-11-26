@@ -17,7 +17,7 @@
 
 "use strict";
 const {v5Path } = require("../../interop");
-const FSHandlerBase = require(`${v5Path}/handlers/fs`);
+const FSHandlerBase = require(`${v5Path}/handler/fs`);
 const S3Handler = require("./s3");
 const GridFSHandler = require("./gridfs");
 const AlluxioHandler = require("./alluxio");
@@ -30,13 +30,13 @@ const ExternalServices = {};
 
 const getDefaultStorageType = () => config.defaultStorage || (config.fs ? "fs" : null) || "gridfs";
 
-const fsHandlerPromise = null;
+let fsHandlerPromise = null;
 const getFSHandler =  () => {
 	if(!fsHandlerPromise) {
 		fsHandlerPromise = FSHandlerBase({...config.fs, name:"fs"});
-	};
+	}
 	return fsHandlerPromise;
-});
+};
 
 ExternalServices.getFileStream = async (account, collection, type, key) => {
 	switch(type) {
@@ -87,9 +87,9 @@ ExternalServices.storeFile = async (account, collection, data) => {
 };
 
 ExternalServices.storeFileStream = async (account, collection, fileStream) => {
-	
-	return (await getFSHandler()).storeFileStream(fileStream);			
-	
+
+	return (await getFSHandler()).storeFileStream(fileStream);
+
 };
 
 ExternalServices.removeFiles = async (account, collection, type, keys) => {
