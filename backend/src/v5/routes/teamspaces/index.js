@@ -425,7 +425,7 @@ const establishRoutes = (isInternal) => {
 		* /teamspaces/{teamspace}/quota:
 		*   put:
 		*     description: Updates the quota of a teamspace
-		*     tags: [Teamspaces]
+		*     tags: [v:internal, Teamspaces]
 		*     operationId: updateQuota
 		*     parameters:
 		*       - name: teamspace
@@ -465,7 +465,7 @@ const establishRoutes = (isInternal) => {
 		* /teamspaces/{teamspace}/quota:
 		*   delete:
 		*     description: Removes the quota of a teamspace
-		*     tags: [Teamspaces]
+		*     tags: [v:internal, Teamspaces]
 		*     operationId: removeQuota
 		*     parameters:
 		*       - name: teamspace
