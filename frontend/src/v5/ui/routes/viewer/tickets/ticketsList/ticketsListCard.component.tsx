@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
@@ -36,7 +36,7 @@ import { MenuItem } from '@mui/material';
 import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
 import { uniq } from 'lodash';
 import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const GroupBySelect = ({ value:valueProp, onChange }) => {
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
@@ -68,17 +68,31 @@ const GroupBySelect = ({ value:valueProp, onChange }) => {
 };
 
 export const TicketsListCard = () => {
+	const { teamspace, project } = useParams<ViewerParams>();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
+	const isFed = FederationsHooksSelectors.selectIsFederation();
+
 	
 	const onFiltersChange = (filters) => {
 		TicketsCardActionsDispatchers.setFilters(filters);
 	};
 
 	const [groupBy, setGroupby] = useState('none');
+
+	useEffect(() => {
+		if (groupBy === 'none') return;
+		TicketsActionsDispatchers.fetchTicketsProperties(teamspace,
+			project,
+			containerOrFederation,
+			tickets.map(({ _id }) => _id),
+			isFed(containerOrFederation),
+			[groupBy],
+		);
+	}, [groupBy, tickets]);
 
 	return (
 		<CardContainer>
