@@ -29,6 +29,9 @@ const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 const { stopPurge } = require('../../../src/v5/models/frontegg.cache');
+const { tmpdir } = require('os');
+const { generateUUIDString } = require('../../../src/v5/utils/helper/uuids');
+const path = require('path');
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
 
@@ -340,6 +343,16 @@ db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.a
 	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
 ]);
+
+ServiceHelper.createTmpDir = () => {
+	const tmpDir = tmpdir();
+	const folder = generateUUIDString();
+	const fullPath = path.posix.join(tmpDir, folder);
+	fs.mkdirSync(fullPath, { recursive: true });
+
+	return fullPath;
+};
+
 ServiceHelper.createQueryString = (options) => {
 	const keys = Object.keys(deleteIfUndefined(options, true));
 
