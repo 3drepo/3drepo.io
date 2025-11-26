@@ -16,7 +16,7 @@
  */
 
 import styled from 'styled-components';
-
+import { SELECTION_COLUMN_WIDTH } from '../../routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableSelectionColumn/ticketsTableSelectionColumn.helper';
 
 export const TableIconContainer  = styled.div<{ $active?: boolean }>`
 	width: 16px;
@@ -39,7 +39,8 @@ export const GearIconContainer = styled(TableIconContainer)`
 	/* absolutely positioned to end of headers because adding it to the actual last
 	header cell causes settings menu to close whenever this last column is changed  */
 	position: absolute;
-	right: 0;
+	/* To account for the selection column offset */
+	right: ${SELECTION_COLUMN_WIDTH}px;
 
 	color: ${({ theme }) => theme.palette.base.main};
 `;
