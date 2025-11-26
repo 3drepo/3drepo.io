@@ -41,16 +41,17 @@ import {
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketById, selectTicketByIdRaw, selectTicketsById, selectTicketsGroups } from './tickets.selectors';
+import { selectPropertyFetched, selectTemplateById, selectTicketById, selectTicketByIdRaw, selectTicketsById, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
-import { addUpdatedAtTime } from './tickets.helpers';
+import { addUpdatedAtTime, findPropertyDefinition } from './tickets.helpers';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import EventEmitter from 'eventemitter3';
 import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -82,11 +83,33 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 
 export function* fetchTicketsProperties({
 	teamspace, projectId, modelId, ticketIds,
-	templateCode, isFederation, propertiesToInclude,
+	isFederation, propertiesToInclude,
 }: FetchTicketsPropertiesAction) {
 	try {
+		const ticketsData = (yield select(selectTicketsById, ticketIds));
+		const codes = [];
 
-		const codes = (yield select(selectTicketsById, ticketIds)).map(({ number }) => `${templateCode}:${number}`);
+		for (let i = 0; i < ticketsData.length ; i++) {
+			const ticket = ticketsData[i];
+			const ticketId = ticket._id;
+			const propertiesWereFetched: boolean[] = yield all(propertiesToInclude.map((name) => select(selectPropertyFetched, ticketId, name)));
+			let template = yield select(selectCurrentProjectTemplateById, ticket.type);
+		
+			if (!template) {
+				template = yield select(selectTemplateById, modelId, ticket.type);
+			}
+
+			const hasProperty = propertiesToInclude.some((name) => !!findPropertyDefinition(template, name));
+
+			if (hasProperty && !propertiesWereFetched.every((e) => e)) {
+				codes.push(`${template.code}:${ticket.number}`);
+			}
+		}
+
+		if (!codes.length) {
+			return;
+		}
+
 		const filterByTemplateCode = {
 			filter: {
 				operator: 'is',
