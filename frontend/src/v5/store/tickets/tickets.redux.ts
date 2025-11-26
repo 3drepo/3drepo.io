@@ -49,7 +49,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	setSorting: ['property', 'order'],
 	resetSorting: [],
 	setPropertiesFetched: ['ticketIds', 'properties', 'fetched'],
-	fetchTicketsProperties: ['teamspace', 'projectId', 'modelId', 'ticketIds', 'templateCode', 'isFederation', 'propertiesToInclude'],
+	fetchTicketsProperties: ['teamspace', 'projectId', 'modelId', 'ticketIds', 'isFederation', 'propertiesToInclude'],
 	upsertTicketsSuccess: ['modelId', 'tickets'],
 	watchPropertiesUpdates: ['propertiesNames', 'watch'],
 	setTabularViewParams: ['params', 'search'],
@@ -207,7 +207,7 @@ export type ClearGroupsAction = Action<'CLEAR_GROUPS'>;
 export type SetSortingAction = Action<'SET_SORTING'> & TicketsSorting;
 export type ResetSortingAction = Action<'RESET_SORTING'>;
 export type SetPropertiesFetchedAction = Action<'SET_PROPERTIES_FETCHED'> & { ticketIds: string[], properties: string[], fetched: boolean };
-export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & TeamspaceProjectAndModel & { ticketIds: string[], templateCode: string, isFederation: boolean, propertiesToInclude?: string[] };
+export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & TeamspaceProjectAndModel & { ticketIds: string[], isFederation: boolean, propertiesToInclude?: string[] };
 export type WatchPropertiesUpdatesAction = Action<'WATCH_PROPERTIES_UPDATES'> & { propertiesNames: string[], watch: EventEmitter };
 export type SetTabularViewParamsAction = Action<'SET_TABULAR_VIEW_PARAMS'> & { params: DashboardTicketsParams, search: string };
 export interface ITicketsActionCreators {
@@ -223,7 +223,6 @@ export interface ITicketsActionCreators {
 		projectId: string,
 		modelId: string,
 		ticketsIds: string[],
-		templateCode: string,
 		isFederation: boolean,
 		propertiesToInclude?: string[],
 	) => FetchTicketsAction;
