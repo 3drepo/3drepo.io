@@ -25,7 +25,7 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selectors';
 import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME } from '@/v5/store/users/users.helpers';
 import { selectJobById } from '@/v4/modules/jobs/jobs.selectors';
-import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
+import { findPropertyDefinition, getTemplateByTicket } from '@/v5/store/tickets/tickets.helpers';
 import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
 
 
@@ -170,13 +170,7 @@ const getkeyByJobsAndUsers = (ticket: ITicket, groupBy: string) => {
 };
 
 const getKey = (ticket: ITicket, groupBy: string) => {
-	const state = getState();
-	const templateId = ticket.type;
-
-	// This is using one or the other because by some reason we save the templates
-	// in the projects state in the dashboard and the templates in models state in
-	// the viewer
-	const template = selectCurrentProjectTemplateById(state, templateId) || selectTemplateById( state, ticket.modelId, templateId);
+	const template = getTemplateByTicket(ticket);
 	const propertyDefinition = findPropertyDefinition(template, groupBy);
 
 	if (!propertyDefinition) {

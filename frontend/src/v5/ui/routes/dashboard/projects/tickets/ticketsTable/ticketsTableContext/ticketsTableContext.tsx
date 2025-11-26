@@ -84,7 +84,6 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 					project,
 					modelId,
 					idsChunk,
-					template.code,
 					isFederation,
 					[name],
 				);
