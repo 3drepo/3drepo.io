@@ -139,7 +139,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces:
 	 *   get:
 	 *     description: Get a list of teamspaces the user has access to
-	 *     tags: [Teamspaces]
+	 *     tags: [v:external, Teamspaces]
 	 *     operationId: getTeamspaceList
 	 *     responses:
 	 *       401:
@@ -173,7 +173,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces/{teamspace}/members:
 	 *   get:
 	 *     description: Get the list of members within the teamspace
-	 *     tags: [Teamspaces]
+	 *     tags: [v:external, Teamspaces]
 	 *     operationId: getTeamspaceMembers
 	 *     parameters:
    	 *       - name: teamspace
@@ -226,7 +226,7 @@ const establishRoutes = (isInternal) => {
 	* /teamspaces/{teamspace}/avatar:
 	*   get:
 	*     description: Gets the avatar of the teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
    	*       - name: teamspace
 	*         description: name of teamspace
@@ -253,7 +253,7 @@ const establishRoutes = (isInternal) => {
 	* /teamspaces/{teamspace}/quota:
 	*   get:
 	*     description: Gets quota information about a user
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
    	*       - name: teamspace
 	*         description: name of teamspace
@@ -311,7 +311,7 @@ const establishRoutes = (isInternal) => {
 	* /teamspaces/{teamspace}/members/{username}:
 	*   delete:
 	*     description: Removes the user from the teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
    	*       - name: teamspace
 	*         description: name of teamspace
@@ -340,7 +340,7 @@ const establishRoutes = (isInternal) => {
 	* /teamspaces/{teamspace}/members/{member}/avatar:
 	*   get:
 	*     description: Gets the avatar of a member of the teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
    	*       - name: teamspace
 	*         description: name of teamspace
@@ -373,7 +373,7 @@ const establishRoutes = (isInternal) => {
 	* /teamspaces/{teamspace}/addOns:
 	*   get:
 	*     description: Gets information about the addOns supported in a teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
    	*       - name: teamspace
 	*         description: name of teamspace
