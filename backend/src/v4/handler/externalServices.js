@@ -16,7 +16,8 @@
  */
 
 "use strict";
-const FSHandler = require("./fs");
+const {v5Path } = require("../../interop");
+const FSHandlerBase = require(`${v5Path}/handlers/fs`);
 const S3Handler = require("./s3");
 const GridFSHandler = require("./gridfs");
 const AlluxioHandler = require("./alluxio");
@@ -29,10 +30,18 @@ const ExternalServices = {};
 
 const getDefaultStorageType = () => config.defaultStorage || (config.fs ? "fs" : null) || "gridfs";
 
-ExternalServices.getFileStream = (account, collection, type, key) => {
+const fsHandlerPromise = null;
+const getFSHandler = async () => {
+	if(!fsHandlerPromise) {
+		fsHandlerPromise = FSHandlerBase({...config.fs, name:"fs"});
+	};
+	return fsHandlerPromise;
+});
+
+ExternalServices.getFileStream = async (account, collection, type, key) => {
 	switch(type) {
 		case "fs" :
-			return FSHandler.getFileStream(key);
+			return (await getFSHandler()).getFileStream(key);
 		case "s3" :
 			return Promise.resolve(S3Handler.getFileStream(key));
 		case "gridfs" :
@@ -41,14 +50,14 @@ ExternalServices.getFileStream = (account, collection, type, key) => {
 			return AlluxioHandler.getFileStream(key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
+			throw ResponseCodes.UNRECOGNISED_STORAGE_TYPE;
 	}
 };
 
-ExternalServices.getFile = (account, collection, type, key) => {
+ExternalServices.getFile = async (account, collection, type, key) => {
 	switch(type) {
 		case "fs" :
-			return Promise.resolve(FSHandler.getFile(key));
+			return Promise.resolve((await getFSHandler()).getFile(key));
 		case "s3" :
 			return Promise.resolve(S3Handler.getFile(key));
 		case "gridfs" :
@@ -57,46 +66,36 @@ ExternalServices.getFile = (account, collection, type, key) => {
 			return AlluxioHandler.getFile(key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
+			throw ResponseCodes.UNRECOGNISED_STORAGE_TYPE;
 	}
 };
 
-ExternalServices.storeFile = (account, collection, data) => {
+ExternalServices.storeFile = async (account, collection, data) => {
 	const type = getDefaultStorageType();
 
 	switch(type) {
 		case "fs":
-			return FSHandler.storeFile(data);
+			return (await getFSHandler()).storeFile(data);
 		case "gridfs":
 			return GridFSHandler.storeFile(account, collection, data);
 		case "alluxio":
 			return AlluxioHandler.storeFile(data);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
+			throw ResponseCodes.UNRECOGNISED_STORAGE_TYPE;
 	}
 };
 
-ExternalServices.storeFileStream = (account, collection, fileStream) => {
-	const type = getDefaultStorageType();
-
-	switch(type) {
-		case "fs":
-			return FSHandler.storeFileStream(fileStream);
-			/* case "gridfs":
-			return GridFSHandler.storeFile(account, collection, data);
-		case "alluxio":
-			return AlluxioHandler.storeFile(data);*/
-		default:
-			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
-	}
+ExternalServices.storeFileStream = async (account, collection, fileStream) => {
+	
+	return (await getFSHandler()).storeFileStream(fileStream);			
+	
 };
 
-ExternalServices.removeFiles = (account, collection, type, keys) => {
+ExternalServices.removeFiles = async (account, collection, type, keys) => {
 	switch(type) {
 		case "fs" :
-			return FSHandler.removeFiles(keys);
+			return (await getFSHandler()).removeFiles(keys);
 		case "s3" :
 			return S3Handler.removeFiles(keys);
 		case "gridfs" :
@@ -105,7 +104,7 @@ ExternalServices.removeFiles = (account, collection, type, keys) => {
 			return AlluxioHandler.removeFiles(keys);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
+			throw ResponseCodes.UNRECOGNISED_STORAGE_TYPE;
 	}
 };
 
