@@ -31,7 +31,6 @@ ResponseCodes.templates = {
 	licenceExpired: { message: 'Licence expired.', status: 403 },
 	incorrectUsernameOrPassword: { message: 'Incorrect username or password.', status: 400 },
 	incorrectPassword: { message: 'Incorrect password.', status: 400 },
-	bypassAuthNotEnabled: { message: 'BYPASS_AUTH is not enabled.', status: 403 },
 
 	// Fail safe
 	pageNotFound: { message: 'Page not found.', status: 404 },
