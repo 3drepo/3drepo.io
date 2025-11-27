@@ -101,15 +101,15 @@ VirtualListContext.displayName = 'VirtualListContext';
 
 const NestedListsContext = ({ children }) => {
 	const root = useContext(VirtualListContext);
-	const refsDict = useRef<Record<any, any>>({}); 
+	const refsDict = useRef<WeakMap<any, any>>(new WeakMap()); 
 
 	const getRef = (items, defaultVal) => {
-		const value = refsDict.current[items];
+		let value = refsDict.current.get(items);
 		if (!value) {
-			refsDict.current[items] = defaultVal;
+			refsDict.current.set(items, defaultVal);
 		}
 
-		return refsDict.current[items];
+		return refsDict.current.get(items);
 	};
 
 
