@@ -48,7 +48,7 @@ const testSubscriptionSchema = () => {
 		['unlimited collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: 'unlimited' }, true],
 		['negative collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: -1 }, false],
 		['random string as collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: generateRandomString() }, false],
-		['numer string as collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: '100' }, true],
+		['numeric string as collaborators', SUBSCRIPTION_TYPES.ENTERPRISE, { collaborators: '100' }, true],
 		['only data', SUBSCRIPTION_TYPES.ENTERPRISE, { data: 1 }, true],
 		['negative data', SUBSCRIPTION_TYPES.ENTERPRISE, { data: -1 }, false],
 		['just expiryDate', SUBSCRIPTION_TYPES.ENTERPRISE, { expiryDate: new Date(Date.now() + 1000) }, true],

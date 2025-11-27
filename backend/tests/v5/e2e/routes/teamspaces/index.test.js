@@ -433,34 +433,37 @@ const testGetAddOns = () => {
 	});
 };
 
-const testUpdateQuota = () => {
+const testUpdateQuota = (internalService) => {
 	describe('Update quota', () => {
 		const testUser = ServiceHelper.generateUserCredentials();
-		const userNoAccess = ServiceHelper.generateUserCredentials();
-
 		const teamspace = ServiceHelper.generateRandomString();
+
 		const updatedQuota = {
 			expiryDate: new Date(Date.now() + 1000 * 60 * 60 * 24),
 			collaborators: parseInt(ServiceHelper.generateRandomNumber(0), 10),
 			data: parseInt(ServiceHelper.generateRandomNumber(0), 10),
 		};
 
-		const route = (key, ts) => `/v5/teamspaces/${ts}/quota${key ? `?key=${key}` : ''}`;
+		const route = (key, ts) => `/v5/teamspaces/${ts}/quota${internalService ? '' : `?key=${key}`}`;
 
 		beforeAll(async () => {
 			await Promise.all([
 				ServiceHelper.db.createUser(testUser),
-				ServiceHelper.db.createUser(userNoAccess),
 			]);
 			await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
 		});
 
-		describe.each([
+		const externalTests = [
+			['service is external', testUser.apiKey, teamspace, false, updatedQuota, templates.pageNotFound],
+		];
+
+		const internalTests = [
 			['teamspace does not exist', testUser.apiKey, generateRandomString(), false, updatedQuota, templates.teamspaceNotFound],
 			['payload is invalid', testUser.apiKey, teamspace, false, { ...updatedQuota, collaborators: undefined, data: undefined }, templates.invalidArguments],
-			['payload is valid', testUser.apiKey, teamspace, true, updatedQuota],
-			['payload is valid and user is not a member of the teamspace', userNoAccess.apiKey, teamspace, true, updatedQuota],
-		])('', (desc, key, ts, success, payload, expectedRes) => {
+			['payload is valid', testUser.apiKey, teamspace, true, updatedQuota, null],
+		];
+
+		describe.each(internalService ? internalTests : externalTests)('', (desc, key, ts, success, payload, expectedRes) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const putRes = await agent.put(route(key, ts)).send(payload).expect(expectedStatus);
@@ -477,10 +480,9 @@ const testUpdateQuota = () => {
 	});
 };
 
-const testDeleteQuota = () => {
+const testDeleteQuota = (internalService) => {
 	describe('Delete quota', () => {
 		const testUser = ServiceHelper.generateUserCredentials();
-		const userNoAccess = ServiceHelper.generateUserCredentials();
 
 		const teamspace = ServiceHelper.generateRandomString();
 		const quota = {
@@ -494,24 +496,28 @@ const testDeleteQuota = () => {
 		beforeAll(async () => {
 			await Promise.all([
 				ServiceHelper.db.createUser(testUser),
-				ServiceHelper.db.createUser(userNoAccess),
 			]);
 			await ServiceHelper.db.createTeamspace(teamspace, [testUser.user], quota);
 		});
 
-		describe.each([
+		const externalTests = [
+			['service is external', testUser.apiKey, teamspace, false, templates.pageNotFound],
+		];
+
+		const internalTests = [
 			['teamspace does not exist', testUser.apiKey, generateRandomString(), false, templates.teamspaceNotFound],
 			['teamspace is valid', testUser.apiKey, teamspace, true],
-			['teamspace is valid and user is not a member of the teamspace', userNoAccess.apiKey, teamspace, true],
-		])('', (desc, key, ts, success, expectedRes) => {
+		];
+
+		describe.each(internalService ? internalTests : externalTests)('', (desc, key, ts, success, expectedRes) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
-				const putRes = await agent.delete(route(key, ts)).expect(expectedStatus);
+				const res = await agent.delete(route(key, ts)).expect(expectedStatus);
 				if (success) {
 					const teamspaceSettings = await DB.findOne(teamspace, 'teamspace', { _id: teamspace });
 					expect(teamspaceSettings.subscriptions).toBeUndefined();
 				} else {
-					expect(putRes.body.code).toEqual(expectedRes.code);
+					expect(res.body.code).toEqual(expectedRes.code);
 				}
 			});
 		});
@@ -535,6 +541,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		testRemoveTeamspaceMember();
 		testGetMemberAvatar();
 		testGetAddOns();
+		testUpdateQuota();
+		testDeleteQuota();
 	});
 
 	describe('Internal Service', () => {
@@ -543,7 +551,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 			agent = await SuperTest(server);
 		});
 
-		testUpdateQuota();
-		testDeleteQuota();
+		testUpdateQuota(true);
+		testDeleteQuota(true);
 	});
 });
