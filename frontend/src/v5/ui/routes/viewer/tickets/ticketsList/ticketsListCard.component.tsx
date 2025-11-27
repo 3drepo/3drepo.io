@@ -81,7 +81,7 @@ export const TicketsListCard = () => {
 		TicketsCardActionsDispatchers.setFilters(filters);
 	};
 
-	const [groupBy, setGroupby] = useState('none');
+	const [groupBy, setGroupby] = useState('properties.standard text');
 
 	useEffect(() => {
 		if (groupBy === 'none') return;

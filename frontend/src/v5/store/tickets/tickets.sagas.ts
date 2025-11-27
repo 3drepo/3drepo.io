@@ -92,6 +92,7 @@ export function* fetchTicketsProperties({
 		for (let i = 0; i < ticketsData.length ; i++) {
 			const ticket = ticketsData[i];
 			const ticketId = ticket._id;
+			// move this responsability to the callers, otherwise it wont refresh if called again
 			const propertiesWereFetched: boolean[] = yield all(propertiesToInclude.map((name) => select(selectPropertyFetched, ticketId, name)));
 			let template = yield select(selectCurrentProjectTemplateById, ticket.type);
 		

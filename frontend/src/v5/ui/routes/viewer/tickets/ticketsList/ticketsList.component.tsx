@@ -39,7 +39,7 @@ const TicketsCardGroup = ({ tickets, groupName, idsToNumber } : TicketsGroup & I
 	>
 		<List>
 			<VirtualList 
-				id='tickets-list'
+				id={'tickets-list-' + tickets[0].title}
 				items={tickets}
 				itemHeight={30}
 				ItemComponent={(ticket: ITicket) => 
