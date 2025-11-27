@@ -21,7 +21,6 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
-import { chunk } from 'lodash';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
@@ -75,19 +74,14 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 			},  {} ) as Record<string, string[]>;
 
 		Object.keys(idsByModelId).map((modelId) => {
-			const ids = idsByModelId[modelId];
 			const isFederation = isFed(modelId);
-			const chunks = chunk(ids, 200);
-			chunks.forEach((idsChunk) => {
-				TicketsActionsDispatchers.fetchTicketsProperties(
-					teamspace,
-					project,
-					modelId,
-					idsChunk,
-					isFederation,
-					[name],
-				);
-			});
+			TicketsActionsDispatchers.fetchTicketsProperties(
+				teamspace,
+				project,
+				modelId,
+				isFederation,
+				[name],
+			);
 		});
 	};
 
