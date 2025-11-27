@@ -37,6 +37,8 @@ import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/
 import { uniq } from 'lodash';
 import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 import { useEffect, useState } from 'react';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 
 const GroupBySelect = ({ value:valueProp, onChange }) => {
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
@@ -85,14 +87,18 @@ export const TicketsListCard = () => {
 
 	useEffect(() => {
 		if (groupBy === 'none') return;
+
+		const alreadyFetched = tickets.every(({ _id }) => selectPropertyFetched(getState(), _id, groupBy));
+		
+		if (alreadyFetched) return;
+
 		TicketsActionsDispatchers.fetchTicketsProperties(teamspace,
 			project,
 			containerOrFederation,
-			tickets.map(({ _id }) => _id),
 			isFed(containerOrFederation),
 			[groupBy],
 		);
-	}, [groupBy, tickets]);
+	}, [groupBy, JSON.stringify(tickets.map(({ _id })=>_id))]);
 
 	return (
 		<CardContainer>
