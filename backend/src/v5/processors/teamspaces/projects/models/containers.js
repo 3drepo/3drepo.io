@@ -23,6 +23,7 @@ const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
+const { UUIDToString } = require('../../../../utils/helper/uuids');
 const Views = require('./commons/views');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const fs = require('fs/promises');
@@ -134,5 +135,16 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
 
 Containers.getRevisionMD5Hash = getModelMD5Hash;
+
+Containers.getTree = async (teamspace, container, revision) => {
+	let revId = revision;
+
+	if (!revId) {
+		const latestRev = await getLatestRevision(teamspace, container, modelTypes.CONTAINER, { _id: 1 });
+		revId = UUIDToString(latestRev._id);
+	}
+
+	return getFileAsStream(teamspace, `${container}.stash.json_mpc.ref`, `${revId}/fulltree.json`);
+};
 
 module.exports = Containers;

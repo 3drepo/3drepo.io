@@ -28,6 +28,7 @@ const {
 	hasWriteAccessToDrawing,
 	hasWriteAccessToFederation,
 } = require('../../../utils/permissions');
+const { BYPASS_AUTH } = require('../../../utils/config.constants');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
@@ -40,7 +41,7 @@ const permissionsCheckTemplate = (callback) => async (req, res, next) => {
 	const { teamspace, project, model } = params;
 
 	try {
-		if (await callback(teamspace, project, model, user)) {
+		if (req.app.get(BYPASS_AUTH) || await callback(teamspace, project, model, user)) {
 			next();
 		} else {
 			respond(req, res, templates.notAuthorized);

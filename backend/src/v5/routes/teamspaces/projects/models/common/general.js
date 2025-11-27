@@ -227,7 +227,20 @@ const getJobsWithAccess = async (req, res) => {
 	}
 };
 
-const establishRoutes = (modelType) => {
+const getTree = async (req, res) => {
+	const { teamspace, container } = req.params;
+	const { revId } = req.query;
+
+	try {
+		const { readStream, filename, size, mimeType } = await Containers.getTree(teamspace, container, revId);
+		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const establishRoutes = (modelType, isInternal) => {
 	const router = Router({ mergeParams: true });
 
 	const hasAdminAccessToModel = {
@@ -1079,6 +1092,10 @@ const establishRoutes = (modelType) => {
 	 *         description: returns a raster image of the thumbnail
 	 */
 		router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
+	}
+
+	if (modelType === modelTypes.CONTAINER && isInternal) {
+		router.get('/:model/tree', hasReadAccessToContainer, getTree);
 	}
 
 	return router;
