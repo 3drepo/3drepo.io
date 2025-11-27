@@ -80,7 +80,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/groups/export:
 	 *   post:
 	 *     description: Export a list of groups from the container/federation
-	 *     tags: [Groups]
+	 *     tags: [v:external, Groups]
 	 *     operationId: ExportModelGroups
 	 *     parameters:
 	 *       - name: teamspace
@@ -139,7 +139,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/groups/import:
 	 *   post:
 	 *     description: Import a list of groups
-	 *     tags: [Groups]
+	 *     tags: [v:external, Groups]
 	 *     operationId: ImportModelGroups
 	 *     parameters:
 	 *       - name: teamspace
