@@ -20,7 +20,6 @@ interface Props {
 	items: any[];
 	itemHeight: number;
 	ItemComponent: (value: any, index: number, array: any[]) => JSX.Element;
-	itemBorder?: number;
 	id?: string;
 }
 
