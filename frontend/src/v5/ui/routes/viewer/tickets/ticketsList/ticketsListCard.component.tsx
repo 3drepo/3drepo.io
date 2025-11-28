@@ -77,13 +77,12 @@ export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-
 	
 	const onFiltersChange = (filters) => {
 		TicketsCardActionsDispatchers.setFilters(filters);
 	};
 
-	const [groupBy, setGroupby] = useState('properties.standard text');
+	const [groupBy, setGroupby] = useState('none');
 
 	useEffect(() => {
 		if (groupBy === 'none') return;

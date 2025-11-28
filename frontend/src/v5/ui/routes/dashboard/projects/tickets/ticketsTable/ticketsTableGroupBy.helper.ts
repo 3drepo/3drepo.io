@@ -16,17 +16,17 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
+import { ITicket, StatusValue } from '@/v5/store/tickets/tickets.types';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import _, { Dictionary, get } from 'lodash';
+import _, { Dictionary } from 'lodash';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
-import { selectStatusConfigByTemplateId, selectTemplateById, selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
+import { selectTemplates, selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selectors';
 import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME } from '@/v5/store/users/users.helpers';
 import { selectJobById } from '@/v4/modules/jobs/jobs.selectors';
 import { findPropertyDefinition, getTemplateByTicket } from '@/v5/store/tickets/tickets.helpers';
-import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
+import { selectCurrentProjectTemplates } from '@/v5/store/projects/projects.selectors';
 
 
 
@@ -67,7 +67,36 @@ export type TicketsGroup = {
 
 type GroupDictionary = Dictionary<{ tickets: ITicket[], value: any }>;
 
-const sortToTicketsGroups = (groups: GroupDictionary): TicketsGroup[] => {
+const sortByStatus = (groups: TicketsGroup[]) => {
+	const state = getState();
+	const aTicket = groups[Object.keys(groups)[0]].tickets[0];
+	const templates = selectCurrentProjectTemplates(state) || selectTemplates(state, aTicket);
+
+
+	const indexByName: Record<string, number> = {};
+
+	const defaultStatusTypes = DEFAULT_STATUS_CONFIG.values.map((a) => a.type);
+
+	templates.forEach((template) => {
+		const values = (template.config?.status || DEFAULT_STATUS_CONFIG).values;
+
+		values.forEach((v) => {
+			const statusIndex = defaultStatusTypes.indexOf(v.type);
+			indexByName[v.name] = indexByName[v.name] ? Math.min(indexByName[v.name], statusIndex) : statusIndex;
+		});
+	});
+	
+	return groups.sort((a, b) =>  {
+		const indexA = indexByName[a.value];
+		const indexB = indexByName[b.value];
+
+		if (indexA !== indexB ) return indexA - indexB;
+		return a.groupName.localeCompare(b.groupName);
+	});
+};
+
+const sortToTicketsGroups = (groups: GroupDictionary, groupBy): TicketsGroup[] => {
+	
 	const { [UNSET]: groupsWithUnsetValue, ...grouspWithSetValue } = groups;
 	const sortedGroups:TicketsGroup[] = Object.keys(grouspWithSetValue)
 		.sort(arrayAndStringCompare)     
@@ -75,6 +104,10 @@ const sortToTicketsGroups = (groups: GroupDictionary): TicketsGroup[] => {
 	
 	if (groupsWithUnsetValue) {
 		sortedGroups.push({ groupName: UNSET, ...groupsWithUnsetValue });
+	}
+	
+	if (groupBy === `properties.${BaseProperties.STATUS}`) {
+		return sortByStatus(sortedGroups);
 	}
 
 	return sortedGroups;
@@ -92,29 +125,6 @@ const DUE_DATE_LABELS = [
 	formatMessage({ id: 'groupBy.dueDate.inFiveWeeks', defaultMessage: 'in 5 weeks' }),
 	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
 ];
-
-
-// const groupByStatus = (tickets: ITicket[]) => {
-// 	const statusPath = `properties.${BaseProperties.STATUS}`;
-// 	const statusConfigValues = (selectStatusConfigByTemplateId(getState(), tickets[0].type) || DEFAULT_STATUS_CONFIG).values;
-// 	const labels: Record<string, string> = {};
-// 	const index: Record<string, number> = {};
-	
-// 	statusConfigValues.forEach(({ name, label }, i)=>  {
-// 		// Takes in consideration the default statuses that can have translations
-// 		labels[name] = label || name;
-		
-// 		// For sorting  of the groups purposes, first  open, then in progress, etc. 
-// 		index[name] = i;
-// 	});
-
-// 	const groups = createGroups(tickets, (ticket) => {
-// 		const value = selectTicketPropertyByName(getState(), ticket._id, statusPath);
-// 		return { name:labels[value], value };
-// 	});
-
-// 	return groups.sort((a, b) => index[a.groupName] - index[b.groupName]);
-// };
 
 const getKeyByDueDate  = (ticket) => {
 	const dueDatePropName = 'properties.' + IssueProperties.DUE_DATE;
@@ -147,9 +157,13 @@ const getKeyByDueDate  = (ticket) => {
 	return { name, value };
 };
 
-const getKeyByStatus = (labels) => (ticket, groupBy) => {
+const getKeyByStatus = (ticket, groupBy) => {
 	const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
-	return { name:labels[value], value };
+	const template = getTemplateByTicket(ticket);
+	const statusConfigValues =  (template?.config?.status || DEFAULT_STATUS_CONFIG).values;
+	const statusConfig = statusConfigValues.find((s) => s.name === value) ;
+	const name = statusConfig.label || statusConfig.name;
+	return { name, value };
 };
 
 const getKeyManyValues = (ticket, groupBy) => {
@@ -180,7 +194,7 @@ const getKey = (ticket: ITicket, groupBy: string) => {
 	
 	if (propertyDefinition.values === 'jobsAndUsers') return getkeyByJobsAndUsers(ticket, groupBy);
 	if (groupBy === `properties.${IssueProperties.DUE_DATE}`) return getKeyByDueDate(ticket);
-	if (groupBy === `properties.${BaseProperties.STATUS}`) return getKeyByStatus({})(ticket, groupBy);
+	if (groupBy === `properties.${BaseProperties.STATUS}`) return getKeyByStatus(ticket, groupBy);
 	if (['text', 'oneOf'].includes(propertyType)) return getKeyBySingleValue(ticket, groupBy);
 	if (propertyType === 'manyOf') return getKeyManyValues(ticket, groupBy);
 };
@@ -206,5 +220,5 @@ export const groupTickets = (groupBy: string, tickets: ITicket[]): TicketsGroup[
 		groups[name].tickets.push(ticket);
 	});
 
-	return sortToTicketsGroups(groups);
+	return sortToTicketsGroups(groups, groupBy);
 };
