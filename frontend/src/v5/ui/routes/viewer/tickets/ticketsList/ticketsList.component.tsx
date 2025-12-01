@@ -49,9 +49,7 @@ const TicketsCardGroup = ({ tickets, groupName, idsToNumber } : TicketsGroup & I
 	</DashboardListCollapse></div>);
 };
 
-
-
-export const TicketsList = ({ groupBy }) => {
+export const TicketsList = ({ groupBy, templates }) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
@@ -86,7 +84,7 @@ export const TicketsList = ({ groupBy }) => {
 
 
 	if (groupBy !== 'none') {
-		const groups = groupTickets(groupBy, filteredTickets);
+		const groups = groupTickets(groupBy, templates, filteredTickets);
 		const idsToNumber = {};
 		let c = 0;
 
