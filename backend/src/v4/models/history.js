@@ -64,11 +64,7 @@ History.listByBranch = async function(account, model, branch, projection, showVo
 		query.void = {"$ne" : true};
 	}
 
-	if(branch === C.MASTER_BRANCH_NAME) {
-		query.shared_id = stringToUUID(C.MASTER_BRANCH);
-	} else if(branch) {
-		query.shared_id = stringToUUID(branch);
-	}
+	// NOTE: The concept is branch is deprecated, so we just ignore it and always get all revisions
 
 	return await History.find(
 		account, model,
@@ -88,13 +84,9 @@ History.findByBranch = async function(account, model, branch, projection, showVo
 		query.void = {"$ne" : true};
 	}
 
-	projection = projection || {};
+	// NOTE: The concept is branch is deprecated, so we just ignore it and always get the latest revision
 
-	if(!branch || branch === C.MASTER_BRANCH_NAME) {
-		query.shared_id = stringToUUID(C.MASTER_BRANCH);
-	} else {
-		query.shared_id = stringToUUID(branch);
-	}
+	projection = projection || {};
 
 	const sort = {timestamp: -1};
 
