@@ -117,7 +117,7 @@ export const TicketsListCard = () => {
 				<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
 					<CardFilters />
 					{tickets.length ? (
-						<TicketsList groupBy={groupBy}/>
+						<TicketsList groupBy={groupBy} templates={templates} />
 					) : (
 						<EmptyListMessage>
 							<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />

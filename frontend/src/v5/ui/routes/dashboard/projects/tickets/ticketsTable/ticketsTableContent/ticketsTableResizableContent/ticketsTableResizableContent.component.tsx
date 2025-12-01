@@ -27,7 +27,7 @@ import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableConte
 import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 
@@ -75,11 +75,18 @@ export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
 	tickets: ITicket[],
+	templateId: string,
+	template: ITemplate,
 };
 
-export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId, tickets: filteredItems }: TicketsTableResizableContentProps) => {
+export const TicketsTableResizableContent = ({ 
+	setTicketValue, 
+	selectedTicketId, 
+	tickets: filteredItems, 
+	templateId, 
+	template,
+}: TicketsTableResizableContentProps) => {
 	const { groupBy } = useContext(TicketsTableContext);
-	const { template } = useParams<DashboardTicketsParams>();
 	const collapsedGroups = useRef<Record<string, boolean>>({});
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
@@ -106,7 +113,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 		);
 	}
 	
-	const groups = groupTickets(groupBy, filteredItems);
+	const groups = groupTickets(groupBy, [template], filteredItems);
 
 	return (
 		<Container>
@@ -124,7 +131,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 						propertyName={groupBy}
 						onChangeCollapse={(collapsed) => onChangeCollapse(value, collapsed)}
 						expanded={collapsedGroups.current[value] === undefined ? tickets.length > 0 : !collapsedGroups.current[value] }
-						key={groupBy + groupName + template + tickets}
+						key={groupBy + groupName + templateId + tickets}
 					/>
 				)} 
 			/>
