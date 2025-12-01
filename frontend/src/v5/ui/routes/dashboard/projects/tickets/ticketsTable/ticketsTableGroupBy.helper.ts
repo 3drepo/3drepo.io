@@ -16,17 +16,16 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { ITicket, StatusValue } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import _, { Dictionary } from 'lodash';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
-import { selectTemplates, selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
+import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selectors';
 import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME } from '@/v5/store/users/users.helpers';
 import { selectJobById } from '@/v4/modules/jobs/jobs.selectors';
-import { findPropertyDefinition, getTemplateByTicket } from '@/v5/store/tickets/tickets.helpers';
-import { selectCurrentProjectTemplates } from '@/v5/store/projects/projects.selectors';
+import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 
 
 
@@ -67,17 +66,13 @@ export type TicketsGroup = {
 
 type GroupDictionary = Dictionary<{ tickets: ITicket[], value: any }>;
 
-const sortByStatus = (groups: TicketsGroup[]) => {
-	const state = getState();
-	const aTicket = groups[Object.keys(groups)[0]].tickets[0];
-	const templates = selectCurrentProjectTemplates(state) || selectTemplates(state, aTicket);
-
-
+const sortByStatus = (groups: TicketsGroup[], templates: ITemplate[]) => {
 	const indexByName: Record<string, number> = {};
 
 	const defaultStatusTypes = DEFAULT_STATUS_CONFIG.values.map((a) => a.type);
 
 	templates.forEach((template) => {
+
 		const values = (template.config?.status || DEFAULT_STATUS_CONFIG).values;
 
 		values.forEach((v) => {
@@ -95,8 +90,7 @@ const sortByStatus = (groups: TicketsGroup[]) => {
 	});
 };
 
-const sortToTicketsGroups = (groups: GroupDictionary, groupBy): TicketsGroup[] => {
-	
+const sortToTicketsGroups = (groups: GroupDictionary, groupBy, templates: ITemplate[]): TicketsGroup[] => {
 	const { [UNSET]: groupsWithUnsetValue, ...grouspWithSetValue } = groups;
 	const sortedGroups:TicketsGroup[] = Object.keys(grouspWithSetValue)
 		.sort(arrayAndStringCompare)     
@@ -107,7 +101,7 @@ const sortToTicketsGroups = (groups: GroupDictionary, groupBy): TicketsGroup[] =
 	}
 	
 	if (groupBy === `properties.${BaseProperties.STATUS}`) {
-		return sortByStatus(sortedGroups);
+		return sortByStatus(sortedGroups, templates);
 	}
 
 	return sortedGroups;
@@ -157,9 +151,8 @@ const getKeyByDueDate  = (ticket) => {
 	return { name, value };
 };
 
-const getKeyByStatus = (ticket, groupBy) => {
+const getKeyByStatus = (ticket, groupBy, template: ITemplate) => {
 	const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
-	const template = getTemplateByTicket(ticket);
 	const statusConfigValues =  (template?.config?.status || DEFAULT_STATUS_CONFIG).values;
 	const statusConfig = statusConfigValues.find((s) => s.name === value) ;
 	const name = statusConfig.label || statusConfig.name;
@@ -183,8 +176,8 @@ const getkeyByJobsAndUsers = (ticket: ITicket, groupBy: string) => {
 	return { name, value };
 };
 
-const getKey = (ticket: ITicket, groupBy: string) => {
-	const template = getTemplateByTicket(ticket);
+const getKey = (ticket: ITicket, groupBy: string, templatesDict: Record<string, ITemplate>) => {
+	const template = templatesDict[ticket.type];
 	const propertyDefinition = findPropertyDefinition(template, groupBy);
 
 	if (!propertyDefinition) {
@@ -194,15 +187,19 @@ const getKey = (ticket: ITicket, groupBy: string) => {
 	
 	if (propertyDefinition.values === 'jobsAndUsers') return getkeyByJobsAndUsers(ticket, groupBy);
 	if (groupBy === `properties.${IssueProperties.DUE_DATE}`) return getKeyByDueDate(ticket);
-	if (groupBy === `properties.${BaseProperties.STATUS}`) return getKeyByStatus(ticket, groupBy);
+	if (groupBy === `properties.${BaseProperties.STATUS}`) return getKeyByStatus(ticket, groupBy, template);
 	if (['text', 'oneOf'].includes(propertyType)) return getKeyBySingleValue(ticket, groupBy);
 	if (propertyType === 'manyOf') return getKeyManyValues(ticket, groupBy);
 };
 
-export const groupTickets = (groupBy: string, tickets: ITicket[]): TicketsGroup[] => {
+
+export const groupTickets = (groupBy: string, templates: ITemplate[], tickets: ITicket[]): TicketsGroup[] => {
 	const groups: GroupDictionary = {};
+	const templateDict:Record<string, ITemplate> = {};
+	templates.forEach((template) => templateDict[template._id] = template);
+
 	tickets.forEach((ticket) => {
-		const key = getKey(ticket, groupBy);
+		const key = getKey(ticket, groupBy, templateDict);
 		let name: string, value: any = undefined;
 
 		if (key.name) {
@@ -220,5 +217,5 @@ export const groupTickets = (groupBy: string, tickets: ITicket[]): TicketsGroup[
 		groups[name].tickets.push(ticket);
 	});
 
-	return sortToTicketsGroups(groups, groupBy);
+	return sortToTicketsGroups(groups, groupBy, templates);
 };

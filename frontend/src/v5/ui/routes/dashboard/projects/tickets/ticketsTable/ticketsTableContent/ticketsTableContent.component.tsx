@@ -119,7 +119,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		);
 	}
 	
-	return <TicketsTableResizableContent {...props} />;
+	return <TicketsTableResizableContent {...props} template={template} />;
 };
 
 export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {

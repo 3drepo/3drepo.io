@@ -32,9 +32,6 @@ import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { getState } from '@/v5/helpers/redux.helpers';
-import { selectTemplateById } from './tickets.selectors';
-import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
@@ -289,14 +286,6 @@ export const templateAlreadyFetched = (template: ITemplate) => {
 };
 
 export const getPropertiesInCamelCase = (properties) => mapKeys(properties, (_, key) => camelCase(key));
-
-// This is using one or the other because by some reason we save the templates
-// in the projects state in the dashboard and the templates in models state in
-// the viewer
-export const getTemplateByTicket = (ticket:ITicket) =>{
-	const state = getState();
-	return  selectCurrentProjectTemplateById(state, ticket.type) || selectTemplateById(state, ticket.modelId, ticket.type);
-};
 
 const fillEmptyOverrides = (values: Partial<ITicket>) => {
 	Object.values(values).forEach((value) => {
