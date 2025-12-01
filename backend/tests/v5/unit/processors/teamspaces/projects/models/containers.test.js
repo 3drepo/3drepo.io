@@ -20,6 +20,7 @@ const {
 	determineTestGroup,
 	generateRandomString,
 	generateUUIDString,
+	generateRandomObject,
 } = require('../../../../../helper/services');
 
 const fs = require('fs/promises');
@@ -553,6 +554,59 @@ const testGetMD5Hash = () => {
 	});
 };
 
+const testGetTree = () => {
+	describe('Get container tree', () => {
+		test('should call getFileAsStream with the provided revision', async () => {
+			const file = generateRandomObject();
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const revId = generateRandomString();
+
+			FilesManager.getFileAsStream.mockResolvedValueOnce(file);
+
+			await expect(Containers.getTree(teamspace, container, revId))
+				.resolves.toEqual(file);
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.stash.json_mpc.ref`, `${revId}/fulltree.json`);
+		});
+
+		test('should call getFileAsStream with the latest revision if revision is not provided', async () => {
+			const file = generateRandomObject();
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const revision = { _id: generateRandomString() };
+
+			Revisions.getLatestRevision.mockResolvedValueOnce(revision);
+			FilesManager.getFileAsStream.mockResolvedValueOnce(file);
+
+			await expect(Containers.getTree(teamspace, container))
+				.resolves.toEqual(file);
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.stash.json_mpc.ref`, `${revision._id}/fulltree.json`);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledWith(teamspace, container,
+				modelTypes.CONTAINER, { _id: 1 });
+		});
+
+		test('should throw error if revision is not provided and no latest revision exists', async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+
+			Revisions.getLatestRevision.mockRejectedValueOnce(new Error());
+
+			await expect(Containers.getTree(teamspace, container))
+				.rejects.toEqual(templates.fileNotFound);
+
+			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledWith(teamspace, container,
+				modelTypes.CONTAINER, { _id: 1 });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -566,4 +620,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 	testGetMD5Hash();
+	testGetTree();
 });

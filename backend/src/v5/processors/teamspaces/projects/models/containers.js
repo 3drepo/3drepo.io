@@ -140,8 +140,12 @@ Containers.getTree = async (teamspace, container, revision) => {
 	let revId = revision;
 
 	if (!revId) {
-		const latestRev = await getLatestRevision(teamspace, container, modelTypes.CONTAINER, { _id: 1 });
-		revId = UUIDToString(latestRev._id);
+		try {
+			const latestRev = await getLatestRevision(teamspace, container, modelTypes.CONTAINER, { _id: 1 });
+			revId = UUIDToString(latestRev?._id);
+		} catch {
+			throw templates.fileNotFound;
+		}
 	}
 
 	return getFileAsStream(teamspace, `${container}.stash.json_mpc.ref`, `${revId}/fulltree.json`);
