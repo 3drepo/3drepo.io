@@ -158,7 +158,7 @@ const establishRoutes = (isInternal) => {
 		 * /teamspaces/{teamspace}/projects/{project}:
 		 *   get:
 		 *     description: Gets a project
-		 *     tags: [Projects]
+		 *     tags: [v:external, Projects]
 		 *     operationId: getProjectSettings
 		 *     parameters:
 		 *       - name: teamspace
@@ -196,7 +196,7 @@ const establishRoutes = (isInternal) => {
 		 * /teamspaces/{teamspace}/projects/{project}:
 		 *   delete:
 		 *     description: Deletes a project
-		 *     tags: [Projects]
+		 *     tags: [v:external, Projects]
 		 *     operationId: deleteProject
 		 *     parameters:
 		 *       - name: teamspace
@@ -225,7 +225,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces/{teamspace}/projects/{project}:
 	 *   patch:
 	 *     description: Edits a project
-	 *     tags: [Projects]
+	 *     tags: [v:external, Projects]
 	 *     operationId: updateProject
 	 *     parameters:
 	 *       - name: teamspace
@@ -264,7 +264,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/image:
 	 *   get:
 	 *     description: Gets a project image
-	 *     tags: [Projects]
+	 *     tags: [v:external, Projects]
 	 *     operationId: getProjectImage
 	 *     parameters:
 	 *       - name: teamspace
@@ -298,7 +298,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/image:
 	 *   put:
 	 *     description: Upload a project image
-	 *     tags: [Projects]
+	 *     tags: [v:external, Projects]
 	 *     operationId: uploadProjectImage
 	 *     parameters:
 	 *       - name: teamspace
@@ -336,7 +336,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/image:
 	 *   delete:
 	 *     description: Deletes a project image
-	 *     tags: [Projects]
+	 *     tags: [v:external, Projects]
 	 *     operationId: deleteProjectImage
 	 *     parameters:
 	 *       - name: teamspace
@@ -365,7 +365,7 @@ const establishRoutes = (isInternal) => {
 	* /teamspaces/{teamspace}/projects/{project}/settings/drawingCategories:
 	*   get:
 	*     description: Get the list of drawing categories available within the project
-	*     tags: [Projects]
+	*     tags: [v:external, Projects]
 	*     operationId: getDrawingCategories
 	*     parameters:
 	*       - name: teamspace
@@ -404,7 +404,7 @@ const establishRoutes = (isInternal) => {
 	* /teamspaces/{teamspace}/projects/{project}/settings/statusCodes:
 	*   get:
 	*     description: Get the list of status codes available within the project
-	*     tags: [Projects]
+	*     tags: [v:external, Projects]
 	*     operationId: getStatusCodes
 	*     parameters:
 	*       - name: teamspace
@@ -453,7 +453,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces/{teamspace}/projects:
 	 *   post:
 	 *     description: Creates a new project
-	 *     tags: [Projects]
+	 *     tags: [v:external, v:internal,Projects]
 	 *     operationId: createProject
 	 *     parameters:
 	 *       - name: teamspace
@@ -495,7 +495,7 @@ const establishRoutes = (isInternal) => {
 	 * /teamspaces/{teamspace}/projects:
 	 *   get:
 	 *     description: Get a list of projects within the specified teamspace the user has access to
-	 *     tags: [Projects]
+	 *     tags: [v:external, v:internal, Projects]
 	 *     operationId: getProjectList
 	 *     parameters:
 	 *       - name: teamspace
