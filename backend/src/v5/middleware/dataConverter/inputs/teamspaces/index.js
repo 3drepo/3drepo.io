@@ -16,6 +16,11 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const Yup = require('yup');
+const { deleteIfUndefined } = require('../../../../utils/helper/objects');
+const { getTeamspaceByAccount } = require('../../../../services/sso/frontegg/components/accounts');
+const { getTeamspaceSetting } = require('../../../../models/teamspaceSettings');
+const { getUserByEmail } = require('../../../../models/users');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { isTeamspaceAdmin } = require('../../../../utils/permissions');
 const { isTeamspaceMember } = require('../../../../processors/teamspaces');
@@ -63,6 +68,39 @@ Teamspaces.memberExists = async (req, res, next) => {
 		}
 	} catch (err) {
 		respond(req, res, err);
+	}
+};
+
+Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		name: Yup.string()
+			.matches(/^[a-zA-Z0-9]+$/, 'Teamspace name must be alphanumeric and contain no full stops.')
+			.max(128, 'Teamspace name must be at most 128 characters long.')
+			.required('Teamspace name is required'),
+		admin: Yup.string().email('Admin must be a valid email address').optional(),
+		accountId: Yup.string().optional(),
+	});
+	let teamspaceExists;
+
+	try {
+		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }));
+
+		try {
+			teamspaceExists = await getTeamspaceSetting(req.body.name, { _id: 1 });
+		} catch (e) {
+			teamspaceExists = false;
+		}
+
+		if (teamspaceExists) {
+			throw new Error('Teamspace with this name already exists.');
+		}
+		if (req.body.admin) await getUserByEmail(req.body.admin);
+
+		if (req.body.accountId && !await getTeamspaceByAccount(req.body.accountId)) throw templates.teamspaceNotFound;
+
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
 
