@@ -221,9 +221,6 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey }:Props) =>
 			// TODO: Check if items didnt cover the thing
 			// make itemheight optional for this
 			// Can use binary search to find the actual height?
-
-			console.log('itemsheight changed:' + parentVKey);
-
 			itemsHeight.current[itemIndex] = elementHeight;
 			itemsHeightChanged = true;
 		}
