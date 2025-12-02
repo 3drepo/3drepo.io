@@ -39,7 +39,7 @@ const TicketsCardGroup = ({ tickets, groupName, idsToNumber } : TicketsGroup & I
 	>
 		<List>
 			<VirtualList 
-				id={'tickets-list-' + tickets[0].title}
+				vKey={'tickets-list-' + tickets[0].title}
 				items={tickets}
 				itemHeight={30}
 				ItemComponent={(ticket: ITicket) => 
@@ -105,7 +105,7 @@ export const TicketsList = ({ groupBy, templates }) => {
 						style={{ position:'absolute' }}
 					>
 						<VirtualList
-							id='groups-list'
+							vKey='groups-list'
 							items={groups}
 							itemHeight={30}
 							ItemComponent={(group: TicketsGroup) => 
@@ -130,6 +130,7 @@ export const TicketsList = ({ groupBy, templates }) => {
 				>
 					<List>
 						<VirtualList 
+							vKey='groups-list'
 							items={filteredTickets}
 							itemHeight={30}
 							ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}

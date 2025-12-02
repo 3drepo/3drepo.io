@@ -17,11 +17,9 @@
 
 import { useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
@@ -123,13 +121,11 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 };
 
 export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
-	const { template: templateId } = useParams<DashboardTicketsParams>();
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const tableRef = useRef(null);
 
 	return (
 		<Container ref={tableRef}>
-			<TableContent {...props} tableRef={tableRef} template={template} />
+			<TableContent {...props} tableRef={tableRef} />
 		</Container>
 	);
 };

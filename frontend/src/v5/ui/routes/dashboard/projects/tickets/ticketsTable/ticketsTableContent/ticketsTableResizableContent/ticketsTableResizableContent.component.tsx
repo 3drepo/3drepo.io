@@ -16,8 +16,6 @@
  */
 
 import { useCallback, useContext, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
@@ -75,7 +73,6 @@ export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
 	tickets: ITicket[],
-	templateId: string,
 	template: ITemplate,
 };
 
@@ -83,7 +80,6 @@ export const TicketsTableResizableContent = ({
 	setTicketValue, 
 	selectedTicketId, 
 	tickets: filteredItems, 
-	templateId, 
 	template,
 }: TicketsTableResizableContentProps) => {
 	const { groupBy } = useContext(TicketsTableContext);
@@ -120,6 +116,7 @@ export const TicketsTableResizableContent = ({
 			<VirtualList
 				items={groups}
 				itemHeight={45}
+				vKey='groups-list'
 				ItemComponent={({ groupName, value, tickets }) => (
 					<CollapsibleTicketsGroup
 						groupName={groupName}
@@ -131,7 +128,7 @@ export const TicketsTableResizableContent = ({
 						propertyName={groupBy}
 						onChangeCollapse={(collapsed) => onChangeCollapse(value, collapsed)}
 						expanded={collapsedGroups.current[value] === undefined ? tickets.length > 0 : !collapsedGroups.current[value] }
-						key={groupBy + groupName + templateId + tickets}
+						key={groupBy + groupName + template._id }
 					/>
 				)} 
 			/>

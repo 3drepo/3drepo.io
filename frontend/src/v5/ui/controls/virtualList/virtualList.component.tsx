@@ -20,7 +20,7 @@ interface Props {
 	items: any[];
 	itemHeight: number;
 	ItemComponent: (value: any, index: number, array: any[]) => JSX.Element;
-	id?: string;
+	vKey?: string;
 }
 
 const emptyRect = { x:0, y:0, width:0, top:0, bottom: 0, height:0 } as DOMRect;
@@ -95,35 +95,47 @@ const getContainerHeight = (items: any[], heights: Record<any, number>, defaultH
 };
 
 
-const VirtualListContext = createContext(undefined);
+
+type VirtualListContextValue = {
+	getRef?: <T>(key:string, defaultVal:T) => T,
+};
+
+
+const VirtualListContext = createContext<VirtualListContextValue>(undefined);
 VirtualListContext.displayName = 'VirtualListContext';
 
+const VKeyContext = createContext<React.Key>('virtual-list');
+VKeyContext.displayName = 'VKeyContext';
 
-const NestedListsContext = ({ children }) => {
+type NestedListsContexProps = {
+	children: any,
+	parentVKey: string,
+};
+
+const NestedListsContext = ({ children }: NestedListsContexProps) => {
 	const root = useContext(VirtualListContext);
-	const refsDict = useRef<WeakMap<any, any>>(new WeakMap()); 
+	const refsDict = useRef<Record<string, any>>({});
 
-	const getRef = (items, defaultVal) => {
-		let value = refsDict.current.get(items);
+	const getRef = (key, defaultVal) => {
+		let value = refsDict.current[key];
 		if (!value) {
-			refsDict.current.set(items, defaultVal);
+			refsDict.current[key] = defaultVal;
 		}
 
-		return refsDict.current.get(items);
+		return refsDict.current[key];
 	};
-
 
 	if (root) return <>{children}</>; 
 
 	return (
-		<VirtualListContext.Provider value={{ getRef  }}>
+		<VirtualListContext.Provider value={{ getRef }}>
 			{children}
 		</VirtualListContext.Provider>
 	);
 };
 
 
-function useVRef<T>(key, defaultVal) {
+function useVRef<T>(key:string, defaultVal: T) {
 	const vContext = useContext(VirtualListContext);
 	const ref = useRef<T>(defaultVal);
 
@@ -138,7 +150,7 @@ function useVRef<T>(key, defaultVal) {
 // Todo: pass a viewport
 // TODO: itemheight should be average?
 // ItemComponent must create an item which bottom is the top of the next item. In other words no gutters are allowed.
-export const VirtualList = ({ items, itemHeight, ItemComponent, id }:Props) => { 
+export const VirtualList = ({ items, itemHeight, ItemComponent, vKey }:Props) => { 
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
 	const [, setRedraw] = useState(false);
@@ -146,10 +158,12 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, id }:Props) => {
 	const itemsRef = useRef(items);
 	const initialized = useRef(true);
 
+	const parentVKey = useContext(VKeyContext);
+
 	const renderInnerHeight = useRef(0);
 	renderInnerHeight.current = window.innerHeight;
 
-	const itemsHeight = useVRef<Record<any, number>>((items),  {}); // get rid of the elements that get deleted
+	const itemsHeight = useVRef<Record<any, number>>(parentVKey as string, {}); // get rid of the elements that get deleted
 	const renderContainerRect = useRef(emptyRect);
 	
 	renderContainerRect.current = containerRef.current?.getBoundingClientRect();
@@ -246,9 +260,9 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, id }:Props) => {
 	}, [items]);
 
 	return (
-		<NestedListsContext>
+		<NestedListsContext parentVKey={vKey}>
 			<div
-				id={id}
+				id={vKey}
 				style={
 					{
 						height: containerHeight, 
@@ -259,7 +273,11 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, id }:Props) => {
 			>
 				<div style={{ height: spacerStart } } id='startSpacer'/>
 				<div ref={itemsContainer as any}   >
-					{itemsSlice.map(ItemComponent)}
+					{itemsSlice.map((e, index, arr) => {
+						var ele = ItemComponent(e, index, arr);
+						const key = parentVKey ? `${parentVKey}.${ele.key}` : ele.key;
+						return (<VKeyContext.Provider value={key} key={key} >{ele}</VKeyContext.Provider>);
+					})}
 				</div>
 			</div>
 		</NestedListsContext>
