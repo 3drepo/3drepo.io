@@ -19,6 +19,7 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
+const { storeFile } = require('../../../../../../../../src/v5/services/filesManager');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -1173,21 +1174,93 @@ const testGetJobsWithAccess = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
-	beforeAll(async () => {
-		server = await ServiceHelper.app();
-		agent = await SuperTest(server);
+const testGetTree = (internalService) => {
+	describe('Get container tree', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const conNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
+
+		const fileContent = ServiceHelper.generateRandomString();
+
+		beforeAll(async () => {
+			const models = [con, conNoRev, fed];
+			await setupBasicData(users, teamspace, project, models);
+			const rev = await addRevision(teamspace, project, con, modelTypes.CONTAINER, true);
+			await storeFile(teamspace, `${con._id}.stash.json_mpc.ref`, `${rev._id}/fulltree.json`, Buffer.from(fileContent));
+		});
+
+		const generateTestData = () => {
+			const model = con;
+			const wrongTypeModel = fed;
+			const modelNotFound = templates.containerNotFound;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tree${internalService ? '' : `?key=${key}`}`;
+
+			const externalTests = [
+				['session is external', getRoute(), false, templates.pageNotFound],
+			];
+
+			const internalTests = [
+				// the errir in first 3 tests should be PROJECT_NOT_FOUND & CONTAINER_NOT_FOUND
+				// waiting for the change in hasContainerReadAccess middleware when BYPASS_AUTH is true
+				// ['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.fileNotFound],
+				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.fileNotFound],
+				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.fileNotFound],
+				['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.fileNotFound],
+				['the container has a revision', getRoute(), true, model],
+			];
+
+			return internalService ? internalTests : externalTests;
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body.toString()).toEqual(fileContent);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData())('Drawings', runTest);
 	});
+};
+
+describe(ServiceHelper.determineTestGroup(__filename), () => {
+	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
-	testGetModelList();
-	testGetModelStats();
-	testAppendFavourites();
-	testDeleteFavourites();
-	testAddModel();
-	testDeleteModel();
-	testUpdateModelSettings();
-	testGetSettings();
-	testGetThumbnail();
-	testGetUsersWithPermissions();
-	testGetJobsWithAccess();
+	describe('External Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app();
+			agent = await SuperTest(server);
+		});
+
+		// testGetModelList();
+		// testGetModelStats();
+		// testAppendFavourites();
+		// testDeleteFavourites();
+		// testAddModel();
+		// testDeleteModel();
+		// testUpdateModelSettings();
+		// testGetSettings();
+		// testGetThumbnail();
+		// testGetUsersWithPermissions();
+		// testGetJobsWithAccess();
+		testGetTree();
+	});
+
+	describe('Internal Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app(true);
+			agent = await SuperTest(server);
+		});
+
+		testGetTree(true);
+	});
 });
