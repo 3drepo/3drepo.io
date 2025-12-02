@@ -17,94 +17,69 @@
 
 "use strict";
 const {v5Path } = require("../../interop");
-const FSHandlerBase = require(`${v5Path}/handler/fs`);
-const S3Handler = require("./s3");
-const GridFSHandler = require("./gridfs");
-const AlluxioHandler = require("./alluxio");
+const FSHandler = require(`${v5Path}/handler/fs`);
 
 const ResponseCodes = require("../response_codes");
 const SystemLogger = require("../logger.js").systemLogger;
-const config = require("../config.js");
+const { FileStorageTypes } = require(`${v5Path}/utils/config.constants`);
 
 const ExternalServices = {};
 
-const getDefaultStorageType = () => config.defaultStorage || (config.fs ? "fs" : null) || "gridfs";
+const getDefaultStorageType = () => FileStorageTypes.FS;
 
-let fsHandlerPromise = null;
-const getFSHandler =  () => {
-	if(!fsHandlerPromise) {
-		fsHandlerPromise = FSHandlerBase({...config.fs, name:"fs"});
-	}
-	return fsHandlerPromise;
-};
+const fsHandler = FSHandler.getHandler(FileStorageTypes.FS);
 
 ExternalServices.getFileStream = async (account, collection, type, key) => {
 	switch(type) {
-		case "fs" :
-			return (await getFSHandler()).getFileStream(key);
-		case "s3" :
-			return Promise.resolve(S3Handler.getFileStream(key));
-		case "gridfs" :
-			return GridFSHandler.getFileStream(account, collection, key);
-		case "alluxio" :
-			return AlluxioHandler.getFileStream(key);
+		case FileStorageTypes.FS :
+			return fsHandler.getFileStream(key);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			throw ResponseCodes.UNRECOGNISED_STORAGE_TYPE;
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
 
-ExternalServices.getFile = async (account, collection, type, key) => {
+ExternalServices.getFile = (account, collection, type, key) => {
 	switch(type) {
-		case "fs" :
-			return Promise.resolve((await getFSHandler()).getFile(key));
-		case "s3" :
-			return Promise.resolve(S3Handler.getFile(key));
-		case "gridfs" :
-			return GridFSHandler.getFile(account, collection, key);
-		case "alluxio" :
-			return AlluxioHandler.getFile(key);
+		case FileStorageTypes.FS :
+			return Promise.resolve(fsHandler.getFile(key));
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			throw ResponseCodes.UNRECOGNISED_STORAGE_TYPE;
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
 
-ExternalServices.storeFile = async (account, collection, data) => {
+ExternalServices.storeFile = (account, collection, data) => {
 	const type = getDefaultStorageType();
 
 	switch(type) {
-		case "fs":
-			return (await getFSHandler()).storeFile(data);
-		case "gridfs":
-			return GridFSHandler.storeFile(account, collection, data);
-		case "alluxio":
-			return AlluxioHandler.storeFile(data);
+		case FileStorageTypes.FS:
+			return fsHandler.storeFile(data);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			throw ResponseCodes.UNRECOGNISED_STORAGE_TYPE;
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
 
 ExternalServices.storeFileStream = async (account, collection, fileStream) => {
-
-	return (await getFSHandler()).storeFileStream(fileStream);
-
-};
-
-ExternalServices.removeFiles = async (account, collection, type, keys) => {
+	const type = getDefaultStorageType();
 	switch(type) {
-		case "fs" :
-			return (await getFSHandler()).removeFiles(keys);
-		case "s3" :
-			return S3Handler.removeFiles(keys);
-		case "gridfs" :
-			return GridFSHandler.removeFiles(account, collection, keys);
-		case "alluxio":
-			return AlluxioHandler.removeFiles(keys);
+		case FileStorageTypes.FS:
+			return fsHandler.storeFileStream(fileStream);
 		default:
 			SystemLogger.logError(`Unrecognised external service: ${type}`);
-			throw ResponseCodes.UNRECOGNISED_STORAGE_TYPE;
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
+	}
+};
+
+ExternalServices.removeFiles = (account, collection, type, keys) => {
+	switch(type) {
+		case FileStorageTypes.FS:
+			return fsHandler.removeFiles(keys);
+
+		default:
+			SystemLogger.logError(`Unrecognised external service: ${type}`);
+			return Promise.reject(ResponseCodes.UNRECOGNISED_STORAGE_TYPE);
 	}
 };
 

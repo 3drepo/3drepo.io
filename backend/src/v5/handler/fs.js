@@ -18,7 +18,9 @@
 const { access, constants, mkdir, readFile, stat, unlink, writeFile } = require('fs/promises');
 const { createReadStream, createWriteStream } = require('fs');
 const { createResponseCode, templates } = require('../utils/responseCodes');
+const { FileStorageTypes } = require('../utils/config.constants');
 const Yup = require('yup');
+const config = require('../utils/config');
 const { generateUUIDString } = require('../utils/helper/uuids');
 const { logger } = require('../utils/logger');
 const path = require('path');
@@ -129,6 +131,17 @@ class FSHandler {
 		}
 	}
 
+	async getFileInfo(key) {
+		try {
+			const fullPath = this.#getFullPath(key);
+			const stats = await stat(fullPath);
+
+			return { path: fullPath, size: stats.size };
+		} catch (err) {
+			throw templates.fileNotFound;
+		}
+	}
+
 	async testFilesystem() {
 		const testPath = this.#getFullPath();
 		try {
@@ -154,8 +167,18 @@ class FSHandler {
 	}
 }
 
-module.exports = async (config) => {
-	const fsHandler = new FSHandler(config);
-	await fsHandler.testFilesystem();
-	return fsHandler;
+const FSHandlerInterface = {};
+
+FSHandlerInterface.getHandler = (storageType) => {
+	switch (storageType) {
+	case FileStorageTypes.FS:
+		return new FSHandler({ ...config[FileStorageTypes.FS], name: FileStorageTypes.FS });
+	case FileStorageTypes.EXTERNAL_FS:
+		return new FSHandler({ ...config[FileStorageTypes.EXTERNAL_FS],
+			name: FileStorageTypes.EXTERNAL_FS,
+			readOnly: true });
+	default:
+		throw new Error(`Filesystem handler for type ${storageType} not found`);
+	}
 };
+module.exports = FSHandlerInterface;

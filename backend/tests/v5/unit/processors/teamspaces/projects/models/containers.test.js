@@ -422,6 +422,15 @@ const testNewRevision = () => {
 			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
 		});
 
+		test('should not remove the file if readOnly is set to true', async () => {
+			await fs.copyFile(objModel, fileCreated);
+			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
+			await expect(Containers.newRevision(teamspace, model, data,
+				{ ...file, readOnly: true })).resolves.toBe(undefined);
+			await expect(fileExists(fileCreated)).resolves.toBe(true);
+			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
+		});
+
 		test('v4 compatibility test', async () => {
 			await fs.copyFile(objModel, fileCreated);
 			ModelSettings.getContainerById.mockResolvedValueOnce({});

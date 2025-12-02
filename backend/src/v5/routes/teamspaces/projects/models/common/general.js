@@ -29,6 +29,7 @@ const {
 } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
+const { BYPASS_AUTH } = require('../../../../../utils/config.constants');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
@@ -38,7 +39,6 @@ const { canDeleteContainer } = require('../../../../../middleware/dataConverter/
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
-const { BYPASS_AUTH } = require('../../../../../utils/config.constants');
 
 const getThumbnail = async (req, res) => {
 	const { teamspace, project, drawing } = req.params;

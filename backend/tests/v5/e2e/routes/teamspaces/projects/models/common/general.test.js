@@ -19,7 +19,6 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
-const { ucFirst } = require('../../../../../../../../src/v4/utils');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -169,10 +168,7 @@ const testGetModelList = (isInternal) => {
 		const runTest = (desc, route, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-				const res = await agent.get(route);
-
-				console.log(res.body);
-				// const res = await agent.get(route).expect(expectedStatus);
+				const res = await agent.get(route).expect(expectedStatus);
 				if (success) {
 					const key = Object.keys(expectedOutput)[0];
 

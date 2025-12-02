@@ -41,6 +41,7 @@ const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
+const { FileStorageTypes } = require(`${src}/utils/config.constants`);
 const { editSubscriptions, grantAdminToUser, updateAddOns } = require(`${src}/models/teamspaceSettings`);
 const { initTeamspace, addTeamspaceMember } = require(`${src}/processors/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -382,6 +383,7 @@ ServiceHelper.outOfOrderArrayEqual = (arr1, arr2) => {
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
+ServiceHelper.generateRandomEmail = () => `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`;
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
 	+ Math.random() * (end.getTime() - start.getTime()));
@@ -461,12 +463,12 @@ ServiceHelper.generateUserCredentials = () => ({
 	},
 });
 
-ServiceHelper.determineTestGroup = (path) => {
-	const match = path.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
+ServiceHelper.determineTestGroup = (filePath) => {
+	const match = filePath.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
 	if (match?.length === 3) {
 		return `${match[1].toUpperCase()} ${match[2]}`;
 	}
-	return path;
+	return filePath;
 };
 
 ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
@@ -920,7 +922,7 @@ ServiceHelper.closeApp = async (server) => {
 };
 
 ServiceHelper.resetFileshare = () => {
-	const fsDir = config.fs.path;
+	const fsDir = config[FileStorageTypes.FS].path;
 	fs.rmSync(fsDir, { recursive: true });
 	fs.mkdirSync(fsDir);
 };

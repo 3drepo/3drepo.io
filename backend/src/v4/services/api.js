@@ -29,7 +29,8 @@ const utils = require("../utils");
 const keyAuthentication =  require("../middlewares/keyAuthentication");
 const { respond } = require(`${v5Path}/utils/responder`);
 const { templates } = require(`${v5Path}/utils/responseCodes`);
-const { initialiseSystem } = require(`${v5Path}/services/initialiser`);
+
+const { initialiseSystem, checkSystem } = require(`${v5Path}/services/initialiser`);
 const { BYPASS_AUTH } = require(`${v5Path}/utils/config.constants`);
 
 const APIService = {};
@@ -114,8 +115,8 @@ APIService.createAppAsync = async (config = {}, v5Init = true) => {
 	const internalService = !!config[BYPASS_AUTH];
 	app.set(BYPASS_AUTH, internalService);
 
+	await checkSystem(internalService);
 	app.disable("etag");
-
 	// Session middlewares
 	app.use(keyAuthentication, manageSessions);
 
@@ -133,7 +134,7 @@ APIService.createAppAsync = async (config = {}, v5Init = true) => {
 	app.use(compress({ level: 9 }));
 
 	app.use(function (req, res, next) {
-		// record start time of the request
+	// record start time of the request
 		req.startTime = Date.now();
 		systemLogger.logInfo(`[IN] ${req.method} ${req.originalUrl}`, undefined, logLabels.network);
 		// intercept OPTIONS method
@@ -167,6 +168,7 @@ APIService.createAppAsync = async (config = {}, v5Init = true) => {
 	});
 
 	return app;
+
 };
 
 module.exports = APIService;

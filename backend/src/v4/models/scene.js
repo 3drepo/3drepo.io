@@ -18,7 +18,6 @@
 "use strict";
 const utils = require("../utils");
 const db = require("../handler/db");
-const ExternalServices = require("../handler/externalServices");
 const matrix = require("./helper/matrix");
 const History = require("./history");
 const {v5Path} = require("../../interop");

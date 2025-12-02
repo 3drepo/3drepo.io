@@ -94,9 +94,13 @@ Containers.getRevisions = async (teamspace, project, container, showVoid) => {
 
 Containers.newRevision = async (teamspace, container, data, file) => {
 	const { properties: { unit: units } = {} } = await getContainerById(teamspace, container, { 'properties.unit': 1 });
-	await queueModelUpload(teamspace, container, { ...data, units }, file).finally(() => fs.rm(file.path).catch((e) => {
-		logger.logError(`Failed to delete uploaded file: ${e.message}`);
-	}));
+	await queueModelUpload(teamspace, container, { ...data, units }, file).finally(async () => {
+		if (!file.readOnly) {
+			await fs.rm(file.path).catch((e) => {
+				logger.logError(`Failed to delete uploaded file: ${e.message}`);
+			});
+		}
+	});
 };
 
 Containers.updateRevisionStatus = (teamspace, project, container, revision, status) => updateRevisionStatus(
