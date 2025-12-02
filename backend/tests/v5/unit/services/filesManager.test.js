@@ -448,6 +448,41 @@ const storeFileTestHelper = (multipleFiles) => {
 
 		config.defaultStorage = defaultStorage;
 	});
+
+	test('should store file if metadata is not provided', async () => {
+		const { defaultStorage } = config;
+		config.defaultStorage = FileStorageTypes.FS;
+
+		const refInfo = generateRandomObject();
+
+		const entries = times(nEntries, () => ({
+			id: generateRandomString(),
+			data: generateRandomString(),
+		}));
+
+		handlerMock.storeFile.mockResolvedValue(refInfo);
+		const teamspace = generateRandomString();
+		const collection = generateRandomString();
+
+		const testProm = multipleFiles ? FilesManager.storeFiles(
+			teamspace, collection, entries)
+			: FilesManager.storeFile(
+				teamspace, collection, entries[0].id, entries[0].data);
+
+		await expect(testProm).resolves.toEqual(undefined);
+
+		expect(handlerMock.storeFile).toHaveBeenCalledTimes(entries.length);
+		const expectedInsertRefsParam = entries.map(({ id, data }) => {
+			expect(handlerMock.storeFile).toHaveBeenCalledWith(data);
+			return { _id: id, ...refInfo, mimeType: DEFAULT_MIME_TYPE };
+		});
+
+		expect(FileRefs.insertManyRefs).toHaveBeenCalledTimes(1);
+		expect(FileRefs.insertManyRefs).toHaveBeenCalledWith(teamspace, collection,
+			expectedInsertRefsParam);
+
+		config.defaultStorage = defaultStorage;
+	});
 };
 const testStoreFile = () => {
 	describe('Store file in fileshare', () => {
