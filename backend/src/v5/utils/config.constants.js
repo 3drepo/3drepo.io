@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,14 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const CalibrationConstants = {};
+const Constants = {};
 
-CalibrationConstants.CALIBRATIONS_COL = 'drawings.calibrations';
+// flag set in api service to bypass authentication/authorisation checks - This should only be enabled in internal facing environments
+Constants.BYPASS_AUTH = 'bypassAuth';
 
-CalibrationConstants.calibrationStatuses = {
-	UNCALIBRATED: 'uncalibrated',
-	CALIBRATED: 'calibrated',
-	UNCONFIRMED: 'unconfirmed',
-};
-
-module.exports = CalibrationConstants;
+module.exports = Constants;

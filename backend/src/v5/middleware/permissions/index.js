@@ -22,6 +22,7 @@ const {
 	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToDrawing, hasWriteAccessToFederation,
 } = require('./components/models');
 const { isActiveTeamspaceMember, isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
+const { BYPASS_AUTH } = require('../../utils/config.constants');
 const { isProjectAdmin } = require('./components/projects');
 const { modelTypes } = require('../../models/modelSettings.constants');
 const { respond } = require('../../utils/responder');
@@ -32,15 +33,19 @@ const { validateMany } = require('../common');
 const Permissions = {};
 
 const isCookieAuthenticatedAgainstTS = async (req, res, next) => {
-	if (req.session.user.isAPIKey) {
-		await next();
-	} else {
-		const authenticatedTeamspace = req.session.user.auth?.authenticatedTeamspace;
-		if (authenticatedTeamspace === req.params.teamspace) {
+	try {
+		if (req.app.get(BYPASS_AUTH) || req.session.user.isAPIKey) {
 			await next();
 		} else {
-			respond(req, res, templates.notAuthenticatedAgainstTeamspace);
+			const authenticatedTeamspace = req.session.user.auth?.authenticatedTeamspace;
+			if (authenticatedTeamspace === req.params.teamspace) {
+				await next();
+			} else {
+				throw templates.notAuthenticatedAgainstTeamspace;
+			}
 		}
+	} catch (err) {
+		respond(req, res, err);
 	}
 };
 
@@ -52,6 +57,7 @@ Permissions.isActiveMemberOfTeamspace = validateMany([convertAllUUIDs, validSess
 // Use this one when you want to make sure the user session is authenticated against the teamspace
 Permissions.hasAccessToTeamspace = validateMany([
 	Permissions.isMemberOfTeamspace, isCookieAuthenticatedAgainstTS]);
+
 Permissions.isTeamspaceAdmin = validateMany([Permissions.hasAccessToTeamspace, isTeamspaceAdmin]);
 Permissions.isAdminToProject = validateMany([Permissions.hasAccessToTeamspace, isProjectAdmin]);
 

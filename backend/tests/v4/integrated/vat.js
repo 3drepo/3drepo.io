@@ -18,7 +18,7 @@
  */
 
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const vat = require("../../../src/v4/models/vat");
 const config = require("../../../src/v4/config");
 
@@ -28,12 +28,13 @@ describe("VAT from http://ec.europa.eu ", function () {
 	const skip = config && config.vat && config.vat.debug
 					&& config.vat.debug.skipChecking;
 
-	before(function(done) {
+	before(async function(done) {
 
 		if (skip) {
 			this.skip();
 			done();
 		} else {
+			const app = await createAppAsync();
 			server = app.listen(8080, function () {
 				console.log("API test server is listening on port 8080!");
 				done();
