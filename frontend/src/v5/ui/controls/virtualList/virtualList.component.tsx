@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRef, useState, useEffect, createContext, useContext } from 'react';
+import { useRef, useState, useEffect, createContext, useContext, createRef } from 'react';
 
 interface Props {
 	items: any[];
@@ -97,7 +97,7 @@ const getContainerHeight = (items: any[], heights: Record<any, number>, defaultH
 
 
 type VirtualListContextValue = {
-	getRef?: <T>(key:string, defaultVal:T) => T,
+	getRef?: <T>(key:string, defaultVal:T) => React.MutableRefObject<T>,
 };
 
 
@@ -119,7 +119,8 @@ const NestedListsContext = ({ children }: NestedListsContexProps) => {
 	const getRef = (key, defaultVal) => {
 		let value = refsDict.current[key];
 		if (!value) {
-			refsDict.current[key] = defaultVal;
+			refsDict.current[key] = createRef();
+			refsDict.current[key].current = defaultVal;
 		}
 
 		return refsDict.current[key];
@@ -134,13 +135,12 @@ const NestedListsContext = ({ children }: NestedListsContexProps) => {
 	);
 };
 
-
-function useVRef<T>(key:string, defaultVal: T) {
+export function useVRef<T>(key:string, defaultVal: T) {
 	const vContext = useContext(VirtualListContext);
-	const ref = useRef<T>(defaultVal);
+	let ref = useRef<T>(defaultVal);
 
 	if (vContext) {
-		ref.current = vContext.getRef(key, defaultVal);
+		ref = vContext.getRef(key, defaultVal);
 	}
 	
 	return ref;
@@ -151,14 +151,14 @@ function useVRef<T>(key:string, defaultVal: T) {
 // TODO: itemheight should be average?
 // ItemComponent must create an item which bottom is the top of the next item. In other words no gutters are allowed.
 export const VirtualList = ({ items, itemHeight, ItemComponent, vKey }:Props) => { 
+	const parentVKey = useContext(VKeyContext);
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
 	const [, setRedraw] = useState(false);
 	const sliceIndexes = useRef({ first:-1, last:-1 });
-	const itemsRef = useRef(items);
+	const itemsRef = useVRef(`${parentVKey}.items`, items);
 	const initialized = useRef(true);
 
-	const parentVKey = useContext(VKeyContext);
 
 	const renderInnerHeight = useRef(0);
 	renderInnerHeight.current = window.innerHeight;
@@ -221,6 +221,9 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey }:Props) =>
 			// TODO: Check if items didnt cover the thing
 			// make itemheight optional for this
 			// Can use binary search to find the actual height?
+
+			console.log('itemsheight changed:' + parentVKey);
+
 			itemsHeight.current[itemIndex] = elementHeight;
 			itemsHeightChanged = true;
 		}
@@ -255,6 +258,7 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey }:Props) =>
 	}, []);
 
 	useEffect(() => {
+		if (itemsRef.current === items) return;
 		itemsRef.current = items;
 		itemsHeight.current = {};
 	}, [items]);

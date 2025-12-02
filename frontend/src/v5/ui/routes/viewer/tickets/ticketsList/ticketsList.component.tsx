@@ -20,7 +20,7 @@ import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer } from './ticketsList.styles';
 import { useEffect, useRef } from 'react';
-import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { useVRef, VirtualList } from '@controls/virtualList/virtualList.component';
 import { groupTickets, TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
@@ -29,13 +29,16 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 type IdsToNumber = { idsToNumber: any };
 
 const TicketsCardGroup = ({ tickets, groupName, idsToNumber } : TicketsGroup & IdsToNumber) => {
+	const expanded = useVRef<boolean>(groupName + '.expanded', true);
+
 	return (<div data-name={groupName} ><DashboardListCollapse
 		title={(
 			<h1>
 				{groupName} ({tickets.length})
 			</h1>
 		)}
-		defaultExpanded
+		defaultExpanded={expanded.current}
+		onChangeCollapse={(collapsed) => expanded.current = !collapsed }
 	>
 		<List>
 			<VirtualList 
