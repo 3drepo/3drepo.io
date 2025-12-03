@@ -19,7 +19,8 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
-const { storeFile } = require('../../../../../../../../src/v5/services/filesManager');
+
+const { storeFile } = require(`${src}/services/filesManager`);
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -64,6 +65,7 @@ const generateBasicData = () => {
 			collaborators: [collaborator.user],
 			modelType: modelTypes.DRAWING }),
 		calibration: ServiceHelper.generateCalibration(),
+		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
 	};
 
 	data.jobs = [
@@ -1176,16 +1178,22 @@ const testGetJobsWithAccess = () => {
 
 const testGetTree = (internalService) => {
 	describe('Get container tree', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
+		const { users, teamspace, project, con, fed, revisions } = generateBasicData();
 		const conNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
 
-		const fileContent = ServiceHelper.generateRandomString();
+		const rev1Content = ServiceHelper.generateRandomString();
+		const rev2Content = ServiceHelper.generateRandomString();
 
 		beforeAll(async () => {
 			const models = [con, conNoRev, fed];
 			await setupBasicData(users, teamspace, project, models);
-			const rev = await addRevision(teamspace, project, con, modelTypes.CONTAINER, true);
-			await storeFile(teamspace, `${con._id}.stash.json_mpc.ref`, `${rev._id}/fulltree.json`, Buffer.from(fileContent));
+			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
+				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
+			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
+				{ ...revisions[1], timestamp: new Date(Date.now() + 1000) }, modelTypes.CONTAINER);
+
+			await storeFile(teamspace, `${con._id}.stash.json_mpc.ref`, `${revisions[0]._id}/fulltree.json`, Buffer.from(rev1Content));
+			await storeFile(teamspace, `${con._id}.stash.json_mpc.ref`, `${revisions[1]._id}/fulltree.json`, Buffer.from(rev2Content));
 		});
 
 		const generateTestData = () => {
@@ -1197,20 +1205,22 @@ const testGetTree = (internalService) => {
 				projectId = project.id,
 				key = users.tsAdmin.apiKey,
 				modelId = model._id,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tree${internalService ? '' : `?key=${key}`}`;
+				revId,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tree${internalService ? `${revId ? `?revId=${revId}` : ''}` : `?key=${key}`}`;
 
 			const externalTests = [
 				['session is external', getRoute(), false, templates.pageNotFound],
 			];
 
 			const internalTests = [
-				// the errir in first 3 tests should be PROJECT_NOT_FOUND & CONTAINER_NOT_FOUND
+				// the error in first 3 tests should be PROJECT_NOT_FOUND & CONTAINER_NOT_FOUND
 				// waiting for the change in hasContainerReadAccess middleware when BYPASS_AUTH is true
 				// ['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.fileNotFound],
 				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.fileNotFound],
 				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.fileNotFound],
 				['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.fileNotFound],
-				['the container has a revision', getRoute(), true, model],
+				['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Content],
+				['a revision is not provided by the user', getRoute(), true, rev2Content],
 			];
 
 			return internalService ? internalTests : externalTests;
@@ -1221,14 +1231,14 @@ const testGetTree = (internalService) => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(route).expect(expectedStatus);
 				if (success) {
-					expect(res.body.toString()).toEqual(fileContent);
+					expect(res.body.toString()).toEqual(expectedOutput);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
 			});
 		};
 
-		describe.each(generateTestData())('Drawings', runTest);
+		describe.each(generateTestData())('Containers', runTest);
 	});
 };
 
@@ -1241,17 +1251,17 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 			agent = await SuperTest(server);
 		});
 
-		// testGetModelList();
-		// testGetModelStats();
-		// testAppendFavourites();
-		// testDeleteFavourites();
-		// testAddModel();
-		// testDeleteModel();
-		// testUpdateModelSettings();
-		// testGetSettings();
-		// testGetThumbnail();
-		// testGetUsersWithPermissions();
-		// testGetJobsWithAccess();
+		testGetModelList();
+		testGetModelStats();
+		testAppendFavourites();
+		testDeleteFavourites();
+		testAddModel();
+		testDeleteModel();
+		testUpdateModelSettings();
+		testGetSettings();
+		testGetThumbnail();
+		testGetUsersWithPermissions();
+		testGetJobsWithAccess();
 		testGetTree();
 	});
 
