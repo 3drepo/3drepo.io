@@ -61,10 +61,10 @@ const configSchema = Yup.object().shape({
 });
 
 class FSHandler {
-	constructor(config) {
+	constructor(fsConfig) {
 		try {
-			configSchema.validateSync(config);
-			this.config = config;
+			configSchema.validateSync(fsConfig);
+			this.config = fsConfig;
 		} catch (err) {
 			logger.logError(err.message);
 			throw err;

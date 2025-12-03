@@ -23,7 +23,6 @@ const CryptoJs = require('crypto-js');
 const config = require('../../../../../../../../src/v5/utils/config');
 const { FileStorageTypes } = require('../../../../../../../../src/v5/utils/config.constants');
 const path = require('path');
-const { parseAsync } = require('yargs');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);

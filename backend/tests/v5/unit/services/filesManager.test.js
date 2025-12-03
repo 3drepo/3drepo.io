@@ -95,7 +95,8 @@ const testRemoveAllFilesFromModel = () => {
 			];
 
 			FileRefs.getAllRemovableEntriesByType
-				.mockImplementation((ts, col) => Promise.resolve(col === refCol1 ? refCol1Data : [{ _id: FileStorageTypes.FS, links: [] }]));
+				.mockImplementation((ts, col) => Promise.resolve(col === refCol1
+					? refCol1Data : [{ _id: FileStorageTypes.FS, links: [] }]));
 
 			const teamspace = generateRandomString();
 
@@ -179,7 +180,8 @@ const testRemoveAllFilesFromTeamspace = () => {
 			];
 
 			FileRefs.getAllRemovableEntriesByType
-				.mockImplementation((ts, col) => Promise.resolve(col === refCol1 ? refCol1Data : [{ _id: FileStorageTypes.FS, links: [] }]));
+				.mockImplementation((ts, col) => Promise.resolve(col === refCol1 ? refCol1Data
+					: [{ _id: FileStorageTypes.FS, links: [] }]));
 
 			const teamspace = generateRandomString();
 
@@ -305,7 +307,10 @@ const testGetFileAsStream = () => {
 		});
 
 		test('should include the filename if it is part of the ref entry', async () => {
-			const fileEntry = { size: 100, type: FileStorageTypes.FS, link: generateRandomString(), name: generateRandomString() };
+			const fileEntry = { size: 100,
+				type: FileStorageTypes.FS,
+				link: generateRandomString(),
+				name: generateRandomString() };
 			const readStream = { [generateRandomString()]: generateRandomString() };
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
 			handlerMock.getFileStream.mockResolvedValueOnce(readStream);
@@ -608,7 +613,9 @@ const testRemoveFilesWithMeta = () => {
 		});
 
 		test('Should manage non file refs properly', async () => {
-			const expectedRefs = times(3, () => ({ _id: generateRandomString(), type: FileStorageTypes.FS, link: generateRandomString() }));
+			const expectedRefs = times(3, () => ({ _id: generateRandomString(),
+				type: FileStorageTypes.FS,
+				link: generateRandomString() }));
 			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
 
 			expectedRefs.push({ _id: generateRandomString(), type: 'http', link: generateRandomString() });
@@ -619,7 +626,8 @@ const testRemoveFilesWithMeta = () => {
 			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
 
 			expect(handlerMock.removeFiles).toHaveBeenCalledTimes(1);
-			expect(handlerMock.removeFiles).toHaveBeenCalledWith(expectedRefs.flatMap(({ type, link }) => (type === FileStorageTypes.FS ? link : [])));
+			expect(handlerMock.removeFiles).toHaveBeenCalledWith(expectedRefs.flatMap(({ type, link }) => (
+				type === FileStorageTypes.FS ? link : [])));
 
 			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledTimes(1);
 			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);

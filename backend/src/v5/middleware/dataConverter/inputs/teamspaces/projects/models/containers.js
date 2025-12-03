@@ -21,7 +21,6 @@ const { codeExists, createResponseCode, templates } = require('../../../../../..
 const FSHandler = require('../../../../../../handler/fs');
 const { FileStorageTypes } = require('../../../../../../utils/config.constants');
 const Yup = require('yup');
-const config = require('../../../../../../utils/config');
 const { createNewUserRecord } = require('../../../../../../processors/users');
 const { generateUUIDString } = require('../../../../../../utils/helper/uuids');
 const { getModelById } = require('../../../../../../models/modelSettings');
