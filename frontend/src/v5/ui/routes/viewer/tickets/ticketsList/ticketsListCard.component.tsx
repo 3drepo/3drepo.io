@@ -36,7 +36,7 @@ import { MenuItem } from '@mui/material';
 import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
 import { uniq } from 'lodash';
 import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 
@@ -77,12 +77,11 @@ export const TicketsListCard = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-	
+	const groupBy = TicketsCardHooksSelectors.selectGroupBy();
+
 	const onFiltersChange = (filters) => {
 		TicketsCardActionsDispatchers.setFilters(filters);
 	};
-
-	const [groupBy, setGroupby] = useState('none');
 
 	useEffect(() => {
 		if (groupBy === 'none') return;
@@ -108,13 +107,13 @@ export const TicketsListCard = () => {
 					actions={(
 						<>
 							{!readOnly && (<NewTicketMenu />)}
-							<GroupBySelect value={groupBy} onChange={setGroupby}/>
+							<GroupBySelect value={groupBy} onChange={TicketsCardActionsDispatchers.setGroupBy}/>
 							<FilterSelection />
 							<TicketsEllipsisMenu />
 						</>
 					)}
 				/>
-				<CardContent onClick={TicketsCardActionsDispatchers.resetState}>
+				<CardContent onClick={() => TicketsCardActionsDispatchers.setSelectedTicket(null)}>
 					<CardFilters />
 					{tickets.length ? (
 						<TicketsList groupBy={groupBy} templates={templates} />
