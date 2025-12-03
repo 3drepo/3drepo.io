@@ -254,7 +254,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}:
 	 *   post:
 	 *     description: Add a new model to the specified project the user is admin of
-	 *     tags: [v:external, Models]
+	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: addModel
 	 *     parameters:
 	 *       - name: teamspace
@@ -392,7 +392,7 @@ const establishRoutes = (modelType, internal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}:
 	 *   get:
 	 *     description: Get a list of models within the specified project the user has access to
-	 *     tags: [v:external, Models]
+	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: getModelList
 	 *     parameters:
 	 *       - name: teamspace
