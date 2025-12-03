@@ -16,7 +16,7 @@
  */
 
 const { src } = require('../../helper/path');
-const { readFile, writeFile, access, rm } = require('fs/promises');
+const { readFile, writeFile, access, rm, unlink } = require('fs/promises');
 const Path = require('path');
 
 const { determineTestGroup, generateRandomString } = require('../../helper/services');
@@ -215,6 +215,14 @@ const testGetFile = () => {
 		test('Should fail to get non existing file', async () => {
 			const fsHandler = FSHandler.getHandler(FileStorageTypes.FS);
 			await expect(fsHandler.getFile('non-existing-file')).rejects.toEqual(templates.fileNotFound);
+		});
+
+		test('Should fail if it is attempt to access file outside of configured path', async () => {
+			const fsHandler = FSHandler.getHandler(FileStorageTypes.FS);
+			const outsidePath = `../${generateRandomString()}`;
+			await writeFile(Path.posix.join(tmpDir, outsidePath), fileContent);
+			await expect(fsHandler.getFile(outsidePath)).rejects.toEqual(templates.fileNotFound);
+			await unlink(Path.posix.join(tmpDir, outsidePath));
 		});
 	});
 };

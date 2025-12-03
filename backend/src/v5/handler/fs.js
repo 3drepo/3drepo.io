@@ -163,7 +163,12 @@ class FSHandler {
 	}
 
 	#getFullPath(subPath = '') {
-		return path.resolve(this.config.path, subPath);
+		const fullPath = path.resolve(this.config.path, subPath);
+		if (!fullPath.startsWith(path.resolve(this.config.path))) {
+			logger.logError(`Attempt to access file outside of configured path: ${subPath}`);
+			throw templates.fileNotFound;
+		}
+		return fullPath;
 	}
 }
 
