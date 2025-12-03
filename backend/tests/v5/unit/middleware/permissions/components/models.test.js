@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { modelTypes } = require('../../../../../../src/v5/models/modelSettings.constants');
 const { src } = require('../../../../helper/path');
 const { determineTestGroup, generateRandomString } = require('../../../../helper/services');
 
@@ -25,6 +26,13 @@ const Responder = require(`${src}/utils/responder`);
 
 jest.mock('../../../../../../src/v5/utils/permissions');
 const Permissions = require(`${src}/utils/permissions`);
+
+jest.mock('../../../../../../src/v5/models/modelSettings');
+const ModelSettings = require(`${src}/models/modelSettings`);
+
+jest.mock('../../../../../../src/v5/models/projectSettings');
+const ProjectSettings = require(`${src}/models/projectSettings`);
+
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/utils/sessions');
@@ -51,32 +59,48 @@ Permissions.hasReadAccessToFederation.mockImplementation(mockImp);
 Permissions.hasWriteAccessToFederation.mockImplementation(mockImp);
 Permissions.hasCommenterAccessToFederation.mockImplementation(mockImp);
 
-const testHelper = (label, testFn, mockedFn) => {
+const testHelper = (type, label, testFn, mockedFn) => {
 	describe.each([
-		['user has access', true, true],
-		['byPass is enabled', true, null, true],
-		['the user has no access', false, false, false, templates.notAuthorized],
-		[`${label} threw ${templates.projectNotFound.code}`, false, templates.projectNotFound, false, templates.projectNotFound],
-	])(label, (desc, success, mockVal, byPass, expectedRes) => {
+		['user has access', true, { }],
+		['byPass is enabled', true, { mockVal: null, byPass: true }],
+		['the user has no access', false, { mockVal: false }, templates.notAuthorized],
+		[`${label} threw ${templates.projectNotFound.code}`, false, { mockVal: templates.projectNotFound }, templates.projectNotFound],
+		['model not found', false, { mockVal: null, modelByIdFail: templates.modelNotFound }, templates.modelNotFound],
+		['model not in project', false, { mockVal: null, modelInProject: false }, templates.modelNotFound],
+	])(label, (desc, success,
+		{ mockVal = true, byPass = false, modelByIdFail, modelInProject = true }, expectedRes) => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const user = generateRandomString();
+
+		const getModelByIdMapping = {
+			[modelTypes.CONTAINER]: ModelSettings.getContainerById,
+			[modelTypes.FEDERATION]: ModelSettings.getFederationById,
+			[modelTypes.DRAWING]: ModelSettings.getDrawingById,
+		};
 		test(` ${success ? 'next() ' : 'respond() '}should be called if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});
 			const req = {
-				params: { teamspace, project, model },
+				params: { teamspace, project, model, type },
 				session: { user: { username: user } },
 				app: { get: () => byPass },
 			};
 
 			Sessions.getUserFromSession.mockReturnValueOnce(user);
 
-			if (mockVal !== null) {
-				if (isBool(mockVal)) {
-					mockedFn.mockResolvedValueOnce(mockVal);
-				} else {
-					mockedFn.mockRejectedValueOnce(mockVal);
+			if (modelByIdFail) {
+				getModelByIdMapping[type].mockRejectedValueOnce(modelByIdFail);
+			} else {
+				ProjectSettings.modelsExistInProject.mockResolvedValueOnce(modelInProject);
+				if (modelInProject) {
+					if (mockVal !== null) {
+						if (isBool(mockVal)) {
+							mockedFn.mockResolvedValueOnce(mockVal);
+						} else {
+							mockedFn.mockRejectedValueOnce(mockVal);
+						}
+					}
 				}
 			}
 
@@ -95,50 +119,66 @@ const testHelper = (label, testFn, mockedFn) => {
 				expect(mockCB).not.toHaveBeenCalledTimes(1);
 			}
 
-			if (mockVal !== null) {
-				expect(mockedFn).toHaveBeenCalledTimes(1);
-				expect(mockedFn).toHaveBeenCalledWith(teamspace, project, model, user);
-			} else {
+			expect(getModelByIdMapping[type]).toHaveBeenCalledTimes(1);
+			expect(getModelByIdMapping[type]).toHaveBeenCalledWith(teamspace, model, { permissions: 1 });
+
+			if (modelByIdFail) {
 				expect(mockedFn).not.toHaveBeenCalled();
+				expect(ProjectSettings.modelsExistInProject).not.toHaveBeenCalled();
+				expect(mockedFn).not.toHaveBeenCalled();
+			} else {
+				expect(ProjectSettings.modelsExistInProject).toHaveBeenCalledTimes(1);
+				expect(ProjectSettings.modelsExistInProject).toHaveBeenCalledWith(teamspace, project, [model]);
+
+				if (modelInProject) {
+					if (mockVal !== null) {
+						expect(mockedFn).toHaveBeenCalledTimes(1);
+						expect(mockedFn).toHaveBeenCalledWith(teamspace, project, model, user, true);
+					} else {
+						expect(mockedFn).not.toHaveBeenCalled();
+					}
+				} else {
+					expect(mockedFn).not.toHaveBeenCalled();
+				}
 			}
 		});
 	});
 };
 
 const testHasReadAccessToContainer = () => {
-	testHelper('hasReadAccessToContainer', ModelMiddleware.hasReadAccessToContainer, Permissions.hasReadAccessToContainer);
+	testHelper(modelTypes.CONTAINER, 'hasReadAccessToContainer', ModelMiddleware.hasReadAccessToContainer, Permissions.hasReadAccessToContainer);
 };
 
 const testHasWriteAccessToContainer = () => {
-	testHelper('hasWriteAccessToContainer', ModelMiddleware.hasWriteAccessToContainer, Permissions.hasWriteAccessToContainer);
+	testHelper(modelTypes.CONTAINER, 'hasWriteAccessToContainer', ModelMiddleware.hasWriteAccessToContainer, Permissions.hasWriteAccessToContainer);
 };
 
 const testHasCommenterAccessToContainer = () => {
-	testHelper('hasCommenterAccessToContainer', ModelMiddleware.hasCommenterAccessToContainer, Permissions.hasCommenterAccessToContainer);
+	testHelper(modelTypes.CONTAINER, 'hasCommenterAccessToContainer', ModelMiddleware.hasCommenterAccessToContainer, Permissions.hasCommenterAccessToContainer);
 };
 
 const testHasReadAccessToFederation = () => {
-	testHelper('hasReadAccessToFederation', ModelMiddleware.hasReadAccessToFederation, Permissions.hasReadAccessToFederation);
+	testHelper(modelTypes.FEDERATION, 'hasReadAccessToFederation', ModelMiddleware.hasReadAccessToFederation, Permissions.hasReadAccessToFederation);
 };
 
 const testHasWriteAccessToFederation = () => {
-	testHelper('hasWriteAccessToFederation', ModelMiddleware.hasWriteAccessToFederation, Permissions.hasWriteAccessToFederation);
+	testHelper(modelTypes.FEDERATION, 'hasWriteAccessToFederation', ModelMiddleware.hasWriteAccessToFederation, Permissions.hasWriteAccessToFederation);
 };
 
 const testHasCommenterAccessToFederation = () => {
-	testHelper('hasCommenterAccessToFederation', ModelMiddleware.hasCommenterAccessToFederation, Permissions.hasCommenterAccessToFederation);
+	testHelper(modelTypes.FEDERATION, 'hasCommenterAccessToFederation', ModelMiddleware.hasCommenterAccessToFederation, Permissions.hasCommenterAccessToFederation);
 };
 
 const testHasAdminAccessToContainer = () => {
-	testHelper('hasAdminAccessToContainer', ModelMiddleware.hasAdminAccessToContainer, Permissions.hasAdminAccessToContainer);
+	testHelper(modelTypes.CONTAINER, 'hasAdminAccessToContainer', ModelMiddleware.hasAdminAccessToContainer, Permissions.hasAdminAccessToContainer);
 };
 
 const testHasAdminAccessToFederation = () => {
-	testHelper('hasAdminAccessToFederation', ModelMiddleware.hasAdminAccessToFederation, Permissions.hasAdminAccessToFederation);
+	testHelper(modelTypes.FEDERATION, 'hasAdminAccessToFederation', ModelMiddleware.hasAdminAccessToFederation, Permissions.hasAdminAccessToFederation);
 };
 
 const testHasAdminAccessToDrawing = () => {
-	testHelper('hasAdminAccessToDrawing', ModelMiddleware.hasAdminAccessToDrawing, Permissions.hasAdminAccessToDrawing);
+	testHelper(modelTypes.DRAWING, 'hasAdminAccessToDrawing', ModelMiddleware.hasAdminAccessToDrawing, Permissions.hasAdminAccessToDrawing);
 };
 
 describe(determineTestGroup(__filename), () => {
@@ -150,7 +190,7 @@ describe(determineTestGroup(__filename), () => {
 	testHasReadAccessToFederation();
 	testHasWriteAccessToFederation();
 	testHasCommenterAccessToFederation();
-	testHasAdminAccessToFederation();
 
 	testHasAdminAccessToDrawing();
+	testHasAdminAccessToFederation();
 });
