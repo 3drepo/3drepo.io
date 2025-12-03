@@ -137,9 +137,12 @@ export const selectFilteredTickets = createSelector(
 	},
 );
 
-
 export const selectIsShowingPins = createSelector(
 	selectTicketsCardDomain, (state) => state.isShowingPins,
+);
+
+export const selectGroupBy = createSelector(
+	selectTicketsCardDomain, (state) => state.groupByField || 'none',
 );
 
 export const selectTicketPins = createSelector(
