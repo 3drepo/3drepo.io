@@ -18,15 +18,12 @@
 const { UUIDToString, stringToUUID } = require('./uuids');
 const { fileExtensionFromBuffer, isString, isUUID, isUUIDString } = require('./typeCheck');
 const Yup = require('yup');
-const { escapeXSS } = require('./strings');
 const { fileUploads } = require('../config');
 const tz = require('countries-and-timezones');
 
 const YupHelper = { validators: {}, types: { strings: {} }, utils: {} };
 
 YupHelper.utils.stripWhen = (schema, cond) => Yup.lazy((value) => (cond(value) ? schema.strip() : schema));
-
-const escapeString = (yupObj) => yupObj.transform((val, originalVal) => escapeXSS(originalVal));
 
 YupHelper.validators.alphanumeric = (yupObj, allowFullStops) => yupObj.matches(
 	allowFullStops ? /^[\w|_|.|-]*$/ : /^[\w|_|-]*$/,
@@ -54,16 +51,16 @@ YupHelper.types.degrees = Yup.number().min(0).max(360);
 
 YupHelper.types.strings.username = YupHelper.validators.alphanumeric(Yup.string().min(2).max(63).strict(true));
 
-YupHelper.types.strings.title = escapeString(Yup.string().min(1).max(120));
+YupHelper.types.strings.title = Yup.string().min(1).max(120);
 
 YupHelper.types.strings.countryCode = Yup.string().min(1).test('valid-country-code',
 	'The country code provided is not valid', (value) => value === undefined || !!tz.getCountry(value));
 
 // This is used for shorter descriptions such as revision desc, model desc, teamspace desc etc.
-YupHelper.types.strings.shortDescription = escapeString(Yup.string().min(1).max(660));
+YupHelper.types.strings.shortDescription = Yup.string().min(1).max(660);
 
 // This is used for longer descriptions such as groups, issues, risks
-YupHelper.types.strings.longDescription = escapeString(Yup.string().min(1).max(1200));
+YupHelper.types.strings.longDescription = Yup.string().min(1).max(1200);
 
 YupHelper.types.timestamp = Yup.number().min(new Date(2000, 1, 1).getTime()).integer()
 	.transform((value, originalValue) => {
@@ -101,7 +98,7 @@ YupHelper.types.strings.unit = Yup.string()
 
 YupHelper.types.strings.email = Yup.string().email();
 
-YupHelper.types.strings.name = escapeString(Yup.string().min(1).max(35));
+YupHelper.types.strings.name = Yup.string().min(1).max(35);
 
 YupHelper.types.date = Yup.date().transform((n, orgVal) => {
 	if (orgVal === null) return orgVal;

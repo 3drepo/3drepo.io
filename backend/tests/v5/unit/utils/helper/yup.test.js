@@ -15,26 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { generateRandomString, generateUUID, generateRandomBuffer, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomBuffer } = require('../../../helper/services');
 const { src, image } = require('../../../helper/path');
 const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
 const config = require('../../../../../src/v5/utils/config');
 const fs = require('fs');
-const { escapeXSS } = require('../../../../../src/v5/utils/helper/strings');
 
 const YupHelper = require(`${src}/utils/helper/yup`);
-
-const validateTestHelper = (data, res, schema) => {
-	test(`${data} should return ${res}`, async () => {
-		await expect(schema.isValid(data)).resolves.toBe(res);
-	});
-};
-
-const castTestHelper = (data, res, schema) => {
-	test(`${data} should return ${res}`, async () => {
-		await expect(schema.validate(data)).resolves.toBe(res);
-	});
-};
 
 const testId = () => {
 	describe.each([
@@ -43,7 +30,9 @@ const testId = () => {
 		[0, false],
 		[true, false],
 	])('ID validator', (data, res) => {
-		validateTestHelper(data, res, YupHelper.types.id);
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.id.isValid(data)).resolves.toBe(res);
+		});
 	});
 };
 
@@ -63,7 +52,9 @@ const testColorArr = () => {
 		[[1, 2, 3, 5, 5], false],
 		[[0.1, 2, 3, 4], false],
 	])('Colour array validator', (data, res) => {
-		validateTestHelper(data, res, YupHelper.types.colorArr);
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.colorArr.isValid(data)).resolves.toBe(res);
+		});
 	});
 };
 
@@ -78,21 +69,21 @@ const testUsername = () => {
 		[0, false],
 		[true, false],
 	])('Username validator', (data, res) => {
-		validateTestHelper(data, res, YupHelper.types.strings.username);
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.strings.username.isValid(data)).resolves.toBe(res);
+		});
 	});
 };
-
-const xssEscapedChars = '\'"<>&';
 
 const testTitle = () => {
 	describe.each([
 		['', false],
-		// [generateRandomString(120), true],
-		// [generateRandomString(121), false],
-		// [xssEscapedChars, true],
-	])('!Title validator', (data, res) => {
-		validateTestHelper(data, res, YupHelper.types.strings.title);
-		if (res) castTestHelper(data, escapeXSS(data), YupHelper.types.strings.title);
+		[generateRandomString(120), true],
+		[generateRandomString(121), false],
+	])('Title validator', (data, res) => {
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.strings.title.isValid(data)).resolves.toBe(res);
+		});
 	});
 };
 
@@ -102,7 +93,9 @@ const testShortDesc = () => {
 		[generateRandomString(660), true],
 		[generateRandomString(661), false],
 	])('Short description validator', (data, res) => {
-		validateTestHelper(data, res, YupHelper.types.strings.shortDescription);
+		test(`${data.length} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.strings.shortDescription.isValid(data)).resolves.toBe(res);
+		});
 	});
 };
 
@@ -111,10 +104,10 @@ const testLongDesc = () => {
 		['', false],
 		[generateRandomString(1200), true],
 		[generateRandomString(1201), false],
-		[xssEscapedChars, true],
 	])('Long description validator', (data, res) => {
-		validateTestHelper(data, res, YupHelper.types.strings.longDescription);
-		if (res) castTestHelper(data, escapeXSS(data), YupHelper.types.strings.longDescription);
+		test(`${data.length} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.strings.longDescription.isValid(data)).resolves.toBe(res);
+		});
 	});
 };
 
@@ -128,7 +121,9 @@ const testTimestamp = () => {
 		[new Date(2000, 1, 1).getTime(), true],
 		[324093824093285092385094354340395834, false],
 	])('Timestamp validator', (data, res) => {
-		validateTestHelper(data, res, YupHelper.types.timestamp);
+		test(`${data} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.timestamp.isValid(data)).resolves.toBe(res);
+		});
 	});
 };
 
@@ -140,7 +135,9 @@ const testDateInThePast = () => {
 		[null, false],
 		[324093824093285092385094354340395834, false],
 	])('Date in the past validator', (data, res) => {
-		validateTestHelper(data, res, YupHelper.types.dateInThePast);
+		test(`${data} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.dateInThePast.isValid(data)).resolves.toBe(res);
+		});
 	});
 };
 
@@ -149,7 +146,9 @@ const testEmbeddedImage = () => {
 		[null, true, true],
 		[null, false, false],
 	])('Image validator', (data, isNullable, res) => {
-		validateTestHelper(data, res, YupHelper.types.embeddedImage(isNullable));
+		test(`${data} characters should return ${res}`, async () => {
+			await expect(YupHelper.types.embeddedImage(isNullable).isValid(data)).resolves.toBe(res);
+		});
 	});
 };
 
@@ -164,11 +163,13 @@ const testEmbeddedImageOrRef = () => {
 		['image buffer', imageBuffer, true],
 		['too large image buffer', tooLargeImageBuffer, false],
 	])('Image validator', (description, data, res) => {
-		validateTestHelper(data, res, YupHelper.types.embeddedImageOrRef());
+		test(`${description} should return ${res}`, async () => {
+			await expect(YupHelper.types.embeddedImageOrRef().isValid(data)).resolves.toBe(res);
+		});
 	});
 };
 
-describe(determineTestGroup(__filename), () => {
+describe('utils/helper/yup', () => {
 	testId();
 	testColorArr();
 	testUsername();
