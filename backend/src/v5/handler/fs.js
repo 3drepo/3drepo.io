@@ -145,7 +145,7 @@ class FSHandler {
 	async testFilesystem() {
 		const testPath = this.#getFullPath();
 		try {
-			await checkAccess(testPath, !this.readOnly);
+			await checkAccess(testPath, !this.config.readOnly);
 		} catch (err) {
 			const errMsg = `Failed to detect to filesystem at ${testPath}, or insufficient permissions`;
 			throw new Error(errMsg);

@@ -94,7 +94,7 @@ const testCheckSystem = () => {
 			expect(FSHandler.getHandler).not.toHaveBeenCalled();
 
 			// Restore config
-			config[FileStorageTypes.EXTERNAL_FS] = originalConfig;
+			config[FileStorageTypes.FS] = originalConfig;
 		});
 	});
 };
