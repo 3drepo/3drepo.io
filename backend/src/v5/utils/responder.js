@@ -24,11 +24,12 @@ const logger = require('./logger').logWithLabel(networkLabel);
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const { cachePolicy } = require(`${v4Path}/config`);
+const { escapeXSS } = require('./helper/strings');
 const zlib = require('zlib');
 
 const Responder = {};
 
-const constructApiInfo = ({ method, originalUrl }) => `${method} ${originalUrl}`;
+const constructApiInfo = ({ method, originalUrl }) => `${method} ${escapeXSS(originalUrl)}`;
 
 const genResponseLogging = ({ status, code }, contentLength, { session, startTime, method, originalUrl } = {}) => {
 	const user = session?.user ? session.user.username : 'unknown';

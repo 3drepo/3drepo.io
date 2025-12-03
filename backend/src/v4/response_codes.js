@@ -16,6 +16,7 @@
  */
 
 "use strict";
+
 (() => {
 
 	const _ = require("lodash");
@@ -24,6 +25,7 @@
 	const utils = require("./utils");
 	const { v5Path } = require("../interop");
 	const { createActivityRecord } = require(`${v5Path}/services/elastic`);
+	const { escapeXSS } = require(`${v5Path}/utils/helper/strings.js`);
 
 	/**
 	 * List of response and error codes
@@ -438,7 +440,7 @@
 		// Prepare error response
 		if (resCode.value) {
 			const responseObject = _.extend({}, extraInfo, {
-				place: place,
+				place: escapeXSS(place),
 				status: resCode.status,
 				message: resCode.message,
 				value: resCode.value
@@ -523,7 +525,7 @@
 		}).on("end", () => {
 			res.end();
 			systemLogger.logInfo(genResponseLogging(response, {
-				place,
+				place: escapeXSS(place),
 				httpCode: response.status,
 				contentLength: length
 			}, req), undefined, logLabels.network);
