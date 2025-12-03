@@ -42,6 +42,7 @@ RoutesManager.init = (app) => {
 	const internal = app.get(BYPASS_AUTH);
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes(internal));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER, internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.CONTAINER, internal));
 	if (!internal) {
 	// Auth
 		app.use('/v5/', UserRoutes);
@@ -61,7 +62,6 @@ RoutesManager.init = (app) => {
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/groups', CreateGroupRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/views', CreateViewRoutes());
-		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.CONTAINER));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
 
 		// Federations

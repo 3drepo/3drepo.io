@@ -21,7 +21,6 @@ const { serialiseRevision, serialiseRevisionArray } = require('../../../../../mi
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const { Router } = require('express');
-const { getUserFromSession } = require('../../../../../utils/sessions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData: validateNewContainerRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
@@ -93,13 +92,12 @@ const updateRevisionStatus = (modelType) => async (req, res) => {
 const createNewRevision = (modelType) => async (req, res) => {
 	const { file } = req;
 	const { teamspace, project, model } = req.params;
-	const owner = getUserFromSession(req.session);
 
 	const fn = {
 		[modelTypes.CONTAINER]: () => Containers.newRevision(teamspace, model,
-			{ ...req.body, owner }, file),
+			req.body, file),
 		[modelTypes.DRAWING]: () => Drawings.newRevision(teamspace, project, model,
-			{ ...req.body, owner }, file),
+			req.body, file),
 	};
 
 	try {
@@ -142,7 +140,7 @@ const establishRoutes = (modelType, internal) => {
 	};
 
 	const validateNewModelRev = {
-		[modelTypes.CONTAINER]: validateNewContainerRev,
+		[modelTypes.CONTAINER]: validateNewContainerRev(internal),
 		[modelTypes.DRAWING]: validateNewDrawingRev,
 	};
 
