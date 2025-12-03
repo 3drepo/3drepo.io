@@ -148,7 +148,7 @@ const establishRoutes = (modelType, internal) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
 	 *   post:
-	 *     description: Create a new revision.
+	 *     description: Create a new revision. Request should be provided in multipart format, unless internal.
 	 *     tags: [v:external, v:internal, Revisions]
 	 *     operationId: createNewModelRevision
 	 *     parameters:
@@ -166,7 +166,7 @@ const establishRoutes = (modelType, internal) => {
 	 *           type: string
 	 *           format: uuid
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -220,6 +220,41 @@ const establishRoutes = (modelType, internal) => {
 	 *               - file
 	 *               - statusCode
 	 *               - revCode
+	*         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               tag:
+	 *                 description: Unique revision name
+	 *                 type: string
+	 *                 example: rev01
+	 *               desc:
+	 *                 description: Description of the revision
+	 *                 type: string
+	 *                 example: Initial design
+	 *               importAnimations:
+	 *                 type: boolean
+	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
+	 *               timezone:
+	 *                 description: Timezone of the revision (for spm files)
+	 *                 type: string
+	 *                 example: Europe/Berlin
+	 *               lod:
+	 *                 description: Level of Detail (0 - 6)
+	 *                 type: integer
+	 *                 example: 0
+	 *               file:
+	 *                 type: string
+	 *                 description: path to find the file in the mounted shared drive
+	 *                 example: folder1/house.rvt
+	 *               owner:
+	 *                 type: string
+	 *                 description: Owner of the revision (email)
+	 *                 example: user@example.com
+	 *             required:
+	 *               - tag
+	 *               - file
+	 *               - owner
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -228,6 +263,7 @@ const establishRoutes = (modelType, internal) => {
 	 *       200:
 	 *         description: creates a new revision
 	 */
+
 	router.post('', hasWriteAccessToModel[modelType], validateNewModelRev[modelType], createNewRevision(modelType));
 
 	if (!internal) {
