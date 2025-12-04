@@ -206,7 +206,8 @@ const testGetQuotaInfo = () => {
 				collaborators: 10,
 				data: 1024,
 				expiryDate: Date.now() + 10000,
-			} };
+			},
+		};
 		const collaboratorLimit = config.subscriptions?.basic?.collaborators === 'unlimited'
 			? 'unlimited' : config.subscriptions?.basic?.collaborators + activeLicense.discretionary.collaborators;
 		const spaceLimitInBytes = (config.subscriptions?.basic?.data + activeLicense.discretionary.data) * 1024 * 1024;
@@ -234,11 +235,13 @@ const testGetQuotaInfo = () => {
 			await Promise.all([
 				ServiceHelper.db.createTeamspace(teamspaceWithLicense, [testUser.user], activeLicense),
 				ServiceHelper.db.createTeamspace(teamspaceWithoutLicense, [testUser.user]),
-				ServiceHelper.db.createTeamspace(teamspaceWithExpiredLicense, [testUser.user], { discretionary: {
-					collaborators: 'unlimited',
-					data: 1024,
-					expiryDate: Date.now() - 100000,
-				} }),
+				ServiceHelper.db.createTeamspace(teamspaceWithExpiredLicense, [testUser.user], {
+					discretionary: {
+						collaborators: 'unlimited',
+						data: 1024,
+						expiryDate: Date.now() - 100000,
+					},
+				}),
 
 			]);
 			await ServiceHelper.db.createUser(userNotAdmin, [teamspaceWithLicense, teamspaceWithoutLicense]);
@@ -433,16 +436,24 @@ const testGetAddOns = () => {
 };
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
-	beforeAll(async () => {
-		server = await ServiceHelper.app();
-		agent = await SuperTest(server);
+	const isInternal = [true, false];
+	describe.each(isInternal)('With internal set to %s', (internalFlag) => {
+		beforeAll(async () => {
+			await ServiceHelper.closeApp(server);
+
+			server = await ServiceHelper.app();
+			agent = await SuperTest(server);
+		});
+		afterAll(async () => {
+			await ServiceHelper.closeApp(server);
+		});
+
+		testGetTeamspaceMembers(internalFlag);
+		testGetTeamspaceList(internalFlag);
+		testGetAvatar(internalFlag);
+		testGetQuotaInfo(internalFlag);
+		testRemoveTeamspaceMember(internalFlag);
+		testGetMemberAvatar(internalFlag);
+		testGetAddOns(internalFlag);
 	});
-	afterAll(() => ServiceHelper.closeApp(server));
-	testGetTeamspaceMembers();
-	testGetTeamspaceList();
-	testGetAvatar();
-	testGetQuotaInfo();
-	testRemoveTeamspaceMember();
-	testGetMemberAvatar();
-	testGetAddOns();
 });
