@@ -1199,7 +1199,6 @@ const testGetTree = (internalService) => {
 		const generateTestData = () => {
 			const model = con;
 			const wrongTypeModel = fed;
-			const modelNotFound = templates.containerNotFound;
 
 			const getRoute = ({
 				projectId = project.id,
@@ -1213,11 +1212,9 @@ const testGetTree = (internalService) => {
 			];
 
 			const internalTests = [
-				// the error in first 3 tests should be PROJECT_NOT_FOUND & CONTAINER_NOT_FOUND
-				// waiting for the change in hasContainerReadAccess middleware when BYPASS_AUTH is true
-				// ['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.fileNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.fileNotFound],
-				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.fileNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
+				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
 				['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.fileNotFound],
 				['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Content],
 				['a revision is not provided by the user', getRoute(), true, rev2Content],
