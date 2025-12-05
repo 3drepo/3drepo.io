@@ -123,7 +123,6 @@ const testHelper = (type, label, testFn, mockedFn) => {
 			expect(getModelByIdMapping[type]).toHaveBeenCalledWith(teamspace, model, { permissions: 1 });
 
 			if (modelByIdFail) {
-				expect(mockedFn).not.toHaveBeenCalled();
 				expect(ProjectSettings.modelsExistInProject).not.toHaveBeenCalled();
 				expect(mockedFn).not.toHaveBeenCalled();
 			} else {
