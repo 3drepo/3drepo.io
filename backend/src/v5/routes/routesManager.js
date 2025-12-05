@@ -43,6 +43,7 @@ RoutesManager.init = (app) => {
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes(internal));
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes(internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER, internal));
 
 	if (!internal) {
 	// Auth
@@ -57,7 +58,6 @@ RoutesManager.init = (app) => {
 		app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
 
 		// Containers
-		app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets', CreateTicketRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/comments', CreateTicketCommentsRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes());
