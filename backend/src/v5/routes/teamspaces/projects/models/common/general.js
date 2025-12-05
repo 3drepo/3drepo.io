@@ -263,6 +263,7 @@ const establishRoutes = (modelType, isInternal) => {
 	};
 
 	if (isInternal) {
+		// istanbul ignore next
 		if (modelType === modelTypes.CONTAINER) {
 			/**
 			* @openapi
