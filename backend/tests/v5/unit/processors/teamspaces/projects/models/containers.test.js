@@ -20,7 +20,6 @@ const {
 	determineTestGroup,
 	generateRandomString,
 	generateUUIDString,
-	generateRandomObject,
 } = require('../../../../../helper/services');
 
 const fs = require('fs/promises');
