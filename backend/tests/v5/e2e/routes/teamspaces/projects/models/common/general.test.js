@@ -1196,7 +1196,7 @@ const testGetTree = (internalService) => {
 			await storeFile(teamspace, `${con._id}.stash.json_mpc.ref`, `${revisions[1]._id}/fulltree.json`, Buffer.from(rev2Content));
 		});
 
-		const generateTestData = () => {
+		const generateTestData = (modelType) => {
 			const model = con;
 			const wrongTypeModel = fed;
 
@@ -1205,20 +1205,20 @@ const testGetTree = (internalService) => {
 				key = users.tsAdmin.apiKey,
 				modelId = model._id,
 				revId,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tree${internalService ? `${revId ? `?revId=${revId}` : ''}` : `?key=${key}`}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tree${internalService ? `${revId ? `?revId=${revId}` : ''}` : `?key=${key}`}`;
 
 			const externalTests = [
 				['session is external', getRoute(), false, templates.pageNotFound],
 			];
 
-			const internalTests = [
+			const internalTests = modelType === modelTypes.CONTAINER ? [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
 				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
 				['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.fileNotFound],
 				['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Content],
 				['a revision is not provided by the user', getRoute(), true, rev2Content],
-			];
+			] : [['the model type used in the route is not container', getRoute(), false, templates.pageNotFound]];
 
 			return internalService ? internalTests : externalTests;
 		};
@@ -1235,7 +1235,9 @@ const testGetTree = (internalService) => {
 			});
 		};
 
-		describe.each(generateTestData())('Containers', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
 	});
 };
 

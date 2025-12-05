@@ -35,6 +35,7 @@ const Federations = require('../../../../../processors/teamspaces/projects/model
 const ModelSettings = require('../../../../../processors/teamspaces/projects/models/commons/settings');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { getContainerTree } = require('../../../../../processors/teamspaces/projects/models/commons/assets/jsonAssets');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
@@ -232,7 +233,7 @@ const getTree = async (req, res) => {
 	const { revId } = req.query;
 
 	try {
-		const { readStream, filename, size, mimeType } = await Containers.getTree(teamspace, container, revId);
+		const { readStream, filename, size, mimeType } = await getContainerTree(teamspace, container, revId);
 		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
 	} catch (err) {
 		// istanbul ignore next
@@ -265,7 +266,7 @@ const establishRoutes = (modelType, isInternal) => {
 		if (modelType === modelTypes.CONTAINER) {
 			/**
 			* @openapi
-			* /teamspaces/{teamspace}/projects/{project}/container/{container}/tree:
+			* /teamspaces/{teamspace}/projects/{project}/containers/{container}/tree:
 			*   get:
 			*     description: Returns the full tree for the container
 			*     tags: [v:internal, Models]
@@ -319,7 +320,7 @@ const establishRoutes = (modelType, isInternal) => {
 			*                     - account: "teamSpace1"
 			*                       project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
 			*                       type: "transformation"
-			*                       name: "Fouliiferous Tree H64_2"
+			*                       name: "Foliiferous Tree H64_2"
 			*                       path: "73a41cea-4c6b-47ed-936b-3f5641aecb52__33fe7c13-17a4-43d6-af03-ceae6880322f"
 			*                       _id: "33fe7c13-17a4-43d6-af03-ceae6880322f"
 			*                       shared_id: "b69a8384-c29d-4954-9efa-4c7bc14f1d3d"
@@ -327,7 +328,7 @@ const establishRoutes = (modelType, isInternal) => {
 			*                         - account: "teamSpace1"
 			*                           project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
 			*                           type: "mesh"
-			*                           name: "Fouliiferous Tree H64"
+			*                           name: "Foliiferous Tree H64"
 			*                           path: "73a41cea-4c6b-47ed-936b-3f5641aecb52__33fe7c13-17a4-43d6-af03-ceae6880322f__ce413e99-8469-4ed0-86e3-ff50bf4fed89"
 			*                           _id: "ce413e99-8469-4ed0-86e3-ff50bf4fed89"
 			*                           shared_id: "a876e59a-8cda-4d61-b438-c74ce7b8855d"
@@ -335,8 +336,8 @@ const establishRoutes = (modelType, isInternal) => {
 			*                       toggleState: "visible"
 			*                   toggleState: "visible"
 			*                 idToName:
-			*                   ce413e99-8469-4ed0-86e3-ff50bf4fed89: "Fouliiferous Tree H64"
-			*                   33fe7c13-17a4-43d6-af03-ceae6880322f: "Fouliiferous Tree H64_2"
+			*                   ce413e99-8469-4ed0-86e3-ff50bf4fed89: "Foliiferous Tree H64"
+			*                   33fe7c13-17a4-43d6-af03-ceae6880322f: "Foliiferous Tree H64_2"
 			*                   73a41cea-4c6b-47ed-936b-3f5641aecb52: "RootNode"
 			*               subTrees: []
 			*/
