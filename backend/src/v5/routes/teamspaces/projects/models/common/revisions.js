@@ -21,7 +21,6 @@ const { serialiseRevision, serialiseRevisionArray } = require('../../../../../mi
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const { Router } = require('express');
-const { getUserFromSession } = require('../../../../../utils/sessions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData: validateNewContainerRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
@@ -93,13 +92,12 @@ const updateRevisionStatus = (modelType) => async (req, res) => {
 const createNewRevision = (modelType) => async (req, res) => {
 	const { file } = req;
 	const { teamspace, project, model } = req.params;
-	const owner = getUserFromSession(req.session);
 
 	const fn = {
 		[modelTypes.CONTAINER]: () => Containers.newRevision(teamspace, model,
-			{ ...req.body, owner }, file),
+			req.body, file),
 		[modelTypes.DRAWING]: () => Drawings.newRevision(teamspace, project, model,
-			{ ...req.body, owner }, file),
+			req.body, file),
 	};
 
 	try {
@@ -128,7 +126,7 @@ const downloadRevisionFiles = (modelType) => async (req, res) => {
 	}
 };
 
-const establishRoutes = (modelType) => {
+const establishRoutes = (modelType, internal) => {
 	const router = Router({ mergeParams: true });
 
 	const hasReadAccessToModel = {
@@ -142,10 +140,133 @@ const establishRoutes = (modelType) => {
 	};
 
 	const validateNewModelRev = {
-		[modelTypes.CONTAINER]: validateNewContainerRev,
+		[modelTypes.CONTAINER]: validateNewContainerRev(internal),
 		[modelTypes.DRAWING]: validateNewDrawingRev,
 	};
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
+	 *   post:
+	 *     description: Create a new revision. Request should be provided in multipart format, unless internal.
+	 *     tags: [v:external, v:internal, Revisions]
+	 *     operationId: createNewModelRevision
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: type
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, drawings]
+	 *       - name: model
+	 *         description: Model ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     requestBody:
+	 *       content:
+	 *         multipart/form-data:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               tag:
+	 *                 description: Unique revision name
+	 *                 type: string
+	 *                 example: rev01
+	 *               statusCode:
+	 *                 type: string
+	 *                 description: Revision status code
+	 *                 example: S0
+	 *               revCode:
+	 *                 type: string
+	 *                 description: Revision code
+	 *                 example: P01
+	 *               desc:
+	 *                 description: Description of the revision
+	 *                 type: string
+	 *                 example: Initial design
+	 *               importAnimations:
+	 *                 type: boolean
+	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
+	 *               timezone:
+	 *                 description: Timezone of the revision (for spm files)
+	 *                 type: string
+	 *                 example: Europe/Berlin
+	 *               lod:
+	 *                 description: Level of Detail (0 - 6)
+	 *                 type: integer
+	 *                 example: 0
+	 *               file:
+	 *                 type: string
+	 *                 format: binary
+	 *             required:
+	 *               - tag
+	 *               - file
+	 *               - statusCode
+	 *               - revCode
+	*         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               tag:
+	 *                 description: Unique revision name
+	 *                 type: string
+	 *                 example: rev01
+	 *               desc:
+	 *                 description: Description of the revision
+	 *                 type: string
+	 *                 example: Initial design
+	 *               importAnimations:
+	 *                 type: boolean
+	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
+	 *               timezone:
+	 *                 description: Timezone of the revision (for spm files)
+	 *                 type: string
+	 *                 example: Europe/Berlin
+	 *               lod:
+	 *                 description: Level of Detail (0 - 6)
+	 *                 type: integer
+	 *                 example: 0
+	 *               file:
+	 *                 type: string
+	 *                 description: path to find the file in the mounted shared drive
+	 *                 example: folder1/house.rvt
+	 *               owner:
+	 *                 type: string
+	 *                 description: Owner of the revision (email)
+	 *                 example: user@example.com
+	 *             required:
+	 *               - tag
+	 *               - file
+	 *               - owner
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: creates a new revision
+	 */
+
+	router.post('', hasWriteAccessToModel[modelType], validateNewModelRev[modelType], createNewRevision(modelType));
+
+	if (!internal) {
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
@@ -168,7 +289,7 @@ const establishRoutes = (modelType) => {
 	 *           type: string
 	 *           format: uuid
 	 *       - name: type
-	   *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -250,95 +371,9 @@ const establishRoutes = (modelType) => {
 	 *                 value:
 	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, statusCode: S0, revCode: P01, desc: The Architecture model of the Lego House, void: true }]
 	 */
-	router.get('', hasReadAccessToModel[modelType], getRevisions(modelType), serialiseRevisionArray);
+		router.get('', hasReadAccessToModel[modelType], getRevisions(modelType), serialiseRevisionArray);
 
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
-	 *   post:
-	 *     description: Create a new revision.
-	 *     tags: [v:external, Revisions]
-	 *     operationId: createNewModelRevision
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *       - name: type
-	   *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, drawings]
-	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     requestBody:
-	 *       content:
-	 *         multipart/form-data:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               tag:
-	 *                 description: Unique revision name
-	 *                 type: string
-	 *                 example: rev01
-	 *               statusCode:
-	 *                 type: string
-	 *                 description: Revision status code
-	 *                 example: S0
-	 *               revCode:
-	 *                 type: string
-	 *                 description: Revision code
-	 *                 example: P01
-	 *               desc:
-	 *                 description: Description of the revision
-	 *                 type: string
-	 *                 example: Initial design
-	 *               importAnimations:
-	 *                 type: boolean
-	 *                 description: Whether animations should be imported (Only relevant for .SPM uploads)
-	 *               timezone:
-	 *                 description: Timezone of the revision
-	 *                 type: string
-	 *                 example: Europe/Berlin
-	 *               lod:
-	 *                 description: Level of Detail (0 - 6)
-	 *                 type: integer
-	 *                 example: 0
-	 *               file:
-	 *                 type: string
-	 *                 format: binary
-	 *             required:
-	 *               - tag
-	 *               - file
-	 *               - statusCode
-	 *               - revCode
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: creates a new revision
-	 */
-	router.post('', hasWriteAccessToModel[modelType], validateNewModelRev[modelType], createNewRevision(modelType));
-
-	/**
+		/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions/{revision}:
 	 *   patch:
@@ -397,9 +432,9 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: updates the status of the revision
 	 */
-	router.patch('/:revision', hasWriteAccessToModel[modelType], validateUpdateRevisionData, updateRevisionStatus(modelType));
+		router.patch('/:revision', hasWriteAccessToModel[modelType], validateUpdateRevisionData, updateRevisionStatus(modelType));
 
-	if (modelType === modelTypes.CONTAINER) {
+		if (modelType === modelTypes.CONTAINER) {
 		/**
 		 * @openapi
 		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
@@ -447,9 +482,9 @@ const establishRoutes = (modelType) => {
 		 *               type: string
 		 *               format: binary
 		 */
-		router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles(modelTypes.CONTAINER));
+			router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles(modelTypes.CONTAINER));
 
-		/**
+			/**
 		 * @openapi
 		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files/original/info:
 		 *   get:
@@ -520,9 +555,9 @@ const establishRoutes = (modelType) => {
 		 *                   description: File size in bytes
 		 *                   example: 329487234
 		 */
-		router.get('/:revision/files/original/info', hasReadAccessToContainer, getRevisionMD5Hash(), serialiseRevision);
-	}
-	if (modelType === modelTypes.DRAWING) {
+			router.get('/:revision/files/original/info', hasReadAccessToContainer, getRevisionMD5Hash(), serialiseRevision);
+		}
+		if (modelType === modelTypes.DRAWING) {
 		/**
 		 * @openapi
 		 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/original:
@@ -571,9 +606,9 @@ const establishRoutes = (modelType) => {
 		 *               type: string
 		 *               format: binary
 		 */
-		router.get('/:revision/files/original', hasWriteAccessToDrawing, downloadRevisionFiles(modelTypes.DRAWING));
+			router.get('/:revision/files/original', hasWriteAccessToDrawing, downloadRevisionFiles(modelTypes.DRAWING));
 
-		/**
+			/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/image:
 	 *   get:
@@ -614,7 +649,8 @@ const establishRoutes = (modelType) => {
 	 *       200:
 	 *         description: returns svg/raster image of the image
 	 */
-		router.get('/:revision/files/image', hasReadAccessToDrawing, getImage);
+			router.get('/:revision/files/image', hasReadAccessToDrawing, getImage);
+		}
 	}
 
 	return router;

@@ -24,17 +24,19 @@ const {mkdirSync} = require("fs");
 const Path = require("path");
 const fileSharePath = Path.join(tmpDir, "v5FileShare");
 const sharedDirPath = Path.join(tmpDir, "v5SharedDir");
-try {
-	mkdirSync(fileSharePath);
-} catch(err) {
-	if(err.code !== "EEXIST") throw err;
+const extDirPath = Path.join(tmpDir, "v5ExternalDir");
+
+const createIfNotExist = (filePath) => {
+	try {
+		mkdirSync(filePath);
+	} catch(err) {
+		if(err.code !== "EEXIST") throw err;
+	}
 }
 
-try {
-	mkdirSync(sharedDirPath);
-} catch(err) {
-	if(err.code !== "EEXIST") throw err;
-}
+createIfNotExist(fileSharePath);
+createIfNotExist(extDirPath);
+createIfNotExist(sharedDirPath);
 
 
 module.exports = {
@@ -91,28 +93,16 @@ module.exports = {
 		host: "127.0.0.1",
 		port: 27227
 	},
-	s3: {
-		accessKey: process.env.S3_ACCESS_KEY,
-		secretKey: process.env.S3_SECRET_KEY,
-		region: "eu-west-2",
-		bucketName: "3drepo-travis"
-	},
 	fs: {
 		path: fileSharePath,
 		levels: 2
 	},
-	defaultStorage: "fs",
-	tokenExpiry: {
-		emailVerify: 336,
-		forgotPassword: 24
+	externalFS: {
+		path: extDirPath
 	},
 	unitySettings: {
         	TOTAL_MEMORY: 2130706432 / 10,
 	},
-	auth: {
-		captcha: false,
-		register: true
-	},	crossOrigin: true,
 	cn_queue: {
 		host: 'amqp://localhost:5672',
 		worker_queue: 'jobq',
