@@ -17,7 +17,9 @@
 						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/new.png">
 					</div>
 					<div style="flex: 1 1 0">
-						<p class="notificationsText"><%= tickets.assigned.count %> <%= tickets.assigned.count === 1? "ticket" : "tickets" %> <%= tickets.assigned.count === 1? "was" : "were" %> assigned to you.</p>
+						<a href="<%= domain %><%= tickets.assigned.link %>" target="_blank">
+							<p class="notificationsText"><%= tickets.assigned.count %> <%= tickets.assigned.count === 1? "ticket" : "tickets" %> <%= tickets.assigned.count === 1? "was" : "were" %> assigned to you.</p>
+						</a>
 					</div>
 					<a href="<%= domain %><%= tickets.assigned.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
 				</div>
@@ -28,7 +30,9 @@
 						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/edit.png">
 					</div>
 					<div style="flex: 1 1 0">
-						<p class="notificationsText"><%= tickets.updated.count %> <%= tickets.updated.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.updated.count === 1? "was" : "were" %> updated.</p>
+						<a href="<%= domain %><%= tickets.updated.link %>" target="_blank">
+							<p class="notificationsText"><%= tickets.updated.count %> <%= tickets.updated.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.updated.count === 1? "was" : "were" %> updated.</p>
+						</a>
 					</div>
 					<a href="<%= domain %><%= tickets.updated.link %>" target="_blank"><img "margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
 				</div>
@@ -39,7 +43,9 @@
 						<img class="notificationType" src="<%= domain %>/assets/email-resources/notifications/done.png">
 					</div>
 					<div style="flex: 1 1 0">
-					   <p class="notificationsText"><%= tickets.closed.count %> <%= tickets.closed.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.closed.count === 1? "was" : "were" %> closed.</p>
+						<a href="<%= domain %><%= tickets.closed.link %>" target="_blank">
+					   		<p class="notificationsText"><%= tickets.closed.count %> <%= tickets.closed.count === 1? "ticket" : "tickets" %> you are associated with <%= tickets.closed.count === 1? "was" : "were" %> closed.</p>
+					   	</a>
 					</div>
 					<a href="<%= domain %><%= tickets.closed.link %>" target="_blank"><img style="margin-top: 4px" src="<%= domain %>/assets/email-resources/notifications/openLink.png"></a>
 				</div>
