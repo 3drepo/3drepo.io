@@ -88,6 +88,7 @@ Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
 				.max(128)
 				.required()
 				.test('check-name-is-not-used', 'Teamspace with this name already exists.', async (value) => {
+					if (!value) return true;
 					try {
 						await getTeamspaceSetting(value, { _id: 1 });
 						return false;
@@ -97,13 +98,20 @@ Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
 				}),
 			false),
 		admin: YupHelper.types.strings.email.optional(),
-		accountId: Yup.string().optional(),
+		accountId: Yup
+			.string()
+			.optional()
+			.test('check-account-exists', 'Account with this ID does not exist.', async (value) => {
+				if (!value) return true;
+				if (await getTeamspaceByAccount(value)) {
+					return true;
+				}
+				return false;
+			}),
 	});
 
 	try {
 		req.body = await schema.validate(req.body, { stripUnknown: true });
-
-		if (req.body.accountId && !await getTeamspaceByAccount(req.body.accountId)) throw templates.teamspaceNotFound;
 
 		await next();
 	} catch (err) {
