@@ -52,7 +52,7 @@ const GroupByList = ({ onChange }) => {
 };
 
 
-export const GroupBySelection = ({ value: valueProp, onChange }) => {
+export const GroupBySelection = ({ onChange }) => {
 	const disabled = false;
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const definitions = uniq(templates.flatMap(getTemplatePropertiesDefinitions));
