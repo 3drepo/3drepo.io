@@ -17,16 +17,11 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { SearchContext, SearchContextComponent, SearchContextType } from '@controls/search/searchContext';
-import { Tooltip, Button, PopoverOrigin, PopoverProps } from '@mui/material';
-import { useContext, useState } from 'react';
-import { FormattedMessage } from 'react-intl';
+import { Tooltip, PopoverOrigin, PopoverProps } from '@mui/material';
+import { useContext } from 'react';
 import { CardAction } from '../../cardAction/cardAction.styles';
-import { TicketFilter } from '../../cardFilters/cardFilters.types';
-import { FilterForm } from '../../cardFilters/filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../cardFilters/filterForm/filterForm.styles';
-import { TicketFiltersSelectionList } from '../../cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.component';
-import { SearchInput, TicketsFiltersModal, TicketsFiltersModalItem } from '../../cardFilters/filtersSelection/tickets/ticketFiltersSelection.styles';
-import { useTicketFiltersContext } from '../../cardFilters/ticketsFilters.context';
+import { SearchInput, TicketsFiltersModalItem } from '../../cardFilters/filtersSelection/tickets/ticketFiltersSelection.styles';
 import GroupByIcon from '@assets/icons/viewer/grouped_list.svg';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
@@ -41,37 +36,6 @@ const TriggerButton = ({ disabled }) =>
 		</CardAction>
 	</Tooltip>
 	);
-
-/*
-const GroupBySelect = ({ value:valueProp, onChange }) => {
-	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
-	const definitions = uniq(templates.flatMap(getTemplatePropertiesDefinitions));
-	const items = uniq(groupByProperties(definitions)).map((value) => ({ value, name: getPropertyLabel(value) }))
-		.sort((a, b) => {
-			const fieldsCountA = a.name.split(':').length;
-			const fieldsCountB = b.name.split(':').length;
-			
-			if (fieldsCountA !== fieldsCountB) {
-				return fieldsCountA - fieldsCountB;
-			}
-			
-			return a.name.localeCompare(b.name);
-		});
-
-	const onChangeHandler = (e) => {
-		onChange(e.target.value);
-	};
-
-	return (<SearchSelect value={valueProp} onChange={onChangeHandler}>
-		<MenuItem key='none' value='none'>None</MenuItem>
-		{(items).map((item) => (
-			<MenuItem key={item.value} value={item.value}>
-				{item.name}
-			</MenuItem>
-		))}
-	</SearchSelect>);
-};
-*/
 
 type ItemType = {
 	value:string,

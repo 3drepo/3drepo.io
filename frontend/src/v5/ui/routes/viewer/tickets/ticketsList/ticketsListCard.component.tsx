@@ -31,11 +31,6 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
-import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
-import { MenuItem } from '@mui/material';
-import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
-import { uniq } from 'lodash';
-import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 import { useEffect } from 'react';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
