@@ -17,13 +17,13 @@
 
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
-import AddIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { sortByName } from '@/v5/store/store.helpers';
-import { ActionMenu, MenuItem, NewTicketButton } from '../ticketsList.styles';
+import { ActionMenu, MenuItem } from '../ticketsList.styles';
 import { TicketsCardViews } from '../../tickets.constants';
 import { ViewerParams } from '../../../../routes.constants';
+import { AddFabButton } from '@controls/button/addFabButton/addFabButton.component';
+import { formatMessage } from '@/v5/services/intl';
 
 export const NewTicketMenu = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
@@ -37,10 +37,7 @@ export const NewTicketMenu = () => {
 	return (
 		<ActionMenu
 			TriggerButton={(
-				<NewTicketButton disabled={!templates?.length}>
-					<AddIcon />
-					<FormattedMessage id="viewer.cards.tickets.newTicket" defaultMessage="New Ticket" />
-				</NewTicketButton>
+				<AddFabButton tooltipText={formatMessage({ id: 'ticket.addTicketButtonText', defaultMessage: 'Add Ticket' })}/>
 			)}
 		>
 			{sortByName(templates).map((template) => (
