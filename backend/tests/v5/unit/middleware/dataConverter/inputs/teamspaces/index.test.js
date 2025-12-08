@@ -24,9 +24,6 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../../src/v5/models/teamspaceSettings');
 const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
 
-jest.mock('../../../../../../../src/v5/models/users');
-const UsersModel = require(`${src}/models/users`);
-
 jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/accounts');
 const FrontEggAccounts = require(`${src}/services/sso/frontegg/components/accounts`);
 
