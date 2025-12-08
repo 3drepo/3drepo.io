@@ -143,13 +143,15 @@ const createTeamspace = async (req, res) => {
 	let userName;
 
 	try {
-		const result = await getUserByEmail(admin)
-			.catch((e) => {
-				if (e.message !== templates.userNotFound.message) throw e;
-				return {};
-			});
+		if (admin) {
+			const result = await getUserByEmail(admin)
+				.catch((e) => {
+					if (e.message !== templates.userNotFound.message) throw e;
+					return {};
+				});
 
-		userName = result.user;
+			userName = result.user;
+		}
 
 		await Teamspaces.initTeamspace(name, userName, accountId);
 
