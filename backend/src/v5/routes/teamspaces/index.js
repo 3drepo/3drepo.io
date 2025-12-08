@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { canRemoveTeamspaceMember, memberExists, validateUpdateQuota, validateCreateTeamspaceData } = require('../../middleware/dataConverter/inputs/teamspaces');
+const { canRemoveTeamspaceMember, memberExists, validateCreateTeamspaceData, validateUpdateQuota } = require('../../middleware/dataConverter/inputs/teamspaces');
 
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 
@@ -138,7 +138,6 @@ const removeQuota = async (req, res) => {
 	}
 };
 
-
 const createTeamspace = async (req, res) => {
 	const { name, accountId, admin } = req.body;
 	let userName;
@@ -154,7 +153,7 @@ const createTeamspace = async (req, res) => {
 
 		await Teamspaces.initTeamspace(name, userName, accountId);
 
-		if (!userName) {
+		if (!userName && admin) {
 			await createInvite(admin, name, DEFAULT_OWNER_JOB, undefined, { teamspace_admin: true }, false);
 		}
 
@@ -230,8 +229,7 @@ const establishRoutes = (isInternal) => {
 		*         description: quota has been removed
 		*/
 		router.delete('/:teamspace/quota', isMemberOfTeamspace, removeQuota);
-	} else {
-		if (isInternal) {
+
 		/**
 		 * @openapi
 		 * /teamspaces:
@@ -300,7 +298,7 @@ const establishRoutes = (isInternal) => {
 			*
 			*
 			*/
-			router.get('/', validSession, getTeamspaceList);
+		router.get('/', validSession, getTeamspaceList);
 
 		/**
 		* @openapi

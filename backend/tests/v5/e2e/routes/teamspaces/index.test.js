@@ -488,92 +488,83 @@ const testGetAddOns = (isInternal) => {
 	});
 };
 
-const testCreateTeamspace = (isInternal = false) => {
+const testCreateTeamspace = () => {
 	describe('Create teamspace', () => {
-		let tests;
 		let accountId;
 		const testUser = ServiceHelper.generateUserCredentials();
 
-		const route = (key) => `/v5/teamspaces/${key ? `?key=${key}` : ''}`;
+		const route = () => '/v5/teamspaces/';
 
 		beforeAll(async () => {
-			await ServiceHelper.db.createUser(testUser);
-			if (isInternal) {
-				accountId = await createAccount(ServiceHelper.generateRandomString());
-			}
+			accountId = await createAccount(ServiceHelper.generateRandomString());
 		});
 
-		if (!isInternal) {
-			tests = [
-				['the user is external', route(testUser.apiKey), false, templates.pageNotFound],
-			];
-		} else {
-			tests = [
-				['the user is internal but the body is empty', route(), false, templates.invalidArguments],
-				[
-					'the user is internal with an non conforming name',
-					route(),
-					false,
-					templates.invalidArguments,
-					{ name: `${ServiceHelper.generateRandomString()}.invalid`,
-					},
-				],
-				[
-					'the user is internal with a valid admin email',
-					route(),
-					true,
-					templates.ok,
-					{ name: ServiceHelper.generateRandomString(),
-						admin: `${ServiceHelper.generateRandomString()}@nonexisting.com`,
-					},
-				],
-				[
-					'the user is internal with an non existing accountId',
-					route(),
-					false,
-					templates.invalidArguments,
-					{ name: ServiceHelper.generateRandomString(),
-						accountId: ServiceHelper.generateRandomString(),
-					},
-				],
-				[
-					'the user is internal with a valid name',
-					route(),
-					true,
-					templates.ok,
-					{ name: ServiceHelper.generateRandomString() },
-				],
-				[
-					'the user is internal with a valid name and admin',
-					route(),
-					true,
-					templates.ok,
-					{ name: ServiceHelper.generateRandomString(),
-						admin: testUser.basicData.email,
-					},
-				],
-				[
-					'the user is internal with a valid name and accountId',
-					route(),
-					true,
-					templates.ok,
-					{ name: ServiceHelper.generateRandomString(),
-						accountId,
-					},
-				],
-				[
-					'the user is internal with a valid name, accountId and admin',
-					route(),
-					true,
-					templates.ok,
-					{ name: ServiceHelper.generateRandomString(),
-						accountId,
-						admin: testUser.basicData.email,
-					},
-				],
+		const tests = [
+			['the body is empty', route(), false, templates.invalidArguments],
+			[
+				'the body has a non conforming name',
+				route(),
+				false,
+				templates.invalidArguments,
+				{ name: `${ServiceHelper.generateRandomString()}.invalid`,
+				},
+			],
+			[
+				'the body has a valid admin email',
+				route(),
+				true,
+				templates.ok,
+				{ name: ServiceHelper.generateRandomString(),
+					admin: `${ServiceHelper.generateRandomString()}@nonexisting.com`,
+				},
+			],
+			[
+				'the body has a non existing accountId',
+				route(),
+				false,
+				templates.invalidArguments,
+				{ name: ServiceHelper.generateRandomString(),
+					accountId: ServiceHelper.generateRandomString(),
+				},
+			],
+			[
+				'the body has a valid name',
+				route(),
+				true,
+				templates.ok,
+				{ name: ServiceHelper.generateRandomString() },
+			],
+			[
+				'the body has a valid name and admin',
+				route(),
+				true,
+				templates.ok,
+				{ name: ServiceHelper.generateRandomString(),
+					admin: testUser.basicData.email,
+				},
+			],
+			[
+				'the body has a valid name and accountId',
+				route(),
+				true,
+				templates.ok,
+				{ name: ServiceHelper.generateRandomString(),
+					accountId,
+				},
+			],
+			[
+				'the body has a valid name, accountId and admin',
+				route(),
+				true,
+				templates.ok,
+				{ name: ServiceHelper.generateRandomString(),
+					accountId,
+					admin: testUser.basicData.email,
+				},
+			],
 
-			];
-		}
+		];
+
 		describe.each(tests)('', (desc, path, success, expectedOutcome, packageData = {}) => {
 			test(`Should ${success ? 'succeed' : `fail with ${expectedOutcome.status}`} if ${desc}`, async () => {
 				const res = await agent.post(path).send(packageData).expect(expectedOutcome.status);
@@ -708,5 +699,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 
 		testUpdateQuota(true);
 		testDeleteQuota(true);
+		testCreateTeamspace();
 	});
 });
