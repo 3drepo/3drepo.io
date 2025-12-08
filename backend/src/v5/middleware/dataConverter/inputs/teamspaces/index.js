@@ -17,10 +17,9 @@
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const Yup = require('yup');
-const { deleteIfUndefined } = require('../../../../utils/helper/objects');
+const YupHelper = require('../../../../utils/helper/yup');
 const { getTeamspaceByAccount } = require('../../../../services/sso/frontegg/components/accounts');
 const { getTeamspaceSetting } = require('../../../../models/teamspaceSettings');
-const { getUserByEmail } = require('../../../../models/users');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { isTeamspaceAdmin } = require('../../../../utils/permissions');
 const { isTeamspaceMember } = require('../../../../processors/teamspaces');
@@ -73,28 +72,25 @@ Teamspaces.memberExists = async (req, res, next) => {
 
 Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
 	const schema = Yup.object().shape({
-		name: Yup.string()
-			.matches(/^[a-zA-Z0-9]+$/, 'Teamspace name must be alphanumeric and contain no full stops.')
-			.max(128, 'Teamspace name must be at most 128 characters long.')
-			.required('Teamspace name is required'),
-		admin: Yup.string().email('Admin must be a valid email address').optional(),
+		name: YupHelper.validators.alphanumeric(
+			Yup.string()
+				.max(128)
+				.required()
+				.test('check-name-is-not-used', 'Teamspace with this name already exists.', async (value) => {
+					try {
+						await getTeamspaceSetting(value, { _id: 1 });
+						return false;
+					} catch {
+						return true;
+					}
+				}),
+			false),
+		admin: YupHelper.types.strings.email.optional(),
 		accountId: Yup.string().optional(),
 	});
-	let teamspaceExists;
 
 	try {
-		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }));
-
-		try {
-			teamspaceExists = await getTeamspaceSetting(req.body.name, { _id: 1 });
-		} catch (e) {
-			teamspaceExists = false;
-		}
-
-		if (teamspaceExists) {
-			throw new Error('Teamspace with this name already exists.');
-		}
-		if (req.body.admin) await getUserByEmail(req.body.admin);
+		req.body = await schema.validate(req.body, { stripUnknown: true });
 
 		if (req.body.accountId && !await getTeamspaceByAccount(req.body.accountId)) throw templates.teamspaceNotFound;
 

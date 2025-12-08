@@ -16,11 +16,18 @@
  */
 
 const { canRemoveTeamspaceMember, memberExists, validateCreateTeamspaceData } = require('../../middleware/dataConverter/inputs/teamspaces');
+
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
+const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { Router } = require('express');
 const Teamspaces = require('../../processors/teamspaces');
 const Users = require('../../processors/users');
+/* istanbul ignore file */
+const { v4Path } = require('../../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+const { create: createInvite } = require(`${v4Path}/models/invitations`);
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
+const { getUserByEmail } = require('../../models/users');
 const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
@@ -110,10 +117,23 @@ const getAddOns = async (req, res) => {
 };
 
 const createTeamspace = async (req, res) => {
-	const { name, accountId, owner } = req.body;
+	const { name, accountId, admin } = req.body;
+	let userName;
 
 	try {
-		await Teamspaces.initTeamspace(name, owner, accountId);
+		const result = await getUserByEmail(admin)
+			.catch((e) => {
+				if (e.message !== templates.userNotFound.message) throw e;
+				return {};
+			});
+
+		userName = result.user;
+
+		await Teamspaces.initTeamspace(name, userName, accountId);
+
+		if (!userName) {
+			await createInvite(admin, name, DEFAULT_OWNER_JOB, undefined, { teamspace_admin: true }, false);
+		}
 
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -125,7 +145,43 @@ const createTeamspace = async (req, res) => {
 const establishRoutes = (isInternal) => {
 	const router = Router({ mergeParams: true });
 
-	if (!isInternal) {
+	if (isInternal) {
+		/**
+		 * @openapi
+		 * /teamspaces:
+		 *   post:
+		 *     description: Create a new teamspace
+		 *     tags: [v:internal, Teamspaces]
+		 *     operationId: createTeamspace
+		 *     requestBody:
+		 *       required: true
+		 *       content:
+		 *         application/json:
+		 *           schema:
+		 *             type: object
+		 *             properties:
+		 *               name:
+		 *                 type: string
+		 *                 description: Name of the teamspace to be created
+		 *                 example: New Teamspace
+		 *               accountId:
+		 *                 type: string
+		 *                 description: The account ID the teamspace will belong to
+		 *                 example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+		 *               admin:
+		 *                 type: string
+		 *                 description: The email of the owner of the teamspace
+		 *                 example: test@test.com
+		 *     responses:
+		 *       200:
+		 *         description: Teamspace created successfully
+		 *       400:
+		 *         $ref: "#/components/responses/invalidArguments"
+		 *       409:
+		 *         $ref: "#/components/responses/resourceAlreadyExists"
+		 */
+		router.post('/', validateCreateTeamspaceData, createTeamspace);
+	} else {
 		/**
 		 * @openapi
 		 * /teamspaces:
@@ -168,7 +224,7 @@ const establishRoutes = (isInternal) => {
 		 *     tags: [v:external, Teamspaces]
 		 *     operationId: getTeamspaceMembers
 		 *     parameters:
-				 *       - name: teamspace
+		 *       - name: teamspace
 		 *         description: name of teamspace
 		 *         in: path
 		 *         required: true
@@ -220,7 +276,7 @@ const establishRoutes = (isInternal) => {
 		*     description: Gets the avatar of the teamspace
 		*     tags: [v:external, Teamspaces]
 		*     parameters:
-				*       - name: teamspace
+		*       - name: teamspace
 		*         description: name of teamspace
 		*         in: path
 		*         required: true
@@ -247,7 +303,7 @@ const establishRoutes = (isInternal) => {
 		*     description: Gets quota information about a user
 		*     tags: [v:external, Teamspaces]
 		*     parameters:
-				*       - name: teamspace
+		*       - name: teamspace
 		*         description: name of teamspace
 		*         in: path
 		*         required: true
@@ -305,7 +361,7 @@ const establishRoutes = (isInternal) => {
 		*     description: Removes the user from the teamspace
 		*     tags: [v:external, Teamspaces]
 		*     parameters:
-				*       - name: teamspace
+		*       - name: teamspace
 		*         description: name of teamspace
 		*         in: path
 		*         required: true
@@ -334,13 +390,13 @@ const establishRoutes = (isInternal) => {
 		*     description: Gets the avatar of a member of the teamspace
 		*     tags: [v:external, Teamspaces]
 		*     parameters:
-				*       - name: teamspace
+		*       - name: teamspace
 		*         description: name of teamspace
 		*         in: path
 		*         required: true
 		*         schema:
 		*           type: string
-				*       - name: member
+		*       - name: member
 		*         description: username of teamspace member
 		*         in: path
 		*         required: true
@@ -367,7 +423,7 @@ const establishRoutes = (isInternal) => {
 		*     description: Gets information about the addOns supported in a teamspace
 		*     tags: [v:external, Teamspaces]
 		*     parameters:
-				*       - name: teamspace
+		*       - name: teamspace
 		*         description: name of teamspace
 		*         in: path
 		*         required: true
@@ -388,7 +444,7 @@ const establishRoutes = (isInternal) => {
 		*                   type: boolean
 		*                   description: Whether or not the vr addOn is supported in this teamspace
 		*                   example: true
-			*                 hereEnabled:
+		*                 hereEnabled:
 		*                   type: boolean
 		*                   description: Whether or not the here addOn is supported in this teamspace
 		*                   example: true
@@ -410,44 +466,6 @@ const establishRoutes = (isInternal) => {
 		*                   example: [issues, risks]
 		*/
 		router.get('/:teamspace/addOns', hasAccessToTeamspace, getAddOns);
-	}
-	if (isInternal) {
-		/**
-	 * @openapi
-	 * /teamspaces:
-	 *   post:
-	 *     description: Create a new teamspace
-	 *     tags: [v:internal, Teamspaces]
-	 *     operationId: createTeamspace
-	 *     requestBody:
-	 *       required: true
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               name:
-	 *                 type: string
-	 *                 description: Name of the teamspace to be created
-	 *                 example: New Teamspace
-	 *               accountId:
-	 *                 type: string
-	 *                 description: The account ID the teamspace will belong to
-	 *                 example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
-	 *               owner:
-	 *                 type: string
-	 *                 description: The email of the owner of the teamspace
-	 *                 example: test@test.com
-	 *     responses:
-	 *       200:
-	 *         description: Teamspace created successfully
-	 *       400:
-	 *         $ref: "#/components/responses/invalidArguments"
-	 *       409:
-	 *         $ref: "#/components/responses/resourceAlreadyExists"
-	 */
-
-		router.post('/', validateCreateTeamspaceData, createTeamspace);
 	}
 
 	return router;

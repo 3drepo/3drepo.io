@@ -47,11 +47,9 @@ const nonAdminUser = generateRandomString();
 const usernameToRemove = generateRandomString();
 const nonTsMemberUser = generateRandomString();
 const teamspace = generateRandomString();
-const existingTeamspaceName = 'alreadyExisting';
 
 TeamspacesProcessor.isTeamspaceMember.mockImplementation((ts, username) => username !== nonTsMemberUser);
 TeamspacesModel.getAddOns.mockImplementation((ts) => (ts === teamspace ? {} : { usersProvisioned: true }));
-TeamspacesModel.getTeamspaceSetting.mockImplementation((ts) => (ts === existingTeamspaceName ? Promise.resolve({ id: 1 }) : Promise.reject(new Error('Not found'))));
 PermissionsUtils.isTeamspaceAdmin.mockImplementation((ts, user) => user === adminUser);
 
 const testCanRemoveTeamspaceMember = () => {
@@ -127,33 +125,14 @@ const testMemberExists = () => {
 };
 
 const testValidateCreateTeamspaceData = () => {
+	const existingTeamspaceName = generateRandomString();
+
 	describe('validateCreateTeamspaceData', () => {
-		test('Should call next if admin email is valid', async () => {
-			const req = { body: { name: 'ValidName', admin: 'admin@example.com' } };
-			const mockCB = jest.fn(() => {});
-			TeamspacesModel.getTeamspaceSetting.mockRejectedValueOnce(new Error('Not found'));
-			UsersModel.getUserByEmail.mockResolvedValueOnce({});
-
-			await Teamspaces.validateCreateTeamspaceData(req, {}, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(1);
-		});
-
-		test('should respond with invalidArguments if admin email is invalid', async () => {
-			const req = { body: { name: 'ValidName', admin: 'invalid-email' } };
-			const mockCB = jest.fn(() => {});
-			TeamspacesModel.getTeamspaceSetting.mockRejectedValueOnce(new Error('Not found'));
-			UsersModel.getUserByEmail.mockRejectedValueOnce(new Error('User not found'));
-
-			await Teamspaces.validateCreateTeamspaceData(req, {}, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(0);
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-		});
-
 		test('should call next if accountId is valid', async () => {
-			const req = { body: { name: 'ValidName', accountId: 'accountIdValue' } };
+			TeamspacesModel.getTeamspaceSetting.mockImplementationOnce(() => Promise.reject(new Error()));
+
+			const req = { body: { name: generateRandomString(), accountId: generateRandomString() } };
 			const mockCB = jest.fn(() => {});
-			TeamspacesModel.getTeamspaceSetting.mockRejectedValueOnce(new Error('Not found'));
 			FrontEggAccounts.getTeamspaceByAccount.mockResolvedValueOnce({});
 
 			await Teamspaces.validateCreateTeamspaceData(req, {}, mockCB);
@@ -161,27 +140,31 @@ const testValidateCreateTeamspaceData = () => {
 		});
 
 		test('should respond with invalidArguments if accountId is invalid', async () => {
-			const req = { body: { name: 'ValidName', accountId: 'invalidAccountId' } };
-			const mockCB = jest.fn(() => {});
-			TeamspacesModel.getTeamspaceSetting.mockRejectedValueOnce(new Error('Not found'));
+			TeamspacesModel.getTeamspaceSetting.mockImplementationOnce(() => Promise.reject(new Error()));
 			FrontEggAccounts.getTeamspaceByAccount.mockResolvedValueOnce(undefined);
 
+			const req = { body: { name: generateRandomString(), accountId: generateRandomString() } };
+			const mockCB = jest.fn(() => {});
+
 			await Teamspaces.validateCreateTeamspaceData(req, {}, mockCB);
-			expect(mockCB).toHaveBeenCalledTimes(0);
+			expect(mockCB).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 		});
 
 		describe.each([
-			['if valid name', { body: { name: 'ValidTeamspaceName' } }, true],
-			['if name at max length', { body: { name: 'A'.repeat(128) } }, true],
-			['if name too long', { body: { name: 'A'.repeat(129) } }, false],
-			['if name with full stop', { body: { name: 'Invalid.Teamspace.Name' } }, false],
-			['if name with special characters', { body: { name: 'Invalid@Teamspace#Name!' } }, false],
+			['if valid name', { body: { name: generateRandomString() } }, true],
+			['if name too long', { body: { name: generateRandomString(129) } }, false],
+			['if name includes a full stop', { body: { name: `${generateRandomString()}.${generateRandomString()}` } }, false],
+			['if name includes special characters', { body: { name: `${generateRandomString()}@${generateRandomString()}#${generateRandomString()}!` } }, false],
 			['if missing name', { body: { } }, false],
 			['if teamspace name already exists', { body: { name: existingTeamspaceName } }, false],
 		])('', (desc, req, success) => {
 			test(`${desc} ${success ? 'should call next()' : 'should respond with invalidArguments'}`, async () => {
+				TeamspacesModel.getTeamspaceSetting.mockImplementationOnce(
+					(ts) => (ts === existingTeamspaceName ? Promise.resolve({ _id: 1 }) : Promise.reject(new Error())),
+				);
+
 				const mockCB = jest.fn(() => {});
 
 				await Teamspaces.validateCreateTeamspaceData(req, {}, mockCB);
@@ -189,7 +172,7 @@ const testValidateCreateTeamspaceData = () => {
 				if (success) {
 					expect(mockCB).toHaveBeenCalledTimes(1);
 				} else {
-					expect(mockCB).toHaveBeenCalledTimes(0);
+					expect(mockCB).not.toHaveBeenCalled();
 					expect(Responder.respond).toHaveBeenCalledTimes(1);
 					expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
 				}
