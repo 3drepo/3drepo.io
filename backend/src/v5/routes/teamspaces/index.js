@@ -15,11 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { canRemoveTeamspaceMember, memberExists, validateCreateTeamspaceData } = require('../../middleware/dataConverter/inputs/teamspaces');
+const { canRemoveTeamspaceMember, memberExists, validateUpdateQuota, validateCreateTeamspaceData } = require('../../middleware/dataConverter/inputs/teamspaces');
 
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
+
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { Router } = require('express');
+const { SUBSCRIPTION_TYPES } = require('../../models/teamspaces.constants');
 const Teamspaces = require('../../processors/teamspaces');
 const Users = require('../../processors/users');
 /* istanbul ignore file */
@@ -116,6 +118,27 @@ const getAddOns = async (req, res) => {
 	}
 };
 
+const updateQuota = async (req, res) => {
+	try {
+		await Teamspaces.updateQuota(req.params.teamspace, SUBSCRIPTION_TYPES.ENTERPRISE, req.body);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const removeQuota = async (req, res) => {
+	try {
+		await Teamspaces.removeQuota(req.params.teamspace);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+
 const createTeamspace = async (req, res) => {
 	const { name, accountId, admin } = req.body;
 	let userName;
@@ -146,6 +169,69 @@ const establishRoutes = (isInternal) => {
 	const router = Router({ mergeParams: true });
 
 	if (isInternal) {
+		/**
+		* @openapi
+		* /teamspaces/{teamspace}/quota:
+		*   put:
+		*     description: Updates the quota of a teamspace
+		*     tags: [v:internal, Teamspaces]
+		*     operationId: updateQuota
+		*     parameters:
+		*       - name: teamspace
+		*         description: name of teamspace
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*     requestBody:
+		*       content:
+		*         application/json:
+		*           schema:
+		*             type: object
+		*             properties:
+		*               expiryDate:
+		*                 type: string
+		*                 description: The expiry date of the quota
+		*                 example: 12/20/2030
+		*               collaborators:
+		*                 type: integer
+		*                 description: The number of collaborators
+		*                 example: 10
+		*               data:
+		*                 type: integer
+		*                 description: The data allowance of the quota
+		*                 example: 100
+		*     responses:
+		*       401:
+		*         $ref: "#/components/responses/notLoggedIn"
+		*       200:
+		*         description: quota has been successfully updated
+		*/
+		router.put('/:teamspace/quota', isMemberOfTeamspace, validateUpdateQuota, updateQuota);
+
+		/**
+		* @openapi
+		* /teamspaces/{teamspace}/quota:
+		*   delete:
+		*     description: Removes the quota of a teamspace
+		*     tags: [v:internal, Teamspaces]
+		*     operationId: removeQuota
+		*     parameters:
+		*       - name: teamspace
+		*         description: name of teamspace
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*     responses:
+		*       401:
+		*         $ref: "#/components/responses/notLoggedIn"
+		*       200:
+		*         description: quota has been removed
+		*/
+		router.delete('/:teamspace/quota', isMemberOfTeamspace, removeQuota);
+	} else {
+		if (isInternal) {
 		/**
 		 * @openapi
 		 * /teamspaces:
@@ -183,90 +269,90 @@ const establishRoutes = (isInternal) => {
 		router.post('/', validateCreateTeamspaceData, createTeamspace);
 	} else {
 		/**
-		 * @openapi
-		 * /teamspaces:
-		 *   get:
-		 *     description: Get a list of teamspaces the user has access to
-		 *     tags: [v:external, Teamspaces]
-		 *     operationId: getTeamspaceList
-		 *     responses:
-		 *       401:
-		 *         $ref: "#/components/responses/notLoggedIn"
-		 *       200:
-		 *         description: returns list of teamspace
-		 *         content:
-		 *           application/json:
-		 *             schema:
-		 *               type: object
-		 *               properties:
-		 *                 teamspaces:
-		 *                   type: array
-		 *                   items:
-		 *                     type: object
-		 *                     properties:
-		 *                       name:
-		 *                         type: string
-		 *                         description: name of the teamspace
-		 *                         example: teamspace1
-		 *                       isAdmin:
-		 *                         type: boolean
-		 *                         description: whether the user is an admin
-		 *
-		 *
-		 */
-		router.get('/', validSession, getTeamspaceList);
+			* @openapi
+			* /teamspaces:
+			*   get:
+			*     description: Get a list of teamspaces the user has access to
+			*     tags: [v:external, Teamspaces]
+			*     operationId: getTeamspaceList
+			*     responses:
+			*       401:
+			*         $ref: "#/components/responses/notLoggedIn"
+			*       200:
+			*         description: returns list of teamspace
+			*         content:
+			*           application/json:
+			*             schema:
+			*               type: object
+			*               properties:
+			*                 teamspaces:
+			*                   type: array
+			*                   items:
+			*                     type: object
+			*                     properties:
+			*                       name:
+			*                         type: string
+			*                         description: name of the teamspace
+			*                         example: teamspace1
+			*                       isAdmin:
+			*                         type: boolean
+			*                         description: whether the user is an admin
+			*
+			*
+			*/
+			router.get('/', validSession, getTeamspaceList);
 
 		/**
-		 * @openapi
-		 * /teamspaces/{teamspace}/members:
-		 *   get:
-		 *     description: Get the list of members within the teamspace
-		 *     tags: [v:external, Teamspaces]
-		 *     operationId: getTeamspaceMembers
-		 *     parameters:
-		 *       - name: teamspace
-		 *         description: name of teamspace
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *     responses:
-		 *       401:
-		 *         $ref: "#/components/responses/notLoggedIn"
-		 *       200:
-		 *         description: returns list of teamspace members with their basic information
-		 *         content:
-		 *           application/json:
-		 *             schema:
-		 *               type: object
-		 *               properties:
-		 *                 members:
-		 *                   type: array
-		 *                   items:
-		 *                     type: object
-		 *                     properties:
-		 *                       user:
-		 *                         type: string
-		 *                         description: User name
-		 *                         example: johnPaul01
-		 *                       firstName:
-		 *                         type: string
-		 *                         description: First name
-		 *                         example: John
-		 *                       lastName:
-		 *                         type: string
-		 *                         description: Last name
-		 *                         example: Paul
-		 *                       company:
-		 *                         type: string
-		 *                         description: Name of the company
-		 *                         example: 3D Repo Ltd
-		 *                       job:
-		 *                         type: string
-		 *                         description: Job within the teamspace
-		 *                         example: Project Manager
-		 *
-		 */
+		* @openapi
+		* /teamspaces/{teamspace}/members:
+		*   get:
+		*     description: Get the list of members within the teamspace
+		*     tags: [v:external, Teamspaces]
+		*     operationId: getTeamspaceMembers
+		*     parameters:
+		*       - name: teamspace
+		*         description: name of teamspace
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*     responses:
+		*       401:
+		*         $ref: "#/components/responses/notLoggedIn"
+		*       200:
+		*         description: returns list of teamspace members with their basic information
+		*         content:
+		*           application/json:
+		*             schema:
+		*               type: object
+		*               properties:
+		*                 members:
+		*                   type: array
+		*                   items:
+		*                     type: object
+		*                     properties:
+		*                       user:
+		*                         type: string
+		*                         description: User name
+		*                         example: johnPaul01
+		*                       firstName:
+		*                         type: string
+		*                         description: First name
+		*                         example: John
+		*                       lastName:
+		*                         type: string
+		*                         description: Last name
+		*                         example: Paul
+		*                       company:
+		*                         type: string
+		*                         description: Name of the company
+		*                         example: 3D Repo Ltd
+		*                       job:
+		*                         type: string
+		*                         description: Job within the teamspace
+		*                         example: Project Manager
+		*
+		*/
 		router.get('/:teamspace/members', hasAccessToTeamspace, getTeamspaceMembers);
 
 		/**
