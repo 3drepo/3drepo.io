@@ -14,22 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { FabProps } from '@mui/material';
+import { FabProps, Tooltip } from '@mui/material';
 import { AddButton } from './addFabButton.styles';
 import AddIcon from '@assets/icons/controls/add_button.svg';
-
 
 interface AddFabButtonProps {
 	tooltipText?: string;
 }
 
 export const AddFabButton = ({ tooltipText, ...props }: AddFabButtonProps & FabProps) => {
-	return (<AddButton
-		aria-label={tooltipText}
-		color="secondary"
-		{...props}
-	>
-		<AddIcon />
-	</AddButton>
+	return (
+		<Tooltip title={tooltipText}>
+			<AddButton
+				aria-label={tooltipText}
+				color="secondary"
+				{...props}
+			>
+				<AddIcon />
+			</AddButton>
+		</Tooltip>
 	);
 };
