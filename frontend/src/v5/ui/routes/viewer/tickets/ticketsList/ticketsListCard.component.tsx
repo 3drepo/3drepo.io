@@ -39,35 +39,8 @@ import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTab
 import { useEffect } from 'react';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
+import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelection/groupBySelection.component';
 
-const GroupBySelect = ({ value:valueProp, onChange }) => {
-	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
-	const definitions = uniq(templates.flatMap(getTemplatePropertiesDefinitions));
-	const items = uniq(groupByProperties(definitions)).map((value) => ({ value, name: getPropertyLabel(value) }))
-		.sort((a, b) => {
-			const fieldsCountA = a.name.split(':').length;
-			const fieldsCountB = b.name.split(':').length;
-			
-			if (fieldsCountA !== fieldsCountB) {
-				return fieldsCountA - fieldsCountB;
-			}
-			
-			return a.name.localeCompare(b.name);
-		});
-
-	const onChangeHandler = (e) => {
-		onChange(e.target.value);
-	};
-
-	return (<SearchSelect value={valueProp} onChange={onChangeHandler}>
-		<MenuItem key='none' value='none'>None</MenuItem>
-		{(items).map((item) => (
-			<MenuItem key={item.value} value={item.value}>
-				{item.name}
-			</MenuItem>
-		))}
-	</SearchSelect>);
-};
 
 export const TicketsListCard = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
@@ -107,8 +80,8 @@ export const TicketsListCard = () => {
 					actions={(
 						<>
 							{!readOnly && (<NewTicketMenu />)}
-							<GroupBySelect value={groupBy} onChange={TicketsCardActionsDispatchers.setGroupBy}/>
 							<FilterSelection />
+							<GroupBySelection value={groupBy} onChange={TicketsCardActionsDispatchers.setGroupBy}/>
 							<TicketsEllipsisMenu />
 						</>
 					)}

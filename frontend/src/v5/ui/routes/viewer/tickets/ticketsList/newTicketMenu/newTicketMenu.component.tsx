@@ -37,7 +37,7 @@ export const NewTicketMenu = () => {
 	return (
 		<ActionMenu
 			TriggerButton={(
-				<AddFabButton tooltipText={formatMessage({ id: 'ticket.addTicketButtonText', defaultMessage: 'Add Ticket' })}/>
+				<AddFabButton disabled={!templates?.length}tooltipText={formatMessage({ id: 'ticket.addTicketButtonText', defaultMessage: 'Add Ticket' })}/>
 			)}
 		>
 			{sortByName(templates).map((template) => (
