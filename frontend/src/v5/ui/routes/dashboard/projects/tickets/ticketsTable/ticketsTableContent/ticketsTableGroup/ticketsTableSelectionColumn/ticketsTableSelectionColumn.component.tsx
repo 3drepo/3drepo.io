@@ -24,7 +24,6 @@ import { CheckboxHeaderCell, Checkbox, SelectionColumnContainer } from './ticket
 import { CellContainer } from '../ticketsTableRow/ticketsTableCell/cell/cell.styles';
 import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { Gap } from '@controls/gap';
-import { uniq } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
 
@@ -52,23 +51,35 @@ export const TicketsTableSelectionColumn = ({
 	selectedTicketId,
 }: TicketsTableSelectionColumnProps) => {
 	const { selectedIds, setSelectedIds } = useContext(TicketsTableContext);
-	const allSelected = tickets.every(({ _id }) => selectedIds.includes(_id)) && tickets.length > 0;
+
+	// Convert selectedIds to a Set for fast lookup
+	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
+
+	const allSelected = tickets.every(({ _id }) => selectedIdsSet.has(_id)) && tickets.length > 0;
 
 	const onCheck = useCallback((e, ticketId) => {
-		if (e.target.checked) {
-			setSelectedIds([...selectedIds, ticketId]);
-			return;
-		}
-		setSelectedIds(selectedIds.filter((id) => id !== ticketId));
-	}, [selectedIds]);
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (e.target.checked) {
+				next.add(ticketId);
+			} else {
+				next.delete(ticketId);
+			}
+			return next;
+		});
+	}, []);
 
-	const onCheckAll = (e) => {
-		if (e.target.checked) {
-			setSelectedIds(uniq([...selectedIds, ...tickets.map((t) => t._id)]));
-			return;
-		}
-		setSelectedIds(selectedIds.filter((id) => !tickets.map((t) => t._id).includes(id)));
-	};
+	const onCheckAll = useCallback((e) => {
+		setSelectedIds((prev) => {
+			const next = new Set(prev);
+			if (e.target.checked) {
+				tickets.forEach((t) => next.add(t._id));
+			} else {
+				tickets.forEach((t) => next.delete(t._id));
+			}
+			return next;
+		});
+	}, [tickets]);
 
 	return (
 		<SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
@@ -83,7 +94,7 @@ export const TicketsTableSelectionColumn = ({
 				itemContent={({ _id }: ITicket) => (
 					<SelectionRow
 						ticketId={_id}
-						selected={selectedIds.includes(_id)}
+						selected={selectedIdsSet.has(_id)}
 						onCheck={onCheck}
 						selectedTicketId={selectedTicketId}
 					/>

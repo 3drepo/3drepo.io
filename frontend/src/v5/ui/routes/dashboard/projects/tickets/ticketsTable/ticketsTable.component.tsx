@@ -286,7 +286,11 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		const removedModelIds = prevModelIds.filter((id) => !containersAndFederations.includes(id));
 		if (removedModelIds.length > 0) {
 			const ticketIdsToRemove = removedModelIds.flatMap((id) => ticketsByModelId[id]);
-			setSelectedIds(selectedIds.filter((id) => !ticketIdsToRemove.includes(id)));
+			setSelectedIds((prev) => {
+				const next = new Set(prev);
+				ticketIdsToRemove.forEach((id) => next.delete(id));
+				return next;
+			});
 		}
 		prevModelIdsRef.current = containersAndFederations;
 	}, [containersAndFederations]);

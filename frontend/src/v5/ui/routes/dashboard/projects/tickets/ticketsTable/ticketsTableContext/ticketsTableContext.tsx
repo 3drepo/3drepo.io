@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useEffect, useState } from 'react';
+import { createContext, Dispatch, useEffect, useState } from 'react';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useParams } from 'react-router';
@@ -36,8 +36,8 @@ export interface TicketsTableType {
 	groupBy: string,
 	setGroupBy: (groupBy: React.SetStateAction<string>) => void;
 	fetchColumn: (name: string, tickets: ITicket[]) => void;
-	setSelectedIds: (ids: string[]) => void;
-	selectedIds: string[];
+	setSelectedIds: Dispatch<React.SetStateAction<Set<string>>>
+	selectedIds: Set<string>;
 	onBulkEdit: () => void;
 }
 
@@ -49,7 +49,7 @@ const defaultValue: TicketsTableType = {
 	setGroupBy: () => {},
 	fetchColumn: () => {},
 	setSelectedIds: () => {},
-	selectedIds: [],
+	selectedIds: new Set([]),
 	onBulkEdit: () => {},
 };
 export const TicketsTableContext = createContext(defaultValue);
@@ -64,7 +64,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 
-	const [selectedIds, setSelectedIds] = useState<string[]>([]);
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
@@ -117,7 +117,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		.map((definition) => definition.name);
 
 	useEffect(() => {
-		setSelectedIds([]);
+		setSelectedIds(new Set());
 	}, [templateId]);
 	
 	return (

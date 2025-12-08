@@ -24,7 +24,7 @@ import { TicketsTableContext } from './ticketsTableContext/ticketsTableContext';
 export const BulkEditButton = () => {
 	const { selectedIds, onBulkEdit } = useContext(TicketsTableContext);
 	return (
-		<Button variant="contained" onClick={onBulkEdit} disabled={selectedIds.length === 0}>
+		<Button variant="contained" onClick={onBulkEdit} disabled={selectedIds.size === 0}>
 			Bulk Edit
 		</Button>
 	);
