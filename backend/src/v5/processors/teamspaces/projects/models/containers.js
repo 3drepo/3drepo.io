@@ -28,6 +28,7 @@ const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const fs = require('fs/promises');
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { getTree } = require('./commons/assets/json');
 const { logger } = require('../../../../utils/logger');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueModelUpload } = require('../../../../services/modelProcessing');
@@ -134,5 +135,7 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
 
 Containers.getRevisionMD5Hash = getModelMD5Hash;
+
+Containers.getTree = getTree;
 
 module.exports = Containers;

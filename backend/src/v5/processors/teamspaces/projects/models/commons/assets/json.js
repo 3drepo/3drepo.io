@@ -15,29 +15,36 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { PassThrough, pipeline } = require('stream');
 const { UUIDToString } = require('../../../../../../utils/helper/uuids');
 const { getFileAsStream } = require('../../../../../../services/filesManager');
-const { getLatestRevision } = require('../../../../../../models/revisions');
-const { modelTypes } = require('../../../../../../models/modelSettings.constants');
-const { templates } = require('../../../../../../utils/responseCodes');
+const { promisify } = require('util');
 
 const JsonAssets = { };
 
 const STASH_JSON_COLLECTION = 'stash.json_mpc.ref';
 
-JsonAssets.getContainerTree = async (teamspace, container, revision) => {
-	let revId = revision;
+const pipeAsync = promisify(pipeline);
 
-	if (!revId) {
-		try {
-			const latestRev = await getLatestRevision(teamspace, container, modelTypes.CONTAINER, { _id: 1 });
-			revId = UUIDToString(latestRev?._id);
-		} catch {
-			throw templates.fileNotFound;
-		}
+const readFileStreamAsync = async (outstream, teamspace, container, filename) => {
+	const { readStream: assetStream } = await getFileAsStream(teamspace,
+		`${container}.${STASH_JSON_COLLECTION}`, filename);
+	await pipeAsync(assetStream, outstream, { end: false });
+};
+
+JsonAssets.getContainerTree = async (teamspace, container, revision) => {
+	const stream = PassThrough();
+
+	try {
+		stream.write('{"subTree": [],"mainTree": ');
+		await readFileStreamAsync(stream, teamspace, container, `${UUIDToString(revision)}/fulltree.json`);
+		stream.end('}');
+	} catch (err) {
+		stream.destroy(err);
+		throw err;
 	}
 
-	return getFileAsStream(teamspace, `${container}.${STASH_JSON_COLLECTION}`, `${revId}/fulltree.json`);
+	return stream;
 };
 
 module.exports = JsonAssets;

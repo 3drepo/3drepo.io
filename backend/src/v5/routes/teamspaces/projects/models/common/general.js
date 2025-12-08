@@ -228,20 +228,7 @@ const getJobsWithAccess = async (req, res) => {
 	}
 };
 
-const getTree = async (req, res) => {
-	const { teamspace, container } = req.params;
-	const { revId } = req.query;
-
-	try {
-		const { readStream, filename, size, mimeType } = await getContainerTree(teamspace, container, revId);
-		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
-	} catch (err) {
-		// istanbul ignore next
-		respond(req, res, err);
-	}
-};
-
-const establishRoutes = (modelType, isInternal) => {
+const establishRoutes = (modelType) => {
 	const router = Router({ mergeParams: true });
 
 	const hasAdminAccessToModel = {
@@ -262,90 +249,7 @@ const establishRoutes = (modelType, isInternal) => {
 		[modelTypes.DRAWING]: async (req, res, next) => { await next(); },
 	};
 
-	if (isInternal) {
-		// istanbul ignore next
-		if (modelType === modelTypes.CONTAINER) {
-			/**
-			* @openapi
-			* /teamspaces/{teamspace}/projects/{project}/containers/{container}/tree:
-			*   get:
-			*     description: Returns the full tree for the container
-			*     tags: [v:internal, Models]
-			*     operationId: getTree
-			*     parameters:
-			*       - name: teamspace
-			*         description: Name of teamspace
-			*         in: path
-			*         required: true
-			*         schema:
-			*           type: string
-			*       - name: project
-			*         description: Project ID
-			*         in: path
-			*         required: true
-			*         schema:
-			*           type: string
-			*           format: uuid
-			*       - name: container
-			*         description: Container ID
-			*         in: path
-			*         required: true
-			*         schema:
-			*           type: string
-			*           format: uuid
-			*       - name: revId
-			*         description: Revision ID
-			*         in: query
-			*         required: false
-			*         schema:
-			*           type: string
-			*           format: uuid
-			*     responses:
-			*       401:
-			*         $ref: "#/components/responses/notLoggedIn"
-			*       200:
-			*         description: returns the full tree for the container
-			*         content:
-			*           application/json:
-			*             example:
-			*               mainTree:
-			*                 nodes:
-			*                   account: "teamSpace1"
-			*                   project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
-			*                   type: "transformation"
-			*                   name: "RootNode"
-			*                   path: "73a41cea-4c6b-47ed-936b-3f5641aecb52"
-			*                   _id: "73a41cea-4c6b-47ed-936b-3f5641aecb52"
-			*                   shared_id: "4dd46b6f-099e-42cd-b045-6460200e7995"
-			*                   children:
-			*                     - account: "teamSpace1"
-			*                       project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
-			*                       type: "transformation"
-			*                       name: "Foliiferous Tree H64_2"
-			*                       path: "73a41cea-4c6b-47ed-936b-3f5641aecb52__33fe7c13-17a4-43d6-af03-ceae6880322f"
-			*                       _id: "33fe7c13-17a4-43d6-af03-ceae6880322f"
-			*                       shared_id: "b69a8384-c29d-4954-9efa-4c7bc14f1d3d"
-			*                       children:
-			*                         - account: "teamSpace1"
-			*                           project: "3549ddf6-885d-4977-87f1-eeac43a0e818"
-			*                           type: "mesh"
-			*                           name: "Foliiferous Tree H64"
-			*                           path: "73a41cea-4c6b-47ed-936b-3f5641aecb52__33fe7c13-17a4-43d6-af03-ceae6880322f__ce413e99-8469-4ed0-86e3-ff50bf4fed89"
-			*                           _id: "ce413e99-8469-4ed0-86e3-ff50bf4fed89"
-			*                           shared_id: "a876e59a-8cda-4d61-b438-c74ce7b8855d"
-			*                           toggleState: "visible"
-			*                       toggleState: "visible"
-			*                   toggleState: "visible"
-			*                 idToName:
-			*                   ce413e99-8469-4ed0-86e3-ff50bf4fed89: "Foliiferous Tree H64"
-			*                   33fe7c13-17a4-43d6-af03-ceae6880322f: "Foliiferous Tree H64_2"
-			*                   73a41cea-4c6b-47ed-936b-3f5641aecb52: "RootNode"
-			*               subTrees: []
-			*/
-			router.get('/:model/tree', hasReadAccessToContainer, getTree);
-		}
-	} else {
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}:
 		*   post:
@@ -481,9 +385,9 @@ const establishRoutes = (modelType, isInternal) => {
 		*                   description: Model ID
 		*                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
 		*/
-		router.post('/', isAdminToProject, validateAddModelData(modelType), addModel(modelType));
+	router.post('/', isAdminToProject, validateAddModelData(modelType), addModel(modelType));
 
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}:
 		*   get:
@@ -554,9 +458,9 @@ const establishRoutes = (modelType, isInternal) => {
 		*                 value:
 		*                   drawings: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Drawing, role: admin, isFavourite: true }]
 		*/
-		router.get('/', hasAccessToTeamspace, getModelList(modelType));
+	router.get('/', hasAccessToTeamspace, getModelList(modelType));
 
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
 		*   patch:
@@ -615,9 +519,9 @@ const establishRoutes = (modelType, isInternal) => {
 		*       200:
 		*         description: adds the models found in the request body to the user's favourites list
 		*/
-		router.patch('/favourites', hasAccessToTeamspace, appendFavourites(modelType));
+	router.patch('/favourites', hasAccessToTeamspace, appendFavourites(modelType));
 
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
 		*   delete:
@@ -658,9 +562,9 @@ const establishRoutes = (modelType, isInternal) => {
 		*       200:
 		*         description: removes the models found in the request body from the user's favourites list
 		*/
-		router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(modelType));
+	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(modelType));
 
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}/{model}/stats:
 		*   get:
@@ -773,9 +677,9 @@ const establishRoutes = (modelType, isInternal) => {
 		*                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
 		*                   calibration: uncalibrated
 		*/
-		router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
+	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
 
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 		*   delete:
@@ -816,9 +720,9 @@ const establishRoutes = (modelType, isInternal) => {
 		*       200:
 		*         description: Model removed.
 		*/
-		router.delete('/:model', hasAdminAccessToModel[modelType], canDeleteModel[modelType], deleteModel(modelType));
+	router.delete('/:model', hasAdminAccessToModel[modelType], canDeleteModel[modelType], deleteModel(modelType));
 
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 		*   patch:
@@ -932,9 +836,9 @@ const establishRoutes = (modelType, isInternal) => {
 		*       200:
 		*         description: updates the settings of the model
 		*/
-		router.patch('/:model', hasAdminAccessToModel[modelType], validateUpdateSettingsData(modelType), updateModelSettings(modelType));
+	router.patch('/:model', hasAdminAccessToModel[modelType], validateUpdateSettingsData(modelType), updateModelSettings(modelType));
 
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 		*   get:
@@ -1020,9 +924,9 @@ const establishRoutes = (modelType, isInternal) => {
 		*                   desc: The Drawing of the Lego House
 		*                   calibration: { verticalRange: [0,10], units: m }
 		*/
-		router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
+	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
 
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}/{model}/members:
 		*   get:
@@ -1079,9 +983,9 @@ const establishRoutes = (modelType, isInternal) => {
 		*                     type: string
 		*                     example: user1
 		*/
-		router.get('/:model/members', hasReadAccessToModel[modelType], getUsersWithPermissions);
+	router.get('/:model/members', hasReadAccessToModel[modelType], getUsersWithPermissions);
 
-		/**
+	/**
 		* @openapi
 		* /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
 		*   get:
@@ -1138,10 +1042,10 @@ const establishRoutes = (modelType, isInternal) => {
 		*                     type: string
 		*                     example: Architect
 		*/
-		router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
+	router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
 
-		if (modelType === modelTypes.DRAWING) {
-			/**
+	if (modelType === modelTypes.DRAWING) {
+		/**
 			* @openapi
 			* /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/thumbnail:
 			*   get:
@@ -1175,8 +1079,7 @@ const establishRoutes = (modelType, isInternal) => {
 			*       200:
 			*         description: returns a raster image of the thumbnail
 			*/
-			router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
-		}
+		router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
 	}
 
 	return router;
