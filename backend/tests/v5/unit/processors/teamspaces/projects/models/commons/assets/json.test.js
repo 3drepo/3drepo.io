@@ -23,7 +23,8 @@ const {
 	generateUUID,
 	generateRandomObject,
 } = require('../../../../../../../helper/services');
-const { UUIDToString } = require('../../../../../../../../../src/v5/utils/helper/uuids');
+
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 jest.mock('../../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);

@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { DEFAULT_CHUNK_SIZE } = require('mongodb/lib/gridfs/chunk');
 const { src } = require('../../../../../../../../helper/path');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');

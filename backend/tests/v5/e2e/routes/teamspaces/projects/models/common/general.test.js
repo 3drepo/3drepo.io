@@ -20,8 +20,6 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
-const { storeFile } = require(`${src}/services/filesManager`);
-
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
