@@ -358,7 +358,7 @@ const testCreateNewRevision = (internal = false) => {
 			} if (internal) {
 				if (params.file) {
 					const externalFsPath = config[FileStorageTypes.EXTERNAL_FS].path;
-					// the file in params.file to externalFS
+					// Copy the file in params.file to externalFS
 					const destPath = path.join(externalFsPath, path.basename(params.file));
 					copyFileSync(params.file, destPath);
 				}
