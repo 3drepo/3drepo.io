@@ -23,14 +23,16 @@ import { CardAction } from '../../cardAction/cardAction.styles';
 import { CardFilterActionMenu } from '../../cardFilters/filterForm/filterForm.styles';
 import { SearchInput, TicketsFiltersModalItem } from '../../cardFilters/filtersSelection/tickets/ticketFiltersSelection.styles';
 import GroupByIcon from '@assets/icons/viewer/grouped_list.svg';
+import ClearCircleIcon from '@assets/icons/controls/clear_circle.svg';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
 import { getPropertyLabel } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 import { uniq } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
+import { MenuItem } from '../../cardFilters/filtersSelection/tickets/list/item/ticketFiltersSelectionItem.styles';
 
 const TriggerButton = ({ disabled }) =>
-	(<Tooltip title={disabled ? '' : formatMessage({ id: 'viewer.card.tickets.addFilter', defaultMessage: 'Add Filter' })}>
+	(<Tooltip title={disabled ? '' : formatMessage({ id: 'viewer.card.tickets.groupBy', defaultMessage: 'Group by' })}>
 		<CardAction disabled={disabled}>
 			<GroupByIcon />
 		</CardAction>
@@ -46,13 +48,15 @@ const GroupByList = ({ onChange }) => {
 	return <>{
 		filteredItems.map((item) => (
 			<ActionMenuItem key={item.value} onClick={() => onChange(item.value)}>
-				{item.name}
+				<MenuItem>
+					{item.name}
+				</MenuItem>
 			</ActionMenuItem>
 		))}</>;
 };
 
 
-export const GroupBySelection = ({ onChange }) => {
+export const GroupBySelection = ({ value: valueProp, onChange }) => {
 	const disabled = false;
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const definitions = uniq(templates.flatMap(getTemplatePropertiesDefinitions));
@@ -68,6 +72,16 @@ export const GroupBySelection = ({ onChange }) => {
 			return a.name.localeCompare(b.name);
 		});
 
+	if (valueProp !== 'none') {
+		return (
+			<Tooltip title={formatMessage({ id: 'viewer.card.tickets.groupByClear', defaultMessage: 'Clear' })} onClick={() => onChange('none')} >
+				<CardAction>
+					<ClearCircleIcon />
+				</CardAction>
+			</Tooltip>
+		);
+	}
+
 	const anchorOrigin: PopoverOrigin = {
 		vertical: 'bottom',
 		horizontal: 'right',
@@ -78,8 +92,8 @@ export const GroupBySelection = ({ onChange }) => {
 		horizontal: 'right',
 	};
 
-	const popoverProps: Partial<PopoverProps> = { anchorOrigin, transformOrigin, marginThreshold: 20 };
 
+	const popoverProps: Partial<PopoverProps> = { anchorOrigin, transformOrigin, marginThreshold: 20 };
 	return (
 		<CardFilterActionMenu
 			TriggerButton={<TriggerButton disabled={disabled} />}
