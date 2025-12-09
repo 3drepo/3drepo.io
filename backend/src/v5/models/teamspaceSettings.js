@@ -176,7 +176,7 @@ TeamspaceSetting.getMembersInfo = async (teamspace) => {
 
 TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace) => {
 	const currentDate = new Date();
-	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`subscriptions.${type}`]: { $exists: true }, [`subscriptions.${type}.expiryDate`]: null },
+	const query = { $or: Object.values(SUBSCRIPTION_TYPES).flatMap((type) => [{ [`subscriptions.${type}`]: { $exists: true }, [`subscriptions.${type}.expiryDate`]: null },
 		{ [`subscriptions.${type}.expiryDate`]: { $gt: currentDate } },
 	]) };
 	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
@@ -184,7 +184,7 @@ TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace) => {
 
 TeamspaceSetting.getTeamspaceExpiredLicenses = (teamspace) => {
 	const currentDate = new Date();
-	const query = { $or: SUBSCRIPTION_TYPES.map((type) => ({ [`subscriptions.${type}.expiryDate`]: { $lt: currentDate } })) };
+	const query = { $or: Object.values(SUBSCRIPTION_TYPES).map((type) => ({ [`subscriptions.${type}.expiryDate`]: { $lt: currentDate } })) };
 	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
 };
 

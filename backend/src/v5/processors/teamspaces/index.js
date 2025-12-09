@@ -22,9 +22,11 @@ const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
 	createTeamspaceSettings,
+	editSubscriptions,
 	getAddOns,
 	getTeamspaceRefId,
 	grantAdminToUser,
+	removeSubscription,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
 const { deleteFavourites, getUserByUsername, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
@@ -229,6 +231,10 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 		seats: { available: quotaInfo.collaborators, used: collaboratorsUsed },
 	};
 };
+
+Teamspaces.updateQuota = editSubscriptions;
+
+Teamspaces.removeQuota = removeSubscription;
 
 Teamspaces.addTeamspaceMember = async (teamspace, userToAdd, invitedBy) => {
 	const userQueryProjection = {
