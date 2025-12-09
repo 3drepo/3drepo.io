@@ -80,11 +80,15 @@ Federations.getAccessibleContainers = (modelType) => async (req, res, next) => {
 		} else {
 			const user = getUserFromSession(req.session);
 			const result = [];
-			await Promise.all(containers.map(async (containerId) => {
-				if (await hasReadAccessToContainer(teamspace, project, containerId, user)) {
-					const containerRev = await getLatestRevision(
-						teamspace, containerId, modelTypes.CONTAINER, { _id: 1 });
-					result.push({ container: containerId, revision: containerRev._id });
+			await Promise.all(containers.map(async ({ _id: containerId }) => {
+				try {
+					if (await hasReadAccessToContainer(teamspace, project, containerId, user)) {
+						const containerRev = await getLatestRevision(
+							teamspace, containerId, modelTypes.CONTAINER, { _id: 1 });
+						result.push({ container: containerId, revision: containerRev._id });
+					}
+				} catch (err) {
+					// do nothing. Container might have no revisions
 				}
 			}));
 			req.containers = result;

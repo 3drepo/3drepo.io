@@ -16,13 +16,20 @@
  */
 
 const {
+	getAssetProperties: getContainerAssetProperties,
+	getTree: getContainerTree,
+} = require('../../../../../../processors/teamspaces/projects/models/containers');
+const {
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
 } = require('../../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../../utils/responder');
 const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
-const { getTree: getContainerTree } = require('../../../../../../processors/teamspaces/projects/models/containers');
+const { getAccessibleContainers } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
+const {
+	getAssetProperties: getFederationAssetProperties,
+} = require('../../../../../../processors/teamspaces/projects/models/federations');
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
@@ -33,6 +40,19 @@ const getTree = async (req, res) => {
 	try {
 		const readStream = await getContainerTree(teamspace, container, revision);
 		writeStreamRespond(req, res, templates.ok, readStream, undefined, undefined, { mimeType: MimeTypes.JSON });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getProperties = (modelType) => async (req, res) => {
+	const { teamspace, revision } = req.params;
+	try {
+		const fn = modelType === modelTypes.CONTAINER ? getContainerAssetProperties
+			: getFederationAssetProperties;
+		const propStream = await fn(teamspace, req.params[modelType], revision, req.containers);
+		writeStreamRespond(req, res, templates.ok, propStream, undefined, undefined, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -130,6 +150,95 @@ const establishRoutes = (modelType, isInternal) => {
 			router.get('/tree', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getTree);
 		}
 	}
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/properties:
+	 *   get:
+	 *     description: Retrieves model properties for a given model or model federation. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is returned.
+	 *     tags: [v:external, Models]
+	 *     operationId: getModelProperties
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Teamspace identifier (e.g., "design-team-alpha")
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project identifier (e.g., "office-tower-2025")
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: modelTypes
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [federation, container]
+	 *       - name: modelId
+	 *         description: UUID of the model (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: revId
+	 *         description: Optional revision ID (e.g., "rev-42f81c")
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       200:
+	 *         description: Model properties successfully retrieved
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 properties:
+	 *                   type: object
+	 *                   description: Top-level model properties
+	 *                   properties:
+	 *                     hiddenNodes:
+	 *                       type: array
+	 *                       items:
+	 *                         type: string
+	 *                       description: UUIDs of hidden nodes
+	 *                 subModels:
+	 *                   type: array
+	 *                   description: Submodels included in the federation
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       account:
+	 *                         type: string
+	 *                         description: Teamspace name owning the submodel
+	 *                       model:
+	 *                         type: string
+	 *                         description: UUID of the submodel
+	 *                       hiddenNodes:
+	 *                         type: array
+	 *                         items:
+	 *                           type: string
+	 *                         description: Hidden node UUIDs for this submodel
+	 *             examples:
+	 *               example:
+	 *                 summary: Example response
+	 *                 value:
+	 *                   properties:
+	 *                     hiddenNodes:
+	 *                       - "5a91e2e4-1d92-4e09-8d89-bf2c44d3db57"
+	 *                   subModels:
+	 *                     - account: "design-team-alpha"
+	 *                       model: "d3b2c4a9-719b-49fe-a613-94decbbdb123"
+	 *                       hiddenNodes:
+	 *                         - "9f4b12aa-83c7-4e3c-b7ca-114faf78b912"
+	 */
+	router.get('/properties', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getProperties(modelType));
+
 	return router;
 };
 

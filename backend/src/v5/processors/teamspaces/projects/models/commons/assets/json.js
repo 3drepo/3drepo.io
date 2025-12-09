@@ -23,13 +23,23 @@ const JsonAssets = { };
 
 const STASH_JSON_COLLECTION = 'stash.json_mpc.ref';
 
-const readFileStreamAsync = async (outstream, teamspace, container, filename) => {
+const readFileStreamAsync = async (outstream, teamspace, container, filename, injectIdentifier) => {
 	const output = await getFileAsStream(teamspace,
 		`${container}.${STASH_JSON_COLLECTION}`, filename);
 
 	const { readStream } = output;
 	await new Promise((resolve, reject) => {
-		readStream.on('data', (d) => outstream.write(d));
+		let first = true;
+		readStream.on('data', (d) => {
+			if (injectIdentifier && first) {
+				first = false;
+				outstream.write(
+					`{"account":"${teamspace}","model":"${container}",`);
+				outstream.write(d.slice(1));
+				first = false;
+			}
+			outstream.write(d);
+		});
 		readStream.on('end', () => resolve());
 		readStream.on('error', reject);
 	});
@@ -43,6 +53,41 @@ JsonAssets.getTree = async (teamspace, container, revision) => {
 	stream.write('{"subTree": [],"mainTree": ');
 	await readFileStreamAsync(stream, teamspace, container, `${UUIDToString(revision)}/fulltree.json`);
 	stream.end('}');
+
+	return stream;
+};
+
+JsonAssets.getAssetProperties = async (teamspace, model, revisions, subModels) => {
+	const stream = PassThrough();
+
+	stream.write('{"properties": ');
+	try {
+		await readFileStreamAsync(stream, teamspace, model, `${UUIDToString(revisions)}/modelProperties.json`);
+	} catch (err) {
+		stream.write(JSON.stringify({ hiddenNodes: [] }));
+	}
+
+	stream.write(',"subModels":[');
+	if (subModels?.length) {
+		let first = true;
+		for (const { container: subModel, revision: subModelRev } of subModels) {
+			try {
+				const subModelStream = PassThrough();
+				// eslint-disable-next-line no-await-in-loop
+				await readFileStreamAsync(subModelStream, teamspace, subModel, `${UUIDToString(subModelRev)}/modelProperties.json`, true);
+
+				if (first) {
+					first = false;
+				} else {
+					stream.write(',');
+				}
+				subModelStream.pipe(stream, { end: false });
+			} catch (err) {
+				// if we failed to fetch model properties for a sub model, just skip it
+			}
+		}
+	}
+	stream.end(']}');
 
 	return stream;
 };

@@ -46,7 +46,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes(internal));
 
 	// // Federations
-	// app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets', CreateAssetsRoutes(modelTypes.FEDERATION, internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets', CreateAssetsRoutes(modelTypes.FEDERATION, internal));
 
 	// Containers
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER, internal));

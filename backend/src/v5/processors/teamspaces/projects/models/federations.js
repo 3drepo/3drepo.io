@@ -24,6 +24,7 @@ const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
+const { getAssetProperties } = require('./commons/assets/json');
 const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
@@ -141,5 +142,9 @@ Federations.getMD5Hash = async (teamspace, project, federation, user) => {
 	}
 	return [];
 };
+
+Federations.getAssetProperties = (
+	teamspace, federation, revisions, containers = [],
+) => getAssetProperties(teamspace, federation, revisions, containers);
 
 module.exports = Federations;
