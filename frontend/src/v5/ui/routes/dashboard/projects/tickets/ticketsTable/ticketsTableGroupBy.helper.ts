@@ -185,7 +185,7 @@ const getKey = (ticket: ITicket, groupBy: string, templatesDict: Record<string, 
 	}
 	const propertyType = propertyDefinition.type;
 	
-	if (propertyDefinition.values === 'jobsAndUsers') return getkeyByJobsAndUsers(ticket, groupBy);
+	if (propertyDefinition.values === 'jobsAndUsers' || groupBy === `properties.${BaseProperties.OWNER}`) return getkeyByJobsAndUsers(ticket, groupBy);
 	if (groupBy === `properties.${IssueProperties.DUE_DATE}`) return getKeyByDueDate(ticket);
 	if (groupBy === `properties.${BaseProperties.STATUS}`) return getKeyByStatus(ticket, groupBy, template);
 	if (['text', 'oneOf'].includes(propertyType)) return getKeyBySingleValue(ticket, groupBy);
