@@ -31,8 +31,8 @@ const getTree = async (req, res) => {
 	const { teamspace, container, revision } = req.params;
 
 	try {
-		const { readStream, size } = await getContainerTree(teamspace, container, revision);
-		writeStreamRespond(req, res, templates.ok, readStream, 'tree.json', size, { mimeType: MimeTypes.JSON });
+		const readStream = await getContainerTree(teamspace, container, revision);
+		writeStreamRespond(req, res, templates.ok, readStream, undefined, undefined, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -127,10 +127,9 @@ const establishRoutes = (modelType, isInternal) => {
             *                   73a41cea-4c6b-47ed-936b-3f5641aecb52: "RootNode"
             *               subTrees: []
             */
-			router.get('/tree', hasReadAccessToModel(modelType), verifyRevQueryParam(modelType), getTree);
+			router.get('/tree', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getTree);
 		}
 	}
-
 	return router;
 };
 

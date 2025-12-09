@@ -35,7 +35,6 @@ const Federations = require('../../../../../processors/teamspaces/projects/model
 const ModelSettings = require('../../../../../processors/teamspaces/projects/models/commons/settings');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
-const { getContainerTree } = require('../../../../../processors/teamspaces/projects/models/commons/assets/jsonAssets');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');

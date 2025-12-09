@@ -1176,100 +1176,22 @@ const testGetJobsWithAccess = () => {
 	});
 };
 
-const testGetTree = (internalService) => {
-	describe('Get container tree', () => {
-		const { users, teamspace, project, con, fed, revisions } = generateBasicData();
-		const conNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
-
-		const rev1Content = ServiceHelper.generateRandomString();
-		const rev2Content = ServiceHelper.generateRandomString();
-
-		beforeAll(async () => {
-			const models = [con, conNoRev, fed];
-			await setupBasicData(users, teamspace, project, models);
-			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
-				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
-			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
-				{ ...revisions[1], timestamp: new Date(Date.now() + 1000) }, modelTypes.CONTAINER);
-
-			await storeFile(teamspace, `${con._id}.stash.json_mpc.ref`, `${revisions[0]._id}/fulltree.json`, Buffer.from(rev1Content));
-			await storeFile(teamspace, `${con._id}.stash.json_mpc.ref`, `${revisions[1]._id}/fulltree.json`, Buffer.from(rev2Content));
-		});
-
-		const generateTestData = (modelType) => {
-			const model = con;
-			const wrongTypeModel = fed;
-
-			const getRoute = ({
-				projectId = project.id,
-				key = users.tsAdmin.apiKey,
-				modelId = model._id,
-				revId,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tree${internalService ? `${revId ? `?revId=${revId}` : ''}` : `?key=${key}`}`;
-
-			const externalTests = [
-				['session is external', getRoute(), false, templates.pageNotFound],
-			];
-
-			const internalTests = modelType === modelTypes.CONTAINER ? [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
-				['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.fileNotFound],
-				['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Content],
-				['a revision is not provided by the user', getRoute(), true, rev2Content],
-			] : [['the model type used in the route is not container', getRoute(), false, templates.pageNotFound]];
-
-			return internalService ? internalTests : externalTests;
-		};
-
-		const runTest = (desc, route, success, expectedOutput) => {
-			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
-				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-				const res = await agent.get(route).expect(expectedStatus);
-				if (success) {
-					expect(res.body.toString()).toEqual(expectedOutput);
-				} else {
-					expect(res.body.code).toEqual(expectedOutput.code);
-				}
-			});
-		};
-
-		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
-		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
-		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
-	});
-};
-
 describe(ServiceHelper.determineTestGroup(__filename), () => {
-	afterEach(() => server.close());
+	beforeAll(async () => {
+		server = await ServiceHelper.app();
+		agent = await SuperTest(server);
+	});
 	afterAll(() => ServiceHelper.closeApp(server));
-	describe('External Service', () => {
-		beforeAll(async () => {
-			server = await ServiceHelper.app();
-			agent = await SuperTest(server);
-		});
 
-		testGetModelList();
-		testGetModelStats();
-		testAppendFavourites();
-		testDeleteFavourites();
-		testAddModel();
-		testDeleteModel();
-		testUpdateModelSettings();
-		testGetSettings();
-		testGetThumbnail();
-		testGetUsersWithPermissions();
-		testGetJobsWithAccess();
-		testGetTree();
-	});
-
-	describe('Internal Service', () => {
-		beforeAll(async () => {
-			server = await ServiceHelper.app(true);
-			agent = await SuperTest(server);
-		});
-
-		testGetTree(true);
-	});
+	testGetModelList();
+	testGetModelStats();
+	testAppendFavourites();
+	testDeleteFavourites();
+	testAddModel();
+	testDeleteModel();
+	testUpdateModelSettings();
+	testGetSettings();
+	testGetThumbnail();
+	testGetUsersWithPermissions();
+	testGetJobsWithAccess();
 });

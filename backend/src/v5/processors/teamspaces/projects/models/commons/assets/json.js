@@ -15,34 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { PassThrough, pipeline } = require('stream');
+const { PassThrough } = require('stream');
 const { UUIDToString } = require('../../../../../../utils/helper/uuids');
 const { getFileAsStream } = require('../../../../../../services/filesManager');
-const { promisify } = require('util');
 
 const JsonAssets = { };
 
 const STASH_JSON_COLLECTION = 'stash.json_mpc.ref';
 
-const pipeAsync = promisify(pipeline);
-
 const readFileStreamAsync = async (outstream, teamspace, container, filename) => {
-	const { readStream: assetStream } = await getFileAsStream(teamspace,
+	const output = await getFileAsStream(teamspace,
 		`${container}.${STASH_JSON_COLLECTION}`, filename);
-	await pipeAsync(assetStream, outstream, { end: false });
+
+	const { readStream } = output;
+	await new Promise((resolve, reject) => {
+		readStream.on('data', (d) => outstream.write(d));
+		readStream.on('end', () => resolve());
+		readStream.on('error', reject);
+	});
+
+	return output;
 };
 
-JsonAssets.getContainerTree = async (teamspace, container, revision) => {
+JsonAssets.getTree = async (teamspace, container, revision) => {
 	const stream = PassThrough();
 
-	try {
-		stream.write('{"subTree": [],"mainTree": ');
-		await readFileStreamAsync(stream, teamspace, container, `${UUIDToString(revision)}/fulltree.json`);
-		stream.end('}');
-	} catch (err) {
-		stream.destroy(err);
-		throw err;
-	}
+	stream.write('{"subTree": [],"mainTree": ');
+	await readFileStreamAsync(stream, teamspace, container, `${UUIDToString(revision)}/fulltree.json`);
+	stream.end('}');
 
 	return stream;
 };
