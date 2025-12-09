@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { modelTypes } = require('../../../../../../src/v5/models/modelSettings.constants');
 const { src } = require('../../../../helper/path');
 const { determineTestGroup, generateRandomString } = require('../../../../helper/services');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { isBool } = require(`${src}/utils/helper/typeCheck`);
 
 jest.mock('../../../../../../src/v5/utils/responder');

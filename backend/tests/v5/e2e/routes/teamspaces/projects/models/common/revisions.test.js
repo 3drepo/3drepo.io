@@ -20,8 +20,9 @@ const ServiceHelper = require('../../../../../../helper/services');
 const { src, dwgModel, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
 const { writeFileSync, unlinkSync, copyFileSync } = require('fs');
 const CryptoJs = require('crypto-js');
-const config = require('../../../../../../../../src/v5/utils/config');
-const { FileStorageTypes } = require('../../../../../../../../src/v5/utils/config.constants');
+
+const config = require(`${src}/utils/config`);
+const { FileStorageTypes } = require(`${src}/utils/config.constants`);
 const path = require('path');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
@@ -303,7 +304,12 @@ const testCreateNewRevision = (internal = false) => {
 				['model status is queued', { ...generateParams(), modelId: models.queuedStatusCont._id }, false, templates.invalidArguments],
 				['model status is processing', { ...generateParams(), modelId: models.processingStatusCont._id }, false, templates.invalidArguments],
 				['tag is invalid', { ...generateParams(), tag: ServiceHelper.generateRandomString(51) }, false, templates.invalidArguments],
-				['!tag is already used', { ...generateParams(), tag: conRevisions.nonVoidRevision.tag }, false, templates.invalidArguments],
+				['tag is already used', { ...generateParams(), tag: conRevisions.nonVoidRevision.tag }, false, templates.invalidArguments],
+				...(internal ? [
+					['owner is not provided', { ...generateParams(), owner: undefined }, false, templates.invalidArguments],
+					['owner not a known user', { ...generateParams(), owner: ServiceHelper.generateRandomEmail(), modelId: modelWithNoRev2._id }, true],
+					['owner not an email', { ...generateParams(), owner: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
+				] : []),
 			];
 
 			const externalCases = [
@@ -313,13 +319,6 @@ const testCreateNewRevision = (internal = false) => {
 				['the user is viewer', { ...generateParams(), key: users.viewer.apiKey }, false, templates.notAuthorized],
 				['the user is commenter', { ...generateParams(), key: users.commenter.apiKey }, false, templates.notAuthorized],
 			];
-
-			const internalCases = modelType === modelTypes.CONTAINER ? [
-				['owner is not provided', { ...generateParams(), owner: undefined }, false, templates.invalidArguments],
-				['owner not a known user', { ...generateParams(), owner: ServiceHelper.generateRandomEmail(), modelId: modelWithNoRev2._id }, true],
-				['owner not an email', { ...generateParams(), owner: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
-
-			] : [];
 
 			const commonCases = [
 				['the teamspace does not exist', { ...generateParams(), ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
@@ -336,7 +335,7 @@ const testCreateNewRevision = (internal = false) => {
 
 			const allCases = [
 				...commonCases,
-				...(internal ? internalCases : externalCases),
+				...(internal ? [] : externalCases),
 				...(modelType === modelTypes.DRAWING ? drawingCases : containerCases),
 			];
 

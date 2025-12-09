@@ -45,7 +45,7 @@ const setupData = async () => {
 
 const testEndpointRoutes = () => {
 	describe('Endpoint routes', () => {
-		test('!should fail with an endpoint that does not exist', async () => {
+		test('should fail with an endpoint that does not exist', async () => {
 			await agent.post(`/v5/${ServiceHelper.generateRandomString()}/`)
 				.send({ user: testUser.user, password: testUser.password })
 				.expect(templates.pageNotFound.status);

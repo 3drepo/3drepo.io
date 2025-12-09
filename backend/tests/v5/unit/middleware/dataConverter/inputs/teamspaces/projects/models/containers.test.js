@@ -21,8 +21,9 @@ const FormData = require('form-data');
 const fs = require('fs');
 const path = require('path');
 const { generateRandomString, determineTestGroup, generateRandomEmail } = require('../../../../../../../helper/services');
-const config = require('../../../../../../../../../src/v5/utils/config');
-const { FileStorageTypes } = require('../../../../../../../../../src/v5/utils/config.constants');
+
+const config = require(`${src}/utils/config`);
+const { FileStorageTypes } = require(`${src}/utils/config.constants`);
 const { cloneDeep } = require('lodash');
 
 jest.mock('../../../../../../../../../src/v5/utils/quota');

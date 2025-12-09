@@ -461,625 +461,625 @@ const establishRoutes = (modelType, internal) => {
 	router.get('/', hasAccessToTeamspace, getModelList(modelType));
 
 	if (!internal) {
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
-	 *   patch:
-	 *     description: Add models to the user's favourites list
-	 *     tags: [v:external, Models]
-	 *     operationId: appendModels
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: ID of project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               models:
-	 *                 type: array
-	 *                 items:
-	 *                   type: string
-	 *                   format: uuid
-	 *           examples:
-     *             containers:
-	 *               summary: containers
-     *               value:
-	 *                 containers: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
-     *             federations:
-	 *               summary: federations
-     *               value:
-	 *                 federations: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
-     *             drawings:
-	 *               summary: drawings
-     *               value:
-     *                 drawings: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: adds the models found in the request body to the user's favourites list
-	 */
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
+		 *   patch:
+		 *     description: Add models to the user's favourites list
+		 *     tags: [v:external, Models]
+		 *     operationId: appendModels
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: ID of project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *     requestBody:
+		 *       content:
+		 *         application/json:
+		 *           schema:
+		 *             type: object
+		 *             properties:
+		 *               models:
+		 *                 type: array
+		 *                 items:
+		 *                   type: string
+		 *                   format: uuid
+		 *           examples:
+		 *             containers:
+		 *               summary: containers
+		 *               value:
+		 *                 containers: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+		 *             federations:
+		 *               summary: federations
+		 *               value:
+		 *                 federations: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+		 *             drawings:
+		 *               summary: drawings
+		 *               value:
+		 *                 drawings: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: adds the models found in the request body to the user's favourites list
+		 */
 		router.patch('/favourites', hasAccessToTeamspace, appendFavourites(modelType));
 
 		/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
-	 *   delete:
-	 *     description: Remove models from the user's favourites list
-	 *     tags: [v:external, Models]
-	 *     operationId: deleteModels
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: ID of project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *       - name: ids
-	 *         description: list of model ids to remove (comma separated)
-	 *         in: query
-	 *         schema:
-	 *           type: string
-	 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: removes the models found in the request body from the user's favourites list
-	 */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
+		 *   delete:
+		 *     description: Remove models from the user's favourites list
+		 *     tags: [v:external, Models]
+		 *     operationId: deleteModels
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: ID of project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *       - name: ids
+		 *         description: list of model ids to remove (comma separated)
+		 *         in: query
+		 *         schema:
+		 *           type: string
+		 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: removes the models found in the request body from the user's favourites list
+		 */
 		router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(modelType));
 
 		/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/stats:
-	 *   get:
-	 *     description: Get the statistics and general information about a model
-	 *     tags: [v:external, Models]
-	 *     operationId: getModelStats
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-   	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations,drawings]
-   	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: returns the statistics of a model
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 code:
-	 *                   type: string
-	 *                   description: Model code
-	 *                   example: STR-01
-     *                 status:
-	 *                   type: string
-	 *                   description: Current status of the model
-	 *                   example: ok
-   	 *                 containers:
-	 *                   type: array
-	 *                   description: The IDs of the models the model consists of
-	 *                   items:
-	 *                     type: object
-	 *                     properties:
-	 *                       _id:
-	 *                         description: container id
-	 *                         type: string
-	 *                         format: uuid
-	 *                       group:
-	 *                         description: federation group the container is under (optional)
-	 *                         type: string
-	 *                         example: Architectural
-	 *                 tickets:
-	 *                   type: object
-	 *                   properties:
-	 *                     issues:
-	 *                       type: integer
-	 *                       description: The number of non closed issues of the model
-	 *                     risks:
-	 *                       type: integer
-	 *                       description: The number of unmitigated risks of the model
-     *                 desc:
-	 *                   type: string
-	 *                   description: Model description
-	 *                   example: Floor 1 MEP with Facade
-     *                 lastUpdated:
-	 *                   type: integer
-	 *                   description: Timestamp(ms) of when any of the submodels was updated
-	 *                   example: 1630598072000
-	 *             examples:
-	 *               container:
-	 *                 summary: container
-     *                 value:
-	 *                   type: Architectural
-     *                   code: STR-01
-     *                   status: ok
-	 *                   unit: mm
-	 *                   desc: Floor 1 MEP with Facade
-	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: rev1 }
-	 *               federation:
-	 *                 summary: federation
-     *                 value:
-     *                   code: STR-01
-     *                   status: ok
-	 *                   desc: Floor 1 MEP with Facade
-	 *                   lastUpdated: 1630598072000
-	 *                   tickets: { issues: 10, risks: 5 }
-	 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
-	 *               drawing:
-	 *                 summary: drawing
-     *                 value:
-     *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-     *                   status: ok
-	 *                   type: Architectural
-	 *                   desc: Floor 1 MEP with Facade
-	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
-	 *                   calibration: uncalibrated
-	 */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/stats:
+		 *   get:
+		 *     description: Get the statistics and general information about a model
+		 *     tags: [v:external, Models]
+		 *     operationId: getModelStats
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations,drawings]
+		 *       - name: model
+		 *         description: Model ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: returns the statistics of a model
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 code:
+		 *                   type: string
+		 *                   description: Model code
+		 *                   example: STR-01
+		 *                 status:
+		 *                   type: string
+		 *                   description: Current status of the model
+		 *                   example: ok
+		 *                 containers:
+		 *                   type: array
+		 *                   description: The IDs of the models the model consists of
+		 *                   items:
+		 *                     type: object
+		 *                     properties:
+		 *                       _id:
+		 *                         description: container id
+		 *                         type: string
+		 *                         format: uuid
+		 *                       group:
+		 *                         description: federation group the container is under (optional)
+		 *                         type: string
+		 *                         example: Architectural
+		 *                 tickets:
+		 *                   type: object
+		 *                   properties:
+		 *                     issues:
+		 *                       type: integer
+		 *                       description: The number of non closed issues of the model
+		 *                     risks:
+		 *                       type: integer
+		 *                       description: The number of unmitigated risks of the model
+		 *                 desc:
+		 *                   type: string
+		 *                   description: Model description
+		 *                   example: Floor 1 MEP with Facade
+		 *                 lastUpdated:
+		 *                   type: integer
+		 *                   description: Timestamp(ms) of when any of the submodels was updated
+		 *                   example: 1630598072000
+		 *             examples:
+		 *               container:
+		 *                 summary: container
+		 *                 value:
+		 *                   type: Architectural
+		 *                   code: STR-01
+		 *                   status: ok
+		 *                   unit: mm
+		 *                   desc: Floor 1 MEP with Facade
+		 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: rev1 }
+		 *               federation:
+		 *                 summary: federation
+		 *                 value:
+		 *                   code: STR-01
+		 *                   status: ok
+		 *                   desc: Floor 1 MEP with Facade
+		 *                   lastUpdated: 1630598072000
+		 *                   tickets: { issues: 10, risks: 5 }
+		 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
+		 *               drawing:
+		 *                 summary: drawing
+		 *                 value:
+		 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+		 *                   status: ok
+		 *                   type: Architectural
+		 *                   desc: Floor 1 MEP with Facade
+		 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
+		 *                   calibration: uncalibrated
+		 */
 		router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
 
 		/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
-	 *   delete:
-	 *     description: Delete model from project the user is admin of
-	 *     tags: [v:external, Models]
-	 *     operationId: deleteModel
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-   	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-   	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/containerNotFound"
-	 *       200:
-	 *         description: Model removed.
-	 */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
+		 *   delete:
+		 *     description: Delete model from project the user is admin of
+		 *     tags: [v:external, Models]
+		 *     operationId: deleteModel
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *       - name: model
+		 *         description: Model ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/containerNotFound"
+		 *       200:
+		 *         description: Model removed.
+		 */
 		router.delete('/:model', hasAdminAccessToModel[modelType], canDeleteModel[modelType], deleteModel(modelType));
 
 		/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
-	 *   patch:
-	 *     description: Updates the settings of a model
-	 *     tags: [v:external, Models]
-	 *     operationId: updateModelSettings
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: ID of project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *       - name: model
-	 *         description: ID of model
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               name:
-	 *                 type: string
-	 *                 example: model1
-	 *               desc:
-	 *                 type: string
-	 *                 example: description1
-	 *               number:
-	 *                 type: string
-	 *                 example: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-	 *                 description: Unique identifier of a drawing (drawings only)
-	 *               surveyPoints:
-	 *                 type: array
-	 *                 items:
-	 *                   type: object
-	 *                   properties:
-	 *                     position:
-	 *                       type: array
-	 *                       items:
-	 *                         type: number
-	 *                         example: 23.45
-	 *                     latLong:
-	 *                       type: array
-	 *                       items:
-	 *                         type: number
-	 *                         example: 23.45
-	 *               angleFromNorth:
-	 *                 type: integer
-	 *                 example: 100
-	 *               unit:
-	 *                 type: string
-	 *                 enum: [mm, cm, dm, m, ft]
-	 *                 example: mm
-	 *               defaultView:
-	 *                 type: string
-	 *                 format: uuid
-	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *               defaultLegend:
-	 *                 type: string
-	 *                 format: uuid
-	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *           examples:
-     *             container:
-	 *               summary: container
-     *               value:
-     *                 name: Lego House Container
-     *                 unit: mm
-	 *                 desc: The Container model of the Lego House
-	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *                 angleFromNorth: 100
-	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-     *             federation:
-	 *               summary: federation
-     *               value:
-     *                 name: Lego House Federation
-     *                 unit: m
-	 *                 desc: The Federation model of the Lego House
-	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *                 angleFromNorth: 120
-	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-	 *             drawing:
-	 *               summary: drawing
-     *               value:
-     *                 name: Lego House Drawing
-     *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-	 *                 desc: The Drawing of the Lego House
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: updates the settings of the model
-	 */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
+		 *   patch:
+		 *     description: Updates the settings of a model
+		 *     tags: [v:external, Models]
+		 *     operationId: updateModelSettings
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: ID of project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *       - name: model
+		 *         description: ID of model
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *     requestBody:
+		 *       content:
+		 *         application/json:
+		 *           schema:
+		 *             type: object
+		 *             properties:
+		 *               name:
+		 *                 type: string
+		 *                 example: model1
+		 *               desc:
+		 *                 type: string
+		 *                 example: description1
+		 *               number:
+		 *                 type: string
+		 *                 example: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+		 *                 description: Unique identifier of a drawing (drawings only)
+		 *               surveyPoints:
+		 *                 type: array
+		 *                 items:
+		 *                   type: object
+		 *                   properties:
+		 *                     position:
+		 *                       type: array
+		 *                       items:
+		 *                         type: number
+		 *                         example: 23.45
+		 *                     latLong:
+		 *                       type: array
+		 *                       items:
+		 *                         type: number
+		 *                         example: 23.45
+		 *               angleFromNorth:
+		 *                 type: integer
+		 *                 example: 100
+		 *               unit:
+		 *                 type: string
+		 *                 enum: [mm, cm, dm, m, ft]
+		 *                 example: mm
+		 *               defaultView:
+		 *                 type: string
+		 *                 format: uuid
+		 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *               defaultLegend:
+		 *                 type: string
+		 *                 format: uuid
+		 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *           examples:
+		 *             container:
+		 *               summary: container
+		 *               value:
+		 *                 name: Lego House Container
+		 *                 unit: mm
+		 *                 desc: The Container model of the Lego House
+		 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *                 angleFromNorth: 100
+		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+		 *             federation:
+		 *               summary: federation
+		 *               value:
+		 *                 name: Lego House Federation
+		 *                 unit: m
+		 *                 desc: The Federation model of the Lego House
+		 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *                 angleFromNorth: 120
+		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+		 *             drawing:
+		 *               summary: drawing
+		 *               value:
+		 *                 name: Lego House Drawing
+		 *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+		 *                 desc: The Drawing of the Lego House
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: updates the settings of the model
+		 */
 		router.patch('/:model', hasAdminAccessToModel[modelType], validateUpdateSettingsData(modelType), updateModelSettings(modelType));
 
 		/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
-	 *   get:
-	 *     description: Get the model settings of model
-	 *     tags: [v:external, Models]
-	 *     operationId: getModelSettings
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: returns the model settings of a model
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               $ref: "#/components/schemas/modelSettings"
-	 *             examples:
-     *               container:
-	 *                 summary: container
-     *                 value:
-	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-     *                   name: Lego House Container
-     *                   unit: mm
-	 *                   code: MOD1
-	 *                   type: Structural
-	 *                   desc: The Container model of the Lego House
-	 *                   timestamp: 1629976656315
-	 *                   status: ok
-	 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
-	 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *                   angleFromNorth: 100
-	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-     *               federation:
-	 *                 summary: federation
-     *                 value:
-	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-     *                   name: Lego House Federation
-     *                   unit: mm
-	 *                   code: MOD1
-	 *                   desc: The Federation model of the Lego House
-	 *                   timestamp: 1629976656315
-	 *                   status: ok
-	 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
-	 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-	 *                   angleFromNorth: 100
-	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-	 *               drawing:
-	 *                 summary: drawing
-     *                 value:
-	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-     *                   name: Lego House Drawing
-     *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-	 *                   type: Structural
-	 *                   desc: The Drawing of the Lego House
-	 *                   calibration: { verticalRange: [0,10], units: m }
-	 */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
+		 *   get:
+		 *     description: Get the model settings of model
+		 *     tags: [v:external, Models]
+		 *     operationId: getModelSettings
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *       - name: model
+		 *         description: Model ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: returns the model settings of a model
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               $ref: "#/components/schemas/modelSettings"
+		 *             examples:
+		 *               container:
+		 *                 summary: container
+		 *                 value:
+		 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
+		 *                   name: Lego House Container
+		 *                   unit: mm
+		 *                   code: MOD1
+		 *                   type: Structural
+		 *                   desc: The Container model of the Lego House
+		 *                   timestamp: 1629976656315
+		 *                   status: ok
+		 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
+		 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *                   angleFromNorth: 100
+		 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+		 *               federation:
+		 *                 summary: federation
+		 *                 value:
+		 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
+		 *                   name: Lego House Federation
+		 *                   unit: mm
+		 *                   code: MOD1
+		 *                   desc: The Federation model of the Lego House
+		 *                   timestamp: 1629976656315
+		 *                   status: ok
+		 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
+		 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
+		 *                   angleFromNorth: 100
+		 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+		 *               drawing:
+		 *                 summary: drawing
+		 *                 value:
+		 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
+		 *                   name: Lego House Drawing
+		 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+		 *                   type: Structural
+		 *                   desc: The Drawing of the Lego House
+		 *                   calibration: { verticalRange: [0,10], units: m }
+		 */
 		router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
 
 		/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/members:
-	 *   get:
-	 *     description: Get the name of the users who have access to the model
-	 *     tags: [v:external, Models]
-	 *     operationId: getUsersWithPermissions
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: excludeViewers
-	 *         description: exclude users who have viewer permission
-	 *         in: query
-	 *         schema:
-	 *           type: boolean
-	 *         example: true
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: returns the users who have access to the model
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 users:
-	 *                   type: array
-	 *                   items:
-	 *                     type: string
-	 *                     example: user1
-	 */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/members:
+		 *   get:
+		 *     description: Get the name of the users who have access to the model
+		 *     tags: [v:external, Models]
+		 *     operationId: getUsersWithPermissions
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *       - name: model
+		 *         description: Model ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: excludeViewers
+		 *         description: exclude users who have viewer permission
+		 *         in: query
+		 *         schema:
+		 *           type: boolean
+		 *         example: true
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: returns the users who have access to the model
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 users:
+		 *                   type: array
+		 *                   items:
+		 *                     type: string
+		 *                     example: user1
+		 */
 		router.get('/:model/members', hasReadAccessToModel[modelType], getUsersWithPermissions);
 
 		/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
-	 *   get:
-	 *     description: Get the names of the jobs that are associated with users who have access to the model
-	 *     tags: [v:external, Models]
-	 *     operationId: getJobsWithAccess
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: excludeViewers
-	 *         description: exclude users who have viewer permission
-	 *         in: query
-	 *         schema:
-	 *           type: boolean
-	 *         example: true
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: returns the jobs that are associated with users who have access to the model
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 jobs:
-	 *                   type: array
-	 *                   items:
-	 *                     type: string
-	 *                     example: Architect
-	 */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
+		 *   get:
+		 *     description: Get the names of the jobs that are associated with users who have access to the model
+		 *     tags: [v:external, Models]
+		 *     operationId: getJobsWithAccess
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *       - name: model
+		 *         description: Model ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: excludeViewers
+		 *         description: exclude users who have viewer permission
+		 *         in: query
+		 *         schema:
+		 *           type: boolean
+		 *         example: true
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: returns the jobs that are associated with users who have access to the model
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 jobs:
+		 *                   type: array
+		 *                   items:
+		 *                     type: string
+		 *                     example: Architect
+		 */
 		router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
 
 		if (modelType === modelTypes.DRAWING) {
 			/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/thumbnail:
-	 *   get:
-	 *     description: Fetches the thumbnail for a drawing.
-	 *     tags: [v:external, Models]
-	 *     operationId: getThumbnail
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *       - name: drawing
-	 *         description: Drawing ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         description: returns a raster image of the thumbnail
-	 */
+			 * @openapi
+			 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/thumbnail:
+			 *   get:
+			 *     description: Fetches the thumbnail for a drawing.
+			 *     tags: [v:external, Models]
+			 *     operationId: getThumbnail
+			 *     parameters:
+			 *       - name: teamspace
+			 *         description: Name of teamspace
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *       - name: project
+			 *         description: Project ID
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *           format: uuid
+			 *       - name: drawing
+			 *         description: Drawing ID
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *           format: uuid
+			 *     responses:
+			 *       401:
+			 *         $ref: "#/components/responses/notLoggedIn"
+			 *       200:
+			 *         description: returns a raster image of the thumbnail
+			 */
 			router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
 		}
 	}

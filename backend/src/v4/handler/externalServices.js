@@ -61,7 +61,7 @@ ExternalServices.storeFile = (account, collection, data) => {
 	}
 };
 
-ExternalServices.storeFileStream = async (account, collection, fileStream) => {
+ExternalServices.storeFileStream = (account, collection, fileStream) => {
 	const type = getDefaultStorageType();
 	switch(type) {
 		case FileStorageTypes.FS:
