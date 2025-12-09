@@ -23,9 +23,10 @@ import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
 import { CheckboxHeaderCell, Checkbox, SelectionColumnContainer } from './ticketsTableSelectionColumn.styles';
 import { CellContainer } from '../ticketsTableRow/ticketsTableCell/cell/cell.styles';
 import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
-import { Gap } from '@controls/gap';
+import { chunk } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.component';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
@@ -82,25 +83,30 @@ export const TicketsTableSelectionColumn = ({
 	}, [tickets]);
 
 	return (
-		<SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
+		<div>
 			<Headers>
 				<CheckboxHeaderCell alwaysVisible>
 					<Checkbox checked={allSelected} onClick={onCheckAll} />
 				</CheckboxHeaderCell>
 			</Headers>
-			<VirtualList
-				items={tickets}
-				itemHeight={TICKET_TABLE_ROW_HEIGHT}
-				itemContent={({ _id }: ITicket) => (
-					<SelectionRow
-						ticketId={_id}
-						selected={selectedIdsSet.has(_id)}
-						onCheck={onCheck}
-						selectedTicketId={selectedTicketId}
-					/>
-				)}
-			/>
-			<Gap $height={`${TICKET_TABLE_ROW_HEIGHT}px`} />
-		</SelectionColumnContainer>
+			<SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
+				<VirtualList
+					items={chunk(tickets, TICKETS_CHUNK_SIZE)}
+					itemHeight={TICKET_TABLE_ROW_HEIGHT * TICKETS_CHUNK_SIZE}
+					ItemComponent={(ticketsChunk: ITicket[]) => (
+						<div key={ticketsChunk[0]._id}>
+							{ticketsChunk.map((ticket) => (
+									<SelectionRow
+										ticketId={ticket._id}
+										selected={selectedIdsSet.has(ticket._id)}
+										onCheck={onCheck}
+										selectedTicketId={selectedTicketId}
+									/>
+							))}
+						</div>
+					)}
+				/>
+			</SelectionColumnContainer>
+		</div>
 	);
 };

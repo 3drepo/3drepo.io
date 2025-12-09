@@ -40,7 +40,10 @@ const { modelTypes } = require('../models/modelSettings.constants');
 
 RoutesManager.init = (app) => {
 	const internal = app.get(BYPASS_AUTH);
+
+	app.use('/v5/teamspaces/', TeamspaceRoutes(internal));
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes(internal));
+
 	if (!internal) {
 	// Auth
 		app.use('/v5/', UserRoutes);
@@ -50,7 +53,6 @@ RoutesManager.init = (app) => {
 		app.use('/v5/sso', SsoRoutes);
 		app.use('/v5/sso/aad', AadRoutes);
 
-		app.use('/v5/teamspaces/', TeamspaceRoutes);
 		app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);
 		app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
 

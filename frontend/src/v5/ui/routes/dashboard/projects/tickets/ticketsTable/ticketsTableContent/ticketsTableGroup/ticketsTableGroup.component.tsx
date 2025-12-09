@@ -23,18 +23,18 @@ import { Table, Group, PlaceholderForStickyFunctionality } from './ticketsTableG
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue, TICKET_TABLE_ROW_HEIGHT } from '../../ticketsTable.helper';
-import { orderBy } from 'lodash';
+import { orderBy, chunk } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
 import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.component';
-import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { useWatchPropertyChange } from '../../useWatchPropertyChange';
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
 import { TicketsTableSelectionColumn } from './ticketsTableSelectionColumn/ticketsTableSelectionColumn.component';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 type TicketsTableGroupContentProps = {
 	tickets: ITicket[];
@@ -48,6 +48,7 @@ type TicketsTableGroupContentProps = {
 	hideNewticketButton: boolean;
 };
 
+export const TICKETS_CHUNK_SIZE = 10;
 const TicketsTableGroupContent = ({ 
 	tickets, 
 	sortedItems,
@@ -66,16 +67,19 @@ const TicketsTableGroupContent = ({
 			{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
 			<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
 				<VirtualList
-					items={sortedItems}
-					itemHeight={TICKET_TABLE_ROW_HEIGHT}
-					itemContent={(ticket: ITicket) => (
-						<TicketsTableRow
-							key={ticket._id}
-							ticket={ticket}
-							modelId={ticket.modelId}
-							onClick={onEditTicket}
-							selected={selectedTicketId === ticket._id}
-						/>
+					items={chunk(sortedItems, TICKETS_CHUNK_SIZE)}
+					itemHeight={TICKET_TABLE_ROW_HEIGHT * TICKETS_CHUNK_SIZE}
+					ItemComponent={(ticketsChunk: ITicket[]) => (
+						<div key={ticketsChunk[0]._id}>
+							{ticketsChunk.map((ticket) => (
+								<TicketsTableRow
+									key={ticket._id}
+									ticket={ticket}
+									modelId={ticket.modelId}
+									onClick={onEditTicket}
+									selected={selectedTicketId === ticket._id}
+								/>))}
+						</div>
 					)}
 				/>
 				{!hideNewticketButton &&
