@@ -60,7 +60,7 @@ const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
-	const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
+	const { host, model_queue, callback_queue } = config.cn_queue;
 	const conn = await amqp.connect(host);
 
 	const purgeQueue = async (queueName) => {
@@ -77,7 +77,6 @@ queue.purgeQueues = async () => {
 	};
 
 	await Promise.all([
-		purgeQueue(worker_queue),
 		purgeQueue(model_queue),
 		purgeQueue(callback_queue),
 	]);

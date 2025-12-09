@@ -37,7 +37,6 @@ class ImportQueue {
 		if(!config.cn_queue ||
 			!config.cn_queue.shared_storage ||
 			!config.cn_queue.callback_queue ||
-			!config.cn_queue.worker_queue ||
 			!config.cn_queue.model_queue ||
 			!config.cn_queue.event_exchange
 		) {
@@ -46,7 +45,6 @@ class ImportQueue {
 
 		this.sharedSpacePath = config.cn_queue.shared_storage;
 		this.callbackQName = config.cn_queue.callback_queue;
-		this.workerQName = config.cn_queue.worker_queue;
 		this.modelQName = config.cn_queue.model_queue;
 		this.eventExchange = config.cn_queue.event_exchange;
 		this.url = config.cn_queue.host;
@@ -163,7 +161,7 @@ class ImportQueue {
 	 * @param {isModelImport} whether this job is a model import
 	 *******************************************************************************/
 	_dispatchWork(corID, msg, isModelImport) {
-		const queueName = isModelImport ? this.modelQName : this.workerQName;
+		const queueName = this.modelQName;
 		return QueueV5.queueMessage(queueName, corID, msg);
 	}
 
