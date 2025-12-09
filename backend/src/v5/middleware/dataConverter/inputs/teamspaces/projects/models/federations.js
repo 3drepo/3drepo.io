@@ -16,12 +16,17 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
+const { getContainers, getFederationById } = require('../../../../../../models/modelSettings');
+const { hasReadAccessToContainer, hasReadAccessToFederation } = require('../../../../../../utils/permissions');
+const { BYPASS_AUTH } = require('../../../../../../utils/config.constants');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../utils/helper/yup');
-const { getContainers } = require('../../../../../../models/modelSettings');
+const { getUserFromSession } = require('../../../../../../utils/sessions');
 const { isString } = require('../../../../../../utils/helper/typeCheck');
+const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { modelsExistInProject } = require('../../../../../../models/projectSettings');
 const { respond } = require('../../../../../../utils/responder');
+const { getLatestRevision } = require('../../../../../../models/revisions');
 
 const Federations = {};
 
@@ -60,6 +65,31 @@ Federations.validateNewRevisionData = async (req, res, next) => {
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Federations.getAccessibleContainers = (modelType) => async (req, res, next) => {
+	if (modelType !== modelTypes.FEDERATION) {
+		await next();
+	} else {
+		const { teamspace, project, model } = req.params;
+		const { subModels: containers } = await getFederationById(teamspace, model, { subModels: 1 });
+
+		if (req.app.get(BYPASS_AUTH)) {
+			req.containers = containers;
+		} else {
+			const user = getUserFromSession(req.session);
+			const result = [];
+			await Promise.all(containers.map(async (containerId) => {
+				if (await hasReadAccessToContainer(teamspace, project, containerId, user)) {
+					const containerRev = await getLatestRevision(
+						teamspace, containerId, modelTypes.CONTAINER, { _id: 1 });
+					result.push({ container: containerId, revision: containerRev._id });
+				}
+			}));
+			req.containers = result;
+		}
+		await next();
 	}
 };
 

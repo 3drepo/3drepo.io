@@ -21,6 +21,7 @@ const { getContainerById, getContainers, updateModelSettings } = require('../../
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
+const JSONAssets = require('./commons/assets/json');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
@@ -137,5 +138,9 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 Containers.getRevisionMD5Hash = getModelMD5Hash;
 
 Containers.getTree = getTree;
+
+Containers.getAssetProperties = (
+	teamspace, container, revision,
+) => JSONAssets.getAssetProperties(teamspace, [{ container, revision }]);
 
 module.exports = Containers;
