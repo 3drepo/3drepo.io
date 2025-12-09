@@ -307,7 +307,7 @@ const testCreateNewRevision = (internal = false) => {
 				['tag is already used', { ...generateParams(), tag: conRevisions.nonVoidRevision.tag }, false, templates.invalidArguments],
 				...(internal ? [
 					['owner is not provided', { ...generateParams(), owner: undefined }, false, templates.invalidArguments],
-					['owner not a known user', { ...generateParams(), owner: ServiceHelper.generateRandomEmail(), modelId: modelWithNoRev2._id }, true],
+					['owner not a known user', { ...generateParams(), owner: ServiceHelper.generateRandomEmail(), modelId: modelWithNoRev2?._id }, true],
 					['owner not an email', { ...generateParams(), owner: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
 				] : []),
 			];
