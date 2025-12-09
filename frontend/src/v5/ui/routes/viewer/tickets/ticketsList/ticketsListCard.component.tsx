@@ -36,7 +36,6 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelection/groupBySelection.component';
 
-
 export const TicketsListCard = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
@@ -76,7 +75,7 @@ export const TicketsListCard = () => {
 						<>
 							{!readOnly && (<NewTicketMenu />)}
 							<FilterSelection />
-							<GroupBySelection onChange={TicketsCardActionsDispatchers.setGroupBy}/>
+							<GroupBySelection value={groupBy} onChange={TicketsCardActionsDispatchers.setGroupBy}/>
 							<TicketsEllipsisMenu />
 						</>
 					)}

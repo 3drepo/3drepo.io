@@ -23,7 +23,8 @@ export const CardAction = styled.button<{ disabled?: boolean }>`
 	background-color: transparent;
 	margin: 0;
 	height: 32px;
-
+	width: 20px;
+	padding: 0;
 	svg {
 		height: 13px;
 	}
