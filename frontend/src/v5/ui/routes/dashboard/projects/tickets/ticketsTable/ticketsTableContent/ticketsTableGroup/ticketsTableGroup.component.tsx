@@ -141,12 +141,12 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	};
 
 	return (
-		<div style={{ display: 'inline-flex' }}>
-			<TicketsTableSelectionColumn tickets={tickets} selectedTicketId={selectedTicketId} />
-			<Table $empty={!tickets.length} $canCreateTicket={!newTicketButtonIsDisabled}>
-				<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
-					<SortedTableContext.Consumer>
-						{({ refreshSorting, sortedItems, sortingColumn }: SortedTableType<ITicket>) => (
+		<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
+			<SortedTableContext.Consumer>
+				{({ refreshSorting, sortedItems, sortingColumn }: SortedTableType<ITicket>) => (
+					<div style={{ display: 'inline-flex' }}>
+						<TicketsTableSelectionColumn tickets={sortedItems} selectedTicketId={selectedTicketId} />
+						<Table $empty={!tickets.length} $canCreateTicket={!newTicketButtonIsDisabled}>
 							<TicketsTableGroupContent
 								tickets={tickets}
 								selectedTicketId={selectedTicketId}
@@ -158,10 +158,10 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 								sortingColumn={sortingColumn}
 								refreshSorting={refreshSorting}
 							/>
-						)}
-					</SortedTableContext.Consumer>
-				</SortedTableComponent>
-			</Table>
-		</ div>
+						</Table>
+					</div>
+				)}
+			</SortedTableContext.Consumer>
+		</SortedTableComponent>
 	);
 };
