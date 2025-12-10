@@ -74,11 +74,6 @@ const testHelper = (type, label, testFn, mockedFn) => {
 		const model = generateRandomString();
 		const user = generateRandomString();
 
-		const getModelByIdMapping = {
-			[modelTypes.CONTAINER]: ModelSettings.getContainerById,
-			[modelTypes.FEDERATION]: ModelSettings.getFederationById,
-			[modelTypes.DRAWING]: ModelSettings.getDrawingById,
-		};
 		test(` ${success ? 'next() ' : 'respond() '}should be called if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});
 			const req = {
@@ -90,9 +85,9 @@ const testHelper = (type, label, testFn, mockedFn) => {
 			Sessions.getUserFromSession.mockReturnValueOnce(user);
 
 			if (modelByIdFail) {
-				getModelByIdMapping[type].mockRejectedValueOnce(modelByIdFail);
+				Permissions.checkModelExists.mockRejectedValueOnce(modelByIdFail);
 			} else {
-				ProjectSettings.modelsExistInProject.mockResolvedValueOnce(modelInProject);
+				Permissions.checkModelExists.mockResolvedValueOnce(modelInProject);
 				if (modelInProject) {
 					if (mockVal !== null) {
 						if (isBool(mockVal)) {
@@ -119,26 +114,19 @@ const testHelper = (type, label, testFn, mockedFn) => {
 				expect(mockCB).not.toHaveBeenCalledTimes(1);
 			}
 
-			expect(getModelByIdMapping[type]).toHaveBeenCalledTimes(1);
-			expect(getModelByIdMapping[type]).toHaveBeenCalledWith(teamspace, model, { permissions: 1 });
-
+			expect(Permissions.checkModelExists).toHaveBeenCalledTimes(1);
+			expect(Permissions.checkModelExists).toHaveBeenCalledWith(teamspace, project, model, type);
 			if (modelByIdFail) {
 				expect(mockedFn).not.toHaveBeenCalled();
-				expect(ProjectSettings.modelsExistInProject).not.toHaveBeenCalled();
-			} else {
-				expect(ProjectSettings.modelsExistInProject).toHaveBeenCalledTimes(1);
-				expect(ProjectSettings.modelsExistInProject).toHaveBeenCalledWith(teamspace, project, [model]);
-
-				if (modelInProject) {
-					if (mockVal !== null) {
-						expect(mockedFn).toHaveBeenCalledTimes(1);
-						expect(mockedFn).toHaveBeenCalledWith(teamspace, project, model, user, true);
-					} else {
-						expect(mockedFn).not.toHaveBeenCalled();
-					}
+			} else if (modelInProject) {
+				if (mockVal !== null) {
+					expect(mockedFn).toHaveBeenCalledTimes(1);
+					expect(mockedFn).toHaveBeenCalledWith(teamspace, project, model, user, true);
 				} else {
 					expect(mockedFn).not.toHaveBeenCalled();
 				}
+			} else {
+				expect(mockedFn).not.toHaveBeenCalled();
 			}
 		});
 	});
