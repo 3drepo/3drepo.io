@@ -125,7 +125,6 @@ const testHelper = (type, label, testFn, mockedFn) => {
 			if (modelByIdFail) {
 				expect(mockedFn).not.toHaveBeenCalled();
 				expect(ProjectSettings.modelsExistInProject).not.toHaveBeenCalled();
-				expect(mockedFn).not.toHaveBeenCalled();
 			} else {
 				expect(ProjectSettings.modelsExistInProject).toHaveBeenCalledTimes(1);
 				expect(ProjectSettings.modelsExistInProject).toHaveBeenCalledWith(teamspace, project, [model]);

@@ -17,6 +17,7 @@
 
 const MimeTypes = {};
 
+MimeTypes.JSON = 'application/json';
 MimeTypes.PDF = 'application/pdf';
 MimeTypes.PNG = 'image/png';
 MimeTypes.SVG = 'image/svg+xml';
