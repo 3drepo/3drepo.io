@@ -20,36 +20,27 @@ import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer } from './ticketsList.styles';
 import { useEffect, useRef } from 'react';
-import { useVRef, VirtualList } from '@controls/virtualList/virtualList.component';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { groupTickets, TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
-import { DashboardListCollapse } from '@components/dashboard/dashboardList';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { TicketsGroupedList } from './ticketsGroupedList.component';
 
 
-type IdsToNumber = { idsToNumber: any };
-
-const TicketsCardGroup = ({ tickets, groupName, idsToNumber } : TicketsGroup & IdsToNumber) => {
-	const expanded = useVRef<boolean>(groupName + '.expanded', true);
-
-	return (<div data-name={groupName} ><DashboardListCollapse
-		title={(
-			<h1>
-				{groupName} ({tickets.length})
-			</h1>
-		)}
-		defaultExpanded={expanded.current}
-		onChangeCollapse={(collapsed) => expanded.current = !collapsed }
-	>
-		<List>
-			<VirtualList 
-				vKey={'tickets-list-' + tickets[0].title}
-				items={tickets}
-				itemHeight={30}
-				ItemComponent={(ticket: ITicket) => 
-					<TicketItem ticket={{ ...ticket, title: idsToNumber[ticket._id]  + ' - ' + ticket.title }} key={ticket._id} />}
-			/>
-		</List>
-	</DashboardListCollapse></div>);
+const TicketsListsContainer = ({ children }) => {
+	return (
+		<ListContainer >
+			<div style={{
+				overflowY: 'auto',
+    			position: 'relative',
+    			height: '100%',
+			}}>
+				<div
+					style={{ position:'absolute' }}
+				>
+					{children}
+				</div>
+			</div>
+		</ListContainer>
+	);
 };
 
 export const TicketsList = ({ groupBy, templates }) => {
@@ -76,7 +67,6 @@ export const TicketsList = ({ groupBy, templates }) => {
 		);
 	}
 
-
 	if (!filteredTickets.length) {
 		return (
 			<EmptyListMessage>
@@ -84,7 +74,6 @@ export const TicketsList = ({ groupBy, templates }) => {
 			</EmptyListMessage>
 		);
 	}
-
 
 	if (groupBy !== 'none') {
 		const groups = groupTickets(groupBy, templates, filteredTickets);
@@ -98,49 +87,29 @@ export const TicketsList = ({ groupBy, templates }) => {
 		});
 
 		return (
-			<ListContainer >
-				<div id='groups-scroller' style={{
-					overflowY: 'auto',
-					position: 'relative',
-					height: '100%',
-				}}>
-					<div
-						style={{ position:'absolute' }}
-					>
-						<VirtualList
-							vKey='groups-list'
-							items={groups}
-							itemHeight={30}
-							ItemComponent={(group: TicketsGroup) => 
-								<TicketsCardGroup key={group.groupName} {...group} idsToNumber={idsToNumber} />
-							}
-						/>
-					</div>
-				</div>
-			</ListContainer>
+			<TicketsListsContainer>
+				<VirtualList
+					vKey='groups-list'
+					items={groups}
+					itemHeight={30}
+					ItemComponent={(group: TicketsGroup) => 
+						<TicketsGroupedList key={group.groupName} {...group} />
+					}
+				/>
+			</TicketsListsContainer>
 		);
 	}
 
 	return (
-		<ListContainer >
-			<div style={{
-				overflowY: 'auto',
-    			position: 'relative',
-    			height: '100%',
-			}}>
-				<div
-					style={{ position:'absolute' }}
-				>
-					<List>
-						<VirtualList 
-							vKey='groups-list'
-							items={filteredTickets}
-							itemHeight={30}
-							ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}
-						/>
-					</List>
-				</div>
-			</div>
-		</ListContainer>
+		<TicketsListsContainer>
+			<List>
+				<VirtualList 
+					vKey='groups-list'
+					items={filteredTickets}
+					itemHeight={30}
+					ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}
+				/>
+			</List>
+		</TicketsListsContainer>
 	);
 };
