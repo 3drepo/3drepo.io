@@ -60,7 +60,7 @@ const testGetTree = () => {
 
 			await new Promise((resolve) => resultStream.on('end', resolve));
 
-			expect(output.join('')).toBe(`{"subTree": [],"mainTree": ${fileContent}}`);
+			expect(output.join('')).toBe(`{"subTrees": [],"mainTree": ${fileContent}}`);
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
