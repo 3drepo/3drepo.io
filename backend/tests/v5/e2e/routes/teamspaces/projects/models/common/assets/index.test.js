@@ -144,7 +144,7 @@ const testGetTree = (internalService) => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(route).expect(expectedStatus);
 				if (success) {
-					const fullOutput = { subTree: [], mainTree: JSON.parse(expectedOutput) };
+					const fullOutput = { subTrees: [], mainTree: JSON.parse(expectedOutput) };
 
 					expect(res.body).toEqual(fullOutput);
 				} else {
