@@ -17,11 +17,12 @@
 
 const { addModel, deleteModel, getModelList, getModelMD5Hash } = require('./commons/modelList');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
+const { getAssetProperties, getTree } = require('./commons/assets/json');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
-const JSONAssets = require('./commons/assets/json');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
@@ -29,7 +30,6 @@ const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const fs = require('fs/promises');
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
-const { getTree } = require('./commons/assets/json');
 const { logger } = require('../../../../utils/logger');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueModelUpload } = require('../../../../services/modelProcessing');
@@ -139,8 +139,6 @@ Containers.getRevisionMD5Hash = getModelMD5Hash;
 
 Containers.getTree = getTree;
 
-Containers.getAssetProperties = (
-	teamspace, container, revision,
-) => JSONAssets.getAssetProperties(teamspace, [{ container, revision }]);
+Containers.getAssetProperties = getAssetProperties;
 
 module.exports = Containers;

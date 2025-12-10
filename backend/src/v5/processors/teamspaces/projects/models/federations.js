@@ -143,8 +143,6 @@ Federations.getMD5Hash = async (teamspace, project, federation, user) => {
 	return [];
 };
 
-Federations.getAssetProperties = (
-	teamspace, federation, revisions, containers = [],
-) => getAssetProperties(teamspace, federation, revisions, containers);
+Federations.getAssetProperties = getAssetProperties;
 
 module.exports = Federations;

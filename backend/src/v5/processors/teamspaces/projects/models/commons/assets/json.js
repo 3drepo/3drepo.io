@@ -37,8 +37,9 @@ const readFileStreamAsync = async (outstream, teamspace, container, filename, in
 					`{"account":"${teamspace}","model":"${container}",`);
 				outstream.write(d.slice(1));
 				first = false;
+			} else {
+				outstream.write(d);
 			}
-			outstream.write(d);
 		});
 		readStream.on('end', () => resolve());
 		readStream.on('error', reject);
@@ -73,6 +74,7 @@ JsonAssets.getAssetProperties = async (teamspace, model, revisions, subModels) =
 		for (const { container: subModel, revision: subModelRev } of subModels) {
 			try {
 				const subModelStream = PassThrough();
+
 				// eslint-disable-next-line no-await-in-loop
 				await readFileStreamAsync(subModelStream, teamspace, subModel, `${UUIDToString(subModelRev)}/modelProperties.json`, true);
 
@@ -82,7 +84,10 @@ JsonAssets.getAssetProperties = async (teamspace, model, revisions, subModels) =
 					stream.write(',');
 				}
 				subModelStream.pipe(stream, { end: false });
+
+				subModelStream.end();
 			} catch (err) {
+
 				// if we failed to fetch model properties for a sub model, just skip it
 			}
 		}

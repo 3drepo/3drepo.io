@@ -23,6 +23,7 @@ const {
 	generateUUID,
 	generateRandomObject,
 } = require('../../../../../../../helper/services');
+const { times } = require('lodash');
 
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
@@ -117,6 +118,85 @@ const testGetTree = () => {
 	});
 };
 
+const testGetAssetProperties = () => {
+	describe.each([
+		['should return with a stream of the expected data (no submodels)', 0],
+		['should return with a stream of default data if no file has been found (no subModel)', 0, true],
+		['should return with a stream of default data if no file has been found (with subModel)', 3, true],
+		['should return with a stream of the expected data (with submodels)', 3],
+		['should return with a stream of the expected data if some submodels failed (with submodels)', 3, false, [true, false, true]],
+		['should return with a stream of the expected data if all submodels failed (with submodels)', 1, false, [true]],
+	])('Get asset properties', (desc, nSubModels, throwOnMain, throwOnSubModels = []) => {
+		test(desc, async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const revision = generateUUID();
+			const fileObj = generateRandomObject();
+
+			const subModels = times(nSubModels, () => ({
+				container: generateRandomString(),
+				revision: generateUUID(),
+			}));
+
+			const implementFilestreamMock = () => {
+				FilesManager.getFileAsStream.mockImplementationOnce(() => {
+					const fakeReadStream = PassThrough();
+					fakeReadStream.write(JSON.stringify(fileObj));
+					fakeReadStream.end();
+					return Promise.resolve({
+						readStream: fakeReadStream,
+					});
+				});
+			};
+
+			if (throwOnMain) {
+				FilesManager.getFileAsStream.mockRejectedValueOnce(templates.fileNotFound);
+			} else {
+				implementFilestreamMock();
+			}
+
+			subModels.forEach((subModel, index) => {
+				if (throwOnSubModels[index]) {
+					FilesManager.getFileAsStream.mockRejectedValueOnce(templates.fileNotFound);
+				} else {
+					implementFilestreamMock();
+				}
+			});
+
+			const resultStream = await JsonAssets.getAssetProperties(teamspace, container,
+				revision, nSubModels === 0 ? undefined : subModels);
+
+			const output = [];
+			resultStream.on('data', (d) => output.push(d.toString()));
+
+			await new Promise((resolve) => resultStream.on('end', resolve));
+
+			const expectedMainContent = throwOnMain
+				? JSON.stringify({ hiddenNodes: [] }) : JSON.stringify(fileObj);
+			const subModelContent = subModels.flatMap(({ container: containerId }, i) => (throwOnSubModels[i]
+				? []
+				: JSON.stringify({ account: teamspace, model: containerId, ...fileObj })));
+
+			expect(output.join('')).toBe(`{"properties": ${expectedMainContent},"subModels":[${subModelContent.join(',')}]}`);
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(nSubModels + 1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+				teamspace,
+				`${container}${JSON_STASH_COL}`,
+				`${UUIDToString(revision)}/modelProperties.json`,
+			);
+			subModels.forEach(({ container: containerId, revision: revId }) => {
+				expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+					teamspace,
+					`${containerId}${JSON_STASH_COL}`,
+					`${UUIDToString(revId)}/modelProperties.json`,
+				);
+			});
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetTree();
+	testGetAssetProperties();
 });

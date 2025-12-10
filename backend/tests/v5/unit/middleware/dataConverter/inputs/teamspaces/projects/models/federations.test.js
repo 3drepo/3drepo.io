@@ -17,7 +17,14 @@
 
 const { times } = require('lodash');
 const { src } = require('../../../../../../../helper/path');
-const { generateUUIDString, generateRandomString } = require('../../../../../../../helper/services');
+const { generateUUIDString, generateRandomString, determineTestGroup } = require('../../../../../../../helper/services');
+const { modelTypes } = require('../../../../../../../../../src/v5/models/modelSettings.constants');
+
+jest.mock('../../../../../../../../../src/v5/utils/permissions');
+const PermUtils = require(`${src}/utils/permissions`);
+
+jest.mock('../../../../../../../../../src/v5/models/revisions');
+const Revisions = require(`${src}/models/revisions`);
 
 jest.mock('../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -81,6 +88,174 @@ const testValidateNewRevisionData = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/federations', () => {
+const testGetAccessibleContainers = () => {
+	describe('Get accessible containers', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const federationId = generateUUIDString();
+		const username = generateRandomString();
+		const reqBase = {
+			params: { teamspace, project, model: federationId },
+			app: { get: () => false },
+			session: { user: { username } },
+		};
+		const res = {};
+		test('Should call next() if model type is not federation', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = { ...reqBase };
+			await Promise.all(Object.values(modelTypes).map(async (type) => {
+				if (type !== modelTypes.FEDERATION) {
+					const fn = Federations.getAccessibleContainers(type);
+					await fn(req, res, mockCB);
+				}
+			}));
+
+			expect(mockCB).toHaveBeenCalledTimes(2);
+			expect(ModelSettings.getFederationById).not.toHaveBeenCalled();
+		});
+
+		const testFn = Federations.getAccessibleContainers(modelTypes.FEDERATION);
+		test('Should return all containers if BYPASS_AUTH is set', async () => {
+			const mockCB = jest.fn(() => {});
+			const reqBypass = {
+				...reqBase,
+				app: { get: () => true },
+			};
+			const nSubModels = 3;
+			const containers = times(nSubModels, () => ({ _id: generateUUIDString() }));
+			const revisions = times(nSubModels, () => ({ _id: generateUUIDString() }));
+
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers });
+			revisions.forEach((revision) => {
+				Revisions.getLatestRevision.mockResolvedValueOnce(revision);
+			});
+
+			await testFn(reqBypass, res, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(reqBypass.containers).toEqual(containers.map((container, i) => ({
+				container: container._id,
+				revision: revisions[i]._id,
+			})));
+
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federationId, { subModels: 1 });
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(nSubModels);
+			containers.forEach((container) => {
+				expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
+					teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
+			});
+		});
+
+		test('Should only return containers with access', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = { ...reqBase };
+
+			const nSubModels = 3;
+			const containers = times(nSubModels, () => ({ _id: generateUUIDString() }));
+			const revisions = times(nSubModels, () => ({ _id: generateUUIDString() }));
+
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers });
+
+			revisions.forEach((revision, i) => {
+				if (i > 1) return;
+				PermUtils.hasReadAccessToContainer.mockResolvedValueOnce(true);
+				Revisions.getLatestRevision.mockResolvedValueOnce(revision);
+			});
+
+			const expectedResults = containers.slice(0, 2).map((container, i) => ({
+				container: container._id,
+				revision: revisions[i]._id,
+			}));
+
+			await testFn(req, res, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.containers).toEqual(expectedResults);
+
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federationId, { subModels: 1 });
+			expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledTimes(nSubModels);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
+			containers.slice(0, 2).forEach((container) => {
+				expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
+					teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
+			});
+		});
+
+		test('Should skip containers which threw error', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = { ...reqBase };
+
+			const nSubModels = 3;
+			const containers = times(nSubModels, () => ({ _id: generateUUIDString() }));
+			const revisions = times(nSubModels, () => ({ _id: generateUUIDString() }));
+
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers });
+
+			revisions.forEach((revision, i) => {
+				if (i > 1) {
+					PermUtils.hasReadAccessToContainer.mockRejectedValueOnce(new Error('Test error'));
+				} else {
+					PermUtils.hasReadAccessToContainer.mockResolvedValueOnce(true);
+					Revisions.getLatestRevision.mockResolvedValueOnce(revision);
+				}
+			});
+
+			const expectedResults = containers.slice(0, 2).map((container, i) => ({
+				container: container._id,
+				revision: revisions[i]._id,
+			}));
+
+			await testFn(req, res, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.containers).toEqual(expectedResults);
+
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federationId, { subModels: 1 });
+			expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledTimes(nSubModels);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
+			containers.slice(0, 2).forEach((container) => {
+				expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
+					teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
+			});
+		});
+
+		test('Should skip containers which get latest revision threw error', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = { ...reqBase };
+
+			const nSubModels = 3;
+			const containers = times(nSubModels, () => ({ _id: generateUUIDString() }));
+			const revisions = times(nSubModels, () => ({ _id: generateUUIDString() }));
+
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers });
+
+			revisions.forEach((revision, i) => {
+				if (i > 1) {
+					Revisions.getLatestRevision.mockRejectedValueOnce(new Error('Test error'));
+				} else {
+					PermUtils.hasReadAccessToContainer.mockResolvedValueOnce(true);
+					Revisions.getLatestRevision.mockResolvedValueOnce(revision);
+				}
+			});
+
+			const expectedResults = containers.slice(0, 2).map((container, i) => ({
+				container: container._id,
+				revision: revisions[i]._id,
+			}));
+
+			await testFn(req, res, mockCB);
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.containers).toEqual(expectedResults);
+
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federationId, { subModels: 1 });
+			expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledTimes(nSubModels);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
+			containers.slice(0, 2).forEach((container) => {
+				expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
+					teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
+			});
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testValidateNewRevisionData();
+	testGetAccessibleContainers();
 });
