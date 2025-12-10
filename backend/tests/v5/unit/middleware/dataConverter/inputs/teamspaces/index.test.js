@@ -163,9 +163,10 @@ const testValidateCreateTeamspaceData = () => {
 			['if teamspace name already exists', { body: { name: existingTeamspaceName } }, false],
 		])('', (desc, req, success) => {
 			test(`${desc} ${success ? 'should call next()' : 'should respond with invalidArguments'}`, async () => {
-				TeamspacesModel.getTeamspaceSetting.mockImplementationOnce(
-					(ts) => (ts === existingTeamspaceName ? Promise.resolve({ _id: 1 }) : Promise.reject(new Error())),
-				);
+				if (req.body.name) {
+					TeamspacesModel.getTeamspaceSetting.mockImplementationOnce((ts) => (ts === existingTeamspaceName
+						? Promise.resolve({ _id: 1 }) : Promise.reject(new Error())));
+				}
 
 				const mockCB = jest.fn(() => {});
 

@@ -83,24 +83,18 @@ Teamspaces.validateUpdateQuota = async (req, res, next) => {
 
 Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
 	const schema = Yup.object().shape({
-		name: YupHelper.validators.alphanumeric(
-			Yup.string()
-				.max(128)
-				.required()
-				.test('check-name-is-not-used', 'Teamspace with this name already exists.', async (value) => {
-					if (!value) return true;
-					try {
-						await getTeamspaceSetting(value, { _id: 1 });
-						return false;
-					} catch {
-						return true;
-					}
-				}),
-			false),
+		name: YupHelper.validators.alphanumeric(Yup.string().max(128).required()
+			.test('check-name-is-not-used', 'Teamspace with this name already exists.', async (value) => {
+				if (!value) return true;
+				try {
+					await getTeamspaceSetting(value, { _id: 1 });
+					return false;
+				} catch {
+					return true;
+				}
+			}), false),
 		admin: YupHelper.types.strings.email.optional(),
-		accountId: Yup
-			.string()
-			.optional()
+		accountId: Yup.string().optional()
 			.test('check-account-exists', 'Account with this ID does not exist.', async (value) => {
 				if (!value) return true;
 				if (await getTeamspaceByAccount(value)) {

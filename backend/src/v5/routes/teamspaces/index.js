@@ -233,73 +233,73 @@ const establishRoutes = (isInternal) => {
 		router.delete('/:teamspace/quota', isMemberOfTeamspace, removeQuota);
 
 		/**
-		 * @openapi
-		 * /teamspaces:
-		 *   post:
-		 *     description: Create a new teamspace
-		 *     tags: [v:internal, Teamspaces]
-		 *     operationId: createTeamspace
-		 *     requestBody:
-		 *       required: true
-		 *       content:
-		 *         application/json:
-		 *           schema:
-		 *             type: object
-		 *             properties:
-		 *               name:
-		 *                 type: string
-		 *                 description: Name of the teamspace to be created
-		 *                 example: New Teamspace
-		 *               accountId:
-		 *                 type: string
-		 *                 description: The account ID the teamspace will belong to
-		 *                 example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
-		 *               admin:
-		 *                 type: string
-		 *                 description: The email of the owner of the teamspace
-		 *                 example: test@test.com
-		 *     responses:
-		 *       200:
-		 *         description: Teamspace created successfully
-		 *       400:
-		 *         $ref: "#/components/responses/invalidArguments"
-		 *       409:
-		 *         $ref: "#/components/responses/resourceAlreadyExists"
-		 */
+		* @openapi
+		* /teamspaces:
+		*   post:
+		*     description: Create a new teamspace
+		*     tags: [v:internal, Teamspaces]
+		*     operationId: createTeamspace
+		*     requestBody:
+		*       required: true
+		*       content:
+		*         application/json:
+		*           schema:
+		*             type: object
+		*             properties:
+		*               name:
+		*                 type: string
+		*                 description: Name of the teamspace to be created
+		*                 example: New Teamspace
+		*               accountId:
+		*                 type: string
+		*                 description: The account ID the teamspace will belong to
+		*                 example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+		*               admin:
+		*                 type: string
+		*                 description: The email of the owner of the teamspace
+		*                 example: test@test.com
+		*     responses:
+		*       200:
+		*         description: Teamspace created successfully
+		*       400:
+		*         $ref: "#/components/responses/invalidArguments"
+		*       409:
+		*         $ref: "#/components/responses/resourceAlreadyExists"
+		*/
 		router.post('/', validateCreateTeamspaceData, createTeamspace);
 	} else {
 		/**
-			* @openapi
-			* /teamspaces:
-			*   get:
-			*     description: Get a list of teamspaces the user has access to
-			*     tags: [v:external, Teamspaces]
-			*     operationId: getTeamspaceList
-			*     responses:
-			*       401:
-			*         $ref: "#/components/responses/notLoggedIn"
-			*       200:
-			*         description: returns list of teamspace
-			*         content:
-			*           application/json:
-			*             schema:
-			*               type: object
-			*               properties:
-			*                 teamspaces:
-			*                   type: array
-			*                   items:
-			*                     type: object
-			*                     properties:
-			*                       name:
-			*                         type: string
-			*                         description: name of the teamspace
-			*                         example: teamspace1
-			*                       isAdmin:
-			*                         type: boolean
-			*                         description: whether the user is an admin
-			*
-			*
-			*/
+		* @openapi
+		* /teamspaces:
+		*   get:
+		*     description: Get a list of teamspaces the user has access to
+		*     tags: [v:external, Teamspaces]
+		*     operationId: getTeamspaceList
+		*     responses:
+		*       401:
+		*         $ref: "#/components/responses/notLoggedIn"
+		*       200:
+		*         description: returns list of teamspace
+		*         content:
+		*           application/json:
+		*             schema:
+		*               type: object
+		*               properties:
+		*                 teamspaces:
+		*                   type: array
+		*                   items:
+		*                     type: object
+		*                     properties:
+		*                       name:
+		*                         type: string
+		*                         description: name of the teamspace
+		*                         example: teamspace1
+		*                       isAdmin:
+		*                         type: boolean
+		*                         description: whether the user is an admin
+		*
+		*
+		*/
 		router.get('/', validSession, getTeamspaceList);
 
 		/**
