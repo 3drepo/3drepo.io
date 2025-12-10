@@ -20,7 +20,9 @@ const Path = require('path');
 const Yup = require('yup');
 const { getRevisionByIdOrTag } = require('../../../../../../../models/revisions');
 const { respond } = require('../../../../../../../utils/responder');
+const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
+const { validateMany } = require('../../../../../../common');
 
 const Revisions = {};
 
@@ -67,5 +69,17 @@ Revisions.revisionExists = (modelType) => async (req, res, next) => {
 		respond(req, res, err);
 	}
 };
+
+const configureQueryToParam = async (req, res, next) => {
+	const { revId } = req.query;
+	if (revId) {
+		req.params.revision = stringToUUID(revId);
+	}
+
+	await next();
+};
+
+Revisions.verifyRevQueryParam = (modelType, allowDefault) => validateMany([
+	configureQueryToParam, Revisions.revisionExists(modelType, allowDefault)]);
 
 module.exports = Revisions;

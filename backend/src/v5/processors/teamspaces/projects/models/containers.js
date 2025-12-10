@@ -27,6 +27,7 @@ const Views = require('./commons/views');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const fs = require('fs/promises');
 const { getFileAsStream } = require('../../../../services/filesManager');
+const { getMetadataFile } = require('./commons/assets/json');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { logger } = require('../../../../utils/logger');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
@@ -134,5 +135,7 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
 
 Containers.getRevisionMD5Hash = getModelMD5Hash;
+
+Containers.getMetadataFile = getMetadataFile;
 
 module.exports = Containers;
