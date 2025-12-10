@@ -27,12 +27,6 @@ const Responder = require(`${src}/utils/responder`);
 jest.mock('../../../../../../src/v5/utils/permissions');
 const Permissions = require(`${src}/utils/permissions`);
 
-jest.mock('../../../../../../src/v5/models/modelSettings');
-const ModelSettings = require(`${src}/models/modelSettings`);
-
-jest.mock('../../../../../../src/v5/models/projectSettings');
-const ProjectSettings = require(`${src}/models/projectSettings`);
-
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/utils/sessions');
