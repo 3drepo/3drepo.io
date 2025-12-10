@@ -38,7 +38,7 @@ export const ListContainer = styled.div`
 	}
 `;
 
-export const List = styled.table`
+export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	overflow: hidden;
