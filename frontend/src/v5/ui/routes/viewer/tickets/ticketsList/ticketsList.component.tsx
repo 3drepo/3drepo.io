@@ -22,7 +22,7 @@ import { List, ListContainer } from './ticketsList.styles';
 import { useEffect, useRef } from 'react';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { groupTickets, TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
-import { TicketsGroupedList } from './ticketsGroupedList.component';
+import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
 
 
 const TicketsListsContainer = ({ children }) => {
