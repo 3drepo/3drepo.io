@@ -20,6 +20,7 @@ const { createResponseCode, templates } = require('../../../../../../../utils/re
 const Yup = require('yup');
 const YupHelper = require('../../../../../../../utils/helper/yup');
 const { fileUploads } = require('../../../../../../../utils/config');
+const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isRevAndStatusCodeUnique } = require('../../../../../../../models/revisions');
 const { respond } = require('../../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../../multer');
@@ -52,6 +53,7 @@ const validateRevisionUpload = async (req, res, next) => {
 
 	try {
 		req.body = await schema.validate(req.body);
+		req.body.owner = getUserFromSession(req.session);
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

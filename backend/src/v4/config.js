@@ -21,6 +21,9 @@ const VERSION = require("../../VERSION.json").VERSION;
 const config = require("app-config").config;
 const utils = require("./utils");
 
+const { v5Path } = require("../interop");
+const { FileStorageTypes } = require(`${v5Path}/utils/config.constants`);
+
 /** *****************************************************************************
  * Coalesce function
  * @param {Object} variable - variable to coalesce
@@ -162,7 +165,7 @@ if (config.db.host.length > 1 && !config.db.replicaSet) {
 	process.exit(1);
 }
 
-config.defaultStorage = config.defaultStorage || (config.fs ? "fs" : "gridfs");
+config.defaultStorage = FileStorageTypes.FS;
 
 let multipleAPIServer = false;
 

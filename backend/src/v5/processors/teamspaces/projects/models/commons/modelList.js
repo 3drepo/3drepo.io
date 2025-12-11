@@ -40,18 +40,18 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 	await removeModelFromProject(teamspace, project, model);
 };
 
-ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
+ModelList.getModelList = async (teamspace, project, user, modelSettings, bypassPerms = false) => {
 	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 
-	const [isTSAdmin, favourites] = await Promise.all([
+	const [isTSAdmin, favourites] = bypassPerms ? [true, []] : await Promise.all([
 		isTeamspaceAdmin(teamspace, user),
 		getFavourites(user, teamspace),
 	]);
 
 	const isAdmin = isTSAdmin || hasProjectAdminPermissions(permissions, user);
 
-	return modelSettings.flatMap(({ _id, name, permissions: modelPerms }) => {
-		const perm = modelPerms ? modelPerms.find((entry) => entry.user === user) : undefined;
+	return modelSettings.flatMap(({ _id, name, permissions: modelPerms = [] }) => {
+		const perm = modelPerms.find((entry) => entry.user === user);
 		return (!isAdmin && !perm)
 			? [] : {
 				_id,

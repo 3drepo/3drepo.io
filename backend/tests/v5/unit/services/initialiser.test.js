@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { FileStorageTypes } = require('../../../../src/v5/utils/config.constants');
 const { src } = require('../../helper/path');
 
 const { determineTestGroup } = require('../../helper/services');
@@ -37,6 +38,18 @@ const Invitations = require(`${src}/models/invitations`);
 jest.mock('../../../../src/v5/models/frontegg.cache');
 const FronteggCache = require(`${src}/models/frontegg.cache`);
 
+jest.mock('../../../../src/v5/handler/fs', () => ({
+	getHandler: jest.fn().mockReturnValue({
+		testFilesystem: jest.fn(),
+
+	}),
+}));
+
+const FSHandler = require(`${src}/handler/fs`);
+const handlerMock = FSHandler.getHandler(FileStorageTypes.FS);
+
+const config = require(`${src}/utils/config`);
+
 const Initialiser = require(`${src}/services/initialiser`);
 
 const testInitialiseSystem = () => {
@@ -54,6 +67,39 @@ const testInitialiseSystem = () => {
 	});
 };
 
+const testCheckSystem = () => {
+	describe('Check System', () => {
+		test('FSHandler testFilesystem should be called for both FS and EXTERNAL_FS', async () => {
+			await Initialiser.checkSystem(true);
+
+			expect(FSHandler.getHandler).toHaveBeenCalledTimes(2);
+			expect(FSHandler.getHandler).toHaveBeenCalledWith(FileStorageTypes.FS);
+			expect(FSHandler.getHandler).toHaveBeenCalledWith(FileStorageTypes.EXTERNAL_FS);
+			expect(handlerMock.testFilesystem).toHaveBeenCalledTimes(2);
+		});
+
+		test('FSHandler testFilesystem should be called only for FS', async () => {
+			await Initialiser.checkSystem(false);
+
+			expect(FSHandler.getHandler).toHaveBeenCalledTimes(1);
+			expect(FSHandler.getHandler).toHaveBeenCalledWith(FileStorageTypes.FS);
+			expect(handlerMock.testFilesystem).toHaveBeenCalledTimes(1);
+		});
+
+		test('Should throw if storage config is not configured', async () => {
+			const originalConfig = config[FileStorageTypes.FS];
+			delete config[FileStorageTypes.FS];
+
+			await expect(Initialiser.checkSystem()).rejects.not.toBeUndefined();
+			expect(FSHandler.getHandler).not.toHaveBeenCalled();
+
+			// Restore config
+			config[FileStorageTypes.FS] = originalConfig;
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testInitialiseSystem();
+	testCheckSystem();
 });
