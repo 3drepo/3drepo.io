@@ -17,6 +17,10 @@
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
 const { SUBSCRIPTION_TYPES } = require('../../../../models/teamspaces.constants');
+const Yup = require('yup');
+const YupHelper = require('../../../../utils/helper/yup');
+const { getTeamspaceByAccount } = require('../../../../services/sso/frontegg/components/accounts');
+const { getTeamspaceSetting } = require('../../../../models/teamspaceSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { isTeamspaceAdmin } = require('../../../../utils/permissions');
 const { isTeamspaceMember } = require('../../../../processors/teamspaces');
@@ -71,6 +75,38 @@ Teamspaces.memberExists = async (req, res, next) => {
 Teamspaces.validateUpdateQuota = async (req, res, next) => {
 	try {
 		req.body = await validateSchema(SUBSCRIPTION_TYPES.ENTERPRISE, req.body, true);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
+	const schema = Yup.object().shape({
+		name: YupHelper.validators.alphanumeric(Yup.string().max(128).required()
+			.test('check-name-is-not-used', 'Teamspace with this name already exists.', async (value) => {
+				if (!value) return true;
+				try {
+					await getTeamspaceSetting(value, { _id: 1 });
+					return false;
+				} catch {
+					return true;
+				}
+			}), false),
+		admin: YupHelper.types.strings.email.optional(),
+		accountId: Yup.string().optional()
+			.test('check-account-exists', 'Account with this ID does not exist.', async (value) => {
+				if (!value) return true;
+				if (await getTeamspaceByAccount(value)) {
+					return true;
+				}
+				return false;
+			}),
+	});
+
+	try {
+		req.body = await schema.validate(req.body, { stripUnknown: true });
+
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));

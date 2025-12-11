@@ -15,14 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { canRemoveTeamspaceMember, memberExists, validateUpdateQuota } = require('../../middleware/dataConverter/inputs/teamspaces');
+const { canRemoveTeamspaceMember, memberExists, validateCreateTeamspaceData, validateUpdateQuota } = require('../../middleware/dataConverter/inputs/teamspaces');
+
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 
+const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { Router } = require('express');
 const { SUBSCRIPTION_TYPES } = require('../../models/teamspaces.constants');
 const Teamspaces = require('../../processors/teamspaces');
 const Users = require('../../processors/users');
+/* istanbul ignore file */
+const { v4Path } = require('../../../interop');
+// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
+const { create: createInvite } = require(`${v4Path}/models/invitations`);
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
+const { getUserByEmail } = require('../../models/users');
 const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
@@ -131,6 +138,34 @@ const removeQuota = async (req, res) => {
 	}
 };
 
+const createTeamspace = async (req, res) => {
+	const { name, accountId, admin } = req.body;
+	let userName;
+
+	try {
+		if (admin) {
+			const result = await getUserByEmail(admin)
+				.catch((e) => {
+					if (e.message !== templates.userNotFound.message) throw e;
+					return {};
+				});
+
+			userName = result.user;
+		}
+
+		await Teamspaces.initTeamspace(name, userName, accountId);
+
+		if (!userName && admin) {
+			await createInvite(admin, name, DEFAULT_OWNER_JOB, undefined, { teamspace_admin: true }, false);
+		}
+
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = (isInternal) => {
 	const router = Router({ mergeParams: true });
 
@@ -196,6 +231,42 @@ const establishRoutes = (isInternal) => {
 		*         description: quota has been removed
 		*/
 		router.delete('/:teamspace/quota', isMemberOfTeamspace, removeQuota);
+
+		/**
+		* @openapi
+		* /teamspaces:
+		*   post:
+		*     description: Create a new teamspace
+		*     tags: [v:internal, Teamspaces]
+		*     operationId: createTeamspace
+		*     requestBody:
+		*       required: true
+		*       content:
+		*         application/json:
+		*           schema:
+		*             type: object
+		*             properties:
+		*               name:
+		*                 type: string
+		*                 description: Name of the teamspace to be created
+		*                 example: New Teamspace
+		*               accountId:
+		*                 type: string
+		*                 description: The account ID the teamspace will belong to
+		*                 example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+		*               admin:
+		*                 type: string
+		*                 description: The email of the owner of the teamspace
+		*                 example: test@test.com
+		*     responses:
+		*       200:
+		*         description: Teamspace created successfully
+		*       400:
+		*         $ref: "#/components/responses/invalidArguments"
+		*       409:
+		*         $ref: "#/components/responses/resourceAlreadyExists"
+		*/
+		router.post('/', validateCreateTeamspaceData, createTeamspace);
 	} else {
 		/**
 		* @openapi
