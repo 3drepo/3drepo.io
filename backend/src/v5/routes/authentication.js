@@ -33,7 +33,7 @@ const establishRoutes = () => {
 	* /authentication/authenticate:
 	*   get:
 	*     description: General authentication route to establish a session.
-	*     tags: [Authentication]
+	*     tags: [v:external, Authentication]
 	*     operationId: authenticate
 	*     parameters:
 	*       - in: query
@@ -66,7 +66,7 @@ const establishRoutes = () => {
 	* /authentication/authenticate/{teamspace}:
 	*   get:
 	*     description: Authenticates a user against a particular teamspace, the user has to have already established a session to use this endpoint.
-	*     tags: [Authentication]
+	*     tags: [v:external, Authentication]
 	*     operationId: authenticateTeamspace
 	*     parameters:
 	*       - in: path

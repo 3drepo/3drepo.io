@@ -23,7 +23,7 @@ const chai = require("chai");
 const deepEqualInAnyOrder = require("deep-equal-in-any-order");
 chai.use(deepEqualInAnyOrder);
 const { expect } = chai;
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const async = require("async");
 const responseCodes = require("../../../src/v4/response_codes");
 const { templates : responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
@@ -218,12 +218,15 @@ describe("Mitigations", function () {
 		]
 	};
 
-	before(function(done) {
+	before(async function() {
+		const app = await createAppAsync();
 
-		server = app.listen(8080, function () {
-			agent = request.agent(server);
-			console.log("API test server is listening on port 8080!");
-			done();
+		await new Promise((resolve) => {
+			server = app.listen(8080, function () {
+				agent = request.agent(server);
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 		});
 	});
 

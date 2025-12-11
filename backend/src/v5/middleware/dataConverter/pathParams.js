@@ -22,7 +22,7 @@ const PathParams = {};
 
 const paramsToIgnore = ['container', 'federation', 'model', 'drawing', 'user', 'member', 'teamspace'];
 
-PathParams.getModelIdFromParam = (modelType) => (req, res, next) => {
+PathParams.getModelIdFromParam = (modelType) => async (req, res, next) => {
 	if (!req.params.model) {
 		const modelParams = {
 			[modelTypes.CONTAINER]: req.params.container,
@@ -33,10 +33,10 @@ PathParams.getModelIdFromParam = (modelType) => (req, res, next) => {
 		req.params.model = modelParams[modelType];
 	}
 
-	next();
+	await next();
 };
 
-PathParams.convertAllUUIDs = (req, res, next) => {
+PathParams.convertAllUUIDs = async (req, res, next) => {
 	if (req.params) {
 		Object.keys(req.params).forEach((key) => {
 			if (!paramsToIgnore.includes(key)) {
@@ -51,7 +51,7 @@ PathParams.convertAllUUIDs = (req, res, next) => {
 		});
 	}
 
-	next();
+	await next();
 };
 
 module.exports = PathParams;
