@@ -74,8 +74,7 @@ Federations.getAccessibleContainers = (modelType) => async (req, res, next) => {
 			await next();
 		} else {
 			const { teamspace, project, model } = req.params;
-			const fed = await getFederationById(teamspace, model);
-			const { subModels = [] } = fed;
+			const { subModels } = await getFederationById(teamspace, model, { subModels: 1 });
 
 			let containers = [];
 			if (req.app.get(BYPASS_AUTH)) {

@@ -115,6 +115,26 @@ const testGetAccessibleContainers = () => {
 		});
 
 		const testFn = Federations.getAccessibleContainers(modelTypes.FEDERATION);
+
+		test('Should respond with error if an error occured', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = {
+				...reqBase,
+			};
+
+			const err = templates.invalidArguments;
+			ModelSettings.getFederationById.mockRejectedValueOnce(err);
+
+			await testFn(req, res, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+
+			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federationId, { subModels: 1 });
+			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
+
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, err);
+		});
+
 		test('Should return all containers if BYPASS_AUTH is set', async () => {
 			const mockCB = jest.fn(() => {});
 			const reqBypass = {
