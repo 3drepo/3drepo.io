@@ -97,4 +97,7 @@ export const ChevronIconContainer = styled.div<{ $collapsed: boolean }>`
 	${({ $collapsed }) => $collapsed && css`
 		transform: rotate(0deg);
 	`}
+	svg {
+		display: block;
+	}
 `;

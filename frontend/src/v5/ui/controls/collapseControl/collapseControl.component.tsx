@@ -19,7 +19,7 @@ import { Collapse } from '@mui/material';
 import { Container, ControlsContainer } from './collapseControl.styles';
 
 export type CollapseToggleProps = {
-	collapsed?: boolean;
+	expanded?: boolean;
 };
 
 export type CollapseControlProps = {
@@ -70,7 +70,7 @@ export const CollapseControl = ({
 	return (
 		<Container className={className} $isLoading={!interactableWhileLoading && isLoading}>
 			<ControlsContainer onClick={toggleExpand}>
-				<CollapseToggleComponent collapsed={isExpanded} />
+				<CollapseToggleComponent expanded={isExpanded} />
 			</ControlsContainer>
 			<Collapse in={isExpanded} onTransitionEnd={onTransitionEnd} >
 				{(!unmountChildren || !unmountHidden)  && children}
