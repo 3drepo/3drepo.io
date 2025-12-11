@@ -77,8 +77,8 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 				let newValue = obj[key];
 				if (newValue !== null) {
 					if (isObject(newValue) && !isDate(newValue) && !isUUID(newValue)) {
-					// if this is an object it is a composite type, in which case
-					// we should merge the old value with the new value
+						// if this is an object it is a composite type, in which case
+						// we should merge the old value with the new value
 						newValue = deleteIfUndefined({ ...(oldValue ?? {}), ...newValue }, true);
 						if (isEqual(newValue, {})) {
 							newValue = null;
@@ -117,11 +117,13 @@ Tickets.updateTickets = async (teamspace, project, model, oldTickets, data, auth
 				changes,
 				timestamp: updateData?.properties?.[basePropertyLabels.UPDATED_AT] ?? new Date(),
 			});
-			return { updateOne: {
-				filter: { _id: oldTicket._id, teamspace, project, model },
-				update: actions,
+			return {
+				updateOne: {
+					filter: { _id: oldTicket._id, teamspace, project, model },
+					update: actions,
 
-			} };
+				},
+			};
 		}
 
 		return [];
