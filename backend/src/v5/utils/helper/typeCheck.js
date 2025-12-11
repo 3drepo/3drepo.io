@@ -25,9 +25,10 @@ const TypeChecker = {};
 TypeChecker.isArray = Array.isArray;
 TypeChecker.isBuffer = (buf) => !!(buf && Buffer.isBuffer(buf));
 TypeChecker.isDate = _.isDate;
-TypeChecker.isString = (value) => _.isString(value);
+TypeChecker.isString = _.isString;
 TypeChecker.isObject = (value) => _.isObject(value) && !TypeChecker.isArray(value);
-TypeChecker.isNumber = (value) => _.isNumber(value);
+TypeChecker.isNumber = _.isNumber;
+TypeChecker.isBool = _.isBoolean;
 TypeChecker.isBooleanString = (value) => value?.toLowerCase() === 'true' || value?.toLowerCase() === 'false';
 TypeChecker.isNumberString = (value) => !_.isNaN(Number(value));
 TypeChecker.isUUIDString = (uuid) => {

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { getContainerById, getDrawingById, getFederationById } = require('../../../models/modelSettings');
 const {
 	hasAdminAccessToContainer,
 	hasAdminAccessToDrawing,
@@ -28,19 +29,38 @@ const {
 	hasWriteAccessToDrawing,
 	hasWriteAccessToFederation,
 } = require('../../../utils/permissions');
+const { BYPASS_AUTH } = require('../../../utils/config.constants');
 const { getUserFromSession } = require('../../../utils/sessions');
+const { modelTypes } = require('../../../models/modelSettings.constants');
+const { modelsExistInProject } = require('../../../models/projectSettings');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
 const ModelPerms = {};
 
-const permissionsCheckTemplate = (callback) => async (req, res, next) => {
+const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
 	const { session, params } = req;
 	const user = getUserFromSession(session);
 	const { teamspace, project, model } = params;
 
 	try {
-		if (await callback(teamspace, project, model, user)) {
+		let getModelFn;
+
+		if (type === modelTypes.CONTAINER) {
+			getModelFn = getContainerById;
+		} else if (type === modelTypes.FEDERATION) {
+			getModelFn = getFederationById;
+		} else {
+			getModelFn = getDrawingById;
+		}
+
+		await getModelFn(teamspace, model, { permissions: 1 });
+
+		if (!await modelsExistInProject(teamspace, project, [model])) {
+			throw templates.modelNotFound;
+		}
+
+		if (req.app.get(BYPASS_AUTH) || await callback(teamspace, project, model, user, true)) {
 			next();
 		} else {
 			respond(req, res, templates.notAuthorized);
@@ -50,18 +70,20 @@ const permissionsCheckTemplate = (callback) => async (req, res, next) => {
 	}
 };
 
-ModelPerms.hasReadAccessToContainer = permissionsCheckTemplate(hasReadAccessToContainer);
-ModelPerms.hasWriteAccessToContainer = permissionsCheckTemplate(hasWriteAccessToContainer);
-ModelPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(hasCommenterAccessToContainer);
-ModelPerms.hasAdminAccessToContainer = permissionsCheckTemplate(hasAdminAccessToContainer);
+ModelPerms.hasReadAccessToContainer = permissionsCheckTemplate(modelTypes.CONTAINER, hasReadAccessToContainer);
+ModelPerms.hasWriteAccessToContainer = permissionsCheckTemplate(modelTypes.CONTAINER, hasWriteAccessToContainer);
+ModelPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(
+	modelTypes.CONTAINER, hasCommenterAccessToContainer);
+ModelPerms.hasAdminAccessToContainer = permissionsCheckTemplate(modelTypes.CONTAINER, hasAdminAccessToContainer);
 
-ModelPerms.hasReadAccessToDrawing = permissionsCheckTemplate(hasReadAccessToDrawing);
-ModelPerms.hasWriteAccessToDrawing = permissionsCheckTemplate(hasWriteAccessToDrawing);
-ModelPerms.hasAdminAccessToDrawing = permissionsCheckTemplate(hasAdminAccessToDrawing);
+ModelPerms.hasReadAccessToDrawing = permissionsCheckTemplate(modelTypes.DRAWING, hasReadAccessToDrawing);
+ModelPerms.hasWriteAccessToDrawing = permissionsCheckTemplate(modelTypes.DRAWING, hasWriteAccessToDrawing);
+ModelPerms.hasAdminAccessToDrawing = permissionsCheckTemplate(modelTypes.DRAWING, hasAdminAccessToDrawing);
 
-ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(hasReadAccessToFederation);
-ModelPerms.hasWriteAccessToFederation = permissionsCheckTemplate(hasWriteAccessToFederation);
-ModelPerms.hasCommenterAccessToFederation = permissionsCheckTemplate(hasCommenterAccessToFederation);
-ModelPerms.hasAdminAccessToFederation = permissionsCheckTemplate(hasAdminAccessToFederation);
+ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(modelTypes.FEDERATION, hasReadAccessToFederation);
+ModelPerms.hasWriteAccessToFederation = permissionsCheckTemplate(modelTypes.FEDERATION, hasWriteAccessToFederation);
+ModelPerms.hasCommenterAccessToFederation = permissionsCheckTemplate(
+	modelTypes.FEDERATION, hasCommenterAccessToFederation);
+ModelPerms.hasAdminAccessToFederation = permissionsCheckTemplate(modelTypes.FEDERATION, hasAdminAccessToFederation);
 
 module.exports = ModelPerms;
