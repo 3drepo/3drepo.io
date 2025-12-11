@@ -41,11 +41,11 @@ Containers.addContainer = addModel;
 
 Containers.deleteContainer = deleteModel;
 
-Containers.getContainerList = async (teamspace, project, user) => {
+Containers.getContainerList = async (teamspace, project, user, bypassPerms) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 	const modelSettings = await getContainers(teamspace, models, { _id: 1, name: 1, permissions: 1 });
 
-	return getModelList(teamspace, project, user, modelSettings);
+	return getModelList(teamspace, project, user, modelSettings, bypassPerms);
 };
 
 Containers.getContainerStats = async (teamspace, project, container) => {
@@ -95,9 +95,13 @@ Containers.getRevisions = async (teamspace, project, container, showVoid) => {
 
 Containers.newRevision = async (teamspace, container, data, file) => {
 	const { properties: { unit: units } = {} } = await getContainerById(teamspace, container, { 'properties.unit': 1 });
-	await queueModelUpload(teamspace, container, { ...data, units }, file).finally(() => fs.rm(file.path).catch((e) => {
-		logger.logError(`Failed to delete uploaded file: ${e.message}`);
-	}));
+	await queueModelUpload(teamspace, container, { ...data, units }, file).finally(async () => {
+		if (!file.readOnly) {
+			await fs.rm(file.path).catch((e) => {
+				logger.logError(`Failed to delete uploaded file: ${e.message}`);
+			});
+		}
+	});
 };
 
 Containers.updateRevisionStatus = (teamspace, project, container, revision, status) => updateRevisionStatus(
