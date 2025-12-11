@@ -337,9 +337,12 @@ db.addLoginRecords = async (records) => {
 db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
 	db.createRevision(teamspace, project, modelId, rev),
 	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
-	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
+	db.addJSONFile(teamspace, modelId, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 
 ]);
+
+db.addJSONFile = (teamspace, modelId, name, content) => FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, name, content);
+
 ServiceHelper.createQueryString = (options) => {
 	const keys = Object.keys(deleteIfUndefined(options, true));
 
