@@ -1210,6 +1210,24 @@ const testValidate = () => {
 			), false],
 	];
 
+	const createPropertiesArray = (numberOfItems, typeOfProp) => times(numberOfItems, (i) => (i % 3 === 0 ? ({
+		name: generateRandomString(),
+		type: typeOfProp,
+		default: true,
+	}) : ({
+		name: generateRandomString(),
+		type: typeOfProp,
+	})));
+
+	const complexTypesDefaultTest = [
+		['image property type with default true', generateBasicSchema([], createPropertiesArray(5, propTypes.IMAGE), {}), false],
+		['view property type with default true', generateBasicSchema([], createPropertiesArray(5, propTypes.VIEW), {}), false],
+		['image list property type with default true', generateBasicSchema([], createPropertiesArray(5, propTypes.IMAGE_LIST), {}), false],
+		['module image property type with default true', generateBasicSchema([{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.IMAGE) }], [], {}), false],
+		['module view property type with default true', generateBasicSchema([{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.VIEW) }], [], {}), false],
+		['module image list property type with default true', generateBasicSchema([{ name: generateRandomString(), properties: createPropertiesArray(5, propTypes.IMAGE_LIST) }], [], {}), false],
+	];
+
 	describe.each([
 		['the template is undefined', undefined, false],
 		['the template is empty', {}, false],
@@ -1220,6 +1238,7 @@ const testValidate = () => {
 		...propertiesTest,
 		...moduleSchemaTest,
 		...tabularColumnsTest,
+		...complexTypesDefaultTest,
 
 	])('Validate ticket template', (desc, data, output) => {
 		test(`Validation should ${output ? 'succeed' : 'fail'} if ${desc}`, () => {
@@ -1267,82 +1286,6 @@ const testValidate = () => {
 		expectedData.modules = expectedData.modules.map(({ name, ...mod }) => (
 			{ ...mod, name, properties: [] }));
 		expectedData.config = { defaultView: true };
-		const output = TemplateSchema.validate(data);
-
-		expect(output).toEqual(expectedData);
-	});
-
-	test('Image field will have the default field stripped if provided', () => {
-		const data = {
-			name: generateRandomString(),
-			code: generateRandomString(3),
-			config: {
-
-			},
-			properties: [
-				{
-					name: generateRandomString(),
-					type: propTypes.IMAGE,
-					default: generateRandomString(),
-				},
-
-			],
-			modules: [
-				{
-					type: presetModules.SAFETIBASE,
-					properties: [
-						{
-							name: generateRandomString(),
-							type: propTypes.IMAGE,
-							default: generateRandomString(),
-						}],
-				}],
-		};
-		const expectedData = cloneDeep(data);
-		delete expectedData.properties[0].default;
-		delete expectedData.modules[0].properties[0].default;
-
-		data[generateRandomString()] = generateRandomString();
-		data.properties[0][generateRandomString()] = generateRandomString();
-		data.modules[0][generateRandomString()] = generateRandomString();
-		const output = TemplateSchema.validate(data);
-
-		expect(output).toEqual(expectedData);
-	});
-
-	test('Image List field will have the default field stripped if provided', () => {
-		const data = {
-			name: generateRandomString(),
-			code: generateRandomString(3),
-			config: {
-
-			},
-			properties: [
-				{
-					name: generateRandomString(),
-					type: propTypes.IMAGE_LIST,
-					default: generateRandomString(),
-				},
-
-			],
-			modules: [
-				{
-					type: presetModules.SAFETIBASE,
-					properties: [
-						{
-							name: generateRandomString(),
-							type: propTypes.IMAGE_LIST,
-							default: generateRandomString(),
-						}],
-				}],
-		};
-		const expectedData = cloneDeep(data);
-		delete expectedData.properties[0].default;
-		delete expectedData.modules[0].properties[0].default;
-
-		data[generateRandomString()] = generateRandomString();
-		data.properties[0][generateRandomString()] = generateRandomString();
-		data.modules[0][generateRandomString()] = generateRandomString();
 		const output = TemplateSchema.validate(data);
 
 		expect(output).toEqual(expectedData);

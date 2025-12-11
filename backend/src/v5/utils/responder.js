@@ -16,6 +16,7 @@
  */
 
 const { isBuffer, isString } = require('./helper/typeCheck');
+const { BYPASS_AUTH } = require('./config.constants');
 const { createActivityRecord } = require('../services/elastic');
 const { createResponseCode } = require('./responseCodes');
 const { deleteIfUndefined } = require('./helper/objects');
@@ -24,20 +25,29 @@ const logger = require('./logger').logWithLabel(networkLabel);
 const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const { cachePolicy } = require(`${v4Path}/config`);
+const { escapeXSS } = require('./helper/strings');
 const zlib = require('zlib');
 
 const Responder = {};
 
-const constructApiInfo = ({ method, originalUrl }) => `${method} ${originalUrl}`;
+const constructApiInfo = ({ method, originalUrl }) => `${method} ${escapeXSS(originalUrl)}`;
 
-const genResponseLogging = ({ status, code }, contentLength, { session, startTime, method, originalUrl } = {}) => {
-	const user = session?.user ? session.user.username : 'unknown';
+const genResponseLogging = ({ status, code }, contentLength, { session, startTime, method, originalUrl, app } = {}) => {
+	const isInternal = !!app?.get(BYPASS_AUTH);
+	let user;
+	if (session?.user) user = session.user.username;
+	else if (isInternal) {
+		user = 'internal-service';
+	} else {
+		user = 'unknown';
+	}
+
 	const currentTime = Date.now();
 	const latency = startTime ? `${currentTime - startTime}` : '???';
 
 	createActivityRecord(status, code, latency, contentLength, user, method, originalUrl);
 
-	return logger.formatResponseMsg({ status, code, latency, contentLength, user, method, originalUrl });
+	return logger.formatResponseMsg({ status, code, latency, contentLength, user, method, originalUrl, isInternal });
 };
 
 const createErrorResponse = (req, res, resCode) => {

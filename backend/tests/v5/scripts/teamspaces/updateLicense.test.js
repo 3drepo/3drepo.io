@@ -35,13 +35,11 @@ const { isEmpty } = require(`${src}/utils/helper/objects`);
 
 const { disconnect } = require(`${src}/handler/db`);
 
-const [ENTERPRISE,, DISCRETIONARY] = SUBSCRIPTION_TYPES;
-
 const setupData = async (data) => {
 	await Promise.all(Object.keys(data).map(async (index) => {
 		const { name, sub = {}, sub2 = {} } = data[index];
 		await createTeamspace(name);
-		if (sub !== {}) {
+		if (!isEmpty(sub)) {
 			const { type, ...changes } = sub;
 			await editSubscriptions(name, type, changes);
 		}
@@ -80,13 +78,13 @@ const runTest = (testData) => {
 	describe.each([
 		['teamspace does not exist', false, templates.teamspaceNotFound, { name: generateRandomString() }, {}],
 		['removing sub of an unrecognised type', false, new Error(`Unrecognised license type: ${badType}`), testData.noSub, { remove: true, type: badType }],
-		['removing a non existing sub', true, undefined, testData.noSub, { remove: true, type: ENTERPRISE }],
-		['removing an existing sub (multiple subs)', true, undefined, testData.multipleSubs, { remove: true, type: ENTERPRISE }],
-		['removing an existing sub (single sub)', true, undefined, testData.enterprise, { remove: true, type: ENTERPRISE }],
+		['removing a non existing sub', true, undefined, testData.noSub, { remove: true, type: SUBSCRIPTION_TYPES.ENTERPRISE }],
+		['removing an existing sub (multiple subs)', true, undefined, testData.multipleSubs, { remove: true, type: SUBSCRIPTION_TYPES.ENTERPRISE }],
+		['removing an existing sub (single sub)', true, undefined, testData.enterprise, { remove: true, type: SUBSCRIPTION_TYPES.ENTERPRISE }],
 		['removing all subs', true, undefined, testData.multipleSubs, { removeAll: true }],
-		['updating a non existing sub', true, undefined, testData.noSub, { type: ENTERPRISE, data: 1 }],
-		['updating an existing sub', true, undefined, testData.enterprise, { type: ENTERPRISE, data: 100 }],
-		['updating an existing sub with invalid data', false, undefined, testData.enterprise, { type: ENTERPRISE, data: 'abc' }],
+		['updating a non existing sub', true, undefined, testData.noSub, { type: SUBSCRIPTION_TYPES.ENTERPRISE, data: 1 }],
+		['updating an existing sub', true, undefined, testData.enterprise, { type: SUBSCRIPTION_TYPES.ENTERPRISE, data: 100 }],
+		['updating an existing sub with invalid data', false, undefined, testData.enterprise, { type: SUBSCRIPTION_TYPES.ENTERPRISE, data: 'abc' }],
 
 	])('Update License', (desc, success, expectedOutput, teamspace, params) => {
 		beforeEach(async () => {
@@ -119,7 +117,7 @@ const createData = () => ({
 	enterprise: {
 		name: generateRandomString(),
 		sub: {
-			type: ENTERPRISE,
+			type: SUBSCRIPTION_TYPES.ENTERPRISE,
 			collaborators: 10,
 			data: 10,
 			expiryDate: generateRandomDate(),
@@ -128,13 +126,13 @@ const createData = () => ({
 	multipleSubs: {
 		name: generateRandomString(),
 		sub: {
-			type: DISCRETIONARY,
+			type: SUBSCRIPTION_TYPES.DISCRETIONARY,
 			collaborators: 'unlimited',
 			data: 10,
 			expiryDate: generateRandomDate(),
 		},
 		sub2: {
-			type: ENTERPRISE,
+			type: SUBSCRIPTION_TYPES.ENTERPRISE,
 			collaborators: 1,
 			data: 10,
 			expiryDate: generateRandomDate(),

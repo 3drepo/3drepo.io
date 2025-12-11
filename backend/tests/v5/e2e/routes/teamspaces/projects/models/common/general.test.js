@@ -63,6 +63,7 @@ const generateBasicData = () => {
 			collaborators: [collaborator.user],
 			modelType: modelTypes.DRAWING }),
 		calibration: ServiceHelper.generateCalibration(),
+		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
 	};
 
 	data.jobs = [
@@ -1179,6 +1180,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		agent = await SuperTest(server);
 	});
 	afterAll(() => ServiceHelper.closeApp(server));
+
 	testGetModelList();
 	testGetModelStats();
 	testAppendFavourites();

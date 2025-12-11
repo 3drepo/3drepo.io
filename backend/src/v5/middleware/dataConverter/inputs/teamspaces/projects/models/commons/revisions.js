@@ -16,11 +16,13 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../../../models/revisions');
 const Path = require('path');
 const Yup = require('yup');
-const { getRevisionByIdOrTag } = require('../../../../../../../models/revisions');
 const { respond } = require('../../../../../../../utils/responder');
+const { stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { sufficientQuota } = require('../../../../../../../utils/quota');
+const { validateMany } = require('../../../../../../common');
 
 const Revisions = {};
 
@@ -57,15 +59,36 @@ Revisions.checkQuotaIsSufficient = async (req, res, next) => {
 	await next();
 };
 
-Revisions.revisionExists = (modelType) => async (req, res, next) => {
+Revisions.revisionExists = (modelType, allowDefault = false) => async (req, res, next) => {
 	try {
 		const { teamspace, model, revision } = req.params;
-		await getRevisionByIdOrTag(teamspace, model, modelType, revision, { _id: 1 });
+
+		if (revision) {
+			const { _id } = await getRevisionByIdOrTag(teamspace, model, modelType, revision, { _id: 1 });
+			req.params.revision = _id;
+		} else if (allowDefault) {
+			const { _id } = await getLatestRevision(teamspace, model, modelType, { _id: 1 });
+			req.params.revision = _id;
+		} else {
+			throw templates.revisionNotFound;
+		}
 
 		await next();
 	} catch (err) {
 		respond(req, res, err);
 	}
 };
+
+const configureQueryToParam = async (req, res, next) => {
+	const { revId } = req.query;
+	if (revId) {
+		req.params.revision = stringToUUID(revId);
+	}
+
+	await next();
+};
+
+Revisions.verifyRevQueryParam = (modelType, allowDefault = true) => validateMany([
+	configureQueryToParam, Revisions.revisionExists(modelType, allowDefault)]);
 
 module.exports = Revisions;
