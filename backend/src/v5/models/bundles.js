@@ -29,6 +29,7 @@ Bundle.getAssetList = async (teamspace, container, revision) => {
 
 	// legacy fallback - if repobundle list is not found, check for unity3d asset list
 	const unityBundle = await findOne(teamspace, `${container}.${UNITY_BUNDLE_COLLECTION}`, { _id: revision }, { _id: 0 });
+
 	if (unityBundle) return unityBundle;
 
 	throw templates.fileNotFound;

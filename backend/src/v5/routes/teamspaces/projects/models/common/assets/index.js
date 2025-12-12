@@ -156,7 +156,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/properties:
 	 *   get:
 	 *     description: Retrieves model properties for a given model or model federation. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is returned.
-	 *     tags: [v:external, Models]
+	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: getModelProperties
 	 *     parameters:
 	 *       - name: teamspace

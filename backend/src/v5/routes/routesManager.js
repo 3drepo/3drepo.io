@@ -21,6 +21,7 @@ const AuthRoutes = require('./authentication');
 const { BYPASS_AUTH } = require('../utils/config.constants');
 const CalibrationRoutes = require('./teamspaces/projects/models/drawings/calibrations');
 const CreateAssetsRoutes = require('./teamspaces/projects/models/common/assets');
+const CreateBundleRoutes = require('./teamspaces/projects/models/common/assets/bundles');
 const CreateGeneralRevisionRoutes = require('./teamspaces/projects/models/common/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
 const CreateModelGeneralRoutes = require('./teamspaces/projects/models/common/general');
@@ -47,10 +48,13 @@ RoutesManager.init = (app) => {
 
 	// // Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets', CreateAssetsRoutes(modelTypes.FEDERATION, internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/bundles', CreateBundleRoutes(modelTypes.FEDERATION, internal));
 
 	// Containers
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER, internal));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets', CreateAssetsRoutes(modelTypes.CONTAINER, internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/bundles', CreateBundleRoutes(modelTypes.CONTAINER, internal));
+
 	if (!internal) {
 		// Auth
 		app.use('/v5/', UserRoutes);
