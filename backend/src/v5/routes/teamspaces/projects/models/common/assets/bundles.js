@@ -16,23 +16,26 @@
  */
 
 const {
+	getRepoBundleInfo: getContainerBundleInfo,
+	getSupermeshMapping: getContainerSupermeshMapping,
+} = require('../../../../../../processors/teamspaces/projects/models/containers');
+const {
+	getRepoBundleInfo: getFederationBundleInfo,
+	getSupermeshMapping: getFederationSupermeshMapping,
+} = require('../../../../../../processors/teamspaces/projects/models/federations');
+const {
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
 } = require('../../../../../../middleware/permissions');
 
 const { Router } = require('express');
 const { getAccessibleContainers } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
-const {
-	getRepoBundleInfo: getContainerBundleInfo,
-} = require('../../../../../../processors/teamspaces/projects/models/containers');
-const {
-	getRepoBundleInfo: getFederationBundleInfo,
-} = require('../../../../../../processors/teamspaces/projects/models/federations');
 
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
-const { respond } = require('../../../../../../utils/responder');
+const { respond, writeStreamRespond } = require('../../../../../../utils/responder');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
+const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 
 const getRepoBundleInfo = (modelType) => async (req, res) => {
 	const { teamspace, revision } = req.params;
@@ -41,6 +44,19 @@ const getRepoBundleInfo = (modelType) => async (req, res) => {
 			: getFederationBundleInfo;
 		const assetList = await fn(teamspace, req.params[modelType], revision, req.containers);
 		respond(req, res, templates.ok, assetList);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getBundlesMeta = (modelType) => async (req, res) => {
+	const { teamspace, revision } = req.params;
+	try {
+		const fn = modelType === modelTypes.CONTAINER ? getContainerSupermeshMapping
+			: getFederationSupermeshMapping;
+		const stream = await fn(teamspace, req.params[modelType], revision, req.containers);
+		writeStreamRespond(req, res, templates.ok, stream, undefined, undefined, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -59,7 +75,7 @@ const establishRoutes = (modelType) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/bundles:
 	 *   get:
-	 *     description: Retrieves repobundle information for a given model or model federation. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is returned.
+	 *     description: Retrieves repobundle information for a given model or model federation. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is returned.This is anticipated to be used only internally by the 3drepo viewer.
 	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: getRepoAssets
 	 *     parameters:
@@ -159,6 +175,195 @@ const establishRoutes = (modelType) => {
 	 *                                 z: { type: number, example: 1240.66 }
 	 */
 	router.get('/', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getRepoBundleInfo(modelType));
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/bundles/meta:
+	 *   get:
+	 *     description: Get bundles metadata information. This is anticipated to be used only internally by the 3drepo viewer.
+	 *     tags: [v:external, v:internal, Models]
+	 *     operationId: getRepoAssets
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Teamspace identifier (e.g., "design-team-alpha")
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project identifier (e.g., "office-tower-2025")
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: modelTypes
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [federation, container]
+	 *       - name: modelId
+	 *         description: UUID of the model (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: revId
+	 *         description: Optional revision ID (e.g., "rev-42f81c")
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       200:
+	 *         description: Successful response
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               oneOf:
+	 *                 # Case 1: Single model (container)
+	 *                 - type: object
+	 *                   properties:
+	 *                     model:
+	 *                       type: string
+	 *                       example: "b1c8b1e9-6ff0-4e27-8b49-df74ac0c12fd"
+	 *                     supermeshes:
+	 *                       type: array
+	 *                       items:
+	 *                         type: object
+	 *                         properties:
+	 *                           id:
+	 *                             type: string
+	 *                             example: "e0a41d52-470e-44e3-9c98-9bf434b1c2af"
+	 *                           data:
+	 *                             type: object
+	 *                             properties:
+	 *                               numberOfIDs:
+	 *                                 type: integer
+	 *                                 example: 542
+	 *                               maxGeoCount:
+	 *                                 type: integer
+	 *                                 example: 542
+	 *                               materials:
+	 *                                 type: array
+	 *                                 items:
+	 *                                   type: object
+	 *                                   properties:
+	 *                                     name:
+	 *                                       type: string
+	 *                                       example: "1a9f7b41-ea3f-4e14-bf9d-df05b81f0e8e"
+	 *                                     albedoColor:
+	 *                                       type: object
+	 *                                       properties:
+	 *                                         r: { type: number, example: 0.44 }
+	 *                                         g: { type: number, example: 0.73 }
+	 *                                         b: { type: number, example: 0.29 }
+	 *                                         a: { type: number, example: 1 }
+	 *                                     shininess:
+	 *                                       type: number
+	 *                                       example: 0.0042
+	 *                               mapping:
+	 *                                 type: array
+	 *                                 items:
+	 *                                   type: object
+	 *                                   properties:
+	 *                                     name:
+	 *                                       type: string
+	 *                                       example: "f77a0d13-9c3a-4ae8-8886-87e2b6a1634f"
+	 *                                     sharedID:
+	 *                                       type: string
+	 *                                       example: "8b6a0313-91c6-4bd6-bb03-d6aa5c8ce728"
+	 *                                     material:
+	 *                                       type: integer
+	 *                                       example: 2
+	 *                                     min:
+	 *                                       type: array
+	 *                                       items: { type: number }
+	 *                                       example: [123.44, 250.0, -8844.33]
+	 *                                     max:
+	 *                                       type: array
+	 *                                       items: { type: number }
+	 *                                       example: [140.22, 260.0, -8800.77]
+	 *                                     usage:
+	 *                                       type: array
+	 *                                       items: { type: string }
+	 *                                       example: ["c1fbb598-b971-4122-bd79-1cd5bf8ae100_0"]
+	 *                 # Case 2: Federation (submodels array)
+	 *                 - type: object
+	 *                   properties:
+	 *                     submodels:
+	 *                       type: array
+	 *                       items:
+	 *                         type: object
+	 *                         properties:
+	 *                           model:
+	 *                             type: string
+	 *                             example: "b1c8b1e9-6ff0-4e27-8b49-df74ac0c12fd"
+	 *                           supermeshes:
+	 *                             type: array
+	 *                             items:
+	 *                               type: object
+	 *                               properties:
+	 *                                 id:
+	 *                                   type: string
+	 *                                   example: "e0a41d52-470e-44e3-9c98-9bf434b1c2af"
+	 *                                 data:
+	 *                                   type: object
+	 *                                   properties:
+	 *                                     numberOfIDs:
+	 *                                       type: integer
+	 *                                       example: 542
+	 *                                     maxGeoCount:
+	 *                                       type: integer
+	 *                                       example: 542
+	 *                                     materials:
+	 *                                       type: array
+	 *                                       items:
+	 *                                         type: object
+	 *                                         properties:
+	 *                                           name:
+	 *                                             type: string
+	 *                                             example: "1a9f7b41-ea3f-4e14-bf9d-df05b81f0e8e"
+	 *                                           albedoColor:
+	 *                                             type: object
+	 *                                             properties:
+	 *                                               r: { type: number, example: 0.44 }
+	 *                                               g: { type: number, example: 0.73 }
+	 *                                               b: { type: number, example: 0.29 }
+	 *                                               a: { type: number, example: 1 }
+	 *                                           shininess:
+	 *                                             type: number
+	 *                                             example: 0.0042
+	 *                                     mapping:
+	 *                                       type: array
+	 *                                       items:
+	 *                                         type: object
+	 *                                         properties:
+	 *                                           name:
+	 *                                             type: string
+	 *                                             example: "f77a0d13-9c3a-4ae8-8886-87e2b6a1634f"
+	 *                                           sharedID:
+	 *                                             type: string
+	 *                                             example: "8b6a0313-91c6-4bd6-bb03-d6aa5c8ce728"
+	 *                                           material:
+	 *                                             type: integer
+	 *                                             example: 2
+	 *                                           min:
+	 *                                             type: array
+	 *                                             items: { type: number }
+	 *                                             example: [123.44, 250.0, -8844.33]
+	 *                                           max:
+	 *                                             type: array
+	 *                                             items: { type: number }
+	 *                                             example: [140.22, 260.0, -8800.77]
+	 *                                           usage:
+	 *                                             type: array
+	 *                                             items: { type: string }
+	 *                                             example: ["c1fbb598-b971-4122-bd79-1cd5bf8ae100_0"]
+	 */
+	router.get('/meta', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getBundlesMeta(modelType));
 
 	return router;
 };

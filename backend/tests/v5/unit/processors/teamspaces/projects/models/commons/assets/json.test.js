@@ -196,7 +196,99 @@ const testGetAssetProperties = () => {
 	});
 };
 
+const testGetSupermeshMapping = () => {
+	describe.each([
+		['should return with a stream of the expected data (no submodels)', 0],
+		['should return with a stream of default data if no file has been found (no subModel)', 0, true],
+		['should return with a stream of the expected data (with submodels)', 3],
+		['should return with a stream of the expected data if some submodels failed (with submodels)', 3, false, [true, false, true]],
+		['should return with a stream of the expected data if all submodels failed (with submodels)', 1, false, [true]],
+	])('Get supermesh mapping', (desc, nSubModels, throwOnMain, throwOnSubModels = []) => {
+		test(desc, async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const revision = generateUUID();
+			const fileObj = generateRandomObject();
+
+			const subModels = times(nSubModels, () => ({
+				container: generateRandomString(),
+				revision: generateUUID(),
+			}));
+
+			const implementFilestreamMock = () => {
+				FilesManager.getFileAsStream.mockImplementationOnce(() => {
+					const fakeReadStream = PassThrough();
+					fakeReadStream.write(JSON.stringify(fileObj));
+					fakeReadStream.end();
+					return Promise.resolve({
+						readStream: fakeReadStream,
+					});
+				});
+			};
+
+			if (nSubModels === 0) {
+				if (throwOnMain) {
+					FilesManager.getFileAsStream.mockRejectedValueOnce(templates.fileNotFound);
+				} else {
+					implementFilestreamMock();
+				}
+			}
+
+			subModels.forEach((subModel, index) => {
+				if (throwOnSubModels[index]) {
+					FilesManager.getFileAsStream.mockRejectedValueOnce(templates.fileNotFound);
+				} else {
+					implementFilestreamMock();
+				}
+			});
+
+			const fnProm = JsonAssets.getSupermeshMapping(teamspace, container,
+				revision, nSubModels === 0 ? undefined : subModels);
+			if (throwOnMain) {
+				expect(fnProm).rejects.toEqual(templates.fileNotFound);
+			} else {
+				const resultStream = await fnProm;
+				const outputChunks = [];
+				resultStream.on('data', (d) => outputChunks.push(d.toString()));
+
+				await new Promise((resolve) => resultStream.on('end', resolve));
+
+				const output = outputChunks.join('');
+
+				if (nSubModels === 0) {
+					expect(output).toEqual(JSON.stringify(fileObj));
+				} else {
+					const subModelContent = subModels.flatMap((data, i) => (throwOnSubModels[i]
+						? []
+						: fileObj));
+					expect(output).toEqual(JSON.stringify({
+						submodels: subModelContent,
+					}));
+				}
+			}
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(nSubModels === 0 ? 1 : nSubModels);
+			if (nSubModels === 0) {
+				expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+					teamspace,
+					`${container}${JSON_STASH_COL}`,
+					`${UUIDToString(revision)}/supermeshes.json`,
+				);
+			} else {
+				subModels.forEach(({ container: containerId, revision: revId }) => {
+					expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(
+						teamspace,
+						`${containerId}${JSON_STASH_COL}`,
+						`${UUIDToString(revId)}/supermeshes.json`,
+					);
+				});
+			}
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetTree();
 	testGetAssetProperties();
+	testGetSupermeshMapping();
 });
