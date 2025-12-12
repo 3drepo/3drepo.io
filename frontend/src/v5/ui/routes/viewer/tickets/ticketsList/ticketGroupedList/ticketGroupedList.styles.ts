@@ -17,11 +17,19 @@
 
 import styled from 'styled-components';
 import { TicketItemContainer, Title } from '../ticketItem/ticketItem.styles';
+import { TextOverflow } from '@controls/textOverflow';
 
 export const GroupedListToggleContainer = styled(TicketItemContainer)`
     min-height: 0;
     display: flex;
-    align-items: anchor-center;
+    align-items: center;
+    border-bottom: 0 !important;
+`;
+
+export const GroupedTextOverflow = styled(TextOverflow)`
+    flex-grow: unset;
+    max-width: 278px;
+    align-content: center;
 `;
 
 export const GroupedListToggleTitle = styled(Title)`
@@ -29,7 +37,8 @@ export const GroupedListToggleTitle = styled(Title)`
     font-size: 13px;
     height: 24px;
     display: flex;
-    align-items: anchor-center;
+    align-items: center;
+    margin-top 1px;
 `;
 
 export const GroupedListSpacer = styled.div`
