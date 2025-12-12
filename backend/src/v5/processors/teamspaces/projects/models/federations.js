@@ -28,6 +28,7 @@ const { getAssetProperties } = require('./commons/assets/json');
 const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { getRepoBundleInfo } = require('./commons/assets/bundles');
 const { hasReadAccessToContainer } = require('../../../../utils/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { updateModelSubModels } = require('../../../../models/modelSettings');
@@ -144,5 +145,7 @@ Federations.getMD5Hash = async (teamspace, project, federation, user) => {
 };
 
 Federations.getAssetProperties = getAssetProperties;
+
+Federations.getRepoBundleInfo = getRepoBundleInfo;
 
 module.exports = Federations;

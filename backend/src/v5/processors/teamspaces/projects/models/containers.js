@@ -28,8 +28,11 @@ const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const fs = require('fs/promises');
+
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { getRepoBundleInfo } = require('./commons/assets/bundles');
+
 const { logger } = require('../../../../utils/logger');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueModelUpload } = require('../../../../services/modelProcessing');
@@ -140,5 +143,7 @@ Containers.getRevisionMD5Hash = getModelMD5Hash;
 Containers.getTree = getTree;
 
 Containers.getAssetProperties = getAssetProperties;
+
+Containers.getRepoBundleInfo = getRepoBundleInfo;
 
 module.exports = Containers;
