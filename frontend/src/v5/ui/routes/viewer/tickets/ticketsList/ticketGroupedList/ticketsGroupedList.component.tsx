@@ -34,7 +34,7 @@ export const TicketsGroupedList = ({ tickets, groupName } : TicketsGroup) => {
 			<List>
 				<CollapseControl
 					CollapseToggleComponent={(({ expanded: expandedProp }) => (
-						<GroupedListToggleContainer>
+						<GroupedListToggleContainer $expanded={expandedProp}>
 							<GroupedListToggleTitle>
 								<GroupedTextOverflow>{groupName}</GroupedTextOverflow>
 								<CircledNumber>{tickets.length}</CircledNumber>

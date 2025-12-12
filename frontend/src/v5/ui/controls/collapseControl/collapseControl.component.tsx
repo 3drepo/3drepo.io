@@ -49,11 +49,10 @@ export const CollapseControl = ({
 	CollapseToggleComponent,
 }: CollapseControlProps): JSX.Element => {
 	const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-	const [unmountChildren, setUnmountChildren] = useState(!defaultExpanded);
+	const [expandedAfterTransition, setExpandedAfterTransition] = useState(defaultExpanded);
 
 	const onTransitionEnd = () => {
-		if (!unmountHidden) return;
-		setUnmountChildren(!isExpanded);
+		setExpandedAfterTransition(isExpanded);
 	};
 
 	useEffect(() =>{
@@ -62,18 +61,18 @@ export const CollapseControl = ({
 
 	const toggleExpand = () => {
 		setIsExpanded((state) => !state);
-		if (!isExpanded && unmountHidden) {
-			setUnmountChildren(false);
+		if (!isExpanded) {
+			setExpandedAfterTransition(true);
 		}
 	};
 
 	return (
 		<Container className={className} $isLoading={!interactableWhileLoading && isLoading}>
 			<ControlsContainer onClick={toggleExpand}>
-				<CollapseToggleComponent expanded={isExpanded} />
+				<CollapseToggleComponent expanded={expandedAfterTransition} />
 			</ControlsContainer>
 			<Collapse in={isExpanded} onTransitionEnd={onTransitionEnd} >
-				{(!unmountChildren || !unmountHidden)  && children}
+				{(expandedAfterTransition || !unmountHidden)  && children}
 			</Collapse>
 		</Container>
 	);
