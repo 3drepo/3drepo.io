@@ -15,15 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { TicketItemContainer, Title } from '../ticketItem/ticketItem.styles';
 import { TextOverflow } from '@controls/textOverflow';
 
-export const GroupedListToggleContainer = styled(TicketItemContainer)`
+export const GroupedListToggleContainer = styled(TicketItemContainer)<{ $expanded:boolean }>`
     min-height: 0;
     display: flex;
     align-items: center;
-    border-bottom: 0 !important;
+  
+    ${({ $expanded }) => !$expanded && css`
+        border-bottom: 0 !important;
+    `};
 `;
 
 export const GroupedTextOverflow = styled(TextOverflow)`
