@@ -21,7 +21,7 @@ import { CollapseControl } from '@controls/collapseControl/collapseControl.compo
 import { List } from '../ticketsList.styles';
 import { TicketItem } from '../ticketItem/ticketItem.component';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { GroupedListSpacer, GroupedListToggleContainer, GroupedListToggleTitle } from './ticketGroupedList.styles';
+import { GroupedListSpacer, GroupedListToggleContainer, GroupedListToggleTitle, GroupedTextOverflow } from './ticketGroupedList.styles';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { ChevronIconContainer } from '@components/viewer/cards/cardFilters/filtersAccordion/filtersAccordion.styles';
@@ -36,7 +36,7 @@ export const TicketsGroupedList = ({ tickets, groupName } : TicketsGroup) => {
 					CollapseToggleComponent={(({ expanded: expandedProp }) => (
 						<GroupedListToggleContainer>
 							<GroupedListToggleTitle>
-								{groupName}
+								<GroupedTextOverflow>{groupName}</GroupedTextOverflow>
 								<CircledNumber>{tickets.length}</CircledNumber>
 							</GroupedListToggleTitle>
 							<ChevronIconContainer $collapsed={!expandedProp}>

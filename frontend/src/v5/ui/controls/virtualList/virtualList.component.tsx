@@ -21,6 +21,7 @@ interface Props {
 	itemHeight: number;
 	ItemComponent: (value: any, index: number, array: any[]) => JSX.Element;
 	vKey?: string;
+	className?: string;
 }
 
 const emptyRect = { x:0, y:0, width:0, top:0, bottom: 0, height:0 } as DOMRect;
@@ -150,7 +151,7 @@ export function useVRef<T>(key:string, defaultVal: T) {
 // Todo: pass a viewport
 // TODO: itemheight should be average?
 // ItemComponent must create an item which bottom is the top of the next item. In other words no gutters are allowed.
-export const VirtualList = ({ items, itemHeight, ItemComponent, vKey }:Props) => { 
+export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className }:Props) => { 
 	const parentVKey = useContext(VKeyContext);
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
@@ -260,6 +261,16 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey }:Props) =>
 		itemsHeight.current = {};
 	}, [items]);
 
+	let itemsContainerClassName = 'vlist-mid';
+	if (itemsSlice[0] === items[0] ) {
+		itemsContainerClassName = 'vlist-start';
+	}
+
+	if (itemsSlice[itemsSlice.length - 1] === items[items.length - 1]) {
+		itemsContainerClassName = 'vlist-end';
+	}
+
+
 	return (
 		<NestedListsContext parentVKey={vKey}>
 			<div
@@ -271,9 +282,10 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey }:Props) =>
 						boxSizing:'border-box',  
 						display:'block',
 					}} ref={containerRef as any}
+				className={className}
 			>
 				<div style={{ height: spacerStart } } id='startSpacer'/>
-				<div ref={itemsContainer as any}   >
+				<div ref={itemsContainer as any}  className={itemsContainerClassName} >
 					{itemsSlice.map((e, index, arr) => {
 						var ele = ItemComponent(e, index, arr);
 						const key = parentVKey ? `${parentVKey}.${ele.key}` : ele.key;
