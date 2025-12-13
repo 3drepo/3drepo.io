@@ -124,7 +124,7 @@ export const TicketsFiltersContextComponent = ({
 			choosablefilters,
 			isFiltering,
 			templates, 
-			modelsIds, 
+			modelsIds,
 		}}>
 			{children}
 		</TicketsFiltersContext.Provider>

@@ -33,7 +33,6 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	}
 
 	&:first-child {
-		border-top-left-radius: 10px;
 		border-top-right-radius: 10px;
 		overflow: hidden;
 	}
