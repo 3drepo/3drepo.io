@@ -197,10 +197,10 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className 
 		const containerRect = containerRef.current?.getBoundingClientRect();
 		let scrolled = false;
 
-		const wasScrolledOut = !intersects({ top:0, bottom: renderInnerHeight.current },  renderContainerRect.current);
-		const scrolledIn =  intersects({ top:0, bottom: innerHeight },  containerRect) && wasScrolledOut;
+		// const wasScrolledOut = !intersects({ top:0, bottom: renderInnerHeight.current },  renderContainerRect.current);
 		
 		const children = itemsContainer.current.children;
+		const scrolledIn =  intersects({ top:0, bottom: innerHeight },  containerRect) && !children.length;
 		
 		for (let i = 0; i < children.length ; i++ ) {
 			const elementBounding = children[i].getBoundingClientRect();
