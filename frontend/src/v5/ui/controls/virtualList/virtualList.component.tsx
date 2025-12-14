@@ -16,12 +16,17 @@
  */
 import { useRef, useState, useEffect, createContext, useContext, createRef } from 'react';
 
+export type VListHandle = {
+	gotoIndex: (index: number) => void;
+};
+
 interface Props {
 	items: any[];
 	itemHeight: number;
 	ItemComponent: (value: any, index: number, array: any[]) => JSX.Element;
 	vKey?: string;
 	className?: string;
+	handle?: React.MutableRefObject<VListHandle>;
 }
 
 const emptyRect = { x:0, y:0, width:0, top:0, bottom: 0, height:0 } as DOMRect;
@@ -89,12 +94,15 @@ const getlastItem = (items: any[],
 	return Math.min(index - 1, items.length - 1);
 };
 
-const getContainerHeight = (items: any[], heights: Record<any, number>, defaultHeight: number) => {
+const getHeightByIndex = (index: number, heights: Record<any, number>, defaultHeight: number) => {
 	let totalHeight = 0;
-	items.forEach((_, index) => totalHeight += heights[index] || defaultHeight);
+
+	for (let i = 0; i < index; i++) {
+		totalHeight += heights[i] || defaultHeight;
+	}
+
 	return totalHeight;
 };
-
 
 
 type VirtualListContextValue = {
@@ -147,11 +155,10 @@ export function useVRef<T>(key:string, defaultVal: T) {
 	return ref;
 }
 
-
 // Todo: pass a viewport
 // TODO: itemheight should be average?
 // ItemComponent must create an item which bottom is the top of the next item. In other words no gutters are allowed.
-export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className }:Props) => { 
+export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className, handle }:Props) => { 
 	const parentVKey = useContext(VKeyContext);
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
@@ -159,7 +166,6 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className 
 	const sliceIndexes = useRef({ first:-1, last:-1 });
 	const itemsRef = useVRef(`${parentVKey}.items`, items);
 	const initialized = useRef(true);
-
 
 	const renderInnerHeight = useRef(0);
 	renderInnerHeight.current = window.innerHeight;
@@ -172,7 +178,7 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className 
 	const res = getFirstItem(items, itemsHeight.current, itemHeight, renderContainerRect.current, renderInnerHeight.current);
 	let spacerStart = 0;
 	let itemsSlice = [];
-	let containerHeight = getContainerHeight(items, itemsHeight.current, itemHeight);
+	let containerHeight = getHeightByIndex(items.length, itemsHeight.current, itemHeight);
 	sliceIndexes.current.first = res?.first;
 
 	if (res) {
@@ -261,6 +267,32 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className 
 		itemsHeight.current = {};
 	}, [items]);
 
+	const gotoIndex = (index) => {
+		containerRef.current.parentElement.scrollTop = getHeightByIndex(index, itemsHeight.current, itemHeight);
+		let framesToVerifyScroll = 10;
+		const veriyfyScroll = () => {
+			if (framesToVerifyScroll >= 0) {
+				window.requestAnimationFrame(veriyfyScroll);
+				framesToVerifyScroll --;
+				return;
+			} 
+
+			var currentScroll = Math.round(containerRef.current.parentElement.scrollTop);
+			var otherScroll = Math.round(getHeightByIndex(index, itemsHeight.current, itemHeight));
+
+			if (currentScroll !== otherScroll) {
+				gotoIndex(index);
+			}
+		};
+
+		window.requestAnimationFrame(veriyfyScroll);
+	};
+
+	useEffect(() => {
+		handle.current = { gotoIndex };
+	}, [handle, gotoIndex]);
+
+
 	let itemsContainerClassName = 'vlist-mid';
 	if (itemsSlice[0] === items[0] ) {
 		itemsContainerClassName = 'vlist-start';
@@ -281,7 +313,8 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className 
 						border: 0, 
 						boxSizing:'border-box',  
 						display:'block',
-					}} ref={containerRef as any}
+					}} 
+				ref={containerRef as any}
 				className={className}
 			>
 				<div style={{ height: spacerStart } } id='startSpacer'/>
