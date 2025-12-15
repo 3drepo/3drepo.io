@@ -17,25 +17,26 @@
 
 const {
 	getRepoBundleInfo: getContainerBundleInfo,
+	getSuperMeshesInfo: getContainerSuperMeshesInfo,
 	getSupermeshMapping: getContainerSupermeshMapping,
 } = require('../../../../../../processors/teamspaces/projects/models/containers');
 const {
 	getRepoBundleInfo: getFederationBundleInfo,
+	getSuperMeshesInfo: getFederationSuperMeshesInfo,
 	getSupermeshMapping: getFederationSupermeshMapping,
 } = require('../../../../../../processors/teamspaces/projects/models/federations');
 const {
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
 } = require('../../../../../../middleware/permissions');
-
+const { respond, writeStreamRespond } = require('../../../../../../utils/responder');
+const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const { getAccessibleContainers } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
-
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
-const { respond, writeStreamRespond } = require('../../../../../../utils/responder');
+const { serialiseUnityMeta } = require('../../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/assets/bundles');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
-const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 
 const getRepoBundleInfo = (modelType) => async (req, res) => {
 	const { teamspace, revision } = req.params;
@@ -63,6 +64,20 @@ const getBundlesMeta = (modelType) => async (req, res) => {
 	}
 };
 
+const getUnityMeta = (modelType) => async (req, res, next) => {
+	const { teamspace, revision } = req.params;
+	try {
+		const fn = modelType === modelTypes.CONTAINER ? getContainerSuperMeshesInfo
+			: getFederationSuperMeshesInfo;
+		const result = await fn(teamspace, req.params[modelType], revision, req.containers);
+		req.supermeshData = result;
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = (modelType) => {
 	const router = Router({ mergeParams: true });
 
@@ -75,8 +90,8 @@ const establishRoutes = (modelType) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/bundles:
 	 *   get:
-	 *     description: Retrieves repobundle information for a given model or model federation. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is returned.This is anticipated to be used only internally by the 3drepo viewer.
-	 *     tags: [v:external, v:internal, Models]
+	 *     description: Retrieves repobundle information for a given model or model federation. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is returned. This is anticipated to be used only internally by the 3drepo viewer.
+	 *     tags: [v:external, v:internal, ViewerAssets]
 	 *     operationId: getRepoAssets
 	 *     parameters:
 	 *       - name: teamspace
@@ -181,7 +196,7 @@ const establishRoutes = (modelType) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/bundles/meta:
 	 *   get:
 	 *     description: Get bundles metadata information. This is anticipated to be used only internally by the 3drepo viewer.
-	 *     tags: [v:external, v:internal, Models]
+	 *     tags: [v:external, v:internal, ViewerAssets]
 	 *     operationId: getRepoAssets
 	 *     parameters:
 	 *       - name: teamspace
@@ -364,6 +379,134 @@ const establishRoutes = (modelType) => {
 	 *                                             example: ["c1fbb598-b971-4122-bd79-1cd5bf8ae100_0"]
 	 */
 	router.get('/meta', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getBundlesMeta(modelType));
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/bundles/unity/meta:
+	 *   get:
+	 *     description: Get meta information that is missing from unity asset list. This is anticipated to be used only internally by the 3drepo viewer.
+	 *     tags: [v:external, v:internal, ViewerAssets]
+	 *     operationId: getUnityAssets
+	 *     parameters:
+	 *       - name: teamspace
+	 *         in: path
+	 *         description: Teamspace identifier (e.g., "design-team-alpha")
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         in: path
+	 *         description: Project identifier (e.g., "office-tower-2025")
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: modelTypes
+	 *         in: path
+	 *         description: Model type
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [federation, container]
+	 *       - name: modelId
+	 *         in: path
+	 *         description: UUID of the model
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: revId
+	 *         in: query
+	 *         description: Optional revision ID
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       '200':
+	 *         description: Successful response
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+	 *                 # Single model response
+	 *                 - type: object
+	 *                   properties:
+	 *                     supermeshes:
+	 *                       type: array
+	 *                       items:
+	 *                         type: object
+	 *                         properties:
+	 *                           _id:
+	 *                             type: string
+	 *                             example: "b03bcf03-9a81-4950-8028-5a90d2046fed"
+	 *                           nVertices:
+	 *                             type: integer
+	 *                             example: 49728
+	 *                           nFaces:
+	 *                             type: integer
+	 *                             example: 73920
+	 *                           nUVChannels:
+	 *                             type: integer
+	 *                             example: 1
+	 *                           primitive:
+	 *                             type: integer
+	 *                             example: 3
+	 *                           min:
+	 *                             type: array
+	 *                             items:
+	 *                               type: number
+	 *                             example: [7363.74658203125, 0, -664.9959716796875]
+	 *                           max:
+	 *                             type: array
+	 *                             items:
+	 *                               type: number
+	 *                             example: [12400.625, 544.9990234375, 0]
+	 *
+	 *                 # Federated model response
+	 *                 - type: object
+	 *                   properties:
+	 *                     subModels:
+	 *                       type: array
+	 *                       items:
+	 *                         type: object
+	 *                         properties:
+	 *                           teamspace:
+	 *                             type: string
+	 *                             example: "teamspace"
+	 *                           model:
+	 *                             type: string
+	 *                             example: "modelid"
+	 *                           supermeshes:
+	 *                             type: array
+	 *                             items:
+	 *                               type: object
+	 *                               properties:
+	 *                                 _id:
+	 *                                   type: string
+	 *                                   example: "b03bcf03-9a81-4950-8028-5a90d2046fed"
+	 *                                 nVertices:
+	 *                                   type: integer
+	 *                                   example: 49728
+	 *                                 nFaces:
+	 *                                   type: integer
+	 *                                   example: 73920
+	 *                                 nUVChannels:
+	 *                                   type: integer
+	 *                                   example: 1
+	 *                                 primitive:
+	 *                                   type: integer
+	 *                                   example: 3
+	 *                                 min:
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: number
+	 *                                   example: [7363.74658203125, 0, -664.9959716796875]
+	 *                                 max:
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: number
+	 *                                   example: [12400.625, 544.9990234375, 0]
+	 */
+
+	router.get('/unity/meta', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getUnityMeta(modelType), serialiseUnityMeta(modelType));
 
 	return router;
 };

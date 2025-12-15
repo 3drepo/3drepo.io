@@ -19,8 +19,8 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../../helper/services');
 const { src } = require('../../../../../../../helper/path');
-const { insertOne } = require('../../../../../../../../../src/v5/handler/db');
-const { stringToUUID } = require('../../../../../../../../../src/v5/utils/helper/uuids');
+const { insertOne, insertMany } = require('../../../../../../../../../src/v5/handler/db');
+const { stringToUUID, UUIDToString } = require('../../../../../../../../../src/v5/utils/helper/uuids');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -276,6 +276,136 @@ const testGetAssetMeta = (internalService) => {
 	});
 };
 
+const testGetUnityMeta = (internalService) => {
+	const generateSuperMeshData = (nMeshes) => {
+		const output = { superMeshes: [] };
+
+		const input = times(nMeshes, () => {
+			const baseData = {
+				primitive: ServiceHelper.generateRandomNumber(),
+			};
+
+			const nFaces = ServiceHelper.generateRandomNumber();
+			const nVertices = ServiceHelper.generateRandomNumber();
+			const nUVChannels = ServiceHelper.generateRandomNumber();
+			const max = [
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber()];
+			const min = [
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber()];
+
+			const superMesh = { ...baseData,
+				faces_count: nFaces,
+				vertices_count: nVertices,
+				uv_channels_count: nUVChannels,
+				bounding_box: [min, max],
+			};
+			const superMeshOut = { ...baseData, nFaces, nVertices, nUVChannels, min, max };
+
+			superMesh._id = ServiceHelper.generateUUID();
+			superMeshOut._id = UUIDToString(superMesh._id);
+			output.superMeshes.push(superMeshOut);
+			return superMesh;
+		});
+
+		return { input, output };
+	};
+	describe('Get unity asset meta', () => {
+		const { users, teamspace, project, con, fed, revisions } = generateBasicData();
+		const conNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
+		const fedNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+		const nMeshes = 1;
+
+		const rev1Content = generateSuperMeshData(nMeshes);
+		const rev2Content = generateSuperMeshData(nMeshes);
+
+		const fedRevisions = times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.FEDERATION));
+		fed.properties.subModels = [{ _id: con._id }];
+
+		beforeAll(async () => {
+			const models = [con, conNoRev, fed, fedNoRev];
+			await setupBasicData(users, teamspace, project, models);
+			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
+				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
+			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
+				{ ...revisions[1], timestamp: new Date(Date.now() + 1000) }, modelTypes.CONTAINER);
+
+			await ServiceHelper.db.createRevision(teamspace, project.id, fed._id,
+				{ ...fedRevisions[0], timestamp: new Date() }, modelTypes.FEDERATION);
+
+			await insertMany(teamspace, `${con._id}.stash.3drepo`, rev1Content.input.map((data) => ({ ...data, type: 'mesh', rev_id: stringToUUID(revisions[0]._id) })));
+			await insertMany(teamspace, `${con._id}.stash.3drepo`, rev2Content.input.map((data) => ({ ...data, type: 'mesh', rev_id: stringToUUID(revisions[1]._id) })));
+		});
+
+		const generateTestData = (modelType) => {
+			const model = modelType === modelTypes.CONTAINER ? con : fed;
+			const wrongTypeModel = modelType === modelTypes.CONTAINER ? fed : con;
+			const modelNoRev = modelType === modelTypes.CONTAINER ? conNoRev : fedNoRev;
+			const modelRevs = modelType === modelTypes.CONTAINER ? revisions : fedRevisions;
+
+			const modelNotFoundErr = modelType === modelTypes.CONTAINER
+				? templates.containerNotFound : templates.federationNotFound;
+			let rev1FullContent;
+			let rev2FullContent;
+
+			if (modelType === modelTypes.CONTAINER) {
+				rev1FullContent = rev1Content.output;
+				rev2FullContent = rev2Content.output;
+			} else {
+				// feds don't cater for revisions
+				const output = [{ superMeshes: rev2Content.output, teamspace, model: con._id }];
+				rev1FullContent = { subModels: output };
+				rev2FullContent = { subModels: output };
+			}
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+				revId,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/bundles/unity/meta${ServiceHelper.createQueryString({ revId, key: internalService ? undefined : key })}`;
+
+			const externalTests = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+			];
+
+			const commonTests = [
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFoundErr],
+				['the model is not of the wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFoundErr],
+				['the model does not have a revision', getRoute({ modelId: modelNoRev._id }), false, templates.revisionNotFound],
+				['an invalid revision is provided by the user', getRoute({ revId: ServiceHelper.generateUUIDString() }), false, templates.revisionNotFound],
+				['a revision is provided by the user', getRoute({ revId: modelRevs[0]._id }), true, rev1FullContent],
+				['a revision is not provided by the user', getRoute(), true, rev2FullContent],
+			];
+
+			return [
+				...commonTests,
+				...(internalService ? [] : externalTests),
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(expectedOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
@@ -287,6 +417,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 
 		testGetAssetList();
 		testGetAssetMeta();
+		testGetUnityMeta();
 	});
 
 	describe('Internal Service', () => {
@@ -296,5 +427,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		});
 		testGetAssetList(true);
 		testGetAssetMeta(true);
+		testGetUnityMeta(true);
 	});
 });
