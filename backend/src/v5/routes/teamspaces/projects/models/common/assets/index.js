@@ -22,6 +22,7 @@ const {
 const { respond, writeStreamRespond } = require('../../../../../../utils/responder');
 const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
+const { getMetadata: getContainerMetadata } = require('../../../../../../processors/teamspaces/projects/models/commons/assets/json');
 const { getTree: getContainerTree } = require('../../../../../../processors/teamspaces/projects/models/containers');
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../../utils/responseCodes');
@@ -43,8 +44,8 @@ const getMetadata = async (req, res) => {
 	const { teamspace, container, revision } = req.params;
 
 	try {
-		const { readStream, size } = await getMetadataFile(teamspace, container, revision);
-		writeStreamRespond(req, res, templates.ok, readStream, 'all.json', size, { mimeType: MimeTypes.JSON });
+		const stream = await getContainerMetadata(teamspace, container, revision);
+		writeStreamRespond(req, res, templates.ok, stream, 'all.json', undefined, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

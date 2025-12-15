@@ -20,6 +20,8 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../../helper/services');
 const { src } = require('../../../../../../../helper/path');
 
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+
 const { storeFile } = require(`${src}/services/filesManager`);
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -103,6 +105,7 @@ const testGetTree = (internalService) => {
 		beforeAll(async () => {
 			const models = [con, conNoRev, fed];
 			await setupBasicData(users, teamspace, project, models);
+
 			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
 				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
 			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
@@ -159,6 +162,77 @@ const testGetTree = (internalService) => {
 	});
 };
 
+const testGetMetadata = (internalService) => {
+	describe('Get metadata', () => {
+		const { users, teamspace, project, con, fed, revisions } = generateBasicData();
+		const conNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
+
+		const rev1Nodes = times(5, () => ServiceHelper.generateBasicNode('meta', revisions[0]._id, times(5, () => ServiceHelper.generateRandomString())));
+		const rev2Nodes = times(5, () => ServiceHelper.generateBasicNode('meta', revisions[1]._id, times(5, () => ServiceHelper.generateRandomString())));
+
+		beforeAll(async () => {
+			const models = [con, conNoRev, fed];
+			await setupBasicData(users, teamspace, project, models);
+
+			await ServiceHelper.db.createScene(teamspace, project.id, con._id,
+				{ ...revisions[0], timestamp: new Date() }, rev1Nodes);
+			await ServiceHelper.db.createScene(teamspace, project.id, con._id,
+				{ ...revisions[1], timestamp: new Date(Date.now() + 1000) }, rev2Nodes);
+		});
+
+		const generateTestData = (modelType) => {
+			const model = con;
+			const wrongTypeModel = fed;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+				revId,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/meta/all.json${internalService ? `${revId ? `?revId=${revId}` : ''}` : `?key=${key}`}`;
+
+			const externalTests = [
+				['session is external', getRoute(), false, templates.pageNotFound],
+			];
+
+			const castNode = (node) => ({
+				_id: UUIDToString(node._id),
+				metadata: node.metadata,
+				parents: node.parents,
+			});
+
+			const internalTests = modelType === modelTypes.CONTAINER ? [
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
+				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
+				['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.revisionNotFound],
+				['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, JSON.stringify(rev1Nodes.map(castNode))],
+				['a revision is not provided by the user', getRoute(), true, JSON.stringify(rev2Nodes.map(castNode))],
+			] : [['the model type used in the route is not container', getRoute(), false, templates.pageNotFound]];
+
+			return internalService ? internalTests : externalTests;
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					const fullOutput = { data: JSON.parse(expectedOutput) };
+
+					expect(res.body).toEqual(fullOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
@@ -169,6 +243,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		});
 
 		testGetTree();
+		testGetMetadata();
 	});
 
 	describe('Internal Service', () => {
@@ -177,5 +252,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 			agent = await SuperTest(server);
 		});
 		testGetTree(true);
+		testGetMetadata(true);
 	});
 });
