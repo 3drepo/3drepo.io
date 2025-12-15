@@ -19,23 +19,27 @@ const { addModel, deleteModel, getModelList, getModelMD5Hash } = require('./comm
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+
+const BundleAssets = require('./commons/assets/bundles');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
+const JsonAssets = require('./commons/assets/json');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const fs = require('fs/promises');
+
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
-const { getTree } = require('./commons/assets/json');
+
 const { logger } = require('../../../../utils/logger');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueModelUpload } = require('../../../../services/modelProcessing');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
-const Containers = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
+const Containers = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups, ...JsonAssets, ...BundleAssets };
 
 Containers.addContainer = addModel;
 
@@ -139,7 +143,5 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
 
 Containers.getRevisionMD5Hash = getModelMD5Hash;
-
-Containers.getTree = getTree;
 
 module.exports = Containers;

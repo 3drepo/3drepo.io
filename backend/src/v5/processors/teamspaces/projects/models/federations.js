@@ -24,14 +24,16 @@ const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
+const { getTree, ...JSONAssets } = require('./commons/assets/json');
 const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { getRepoBundleInfo } = require('./commons/assets/bundles');
 const { hasReadAccessToContainer } = require('../../../../utils/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { updateModelSubModels } = require('../../../../models/modelSettings');
 
-const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
+const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups, ...JSONAssets };
 
 // Override
 Federations.getTicketGroupById = async (teamspace, project, federation, revId, ticket, groupId, convertToMeshIds) => {
@@ -141,5 +143,7 @@ Federations.getMD5Hash = async (teamspace, project, federation, user) => {
 	}
 	return [];
 };
+
+Federations.getRepoBundleInfo = getRepoBundleInfo;
 
 module.exports = Federations;
