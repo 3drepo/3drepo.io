@@ -94,7 +94,7 @@ const testSerialiseUnityMeta = () => {
 		);
 	});
 
-	test(`Should respend with ${templates.unknown.code} if an error occured`, () => {
+	test(`Should respond with ${templates.unknown.code} if an error occured`, () => {
 		const req = { supermeshData: [] };
 		const res = {};
 
