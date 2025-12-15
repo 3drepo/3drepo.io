@@ -51,7 +51,7 @@ Permissions.hasProjectAdminPermissions = (perms, username) => perms.some(
 	({ user, permissions }) => user === username && permissions.includes(PROJECT_ADMIN),
 );
 
-const modelPermCheck = (permCheck, modelType) => async (teamspace, project, modelID, username, adminCheck = true) => {
+Permissions.checkModelExists = async (teamspace, project, model, modelType) => {
 	let getModelFn = getModelById;
 
 	if (modelType === modelTypes.CONTAINER) {
@@ -62,12 +62,17 @@ const modelPermCheck = (permCheck, modelType) => async (teamspace, project, mode
 		getModelFn = getDrawingById;
 	}
 
-	const model = await getModelFn(teamspace, modelID, { permissions: 1 });
-	const modelExists = await modelsExistInProject(teamspace, project, [modelID]);
+	const modelDetails = await getModelFn(teamspace, model, { permissions: 1 });
+	const modelExists = await modelsExistInProject(teamspace, project, [model]);
 	if (!modelExists) {
 		return false;
 	}
+	return modelDetails;
+};
 
+const modelPermCheck = (permCheck, modelType) => async (teamspace, project, modelID, username, adminCheck = true) => {
+	const model = await Permissions.checkModelExists(teamspace, project, modelID, modelType);
+	if (!model) return false;
 	if (adminCheck) {
 		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
 		if (hasAdminPerms) {

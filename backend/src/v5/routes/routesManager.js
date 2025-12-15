@@ -20,6 +20,7 @@ const AadRoutes = require('./sso/aad');
 const AuthRoutes = require('./authentication');
 const { BYPASS_AUTH } = require('../utils/config.constants');
 const CalibrationRoutes = require('./teamspaces/projects/models/drawings/calibrations');
+const CreateAssetsRoutes = require('./teamspaces/projects/models/common/assets');
 const CreateGeneralRevisionRoutes = require('./teamspaces/projects/models/common/revisions');
 const CreateGroupRoutes = require('./teamspaces/projects/models/common/groups');
 const CreateModelGeneralRoutes = require('./teamspaces/projects/models/common/general');
@@ -43,6 +44,9 @@ RoutesManager.init = (app) => {
 
 	app.use('/v5/teamspaces/', TeamspaceRoutes(internal));
 	app.use('/v5/teamspaces/:teamspace/projects', ProjectRoutes(internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER, internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.CONTAINER, internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets', CreateAssetsRoutes(modelTypes.CONTAINER, internal));
 
 	if (!internal) {
 	// Auth
@@ -57,17 +61,15 @@ RoutesManager.init = (app) => {
 		app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
 
 		// Containers
-		app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets', CreateTicketRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/comments', CreateTicketCommentsRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/groups', CreateGroupRoutes());
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/views', CreateViewRoutes());
-		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.CONTAINER));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', MetadataRoutes);
 
 		// Federations
-		app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION));
+		app.use('/v5/teamspaces/:teamspace/projects/:project/federations', CreateModelGeneralRoutes(modelTypes.FEDERATION, internal));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets', CreateTicketRoutes(true));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets/:ticket/comments', CreateTicketCommentsRoutes(true));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/tickets/:ticket/groups', CreateTicketGroupsRoutes(true));
@@ -77,7 +79,7 @@ RoutesManager.init = (app) => {
 		app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:federation/files', FederationFilesRoutes);
 
 		// Drawings
-		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING));
+		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING, internal));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.DRAWING));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:drawing/revisions/:revision/calibrations', CalibrationRoutes);
 	}
