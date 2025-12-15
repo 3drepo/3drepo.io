@@ -15,10 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
 const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber, outOfOrderArrayEqual, generateUUIDString } = require('../../../../../helper/services');
 
 const CryptoJs = require('crypto-js');
+
+jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/containers');
+const ContainersProcessor = require(`${src}/processors/teamspaces/projects/models/containers`);
 
 jest.mock('../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
@@ -527,6 +531,49 @@ const testGetMD5Hash = () => {
 	});
 };
 
+const testGetSuperMeshesInfo = () => {
+	describe('Get super meshes info for federation', () => {
+		const teamspace = generateRandomString();
+		const federationId = generateRandomString();
+		const revisionId = generateRandomString();
+
+		test('when federation has containers', async () => {
+			const containers = times(3, () => ({
+				container: generateRandomString(), revision: generateRandomString() }));
+			const superMeshInfoMock = times(3, () => generateRandomObject());
+
+			superMeshInfoMock.forEach((info) => {
+				ContainersProcessor.getSuperMeshesInfo.mockResolvedValueOnce(info);
+			});
+
+			const expectedData = superMeshInfoMock.map((info, index) => ({
+				teamspace,
+				model: containers[index].container,
+				superMeshes: info,
+			}));
+
+			await expect(Federations.getSuperMeshesInfo(teamspace, federationId, revisionId, containers))
+				.resolves.toEqual({ subModels: expectedData });
+
+			expect(ContainersProcessor.getSuperMeshesInfo).toHaveBeenCalledTimes(containers.length);
+			containers.forEach(({ container: model, revision }) => {
+				expect(ContainersProcessor.getSuperMeshesInfo).toHaveBeenCalledWith(
+					teamspace,
+					model,
+					revision,
+				);
+			});
+		});
+
+		test('when federation has no containers', async () => {
+			await expect(Federations.getSuperMeshesInfo(teamspace, federationId, revisionId, []))
+				.resolves.toEqual({ subModels: [] });
+
+			expect(ContainersProcessor.getSuperMeshesInfo).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetFederationList();
 	testAppendFavourites();
@@ -538,4 +585,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetSettings();
 	testGetTicketGroupById();
 	testGetMD5Hash();
+	testGetSuperMeshesInfo();
 });

@@ -32,6 +32,8 @@ const { getRepoBundleInfo } = require('./commons/assets/bundles');
 const { hasReadAccessToContainer } = require('../../../../utils/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { updateModelSubModels } = require('../../../../models/modelSettings');
+const { getSuperMeshesInfo } = require('./containers');
+
 
 const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups, ...JSONAssets };
 
@@ -145,5 +147,13 @@ Federations.getMD5Hash = async (teamspace, project, federation, user) => {
 };
 
 Federations.getRepoBundleInfo = getRepoBundleInfo;
+
+Federations.getSuperMeshesInfo = async (teamspace, federation, revision, containers) => {
+	const supermeshData = await Promise.all(containers.map(async ({container, revision: containerRev}) => {
+		const data = await getSuperMeshesInfo(teamspace, container, containerRev);
+		return {teamspace, model: container, superMeshes: data};
+	}));
+	return { subModels: supermeshData};
+};
 
 module.exports = Federations;

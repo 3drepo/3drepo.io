@@ -32,6 +32,7 @@ const fs = require('fs/promises');
 
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { getSuperMeshesInfo } = require('./commons/scenes');
 
 const { logger } = require('../../../../utils/logger');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
@@ -139,5 +140,7 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
 
 Containers.getRevisionMD5Hash = getModelMD5Hash;
+
+Containers.getSuperMeshesInfo = getSuperMeshesInfo;
 
 module.exports = Containers;
