@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { isArray, isObject } = require('../../../../../../../../utils/helper/typeCheck');
 const Yup = require('yup');
 const { logger } = require('../../../../../../../../utils/logger');
 const { modelTypes } = require('../../../../../../../../models/modelSettings.constants');
@@ -26,12 +27,25 @@ const Bundles = {};
 
 const baseSchema = Yup.object({
 	_id: types.id,
-	max: Yup.array().of(Yup.number()).length(3),
-	min: Yup.array().of(Yup.number()).length(3),
+	primitive: Yup.number().default(3),
+
 	nFaces: Yup.number().default(0),
 	nVertices: Yup.number().default(0),
 	nUVChannels: Yup.number().default(0),
-	primitive: Yup.number().default(3),
+
+	min: Yup.array().of(Yup.number()).length(3),
+	max: Yup.array().of(Yup.number()).length(3),
+}).transform((value) => {
+	if (!value || !isObject(value)) return value;
+
+	return {
+		...value,
+		nFaces: value.faces_count ?? 0,
+		nVertices: value.vertices_count ?? 0,
+		nUVChannels: value.uv_channels_count ?? 0,
+		min: (isArray(value.bounding_box) && value.bounding_box[0]) ?? [0, 0, 0],
+		max: (isArray(value.bounding_box) && value.bounding_box[1]) ?? [0, 0, 0],
+	};
 });
 
 Bundles.serialiseUnityMeta = (modelType) => (req, res) => {
@@ -39,6 +53,7 @@ Bundles.serialiseUnityMeta = (modelType) => (req, res) => {
 		const containerSchema = {
 			superMeshes: Yup.array().of(baseSchema),
 		};
+
 		const schema = modelType === modelTypes.CONTAINER ? Yup.object(containerSchema) : Yup.object({
 			subModels: Yup.array().of(
 				Yup.object({

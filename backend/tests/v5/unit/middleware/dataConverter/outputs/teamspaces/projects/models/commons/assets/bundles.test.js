@@ -33,15 +33,22 @@ const generateTestData = () => {
 
 	input.superMeshes = times(3, () => {
 		const baseData = {
-			max: [generateRandomNumber(), generateRandomNumber(), generateRandomNumber()],
-			min: [generateRandomNumber(), generateRandomNumber(), generateRandomNumber()],
-			nFaces: generateRandomNumber(),
-			nVertices: generateRandomNumber(),
-			nUVChannels: generateRandomNumber(),
 			primitive: generateRandomNumber(),
 		};
-		const superMesh = { ...baseData };
-		const superMeshOut = { ...baseData };
+
+		const nFaces = generateRandomNumber();
+		const nVertices = generateRandomNumber();
+		const nUVChannels = generateRandomNumber();
+		const max = [generateRandomNumber(), generateRandomNumber(), generateRandomNumber()];
+		const min = [generateRandomNumber(), generateRandomNumber(), generateRandomNumber()];
+
+		const superMesh = { ...baseData,
+			faces_count: nFaces,
+			vertices_count: nVertices,
+			uv_channels_count: nUVChannels,
+			bounding_box: [min, max],
+		};
+		const superMeshOut = { ...baseData, nFaces, nVertices, nUVChannels, min, max };
 
 		superMesh._id = generateUUID();
 		superMeshOut._id = UUIDToString(superMesh._id);
