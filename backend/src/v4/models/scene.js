@@ -18,7 +18,6 @@
 "use strict";
 const utils = require("../utils");
 const db = require("../handler/db");
-const ExternalServices = require("../handler/externalServices");
 const matrix = require("./helper/matrix");
 const History = require("./history");
 const {v5Path} = require("../../interop");
@@ -113,10 +112,6 @@ Scene.findMetadataNodesByFields = async function (account, model, branch, revisi
 	}
 
 	return cleanAll(await db.aggregate(account, getSceneCollectionName(model), [query, projection]));
-};
-
-Scene.getGridfsFileStream = async function (account, model, filename) {
-	return ExternalServices.getFileStream(account, getSceneCollectionName(model), "gridfs", filename);
 };
 
 Scene.getNodeById = async function (account, model, id, projection = {}) {

@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const FSHandler = require('../handler/fs');
+const { FileStorageTypes } = require('../utils/config.constants');
+const config = require('../utils/config');
 const { init: initFrontegg } = require('./sso/frontegg');
 const { initialise: initFronteggCache } = require('../models/frontegg.cache');
 const { initialise: initInvites } = require('../models/invitations');
@@ -32,5 +35,22 @@ Initialiser.initialiseSystem = () => Promise.all([
 	initFrontegg(),
 	initFronteggCache(),
 ]);
+
+const checkFSHandler = async (storageType) => {
+	if (!config[storageType]) {
+		throw new Error(`Filesystem configuration for ${storageType} is missing`);
+	}
+
+	const handler = FSHandler.getHandler(storageType);
+	await handler.testFilesystem();
+};
+
+Initialiser.checkSystem = async (requireExternalFS = false) => {
+	await Promise.all([
+		checkFSHandler(FileStorageTypes.FS),
+		requireExternalFS && config[FileStorageTypes.EXTERNAL_FS]
+			? checkFSHandler(FileStorageTypes.EXTERNAL_FS) : Promise.resolve(),
+	]);
+};
 
 module.exports = Initialiser;

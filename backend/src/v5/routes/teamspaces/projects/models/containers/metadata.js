@@ -43,7 +43,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/{metadata}:
 	 *   patch:
 	 *     description: Adds, removes or edits custom metadata of an element of a 3D model. If a metadata does not exist it is added and if it exists it is updated. To remove a metadata provide null value.
-	 *     tags: [Metadata]
+	 *     tags: [v:external, Metadata]
 	 *     operationId: updateCustomMetadata
 	 *     parameters:
 	 *       - name: teamspace

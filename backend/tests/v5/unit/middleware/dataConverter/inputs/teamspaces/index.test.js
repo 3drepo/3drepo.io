@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { generateRandomString, determineTestGroup } = require('../../../../../helper/services');
+const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
 jest.mock('../../../../../../../src/v5/utils/responder');
@@ -30,8 +30,13 @@ const TeamspacesProcessor = require(`${src}/processors/teamspaces`);
 jest.mock('../../../../../../../src/v5/utils/permissions');
 const PermissionsUtils = require(`${src}/utils/permissions`);
 
+jest.mock('../../../../../../../src/v5/schemas/subscriptions');
+const SubscriptionsSchema = require(`${src}/schemas/subscriptions`);
+
 const Teamspaces = require(`${src}/middleware/dataConverter/inputs/teamspaces`);
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const { SUBSCRIPTION_TYPES } = require(`${src}/models/teamspaces.constants`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -119,7 +124,41 @@ const testMemberExists = () => {
 	});
 };
 
+const testValidateUpdateQuota = () => {
+	describe('validateQuota', () => {
+		test('next() should be called if the provided data is valid', async () => {
+			const mockCB = jest.fn(() => {});
+			const data = generateRandomObject();
+
+			await Teamspaces.validateUpdateQuota({ body: data }, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).not.toHaveBeenCalled();
+			expect(SubscriptionsSchema.validateSchema).toHaveBeenCalledTimes(1);
+			expect(SubscriptionsSchema.validateSchema)
+				.toHaveBeenCalledWith(SUBSCRIPTION_TYPES.ENTERPRISE, data, true);
+		});
+
+		test('should respond with error if validateSchema throws an error', async () => {
+			const mockCB = jest.fn(() => {});
+			const req = { body: generateRandomObject() };
+			const err = new Error(generateRandomString());
+			SubscriptionsSchema.validateSchema.mockRejectedValueOnce(err);
+
+			await Teamspaces.validateUpdateQuota(req, {}, mockCB);
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(SubscriptionsSchema.validateSchema).toHaveBeenCalledTimes(1);
+			expect(SubscriptionsSchema.validateSchema)
+				.toHaveBeenCalledWith(SUBSCRIPTION_TYPES.ENTERPRISE, req.body, true);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, {},
+				{ ...templates.invalidArguments, message: err.message });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testCanRemoveTeamspaceMember();
 	testMemberExists();
+	testValidateUpdateQuota();
 });
