@@ -19,27 +19,27 @@ import { Fab } from '@mui/material';
 import styled from 'styled-components';
 
 export const AddButton = styled(Fab)`
-    && {
-        background-color: transparent;
-        color: ${({ theme }) => theme.palette.primary.main};
-        margin: 0;
-        border: 0;
-        width: 32px;
-        height: 32px;
+	&& {
+		background-color: transparent;
+		color: ${({ theme }) => theme.palette.primary.main};
+		margin: 0;
+		border: 0;
+		width: 32px;
+		height: 32px;
 
-        &:hover {
-            background-color: transparent;
-            color: ${({ theme }) => theme.palette.primary.dark};
-        }
-        &:active {
-            background-color: transparent;
-            box-shadow: none;
-            color: ${({ theme }) => theme.palette.primary.darkest};
-        }
-        &:disabled {
-            background-color: transparent;
+		&:hover {
+			background-color: transparent;
+			color: ${({ theme }) => theme.palette.primary.dark};
+		}
+		&:active {
+			background-color: transparent;
+			box-shadow: none;
+			color: ${({ theme }) => theme.palette.primary.darkest};
+		}
+		&:disabled {
+			background-color: transparent;
 
-            color: #edf0f8; // TODO - fix after new palette is released
-        }
-    }
+			color: #edf0f8; // TODO - fix after new palette is released
+		}
+	}
 `;
