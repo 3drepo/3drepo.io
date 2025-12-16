@@ -35,18 +35,14 @@ const baseSchema = Yup.object({
 
 	min: Yup.array().of(Yup.number()).length(3).default([0, 0, 0]),
 	max: Yup.array().of(Yup.number()).length(3).default([0, 0, 0]),
-}).transform((value) => {
-	if (!value || !isObject(value)) return value;
-
-	return {
-		...value,
-		nFaces: value.faces_count ?? 0,
-		nVertices: value.vertices_count ?? 0,
-		nUVChannels: value.uv_channels_count ?? 0,
-		min: isArray(value?.bounding_box) ? value.bounding_box[0] : [0, 0, 0],
-		max: isArray(value?.bounding_box) ? value.bounding_box[1] : [0, 0, 0],
-	};
-});
+}).transform((value) => ({
+	...value,
+	nFaces: value.faces_count ?? 0,
+	nVertices: value.vertices_count ?? 0,
+	nUVChannels: value.uv_channels_count ?? 0,
+	min: isArray(value?.bounding_box) ? value.bounding_box[0] : [0, 0, 0],
+	max: isArray(value?.bounding_box) ? value.bounding_box[1] : [0, 0, 0],
+}));
 
 Bundles.serialiseUnityMeta = (modelType) => (req, res) => {
 	try {
