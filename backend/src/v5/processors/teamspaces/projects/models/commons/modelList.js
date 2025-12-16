@@ -16,12 +16,12 @@
  */
 
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
-const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions');
 const { USERS_DB_NAME } = require('../../../../../models/users.constants');
 const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');
 const { getMD5FileHash } = require('../../../../../services/filesManager');
+const { getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { removeModelData } = require('../../../../../utils/helper/models');
 

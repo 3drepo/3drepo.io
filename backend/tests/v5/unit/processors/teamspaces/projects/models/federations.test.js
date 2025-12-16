@@ -45,8 +45,6 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
-jest.mock('../../../../../../../src/v5/models/fileRefs');
-const FilesRef = require(`${src}/models/fileRefs`);
 
 jest.mock('../../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);

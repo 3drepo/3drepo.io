@@ -17,6 +17,7 @@
 
 const { hasReadAccessToContainer, hasReadAccessToDrawing, hasWriteAccessToContainer, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
+const { revisionExists, validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const { serialiseRevision, serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
@@ -26,7 +27,6 @@ const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData: validateNewContainerRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { validateNewRevisionData: validateNewDrawingRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings');
-const { revisionExists, validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getImage = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { isArray, isObject } = require('../../../../../../../../utils/helper/typeCheck');
 const Yup = require('yup');
+const { isArray } = require('../../../../../../../../utils/helper/typeCheck');
 const { logger } = require('../../../../../../../../utils/logger');
 const { modelTypes } = require('../../../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../../../utils/responder');
