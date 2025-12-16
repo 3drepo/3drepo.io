@@ -75,7 +75,7 @@ const streamSubModelData = async (outstream, teamspace, subModels, getFileName, 
 JsonAssets.getTree = async (teamspace, container, revision) => {
 	const stream = PassThrough();
 
-	stream.write('{"subTree": [],"mainTree": ');
+	stream.write('{"subTrees": [],"mainTree": ');
 	await readFileStreamAsync(stream, teamspace, container, `${UUIDToString(revision)}/fulltree.json`);
 	stream.end('}');
 

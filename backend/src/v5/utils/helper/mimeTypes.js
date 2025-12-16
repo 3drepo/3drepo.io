@@ -24,5 +24,6 @@ MimeTypes.SVG = 'image/svg+xml';
 MimeTypes.JPG = 'image/jpeg';
 MimeTypes.DWG = 'application/dwg';
 MimeTypes.ZIP = 'application/zip';
+MimeTypes.BINARY = 'application/octet-stream';
 
 module.exports = MimeTypes;
