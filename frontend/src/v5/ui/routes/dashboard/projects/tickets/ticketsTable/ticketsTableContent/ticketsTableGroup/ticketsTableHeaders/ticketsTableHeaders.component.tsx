@@ -14,38 +14,24 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useContext } from 'react';
-import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
-import { HeaderCell, HeaderCellText, Headers } from './ticketsTableHeaders.styles';
-import { getPropertyLabel } from '../../../ticketsTable.helper';
+import { Headers } from './ticketsTableHeaders.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
-import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { TicketsTableHeaderFilter } from './ticketsTableHeaderFilter.component';
-
-const TicketHeaderCell = ({ name, ...props }) => {
-	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
-	const isSelected = name === sortingColumn;
-
-	return (
-		<HeaderCell name={name} onClick={() => onColumnClick(name)}>
-			<HeaderCellText {...props}>
-				{getPropertyLabel(name)}
-			</HeaderCellText>
-			{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
-			<TicketsTableHeaderFilter propertyName={name}/>
-		</HeaderCell>
-	);
-};
+import { TicketsTableHeaderBulkEdit } from './ticketsTableHeaderBulkEdit.component';
+import { NON_BULK_EDITABLE_COLUMNS } from './ticketsTableHeaders.helpers';
+import { TicketsTableHeader } from './ticketsTableHeader.component';
 
 export const TicketsTableHeaders = () => {
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
-
+	const selectedTicketIds = ['ticketId1', 'ticketId2'] // TODO get selectedIds from context
+	
+	const canBulkEditProperty = (name: string) => !NON_BULK_EDITABLE_COLUMNS.includes(name) && selectedTicketIds.length > 1;
+	
 	return (
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
-				<TicketHeaderCell key={name} name={name} />
+				canBulkEditProperty(name) ? <TicketsTableHeaderBulkEdit key={name} name={name} /> : <TicketsTableHeader key={name} name={name} />
 			))}
 			<ColumnsVisibilitySettings />
 		</Headers>

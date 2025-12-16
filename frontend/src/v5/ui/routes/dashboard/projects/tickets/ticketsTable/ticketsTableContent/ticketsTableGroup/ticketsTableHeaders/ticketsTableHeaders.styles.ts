@@ -22,7 +22,7 @@ import { ResizableTableHeader } from '@controls/resizableTableContext/resizableT
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
-	margin-bottom: 8px;
+	margin-bottom: 6px;
 	width: 100%;
 `;
 
@@ -36,17 +36,29 @@ export const HeaderCellText = styled(TextOverflow)`
 `;
 
 export const HeaderCell = styled(ResizableTableHeader)`
+	align-self: center;
+	padding: 5px 2px 0;
+	margin: 0px;
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 	user-select: none;
-	padding: 0 10px;
 	align-items: center;
 
 	svg {
 		width: 16px;
 	}
 
-	&:last-of-type {
-		padding-right: 20px;
+`;
+
+export const BulkEditHeaderButton = styled.div`
+	display: flex;
+	border: 1px solid ${({ theme }) => theme.palette.base.main};
+	border-radius: 5px;
+	padding: 4px 5px;
+	width: 100%;
+	
+	&:active, &:hover {
+		background-color: ${({ theme }) => theme.palette.base.main};
+		color: ${({ theme }) => theme.palette.primary.contrast};
 	}
 `;

@@ -15,17 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled, { css } from 'styled-components';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { PopoverOrigin } from '@mui/material';
 
-export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
-	width: 100%;
-	overflow: hidden;
-	grid-row: 1;
-	grid-column: ${({ $index }) => $index + 1};
-	display: flex;
-	padding: 5px 5px 0;
+export const TICKET_HEADER_POPOVER_PROPS = {
+	anchorOrigin: {
+		vertical: 'bottom',
+		horizontal: 'left',
+	} as PopoverOrigin,
+	transformOrigin: {
+		vertical: 'top',
+		horizontal: 'left',
+	} as PopoverOrigin,
+};
 
-	${({ $isMoving, theme }) => $isMoving && css`
-		background-color: ${theme.palette.primary.lightest};
-	`};
-`;
+export const NON_BULK_EDITABLE_COLUMNS = [
+	'id',
+	`properties.${BaseProperties.OWNER}`,
+	'modelName',
+	BaseProperties.CREATED_AT,
+	BaseProperties.UPDATED_AT,
+	BaseProperties.TITLE,
+];
