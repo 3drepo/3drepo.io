@@ -18,7 +18,7 @@
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { addRevision, getLatestRevision } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getContainers, getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
+const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
@@ -29,7 +29,6 @@ const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getRepoBundleInfo } = require('./commons/assets/bundles');
-const { hasReadAccessToContainer } = require('../../../../utils/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { updateModelSubModels } = require('../../../../models/modelSettings');
 const { getSuperMeshesInfo } = require('./containers');
