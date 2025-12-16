@@ -51,18 +51,22 @@ const generateBasicData = () => {
 		con: ServiceHelper.generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
-			collaborators: [collaborator.user] }),
+			collaborators: [collaborator.user],
+		}),
 		fed: ServiceHelper.generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
 			collaborators: [collaborator.user],
-			modelType: modelTypes.FEDERATION }),
+			modelType: modelTypes.FEDERATION,
+		}),
 		draw: ServiceHelper.generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
 			collaborators: [collaborator.user],
-			modelType: modelTypes.DRAWING }),
+			modelType: modelTypes.DRAWING,
+		}),
 		calibration: ServiceHelper.generateCalibration(),
+		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
 	};
 
 	data.jobs = [
@@ -95,7 +99,7 @@ const setupBasicData = async (users, teamspace, project, models) => {
 	]);
 };
 
-const testGetModelList = () => {
+const testGetModelList = (isInternal) => {
 	describe('Get model list', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 		const models = [...times(15, (n) => {
@@ -134,17 +138,35 @@ const testGetModelList = () => {
 			const getRoute = ({
 				projectId = project.id,
 				key = users.tsAdmin.apiKey,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s${key ? `?key=${key}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s${isInternal ? '' : `${key ? `?key=${key}` : ''}`}`;
 
-			const modelList = models.flatMap(({ _id, isFavourite, name, modelType: type }) => (type === modelType ? { _id, isFavourite: !!isFavourite, name, role: 'admin' } : []));
+			const modelList = models.flatMap(({ _id, isFavourite, name, modelType: type }) => (type === modelType ? { _id, isFavourite: !isInternal && !!isFavourite, name, role: 'admin' } : []));
 
-			return [
-				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
-				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+			const generalTests = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				[`the user is a member of the teamspace but has no access to any of the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), true, { [`${modelType}s`]: [] }],
 				[`the user has access to some ${modelType}s`, getRoute(), true, { [`${modelType}s`]: modelList }],
 			];
+
+			const noRouteTests = [
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.pageNotFound],
+				[`the user has access to some ${modelType}s`, getRoute(), false, templates.pageNotFound],
+			];
+
+			const externalTests = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				[`the user is a member of the teamspace but has no access to any of the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), true, { [`${modelType}s`]: [] }],
+
+			];
+
+			if (isInternal) {
+				if (modelType === modelTypes.CONTAINER) {
+					return generalTests;
+				}
+				return noRouteTests;
+			}
+
+			return [...externalTests, ...generalTests];
 		};
 
 		const runTest = (desc, route, success, expectedOutput) => {
@@ -161,8 +183,8 @@ const testGetModelList = () => {
 				}
 			});
 		};
-		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
 		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
 		describe.each(generateTestData(modelTypes.DRAWING))('Drawing', runTest);
 	});
 };
@@ -428,11 +450,15 @@ const testGetModelStats = (isInternal = false) => {
 const testAppendFavourites = () => {
 	describe('Append Favourites', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
-		const favFed = { ...ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
-			isFavourite: true };
+		const favFed = {
+			...ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+			isFavourite: true,
+		};
 		const favCon = { ...ServiceHelper.generateRandomModel(), isFavourite: true };
-		const favDraw = { ...ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING }),
-			isFavourite: true };
+		const favDraw = {
+			...ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING }),
+			isFavourite: true,
+		};
 
 		beforeAll(async () => {
 			const models = [con, fed, draw, favFed, favCon, favDraw];
@@ -484,7 +510,7 @@ const testAppendFavourites = () => {
 				[`the user does not have access to the ${modelType}`, generateRouteParams({ key: users.noProjectAccess.apiKey }), false, templates.invalidArguments, standardPayload],
 				[`the ${modelType} list provided contains a ${wrongModelType}`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [wrongTypeModel._id] }],
 				[`the ${modelType} list provided isEmpty`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [] }],
-				['the payload is empty', generateRouteParams(), false, templates.invalidArguments, { }],
+				['the payload is empty', generateRouteParams(), false, templates.invalidArguments, {}],
 				[`the ${modelType} list contains a ${modelType} that does not exist`, generateRouteParams(), false, templates.invalidArguments, { [`${modelType}s`]: [ServiceHelper.generateRandomString()] }],
 				[`the ${modelType} list is valid`, generateRouteParams(), true, undefined, standardPayload],
 				[`the ${modelType} list contains ${modelType} that is already a favourite`, generateRouteParams(), true, undefined, { [`${modelType}s`]: [favModel._id] }],
@@ -521,11 +547,15 @@ const testAppendFavourites = () => {
 const testDeleteFavourites = () => {
 	describe('Remove Favourites', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
-		const favFed = { ...ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
-			isFavourite: true };
+		const favFed = {
+			...ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+			isFavourite: true,
+		};
 		const favCon = { ...ServiceHelper.generateRandomModel(), isFavourite: true };
-		const favDraw = { ...ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING }),
-			isFavourite: true };
+		const favDraw = {
+			...ServiceHelper.generateRandomModel({ modelType: modelTypes.DRAWING }),
+			isFavourite: true,
+		};
 
 		beforeAll(async () => {
 			const models = [con, fed, draw, favFed, favCon, favDraw];
@@ -620,7 +650,7 @@ const testDeleteFavourites = () => {
 	});
 };
 
-const testAddModel = () => {
+const testAddModel = (isInternal) => {
 	describe('Add Model', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 
@@ -667,18 +697,30 @@ const testAddModel = () => {
 				type: modelType === modelTypes.FEDERATION ? undefined : ServiceHelper.generateRandomString(),
 			});
 
-			return [
-				['the user does not have a valid session', getRoute({ key: null }), false, generatePayload(), templates.notLoggedIn],
-				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, generatePayload(), templates.teamspaceNotFound],
+			const general = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, generatePayload(), templates.projectNotFound],
-				['the user is not a project admin', getRoute({ key: users.noProjectAccess.apiKey }), false, generatePayload(), templates.notAuthorized],
 				[`the name has been taken by another ${modelType}`, getRoute(), false, generatePayload(model.name), templates.invalidArguments],
 				[`the name has been taken by another ${modelType} (case insensitive)`, getRoute(), false, generatePayload(model.name.toUpperCase()), templates.invalidArguments],
 				[`the name has been taken by a ${wrongModelType}`, getRoute(), false, generatePayload(wrongTypeModel.name), templates.invalidArguments],
 				[`the name has been taken by a ${wrongModelType} (case insensitive)`, getRoute(), false, generatePayload(wrongTypeModel.name.toUpperCase()), templates.invalidArguments],
 				['with invalid payload', getRoute(), false, {}, templates.invalidArguments],
+			];
+
+			const external = [
+				['the user does not have a valid session', getRoute({ key: null }), false, generatePayload(), templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, generatePayload(), templates.teamspaceNotFound],
+				['the user is not a project admin', getRoute({ key: users.noProjectAccess.apiKey }), false, generatePayload(), templates.notAuthorized],
 				['user has sufficient permission and the payload is valid', getRoute(), true, generatePayload()],
 			];
+
+			if (isInternal) {
+				if (modelType === modelTypes.CONTAINER) {
+					return general;
+				}
+				return general.map(([desc, route, , payload]) => [
+					desc, route, false, payload, templates.pageNotFound]);
+			}
+			return external;
 		};
 
 		const runTest = (desc, route, success, payload, expectedOutput) => {
@@ -780,7 +822,7 @@ const testDeleteModel = (isInternal = false) => {
 					const modelType = Object.keys(getRes.body)[0];
 
 					expect(getRes.body[modelType].find(({ _id }) => _id === res.body._id)).toBeUndefined();
-				}	else if (success && isInternal) {
+				} else if (success && isInternal) {
 					const getRes = await agent.get(route).expect(templates.containerNotFound.status);
 
 					expect(getRes.body.code).toEqual(templates.containerNotFound.code);
@@ -1250,5 +1292,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		testUpdateModelSettings(true);
 		testGetModelStats(true);
 		testGetSettings(true);
+		testGetModelList(true);
+		testAddModel(true);
 	});
 });

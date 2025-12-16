@@ -29,6 +29,7 @@ const {
 } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
+const { BYPASS_AUTH } = require('../../../../../utils/config.constants');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
@@ -96,7 +97,7 @@ const getModelList = (modelType) => async (req, res) => {
 	};
 
 	try {
-		const models = await fn[modelType](teamspace, project, user);
+		const models = await fn[modelType](teamspace, project, user, req.app.get(BYPASS_AUTH));
 		respond(req, res, templates.ok, { [`${modelType}s`]: models });
 	} catch (err) {
 		respond(req, res, err);
@@ -263,14 +264,14 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         required: true
 		 *         schema:
 		 *           type: string
-				 *       - name: project
+		 *       - name: project
 		 *         description: Project ID
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -278,8 +279,8 @@ const establishRoutes = (modelType, isInternal) => {
 		 *           enum: [containers, federations, drawings]
 		 *     requestBody:
 		 *       content:
-				 *         application/json:
-				 *           schema:
+		 *         application/json:
+		 *           schema:
 		 *             type: object
 		 *             required:
 		 *               - name
@@ -341,30 +342,30 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                 example: 100
 		 *                 description: Angle from North in degrees
 		 *           examples:
-			 *             container:
+		 *             container:
 		 *               summary: container
-			 *               value:
-			 *                 name: Lego House Architecture
-			 *                 unit: mm
+		 *               value:
+		 *                 name: Lego House Architecture
+		 *                 unit: mm
 		 *                 desc: The Architecture model of the Lego House
 		 *                 code: LEGO_ARCHIT_001
 		 *                 type: Architecture
 		 *                 angleFromNorth: 100
 		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-			 *             federation:
+		 *             federation:
 		 *               summary: federation
-			 *               value:
-			 *                 name: Lego House Federation
-			 *                 unit: m
+		 *               value:
+		 *                 name: Lego House Federation
+		 *                 unit: m
 		 *                 desc: The Structural model of the Lego House
 		 *                 code: LEGO_ARCHIT_002
 		 *                 angleFromNorth: 150
-			 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
 		 *             drawing:
 		 *               summary: drawing
-			 *               value:
-			 *                 name: Lego House Drawing
-			 *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+		 *               value:
+		 *                 name: Lego House Drawing
+		 *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
 		 *                 desc: The Drawing of the Lego House
 		 *                 type: Structural
 		 *     responses:
@@ -408,7 +409,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -445,18 +446,18 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                         type: boolean
 		 *                         description: whether the model is a favourited item for the user
 		 *             examples:
-			 *               containers:
+		 *               containers:
 		 *                 summary: containers
-			 *                 value:
+		 *                 value:
 		 *                   containers: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Container, role: admin, isFavourite: true }]
-			 *               federations:
+		 *               federations:
 		 *                 summary: federations
-			 *                 value:
-			 *                   federations: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Federation, role: admin, isFavourite: true }]
-			 *               drawings:
+		 *                 value:
+		 *                   federations: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Federation, role: admin, isFavourite: true }]
+		 *               drawings:
 		 *                 summary: drawings
-			 *                 value:
-			 *                   drawings: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Drawing, role: admin, isFavourite: true }]
+		 *                 value:
+		 *                   drawings: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Drawing, role: admin, isFavourite: true }]
 		 */
 		router.get('/', hasAccessToTeamspace, getModelList(modelType));
 
@@ -481,7 +482,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -499,18 +500,18 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                   type: string
 		 *                   format: uuid
 		 *           examples:
-			 *             containers:
+		 *             containers:
 		 *               summary: containers
-			 *               value:
+		 *               value:
 		 *                 containers: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
-			 *             federations:
+		 *             federations:
 		 *               summary: federations
-			 *               value:
+		 *               value:
 		 *                 federations: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
-			 *             drawings:
+		 *             drawings:
 		 *               summary: drawings
-			 *               value:
-			 *                 drawings: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+		 *               value:
+		 *                 drawings: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
 		 *     responses:
 		 *       401:
 		 *         $ref: "#/components/responses/notLoggedIn"
@@ -542,7 +543,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -578,20 +579,20 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         required: true
 		 *         schema:
 		 *           type: string
-				 *       - name: project
+		 *       - name: project
 		 *         description: Project ID
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *           enum: [containers, federations,drawings]
-				 *       - name: model
+		 *       - name: model
 		 *         description: Model ID
 		 *         in: path
 		 *         required: true
@@ -613,11 +614,11 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                   type: string
 		 *                   description: Model code
 		 *                   example: STR-01
-			 *                 status:
+		 *                 status:
 		 *                   type: string
 		 *                   description: Current status of the model
 		 *                   example: ok
-				 *                 containers:
+		 *                 containers:
 		 *                   type: array
 		 *                   description: The IDs of the models the model consists of
 		 *                   items:
@@ -640,38 +641,38 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                     risks:
 		 *                       type: integer
 		 *                       description: The number of unmitigated risks of the model
-			 *                 desc:
+		 *                 desc:
 		 *                   type: string
 		 *                   description: Model description
 		 *                   example: Floor 1 MEP with Facade
-			 *                 lastUpdated:
+		 *                 lastUpdated:
 		 *                   type: integer
 		 *                   description: Timestamp(ms) of when any of the submodels was updated
 		 *                   example: 1630598072000
 		 *             examples:
 		 *               container:
 		 *                 summary: container
-			 *                 value:
+		 *                 value:
 		 *                   type: Architectural
-			 *                   code: STR-01
-			 *                   status: ok
+		 *                   code: STR-01
+		 *                   status: ok
 		 *                   unit: mm
 		 *                   desc: Floor 1 MEP with Facade
 		 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: rev1 }
 		 *               federation:
 		 *                 summary: federation
-			 *                 value:
-			 *                   code: STR-01
-			 *                   status: ok
+		 *                 value:
+		 *                   code: STR-01
+		 *                   status: ok
 		 *                   desc: Floor 1 MEP with Facade
 		 *                   lastUpdated: 1630598072000
 		 *                   tickets: { issues: 10, risks: 5 }
 		 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
 		 *               drawing:
 		 *                 summary: drawing
-			 *                 value:
-			 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-			 *                   status: ok
+		 *                 value:
+		 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+		 *                   status: ok
 		 *                   type: Architectural
 		 *                   desc: Floor 1 MEP with Facade
 		 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
@@ -693,20 +694,20 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         required: true
 		 *         schema:
 		 *           type: string
-				 *       - name: project
+		 *       - name: project
 		 *         description: Project ID
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *           enum: [containers, federations, drawings]
-				 *       - name: model
+		 *       - name: model
 		 *         description: Model ID
 		 *         in: path
 		 *         required: true
@@ -743,7 +744,11 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
+<<<<<<< HEAD
 			 *         description: Model type
+=======
+		 *         description: Model type
+>>>>>>> 5345bdd2aa31772b701346ebfcf59c6562068ff8
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -802,21 +807,21 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                 format: uuid
 		 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 		 *           examples:
-			 *             container:
+		 *             container:
 		 *               summary: container
-			 *               value:
-			 *                 name: Lego House Container
-			 *                 unit: mm
+		 *               value:
+		 *                 name: Lego House Container
+		 *                 unit: mm
 		 *                 desc: The Container model of the Lego House
 		 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 		 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 		 *                 angleFromNorth: 100
 		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-			 *             federation:
+		 *             federation:
 		 *               summary: federation
-			 *               value:
-			 *                 name: Lego House Federation
-			 *                 unit: m
+		 *               value:
+		 *                 name: Lego House Federation
+		 *                 unit: m
 		 *                 desc: The Federation model of the Lego House
 		 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 		 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
@@ -824,9 +829,9 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
 		 *             drawing:
 		 *               summary: drawing
-			 *               value:
-			 *                 name: Lego House Drawing
-			 *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+		 *               value:
+		 *                 name: Lego House Drawing
+		 *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
 		 *                 desc: The Drawing of the Lego House
 		 *     responses:
 		 *       401:
@@ -859,7 +864,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -883,12 +888,12 @@ const establishRoutes = (modelType, isInternal) => {
 		 *             schema:
 		 *               $ref: "#/components/schemas/modelSettings"
 		 *             examples:
-			 *               container:
+		 *               container:
 		 *                 summary: container
-			 *                 value:
+		 *                 value:
 		 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-			 *                   name: Lego House Container
-			 *                   unit: mm
+		 *                   name: Lego House Container
+		 *                   unit: mm
 		 *                   code: MOD1
 		 *                   type: Structural
 		 *                   desc: The Container model of the Lego House
@@ -899,12 +904,12 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 		 *                   angleFromNorth: 100
 		 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-			 *               federation:
+		 *               federation:
 		 *                 summary: federation
-			 *                 value:
+		 *                 value:
 		 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-			 *                   name: Lego House Federation
-			 *                   unit: mm
+		 *                   name: Lego House Federation
+		 *                   unit: mm
 		 *                   code: MOD1
 		 *                   desc: The Federation model of the Lego House
 		 *                   timestamp: 1629976656315
@@ -916,10 +921,10 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
 		 *               drawing:
 		 *                 summary: drawing
-			 *                 value:
+		 *                 value:
 		 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-			 *                   name: Lego House Drawing
-			 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+		 *                   name: Lego House Drawing
+		 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
 		 *                   type: Structural
 		 *                   desc: The Drawing of the Lego House
 		 *                   calibration: { verticalRange: [0,10], units: m }
@@ -947,7 +952,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -1006,7 +1011,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -1386,7 +1391,6 @@ const establishRoutes = (modelType, isInternal) => {
 		 */
 		router.get('/:model/stats', hasReadAccessToContainer, getModelStats(modelType), formatModelStats(modelType));
 	}
-
 	return router;
 };
 
