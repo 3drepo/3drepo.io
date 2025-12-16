@@ -27,9 +27,6 @@ const { times } = require('lodash');
 jest.mock('../../../../../../../../../src/v5/models/bundles');
 const BundlesModel = require(`${src}/models/bundles`);
 
-// jest.mock('../../../../../../../../../src/v5/services/filesManager');
-// const FilesManager = require(`${src}/services/filesManager`);
-
 const bundlesAssets = require(`${src}/processors/teamspaces/projects/models/commons/assets/bundles`);
 
 const testGetRepoBundleInfo = () => {

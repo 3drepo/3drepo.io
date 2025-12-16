@@ -19,8 +19,9 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../../helper/services');
 const { src } = require('../../../../../../../helper/path');
-const { insertOne, insertMany } = require('../../../../../../../../../src/v5/handler/db');
-const { stringToUUID, UUIDToString } = require('../../../../../../../../../src/v5/utils/helper/uuids');
+
+const { insertOne, insertMany } = require(`${src}/handler/db`);
+const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);

@@ -18,7 +18,8 @@
 const { times } = require('lodash');
 const { src } = require('../../../../../../../helper/path');
 const { generateUUIDString, generateRandomString, determineTestGroup } = require('../../../../../../../helper/services');
-const { modelTypes } = require('../../../../../../../../../src/v5/models/modelSettings.constants');
+
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 jest.mock('../../../../../../../../../src/v5/utils/permissions');
 const PermUtils = require(`${src}/utils/permissions`);

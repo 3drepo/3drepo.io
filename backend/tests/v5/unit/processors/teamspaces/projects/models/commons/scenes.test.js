@@ -28,8 +28,9 @@ const {
 	sleepMS,
 	generateRandomObject,
 } = require('../../../../../../helper/services');
-const { UUIDToString, stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
-const { idTypesToKeys, idTypes, metaKeyToIdType } = require('../../../../../../../../src/v5/models/metadata.constants');
+
+const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { idTypesToKeys, idTypes, metaKeyToIdType } = require(`${src}/models/metadata.constants`);
 
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
