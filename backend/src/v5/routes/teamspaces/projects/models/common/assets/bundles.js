@@ -112,7 +112,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [federation, container]
+	 *           enum: [federations, containers]
 	 *       - name: modelId
 	 *         description: UUID of the model (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
 	 *         in: path
@@ -217,15 +217,15 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [federation, container]
+	 *           enum: [federations, containers]
 	 *       - name: modelId
-	 *         description: UUID of the model (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+	 *         description: Model ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *       - name: revId
-	 *         description: Optional revision ID (e.g., "rev-42f81c")
+	 *         description: Revision ID (optional)
 	 *         in: query
 	 *         required: false
 	 *         schema:
@@ -406,7 +406,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [federation, container]
+	 *           enum: [federations, containers]
 	 *       - name: modelId
 	 *         in: path
 	 *         description: UUID of the model

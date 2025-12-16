@@ -177,7 +177,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [federation, container]
+	 *           enum: [federations, containers]
 	 *       - name: modelId
 	 *         description: UUID of the model (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
 	 *         in: path
