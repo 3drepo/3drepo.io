@@ -57,7 +57,7 @@ const getBundlesMeta = (modelType) => async (req, res) => {
 		const fn = modelType === modelTypes.CONTAINER ? getContainerSupermeshMapping
 			: getFederationSupermeshMapping;
 		const stream = await fn(teamspace, req.params[modelType], revision, req.containers);
-		writeStreamRespond(req, res, templates.ok, stream, undefined, undefined, { mimeType: MimeTypes.JSON });
+		writeStreamRespond(req, res, templates.ok, stream, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

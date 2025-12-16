@@ -39,7 +39,7 @@ const getTree = async (req, res) => {
 
 	try {
 		const readStream = await getContainerTree(teamspace, container, revision);
-		writeStreamRespond(req, res, templates.ok, readStream, undefined, undefined, { mimeType: MimeTypes.JSON });
+		writeStreamRespond(req, res, templates.ok, readStream, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -52,7 +52,7 @@ const getProperties = (modelType) => async (req, res) => {
 		const fn = modelType === modelTypes.CONTAINER ? getContainerAssetProperties
 			: getFederationAssetProperties;
 		const propStream = await fn(teamspace, req.params[modelType], revision, req.containers);
-		writeStreamRespond(req, res, templates.ok, propStream, undefined, undefined, { mimeType: MimeTypes.JSON });
+		writeStreamRespond(req, res, templates.ok, propStream, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

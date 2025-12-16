@@ -33,7 +33,8 @@ const getImage = async (req, res) => {
 	try {
 		const { readStream, filename, size, mimeType, encoding } = await Drawings.getImageByRevision(
 			teamspace, project, drawing, revision);
-		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType, encoding });
+		writeStreamRespond(req, res, templates.ok, readStream,
+			{ fileName: filename, fileSize: size, mimeType, encoding });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -121,7 +122,7 @@ const downloadRevisionFiles = (modelType) => async (req, res) => {
 
 	try {
 		const file = await fn[modelType](teamspace, model, revision);
-		writeStreamRespond(req, res, templates.ok, file.readStream, file.filename, file.size);
+		writeStreamRespond(req, res, templates.ok, file.readStream, { fileName: file.filename, fileSize: file.size });
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);

@@ -44,7 +44,7 @@ const getThumbnail = async (req, res) => {
 
 	try {
 		const { readStream, filename, size, mimeType } = await Drawings.getLatestThumbnail(teamspace, project, drawing);
-		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
+		writeStreamRespond(req, res, templates.ok, readStream, { fileName: filename, fileSize: size, mimeType });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

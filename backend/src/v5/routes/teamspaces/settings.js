@@ -23,6 +23,7 @@ const {
 const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../utils/responder');
 const Audit = require('../../processors/teamspaces/audits');
+const MimeTypes = require('../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const TeamspaceSettings = require('../../processors/teamspaces/settings');
 const { UUIDToString } = require('../../utils/helper/uuids');
@@ -90,7 +91,7 @@ const getAuditLogArchive = async (req, res) => {
 	try {
 		const archive = await Audit.getAuditLogArchive(teamspace, user, from, to);
 
-		writeStreamRespond(req, res, templates.ok, archive, 'audit.zip', undefined, { mimeType: 'application/zip' });
+		writeStreamRespond(req, res, templates.ok, archive, { fileName: 'audit.zip', mimeType: MimeTypes.ZIP });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
