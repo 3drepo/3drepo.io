@@ -27,7 +27,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const BundlesMiddleware = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/assets/bundles`);
 
-const generateTestData = () => {
+const generateTestData = (withDefaults = false) => {
 	const input = {};
 	const output = { superMeshes: [] };
 
@@ -36,19 +36,33 @@ const generateTestData = () => {
 			primitive: generateRandomNumber(),
 		};
 
-		const nFaces = generateRandomNumber();
-		const nVertices = generateRandomNumber();
-		const nUVChannels = generateRandomNumber();
-		const max = [generateRandomNumber(), generateRandomNumber(), generateRandomNumber()];
-		const min = [generateRandomNumber(), generateRandomNumber(), generateRandomNumber()];
+		const superMesh = { ...baseData };
+		const superMeshOut = { ...baseData };
 
-		const superMesh = { ...baseData,
-			faces_count: nFaces,
-			vertices_count: nVertices,
-			uv_channels_count: nUVChannels,
-			bounding_box: [min, max],
-		};
-		const superMeshOut = { ...baseData, nFaces, nVertices, nUVChannels, min, max };
+		if (withDefaults) {
+			superMeshOut.nFaces = 0;
+			superMeshOut.nVertices = 0;
+			superMeshOut.nUVChannels = 0;
+			superMeshOut.min = [0, 0, 0];
+			superMeshOut.max = [0, 0, 0];
+		} else {
+			const nFaces = generateRandomNumber();
+			const nVertices = generateRandomNumber();
+			const nUVChannels = generateRandomNumber();
+			const max = [generateRandomNumber(), generateRandomNumber(), generateRandomNumber()];
+			const min = [generateRandomNumber(), generateRandomNumber(), generateRandomNumber()];
+
+			superMesh.faces_count = nFaces;
+			superMesh.vertices_count = nVertices;
+			superMesh.uv_channels_count = nUVChannels;
+			superMesh.bounding_box = [min, max];
+
+			superMeshOut.nFaces = nFaces;
+			superMeshOut.nVertices = nVertices;
+			superMeshOut.nUVChannels = nUVChannels;
+			superMeshOut.min = min;
+			superMeshOut.max = max;
+		}
 
 		superMesh._id = generateUUID();
 		superMeshOut._id = UUIDToString(superMesh._id);
@@ -61,57 +75,98 @@ const generateTestData = () => {
 };
 
 const testSerialiseUnityMeta = () => {
-	test('Serialise unity meta for container model', () => {
-		const { input, output } = generateTestData();
-		const req = { supermeshData: input };
-		const res = {};
+	describe('Serialise unity meta', () => {
+		test('Should work for container model', () => {
+			const { input, output } = generateTestData();
+			const req = { supermeshData: input };
+			const res = {};
 
-		BundlesMiddleware.serialiseUnityMeta(modelTypes.CONTAINER)(req, res);
+			BundlesMiddleware.serialiseUnityMeta(modelTypes.CONTAINER)(req, res);
 
-		expect(Responder.respond).toHaveBeenCalledWith(
-			req,
-			res,
-			templates.ok,
-			output,
-		);
-	});
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req,
+				res,
+				templates.ok,
+				output,
+			);
+		});
 
-	test('Serialise unity meta for federations', () => {
-		const nSubModels = 3;
-		const input = { subModels: [] };
-		const output = { subModels: [] };
+		test('Should work for federations', () => {
+			const nSubModels = 3;
+			const input = { subModels: [] };
+			const output = { subModels: [] };
 
-		for (let i = 0; i < nSubModels; i++) {
-			const { input: subInput, output: subOutput } = generateTestData();
-			const teamspace = generateRandomString();
-			const model = generateRandomString();
-			input.subModels.push({ superMeshes: subInput, teamspace, model });
-			output.subModels.push({ superMeshes: subOutput, teamspace, model });
-		}
+			for (let i = 0; i < nSubModels; i++) {
+				const { input: subInput, output: subOutput } = generateTestData();
+				const teamspace = generateRandomString();
+				const model = generateRandomString();
+				input.subModels.push({ superMeshes: subInput, teamspace, model });
+				output.subModels.push({ superMeshes: subOutput, teamspace, model });
+			}
 
-		const req = { supermeshData: input };
-		const res = {};
+			const req = { supermeshData: input };
+			const res = {};
 
-		BundlesMiddleware.serialiseUnityMeta(modelTypes.FEDERATION)(req, res);
-		expect(Responder.respond).toHaveBeenCalledWith(
-			req,
-			res,
-			templates.ok,
-			output,
-		);
-	});
+			BundlesMiddleware.serialiseUnityMeta(modelTypes.FEDERATION)(req, res);
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req,
+				res,
+				templates.ok,
+				output,
+			);
+		});
 
-	test(`Should respond with ${templates.unknown.code} if an error occured`, () => {
-		const req = { supermeshData: [] };
-		const res = {};
+		test('Should work for federations (with defaults)', () => {
+			const nSubModels = 3;
+			const input = { subModels: [] };
+			const output = { subModels: [] };
 
-		BundlesMiddleware.serialiseUnityMeta(modelTypes.CONTAINER)(req, res);
+			for (let i = 0; i < nSubModels; i++) {
+				const { input: subInput, output: subOutput } = generateTestData(true);
+				const teamspace = generateRandomString();
+				const model = generateRandomString();
+				input.subModels.push({ superMeshes: subInput, teamspace, model });
+				output.subModels.push({ superMeshes: subOutput, teamspace, model });
+			}
 
-		expect(Responder.respond).toHaveBeenCalledWith(
-			req,
-			res,
-			templates.unknown,
-		);
+			const req = { supermeshData: input };
+			const res = {};
+
+			BundlesMiddleware.serialiseUnityMeta(modelTypes.FEDERATION)(req, res);
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req,
+				res,
+				templates.ok,
+				output,
+			);
+		});
+
+		test(`Should respond with ${templates.unknown.code} if an error occured`, () => {
+			const req = { supermeshData: [] };
+			const res = {};
+
+			BundlesMiddleware.serialiseUnityMeta(modelTypes.CONTAINER)(req, res);
+
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req,
+				res,
+				templates.unknown,
+			);
+		});
+
+		test('Should respond with empty array if no object was provided', () => {
+			const req = { };
+			const res = {};
+
+			BundlesMiddleware.serialiseUnityMeta(modelTypes.CONTAINER)(req, res);
+
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req,
+				res,
+				templates.ok,
+				{ superMeshes: [] },
+			);
+		});
 	});
 };
 
