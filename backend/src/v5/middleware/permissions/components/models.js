@@ -51,7 +51,7 @@ const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
 			await getContainerById(teamspace, model, { _id: 1 });
 
 			next();
-		} else if ( await callback(teamspace, project, model, user, true)) {
+		} else if (await callback(teamspace, project, model, user, true)) {
 			next();
 		} else {
 			respond(req, res, templates.notAuthorized);
