@@ -86,15 +86,18 @@ const generateBasicData = () => {
 	};
 
 	const drawRevisions = {
-		voidRevision: { ...ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING),
+		voidRevision: {
+			...ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING),
 			timestamp: new Date(100000),
 			calibration: calibrationStatuses.UNCALIBRATED,
 		},
-		nonVoidRevision: { ...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
+		nonVoidRevision: {
+			...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
 			timestamp: new Date(200000),
 			calibration: calibrationStatuses.CALIBRATED,
 		},
-		noFileRevision: { ...ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
+		noFileRevision: {
+			...ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
 			timestamp: new Date(300000),
 			calibration: calibrationStatuses.UNCONFIRMED,
 		},
@@ -148,7 +151,7 @@ const setupData = async ({ users, teamspace, project, models, drawRevisions, con
 	]);
 };
 
-const testGetRevisions = () => {
+const testGetRevisions = (isInternal = false) => {
 	describe('Get Revisions', () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, models, drawRevisions, conRevisions } = basicData;
@@ -178,7 +181,7 @@ const testGetRevisions = () => {
 			return { revisions: formattedRevisions };
 		};
 
-		const generateTestData = (modelType) => {
+		const generateTestData = (modelType, internal) => {
 			let model;
 			let modelNotFound;
 
@@ -191,12 +194,22 @@ const testGetRevisions = () => {
 			}
 
 			const params = {
-				key: users.tsAdmin.apiKey,
+				key: isInternal ? undefined : users.tsAdmin.apiKey,
 				ts: teamspace,
 				projectId: project.id,
 				modelId: model._id,
 				modelType,
 			};
+
+			if (internal && modelType === modelTypes.CONTAINER) {
+				return [
+					['the user is internal and getting a container revisions', params, true],
+				];
+			} if (internal && modelType !== modelTypes.CONTAINER) {
+				return [
+					['trying to access endpoint for non-container model', params, false, templates.pageNotFound],
+				];
+			}
 
 			return [
 				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
@@ -212,7 +225,7 @@ const testGetRevisions = () => {
 		};
 
 		const runTest = (desc, params, success, error) => {
-			const route = ({ ts, projectId, modelId, modelType, showVoid = false, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions?showVoid=${showVoid}&key=${key}`;
+			const route = ({ ts, projectId, modelId, modelType, showVoid = false, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions?showVoid=${showVoid}${key ? `&key=${key}` : ''}`;
 
 			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : error.status;
@@ -230,8 +243,8 @@ const testGetRevisions = () => {
 			});
 		};
 
-		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
-		describe.each(generateTestData(modelTypes.DRAWING))('Drawing', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER, isInternal))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING, isInternal))('Drawing', runTest);
 	});
 };
 
@@ -629,20 +642,32 @@ const testGetImage = () => {
 };
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
-	beforeAll(async () => {
-		server = await ServiceHelper.app();
-		agent = await SuperTest(server);
-	});
-
+	afterEach(() => server.close());
 	afterAll(() => Promise.all([
 		ServiceHelper.queue.purgeQueues(),
 		ServiceHelper.closeApp(server),
 	]));
 
-	testGetRevisions();
-	testCreateNewRevision();
-	testUpdateRevisionStatus();
-	testDownloadRevisionFiles();
-	testGetImage();
-	testGetRevisionMD5Hash();
+	describe('External Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app();
+			agent = await SuperTest(server);
+		});
+
+		testGetRevisions();
+		testCreateNewRevision();
+		testUpdateRevisionStatus();
+		testDownloadRevisionFiles();
+		testGetImage();
+		testGetRevisionMD5Hash();
+	});
+
+	describe('Internal Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app(true);
+			agent = await SuperTest(server);
+		});
+
+		testGetRevisions(true);
+	});
 });

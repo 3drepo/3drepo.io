@@ -226,7 +226,7 @@ const addRevision = async (teamspace, project, model, modelType = modelTypes.CON
 	return rev;
 };
 
-const testGetModelStats = () => {
+const testGetModelStats = (isInternal = false) => {
 	describe('Get model stats', () => {
 		const { users, teamspace, project, con, fed, draw, calibration } = generateBasicData();
 		const [fedWithNoSubModel, fedWithNoRevInSubModel] = times(
@@ -279,7 +279,7 @@ const testGetModelStats = () => {
 			fed.revs = [rev];
 		});
 
-		const generateTestData = (modelType) => {
+		const generateTestData = (modelType, internal) => {
 			let model;
 			let wrongTypeModel;
 			let modelNotFound;
@@ -300,10 +300,19 @@ const testGetModelStats = () => {
 
 			const getRoute = ({
 				projectId = project.id,
-				key = users.tsAdmin.apiKey,
+				key = internal ? undefined : users.tsAdmin.apiKey,
 				modelId = model._id,
 			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/stats${key ? `?key=${key}` : ''}`;
 
+			if (internal && modelType === modelTypes.CONTAINER) {
+				return [
+					[`the ${modelType} is valid and user has access`, getRoute(), true, model],
+				];
+			} if (internal && modelType !== modelTypes.CONTAINER) {
+				return [
+					[`trying to access endpoint for ${modelType}`, getRoute(), false, templates.pageNotFound],
+				];
+			}
 			const basicCases = [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
@@ -410,9 +419,9 @@ const testGetModelStats = () => {
 			});
 		};
 
-		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
-		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
-		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION, isInternal))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER, isInternal))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING, isInternal))('Drawings', runTest);
 	});
 };
 
@@ -692,7 +701,7 @@ const testAddModel = () => {
 	});
 };
 
-const testDeleteModel = () => {
+const testDeleteModel = (isInternal = false) => {
 	describe('Delete Model', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 		const conIsSubModel = ServiceHelper.generateRandomModel();
@@ -711,10 +720,15 @@ const testDeleteModel = () => {
 			});
 		});
 
-		const generateTestData = (modelType) => {
+		const generateTestData = (modelType, internal = false) => {
 			let model;
 			let wrongTypeModel;
 			let modelNotFound;
+			const getRoute = ({
+				projectId = project.id,
+				key = internal ? undefined : users.tsAdmin.apiKey,
+				modelId = model._id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
 
 			if (modelType === modelTypes.CONTAINER) {
 				wrongTypeModel = fed;
@@ -730,12 +744,17 @@ const testDeleteModel = () => {
 				modelNotFound = templates.drawingNotFound;
 			}
 
-			const getRoute = ({
-				projectId = project.id,
-				key = users.tsAdmin.apiKey,
-				modelId = model._id,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
-
+			if (internal && modelType === modelTypes.CONTAINER) {
+				return [
+					['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+					[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+					[`the ${modelType} exists and is internal`, getRoute(), true],
+				];
+			} if (internal && modelType !== modelTypes.CONTAINER) {
+				return [
+					[`trying to access the endpoint for ${modelType}`, getRoute(), false, templates.pageNotFound],
+				];
+			}
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
@@ -754,25 +773,30 @@ const testDeleteModel = () => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.delete(route).expect(expectedStatus);
-				if (success) {
-					const queryStr = route.split('?')[1];
+				if (success && !isInternal) {
+					const queryStr = isInternal ? '' : `?${route.split('?')[1]}`;
 					const getRoute = route.split('/').slice(0, -1).join('/');
-					const getRes = await agent.get(`${getRoute}?${queryStr}`).expect(templates.ok.status);
+					const getRes = await agent.get(`${getRoute}${queryStr}`).expect(templates.ok.status);
 					const modelType = Object.keys(getRes.body)[0];
+
 					expect(getRes.body[modelType].find(({ _id }) => _id === res.body._id)).toBeUndefined();
+				}	else if (success && isInternal) {
+					const getRes = await agent.get(route).expect(templates.containerNotFound.status);
+
+					expect(getRes.body.code).toEqual(templates.containerNotFound.code);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
 			});
 		};
 
-		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
-		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
-		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION, isInternal))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER, isInternal))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING, isInternal))('Drawings', runTest);
 	});
 };
 
-const testUpdateModelSettings = () => {
+const testUpdateModelSettings = (isInternal = false) => {
 	describe('Update Settings', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 		const conIsSubModel = ServiceHelper.generateRandomModel();
@@ -797,7 +821,7 @@ const testUpdateModelSettings = () => {
 			]);
 		});
 
-		const generateTestData = (modelType) => {
+		const generateTestData = (modelType, internal) => {
 			let model;
 			let wrongTypeModel;
 			let modelNotFound;
@@ -818,11 +842,21 @@ const testUpdateModelSettings = () => {
 
 			const getRoute = ({
 				projectId = project.id,
-				key = users.tsAdmin.apiKey,
+				key = internal ? undefined : users.tsAdmin.apiKey,
 				modelId = model._id,
 			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
 
 			const dummyPayload = { name: ServiceHelper.generateRandomString() };
+
+			if (internal && modelType === modelTypes.CONTAINER) {
+				return [
+					['the payload is valid', getRoute(), true, dummyPayload],
+				];
+			} if (internal && modelType !== modelTypes.CONTAINER) {
+				return [
+					[`trying to access endpoint for ${modelType}`, getRoute(), false, dummyPayload, templates.pageNotFound],
+				];
+			}
 
 			return [
 				['the user does not have a valid session', getRoute({ key: null }), false, dummyPayload, templates.notLoggedIn],
@@ -861,13 +895,13 @@ const testUpdateModelSettings = () => {
 			});
 		};
 
-		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
-		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
-		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION, isInternal))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER, isInternal))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING, isInternal))('Drawings', runTest);
 	});
 };
 
-const testGetSettings = () => {
+const testGetSettings = (isInternal = false) => {
 	describe('Get Model Settings', () => {
 		const { users, teamspace, project, con, fed, draw } = generateBasicData();
 
@@ -905,7 +939,7 @@ const testGetSettings = () => {
 			await setupBasicData(users, teamspace, project, models);
 		});
 
-		const generateTestData = (modelType) => {
+		const generateTestData = (modelType, internal) => {
 			let model;
 			let model2;
 			let wrongTypeModel;
@@ -930,9 +964,19 @@ const testGetSettings = () => {
 
 			const getRoute = ({
 				projectId = project.id,
-				key = users.tsAdmin.apiKey,
+				key = internal ? undefined : users.tsAdmin.apiKey,
 				modelId = model._id,
 			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
+
+			if (internal && modelType === modelTypes.CONTAINER) {
+				return [
+					['the model exists and the user has access', modelType, getRoute(), true, model],
+				];
+			} if (internal && modelType !== modelTypes.CONTAINER) {
+				return [
+					[`trying to access the endpoint for ${modelType}`, modelType, getRoute(), false, templates.pageNotFound],
+				];
+			}
 
 			return [
 				['the user does not have a valid session', modelType, getRoute({ key: null }), false, templates.notLoggedIn],
@@ -987,9 +1031,9 @@ const testGetSettings = () => {
 			});
 		};
 
-		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
-		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
-		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION, isInternal))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER, isInternal))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING, isInternal))('Drawings', runTest);
 	});
 };
 
@@ -1174,20 +1218,37 @@ const testGetJobsWithAccess = () => {
 };
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
-	beforeAll(async () => {
-		server = await ServiceHelper.app();
-		agent = await SuperTest(server);
-	});
+	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
-	testGetModelList();
-	testGetModelStats();
-	testAppendFavourites();
-	testDeleteFavourites();
-	testAddModel();
-	testDeleteModel();
-	testUpdateModelSettings();
-	testGetSettings();
-	testGetThumbnail();
-	testGetUsersWithPermissions();
-	testGetJobsWithAccess();
+
+	describe('External Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app();
+			agent = await SuperTest(server);
+		});
+
+		testGetModelList();
+		testGetModelStats();
+		testAppendFavourites();
+		testDeleteFavourites();
+		testAddModel();
+		testDeleteModel();
+		testUpdateModelSettings();
+		testGetSettings();
+		testGetThumbnail();
+		testGetUsersWithPermissions();
+		testGetJobsWithAccess();
+	});
+
+	describe('Internal Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app(true);
+			agent = await SuperTest(server);
+		});
+
+		testDeleteModel(true);
+		testUpdateModelSettings(true);
+		testGetModelStats(true);
+		testGetSettings(true);
+	});
 });
