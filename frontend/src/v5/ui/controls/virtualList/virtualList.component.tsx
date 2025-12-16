@@ -17,13 +17,14 @@
 import { useRef, useState, useEffect, createContext, useContext, createRef } from 'react';
 
 export type VListHandle = {
-	gotoIndex: (index: number) => void;
+	gotoIndex: (index: number) => Promise<any>;
+	getOffsetToIndex: (index: number) => number;
 };
 
-interface Props {
-	items: any[];
+interface Props<T> {
+	items: T[];
 	itemHeight: number;
-	ItemComponent: (value: any, index: number, array: any[]) => JSX.Element;
+	ItemComponent: (value: T, index: number, array: any[]) => JSX.Element;
 	vKey?: string;
 	className?: string;
 	handle?: React.MutableRefObject<VListHandle>;
@@ -94,7 +95,7 @@ const getlastItem = (items: any[],
 	return Math.min(index - 1, items.length - 1);
 };
 
-const getHeightByIndex = (index: number, heights: Record<any, number>, defaultHeight: number) => {
+export const getHeightByIndex = (index: number, heights: Record<any, number>, defaultHeight: number) => {
 	let totalHeight = 0;
 
 	for (let i = 0; i < index; i++) {
@@ -155,22 +156,41 @@ export function useVRef<T>(key:string, defaultVal: T) {
 	return ref;
 }
 
+const untilXFramesPassed = (frames: number) => {
+	let framesCount = frames;
+
+	return new Promise((resolve) => {
+		const waitingFrames = () => {
+			if (framesCount >= 0) {
+				window.requestAnimationFrame(waitingFrames);
+				framesCount--;
+				return;
+			}
+
+			resolve(true);
+		};
+
+		window.requestAnimationFrame(waitingFrames);
+	});
+};
+
+
 // Todo: pass a viewport
 // TODO: itemheight should be average?
 // ItemComponent must create an item which bottom is the top of the next item. In other words no gutters are allowed.
-export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className, handle }:Props) => { 
+export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemComponent, vKey, className, handle }:Props<T>) => { 
 	const parentVKey = useContext(VKeyContext);
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
 	const [, setRedraw] = useState(false);
 	const sliceIndexes = useRef({ first:-1, last:-1 });
-	const itemsRef = useVRef(`${parentVKey}.items`, items);
+	const itemsRef = useVRef(`${parentVKey}._items_`, items);
 	const initialized = useRef(true);
 
 	const renderInnerHeight = useRef(0);
 	renderInnerHeight.current = window.innerHeight;
 
-	const itemsHeight = useVRef<Record<any, number>>(parentVKey as string, {}); // get rid of the elements that get deleted
+	const itemsHeight = useVRef<Record<any, number>>(`${parentVKey}._itemsHeight_`, {}); // get rid of the elements that get deleted
 	const renderContainerRect = useRef(emptyRect);
 	
 	renderContainerRect.current = containerRef.current?.getBoundingClientRect();
@@ -267,29 +287,27 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, vKey, className,
 		itemsHeight.current = {};
 	}, [items]);
 
-	const gotoIndex = (index) => {
+
+	const getOffsetToIndex = (index) => {
+		return getHeightByIndex(index, itemsHeight.current, itemHeight);
+	};
+
+	const gotoIndex = async (index) => {
 		containerRef.current.parentElement.scrollTop = getHeightByIndex(index, itemsHeight.current, itemHeight);
-		let framesToVerifyScroll = 10;
-		const veriyfyScroll = () => {
-			if (framesToVerifyScroll >= 0) {
-				window.requestAnimationFrame(veriyfyScroll);
-				framesToVerifyScroll --;
-				return;
-			} 
+		await untilXFramesPassed(10);
+		var currentScroll = Math.round(containerRef.current.parentElement.scrollTop);
+		var otherScroll = Math.round(getHeightByIndex(index, itemsHeight.current, itemHeight));
+	
+		if (currentScroll != otherScroll) {
+			await gotoIndex(index);
+		}
 
-			var currentScroll = Math.round(containerRef.current.parentElement.scrollTop);
-			var otherScroll = Math.round(getHeightByIndex(index, itemsHeight.current, itemHeight));
-
-			if (currentScroll !== otherScroll) {
-				gotoIndex(index);
-			}
-		};
-
-		window.requestAnimationFrame(veriyfyScroll);
+		return true;
 	};
 
 	useEffect(() => {
-		handle.current = { gotoIndex };
+		if (!handle) return;
+		handle.current = { gotoIndex, getOffsetToIndex };
 	}, [handle, gotoIndex]);
 
 
