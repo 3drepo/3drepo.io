@@ -23,6 +23,9 @@ jest.mock('../../../../../../src/v5/utils/permissions');
 const Permissions = require(`${src}/utils/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
+jest.mock('../../../../../../src/v5/models/modelSettings');
+const ModelSettings = require(`${src}/models/modelSettings`);
+
 jest.mock('../../../../../../src/v5/utils/sessions');
 const Sessions = require(`${src}/utils/sessions`);
 const ModelMiddleware = require(`${src}/middleware/permissions/components/models`);
@@ -36,6 +39,7 @@ const mockImp = (teamspace) => {
 	}
 	return teamspace === 'ts';
 };
+const basicParams = { app: { get: () => false } };
 
 Permissions.hasReadAccessToContainer.mockImplementation(mockImp);
 Permissions.hasWriteAccessToContainer.mockImplementation(mockImp);
@@ -47,14 +51,26 @@ Permissions.hasReadAccessToFederation.mockImplementation(mockImp);
 Permissions.hasWriteAccessToFederation.mockImplementation(mockImp);
 Permissions.hasCommenterAccessToFederation.mockImplementation(mockImp);
 
+ModelSettings.getContainerById.mockImplementation(() => Promise.resolve({ _id: 'containerId' }));
+
 Sessions.getUserFromSession.mockImplementation(() => 'hi');
 
 const testHasReadAccessToContainer = () => {
 	describe('hasReadAccessToContainer', () => {
+		test('next() should be called if the session has BYPASS_AUTH enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasReadAccessToContainer(
+				{ app: { get: () => true }, params: { teamspace: 'any' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasReadAccessToContainer(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -64,7 +80,7 @@ const testHasReadAccessToContainer = () => {
 		test('should respond with not authorised if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasReadAccessToContainer(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -76,7 +92,7 @@ const testHasReadAccessToContainer = () => {
 		test('should respond with projectNotFound error if hasReadAccessToContainer threw projectNotFound', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasReadAccessToContainer(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -89,10 +105,20 @@ const testHasReadAccessToContainer = () => {
 
 const testHasWriteAccessToContainer = () => {
 	describe('hasWriteAccessToContainer', () => {
+		test('next() should be called if the session has BYPASS_AUTH enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasWriteAccessToContainer(
+				{ app: { get: () => true }, params: { teamspace: 'any' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasWriteAccessToContainer(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -102,7 +128,7 @@ const testHasWriteAccessToContainer = () => {
 		test('should respond with not authorised if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasWriteAccessToContainer(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -114,7 +140,7 @@ const testHasWriteAccessToContainer = () => {
 		test('should respond with projectNotFound error if hasReadAccessToContainer threw projectNotFound', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasWriteAccessToContainer(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -127,10 +153,20 @@ const testHasWriteAccessToContainer = () => {
 
 const testHasCommenterAccessToContainer = () => {
 	describe('hasCommenterAccessToContainer', () => {
+		test('next() should be called if the session has BYPASS_AUTH enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasCommenterAccessToContainer(
+				{ app: { get: () => true }, params: { teamspace: 'any' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasCommenterAccessToContainer(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -140,7 +176,7 @@ const testHasCommenterAccessToContainer = () => {
 		test('should respond with not authorised if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasCommenterAccessToContainer(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -152,7 +188,7 @@ const testHasCommenterAccessToContainer = () => {
 		test('should respond with projectNotFound error if hasReadAccessToContainer threw projectNotFound', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasCommenterAccessToContainer(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -165,10 +201,20 @@ const testHasCommenterAccessToContainer = () => {
 
 const testHasReadAccessToFederation = () => {
 	describe('hasReadAccessToFederation', () => {
+		test('next() should be called if the session has BYPASS_AUTH enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasReadAccessToFederation(
+				{ app: { get: () => true }, params: { teamspace: 'any' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasReadAccessToFederation(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -178,7 +224,7 @@ const testHasReadAccessToFederation = () => {
 		test('should respond with not authorised if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasReadAccessToFederation(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -190,7 +236,7 @@ const testHasReadAccessToFederation = () => {
 		test('should respond with projectNotFound error if hasReadAccessToFederation threw projectNotFound', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasReadAccessToFederation(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -203,10 +249,20 @@ const testHasReadAccessToFederation = () => {
 
 const testHasWriteAccessToFederation = () => {
 	describe('hasWriteAccessToFederation', () => {
+		test('next() should be called if the session has BYPASS_AUTH enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasWriteAccessToFederation(
+				{ app: { get: () => true }, params: { teamspace: 'any' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasWriteAccessToFederation(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -216,7 +272,7 @@ const testHasWriteAccessToFederation = () => {
 		test('should respond with not authorised if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasWriteAccessToFederation(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -228,7 +284,7 @@ const testHasWriteAccessToFederation = () => {
 		test('should respond with projectNotFound error if hasReadAccessToFederation threw projectNotFound', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasWriteAccessToFederation(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -241,10 +297,20 @@ const testHasWriteAccessToFederation = () => {
 
 const testHasCommenterAccessToFederation = () => {
 	describe('hasCommenterAccessToFederation', () => {
+		test('next() should be called if the session has BYPASS_AUTH enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasCommenterAccessToFederation(
+				{ app: { get: () => true }, params: { teamspace: 'any' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasCommenterAccessToFederation(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -254,7 +320,7 @@ const testHasCommenterAccessToFederation = () => {
 		test('should respond with not authorised if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasCommenterAccessToFederation(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -266,7 +332,7 @@ const testHasCommenterAccessToFederation = () => {
 		test('should respond with projectNotFound error if hasReadAccessToFederation threw projectNotFound', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasCommenterAccessToFederation(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -279,10 +345,20 @@ const testHasCommenterAccessToFederation = () => {
 
 const testHasAdminAccessToDrawing = () => {
 	describe('hasAdminAccessToDrawing', () => {
+		test('next() should be called if the session has BYPASS_AUTH enabled', async () => {
+			const mockCB = jest.fn(() => {});
+			await ModelMiddleware.hasAdminAccessToDrawing(
+				{ app: { get: () => true }, params: { teamspace: 'any' }, session: { user: { username: 'hi' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
 		test('next() should be called if the user has access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasAdminAccessToDrawing(
-				{ params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -292,7 +368,7 @@ const testHasAdminAccessToDrawing = () => {
 		test('should respond with not authorised if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasAdminAccessToDrawing(
-				{ params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'ts1' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -304,7 +380,7 @@ const testHasAdminAccessToDrawing = () => {
 		test('should respond with projectNotFound error if hasReadAccessToDrawing threw projectNotFound', async () => {
 			const mockCB = jest.fn(() => {});
 			await ModelMiddleware.hasAdminAccessToDrawing(
-				{ params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
+				{ ...basicParams, params: { teamspace: 'throwProjectError' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
