@@ -17,7 +17,7 @@
 import { useRef, useState, useEffect, createContext, useContext, createRef } from 'react';
 
 export type VListHandle = {
-	gotoIndex: (index: number) => Promise<any>;
+	gotoIndex: (index: number, scroller?: Element ) => Promise<any>;
 	getOffsetToIndex: (index: number) => number;
 };
 
@@ -156,7 +156,7 @@ export function useVRef<T>(key:string, defaultVal: T) {
 	return ref;
 }
 
-const untilXFramesPassed = (frames: number) => {
+export const untilXFramesPassed = (frames: number) => {
 	let framesCount = frames;
 
 	return new Promise((resolve) => {
@@ -186,6 +186,7 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 	const sliceIndexes = useRef({ first:-1, last:-1 });
 	const itemsRef = useVRef(`${parentVKey}._items_`, items);
 	const initialized = useRef(true);
+
 
 	const renderInnerHeight = useRef(0);
 	renderInnerHeight.current = window.innerHeight;
@@ -292,14 +293,25 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 		return getHeightByIndex(index, itemsHeight.current, itemHeight);
 	};
 
-	const gotoIndex = async (index) => {
-		containerRef.current.parentElement.scrollTop = getHeightByIndex(index, itemsHeight.current, itemHeight);
-		await untilXFramesPassed(10);
-		var currentScroll = Math.round(containerRef.current.parentElement.scrollTop);
-		var otherScroll = Math.round(getHeightByIndex(index, itemsHeight.current, itemHeight));
-	
-		if (currentScroll != otherScroll) {
-			await gotoIndex(index);
+	const gotoIndex = async (index, scroller?:Element) => {
+		const scrollingElement = scroller || containerRef.current.parentElement;
+		scrollingElement.scrollTop = getHeightByIndex(index, itemsHeight.current, itemHeight);
+		let done  = false;
+
+		for (let i = 0 ; i < 4 && !done ; i++) {
+			await untilXFramesPassed(10);
+			var currentScroll = Math.round(scrollingElement.scrollTop);
+			var otherScroll = Math.round(getHeightByIndex(index, itemsHeight.current, itemHeight));
+			
+			if (currentScroll != otherScroll) {
+				scrollingElement.scrollTop = otherScroll;
+			} else {
+				done = true;
+			}
+		}
+
+		if (!done) {
+			console.warn('Warn: VirtualList couldnt goto element with index:' + index);
 		}
 
 		return true;

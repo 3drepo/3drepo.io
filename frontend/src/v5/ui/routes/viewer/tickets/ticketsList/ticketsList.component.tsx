@@ -20,22 +20,23 @@ import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer } from './ticketsList.styles';
 import { useEffect, useRef } from 'react';
-import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
 import { groupTickets, TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
 
 
-const TicketsListsContainer = ({ children }) => {
+const TicketsListsContainer = ({ children, scrollerRef }) => {
 	return (
 		<ListContainer >
-			<div style={{
-				overflowY: 'auto',
-    			position: 'relative',
-    			height: '100%',
-			}}>
-				<div
-					style={{ position:'absolute' }}
-				>
+			<div 
+				ref={scrollerRef }
+				style={{
+					overflowY: 'auto',
+					position: 'relative',
+					height: '100%',
+				}}
+			>
+				<div style={{ position:'absolute' }}>
 					{children}
 				</div>
 			</div>
@@ -46,18 +47,39 @@ const TicketsListsContainer = ({ children }) => {
 export const TicketsList = ({ groupBy, templates }) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
-	const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
-	const virtuosoRef = useRef<any>();
-	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
-	
-	useEffect(() => {
-		virtuosoRef.current?.scrollToIndex?.({
-			behavior: 'instant',
-			block: 'nearest',
-			align: 'start',
-			index: selectedIndex === -1 ? 0 : selectedIndex,
+	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();	
+	let groups:TicketsGroup[];
+	const tableHandle = useRef<VListHandle>();
+	const subTableHandle = useRef<VListHandle>();
+	const scrollerRef = useRef<Element>();
+
+
+	if (groupBy !== 'none') {
+		groups = groupTickets(groupBy, templates, filteredTickets);
+		const idsToNumber = {};
+		let c = 0;
+
+		groups.forEach((g)=> {
+			g.tickets.forEach((t) => {
+				idsToNumber[t._id] = c++;
+			});
 		});
-	}, [selectedIndex, filteredTickets, isFiltering]);
+	}
+
+
+	useEffect(() => {
+		if (groupBy === 'none') {
+			const selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId);
+			tableHandle.current?.gotoIndex(selectedIndex, scrollerRef.current);
+		}
+
+		// virtuosoRef.current?.scrollToIndex?.({
+		// 	behavior: 'instant',
+		// 	block: 'nearest',
+		// 	align: 'start',
+		// 	index: selectedIndex === -1 ? 0 : selectedIndex,
+		// });
+	}, [selectedTicketId, filteredTickets, isFiltering, groupBy]);
 
 	if (isFiltering) {
 		return (
@@ -75,19 +97,9 @@ export const TicketsList = ({ groupBy, templates }) => {
 		);
 	}
 
-	if (groupBy !== 'none') {
-		const groups = groupTickets(groupBy, templates, filteredTickets);
-		const idsToNumber = {};
-		let c = 0;
-
-		groups.forEach((g)=> {
-			g.tickets.forEach((t) => {
-				idsToNumber[t._id] = c++;
-			});
-		});
-
+	if (groups) {
 		return (
-			<TicketsListsContainer>
+			<TicketsListsContainer scrollerRef={scrollerRef}>
 				<VirtualList
 					vKey='groups-list'
 					items={groups}
@@ -101,9 +113,10 @@ export const TicketsList = ({ groupBy, templates }) => {
 	}
 
 	return (
-		<TicketsListsContainer>
+		<TicketsListsContainer scrollerRef={scrollerRef}>
 			<List>
 				<VirtualList 
+					handle={tableHandle}
 					vKey='groups-list'
 					items={filteredTickets}
 					itemHeight={30}
