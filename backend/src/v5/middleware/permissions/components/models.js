@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getContainerById, getDrawingById, getFederationById } = require('../../../models/modelSettings');
 const {
+	checkModelExists,
 	hasAdminAccessToContainer,
 	hasAdminAccessToDrawing,
 	hasAdminAccessToFederation,
@@ -32,7 +32,6 @@ const {
 const { BYPASS_AUTH } = require('../../../utils/config.constants');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { modelTypes } = require('../../../models/modelSettings.constants');
-const { modelsExistInProject } = require('../../../models/projectSettings');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
@@ -44,22 +43,10 @@ const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
 	const { teamspace, project, model } = params;
 
 	try {
-		let getModelFn;
-
-		if (type === modelTypes.CONTAINER) {
-			getModelFn = getContainerById;
-		} else if (type === modelTypes.FEDERATION) {
-			getModelFn = getFederationById;
-		} else {
-			getModelFn = getDrawingById;
-		}
-
-		await getModelFn(teamspace, model, { permissions: 1 });
-
-		if (!await modelsExistInProject(teamspace, project, [model])) {
+		const modelInProject = await checkModelExists(teamspace, project, model, type);
+		if (!modelInProject) {
 			throw templates.modelNotFound;
 		}
-
 		if (req.app.get(BYPASS_AUTH) || await callback(teamspace, project, model, user, true)) {
 			next();
 		} else {
