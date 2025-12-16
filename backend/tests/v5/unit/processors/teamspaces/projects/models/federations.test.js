@@ -392,36 +392,25 @@ const testGetTicketGroupById = () => {
 		const groupId = generateRandomString();
 
 		test('Should retrieve containers then call the general getTicketGroupById', async () => {
-			const containers = [generateRandomString(), generateRandomString()];
-
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers.map((_id) => ({ _id })) });
-
+			const containers = times(2, () => ({ container: generateRandomString() }));
 			const expectedData = generateRandomObject();
 			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
 
-			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket, groupId, true))
+			await expect(Federations.getTicketGroupById(
+				teamspace, projectId, federation, revId, ticket, groupId, true, containers))
 				.resolves.toEqual(expectedData);
 
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federation,
-				{ subModels: 1 });
-
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, true, containers);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation,
+				revId, ticket, groupId, true, containers.map((c) => c.container));
 		});
 
 		test('Should retrieve containers then call the general getTicketGroupById even if there\'s no containers', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ });
-
 			const expectedData = generateRandomObject();
 			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
 
 			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket,
-				groupId, false)).resolves.toEqual(expectedData);
-
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federation,
-				{ subModels: 1 });
+				groupId, false, [])).resolves.toEqual(expectedData);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, false, undefined);
@@ -434,97 +423,47 @@ const testGetMD5Hash = () => {
 		const revisionMock = { _id: Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date(), tag: 'tag' };
 		const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
 		const mockMD5Hash = { hash: CryptoJs.MD5(revisionMock._id).toString(), size: fileEntry.size };
-		ModelSettings.getContainers.mockImplementation((teamspace, containers) => {
-			if (containers.length > 1) {
-				return mockContainers;
-			}
+		const teamspace = generateRandomString();
 
-			return mockContainers.filter((container) => container._id === containers[0]);
-		});
-		ModelSettings.getContainerById.mockImplementation(
-			(ts, container) => mockContainers.filter((cntr) => cntr._id === container));
-		ProjectSettings.modelsExistInProject.mockResolvedValue(true);
+		test('it should return an array with all the containers if admin', async () => {
+			const nContainers = 3;
+			const containers = times(nContainers, () => ({
+				container: generateRandomString(), revision: generateRandomString() }));
 
-		test('should get an empty array if user does not have rights to the container', async () => {
 			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
+			Revisions.getRevisionByIdOrTag.mockResolvedValue(revisionMock);
+			FilesManager.getMD5FileHash.mockResolvedValue(mockMD5Hash);
 
-			await expect(Federations.getMD5Hash('teamspace', 'federation', 'NoAcessUser')).resolves.toEqual([]);
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getContainers).toHaveBeenCalledWith('teamspace', ['1', '2', '3'], { _id: 1, name: 1, permissions: 1 });
-			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
-			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
-		});
-
-		test('it should return just the containers users have access to', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
-			Revisions.getLatestRevision.mockResolvedValueOnce(revisionMock);
-			FilesManager.getMD5FileHash.mockResolvedValueOnce(mockMD5Hash);
-
-			await expect(Federations.getMD5Hash('teamspace', 'project', 'federation', 'user1')).resolves.toEqual([{ container: '1',
+			const expectedResults = containers.map(({ container }) => ({
+				container,
 				tag: revisionMock.tag,
 				timestamp: revisionMock.timestamp,
 				hash: CryptoJs.MD5(revisionMock._id).toString(),
 				filename: revisionMock.rFile[0],
-				size: fileEntry.size }]);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith('teamspace', 'federation', { subModels: 1 });
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getContainers).toHaveBeenCalledWith('teamspace', ['1', '2', '3'], { _id: 1, name: 1, permissions: 1 });
-			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledWith('teamspace', '1', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
-			expect(FilesManager.getMD5FileHash).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getMD5FileHash).toHaveBeenCalledWith('teamspace', '1.history', 'success!');
-		});
+				size: fileEntry.size,
+			}));
 
-		test('it should return an array with all the containers if admin', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
-			Revisions.getLatestRevision.mockResolvedValue(revisionMock);
-			FilesManager.getMD5FileHash.mockResolvedValue(mockMD5Hash);
-			FilesRef.getRefEntry.mockResolvedValue(fileEntry);
+			outOfOrderArrayEqual(await Federations.getMD5Hash(teamspace, containers), expectedResults);
 
-			outOfOrderArrayEqual(await Federations.getMD5Hash('teamspace', 'project', 'federation', 'tsAdmin'), [
-				{
-					container: '1',
-					tag: revisionMock.tag,
-					timestamp: revisionMock.timestamp,
-					hash: CryptoJs.MD5(revisionMock._id).toString(),
-					filename: revisionMock.rFile[0],
-					size: fileEntry.size,
-				}, {
-					container: '2',
-					tag: revisionMock.tag,
-					timestamp: revisionMock.timestamp,
-					hash: CryptoJs.MD5(revisionMock._id).toString(),
-					filename: revisionMock.rFile[0],
-					size: fileEntry.size,
-				}, {
-					container: '3',
-					tag: revisionMock.tag,
-					timestamp: revisionMock.timestamp,
-					hash: CryptoJs.MD5(revisionMock._id).toString(),
-					filename: revisionMock.rFile[0],
-					size: fileEntry.size,
-				}]);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith('teamspace', 'federation', { subModels: 1 });
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getContainers).toHaveBeenCalledWith('teamspace', ['1', '2', '3'], { _id: 1, name: 1, permissions: 1 });
-			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(3);
-			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(1, 'teamspace', '1', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
-			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(2, 'teamspace', '2', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
-			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(3, 'teamspace', '3', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(nContainers);
+
+			containers.forEach(({ container, revision }) => {
+				expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(
+					teamspace,
+					container,
+					modelTypes.CONTAINER,
+					revision,
+					{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 },
+					{ includeVoid: false },
+				);
+			});
+
+			expect(FilesManager.getMD5FileHash).toHaveBeenCalledTimes(nContainers);
 		});
 
 		test('it should return an empty array if the federation has no containers added', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ });
+			await expect(Federations.getMD5Hash(teamspace, [])).resolves.toEqual([]);
 
-			await expect(Federations.getMD5Hash('teamspace', 'project', 'federation', 'tsAdmin')).resolves.toEqual([]);
-
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith('teamspace', 'federation', { subModels: 1 });
-			expect(ModelSettings.getContainers).not.toHaveBeenCalled();
 			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
 			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
 		});

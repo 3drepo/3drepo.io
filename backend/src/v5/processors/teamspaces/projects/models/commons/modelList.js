@@ -63,18 +63,10 @@ ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 };
 
 ModelList.getModelMD5Hash = async (teamspace, container, revision) => {
-	let rev;
-
-	if (revision) {
-		rev = await getRevisionByIdOrTag(
-			teamspace, container, modelTypes.CONTAINER, revision,
-			{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 },
-			{ includeVoid: false });
-	} else {
-		rev = await getLatestRevision(
-			teamspace, container, modelTypes.CONTAINER,
-			{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 });
-	}
+	const rev = await getRevisionByIdOrTag(
+		teamspace, container, modelTypes.CONTAINER, revision,
+		{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 },
+		{ includeVoid: false });
 
 	if (!rev.rFile?.length) return {};
 

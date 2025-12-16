@@ -77,6 +77,9 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 		ServiceHelper.db.createTemplates(teamspace, [template]),
 	]);
 
+	await ServiceHelper.db.createRevision(
+		teamspace, project.id, con._id, ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER);
+
 	await Promise.all([fed, con].map(async (model) => {
 		const modelType = fed === model ? 'federation' : 'container';
 		const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
@@ -381,7 +384,7 @@ const testUpdateGroup = () => {
 		const runTest = (desc, { model, checkOutput = true, ...routeParams },
 			payload, success, expectedOutput = templates.ok) => {
 			const updateRoute = ({ key, projectId, modelId, ticketId, groupId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}`;
-			const getRoute = ({ key, projectId, modelId, ticketId, groupId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${key ? `?key=${key}` : ''}`;
+			const getRoute = ({ key, projectId, modelId, ticketId, groupId, modelType, ...extras }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/groups/${groupId}${ServiceHelper.createQueryString({ key, convertIds: !!extras.checkOutput })}`;
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const endpoint = updateRoute({ modelId: model._id,
 					ticketId: model.ticket?._id,

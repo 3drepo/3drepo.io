@@ -26,7 +26,7 @@ const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData: validateNewContainerRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { validateNewRevisionData: validateNewDrawingRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings');
-const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
+const { revisionExists, validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getImage = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;
@@ -59,7 +59,7 @@ const getRevisions = (modelType) => async (req, res, next) => {
 	}
 };
 
-const getRevisionMD5Hash = () => async (req, res, next) => {
+const getRevisionMD5Hash = async (req, res, next) => {
 	const { teamspace, container, revision } = req.params;
 
 	try {
@@ -520,7 +520,7 @@ const establishRoutes = (modelType) => {
 		 *                   description: File size in bytes
 		 *                   example: 329487234
 		 */
-		router.get('/:revision/files/original/info', hasReadAccessToContainer, getRevisionMD5Hash(), serialiseRevision);
+		router.get('/:revision/files/original/info', hasReadAccessToContainer, revisionExists(modelTypes.CONTAINER), getRevisionMD5Hash, serialiseRevision);
 	}
 	if (modelType === modelTypes.DRAWING) {
 		/**
