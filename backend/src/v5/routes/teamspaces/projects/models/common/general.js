@@ -1081,9 +1081,7 @@ const establishRoutes = (modelType, isInternal) => {
 			 */
 			router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
 		}
-	}
-
-	if (modelType === modelTypes.CONTAINER) {
+	} if (isInternal && modelType === modelTypes.CONTAINER) {
 		/**
 		 * @openapi
 		 * /teamspaces/{teamspace}/projects/{project}/containers/{model}:
@@ -1098,20 +1096,20 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         required: true
 		 *         schema:
 		 *           type: string
-				 *       - name: project
+		 *       - name: project
 		 *         description: Project ID
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *           enum: [containers, federations, drawings]
-				 *       - name: model
+		 *       - name: model
 		 *         description: Model ID
 		 *         in: path
 		 *         required: true
@@ -1148,7 +1146,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -1207,32 +1205,16 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                 format: uuid
 		 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 		 *           examples:
-			 *             container:
+		 *             container:
 		 *               summary: container
-			 *               value:
-			 *                 name: Lego House Container
-			 *                 unit: mm
+		 *               value:
+		 *                 name: Lego House Container
+		 *                 unit: mm
 		 *                 desc: The Container model of the Lego House
 		 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 		 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 		 *                 angleFromNorth: 100
 		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-			 *             federation:
-		 *               summary: federation
-			 *               value:
-			 *                 name: Lego House Federation
-			 *                 unit: m
-		 *                 desc: The Federation model of the Lego House
-		 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-		 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-		 *                 angleFromNorth: 120
-		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-		 *             drawing:
-		 *               summary: drawing
-			 *               value:
-			 *                 name: Lego House Drawing
-			 *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-		 *                 desc: The Drawing of the Lego House
 		 *     responses:
 		 *       401:
 		 *         $ref: "#/components/responses/notLoggedIn"
@@ -1264,7 +1246,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
@@ -1288,12 +1270,12 @@ const establishRoutes = (modelType, isInternal) => {
 		 *             schema:
 		 *               $ref: "#/components/schemas/modelSettings"
 		 *             examples:
-			 *               container:
+		 *               container:
 		 *                 summary: container
-			 *                 value:
+		 *                 value:
 		 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-			 *                   name: Lego House Container
-			 *                   unit: mm
+		 *                   name: Lego House Container
+		 *                   unit: mm
 		 *                   code: MOD1
 		 *                   type: Structural
 		 *                   desc: The Container model of the Lego House
@@ -1304,30 +1286,6 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 		 *                   angleFromNorth: 100
 		 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-			 *               federation:
-		 *                 summary: federation
-			 *                 value:
-		 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-			 *                   name: Lego House Federation
-			 *                   unit: mm
-		 *                   code: MOD1
-		 *                   desc: The Federation model of the Lego House
-		 *                   timestamp: 1629976656315
-		 *                   status: ok
-		 *                   errorReason: { message: System error occured. Please contact support., timestamp: 1629976656315, errorCode: 14 }
-		 *                   defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-		 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
-		 *                   angleFromNorth: 100
-		 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-		 *               drawing:
-		 *                 summary: drawing
-			 *                 value:
-		 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-			 *                   name: Lego House Drawing
-			 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-		 *                   type: Structural
-		 *                   desc: The Drawing of the Lego House
-		 *                   calibration: { verticalRange: [0,10], units: m }
 		 */
 		router.get('/:model', hasReadAccessToContainer, getModelSettings(modelType), formatModelSettings);
 
@@ -1345,20 +1303,20 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         required: true
 		 *         schema:
 		 *           type: string
-				 *       - name: project
+		 *       - name: project
 		 *         description: Project ID
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-			 *         description: Model type
+		 *         description: Model type
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *           enum: [containers, federations,drawings]
-				 *       - name: model
+		 *       - name: model
 		 *         description: Model ID
 		 *         in: path
 		 *         required: true
@@ -1380,11 +1338,11 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                   type: string
 		 *                   description: Model code
 		 *                   example: STR-01
-			 *                 status:
+		 *                 status:
 		 *                   type: string
 		 *                   description: Current status of the model
 		 *                   example: ok
-				 *                 containers:
+		 *                 containers:
 		 *                   type: array
 		 *                   description: The IDs of the models the model consists of
 		 *                   items:
@@ -1407,42 +1365,24 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                     risks:
 		 *                       type: integer
 		 *                       description: The number of unmitigated risks of the model
-			 *                 desc:
+		 *                 desc:
 		 *                   type: string
 		 *                   description: Model description
 		 *                   example: Floor 1 MEP with Facade
-			 *                 lastUpdated:
+		 *                 lastUpdated:
 		 *                   type: integer
 		 *                   description: Timestamp(ms) of when any of the submodels was updated
 		 *                   example: 1630598072000
 		 *             examples:
 		 *               container:
 		 *                 summary: container
-			 *                 value:
+		 *                 value:
 		 *                   type: Architectural
-			 *                   code: STR-01
-			 *                   status: ok
+		 *                   code: STR-01
+		 *                   status: ok
 		 *                   unit: mm
 		 *                   desc: Floor 1 MEP with Facade
 		 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: rev1 }
-		 *               federation:
-		 *                 summary: federation
-			 *                 value:
-			 *                   code: STR-01
-			 *                   status: ok
-		 *                   desc: Floor 1 MEP with Facade
-		 *                   lastUpdated: 1630598072000
-		 *                   tickets: { issues: 10, risks: 5 }
-		 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
-		 *               drawing:
-		 *                 summary: drawing
-			 *                 value:
-			 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-			 *                   status: ok
-		 *                   type: Architectural
-		 *                   desc: Floor 1 MEP with Facade
-		 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
-		 *                   calibration: uncalibrated
 		 */
 		router.get('/:model/stats', hasReadAccessToContainer, getModelStats(modelType), formatModelStats(modelType));
 	}

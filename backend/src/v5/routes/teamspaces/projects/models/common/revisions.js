@@ -617,9 +617,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 */
 			router.get('/:revision/files/image', hasReadAccessToDrawing, getImage);
 		}
-	}
-
-	if (modelType === modelTypes.CONTAINER) {
+	} if (isInternal && modelType === modelTypes.CONTAINER) {
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/revisions:
@@ -719,10 +717,6 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                 summary: containers
 	 *                 value:
 	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, tag: rev01, desc: The Architecture model of the Lego House, void: true }]
-	 *               drawings:
-	 *                 summary: drawings
-	 *                 value:
-	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, statusCode: S0, revCode: P01, desc: The Architecture model of the Lego House, void: true }]
 	 */
 		router.get('', hasReadAccessToContainer, getRevisions(modelType), serialiseRevisionArray);
 	}
