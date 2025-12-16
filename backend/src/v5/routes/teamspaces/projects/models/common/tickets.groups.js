@@ -37,18 +37,18 @@ const { getUserFromSession } = require('../../../../../utils/sessions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 const { serialiseGroup } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets.groups');
-const { stringToUUID } = require('../../../../../utils/helper/uuids');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateUpdateGroup } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets.groups');
+const { verifyRevQueryParam } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getGroup = (isFed) => async (req, res, next) => {
 	const { params, query, containers } = req;
-	const { teamspace, project, model, ticket, group } = params;
+	const { teamspace, project, model, ticket, group, revision } = params;
 
 	try {
 		const convertToMeshIds = query.convertIds !== 'false';
 		const getGroupById = isFed ? getFedGroup : getConGroup;
-		req.groupData = await getGroupById(teamspace, project, model, stringToUUID(query.revId), ticket, group,
+		req.groupData = await getGroupById(teamspace, project, model, revision, ticket, group,
 			convertToMeshIds, containers);
 		await next();
 	} catch (err) {
@@ -146,7 +146,7 @@ const establishRoutes = (isFed) => {
 	 *             schema:
    	 *               $ref: "#/components/schemas/ticketGroup"
 	 */
-	router.get('/:group', hasReadAccess, checkTicketExists, getAccessibleContainers(modelType), getGroup(isFed), serialiseGroup);
+	router.get('/:group', hasReadAccess, checkTicketExists, verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getGroup(isFed), serialiseGroup);
 
 	/**
 	 * @openapi
