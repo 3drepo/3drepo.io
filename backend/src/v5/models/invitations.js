@@ -15,15 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Invitations = {};
 const { ADMIN_DB } = require('../handler/db.constants');
+const { DEFAULT_OWNER_JOB } = require('./jobs.constants');
+
+const Invitations = {};
+const { addUserToAccount } = require('../services/sso/frontegg');
 const db = require('../handler/db');
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { getTeamspaceRefId } = require('./teamspaceSettings');
+const { publish } = require('../services/eventsManager/eventsManager');
 
 const COL_NAME = 'invitations';
 
 const findMany = (query, projection, sort) => db.find(ADMIN_DB, COL_NAME, query, projection, sort);
 
 Invitations.getInvitationsByTeamspace = (teamspace, projection = {}) => findMany({ 'teamSpaces.teamspace': teamspace }, projection);
+
+Invitations.inviteUserAsAdmin = async (teamspace, email) => {
+	const job = DEFAULT_OWNER_JOB;
+	const permissions = { teamspace_admin: true };
+	const teamspaceEntry = { teamspace, job, permissions };
+	const invitation = { _id: email, teamSpaces: [teamspaceEntry] };
+
+	const refId = await getTeamspaceRefId(teamspace);
+	await addUserToAccount(email, refId);
+
+	await db.insertOne(ADMIN_DB, COL_NAME, invitation);
+	publish(events.INVITATION_ADDED, { teamspace, email, job, permissions });
+};
 
 Invitations.initialise = () => db.createIndex(ADMIN_DB, COL_NAME, { 'teamSpaces.teamspace': 1 }, { runInBackground: true });
 

@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { generateRandomString, determineTestGroup, generateRandomObject, generateRandomEmail } = require('../../../../../helper/services');
+const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
+
+jest.mock('../../../../../../../src/v5/schemas/teamspaces');
+const TeamspaceSchema = require(`${src}/schemas/teamspaces`);
 
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
 jest.mock('../../../../../../../src/v5/models/teamspaceSettings');
 const TeamspacesModel = require(`${src}/models/teamspaceSettings`);
-
-jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/accounts');
-const FrontEggAccounts = require(`${src}/services/sso/frontegg/components/accounts`);
 
 jest.mock('../../../../../../../src/v5/processors/teamspaces');
 const TeamspacesProcessor = require(`${src}/processors/teamspaces`);
@@ -127,49 +127,38 @@ const testMemberExists = () => {
 };
 
 const testValidateCreateTeamspaceData = () => {
-	describe.each([
-		['name is valid', { body: { name: generateRandomString() } }, true],
-		['name too long', { body: { name: generateRandomString(129) } }, false],
-		['name includes a full stop', { body: { name: `${generateRandomString()}.${generateRandomString()}` } }, false],
-		['name includes special characters', { body: { name: `${generateRandomString()}@${generateRandomString()}#${generateRandomString()}!` } }, false],
-		['teamspace name already exists', { body: { name: generateRandomString() } }, false, { failTsCheck: true }],
-		['email is valid', { body: { name: generateRandomString(), admin: generateRandomEmail() } }, true],
-		['email is invalid', { body: { name: generateRandomString(), admin: generateRandomString() } }, false],
-		['account is provided', { body: { name: generateRandomString(), accountId: generateRandomString() } }, true, { accountCheckFail: false, getTeamspaceCheckFail: false }],
-		['account doesn\'t exist', { body: { name: generateRandomString(), accountId: generateRandomString() } }, false, { accountCheckFail: true }],
-		['account is already in used by another teamspace', { body: { name: generateRandomString(), accountId: generateRandomString() } }, false, { accountCheckFail: false, getTeamspaceCheckFail: true }],
-		['everything is provided ', { body: { name: generateRandomString(), accountId: generateRandomString(), admin: generateRandomEmail() } }, true, { accountCheckFail: false, getTeamspaceCheckFail: false }],
-		['name is missing ', { body: { accountId: generateRandomString(), admin: generateRandomEmail() } }, false, { accountCheckFail: false, getTeamspaceCheckFail: false }],
-	])('Validate create teamspace data', (desc, req, success, { failTsCheck = false, accountCheckFail = null, getTeamspaceCheckFail = null } = {}) => {
-		test(`${success ? 'Should call next()' : 'should respond with invalidArguments'} if ${desc}`, async () => {
-			if (req.body.name) {
-				if (failTsCheck) {
-					TeamspacesModel.getTeamspaceSetting.mockResolvedValueOnce();
-				} else {
-					TeamspacesModel.getTeamspaceSetting.mockRejectedValueOnce(new Error());
-				}
-			}
-
-			if (accountCheckFail !== null) {
-				FrontEggAccounts.doesAccountExist.mockResolvedValueOnce(!accountCheckFail);
-			}
-
-			if (getTeamspaceCheckFail !== null) {
-				FrontEggAccounts.getTeamspaceByAccount
-					.mockResolvedValueOnce(getTeamspaceCheckFail ? generateRandomString() : undefined);
-			}
-
+	describe('Validate create teamspace data', () => {
+		test('Should call next if the data is validated', async () => {
+			const input = generateRandomObject();
+			const req = { body: input };
 			const mockCB = jest.fn(() => {});
+			const output = generateRandomObject();
+
+			TeamspaceSchema.validateNewTeamspaceSchema.mockResolvedValueOnce(output);
 
 			await Teamspaces.validateCreateTeamspaceData(req, {}, mockCB);
 
-			if (success) {
-				expect(mockCB).toHaveBeenCalledTimes(1);
-			} else {
-				expect(mockCB).not.toHaveBeenCalled();
-				expect(Responder.respond).toHaveBeenCalledTimes(1);
-				expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
-			}
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.body).toEqual(output);
+			expect(TeamspaceSchema.validateNewTeamspaceSchema).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSchema.validateNewTeamspaceSchema).toHaveBeenCalledWith(input);
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if validation fails`, async () => {
+			const input = generateRandomObject();
+			const req = { body: input };
+			const mockCB = jest.fn(() => {});
+
+			TeamspaceSchema.validateNewTeamspaceSchema.mockRejectedValueOnce(new Error());
+
+			await Teamspaces.validateCreateTeamspaceData(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+
+			expect(TeamspaceSchema.validateNewTeamspaceSchema).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSchema.validateNewTeamspaceSchema).toHaveBeenCalledWith(input);
 		});
 	});
 };

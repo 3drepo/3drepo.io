@@ -19,7 +19,19 @@ const { src } = require('../../helper/path');
 
 const Invitations = require(`${src}/models/invitations`);
 const db = require(`${src}/handler/db`);
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../helper/services');
+
+const { DEFAULT_OWNER_JOB } = require('../../../../src/v5/models/jobs.constants');
+const { events } = require('../../../../src/v5/services/eventsManager/eventsManager.constants');
+
+jest.mock('../../../../src/v5/services/sso/frontegg');
+const FronteggMock = require(`${src}/services/sso/frontegg`);
+
+jest.mock('../../../../src/v5/models/teamspaceSettings');
+const TeamspaceSettingsMock = require(`${src}/models/teamspaceSettings`);
+
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManagerMock = require(`${src}/services/eventsManager/eventsManager`);
 
 const testGetInvitationsByTeamspace = () => {
 	describe('Get invitations by teamspace', () => {
@@ -49,7 +61,44 @@ const testInit = () => {
 	});
 };
 
-describe('models/invitations', () => {
+const testInviteUserAsAdmin = () => {
+	describe('Invite user as admin', () => {
+		test('Should invite user as admin', async () => {
+			const teamspace = generateRandomString();
+			const email = generateRandomString();
+			const accountId = generateRandomString();
+
+			TeamspaceSettingsMock.getTeamspaceRefId.mockResolvedValueOnce(accountId);
+			const dbMock = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
+
+			await Invitations.inviteUserAsAdmin(teamspace, email);
+
+			expect(FronteggMock.addUserToAccount).toHaveBeenCalledTimes(1);
+			expect(FronteggMock.addUserToAccount).toHaveBeenCalledWith(email, accountId);
+
+			expect(dbMock).toHaveBeenCalledTimes(1);
+			expect(dbMock).toHaveBeenCalledWith('admin', 'invitations', {
+				_id: email,
+				teamSpaces: [{
+					teamspace,
+					job: DEFAULT_OWNER_JOB,
+					permissions: { teamspace_admin: true },
+				}],
+			});
+
+			expect(EventsManagerMock.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManagerMock.publish).toHaveBeenCalledWith(events.INVITATION_ADDED, {
+				teamspace,
+				email,
+				job: DEFAULT_OWNER_JOB,
+				permissions: { teamspace_admin: true },
+			});
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testGetInvitationsByTeamspace();
+	testInviteUserAsAdmin();
 	testInit();
 });

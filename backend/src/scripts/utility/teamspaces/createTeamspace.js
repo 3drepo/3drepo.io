@@ -16,43 +16,27 @@
  */
 
 const Path = require('path');
-const { v5Path, v4Path } = require('../../../interop');
+const { v5Path } = require('../../../interop');
+const { validateNewTeamspaceSchema } = require('../../../v5/schemas/teamspaces');
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const { initTeamspace } = require(`${v5Path}/processors/teamspaces`);
-const { getUserByUsernameOrEmail } = require(`${v5Path}/models/users`);
-const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
-const { templates } = require(`${v5Path}/utils/responseCodes`);
-const { create: createInvite } = require(`${v4Path}/models/invitations`);
-
-const { DEFAULT_OWNER_JOB } = require(`${v5Path}/models/jobs.constants`);
 
 const run = async (teamspace, user, accountId) => {
-	logger.logInfo(`Checking ${user} information...`);
-	let username;
-	try {
-		const { user: foundUser } = await getUserByUsernameOrEmail(user);
-		username = foundUser;
-	} catch (error) {
-		/* istanbul ignore next */
-		if (error.message !== templates.userNotFound.message) throw error;
-	}
+	const data = {
+		name: teamspace,
+		admin: user,
+		accountId,
+	};
 
-	logger.logInfo(`Checking if teamspace ${teamspace} already exists...`);
-	const teamspaceExists = await getTeamspaceSetting(teamspace, { _id: 1 }).catch(() => false);
+	const validateData = await validateNewTeamspaceSchema(data);
 
-	if (teamspaceExists) {
-		throw new Error('Teamspace already exists');
-	}
-
-	await initTeamspace(teamspace, username, accountId);
-	if (!username) {
-		await createInvite(user, teamspace, DEFAULT_OWNER_JOB, undefined, { teamspace_admin: true }, false);
-	}
+	await initTeamspace(validateData.name, validateData.admin, validateData.accountId);
 
 	logger.logInfo(`Teamspace ${teamspace} created.`);
 };
+
 const genYargs = /* istanbul ignore next */(yargs) => {
 	const commandName = Path.basename(__filename, Path.extname(__filename));
 	const argsSpec = (subYargs) => subYargs.option('teamspace',

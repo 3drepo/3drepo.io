@@ -26,6 +26,7 @@ const { isTeamspaceAdmin } = require('../../../../utils/permissions');
 const { isTeamspaceMember } = require('../../../../processors/teamspaces');
 const { respond } = require('../../../../utils/responder');
 const { validateSchema } = require('../../../../schemas/subscriptions');
+const { validateNewTeamspaceSchema } = require('../../../../schemas/teamspaces');
 
 const Teamspaces = {};
 
@@ -82,38 +83,10 @@ Teamspaces.validateUpdateQuota = async (req, res, next) => {
 };
 
 Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
-	const schema = Yup.object().shape({
-		name: YupHelper.validators.alphanumeric(YupHelper.types.strings.title.required()
-			.test('check-name-is-not-used', 'Teamspace with this name already exists.', async (value) => {
-				if (!value) return true;
-				try {
-					await getTeamspaceSetting(value, { _id: 1 });
-					return false;
-				} catch {
-					return true;
-				}
-			}), false),
-		admin: YupHelper.types.strings.email,
-		accountId: Yup.string()
-			.test('check-account-exists', 'Account with this ID does not exist.', async (value) => {
-				if (!value) return true;
-				if (await doesAccountExist(value)) {
-					return true;
-				}
-				return false;
-			}).test('check-account-has-no-teamspace', 'Account with this ID is already associated with another teamspace.', async (value) => {
-				if (!value) return true;
-				const teamspace = await getTeamspaceByAccount(value);
-				return teamspace === undefined;
-			}),
-	});
-
 	try {
-		req.body = await schema.validate(req.body, { stripUnknown: true });
-
+		req.body = await validateNewTeamspaceSchema(req.body);
 		await next();
 	} catch (err) {
-		console.log(err);
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
