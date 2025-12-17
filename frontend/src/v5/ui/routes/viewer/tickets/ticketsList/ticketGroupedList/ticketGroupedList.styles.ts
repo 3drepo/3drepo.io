@@ -18,6 +18,7 @@
 import styled, { css } from 'styled-components';
 import { TicketItemContainer, Title } from '../ticketItem/ticketItem.styles';
 import { TextOverflow } from '@controls/textOverflow';
+import { Spinner as SpinnerBase } from '@controls/spinnerLoader/spinnerLoader.styles';
 
 export const GroupedListToggleContainer = styled(TicketItemContainer)<{ $expanded:boolean }>`
 	min-height: 0;
@@ -46,4 +47,8 @@ export const GroupedListToggleTitle = styled(Title)`
 
 export const GroupedListSpacer = styled.div`
 	padding-bottom: 10px
+`;
+
+export const Spinner = styled(SpinnerBase)`
+	margin-left: 5px;
 `;
