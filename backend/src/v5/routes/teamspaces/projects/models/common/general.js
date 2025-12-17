@@ -744,11 +744,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *         schema:
 		 *           type: string
 		 *       - name: type
-<<<<<<< HEAD
-			 *         description: Model type
-=======
 		 *         description: Model type
->>>>>>> 5345bdd2aa31772b701346ebfcf59c6562068ff8
 		 *         in: path
 		 *         required: true
 		 *         schema:

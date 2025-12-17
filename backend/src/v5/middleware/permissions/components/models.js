@@ -30,7 +30,6 @@ const {
 	hasWriteAccessToFederation,
 } = require('../../../utils/permissions');
 const { BYPASS_AUTH } = require('../../../utils/config.constants');
-const { getContainerById } = require('../../../models/modelSettings');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { modelTypes } = require('../../../models/modelSettings.constants');
 const { respond } = require('../../../utils/responder');
@@ -47,11 +46,7 @@ const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
 		if (!modelInProject) {
 			throw templates.modelNotFound;
 		}
-		if (req.app.get(BYPASS_AUTH)) {
-			await getContainerById(teamspace, model, { _id: 1 });
-
-			next();
-		} else if (await callback(teamspace, project, model, user, true)) {
+		if (req.app.get(BYPASS_AUTH) || await callback(teamspace, project, model, user, true)) {
 			next();
 		} else {
 			respond(req, res, templates.notAuthorized);
