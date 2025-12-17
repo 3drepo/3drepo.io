@@ -48,9 +48,6 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.CONTAINER, internal));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets', CreateAssetsRoutes(modelTypes.CONTAINER, internal));
 
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER, internal));
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.CONTAINER, internal));
-
 	if (!internal) {
 	// Auth
 		app.use('/v5/', UserRoutes);

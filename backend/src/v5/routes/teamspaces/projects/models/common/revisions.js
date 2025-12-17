@@ -264,218 +264,113 @@ const establishRoutes = (modelType, isInternal) => {
 	 *         description: creates a new revision
 	 */
 	router.post('', hasWriteAccessToModel[modelType], validateNewModelRev[modelType], createNewRevision(modelType));
-
-	if (isInternal && modelType === modelTypes.CONTAINER) {
-		/**
-		 * @openapi
-		 * /teamspaces/{teamspace}/projects/{project}/containers/{model}/revisions:
-		 *   get:
-		 *     description: Get a list of revisions of a container
-		 *     tags: [v:internal, Revisions]
-		 *     operationId: getModelRevisions
-		 *     parameters:
-		 *       - name: teamspace
-		 *         description: Name of teamspace
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: project
-		 *         description: Project ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           format: uuid
-		 *       - name: type
-		 *         description: Model type
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           enum: [containers, drawings]
-		 *       - name: model
-		 *         description: Model ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           format: uuid
-		 *       - name: showVoid
-		 *         description: Include void revisions or not
-		 *         in: query
-		 *         required: false
-		 *         schema:
-		 *           type: string
-		 *     responses:
-		 *       401:
-		 *         $ref: "#/components/responses/notLoggedIn"
-		 *       404:
-		 *         $ref: "#/components/responses/teamspaceNotFound"
-		 *       200:
-		 *         description: returns list of revisions
-		 *         content:
-		 *           application/json:
-		 *             schema:
-		 *               type: object
-		 *               properties:
-		 *                 revisions:
-		 *                   type: array
-		 *                   items:
-		 *                     type: object
-		 *                     properties:
-		 *                       _id:
-		 *                         type: string
-		 *                         description: Revision ID
-		 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-		 *                       author:
-		 *                         type: string
-		 *                         description: name of the creator of the revision
-		 *                         example: someUser
-		 *                       timestamp:
-		 *                         type: number
-		 *                         description: Revision creation date
-		 *                         example: 1644925152000
-		 *                       format:
-		 *                         type: string
-		 *                         description: File format
-		 *                         example: .rvt
-		 *                       tag:
-		 *                         description: Unique revision name
-		 *                         type: string
-		 *                         example: rev01
-		 *                       statusCode:
-		 *                         type: string
-		 *                         description: Revision status code
-		 *                         example: S0
-		 *                       revCode:
-		 *                         type: string
-		 *                         description: Revision code
-		 *                         example: P01
-		 *                       desc:
-		 *                         type: string
-		 *                         description: Revision description
-		 *                         example: Level 2 floor plan
-		 *                       void:
-		 *                         type: boolean
-		 *                         description: Whether revision is void or not
-		 *                         example: false
-		 *             examples:
-		 *               containers:
-		 *                 summary: containers
-		 *                 value:
-		 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, tag: rev01, desc: The Architecture model of the Lego House, void: true }]
-		 */
-		router.get('', hasReadAccessToContainer, getRevisions(modelType), serialiseRevisionArray);
-	}
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
+	 *   get:
+	 *     description: Get a list of revisions of a model
+	 *     tags: [v:external, Revisions]
+	 *     operationId: getModelRevisions
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: type
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, drawings]
+	 *       - name: model
+	 *         description: Model ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: showVoid
+	 *         description: Include void revisions or not
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns list of revisions
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 revisions:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         description: Revision ID
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                       author:
+	 *                         type: string
+	 *                         description: name of the creator of the revision
+	 *                         example: someUser
+	 *                       timestamp:
+	 *                         type: number
+	 *                         description: Revision creation date
+	 *                         example: 1644925152000
+	 *                       format:
+	 *                         type: string
+	 *                         description: File format
+	 *                         example: .rvt
+	 *                       tag:
+	 *                         description: Unique revision name
+	 *                         type: string
+	 *                         example: rev01
+	 *                       statusCode:
+	 *                         type: string
+	 *                         description: Revision status code
+	 *                         example: S0
+	 *                       revCode:
+	 *                         type: string
+	 *                         description: Revision code
+	 *                         example: P01
+	 *                       desc:
+	 *                         type: string
+	 *                         description: Revision description
+	 *                         example: Level 2 floor plan
+	 *                       void:
+	 *                         type: boolean
+	 *                         description: Whether revision is void or not
+	 *                         example: false
+	 *             examples:
+	 *               containers:
+	 *                 summary: containers
+	 *                 value:
+	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, tag: rev01, desc: The Architecture model of the Lego House, void: true }]
+	 *               drawings:
+	 *                 summary: drawings
+	 *                 value:
+	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, statusCode: S0, revCode: P01, desc: The Architecture model of the Lego House, void: true }]
+	 */
+	router.get('', hasReadAccessToModel[modelType], getRevisions(modelType), serialiseRevisionArray);
 
 	if (!isInternal) {
-		/**
-		 * @openapi
-		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
-		 *   get:
-		 *     description: Get a list of revisions of a model
-		 *     tags: [v:external, Revisions]
-		 *     operationId: getModelRevisions
-		 *     parameters:
-		 *       - name: teamspace
-		 *         description: Name of teamspace
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: project
-		 *         description: Project ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           format: uuid
-		 *       - name: type
-		 *         description: Model type
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           enum: [containers, drawings]
-		 *       - name: model
-		 *         description: Model ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           format: uuid
-		 *       - name: showVoid
-		 *         description: Include void revisions or not
-		 *         in: query
-		 *         required: false
-		 *         schema:
-		 *           type: string
-		 *     responses:
-		 *       401:
-		 *         $ref: "#/components/responses/notLoggedIn"
-		 *       404:
-		 *         $ref: "#/components/responses/teamspaceNotFound"
-		 *       200:
-		 *         description: returns list of revisions
-		 *         content:
-		 *           application/json:
-		 *             schema:
-		 *               type: object
-		 *               properties:
-		 *                 revisions:
-		 *                   type: array
-		 *                   items:
-		 *                     type: object
-		 *                     properties:
-		 *                       _id:
-		 *                         type: string
-		 *                         description: Revision ID
-		 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-		 *                       author:
-		 *                         type: string
-		 *                         description: name of the creator of the revision
-		 *                         example: someUser
-		 *                       timestamp:
-		 *                         type: number
-		 *                         description: Revision creation date
-		 *                         example: 1644925152000
-		 *                       format:
-		 *                         type: string
-		 *                         description: File format
-		 *                         example: .rvt
-		 *                       tag:
-		 *                         description: Unique revision name
-		 *                         type: string
-		 *                         example: rev01
-		 *                       statusCode:
-		 *                         type: string
-		 *                         description: Revision status code
-		 *                         example: S0
-		 *                       revCode:
-		 *                         type: string
-		 *                         description: Revision code
-		 *                         example: P01
-		 *                       desc:
-		 *                         type: string
-		 *                         description: Revision description
-		 *                         example: Level 2 floor plan
-		 *                       void:
-		 *                         type: boolean
-		 *                         description: Whether revision is void or not
-		 *                         example: false
-		 *             examples:
-		 *               containers:
-		 *                 summary: containers
-		 *                 value:
-		 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, tag: rev01, desc: The Architecture model of the Lego House, void: true }]
-		 *               drawings:
-		 *                 summary: drawings
-		 *                 value:
-		 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, statusCode: S0, revCode: P01, desc: The Architecture model of the Lego House, void: true }]
-		 */
-		router.get('', hasReadAccessToModel[modelType], getRevisions(modelType), serialiseRevisionArray);
-
 		/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions/{revision}:
