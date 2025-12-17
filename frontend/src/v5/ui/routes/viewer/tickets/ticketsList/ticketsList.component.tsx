@@ -19,7 +19,7 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer } from './ticketsList.styles';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { untilXFramesPassed, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
 import { groupTickets, TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
@@ -48,23 +48,22 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
-	let groups:TicketsGroup[];
+	
+	const [groups, setGroups] = useState([]);
+
 	const tableHandle = useRef<VListHandle>();
 	const subTableHandle = useRef<VListHandle>();
 	const scrollerRef = useRef<Element>();
 
+	useEffect(() => {
+		if (groupBy === 'none') {
+			setGroups([]);
+			return;
+		} 
+		
+		setGroups(groupTickets(groupBy, templates, filteredTickets));
+	}, [groupBy, templates, filteredTickets]);
 
-	if (groupBy !== 'none') {
-		groups = groupTickets(groupBy, templates, filteredTickets);
-		const idsToNumber = {};
-		let c = 0;
-
-		groups.forEach((g)=> {
-			g.tickets.forEach((t) => {
-				idsToNumber[t._id] = c++;
-			});
-		});
-	}
 
 	let selectedIndex = -1;
 	let selectedSubIndex = -1;
@@ -98,8 +97,12 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 			const offset = tableHandle.current.getOffsetToIndex(selectedIndex) + 
 						(subTableHandle.current?.getOffsetToIndex(selectedSubIndex) || 0) + 
 						groupCollapseHeight;
+					
+			let isShowing = subTableHandle.current?.isItemWithIndexShowing(selectedSubIndex, scrollingElement);
 
-			scrollingElement.scrollTop = offset;
+			if (!isShowing) {
+				scrollingElement.scrollTop = offset;
+			}
 
 			(async () => {
 				let done = false;
@@ -111,8 +114,10 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 						(subTableHandle.current?.getOffsetToIndex(selectedSubIndex) || 0) + 
 						groupCollapseHeight,
 					);
-						
-					if (currentScroll != otherScroll) {
+		
+					isShowing = subTableHandle.current?.isItemWithIndexShowing(selectedSubIndex, scrollingElement);
+
+					if (currentScroll != otherScroll && !isShowing) {
 						scrollingElement.scrollTop = otherScroll;
 					} else {
 						done = true;
@@ -139,7 +144,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 		);
 	}
 
-	if (groups) {
+	if (groups.length) {
 		return (
 			<TicketsListsContainer scrollerRef={scrollerRef}>
 				<VirtualList

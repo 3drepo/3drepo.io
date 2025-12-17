@@ -19,6 +19,7 @@ import { useRef, useState, useEffect, createContext, useContext, createRef, Muta
 export type VListHandle = {
 	gotoIndex: (index: number, scroller?: Element ) => Promise<any>;
 	getOffsetToIndex: (index: number) => number;
+	isItemWithIndexShowing: (index: number, scroller?: Element) => boolean;
 };
 
 interface Props<T> {
@@ -223,9 +224,7 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 		let indexChanged = false;
 		const containerRect = containerRef.current?.getBoundingClientRect();
 		let scrolled = false;
-
-		// const wasScrolledOut = !intersects({ top:0, bottom: renderInnerHeight.current },  renderContainerRect.current);
-		
+	
 		const children = itemsContainer.current.children;
 		const scrolledIn =  intersects({ top:0, bottom: innerHeight },  containerRect) && !children.length;
 		
@@ -289,21 +288,43 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 	}, [items]);
 
 
+	const isItemWithIndexShowing = (index, scroller?:Element) => {
+		const isRendering = res?.first <= index && index <= (itemsSlice.length - 1 ) +  res?.first;
+		if (!isRendering) return false;
+		const scrollingElement = scroller || containerRef.current.parentElement;
+		const itemBounds  = itemsContainer.current.children[index - res.first].getBoundingClientRect();
+		const scrollingElementBounds = scrollingElement.getBoundingClientRect();
+		const isSmallerAndContained = itemBounds.height <= scrollingElementBounds.height &&
+				lineInRange(itemBounds.top, scrollingElementBounds.top, scrollingElementBounds.bottom) 
+				&& lineInRange(itemBounds.bottom, scrollingElementBounds.top, scrollingElementBounds.bottom);
+
+		const isLargerAndAligned =  itemBounds.height > scrollingElementBounds.height && 
+				equalsHeight(itemBounds.top, scrollingElementBounds.top);
+
+		return isSmallerAndContained || isLargerAndAligned ;
+	};
+
+
 	const getOffsetToIndex = (index) => {
 		return getHeightByIndex(index, itemsHeight.current, itemHeight);
 	};
 
 	const gotoIndex = async (index, scroller?:Element) => {
 		const scrollingElement = scroller || containerRef.current.parentElement;
-		scrollingElement.scrollTop = getHeightByIndex(index, itemsHeight.current, itemHeight);
-		let done  = false;
+
+		if ( !isItemWithIndexShowing(index, scrollingElement)) {
+			scrollingElement.scrollTop = getHeightByIndex(index, itemsHeight.current, itemHeight);
+		} 
+
+		let done = false;
 
 		for (let i = 0 ; i < 4 && !done ; i++) {
 			await untilXFramesPassed(10);
 			var currentScroll = Math.round(scrollingElement.scrollTop);
 			var otherScroll = Math.round(getHeightByIndex(index, itemsHeight.current, itemHeight));
 			
-			if (currentScroll != otherScroll) {
+			
+			if (currentScroll != otherScroll && !isItemWithIndexShowing(index, scrollingElement)) {
 				scrollingElement.scrollTop = otherScroll;
 			} else {
 				done = true;
@@ -319,8 +340,8 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 
 	useEffect(() => {
 		if (!handle) return;
-		handle.current = { gotoIndex, getOffsetToIndex };
-	}, [handle, gotoIndex]);
+		handle.current = { gotoIndex, getOffsetToIndex, isItemWithIndexShowing };
+	}, [handle, gotoIndex, isItemWithIndexShowing]);
 
 
 	let itemsContainerClassName = 'vlist-mid';
