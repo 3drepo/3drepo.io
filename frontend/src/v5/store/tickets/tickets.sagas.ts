@@ -57,6 +57,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation, pro
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { propertiesToInclude });
+		yield put(TicketsActions.resetPropertiesFetched());
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -113,7 +114,7 @@ export function* fetchTicketsProperties({
 			yield put(TicketsActions.setPropertiesFetched(tickets.map(({ _id }) => _id), propertiesToInclude, true));
 		}
 		
-		onSuccess();
+		onSuccess?.();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -122,7 +123,7 @@ export function* fetchTicketsProperties({
 			),
 			error,
 		}));
-		onError();
+		onError?.();
 	}
 }
 
