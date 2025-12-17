@@ -31,7 +31,7 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelection/groupBySelection.component';
@@ -45,6 +45,7 @@ export const TicketsListCard = () => {
 	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const groupBy = TicketsCardHooksSelectors.selectGroupBy();
+	const [fetchingProperties, setFetchingProperties] = useState(false);
 
 	const onFiltersChange = (filters) => {
 		TicketsCardActionsDispatchers.setFilters(filters);
@@ -57,13 +58,18 @@ export const TicketsListCard = () => {
 		
 		if (alreadyFetched) return;
 
+		setFetchingProperties(true);
+
 		TicketsActionsDispatchers.fetchTicketsProperties(teamspace,
 			project,
 			containerOrFederation,
 			isFed(containerOrFederation),
 			[groupBy],
+			() => {
+				setFetchingProperties(false);
+			},
 		);
-	}, [groupBy, JSON.stringify(tickets.map(({ _id })=>_id))]);
+	}, [groupBy, JSON.stringify(tickets.map(({ _id })=>_id)), setFetchingProperties]);
 
 	return (
 		<CardContainer>
@@ -83,7 +89,7 @@ export const TicketsListCard = () => {
 				<CardContent onClick={() => TicketsCardActionsDispatchers.setSelectedTicket(null)}>
 					<CardFilters />
 					{tickets.length ? (
-						<TicketsList groupBy={groupBy} templates={templates} />
+						<TicketsList groupBy={groupBy} templates={templates} loading={fetchingProperties}/>
 					) : (
 						<EmptyListMessage>
 							<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />

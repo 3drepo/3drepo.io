@@ -26,12 +26,14 @@ import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { ChevronIconContainer } from '@components/viewer/cards/cardFilters/filtersAccordion/filtersAccordion.styles';
 import { MutableRefObject } from 'react';
+import { SpinnerLoader } from '@controls/spinnerLoader';
 
 type GroupedListProps = {
 	handle?: MutableRefObject<VListHandle>;
+	loading: boolean;
 };
 
-export const TicketsGroupedList = ({ tickets, groupName, handle } : TicketsGroup & GroupedListProps) => {
+export const TicketsGroupedList = ({ tickets, groupName, handle, loading } : TicketsGroup & GroupedListProps) => {
 	const expanded = useVRef<boolean>(groupName + '.expanded', true);
 
 	return (
@@ -42,7 +44,8 @@ export const TicketsGroupedList = ({ tickets, groupName, handle } : TicketsGroup
 						<GroupedListToggleContainer $expanded={expandedProp}>
 							<GroupedListToggleTitle>
 								<GroupedTextOverflow>{groupName}</GroupedTextOverflow>
-								<CircledNumber>{tickets.length}</CircledNumber>
+								{loading && (<SpinnerLoader />)}
+								{!loading && (<CircledNumber>{tickets.length}</CircledNumber>)}
 							</GroupedListToggleTitle>
 							<ChevronIconContainer $collapsed={!expandedProp}>
 								<ChevronIcon />

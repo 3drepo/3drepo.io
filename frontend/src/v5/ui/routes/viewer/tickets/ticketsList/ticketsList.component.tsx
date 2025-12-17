@@ -44,7 +44,7 @@ const TicketsListsContainer = ({ children, scrollerRef }) => {
 	);
 };
 
-export const TicketsList = ({ groupBy, templates }) => {
+export const TicketsList = ({ groupBy, templates, loading }) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
@@ -103,7 +103,7 @@ export const TicketsList = ({ groupBy, templates }) => {
 
 			(async () => {
 				let done = false;
-				for (let i = 0 ; i < 4 && !done ; i++) {
+				for (let i = 0 ; i < 10 && !done ; i++) {
 					await untilXFramesPassed(10);
 					const currentScroll = Math.round(scrollingElement.scrollTop);
 					const otherScroll = Math.round(
@@ -148,7 +148,7 @@ export const TicketsList = ({ groupBy, templates }) => {
 					items={groups}
 					itemHeight={30}
 					ItemComponent={(group: TicketsGroup, index) => 
-						<TicketsGroupedList key={group.groupName} {...group} handle={index === selectedIndex ? subTableHandle : undefined }/>
+						<TicketsGroupedList loading={loading} key={group.groupName} {...group} handle={index === selectedIndex ? subTableHandle : undefined }/>
 					}
 				/>
 			</TicketsListsContainer>

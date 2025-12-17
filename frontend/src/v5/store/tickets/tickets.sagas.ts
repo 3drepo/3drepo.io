@@ -82,6 +82,8 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 export function* fetchTicketsProperties({
 	teamspace, projectId, modelId,
 	isFederation, propertiesToInclude,
+	onSuccess,
+	onError,
 }: FetchTicketsPropertiesAction) {
 	try {
 		const ticketsData = yield select(selectTicketsByContainersAndFederations, [modelId]);
@@ -110,7 +112,8 @@ export function* fetchTicketsProperties({
 			yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
 			yield put(TicketsActions.setPropertiesFetched(tickets.map(({ _id }) => _id), propertiesToInclude, true));
 		}
-
+		
+		onSuccess();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -119,6 +122,7 @@ export function* fetchTicketsProperties({
 			),
 			error,
 		}));
+		onError();
 	}
 }
 
