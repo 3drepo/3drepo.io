@@ -86,7 +86,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 		if (groupBy === 'none') {
 			tableHandle.current?.gotoIndex(selectedIndex, scrollerRef.current);
 		 } else {
-			if (!tableHandle.current || !subTableHandle.current) {
+			if (!tableHandle.current) {
 				return;
 			}
 			const groupCollapseHeight = 50;
@@ -96,7 +96,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 			// For going to an index on a sublist there's no built in mechanism for now
 			// so it's done manually
 			const offset = tableHandle.current.getOffsetToIndex(selectedIndex) + 
-						subTableHandle.current.getOffsetToIndex(selectedSubIndex) + 
+						(subTableHandle.current?.getOffsetToIndex(selectedSubIndex) || 0) + 
 						groupCollapseHeight;
 
 			scrollingElement.scrollTop = offset;
@@ -108,7 +108,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 					const currentScroll = Math.round(scrollingElement.scrollTop);
 					const otherScroll = Math.round(
 						tableHandle.current.getOffsetToIndex(selectedIndex) + 
-						subTableHandle.current.getOffsetToIndex(selectedSubIndex) + 
+						(subTableHandle.current?.getOffsetToIndex(selectedSubIndex) || 0) + 
 						groupCollapseHeight,
 					);
 						
