@@ -17,7 +17,9 @@
 
 const {
 	getRepoBundleInfo: getContainerBundleInfo,
+	getRepoBundle: getContainerRepoBundle,
 	getSupermeshMapping: getContainerSupermeshMapping,
+	getUnityBundle: getContainerUnityBundle,
 } = require('../../../../../../processors/teamspaces/projects/models/containers');
 const {
 	getRepoBundleInfo: getFederationBundleInfo,
@@ -27,15 +29,14 @@ const {
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
 } = require('../../../../../../middleware/permissions');
-
+const { respond, writeStreamRespond } = require('../../../../../../utils/responder');
+const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const { getAccessibleContainers } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
-const { respond, writeStreamRespond } = require('../../../../../../utils/responder');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
-const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 
 const getRepoBundleInfo = (modelType) => async (req, res) => {
 	const { teamspace, revision } = req.params;
@@ -57,6 +58,30 @@ const getBundlesMeta = (modelType) => async (req, res) => {
 			: getFederationSupermeshMapping;
 		const stream = await fn(teamspace, req.params[modelType], revision, req.containers);
 		writeStreamRespond(req, res, templates.ok, stream, undefined, undefined, { mimeType: MimeTypes.JSON });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getUnityBundle = async (req, res) => {
+	const { teamspace, container, bundleId } = req.params;
+
+	try {
+		const { readStream, size, mimeType, encoding } = await getContainerUnityBundle(teamspace, container, bundleId);
+		writeStreamRespond(req, res, templates.ok, readStream, undefined, size, { encoding, mimeType });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getRepoBundle = async (req, res) => {
+	const { teamspace, container, bundleId } = req.params;
+
+	try {
+		const { readStream, size, mimeType, encoding } = await getContainerRepoBundle(teamspace, container, bundleId);
+		writeStreamRespond(req, res, templates.ok, readStream, undefined, size, { encoding, mimeType });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -364,6 +389,10 @@ const establishRoutes = (modelType) => {
 	 *                                             example: ["c1fbb598-b971-4122-bd79-1cd5bf8ae100_0"]
 	 */
 	router.get('/meta', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getBundlesMeta(modelType));
+
+	router.get('/unity/:bundleId', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getUnityBundle);
+
+	router.get('/repo/:bundleId', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getRepoBundle);
 
 	return router;
 };

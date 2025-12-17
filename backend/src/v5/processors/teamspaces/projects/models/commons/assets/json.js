@@ -22,8 +22,6 @@ const { getFileAsStream } = require('../../../../../../services/filesManager');
 const JsonAssets = { };
 
 const STASH_JSON_COLLECTION = 'stash.json_mpc.ref';
-const STASH_UNITY3D_COLLECTION = 'stash.unity3d.ref';
-const STASH_REPOBUNDLES_COLLECTION = 'stash.repobundles.ref';
 
 const readFileStreamAsync = async (outstream, teamspace, container, filename, injectIdentifier) => {
 	const output = await getFileAsStream(teamspace,
@@ -103,10 +101,6 @@ JsonAssets.getAssetProperties = async (teamspace, model, revisions, subModels) =
 
 	return stream;
 };
-
-JsonAssets.getUnityBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}.${STASH_UNITY3D_COLLECTION}`, `${UUIDToString(bundleId)}.unity3d`);
-
-JsonAssets.getRepoBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}.${STASH_REPOBUNDLES_COLLECTION}`, `${UUIDToString(bundleId)}.repobundles`);
 
 JsonAssets.getSupermeshMapping = async (teamspace, model, revisions, subModels) => {
 	const outstream = new PassThrough();

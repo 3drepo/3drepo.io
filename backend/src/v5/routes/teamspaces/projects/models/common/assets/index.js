@@ -15,11 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const {
-	getRepoBundle: getContainerRepoBundle,
-	getTree: getContainerTree,
-	getUnityBundle: getContainerUnityBundle,
-} = require('../../../../../../processors/teamspaces/projects/models/containers');
+const { getAssetProperties: getContainerAssetProperties, getTree: getContainerTree } = require('../../../../../../processors/teamspaces/projects/models/containers');
 const {
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
@@ -28,9 +24,7 @@ const { respond, writeStreamRespond } = require('../../../../../../utils/respond
 const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const { getAccessibleContainers } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
-const {
-	getAssetProperties: getFederationAssetProperties,
-} = require('../../../../../../processors/teamspaces/projects/models/federations');
+const { getAssetProperties: getFederationAssetProperties } = require('../../../../../../processors/teamspaces/projects/models/federations');
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
@@ -46,31 +40,6 @@ const getTree = async (req, res) => {
 		respond(req, res, err);
 	}
 };
-
-const getUnityBundle = async (req, res) => {
-	const { teamspace, container, bundleId } = req.params;
-
-	try {
-		const readStream = await getContainerUnityBundle(teamspace, container, bundleId);
-		writeStreamRespond(req, res, templates.ok, readStream, undefined, undefined, { mimeType: MimeTypes.JSON });
-	} catch (err) {
-		// istanbul ignore next
-		respond(req, res, err);
-	}
-};
-
-const getRepoBundle = async (req, res) => {
-	const { teamspace, container, bundleId } = req.params;
-
-	try {
-		const readStream = await getContainerRepoBundle(teamspace, container, bundleId);
-		writeStreamRespond(req, res, templates.ok, readStream, undefined, undefined, { mimeType: MimeTypes.JSON });
-	} catch (err) {
-		// istanbul ignore next
-		respond(req, res, err);
-	}
-};
-
 
 const getProperties = (modelType) => async (req, res) => {
 	const { teamspace, revision } = req.params;

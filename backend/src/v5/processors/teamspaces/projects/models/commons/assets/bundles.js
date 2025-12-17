@@ -15,9 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString } = require('../../../../../../utils/helper/uuids');
 const { getAssetList } = require('../../../../../../models/bundles');
+const { getFileAsStream } = require('../../../../../../services/filesManager');
 
 const JsonAssets = { };
+
+const STASH_UNITY3D_COLLECTION = 'stash.unity3d.ref';
+const STASH_REPOBUNDLES_COLLECTION = 'stash.repobundles.ref';
 
 JsonAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => {
 	const containerList = subModels || [{ container: model, revision }];
@@ -26,5 +31,9 @@ JsonAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => 
 		{ container, revision: revId }) => getAssetList(teamspace, container, revId).catch(() => undefined)));
 	return { models: lists.filter((entry) => !!entry) };
 };
+
+JsonAssets.getUnityBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}.${STASH_UNITY3D_COLLECTION}`, UUIDToString(bundleId));
+
+JsonAssets.getRepoBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}.${STASH_REPOBUNDLES_COLLECTION}`, UUIDToString(bundleId));
 
 module.exports = JsonAssets;
