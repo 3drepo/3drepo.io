@@ -18,7 +18,7 @@ import { Headers } from './ticketsTableHeaders.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { TicketsTableHeaderBulkEdit } from './ticketsTableHeaderBulkEdit.component';
+import { TicketsTableHeaderBulkEdit } from './ticketsTableHeaderBulkEdit/ticketsTableHeaderBulkEdit.component';
 import { NON_BULK_EDITABLE_COLUMNS } from './ticketsTableHeaders.helpers';
 import { TicketsTableHeader } from './ticketsTableHeader.component';
 
