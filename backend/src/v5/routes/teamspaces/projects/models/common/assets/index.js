@@ -16,8 +16,9 @@
  */
 
 const {
-	getAssetProperties: getContainerAssetProperties,
+	getRepoBundle: getContainerRepoBundle,
 	getTree: getContainerTree,
+	getUnityBundle: getContainerUnityBundle,
 } = require('../../../../../../processors/teamspaces/projects/models/containers');
 const {
 	hasReadAccessToContainer,
@@ -45,6 +46,31 @@ const getTree = async (req, res) => {
 		respond(req, res, err);
 	}
 };
+
+const getUnityBundle = async (req, res) => {
+	const { teamspace, container, bundleId } = req.params;
+
+	try {
+		const readStream = await getContainerUnityBundle(teamspace, container, bundleId);
+		writeStreamRespond(req, res, templates.ok, readStream, undefined, undefined, { mimeType: MimeTypes.JSON });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getRepoBundle = async (req, res) => {
+	const { teamspace, container, bundleId } = req.params;
+
+	try {
+		const readStream = await getContainerRepoBundle(teamspace, container, bundleId);
+		writeStreamRespond(req, res, templates.ok, readStream, undefined, undefined, { mimeType: MimeTypes.JSON });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 
 const getProperties = (modelType) => async (req, res) => {
 	const { teamspace, revision } = req.params;

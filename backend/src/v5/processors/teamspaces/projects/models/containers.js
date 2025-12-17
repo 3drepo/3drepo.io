@@ -19,6 +19,7 @@ const { addModel, deleteModel, getModelList, getModelMD5Hash } = require('./comm
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
+const { getRepoBundle, getTree, getUnityBundle } = require('./commons/assets/json');
 
 const BundleAssets = require('./commons/assets/bundles');
 const Comments = require('./commons/tickets.comments');
@@ -143,5 +144,11 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 	container, { corID: 0, account: 0, permissions: 0 });
 
 Containers.getRevisionMD5Hash = getModelMD5Hash;
+
+Containers.getTree = getTree;
+
+Containers.getUnityBundle = getUnityBundle;
+
+Containers.getRepoBundle = getRepoBundle;
 
 module.exports = Containers;
