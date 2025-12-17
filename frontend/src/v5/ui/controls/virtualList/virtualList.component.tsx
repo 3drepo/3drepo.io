@@ -350,7 +350,7 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 				<div style={{ height: spacerStart } } id='startSpacer'/>
 				<div ref={itemsContainer as any}  className={itemsContainerClassName} >
 					{itemsSlice.map((e, index, arr) => {
-						var ele = ItemComponent(e, index, arr);
+						var ele = ItemComponent(e, index + (res?.first || 0), arr);
 						const key = parentVKey ? `${parentVKey}.${ele.key}` : ele.key;
 						return (<VKeyContext.Provider value={key} key={key} >{ele}</VKeyContext.Provider>);
 					})}
