@@ -148,7 +148,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 					items={groups}
 					itemHeight={30}
 					ItemComponent={(group: TicketsGroup, index) => 
-						<TicketsGroupedList loading={loading} key={group.groupName} {...group} handle={index === selectedIndex ? subTableHandle : undefined }/>
+						<TicketsGroupedList expanded={index === selectedIndex } loading={loading} key={group.groupName} {...group} handle={index === selectedIndex ? subTableHandle : undefined }/>
 					}
 				/>
 			</TicketsListsContainer>

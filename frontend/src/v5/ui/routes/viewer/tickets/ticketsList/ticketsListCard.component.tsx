@@ -81,7 +81,10 @@ export const TicketsListCard = () => {
 						<>
 							{!readOnly && (<NewTicketMenu />)}
 							<FilterSelection />
-							<GroupBySelection value={groupBy} onChange={TicketsCardActionsDispatchers.setGroupBy}/>
+							<GroupBySelection value={groupBy} onChange={(value) => {
+								TicketsCardActionsDispatchers.setSelectedTicket(null);
+								TicketsCardActionsDispatchers.setGroupBy(value);
+							}} />
 							<TicketsEllipsisMenu />
 						</>
 					)}

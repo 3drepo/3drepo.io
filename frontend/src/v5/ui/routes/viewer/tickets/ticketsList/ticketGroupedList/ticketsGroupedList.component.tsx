@@ -31,10 +31,11 @@ import { SpinnerLoader } from '@controls/spinnerLoader';
 type GroupedListProps = {
 	handle?: MutableRefObject<VListHandle>;
 	loading: boolean;
+	expanded: boolean;
 };
 
-export const TicketsGroupedList = ({ tickets, groupName, handle, loading } : TicketsGroup & GroupedListProps) => {
-	const expanded = useVRef<boolean>(groupName + '.expanded', true);
+export const TicketsGroupedList = ({ tickets, groupName, handle, loading, expanded: expandedDefault } : TicketsGroup & GroupedListProps) => {
+	const expanded = useVRef<boolean>(groupName + '.expanded', expandedDefault);
 
 	return (
 		<GroupedListSpacer>
@@ -54,6 +55,7 @@ export const TicketsGroupedList = ({ tickets, groupName, handle, loading } : Tic
 					))}
 					defaultExpanded={expanded.current}
 					onChangeCollapse={(collapsed) => expanded.current = !collapsed }
+					unmountHidden
 				>
 					<VirtualList 
 						handle={handle}
