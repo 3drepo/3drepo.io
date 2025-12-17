@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useVRef, VirtualList } from '@controls/virtualList/virtualList.component';
+import { useVRef, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
 import { TicketsGroup } from '../../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { CollapseControl } from '@controls/collapseControl/collapseControl.component';
 import { List } from '../ticketsList.styles';
@@ -25,8 +25,13 @@ import { GroupedListSpacer, GroupedListToggleContainer, GroupedListToggleTitle, 
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { ChevronIconContainer } from '@components/viewer/cards/cardFilters/filtersAccordion/filtersAccordion.styles';
+import { MutableRefObject } from 'react';
 
-export const TicketsGroupedList = ({ tickets, groupName } : TicketsGroup) => {
+type GroupedListProps = {
+	handle?: MutableRefObject<VListHandle>;
+};
+
+export const TicketsGroupedList = ({ tickets, groupName, handle } : TicketsGroup & GroupedListProps) => {
 	const expanded = useVRef<boolean>(groupName + '.expanded', true);
 
 	return (
@@ -48,6 +53,7 @@ export const TicketsGroupedList = ({ tickets, groupName } : TicketsGroup) => {
 					onChangeCollapse={(collapsed) => expanded.current = !collapsed }
 				>
 					<VirtualList 
+						handle={handle}
 						vKey={'tickets-list-' + tickets[0].title}
 						items={tickets}
 						itemHeight={30}

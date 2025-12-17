@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRef, useState, useEffect, createContext, useContext, createRef } from 'react';
+import { useRef, useState, useEffect, createContext, useContext, createRef, MutableRefObject } from 'react';
 
 export type VListHandle = {
 	gotoIndex: (index: number, scroller?: Element ) => Promise<any>;
@@ -27,7 +27,7 @@ interface Props<T> {
 	ItemComponent: (value: T, index: number, array: any[]) => JSX.Element;
 	vKey?: string;
 	className?: string;
-	handle?: React.MutableRefObject<VListHandle>;
+	handle?: MutableRefObject<VListHandle>;
 }
 
 const emptyRect = { x:0, y:0, width:0, top:0, bottom: 0, height:0 } as DOMRect;
