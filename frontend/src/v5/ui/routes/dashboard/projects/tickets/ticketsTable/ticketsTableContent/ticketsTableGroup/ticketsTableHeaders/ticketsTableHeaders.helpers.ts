@@ -33,7 +33,7 @@ export const NON_BULK_EDITABLE_COLUMNS = [
 	'id',
 	`properties.${BaseProperties.OWNER}`,
 	'modelName',
-	BaseProperties.CREATED_AT,
-	BaseProperties.UPDATED_AT,
+	`properties.${BaseProperties.CREATED_AT}`,
+	`properties.${BaseProperties.UPDATED_AT}`,
 	BaseProperties.TITLE,
 ];
