@@ -20,30 +20,30 @@ import { TicketItemContainer, Title } from '../ticketItem/ticketItem.styles';
 import { TextOverflow } from '@controls/textOverflow';
 
 export const GroupedListToggleContainer = styled(TicketItemContainer)<{ $expanded:boolean }>`
-    min-height: 0;
-    display: flex;
-    align-items: center;
+	min-height: 0;
+	display: flex;
+	align-items: center;
   
-    ${({ $expanded }) => !$expanded && css`
-        border-bottom: 0 !important;
-    `};
+	${({ $expanded }) => !$expanded && css`
+		border-bottom: 0 !important;
+	`};
 `;
 
 export const GroupedTextOverflow = styled(TextOverflow)`
-    flex-grow: unset;
-    max-width: 278px;
-    align-content: center;
+	flex-grow: unset;
+	max-width: 278px;
+	align-content: center;
 `;
 
 export const GroupedListToggleTitle = styled(Title)`
-    color: ${({ theme }) => theme.palette.secondary.main};
-    font-size: 13px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    margin-top 1px;
+	color: ${({ theme }) => theme.palette.secondary.main};
+	font-size: 13px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	margin-top: 1px;
 `;
 
 export const GroupedListSpacer = styled.div`
-    padding-bottom: 10px
+	padding-bottom: 10px
 `;

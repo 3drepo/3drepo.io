@@ -47,7 +47,6 @@ export const List = styled.div`
 	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
 	box-sizing: border-box;
 
-
 	${/* sc-selector */ TicketItemContainer} {
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
