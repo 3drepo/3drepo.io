@@ -16,10 +16,10 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const { doesAccountExist, getTeamspaceByAccount } = require('../../../../services/sso/frontegg/components/accounts');
 const { SUBSCRIPTION_TYPES } = require('../../../../models/teamspaces.constants');
 const Yup = require('yup');
 const YupHelper = require('../../../../utils/helper/yup');
-const { getTeamspaceByAccount } = require('../../../../services/sso/frontegg/components/accounts');
 const { getTeamspaceSetting } = require('../../../../models/teamspaceSettings');
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { isTeamspaceAdmin } = require('../../../../utils/permissions');
@@ -83,7 +83,7 @@ Teamspaces.validateUpdateQuota = async (req, res, next) => {
 
 Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
 	const schema = Yup.object().shape({
-		name: YupHelper.validators.alphanumeric(Yup.string().max(128).required()
+		name: YupHelper.validators.alphanumeric(YupHelper.types.strings.title.required()
 			.test('check-name-is-not-used', 'Teamspace with this name already exists.', async (value) => {
 				if (!value) return true;
 				try {
@@ -93,14 +93,18 @@ Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
 					return true;
 				}
 			}), false),
-		admin: YupHelper.types.strings.email.optional(),
-		accountId: Yup.string().optional()
+		admin: YupHelper.types.strings.email,
+		accountId: Yup.string()
 			.test('check-account-exists', 'Account with this ID does not exist.', async (value) => {
 				if (!value) return true;
-				if (await getTeamspaceByAccount(value)) {
+				if (await doesAccountExist(value)) {
 					return true;
 				}
 				return false;
+			}).test('check-account-has-no-teamspace', 'Account with this ID is already associated with another teamspace.', async (value) => {
+				if (!value) return true;
+				const teamspace = await getTeamspaceByAccount(value);
+				return teamspace === undefined;
 			}),
 	});
 
@@ -109,6 +113,7 @@ Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
 
 		await next();
 	} catch (err) {
+		console.log(err);
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
