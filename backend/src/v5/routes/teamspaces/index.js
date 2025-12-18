@@ -241,8 +241,6 @@ const establishRoutes = (isInternal) => {
 		*         description: Teamspace created successfully
 		*       400:
 		*         $ref: "#/components/responses/invalidArguments"
-		*       409:
-		*         $ref: "#/components/responses/resourceAlreadyExists"
 		*/
 		router.post('/', validateCreateTeamspaceData, createTeamspace);
 	} else {
