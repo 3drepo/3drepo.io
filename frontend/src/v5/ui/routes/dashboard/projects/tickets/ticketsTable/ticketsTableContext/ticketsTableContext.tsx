@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext } from 'react';
+import { createContext, Dispatch, useEffect, useState } from 'react';
 import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useParams } from 'react-router';
@@ -36,6 +36,9 @@ export interface TicketsTableType {
 	groupBy: string,
 	setGroupBy: (groupBy: React.SetStateAction<string>) => void;
 	fetchColumn: (name: string, tickets: ITicket[]) => void;
+	setSelectedIds: Dispatch<React.SetStateAction<Set<string>>>
+	selectedIds: Set<string>;
+	onBulkEdit: () => void;
 }
 
 const defaultValue: TicketsTableType = {
@@ -45,6 +48,9 @@ const defaultValue: TicketsTableType = {
 	groupBy: '',
 	setGroupBy: () => {},
 	fetchColumn: () => {},
+	setSelectedIds: () => {},
+	selectedIds: new Set([]),
+	onBulkEdit: () => {},
 };
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
@@ -58,11 +64,17 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
 		{},
 	);
+
+	const onBulkEdit = () => {
+		// eslint-disable-next-line no-console
+		console.log('Editting these ids...', selectedIds);
+	};
 
 	const fetchColumn = (name, tickets: ITicket[]) => {
 		const idsByModelId = tickets
@@ -103,6 +115,10 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	const groupByProperties = definitionsAsArray
 		.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
 		.map((definition) => definition.name);
+
+	useEffect(() => {
+		setSelectedIds(new Set());
+	}, [templateId]);
 	
 	return (
 		<TicketsTableContext.Provider value={{
@@ -112,6 +128,9 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 			groupBy: groupBy || NONE_OPTION,
 			setGroupBy,
 			fetchColumn,
+			setSelectedIds,
+			selectedIds,
+			onBulkEdit,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>

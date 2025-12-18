@@ -57,6 +57,7 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
 import { isEqual } from 'lodash';
+import { BulkEditButton } from './bulkEditButton.component';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -71,6 +72,7 @@ type TicketsTableProps = {
 export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
 	const navigate = useNavigate();
 	const params = useParams<DashboardTicketsParams>();
+	const { setSelectedIds, selectedIds } = useContext(TicketsTableContext);
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
 	const { teamspace, project, template, ticketId } = params;
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
@@ -106,7 +108,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-
+	const ticketsByModelId = TicketsHooksSelectors.selectTicketsByModelIdDictionary();
+	const prevModelIdsRef = useRef<string[]>(containersAndFederations);
 
 	const [paramFilters, setParamFilters] = useSearchParam<string>('filters', undefined, true);
 
@@ -276,6 +279,21 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			TicketsActionsDispatchers.setTabularViewParams(paramsToSave.current.params, paramsToSave.current.search);
 		};
 	}, []);
+	
+	useEffect(() => {
+		// Must remove selected ticket ids if their corresponding model is removed from the table
+		const prevModelIds = prevModelIdsRef.current;
+		const removedModelIds = prevModelIds.filter((id) => !containersAndFederations.includes(id));
+		if (removedModelIds.length > 0) {
+			const ticketIdsToRemove = removedModelIds.flatMap((id) => ticketsByModelId[id]);
+			setSelectedIds((prev) => {
+				const next = new Set(prev);
+				ticketIdsToRemove.forEach((id) => next.delete(id));
+				return next;
+			});
+		}
+		prevModelIdsRef.current = containersAndFederations;
+	}, [containersAndFederations]);
 
 	paramsToSave.current = { search: window.location.search, params };
 
@@ -301,6 +319,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 								{...paramToInputProps(template, setTemplate)}
 							/>
 							<GroupBySelect />
+							<BulkEditButton />
 						</SelectorsContainer>
 					</FlexContainer>
 					<FlexContainer>
