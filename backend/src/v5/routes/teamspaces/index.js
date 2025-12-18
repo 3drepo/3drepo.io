@@ -19,13 +19,11 @@ const { canRemoveTeamspaceMember, memberExists, validateCreateTeamspaceData, val
 
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 
-const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { Router } = require('express');
 const { SUBSCRIPTION_TYPES } = require('../../models/teamspaces.constants');
 const Teamspaces = require('../../processors/teamspaces');
 const Users = require('../../processors/users');
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
-const { getUserByEmail } = require('../../models/users');
 const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');

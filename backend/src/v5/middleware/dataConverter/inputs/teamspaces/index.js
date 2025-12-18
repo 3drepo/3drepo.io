@@ -16,17 +16,14 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
-const { doesAccountExist, getTeamspaceByAccount } = require('../../../../services/sso/frontegg/components/accounts');
 const { SUBSCRIPTION_TYPES } = require('../../../../models/teamspaces.constants');
-const Yup = require('yup');
-const YupHelper = require('../../../../utils/helper/yup');
-const { getTeamspaceSetting } = require('../../../../models/teamspaceSettings');
+
 const { getUserFromSession } = require('../../../../utils/sessions');
 const { isTeamspaceAdmin } = require('../../../../utils/permissions');
 const { isTeamspaceMember } = require('../../../../processors/teamspaces');
 const { respond } = require('../../../../utils/responder');
-const { validateSchema } = require('../../../../schemas/subscriptions');
 const { validateNewTeamspaceSchema } = require('../../../../schemas/teamspaces');
+const { validateSchema } = require('../../../../schemas/subscriptions');
 
 const Teamspaces = {};
 
