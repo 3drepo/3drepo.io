@@ -24,10 +24,6 @@ const { Router } = require('express');
 const { SUBSCRIPTION_TYPES } = require('../../models/teamspaces.constants');
 const Teamspaces = require('../../processors/teamspaces');
 const Users = require('../../processors/users');
-/* istanbul ignore file */
-const { v4Path } = require('../../../interop');
-// eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
-const { create: createInvite } = require(`${v4Path}/models/invitations`);
 const { fileExtensionFromBuffer } = require('../../utils/helper/typeCheck');
 const { getUserByEmail } = require('../../models/users');
 const { notUserProvisioned } = require('../../middleware/permissions/components/teamspaces');
@@ -140,25 +136,9 @@ const removeQuota = async (req, res) => {
 
 const createTeamspace = async (req, res) => {
 	const { name, accountId, admin } = req.body;
-	let userName;
 
 	try {
-		if (admin) {
-			const result = await getUserByEmail(admin)
-				.catch((e) => {
-					if (e.message !== templates.userNotFound.message) throw e;
-					return {};
-				});
-
-			userName = result.user;
-		}
-
-		await Teamspaces.initTeamspace(name, userName, accountId);
-
-		if (!userName && admin) {
-			await createInvite(admin, name, DEFAULT_OWNER_JOB, undefined, { teamspace_admin: true }, false);
-		}
-
+		await Teamspaces.initTeamspace(name, admin, accountId);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -252,11 +232,11 @@ const establishRoutes = (isInternal) => {
 		*                 example: New Teamspace
 		*               accountId:
 		*                 type: string
-		*                 description: The account ID the teamspace will belong to
+		*                 description: Frontegg account ID this teamspace associates with (optional, only if the account already exists)
 		*                 example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
 		*               admin:
 		*                 type: string
-		*                 description: The email of the owner of the teamspace
+		*                 description: The email of the owner of the teamspace (optional, only if the account is intended to be accessed externally)
 		*                 example: test@test.com
 		*     responses:
 		*       200:

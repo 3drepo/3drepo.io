@@ -36,12 +36,9 @@ const newTeamspaceSchema = Yup.object().shape({
 		}), false),
 	admin: YupHelper.types.strings.email,
 	accountId: Yup.string()
-		.test('check-account-exists', 'Account with this ID does not exist.', async (value) => {
+		.test('check-account-exists', 'Account with this ID does not exist.', (value) => {
 			if (!value) return true;
-			if (await doesAccountExist(value)) {
-				return true;
-			}
-			return false;
+			return doesAccountExist(value);
 		}).test('check-account-has-no-teamspace', 'Account with this ID is already associated with another teamspace.', async (value) => {
 			if (!value) return true;
 			const teamspace = await getTeamspaceByAccount(value);

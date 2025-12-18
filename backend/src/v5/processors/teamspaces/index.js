@@ -97,6 +97,7 @@ Teamspaces.initTeamspace = async (teamspaceName, adminUser, accountId) => {
 		} else if (adminUser) {
 			await inviteUserAsAdmin(teamspaceName, adminUser);
 		}
+		return teamspaceId;
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${teamspaceName}:${err.message}`);
 		throw err;
