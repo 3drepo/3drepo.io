@@ -74,7 +74,7 @@ const testInviteUserAsAdmin = () => {
 			await Invitations.inviteUserAsAdmin(teamspace, email);
 
 			expect(FronteggMock.addUserToAccount).toHaveBeenCalledTimes(1);
-			expect(FronteggMock.addUserToAccount).toHaveBeenCalledWith(email, accountId);
+			expect(FronteggMock.addUserToAccount).toHaveBeenCalledWith(accountId, email);
 
 			expect(dbMock).toHaveBeenCalledTimes(1);
 			expect(dbMock).toHaveBeenCalledWith('admin', 'invitations', {

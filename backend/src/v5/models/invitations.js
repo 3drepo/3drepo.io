@@ -38,7 +38,7 @@ Invitations.inviteUserAsAdmin = async (teamspace, email) => {
 	const invitation = { _id: email, teamSpaces: [teamspaceEntry] };
 
 	const refId = await getTeamspaceRefId(teamspace);
-	await addUserToAccount(email, refId);
+	await addUserToAccount(refId, email);
 
 	await db.insertOne(ADMIN_DB, COL_NAME, invitation);
 	publish(events.INVITATION_ADDED, { teamspace, email, job, permissions });
