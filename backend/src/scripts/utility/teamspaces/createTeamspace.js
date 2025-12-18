@@ -46,9 +46,9 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 			demandOption: true,
 		}).option('user',
 		{
-			describe: 'a user to be assigned to be an admin of this teamspace',
+			describe: 'an email to be assigned to be an admin of this teamspace',
 			type: 'string',
-			demandOption: true,
+			demandOption: false,
 		}).option('accountId', {
 		describe: 'an already existing frontEgg account Id (tennant Id) for the teamspace',
 		type: 'string',
