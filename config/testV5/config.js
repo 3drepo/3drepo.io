@@ -105,7 +105,6 @@ module.exports = {
 	},
 	cn_queue: {
 		host: 'amqp://localhost:5672',
-		worker_queue: 'jobq',
 		model_queue: 'modelq',
 		callback_queue: 'callbackq',
 		upload_dir: tmpDir,
