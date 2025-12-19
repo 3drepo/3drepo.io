@@ -54,6 +54,7 @@ ResponseCodes.templates = {
 
 	// Model related error
 	modelNotFound: { message: 'Model not found.', status: 404 },
+	meshNotFound: { message: 'Mesh not found.', status: 404 },
 
 	// Federation related error
 	federationNotFound: { message: 'Federation not found.', status: 404 },

@@ -18,11 +18,16 @@
 const Scene = {};
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
+const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
+const { getNodeByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
+const GeoMaths = require('../../../../../utils/helper/geoMaths');
+const Stream = require('stream');
 const config = require('../../../../../utils/config');
-const { getFile } = require('../../../../../services/filesManager');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
-const { getNodesBySharedIds } = require('../../../../../models/scenes');
+const { nodeTypes } = require('../../../../../models/scenes constants');
+const { pipeline } = require('stream/promises');
+const { templates } = require('../../../../../utils/responseCodes');
 
 const contextCache = {};
 
@@ -119,6 +124,78 @@ Scene.sharedIdsToExternalIds = async (teamspace, container, revId, sharedIds) =>
 	const metadata = await getMetadataByQuery(teamspace, container, query, projection);
 
 	return Scene.getExternalIdsFromMetadata(metadata);
+};
+
+const calculateNodeMatrix = async (teamspace, project, container, sharedId) => {
+	const transNode = await getNodeByQuery(teamspace, project, container,
+		{ shared_id: sharedId, type: nodeTypes.TRANSFORMATION }, { parents: 1, matrix: 1 });
+	if ((transNode.parents || []).length > 0) {
+		const parentMatrix = await calculateNodeMatrix(teamspace, project, container, transNode.parents[0]);
+		if (transNode.matrix) {
+			return GeoMaths.matrices.multiply(parentMatrix, transNode.matrix);
+		}
+	}
+
+	return transNode.matrix || GeoMaths.matrices.identity();
+};
+
+const fetchMeshBinariesStreams = async (teamspace, container, refObj) => {
+	const { elements: { vertices, faces }, buffer: { start: startIndex, name } } = refObj;
+
+	// nodejs API on createReadStream : start and end index are inclusive, thus we need -1 on end
+	const verticeRegion = {
+		start: startIndex + vertices.start,
+		end: startIndex + vertices.start + vertices.size - 1,
+	};
+	const faceRegion = {
+		start: startIndex + faces.start,
+		end: startIndex + faces.start + faces.size - 1,
+	};
+
+	const { readStream: verticesStream } = await getFileAsStream(teamspace, `${container}.scene`, name, verticeRegion);
+	const { readStream: facesStream } = await getFileAsStream(teamspace, `${container}.scene`, name, faceRegion);
+
+	return { verticesStream, facesStream };
+};
+
+Scene.getMeshData = async (teamspace, project, container, meshId) => {
+	const projection = {
+		parents: 1,
+		vertices: 1,
+		faces: 1,
+		_blobRef: 1,
+		primitive: 1,
+		rev_id: 1,
+	};
+
+	const meshNode = await getNodeByQuery(teamspace, project, container,
+		{ _id: meshId, type: nodeTypes.MESH }, projection);
+
+	// eslint-disable-next-line no-underscore-dangle
+	if (!meshNode || !meshNode._blobRef) {
+		throw templates.meshNotFound;
+	}
+
+	const [matrix, { verticesStream, facesStream }] = await Promise.all([
+		calculateNodeMatrix(teamspace, project, container, meshNode.parents[0]),
+		// eslint-disable-next-line no-underscore-dangle
+		fetchMeshBinariesStreams(teamspace, container, meshNode._blobRef),
+	]);
+
+	const outStream = Stream.PassThrough();
+
+	outStream.write('{');
+	outStream.write(`"matrix":${JSON.stringify(matrix)},`);
+	outStream.write(`"primitive": ${meshNode.primitive || 3},`);
+	outStream.write('"vertices":[');
+	const vertexStream = GeoMaths.vectors.toJSONStream(verticesStream);
+	await pipeline(vertexStream, outStream, { end: false });
+	outStream.write('],"faces":[');
+	const faceStream = GeoMaths.faces.toJSONStream(facesStream);
+	await pipeline(faceStream, outStream, { end: false });
+	outStream.end(']}');
+
+	return outStream;
 };
 
 module.exports = Scene;
