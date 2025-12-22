@@ -37,7 +37,6 @@ class ImportQueue {
 		if(!config.cn_queue ||
 			!config.cn_queue.shared_storage ||
 			!config.cn_queue.callback_queue ||
-			!config.cn_queue.worker_queue ||
 			!config.cn_queue.model_queue ||
 			!config.cn_queue.event_exchange
 		) {
@@ -46,7 +45,6 @@ class ImportQueue {
 
 		this.sharedSpacePath = config.cn_queue.shared_storage;
 		this.callbackQName = config.cn_queue.callback_queue;
-		this.workerQName = config.cn_queue.worker_queue;
 		this.modelQName = config.cn_queue.model_queue;
 		this.eventExchange = config.cn_queue.event_exchange;
 		this.url = config.cn_queue.host;
@@ -74,27 +72,7 @@ class ImportQueue {
 		}
 
 		const msg = `import -f ${sharedSpacePH}/${corID}.json`;
-		return this._dispatchWork(corID, msg, true);
-	}
-
-	/** *****************************************************************************
-	 * Dispatch work to queue to create a federated model
-	 * @param {string} corID - correlation ID for this request
-	 * @param {account} account - username
-	 * @param {defObj} defObj - object to describe the federated model like submodels and transformation
-	 *******************************************************************************/
-	createFederatedModel(corID, account, defObj) {
-		const newFileDir = this.sharedSpacePath + "/" + corID;
-		const filename = `${newFileDir}/obj.json`;
-
-		return Utils.mkdir(this.sharedSpacePath).then(() => {
-			return Utils.mkdir(newFileDir).then(() => {
-				return Utils.writeFile(filename, JSON.stringify(defObj)).then(() => {
-					const msg = `genFed ${sharedSpacePH}/${corID}/obj.json ${account}`;
-					return this._dispatchWork(corID, msg);
-				});
-			});
-		});
+		return this._dispatchWork(corID, msg);
 	}
 
 	/** *****************************************************************************
@@ -162,9 +140,8 @@ class ImportQueue {
 	 * @param {msg} orgFilePath - Path to where the file is currently
 	 * @param {isModelImport} whether this job is a model import
 	 *******************************************************************************/
-	_dispatchWork(corID, msg, isModelImport) {
-		const queueName = isModelImport ? this.modelQName : this.workerQName;
-		return QueueV5.queueMessage(queueName, corID, msg);
+	_dispatchWork(corID, msg) {
+		return QueueV5.queueMessage(this.modelQName, corID, msg);
 	}
 
 	insertEventMessage(msg) {
