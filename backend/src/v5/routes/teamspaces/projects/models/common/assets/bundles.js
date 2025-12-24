@@ -390,9 +390,94 @@ const establishRoutes = (modelType) => {
 	 */
 	router.get('/meta', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getBundlesMeta(modelType));
 
-	router.get('/unity/:bundleId', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getUnityBundle);
+	// istanbul ignore next
+	if (modelType === modelTypes.CONTAINER) {
+		/**
+	    * @openapi
+	    * /teamspaces/{teamspace}/projects/{project}/containers/{containerId}/assets/bundles/unity/{bundleId}:
+	    *   get:
+	    *     description: Gets an actual Unity Bundle file containing a set of assets
+	    *     tags: [v:external, v:internal, Models]
+	    *     operationId: getUnityBundle
+	    *     parameters:
+	    *       - name: teamspace
+	    *         description: Teamspace identifier (e.g., "design-team-alpha")
+	    *         in: path
+	    *         required: true
+	    *         schema:
+	    *           type: string
+	    *       - name: project
+	    *         description: Project identifier (e.g., "office-tower-2025")
+	    *         in: path
+	    *         required: true
+	    *         schema:
+	    *           type: string
+	    *       - name: containerId
+	    *         description: UUID of the container (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+	    *         in: path
+	    *         required: true
+	    *         schema:
+	    *           type: string
+	    *       - name: bundleId
+	    *         description: Bundle ID (e.g., "9f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+	    *         in: path
+	    *         required: true
+	    *         schema:
+	    *           type: string
+	    *     responses:
+	    *       200:
+	    *         description: Returns the unity bundle file
+		*         content:
+		*           application/octet-stream:
+		*             schema:
+		*               type: string
+		*               format: binary
+	    */
+		router.get('/unity/:bundleId', hasReadAccessToContainer, getUnityBundle);
 
-	router.get('/repo/:bundleId', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getRepoBundle);
+		/**
+	    * @openapi
+	    * /teamspaces/{teamspace}/projects/{project}/containers/{containerId}/assets/bundles/repo/{bundleId}:
+	    *   get:
+	    *     description: Gets an actual Repo Bundle file containing a set of assets
+	    *     tags: [v:external, v:internal, Models]
+	    *     operationId: getRepoBundle
+	    *     parameters:
+	    *       - name: teamspace
+	    *         description: Teamspace identifier (e.g., "design-team-alpha")
+	    *         in: path
+	    *         required: true
+	    *         schema:
+	    *           type: string
+	    *       - name: project
+	    *         description: Project identifier (e.g., "office-tower-2025")
+	    *         in: path
+	    *         required: true
+	    *         schema:
+	    *           type: string
+	    *       - name: containerId
+	    *         description: UUID of the container (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+	    *         in: path
+	    *         required: true
+	    *         schema:
+	    *           type: string
+	    *       - name: bundleId
+	    *         description: Bundle ID (e.g., "9f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+	    *         in: path
+	    *         required: true
+	    *         schema:
+	    *           type: string
+	    *     responses:
+	    *       200:
+	    *         description: Returns the repo bundle file
+		*         content:
+		*           application/octet-stream:
+		*             schema:
+		*               type: string
+		*               format: binary
+	    */
+		router.get('/repo/:bundleId', hasReadAccessToContainer, getRepoBundle);
+	}
 
 	return router;
 };
