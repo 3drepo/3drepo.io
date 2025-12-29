@@ -33,7 +33,7 @@ const { hasReadAccessToContainer } = require('../../../../utils/permissions');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { updateModelSubModels } = require('../../../../models/modelSettings');
 
-const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups, ...JSONAssets };
+const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
 
 // Override
 Federations.getTicketGroupById = async (teamspace, project, federation, revId, ticket, groupId, convertToMeshIds) => {
