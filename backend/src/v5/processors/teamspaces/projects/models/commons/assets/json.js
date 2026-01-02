@@ -36,7 +36,6 @@ const readFileStreamAsync = async (outstream, teamspace, container, filename, in
 				outstream.write(
 					`{"account":"${teamspace}","model":"${container}",`);
 				outstream.write(d.slice(1));
-				first = false;
 			} else {
 				outstream.write(d);
 			}
@@ -82,13 +81,13 @@ JsonAssets.getTree = async (teamspace, container, revision) => {
 	return stream;
 };
 
-JsonAssets.getAssetProperties = async (teamspace, model, revisions, subModels) => {
+JsonAssets.getAssetProperties = async (teamspace, model, revision, subModels) => {
 	const stream = PassThrough();
 	const getFileName = (rev) => `${UUIDToString(rev)}/modelProperties.json`;
 
 	stream.write('{"properties": ');
 	try {
-		await readFileStreamAsync(stream, teamspace, model, getFileName(revisions));
+		await readFileStreamAsync(stream, teamspace, model, getFileName(revision));
 	} catch (err) {
 		stream.write(JSON.stringify({ hiddenNodes: [] }));
 	}
@@ -102,7 +101,7 @@ JsonAssets.getAssetProperties = async (teamspace, model, revisions, subModels) =
 	return stream;
 };
 
-JsonAssets.getSupermeshMapping = async (teamspace, model, revisions, subModels) => {
+JsonAssets.getSupermeshMapping = async (teamspace, model, revision, subModels) => {
 	const outstream = new PassThrough();
 	const getFileName = (rev) => `${UUIDToString(rev)}/supermeshes.json`;
 	if (subModels) {
@@ -110,7 +109,7 @@ JsonAssets.getSupermeshMapping = async (teamspace, model, revisions, subModels) 
 		await streamSubModelData(outstream, teamspace, subModels, getFileName);
 		outstream.write(']}');
 	} else {
-		await readFileStreamAsync(outstream, teamspace, model, getFileName(revisions));
+		await readFileStreamAsync(outstream, teamspace, model, getFileName(revision));
 	}
 	outstream.end();
 	return outstream;

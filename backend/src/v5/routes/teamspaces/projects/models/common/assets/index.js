@@ -47,11 +47,11 @@ const getTree = async (req, res) => {
 };
 
 const getProperties = (modelType) => async (req, res) => {
-	const { teamspace, revision } = req.params;
+	const { teamspace, revision, model } = req.params;
 	try {
 		const fn = modelType === modelTypes.CONTAINER ? getContainerAssetProperties
 			: getFederationAssetProperties;
-		const propStream = await fn(teamspace, req.params[modelType], revision, req.containers);
+		const propStream = await fn(teamspace, model, revision, req.containers);
 		writeStreamRespond(req, res, templates.ok, propStream, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next

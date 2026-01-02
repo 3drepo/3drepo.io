@@ -197,7 +197,7 @@ const establishRoutes = (modelType) => {
 	 *   get:
 	 *     description: Get bundles metadata information. This is anticipated to be used only internally by the 3drepo viewer.
 	 *     tags: [v:external, v:internal, ViewerAssets]
-	 *     operationId: getRepoAssets
+	 *     operationId: getRepoBundlesMeta
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Teamspace identifier (e.g., "design-team-alpha")
@@ -386,7 +386,7 @@ const establishRoutes = (modelType) => {
 	 *   get:
 	 *     description: Get meta information that is missing from unity asset list. This is anticipated to be used only internally by the 3drepo viewer.
 	 *     tags: [v:external, v:internal, ViewerAssets]
-	 *     operationId: getUnityAssets
+	 *     operationId: getUnityBundlesMeta
 	 *     parameters:
 	 *       - name: teamspace
 	 *         in: path
