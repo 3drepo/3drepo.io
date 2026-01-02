@@ -1,6 +1,6 @@
 {
   "name": "3drepo.io",
-  "version": "5.20.4",
+  "version": "5.20.5",
   "engines": {
     "node": "22.x.x"
   },
@@ -53,7 +53,7 @@
     "dayjs": "1.11.11",
     "ejs": "3.1.10",
     "elastic-apm-node": "4.8.0",
-    "express": "4.21.2",
+    "express": "4.22.0",
     "express-body-parser-error-handler": "1.0.7",
     "express-session": "1.18.2",
     "file-type": "16.5.4",

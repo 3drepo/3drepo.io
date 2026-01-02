@@ -17,10 +17,12 @@
 
 const MimeTypes = {};
 
+MimeTypes.JSON = 'application/json';
 MimeTypes.PDF = 'application/pdf';
 MimeTypes.PNG = 'image/png';
 MimeTypes.SVG = 'image/svg+xml';
 MimeTypes.JPG = 'image/jpeg';
 MimeTypes.DWG = 'application/dwg';
+MimeTypes.BINARY = 'application/octet-stream';
 
 module.exports = MimeTypes;
