@@ -1041,6 +1041,7 @@ const testValidate = () => {
 		['module with a property that has the same name as a root property', { ...createSkeleton([{ name: generateRandomString(), properties: [{ name: 'a', type: propTypes.TEXT }] }]), properties: [{ name: 'a', type: propTypes.TEXT }] }, true],
 		['module contains valid color', createSkeleton([{ name: generateRandomString(), color: '#AABBCC' }]), true],
 		['module contains invalid color', createSkeleton([{ name: generateRandomString(), color: generateRandomString() }]), false],
+		['module contains invalid color (missing #)', createSkeleton([{ name: generateRandomString(), color: 'AABBCC' }]), false],
 		['module contains valid color but is preset', createSkeleton([{ type: presetModules.SEQUENCING, color: '#AABBCC' }]), false],
 		['all modules provided are valid', createSkeleton([
 			{ type: presetModules.SEQUENCING }, { name: generateRandomString() }]), true],
