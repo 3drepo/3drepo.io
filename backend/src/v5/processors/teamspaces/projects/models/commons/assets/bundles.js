@@ -15,15 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const MimeTypes = {};
+const { getAssetList } = require('../../../../../../models/bundles');
 
-MimeTypes.JSON = 'application/json';
-MimeTypes.PDF = 'application/pdf';
-MimeTypes.PNG = 'image/png';
-MimeTypes.SVG = 'image/svg+xml';
-MimeTypes.JPG = 'image/jpeg';
-MimeTypes.DWG = 'application/dwg';
-MimeTypes.ZIP = 'application/zip';
-MimeTypes.BINARY = 'application/octet-stream';
+const JsonAssets = { };
 
-module.exports = MimeTypes;
+JsonAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => {
+	const containerList = subModels || [{ container: model, revision }];
+
+	const lists = await Promise.all(containerList.map((
+		{ container, revision: revId }) => getAssetList(teamspace, container, revId).catch(() => undefined)));
+	return { models: lists.filter((entry) => !!entry) };
+};
+
+module.exports = JsonAssets;
