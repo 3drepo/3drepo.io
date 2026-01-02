@@ -92,17 +92,19 @@ Federations.getAccessibleContainers = (modelType) => async (req, res, next) => {
 					}
 				}));
 			}
-			req.containers = [];
 
-			await Promise.all(containers.map(async ({ _id: containerId }) => {
+			const containersFound = await Promise.all(containers.map(async ({ _id: containerId }) => {
 				try {
 					const containerRev = await getLatestRevision(
 						teamspace, containerId, modelTypes.CONTAINER, { _id: 1 });
-					req.containers.push({ container: containerId, revision: containerRev._id });
+					return { container: containerId, revision: containerRev._id };
 				} catch (err) {
-				// do nothing. If we can't get the latest revision, skip this container
+					// return undefined. If we can't get the latest revision, skip this container
+					return undefined;
 				}
 			}));
+
+			req.containers = containersFound.filter((c) => !!c);
 
 			await next();
 		}
