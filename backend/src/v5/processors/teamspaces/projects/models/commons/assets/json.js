@@ -53,7 +53,7 @@ const streamSubModelData = async (outstream, teamspace, subModels, getFileName, 
 		try {
 			const subModelStream = PassThrough();
 
-			// We ened to read this async to ensure order is preserved
+			// We need to read this async to ensure order is preserved
 			// eslint-disable-next-line no-await-in-loop
 			await readFileStreamAsync(subModelStream, teamspace, subModel, getFileName(subModelRev), injectIdentifier);
 
@@ -66,7 +66,7 @@ const streamSubModelData = async (outstream, teamspace, subModels, getFileName, 
 
 			subModelStream.end();
 		} catch (err) {
-			// if we failed to fetch model properties for a sub model, just skip it
+			// If we failed to fetch model properties for a submodel, just skip it
 		}
 	}
 };

@@ -88,7 +88,7 @@ Federations.getAccessibleContainers = (modelType) => async (req, res, next) => {
 							containers.push({ _id: containerId });
 						}
 					} catch (err) {
-					// do nothing. If we can't get access info, user has no access
+					// Do nothing. If we can't get access info, the user has no access
 					}
 				}));
 			}
