@@ -338,7 +338,6 @@ db.addLoginRecords = async (records) => {
 };
 
 db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
-	db.createRevision(teamspace, project, modelId, rev),
 	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
 	db.addJSONFile(teamspace, modelId, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
 

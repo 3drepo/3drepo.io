@@ -20,6 +20,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
+const { mode } = require('crypto-js');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -36,6 +37,10 @@ let agent;
 const generateBasicData = () => {
 	const template = ServiceHelper.generateTemplate(false, true);
 	const con = ServiceHelper.generateRandomModel();
+	const fed = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION,
+		properties: { subModels: [{ _id: con._id }] } });
+	con.rev = ServiceHelper.generateRevisionEntry();
+	fed.rev = ServiceHelper.generateRevisionEntry();
 
 	return ({
 		users: {
@@ -48,8 +53,7 @@ const generateBasicData = () => {
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
 		con,
-		fed: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION,
-			properties: { subModels: [{ _id: con._id }] } }),
+		fed,
 		template,
 		ticket: ServiceHelper.generateTicket(template, false, con._id),
 	});
@@ -77,18 +81,7 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 		ServiceHelper.db.createTemplates(teamspace, [template]),
 	]);
 
-	const revisions = times(2, () => ServiceHelper.generateRevisionEntry());
-	await Promise.all([
-		ServiceHelper.db.createRevision(
-			teamspace, project.id, con._id, revisions[0], modelTypes.CONTAINER),
-		ServiceHelper.db.createRevision(
-			teamspace, project.id, fed._id, revisions[1], modelTypes.FEDERATION),
-	]);
-
-	const idMap = JSON.stringify({});
-
-	ServiceHelper.db.addJSONFile(teamspace, con._id, `${revisions[0]._id}/idToMeshes.json`, idMap);
-	ServiceHelper.db.addJSONFile(teamspace, fed._id, `${revisions[1]._id}/idToMeshes.json`, idMap);
+	/* eslint-disable no-param-reassign */
 
 	await Promise.all([fed, con].map(async (model) => {
 		const modelType = fed === model ? 'federation' : 'container';
@@ -96,8 +89,10 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 		const getTicketRoute = (modelId, ticketId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets/${ticketId}?key=${users.tsAdmin.apiKey}`;
 
 		const { body: ticketRes } = await agent.post(addTicketRoute(model._id)).send(ticket);
-		/* eslint-disable no-param-reassign */
 		const { body: getRes } = await agent.get(getTicketRoute(model._id, ticketRes._id));
+
+		await ServiceHelper.db.createRevision(
+			teamspace, project.id, model._id, model.rev, modelType);
 
 		for (const field in getRes.properties) {
 			if (getRes.properties[field]?.state) {
@@ -112,8 +107,8 @@ const setupBasicData = async ({ users, teamspace, project, fed, con, template, t
 		model.ticket = { ...cloneDeep(ticket), _id: ticketRes._id };
 
 		model.notFound = { _id: ServiceHelper.generateUUIDString() };
-		/* eslint-enable no-param-reassign */
 	}));
+	/* eslint-enable no-param-reassign */
 };
 
 const setupExtIDTicket = (container) => {
@@ -130,8 +125,7 @@ const setupExtIDTicket = (container) => {
 	};
 	const ticket = ServiceHelper.generateTicket(template);
 
-	const rev = ServiceHelper.generateRevisionEntry();
-	const revId = rev._id;
+	const revId = container.rev._id;
 
 	const rootNode = ServiceHelper.generateBasicNode('transformation', revId);
 
@@ -160,7 +154,7 @@ const setupExtIDTicket = (container) => {
 	};
 
 	const createGroupWithExtIds = (idsObj) => {
-		const group = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container });
+		const group = ServiceHelper.generateGroup(false, { serialised: true, hasId: false, container: container._id });
 		/* eslint-disable-next-line no-underscore-dangle */
 		delete group.objects[0]._ids;
 		group.objects[0] = { ...group.objects[0], ...idsObj };
@@ -219,18 +213,18 @@ const setupExtIDTicket = (container) => {
 		template,
 		groups,
 		viewName,
-		scene: { nodes, rev, meshMap } };
+		scene: { nodes, rev: container.rev, meshMap } };
 };
 
 const testGetGroup = () => {
 	describe('Get group', () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, con, fed } = basicData;
-
-		const extIdTestCase = setupExtIDTicket(con._id);
+		const extIdTestCase = setupExtIDTicket(con);
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
+
 			await ServiceHelper.db.createTemplates(teamspace, [extIdTestCase.template]);
 
 			await ServiceHelper.db.createScene(teamspace, project.id, con._id, extIdTestCase.scene.rev,
@@ -322,7 +316,6 @@ const testGetGroup = () => {
 					} else if (original) {
 						expectedData.objects = [{ container: con._id, ...original }];
 					}
-
 					expect(res.body).toEqual(expectedData);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
