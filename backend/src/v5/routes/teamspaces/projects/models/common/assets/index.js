@@ -26,12 +26,11 @@ const {
 const { respond, writeStreamRespond } = require('../../../../../../utils/responder');
 const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
-const { getTree: getContainerTree } = require('../../../../../../processors/teamspaces/projects/models/containers');
-const { getMeshData } = require('../../../../../../processors/teamspaces/projects/models/commons/scenes');
 const { getAccessibleContainers } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 const {
 	getAssetProperties: getFederationAssetProperties,
 } = require('../../../../../../processors/teamspaces/projects/models/federations');
+const { getMeshData } = require('../../../../../../processors/teamspaces/projects/models/commons/scenes');
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
@@ -164,7 +163,7 @@ const establishRoutes = (modelType, isInternal) => {
 		}
 	}
 
-    if (modelTypes.CONTAINER === modelType) {
+	if (modelTypes.CONTAINER === modelType) {
 		/**
          * @openapi
          * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/meshes/{meshId}:
