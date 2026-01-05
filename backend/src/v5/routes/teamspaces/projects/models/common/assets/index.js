@@ -19,6 +19,7 @@ const {
 	getAssetProperties: getContainerAssetProperties,
 	getTree: getContainerTree,
 } = require('../../../../../../processors/teamspaces/projects/models/containers');
+const { getMeshData, getTexture: getTextureData } = require('../../../../../../processors/teamspaces/projects/models/commons/scenes');
 const {
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
@@ -30,7 +31,6 @@ const { getAccessibleContainers } = require('../../../../../../middleware/dataCo
 const {
 	getAssetProperties: getFederationAssetProperties,
 } = require('../../../../../../processors/teamspaces/projects/models/federations');
-const { getMeshData } = require('../../../../../../processors/teamspaces/projects/models/commons/scenes');
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
@@ -65,6 +65,17 @@ const getMesh = async (req, res) => {
 	try {
 		const stream = await getMeshData(teamspace, project, container, meshId);
 		writeStreamRespond(req, res, templates.ok, stream, { mimeType: MimeTypes.JSON });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTexture = async (req, res) => {
+	const { teamspace, project, container, textureId } = req.params;
+	try {
+		const { readStream, size, mimeType } = await getTextureData(teamspace, project, container, textureId);
+		writeStreamRespond(req, res, templates.ok, readStream, { mimeType, fileSize: size });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -245,6 +256,51 @@ const establishRoutes = (modelType, isInternal) => {
          */
 
 		router.get('/meshes/:meshId', hasReadAccessToModel[modelType], getMesh);
+
+		/**
+         * @openapi
+         * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/textures/{textureId}:
+         *   get:
+         *     description: Returns texture binary data
+         *     tags: [v:internal, v:external, Models]
+         *     operationId: getTexture
+         *     parameters:
+         *       - name: teamspace
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *       - name: project
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *       - name: container
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *       - name: textureId
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *     responses:
+         *       401:
+         *         $ref: "#/components/responses/notLoggedIn"
+         *       200:
+         *         description: Texture binary data
+         *         content:
+         *           image/png:
+         *             schema:
+         *               type: string
+         *               format: binary
+         */
+
+		router.get('/textures/:textureId', hasReadAccessToModel[modelType], getTexture);
 	}
 
 	/**

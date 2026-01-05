@@ -352,6 +352,123 @@ const testGetMeshData = () => {
 	});
 };
 
+const testGetTexture = () => {
+	describe('Get texture', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const container = generateRandomString();
+		const textureId = generateUUID();
+		test('Should throw an error if texture node is not found', async () => {
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce(null);
+
+			await expect(Scenes.getTexture(teamspace, project, container, textureId))
+				.rejects.toEqual(templates.textureNotFound);
+
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
+				{ _id: textureId, type: nodeTypes.TEXTURE }, {
+					_id: 1,
+					_blobRef: 1,
+					extension: 1,
+				});
+		});
+		test('Should throw an error if texture node has no _blobRef', async () => {
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce({});
+
+			await expect(Scenes.getTexture(teamspace, project, container, textureId))
+				.rejects.toEqual(templates.textureNotFound);
+
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
+				{ _id: textureId, type: nodeTypes.TEXTURE }, {
+					_id: 1,
+					_blobRef: 1,
+					extension: 1,
+				});
+		});
+
+		test('Should return texture stream and mime type if texture node is found', async () => {
+			const fileName = generateRandomString();
+			const extension = 'png';
+
+			// Texture node
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce({
+				// eslint-disable-next-line no-underscore-dangle
+				_blobRef: {
+					elements: {
+						data: { start: 0, size: 100 },
+					},
+					buffer: {
+						start: 0,
+						name: fileName,
+					},
+				},
+				extension,
+			});
+
+			const readStream = generateRandomString();
+
+			FilesManager.getFileAsStream.mockResolvedValueOnce({
+				readStream,
+			});
+
+			const res = await Scenes.getTexture(teamspace, project, container, textureId);
+
+			expect(res).toEqual({
+				readStream,
+				mimeType: `image/${extension}`,
+				size: 100,
+			});
+
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
+				{ _id: textureId, type: nodeTypes.TEXTURE }, {
+					_id: 1,
+					_blobRef: 1,
+					extension: 1,
+				});
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.scene`,
+				fileName, { start: 0, end: 100 });
+		});
+
+		test('Should return texture stream and mime type as jpeg if texture node extension is jpg', async () => {
+			const fileName = generateRandomString();
+			const extension = 'jpg';
+
+			// Texture node
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce({
+				// eslint-disable-next-line no-underscore-dangle
+				_blobRef: {
+					elements: {
+						data: { start: 0, size: 100 },
+					},
+					buffer: {
+						start: 0,
+						name: fileName,
+					},
+				},
+				extension,
+			});
+
+			const readStream = generateRandomString();
+
+			FilesManager.getFileAsStream.mockResolvedValueOnce({
+				readStream,
+			});
+
+			const res = await Scenes.getTexture(teamspace, project, container, textureId);
+
+			expect(res).toEqual({
+				readStream,
+				mimeType: 'image/jpeg',
+				size: 100,
+			});
+		});
+	});
+};
+
 const testGetSuperMeshesInfo = () => {
 	describe('Get supermeshes info in revision', () => {
 		const teamspace = generateRandomString();
@@ -385,6 +502,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetExternalIdsFromMetadata();
 	testSharedIdsToExternalIds();
 	testPrepareCache();
+	testGetTexture();
 	testGetMeshData();
 	testGetSuperMeshesInfo();
 });

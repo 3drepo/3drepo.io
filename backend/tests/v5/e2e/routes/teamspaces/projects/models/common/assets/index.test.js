@@ -291,13 +291,13 @@ const testGetMesh = (isInternal) => {
 				['user is a commenter', getRoute({ key: users.commenter.apiKey }), true],
 			];
 
-			const commonTests = modelType === modelTypes.CONTAINER ? [
+			const commonTests = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
 				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
 				['the mesh does not exist', getRoute({ meshIdParam: ServiceHelper.generateRandomString() }), false, templates.meshNotFound],
 				['the mesh exists', getRoute(), true],
-			] : [['the model type used in the route is not container', getRoute(), false, templates.pageNotFound]];
+			];
 
 			return isInternal ? commonTests : [...externalTests, ...commonTests];
 		};
@@ -329,6 +329,83 @@ const testGetMesh = (isInternal) => {
 	});
 };
 
+const testGetTexture = (isInternal) => {
+	describe('Get texture', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const revEntry = ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER);
+
+		const textureNode = ServiceHelper.generateTextureNode(revEntry._id, []);
+
+		const nodes = [textureNode];
+
+		const textureId = UUIDToString(textureNode._id);
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed]);
+
+			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
+				revEntry,
+				modelTypes.CONTAINER);
+
+			await ServiceHelper.db.createScene(teamspace, project.id, con._id, revEntry,
+				nodes);
+		});
+
+		const getRoute = ({
+			projectId = project.id,
+			key = users.tsAdmin.apiKey,
+			modelType = modelTypes.CONTAINER,
+			modelId = con._id,
+			textureIdParam = textureId,
+		} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/textures/${textureIdParam}${ServiceHelper.createQueryString(isInternal ? {} : { key })}`;
+		const generateTestData = (modelType) => {
+			if (modelType !== modelTypes.CONTAINER) {
+				return [['the model type used in the route is not container', getRoute({ modelType }), false, templates.pageNotFound]];
+			}
+
+			const wrongTypeModel = fed;
+
+			const externalTests = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				['user is a viewer', getRoute({ key: users.viewer.apiKey }), true],
+				['user is a collaborator', getRoute({ key: users.collaborator.apiKey }), true],
+				['user is a commenter', getRoute({ key: users.commenter.apiKey }), true],
+			];
+
+			const commonTests = [
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
+				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
+				['the texture does not exist', getRoute({ textureIdParam: ServiceHelper.generateRandomString() }), false, templates.textureNotFound],
+				['the texture exists', getRoute(), true],
+			];
+
+			return isInternal ? commonTests : [...externalTests, ...commonTests];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(Buffer.isBuffer(res.body)).toBeTruthy();
+					// turn the buffer back to string and compare
+					const resString = Buffer.from(res.body).toString();
+					expect(resString).toEqual(textureNode.blobData.data);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
@@ -340,6 +417,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 
 		testGetTree();
 		testGetMesh();
+		testGetTexture();
 		testGetModelProperties();
 	});
 

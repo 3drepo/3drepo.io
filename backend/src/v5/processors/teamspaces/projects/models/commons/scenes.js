@@ -157,6 +157,34 @@ const fetchMeshBinariesStreams = async (teamspace, container, refObj) => {
 	return { verticesStream, facesStream };
 };
 
+Scene.getTexture = async (teamspace, project, container, textureId) => {
+	const textureNode = await getNodeByQuery(teamspace, project, container,
+		{ _id: textureId, type: nodeTypes.TEXTURE }, {
+			_id: 1,
+			_blobRef: 1,
+			extension: 1,
+		});
+
+	// eslint-disable-next-line no-underscore-dangle
+	if (!textureNode || !textureNode._blobRef) {
+		throw templates.textureNotFound;
+	}
+
+	const { _blobRef: { elements, buffer } } = textureNode;
+
+	// chunkInfo is passed to createReadStream, which expects `start` and `end` properties
+	const chunkInfo = {
+		start: buffer.start + elements.data.start,
+		end: buffer.start + elements.data.start + elements.data.size,
+	};
+
+	const res = await getFileAsStream(teamspace, `${container}.scene`, buffer.name, chunkInfo);
+
+	const mimeType = `image/${textureNode.extension === 'jpg' ? 'jpeg' : textureNode.extension}`;
+
+	return { ...res, mimeType, size: chunkInfo.end - chunkInfo.start };
+};
+
 Scene.getMeshData = async (teamspace, project, container, meshId) => {
 	const projection = {
 		parents: 1,

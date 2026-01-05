@@ -20,6 +20,7 @@ const SceneConstants = {};
 SceneConstants.nodeTypes = {
 	TRANSFORMATION: 'transformation',
 	MESH: 'mesh',
+	TEXTURE: 'texture',
 };
 
 module.exports = SceneConstants;

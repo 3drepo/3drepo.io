@@ -33,6 +33,7 @@ const { tmpdir } = require('os');
 const { generateUUIDString } = require('../../../src/v5/utils/helper/uuids');
 const path = require('path');
 const { PassThrough } = require('stream');
+const { isString } = require('../../../src/v5/utils/helper/typeCheck');
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
 
@@ -343,6 +344,7 @@ const addNodes = async (teamspace, modelId, nodes) => {
 		vertices: Float32Array,
 		faces: Uint32Array,
 		normals: Float32Array,
+		data: Uint8Array,
 	};
 	const collection = `${modelId}.scene`;
 
@@ -357,7 +359,7 @@ const addNodes = async (teamspace, modelId, nodes) => {
 				const Type = arrTypes[key];
 				const typed = new Type(data);
 
-				const buffer = Buffer.from(
+				const buffer = isString(data) ? Buffer.from(data) : Buffer.from(
 					typed.buffer,
 					typed.byteOffset,
 					typed.byteLength,
@@ -376,6 +378,7 @@ const addNodes = async (teamspace, modelId, nodes) => {
 			const name = ServiceHelper.generateUUIDString();
 			// eslint-disable-next-line no-underscore-dangle
 			nodeData._blobRef = { elements: elementInfo, buffer: { start: 0, size: offset, name } };
+
 			await FilesManager.storeFileStream(teamspace, collection, name, stream);
 		}
 
@@ -1000,6 +1003,18 @@ ServiceHelper.generateMeshNode = (rev_id, parents) => {
 	blobData.normals = Array.from(new Float32Array(blobData.normals));
 
 	return ServiceHelper.generateBasicNode('mesh', rev_id, parents, { blobData });
+};
+
+ServiceHelper.generateTextureNode = (rev_id, parents) => {
+	const blobData = {
+		data: ServiceHelper.generateRandomString(256),
+	};
+	const nodeData = {
+		blobData,
+		extension: 'png',
+
+	};
+	return ServiceHelper.generateBasicNode('texture', rev_id, parents, nodeData);
 };
 
 module.exports = ServiceHelper;
