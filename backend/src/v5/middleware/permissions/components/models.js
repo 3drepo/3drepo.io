@@ -47,7 +47,7 @@ const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
 			throw templates.modelNotFound;
 		}
 		if (req.app.get(BYPASS_AUTH) || await callback(teamspace, project, model, user, true)) {
-			next();
+			await next();
 		} else {
 			respond(req, res, templates.notAuthorized);
 		}
