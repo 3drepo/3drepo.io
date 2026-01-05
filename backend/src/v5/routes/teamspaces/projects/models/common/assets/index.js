@@ -23,6 +23,7 @@ const { respond, writeStreamRespond } = require('../../../../../../utils/respond
 const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const { getTree: getContainerTree } = require('../../../../../../processors/teamspaces/projects/models/containers');
+const { getMeshData } = require('../../../../../../processors/teamspaces/projects/models/commons/scenes');
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
@@ -32,7 +33,19 @@ const getTree = async (req, res) => {
 
 	try {
 		const readStream = await getContainerTree(teamspace, container, revision);
+
 		writeStreamRespond(req, res, templates.ok, readStream, undefined, undefined, { mimeType: MimeTypes.JSON });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getMesh = async (req, res) => {
+	const { teamspace, project, container, meshId } = req.params;
+	try {
+		const stream = await getMeshData(teamspace, project, container, meshId);
+		writeStreamRespond(req, res, templates.ok, stream, undefined, undefined, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -130,6 +143,91 @@ const establishRoutes = (modelType, isInternal) => {
 			router.get('/tree', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getTree);
 		}
 	}
+	/* istanbul ignore else */
+	if (modelTypes.CONTAINER === modelType) {
+		/**
+         * @openapi
+         * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/meshes/{meshId}:
+         *   get:
+         *     description: Returns mesh geometry data
+         *     tags: [v:internal, v:external, Models]
+         *     operationId: getMesh
+         *     parameters:
+         *       - name: teamspace
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *       - name: project
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *       - name: container
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *       - name: meshId
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *     responses:
+         *       401:
+         *         $ref: "#/components/responses/notLoggedIn"
+         *       200:
+         *         description: Mesh geometry data
+         *         content:
+         *           application/json:
+         *             schema:
+         *               type: object
+         *               properties:
+         *                 matrix:
+         *                   description: 4x4 transformation matrix
+         *                   type: array
+         *                   example:
+         *                     - [1, 0, 0, 0]
+         *                     - [0, 1, 0, 0]
+         *                     - [0, 0, 1, 0]
+         *                     - [0, 0, 0, 1]
+         *                   items:
+         *                     type: array
+         *                     items:
+         *                       type: number
+         *                 vertices:
+         *                   description: Vertex positions
+         *                   type: array
+         *                   example:
+         *                     - [0.0, 0.0, 0.0]
+         *                     - [1.0, 0.0, 0.0]
+         *                     - [0.0, 1.0, 0.0]
+         *                   items:
+         *                     type: array
+         *                     items:
+         *                       type: number
+         *                 faces:
+         *                   description: Triangulated faces , or lines if primitive type is 2
+         *                   type: array
+         *                   example:
+         *                     - [0, 1, 2]
+         *                   items:
+         *                     type: array
+         *                     items:
+         *                       type: integer
+         *                 primitive:
+         *                   description: Geometry type (2 = line, 3 = mesh)
+         *                   type: integer
+         *                   enum: [2, 3]
+         *                   example: 3
+         */
+
+		router.get('/meshes/:meshId', hasReadAccessToModel[modelType], getMesh);
+	}
+
 	return router;
 };
 

@@ -19,6 +19,7 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../../helper/services');
 const { src } = require('../../../../../../../helper/path');
+const { UUIDToString } = require('../../../../../../../../../src/v5/utils/helper/uuids');
 
 const { storeFile } = require(`${src}/services/filesManager`);
 
@@ -159,6 +160,91 @@ const testGetTree = (internalService) => {
 	});
 };
 
+const testGetMesh = (isInternal) => {
+	describe('Get mesh', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const revEntry = ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER);
+
+		const rootNode = ServiceHelper.generateBasicNode('transformation', revEntry._id);
+		const mesh1 = ServiceHelper.generateMeshNode(revEntry._id, [rootNode.shared_id]);
+
+		const nodes = [rootNode, mesh1];
+
+		const meshId = UUIDToString(mesh1._id);
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con]);
+
+			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
+				revEntry,
+				modelTypes.CONTAINER);
+
+			await ServiceHelper.db.createScene(teamspace, project.id, con._id, revEntry,
+				nodes);
+		});
+
+		const getRoute = ({
+			projectId = project.id,
+			key = users.tsAdmin.apiKey,
+			modelType = modelTypes.CONTAINER,
+			modelId = con._id,
+			meshIdParam = meshId,
+		} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/meshes/${meshIdParam}${ServiceHelper.createQueryString(isInternal ? {} : { key })}`;
+
+		const generateTestData = (modelType) => {
+			if (modelType !== modelTypes.CONTAINER) {
+				return [['the model type used in the route is not container', getRoute({ modelType }), false, templates.pageNotFound]];
+			}
+
+			const wrongTypeModel = fed;
+
+			const externalTests = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+				['user is a viewer', getRoute({ key: users.viewer.apiKey }), true],
+				['user is a collaborator', getRoute({ key: users.collaborator.apiKey }), true],
+				['user is a commenter', getRoute({ key: users.commenter.apiKey }), true],
+			];
+
+			const commonTests = modelType === modelTypes.CONTAINER ? [
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
+				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
+				['the mesh does not exist', getRoute({ meshIdParam: ServiceHelper.generateRandomString() }), false, templates.meshNotFound],
+				['the mesh exists', getRoute(), true],
+			] : [['the model type used in the route is not container', getRoute(), false, templates.pageNotFound]];
+
+			return isInternal ? commonTests : [...externalTests, ...commonTests];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					const expectedData = {
+						matrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
+						primitive: 3,
+						vertices: Array.from(
+							{ length: mesh1.blobData.vertices.length / 3 },
+							(_, i) => mesh1.blobData.vertices.slice(i * 3, i * 3 + 3),
+						),
+						faces: mesh1.blobData.faces.filter((n, i) => i % 4 !== 0),
+					};
+					expect(res.body).toEqual(expectedData);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
@@ -169,6 +255,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		});
 
 		testGetTree();
+		testGetMesh();
 	});
 
 	describe('Internal Service', () => {
@@ -177,5 +264,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 			agent = await SuperTest(server);
 		});
 		testGetTree(true);
+		testGetMesh(true);
 	});
 });
