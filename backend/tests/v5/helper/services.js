@@ -390,6 +390,7 @@ db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.a
 	...(meshMap ? [FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap))] : []),
 ]);
 
+db.addJSONFile = (teamspace, modelId, name, content) => FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, name, content);
 ServiceHelper.createTmpDir = () => {
 	const tmpDir = tmpdir();
 	const folder = generateUUIDString();

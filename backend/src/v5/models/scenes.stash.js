@@ -15,15 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const MimeTypes = {};
+const Scene = {};
+const db = require('../handler/db');
 
-MimeTypes.JSON = 'application/json';
-MimeTypes.PDF = 'application/pdf';
-MimeTypes.PNG = 'image/png';
-MimeTypes.SVG = 'image/svg+xml';
-MimeTypes.JPG = 'image/jpeg';
-MimeTypes.DWG = 'application/dwg';
-MimeTypes.ZIP = 'application/zip';
-MimeTypes.BINARY = 'application/octet-stream';
+const STASH_EXT = '.stash.3drepo';
 
-module.exports = MimeTypes;
+Scene.getSuperMeshesInRevision = (teamspace, model, revision, projection) => db.find(
+	teamspace, `${model}${STASH_EXT}`, { rev_id: revision, type: 'mesh' }, projection);
+
+module.exports = Scene;

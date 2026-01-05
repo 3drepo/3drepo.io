@@ -28,13 +28,17 @@ const {
 	sleepMS,
 	generateRandomObject,
 } = require('../../../../../../helper/services');
-const { UUIDToString, stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
-const { idTypesToKeys, idTypes, metaKeyToIdType } = require('../../../../../../../../src/v5/models/metadata.constants');
-const { templates } = require('../../../../../../../../src/v5/utils/responseCodes');
-const { nodeTypes } = require('../../../../../../../../src/v5/models/scenes constants');
-const GeoMaths = require('../../../../../../../../src/v5/utils/helper/geoMaths');
+
+const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { idTypesToKeys, idTypes, metaKeyToIdType } = require(`${src}/models/metadata.constants`);
+const { templates } = require(`${src}/utils/responseCodes`);
+const { nodeTypes } = require(`${src}/models/scenes.constants`);
+const GeoMaths = require(`${src}/utils/helper/geoMaths`);
 
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
+
+jest.mock('../../../../../../../../src/v5/models/scenes.stash');
+const SceneStashModel = require(`${src}/models/scenes.stash`);
 
 jest.mock('../../../../../../../../src/v5/models/metadata');
 const MetaModel = require(`${src}/models/metadata`);
@@ -347,10 +351,39 @@ const testGetMeshData = () => {
 	});
 };
 
+const testGetSuperMeshesInfo = () => {
+	describe('Get supermeshes info in revision', () => {
+		const teamspace = generateRandomString();
+		const model = generateRandomString();
+		const revision = generateUUID();
+
+		test('Should return supermeshes info in revision', async () => {
+			const data = generateRandomObject();
+			SceneStashModel.getSuperMeshesInRevision.mockResolvedValueOnce(data);
+
+			expect(await Scenes.getSuperMeshesInfo(teamspace, model, revision)).toEqual({ superMeshes: data });
+
+			expect(SceneStashModel.getSuperMeshesInRevision).toHaveBeenCalledTimes(1);
+			expect(SceneStashModel.getSuperMeshesInRevision).toHaveBeenCalledWith(
+				teamspace, model, revision,
+				{
+					_id: 1,
+					vertices_count: 1,
+					faces_count: 1,
+					uv_channels_count: 1,
+					bounding_box: 1,
+					primitive: 1,
+				},
+			);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
 	testGetExternalIdsFromMetadata();
 	testSharedIdsToExternalIds();
 	testPrepareCache();
 	testGetMeshData();
+	testGetSuperMeshesInfo();
 });

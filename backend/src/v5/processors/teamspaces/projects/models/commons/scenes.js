@@ -25,7 +25,8 @@ const GeoMaths = require('../../../../../utils/helper/geoMaths');
 const Stream = require('stream');
 const config = require('../../../../../utils/config');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
-const { nodeTypes } = require('../../../../../models/scenes constants');
+const { getSuperMeshesInRevision } = require('../../../../../models/scenes.stash');
+const { nodeTypes } = require('../../../../../models/scenes.constants');
 const { pipeline } = require('stream/promises');
 const { templates } = require('../../../../../utils/responseCodes');
 
@@ -196,6 +197,19 @@ Scene.getMeshData = async (teamspace, project, container, meshId) => {
 	outStream.end(']}');
 
 	return outStream;
+};
+
+Scene.getSuperMeshesInfo = async (teamspace, container, revision) => {
+	const projection = {
+		_id: 1,
+		vertices_count: 1,
+		faces_count: 1,
+		uv_channels_count: 1,
+		bounding_box: 1,
+		primitive: 1,
+	};
+	const superMeshes = await getSuperMeshesInRevision(teamspace, container, revision, projection);
+	return { superMeshes };
 };
 
 module.exports = Scene;

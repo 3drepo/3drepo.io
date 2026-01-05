@@ -19,7 +19,9 @@ const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../../helper/services');
 const { src } = require('../../../../../../../helper/path');
-const { UUIDToString } = require('../../../../../../../../../src/v5/utils/helper/uuids');
+
+const { insertOne, insertMany } = require(`${src}/handler/db`);
+const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -85,74 +87,8 @@ const setupBasicData = async (users, teamspace, project, models) => {
 	]);
 };
 
-const testGetTree = (internalService) => {
-	describe('Get tree', () => {
-		const { users, teamspace, project, con, fed, revisions, conNoRev } = generateBasicData();
-
-		const rev1Content = JSON.stringify(ServiceHelper.generateRandomObject());
-		const rev2Content = JSON.stringify(ServiceHelper.generateRandomObject());
-
-		beforeAll(async () => {
-			const models = [con, conNoRev, fed];
-			await setupBasicData(users, teamspace, project, models);
-			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
-				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
-			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
-				{ ...revisions[1], timestamp: new Date(Date.now() + 1000) }, modelTypes.CONTAINER);
-
-			await ServiceHelper.db.addJSONFile(teamspace, con._id, `${revisions[0]._id}/fulltree.json`, Buffer.from(rev1Content));
-			await ServiceHelper.db.addJSONFile(teamspace, con._id, `${revisions[1]._id}/fulltree.json`, Buffer.from(rev2Content));
-		});
-
-		const generateTestData = (modelType) => {
-			const model = con;
-			const wrongTypeModel = fed;
-
-			const getRoute = ({
-				projectId = project.id,
-				key = users.tsAdmin.apiKey,
-				modelId = model._id,
-				revId,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/tree${ServiceHelper.createQueryString({ revId, key: internalService ? undefined : key })}`;
-
-			const externalTests = [
-				['session is external', getRoute(), false, templates.pageNotFound],
-			];
-
-			const internalTests = modelType === modelTypes.CONTAINER ? [
-				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
-				['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.revisionNotFound],
-				['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Content],
-				['an invalid revision is provided by the user', getRoute({ revId: ServiceHelper.generateUUIDString() }), false, templates.revisionNotFound],
-				['a revision is not provided by the user', getRoute(), true, rev2Content],
-			] : [['the model type used in the route is not container', getRoute(), false, templates.pageNotFound]];
-
-			return internalService ? internalTests : externalTests;
-		};
-
-		const runTest = (desc, route, success, expectedOutput) => {
-			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
-				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
-				const res = await agent.get(route).expect(expectedStatus);
-				if (success) {
-					const fullOutput = { subTrees: [], mainTree: JSON.parse(expectedOutput) };
-
-					expect(res.body).toEqual(fullOutput);
-				} else {
-					expect(res.body.code).toEqual(expectedOutput.code);
-				}
-			});
-		};
-
-		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
-		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
-	});
-};
-
-const testGetModelProperties = (internalService) => {
-	describe('Get model properties', () => {
+const testGetAssetList = (internalService) => {
+	describe('Get Asset list', () => {
 		const { users, teamspace, project, con, fed, revisions, conNoRev, fedNoRev } = generateBasicData();
 
 		const rev1Content = ServiceHelper.generateRandomObject();
@@ -172,8 +108,8 @@ const testGetModelProperties = (internalService) => {
 			await ServiceHelper.db.createRevision(teamspace, project.id, fed._id,
 				{ ...fedRevisions[0], timestamp: new Date() }, modelTypes.FEDERATION);
 
-			await ServiceHelper.db.addJSONFile(teamspace, con._id, `${revisions[0]._id}/modelProperties.json`, Buffer.from(JSON.stringify(rev1Content)));
-			await ServiceHelper.db.addJSONFile(teamspace, con._id, `${revisions[1]._id}/modelProperties.json`, Buffer.from(JSON.stringify(rev2Content)));
+			await insertOne(teamspace, `${con._id}.stash.repobundles`, { _id: stringToUUID(revisions[0]._id), ...rev1Content });
+			await insertOne(teamspace, `${con._id}.stash.unity3d`, { _id: stringToUUID(revisions[1]._id), ...rev2Content });
 		});
 
 		const generateTestData = (modelType) => {
@@ -188,22 +124,19 @@ const testGetModelProperties = (internalService) => {
 			let rev2FullContent;
 
 			if (modelType === modelTypes.CONTAINER) {
-				rev1FullContent = { subModels: [], properties: rev1Content };
-				rev2FullContent = { subModels: [], properties: rev2Content };
+				rev1FullContent = { models: [rev1Content] };
+				rev2FullContent = { models: [rev2Content] };
 			} else {
 				// feds don't cater for revisions
-				rev1FullContent = { subModels: [{ account: teamspace, model: con._id, ...rev2Content }],
-					properties: { hiddenNodes: [] } };
-				rev2FullContent = { subModels: [{ account: teamspace, model: con._id, ...rev2Content }],
-					properties: { hiddenNodes: [] } };
+				rev1FullContent = { models: [rev2Content] };
+				rev2FullContent = { models: [rev2Content] };
 			}
-
 			const getRoute = ({
 				projectId = project.id,
 				key = users.tsAdmin.apiKey,
 				modelId = model._id,
 				revId,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/properties${ServiceHelper.createQueryString({ revId, key: internalService ? undefined : key })}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/bundles${ServiceHelper.createQueryString({ revId, key: internalService ? undefined : key })}`;
 
 			const externalTests = [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
@@ -244,62 +177,77 @@ const testGetModelProperties = (internalService) => {
 	});
 };
 
-const testGetMesh = (isInternal) => {
-	describe('Get mesh', () => {
-		const { users, teamspace, project, con, fed } = generateBasicData();
-		const revEntry = ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER);
+const testGetAssetMeta = (internalService) => {
+	describe('Get Asset meta', () => {
+		const { users, teamspace, project, con, fed, revisions, conNoRev, fedNoRev } = generateBasicData();
 
-		const rootNode = ServiceHelper.generateBasicNode('transformation', revEntry._id);
-		const mesh1 = ServiceHelper.generateMeshNode(revEntry._id, [rootNode.shared_id]);
+		const rev1Content = ServiceHelper.generateRandomObject();
+		const rev2Content = ServiceHelper.generateRandomObject();
 
-		const nodes = [rootNode, mesh1];
-
-		const meshId = UUIDToString(mesh1._id);
+		const fedRevisions = times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.FEDERATION));
+		fed.properties.subModels = [{ _id: con._id }];
 
 		beforeAll(async () => {
-			await setupBasicData(users, teamspace, project, [con]);
-
+			const models = [con, conNoRev, fed, fedNoRev];
+			await setupBasicData(users, teamspace, project, models);
 			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
-				revEntry,
-				modelTypes.CONTAINER);
+				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
+			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
+				{ ...revisions[1], timestamp: new Date(Date.now() + 1000) }, modelTypes.CONTAINER);
 
-			await ServiceHelper.db.createScene(teamspace, project.id, con._id, revEntry,
-				nodes);
+			await ServiceHelper.db.createRevision(teamspace, project.id, fed._id,
+				{ ...fedRevisions[0], timestamp: new Date() }, modelTypes.FEDERATION);
+
+			await ServiceHelper.db.addJSONFile(teamspace, con._id, `${revisions[0]._id}/supermeshes.json`, Buffer.from(JSON.stringify(rev1Content)));
+			await ServiceHelper.db.addJSONFile(teamspace, con._id, `${revisions[1]._id}/supermeshes.json`, Buffer.from(JSON.stringify(rev2Content)));
 		});
 
-		const getRoute = ({
-			projectId = project.id,
-			key = users.tsAdmin.apiKey,
-			modelType = modelTypes.CONTAINER,
-			modelId = con._id,
-			meshIdParam = meshId,
-		} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/meshes/${meshIdParam}${ServiceHelper.createQueryString(isInternal ? {} : { key })}`;
-
 		const generateTestData = (modelType) => {
-			if (modelType !== modelTypes.CONTAINER) {
-				return [['the model type used in the route is not container', getRoute({ modelType }), false, templates.pageNotFound]];
-			}
+			const model = modelType === modelTypes.CONTAINER ? con : fed;
+			const wrongTypeModel = modelType === modelTypes.CONTAINER ? fed : con;
+			const modelNoRev = modelType === modelTypes.CONTAINER ? conNoRev : fedNoRev;
+			const modelRevs = modelType === modelTypes.CONTAINER ? revisions : fedRevisions;
 
-			const wrongTypeModel = fed;
+			const modelNotFoundErr = modelType === modelTypes.CONTAINER
+				? templates.containerNotFound : templates.federationNotFound;
+			let rev1FullContent;
+			let rev2FullContent;
+
+			if (modelType === modelTypes.CONTAINER) {
+				rev1FullContent = rev1Content;
+				rev2FullContent = rev2Content;
+			} else {
+				// feds don't cater for revisions
+				rev1FullContent = { submodels: [rev2Content] };
+				rev2FullContent = { submodels: [rev2Content] };
+			}
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+				revId,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/bundles/meta${ServiceHelper.createQueryString({ revId, key: internalService ? undefined : key })}`;
 
 			const externalTests = [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
 				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
-				['user is a viewer', getRoute({ key: users.viewer.apiKey }), true],
-				['user is a collaborator', getRoute({ key: users.collaborator.apiKey }), true],
-				['user is a commenter', getRoute({ key: users.commenter.apiKey }), true],
 			];
 
-			const commonTests = modelType === modelTypes.CONTAINER ? [
+			const commonTests = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-				['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
-				['the mesh does not exist', getRoute({ meshIdParam: ServiceHelper.generateRandomString() }), false, templates.meshNotFound],
-				['the mesh exists', getRoute(), true],
-			] : [['the model type used in the route is not container', getRoute(), false, templates.pageNotFound]];
+				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFoundErr],
+				['the model is not of the wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFoundErr],
+				['the model does not have a revision', getRoute({ modelId: modelNoRev._id }), false, templates.revisionNotFound],
+				['an invalid revision is provided by the user', getRoute({ revId: ServiceHelper.generateUUIDString() }), false, templates.revisionNotFound],
+				['a revision is provided by the user', getRoute({ revId: modelRevs[0]._id }), true, rev1FullContent],
+				['a revision is not provided by the user', getRoute(), true, rev2FullContent],
+			];
 
-			return isInternal ? commonTests : [...externalTests, ...commonTests];
+			return [
+				...commonTests,
+				...(internalService ? [] : externalTests),
+			];
 		};
 
 		const runTest = (desc, route, success, expectedOutput) => {
@@ -307,16 +255,7 @@ const testGetMesh = (isInternal) => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(route).expect(expectedStatus);
 				if (success) {
-					const expectedData = {
-						matrix: [[1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]],
-						primitive: 3,
-						vertices: Array.from(
-							{ length: mesh1.blobData.vertices.length / 3 },
-							(_, i) => mesh1.blobData.vertices.slice(i * 3, i * 3 + 3),
-						),
-						faces: mesh1.blobData.faces.filter((n, i) => i % 4 !== 0),
-					};
-					expect(res.body).toEqual(expectedData);
+					expect(res.body).toEqual(expectedOutput);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -325,7 +264,134 @@ const testGetMesh = (isInternal) => {
 
 		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
 		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
-		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
+	});
+};
+
+const testGetUnityMeta = (internalService) => {
+	const generateSuperMeshData = (nMeshes) => {
+		const output = { superMeshes: [] };
+
+		const input = times(nMeshes, () => {
+			const baseData = {
+				primitive: ServiceHelper.generateRandomNumber(),
+			};
+
+			const nFaces = ServiceHelper.generateRandomNumber();
+			const nVertices = ServiceHelper.generateRandomNumber();
+			const nUVChannels = ServiceHelper.generateRandomNumber();
+			const max = [
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber()];
+			const min = [
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber(),
+				ServiceHelper.generateRandomNumber()];
+
+			const superMesh = { ...baseData,
+				faces_count: nFaces,
+				vertices_count: nVertices,
+				uv_channels_count: nUVChannels,
+				bounding_box: [min, max],
+			};
+			const superMeshOut = { ...baseData, nFaces, nVertices, nUVChannels, min, max };
+
+			superMesh._id = ServiceHelper.generateUUID();
+			superMeshOut._id = UUIDToString(superMesh._id);
+			output.superMeshes.push(superMeshOut);
+			return superMesh;
+		});
+
+		return { input, output };
+	};
+	describe('Get unity asset meta', () => {
+		const { users, teamspace, project, con, fed, revisions, conNoRev, fedNoRev } = generateBasicData();
+		const nMeshes = 10;
+
+		const rev1Content = generateSuperMeshData(nMeshes);
+		const rev2Content = generateSuperMeshData(nMeshes);
+
+		const fedRevisions = times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.FEDERATION));
+		fed.properties.subModels = [{ _id: con._id }];
+
+		beforeAll(async () => {
+			const models = [con, conNoRev, fed, fedNoRev];
+			await setupBasicData(users, teamspace, project, models);
+			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
+				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
+			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
+				{ ...revisions[1], timestamp: new Date(Date.now() + 1000) }, modelTypes.CONTAINER);
+
+			await ServiceHelper.db.createRevision(teamspace, project.id, fed._id,
+				{ ...fedRevisions[0], timestamp: new Date() }, modelTypes.FEDERATION);
+
+			await insertMany(teamspace, `${con._id}.stash.3drepo`, rev1Content.input.map((data) => ({ ...data, type: 'mesh', rev_id: stringToUUID(revisions[0]._id) })));
+			await insertMany(teamspace, `${con._id}.stash.3drepo`, rev2Content.input.map((data) => ({ ...data, type: 'mesh', rev_id: stringToUUID(revisions[1]._id) })));
+		});
+
+		const generateTestData = (modelType) => {
+			const model = modelType === modelTypes.CONTAINER ? con : fed;
+			const wrongTypeModel = modelType === modelTypes.CONTAINER ? fed : con;
+			const modelNoRev = modelType === modelTypes.CONTAINER ? conNoRev : fedNoRev;
+			const modelRevs = modelType === modelTypes.CONTAINER ? revisions : fedRevisions;
+
+			const modelNotFoundErr = modelType === modelTypes.CONTAINER
+				? templates.containerNotFound : templates.federationNotFound;
+			let rev1FullContent;
+			let rev2FullContent;
+
+			if (modelType === modelTypes.CONTAINER) {
+				rev1FullContent = rev1Content.output;
+				rev2FullContent = rev2Content.output;
+			} else {
+				// feds don't cater for revisions
+				const output = [{ superMeshes: rev2Content.output, teamspace, model: con._id }];
+				rev1FullContent = { subModels: output };
+				rev2FullContent = { subModels: output };
+			}
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+				revId,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/assets/bundles/unity/meta${ServiceHelper.createQueryString({ revId, key: internalService ? undefined : key })}`;
+
+			const externalTests = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+			];
+
+			const commonTests = [
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFoundErr],
+				['the model is not of the wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFoundErr],
+				['the model does not have a revision', getRoute({ modelId: modelNoRev._id }), false, templates.revisionNotFound],
+				['an invalid revision is provided by the user', getRoute({ revId: ServiceHelper.generateUUIDString() }), false, templates.revisionNotFound],
+				['a revision is provided by the user', getRoute({ revId: modelRevs[0]._id }), true, rev1FullContent],
+				['a revision is not provided by the user', getRoute(), true, rev2FullContent],
+			];
+
+			return [
+				...commonTests,
+				...(internalService ? [] : externalTests),
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(expectedOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
 	});
 };
 
@@ -338,9 +404,9 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 			agent = await SuperTest(server);
 		});
 
-		testGetTree();
-		testGetMesh();
-		testGetModelProperties();
+		testGetAssetList();
+		testGetAssetMeta();
+		testGetUnityMeta();
 	});
 
 	describe('Internal Service', () => {
@@ -348,8 +414,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 			server = await ServiceHelper.app(true);
 			agent = await SuperTest(server);
 		});
-		testGetTree(true);
-		testGetMesh(true);
-		testGetModelProperties(true);
+		testGetAssetList(true);
+		testGetAssetMeta(true);
+		testGetUnityMeta(true);
 	});
 });
