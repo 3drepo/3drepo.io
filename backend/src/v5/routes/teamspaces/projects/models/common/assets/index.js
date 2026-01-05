@@ -240,7 +240,7 @@ const establishRoutes = (modelType, isInternal) => {
          *                     items:
          *                       type: number
          *                 faces:
-         *                   description: Triangulated faces , or lines if primitive type is 2
+         *                   description: Triangulated faces, or lines if primitive type is 2
          *                   type: array
          *                   example:
          *                     - [0, 1, 2]

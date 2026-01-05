@@ -1012,7 +1012,6 @@ ServiceHelper.generateTextureNode = (rev_id, parents) => {
 	const nodeData = {
 		blobData,
 		extension: 'png',
-
 	};
 	return ServiceHelper.generateBasicNode('texture', rev_id, parents, nodeData);
 };
