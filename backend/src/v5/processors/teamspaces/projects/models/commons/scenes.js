@@ -132,9 +132,7 @@ const calculateNodeMatrix = async (teamspace, project, container, sharedId) => {
 		{ shared_id: sharedId, type: nodeTypes.TRANSFORMATION }, { parents: 1, matrix: 1 });
 	if ((transNode.parents || []).length > 0) {
 		const parentMatrix = await calculateNodeMatrix(teamspace, project, container, transNode.parents[0]);
-		if (transNode.matrix) {
-			return GeoMaths.matrices.multiply(parentMatrix, transNode.matrix);
-		}
+		return transNode.matrix ? GeoMaths.matrices.multiply(parentMatrix, transNode.matrix) : parentMatrix;
 	}
 
 	return transNode.matrix || GeoMaths.matrices.identity();

@@ -262,6 +262,7 @@ const testGetMeshData = () => {
 			['Should return identity matrix if parent node has no matrix', [{}], GeoMaths.matrices.identity()],
 			['Should return parent\'s matrix if parent node exists', [{ matrix: matrix1 }], matrix1],
 			['Should return multipled matrix if more than one ancestor exist', [{ matrix: matrix1, parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
+			['Should return multipled matrix if more than one ancestor exist (one with no matrix)', [{ matrix: matrix1, parents: [generateUUIDString()] }, { parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
 		]
 			.forEach(([desc, parentMocks, expectedMatrix]) => {
 				test(desc, async () => {
