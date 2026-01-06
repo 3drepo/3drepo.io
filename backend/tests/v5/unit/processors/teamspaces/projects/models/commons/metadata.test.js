@@ -42,11 +42,10 @@ const testUpdateCustomMetadata = () => {
 
 const getMetadata = () => {
 	describe('Get metadata', () => {
-		test('should return with a stream of the expected data', async () => {
+		test('should return the data getMetadataByQuery returns in the correct format', async () => {
 			const teamspace = generateRandomString();
 			const container = generateRandomString();
 			const revision = generateUUID();
-
 			const metadata = times(10, () => ({
 				_id: generateUUID(),
 				parents: [generateUUID(), generateUUID()],
@@ -55,6 +54,10 @@ const getMetadata = () => {
 					value: generateRandomString(),
 				})),
 			}));
+
+			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+
+			const res = await Metadata.getAllMetadata(teamspace, container, revision);
 
 			const castedMetadata = metadata.map((entry) => ({
 				_id: UUIDToString(entry._id),
@@ -65,40 +68,24 @@ const getMetadata = () => {
 				}, {}),
 			}));
 
-			Metadata.getMetadataByQuery.mockResolvedValueOnce(metadata);
-
-			const resultStream = await Metadata.getMetadata(teamspace, container, revision);
-
-			const output = [];
-			resultStream.on('data', (d) => output.push(d.toString()));
-			await new Promise((resolve) => resultStream.on('end', resolve));
-
-			expect(output.join('')).toBe(`{"data":${JSON.stringify(castedMetadata)}}`);
-
-			expect(Metadata.getMetadataByQuery).toHaveBeenCalledTimes(1);
-			expect(Metadata.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, { rev_id: revision, type: 'meta' }, { metadata: 1, parents: 1 });
+			expect(res).toEqual(castedMetadata);
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, { rev_id: revision, type: 'meta' }, { metadata: 1, parents: 1 });
 		});
 
-		test('should return with a stream of the expected data when metadata just have id', async () => {
+		test('should return the data getMetadataByQuery returns (meta with just id)', async () => {
 			const teamspace = generateRandomString();
 			const container = generateRandomString();
 			const revision = generateUUID();
-
 			const metadata = times(10, () => ({ _id: generateUUID() }));
+
+			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
+
+			const res = await Metadata.getAllMetadata(teamspace, container, revision);
 			const castedMetadata = metadata.map((entry) => ({ _id: UUIDToString(entry._id) }));
-
-			Metadata.getMetadataByQuery.mockResolvedValueOnce(metadata);
-
-			const resultStream = await Metadata.getMetadata(teamspace, container, revision);
-
-			const output = [];
-			resultStream.on('data', (d) => output.push(d.toString()));
-			await new Promise((resolve) => resultStream.on('end', resolve));
-
-			expect(output.join('')).toBe(`{"data":${JSON.stringify(castedMetadata)}}`);
-
-			expect(Metadata.getMetadataByQuery).toHaveBeenCalledTimes(1);
-			expect(Metadata.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, { rev_id: revision, type: 'meta' }, { metadata: 1, parents: 1 });
+			expect(res).toEqual(castedMetadata);
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, { rev_id: revision, type: 'meta' }, { metadata: 1, parents: 1 });
 		});
 	});
 };
