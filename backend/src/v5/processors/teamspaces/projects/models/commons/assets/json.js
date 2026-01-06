@@ -23,18 +23,52 @@ const JsonAssets = { };
 
 const STASH_JSON_COLLECTION = 'stash.json_mpc.ref';
 
-const readFileStreamAsync = async (outstream, teamspace, container, filename) => {
+const readFileStreamAsync = async (outstream, teamspace, container, filename, injectIdentifier) => {
 	const output = await getFileAsStream(teamspace,
 		`${container}.${STASH_JSON_COLLECTION}`, filename);
 
 	const { readStream } = output;
 	await new Promise((resolve, reject) => {
-		readStream.on('data', (d) => outstream.write(d));
+		let first = true;
+		readStream.on('data', (d) => {
+			if (injectIdentifier && first) {
+				first = false;
+				outstream.write(
+					`{"account":"${teamspace}","model":"${container}",`);
+				outstream.write(d.slice(1));
+			} else {
+				outstream.write(d);
+			}
+		});
 		readStream.on('end', () => resolve());
 		readStream.on('error', reject);
 	});
 
 	return output;
+};
+
+const streamSubModelData = async (outstream, teamspace, subModels, getFileName, injectIdentifier = false) => {
+	let first = true;
+	for (const { container: subModel, revision: subModelRev } of subModels) {
+		try {
+			const subModelStream = PassThrough();
+
+			// We need to read this async to ensure order is preserved
+			// eslint-disable-next-line no-await-in-loop
+			await readFileStreamAsync(subModelStream, teamspace, subModel, getFileName(subModelRev), injectIdentifier);
+
+			if (first) {
+				first = false;
+			} else {
+				outstream.write(',');
+			}
+			subModelStream.pipe(outstream, { end: false });
+
+			subModelStream.end();
+		} catch (err) {
+			// If we failed to fetch model properties for a submodel, just skip it
+		}
+	}
 };
 
 JsonAssets.getTree = async (teamspace, container, revision) => {
@@ -45,6 +79,40 @@ JsonAssets.getTree = async (teamspace, container, revision) => {
 	stream.end('}');
 
 	return stream;
+};
+
+JsonAssets.getAssetProperties = async (teamspace, model, revision, subModels) => {
+	const stream = PassThrough();
+	const getFileName = (rev) => `${UUIDToString(rev)}/modelProperties.json`;
+
+	stream.write('{"properties": ');
+	try {
+		await readFileStreamAsync(stream, teamspace, model, getFileName(revision));
+	} catch (err) {
+		stream.write(JSON.stringify({ hiddenNodes: [] }));
+	}
+
+	stream.write(',"subModels":[');
+	if (subModels?.length) {
+		await streamSubModelData(stream, teamspace, subModels, getFileName, true);
+	}
+	stream.end(']}');
+
+	return stream;
+};
+
+JsonAssets.getSupermeshMapping = async (teamspace, model, revision, subModels) => {
+	const outstream = new PassThrough();
+	const getFileName = (rev) => `${UUIDToString(rev)}/supermeshes.json`;
+	if (subModels) {
+		outstream.write('{"submodels":[');
+		await streamSubModelData(outstream, teamspace, subModels, getFileName);
+		outstream.write(']}');
+	} else {
+		await readFileStreamAsync(outstream, teamspace, model, getFileName(revision));
+	}
+	outstream.end();
+	return outstream;
 };
 
 module.exports = JsonAssets;
