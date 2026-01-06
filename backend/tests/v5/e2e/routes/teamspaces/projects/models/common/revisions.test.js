@@ -703,10 +703,7 @@ const testGetImage = () => {
 
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
-	afterAll(() => Promise.all([
-		ServiceHelper.queue.purgeQueues(),
-		ServiceHelper.closeApp(server),
-	]));
+	afterAll(() => ServiceHelper.closeApp(server));
 
 	describe('External Service', () => {
 		beforeAll(async () => {

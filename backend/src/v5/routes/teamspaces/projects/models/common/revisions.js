@@ -587,7 +587,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *                 value:
 		 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, statusCode: S0, revCode: P01, desc: The Architecture model of the Lego House, void: true }]
 		 */
-			router.get('/:revision/files/original/info', hasReadAccessToContainer, revisionExists(modelTypes.CONTAINER), getRevisionMD5Hash(), serialiseRevision);
+			router.get('/:revision/files/original/info', hasReadAccessToContainer, revisionExists(modelTypes.CONTAINER), getRevisionMD5Hash, serialiseRevision);
 		}
 		if (modelType === modelTypes.DRAWING) {
 			/**
