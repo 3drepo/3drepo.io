@@ -30,7 +30,6 @@ const Views = require('./commons/views');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const fs = require('fs/promises');
 
-const { getAllMetadata } = require('./commons/metadata');
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getSuperMeshesInfo } = require('./commons/scenes');

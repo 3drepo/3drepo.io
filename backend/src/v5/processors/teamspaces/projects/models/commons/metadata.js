@@ -15,10 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString } = require('../../../../../utils/helper/uuids');
-const { cloneDeep } = require('../../../../../utils/helper/objects');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
-const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { updateCustomMetadata } = require('../../../../../models/metadata');
 
 const Metadata = { };
