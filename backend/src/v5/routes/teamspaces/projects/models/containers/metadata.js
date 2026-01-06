@@ -18,6 +18,7 @@
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../../middleware/permissions');
 const Metadata = require('../../../../../processors/teamspaces/projects/models/commons/metadata');
 const { Router } = require('express');
+const { formatMetadata } = require('../../../../../middleware/dataConverter/outputs/common/metadata');
 const { getAllMetadata: getContainerMetadata } = require('../../../../../processors/teamspaces/projects/models/commons/metadata');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
@@ -38,12 +39,12 @@ const updateCustomMetadata = async (req, res) => {
 	}
 };
 
-const getAllMetadata = async (req, res) => {
+const getAllMetadata = async (req, res, next) => {
 	const { teamspace, container, revision } = req.params;
 
 	try {
-		const data = await getContainerMetadata(teamspace, container, revision);
-		respond(req, res, templates.ok, data);
+		req.metadata = await getContainerMetadata(teamspace, container, revision);
+		await next();
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -147,7 +148,7 @@ const establishRoutes = (isInternal) => {
 		*                  }
 		*               ]
 		*/
-		router.get('/', hasReadAccessToContainer, verifyRevQueryParam(modelTypes.CONTAINER), getAllMetadata);
+		router.get('/', hasReadAccessToContainer, verifyRevQueryParam(modelTypes.CONTAINER), getAllMetadata, formatMetadata);
 	} else {
 		/**
 		 * @openapi

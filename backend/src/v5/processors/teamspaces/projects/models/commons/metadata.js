@@ -25,33 +25,8 @@ const Metadata = { };
 
 Metadata.updateCustomMetadata = updateCustomMetadata;
 
-const castMetaEntry = (entry) => {
-	const castedMetadata = cloneDeep(entry);
-	castedMetadata._id = UUIDToString(entry._id);
-
-	if (entry.parents) {
-		castedMetadata.parents = entry.parents.map(UUIDToString);
-	}
-
-	if (isArray(entry.metadata)) {
-		const metaObj = {};
-
-		entry.metadata.forEach(({ key, value }) => {
-			metaObj[key] = value;
-		});
-
-		castedMetadata.metadata = metaObj;
-	}
-
-	return castedMetadata;
-};
-
-Metadata.getAllMetadata = async (teamspace, container, revision) => {
-	const metadata = await getMetadataByQuery(teamspace, container,
-		{ rev_id: revision, type: 'meta' },
-		{ metadata: 1, parents: 1 });
-
-	return metadata.map(castMetaEntry);
-};
+Metadata.getAllMetadata = (teamspace, container, revision) => getMetadataByQuery(teamspace, container,
+	{ rev_id: revision, type: 'meta' },
+	{ metadata: 1, parents: 1 });
 
 module.exports = Metadata;

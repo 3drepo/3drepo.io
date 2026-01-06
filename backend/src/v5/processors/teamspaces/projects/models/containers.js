@@ -148,6 +148,4 @@ Containers.getRevisionMD5Hash = getModelMD5Hash;
 
 Containers.getSuperMeshesInfo = getSuperMeshesInfo;
 
-Containers.getMetadataFile = getAllMetadata;
-
 module.exports = Containers;

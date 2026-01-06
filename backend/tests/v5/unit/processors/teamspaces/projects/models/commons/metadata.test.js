@@ -19,7 +19,6 @@ const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { generateRandomString, generateUUID } = require('../../../../../../helper/services');
 
-const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/metadata`);
 jest.mock('../../../../../../../../src/v5/models/metadata');
 const MetadataModel = require(`${src}/models/metadata`);
@@ -59,16 +58,7 @@ const getMetadata = () => {
 
 			const res = await Metadata.getAllMetadata(teamspace, container, revision);
 
-			const castedMetadata = metadata.map((entry) => ({
-				_id: UUIDToString(entry._id),
-				parents: entry.parents.map(UUIDToString),
-				metadata: entry.metadata.reduce((acc, { key, value }) => {
-					acc[key] = value;
-					return acc;
-				}, {}),
-			}));
-
-			expect(res).toEqual(castedMetadata);
+			expect(res).toEqual(metadata);
 			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
 			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, { rev_id: revision, type: 'meta' }, { metadata: 1, parents: 1 });
 		});
@@ -82,8 +72,8 @@ const getMetadata = () => {
 			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(metadata);
 
 			const res = await Metadata.getAllMetadata(teamspace, container, revision);
-			const castedMetadata = metadata.map((entry) => ({ _id: UUIDToString(entry._id) }));
-			expect(res).toEqual(castedMetadata);
+
+			expect(res).toEqual(metadata);
 			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
 			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, { rev_id: revision, type: 'meta' }, { metadata: 1, parents: 1 });
 		});
