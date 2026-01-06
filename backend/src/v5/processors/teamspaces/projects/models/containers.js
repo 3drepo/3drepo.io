@@ -30,8 +30,8 @@ const Views = require('./commons/views');
 const { deleteIfUndefined } = require('../../../../utils/helper/objects');
 const fs = require('fs/promises');
 
+const { getAllMetadata } = require('./commons/metadata');
 const { getFileAsStream } = require('../../../../services/filesManager');
-const { getMetadataFile } = require('./commons/assets/json');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getSuperMeshesInfo } = require('./commons/scenes');
 
@@ -148,6 +148,6 @@ Containers.getRevisionMD5Hash = getModelMD5Hash;
 
 Containers.getSuperMeshesInfo = getSuperMeshesInfo;
 
-Containers.getMetadataFile = getMetadataFile;
+Containers.getMetadataFile = getAllMetadata;
 
 module.exports = Containers;

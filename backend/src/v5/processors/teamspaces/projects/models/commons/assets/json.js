@@ -17,10 +17,7 @@
 
 const { PassThrough } = require('stream');
 const { UUIDToString } = require('../../../../../../utils/helper/uuids');
-const { cloneDeep } = require('../../../../../../utils/helper/objects');
 const { getFileAsStream } = require('../../../../../../services/filesManager');
-const { getMetadataByQuery } = require('../../../../../../models/metadata');
-const { isArray } = require('../../../../../../utils/helper/typeCheck');
 
 const JsonAssets = { };
 
@@ -81,41 +78,6 @@ JsonAssets.getTree = async (teamspace, container, revision) => {
 	await readFileStreamAsync(stream, teamspace, container, `${UUIDToString(revision)}/fulltree.json`);
 	stream.end('}');
 
-	return stream;
-};
-
-const castMetaEntry = (entry) => {
-	const castedMetadata = cloneDeep(entry);
-	castedMetadata._id = UUIDToString(entry._id);
-
-	if (entry.parents) {
-		castedMetadata.parents = entry.parents.map(UUIDToString);
-	}
-
-	if (isArray(entry.metadata)) {
-		const metaObj = {};
-
-		entry.metadata.forEach(({ key, value }) => {
-			metaObj[key] = value;
-		});
-
-		castedMetadata.metadata = metaObj;
-	}
-
-	return castedMetadata;
-};
-
-JsonAssets.getMetadata = async (teamspace, container, revision) => {
-	const metadata = await getMetadataByQuery(teamspace, container,
-		{ rev_id: revision, type: 'meta' },
-		{ metadata: 1, parents: 1 });
-
-	const castedMetadata = metadata.map(castMetaEntry);
-
-	const stream = PassThrough();
-	stream.write('{"data":');
-	stream.write(JSON.stringify(castedMetadata));
-	stream.end('}');
 	return stream;
 };
 
