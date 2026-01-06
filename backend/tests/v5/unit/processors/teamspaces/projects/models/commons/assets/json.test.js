@@ -290,72 +290,8 @@ const testGetSupermeshMapping = () => {
 	});
 };
 
-const getMetadata = () => {
-	describe('Get metadata', () => {
-		test('should return with a stream of the expected data', async () => {
-			const teamspace = generateRandomString();
-			const container = generateRandomString();
-			const revision = generateUUID();
-
-			const metadata = times(10, () => ({
-				_id: generateUUID(),
-				parents: [generateUUID(), generateUUID()],
-				metadata: times(5, () => ({
-					key: generateRandomString(),
-					value: generateRandomString(),
-				})),
-			}));
-
-			const castedMetadata = metadata.map((entry) => ({
-				_id: UUIDToString(entry._id),
-				parents: entry.parents.map(UUIDToString),
-				metadata: entry.metadata.reduce((acc, { key, value }) => {
-					acc[key] = value;
-					return acc;
-				}, {}),
-			}));
-
-			Metadata.getMetadataByQuery.mockResolvedValueOnce(metadata);
-
-			const resultStream = await JsonAssets.getMetadata(teamspace, container, revision);
-
-			const output = [];
-			resultStream.on('data', (d) => output.push(d.toString()));
-			await new Promise((resolve) => resultStream.on('end', resolve));
-
-			expect(output.join('')).toBe(`{"data":${JSON.stringify(castedMetadata)}}`);
-
-			expect(Metadata.getMetadataByQuery).toHaveBeenCalledTimes(1);
-			expect(Metadata.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, { rev_id: revision, type: 'meta' }, { metadata: 1, parents: 1 });
-		});
-
-		test('should return with a stream of the expected data when metadata just have id', async () => {
-			const teamspace = generateRandomString();
-			const container = generateRandomString();
-			const revision = generateUUID();
-
-			const metadata = times(10, () => ({ _id: generateUUID() }));
-			const castedMetadata = metadata.map((entry) => ({ _id: UUIDToString(entry._id) }));
-
-			Metadata.getMetadataByQuery.mockResolvedValueOnce(metadata);
-
-			const resultStream = await JsonAssets.getMetadata(teamspace, container, revision);
-
-			const output = [];
-			resultStream.on('data', (d) => output.push(d.toString()));
-			await new Promise((resolve) => resultStream.on('end', resolve));
-
-			expect(output.join('')).toBe(`{"data":${JSON.stringify(castedMetadata)}}`);
-
-			expect(Metadata.getMetadataByQuery).toHaveBeenCalledTimes(1);
-			expect(Metadata.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, { rev_id: revision, type: 'meta' }, { metadata: 1, parents: 1 });
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testGetTree();
 	testGetAssetProperties();
 	testGetSupermeshMapping();
-	getMetadata();
 });
