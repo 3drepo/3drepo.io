@@ -19,7 +19,7 @@ const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const { generateRandomString, generateUUID } = require('../../../../../../helper/services');
 
-const { UUIDToString } = require(`${src}utils/helper/uuids`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/metadata`);
 jest.mock('../../../../../../../../src/v5/models/metadata');
 const MetadataModel = require(`${src}/models/metadata`);
