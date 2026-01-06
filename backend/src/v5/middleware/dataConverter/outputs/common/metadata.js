@@ -25,10 +25,10 @@ const Metadata = {};
 const schema = Yup.array().of(Yup.object({
 	_id: types.id,
 	parents: Yup.array().of(types.id),
-	metadata: Yup.mixed().transform((metaArr) => (metaArr ? metaArr.reduce((acc, { key, value }) => {
+	metadata: Yup.mixed().transform((metaArr) => metaArr.reduce((acc, { key, value }) => {
 		acc[key] = value;
 		return acc;
-	}, {}) : undefined)),
+	}, {})),
 }));
 
 Metadata.formatMetadata = (req, res) => {
