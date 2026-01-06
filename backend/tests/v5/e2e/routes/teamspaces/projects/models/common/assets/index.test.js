@@ -30,6 +30,9 @@ const generateBasicData = () => {
 	const viewer = ServiceHelper.generateUserCredentials();
 	const commenter = ServiceHelper.generateUserCredentials();
 	const collaborator = ServiceHelper.generateUserCredentials();
+	const perms = { viewers: [viewer.user],
+		commenters: [commenter.user],
+		collaborators: [collaborator.user] };
 	const data = {
 		users: {
 			tsAdmin: ServiceHelper.generateUserCredentials(),
@@ -42,29 +45,20 @@ const generateBasicData = () => {
 		},
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
-		con: ServiceHelper.generateRandomModel({
-			viewers: [viewer.user],
-			commenters: [commenter.user],
-			collaborators: [collaborator.user] }),
-		fed: ServiceHelper.generateRandomModel({
-			viewers: [viewer.user],
-			commenters: [commenter.user],
-			collaborators: [collaborator.user],
+		con: ServiceHelper.generateRandomModel(perms),
+		conNoRev: ServiceHelper.generateRandomModel(perms),
+		fedNoRev: ServiceHelper.generateRandomModel({
+			...perms,
 			modelType: modelTypes.FEDERATION }),
-		draw: ServiceHelper.generateRandomModel({
-			viewers: [viewer.user],
-			commenters: [commenter.user],
-			collaborators: [collaborator.user],
-			modelType: modelTypes.DRAWING }),
-		calibration: ServiceHelper.generateCalibration(),
+
 		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
 	};
 
-	data.jobs = [
-		{ _id: ServiceHelper.generateRandomString(), users: [viewer.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: [collaborator.user] },
-		{ _id: ServiceHelper.generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
-	];
+	data.fed = ServiceHelper.generateRandomModel({
+		...perms,
+		modelType: modelTypes.FEDERATION,
+		properties: { subModels: [{ _id: data.con._id }, { _id: data.conNoRev._id }] },
+	});
 
 	return data;
 };
@@ -92,8 +86,7 @@ const setupBasicData = async (users, teamspace, project, models) => {
 
 const testGetTree = (internalService) => {
 	describe('Get tree', () => {
-		const { users, teamspace, project, con, fed, revisions } = generateBasicData();
-		const conNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
+		const { users, teamspace, project, con, fed, revisions, conNoRev } = generateBasicData();
 
 		const rev1Content = JSON.stringify(ServiceHelper.generateRandomObject());
 		const rev2Content = JSON.stringify(ServiceHelper.generateRandomObject());
@@ -154,15 +147,12 @@ const testGetTree = (internalService) => {
 
 		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
 		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
-		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
 	});
 };
 
 const testGetModelProperties = (internalService) => {
 	describe('Get model properties', () => {
-		const { users, teamspace, project, con, fed, revisions } = generateBasicData();
-		const conNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
-		const fedNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
+		const { users, teamspace, project, con, fed, revisions, conNoRev, fedNoRev } = generateBasicData();
 
 		const rev1Content = ServiceHelper.generateRandomObject();
 		const rev2Content = ServiceHelper.generateRandomObject();

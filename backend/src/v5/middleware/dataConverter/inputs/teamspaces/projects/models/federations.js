@@ -88,21 +88,23 @@ Federations.getAccessibleContainers = (modelType) => async (req, res, next) => {
 							containers.push({ _id: containerId });
 						}
 					} catch (err) {
-					// do nothing. If we can't get access info, user has no access
+					// Do nothing. If we can't get access info, the user has no access
 					}
 				}));
 			}
-			req.containers = [];
 
-			await Promise.all(containers.map(async ({ _id: containerId }) => {
+			const containersFound = await Promise.all(containers.map(async ({ _id: containerId }) => {
 				try {
 					const containerRev = await getLatestRevision(
 						teamspace, containerId, modelTypes.CONTAINER, { _id: 1 });
-					req.containers.push({ container: containerId, revision: containerRev._id });
+					return { container: containerId, revision: containerRev._id };
 				} catch (err) {
-				// do nothing. If we can't get the latest revision, skip this container
+					// return undefined. If we can't get the latest revision, skip this container
+					return undefined;
 				}
 			}));
+
+			req.containers = containersFound.filter((c) => !!c);
 
 			await next();
 		}

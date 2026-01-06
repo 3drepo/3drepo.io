@@ -18,11 +18,13 @@
 const {
 	getRepoBundleInfo: getContainerBundleInfo,
 	getRepoBundle: getContainerRepoBundle,
+	getSuperMeshesInfo: getContainerSuperMeshesInfo,
 	getSupermeshMapping: getContainerSupermeshMapping,
 	getUnityBundle: getContainerUnityBundle,
 } = require('../../../../../../processors/teamspaces/projects/models/containers');
 const {
 	getRepoBundleInfo: getFederationBundleInfo,
+	getSuperMeshesInfo: getFederationSuperMeshesInfo,
 	getSupermeshMapping: getFederationSupermeshMapping,
 } = require('../../../../../../processors/teamspaces/projects/models/federations');
 const {
@@ -33,8 +35,8 @@ const { respond, writeStreamRespond } = require('../../../../../../utils/respond
 const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const { getAccessibleContainers } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
-
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
+const { serialiseUnityMeta } = require('../../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/assets/bundles');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
@@ -57,7 +59,21 @@ const getBundlesMeta = (modelType) => async (req, res) => {
 		const fn = modelType === modelTypes.CONTAINER ? getContainerSupermeshMapping
 			: getFederationSupermeshMapping;
 		const stream = await fn(teamspace, req.params[modelType], revision, req.containers);
-		writeStreamRespond(req, res, templates.ok, stream, undefined, undefined, { mimeType: MimeTypes.JSON });
+		writeStreamRespond(req, res, templates.ok, stream, { mimeType: MimeTypes.JSON });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getUnityMeta = (modelType) => async (req, res, next) => {
+	const { teamspace, revision } = req.params;
+	try {
+		const fn = modelType === modelTypes.CONTAINER ? getContainerSuperMeshesInfo
+			: getFederationSuperMeshesInfo;
+		const result = await fn(teamspace, req.params[modelType], revision, req.containers);
+		req.supermeshData = result;
+		await next();
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -100,8 +116,8 @@ const establishRoutes = (modelType) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/bundles:
 	 *   get:
-	 *     description: Retrieves repobundle information for a given model or model federation. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is returned.This is anticipated to be used only internally by the 3drepo viewer.
-	 *     tags: [v:external, v:internal, Models]
+	 *     description: Retrieves repobundle information for a given model or model federation. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is returned. This is anticipated to be used only internally by the 3drepo viewer.
+	 *     tags: [v:external, v:internal, ViewerAssets]
 	 *     operationId: getRepoAssets
 	 *     parameters:
 	 *       - name: teamspace
@@ -122,7 +138,7 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [federation, container]
+	 *           enum: [federations, containers]
 	 *       - name: modelId
 	 *         description: UUID of the model (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
 	 *         in: path
@@ -206,8 +222,8 @@ const establishRoutes = (modelType) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/bundles/meta:
 	 *   get:
 	 *     description: Get bundles metadata information. This is anticipated to be used only internally by the 3drepo viewer.
-	 *     tags: [v:external, v:internal, Models]
-	 *     operationId: getRepoAssets
+	 *     tags: [v:external, v:internal, ViewerAssets]
+	 *     operationId: getRepoBundlesMeta
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: Teamspace identifier (e.g., "design-team-alpha")
@@ -227,15 +243,15 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [federation, container]
+	 *           enum: [federations, containers]
 	 *       - name: modelId
-	 *         description: UUID of the model (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+	 *         description: Model ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *       - name: revId
-	 *         description: Optional revision ID (e.g., "rev-42f81c")
+	 *         description: Revision ID (optional)
 	 *         in: query
 	 *         required: false
 	 *         schema:
@@ -390,92 +406,219 @@ const establishRoutes = (modelType) => {
 	 */
 	router.get('/meta', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getBundlesMeta(modelType));
 
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/bundles/unity/meta:
+	 *   get:
+	 *     description: Get meta information that is missing from unity asset list. This is anticipated to be used only internally by the 3drepo viewer.
+	 *     tags: [v:external, v:internal, ViewerAssets]
+	 *     operationId: getUnityBundlesMeta
+	 *     parameters:
+	 *       - name: teamspace
+	 *         in: path
+	 *         description: Teamspace identifier (e.g., "design-team-alpha")
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         in: path
+	 *         description: Project identifier (e.g., "office-tower-2025")
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: modelTypes
+	 *         in: path
+	 *         description: Model type
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [federations, containers]
+	 *       - name: modelId
+	 *         in: path
+	 *         description: UUID of the model
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: revId
+	 *         in: query
+	 *         description: Optional revision ID
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       '200':
+	 *         description: Successful response
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               oneOf:
+	 *                 # Single model response
+	 *                 - type: object
+	 *                   properties:
+	 *                     supermeshes:
+	 *                       type: array
+	 *                       items:
+	 *                         type: object
+	 *                         properties:
+	 *                           _id:
+	 *                             type: string
+	 *                             example: "b03bcf03-9a81-4950-8028-5a90d2046fed"
+	 *                           nVertices:
+	 *                             type: integer
+	 *                             example: 49728
+	 *                           nFaces:
+	 *                             type: integer
+	 *                             example: 73920
+	 *                           nUVChannels:
+	 *                             type: integer
+	 *                             example: 1
+	 *                           primitive:
+	 *                             type: integer
+	 *                             example: 3
+	 *                           min:
+	 *                             type: array
+	 *                             items:
+	 *                               type: number
+	 *                             example: [7363.74658203125, 0, -664.9959716796875]
+	 *                           max:
+	 *                             type: array
+	 *                             items:
+	 *                               type: number
+	 *                             example: [12400.625, 544.9990234375, 0]
+	 *
+	 *                 # Federated model response
+	 *                 - type: object
+	 *                   properties:
+	 *                     subModels:
+	 *                       type: array
+	 *                       items:
+	 *                         type: object
+	 *                         properties:
+	 *                           teamspace:
+	 *                             type: string
+	 *                             example: "teamspace"
+	 *                           model:
+	 *                             type: string
+	 *                             example: "modelid"
+	 *                           supermeshes:
+	 *                             type: array
+	 *                             items:
+	 *                               type: object
+	 *                               properties:
+	 *                                 _id:
+	 *                                   type: string
+	 *                                   example: "b03bcf03-9a81-4950-8028-5a90d2046fed"
+	 *                                 nVertices:
+	 *                                   type: integer
+	 *                                   example: 49728
+	 *                                 nFaces:
+	 *                                   type: integer
+	 *                                   example: 73920
+	 *                                 nUVChannels:
+	 *                                   type: integer
+	 *                                   example: 1
+	 *                                 primitive:
+	 *                                   type: integer
+	 *                                   example: 3
+	 *                                 min:
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: number
+	 *                                   example: [7363.74658203125, 0, -664.9959716796875]
+	 *                                 max:
+	 *                                   type: array
+	 *                                   items:
+	 *                                     type: number
+	 *                                   example: [12400.625, 544.9990234375, 0]
+	 */
+	router.get('/unity/meta', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getUnityMeta(modelType), serialiseUnityMeta(modelType));
+
 	// istanbul ignore next
 	if (modelType === modelTypes.CONTAINER) {
 		/**
-	    * @openapi
-	    * /teamspaces/{teamspace}/projects/{project}/containers/{containerId}/assets/bundles/unity/{bundleId}:
-	    *   get:
-	    *     description: Gets an actual Unity Bundle file containing a set of assets
-	    *     tags: [v:external, v:internal, Models]
-	    *     operationId: getUnityBundle
-	    *     parameters:
-	    *       - name: teamspace
-	    *         description: Teamspace identifier (e.g., "design-team-alpha")
-	    *         in: path
-	    *         required: true
-	    *         schema:
-	    *           type: string
-	    *       - name: project
-	    *         description: Project identifier (e.g., "office-tower-2025")
-	    *         in: path
-	    *         required: true
-	    *         schema:
-	    *           type: string
-	    *       - name: containerId
-	    *         description: UUID of the container (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
-	    *         in: path
-	    *         required: true
-	    *         schema:
-	    *           type: string
-	    *       - name: bundleId
-	    *         description: Bundle ID (e.g., "9f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
-	    *         in: path
-	    *         required: true
-	    *         schema:
-	    *           type: string
-	    *     responses:
-	    *       200:
-	    *         description: Returns the unity bundle file
+		* @openapi
+		* /teamspaces/{teamspace}/projects/{project}/containers/{containerId}/assets/bundles/unity/{bundleId}:
+		*   get:
+		*     description: Gets an actual Unity Bundle file containing a set of assets
+		*     tags: [v:external, v:internal, Models]
+		*     operationId: getUnityBundle
+		*     parameters:
+		*       - name: teamspace
+		*         description: Teamspace identifier (e.g., "design-team-alpha")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: project
+		*         description: Project identifier (e.g., "office-tower-2025")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: containerId
+		*         description: UUID of the container (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: bundleId
+		*         description: Bundle ID (e.g., "9f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*     responses:
+		*       200:
+		*         description: Returns the unity bundle file
 		*         content:
 		*           application/octet-stream:
 		*             schema:
 		*               type: string
 		*               format: binary
-	    */
+		*/
 		router.get('/unity/:bundleId', hasReadAccessToContainer, getUnityBundle);
 
 		/**
-	    * @openapi
-	    * /teamspaces/{teamspace}/projects/{project}/containers/{containerId}/assets/bundles/repo/{bundleId}:
-	    *   get:
-	    *     description: Gets an actual Repo Bundle file containing a set of assets
-	    *     tags: [v:external, v:internal, Models]
-	    *     operationId: getRepoBundle
-	    *     parameters:
-	    *       - name: teamspace
-	    *         description: Teamspace identifier (e.g., "design-team-alpha")
-	    *         in: path
-	    *         required: true
-	    *         schema:
-	    *           type: string
-	    *       - name: project
-	    *         description: Project identifier (e.g., "office-tower-2025")
-	    *         in: path
-	    *         required: true
-	    *         schema:
-	    *           type: string
-	    *       - name: containerId
-	    *         description: UUID of the container (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
-	    *         in: path
-	    *         required: true
-	    *         schema:
-	    *           type: string
-	    *       - name: bundleId
-	    *         description: Bundle ID (e.g., "9f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
-	    *         in: path
-	    *         required: true
-	    *         schema:
-	    *           type: string
-	    *     responses:
-	    *       200:
-	    *         description: Returns the repo bundle file
+		* @openapi
+		* /teamspaces/{teamspace}/projects/{project}/containers/{containerId}/assets/bundles/repo/{bundleId}:
+		*   get:
+		*     description: Gets an actual Repo Bundle file containing a set of assets
+		*     tags: [v:external, v:internal, Models]
+		*     operationId: getRepoBundle
+		*     parameters:
+		*       - name: teamspace
+		*         description: Teamspace identifier (e.g., "design-team-alpha")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: project
+		*         description: Project identifier (e.g., "office-tower-2025")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: containerId
+		*         description: UUID of the container (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: bundleId
+		*         description: Bundle ID (e.g., "9f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*     responses:
+		*       200:
+		*         description: Returns the repo bundle file
 		*         content:
 		*           application/octet-stream:
 		*             schema:
 		*               type: string
 		*               format: binary
-	    */
+		*/
 		router.get('/repo/:bundleId', hasReadAccessToContainer, getRepoBundle);
 	}
 

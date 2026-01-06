@@ -18,7 +18,8 @@
 const { times } = require('lodash');
 const { src } = require('../../../../../../../helper/path');
 const { generateUUIDString, generateRandomString, determineTestGroup } = require('../../../../../../../helper/services');
-const { modelTypes } = require('../../../../../../../../../src/v5/models/modelSettings.constants');
+
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 jest.mock('../../../../../../../../../src/v5/utils/permissions');
 const PermUtils = require(`${src}/utils/permissions`);
@@ -247,10 +248,10 @@ const testGetAccessibleContainers = () => {
 			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers });
 
 			revisions.forEach((revision, i) => {
+				PermUtils.hasReadAccessToContainer.mockResolvedValueOnce(true);
 				if (i > 1) {
 					Revisions.getLatestRevision.mockRejectedValueOnce(new Error('Test error'));
 				} else {
-					PermUtils.hasReadAccessToContainer.mockResolvedValueOnce(true);
 					Revisions.getLatestRevision.mockResolvedValueOnce(revision);
 				}
 			});
@@ -266,8 +267,8 @@ const testGetAccessibleContainers = () => {
 
 			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federationId, { subModels: 1 });
 			expect(PermUtils.hasReadAccessToContainer).toHaveBeenCalledTimes(nSubModels);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
-			containers.slice(0, 2).forEach((container) => {
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(nSubModels);
+			containers.forEach((container) => {
 				expect(Revisions.getLatestRevision).toHaveBeenCalledWith(
 					teamspace, container._id, modelTypes.CONTAINER, { _id: 1 });
 			});

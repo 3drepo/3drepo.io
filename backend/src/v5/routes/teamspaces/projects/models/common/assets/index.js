@@ -34,7 +34,7 @@ const getTree = async (req, res) => {
 
 	try {
 		const readStream = await getContainerTree(teamspace, container, revision);
-		writeStreamRespond(req, res, templates.ok, readStream, undefined, undefined, { mimeType: MimeTypes.JSON });
+		writeStreamRespond(req, res, templates.ok, readStream, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -42,12 +42,12 @@ const getTree = async (req, res) => {
 };
 
 const getProperties = (modelType) => async (req, res) => {
-	const { teamspace, revision } = req.params;
+	const { teamspace, revision, model } = req.params;
 	try {
 		const fn = modelType === modelTypes.CONTAINER ? getContainerAssetProperties
 			: getFederationAssetProperties;
-		const propStream = await fn(teamspace, req.params[modelType], revision, req.containers);
-		writeStreamRespond(req, res, templates.ok, propStream, undefined, undefined, { mimeType: MimeTypes.JSON });
+		const propStream = await fn(teamspace, model, revision, req.containers);
+		writeStreamRespond(req, res, templates.ok, propStream, { mimeType: MimeTypes.JSON });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -151,7 +151,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{modelTypes}/{modelId}/assets/properties:
 	 *   get:
 	 *     description: Retrieves model properties for a given model or model federation. Optionally accepts a revision ID (`revId`). If `revId` is not provided, the latest revision is returned.
-	 *     tags: [v:external, v:internal, Models]
+	 *     tags: [v:external, v:internal, ViewerAssets]
 	 *     operationId: getModelProperties
 	 *     parameters:
 	 *       - name: teamspace
@@ -172,7 +172,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-	 *           enum: [federation, container]
+	 *           enum: [federations, containers]
 	 *       - name: modelId
 	 *         description: UUID of the model (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
 	 *         in: path
