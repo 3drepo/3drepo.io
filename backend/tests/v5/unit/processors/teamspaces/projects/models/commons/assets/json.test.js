@@ -30,9 +30,6 @@ const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 jest.mock('../../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
-jest.mock('../../../../../../../../../src/v5/models/metadata');
-const Metadata = require(`${src}/models/metadata`);
-
 const JsonAssets = require(`${src}/processors/teamspaces/projects/models/commons/assets/json`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
