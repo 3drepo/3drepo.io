@@ -22,9 +22,12 @@ const { src } = require('../../../../../../../helper/path');
 
 const { insertOne, insertMany } = require(`${src}/handler/db`);
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
-const { storeFile } = require(`${src}services/filesManager`);
+const { storeFile } = require(`${src}/services/filesManager`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const REPO_BUNDLE_COLLECTION = '.stash.repobundles';
+const UNITY_BUNDLE_COLLECTION = '.stash.unity3d';
 
 let server;
 let agent;
@@ -108,8 +111,8 @@ const testGetAssetList = (internalService) => {
 			await ServiceHelper.db.createRevision(teamspace, project.id, fed._id,
 				{ ...fedRevisions[0], timestamp: new Date() }, modelTypes.FEDERATION);
 
-			await insertOne(teamspace, `${con._id}.stash.repobundles`, { _id: stringToUUID(revisions[0]._id), ...rev1Content });
-			await insertOne(teamspace, `${con._id}.stash.unity3d`, { _id: stringToUUID(revisions[1]._id), ...rev2Content });
+			await insertOne(teamspace, `${con._id}${REPO_BUNDLE_COLLECTION}`, { _id: stringToUUID(revisions[0]._id), ...rev1Content });
+			await insertOne(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, { _id: stringToUUID(revisions[1]._id), ...rev2Content });
 		});
 
 		const generateTestData = (modelType) => {
@@ -395,7 +398,6 @@ const testGetUnityMeta = (internalService) => {
 	});
 };
 
-
 const testGetRepoBundle = (internalService) => {
 	describe('Get Repo bundle', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
@@ -408,8 +410,8 @@ const testGetRepoBundle = (internalService) => {
 		beforeAll(async () => {
 			const models = [con, fed];
 			await setupBasicData(users, teamspace, project, models);
-			await storeFile(teamspace, `${con._id}.stash.repobundles`, bundle1Id, bundle1Content);
-			await storeFile(teamspace, `${con._id}.stash.repobundles`, bundle2Id, bundle2Content);
+			await storeFile(teamspace, `${con._id}${REPO_BUNDLE_COLLECTION}`, bundle1Id, bundle1Content);
+			await storeFile(teamspace, `${con._id}${REPO_BUNDLE_COLLECTION}`, bundle2Id, bundle2Content);
 		});
 
 		const generateTestData = () => {
@@ -469,8 +471,8 @@ const testGetUnityBundle = (internalService) => {
 		beforeAll(async () => {
 			const models = [con, fed];
 			await setupBasicData(users, teamspace, project, models);
-			await storeFile(teamspace, `${con._id}.stash.unity3d`, bundle1Id, bundle1Content);
-			await storeFile(teamspace, `${con._id}.stash.unity3d`, bundle2Id, bundle2Content);
+			await storeFile(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, bundle1Id, bundle1Content);
+			await storeFile(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, bundle2Id, bundle2Content);
 		});
 
 		const generateTestData = () => {
