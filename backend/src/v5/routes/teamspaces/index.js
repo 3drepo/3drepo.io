@@ -138,7 +138,7 @@ const establishRoutes = (isInternal) => {
 	* @openapi
 	* /teamspaces/{teamspace}/quota:
 	*   get:
-	*     description: Gets quota information about a user
+	*     description: Gets quota information about a teamspace
 	*     tags: [v:external, v:internal, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
