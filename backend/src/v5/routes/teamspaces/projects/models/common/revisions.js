@@ -436,11 +436,11 @@ const establishRoutes = (modelType, isInternal) => {
 		if (modelType === modelTypes.CONTAINER) {
 			/**
 			 * @openapi
-			 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
+			 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
 			 *   get:
-			 *     description: Get a list of revisions of a model
+			 *     description: Downloads the container files of the selected revision
 			 *     tags: [v:external, Revisions]
-			 *     operationId: getModelRevisions
+			 *     operationId: downloadContainerRevisionFiles
 			 *     parameters:
 			 *       - name: teamspace
 			 *         description: Name of teamspace
@@ -455,24 +455,17 @@ const establishRoutes = (modelType, isInternal) => {
 			 *         schema:
 			 *           type: string
 			 *           format: uuid
-			 *       - name: type
-			 *         description: Model type
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *           enum: [containers, drawings]
-			 *       - name: model
-			 *         description: Model ID
+			 *       - name: container
+			 *         description: Container ID
 			 *         in: path
 			 *         required: true
 			 *         schema:
 			 *           type: string
 			 *           format: uuid
-			 *       - name: showVoid
-			 *         description: Include void revisions or not
-			 *         in: query
-			 *         required: false
+			 *       - name: revision
+			 *         description: Revision ID or Revision tag
+			 *         in: path
+			 *         required: true
 			 *         schema:
 			 *           type: string
 			 *     responses:
@@ -592,11 +585,11 @@ const establishRoutes = (modelType, isInternal) => {
 		if (modelType === modelTypes.DRAWING) {
 			/**
 			 * @openapi
-			 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions/{revision}:
-			 *   patch:
-			 *     description: Update a revision. Currently only the void status can be updated.
+			 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/original:
+			 *   get:
+			 *     description: Downloads the drawing files of the selected revision
 			 *     tags: [v:external, Revisions]
-			 *     operationId: updateModelRevisionStatus
+			 *     operationId: downloadDrawingRevisionFiles
 			 *     parameters:
 			 *       - name: teamspace
 			 *         description: Name of teamspace
@@ -611,43 +604,32 @@ const establishRoutes = (modelType, isInternal) => {
 			 *         schema:
 			 *           type: string
 			 *           format: uuid
-			 *       - name: type
-			 *         description: Model type
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *           enum: [containers, drawings]
-			 *       - name: model
-			 *         description: Model ID
+			 *       - name: drawing
+			 *         description: Drawing ID
 			 *         in: path
 			 *         required: true
 			 *         schema:
 			 *           type: string
 			 *           format: uuid
 			 *       - name: revision
-			 *         description: Revision ID or Revision tag
+			 *         description: Revision ID
 			 *         in: path
 			 *         required: true
 			 *         schema:
 			 *           type: string
-			 *     requestBody:
-			 *       content:
-			 *         application/json:
-			 *           schema:
-			 *             properties:
-			 *               void:
-			 *                 description: The new status value
-			 *                 type: boolean
-			 *             required:
-			 *               - status
+			 *           format: uuid
 			 *     responses:
 			 *       401:
 			 *         $ref: "#/components/responses/notLoggedIn"
 			 *       404:
 			 *         $ref: "#/components/responses/teamspaceNotFound"
 			 *       200:
-			 *         description: updates the status of the revision
+			 *         description: downloads the revision files
+			 *         content:
+			 *           application/octet-stream:
+			 *             schema:
+			 *               type: string
+			 *               format: binary
 			 */
 			router.get('/:revision/files/original', hasWriteAccessToDrawing, downloadRevisionFiles(modelTypes.DRAWING));
 
