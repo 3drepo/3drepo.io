@@ -128,8 +128,6 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 			...ServiceHelper.generateUserCredentials(),
 			user: teamspace,
 			password: teamspace });
-	} else if (admins.length === 0) {
-		throw Error('an admin needs to be provided, or createUser needs to be set to true.');
 	}
 	const firstAdmin = createUser ? teamspace : admins[0];
 	const accountId = await initTeamspace(teamspace, firstAdmin);
