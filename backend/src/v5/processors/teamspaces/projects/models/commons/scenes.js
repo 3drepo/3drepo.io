@@ -23,6 +23,7 @@ const config = require('../../../../../utils/config');
 const { getFile } = require('../../../../../services/filesManager');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getNodesBySharedIds } = require('../../../../../models/scenes');
+const { getSuperMeshesInRevision } = require('../../../../../models/scenes.stash');
 
 const contextCache = {};
 
@@ -119,6 +120,19 @@ Scene.sharedIdsToExternalIds = async (teamspace, container, revId, sharedIds) =>
 	const metadata = await getMetadataByQuery(teamspace, container, query, projection);
 
 	return Scene.getExternalIdsFromMetadata(metadata);
+};
+
+Scene.getSuperMeshesInfo = async (teamspace, container, revision) => {
+	const projection = {
+		_id: 1,
+		vertices_count: 1,
+		faces_count: 1,
+		uv_channels_count: 1,
+		bounding_box: 1,
+		primitive: 1,
+	};
+	const superMeshes = await getSuperMeshesInRevision(teamspace, container, revision, projection);
+	return { superMeshes };
 };
 
 module.exports = Scene;
