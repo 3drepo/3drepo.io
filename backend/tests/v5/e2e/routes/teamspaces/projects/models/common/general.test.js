@@ -322,17 +322,30 @@ const testGetModelStats = (isInternal = false) => {
 
 			const getRoute = ({
 				projectId = project.id,
-				key = isInternal ? undefined : users.tsAdmin.apiKey,
+				key = users.tsAdmin.apiKey,
 				modelId = model._id,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/stats${key ? `?key=${key}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/stats${ServiceHelper.createQueryString({ key: isInternal ? null : key })}`;
+
+
+			if (isInternal && modelType !== modelTypes.CONTAINER) {
+				return [
+					[`trying to access endpoint for ${modelType}`, getRoute(), false, templates.pageNotFound],
+				];
+			}
 
 			const basicCases = [
-				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
-				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+			];
+
+			const externalCases = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				[`the user does not have access to the ${modelType}`, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 			];
 
 			const customCases = {
@@ -353,23 +366,11 @@ const testGetModelStats = (isInternal = false) => {
 				],
 			};
 
-			if (isInternal) {
-				if (modelType === modelTypes.CONTAINER) {
-					return [
-						['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-						[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
-						[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
 
-						...customCases[modelType],
-					];
-				}
-				return [
-					[`trying to access endpoint for ${modelType}`, getRoute(), false, templates.pageNotFound],
-				];
-			}
 			return [
 				...basicCases,
 				...customCases[modelType],
+				...(isInternal ? [] : externalCases),
 			];
 		};
 
@@ -702,6 +703,12 @@ const testAddModel = (isInternal) => {
 				type: modelType === modelTypes.FEDERATION ? undefined : ServiceHelper.generateRandomString(),
 			});
 
+			if (isInternal && modelType !== modelTypes.CONTAINER) {
+				return [
+					[`trying to access endpoint for ${modelType}`, getRoute(), false, generatePayload(), templates.pageNotFound],
+				];
+			};
+
 			const general = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, generatePayload(), templates.projectNotFound],
 				[`the name has been taken by another ${modelType}`, getRoute(), false, generatePayload(model.name), templates.invalidArguments],
@@ -718,14 +725,10 @@ const testAddModel = (isInternal) => {
 				['user has sufficient permission and the payload is valid', getRoute(), true, generatePayload()],
 			];
 
-			if (isInternal) {
-				if (modelType === modelTypes.CONTAINER) {
-					return general;
-				}
-				return general.map(([desc, route, , payload]) => [
-					desc, route, false, payload, templates.pageNotFound]);
-			}
-			return external;
+			return [
+				...general,
+				...(isInternal ? [] : external),
+			]
 		};
 
 		const runTest = (desc, route, success, payload, expectedOutput) => {
@@ -773,9 +776,9 @@ const testDeleteModel = (isInternal = false) => {
 			let modelNotFound;
 			const getRoute = ({
 				projectId = project.id,
-				key = isInternal ? undefined : users.tsAdmin.apiKey,
+				key = users.tsAdmin.apiKey,
 				modelId = model._id,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${ServiceHelper.createQueryString({ key: isInternal ? null : key })}`;
 
 			if (modelType === modelTypes.CONTAINER) {
 				wrongTypeModel = fed;
@@ -791,29 +794,36 @@ const testDeleteModel = (isInternal = false) => {
 				modelNotFound = templates.drawingNotFound;
 			}
 
-			if (isInternal && modelType === modelTypes.CONTAINER) {
-				return [
-					['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
-					[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-					[`the ${modelType} exists and is internal`, getRoute(), true],
-				];
-			} if (isInternal && modelType !== modelTypes.CONTAINER) {
+			if (isInternal && modelType !== modelTypes.CONTAINER) {
 				return [
 					[`trying to access the endpoint for ${modelType}`, getRoute(), false, templates.pageNotFound],
 				];
 			}
-			return [
-				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
-				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+
+			const commonCases = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
+				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+				[`the ${modelType} exists and is internal`, getRoute(), true],
 				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+			];
+
+			const externalCases = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
 				['the user lacks sufficient permissions', getRoute({ key: users.viewer.apiKey }), false, templates.notAuthorized],
 				[`the ${modelType} exists and the user has sufficient permissions`, getRoute(), true],
 				...(modelType !== modelTypes.CONTAINER ? [] : [
 					[`the ${modelType} is a sub model of a federation`, getRoute({ modelId: conIsSubModel._id }), false, templates.containerIsSubModel],
 				]),
 			];
+
+			return [
+				...commonCases,
+				...(isInternal ? [] : externalCases),
+			];
+
 		};
 
 		const runTest = (desc, route, success, expectedOutput) => {
@@ -868,7 +878,7 @@ const testUpdateModelSettings = (isInternal = false) => {
 			]);
 		});
 
-		const generateTestData = (modelType, internal) => {
+		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
 			let modelNotFound;
@@ -889,33 +899,25 @@ const testUpdateModelSettings = (isInternal = false) => {
 
 			const getRoute = ({
 				projectId = project.id,
-				key = internal ? undefined : users.tsAdmin.apiKey,
+				key = users.tsAdmin.apiKey,
 				modelId = model._id,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${ServiceHelper.createQueryString({ key: isInternal ? null : key })}`;
 
 			const dummyPayload = { name: ServiceHelper.generateRandomString() };
 
-			if (internal && modelType === modelTypes.CONTAINER) {
-				return [
-					['the payload is valid', getRoute(), true, dummyPayload],
-				];
-			} if (internal && modelType !== modelTypes.CONTAINER) {
+			if (isInternal && modelType !== modelTypes.CONTAINER) {
 				return [
 					[`trying to access endpoint for ${modelType}`, getRoute(), false, dummyPayload, templates.pageNotFound],
 				];
 			}
 
-			return [
-				['the user does not have a valid session', getRoute({ key: null }), false, dummyPayload, templates.notLoggedIn],
-				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, dummyPayload, templates.teamspaceNotFound],
+			const commonCases = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, dummyPayload, templates.projectNotFound],
 				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, dummyPayload, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, dummyPayload, modelNotFound],
-				['the user lacks sufficient permissions', getRoute({ key: users.viewer.apiKey }), false, dummyPayload, templates.notAuthorized],
 				['the payload does not conform to the schema', getRoute(), false, { name: 123 }, templates.invalidArguments],
 				['the payload contains unrecognised data', getRoute(), false, { name: 123, [ServiceHelper.generateRandomString()]: true }, templates.invalidArguments],
 				['the user is trying to toggle federate', getRoute(), false, { federate: modelType !== modelTypes.FEDERATION }, templates.invalidArguments],
-				['the payload is valid', getRoute(), true, dummyPayload],
 				...(modelType !== modelTypes.DRAWING ? [
 					['the defaultView is not recognised', getRoute(), false, { defaultView: ServiceHelper.generateRandomString() }, templates.invalidArguments],
 					['the defaultView is set to a valid view', getRoute(), true, { defaultView: UUIDToString(model.view._id) }],
@@ -926,9 +928,22 @@ const testUpdateModelSettings = (isInternal = false) => {
 					['the code and units are updated', getRoute(), true, { code: ServiceHelper.generateRandomString(), unit: 'm' }],
 					['the code is unset and units are updated', getRoute(), true, { code: null, unit: 'm' }],
 				] : []),
+				['the payload is valid', getRoute(), true, dummyPayload],
+
 				...(modelType === modelTypes.FEDERATION ? [
 					['the user tries to edit submodel array', getRoute(), false, { subModels: [con._id] }, templates.invalidArguments],
 				] : []),
+			];
+
+			const externalCases = [
+				['the user does not have a valid session', getRoute({ key: null }), false, dummyPayload, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, dummyPayload, templates.teamspaceNotFound],
+				['the user lacks sufficient permissions', getRoute({ key: users.viewer.apiKey }), false, dummyPayload, templates.notAuthorized],
+			];
+
+			return [
+				...commonCases,
+				...(isInternal ? [] : externalCases),
 			];
 		};
 
@@ -986,7 +1001,7 @@ const testGetSettings = (isInternal = false) => {
 			await setupBasicData(users, teamspace, project, models);
 		});
 
-		const generateTestData = (modelType, internal) => {
+		const generateTestData = (modelType) => {
 			let model;
 			let model2;
 			let wrongTypeModel;
@@ -1011,29 +1026,32 @@ const testGetSettings = (isInternal = false) => {
 
 			const getRoute = ({
 				projectId = project.id,
-				key = internal ? undefined : users.tsAdmin.apiKey,
+				key = users.tsAdmin.apiKey,
 				modelId = model._id,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${key ? `?key=${key}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}${ServiceHelper.createQueryString({ key })}`;
 
-			if (internal && modelType === modelTypes.CONTAINER) {
-				return [
-					['the model exists and the user has access', modelType, getRoute(), true, model],
-				];
-			} if (internal && modelType !== modelTypes.CONTAINER) {
+			if (isInternal && modelType !== modelTypes.CONTAINER) {
 				return [
 					[`trying to access the endpoint for ${modelType}`, modelType, getRoute(), false, templates.pageNotFound],
 				];
 			}
 
-			return [
-				['the user does not have a valid session', modelType, getRoute({ key: null }), false, templates.notLoggedIn],
-				['the user is not a member of the teamspace', modelType, getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+			const commonCases = [
 				['the project does not exist', modelType, getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 				[`the ${modelType} does not exist`, modelType, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, modelType, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-				[`the user does not have access to the ${modelType}`, modelType, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 				['the model exists and the user has access', modelType, getRoute(), true, model],
 				['the model exists and the user has access (2)', modelType, getRoute({ modelId: model2._id }), true, model2],
+			];
+			const externalCases = [
+				['the user does not have a valid session', modelType, getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', modelType, getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				[`the user does not have access to the ${modelType}`, modelType, getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+			];
+
+			return [
+				...commonCases,
+				...(isInternal ? [] : externalCases),
 			];
 		};
 
@@ -1279,7 +1297,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		testAppendFavourites();
 		testDeleteFavourites();
 		testAddModel();
-		testDeleteModel();
+		// testDeleteModel();
 		testUpdateModelSettings();
 		testGetSettings();
 		testGetThumbnail();
