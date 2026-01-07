@@ -326,7 +326,6 @@ const testGetModelStats = (isInternal = false) => {
 				modelId = model._id,
 			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/stats${ServiceHelper.createQueryString({ key: isInternal ? null : key })}`;
 
-
 			if (isInternal && modelType !== modelTypes.CONTAINER) {
 				return [
 					[`trying to access endpoint for ${modelType}`, getRoute(), false, templates.pageNotFound],
@@ -365,7 +364,6 @@ const testGetModelStats = (isInternal = false) => {
 					[`the ${modelType} is valid and user has access (no revision)`, getRoute({ modelId: drawNoRev._id }), true, drawNoRev],
 				],
 			};
-
 
 			return [
 				...basicCases,
@@ -707,7 +705,7 @@ const testAddModel = (isInternal) => {
 				return [
 					[`trying to access endpoint for ${modelType}`, getRoute(), false, generatePayload(), templates.pageNotFound],
 				];
-			};
+			}
 
 			const general = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, generatePayload(), templates.projectNotFound],
@@ -728,7 +726,7 @@ const testAddModel = (isInternal) => {
 			return [
 				...general,
 				...(isInternal ? [] : external),
-			]
+			];
 		};
 
 		const runTest = (desc, route, success, payload, expectedOutput) => {
@@ -823,7 +821,6 @@ const testDeleteModel = (isInternal = false) => {
 				...commonCases,
 				...(isInternal ? [] : externalCases),
 			];
-
 		};
 
 		const runTest = (desc, route, success, expectedOutput) => {
