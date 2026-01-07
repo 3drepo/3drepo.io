@@ -31,6 +31,8 @@ Cache.addAccount = (accountId, teamspaceName) => {
 	return accountId;
 };
 
+Cache.doesAccountExist = (accountId) => teamspaceByAccount.has(accountId);
+
 Cache.getTeamspaceByAccount = (accountId) => teamspaceByAccount.get(accountId);
 
 Cache.removeAccount = (accountId) => {
