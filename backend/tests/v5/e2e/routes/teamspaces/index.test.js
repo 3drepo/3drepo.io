@@ -29,6 +29,9 @@ const { ADD_ONS, ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants
 const { updateAddOns } = require(`${src}/models/teamspaceSettings`);
 const DB = require(`${src}/handler/db`);
 
+const { getTeamspaceSetting } = require(`${src}/models/teamspaceSettings`);
+const { createAccount } = require(`${src}/services/sso/frontegg`);
+
 let server;
 let agent;
 
@@ -527,6 +530,47 @@ const testDeleteQuota = (internalService) => {
 	});
 };
 
+const testCreateTeamspace = (isInternal) => {
+	const existingTeamspace = ServiceHelper.generateRandomString();
+	const freeAccountIdTest = { name: ServiceHelper.generateRandomString() };
+	const usedAccountIdTest = { name: existingTeamspace };
+	const route = '/v5/teamspaces/';
+	const testCases = isInternal ? [
+		['No name is provided', {}, false, templates.invalidArguments],
+		['Invalid name is provided', { name: '@Asfds' }, false, templates.invalidArguments],
+		['Valid name is provided', { name: ServiceHelper.generateRandomString() }, true],
+		['The teamspace already exists', { name: existingTeamspace }, false, templates.invalidArguments],
+		['An email is provided', { name: ServiceHelper.generateRandomString(), admin: ServiceHelper.generateRandomEmail() }, true],
+		['An invalid email is provided', { name: ServiceHelper.generateRandomString(), admin: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
+		['An available account Id provided', freeAccountIdTest, true],
+		['An used account Id provided', usedAccountIdTest, false, templates.invalidArguments],
+	] : [
+		['service is external', {}, false, templates.pageNotFound],
+	];
+	describe('Create teamspace', () => {
+		beforeAll(async () => {
+			usedAccountIdTest.accountId = await ServiceHelper.db.createTeamspace(
+				existingTeamspace, undefined, undefined, false);
+			freeAccountIdTest.accountId = await createAccount();
+		});
+
+		testCases.forEach(([desc, body, success, expectedOutcome = templates.ok]) => {
+			test(`Should ${success ? 'succeed' : `fail with ${expectedOutcome.status}`} if ${desc}`, async () => {
+				const res = await agent.post(route).send(body).expect(expectedOutcome.status);
+
+				if (success) {
+					await expect(getTeamspaceSetting(body.name)).resolves.toBeDefined();
+				} else {
+					expect(res.body.code).toEqual(expectedOutcome.code);
+					if (body.name !== existingTeamspace) {
+						await expect(getTeamspaceSetting(body.name)).rejects.toEqual(templates.teamspaceNotFound);
+					}
+				}
+			});
+		});
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
@@ -546,6 +590,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		testGetAddOns();
 		testUpdateQuota();
 		testDeleteQuota();
+		testCreateTeamspace();
 	});
 
 	describe('Internal Service', () => {
@@ -556,5 +601,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 
 		testUpdateQuota(true);
 		testDeleteQuota(true);
+		testCreateTeamspace(true);
 	});
 });

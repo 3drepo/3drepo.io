@@ -29,9 +29,6 @@ const Permissions = require(`${src}/utils/permissions`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
-jest.mock('../../../../../../src/v5/models/modelSettings');
-const ModelSettings = require(`${src}/models/modelSettings`);
-
 jest.mock('../../../../../../src/v5/utils/sessions');
 const Sessions = require(`${src}/utils/sessions`);
 const ModelMiddleware = require(`${src}/middleware/permissions/components/models`);
@@ -45,8 +42,6 @@ const mockImp = (teamspace) => {
 	}
 	return teamspace === 'ts';
 };
-
-ModelSettings.getContainerById.mockImplementation(() => Promise.resolve({ _id: 'containerId' }));
 
 Permissions.hasReadAccessToContainer.mockImplementation(mockImp);
 Permissions.hasWriteAccessToContainer.mockImplementation(mockImp);
