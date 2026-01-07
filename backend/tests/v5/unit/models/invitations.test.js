@@ -21,8 +21,8 @@ const Invitations = require(`${src}/models/invitations`);
 const db = require(`${src}/handler/db`);
 const { generateRandomString, determineTestGroup } = require('../../helper/services');
 
-const { DEFAULT_OWNER_JOB } = require('../../../../src/v5/models/jobs.constants');
-const { events } = require('../../../../src/v5/services/eventsManager/eventsManager.constants');
+const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
 jest.mock('../../../../src/v5/services/sso/frontegg');
 const FronteggMock = require(`${src}/services/sso/frontegg`);

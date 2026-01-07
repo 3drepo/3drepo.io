@@ -539,7 +539,7 @@ const testCreateTeamspace = (isInternal) => {
 		['The teamspace already exists', { name: existingTeamspace }, false, templates.invalidArguments],
 		['An email is provided', { name: ServiceHelper.generateRandomString(), admin: ServiceHelper.generateRandomEmail() }, true],
 		['An invalid email is provided', { name: ServiceHelper.generateRandomString(), admin: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
-		['!An available account Id provided', freeAccountIdTest, true],
+		['An available account Id provided', freeAccountIdTest, true],
 		['An used account Id provided', usedAccountIdTest, false, templates.invalidArguments],
 	] : [
 		['service is external', {}, false, templates.pageNotFound],

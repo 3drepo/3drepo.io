@@ -17,7 +17,8 @@
 
 const Path = require('path');
 const { v5Path } = require('../../../interop');
-const { validateNewTeamspaceSchema } = require('../../../v5/schemas/teamspaces');
+
+const { validateNewTeamspaceSchema } = require(`${v5Path}/schemas/teamspaces`);
 
 const { logger } = require(`${v5Path}/utils/logger`);
 
