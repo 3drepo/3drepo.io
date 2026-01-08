@@ -31,6 +31,9 @@ const {
 
 const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { idTypesToKeys, idTypes, metaKeyToIdType } = require(`${src}/models/metadata.constants`);
+const { templates } = require(`${src}/utils/responseCodes`);
+const { nodeTypes } = require(`${src}/models/scenes.constants`);
+const GeoMaths = require(`${src}/utils/helper/geoMaths`);
 
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
@@ -45,6 +48,8 @@ const ScenesModel = require(`${src}/models/scenes`);
 
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
+
+const { Readable } = require('stream');
 
 const testGetMeshesWithParentIds = () => {
 	const teamspace = generateRandomString();
@@ -208,6 +213,253 @@ const testPrepareCache = () => {
 	});
 };
 
+const testGetMeshData = () => {
+	describe('Get mesh data', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const container = generateRandomString();
+		const meshId = generateUUID();
+		test('Should throw an error if mesh node is not found', async () => {
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce(null);
+
+			await expect(Scenes.getMeshData(teamspace, project, container, meshId))
+				.rejects.toEqual(templates.meshNotFound);
+
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
+				{ _id: meshId, type: nodeTypes.MESH }, {
+					parents: 1,
+					_blobRef: 1,
+					primitive: 1,
+				});
+		});
+		test('Should throw an error if mesh node has no _blobRef', async () => {
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce({});
+
+			await expect(Scenes.getMeshData(teamspace, project, container, meshId))
+				.rejects.toEqual(templates.meshNotFound);
+
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
+				{ _id: meshId, type: nodeTypes.MESH }, {
+					parents: 1,
+					_blobRef: 1,
+					primitive: 1,
+				});
+		});
+
+		const matrix1 = times(4, () => times(4, () => Math.random()));
+		const matrix2 = times(4, () => times(4, () => Math.random()));
+		const resultMatrix = GeoMaths.matrices.multiply(matrix2, matrix1);
+
+		[
+			['Should return identity matrix if parent node has no matrix', [{}], GeoMaths.matrices.identity()],
+			['Should return parent\'s matrix if parent node exists', [{ matrix: matrix1 }], matrix1],
+			['Should return multipled matrix if more than one ancestor exist', [{ matrix: matrix1, parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
+			['Should return multipled matrix if more than one ancestor exist (one with no matrix)', [{ matrix: matrix1, parents: [generateUUIDString()] }, { parents: [generateUUIDString()] }, { matrix: matrix2, parents: [generateUUIDString()] }, { }], resultMatrix],
+		]
+			.forEach(([desc, parentMocks, expectedMatrix]) => {
+				test(desc, async () => {
+					const parentId = generateUUIDString();
+					const fileName = generateRandomString();
+
+					// Mesh node
+					ScenesModel.getNodeByQuery.mockResolvedValueOnce({
+						// eslint-disable-next-line no-underscore-dangle
+						_blobRef: {
+							elements: {
+								vertices: { start: 0, size: 12 },
+								faces: { start: 12, size: 12 },
+							},
+							buffer: {
+								start: 0,
+								name: fileName,
+							},
+						},
+						parents: [parentId],
+					});
+
+					// Parent node mocks
+					parentMocks.forEach((mock) => {
+						ScenesModel.getNodeByQuery.mockResolvedValueOnce(mock);
+					});
+
+					const verticesReadStream = generateRandomString();
+					const facesReadStream = generateRandomString();
+
+					FilesManager.getFileAsStream.mockResolvedValueOnce({
+						readStream: verticesReadStream,
+					});
+					FilesManager.getFileAsStream.mockResolvedValueOnce({
+						readStream: facesReadStream,
+					});
+
+					const vectorData = generateRandomObject();
+					const faceData = generateRandomObject();
+					// spy on geomaths vectors and faces toJSONStream
+					const vectorSpy = jest.spyOn(GeoMaths.vectors, 'toJSONStream').mockReturnValueOnce(Readable.from([JSON.stringify(vectorData)]));
+					const facesSpy = jest.spyOn(GeoMaths.faces, 'toJSONStream').mockReturnValueOnce(Readable.from([JSON.stringify(faceData)]));
+
+					const resStream = await Scenes.getMeshData(teamspace, project, container, meshId);
+
+					const chunks = [];
+					for await (const chunk of resStream) {
+						chunks.push(chunk);
+					}
+					const resString = chunks.join('');
+					const expectedString = `{"matrix":${JSON.stringify(expectedMatrix)},"primitive": 3,"vertices":[${JSON.stringify(vectorData)}],"faces":[${JSON.stringify(faceData)}]}`;
+					expect(resString).toEqual(expectedString);
+
+					expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1 + parentMocks.length);
+					expect(ScenesModel.getNodeByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container,
+						{ _id: meshId, type: nodeTypes.MESH }, {
+							parents: 1,
+							_blobRef: 1,
+							primitive: 1,
+						});
+					parentMocks.forEach((_, index) => {
+						const sharedId = index === 0 ? parentId : parentMocks[index - 1].parents[0];
+						expect(ScenesModel.getNodeByQuery).toHaveBeenNthCalledWith(
+							2 + index, teamspace, project, container,
+							{ shared_id: sharedId, type: nodeTypes.TRANSFORMATION }, {
+								parents: 1,
+								matrix: 1,
+							});
+					});
+
+					expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(2);
+					expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.scene`,
+						fileName, { start: 0, end: 11 });
+					expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.scene`,
+						fileName, { start: 12, end: 23 });
+
+					expect(vectorSpy).toHaveBeenCalledTimes(1);
+					expect(vectorSpy).toHaveBeenCalledWith(verticesReadStream);
+
+					expect(facesSpy).toHaveBeenCalledTimes(1);
+					expect(facesSpy).toHaveBeenCalledWith(facesReadStream);
+				});
+			});
+	});
+};
+
+const testGetTexture = () => {
+	describe('Get texture', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const container = generateRandomString();
+		const textureId = generateUUID();
+		test('Should throw an error if texture node is not found', async () => {
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce(null);
+
+			await expect(Scenes.getTexture(teamspace, project, container, textureId))
+				.rejects.toEqual(templates.textureNotFound);
+
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
+				{ _id: textureId, type: nodeTypes.TEXTURE }, {
+					_id: 1,
+					_blobRef: 1,
+					extension: 1,
+				});
+		});
+		test('Should throw an error if texture node has no _blobRef', async () => {
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce({});
+
+			await expect(Scenes.getTexture(teamspace, project, container, textureId))
+				.rejects.toEqual(templates.textureNotFound);
+
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
+				{ _id: textureId, type: nodeTypes.TEXTURE }, {
+					_id: 1,
+					_blobRef: 1,
+					extension: 1,
+				});
+		});
+
+		test('Should return texture stream and mime type if texture node is found', async () => {
+			const fileName = generateRandomString();
+			const extension = 'png';
+
+			// Texture node
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce({
+				// eslint-disable-next-line no-underscore-dangle
+				_blobRef: {
+					elements: {
+						data: { start: 0, size: 100 },
+					},
+					buffer: {
+						start: 0,
+						name: fileName,
+					},
+				},
+				extension,
+			});
+
+			const readStream = generateRandomString();
+
+			FilesManager.getFileAsStream.mockResolvedValueOnce({
+				readStream,
+			});
+
+			const res = await Scenes.getTexture(teamspace, project, container, textureId);
+
+			expect(res).toEqual({
+				readStream,
+				mimeType: `image/${extension}`,
+				size: 100,
+			});
+
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
+				{ _id: textureId, type: nodeTypes.TEXTURE }, {
+					_id: 1,
+					_blobRef: 1,
+					extension: 1,
+				});
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}.scene`,
+				fileName, { start: 0, end: 100 });
+		});
+
+		test('Should return texture stream and mime type as jpeg if texture node extension is jpg', async () => {
+			const fileName = generateRandomString();
+			const extension = 'jpg';
+
+			// Texture node
+			ScenesModel.getNodeByQuery.mockResolvedValueOnce({
+				// eslint-disable-next-line no-underscore-dangle
+				_blobRef: {
+					elements: {
+						data: { start: 0, size: 100 },
+					},
+					buffer: {
+						start: 0,
+						name: fileName,
+					},
+				},
+				extension,
+			});
+
+			const readStream = generateRandomString();
+
+			FilesManager.getFileAsStream.mockResolvedValueOnce({
+				readStream,
+			});
+
+			const res = await Scenes.getTexture(teamspace, project, container, textureId);
+
+			expect(res).toEqual({
+				readStream,
+				mimeType: 'image/jpeg',
+				size: 100,
+			});
+		});
+	});
+};
+
 const testGetSuperMeshesInfo = () => {
 	describe('Get supermeshes info in revision', () => {
 		const teamspace = generateRandomString();
@@ -241,5 +493,7 @@ describe(determineTestGroup(__filename), () => {
 	testGetExternalIdsFromMetadata();
 	testSharedIdsToExternalIds();
 	testPrepareCache();
+	testGetTexture();
+	testGetMeshData();
 	testGetSuperMeshesInfo();
 });
