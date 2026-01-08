@@ -24,6 +24,7 @@ const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updatePr
 const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
+const { BouncerCodes } = require('../../../utils/bouncerCodes');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
@@ -130,11 +131,12 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 		try {
 			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
 			const { errorCode, message } = errorReason;
+			const code = BouncerCodes.codeExists(errorCode) ? BouncerCodes.templates[errorCode].message : errorCode;
 
 			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
 				{
 					errInfo: {
-						code: errorCode,
+						code,
 						message,
 					},
 					teamspace,
