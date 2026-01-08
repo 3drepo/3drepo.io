@@ -18,6 +18,7 @@
 const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
+const { templates: bouncerTemplates } = require('../../../../../src/v5/utils/bouncerCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup } = require('../../../helper/services');
 
@@ -663,7 +664,7 @@ const testModelProcessingCompleted = () => {
 
 					const mailerData = {
 						errInfo: {
-							code: data.data.errorReason.errorCode,
+							code: bouncerTemplates[data.data.errorReason.errorCode].message,
 							message: data.data.errorReason.message,
 						},
 						teamspace: data.teamspace,
