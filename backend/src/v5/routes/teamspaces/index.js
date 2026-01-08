@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { canRemoveTeamspaceMember, memberExists, validateUpdateQuota } = require('../../middleware/dataConverter/inputs/teamspaces');
+const { canRemoveTeamspaceMember, memberExists, validateCreateTeamspaceData, validateUpdateQuota } = require('../../middleware/dataConverter/inputs/teamspaces');
+
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 
 const { Router } = require('express');
@@ -131,6 +132,18 @@ const removeQuota = async (req, res) => {
 	}
 };
 
+const createTeamspace = async (req, res) => {
+	const { name, accountId, admin } = req.body;
+
+	try {
+		await Teamspaces.initTeamspace(name, admin, accountId);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = (isInternal) => {
 	const router = Router({ mergeParams: true });
 
@@ -196,6 +209,40 @@ const establishRoutes = (isInternal) => {
 		*         description: quota has been removed
 		*/
 		router.delete('/:teamspace/quota', isMemberOfTeamspace, removeQuota);
+
+		/**
+		* @openapi
+		* /teamspaces:
+		*   post:
+		*     description: Create a new teamspace
+		*     tags: [v:internal, Teamspaces]
+		*     operationId: createTeamspace
+		*     requestBody:
+		*       required: true
+		*       content:
+		*         application/json:
+		*           schema:
+		*             type: object
+		*             properties:
+		*               name:
+		*                 type: string
+		*                 description: Name of the teamspace to be created
+		*                 example: New Teamspace
+		*               accountId:
+		*                 type: string
+		*                 description: Frontegg account ID this teamspace associates with (optional, only if the account already exists)
+		*                 example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+		*               admin:
+		*                 type: string
+		*                 description: The email of the owner of the teamspace (optional, only if the account is intended to be accessed externally)
+		*                 example: test@test.com
+		*     responses:
+		*       200:
+		*         description: Teamspace created successfully
+		*       400:
+		*         $ref: "#/components/responses/invalidArguments"
+		*/
+		router.post('/', validateCreateTeamspaceData, createTeamspace);
 	} else {
 		/**
 		* @openapi
