@@ -98,7 +98,7 @@ const establishRoutes = (modelType, isInternal) => {
             * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/tree:
             *   get:
             *     description: Returns the full tree for the container
-            *     tags: [v:internal, Models]
+            *     tags: [v:internal, ViewerAssets]
             *     operationId: getTree
             *     parameters:
             *       - name: teamspace
@@ -180,7 +180,7 @@ const establishRoutes = (modelType, isInternal) => {
          * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/meshes/{meshId}:
          *   get:
          *     description: Returns mesh geometry data
-         *     tags: [v:internal, v:external, Models]
+         *     tags: [v:internal, v:external, ViewerAssets]
          *     operationId: getMesh
          *     parameters:
          *       - name: teamspace
@@ -262,7 +262,7 @@ const establishRoutes = (modelType, isInternal) => {
          * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/textures/{textureId}:
          *   get:
          *     description: Returns texture binary data
-         *     tags: [v:internal, v:external, Models]
+         *     tags: [v:internal, v:external, ViewerAssets]
          *     operationId: getTexture
          *     parameters:
          *       - name: teamspace

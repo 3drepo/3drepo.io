@@ -28,12 +28,15 @@ const { image, src, srcV4 } = require('./path');
 const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
-const { stopPurge } = require('../../../src/v5/models/frontegg.cache');
+
+const { stopPurge } = require(`${src}/models/frontegg.cache`);
 const { tmpdir } = require('os');
-const { generateUUIDString } = require('../../../src/v5/utils/helper/uuids');
+
+const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 const path = require('path');
 const { PassThrough } = require('stream');
-const { isString } = require('../../../src/v5/utils/helper/typeCheck');
+
+const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
 

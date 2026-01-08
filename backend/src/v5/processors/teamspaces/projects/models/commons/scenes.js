@@ -188,11 +188,8 @@ Scene.getTexture = async (teamspace, project, container, textureId) => {
 Scene.getMeshData = async (teamspace, project, container, meshId) => {
 	const projection = {
 		parents: 1,
-		vertices: 1,
-		faces: 1,
 		_blobRef: 1,
 		primitive: 1,
-		rev_id: 1,
 	};
 
 	const meshNode = await getNodeByQuery(teamspace, project, container,
