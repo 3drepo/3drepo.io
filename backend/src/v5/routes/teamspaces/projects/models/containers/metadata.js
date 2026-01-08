@@ -18,8 +18,7 @@
 const { hasReadAccessToContainer, hasWriteAccessToContainer } = require('../../../../../middleware/permissions');
 const Metadata = require('../../../../../processors/teamspaces/projects/models/commons/metadata');
 const { Router } = require('express');
-const { formatMetadata } = require('../../../../../middleware/dataConverter/outputs/common/metadata');
-const { getAllMetadata: getContainerMetadata } = require('../../../../../processors/teamspaces/projects/models/commons/metadata');
+const { formatMetadata } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/metadata');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
@@ -43,7 +42,7 @@ const getAllMetadata = async (req, res, next) => {
 	const { teamspace, container, revision } = req.params;
 
 	try {
-		req.metadata = await getContainerMetadata(teamspace, container, revision);
+		req.metadata = await Metadata.getAllMetadata(teamspace, container, revision);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
