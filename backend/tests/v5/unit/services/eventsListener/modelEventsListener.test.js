@@ -18,9 +18,9 @@
 const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
-const { templates: bouncerTemplates } = require('../../../../../src/v5/utils/bouncerCodes');
+const { templates: bouncerTemplates, codeExists } = require('../../../../../src/v5/utils/bouncerCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup, generateRandomNumber } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -634,7 +634,8 @@ const testModelProcessingCompleted = () => {
 			[true, false, false, true],
 			[false, false, true],
 			[true, false, false],
-		])('', (sendMail, success, userErr, noLogArchive) => {
+			[true, false, false, undefined, generateRandomNumber(1000, 2000)],
+		])('', (sendMail, success, userErr, noLogArchive, errorCode) => {
 			test(`Should ${sendMail ? 'not ' : ''}send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
 				const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 				const data = {
@@ -645,7 +646,7 @@ const testModelProcessingCompleted = () => {
 					revId: generateUUID(),
 					user: generateRandomString(),
 					modelType: modelTypes.FEDERATION,
-					data: generateImportResult(success, generateRandomString(), userErr),
+					data: generateImportResult(success, generateRandomString(), userErr, errorCode),
 				};
 
 				const zipPath = generateRandomString();
@@ -664,7 +665,9 @@ const testModelProcessingCompleted = () => {
 
 					const mailerData = {
 						errInfo: {
-							code: bouncerTemplates[data.data.errorReason.errorCode].message,
+							code: codeExists(data.data.errorReason.errorCode)
+								? bouncerTemplates[data.data.errorReason.errorCode].message
+								: data.data.errorReason.errorCode,
 							message: data.data.errorReason.message,
 						},
 						teamspace: data.teamspace,
