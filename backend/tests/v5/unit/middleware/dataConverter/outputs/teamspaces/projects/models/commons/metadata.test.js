@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup, generateRandomNumber, generateUUID, generateRandomString } = require('../../../../../helper/services');
-const { src } = require('../../../../../helper/path');
+const { determineTestGroup, generateRandomNumber, generateUUID, generateRandomString } = require('../../../../../../../../helper/services');
+const { src } = require('../../../../../../../../helper/path');
 const { times } = require('lodash');
 
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-jest.mock('../../../../../../../src/v5/utils/responder');
+jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
-const Metadata = require(`${src}/middleware/dataConverter/outputs/common/metadata`);
+const Metadata = require(`${src}/middleware/dataConverter/outputs/teamspaces/projects/models/commons/metadata`);
 
 const testFormatMetadata = () => {
 	describe('Format metadata', () => {

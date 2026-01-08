@@ -16,9 +16,9 @@
  */
 
 const Yup = require('yup');
-const { respond } = require('../../../../utils/responder');
-const { templates } = require('../../../../utils/responseCodes');
-const { types } = require('../../../../utils/helper/yup');
+const { respond } = require('../../../../../../../utils/responder');
+const { templates } = require('../../../../../../../utils/responseCodes');
+const { types } = require('../../../../../../../utils/helper/yup');
 
 const Metadata = {};
 
