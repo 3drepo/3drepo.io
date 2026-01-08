@@ -802,24 +802,24 @@ const testDeleteModel = (isInternal = false) => {
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 				['the model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
-				[`the ${modelType} exists and is internal`, getRoute(), true],
 				[`the ${modelType} does not exist`, getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFound],
 				[`the model is not a ${modelType}`, getRoute({ modelId: wrongTypeModel._id }), false, modelNotFound],
+				[`the ${modelType} exists and the user has sufficient permissions`, getRoute(), true],
 			];
 
 			const externalCases = [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
 				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
 				['the user lacks sufficient permissions', getRoute({ key: users.viewer.apiKey }), false, templates.notAuthorized],
-				[`the ${modelType} exists and the user has sufficient permissions`, getRoute(), true],
 				...(modelType !== modelTypes.CONTAINER ? [] : [
 					[`the ${modelType} is a sub model of a federation`, getRoute({ modelId: conIsSubModel._id }), false, templates.containerIsSubModel],
 				]),
 			];
 
 			return [
-				...commonCases,
+				// NOTE: order matters here as the successful test case in commonCases will delete the model
 				...(isInternal ? [] : externalCases),
+				...commonCases,
 			];
 		};
 
@@ -1294,7 +1294,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		testAppendFavourites();
 		testDeleteFavourites();
 		testAddModel();
-		// testDeleteModel();
+		testDeleteModel();
 		testUpdateModelSettings();
 		testGetSettings();
 		testGetThumbnail();
