@@ -17,7 +17,10 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
+const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
+
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -26,52 +29,51 @@ const { templates } = require(`${src}/utils/responseCodes`);
 let server;
 let agent;
 
-const users = {
-	tsAdmin: ServiceHelper.generateUserCredentials(),
-	noProjectAccess: ServiceHelper.generateUserCredentials(),
-	viewer: ServiceHelper.generateUserCredentials(),
-	commenter: ServiceHelper.generateUserCredentials(),
-	collaborator: ServiceHelper.generateUserCredentials(),
-};
+const generateBasicData = () => {
+	const users = {
+		tsAdmin: ServiceHelper.generateUserCredentials(),
+		noProjectAccess: ServiceHelper.generateUserCredentials(),
+		viewer: ServiceHelper.generateUserCredentials(),
+		commenter: ServiceHelper.generateUserCredentials(),
+		collaborator: ServiceHelper.generateUserCredentials(),
+		nobody: ServiceHelper.generateUserCredentials(),
+		projectAdmin: ServiceHelper.generateUserCredentials(),
+	};
 
-const nobody = ServiceHelper.generateUserCredentials();
-const teamspace = ServiceHelper.generateRandomString();
+	const metadata = {
+		_id: ServiceHelper.generateUUIDString(),
+		metadata: [
+			{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString() },
+			{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString(), custom: true },
+			{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString(), custom: true },
+		],
+	};
 
-const project = {
-	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-};
-
-const models = [
-	ServiceHelper.generateRandomModel({ viewers: [users.viewer.user],
+	const perms = { viewers: [users.viewer.user],
 		commenters: [users.commenter.user],
-		collaborators: [users.collaborator.user] }),
-	ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
-	ServiceHelper.generateRandomModel(),
-];
-const container = models[0];
-const federation = models[1];
+		collaborators: [users.collaborator.user] };
 
-const metadata = {
-	_id: ServiceHelper.generateUUIDString(),
-	metadata: [
-		{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString() },
-		{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString(), custom: true },
-		{ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString(), custom: true },
-	],
+	const data = {
+		users,
+		teamspace: ServiceHelper.generateRandomString(),
+		project: ServiceHelper.generateRandomProject(),
+		con: ServiceHelper.generateRandomModel(perms),
+		fed: ServiceHelper.generateRandomModel({ ...perms, modelType: modelTypes.FEDERATION }),
+		conNoRev: ServiceHelper.generateRandomModel(perms),
+		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
+		metadata,
+	};
+
+	return data;
 };
 
-const nonCustomMetadata = metadata.metadata[0];
-const customMetadata = metadata.metadata[1];
-const metadataToDelete = metadata.metadata[2];
-
-const setupData = async () => {
+const setupData = async (users, teamspace, project, models, con, metadata) => {
 	const { tsAdmin, ...otherUsers } = users;
 
 	await ServiceHelper.db.createUser(tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
 
-	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], [teamspace]));
+	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
 		teamspace,
 		model._id,
@@ -81,25 +83,35 @@ const setupData = async () => {
 	return Promise.all([
 		...userProms,
 		...modelProms,
-		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project._id, project.name, models.map((m) => m._id)),
-		ServiceHelper.db.createMetadata(teamspace, container._id, metadata._id, metadata.metadata),
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map((m) => m._id),
+			[users.projectAdmin.user]),
+		ServiceHelper.db.createMetadata(teamspace, con._id, metadata._id, metadata.metadata),
 	]);
 };
 
 const testUpdateCustomMetadata = () => {
-	const createRoute = (projectId = project._id, containerId = container._id, metadataId = metadata._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/metadata/${metadataId}`;
-
-	const routeV4 = `/${teamspace}/${container._id}/meta/${metadata._id}.json`;
-
 	describe('Update Metadata', () => {
+		const { users, teamspace, project, con, fed, conNoRev, metadata } = generateBasicData();
+		const nonCustomMetadata = metadata.metadata[0];
+		const customMetadata = metadata.metadata[1];
+		const metadataToDelete = metadata.metadata[2];
+
+		const createRoute = (projectId = project.id, containerId = con._id, metadataId = metadata._id) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/metadata/${metadataId}`;
+
+		const routeV4 = `/${teamspace}/${con._id}/meta/${metadata._id}.json`;
+
+		beforeAll(async () => {
+			const models = [con, conNoRev, fed];
+			await setupData(users, teamspace, project, models, con, metadata);
+		});
+
 		test('should fail without a valid session', async () => {
 			const res = await agent.patch(createRoute()).expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
 
 		test('should fail if the user is not a member of the teamspace', async () => {
-			const res = await agent.patch(`${createRoute()}?key=${nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
+			const res = await agent.patch(`${createRoute()}?key=${users.nobody.apiKey}`).expect(templates.teamspaceNotFound.status);
 			expect(res.body.code).toEqual(templates.teamspaceNotFound.code);
 		});
 
@@ -110,19 +122,19 @@ const testUpdateCustomMetadata = () => {
 		});
 
 		test('should fail if the container does not exist', async () => {
-			const res = await agent.patch(`${createRoute(project._id, ServiceHelper.generateRandomString())}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.patch(`${createRoute(project.id, ServiceHelper.generateRandomString())}?key=${users.tsAdmin.apiKey}`)
 				.expect(templates.containerNotFound.status);
 			expect(res.body.status).toEqual(templates.containerNotFound.status);
 		});
 
 		test('should fail if the container is a federation', async () => {
-			const res = await agent.patch(`${createRoute(project._id, federation._id)}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.patch(`${createRoute(project.id, fed._id)}?key=${users.tsAdmin.apiKey}`)
 				.expect(templates.containerNotFound.status);
 			expect(res.body.status).toEqual(templates.containerNotFound.status);
 		});
 
 		test('should fail if the metadata does not exist', async () => {
-			const res = await agent.patch(`${createRoute(project._id, container._id, ServiceHelper.generateRandomString())}?key=${users.tsAdmin.apiKey}`)
+			const res = await agent.patch(`${createRoute(project.id, con._id, ServiceHelper.generateRandomString())}?key=${users.tsAdmin.apiKey}`)
 				.expect(templates.metadataNotFound.status);
 			expect(res.body.status).toEqual(templates.metadataNotFound.status);
 		});
@@ -130,6 +142,7 @@ const testUpdateCustomMetadata = () => {
 		test('should fail if the user does not have access to the container', async () => {
 			const res = await agent.patch(`${createRoute()}?key=${users.noProjectAccess.apiKey}`)
 				.expect(templates.notAuthorized.status);
+
 			expect(res.body.status).toEqual(templates.notAuthorized.status);
 		});
 
@@ -279,12 +292,122 @@ const testUpdateCustomMetadata = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
-	beforeAll(async () => {
-		server = await ServiceHelper.app();
-		agent = await SuperTest(server);
-		await setupData();
+const getNodesForRev = (revId) => {
+	const rootNode = ServiceHelper.generateBasicNode('transformation', revId);
+	const metaNodes = times(5, () => ServiceHelper.generateBasicNode('meta', revId, [rootNode.shared_id], { metadata: times(5, () => ({ key: ServiceHelper.generateRandomString(), value: ServiceHelper.generateRandomString() })) }));
+	const meshNode = ServiceHelper.generateBasicNode('mesh', revId, [rootNode.shared_id]);
+	const meshIdStr = UUIDToString(meshNode._id);
+
+	const meshMap = {
+		[`${UUIDToString(rootNode._id)}`]: [meshIdStr],
+		[meshIdStr]: meshIdStr,
+	};
+
+	return { nodes: [rootNode, ...metaNodes, meshNode], metaNodes, meshMap };
+};
+
+const testGetMetadata = (internalService) => {
+	describe('Get metadata', () => {
+		const { users, teamspace, project, con, fed, revisions, metadata } = generateBasicData();
+		const conNoRev = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
+
+		const rev1Nodes = getNodesForRev(revisions[0]._id);
+		const rev2Nodes = getNodesForRev(revisions[1]._id);
+
+		beforeAll(async () => {
+			const models = [con, conNoRev, fed];
+			await setupData(users, teamspace, project, models, con, metadata);
+			await ServiceHelper.db.createRevision(teamspace, project, con._id,
+				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
+			await ServiceHelper.db.createRevision(teamspace, project, con._id,
+				{ ...revisions[1], timestamp: new Date(Date.now() + 1000) }, modelTypes.CONTAINER);
+
+			await ServiceHelper.db.createScene(teamspace, project.id, con._id,
+				revisions[0], rev1Nodes.nodes, rev1Nodes.meshMap);
+			await ServiceHelper.db.createScene(teamspace, project.id, con._id,
+				revisions[1], rev2Nodes.nodes, rev2Nodes.meshMap);
+		});
+
+		const generateTestData = (modelType) => {
+			const model = con;
+			const wrongTypeModel = fed;
+
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = model._id,
+				revId,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/metadata${internalService ? `${revId ? `?revId=${revId}` : ''}` : `?key=${key}`}`;
+
+			const externalTests = [
+				['session is external', getRoute(), false, templates.pageNotFound],
+			];
+
+			const castNode = (node) => {
+				const metaObj = {};
+
+				node.metadata.forEach(({ key, value }) => {
+					metaObj[key] = value;
+				});
+
+				return {
+					_id: UUIDToString(node._id),
+					metadata: metaObj,
+					parents: node.parents.map(UUIDToString),
+				};
+			};
+
+			if (internalService) {
+				return modelType === modelTypes.CONTAINER ? [
+					['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+					['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
+					['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
+					['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.revisionNotFound],
+					['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Nodes.metaNodes.map(castNode)],
+					['a revision is not provided by the user', getRoute(), true, rev2Nodes.metaNodes.map(castNode)],
+				] : [['the model type used in the route is not container', getRoute(), false, templates.pageNotFound]];
+			}
+
+			return externalTests;
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(expectedOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
 	});
+};
+
+describe(ServiceHelper.determineTestGroup(__filename), () => {
+	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
-	testUpdateCustomMetadata();
+	describe('External Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app();
+			agent = await SuperTest(server);
+		});
+
+		testUpdateCustomMetadata();
+		testGetMetadata();
+	});
+
+	describe('Internal Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app(true);
+			agent = await SuperTest(server);
+		});
+
+		testGetMetadata(true);
+	});
 });

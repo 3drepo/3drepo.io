@@ -95,6 +95,7 @@ const testGetTree = (internalService) => {
 		beforeAll(async () => {
 			const models = [con, conNoRev, fed];
 			await setupBasicData(users, teamspace, project, models);
+
 			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
 				{ ...revisions[0], timestamp: new Date() }, modelTypes.CONTAINER);
 			await ServiceHelper.db.createRevision(teamspace, project.id, con._id,
@@ -148,6 +149,7 @@ const testGetTree = (internalService) => {
 
 		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
 		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
 	});
 };
 
