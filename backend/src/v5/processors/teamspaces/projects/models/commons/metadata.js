@@ -15,10 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { updateCustomMetadata } = require('../../../../models/metadata');
+const { getMetadataByQuery } = require('../../../../../models/metadata');
+const { updateCustomMetadata } = require('../../../../../models/metadata');
 
 const Metadata = { };
 
 Metadata.updateCustomMetadata = updateCustomMetadata;
+
+Metadata.getAllMetadata = (teamspace, container, revision) => getMetadataByQuery(teamspace, container,
+	{ rev_id: revision, type: 'meta' },
+	{ metadata: 1, parents: 1 });
 
 module.exports = Metadata;
