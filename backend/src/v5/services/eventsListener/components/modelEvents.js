@@ -17,6 +17,7 @@
 
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { addGroupUpdateLog, addImportedLogs, addTicketLog } = require('../../../models/tickets.logs');
+const { codeExists, templates } = require('../../../utils/bouncerCodes');
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
@@ -24,7 +25,6 @@ const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updatePr
 const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
-const { codeExists, templates } = require('../../../utils/bouncerCodes');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
