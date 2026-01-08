@@ -229,11 +229,8 @@ const testGetMeshData = () => {
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
 				{ _id: meshId, type: nodeTypes.MESH }, {
 					parents: 1,
-					vertices: 1,
-					faces: 1,
 					_blobRef: 1,
 					primitive: 1,
-					rev_id: 1,
 				});
 		});
 		test('Should throw an error if mesh node has no _blobRef', async () => {
@@ -246,11 +243,8 @@ const testGetMeshData = () => {
 			expect(ScenesModel.getNodeByQuery).toHaveBeenCalledWith(teamspace, project, container,
 				{ _id: meshId, type: nodeTypes.MESH }, {
 					parents: 1,
-					vertices: 1,
-					faces: 1,
 					_blobRef: 1,
 					primitive: 1,
-					rev_id: 1,
 				});
 		});
 
@@ -320,11 +314,8 @@ const testGetMeshData = () => {
 					expect(ScenesModel.getNodeByQuery).toHaveBeenNthCalledWith(1, teamspace, project, container,
 						{ _id: meshId, type: nodeTypes.MESH }, {
 							parents: 1,
-							vertices: 1,
-							faces: 1,
 							_blobRef: 1,
 							primitive: 1,
-							rev_id: 1,
 						});
 					parentMocks.forEach((_, index) => {
 						const sharedId = index === 0 ? parentId : parentMocks[index - 1].parents[0];
