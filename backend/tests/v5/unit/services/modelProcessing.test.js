@@ -296,13 +296,15 @@ const testGetLogArchive = () => {
 
 		test('Should return with zip file if path is found but no log files are found', async () => {
 			const corId = generateUUIDString();
+			const notLog = `${generateRandomString()}.Notlog`;
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
 			await fs.mkdir(taskPath);
-			await fs.writeFile(`${taskPath}/${generateRandomString()}.Notlog`,
+			await fs.writeFile(`${taskPath}/${notLog}`,
 				generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: undefined,
+				fileName: notLog,
 			});
 		});
 	});
