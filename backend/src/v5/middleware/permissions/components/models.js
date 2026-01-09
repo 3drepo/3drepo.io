@@ -41,7 +41,6 @@ const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
 	const { session, params } = req;
 	const user = getUserFromSession(session);
 	const { teamspace, project, model } = params;
-
 	try {
 		const modelInProject = await checkModelExists(teamspace, project, model, type);
 		if (!modelInProject) {

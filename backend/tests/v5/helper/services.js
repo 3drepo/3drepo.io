@@ -28,10 +28,15 @@ const { image, src, srcV4 } = require('./path');
 const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
-const { stopPurge } = require('../../../src/v5/models/frontegg.cache');
+
+const { stopPurge } = require(`${src}/models/frontegg.cache`);
 const { tmpdir } = require('os');
-const { generateUUIDString } = require('../../../src/v5/utils/helper/uuids');
+
+const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
 const path = require('path');
+const { PassThrough } = require('stream');
+
+const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
 
@@ -335,10 +340,58 @@ db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
-db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
-	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
-	db.addJSONFile(teamspace, modelId, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
+const addNodes = async (teamspace, modelId, nodes) => {
+	const arrTypes = {
+		vertices: Float32Array,
+		faces: Uint32Array,
+		normals: Float32Array,
+		data: Uint8Array,
+	};
+	const collection = `${modelId}.scene`;
 
+	const processedNodes = await Promise.all(nodes.map(async (node) => {
+		const { blobData, ...nodeData } = node;
+		if (blobData) {
+			const stream = new PassThrough();
+			const elementInfo = {};
+			let offset = 0;
+			Object.keys(blobData).forEach((key) => {
+				const data = blobData[key];
+				const Type = arrTypes[key];
+				const typed = new Type(data);
+
+				const buffer = isString(data) ? Buffer.from(data) : Buffer.from(
+					typed.buffer,
+					typed.byteOffset,
+					typed.byteLength,
+				);
+				stream.write(buffer);
+				const start = offset;
+				const size = buffer.byteLength;
+
+				elementInfo[key] = {
+					start, size,
+				};
+				offset = start + size;
+			});
+
+			stream.end();
+			const name = ServiceHelper.generateUUIDString();
+			// eslint-disable-next-line no-underscore-dangle
+			nodeData._blobRef = { elements: elementInfo, buffer: { start: 0, size: offset, name } };
+
+			await FilesManager.storeFileStream(teamspace, collection, name, stream);
+		}
+
+		return nodeData;
+	}));
+
+	await DbHandler.insertMany(teamspace, collection, processedNodes);
+};
+
+db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
+	addNodes(teamspace, modelId, nodes),
+	...(meshMap ? [FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap))] : []),
 ]);
 
 db.addJSONFile = (teamspace, modelId, name, content) => FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, name, content);
@@ -938,5 +991,30 @@ ServiceHelper.generateBasicNode = (type, rev_id, parents, additionalData = {}) =
 	parents,
 	...additionalData,
 });
+
+ServiceHelper.generateMeshNode = (rev_id, parents) => {
+	const blobData = {
+		vertices: times(9, () => ServiceHelper.generateRandomNumber(-100, 100)),
+		normals: times(9, () => ServiceHelper.generateRandomNumber(-1, 1)),
+		faces: [3, ...times(3, () => Math.floor(ServiceHelper.generateRandomNumber(0, 2)))],
+	};
+
+	// javascript is 64-bit float by default, need to convert to proper typed array and back
+	blobData.vertices = Array.from(new Float32Array(blobData.vertices));
+	blobData.normals = Array.from(new Float32Array(blobData.normals));
+
+	return ServiceHelper.generateBasicNode('mesh', rev_id, parents, { blobData });
+};
+
+ServiceHelper.generateTextureNode = (rev_id, parents) => {
+	const blobData = {
+		data: ServiceHelper.generateRandomString(256),
+	};
+	const nodeData = {
+		blobData,
+		extension: 'png',
+	};
+	return ServiceHelper.generateBasicNode('texture', rev_id, parents, nodeData);
+};
 
 module.exports = ServiceHelper;

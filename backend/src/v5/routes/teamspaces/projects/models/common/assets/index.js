@@ -15,7 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getAssetProperties: getContainerAssetProperties, getTree: getContainerTree } = require('../../../../../../processors/teamspaces/projects/models/containers');
+const {
+	getAssetProperties: getContainerAssetProperties,
+	getTree: getContainerTree,
+} = require('../../../../../../processors/teamspaces/projects/models/containers');
+const { getMeshData, getTexture: getTextureData } = require('../../../../../../processors/teamspaces/projects/models/commons/scenes');
 const {
 	hasReadAccessToContainer,
 	hasReadAccessToFederation,
@@ -54,6 +58,28 @@ const getProperties = (modelType) => async (req, res) => {
 	}
 };
 
+const getMesh = async (req, res) => {
+	const { teamspace, project, container, meshId } = req.params;
+	try {
+		const stream = await getMeshData(teamspace, project, container, meshId);
+		writeStreamRespond(req, res, templates.ok, stream, { mimeType: MimeTypes.JSON });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTexture = async (req, res) => {
+	const { teamspace, project, container, textureId } = req.params;
+	try {
+		const { readStream, size, mimeType } = await getTextureData(teamspace, project, container, textureId);
+		writeStreamRespond(req, res, templates.ok, readStream, { mimeType, fileSize: size });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = (modelType, isInternal) => {
 	const router = Router({ mergeParams: true });
 
@@ -70,7 +96,7 @@ const establishRoutes = (modelType, isInternal) => {
             * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/tree:
             *   get:
             *     description: Returns the full tree for the container
-            *     tags: [v:internal, Models]
+            *     tags: [v:internal, ViewerAssets]
             *     operationId: getTree
             *     parameters:
             *       - name: teamspace
@@ -144,6 +170,135 @@ const establishRoutes = (modelType, isInternal) => {
             */
 			router.get('/tree', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getTree);
 		}
+	}
+
+	if (modelTypes.CONTAINER === modelType) {
+		/**
+         * @openapi
+         * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/meshes/{meshId}:
+         *   get:
+         *     description: Returns mesh geometry data
+         *     tags: [v:internal, v:external, ViewerAssets]
+         *     operationId: getMesh
+         *     parameters:
+         *       - name: teamspace
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *       - name: project
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *       - name: container
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *       - name: meshId
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *     responses:
+         *       401:
+         *         $ref: "#/components/responses/notLoggedIn"
+         *       200:
+         *         description: Mesh geometry data
+         *         content:
+         *           application/json:
+         *             schema:
+         *               type: object
+         *               properties:
+         *                 matrix:
+         *                   description: 4x4 transformation matrix
+         *                   type: array
+         *                   example:
+         *                     - [1, 0, 0, 0]
+         *                     - [0, 1, 0, 0]
+         *                     - [0, 0, 1, 0]
+         *                     - [0, 0, 0, 1]
+         *                   items:
+         *                     type: array
+         *                     items:
+         *                       type: number
+         *                 vertices:
+         *                   description: Vertex positions
+         *                   type: array
+         *                   example:
+         *                     - [0.0, 0.0, 0.0]
+         *                     - [1.0, 0.0, 0.0]
+         *                     - [0.0, 1.0, 0.0]
+         *                   items:
+         *                     type: array
+         *                     items:
+         *                       type: number
+         *                 faces:
+         *                   description: Triangulated faces, or lines if primitive type is 2
+         *                   type: array
+         *                   example:
+         *                     - [0, 1, 2]
+         *                   items:
+         *                     type: array
+         *                     items:
+         *                       type: integer
+         *                 primitive:
+         *                   description: Geometry type (2 = line, 3 = mesh)
+         *                   type: integer
+         *                   enum: [2, 3]
+         *                   example: 3
+         */
+
+		router.get('/meshes/:meshId', hasReadAccessToModel[modelType], getMesh);
+
+		/**
+         * @openapi
+         * /teamspaces/{teamspace}/projects/{project}/containers/{container}/assets/textures/{textureId}:
+         *   get:
+         *     description: Returns texture binary data
+         *     tags: [v:internal, v:external, ViewerAssets]
+         *     operationId: getTexture
+         *     parameters:
+         *       - name: teamspace
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *       - name: project
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *       - name: container
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *       - name: textureId
+         *         in: path
+         *         required: true
+         *         schema:
+         *           type: string
+         *           format: uuid
+         *     responses:
+         *       401:
+         *         $ref: "#/components/responses/notLoggedIn"
+         *       200:
+         *         description: Texture binary data
+         *         content:
+         *           image/png:
+         *             schema:
+         *               type: string
+         *               format: binary
+         */
+
+		router.get('/textures/:textureId', hasReadAccessToModel[modelType], getTexture);
 	}
 
 	/**
