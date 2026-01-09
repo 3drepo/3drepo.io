@@ -128,7 +128,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 		await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
 	} else if (!errorReason.userErr) {
 		try {
-			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
+			const { zipPath, logPreview, fileName } = (await getLogArchive(UUIDToString(revId))) || {};
 			const { errorCode, message } = errorReason;
 
 			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
@@ -143,6 +143,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 					project: UUIDToString(project),
 					revId: UUIDToString(revId),
 					modelType,
+					fileName,
 					logExcerpt: logPreview,
 
 				},

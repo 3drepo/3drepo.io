@@ -184,6 +184,7 @@ ModelProcessing.getLogArchive = async (corId) => {
 		});
 
 		let logPreviewProm;
+		let fileName;
 		files.forEach((file) => {
 			if (file.endsWith('.log')) {
 				const logPath = Path.join(taskDir, file);
@@ -210,13 +211,15 @@ ModelProcessing.getLogArchive = async (corId) => {
 						}
 					});
 				}
+			} else {
+				fileName = file;
 			}
 		});
 
 		archive.finalize();
 		await archiveReady;
 
-		return { zipPath, logPreview: await logPreviewProm };
+		return { zipPath, logPreview: await logPreviewProm, fileName };
 	} catch (err) {
 		logger.logError(`Error while compressing log files for import error email: ${err.message}`);
 		return undefined;
