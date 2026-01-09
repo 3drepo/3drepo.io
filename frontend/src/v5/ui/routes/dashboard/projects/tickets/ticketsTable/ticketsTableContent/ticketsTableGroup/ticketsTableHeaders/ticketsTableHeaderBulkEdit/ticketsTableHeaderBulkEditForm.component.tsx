@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useParams } from "react-router-dom";
 import { Button, ButtonsContainer, Container, TitleContainer } from "@components/viewer/cards/cardFilters/filterForm/filterForm.styles";
 import { ActionMenuItem } from "@controls/actionMenu";
 import { compact, isEmpty } from "lodash";
@@ -31,6 +32,10 @@ import { TicketFilterType } from "@components/viewer/cards/cardFilters/cardFilte
 import { MultiSelectMenuItem } from "@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component";
 import { Value } from "@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.styles";
 import { MenuItem } from "../../../../../selectMenus/selectMenus.styles";
+import { DashboardTicketsParams } from "@/v5/ui/routes/routes.constants";
+import { getStatusPropertyValues } from "@controls/chip/statusChip/statusChip.helpers";
+import { TicketsHooksSelectors } from "@/v5/services/selectorsHooks";
+import { IChipSelectItem, ChipSelectItem } from "@controls/chip/chipSelect/chipSelect.component";
 
 // type FormType = { selectOptions?: Option[], values: { value: TicketFilterValue, displayValue?: string }[], operator: TicketFilterOperator };
 type FormType = any;
@@ -43,8 +48,20 @@ type InputFieldProps = {
 	formError?: string;
 };
 const InputField = ({module, property, type, ...inputProps}: InputFieldProps) => {
+	const { template: templateId, project: projectId } = useParams<DashboardTicketsParams>();
 	if (type === 'number') return <FormNumberField {...inputProps} />;
 	if (type === 'boolean') return <FormBooleanSelect {...inputProps} />;
+	if (type === 'status') {
+		const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(projectId, templateId);
+		const values = getStatusPropertyValues(statusConfig);
+		return (
+			<FormSelect {...inputProps}>
+				{Object.values(values).map(({ value, ...optionProps }: IChipSelectItem) => (
+					<ChipSelectItem key={value} value={value} {...optionProps} />
+				))}
+			</FormSelect>
+		);
+	}
 	if (isDateType(type)) return <FormDateTime {...inputProps} />;
 	if (isJobsAndUsersProperty(module, property, type)) return (
 		<FormJobsAndUsersSelect
@@ -63,9 +80,7 @@ const InputField = ({module, property, type, ...inputProps}: InputFieldProps) =>
 			<FormSelect {...inputProps}>
 				{selectOptions.map(({ value }) => (
 					<MenuItem key={value} value={value}>
-						<Value>
-							{value}
-						</Value>
+						<Value>{value}</Value>
 					</MenuItem>
 				))}
 			</FormSelect>
@@ -77,9 +92,7 @@ const InputField = ({module, property, type, ...inputProps}: InputFieldProps) =>
 			<FormMultiSelect {...inputProps}>
 				{selectOptions.map(({ value }) => (
 					<MultiSelectMenuItem key={value} value={value}>
-						<Value>
-							{value}
-						</Value>
+						<Value>{value}</Value>
 					</MultiSelectMenuItem>
 				))}
 			</FormMultiSelect>
@@ -106,7 +119,7 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 	const checkedTicketIds = ['ticketId1', 'ticketId2']; // TODO: get checked ticket ids from context
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
-        console.log('@@ SUBMIT VALUE:', filledForm);
+		console.log('@@ SUBMIT VALUE:', filledForm);
 		console.log('@@ FOR PROPERTY:', module, property);
 		console.log('@@ FOR TICKETS:', checkedTicketIds);
 	});
