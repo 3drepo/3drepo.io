@@ -15,91 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams } from "react-router-dom";
 import { Button, ButtonsContainer, Container, TitleContainer } from "@components/viewer/cards/cardFilters/filterForm/filterForm.styles";
 import { ActionMenuItem } from "@controls/actionMenu";
-import { compact, isEmpty } from "lodash";
+import { isEmpty } from "lodash";
 import { FormProvider, useForm } from "react-hook-form";
 import { FormattedMessage } from "react-intl";
 import { findFilterByPropertyName } from "../ticketsTableHeaderFilter.component";
 import { useTicketFiltersContext } from "@components/viewer/cards/cardFilters/ticketsFilters.context";
-import { getSelectOptions, isJobsAndUsersProperty } from "@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.component";
-import { FormBooleanSelect, FormDateTime, FormJobsAndUsersSelect, FormMultiSelect, FormNumberField, FormSelect, FormTextField } from "@controls/inputs/formInputs.component";
-import { getFilterFormTitle, isDateType} from "@components/viewer/cards/cardFilters/cardFilters.helpers";
-import { mapFormArrayToArray } from "@/v5/helpers/form.helper";
-import { getFilterFromEvent } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
-import { TicketFilterType } from "@components/viewer/cards/cardFilters/cardFilters.types";
-import { MultiSelectMenuItem } from "@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component";
-import { Value } from "@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.styles";
-import { MenuItem } from "../../../../../selectMenus/selectMenus.styles";
-import { DashboardTicketsParams } from "@/v5/ui/routes/routes.constants";
-import { getStatusPropertyValues } from "@controls/chip/statusChip/statusChip.helpers";
-import { TicketsHooksSelectors } from "@/v5/services/selectorsHooks";
-import { IChipSelectItem, ChipSelectItem } from "@controls/chip/chipSelect/chipSelect.component";
+import { getFilterFormTitle } from "@components/viewer/cards/cardFilters/cardFilters.helpers";
+import { BulkEditInputField } from "./bulkEditInputField/bulkEditInputField.component";
 
-// type FormType = { selectOptions?: Option[], values: { value: TicketFilterValue, displayValue?: string }[], operator: TicketFilterOperator };
-type FormType = any;
-
-type InputFieldProps = {
-	module: string;
-	property: string;
-	type: TicketFilterType;
-	name: string;
-	formError?: string;
-};
-const InputField = ({module, property, type, ...inputProps}: InputFieldProps) => {
-	const { template: templateId, project: projectId } = useParams<DashboardTicketsParams>();
-	if (type === 'number') return <FormNumberField {...inputProps} />;
-	if (type === 'boolean') return <FormBooleanSelect {...inputProps} />;
-	if (type === 'status') {
-		const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(projectId, templateId);
-		const values = getStatusPropertyValues(statusConfig);
-		return (
-			<FormSelect {...inputProps}>
-				{Object.values(values).map(({ value, ...optionProps }: IChipSelectItem) => (
-					<ChipSelectItem key={value} value={value} {...optionProps} />
-				))}
-			</FormSelect>
-		);
-	}
-	if (isDateType(type)) return <FormDateTime {...inputProps} />;
-	if (isJobsAndUsersProperty(module, property, type)) return (
-		<FormJobsAndUsersSelect
-			multiple
-			maxItems={19}
-			transformInputValue={(v) => compact(mapFormArrayToArray(v))}
-			transformOutputValue={(e) => getFilterFromEvent(e)}
-			excludeJobs={(type === 'owner')}
-			usersAndJobs={getSelectOptions(module, property, type).map(({ value }) => value)}
-			{...inputProps}
-		/>
-	);
-	if (type === 'oneOf') {
-		const selectOptions = getSelectOptions(module, property, type);
-		return (
-			<FormSelect {...inputProps}>
-				{selectOptions.map(({ value }) => (
-					<MenuItem key={value} value={value}>
-						<Value>{value}</Value>
-					</MenuItem>
-				))}
-			</FormSelect>
-		)
-	}
-	if (type === 'manyOf') {
-		const selectOptions = getSelectOptions(module, property, type);
-		return (
-			<FormMultiSelect {...inputProps}>
-				{selectOptions.map(({ value }) => (
-					<MultiSelectMenuItem key={value} value={value}>
-						<Value>{value}</Value>
-					</MultiSelectMenuItem>
-				))}
-			</FormMultiSelect>
-		)
-	}
-	return <FormTextField {...inputProps} />;
-}
+type FormType = { value: any; };
 
 export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
    const { filters, choosablefilters } = useTicketFiltersContext();
@@ -124,16 +50,15 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 		console.log('@@ FOR TICKETS:', checkedTicketIds);
 	});
 
-
 	return (
 		<FormProvider {...formData}>
 			<Container>
 				<TitleContainer>
 					{getFilterFormTitle([module, property])}
 				</TitleContainer>
-				<InputField
+				<BulkEditInputField
 					name="value"
-					formError={errors?.values?.value}
+					// formError={errors?.values?.value}
 					module={module}
 					property={property}
 					type={type}
