@@ -19,7 +19,6 @@ const { addModel, deleteModel, getModelList, getModelMD5Hash } = require('./comm
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getContainerById, getContainers, updateModelSettings } = require('../../../../models/modelSettings');
 const { getLatestRevision, getRevisionByIdOrTag, getRevisionCount, getRevisionFormat, getRevisions, updateRevisionStatus } = require('../../../../models/revisions');
-const { getRepoBundle, getUnityBundle } = require('./commons/assets/bundles');
 
 const BundleAssets = require('./commons/assets/bundles');
 const Comments = require('./commons/tickets.comments');
@@ -34,7 +33,6 @@ const fs = require('fs/promises');
 const { getFileAsStream } = require('../../../../services/filesManager');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getSuperMeshesInfo } = require('./commons/scenes');
-const { getTree } = require('./commons/assets/json');
 
 const { logger } = require('../../../../utils/logger');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
@@ -148,11 +146,5 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 Containers.getRevisionMD5Hash = getModelMD5Hash;
 
 Containers.getSuperMeshesInfo = getSuperMeshesInfo;
-
-Containers.getTree = getTree;
-
-Containers.getUnityBundle = getUnityBundle;
-
-Containers.getRepoBundle = getRepoBundle;
 
 module.exports = Containers;

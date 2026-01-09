@@ -420,7 +420,7 @@ const testGetRepoBundle = (internalService) => {
 				key = users.tsAdmin.apiKey,
 				modelId = con._id,
 				bundleId = bundle1Id,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/assets/bundles/repo/${bundleId}${key ? `?key=${key}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/assets/bundles/repo/${bundleId}${ServiceHelper.createQueryString({ key: internalService ? undefined : key })}`;
 
 			const externalTests = [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
@@ -481,7 +481,7 @@ const testGetUnityBundle = (internalService) => {
 				key = users.tsAdmin.apiKey,
 				modelId = con._id,
 				bundleId = bundle1Id,
-			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/assets/bundles/unity/${bundleId}${key ? `?key=${key}` : ''}`;
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/assets/bundles/unity/${bundleId}${ServiceHelper.createQueryString({ key: internalService ? undefined : key })}`;
 
 			const externalTests = [
 				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],

@@ -85,7 +85,7 @@ const getUnityBundle = async (req, res) => {
 
 	try {
 		const { readStream, size, mimeType, encoding } = await getContainerUnityBundle(teamspace, container, bundleId);
-		writeStreamRespond(req, res, templates.ok, readStream, undefined, size, { encoding, mimeType });
+		writeStreamRespond(req, res, templates.ok, readStream, { encoding, mimeType, fileSize: size });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -97,7 +97,7 @@ const getRepoBundle = async (req, res) => {
 
 	try {
 		const { readStream, size, mimeType, encoding } = await getContainerRepoBundle(teamspace, container, bundleId);
-		writeStreamRespond(req, res, templates.ok, readStream, undefined, size, { encoding, mimeType });
+		writeStreamRespond(req, res, templates.ok, readStream, { encoding, mimeType, fileSize: size });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -533,7 +533,7 @@ const establishRoutes = (modelType) => {
 	 */
 	router.get('/unity/meta', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getUnityMeta(modelType), serialiseUnityMeta(modelType));
 
-	// istanbul ignore next
+	// istanbul ignore else
 	if (modelType === modelTypes.CONTAINER) {
 		/**
 		* @openapi

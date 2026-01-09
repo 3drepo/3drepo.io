@@ -19,12 +19,12 @@ const { UUIDToString } = require('../../../../../../utils/helper/uuids');
 const { getAssetList } = require('../../../../../../models/bundles');
 const { getFileAsStream } = require('../../../../../../services/filesManager');
 
-const JsonAssets = { };
+const BundleAssets = { };
 
-const STASH_UNITY3D_COLLECTION = 'stash.unity3d.ref';
-const STASH_REPOBUNDLES_COLLECTION = 'stash.repobundles.ref';
+const STASH_UNITY3D_EXT = '.stash.unity3d';
+const STASH_REPOBUNDLES_EXT = '.stash.repobundles';
 
-JsonAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => {
+BundleAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => {
 	const containerList = subModels || [{ container: model, revision }];
 
 	const lists = await Promise.all(containerList.map((
@@ -32,8 +32,8 @@ JsonAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => 
 	return { models: lists.filter((entry) => !!entry) };
 };
 
-JsonAssets.getUnityBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}.${STASH_UNITY3D_COLLECTION}`, UUIDToString(bundleId));
+BundleAssets.getUnityBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}${STASH_UNITY3D_EXT}`, UUIDToString(bundleId));
 
-JsonAssets.getRepoBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}.${STASH_REPOBUNDLES_COLLECTION}`, UUIDToString(bundleId));
+BundleAssets.getRepoBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}${STASH_REPOBUNDLES_EXT}`, UUIDToString(bundleId));
 
-module.exports = JsonAssets;
+module.exports = BundleAssets;
