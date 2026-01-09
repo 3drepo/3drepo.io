@@ -17,7 +17,7 @@
 
 import { CardFilterActionMenu } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
-import ArrowDownIcon from '@assets/icons/outlined/arrow-outlined.svg';
+import ArrowDownIcon from '@assets/icons/filled/caret-filled.svg';
 import { useState } from 'react';
 import { BulkEditHeaderButton, HeaderCell, HeaderCellText } from '../ticketsTableHeaders.styles';
 import { getPropertyLabel } from '../../../../ticketsTable.helper';

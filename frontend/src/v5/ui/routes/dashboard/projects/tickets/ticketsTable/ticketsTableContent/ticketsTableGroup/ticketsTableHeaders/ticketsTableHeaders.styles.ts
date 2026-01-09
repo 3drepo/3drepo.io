@@ -47,6 +47,7 @@ export const HeaderCell = styled(ResizableTableHeader)`
 
 	svg {
 		width: 16px;
+		align-self: center;
 	}
 
 `;
