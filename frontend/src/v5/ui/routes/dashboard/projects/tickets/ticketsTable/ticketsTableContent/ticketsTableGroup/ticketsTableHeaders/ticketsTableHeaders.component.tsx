@@ -33,7 +33,6 @@ export const TicketsTableHeaders = () => {
 			{visibleSortedColumnsNames.map((name) => (
 				canBulkEditProperty(name) ? <TicketsTableHeaderBulkEdit key={name} name={name} /> : <TicketsTableHeader key={name} name={name} />
 			))}
-			<ColumnsVisibilitySettings />
 		</Headers>
 	);
 };

@@ -22,6 +22,7 @@ import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { NewTicketMenu } from '../../../newTicketMenu/newTicketMenu.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { SELECTION_COLUMN_WIDTH } from '../ticketsTableSelectionColumn/ticketsTableSelectionColumn.helper';
+import { SETTINGS_COLUMN_WIDTH } from '../ticketsTableSettingsColumn/ticketsTableSettingsColumn.styles';
 
 type NewTicketRowButtonProps = {
 	disabled?: boolean;
@@ -37,7 +38,7 @@ export const NewTicketRowButton = ({ onNewTicket, disabled }: NewTicketRowButton
 			TriggerButton={(
 				<NewTicketRow
 					disabled={disabled}
-					style={{ width: rowWidth + SELECTION_COLUMN_WIDTH }} // To account for the selection column
+					style={{ width: rowWidth + SELECTION_COLUMN_WIDTH + SETTINGS_COLUMN_WIDTH }} // To account for the additional columns
 				>
 					<NewTicketTextContainer>
 						<AddCircleIcon />

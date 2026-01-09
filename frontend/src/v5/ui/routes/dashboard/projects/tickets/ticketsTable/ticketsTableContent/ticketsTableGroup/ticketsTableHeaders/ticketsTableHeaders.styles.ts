@@ -24,6 +24,7 @@ export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
 	margin-bottom: 6px;
 	width: 100%;
+	height: 26px;
 `;
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;

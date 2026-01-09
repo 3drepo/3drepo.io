@@ -16,7 +16,6 @@
  */
 
 import styled, { css } from 'styled-components';
-import { SELECTION_COLUMN_WIDTH } from '../ticketsTableSelectionColumn/ticketsTableSelectionColumn.helper';
 
 export const NEW_TICKET_ROW_HEIGHT = '37px';
 export const NewTicketRow = styled.div<{ disabled?: boolean }>`
@@ -27,7 +26,7 @@ export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	display: grid;
 	position: relative;
 	/* Selection column is actually in a separate table, so offset is needed to make it all seem like one table*/
-	right: ${SELECTION_COLUMN_WIDTH}px;
+	border-top: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 	z-index: 11;
 
 	${({ disabled }) => disabled && css`

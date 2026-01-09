@@ -96,12 +96,12 @@ export const TicketsTableSelectionColumn = ({
 					ItemComponent={(ticketsChunk: ITicket[]) => (
 						<div key={ticketsChunk[0]._id}>
 							{ticketsChunk.map((ticket) => (
-									<SelectionRow
-										ticketId={ticket._id}
-										selected={selectedIdsSet.has(ticket._id)}
-										onCheck={onCheck}
-										selectedTicketId={selectedTicketId}
-									/>
+								<SelectionRow
+									ticketId={ticket._id}
+									selected={selectedIdsSet.has(ticket._id)}
+									onCheck={onCheck}
+									selectedTicketId={selectedTicketId}
+								/>
 							))}
 						</div>
 					)}

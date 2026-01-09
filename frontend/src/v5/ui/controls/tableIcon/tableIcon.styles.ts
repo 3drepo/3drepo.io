@@ -38,9 +38,9 @@ export const TableIconContainer  = styled.div<{ $active?: boolean }>`
 export const GearIconContainer = styled(TableIconContainer)`
 	/* absolutely positioned to end of headers because adding it to the actual last
 	header cell causes settings menu to close whenever this last column is changed  */
-	position: absolute;
+	/* position: absolute; */
 	/* To account for the selection column offset */
-	right: ${SELECTION_COLUMN_WIDTH}px;
+	/* right: ${SELECTION_COLUMN_WIDTH}px; */
 
 	color: ${({ theme }) => theme.palette.base.main};
 `;

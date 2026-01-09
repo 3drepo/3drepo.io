@@ -35,6 +35,7 @@ import { useWatchPropertyChange } from '../../useWatchPropertyChange';
 import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
 import { TicketsTableSelectionColumn } from './ticketsTableSelectionColumn/ticketsTableSelectionColumn.component';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { TicketsTableSettingsColumn } from './ticketsTableSettingsColumn/ticketsTableSettingsColumn.component';
 
 type TicketsTableGroupContentProps = {
 	tickets: ITicket[];
@@ -43,8 +44,6 @@ type TicketsTableGroupContentProps = {
 	refreshSorting: () => void;
 	selectedTicketId?: string;
 	onEditTicket: SetTicketValue;
-	onNewTicket: (modelId: string) => void;
-	newTicketButtonIsDisabled: boolean;
 	hideNewticketButton: boolean;
 };
 
@@ -55,9 +54,7 @@ const TicketsTableGroupContent = ({
 	refreshSorting,
 	sortingColumn,
 	selectedTicketId, 
-	onEditTicket, 
-	onNewTicket, 
-	newTicketButtonIsDisabled, 
+	onEditTicket,
 	hideNewticketButton,
 }: TicketsTableGroupContentProps) => {
 	useWatchPropertyChange(sortingColumn, refreshSorting);
@@ -82,12 +79,6 @@ const TicketsTableGroupContent = ({
 						</div>
 					)}
 				/>
-				{!hideNewticketButton &&
-				<NewTicketRowButton
-					onNewTicket={onNewTicket}
-					disabled={newTicketButtonIsDisabled}
-				/>
-				}
 			</Group>
 		</>
 	);
@@ -104,7 +95,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
-	const hideNewticketButton = template.deprecated;
+	const hideNewticketButton = true; // template.deprecated;
 
 	const assigneesSort = (items: ITicket[], order) => orderBy(
 		items.map(sortAssignees),
@@ -151,17 +142,22 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 								tickets={tickets}
 								selectedTicketId={selectedTicketId}
 								onEditTicket={onEditTicket}
-								onNewTicket={onNewTicket}
-								newTicketButtonIsDisabled={newTicketButtonIsDisabled}
 								hideNewticketButton={hideNewticketButton}
 								sortedItems={sortedItems}
 								sortingColumn={sortingColumn}
 								refreshSorting={refreshSorting}
 							/>
 						</Table>
+						<TicketsTableSettingsColumn tickets={sortedItems} selectedTicketId={selectedTicketId} />
 					</div>
 				)}
 			</SortedTableContext.Consumer>
+			{!hideNewticketButton &&
+				<NewTicketRowButton
+					onNewTicket={onNewTicket}
+					disabled={newTicketButtonIsDisabled}
+				/>
+			}
 		</SortedTableComponent>
 	);
 };
