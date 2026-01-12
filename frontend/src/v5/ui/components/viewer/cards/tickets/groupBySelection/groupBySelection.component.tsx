@@ -105,7 +105,7 @@ export const GroupBySelection = ({ value: valueProp, onChange }) => {
 				<TicketsFiltersModalItem $visible>
 					<SearchInput
 						placeholder={formatMessage({
-							id: 'viewer.card.tickets.filters.searchInputPlaceholder',
+							id: 'viewer.card.tickets.groupby.searchInputPlaceholder',
 							defaultMessage: 'Search for property...',
 						})}
 					/>
