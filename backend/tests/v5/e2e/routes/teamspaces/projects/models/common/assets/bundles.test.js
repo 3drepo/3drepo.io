@@ -28,6 +28,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const REPO_BUNDLE_COLLECTION = '.stash.repobundles';
 const UNITY_BUNDLE_COLLECTION = '.stash.unity3d';
+const UNITY3D_NAME_EXT = '.unity3d';
 
 let server;
 let agent;
@@ -471,8 +472,8 @@ const testGetUnityBundle = (internalService) => {
 		beforeAll(async () => {
 			const models = [con, fed];
 			await setupBasicData(users, teamspace, project, models);
-			await storeFile(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, bundle1Id, bundle1Content);
-			await storeFile(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, bundle2Id, bundle2Content);
+			await storeFile(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, `${bundle1Id}${UNITY3D_NAME_EXT}`, bundle1Content);
+			await storeFile(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, `${bundle2Id}${UNITY3D_NAME_EXT}`, bundle2Content);
 		});
 
 		const generateTestData = () => {

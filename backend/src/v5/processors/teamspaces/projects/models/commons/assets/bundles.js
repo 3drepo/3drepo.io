@@ -23,6 +23,7 @@ const BundleAssets = { };
 
 const STASH_UNITY3D_EXT = '.stash.unity3d';
 const STASH_REPOBUNDLES_EXT = '.stash.repobundles';
+const UNITY3D_NAME_EXT = '.unity3d';
 
 BundleAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => {
 	const containerList = subModels || [{ container: model, revision }];
@@ -32,7 +33,7 @@ BundleAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) =
 	return { models: lists.filter((entry) => !!entry) };
 };
 
-BundleAssets.getUnityBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}${STASH_UNITY3D_EXT}`, UUIDToString(bundleId));
+BundleAssets.getUnityBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}${STASH_UNITY3D_EXT}`, `${UUIDToString(bundleId)}${UNITY3D_NAME_EXT}`);
 
 BundleAssets.getRepoBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}${STASH_REPOBUNDLES_EXT}`, UUIDToString(bundleId));
 
