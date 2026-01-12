@@ -89,7 +89,7 @@ const testGetUnityBundle = () => {
 				.resolves.toEqual(mockResult);
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}${STASH_UNITY3D_EXT}`, UUIDToString(bundleId));
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}${STASH_UNITY3D_EXT}`, `${UUIDToString(bundleId)}${UNITY3D_NAME_EXT}`);
 		});
 	});
 };
@@ -108,7 +108,7 @@ const testGetRepoBundle = () => {
 				.resolves.toEqual(mockResult);
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}${STASH_REPOBUNDLES_EXT}`, `${UUIDToString(bundleId)}${UNITY3D_NAME_EXT}`);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, `${container}${STASH_REPOBUNDLES_EXT}`, UUIDToString(bundleId));
 		});
 	});
 };
