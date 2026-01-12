@@ -30,6 +30,7 @@ import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 
 
 export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
+export const NO_PROPERTY = formatMessage({ id: 'tickets.selectOption.property.notExisting', defaultMessage: 'No property' });
 
 const arrayAndStringCompare = (a, b) => {
 	const arrA = a.split(',');
@@ -181,8 +182,9 @@ const getKey = (ticket: ITicket, groupBy: string, templatesDict: Record<string, 
 	const propertyDefinition = findPropertyDefinition(template, groupBy);
 
 	if (!propertyDefinition) {
-		return  { name: UNSET, value: '' };
+		return  { name: NO_PROPERTY, value: '' };
 	}
+	
 	const propertyType = propertyDefinition.type;
 	
 	if (propertyDefinition.values === 'jobsAndUsers' || groupBy === `properties.${BaseProperties.OWNER}`) return getkeyByJobsAndUsers(ticket, groupBy);
