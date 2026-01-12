@@ -35,6 +35,7 @@ import { useEffect, useState } from 'react';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelection/groupBySelection.component';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
 export const TicketsListCard = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
@@ -52,7 +53,7 @@ export const TicketsListCard = () => {
 	};
 
 	useEffect(() => {
-		if (groupBy === 'none') return;
+		if (groupBy === NONE_OPTION) return;
 
 		const alreadyFetched = tickets.every(({ _id }) => selectPropertyFetched(getState(), _id, groupBy));
 		

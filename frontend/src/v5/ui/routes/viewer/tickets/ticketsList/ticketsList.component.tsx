@@ -23,6 +23,7 @@ import { useEffect, useRef, useState } from 'react';
 import { untilXFramesPassed, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
 import { groupTickets, TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
 
 const TicketsListsContainer = ({ children, scrollerRef }) => {
@@ -56,7 +57,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 	const scrollerRef = useRef<Element>();
 
 	useEffect(() => {
-		if (groupBy === 'none') {
+		if (groupBy === NONE_OPTION) {
 			setGroups([]);
 			return;
 		} 
@@ -67,7 +68,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 
 	let selectedIndex = -1;
 	let selectedSubIndex = -1;
-	if (groupBy === 'none') {
+	if (groupBy === NONE_OPTION) {
 		selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId) ;
 	} else {
 		selectedIndex = groups.findIndex((g) => {
@@ -82,7 +83,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 
 	useEffect(() => {
 		if (selectedIndex == -1) return;
-		if (groupBy === 'none') {
+		if (groupBy === NONE_OPTION) {
 			tableHandle.current?.gotoIndex(selectedIndex, scrollerRef.current);
 		 } else {
 			if (!tableHandle.current) {
