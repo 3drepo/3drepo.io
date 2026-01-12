@@ -336,7 +336,7 @@ export const findPropertyDefinition = (template:ITemplate,  property:string) => 
 
 	if (propertyChunks[0] === 'modules') {
 		const module = findModuleByNameOrType(template.modules, propertyChunks[1]);
-		return findByName(module.properties, propertyChunks[2]) as PropertyDefinition;
+		return findByName(module?.properties, propertyChunks[2]) as PropertyDefinition;
 	}
 
 	if (propertyChunks[0] === 'properties') {
