@@ -18,14 +18,13 @@
 import styled from 'styled-components';
 import { Group } from '../ticketsTableGroup.styles';
 import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
+import { SETTINGS_COLUMN_WIDTH } from '../ticketsTableGroup.helper';
 
-export const SETTINGS_COLUMN_WIDTH = 24;
 export const SettingsColumnContainer = styled(Group)`
 	width: ${SETTINGS_COLUMN_WIDTH}px;
 	gap: 0;
 	& div > ${/* sc-selector */Row} {
 		width: ${SETTINGS_COLUMN_WIDTH}px;
-		border-left: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 
 		&:first-child{
 			overflow: hidden;

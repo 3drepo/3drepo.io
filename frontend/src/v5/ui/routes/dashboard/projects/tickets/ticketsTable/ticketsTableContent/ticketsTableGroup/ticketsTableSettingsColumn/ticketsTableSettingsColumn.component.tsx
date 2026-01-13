@@ -1,7 +1,7 @@
+import { chunk } from "lodash";
 import { VirtualList } from "@controls/virtualList/virtualList.component";
 import { Headers, HeaderCell } from "../ticketsTableHeaders/ticketsTableHeaders.styles";
 import { ColumnsVisibilitySettings } from "../columnsVisibilitySettings/columnsVisibilitySettings.component";
-import { chunk } from "lodash";
 import { Row } from "../ticketsTableRow/ticketsTableRow.styles";
 import { CellContainer } from "../ticketsTableRow/ticketsTableCell/cell/cell.styles";
 import { TICKET_TABLE_ROW_HEIGHT } from "../../../ticketsTable.helper";

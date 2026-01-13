@@ -16,3 +16,4 @@
  */
 
 export const SELECTION_COLUMN_WIDTH = 54;
+export const SETTINGS_COLUMN_WIDTH = 24;

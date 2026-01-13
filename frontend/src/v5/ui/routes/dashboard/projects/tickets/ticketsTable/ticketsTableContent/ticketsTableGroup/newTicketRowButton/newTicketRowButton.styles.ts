@@ -19,14 +19,14 @@ import styled, { css } from 'styled-components';
 
 export const NEW_TICKET_ROW_HEIGHT = '37px';
 export const NewTicketRow = styled.div<{ disabled?: boolean }>`
+	grid-area: newTicketRow;
 	height: ${NEW_TICKET_ROW_HEIGHT};
+	width: 100%;
 	cursor: pointer;
 	color: ${({ theme }) => theme.palette.base.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	display: grid;
 	position: relative;
-	/* Selection column is actually in a separate table, so offset is needed to make it all seem like one table*/
-	border-top: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 	z-index: 11;
 
 	${({ disabled }) => disabled && css`

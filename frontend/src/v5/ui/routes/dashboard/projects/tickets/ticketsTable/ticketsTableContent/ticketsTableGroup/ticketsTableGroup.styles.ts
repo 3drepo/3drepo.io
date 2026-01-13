@@ -21,48 +21,43 @@ import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 import { Highlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
 import { DropLine } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnDropAreas/movingColumnDropAreas.styles';
 import { Headers } from './ticketsTableHeaders/ticketsTableHeaders.styles';
-import { NEW_TICKET_ROW_HEIGHT, NewTicketRow } from './newTicketRowButton/newTicketRowButton.styles';
+import { NEW_TICKET_ROW_HEIGHT } from './newTicketRowButton/newTicketRowButton.styles';
+import { SELECTION_COLUMN_WIDTH, SETTINGS_COLUMN_WIDTH } from './ticketsTableGroup.helper';
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
-
-const roundBorderTop = css`
-	border-top-left-radius: 10px;
-	border-top-right-radius: 10px;
-`;
-
-const roundBorderBottom = css`
-	border-bottom-left-radius: 10px;
-	border-bottom-right-radius: 10px;
-`;
 
 export const Group = styled.div<{ $empty: boolean, $hideNewticketButton: boolean }>`
 	display: grid;
 	gap: 1px;
 	width: fit-content;
 	background-color: transparent;
+`;
 
-	${({ $hideNewticketButton }) => $hideNewticketButton && css`
-		& > ${/* sc-selector */Row}:last-child{
-			${roundBorderBottom}
-			overflow: hidden;
+export const RoundedContainer = styled.div<{ hideNewTicketButton: boolean }>`
+	display: grid;
+	gap: 1px;
+	grid-template-columns: ${SELECTION_COLUMN_WIDTH}px auto ${SETTINGS_COLUMN_WIDTH}px;
+	grid-template-areas: "selection tableData settings"
+		"newTicketRow newTicketRow newTicketRow";
+	margin-right: 40px;
+
+	border-radius: 0 0 10px 10px;
+	overflow: hidden;
+	>*:first-child {
+		${Row}:first-of-type {
+			border-top-left-radius: 10px;
 		}
-	`}
-
-	${NewTicketRow} {
-		${roundBorderBottom};
-		${({ $empty }) => $empty && roundBorderTop}
+		${({ hideNewTicketButton }) => hideNewTicketButton && css`
+			${Row}:last-of-type {
+				border-bottom-left-radius: 10px;
+			}
+		`}
 	}
 `;
 
-export const Table = styled(ResizableTable)<{ $empty?: boolean, $canCreateTicket?: boolean }>`
+export const Table = styled(ResizableTable)<{ $canCreateTicket?: boolean }>`
 	overflow-x: unset;
 	width: fit-content;
-
-	${({ $empty }) => $empty && css`
-		${Group} {
-			width: unset;
-		}
-	`}
 
 	${Highlighter} {
 		border-radius: 10px;

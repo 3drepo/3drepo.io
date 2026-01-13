@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { HeaderCell } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { Group } from '../ticketsTableGroup.styles';
 import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
-import { SELECTION_COLUMN_WIDTH } from './ticketsTableSelectionColumn.helper';
+import { SELECTION_COLUMN_WIDTH } from '../ticketsTableGroup.helper';
 
 export const Checkbox = styled(CheckboxBase)`
 	margin: 0 auto;
@@ -42,14 +42,5 @@ export const SelectionColumnContainer = styled(Group)`
 	gap: 0;
 	& div > ${/* sc-selector */Row} {
 		width: ${SELECTION_COLUMN_WIDTH}px;
-		border-right: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
-
-		&:first-child{
-			/* border-radius: 10px 0 0; */
-			overflow: hidden;
-		}
-		/* &:last-child{
-			border-bottom: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
-		} */
 	}
 `;
