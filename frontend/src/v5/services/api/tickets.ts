@@ -186,6 +186,24 @@ export const updateFederationTicket = async (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}`, ticket)
 );
 
+export const updateContainerManyTickets = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+	tickets: Partial<ITicket>[],
+) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`, tickets)
+);
+
+export const updateFederationManyTickets = async (
+	teamspace: string,
+	projectId: string,
+	federationId: string,
+	tickets: Partial<ITicket>[],
+) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`, tickets)
+);
+
 export const fetchRiskCategories = async (
 	teamspace: string,
 ): Promise<FetchRiskCategoriesResponse> => {
