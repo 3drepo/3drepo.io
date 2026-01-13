@@ -22,12 +22,27 @@ import { NON_BULK_EDITABLE_COLUMNS } from './ticketsTableHeaders.helpers';
 import { TicketsTableHeader } from './ticketsTableHeader.component';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
 import { useContext } from 'react';
+import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
+import { useParams } from 'react-router-dom';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const TicketsTableHeaders = () => {
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const { selectedIds } = useContext(TicketsTableContext);
-	
-	const canBulkEditProperty = (name: string) => !NON_BULK_EDITABLE_COLUMNS.includes(name) && selectedIds.size > 0;
+
+	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+
+	const canBulkEditProperty = (name: string) => {
+		const propDef = findPropertyDefinition(template, name)
+		const isReadOnly = propDef?.readOnly || propDef?.readOnlyOnUI || propDef?.deprecated;
+		return !NON_BULK_EDITABLE_COLUMNS.includes(name)
+			&& selectedIds.size > 0
+			&& !propDef?.immutable // cannot bulk edit immutable properties to prevent user error
+			&& !propDef?.unique // user is unlikely to want to bulk edit unique properties and it will usually error
+			&& !isReadOnly;
+	}
 	
 	return (
 		<Headers>
