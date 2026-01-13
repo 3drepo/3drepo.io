@@ -21,6 +21,7 @@ import { selectTickets, selectTemplates, selectTicketById, selectTemplateById, s
 import { cloneDeep } from 'lodash';
 import { createTestStore } from '../test.helpers';
 import { mockRiskCategories, templateMockFactory, ticketMockFactory } from './tickets.fixture';
+import { mockServer } from '../../internals/testing/mockServer';
 
 describe('Tickets: store', () => {
 	let dispatch, getState, waitForActions;
@@ -59,8 +60,14 @@ describe('Tickets: store', () => {
 		it('should update many tickets', async () => {
 			const tickets =  [];
 
+			mockServer
+				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets`)
+				.reply(200);
+
 			for (let i=0 ; i<100; i++) {
-				tickets.push(ticketMockFactory({ modelId, properties: { priority: 'Low'} }));
+				const ticket = ticketMockFactory({modelId});
+				ticket.properties.priority = 'Low';
+				tickets.push(ticket);
 			}
 
 			dispatch(TicketsActions.fetchTicketsSuccess(modelId, tickets));
@@ -70,7 +77,7 @@ describe('Tickets: store', () => {
 			const modifications = { title:'modified ticket', properties:{priority:'Top'}}
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateManyTickets(teamspace, projectId, modelId, false, ids, modifications));
+				dispatch(TicketsActions.updateManyTickets(teamspace, projectId, modelId, ids, modifications, false));
 			}, [
 				TicketsTypes.UPSERT_TICKETS_SUCCESS,
 			]);
@@ -78,6 +85,7 @@ describe('Tickets: store', () => {
 			for (let i = 0; i < 50 ;i ++) {
 				const ticket = tickets[i];
 				const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
+				delete ticketFromStore.properties['Updated at'];
 				const modified = {...ticket,  ...modifications, properties:{...ticket.properties, priority:'Top' } };
 				// All the tickets from the first half should have been modified			
 				expect(ticketFromStore).toEqual(modified);
