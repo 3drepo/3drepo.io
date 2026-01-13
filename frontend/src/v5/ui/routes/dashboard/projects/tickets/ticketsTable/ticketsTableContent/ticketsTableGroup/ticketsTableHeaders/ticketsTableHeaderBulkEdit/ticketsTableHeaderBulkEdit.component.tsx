@@ -36,7 +36,7 @@ export const TicketsTableHeaderBulkEdit = ({ name, ...props }: TicketsTableHeade
 			onOpen={() => setActive(true)}
 			TriggerButton={(
 				<HeaderCell name={name} {...props}>
-					<BulkEditHeaderButton>
+					<BulkEditHeaderButton $active={active}>
 						<HeaderCellText>
 							{getPropertyLabel(name)}
 				 		</HeaderCellText>

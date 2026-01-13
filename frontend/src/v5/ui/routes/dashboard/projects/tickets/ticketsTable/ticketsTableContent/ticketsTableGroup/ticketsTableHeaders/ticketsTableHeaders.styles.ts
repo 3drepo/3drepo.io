@@ -16,7 +16,7 @@
  */
 
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { TextOverflow } from '@controls/textOverflow';
 import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 
@@ -52,15 +52,25 @@ export const HeaderCell = styled(ResizableTableHeader)`
 
 `;
 
-export const BulkEditHeaderButton = styled.div`
+const activeStyles = css`
+	background-color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+
+export const BulkEditHeaderButton = styled.div<{ $active?: boolean }>`
 	display: flex;
 	border: 1px solid ${({ theme }) => theme.palette.base.main};
 	border-radius: 5px;
 	padding: 4px 5px;
 	width: 100%;
-	
-	&:active, &:hover {
-		background-color: ${({ theme }) => theme.palette.base.main};
-		color: ${({ theme }) => theme.palette.primary.contrast};
+
+	cursor: pointer;
+	> * {
 	}
+	
+	&:hover {
+		${activeStyles}
+	}
+
+	${({ $active }) => $active && activeStyles}
 `;
