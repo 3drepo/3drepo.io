@@ -210,6 +210,8 @@ export type SetPropertiesFetchedAction = Action<'SET_PROPERTIES_FETCHED'> & { ti
 export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & TeamspaceProjectAndModel & { ticketIds: string[], templateCode: string, isFederation: boolean, propertiesToInclude?: string[] };
 export type WatchPropertiesUpdatesAction = Action<'WATCH_PROPERTIES_UPDATES'> & { propertiesNames: string[], watch: EventEmitter };
 export type SetTabularViewParamsAction = Action<'SET_TABULAR_VIEW_PARAMS'> & { params: DashboardTicketsParams, search: string };
+export type UpdateManyTicketsAction = Action<'UPDATE_MANY_TICKETS'> & TeamspaceProjectAndModel & { ids: string[], ticket: Partial<ITicket>, isFederation: boolean, onError?: () => void };
+
 export interface ITicketsActionCreators {
 	fetchTickets: (
 		teamspace: string,
@@ -312,6 +314,15 @@ export interface ITicketsActionCreators {
 	updateTicketGroupSuccess: (
 		group: Group,
 	) => UpdateTicketGroupSuccessAction;
+	updateManyTickets: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		isFederation: boolean, 
+		ids: string[], 
+		ticket: Partial<ITicket>, 
+		onError?: () => void 
+	) => UpdateManyTicketsAction;
 	clearGroups: () => ClearGroupsAction;
 	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
 	resetSorting: () => ResetSortingAction,
