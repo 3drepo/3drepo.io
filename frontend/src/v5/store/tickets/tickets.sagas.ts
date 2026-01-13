@@ -37,6 +37,7 @@ import {
 	FetchTicketGroupsAndGoToView,
 	WatchPropertiesUpdatesAction,
 	SetPropertiesFetchedAction,
+	UpdateManyTicketsAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
@@ -356,6 +357,31 @@ export function* watchPropertiesUpdates({ propertiesNames, watch }: WatchPropert
 	yield cancel(watchFetchTask);
 }
 
+export function* updateManyTickets({ teamspace, projectId, modelId, ids, ticket, isFederation, onError }: UpdateManyTicketsAction) {
+	try {
+		const updateModelTicket = isFederation
+			? API.Tickets.updateFederationManyTickets
+			: API.Tickets.updateContainerManyTickets;
+
+		addUpdatedAtTime(ticket);
+		const tickets = ids.map((id) => ({ ...ticket, _id: id }));
+
+		yield updateModelTicket(teamspace, projectId, modelId, tickets);
+		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
+
+		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateManyTickets.updated', defaultMessage: 'Tickets updated' })));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update the ticket for {model} ' },
+				{ model: getContainerOrFederationFormattedText(isFederation) },
+			),
+			error,
+		}));
+		onError?.();
+	}
+}
+
 export default function* ticketsSaga() {
 	yield takeEvery(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeEvery(TicketsTypes.FETCH_TICKET, fetchTicket);
@@ -370,4 +396,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
 	yield takeEvery(TicketsTypes.FETCH_TICKETS_PROPERTIES, fetchTicketsProperties);
 	yield takeEvery(TicketsTypes.WATCH_PROPERTIES_UPDATES, watchPropertiesUpdates);
+	yield takeLatest(TicketsTypes.UPDATE_MANY_TICKETS, updateManyTickets);
 }

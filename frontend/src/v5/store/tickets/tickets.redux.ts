@@ -53,6 +53,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	upsertTicketsSuccess: ['modelId', 'tickets'],
 	watchPropertiesUpdates: ['propertiesNames', 'watch'],
 	setTabularViewParams: ['params', 'search'],
+	updateManyTickets: ['teamspace', 'projectId', 'modelId', 'ids', 'ticket', 'isFederation', 'onError'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -318,9 +319,9 @@ export interface ITicketsActionCreators {
 		teamspace: string,
 		projectId: string,
 		modelId: string,
-		isFederation: boolean, 
 		ids: string[], 
 		ticket: Partial<ITicket>, 
+		isFederation: boolean, 
 		onError?: () => void 
 	) => UpdateManyTicketsAction;
 	clearGroups: () => ClearGroupsAction;
