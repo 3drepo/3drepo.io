@@ -16,17 +16,18 @@
  */
 import { Headers } from './ticketsTableHeaders.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { TicketsTableHeaderBulkEdit } from './ticketsTableHeaderBulkEdit/ticketsTableHeaderBulkEdit.component';
 import { NON_BULK_EDITABLE_COLUMNS } from './ticketsTableHeaders.helpers';
 import { TicketsTableHeader } from './ticketsTableHeader.component';
+import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { useContext } from 'react';
 
 export const TicketsTableHeaders = () => {
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
-	const selectedTicketIds = ['ticketId1', 'ticketId2'] // TODO get selectedIds from context
+	const { selectedIds } = useContext(TicketsTableContext);
 	
-	const canBulkEditProperty = (name: string) => !NON_BULK_EDITABLE_COLUMNS.includes(name) && selectedTicketIds.length > 1;
+	const canBulkEditProperty = (name: string) => !NON_BULK_EDITABLE_COLUMNS.includes(name) && selectedIds.size > 0;
 	
 	return (
 		<Headers>

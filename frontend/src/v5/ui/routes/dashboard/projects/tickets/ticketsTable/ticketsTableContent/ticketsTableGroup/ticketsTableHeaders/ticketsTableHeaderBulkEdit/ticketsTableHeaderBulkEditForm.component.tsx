@@ -24,11 +24,14 @@ import { findFilterByPropertyName } from "../ticketsTableHeaderFilter.component"
 import { useTicketFiltersContext } from "@components/viewer/cards/cardFilters/ticketsFilters.context";
 import { getFilterFormTitle } from "@components/viewer/cards/cardFilters/cardFilters.helpers";
 import { BulkEditInputField } from "./bulkEditInputField/bulkEditInputField.component";
+import { useContext } from "react";
+import { TicketsTableContext } from "../../../../ticketsTableContext/ticketsTableContext";
 
 type FormType = { value: any; };
 
 export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
-   const { filters, choosablefilters } = useTicketFiltersContext();
+	const { filters, choosablefilters } = useTicketFiltersContext();
+	const { selectedIds } = useContext(TicketsTableContext);
 	const { module, property, type } = findFilterByPropertyName([...filters, ...choosablefilters], name); 
 	const defaultValues: FormType = {
 		value: type === 'manyOf' ? [] : '',
@@ -42,12 +45,11 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 	});
 	const { formState: { isValid, dirtyFields, errors } } = formData;
 	const canSubmit = isValid && !isEmpty(dirtyFields);
-	const checkedTicketIds = ['ticketId1', 'ticketId2']; // TODO: get checked ticket ids from context
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
 		console.log('@@ SUBMIT VALUE:', filledForm);
 		console.log('@@ FOR PROPERTY:', module, property);
-		console.log('@@ FOR TICKETS:', checkedTicketIds);
+		console.log('@@ FOR TICKETS:', selectedIds);
 	});
 
 	return (
