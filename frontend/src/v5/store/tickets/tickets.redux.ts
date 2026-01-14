@@ -53,7 +53,7 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	upsertTicketsSuccess: ['modelId', 'tickets'],
 	watchPropertiesUpdates: ['propertiesNames', 'watch'],
 	setTabularViewParams: ['params', 'search'],
-	updateManyTickets: ['teamspace', 'projectId', 'modelId', 'ids', 'ticket', 'isFederation', 'onError'],
+	updateManyTickets: ['teamspace', 'projectId', 'modelId', 'template', 'ids', 'ticket', 'isFederation', 'onError'],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -211,7 +211,7 @@ export type SetPropertiesFetchedAction = Action<'SET_PROPERTIES_FETCHED'> & { ti
 export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & TeamspaceProjectAndModel & { ticketIds: string[], templateCode: string, isFederation: boolean, propertiesToInclude?: string[] };
 export type WatchPropertiesUpdatesAction = Action<'WATCH_PROPERTIES_UPDATES'> & { propertiesNames: string[], watch: EventEmitter };
 export type SetTabularViewParamsAction = Action<'SET_TABULAR_VIEW_PARAMS'> & { params: DashboardTicketsParams, search: string };
-export type UpdateManyTicketsAction = Action<'UPDATE_MANY_TICKETS'> & TeamspaceProjectAndModel & { ids: string[], ticket: Partial<ITicket>, isFederation: boolean, onError?: () => void };
+export type UpdateManyTicketsAction = Action<'UPDATE_MANY_TICKETS'> & TeamspaceProjectAndModel & { ids: string[], ticket: Partial<ITicket>, template: string, isFederation: boolean, onError?: () => void };
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -319,6 +319,7 @@ export interface ITicketsActionCreators {
 		teamspace: string,
 		projectId: string,
 		modelId: string,
+		template: string,
 		ids: string[], 
 		ticket: Partial<ITicket>, 
 		isFederation: boolean, 

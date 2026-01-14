@@ -190,18 +190,20 @@ export const updateContainerManyTickets = async (
 	teamspace: string,
 	projectId: string,
 	containerId: string,
+	template: string,
 	tickets: Partial<ITicket>[],
 ) => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`, tickets)
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets?template=${template}`, { tickets })
 );
 
 export const updateFederationManyTickets = async (
 	teamspace: string,
 	projectId: string,
 	federationId: string,
+	template: string,
 	tickets: Partial<ITicket>[],
 ) => (
-	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`, tickets)
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets?template=${template}`, { tickets })
 );
 
 export const fetchRiskCategories = async (

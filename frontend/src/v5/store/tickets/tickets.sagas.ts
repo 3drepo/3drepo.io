@@ -81,6 +81,16 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 	ExecutionStrategy.Fifo,
 );
 
+const updateManyTicketsQueue = new AsyncFunctionExecutor(
+	(isFederation, teamspace, projectId, modelId, template, tickets) => (
+		isFederation
+			? API.Tickets.updateFederationManyTickets
+			: API.Tickets.updateContainerManyTickets
+	)(teamspace, projectId, modelId, template, tickets),
+	20,
+	ExecutionStrategy.Fifo,
+);
+
 export function* fetchTicketsProperties({
 	teamspace, projectId, modelId, ticketIds,
 	templateCode, isFederation, propertiesToInclude,
@@ -357,17 +367,12 @@ export function* watchPropertiesUpdates({ propertiesNames, watch }: WatchPropert
 	yield cancel(watchFetchTask);
 }
 
-export function* updateManyTickets({ teamspace, projectId, modelId, ids, ticket, isFederation, onError }: UpdateManyTicketsAction) {
+export function* updateManyTickets({ teamspace, projectId, modelId, ids, ticket, isFederation, template, onError }: UpdateManyTicketsAction) {
 	try {
-		const updateModelTicket = isFederation
-			? API.Tickets.updateFederationManyTickets
-			: API.Tickets.updateContainerManyTickets;
-
-		addUpdatedAtTime(ticket);
 		const tickets = ids.map((id) => ({ ...ticket, _id: id }));
 
-		yield updateModelTicket(teamspace, projectId, modelId, tickets);
-		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
+		yield updateManyTicketsQueue.addCall(isFederation, teamspace, projectId, modelId, template, tickets);
+		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets.map(addUpdatedAtTime)));
 
 		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateManyTickets.updated', defaultMessage: 'Tickets updated' })));
 	} catch (error) {
