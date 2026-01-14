@@ -59,30 +59,35 @@ describe('Tickets: store', () => {
 	
 		it('should update many tickets', async () => {
 			const tickets =  [];
-
+			const ticketsCount = 100;
+			const templateId = 'templateId'
+			const ticketsHalf = Math.round(ticketsCount/2);
+	
 			mockServer
-				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets`)
+				.patch(`/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/tickets?template=${templateId}`)
 				.reply(200);
+	
 
-			for (let i=0 ; i<100; i++) {
-				const ticket = ticketMockFactory({modelId});
+
+			for (let i=0 ; i < ticketsCount; i++) {
+				const ticket = ticketMockFactory({modelId, type: templateId});
 				ticket.properties.priority = 'Low';
 				tickets.push(ticket);
 			}
 
 			dispatch(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	
-			const ids = tickets.slice(0, 50).map(t=> t._id);
+			const ids = tickets.slice(0, ticketsHalf).map(t=> t._id);
 
 			const modifications = { title:'modified ticket', properties:{priority:'Top'}}
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateManyTickets(teamspace, projectId, modelId, ids, modifications, false));
+				dispatch(TicketsActions.updateManyTickets(teamspace, projectId, modelId, templateId, ids, modifications, false));
 			}, [
 				TicketsTypes.UPSERT_TICKETS_SUCCESS,
 			]);
 			
-			for (let i = 0; i < 50 ;i ++) {
+			for (let i = 0; i < ticketsHalf ;i ++) {
 				const ticket = tickets[i];
 				const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
 				delete ticketFromStore.properties['Updated at'];
@@ -91,7 +96,7 @@ describe('Tickets: store', () => {
 				expect(ticketFromStore).toEqual(modified);
 			}
 
-			for (let i = 50; i < 100 ;i ++) {
+			for (let i = ticketsHalf; i < ticketsCount ;i ++) {
 				const ticket = tickets[i];
 				const ticketFromStore = selectTicketById(getState(), modelId, ticket._id);
 				// All the tickets from the second half should have stayed the same			

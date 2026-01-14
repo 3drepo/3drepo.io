@@ -19,7 +19,7 @@ import { all, cancel, fork, put, select, take, takeEvery, takeLatest } from 'red
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
-import { get, isString } from 'lodash';
+import { chunk, get, isString } from 'lodash';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -87,7 +87,7 @@ const updateManyTicketsQueue = new AsyncFunctionExecutor(
 			? API.Tickets.updateFederationManyTickets
 			: API.Tickets.updateContainerManyTickets
 	)(teamspace, projectId, modelId, template, tickets),
-	20,
+	2,
 	ExecutionStrategy.Fifo,
 );
 
@@ -370,8 +370,14 @@ export function* watchPropertiesUpdates({ propertiesNames, watch }: WatchPropert
 export function* updateManyTickets({ teamspace, projectId, modelId, ids, ticket, isFederation, template, onError }: UpdateManyTicketsAction) {
 	try {
 		const tickets = ids.map((id) => ({ ...ticket, _id: id }));
+		let chunkSize = 1000;
+		
+		const chunks = chunk(tickets, chunkSize);
 
-		yield updateManyTicketsQueue.addCall(isFederation, teamspace, projectId, modelId, template, tickets);
+		for (let i = 0; i < chunks.length ; i++) {
+			yield updateManyTicketsQueue.addCall(isFederation, teamspace, projectId, modelId, template, chunks[i]);
+		}
+		
 		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets.map(addUpdatedAtTime)));
 
 		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateManyTickets.updated', defaultMessage: 'Tickets updated' })));
