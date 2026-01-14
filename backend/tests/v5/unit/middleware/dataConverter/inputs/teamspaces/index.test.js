@@ -18,6 +18,9 @@
 const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../../../../helper/services');
 const { src } = require('../../../../../helper/path');
 
+jest.mock('../../../../../../../src/v5/schemas/teamspaces');
+const TeamspaceSchema = require(`${src}/schemas/teamspaces`);
+
 jest.mock('../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
 
@@ -49,7 +52,6 @@ const teamspace = generateRandomString();
 
 TeamspacesProcessor.isTeamspaceMember.mockImplementation((ts, username) => username !== nonTsMemberUser);
 TeamspacesModel.getAddOns.mockImplementation((ts) => (ts === teamspace ? {} : { usersProvisioned: true }));
-
 PermissionsUtils.isTeamspaceAdmin.mockImplementation((ts, user) => user === adminUser);
 
 const testCanRemoveTeamspaceMember = () => {
@@ -124,6 +126,42 @@ const testMemberExists = () => {
 	});
 };
 
+const testValidateCreateTeamspaceData = () => {
+	describe('Validate create teamspace data', () => {
+		test('Should call next if the data is validated', async () => {
+			const input = generateRandomObject();
+			const req = { body: input };
+			const mockCB = jest.fn(() => {});
+			const output = generateRandomObject();
+
+			TeamspaceSchema.validateNewTeamspaceSchema.mockResolvedValueOnce(output);
+
+			await Teamspaces.validateCreateTeamspaceData(req, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(req.body).toEqual(output);
+			expect(TeamspaceSchema.validateNewTeamspaceSchema).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSchema.validateNewTeamspaceSchema).toHaveBeenCalledWith(input);
+		});
+
+		test(`Should respond with ${templates.invalidArguments.code} if validation fails`, async () => {
+			const input = generateRandomObject();
+			const req = { body: input };
+			const mockCB = jest.fn(() => {});
+
+			TeamspaceSchema.validateNewTeamspaceSchema.mockRejectedValueOnce(new Error());
+
+			await Teamspaces.validateCreateTeamspaceData(req, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.invalidArguments.code);
+
+			expect(TeamspaceSchema.validateNewTeamspaceSchema).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSchema.validateNewTeamspaceSchema).toHaveBeenCalledWith(input);
+		});
+	});
+};
 const testValidateUpdateQuota = () => {
 	describe('validateQuota', () => {
 		test('next() should be called if the provided data is valid', async () => {
@@ -160,5 +198,6 @@ const testValidateUpdateQuota = () => {
 describe(determineTestGroup(__filename), () => {
 	testCanRemoveTeamspaceMember();
 	testMemberExists();
+	testValidateCreateTeamspaceData();
 	testValidateUpdateQuota();
 });

@@ -17,6 +17,7 @@
 
 const { hasReadAccessToContainer, hasReadAccessToDrawing, hasWriteAccessToContainer, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
+const { revisionExists, validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 const { serialiseRevision, serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
@@ -25,14 +26,14 @@ const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData: validateNewContainerRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { validateNewRevisionData: validateNewDrawingRev } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/drawings');
-const { validateUpdateRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getImage = async (req, res) => {
 	const { teamspace, project, drawing, revision } = req.params;
 	try {
 		const { readStream, filename, size, mimeType, encoding } = await Drawings.getImageByRevision(
 			teamspace, project, drawing, revision);
-		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType, encoding });
+		writeStreamRespond(req, res, templates.ok, readStream,
+			{ fileName: filename, fileSize: size, mimeType, encoding });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -58,7 +59,7 @@ const getRevisions = (modelType) => async (req, res, next) => {
 	}
 };
 
-const getRevisionMD5Hash = () => async (req, res, next) => {
+const getRevisionMD5Hash = async (req, res, next) => {
 	const { teamspace, container, revision } = req.params;
 
 	try {
@@ -119,14 +120,14 @@ const downloadRevisionFiles = (modelType) => async (req, res) => {
 
 	try {
 		const file = await fn[modelType](teamspace, model, revision);
-		writeStreamRespond(req, res, templates.ok, file.readStream, file.filename, file.size);
+		writeStreamRespond(req, res, templates.ok, file.readStream, { fileName: file.filename, fileSize: file.size });
 	} catch (err) {
 		/* istanbul ignore next */
 		respond(req, res, err);
 	}
 };
 
-const establishRoutes = (modelType, internal) => {
+const establishRoutes = (modelType, isInternal) => {
 	const router = Router({ mergeParams: true });
 
 	const hasReadAccessToModel = {
@@ -140,7 +141,7 @@ const establishRoutes = (modelType, internal) => {
 	};
 
 	const validateNewModelRev = {
-		[modelTypes.CONTAINER]: validateNewContainerRev(internal),
+		[modelTypes.CONTAINER]: validateNewContainerRev(isInternal),
 		[modelTypes.DRAWING]: validateNewDrawingRev,
 	};
 
@@ -220,7 +221,7 @@ const establishRoutes = (modelType, internal) => {
 	 *               - file
 	 *               - statusCode
 	 *               - revCode
-	*         application/json:
+	 *         application/json:
 	 *           schema:
 	 *             type: object
 	 *             properties:
@@ -263,17 +264,232 @@ const establishRoutes = (modelType, internal) => {
 	 *       200:
 	 *         description: creates a new revision
 	 */
-
 	router.post('', hasWriteAccessToModel[modelType], validateNewModelRev[modelType], createNewRevision(modelType));
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
+	 *   get:
+	 *     description: Get a list of revisions of a model
+	 *     tags: [v:external, Revisions]
+	 *     operationId: getModelRevisions
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: type
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, drawings]
+	 *       - name: model
+	 *         description: Model ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: showVoid
+	 *         description: Include void revisions or not
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns list of revisions
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 revisions:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       _id:
+	 *                         type: string
+	 *                         description: Revision ID
+	 *                         example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                       author:
+	 *                         type: string
+	 *                         description: name of the creator of the revision
+	 *                         example: someUser
+	 *                       timestamp:
+	 *                         type: number
+	 *                         description: Revision creation date
+	 *                         example: 1644925152000
+	 *                       format:
+	 *                         type: string
+	 *                         description: File format
+	 *                         example: .rvt
+	 *                       tag:
+	 *                         description: Unique revision name
+	 *                         type: string
+	 *                         example: rev01
+	 *                       statusCode:
+	 *                         type: string
+	 *                         description: Revision status code
+	 *                         example: S0
+	 *                       revCode:
+	 *                         type: string
+	 *                         description: Revision code
+	 *                         example: P01
+	 *                       desc:
+	 *                         type: string
+	 *                         description: Revision description
+	 *                         example: Level 2 floor plan
+	 *                       void:
+	 *                         type: boolean
+	 *                         description: Whether revision is void or not
+	 *                         example: false
+	 *             examples:
+	 *               containers:
+	 *                 summary: containers
+	 *                 value:
+	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, tag: rev01, desc: The Architecture model of the Lego House, void: true }]
+	 *               drawings:
+	 *                 summary: drawings
+	 *                 value:
+	 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, statusCode: S0, revCode: P01, desc: The Architecture model of the Lego House, void: true }]
+	 */
+	router.get('', hasReadAccessToModel[modelType], getRevisions(modelType), serialiseRevisionArray);
 
-	if (!internal) {
+	if (!isInternal) {
 		/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions/{revision}:
+	 *   patch:
+	 *     description: Update a revision. Currently only the void status can be updated.
+	 *     tags: [v:external, Revisions]
+	 *     operationId: updateModelRevisionStatus
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: type
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, drawings]
+	 *       - name: model
+	 *         description: Model ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: revision
+	 *         description: Revision ID or Revision tag
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             properties:
+	 *               void:
+	 *                 description: The new status value
+	 *                 type: boolean
+	 *             required:
+	 *               - status
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: updates the status of the revision
+	 */
+		router.patch('/:revision', hasWriteAccessToModel[modelType], validateUpdateRevisionData, updateRevisionStatus(modelType));
+
+		if (modelType === modelTypes.CONTAINER) {
+			/**
+			 * @openapi
+			 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
+			 *   get:
+			 *     description: Downloads the container files of the selected revision
+			 *     tags: [v:external, Revisions]
+			 *     operationId: downloadContainerRevisionFiles
+			 *     parameters:
+			 *       - name: teamspace
+			 *         description: Name of teamspace
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *       - name: project
+			 *         description: Project ID
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *           format: uuid
+			 *       - name: container
+			 *         description: Container ID
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *           format: uuid
+			 *       - name: revision
+			 *         description: Revision ID or Revision tag
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *     responses:
+			 *       401:
+			 *         $ref: "#/components/responses/notLoggedIn"
+			 *       404:
+			 *         $ref: "#/components/responses/teamspaceNotFound"
+			 *       200:
+			 *         description: downloads the revision files
+			 *         content:
+			 *           application/octet-stream:
+			 *             schema:
+			 *               type: string
+			 *               format: binary
+			 */
+			router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles(modelTypes.CONTAINER));
+
+			/**
 		 * @openapi
-		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions:
+		 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files/original/info:
 		 *   get:
-		 *     description: Get a list of revisions of a model
+		 *     description: Get the details of the original file uploaded to that revision of the container
 		 *     tags: [v:external, Revisions]
-		 *     operationId: getModelRevisions
+		 *     operationId: getRevisionMD5Hash
 		 *     parameters:
 		 *       - name: teamspace
 		 *         description: Name of teamspace
@@ -288,24 +504,17 @@ const establishRoutes = (modelType, internal) => {
 		 *         schema:
 		 *           type: string
 		 *           format: uuid
-		 *       - name: type
-		 *         description: Model type
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           enum: [containers, drawings]
-		 *       - name: model
-		 *         description: Model ID
+		 *       - name: container
+		 *         description: Container ID
 		 *         in: path
 		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *           format: uuid
-		 *       - name: showVoid
-		 *         description: Include void revisions or not
-		 *         in: query
-		 *         required: false
+		 *       - name: revision
+		 *         description: Revision ID or Revision tag
+		 *         in: path
+		 *         required: true
 		 *         schema:
 		 *           type: string
 		 *     responses:
@@ -314,7 +523,7 @@ const establishRoutes = (modelType, internal) => {
 		 *       404:
 		 *         $ref: "#/components/responses/teamspaceNotFound"
 		 *       200:
-		 *         description: returns list of revisions
+		 *         description: get the details of the original file uploaded to that revision of the container
 		 *         content:
 		 *           application/json:
 		 *             schema:
@@ -371,191 +580,7 @@ const establishRoutes = (modelType, internal) => {
 		 *                 value:
 		 *                   revisions: [{ _id: ef0855b6-4cc7-4be1-b2d6-c032dce7806a, author: someUser, timestamp: 1644925152000, format: .rvt, statusCode: S0, revCode: P01, desc: The Architecture model of the Lego House, void: true }]
 		 */
-		router.get('', hasReadAccessToModel[modelType], getRevisions(modelType), serialiseRevisionArray);
-
-		/**
-		 * @openapi
-		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions/{revision}:
-		 *   patch:
-		 *     description: Update a revision. Currently only the void status can be updated.
-		 *     tags: [v:external, Revisions]
-		 *     operationId: updateModelRevisionStatus
-		 *     parameters:
-		 *       - name: teamspace
-		 *         description: Name of teamspace
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *       - name: project
-		 *         description: Project ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           format: uuid
-		 *       - name: type
-		 *         description: Model type
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           enum: [containers, drawings]
-		 *       - name: model
-		 *         description: Model ID
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *           format: uuid
-		 *       - name: revision
-		 *         description: Revision ID or Revision tag
-		 *         in: path
-		 *         required: true
-		 *         schema:
-		 *           type: string
-		 *     requestBody:
-		 *       content:
-		 *         application/json:
-		 *           schema:
-		 *             properties:
-		 *               void:
-		 *                 description: The new status value
-		 *                 type: boolean
-		 *             required:
-		 *               - status
-		 *     responses:
-		 *       401:
-		 *         $ref: "#/components/responses/notLoggedIn"
-		 *       404:
-		 *         $ref: "#/components/responses/teamspaceNotFound"
-		 *       200:
-		 *         description: updates the status of the revision
-		 */
-		router.patch('/:revision', hasWriteAccessToModel[modelType], validateUpdateRevisionData, updateRevisionStatus(modelType));
-
-		if (modelType === modelTypes.CONTAINER) {
-			/**
-			 * @openapi
-			 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files:
-			 *   get:
-			 *     description: Downloads the container files of the selected revision
-			 *     tags: [v:external, Revisions]
-			 *     operationId: downloadContainerRevisionFiles
-			 *     parameters:
-			 *       - name: teamspace
-			 *         description: Name of teamspace
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *       - name: project
-			 *         description: Project ID
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *           format: uuid
-			 *       - name: container
-			 *         description: Container ID
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *           format: uuid
-			 *       - name: revision
-			 *         description: Revision ID or Revision tag
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *     responses:
-			 *       401:
-			 *         $ref: "#/components/responses/notLoggedIn"
-			 *       404:
-			 *         $ref: "#/components/responses/teamspaceNotFound"
-			 *       200:
-			 *         description: downloads the revision files
-			 *         content:
-			 *           application/octet-stream:
-			 *             schema:
-			 *               type: string
-			 *               format: binary
-			 */
-			router.get('/:revision/files', hasWriteAccessToContainer, downloadRevisionFiles(modelTypes.CONTAINER));
-
-			/**
-			 * @openapi
-			 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/revisions/{revision}/files/original/info:
-			 *   get:
-			 *     description: Get the details of the original file uploaded to that revision of the container
-			 *     tags: [v:external, Revisions]
-			 *     operationId: getRevisionMD5Hash
-			 *     parameters:
-			 *       - name: teamspace
-			 *         description: Name of teamspace
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *       - name: project
-			 *         description: Project ID
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *           format: uuid
-			 *       - name: container
-			 *         description: Container ID
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *           format: uuid
-			 *       - name: revision
-			 *         description: Revision ID or Revision tag
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *     responses:
-			 *       401:
-			 *         $ref: "#/components/responses/notLoggedIn"
-			 *       404:
-			 *         $ref: "#/components/responses/teamspaceNotFound"
-			 *       200:
-			 *         description: get the details of the original file uploaded to that revision of the container
-			 *         content:
-			 *           application/json:
-			 *             schema:
-			 *               type: object
-			 *               properties:
-			 *                 container:
-			 *                   type: string
-			 *                   description: Container ID
-			 *                   example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
-			 *                 tag:
-			 *                   type: string
-			 *                   description: Revision Tag
-			 *                   example: X01
-			 *                 timestamp:
-			 *                   type: number
-			 *                   description: Upload date
-			 *                   example: 1435068682
-			 *                 hash:
-			 *                   type: string
-			 *                   description: MD5 hash of the original file uploaded
-			 *                   example: 76dea970d89477ed03dc5289f297443c
-			 *                 filename:
-			 *                   type: string
-			 *                   description: Name of the file
-			 *                   example: test.rvt
-			 *                 size:
-			 *                   type: number
-			 *                   description: File size in bytes
-			 *                   example: 329487234
-			 */
-			router.get('/:revision/files/original/info', hasReadAccessToContainer, getRevisionMD5Hash(), serialiseRevision);
+			router.get('/:revision/files/original/info', hasReadAccessToContainer, revisionExists(modelTypes.CONTAINER), getRevisionMD5Hash, serialiseRevision);
 		}
 		if (modelType === modelTypes.DRAWING) {
 			/**
@@ -609,46 +634,46 @@ const establishRoutes = (modelType, internal) => {
 			router.get('/:revision/files/original', hasWriteAccessToDrawing, downloadRevisionFiles(modelTypes.DRAWING));
 
 			/**
-			 * @openapi
-			 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/image:
-			 *   get:
-			 *     description: Fetches the image for a drawing.
-			 *     tags: [v:external, Revisions]
-			 *     operationId: getImage
-			 *     parameters:
-			 *       - name: teamspace
-			 *         description: Name of teamspace
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *       - name: project
-			 *         description: Project ID
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *           format: uuid
-			 *       - name: drawing
-			 *         description: Drawing ID
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *           format: uuid
-			 *       - name: revision
-			 *         description: Revision ID
-			 *         in: path
-			 *         required: true
-			 *         schema:
-			 *           type: string
-			 *           format: uuid
-			 *     responses:
-			 *       401:
-			 *         $ref: "#/components/responses/notLoggedIn"
-			 *       200:
-			 *         description: returns svg/raster image of the image
-			 */
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/files/image:
+		 *   get:
+		 *     description: Fetches the image for a drawing.
+		 *     tags: [v:external, Revisions]
+		 *     operationId: getImage
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: drawing
+		 *         description: Drawing ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *       - name: revision
+		 *         description: Revision ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           format: uuid
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       200:
+		 *         description: returns svg/raster image of the image
+		 */
 			router.get('/:revision/files/image', hasReadAccessToDrawing, getImage);
 		}
 	}

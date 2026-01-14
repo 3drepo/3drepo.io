@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { updateCustomMetadata } = require('../../../../models/metadata');
+const { getAssetList } = require('../../../../../../models/bundles');
 
-const Metadata = { };
+const JsonAssets = { };
 
-Metadata.updateCustomMetadata = updateCustomMetadata;
+JsonAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => {
+	const containerList = subModels || [{ container: model, revision }];
 
-module.exports = Metadata;
+	const lists = await Promise.all(containerList.map((
+		{ container, revision: revId }) => getAssetList(teamspace, container, revId).catch(() => undefined)));
+	return { models: lists.filter((entry) => !!entry) };
+};
+
+module.exports = JsonAssets;
