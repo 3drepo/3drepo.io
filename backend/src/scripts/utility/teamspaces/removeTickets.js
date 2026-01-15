@@ -18,11 +18,9 @@
 const Path = require('path');
 const { v5Path } = require('../../../interop');
 
-const { removeAllTicketsWithTemplates } = require(`${v5Path}/models/tickets`);
+const { removeTicketsWithTemplates } = require(`${v5Path}/processors/teamspaces/projects/models/commons/tickets`);
 const { stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
 const { deprecateTemplates, deleteTemplates } = require(`${v5Path}/processors/teamspaces/settings`);
-const { deleteCommentsByTicketIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/tickets.comments`);
-const { deleteLogsByTicketIds } = require(`${v5Path}/models/tickets.logs`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const run = async (teamspace, templateIdsStr) => {
@@ -34,12 +32,7 @@ const run = async (teamspace, templateIdsStr) => {
 
 	logger.logInfo('Removing tickets and associated files...');
 
-	const ticketIds = await removeAllTicketsWithTemplates(teamspace, templateIds);
-
-	await Promise.all([
-		deleteCommentsByTicketIds(teamspace, ticketIds),
-		deleteLogsByTicketIds(teamspace, ticketIds),
-	]);
+	await removeTicketsWithTemplates(teamspace, templateIds);
 
 	// remove the templates themselves
 	await deleteTemplates(teamspace, templateIds);

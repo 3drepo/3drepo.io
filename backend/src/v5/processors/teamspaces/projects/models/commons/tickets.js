@@ -391,8 +391,6 @@ Tickets.removeTicketsWithTemplates = async (teamspace, templateIds) => {
 	]);
 
 	removeFilesWithMeta(teamspace, TICKETS_RESOURCES_COL, { ticket: { $in: ticketIds } });
-
-	return ticketIds;
 };
 
 // placeholdersToFind should be left undfined if we want to replace all placeholders
