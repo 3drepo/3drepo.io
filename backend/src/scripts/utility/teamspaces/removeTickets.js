@@ -17,49 +17,29 @@
 
 const Path = require('path');
 const { v5Path } = require('../../../interop');
-const { getTemplateById, updateTemplate, deleteTemplates } = require('../../../v5/models/tickets.templates');
-const { removeAllTicketsWithTemplates } = require('../../../v5/models/tickets');
-const { removeFilesWithMeta } = require('../../../v5/services/filesManager');
-const { stringToUUID } = require('../../../v5/utils/helper/uuids');
 
+const { removeAllTicketsWithTemplates } = require(`${v5Path}/models/tickets`);
+const { stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
+const { deprecateTemplates, deleteTemplates } = require(`${v5Path}/processors/teamspaces/settings`);
+const { deleteCommentsByTicketIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/tickets.comments`);
+const { deleteLogsByTicketIds } = require(`${v5Path}/models/tickets.logs`);
 const { logger } = require(`${v5Path}/utils/logger`);
-
-const deprecateTemplates = async (teamspace, templateIds) => {
-	logger.logInfo(`Deprecating ${templateIds.length} templates in teamspace: ${teamspace}`);
-	const templatesObj = await Promise.all(
-		templateIds.map((id) => getTemplateById(teamspace, id).catch(() => undefined)));
-	const templates = templatesObj.filter((t) => !!t);
-	if (templates.length !== templateIds.length) {
-		const missingTems = templateIds.filter((id) => !templates.some((t) => t._id === id));
-		throw new Error(`Templates with IDs ${missingTems.join(', ')} not found in teamspace ${teamspace}`);
-	}
-
-	await Promise.all(templates.map(async (template) => {
-		if (!template.deprecated) {
-			await updateTemplate(teamspace, template._id, { ...template, deprecated: true });
-		}
-	}));
-};
 
 const run = async (teamspace, templateIdsStr) => {
 	logger.logInfo(`Removing ticket templates and their associated tickets from teamspace: ${teamspace}`);
 
 	const templateIds = templateIdsStr.split(',').map((stringToUUID));
 
-	/*
-	 * FIXME: this should really be a function inside the processor, instead of the
-	 * script calling the model functions directly.
-	 * The script should not need to be aware where data is stored, and if we use additional collections
-	 * in the future, the processor should handle that abstraction.
-	*/
 	await deprecateTemplates(teamspace, templateIds);
 
-	logger.logInfo('Removing tickets...');
+	logger.logInfo('Removing tickets and associated files...');
 
 	const ticketIds = await removeAllTicketsWithTemplates(teamspace, templateIds);
 
-	logger.logInfo(`Removed ${ticketIds.length} tickets from teamspace: ${teamspace}, removing associated files...`);
-	await removeFilesWithMeta(teamspace, 'tickets.resources', { ticket: { $in: ticketIds } });
+	await Promise.all([
+		deleteCommentsByTicketIds(teamspace, ticketIds),
+		deleteLogsByTicketIds(teamspace, ticketIds),
+	]);
 
 	// remove the templates themselves
 	await deleteTemplates(teamspace, templateIds);

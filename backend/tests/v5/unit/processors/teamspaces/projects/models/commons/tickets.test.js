@@ -17,7 +17,7 @@
 
 const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber } = require('../../../../../../helper/services');
+const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, generateUUIDString } = require('../../../../../../helper/services');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
@@ -37,6 +37,9 @@ const TicketsModel = require(`${src}/models/tickets`);
 
 jest.mock('../../../../../../../../src/v5/models/tickets.templates');
 const TemplatesModel = require(`${src}/models/tickets.templates`);
+
+jest.mock('../../../../../../../../src/v5/models/tickets.logs');
+const LogsModel = require(`${src}/models/tickets.logs`);
 
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.comments');
 const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
@@ -1199,6 +1202,37 @@ const testGetOpenTicketsCount = () => {
 	});
 };
 
+const testRemoveTicketsWithTemplates = () => {
+	describe('Remove tickets with templates', () => {
+		test('should remove all tickets with templates, the ticket comments, logs and any resources', async () => {
+			const teamspace = generateRandomString();
+			const templateIds = times(5, generateUUID);
+			const ticketIds = times(10, generateUUIDString);
+
+			TicketsModel.removeAllTicketsWithTemplates.mockResolvedValueOnce(ticketIds);
+			CommentsProcessor.deleteCommentsByTicketIds.mockResolvedValueOnce(undefined);
+			LogsModel.deleteLogsByTicketIds.mockResolvedValueOnce(undefined);
+			FilesManager.removeFilesWithMeta.mockResolvedValueOnce(undefined);
+
+			await expect(Tickets.removeTicketsWithTemplates(teamspace, templateIds))
+				.resolves.toBeUndefined();
+
+			expect(TicketsModel.removeAllTicketsWithTemplates).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.removeAllTicketsWithTemplates).toHaveBeenCalledWith(teamspace, templateIds);
+
+			expect(CommentsProcessor.deleteCommentsByTicketIds).toHaveBeenCalledTimes(1);
+			expect(CommentsProcessor.deleteCommentsByTicketIds).toHaveBeenCalledWith(teamspace, ticketIds);
+
+			expect(LogsModel.deleteLogsByTicketIds).toHaveBeenCalledTimes(1);
+			expect(LogsModel.deleteLogsByTicketIds).toHaveBeenCalledWith(teamspace, ticketIds);
+
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace,
+				TICKETS_RESOURCES_COL, { ticket: { $in: ticketIds } });
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testAddTicket();
 	testImportTickets();
@@ -1208,4 +1242,5 @@ describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testUpdateManyTickets();
 	testGetTicketList();
 	testGetOpenTicketsCount();
+	testRemoveTicketsWithTemplates();
 });

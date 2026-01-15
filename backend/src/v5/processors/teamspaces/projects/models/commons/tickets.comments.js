@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addComment, deleteComment, getCommentById, getCommentsByTicket, importComments, updateComment } = require('../../../../../models/tickets.comments');
+const { addComment, deleteComment, deleteCommentsByTicketIds, getCommentById, getCommentsByTicket, importComments, updateComment } = require('../../../../../models/tickets.comments');
 const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
@@ -133,5 +133,7 @@ Comments.getCommentsByTicket = (teamspace, project, model, ticket, { updatedSinc
 };
 
 Comments.getCommentById = getCommentById;
+
+Comments.deleteCommentsByTicketIds = deleteCommentsByTicketIds;
 
 module.exports = Comments;

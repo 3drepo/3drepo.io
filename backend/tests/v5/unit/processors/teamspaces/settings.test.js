@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../../helper/path');
 
 const { generateRandomString } = require('../../../helper/services');
@@ -88,9 +89,37 @@ const testGetRiskCategories = () => {
 	});
 };
 
+const testDeprecateTemplates = () => {
+	describe('Deprecate templates', () => {
+		test('should call updateTemplate for non-deprecated templates', async () => {
+			const teamspace = generateRandomString();
+			const templateIds = times(5, generateUUID);
+			const templates = templateIds.map((id, index) => (
+				{ _id: id, deprecated: index % 2 === 1, name: `Template ${index + 1}` }
+			));
+
+			TemplateModel.getTemplatesByQuery.mockResolvedValueOnce(templates);
+			TemplateModel.updateTemplate.mockResolvedValueOnce(undefined);
+
+			await Settings.deprecateTemplates(teamspace, templateIds);
+
+			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
+			expect(TemplateModel.getTemplatesByQuery).toHaveBeenCalledWith(teamspace, { _id: { $in: templateIds } });
+
+			const expectedCalls = templates.filter(({ deprecated }) => !deprecated);
+			expect(TemplateModel.updateTemplate).toHaveBeenCalledTimes(expectedCalls.length);
+			expectedCalls.forEach(
+				(call) => expect(TemplateModel.updateTemplate)
+					.toHaveBeenCalledWith(teamspace, call._id, { ...call, deprecated: true }),
+			);
+		});
+	});
+};
+
 describe('processors/teamspaces/settings', () => {
 	testAddTemplate();
 	testUpdateTemplate();
 	testGetTemplateList();
 	testGetRiskCategories();
+	testDeprecateTemplates();
 });
