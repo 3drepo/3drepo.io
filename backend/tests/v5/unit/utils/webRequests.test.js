@@ -19,9 +19,10 @@ jest.mock('axios');
 const axios = require('axios');
 const { src } = require('../../helper/path');
 const Crypto = require('crypto');
+const { determineTestGroup } = require('../../helper/services');
 
 // We can't use the one from service helper because mocking axios upsets
-// frontegg, which is a dependence of something that is being imported in that file...
+// frontegg, which is a dependency of something that is being imported in that file...
 const generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
 
 const WebRequests = require(`${src}/utils/webRequests`);
@@ -49,6 +50,32 @@ const testGetRequest = () => {
 			expect(res).toEqual(getResponse);
 			expect(axios.get).toHaveBeenCalledTimes(1);
 			expect(axios.get).toHaveBeenCalledWith(uri, { headers });
+		});
+	});
+};
+
+const testGetArrayBufferRequest = () => {
+	describe('Get array buffer request', () => {
+		test('Should make a get array buffer request', async () => {
+			const getResponse = generateRandomString();
+			axios.get.mockResolvedValueOnce(getResponse);
+
+			const uri = generateRandomString();
+			const res = await WebRequests.getArrayBuffer(uri);
+			expect(res).toEqual(getResponse);
+			expect(axios.get).toHaveBeenCalledTimes(1);
+			expect(axios.get).toHaveBeenCalledWith(uri, { responseType: 'arraybuffer' });
+		});
+		test('Should make a get array buffer request with headers', async () => {
+			const getResponse = generateRandomString();
+			axios.get.mockResolvedValueOnce(getResponse);
+
+			const uri = generateRandomString();
+			const headers = { Authorisation: `Bearer ${generateRandomString()}` };
+			const res = await WebRequests.getArrayBuffer(uri, headers);
+			expect(res).toEqual(getResponse);
+			expect(axios.get).toHaveBeenCalledTimes(1);
+			expect(axios.get).toHaveBeenCalledWith(uri, { headers, responseType: 'arraybuffer' });
 		});
 	});
 };
@@ -120,8 +147,9 @@ const testPutRequest = () => {
 	});
 };
 
-describe('utils/webRequests', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetRequest();
+	testGetArrayBufferRequest();
 	testPostRequest();
 	testPutRequest();
 	testDeleteRequest();

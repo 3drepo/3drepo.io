@@ -16,17 +16,20 @@
  */
 
 import { createSelector } from 'reselect';
-import { orderBy } from 'lodash';
+import { orderBy, get, isEmpty } from 'lodash';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { ITicketsState } from './tickets.redux';
 import { ticketWithGroups } from './ticketsGroups.helpers';
 import { ITemplate, ITicket } from './tickets.types';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
-import { selectCurrentProjectTemplateById } from '../projects/projects.selectors';
+import { selectCurrentProject, selectCurrentProjectTemplateById } from '../projects/projects.selectors';
 import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { TicketSortingProperty } from './card/ticketsCard.types';
+import { TICKETS_ROUTE_WITH_TICKET, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { generatePath } from 'react-router';
+import { DEFAULT_COLUMNS, INITIAL_COLUMNS_NO_OVERRIDES } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -47,9 +50,9 @@ const selectTicketsDomain = (state): ITicketsState => state.tickets || {};
 
 export const selectTicketsHaveBeenFetched = createSelector(
 	selectTicketsDomain,
-	(state): (modelId) => boolean => (modelId) => modelId in state.ticketsByModelId,
+	(state, modelId) => modelId,
+	(state, modelId) => modelId in state.ticketsByModelId,
 );
-
 
 const removeDeprecated = (template: ITemplate): ITemplate => {
 	const removeDeprecatedItems = (properties: any[])  => properties.filter((prop) => !prop.deprecated);
@@ -66,8 +69,6 @@ const removeDeprecated = (template: ITemplate): ITemplate => {
 			)),
 	};
 };
-
-
 
 export const selectTemplates = createSelector(
 	selectTicketsDomain,
@@ -95,7 +96,10 @@ export const selectTicketsGroups = createSelector(
 export const selectTicketsRaw = createSelector(
 	selectTicketsDomain,
 	(state, modelId) => modelId,
-	(state, modelId) => state.ticketsByModelId[modelId] || [],
+	(state, modelId) => {
+		const ticketIds = state.ticketsByModelId[modelId] || [];
+		return ticketIds.map((ticketId) => state.ticketsData[ticketId]);
+	},
 );
 
 export const selectTicketsWithGroups = createSelector(
@@ -115,6 +119,11 @@ export const selectSorting = createSelector(
 	(state) => state.sorting,
 );
 
+export const selectTicketsData = createSelector(
+	selectTicketsDomain,
+	(state) => state.ticketsData,
+);
+
 export const selectTickets = createSelector(
 	selectTicketsWithGroups,
 	selectSorting,
@@ -131,9 +140,9 @@ export const selectTickets = createSelector(
 );
 
 export const selectTicketByIdRaw = createSelector(
-	selectTicketsRaw,
+	selectTicketsDomain,
 	(_, modelId, ticketId) => ticketId,
-	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
+	(state, ticketId) => state.ticketsData[ticketId] || null,
 ) as (state:object, containerOrFederation:string, ticketId: string) => ITicket;
 
 export const selectTicketById = createSelector(
@@ -142,18 +151,37 @@ export const selectTicketById = createSelector(
 	(tickets, ticketId) => tickets.find(({ _id }) => _id === ticketId) || null,
 ) as (state:object, containerOrFederation:string, ticketId: string) => ITicket;
 
+export const selectTicketsById = createSelector(
+	selectTicketsData,
+	(_, ticketIds: string[]) => ticketIds,
+	(ticketsData, ticketIds) => {
+		return ticketIds.reduce((acc, ticketId) => {
+			const ticket = ticketsData[ticketId];
+			if (ticket) {
+				acc.push(ticket);
+			}
+			return acc;
+		}, []);
+	},
+) as (state:object, ticketIds: string[]) => ITicket[];
+
 export const selectRiskCategories = createSelector(
 	selectTicketsDomain,
 	(state) => state.riskCategories,
 );
 
+export const selectTicketsByModelIdDictionary = createSelector(
+	selectTicketsDomain,
+	(state) => state.ticketsByModelId,
+);
+
 export const selectTicketsByContainersAndFederations = createSelector(
-	(state) => state,
-	(state, modelsIds: string[]) => modelsIds,
-	(storeState, modelsIds) => {
+	selectTicketsByModelIdDictionary,
+	(_, modelsIds: string[]) => modelsIds,
+	(_, modelsIds) => {
 		const tickets = modelsIds.flatMap((modelId) => {
-			const modelTickets = selectTickets(storeState, modelId);
-			const modelName = (selectFederationById(storeState, modelId) || selectContainerById(storeState, modelId))?.name;
+			const modelTickets = selectTickets(getState(), modelId);
+			const modelName = (selectFederationById(getState(), modelId) || selectContainerById(getState(), modelId))?.name;
 			return modelTickets.map((t) => ({ ...t, modelName })); // modelName is added for column sorting
 		});
 		return sortTicketsByCreationDate(tickets);
@@ -172,13 +200,67 @@ export const selectStatusConfigByTemplateId = createSelector(
 	(ticketTemplate, projectTemplate) => ticketTemplate?.config?.status || projectTemplate?.config?.status || DEFAULT_STATUS_CONFIG,
 );
 
-export const selectFetchingProperties = createSelector(
+export const selectTicketPropertyByName = createSelector(
+	selectTicketsData,
+	(_, ticketId: string, propertyName: string) => ({ ticketId, propertyName }),
+	(ticketsData, { ticketId, propertyName }) => {
+		const ticket = ticketsData[ticketId];
+		if (!ticket) return undefined;
+		
+		// Handle nested property access (e.g., "properties.status", "title", etc.)
+		return get(ticket, propertyName);
+	},
+) as (state: any, ticketId: string, propertyName: string) => any;
+
+
+// Selectors for loading properties tracking
+export const selectPropertiesFetched = createSelector(
 	selectTicketsDomain,
-	(state) => state.fetchingProperties || {},
+	(state) => state.fetchedProperties || {},
 );
 
-export const selectFetchingPropertiesByTicketId = createSelector(
-	selectFetchingProperties,
-	(state, ticketId) => ticketId,
-	(fetchingProperties, ticketId) => fetchingProperties[ticketId] || new Set([]),
+const initialPropertiesFetched = new Set(INITIAL_COLUMNS_NO_OVERRIDES);
+
+export const selectInitialTabularColumns = createSelector(
+	selectCurrentProjectTemplateById,
+	(ticketTemplate) => {
+		const columnsFromConfig = get(ticketTemplate, 'config.tabular.columns');
+		if (!columnsFromConfig) return initialPropertiesFetched;
+		return new Set([...DEFAULT_COLUMNS, ...columnsFromConfig.map(({ property, module }) => module ? `modules.${module}.${property}` : `properties.${property}`)]);
+	},
+);
+
+// The format of the propertiesToInclude is the property name without property prefix, e.g. 'Assignees', 'Due Date', etc.
+// And with modules properties its the module name and property name separated by a dot, e.g. 'ModuleName.PropertyName' like
+// 'safetibase.Level Of Risk'.
+export const selectPropertyFetched = createSelector(
+	selectPropertiesFetched,
+	(state, ticketId: string, property: string) => ({ ticketId, property }),
+	(propertiesFetched, { ticketId, property }): boolean =>  
+		initialPropertiesFetched.has(property) || 
+	(propertiesFetched[ticketId] || {}) [property] || false,
+) as (state: any, ticketId: string, property: string) => boolean;
+
+export const selectPropertyFetchedForTickets = createSelector(
+	selectPropertiesFetched,
+	(state, ticketIds: string[], property: string) => ({ ticketIds, property }),
+	(propertiesFetched, { ticketIds, property }): boolean =>
+		initialPropertiesFetched.has(property) || 
+		ticketIds.every((ticketId) => (propertiesFetched[ticketId] || {}) [property] || false),
+) as (state: any, ticketIds: string[], property: string) => boolean;
+
+
+export const selectTicketsTableLink = createSelector(
+	selectTicketsDomain,
+	selectCurrentProject,
+	(state, project) => {
+		const { params, search } = state.tabularViewParams;
+		if (isEmpty(params) || params.project !== project) {
+			return 't/tickets';
+		}
+
+		const ticketsPath = params.ticketId ? TICKETS_ROUTE_WITH_TICKET : TICKETS_ROUTE;
+		const pathname = generatePath(ticketsPath, params as any);
+		return ({ pathname, search });
+	},
 );

@@ -16,7 +16,7 @@
  */
 
 import { DEFAULT_RISKS_FILTERS } from '@/v4/constants/risks';
-import { cloneDeep, isEmpty, keyBy } from 'lodash';
+import { cloneDeep, get, isEmpty, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: RisksTypes, Creators: RisksActions } = createActions({
@@ -291,7 +291,11 @@ const removeResourceSuccess =  (state = INITIAL_STATE, { resource, riskId }) => 
 };
 
 const attachResourcesSuccess = (state = INITIAL_STATE, { resources, riskId }) => {
-	resources = resources.concat(state.risksMap[riskId].resources || []);
+	const risk = get(state.risksMap, riskId);
+	if (!risk) {
+		return state;
+	}
+	resources = resources.concat(risk.resources || []);
 	const risksMap = updateRiskProps(state.risksMap, riskId, { resources });
 	return { ...state, risksMap};
 };

@@ -62,4 +62,14 @@ TicketLogs.addTicketLog = (teamspace, project, model, ticket, ticketLog) => DB.i
 TicketLogs.deleteLogsByTicketIds = (teamspace, ticketIds) => DB.deleteMany(teamspace,
 	TICKET_LOGS_COL, { ticket: { $in: ticketIds } });
 
+TicketLogs.getTicketLogs = (
+	teamspace,
+	project,
+	model,
+	ticket,
+	projection = { _id: 0, author: 1, changes: 1, timestamp: 1, imported: 1 },
+	sort = { timestamp: 1 },
+) => DB.find(
+	teamspace, TICKET_LOGS_COL, { teamspace, project, model, ticket }, projection, sort);
+
 module.exports = TicketLogs;

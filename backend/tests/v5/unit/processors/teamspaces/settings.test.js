@@ -16,6 +16,7 @@
  */
 
 const { times } = require('lodash');
+const { events } = require('../../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { src } = require('../../../helper/path');
 
 const { generateRandomString } = require('../../../helper/services');
@@ -25,6 +26,9 @@ const TemplateModel = require(`${src}/models/tickets.templates`);
 
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const SettingsModel = require(`${src}/models/teamspaceSettings`);
+
+jest.mock('../../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 
 const Settings = require(`${src}/processors/teamspaces/settings`);
 const { generateUUID } = require(`${src}/utils/helper/uuids`);
@@ -50,12 +54,14 @@ const testUpdateTemplate = () => {
 			const teamspace = generateRandomString();
 			const data = { [generateRandomString()]: generateRandomString() };
 			const id = generateUUID();
-			const expectedOutput = generateRandomString();
-			TemplateModel.updateTemplate.mockResolvedValueOnce(expectedOutput);
-			await expect(Settings.updateTicketTemplate(teamspace, id, data)).resolves.toEqual(expectedOutput);
+			await Settings.updateTicketTemplate(teamspace, id, data);
 
 			expect(TemplateModel.updateTemplate).toHaveBeenCalledTimes(1);
 			expect(TemplateModel.updateTemplate).toHaveBeenCalledWith(teamspace, id, data);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKET_TEMPLATE_UPDATED,
+				{ teamspace, template: id, data });
 		});
 	});
 };

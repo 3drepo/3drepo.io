@@ -110,7 +110,7 @@ const getUserDetails = async (req, res, next) => {
 
 const getToken = (urlUsed) => async (req, res, next) => {
 	try {
-		const tokenInfo = await generateToken(urlUsed, req.state.code, req.session.pkceCodes.challenge);
+		const tokenInfo = await generateToken(urlUsed, req.state.code, req.session.pkceCodes.verifier);
 		req.auth = { tokenInfo };
 		await next();
 	} catch (err) {

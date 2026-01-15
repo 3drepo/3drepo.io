@@ -45,21 +45,21 @@ const number = Yup.string()
 		}),
 		(value, testContext) => {
 			if (!testContext.options?.context) return true;
-			return !testContext.options.context.alreadyExistingNumbers?.map((n) => n.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
+			const { existingNumbers } = testContext.options?.context as { existingNumbers: Set<string> };
+			return !existingNumbers?.has(value?.toLowerCase().trim());
 		},
 	);
 
+export const CALIBRATION_INVALID_RANGE_ERROR = formatMessage({
+	id: 'validation.drawing.calibration.error.invalidRange',
+	defaultMessage: 'Bottom extent should be smaller than top',
+});
 const calibration = Yup.object().shape({
 	units: Yup.string().required(formatMessage({
 		id: 'validation.drawing.calibration.units.error.required',
 		defaultMessage: 'Units is a required field',
 	})),
-	verticalRange: numberRange(
-		formatMessage({
-			id: 'validation.drawing.calibration.error.invalidRange',
-			defaultMessage: 'Bottom extent should be smaller than top',
-		}),
-	),
+	verticalRange: numberRange(CALIBRATION_INVALID_RANGE_ERROR),
 });
 
 export const DrawingFormSchema =  Yup.object().shape({

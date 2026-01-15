@@ -24,19 +24,13 @@ const { determineTestGroup, generateRandomString, generateRandomObject } = requi
 const Teamspace = require(`${src}/models/teamspaceSettings`);
 const { USERS_DB_NAME } = require(`${src}/models/users.constants`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
-const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const { TEAM_MEMBER } = require(`${src}/models/roles.constants`);
 const { ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 
-const USER_COL = 'system.users';
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
-
-jest.mock('../../../../src/v5/services/sso/frontegg');
-const FronteggService = require(`${src}/services/sso/frontegg`);
 
 const generateSecurityConfig = (sso, whiteList) => {
 	if (!sso && !whiteList) return {};
@@ -46,78 +40,6 @@ const generateSecurityConfig = (sso, whiteList) => {
 			[SECURITY_SETTINGS.DOMAIN_WHITELIST]: whiteList,
 		}),
 	};
-};
-
-const testHasAccessToTeamspace = () => {
-	describe('Has access to teamspace', () => {
-		const teamspace = generateRandomString();
-		const user = generateRandomString();
-		const domain = `${generateRandomString()}.com`;
-
-		test('should return false if the user do not have access to teamspace', async () => {
-			const findFn = jest.spyOn(db, 'findOne');
-			findFn.mockResolvedValueOnce();
-
-			const res = await Teamspace.hasAccessToTeamspace(teamspace, user);
-
-			expect(res).toBeFalsy();
-			expect(findFn).toHaveBeenCalledTimes(1);
-		});
-
-		const genUserData = ({ inDomain, sso } = {}) => ({
-			_id: user,
-			customData: {
-				email: `${generateRandomString()}@${inDomain ? domain : `${generateRandomString()}.com`}`,
-				sso: sso ? { something: 1 } : undefined,
-			},
-		});
-
-		describe.each([
-			['user has access to a teamspace with no restriction', genUserData(), {}, true, undefined, true],
-			['user has access to the teamspace and is in whitelist domain', genUserData({ inDomain: true }), generateSecurityConfig(false, [domain]), false, membershipStatus.ACTIVE, true],
-			['user has access to the teamspace but is not in whitelist domain but status check is bypassed', genUserData({ }), generateSecurityConfig(false, [domain]), true, undefined, true],
-			['user has access to the teamspace but is not in whitelist domain', genUserData({ }), generateSecurityConfig(false, [domain]), false, undefined, false, templates.domainRestricted],
-			['user has access to a teamspace but membershipStatus is inactive', genUserData(), {}, false, membershipStatus.INACTIVE, false, templates.membershipInactive],
-			['user has access to a teamspace but membershipStatus is pending invite', genUserData(), {}, false, membershipStatus.PENDING_INVITE, false, templates.pendingInviteAcceptance],
-			['user has access to a teamspace but membershipStatus is empty', genUserData(), {}, false, membershipStatus.NOT_MEMBER, false, false],
-		])('', (desc, userData, teamspaceSettings, bypassStatus, memStatus, success, retVal) => {
-			test(`Should ${success ? 'return true' : `throw with ${retVal?.code}`} if ${desc}`, async () => {
-				const findFn = jest.spyOn(db, 'findOne');
-				// first call fetches the user data
-				findFn.mockResolvedValueOnce(userData);
-
-				if (!bypassStatus) {
-					// second call fetches teamspace settings
-					findFn.mockResolvedValueOnce(teamspaceSettings);
-				}
-
-				const refId = generateRandomString();
-
-				if (memStatus !== undefined) {
-					// third call fetches refId
-					findFn.mockResolvedValueOnce({ customData: { refId } });
-					FronteggService.getUserStatusInAccount.mockResolvedValueOnce(memStatus);
-				}
-
-				const test = expect(Teamspace.hasAccessToTeamspace(teamspace, user, bypassStatus));
-
-				if (success) {
-					await test.resolves.toBeTruthy();
-				} else if (retVal === false) {
-					await test.resolves.toBeFalsy();
-				} else {
-					await test.rejects.toEqual(retVal);
-				}
-
-				let expectedCalls = 1;
-
-				if (!bypassStatus) ++expectedCalls;
-				if (memStatus !== undefined) ++expectedCalls;
-
-				expect(findFn).toHaveBeenCalledTimes(expectedCalls);
-			});
-		});
-	});
 };
 
 const testTeamspaceAdmins = () => {
@@ -520,40 +442,6 @@ const testCreateTeamspaceSettings = () => {
 	});
 };
 
-const testGetAllUsersInTeamspace = () => {
-	describe('Get all users in teamspace', () => {
-		test('should get all users in a teamspace', async () => {
-			const teamspace = generateRandomString();
-			const users = [
-				{ id: generateRandomString(), user: generateRandomString() },
-				{ id: generateRandomString(), user: generateRandomString() },
-			];
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
-			const res = await Teamspace.getAllUsersInTeamspace(teamspace);
-			expect(res).toEqual(users);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', USER_COL, { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
-				{ user: 1 }, undefined);
-		});
-
-		test('should get all users in a teamspace (with projection)', async () => {
-			const teamspace = generateRandomString();
-			const users = [
-				{ id: generateRandomString(), user: generateRandomString() },
-				{ id: generateRandomString(), user: generateRandomString() },
-			];
-
-			const projection = { [generateRandomString()]: 1 };
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
-			const res = await Teamspace.getAllUsersInTeamspace(teamspace, projection);
-			expect(res).toEqual(users);
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', USER_COL, { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
-				projection, undefined);
-		});
-	});
-};
-
 const testRemoveUserFromAdminPrivileges = () => {
 	describe('Remove user from admin privileges', () => {
 		test('Should trigger a query to remove user from admin permissions array', async () => {
@@ -839,7 +727,6 @@ const testGetTeamspaceInvites = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testTeamspaceAdmins();
-	testHasAccessToTeamspace();
 	testGetSubscriptions();
 	testEditSubscriptions();
 	testRemoveSubscription();
@@ -849,7 +736,6 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateAddOns();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
-	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
 	testGetTeamspaceActiveLicenses();
 	testGetTeamspaceExpiredLicenses();

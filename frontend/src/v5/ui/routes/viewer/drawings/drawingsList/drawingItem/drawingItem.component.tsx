@@ -34,7 +34,7 @@ import { FormattedMessage } from 'react-intl';
 import { DrawingsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams, useHistory, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { useContext, useEffect } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
@@ -56,7 +56,7 @@ type DrawingItemProps = {
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
-	const history = useHistory();
+	const navigate = useNavigate();
 	const { pathname, search } = useLocation();
 	const { setOrigin } = useContext(CalibrationContext);
 	const queries = DrawingsCardHooksSelectors.selectQueries();
@@ -68,7 +68,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 
 	const onCalibrateClick = () => {
 		const path = viewerRoute(teamspace, project, containerOrFederation, revision, { drawingId, isCalibrating: true }, false);
-		history.push(path);
+		navigate(path);
 		setOrigin(pathname + search);
 	};
 

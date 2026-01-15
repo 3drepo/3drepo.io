@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { camelCase, snakeCase } = require('lodash');
+const { camelCase, escape, snakeCase } = require('lodash');
 const crypto = require('crypto');
 
 const StringHelper = {};
@@ -41,6 +41,13 @@ StringHelper.formatPronouns = (str) => {
 	return strArr.map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
+StringHelper.splitName = (str) => {
+	if (!str) return undefined;
+	const [firstName, ...lastName] = str?.split(' ');
+	return [firstName, lastName.join(' ')];
+};
+
 StringHelper.escapeRegexChrs = (text) => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+StringHelper.escapeXSS = escape;
 
 module.exports = StringHelper;

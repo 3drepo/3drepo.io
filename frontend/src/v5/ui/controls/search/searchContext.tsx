@@ -16,13 +16,14 @@
  */
 
 import { get, isString } from 'lodash';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useEffect, useState } from 'react';
 import { matchesQuery } from './searchContext.helpers';
 
 export interface SearchContextType<T> {
 	items: T[];
 	filteredItems: T[];
 	query: string;
+	refresh?: () => void;
 	setQuery: (query: string) => void;
 }
 
@@ -34,12 +35,15 @@ export interface SearchContextProps<T> {
 	items: T[];
 	children: any;
 	fieldsToFilter?: string[];
+	refresh?: () => void;
 	filteringFunction?: (items: T[], query: string) => T[];
 }
 
 export const SearchContextComponent = ({ items, children, fieldsToFilter, filteringFunction }: SearchContextProps<any>) => {
 	const [query, setQuery] = useState('');
-	const [contextValue, setContextValue] = useState({ items, filteredItems: items, query, setQuery });
+	const [refreshFlag, setRefreshFlag] = useState(false);
+	const refresh = useCallback(() => setRefreshFlag(!refreshFlag), [refreshFlag]);
+	const [contextValue, setContextValue] = useState<SearchContextType<any>>({ items, filteredItems: items, query, setQuery, refresh });
 
 	useEffect(() => {
 		let filteredItems = items;
@@ -55,8 +59,10 @@ export const SearchContextComponent = ({ items, children, fieldsToFilter, filter
 			));
 		}
 
-		setContextValue({ items, filteredItems, query, setQuery });
-	}, [query, items]);
+		setContextValue({ items, filteredItems, query, setQuery, refresh });
+	}, [query, items, refresh]);
+
+
 
 	return (
 		<SearchContext.Provider value={contextValue}>

@@ -22,24 +22,26 @@ import { TableColumn } from '@controls/resizableTableContext/resizableTableConte
 
 const TABLE_COLUMNS_INVALID_PROPERTIES = ['view', 'image', 'imageList', 'coords'];
 const TABLE_COLUMNS_DEFAULT_PROPERTIES = ['id', 'modelName', BaseProperties.TITLE];
+const minWidth =  70;
+
 const TABLE_COLUMNS_DEFAULT_WIDTHS = {
-	'id': { width: 80, minWidth: 25 },
-	'modelName': { width: 170, minWidth: 25 },
-	[BaseProperties.TITLE]: { width: 380, minWidth: 25 },
-	[IssueProperties.PRIORITY]: { width: 90, minWidth: 25 },
-	[IssueProperties.ASSIGNEES]: { width: 96, minWidth: 25 },
-	[`properties.${BaseProperties.STATUS}`]: { width: 150, minWidth: 52 },
+	'id': { width: 80, minWidth },
+	'modelName': { width: 170, minWidth },
+	[BaseProperties.TITLE]: { width: 380, minWidth },
+	[IssueProperties.PRIORITY]: { width: 90, minWidth },
+	[IssueProperties.ASSIGNEES]: { width: 96, minWidth },
+	[`properties.${BaseProperties.STATUS}`]: { width: 150, minWidth },
 };
 const TABLE_COLUMNS_TYPE_TO_WIDTHS: Partial<Record<PropertyTypeDefinition, { width: number, minWidth: number }>> = {
-	'text': { width: 140, minWidth: 25 },
-	'longText': { width: 200, minWidth: 25 },
-	'boolean': { width: 140, minWidth: 25 },
-	'number': { width: 100, minWidth: 25 },
+	'text': { width: 140, minWidth },
+	'longText': { width: 200, minWidth },
+	'boolean': { width: 140, minWidth },
+	'number': { width: 100, minWidth },
 	// @ts-ignore
-	'pastDate': { width: 147, minWidth: 25 },
-	'date': { width: 147, minWidth: 25 },
-	'manyOf': { width: 140, minWidth: 25 },
-	'oneOf': { width: 140, minWidth: 25 },
+	'pastDate': { width: 147, minWidth },
+	'date': { width: 147, minWidth },
+	'manyOf': { width: 140, minWidth },
+	'oneOf': { width: 140, minWidth },
 };
 
 const getTableColumnData = ({ name, type }): TableColumn => {

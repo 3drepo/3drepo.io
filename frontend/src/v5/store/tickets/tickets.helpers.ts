@@ -280,6 +280,7 @@ export const sanitizeViewVals = (values:Partial<ITicket>, ticket:ITicket, templa
 };
 
 export const templateAlreadyFetched = (template: ITemplate) => {
+	if (!template) return false;
 	const fetchedProperties: string[] = Object.values(TicketBaseKeys);
 	return fetchedProperties.some((prop) => Object.keys(template).includes(prop));
 };

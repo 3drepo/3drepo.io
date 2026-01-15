@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { destroySession, isSessionValid, setCSRFCookie } = require('../utils/sessions');
+const { BYPASS_AUTH } = require('../utils/config.constants');
 const { USER_AGENT_HEADER } = require('../utils/sessions.constants');
 const { logger } = require('../utils/logger');
 const { respond } = require('../utils/responder');
@@ -33,18 +34,16 @@ const checkValidSession = async (req, res, ignoreAPIKey) => {
 	}
 
 	if (!session.user.isAPIKey) {
-		const { id: sessionId, ipAddress, user: { userAgent } } = session;
+		const { id: sessionId, user: { userAgent } } = session;
 		const reqUserAgent = headers[USER_AGENT_HEADER];
 
-		const ipMatch = ipAddress === (req.ips[0] || req.ip);
 		const userAgentMatch = reqUserAgent === userAgent;
 
-		if (!ipMatch || !userAgentMatch) {
+		if (!userAgentMatch) {
 			await destroySessionIfExists(req, res);
-			logger.logInfo(`Session ${sessionId} destroyed due to IP or user agent mismatch`);
+			logger.logInfo(`Session ${sessionId} destroyed due to user agent mismatch`);
 			return false;
 		}
-
 		// extend the CSRF cookie with the existing token
 		setCSRFCookie(session.token, res);
 	}
@@ -53,7 +52,7 @@ const checkValidSession = async (req, res, ignoreAPIKey) => {
 };
 
 const validSession = (ignoreAPIKey) => async (req, res, next) => {
-	if (await checkValidSession(req, res, ignoreAPIKey)) {
+	if (req.app.get(BYPASS_AUTH) || await checkValidSession(req, res, ignoreAPIKey)) {
 		await next();
 	} else {
 		respond(req, res, templates.notLoggedIn);

@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useContext, useEffect } from 'react';
+import { memo } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useParams } from 'react-router-dom';
 import {
@@ -26,25 +26,14 @@ import {
 } from '@components/dashboard/dashboardList/dashboardListItem/components';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { FavouriteCheckbox } from '@controls/favouriteCheckbox';
-import {
-	enableRealtimeContainerRemoved,
-	enableRealtimeContainerUpdateSettings,
-} from '@/v5/services/realtime/container.events';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { IContainer } from '@/v5/store/containers/containers.types';
-import {
-	enableRealtimeContainerRevisionUpdate,
-	enableRealtimeNewContainerRevisionUpdate,
-} from '@/v5/services/realtime/containerRevision.events';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { DashboardParams } from '@/v5/ui/routes/routes.constants';
 import { Display } from '@/v5/ui/themes/media';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainerRevisionDetails } from '@components/shared/containerRevisionDetails/containerRevisionDetails.component';
 import { ContainerEllipsisMenu } from './containerEllipsisMenu/containerEllipsisMenu.component';
-import { IsMainList } from '../../mainList.context';
-
 interface IContainerListItem {
 	isSelected: boolean;
 	container: IContainer;
@@ -57,19 +46,6 @@ export const ContainerListItem = memo(({
 	onSelectOrToggleItem,
 }: IContainerListItem): JSX.Element => {
 	const { teamspace, project } = useParams<DashboardParams>();
-	const isMainList = useContext(IsMainList);
-
-	useEffect(() => {
-		if (isMainList) {
-			return combineSubscriptions(
-				enableRealtimeContainerRemoved(teamspace, project, container._id),
-				enableRealtimeContainerUpdateSettings(teamspace, project, container._id),
-				enableRealtimeContainerRevisionUpdate(teamspace, project, container._id),
-				enableRealtimeNewContainerRevisionUpdate(teamspace, project, container._id),
-			);
-		}
-		return null;
-	}, [container._id]);
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {
 		if (checked) {

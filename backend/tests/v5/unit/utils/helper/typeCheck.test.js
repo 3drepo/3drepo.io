@@ -176,6 +176,22 @@ const testFileExtensionFromBuffer = () => {
 	});
 };
 
+const testFileExtensionFromPath = () => {
+	describe.each(
+		[
+			['Valid path', image, 'png'],
+			['Empty string', '', undefined],
+			['Number', 3, undefined],
+			['Null value', null, undefined],
+			['Undefined value', undefined, undefined],
+		],
+	)('Get file extension', (description, data, extension) => {
+		test(`${description} should return ${extension}`, async () => {
+			await expect(TypeChecker.fileExtensionFromPath(data)).resolves.toBe(extension);
+		});
+	});
+};
+
 describe('utils/helpers/typeCheck', () => {
 	testIsBuffer();
 	testIsString();
@@ -185,5 +201,6 @@ describe('utils/helpers/typeCheck', () => {
 	testIsNumberString();
 	testFileMimeFromBuffer();
 	testFileExtensionFromBuffer();
+	testFileExtensionFromPath();
 	testIsUUID();
 });

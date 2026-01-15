@@ -16,7 +16,6 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { SequencesActions, selectOpenOnToday } from '@/v4/modules/sequences';
@@ -31,4 +30,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	showSequenceDate: SequencesActions.showSequenceDate,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(SequencesList));
+export default connect(mapStateToProps, mapDispatchToProps)(SequencesList);

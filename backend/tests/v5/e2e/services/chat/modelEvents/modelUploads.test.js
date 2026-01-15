@@ -18,12 +18,12 @@
 const ServiceHelper = require('../../../../helper/services');
 const { src, objModel, dwgModel } = require('../../../../helper/path');
 const SuperTest = require('supertest');
+const { isUUIDString } = require('../../../../../../src/v5/utils/helper/typeCheck');
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { queueMessage } = require(`${src}/handler/queue`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
-const { mkdirSync, writeFileSync } = require('fs');
 
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
@@ -103,7 +103,7 @@ const noEventExpected = (socket, event, fn) => new Promise((resolve, reject) => 
 const modelUploadTest = () => {
 	describe('Model uploads', () => {
 		const route = (ts = teamspace, proj = project.id, cont = container._id) => `/v5/teamspaces/${ts}/projects/${proj}/containers/${cont}/revisions`;
-		const fedRoute = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/revisions`;
+
 		test(`should receive a ${EVENTS.CONTAINER_SETTINGS_UPDATE} event after revision upload if the user has joined the room`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: container._id };
@@ -121,20 +121,77 @@ const modelUploadTest = () => {
 			socket.close();
 		});
 
-		test(`should receive a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event after revision upload if the user has joined the room`, async () => {
+		test(`should receive a ${EVENTS.NEW_FEDERATION} event after federation created if the user has joined the room`, async () => {
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
+			const data = { teamspace, project: project.id };
+
+			const joinPromise = ServiceHelper.socket.joinRoom(socket, data);
+
+			await expect(joinPromise).resolves.toBeUndefined();
+
+			const federationCreatedPromise = waitForEvent(socket, EVENTS.NEW_FEDERATION);
+
+			const createFedRoute = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations`;
+			const createFedBody = {
+				unit: 'mm',
+				name: 'testFederation',
+			};
+
+			const fedResponse = await agent.post(`${createFedRoute}?key=${user.apiKey}`)
+				.send(createFedBody);
+
+			await expect(federationCreatedPromise).resolves.toEqual({
+				...data,
+				data: {
+					...createFedBody,
+					_id: fedResponse.body._id,
+				},
+			});
+
+			socket.close();
+		});
+
+		test(`should receive a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event after federation updated if the user has joined the room`, async () => {
 			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 			const data = { teamspace, project: project.id, model: federation._id };
 
 			const joinPromise = ServiceHelper.socket.joinRoom(socket, data);
 
 			await expect(joinPromise).resolves.toBeUndefined();
-			const modelUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_SETTINGS_UPDATE);
 
-			await agent.post(`${fedRoute}?key=${user.apiKey}`)
-				.send({ containers: [container._id] })
+			const settingsUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_SETTINGS_UPDATE);
+			const newRevisionPromise = waitForEvent(socket, EVENTS.FEDERATION_NEW_REVISION);
+
+			const updateFedRoute = `/v5/teamspaces/${teamspace}/projects/${project.id}/federations/${federation._id}/revisions`;
+
+			const containers = [
+				{ _id: container._id },
+			];
+
+			await agent.post(`${updateFedRoute}?key=${user.apiKey}`)
+				.send({ containers })
 				.expect(templates.ok.status);
 
-			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: 'queued' } });
+			const settingsUpdate = await settingsUpdatePromise;
+
+			expect(settingsUpdate.data.status).toEqual('ok');
+			expect(settingsUpdate.data.containers).toEqual(containers);
+			expect(typeof settingsUpdate.data.timestamp).toBe('string');
+			expect(new Date(settingsUpdate.data.timestamp).getTime()).not.toBeNaN();
+			expect(settingsUpdate.model).toEqual(federation._id);
+			expect(settingsUpdate.project).toEqual(project.id);
+			expect(settingsUpdate.teamspace).toEqual(teamspace);
+
+			const revisionUpdate = await newRevisionPromise;
+
+			expect(isUUIDString(revisionUpdate.data._id)).toBe(true);
+			expect(revisionUpdate.data.author).toEqual(user.user);
+			expect(typeof revisionUpdate.data.timestamp).toBe('number');
+			expect(new Date(settingsUpdate.data.timestamp).getTime()).not.toBeNaN();
+			expect(revisionUpdate.model).toEqual(federation._id);
+			expect(revisionUpdate.project).toEqual(project.id);
+			expect(revisionUpdate.teamspace).toEqual(teamspace);
+
 			socket.close();
 		});
 
@@ -211,21 +268,6 @@ const queueUpdateTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
 			const content = { status: 'processing', database: teamspace, project: container._id };
-			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
-				JSON.stringify(content));
-			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
-
-			socket.close();
-		});
-
-		test(`should receive a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event if a federation status has been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
-			const data = { teamspace, project: project.id, model: federation._id };
-			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
-
-			const modelUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_SETTINGS_UPDATE);
-
-			const content = { status: 'processing', database: teamspace, project: federation._id };
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
 				JSON.stringify(content));
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
@@ -313,41 +355,6 @@ const queueFinishedTest = () => {
 					format: drawingRevision.format,
 					desc: drawingRevision.desc,
 					calibration: calibrationStatuses.CALIBRATED,
-				} }));
-
-			socket.close();
-		});
-
-		test(`should receive a ${EVENTS.FEDERATION_SETTINGS_UPDATE} event if a federation revision has finished`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
-			const data = { teamspace, project: project.id, model: federation._id };
-			await expect(ServiceHelper.socket.joinRoom(socket, data)).resolves.toBeUndefined();
-
-			const content = { value: 0, database: teamspace, project: federation._id };
-			const fileContent = { subProjects: [{ project: container._id }] };
-			mkdirSync(`${queueConfig.shared_storage}/${federationRevision._id}`);
-			writeFileSync(`${queueConfig.shared_storage}/${federationRevision._id}/obj.json`, JSON.stringify(fileContent));
-
-			const modelUpdatePromise = waitForEvent(socket, EVENTS.FEDERATION_SETTINGS_UPDATE);
-			const newRevisionPromise = waitForEvent(socket, EVENTS.FEDERATION_NEW_REVISION);
-
-			await queueMessage(queueConfig.callback_queue, federationRevision._id, JSON.stringify(content));
-
-			const modelUpdateResults = await modelUpdatePromise;
-			expect(modelUpdateResults?.data?.timestamp).not.toBeUndefined();
-			expect(modelUpdateResults).toEqual({ ...data,
-				data: { containers: [{ _id: container._id }], status: 'ok', timestamp: modelUpdateResults.data.timestamp } });
-
-			const newRevisionResults = await newRevisionPromise;
-			expect(newRevisionResults?.data?.timestamp).not.toBeUndefined();
-			expect(newRevisionResults).toEqual(expect.objectContaining({ ...data,
-				data: {
-					_id: federationRevision._id,
-					author: user.user,
-					tag: federationRevision.tag,
-					timestamp: newRevisionResults.data.timestamp,
-					format: getRevisionFormat(federationRevision.rFile),
-					desc: federationRevision.desc,
 				} }));
 
 			socket.close();

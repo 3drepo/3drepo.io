@@ -16,7 +16,7 @@
  */
 
 import { Typography } from '@controls/typography';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
 export const Title = styled(Typography).attrs({ variant: 'h5' })`
 	color: ${({ theme }) => theme.palette.secondary.main};
@@ -26,7 +26,7 @@ export const SubTitle = styled(Typography).attrs({ variant: 'body1' })`
 	color: ${({ theme }) => theme.palette.base.main};
 `;
 
-export const DoubleInputLineContainer = styled.div`
+export const DoubleInputLineContainer = styled.div<{ $hideBottomExtentError: boolean }>`
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	width: 100%;
@@ -37,8 +37,10 @@ export const DoubleInputLineContainer = styled.div`
 			width: 200%;
 		}
 
-		&:nth-of-type(2) .MuiFormHelperText-root {
-			display: none;
-		}
+		${({ $hideBottomExtentError }) => $hideBottomExtentError && css`
+			&:nth-of-type(2) .MuiFormHelperText-root {
+				display: none;
+			}
+		`}
 	}
 `;

@@ -19,7 +19,7 @@
 
 const { v5Path } = require("../../interop");
 
-const { hasAccessToTeamspace } = require(`${v5Path}/models/teamspaceSettings`);
+const { isTeamspaceMember } = require(`${v5Path}/processors/teamspaces`);
 
 const AccountPermissions = require("../models/accountPermissions");
 const PermissionTemplates = require("../models/permissionTemplates");
@@ -47,7 +47,7 @@ const PermissionTemplates = require("../models/permissionTemplates");
 
 			accountLevel: async function(username) {
 
-				await hasAccessToTeamspace(account, username);
+				await isTeamspaceMember(account, username);
 
 				return getTeamspaceSettings(account, { permissions: 1 }).then(settings => {
 					const permission = AccountPermissions.findByUser(settings, username);
