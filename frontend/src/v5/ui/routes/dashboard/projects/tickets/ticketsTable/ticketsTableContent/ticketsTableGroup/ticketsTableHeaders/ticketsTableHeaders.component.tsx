@@ -26,6 +26,7 @@ import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { isSequencingProperty } from '@/v5/ui/routes/viewer/tickets/ticketsForm/propertiesList.component';
 
 export const TicketsTableHeaders = () => {
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
@@ -35,12 +36,13 @@ export const TicketsTableHeaders = () => {
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 
 	const canBulkEditProperty = (name: string) => {
-		const propDef = findPropertyDefinition(template, name)
+		const propDef = findPropertyDefinition(template, name);
 		const isReadOnly = propDef?.readOnly || propDef?.readOnlyOnUI || propDef?.deprecated;
 		return !NON_BULK_EDITABLE_COLUMNS.includes(name)
 			&& selectedIds.size > 0
 			&& !propDef?.immutable // cannot bulk edit immutable properties to prevent user error
 			&& !propDef?.unique // user is unlikely to want to bulk edit unique properties and it will usually error
+			&& !isSequencingProperty(name) // sequencing dates have complex rules (start must be before end), disallow bulk edit for now
 			&& !isReadOnly;
 	}
 	

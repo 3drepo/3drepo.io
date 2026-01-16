@@ -33,7 +33,7 @@ interface PropertiesListProps {
 	onPropertyBlur?: (...args) => void;
 }
 
-const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
+export const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
 
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { containerOrFederation } = useContext(TicketContext);
