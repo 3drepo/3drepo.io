@@ -26,7 +26,8 @@ export const SettingsColumnContainer = styled(Group)`
 	& div > ${/* sc-selector */Row} {
 		width: ${SETTINGS_COLUMN_WIDTH}px;
 
-		&:first-child{
+		&:first-child {
+			border-top-right-radius: 10px;
 			overflow: hidden;
 		}
 	}

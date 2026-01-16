@@ -25,7 +25,6 @@ import { NEW_TICKET_ROW_HEIGHT } from './newTicketRowButton/newTicketRowButton.s
 import { NEW_TICKET_ROW_AREA_NAME, SELECTION_COLUMN_WIDTH, SETTINGS_COLUMN_WIDTH } from './ticketsTableGroup.helper';
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
-
 export const Group = styled.div<{ $empty: boolean, $hideNewticketButton: boolean }>`
 	display: grid;
 	gap: 1px;
@@ -51,6 +50,11 @@ export const RoundedContainer = styled.div<{ hideNewTicketButton: boolean }>`
 				border-bottom-left-radius: 10px;
 			}
 		`}
+	}
+	>*:last-child {
+		${Row}:last-of-type {
+			border-bottom-right-radius: 10px;
+		}
 	}
 `;
 

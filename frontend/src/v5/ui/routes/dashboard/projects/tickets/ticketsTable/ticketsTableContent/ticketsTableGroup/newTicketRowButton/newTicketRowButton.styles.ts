@@ -32,6 +32,8 @@ export const NewTicketRow = styled.div<{ disabled?: boolean }>`
 	display: grid;
 	position: relative;
 	z-index: 11;
+	border-radius: 0 0 10px 10px;
+	outline: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 
 	${({ disabled }) => disabled && css`
 		cursor: initial;
