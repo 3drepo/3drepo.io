@@ -21,6 +21,11 @@ import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
 import { Loader as UnstyledLoader } from '@/v4/routes/components/loader/loader.component';
 import { TicketItemContainer } from './ticketItem/ticketItem.styles';
+import { Checkbox } from '@mui/material';
+import React from 'react';
+import BulkCheckboxIcon from '@assets/icons/controls/bulk_checkbox.svg';
+import BulkCheckboxCheckedIcon from '@assets/icons/controls/bulk_checkbox_checked.svg';
+
 
 export const Loader = styled(UnstyledLoader)`
 	height: 100%;
@@ -86,4 +91,21 @@ export const ActionMenu = styled(ActionMenuBase).attrs({
 
 export const MenuItem = styled(MenuItemBase)`
 	padding: 5px 12px;
+`;
+
+export const BulkCheckbox = styled(Checkbox).attrs({
+	icon: React.createElement(BulkCheckboxIcon),
+	checkedIcon:  React.createElement(BulkCheckboxCheckedIcon),
+})`
+	color: ${({ theme }) => theme.palette.secondary.main} !important;
+    cursor: pointer;
+    background-color: transparent;
+    margin: 0;
+    height: 32px;
+    width: 20px;
+    padding: 0;
+
+	&:hover:not(.Mui-checked) path {
+		fill: ${({ theme }) => theme.palette.secondary.main} !important;
+	}
 `;

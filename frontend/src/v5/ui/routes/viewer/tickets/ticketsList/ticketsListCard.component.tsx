@@ -19,6 +19,7 @@ import { FederationsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/servi
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { FormattedMessage } from 'react-intl';
 import TicketsIcon from '@assets/icons/outlined/tickets-outlined.svg';
+
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { TicketsList } from './ticketsList.component';
 import { NewTicketMenu } from './newTicketMenu/newTicketMenu.component';
@@ -38,6 +39,8 @@ import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelect
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { ModuleTitle } from '@components/viewer/cards/cardFilters/cardFilters.styles';
 import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { BulkCheckbox } from './ticketsList.styles';
+import { Tooltip } from '@mui/material';
 
 export const TicketsListCard = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
@@ -83,6 +86,7 @@ export const TicketsListCard = () => {
 					actions={(
 						<>
 							{!readOnly && (<NewTicketMenu />)}
+							{!readOnly && (<Tooltip title={formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' })}><BulkCheckbox /></Tooltip>)}
 							<FilterSelection />
 							<GroupBySelection value={groupBy} onChange={(value) => {
 								TicketsCardActionsDispatchers.setSelectedTicket(null);
