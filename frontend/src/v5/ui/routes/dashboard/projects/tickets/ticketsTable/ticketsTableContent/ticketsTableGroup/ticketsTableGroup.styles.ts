@@ -22,7 +22,7 @@ import { Highlighter } from '@controls/resizableTableContext/resizableTable/over
 import { DropLine } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnDropAreas/movingColumnDropAreas.styles';
 import { Headers } from './ticketsTableHeaders/ticketsTableHeaders.styles';
 import { NEW_TICKET_ROW_HEIGHT } from './newTicketRowButton/newTicketRowButton.styles';
-import { SELECTION_COLUMN_WIDTH, SETTINGS_COLUMN_WIDTH } from './ticketsTableGroup.helper';
+import { NEW_TICKET_ROW_AREA_NAME, SELECTION_COLUMN_WIDTH, SETTINGS_COLUMN_WIDTH } from './ticketsTableGroup.helper';
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
 
@@ -38,11 +38,10 @@ export const RoundedContainer = styled.div<{ hideNewTicketButton: boolean }>`
 	gap: 1px;
 	grid-template-columns: ${SELECTION_COLUMN_WIDTH}px auto ${SETTINGS_COLUMN_WIDTH}px;
 	grid-template-areas: "selection tableData settings"
-		"newTicketRow newTicketRow newTicketRow";
+		"${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME}";
 	margin-right: 40px;
-
+	width: fit-content;
 	border-radius: 0 0 10px 10px;
-	overflow: hidden;
 	>*:first-child {
 		${Row}:first-of-type {
 			border-top-left-radius: 10px;

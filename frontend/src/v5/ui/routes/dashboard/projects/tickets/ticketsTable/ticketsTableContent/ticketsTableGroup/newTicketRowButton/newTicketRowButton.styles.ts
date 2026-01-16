@@ -16,10 +16,14 @@
  */
 
 import styled, { css } from 'styled-components';
+import { NEW_TICKET_ROW_AREA_NAME } from '../ticketsTableGroup.helper';
 
 export const NEW_TICKET_ROW_HEIGHT = '37px';
+export const NewTicketRowGridArea = styled.div`
+	grid-area: ${NEW_TICKET_ROW_AREA_NAME};
+`;
+
 export const NewTicketRow = styled.div<{ disabled?: boolean }>`
-	grid-area: newTicketRow;
 	height: ${NEW_TICKET_ROW_HEIGHT};
 	width: 100%;
 	cursor: pointer;

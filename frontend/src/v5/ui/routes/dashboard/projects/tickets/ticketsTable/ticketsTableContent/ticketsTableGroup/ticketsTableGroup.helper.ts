@@ -17,3 +17,5 @@
 
 export const SELECTION_COLUMN_WIDTH = 54;
 export const SETTINGS_COLUMN_WIDTH = 24;
+
+export const NEW_TICKET_ROW_AREA_NAME = 'newTicketRow';
