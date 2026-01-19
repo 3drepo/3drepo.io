@@ -29,7 +29,7 @@ type FiltersSectionProps = {
 	propertyName: string;
 };
 
-const findFilterByPropertyName = (filters: TicketFilter[], propertyName: string) => {
+export const findFilterByPropertyName = (filters: TicketFilter[], propertyName: string) => {
 	const chunks = propertyName.split('.');
 
 	// if the propertyname is like title

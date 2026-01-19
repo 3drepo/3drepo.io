@@ -40,8 +40,6 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 	const formData = useForm<FormType>({
 		defaultValues,
 		mode: 'onChange',
-		// resolver: yupResolver(FilterSchema),
-		shouldUnregister: true,
 	});
 	const { formState: { isValid, dirtyFields, errors } } = formData;
 	const canSubmit = isValid && !isEmpty(dirtyFields);
@@ -60,7 +58,6 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 				</TitleContainer>
 				<BulkEditInputField
 					name="value"
-					// formError={errors?.values?.value}
 					module={module}
 					property={property}
 					type={type}
