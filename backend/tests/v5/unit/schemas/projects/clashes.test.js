@@ -35,7 +35,6 @@ const testValidatePlan = () => {
 	describe('Validate plan data', () => {
 		const teamspace = generateUUIDString();
 		const project = generateUUIDString();
-		const planId = generateUUIDString();
 		const standardRule = {
 			name: generateRandomString(),
 			field: { operator: fieldOperators.IS.name, values: [generateRandomString()] },
