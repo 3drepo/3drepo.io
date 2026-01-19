@@ -1163,7 +1163,7 @@ export class UnityUtil {
 	 * the model. This only takes effect in single-plane mode.
 	 */
 	public static setKeepClipGizmoInView(enable: boolean) {
-		if(enable) {
+		if (enable) {
 			UnityUtil.toUnity('EnableKeepClipGizmoInView', UnityUtil.LoadingState.VIEWER_READY);
 		} else {
 			UnityUtil.toUnity('DisableKeepClipGizmoInView', UnityUtil.LoadingState.VIEWER_READY);
@@ -1761,20 +1761,21 @@ export class UnityUtil {
 	 * Use branch = master and revision = head to get the latest revision.
 	 * If you want to know when the model finishes loading, use [[onLoaded]]
 	 * @category Configurations
-	 * @param account - name of teamspace
+	 * @param teamspace - name of teamspace
 	 * @param model - name of model
-	 * @param branch - ID of the branch (deprecated value)
+	 * @param project - ID of the project
 	 * @param revision - ID of revision
+	 * @param isFederation - flag signaling whether the model is a container or a federation
 	 * @param initView? - the view the model should load with
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @return returns a promise that resolves when the model start loading.
 	 */
 	public static loadModel(
-		account: string,
+		teamspace: string,
+		project: string,
 		model: string,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		branch = '',
 		revision = 'head',
+		isFederation: boolean = false,
 		initView = null,
 		clearCanvas = true,
 	): Promise<void> {
@@ -1783,8 +1784,10 @@ export class UnityUtil {
 		}
 
 		const params: any = {
-			database: account,
+			database: teamspace,
+			project,
 			model,
+			isFederation,
 		};
 
 		if (revision !== 'head') {
