@@ -26,9 +26,6 @@ const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = 
 jest.mock('../../../../../src/v5/models/modelSettings');
 const ModelSettingsModel = require(`${src}/models/modelSettings`);
 
-jest.mock('../../../../../src/v5/models/clashes');
-const ClashesModel = require(`${src}/models/clashes`);
-
 jest.mock('../../../../../src/v5/models/projectSettings');
 const ProjectSettingsModel = require(`${src}/models/projectSettings`);
 
@@ -36,7 +33,6 @@ const ClashesSchema = require(`${src}/schemas/projects/clashes`);
 
 const testValidatePlan = () => {
 	describe('Validate plan data', () => {
-		const existingName = generateRandomString();
 		const teamspace = generateUUIDString();
 		const project = generateUUIDString();
 		const planId = generateUUIDString();
@@ -61,7 +57,6 @@ const testValidatePlan = () => {
 			['with no object (null)', false, null],
 			['with valid data', true, planData],
 			['with empty name', false, { ...planData, name: '' }],
-			['with existing name', false, { ...planData, name: existingName }],
 			['with too long name', false, { ...planData, name: generateRandomString(1201) }],
 			['with undefined name', false, { ...planData, name: undefined }],
 			['with invalid type', false, { ...planData, type: generateRandomString() }],
@@ -86,11 +81,6 @@ const testValidatePlan = () => {
 						ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 						ProjectSettingsModel.modelsExistInProject.mockResolvedValueOnce({});
 					});
-				}
-
-				if (data?.name) {
-					ClashesModel.getPlanByName.mockResolvedValueOnce({
-						_id: data.name === existingName ? generateUUIDString() : planId });
 				}
 
 				const test = expect(ClashesSchema.validatePlan(teamspace, project, planId, data));

@@ -42,14 +42,7 @@ const generatePlanSchema = (teamspace, project, planId) => {
 	}).required();
 
 	return Yup.object().shape({
-		name: types.strings.title.test('check-name-is-unique', 'Clash plan with the same name already exists', async (value) => {
-			try {
-				const plan = await getPlanByName(teamspace, value, { _id: 1 });
-				return UUIDToString(plan._id) === UUIDToString(planId);
-			} catch {
-				return true;
-			}
-		}).required(),
+		name: types.strings.title.required(),
 		type: Yup.string().oneOf(CLASH_PLAN_TYPES).required(),
 		tolerance: Yup.number().min(0).required(),
 		selfIntersectionsCheck: Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).optional().default(false),

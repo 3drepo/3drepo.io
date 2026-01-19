@@ -83,7 +83,6 @@ const testCreatePlan = () => {
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 			['payload is invalid', { planData: { ...generatePlanData(), type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
-			['payload is invalid (name exists)', { planData: { ...generatePlanData(), name: existingPlan.name } }, false, templates.invalidArguments],
 			['user has access to a project', { key: users.projectAdmin.apiKey }, true],
 			['user is teamspace admin', {}, true],
 		])('', (desc, { ts = teamspace, proj = project.id, key = users.tsAdmin.apiKey, planData = generatePlanData() }, success, expectedRes) => {
