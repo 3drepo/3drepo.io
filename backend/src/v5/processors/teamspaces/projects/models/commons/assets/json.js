@@ -50,7 +50,7 @@ const readFileStreamAsync = async (outstream, teamspace, container, filename, in
 const streamSubModelData = async (outstream, teamspace, subModels, getFileName, injectIdentifier = false) => {
 	let first = true;
 
-	//asynchroniously get all submodel streams
+	// asynchroniously get all submodel streams
 	const subStreams = await Promise.all(subModels.map(async ({ container: subModel, revision: subModelRev }) => {
 		try {
 			const subModelStream = PassThrough();
@@ -77,14 +77,12 @@ const streamSubModelData = async (outstream, teamspace, subModels, getFileName, 
 			});
 			subModelStream.on('end', resolve);
 			subModelStream.on('error', reject);
-		})
+		});
 
 		subModelStream.end();
-		//eslint-disable-next-line no-await-in-loop
+		// eslint-disable-next-line no-await-in-loop
 		await pipeProm;
-
 	}
-
 };
 
 JsonAssets.getTree = async (teamspace, container, revision) => {
