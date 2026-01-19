@@ -26,8 +26,8 @@ const Clashes = {};
 
 const validatePlanData = async (req, res, next) => {
 	try {
-		const { teamspace, project, planId } = req.params;
-		req.body = await validatePlan(teamspace, project, planId, req.body);
+		const { teamspace, project } = req.params;
+		req.body = await validatePlan(teamspace, project, req.body);
 
 		if (req.planData) {
 			if (isEqual(req.planData, req.body)) {

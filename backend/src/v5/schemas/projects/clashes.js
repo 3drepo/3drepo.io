@@ -16,17 +16,15 @@
  */
 
 const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require('../../models/clashes.constants');
-const { UUIDToString } = require('../../utils/helper/uuids');
 const Yup = require('yup');
 const { getContainerById } = require('../../models/modelSettings');
-const { getPlanByName } = require('../../models/clashes');
 const { modelsExistInProject } = require('../../models/projectSettings');
 const { schema: rulesSchema } = require('../rules');
 const { types } = require('../../utils/helper/yup');
 
 const ClashSchema = {};
 
-const generatePlanSchema = (teamspace, project, planId) => {
+const generatePlanSchema = (teamspace, project) => {
 	const selectionSchema = Yup.object().shape({
 		container: types.id.required().test('container-validation', 'Container must exist within the project', async (value) => {
 			if (!value) {
@@ -62,7 +60,7 @@ const generatePlanSchema = (teamspace, project, planId) => {
 	}).noUnknown(true).required();
 };
 
-ClashSchema.validatePlan = (teamspace, project, planId, data) => generatePlanSchema(teamspace, project, planId)
+ClashSchema.validatePlan = (teamspace, project, data) => generatePlanSchema(teamspace, project)
 	.validate(data);
 
 module.exports = ClashSchema;

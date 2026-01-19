@@ -69,7 +69,7 @@ const testCreatePlan = () => {
 	describe('Create clash test plan', () => {
 		const route = (ts, project, key) => `/v5/teamspaces/${ts}/projects/${project}/clash${key ? `?key=${key}` : ''}`;
 		const basicData = generateBasicData();
-		const { users, teamspace, project, models, plan: existingPlan } = basicData;
+		const { users, teamspace, project, models } = basicData;
 
 		const generatePlanData = () => ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
 
