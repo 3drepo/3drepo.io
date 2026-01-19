@@ -20,6 +20,7 @@ const AadRoutes = require('./sso/aad');
 const AuthRoutes = require('./authentication');
 const { BYPASS_AUTH } = require('../utils/config.constants');
 const CalibrationRoutes = require('./teamspaces/projects/models/drawings/calibrations');
+const ClashRoutes = require('./teamspaces/projects/clashes');
 const CreateAssetsRoutes = require('./teamspaces/projects/models/common/assets');
 const CreateBundleRoutes = require('./teamspaces/projects/models/common/assets/bundles');
 const CreateGeneralRevisionRoutes = require('./teamspaces/projects/models/common/revisions');
@@ -65,7 +66,6 @@ RoutesManager.init = (app) => {
 		app.use('/v5/authentication', AuthRoutes);
 		app.use('/v5/sso', SsoRoutes);
 		app.use('/v5/sso/aad', AadRoutes);
-
 		app.use('/v5/teamspaces/:teamspace/settings', TeamspaceSettingsRoutes);
 		app.use('/v5/teamspaces/:teamspace/jobs', TeamspaceJobRoutes);
 
@@ -90,6 +90,9 @@ RoutesManager.init = (app) => {
 		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings', CreateModelGeneralRoutes(modelTypes.DRAWING, internal));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:model/revisions', CreateGeneralRevisionRoutes(modelTypes.DRAWING));
 		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:drawing/revisions/:revision/calibrations', CalibrationRoutes);
+
+		// Clashes
+		app.use('/v5/teamspaces/:teamspace/projects/:project/clash', ClashRoutes);
 	}
 };
 
