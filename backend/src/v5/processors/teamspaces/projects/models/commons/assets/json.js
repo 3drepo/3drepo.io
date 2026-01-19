@@ -64,24 +64,24 @@ const streamSubModelData = async (outstream, teamspace, subModels, getFileName, 
 
 	// pipe them one by one to the output stream
 	for (const subModelStream of subStreams) {
-		if (!subModelStream) return;
-
-		if (first) {
-			first = false;
-		} else {
-			outstream.write(',');
-		}
-		const pipeProm = new Promise((resolve, reject) => {
-			subModelStream.on('data', (d) => {
-				outstream.write(d);
+		if (subModelStream) {
+			if (first) {
+				first = false;
+			} else {
+				outstream.write(',');
+			}
+			const pipeProm = new Promise((resolve, reject) => {
+				subModelStream.on('data', (d) => {
+					outstream.write(d);
+				});
+				subModelStream.on('end', resolve);
+				subModelStream.on('error', reject);
 			});
-			subModelStream.on('end', resolve);
-			subModelStream.on('error', reject);
-		});
 
-		subModelStream.end();
-		// eslint-disable-next-line no-await-in-loop
-		await pipeProm;
+			subModelStream.end();
+			// eslint-disable-next-line no-await-in-loop
+			await pipeProm;
+		}
 	}
 };
 
