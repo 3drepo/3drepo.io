@@ -28,9 +28,7 @@ const { respond, writeStreamRespond } = require('../../../../../../utils/respond
 const MimeTypes = require('../../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const { getAccessibleContainers } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
-const {
-	getAssetProperties: getFederationAssetProperties,
-} = require('../../../../../../processors/teamspaces/projects/models/federations');
+const { getAssetProperties: getFederationAssetProperties } = require('../../../../../../processors/teamspaces/projects/models/federations');
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { templates } = require('../../../../../../utils/responseCodes');
 const { verifyRevQueryParam } = require('../../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
