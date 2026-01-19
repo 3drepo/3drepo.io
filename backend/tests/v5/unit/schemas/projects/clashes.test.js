@@ -75,7 +75,7 @@ const testValidatePlan = () => {
 			['with valid trigger', true, { ...planData, trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]] }],
 			['with selections without container', false, { ...planData, selectionA: { rules: [standardRule] }, selectionB: { rules: [standardRule] } }],
 		])('Validate plan data properties (without selection)', (desc, success, data) => {
-			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+			test(`should ${success ? 'succeed' : 'fail'} ${desc}`, async () => {
 				if (data?.selectionA?.container) {
 					times(2, () => {
 						ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
@@ -83,7 +83,7 @@ const testValidatePlan = () => {
 					});
 				}
 
-				const test = expect(ClashesSchema.validatePlan(teamspace, project, planId, data));
+				const test = expect(ClashesSchema.validatePlan(teamspace, project, data));
 				if (success) {
 					await test.resolves.not.toBeUndefined();
 				} else {
@@ -99,7 +99,7 @@ const testValidatePlan = () => {
 					ProjectSettingsModel.modelsExistInProject.mockResolvedValueOnce(true);
 				});
 
-				await expect(ClashesSchema.validatePlan(teamspace, project, planId, planData))
+				await expect(ClashesSchema.validatePlan(teamspace, project, planData))
 					.rejects.not.toBeUndefined();
 			});
 
@@ -109,7 +109,7 @@ const testValidatePlan = () => {
 					ProjectSettingsModel.modelsExistInProject.mockRejectedValueOnce(templates.modelNotFound);
 				});
 
-				await expect(ClashesSchema.validatePlan(teamspace, project, planId, planData))
+				await expect(ClashesSchema.validatePlan(teamspace, project, planData))
 					.rejects.not.toBeUndefined();
 			});
 		});

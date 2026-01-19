@@ -45,10 +45,11 @@ const testValidateNewPlanData = () => {
 			ClashesSchema.validatePlan.mockRejectedValueOnce(templates.invalidArguments);
 
 			await Clashes.validateNewPlanData(req, {}, mockCB);
+
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
 			expect(ClashesSchema.validatePlan)
-				.toHaveBeenCalledWith(req.params.teamspace, req.params.project, undefined, req.body);
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.invalidArguments);
 		});
@@ -59,13 +60,14 @@ const testValidateNewPlanData = () => {
 				params: { teamspace: generateRandomString(), project: generateRandomString() },
 				body: generateRandomObject(),
 			};
-			ClashesSchema.validatePlan.mockResolvedValueOnce({});
+			ClashesSchema.validatePlan.mockResolvedValueOnce(req.body);
 
 			await Clashes.validateNewPlanData(req, {}, mockCB);
+
 			expect(mockCB).toHaveBeenCalled();
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
 			expect(ClashesSchema.validatePlan)
-				.toHaveBeenCalledWith(req.params.teamspace, req.params.project, undefined, req.body);
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 	});
@@ -89,7 +91,7 @@ const testValidateUpdatePlanData = () => {
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(ClashesModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 1 });
+			expect(ClashesModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
 			expect(ClashesSchema.validatePlan).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.clashPlanNotFound);
@@ -107,17 +109,16 @@ const testValidateUpdatePlanData = () => {
 				body: generateRandomObject(),
 			};
 			ClashesModel.getPlanById.mockResolvedValueOnce(plan);
-			ClashesSchema.validatePlan.mockResolvedValueOnce({});
+			ClashesSchema.validatePlan.mockResolvedValueOnce(req.body);
 
 			await Clashes.validateUpdatePlanData(req, {}, mockCB);
 
 			expect(mockCB).toHaveBeenCalled();
 			expect(req.planData).toEqual(plan);
 			expect(ClashesModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 1 });
+			expect(ClashesModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
-			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
-				req.params.planId, req.body);
+			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 
@@ -139,10 +140,9 @@ const testValidateUpdatePlanData = () => {
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(ClashesModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 1 });
+			expect(ClashesModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
-			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
-				req.params.planId, req.body);
+			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.invalidArguments);
 		});
@@ -159,16 +159,15 @@ const testValidateUpdatePlanData = () => {
 				body: plan,
 			};
 			ClashesModel.getPlanById.mockResolvedValueOnce(plan);
-			ClashesSchema.validatePlan.mockResolvedValueOnce({});
+			ClashesSchema.validatePlan.mockResolvedValueOnce(req.body);
 
 			await Clashes.validateUpdatePlanData(req, {}, mockCB);
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(ClashesModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 1 });
+			expect(ClashesModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
-			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project,
-				req.params.planId, req.body);
+			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, { ...templates.invalidArguments, message: 'No valid properties to update' });
 		});
