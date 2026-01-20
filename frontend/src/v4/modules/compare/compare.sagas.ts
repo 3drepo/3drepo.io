@@ -28,6 +28,7 @@ import { Viewer } from '../../services/viewer/viewer';
 import { DialogActions } from '../dialog';
 import { selectIsFederation, selectRevisions, selectSettings, ModelTypes } from '../model';
 import { selectNodesIndexesMap, selectTreeNodesList, TreeActions } from '../tree';
+import { selectUrlParams } from '../router/router.selectors';
 import { CompareActions, CompareTypes, ICompareComponentState } from './compare.redux';
 import {
 	selectActiveTab,
@@ -78,7 +79,8 @@ function* getCompareModelData({ isFederation, revision }) {
 		const settings = yield select(selectSettings);
 		const revisions = yield select(selectRevisions);
 		const teamspace = settings.account;
-		const project = "TODO: Fill me in";
+		const { project } = yield select(selectUrlParams);
+
 
 		if (!isFederation) {
 			const model =
