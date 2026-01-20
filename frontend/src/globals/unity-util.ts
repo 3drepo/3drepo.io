@@ -868,20 +868,23 @@ export class UnityUtil {
 	 * Load comparator model for compare tool
 	 * This returns a promise which will be resolved when the comparator model is loaded
 	 * @category Compare Tool
-	 * @param account - teamspace
-	 * @param model - model ID
+	 * @param teamspace - teamspace
+	 * @param project - project
+	 * @param container - model ID
 	 * @param revision - Specific revision ID/tag to load
 	 * @return returns a promise that resolves upon comparator model finished loading.
 	 */
-	public static diffToolLoadComparator(account: string, model: string, revision = 'head'): Promise<void> {
+	public static diffToolLoadComparator(teamspace: string, project: string, container: string, revision = 'head'): Promise<void> {
 		const params: any = {
-			database: account,
-			model,
+			database: teamspace,
+			project,
+			model: container,
 		};
 
 		if (revision !== 'head') {
 			params.revID = revision;
 		}
+
 		UnityUtil.toUnity('DiffToolLoadComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 		if (!UnityUtil.loadComparatorPromise) {
@@ -896,13 +899,14 @@ export class UnityUtil {
 	 * Set an existing submodel/model as a comparator model
 	 * This will return as a base model when you have cleared the comparator (i.e. disabled diff)
 	 * @category Compare Tool
-	 * @param account - name of teamspace
-	 * @param model - model ID
+	 * @param teamspace - name of teamspace
+	 * @param container - model ID
 	 */
-	public static diffToolSetAsComparator(account: string, model: string) {
+	public static diffToolSetAsComparator(teamspace: string, project: string, container: string) {
 		const params: any = {
-			database: account,
-			model,
+			database: teamspace,
+			project,
+			model: container,
 		};
 		UnityUtil.toUnity('DiffToolAssignAsComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}

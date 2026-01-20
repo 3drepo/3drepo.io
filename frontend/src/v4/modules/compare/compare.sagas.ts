@@ -50,7 +50,7 @@ const getNextRevision = (revisions, currentRevision) => {
 	return revisions[(index + 1) % revisions.length];
 };
 
-const prepareModelToCompare = (teamspace, modelId, name, isFederation, revisions, currentRevision?) => {
+const prepareModelToCompare = (teamspace, project, modelId, name, isFederation, revisions, currentRevision?) => {
 	const baseRevision = isFederation || !currentRevision
 		? revisions[0]
 		: revisions.find((rev) => rev.tag === currentRevision || rev._id === currentRevision) || revisions[0];
@@ -63,6 +63,7 @@ const prepareModelToCompare = (teamspace, modelId, name, isFederation, revisions
 	return {
 		_id: modelId,
 		teamspace,
+		project,
 		name,
 		baseRevision,
 		currentRevision: revisionData,
@@ -77,16 +78,17 @@ function* getCompareModelData({ isFederation, revision }) {
 		const settings = yield select(selectSettings);
 		const revisions = yield select(selectRevisions);
 		const teamspace = settings.account;
+		const project = "TODO: Fill me in";
 
 		if (!isFederation) {
 			const model =
-				prepareModelToCompare(teamspace, settings._id, settings.name, isFederation, revisions, revision);
+				prepareModelToCompare(teamspace, project, settings._id, settings.name, isFederation, revisions, revision);
 			yield put(CompareActions.setComponentState({ compareModels: [model], isPending: false }));
 		} else {
 			const { data: submodelsRevisionsMap } = yield API.getSubModelsRevisions(teamspace, settings._id, revision);
 			let compareModels = Object.keys(submodelsRevisionsMap).map((model) => {
 				const subModelData = submodelsRevisionsMap[model];
-				return prepareModelToCompare(teamspace, model, subModelData.name, false, subModelData.revisions);
+				return prepareModelToCompare(teamspace, project, model, subModelData.name, false, subModelData.revisions);
 			});
 
 			compareModels = compareModels.filter((model) => selectHasViewerAccess(getState(), model._id));
@@ -277,11 +279,13 @@ function* startComparisonOfFederation() {
 			if (keepModelShown) {
 				Viewer.diffToolSetAsComparator(
 					model.teamspace,
+					model.project,
 					model._id
 				);
 			} else {
 				const modelPromise = Viewer.diffToolLoadComparator(
 					model.teamspace,
+					model.project,
 					model._id,
 					targetRevision.name
 				);
@@ -310,9 +314,9 @@ function* startComparisonOfFederation() {
 
 function* startComparisonOfModel() {
 	const targetModels = yield select(selectTargetModelsList);
-	const { teamspace, _id } = targetModels[0];
+	const { teamspace, project, _id } = targetModels[0];
 	const revision = targetModels[0].targetDiffRevision;
-	yield Viewer.diffToolLoadComparator(teamspace, _id, revision.name);
+	yield Viewer.diffToolLoadComparator(teamspace, project, _id, revision.name);
 }
 
 function* startCompare() {

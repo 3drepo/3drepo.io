@@ -745,12 +745,12 @@ export class ViewerService {
 	 * Diffs
 	 */
 
-	public diffToolSetAsComparator(account: string, model: string) {
-		UnityUtil.diffToolSetAsComparator(account, model);
+	public diffToolSetAsComparator(account: string, project: string, model: string) {
+		UnityUtil.diffToolSetAsComparator(account, project, model);
 	}
 
-	public diffToolLoadComparator(account: string, model: string, revision: string) {
-		return UnityUtil.diffToolLoadComparator(account, model, revision);
+	public diffToolLoadComparator(account: string, project: string, model: string, revision: string) {
+		return UnityUtil.diffToolLoadComparator(account, project, model, revision);
 	}
 
 	public diffToolEnableWithDiffMode() {
