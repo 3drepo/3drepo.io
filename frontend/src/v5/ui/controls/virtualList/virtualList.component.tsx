@@ -290,7 +290,7 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 
 	const isItemWithIndexShowing = (index, scroller?:Element) => {
 		const isRendering = res?.first <= index && index <= (itemsSlice.length - 1 ) +  res?.first;
-		if (!isRendering) return false;
+		if (!isRendering || !itemsContainer.current) return false;
 		const scrollingElement = scroller || containerRef.current.parentElement;
 		const itemBounds  = itemsContainer.current.children[index - res.first].getBoundingClientRect();
 		const scrollingElementBounds = scrollingElement.getBoundingClientRect();
