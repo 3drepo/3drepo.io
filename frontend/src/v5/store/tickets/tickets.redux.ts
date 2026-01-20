@@ -71,7 +71,7 @@ export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: 
 	const ticketIds: string[] = [];
 	
 	tickets.forEach((ticket) => {
-		state.ticketsData[ticket._id] = ticket;
+		state.ticketsData[ticket._id] = { ...ticket, modelId };
 		ticketIds.push(ticket._id);
 	});
 	
@@ -88,7 +88,7 @@ export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: U
 		mergeWithArray(existingTicket, ticket);
 	} else {
 		// Add new ticket
-		state.ticketsData[ticket._id] = ticket as ITicket;
+		state.ticketsData[ticket._id] = { ...ticket, modelId } as any;
 		state.ticketsByModelId[modelId].push(ticket._id);
 	}
 };

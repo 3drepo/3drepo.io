@@ -285,6 +285,10 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		return null;
 	}
 
+	const updateTickets = () => {
+		TicketsActionsDispatchers.updateManyTickets(teamspace, project, '', '', Array.from(filteredTicketsIDs), { properties:{ Status:'In Progress' } }, false);
+	};
+
 	return (
 		// eslint-disable-next-line max-len
 		<TicketsFiltersContextComponent onChange={onChangeFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters} isFiltering={isFiltering}>
@@ -321,6 +325,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 							/>}
 					</FlexContainer>
 				</FiltersContainer>
+				<button onClick={updateTickets}>update tickets</button>
 				<CardFilters />
 				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
 			</TicketsTableLayout>

@@ -19,7 +19,7 @@ import { all, cancel, fork, put, select, take, takeEvery, takeLatest } from 'red
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
-import { chunk, get, isString } from 'lodash';
+import { chunk, get, isEqual, isString } from 'lodash';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -367,18 +367,81 @@ export function* watchPropertiesUpdates({ propertiesNames, watch }: WatchPropert
 	yield cancel(watchFetchTask);
 }
 
-export function* updateManyTickets({ teamspace, projectId, modelId, ids, ticket, isFederation, template, onError }: UpdateManyTicketsAction) {
-	try {
-		const tickets = ids.map((id) => ({ ...ticket, _id: id }));
-		let chunkSize = 1000;
-		
-		const chunks = chunk(tickets, chunkSize);
+const hasSameValue = (ticket:Partial<ITicket>, updateFields:Partial<ITicket>)=> {
+	let value = false;
 
-		for (let i = 0; i < chunks.length ; i++) {
-			yield updateManyTicketsQueue.addCall(isFederation, teamspace, projectId, modelId, template, chunks[i]);
+	for (let key of Object.keys(updateFields)) {
+		if (key === 'properties' || value) break;
+
+		if (ticket[key] === updateFields[key]) {
+			value = true;
 		}
-		
-		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets.map(addUpdatedAtTime)));
+	}
+	
+	for (let key of Object.keys(updateFields.properties || {})) {
+		if (value) break;
+		if (isEqual(ticket.properties[key], updateFields.properties[key])) {
+			value = true;
+		}
+	}
+
+	for (let key of Object.keys(updateFields.modules || {})) {
+		for (let moduleProperty of Object.keys(updateFields.modules[key].properties || {})) {
+			if (value) break;
+			if (isEqual(ticket.modules[key].properties[moduleProperty], updateFields.modules[key].properties[moduleProperty])) {
+				value = true;
+			}
+		}
+	}
+
+	return value;
+};
+
+export function* updateManyTickets({ teamspace, projectId, ids, ticket, isFederation, onError }: UpdateManyTicketsAction) {
+	try {
+		// This is for updating all tickets in the redux state
+		const ticketsByModelTemplateId:Record<string, Partial<ITicket>[]> = {};
+
+		// This is for updating all tickets in the redux state
+		const allTicketsUpdates:Record<string, Partial<ITicket>[]> = {};
+
+		for (let i = 0 ; i < ids.length ; i++) {
+			const id =  ids[i];
+			const ticketData = yield select(selectTicketByIdRaw, undefined, id);
+
+
+			// *** README *** : This validation should be removed before the release and after
+			// the backend is changed to not complain about tickets with the same original value.
+			if (!hasSameValue(ticketData, ticket)) {
+				const key = ticketData.modelId + '.' + ticketData.type;
+
+				if (!ticketsByModelTemplateId[key]) {
+					ticketsByModelTemplateId[key] = [];
+				}
+
+				ticketsByModelTemplateId[key].push({ ...ticket, _id: id });
+			}
+
+			if (!allTicketsUpdates[ticketData.modelId]) {
+				allTicketsUpdates[ticketData.modelId] = [];
+			}
+
+			allTicketsUpdates[ticketData.modelId].push({ ...ticket, _id: id });
+		}
+
+		let chunkSize = 1000;
+
+		for (let modelIdTemplate of Object.keys(ticketsByModelTemplateId)) {
+			const chunks = chunk(ticketsByModelTemplateId[modelIdTemplate], chunkSize);
+			const [modelId, template] = modelIdTemplate.split('.');
+			for (let i = 0; i < chunks.length ; i++) {
+				yield updateManyTicketsQueue.addCall(isFederation, teamspace, projectId, modelId, template, chunks[i]);
+			} 
+		}
+
+		for (let modelId of Object.keys(allTicketsUpdates)) {
+			yield put(TicketsActions.upsertTicketsSuccess(modelId, allTicketsUpdates[modelId].map(addUpdatedAtTime)));
+		}
 
 		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateManyTickets.updated', defaultMessage: 'Tickets updated' })));
 	} catch (error) {
