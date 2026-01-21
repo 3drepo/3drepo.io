@@ -36,6 +36,8 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelection/groupBySelection.component';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { ModuleTitle } from '@components/viewer/cards/cardFilters/cardFilters.styles';
+import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export const TicketsListCard = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
@@ -92,6 +94,11 @@ export const TicketsListCard = () => {
 				/>
 				<CardContent onClick={() => TicketsCardActionsDispatchers.setSelectedTicket(null)}>
 					<CardFilters />
+					{groupBy !== NONE_OPTION &&
+						(<ModuleTitle>
+							{formatMessage({ id: 'viewer.cards.tickets.groupedByLabel', defaultMessage: 'Grouped by: ' })}{getPropertyLabel(groupBy)}
+						</ModuleTitle>)
+					}
 					{tickets.length ? (
 						<TicketsList groupBy={groupBy} templates={templates} loading={fetchingProperties}/>
 					) : (
