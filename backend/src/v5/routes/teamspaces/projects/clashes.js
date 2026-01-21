@@ -61,7 +61,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/clashes:
+	 * /teamspaces/{teamspace}/projects/{project}/clash:
 	 *   post:
 	 *     description: Creates a new clash test plan
 	 *     tags: [v:external, Clashes]
@@ -158,7 +158,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}:
+	 * /teamspaces/{teamspace}/projects/{project}/clash/{planId}:
 	 *   patch:
 	 *     description: Updates a clash test plan
 	 *     tags: [v:external, Clashes]
@@ -251,7 +251,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}:
+	 * /teamspaces/{teamspace}/projects/{project}/clash/{planId}:
 	 *   delete:
 	 *     description: Deletes a clash test plan
 	 *     tags: [v:external, Clashes]
