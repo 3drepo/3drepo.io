@@ -36,14 +36,15 @@ Clashes.getPlanById = (teamspace, id, projection) => getPlanByQuery(teamspace, {
 
 Clashes.getPlanByName = (teamspace, name, projection) => getPlanByQuery(teamspace, { name }, projection);
 
-Clashes.createPlan = async (teamspace, data) => {
+Clashes.createPlan = async (teamspace, data, user) => {
 	const _id = generateUUID();
-	await db.insertOne(teamspace, CLASH_PLANS_COL, { _id, ...data });
+	await db.insertOne(teamspace, CLASH_PLANS_COL, { ...data, _id, createdAt: new Date(), createdBy: user });
 	return _id;
 };
 
-Clashes.updatePlan = async (teamspace, planId, data) => {
-	await db.updateOne(teamspace, CLASH_PLANS_COL, { _id: planId }, { $set: data });
+Clashes.updatePlan = async (teamspace, planId, data, user) => {
+	await db.updateOne(teamspace, CLASH_PLANS_COL, { _id: planId },
+		{ $set: { ...data, updatedAt: new Date(), updatedBy: user } });
 };
 
 Clashes.deletePlan = async (teamspace, planId) => {

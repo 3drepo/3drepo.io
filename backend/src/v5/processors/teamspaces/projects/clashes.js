@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes');
+const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
 
 const Clashes = {};
 

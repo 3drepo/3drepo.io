@@ -16,7 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const { getPlanById } = require('../../../../../models/clashes');
+const { getPlanById } = require('../../../../../models/clashes.plans');
 const { isEqual } = require('../../../../../utils/helper/objects');
 const { respond } = require('../../../../../utils/responder');
 const { validateMany } = require('../../../../common');

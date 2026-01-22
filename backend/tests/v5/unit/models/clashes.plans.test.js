@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { update } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
 
 const { CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
-const Clashes = require(`${src}/models/clashes`);
+const ClashPlans = require(`${src}/models/clashes.plans`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -32,7 +33,7 @@ const testGetPlanById = () => {
 			const planId = generateRandomString();
 			const projection = { _id: 1 };
 
-			await expect(Clashes.getPlanById(teamspace, planId, projection))
+			await expect(ClashPlans.getPlanById(teamspace, planId, projection))
 				.resolves.toEqual(data);
 
 			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId }, projection);
@@ -44,7 +45,7 @@ const testGetPlanById = () => {
 			const planId = generateRandomString();
 			const projection = { _id: 1 };
 
-			await expect(Clashes.getPlanById(teamspace, planId, projection))
+			await expect(ClashPlans.getPlanById(teamspace, planId, projection))
 				.rejects.toEqual(templates.clashPlanNotFound);
 
 			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId }, projection);
@@ -61,7 +62,7 @@ const testGetPlanByName = () => {
 			const name = generateRandomString();
 			const projection = { _id: 1 };
 
-			await expect(Clashes.getPlanByName(teamspace, name, projection))
+			await expect(ClashPlans.getPlanByName(teamspace, name, projection))
 				.resolves.toEqual(data);
 
 			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { name }, projection);
@@ -73,7 +74,7 @@ const testGetPlanByName = () => {
 			const name = generateRandomString();
 			const projection = { _id: 1 };
 
-			await expect(Clashes.getPlanByName(teamspace, name, projection))
+			await expect(ClashPlans.getPlanByName(teamspace, name, projection))
 				.rejects.toEqual(templates.clashPlanNotFound);
 
 			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { name }, projection);
@@ -86,13 +87,15 @@ const testCreatePlan = () => {
 		test('should create a plan and return its id', async () => {
 			const insertFn = jest.spyOn(db, 'insertOne').mockResolvedValue();
 			const teamspace = generateRandomString();
+			const user = generateRandomString();
 			const data = generateRandomObject();
 
-			const res = await Clashes.createPlan(teamspace, data);
+			const res = await ClashPlans.createPlan(teamspace, data, user);
 
-			const { _id } = insertFn.mock.calls[0][2];
+			const { _id, createdAt } = insertFn.mock.calls[0][2];
 			expect(insertFn).toHaveBeenCalledTimes(1);
-			expect(insertFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id, ...data });
+			expect(insertFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL,
+				{ ...data, _id, createdAt, createdBy: user });
 			expect(res).toEqual(_id);
 		});
 	});
@@ -104,12 +107,15 @@ const testUpdatePlan = () => {
 			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
 			const teamspace = generateRandomString();
 			const planId = generateRandomString();
+			const user = generateRandomString();
 			const data = generateRandomObject();
 
-			await Clashes.updatePlan(teamspace, planId, data);
+			await ClashPlans.updatePlan(teamspace, planId, data, user);
 
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
 			expect(updateFn).toHaveBeenCalledTimes(1);
-			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId }, { $set: data });
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId },
+				{ $set: { ...data, updatedAt, updatedBy: user } });
 		});
 	});
 };
@@ -121,7 +127,7 @@ const testDeletePlan = () => {
 			const planId = generateRandomString();
 			const deleteFn = jest.spyOn(db, 'deleteOne').mockResolvedValueOnce(undefined);
 
-			await Clashes.deletePlan(teamspace, planId);
+			await ClashPlans.deletePlan(teamspace, planId);
 
 			expect(deleteFn).toHaveBeenCalledTimes(1);
 			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId });

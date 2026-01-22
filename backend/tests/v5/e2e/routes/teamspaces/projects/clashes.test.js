@@ -20,7 +20,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 
-const { getPlanById } = require(`${src}/models/clashes`);
+const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -67,7 +67,7 @@ const generateBasicData = () => {
 
 const testCreatePlan = () => {
 	describe('Create clash test plan', () => {
-		const route = (ts, project, key) => `/v5/teamspaces/${ts}/projects/${project}/clash${key ? `?key=${key}` : ''}`;
+		const route = (ts, project, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes${key ? `?key=${key}` : ''}`;
 		const basicData = generateBasicData();
 		const { users, teamspace, project, models } = basicData;
 
@@ -79,21 +79,26 @@ const testCreatePlan = () => {
 
 		describe.each([
 			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
-			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+			['session is invalid', { user: { apiKey: ServiceHelper.generateRandomString() } }, false, templates.notLoggedIn],
+			['user is not a member of the teamspace', { user: users.unlicencedUser }, false, templates.teamspaceNotFound],
 			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 			['payload is invalid', { planData: { ...generatePlanData(), type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
-			['user has access to a project', { key: users.projectAdmin.apiKey }, true],
+			['user has access to a project', { user: users.projectAdmin }, true],
 			['user is teamspace admin', {}, true],
-		])('', (desc, { ts = teamspace, proj = project.id, key = users.tsAdmin.apiKey, planData = generatePlanData() }, success, expectedRes) => {
+		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planData = generatePlanData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
-				const res = await agent.post(route(ts, proj, key))
+				const res = await agent.post(route(ts, proj, user.apiKey))
 					.send(planData)
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
 					const plan = await getPlanById(ts, stringToUUID(res.body._id));
-					expect(plan).toEqual({ ...planData, _id: plan._id });
+					expect(plan).toEqual({
+						...planData,
+						_id: plan._id,
+						createdBy: user.user,
+						createdAt: plan.createdAt,
+					});
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -104,7 +109,7 @@ const testCreatePlan = () => {
 
 const testUpdatePlan = () => {
 	describe('Update clash test plan', () => {
-		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clash/${planId}${key ? `?key=${key}` : ''}`;
+		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}${key ? `?key=${key}` : ''}`;
 
 		const basicData = generateBasicData();
 		const { users, teamspace, project, plan: existingPlan } = basicData;
@@ -117,23 +122,28 @@ const testUpdatePlan = () => {
 
 		describe.each([
 			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
-			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+			['session is invalid', { user: { apiKey: ServiceHelper.generateRandomString() } }, false, templates.notLoggedIn],
+			['user is not a member of the teamspace', { user: users.unlicencedUser }, false, templates.teamspaceNotFound],
 			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
 			['payload is invalid', { planData: { ...existingPlan, type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
 			['payload is invalid (no changes)', { planData: existingPlan }, false, templates.invalidArguments],
-			['user has access to a project', { key: users.projectAdmin.apiKey }, true],
+			['user has access to a project', { user: users.projectAdmin }, true],
 			['user is teamspace admin', {}, true],
-		])('', (desc, { ts = teamspace, proj = project.id, key = users.tsAdmin.apiKey, planId = existingPlan._id, planData = generateUpdateData() }, success, expectedRes) => {
+		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planId = existingPlan._id, planData = generateUpdateData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
-				const res = await agent.patch(route(ts, proj, planId, key))
+				const res = await agent.patch(route(ts, proj, planId, user.apiKey))
 					.send(planData)
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
 					const plan = await getPlanById(ts, stringToUUID(planId));
-					expect(plan).toEqual({ ...planData, _id: plan._id });
+					expect(plan).toEqual({
+						...planData,
+						_id: plan._id,
+						updatedAt: plan.updatedAt,
+						updatedBy: user.user,
+					});
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -144,7 +154,7 @@ const testUpdatePlan = () => {
 
 const testDeletePlan = () => {
 	describe('Delete clash test plan', () => {
-		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clash/${planId}${key ? `?key=${key}` : ''}`;
+		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}${key ? `?key=${key}` : ''}`;
 
 		const basicData = generateBasicData();
 		const { users, teamspace, project, plan: existingPlan } = basicData;

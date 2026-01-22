@@ -32,9 +32,12 @@ const generatePlanSchema = (teamspace, project) => {
 			}
 
 			const isContainer = await getContainerById(teamspace, value, { _id: 1 }).catch(() => false);
-			const existsInProject = await modelsExistInProject(teamspace, project, [value]).catch(() => false);
 
-			return isContainer && existsInProject;
+			if (!isContainer) {
+				return false;
+			}
+
+			return modelsExistInProject(teamspace, project, [value]).catch(() => false);
 		}),
 		rules: rulesSchema.optional(),
 	}).required();

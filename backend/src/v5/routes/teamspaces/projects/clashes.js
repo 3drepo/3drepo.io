@@ -19,14 +19,16 @@ const { planExists, validateNewPlanData, validateUpdatePlanData } = require('../
 const Clashes = require('../../../processors/teamspaces/projects/clashes');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
+const { getUserFromSession } = require('../../../utils/sessions');
 const { isAdminToProject } = require('../../../middleware/permissions');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
 const createPlan = async (req, res) => {
+	const user = getUserFromSession(req.session);
 	const { teamspace } = req.params;
 	try {
-		const planId = await Clashes.createPlan(teamspace, req.body, req.user);
+		const planId = await Clashes.createPlan(teamspace, req.body, user);
 		respond(req, res, templates.ok, { _id: UUIDToString(planId) });
 	} catch (err) {
 		// istanbul ignore next
@@ -35,9 +37,10 @@ const createPlan = async (req, res) => {
 };
 
 const updatePlan = async (req, res) => {
+	const user = getUserFromSession(req.session);
 	const { teamspace, planId } = req.params;
 	try {
-		await Clashes.updatePlan(teamspace, planId, req.body);
+		await Clashes.updatePlan(teamspace, planId, req.body, user);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -61,7 +64,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/clash:
+	 * /teamspaces/{teamspace}/projects/{project}/clashes:
 	 *   post:
 	 *     description: Creates a new clash test plan
 	 *     tags: [v:external, Clashes]
@@ -158,7 +161,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/clash/{planId}:
+	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}:
 	 *   patch:
 	 *     description: Updates a clash test plan
 	 *     tags: [v:external, Clashes]
@@ -251,7 +254,7 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/clash/{planId}:
+	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}:
 	 *   delete:
 	 *     description: Deletes a clash test plan
 	 *     tags: [v:external, Clashes]

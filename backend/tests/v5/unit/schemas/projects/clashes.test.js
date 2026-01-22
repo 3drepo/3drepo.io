@@ -95,7 +95,6 @@ const testValidatePlan = () => {
 			test('should fail if model is not container', async () => {
 				times(2, () => {
 					ModelSettingsModel.getContainerById.mockRejectedValueOnce(templates.modelNotFound);
-					ProjectSettingsModel.modelsExistInProject.mockResolvedValueOnce(true);
 				});
 
 				await expect(ClashesSchema.validatePlan(teamspace, project, planData))

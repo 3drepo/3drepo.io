@@ -19,8 +19,8 @@ const { src } = require('../../../../helper/path');
 
 const { generateRandomString, determineTestGroup } = require('../../../../helper/services');
 
-jest.mock('../../../../../../src/v5/models/clashes');
-const ClashesModel = require(`${src}/models/clashes`);
+jest.mock('../../../../../../src/v5/models/clashes.plans');
+const ClashPlansModel = require(`${src}/models/clashes.plans`);
 
 const Clashes = require(`${src}/processors/teamspaces/projects/clashes`);
 
@@ -29,12 +29,12 @@ const testCreatePlan = () => {
 		test('should call createPlan with the teamspace and data provided', async () => {
 			const teamspace = generateRandomString();
 			const data = generateRandomString();
-			ClashesModel.createPlan.mockResolvedValueOnce(data);
+			ClashPlansModel.createPlan.mockResolvedValueOnce(data);
 
 			await expect(Clashes.createPlan(teamspace, data));
 
-			expect(ClashesModel.createPlan).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.createPlan).toHaveBeenCalledWith(teamspace, data);
+			expect(ClashPlansModel.createPlan).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.createPlan).toHaveBeenCalledWith(teamspace, data);
 		});
 	});
 };

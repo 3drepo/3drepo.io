@@ -92,7 +92,7 @@ RoutesManager.init = (app) => {
 		app.use('/v5/teamspaces/:teamspace/projects/:project/drawings/:drawing/revisions/:revision/calibrations', CalibrationRoutes);
 
 		// Clashes
-		app.use('/v5/teamspaces/:teamspace/projects/:project/clash', ClashRoutes);
+		app.use('/v5/teamspaces/:teamspace/projects/:project/clashes', ClashRoutes);
 	}
 };
 
