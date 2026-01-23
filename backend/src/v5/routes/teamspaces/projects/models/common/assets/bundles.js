@@ -17,8 +17,10 @@
 
 const {
 	getRepoBundleInfo: getContainerBundleInfo,
+	getRepoBundle: getContainerRepoBundle,
 	getSuperMeshesInfo: getContainerSuperMeshesInfo,
 	getSupermeshMapping: getContainerSupermeshMapping,
+	getUnityBundle: getContainerUnityBundle,
 } = require('../../../../../../processors/teamspaces/projects/models/containers');
 const {
 	getRepoBundleInfo: getFederationBundleInfo,
@@ -72,6 +74,30 @@ const getUnityMeta = (modelType) => async (req, res, next) => {
 		const result = await fn(teamspace, req.params[modelType], revision, req.containers);
 		req.supermeshData = result;
 		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getUnityBundle = async (req, res) => {
+	const { teamspace, container, bundleId } = req.params;
+
+	try {
+		const { readStream, size, mimeType, encoding } = await getContainerUnityBundle(teamspace, container, bundleId);
+		writeStreamRespond(req, res, templates.ok, readStream, { encoding, mimeType, fileSize: size });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getRepoBundle = async (req, res) => {
+	const { teamspace, container, bundleId } = req.params;
+
+	try {
+		const { readStream, size, mimeType, encoding } = await getContainerRepoBundle(teamspace, container, bundleId);
+		writeStreamRespond(req, res, templates.ok, readStream, { encoding, mimeType, fileSize: size });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -505,8 +531,96 @@ const establishRoutes = (modelType) => {
 	 *                                     type: number
 	 *                                   example: [12400.625, 544.9990234375, 0]
 	 */
-
 	router.get('/unity/meta', hasReadAccessToModel[modelType], verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getUnityMeta(modelType), serialiseUnityMeta(modelType));
+
+	// istanbul ignore else
+	if (modelType === modelTypes.CONTAINER) {
+		/**
+		* @openapi
+		* /teamspaces/{teamspace}/projects/{project}/containers/{containerId}/assets/bundles/unity/{bundleId}:
+		*   get:
+		*     description: Gets an actual Unity Bundle file containing a set of assets
+		*     tags: [v:external, v:internal, Models]
+		*     operationId: getUnityBundle
+		*     parameters:
+		*       - name: teamspace
+		*         description: Teamspace identifier (e.g., "design-team-alpha")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: project
+		*         description: Project identifier (e.g., "office-tower-2025")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: containerId
+		*         description: UUID of the container (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: bundleId
+		*         description: Bundle ID (e.g., "9f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*     responses:
+		*       200:
+		*         description: Returns the unity bundle file
+		*         content:
+		*           application/octet-stream:
+		*             schema:
+		*               type: string
+		*               format: binary
+		*/
+		router.get('/unity/:bundleId', hasReadAccessToContainer, getUnityBundle);
+
+		/**
+		* @openapi
+		* /teamspaces/{teamspace}/projects/{project}/containers/{containerId}/assets/bundles/repo/{bundleId}:
+		*   get:
+		*     description: Gets an actual Repo Bundle file containing a set of assets
+		*     tags: [v:external, v:internal, Models]
+		*     operationId: getRepoBundle
+		*     parameters:
+		*       - name: teamspace
+		*         description: Teamspace identifier (e.g., "design-team-alpha")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: project
+		*         description: Project identifier (e.g., "office-tower-2025")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: containerId
+		*         description: UUID of the container (e.g., "8f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*       - name: bundleId
+		*         description: Bundle ID (e.g., "9f1c1a9e-52ab-4c8e-9f87-3b75e8c0b4de")
+		*         in: path
+		*         required: true
+		*         schema:
+		*           type: string
+		*     responses:
+		*       200:
+		*         description: Returns the repo bundle file
+		*         content:
+		*           application/octet-stream:
+		*             schema:
+		*               type: string
+		*               format: binary
+		*/
+		router.get('/repo/:bundleId', hasReadAccessToContainer, getRepoBundle);
+	}
 
 	return router;
 };
