@@ -192,4 +192,12 @@ Drawings.deleteFavourites = async (username, teamspace, project, favouritesToRem
 Drawings.getSettings = (teamspace, drawing) => getDrawingById(teamspace,
 	drawing, { name: 1, number: 1, type: 1, desc: 1, calibration: 1 });
 
+Drawings.getMultipleDrawingsStats = async (teamspace, project, drawings) => {
+	const stats = {};
+	await Promise.all(drawings.map(async (drawing) => {
+		stats[drawing] = await Drawings.getDrawingStats(teamspace, project, drawing);
+	}));
+	return stats;
+};
+
 module.exports = Drawings;

@@ -37,6 +37,7 @@ const ModelSettings = require('../../../../../processors/teamspaces/projects/mod
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { hasReadAccessToModels } = require('../../../../../utils/permissions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 
@@ -228,6 +229,29 @@ const getJobsWithAccess = async (req, res) => {
 	}
 };
 
+const getModelStatsInBulk = (modelType) => async (req, res, next) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	const { models } = req.query;
+	const modelsList = models.split(',');
+
+	const getStatsFn = {
+		[modelTypes.CONTAINER]: Containers.getMultipleContainersStats,
+		[modelTypes.DRAWING]: Drawings.getMultipleDrawingsStats,
+		[modelTypes.FEDERATION]: Federations.getMultipleFederationsStats,
+	};
+
+	try {
+		const availableModels = await hasReadAccessToModels(teamspace, project, modelsList, user);
+		const stats = await getStatsFn[modelType](teamspace, project, availableModels);
+		req.outputData = stats;
+		await next();
+	} catch (err) {
+		/* istanbul ignore next */
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = (modelType, isInternal) => {
 	const router = Router({ mergeParams: true });
 
@@ -250,6 +274,8 @@ const establishRoutes = (modelType, isInternal) => {
 	};
 
 	if (!isInternal) {
+		router.get('/stats', hasAccessToTeamspace, getModelStatsInBulk(modelType));
+
 		/**
 		 * @openapi
 		 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:

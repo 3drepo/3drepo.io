@@ -92,6 +92,13 @@ Permissions.hasReadAccessToSomeModels = async (teamspace, project, models, usern
 		&& permissions.some((perm) => perm.user === username && permCheck(perm)));
 };
 
+Permissions.hasReadAccessToModels = async (teamspace, project, models, username) => {
+	const permCheck = (perm) => MODEL_READ_ROLES.includes(perm.permission);
+	const modelPerms = await findModels(teamspace, { _id: { $in: models } }, { permissions: 1 });
+	return modelPerms.filter(({ permissions }) => permissions
+		&& permissions.some((perm) => perm.user === username && permCheck(perm)));
+};
+
 Permissions.hasWriteAccessToModel = modelPermCheck(
 	(perm) => MODEL_WRITE_ROLES.includes(perm.permission), undefined,
 );

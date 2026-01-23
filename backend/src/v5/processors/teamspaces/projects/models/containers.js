@@ -147,4 +147,12 @@ Containers.getRevisionMD5Hash = getModelMD5Hash;
 
 Containers.getSuperMeshesInfo = getSuperMeshesInfo;
 
+Containers.getMultipleContainersStats = async (teamspace, project, containers) => {
+	const stats = {};
+	await Promise.all(containers.map(async (container) => {
+		stats[container] = await Containers.getContainerStats(teamspace, project, container);
+	}));
+	return stats;
+};
+
 module.exports = Containers;

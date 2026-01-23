@@ -132,4 +132,12 @@ Federations.getSuperMeshesInfo = async (teamspace, federation, revision, contain
 	return { subModels: supermeshData };
 };
 
+Federations.getMultipleFederationsStats = async (teamspace, project, federations) => {
+	const stats = {};
+	await Promise.all(federations.map(async (federation) => {
+		stats[federation] = await Federations.getFederationStats(teamspace, project, federation);
+	}));
+	return stats;
+};
+
 module.exports = Federations;
