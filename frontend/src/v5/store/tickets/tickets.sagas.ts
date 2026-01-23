@@ -43,7 +43,7 @@ import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
 import { selectTicketById, selectTicketByIdRaw, selectTicketsById, selectTicketsData, selectTicketsGroups } from './tickets.selectors';
-import { selectContainersByFederationId } from '../federations/federations.selectors';
+import { selectContainersByFederationId, selectIsFederation } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { addUpdatedAtTime } from './tickets.helpers';
 import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
@@ -52,6 +52,7 @@ import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.cons
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import EventEmitter from 'eventemitter3';
 import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -397,13 +398,15 @@ const hasSameValue = (ticket:Partial<ITicket>, updateFields:Partial<ITicket>)=> 
 	return value;
 };
 
-export function* updateManyTickets({ teamspace, projectId, ids, ticket, isFederation, onError }: UpdateManyTicketsAction) {
+export function* updateManyTickets({ teamspace, projectId, ids, ticket, onSuccess, onError }: UpdateManyTicketsAction) {
 	try {
 		// // This is for updating all tickets in the redux state
 		const ticketsByModelTemplateId:Record<string, Partial<ITicket>[]> = {};
 
 		// // This is for updating all tickets in the redux state
 		const allTicketsUpdates:Record<string, Partial<ITicket>[]> = {};
+
+		const state = getState();
 
 		const ticketsData = yield select(selectTicketsData);
 
@@ -431,12 +434,13 @@ export function* updateManyTickets({ teamspace, projectId, ids, ticket, isFedera
 		}
 
 		let chunkSize = 1000;
+		const isFed = selectIsFederation(state);
 
 		for (let modelIdTemplate of Object.keys(ticketsByModelTemplateId)) {
 			const chunks = chunk(ticketsByModelTemplateId[modelIdTemplate], chunkSize);
 			const [modelId, template] = modelIdTemplate.split('.');
 			for (let i = 0; i < chunks.length ; i++) {
-				yield updateManyTicketsQueue.addCall(isFederation, teamspace, projectId, modelId, template, chunks[i]);
+				yield updateManyTicketsQueue.addCall(isFed(modelId), teamspace, projectId, modelId, template, chunks[i]);
 			} 
 		}
 
@@ -444,12 +448,13 @@ export function* updateManyTickets({ teamspace, projectId, ids, ticket, isFedera
 			yield put(TicketsActions.upsertTicketsSuccess(modelId, allTicketsUpdates[modelId].map(addUpdatedAtTime)));
 		}
 
+		onSuccess?.();
 		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateManyTickets.updated', defaultMessage: 'Tickets updated' })));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update the ticket for {model} ' },
-				{ model: getContainerOrFederationFormattedText(isFederation) },
+				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update tickets({ticketsCount})' },
+				{ ticketsCount: ids.length },
 			),
 			error,
 		}));

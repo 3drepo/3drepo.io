@@ -286,11 +286,11 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	}
 
 	const updateTicketsInProgress = () => {
-		TicketsActionsDispatchers.updateManyTickets(teamspace, project, '', '', Array.from(filteredTicketsIDs), { properties:{ Status:'In Progress' } }, false);
+		TicketsActionsDispatchers.updateManyTickets(teamspace, project, Array.from(filteredTicketsIDs), { properties:{ Status:'In Progress' } });
 	};
 
 	const updateTicketsOpen = () => {
-		TicketsActionsDispatchers.updateManyTickets(teamspace, project, '', '', Array.from(filteredTicketsIDs), { properties:{ Status:'Open' } }, false);
+		TicketsActionsDispatchers.updateManyTickets(teamspace, project, Array.from(filteredTicketsIDs), { properties:{ Status:'Open' } });
 	};
 
 	return (
