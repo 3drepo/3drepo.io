@@ -42,14 +42,8 @@ const generatePlanSchema = (teamspace, project) => {
 		type: Yup.string().oneOf(CLASH_PLAN_TYPES).required(),
 		tolerance: Yup.number().min(0).required(),
 		selfIntersectionsCheck: Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).optional().default(false),
-		trigger: Yup.array().of(Yup.string().oneOf(TRIGGER_OPTIONS)).min(1).transform(
-			(values) => {
-				if (!values) {
-					return true;
-				}
-
-				return Array.from(new Set(values));
-			})
+		trigger: Yup.array().of(Yup.string().oneOf(TRIGGER_OPTIONS)).min(1)
+			.transform((values) => (values ? Array.from(new Set(values)) : values))
 			.required(),
 		selectionA: selectionSchema,
 		selectionB: selectionSchema,

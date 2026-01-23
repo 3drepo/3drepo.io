@@ -73,6 +73,7 @@ const testValidatePlan = () => {
 			['with empty trigger', false, { ...planData, trigger: [] }],
 			['with valid trigger', true, { ...planData, trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]] }],
 			['with selections without container', false, { ...planData, selectionA: { rules: [standardRule] }, selectionB: { rules: [standardRule] } }],
+			['with selections with null container', false, { ...planData, selectionA: { rules: [standardRule], container: null }, selectionB: { rules: [standardRule], container: null } }],
 		])('Validate plan data properties (without selection)', (desc, success, data, expectedData) => {
 			test(`should ${success ? 'succeed' : 'fail'} ${desc}`, async () => {
 				if (success) {
