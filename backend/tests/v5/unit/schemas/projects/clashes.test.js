@@ -64,29 +64,30 @@ const testValidatePlan = () => {
 			['with negative tolerance', false, { ...planData, tolerance: generateRandomNumber(-10, -1) }],
 			['with undefined tolerance', false, { ...planData, tolerance: undefined }],
 			['with invalid selfIntersectionsCheck', false, { ...planData, selfIntersectionsCheck: generateRandomString() }],
-			['with undefined selfIntersectionsCheck', true, { ...planData, selfIntersectionsCheck: undefined }],
+			['with undefined selfIntersectionsCheck', true, { ...planData, selfIntersectionsCheck: undefined }, { ...planData, selfIntersectionsCheck: false }],
 			['with selfIntersectionsCheck set to true', true, { ...planData, selfIntersectionsCheck: true }],
 			['with selfIntersectionsCheck set to false', true, { ...planData, selfIntersectionsCheck: false }],
 			['with invalid trigger', false, { ...planData, trigger: generateRandomString() }],
 			['with undefined trigger', false, { ...planData, trigger: undefined }],
-			['with duplicate trigger', false, { ...planData, trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[0]] }],
+			['with duplicate trigger', true, { ...planData, trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[0]] }, { ...planData, trigger: [TRIGGER_OPTIONS[0]] }],
 			['with empty trigger', false, { ...planData, trigger: [] }],
 			['with valid trigger', true, { ...planData, trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]] }],
 			['with selections without container', false, { ...planData, selectionA: { rules: [standardRule] }, selectionB: { rules: [standardRule] } }],
-		])('Validate plan data properties (without selection)', (desc, success, data) => {
+		])('Validate plan data properties (without selection)', (desc, success, data, expectedData) => {
 			test(`should ${success ? 'succeed' : 'fail'} ${desc}`, async () => {
-				if (data?.selectionA?.container) {
+				if (success) {
 					times(2, () => {
 						ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 						ProjectSettingsModel.modelsExistInProject.mockResolvedValueOnce({});
 					});
 				}
 
-				const test = expect(ClashesSchema.validatePlan(teamspace, project, data));
 				if (success) {
-					await test.resolves.not.toBeUndefined();
+					await expect(ClashesSchema.validatePlan(teamspace, project, data))
+						.resolves.toEqual(expectedData ?? data);
 				} else {
-					await test.rejects.not.toBeUndefined();
+					await expect(() => ClashesSchema.validatePlan(teamspace, project, data))
+						.not.toBeUndefined();
 				}
 			});
 		});

@@ -32,12 +32,7 @@ const generatePlanSchema = (teamspace, project) => {
 			}
 
 			const isContainer = await getContainerById(teamspace, value, { _id: 1 }).catch(() => false);
-
-			if (!isContainer) {
-				return false;
-			}
-
-			return modelsExistInProject(teamspace, project, [value]).catch(() => false);
+			return isContainer ? modelsExistInProject(teamspace, project, [value]).catch(() => false) : false;
 		}),
 		rules: rulesSchema.optional(),
 	}).required();
@@ -47,15 +42,13 @@ const generatePlanSchema = (teamspace, project) => {
 		type: Yup.string().oneOf(CLASH_PLAN_TYPES).required(),
 		tolerance: Yup.number().min(0).required(),
 		selfIntersectionsCheck: Yup.mixed().oneOf(SELF_INTERSECTIONS_CHECK_OPTIONS).optional().default(false),
-		trigger: Yup.array().of(Yup.string().oneOf(TRIGGER_OPTIONS)).min(1).test(
-			'No duplicate values', 'Trigger array cannot contain duplicate values',
+		trigger: Yup.array().of(Yup.string().oneOf(TRIGGER_OPTIONS)).min(1).transform(
 			(values) => {
 				if (!values) {
 					return true;
 				}
 
-				const idSet = new Set();
-				return !values.some((val) => idSet.size === idSet.add(val).size);
+				return Array.from(new Set(values));
 			})
 			.required(),
 		selectionA: selectionSchema,
