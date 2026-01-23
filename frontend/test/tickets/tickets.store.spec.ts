@@ -82,7 +82,7 @@ describe('Tickets: store', () => {
 			const modifications = { title:'modified ticket', properties:{priority:'Top'}}
 
 			await waitForActions(() => {
-				dispatch(TicketsActions.updateManyTickets(teamspace, projectId, modelId, templateId, ids, modifications, false));
+				dispatch(TicketsActions.updateManyTickets(teamspace, projectId, ids, modifications));
 			}, [
 				TicketsTypes.UPSERT_TICKETS_SUCCESS,
 			]);
