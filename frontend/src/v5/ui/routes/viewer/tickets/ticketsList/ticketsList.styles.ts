@@ -38,7 +38,7 @@ export const ListContainer = styled.div`
 	}
 `;
 
-export const List = styled.table`
+export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	overflow: hidden;
@@ -46,8 +46,13 @@ export const List = styled.table`
 	margin-bottom: 0;
 	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
 	box-sizing: border-box;
-	tr:not(:last-child) ${/* sc-selector */ TicketItemContainer}{
+
+	${/* sc-selector */ TicketItemContainer} {
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	}
+
+	.vlist-end ${/* sc-selector */ TicketItemContainer}:last-child{
+		border-bottom: 0;
 	}
 `;
 

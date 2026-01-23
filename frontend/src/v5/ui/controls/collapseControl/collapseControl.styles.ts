@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2024 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,19 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Section } from './filtersSection/filtersSection.styles';
+import styled, { css } from 'styled-components';
 
-export const ModuleTitle = styled.p`
-	color: ${({ theme }) => theme.palette.base.main};
-	text-transform: uppercase;
-	margin-top: 0;
-	margin-bottom: 10px;
-	font-size: 9px;
-	line-height: 12px;
-	letter-spacing: 1px;
+export const Container = styled.div<{ $isLoading?: boolean }>`
+	${({ $isLoading }) => $isLoading && css`
+		pointer-events: none;
+	`}
+`;
 
-	${Section} + & {
-		margin-top: 10px;
-	}
+export const ControlsContainer = styled.div`
+	display: flex;
+	justify-content: space-between;
+	overflow: hidden;
+	width: 100%;
 `;
