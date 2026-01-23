@@ -97,6 +97,7 @@ export const TicketsTableSelectionColumn = ({
 						<div key={ticketsChunk[0]._id}>
 							{ticketsChunk.map((ticket) => (
 								<SelectionRow
+									key={ticket._id}
 									ticketId={ticket._id}
 									selected={selectedIdsSet.has(ticket._id)}
 									onCheck={onCheck}

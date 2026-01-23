@@ -17,7 +17,6 @@
 
 import { Button, ButtonsContainer, Container, TitleContainer } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
 import { ActionMenuItem } from '@controls/actionMenu';
-import { isEmpty } from 'lodash';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { findFilterByPropertyName } from '../ticketsTableHeaderFilter.component';
@@ -26,6 +25,10 @@ import { getFilterFormTitle } from '@components/viewer/cards/cardFilters/cardFil
 import { BulkEditInputField } from './bulkEditInputField/bulkEditInputField.component';
 import { useContext } from 'react';
 import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
+import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { useParams } from 'react-router-dom';
 
 type FormType = { value: any; };
 
@@ -33,6 +36,9 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 	const { filters, choosablefilters } = useTicketFiltersContext();
 	const { selectedIds } = useContext(TicketsTableContext);
 	const { module, property, type } = findFilterByPropertyName([...filters, ...choosablefilters], name); 
+	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+	const propDef = findPropertyDefinition(template, name);
 	const defaultValues: FormType = {
 		value: type === 'manyOf' ? [] : '',
 	};
@@ -41,8 +47,11 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 		defaultValues,
 		mode: 'onChange',
 	});
-	const { formState: { isValid, dirtyFields } } = formData;
-	const canSubmit = isValid && !isEmpty(dirtyFields);
+	const { formState: { isValid }, watch } = formData;
+
+	const isEmptyValue = !watch('value');
+	const notNullable = propDef?.required || (propDef?.type === 'oneOf');
+	const canSubmit = isValid && (!notNullable || !isEmptyValue);
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
 		// eslint-disable-next-line no-console
@@ -71,7 +80,11 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 					</Button>
 					<ActionMenuItem disabled={!canSubmit}>
 						<Button onClick={handleSubmit} color="primary" variant="contained" disabled={!canSubmit}>
-							<FormattedMessage id="ticketsTable.headers.bulkEditForm.apply" defaultMessage="Apply" />
+							{isEmptyValue ? (
+								<FormattedMessage id="ticketsTable.headers.bulkEditForm.clear" defaultMessage="Clear All" />
+							) : (
+								<FormattedMessage id="ticketsTable.headers.bulkEditForm.apply" defaultMessage="Apply" />
+							)}
 						</Button>
 					</ActionMenuItem>
 				</ButtonsContainer>
