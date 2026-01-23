@@ -91,7 +91,8 @@ const testValidateUpdatePlanData = () => {
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
+			expect(ClashPlansModel.getPlanById)
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
 			expect(ClashesSchema.validatePlan).not.toHaveBeenCalled();
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.clashPlanNotFound);
@@ -116,7 +117,8 @@ const testValidateUpdatePlanData = () => {
 			expect(mockCB).toHaveBeenCalled();
 			expect(req.planData).toEqual(plan);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
+			expect(ClashPlansModel.getPlanById)
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
 			expect(Responder.respond).not.toHaveBeenCalled();
@@ -140,7 +142,8 @@ const testValidateUpdatePlanData = () => {
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
+			expect(ClashPlansModel.getPlanById)
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
@@ -165,7 +168,8 @@ const testValidateUpdatePlanData = () => {
 
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
+			expect(ClashPlansModel.getPlanById)
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId, { _id: 0 });
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledTimes(1);
 			expect(ClashesSchema.validatePlan).toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.body);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);

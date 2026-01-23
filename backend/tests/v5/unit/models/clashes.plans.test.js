@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { update } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
 
