@@ -15,17 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Button, ButtonsContainer, Container, TitleContainer } from "@components/viewer/cards/cardFilters/filterForm/filterForm.styles";
-import { ActionMenuItem } from "@controls/actionMenu";
-import { isEmpty } from "lodash";
-import { FormProvider, useForm } from "react-hook-form";
-import { FormattedMessage } from "react-intl";
-import { findFilterByPropertyName } from "../ticketsTableHeaderFilter.component";
-import { useTicketFiltersContext } from "@components/viewer/cards/cardFilters/ticketsFilters.context";
-import { getFilterFormTitle } from "@components/viewer/cards/cardFilters/cardFilters.helpers";
-import { BulkEditInputField } from "./bulkEditInputField/bulkEditInputField.component";
-import { useContext } from "react";
-import { TicketsTableContext } from "../../../../ticketsTableContext/ticketsTableContext";
+import { Button, ButtonsContainer, Container, TitleContainer } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
+import { ActionMenuItem } from '@controls/actionMenu';
+import { isEmpty } from 'lodash';
+import { FormProvider, useForm } from 'react-hook-form';
+import { FormattedMessage } from 'react-intl';
+import { findFilterByPropertyName } from '../ticketsTableHeaderFilter.component';
+import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
+import { getFilterFormTitle } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { BulkEditInputField } from './bulkEditInputField/bulkEditInputField.component';
+import { useContext } from 'react';
+import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
 
 type FormType = { value: any; };
 
@@ -41,12 +41,15 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 		defaultValues,
 		mode: 'onChange',
 	});
-	const { formState: { isValid, dirtyFields, errors } } = formData;
+	const { formState: { isValid, dirtyFields } } = formData;
 	const canSubmit = isValid && !isEmpty(dirtyFields);
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
+		// eslint-disable-next-line no-console
 		console.log('@@ SUBMIT VALUE:', filledForm);
+		// eslint-disable-next-line no-console
 		console.log('@@ FOR PROPERTY:', module, property);
+		// eslint-disable-next-line no-console
 		console.log('@@ FOR TICKETS:', selectedIds);
 	});
 
@@ -75,4 +78,4 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 			</Container>
 		</FormProvider>
 	);
-}
+};

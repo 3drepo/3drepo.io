@@ -44,7 +44,7 @@ export const TicketsTableHeaders = () => {
 			&& !propDef?.unique // user is unlikely to want to bulk edit unique properties and it will usually error
 			&& !isSequencingProperty(name) // sequencing dates have complex rules (start must be before end), disallow bulk edit for now
 			&& !isReadOnly;
-	}
+	};
 	
 	return (
 		<Headers>

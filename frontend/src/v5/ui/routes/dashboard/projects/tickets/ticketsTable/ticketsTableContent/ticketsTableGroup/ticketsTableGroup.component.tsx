@@ -36,6 +36,7 @@ import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsT
 import { TicketsTableSelectionColumn } from './ticketsTableSelectionColumn/ticketsTableSelectionColumn.component';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { TicketsTableSettingsColumn } from './ticketsTableSettingsColumn/ticketsTableSettingsColumn.component';
+import { TICKETS_CHUNK_SIZE } from './ticketsTableGroup.helper';
 
 type TicketsTableGroupContentProps = {
 	tickets: ITicket[];
@@ -47,7 +48,6 @@ type TicketsTableGroupContentProps = {
 	hideNewticketButton: boolean;
 };
 
-export const TICKETS_CHUNK_SIZE = 10;
 const TicketsTableGroupContent = ({ 
 	tickets, 
 	sortedItems,

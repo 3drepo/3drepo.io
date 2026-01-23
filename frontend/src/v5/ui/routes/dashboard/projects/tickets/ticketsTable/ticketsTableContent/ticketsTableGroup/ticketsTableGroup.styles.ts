@@ -42,17 +42,17 @@ export const RoundedContainer = styled.div<{ hideNewTicketButton: boolean }>`
 	width: fit-content;
 	border-radius: 0 0 10px 10px;
 	>*:first-child {
-		${Row}:first-of-type {
+		${/* sc-selector */ Row}:first-of-type {
 			border-top-left-radius: 10px;
 		}
 		${({ hideNewTicketButton }) => hideNewTicketButton && css`
-			${Row}:last-of-type {
+			${/* sc-selector */ Row}:last-of-type {
 				border-bottom-left-radius: 10px;
 			}
 		`}
 	}
 	>*:last-child {
-		${Row}:last-of-type {
+		${/* sc-selector */ Row}:last-of-type {
 			border-bottom-right-radius: 10px;
 		}
 	}

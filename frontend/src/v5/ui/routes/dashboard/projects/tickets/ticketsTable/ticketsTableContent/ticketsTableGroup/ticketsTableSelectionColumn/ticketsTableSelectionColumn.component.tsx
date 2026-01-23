@@ -26,7 +26,7 @@ import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { chunk } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
-import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.component';
+import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.helper';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];

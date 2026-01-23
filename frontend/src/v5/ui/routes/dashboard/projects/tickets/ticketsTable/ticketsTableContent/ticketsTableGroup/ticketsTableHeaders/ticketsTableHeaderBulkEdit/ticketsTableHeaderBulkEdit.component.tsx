@@ -26,7 +26,7 @@ import { TicketsTableHeaderBulkEditForm } from './ticketsTableHeaderBulkEditForm
 
 type TicketsTableHeaderBulkEditProps = {
 	name: string;
-}
+};
 
 export const TicketsTableHeaderBulkEdit = ({ name, ...props }: TicketsTableHeaderBulkEditProps) => {
 	const [active, setActive] = useState(false);
@@ -39,9 +39,9 @@ export const TicketsTableHeaderBulkEdit = ({ name, ...props }: TicketsTableHeade
 					<BulkEditHeaderButton $active={active}>
 						<HeaderCellText>
 							{getPropertyLabel(name)}
-				 		</HeaderCellText>
+						</HeaderCellText>
 						<ArrowDownIcon />
-				 	</BulkEditHeaderButton>
+					</BulkEditHeaderButton>
 				</HeaderCell>
 			)}
 			PopoverProps={TICKET_HEADER_POPOVER_PROPS}

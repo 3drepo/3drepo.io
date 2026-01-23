@@ -71,7 +71,7 @@ type TicketsTableProps = {
 export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
 	const navigate = useNavigate();
 	const params = useParams<DashboardTicketsParams>();
-	const { setSelectedIds, selectedIds } = useContext(TicketsTableContext);
+	const { setSelectedIds } = useContext(TicketsTableContext);
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
 	const { teamspace, project, template, ticketId } = params;
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
