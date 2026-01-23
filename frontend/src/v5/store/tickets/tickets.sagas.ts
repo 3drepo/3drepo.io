@@ -42,7 +42,7 @@ import {
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketById, selectTicketByIdRaw, selectTicketsById, selectTicketsGroups } from './tickets.selectors';
+import { selectTicketById, selectTicketByIdRaw, selectTicketsById, selectTicketsData, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { addUpdatedAtTime } from './tickets.helpers';
@@ -399,16 +399,17 @@ const hasSameValue = (ticket:Partial<ITicket>, updateFields:Partial<ITicket>)=> 
 
 export function* updateManyTickets({ teamspace, projectId, ids, ticket, isFederation, onError }: UpdateManyTicketsAction) {
 	try {
-		// This is for updating all tickets in the redux state
+		// // This is for updating all tickets in the redux state
 		const ticketsByModelTemplateId:Record<string, Partial<ITicket>[]> = {};
 
-		// This is for updating all tickets in the redux state
+		// // This is for updating all tickets in the redux state
 		const allTicketsUpdates:Record<string, Partial<ITicket>[]> = {};
+
+		const ticketsData = yield select(selectTicketsData);
 
 		for (let i = 0 ; i < ids.length ; i++) {
 			const id =  ids[i];
-			const ticketData = yield select(selectTicketByIdRaw, undefined, id);
-
+			const ticketData = ticketsData[id];
 
 			// *** README *** : This validation should be removed before the release and after
 			// the backend is changed to not complain about tickets with the same original value.

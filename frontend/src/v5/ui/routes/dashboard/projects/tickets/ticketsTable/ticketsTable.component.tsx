@@ -285,8 +285,12 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		return null;
 	}
 
-	const updateTickets = () => {
+	const updateTicketsInProgress = () => {
 		TicketsActionsDispatchers.updateManyTickets(teamspace, project, '', '', Array.from(filteredTicketsIDs), { properties:{ Status:'In Progress' } }, false);
+	};
+
+	const updateTicketsOpen = () => {
+		TicketsActionsDispatchers.updateManyTickets(teamspace, project, '', '', Array.from(filteredTicketsIDs), { properties:{ Status:'Open' } }, false);
 	};
 
 	return (
@@ -325,7 +329,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 							/>}
 					</FlexContainer>
 				</FiltersContainer>
-				<button onClick={updateTickets}>update tickets</button>
+				<button onClick={updateTicketsInProgress}>update tickets progres</button>
+				<button onClick={updateTicketsOpen}>update tickets open</button>
 				<CardFilters />
 				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
 			</TicketsTableLayout>
