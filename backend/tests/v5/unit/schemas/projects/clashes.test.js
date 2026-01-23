@@ -73,22 +73,21 @@ const testValidatePlan = () => {
 			['with empty trigger', false, { ...planData, trigger: [] }],
 			['with valid trigger', true, { ...planData, trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]] }],
 			['with selections without container', false, { ...planData, selectionA: { rules: [standardRule] }, selectionB: { rules: [standardRule] } }],
-			['with selections with null container', false, { ...planData, selectionA: { rules: [standardRule], container: null }, selectionB: { rules: [standardRule], container: null } }],
+			['with selections with null container', false, { ...planData, selectionA: { container: null }, selectionB: { container: null } }],
 		])('Validate plan data properties (without selection)', (desc, success, data, expectedData) => {
 			test(`should ${success ? 'succeed' : 'fail'} ${desc}`, async () => {
-				if (success) {
+				if (data?.selectionA?.container) {
 					times(2, () => {
 						ModelSettingsModel.getContainerById.mockResolvedValueOnce({});
 						ProjectSettingsModel.modelsExistInProject.mockResolvedValueOnce({});
 					});
 				}
 
+				const test = ClashesSchema.validatePlan(teamspace, project, data);
 				if (success) {
-					await expect(ClashesSchema.validatePlan(teamspace, project, data))
-						.resolves.toEqual(expectedData ?? data);
+					await expect(test).resolves.toEqual(expectedData ?? data);
 				} else {
-					await expect(() => ClashesSchema.validatePlan(teamspace, project, data))
-						.not.toBeUndefined();
+					await expect(test).rejects.toBeDefined();
 				}
 			});
 		});
