@@ -93,6 +93,9 @@ ResponseCodes.templates = {
 	// Legend related error
 	legendNotFound: { message: 'Legend not found.', status: 404 },
 
+	// Clashes related error
+	clashPlanNotFound: { message: 'Clash plan not found.', status: 404 },
+
 	// endpoint decommissioned
 	endpointDecommissioned: { message: 'Endpoint no longer available.', status: 410 },
 
