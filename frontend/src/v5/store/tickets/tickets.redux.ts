@@ -49,11 +49,12 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	setSorting: ['property', 'order'],
 	resetSorting: [],
 	setPropertiesFetched: ['ticketIds', 'properties', 'fetched'],
-	fetchTicketsProperties: ['teamspace', 'projectId', 'modelId', 'ticketIds', 'templateCode', 'isFederation', 'propertiesToInclude'],
+	fetchTicketsProperties: ['teamspace', 'projectId', 'modelId', 'isFederation', 'propertiesToInclude', 'onSuccess'],
 	upsertTicketsSuccess: ['modelId', 'tickets'],
 	watchPropertiesUpdates: ['propertiesNames', 'watch'],
 	setTabularViewParams: ['params', 'search'],
 	updateManyTickets: ['teamspace', 'projectId', 'ids', 'ticket', 'onSuccess', 'onError'],
+	resetPropertiesFetched: [],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
@@ -69,7 +70,6 @@ export const INITIAL_STATE: ITicketsState = {
 
 export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: FetchTicketsSuccessAction) => {
 	const ticketIds: string[] = [];
-	
 	tickets.forEach((ticket) => {
 		state.ticketsData[ticket._id] = { ...ticket, modelId };
 		ticketIds.push(ticket._id);
@@ -158,6 +158,10 @@ export const setTabularViewParams = (state: ITicketsState, { params, search }: S
 	state.tabularViewParams = { params, search };
 };
 
+const resetPropertiesFetched = (state:ITicketsState) => {
+	state.fetchedProperties = {};
+};
+
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
@@ -172,6 +176,7 @@ export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.RESET_SORTING]: resetSorting,
 	[TicketsTypes.SET_PROPERTIES_FETCHED]: setPropertiesFetched,
 	[TicketsTypes.SET_TABULAR_VIEW_PARAMS]: setTabularViewParams,
+	[TicketsTypes.RESET_PROPERTIES_FETCHED]: resetPropertiesFetched,
 }));
 
 export interface ITicketsState {
@@ -207,11 +212,13 @@ export type UpdateTicketGroupSuccessAction = Action<'UPDATE_TICKET_GROUP_SUCCESS
 export type ClearGroupsAction = Action<'CLEAR_GROUPS'>;
 export type SetSortingAction = Action<'SET_SORTING'> & TicketsSorting;
 export type ResetSortingAction = Action<'RESET_SORTING'>;
+export type ResetPropertiesFetchedAction = Action<'RESET_PROPERTIES_FETCHED'>;
 export type SetPropertiesFetchedAction = Action<'SET_PROPERTIES_FETCHED'> & { ticketIds: string[], properties: string[], fetched: boolean };
-export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & TeamspaceProjectAndModel & { ticketIds: string[], templateCode: string, isFederation: boolean, propertiesToInclude?: string[] };
+export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[],  onSuccess: () => void, onError: () => void };
 export type WatchPropertiesUpdatesAction = Action<'WATCH_PROPERTIES_UPDATES'> & { propertiesNames: string[], watch: EventEmitter };
 export type SetTabularViewParamsAction = Action<'SET_TABULAR_VIEW_PARAMS'> & { params: DashboardTicketsParams, search: string };
 export type UpdateManyTicketsAction = Action<'UPDATE_MANY_TICKETS'> & TeamspaceProjectAndModel & { ids: string[], ticket: Partial<ITicket>, onSuccess?: () => void, onError?: () => void };
+
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -225,11 +232,10 @@ export interface ITicketsActionCreators {
 		teamspace: string,
 		projectId: string,
 		modelId: string,
-		ticketsIds: string[],
-		templateCode: string,
 		isFederation: boolean,
-		propertiesToInclude?: string[],
-	) => FetchTicketsAction;
+		propertiesToInclude: string[],
+		onSuccess?: () => void,
+	) => FetchTicketsPropertiesAction;
 	fetchTicket: (
 		teamspace: string,
 		projectId: string,
@@ -323,6 +329,7 @@ export interface ITicketsActionCreators {
 		onSuccess?: () => void,
 		onError?: () => void 
 	) => UpdateManyTicketsAction;
+	resetPropertiesFetched: () => ResetPropertiesFetchedAction;
 	clearGroups: () => ClearGroupsAction;
 	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
 	resetSorting: () => ResetSortingAction,

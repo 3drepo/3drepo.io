@@ -42,11 +42,10 @@ import {
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketById, selectTicketByIdRaw, selectTicketsById, selectTicketsData, selectTicketsGroups } from './tickets.selectors';
+import { selectTicketById, selectTicketByIdRaw, selectTicketsByContainersAndFederations, selectTicketsData, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId, selectIsFederation } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { addUpdatedAtTime } from './tickets.helpers';
-import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
@@ -60,6 +59,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation, pro
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { propertiesToInclude });
+		yield put(TicketsActions.resetPropertiesFetched());
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -78,7 +78,7 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets
 	)(teamspace, projectId, modelId, queryParams),
-	20,
+	2,
 	ExecutionStrategy.Fifo,
 );
 
@@ -93,35 +93,40 @@ const updateManyTicketsQueue = new AsyncFunctionExecutor(
 );
 
 export function* fetchTicketsProperties({
-	teamspace, projectId, modelId, ticketIds,
-	templateCode, isFederation, propertiesToInclude,
+	teamspace, projectId, modelId,
+	isFederation, propertiesToInclude,
+	onSuccess,
+	onError,
 }: FetchTicketsPropertiesAction) {
 	try {
+		const ticketsData = yield select(selectTicketsByContainersAndFederations, [modelId]);
 
-		const codes = (yield select(selectTicketsById, ticketIds)).map(({ number }) => `${templateCode}:${number}`);
-		const filterByTemplateCode = {
-			filter: {
-				operator: 'is',
-				values: codes,
-			},
-			property: 'Ticket ID',
-			type: 'ticketCode',
-		} as any;
-	
+		let chunkSize = 1000;
+
+		let ticketsFetchsCount = Math.ceil(ticketsData.length / chunkSize);
 		// The format required in the query to fetch the tickets 
 		// is without the full path of the property so we strip that
 		const propertiesToIncludeParam = propertiesToInclude.map(stripModuleOrPropertyPrefix);
+		for (let i = 0 ; i < ticketsFetchsCount ; i++ ) {
+			const tickets = yield ticketPropertiesQueue.addCall(
+				isFederation,
+				teamspace,
+				projectId,
+				modelId,
+				{
+					propertiesToInclude: propertiesToIncludeParam,
+					skip: i * chunkSize,
+					limit: chunkSize,
+					sortBy: 'Created at',
+				},
+			);
 
-		const tickets = yield ticketPropertiesQueue.addCall(
-			isFederation,
-			teamspace,
-			projectId,
-			modelId,
-			{ propertiesToInclude: propertiesToIncludeParam, filters: filtersToQuery([filterByTemplateCode]) },
-		);
+
+			yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
+			yield put(TicketsActions.setPropertiesFetched(tickets.map(({ _id }) => _id), propertiesToInclude, true));
+		}
 		
-		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
-		yield put(TicketsActions.setPropertiesFetched(ticketIds, propertiesToInclude, true));
+		onSuccess?.();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -130,6 +135,7 @@ export function* fetchTicketsProperties({
 			),
 			error,
 		}));
+		onError?.();
 	}
 }
 

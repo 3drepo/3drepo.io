@@ -62,8 +62,6 @@ export const SearchContextComponent = ({ items, children, fieldsToFilter, filter
 		setContextValue({ items, filteredItems, query, setQuery, refresh });
 	}, [query, items, refresh]);
 
-
-
 	return (
 		<SearchContext.Provider value={contextValue}>
 			{children}

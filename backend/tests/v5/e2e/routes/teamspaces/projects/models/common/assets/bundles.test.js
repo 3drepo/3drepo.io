@@ -22,9 +22,13 @@ const { src } = require('../../../../../../../helper/path');
 
 const { insertOne, insertMany } = require(`${src}/handler/db`);
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
-
+const { storeFile } = require(`${src}/services/filesManager`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
+
+const REPO_BUNDLE_COLLECTION = '.stash.repobundles';
+const UNITY_BUNDLE_COLLECTION = '.stash.unity3d';
+const UNITY3D_NAME_EXT = '.unity3d';
 
 let server;
 let agent;
@@ -108,8 +112,8 @@ const testGetAssetList = (internalService) => {
 			await ServiceHelper.db.createRevision(teamspace, project.id, fed._id,
 				{ ...fedRevisions[0], timestamp: new Date() }, modelTypes.FEDERATION);
 
-			await insertOne(teamspace, `${con._id}.stash.repobundles`, { _id: stringToUUID(revisions[0]._id), ...rev1Content });
-			await insertOne(teamspace, `${con._id}.stash.unity3d`, { _id: stringToUUID(revisions[1]._id), ...rev2Content });
+			await insertOne(teamspace, `${con._id}${REPO_BUNDLE_COLLECTION}`, { _id: stringToUUID(revisions[0]._id), ...rev1Content });
+			await insertOne(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, { _id: stringToUUID(revisions[1]._id), ...rev2Content });
 		});
 
 		const generateTestData = (modelType) => {
@@ -147,7 +151,7 @@ const testGetAssetList = (internalService) => {
 			const commonTests = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFoundErr],
-				['the model is not of the wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFoundErr],
+				['the model is of the wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFoundErr],
 				['the model does not have a revision', getRoute({ modelId: modelNoRev._id }), false, templates.revisionNotFound],
 				['an invalid revision is provided by the user', getRoute({ revId: ServiceHelper.generateUUIDString() }), false, templates.revisionNotFound],
 				['a revision is provided by the user', getRoute({ revId: modelRevs[0]._id }), true, rev1FullContent],
@@ -237,7 +241,7 @@ const testGetAssetMeta = (internalService) => {
 			const commonTests = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, modelNotFoundErr],
-				['the model is not of the wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFoundErr],
+				['the model is of the wrong type', getRoute({ modelId: wrongTypeModel._id }), false, modelNotFoundErr],
 				['the model does not have a revision', getRoute({ modelId: modelNoRev._id }), false, templates.revisionNotFound],
 				['an invalid revision is provided by the user', getRoute({ revId: ServiceHelper.generateUUIDString() }), false, templates.revisionNotFound],
 				['a revision is provided by the user', getRoute({ revId: modelRevs[0]._id }), true, rev1FullContent],
@@ -395,6 +399,128 @@ const testGetUnityMeta = (internalService) => {
 	});
 };
 
+const testGetRepoBundle = (internalService) => {
+	describe('Get Repo bundle', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+
+		const bundle1Content = Buffer.from(ServiceHelper.generateRandomString());
+		const bundle2Content = Buffer.from(ServiceHelper.generateRandomString());
+		const bundle1Id = ServiceHelper.generateUUIDString();
+		const bundle2Id = ServiceHelper.generateUUIDString();
+
+		beforeAll(async () => {
+			const models = [con, fed];
+			await setupBasicData(users, teamspace, project, models);
+			await storeFile(teamspace, `${con._id}${REPO_BUNDLE_COLLECTION}`, bundle1Id, bundle1Content);
+			await storeFile(teamspace, `${con._id}${REPO_BUNDLE_COLLECTION}`, bundle2Id, bundle2Content);
+		});
+
+		const generateTestData = () => {
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = con._id,
+				bundleId = bundle1Id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/assets/bundles/repo/${bundleId}${ServiceHelper.createQueryString({ key: internalService ? undefined : key })}`;
+
+			const externalTests = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+			];
+
+			const commonTests = [
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
+				['the model is of the wrong type', getRoute({ modelId: fed._id }), false, templates.containerNotFound],
+				['an invalid bundleId is provided by the user', getRoute({ bundleId: ServiceHelper.generateUUIDString() }), false, templates.fileNotFound],
+				['a bundleId is provided by the user', getRoute({ bundleId: bundle1Id }), true, bundle1Content],
+				['another bundleId is provided by the user', getRoute({ bundleId: bundle2Id }), true, bundle2Content],
+			];
+
+			return [
+				...commonTests,
+				...(internalService ? [] : externalTests),
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(expectedOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+	});
+};
+
+const testGetUnityBundle = (internalService) => {
+	describe('Get Unity bundle', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+
+		const bundle1Content = Buffer.from(ServiceHelper.generateRandomString());
+		const bundle2Content = Buffer.from(ServiceHelper.generateRandomString());
+		const bundle1Id = ServiceHelper.generateUUIDString();
+		const bundle2Id = ServiceHelper.generateUUIDString();
+
+		beforeAll(async () => {
+			const models = [con, fed];
+			await setupBasicData(users, teamspace, project, models);
+			await storeFile(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, `${bundle1Id}${UNITY3D_NAME_EXT}`, bundle1Content);
+			await storeFile(teamspace, `${con._id}${UNITY_BUNDLE_COLLECTION}`, `${bundle2Id}${UNITY3D_NAME_EXT}`, bundle2Content);
+		});
+
+		const generateTestData = () => {
+			const getRoute = ({
+				projectId = project.id,
+				key = users.tsAdmin.apiKey,
+				modelId = con._id,
+				bundleId = bundle1Id,
+			} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${modelId}/assets/bundles/unity/${bundleId}${ServiceHelper.createQueryString({ key: internalService ? undefined : key })}`;
+
+			const externalTests = [
+				['the user does not have a valid session', getRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', getRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the model', getRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
+			];
+
+			const commonTests = [
+				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
+				['the model is of the wrong type', getRoute({ modelId: fed._id }), false, templates.containerNotFound],
+				['an invalid bundleId is provided by the user', getRoute({ bundleId: ServiceHelper.generateUUIDString() }), false, templates.fileNotFound],
+				['a bundleId is provided by the user', getRoute({ bundleId: bundle1Id }), true, bundle1Content],
+				['another bundleId is provided by the user', getRoute({ bundleId: bundle2Id }), true, bundle2Content],
+			];
+
+			return [
+				...commonTests,
+				...(internalService ? [] : externalTests),
+			];
+		};
+
+		const runTest = (desc, route, success, expectedOutput) => {
+			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+				if (success) {
+					expect(res.body).toEqual(expectedOutput);
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+	});
+};
+
 describe(ServiceHelper.determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
@@ -407,6 +533,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		testGetAssetList();
 		testGetAssetMeta();
 		testGetUnityMeta();
+		testGetRepoBundle();
+		testGetUnityBundle();
 	});
 
 	describe('Internal Service', () => {
@@ -417,5 +545,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		testGetAssetList(true);
 		testGetAssetMeta(true);
 		testGetUnityMeta(true);
+		testGetRepoBundle(true);
+		testGetUnityBundle(true);
 	});
 });

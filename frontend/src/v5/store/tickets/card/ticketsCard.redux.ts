@@ -44,6 +44,7 @@ export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createA
 	setEditingGroups: ['isEditing'],
 	setIsShowingPins: ['isShowing'],
 	setFiltering: ['isFiltering'],
+	setGroupBy: ['groupByField'],
 	applyFilterForTicket: ['teamspace', 'projectId', 'modelId', 'isFederation', 'ticketId'],
 }, { prefix: 'TICKETS_CARD/' }) as { Types: Constants<ITicketsCardActionCreators>; Creators: ITicketsCardActionCreators };
 
@@ -63,6 +64,7 @@ export interface ITicketsCardState {
 	isEditingGroups: boolean,
 	isShowingPins: boolean,
 	isFiltering: boolean,
+	groupByField: string | null,
 }
 
 export const INITIAL_STATE: ITicketsCardState = {
@@ -81,6 +83,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 	isEditingGroups: false,
 	isShowingPins: true,
 	isFiltering: false,
+	groupByField: null,
 };
 
 export const setSelectedTicket = (state: ITicketsCardState, { ticketId }: SetSelectedTicketAction) => {
@@ -149,6 +152,10 @@ export const setFiltering = (state: ITicketsCardState, { isFiltering }: SetFilte
 	state.isFiltering = isFiltering;
 };
 
+export const setGroupBy = (state: ITicketsCardState, { groupByField }: SetGroupByAction) => {
+	state.groupByField = groupByField;
+};
+
 export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_SELECTED_TICKET]: setSelectedTicket,
 	[TicketsCardTypes.SET_SELECTED_TEMPLATE]: setSelectedTemplate,
@@ -165,6 +172,7 @@ export const ticketsCardReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsCardTypes.SET_IS_SHOWING_PINS]: setIsShowingPins,
 	[TicketsCardTypes.SET_FILTERING]: setFiltering,
 	[TicketsCardTypes.SET_FILTERS]: setFilters,
+	[TicketsCardTypes.SET_GROUP_BY]: setGroupBy,
 }));
 
 export type SetSelectedTicketAction = Action<'SET_SELECTED_TICKET'> & { ticketId: string };
@@ -189,6 +197,7 @@ export type SetIsShowingPinsAction = Action<'SET_IS_SHOWING_PINS'> & { isShowing
 export type SetFilteringAction = Action<'SET_FILTERING'> & { isFiltering: boolean } ;
 export type ApplyFilterForTicketAction = Action<'APPLY_FILTER_FOR_TICKET'> & TeamspaceProjectAndModel & { isFederation: boolean, ticketId: string } ;
 export type SetFiltersAction = Action<'SET_FILTERS'> & { filters: TicketFilter[] };
+export type SetGroupByAction = Action<'SET_GROUP_BY'> & { groupByField: string };
 
 export interface ITicketsCardActionCreators {
 	setSelectedTicket: (ticketId: string) => SetSelectedTicketAction,
@@ -226,4 +235,5 @@ export interface ITicketsCardActionCreators {
 		isFederation: boolean,
 		ticketId: string,
 	) => ApplyFilterForTicketAction,
+	setGroupBy: (groupByField: string) => SetGroupByAction,
 }
