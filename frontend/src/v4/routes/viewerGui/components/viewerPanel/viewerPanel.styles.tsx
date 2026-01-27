@@ -138,12 +138,5 @@ export const ViewerPanelButton = styled(SubmitButton)<IViewerPanelButton>`
 		margin-right: -3px;
 		width: 40px;
 		height: 40px;
-		${({ active }) => active ? css`
-			background-color: #ff9800;
-			&:hover {
-				background-color: ${COLOR.DARK_ORANGE};
-			}
-		` : ''
-		}
 	}
 `;

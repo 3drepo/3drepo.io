@@ -34,6 +34,7 @@ export const TicketsTableSettingsColumn = ({ tickets, selectedTicketId }) => (
 		</Headers>
 		<SettingsColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
 			<VirtualList
+				vKey="settings-column"
 				items={chunk(tickets, TICKETS_CHUNK_SIZE)}
 				itemHeight={TICKET_TABLE_ROW_HEIGHT * TICKETS_CHUNK_SIZE}
 				ItemComponent={(ticketsChunk: ITicket[]) => (

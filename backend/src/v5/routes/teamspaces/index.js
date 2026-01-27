@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { canRemoveTeamspaceMember, memberExists, validateUpdateQuota } = require('../../middleware/dataConverter/inputs/teamspaces');
+const { canRemoveTeamspaceMember, memberExists, validateCreateTeamspaceData, validateUpdateQuota } = require('../../middleware/dataConverter/inputs/teamspaces');
+
 const { hasAccessToTeamspace, isMemberOfTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 
 const { Router } = require('express');
@@ -131,8 +132,78 @@ const removeQuota = async (req, res) => {
 	}
 };
 
+const createTeamspace = async (req, res) => {
+	const { name, accountId, admin } = req.body;
+
+	try {
+		await Teamspaces.initTeamspace(name, admin, accountId);
+		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = (isInternal) => {
 	const router = Router({ mergeParams: true });
+
+	/**
+	* @openapi
+	* /teamspaces/{teamspace}/quota:
+	*   get:
+	*     description: Gets quota information about a teamspace
+	*     tags: [v:external, v:internal, Teamspaces]
+	*     parameters:
+	*       - name: teamspace
+	*         description: name of teamspace
+	*         in: path
+	*         required: true
+	*         schema:
+	*           type: string
+	*     operationId: getQuotaInfo
+	*     responses:
+	*       401:
+	*         $ref: "#/components/responses/notLoggedIn"
+	*       200:
+	*         description: Gets the quota information of the user
+	*         content:
+	*           application/json:
+	*             schema:
+	*               type: object
+	*               properties:
+	*                 freeTier:
+	*                   type: boolean
+	*                   description: Whether or not the user has a paid subscription
+	*                   example: true
+	*                 expiryDate:
+	*                   type: number
+	*                   description: The closest expiry date of a users active plan (in epoch)
+	*                   example: 1233445
+	*                 data:
+	*                   type: object
+	*                   properties:
+	*                     used:
+	*                       type: number
+	*                       description: The number of bytes the user is currently using
+	*                       example: 1000000
+	*                     available:
+	*                       type: number
+	*                       description: The number of bytes the user can use
+	*                       example: 1000000
+	*                 seats:
+	*                   type: object
+	*                   properties:
+	*                     used:
+	*                       type: number
+	*                       description: The number of collaborators the user is currently using
+	*                       example: 1000000
+	*                     available:
+	*                       type: number
+	*                       description: The number of collaborators the user can use
+	*                       example: 1000000
+	*
+	*/
+	router.get('/:teamspace/quota', isTeamspaceAdmin, getQuotaInfo);
 
 	if (isInternal) {
 		/**
@@ -196,6 +267,40 @@ const establishRoutes = (isInternal) => {
 		*         description: quota has been removed
 		*/
 		router.delete('/:teamspace/quota', isMemberOfTeamspace, removeQuota);
+
+		/**
+		* @openapi
+		* /teamspaces:
+		*   post:
+		*     description: Create a new teamspace
+		*     tags: [v:internal, Teamspaces]
+		*     operationId: createTeamspace
+		*     requestBody:
+		*       required: true
+		*       content:
+		*         application/json:
+		*           schema:
+		*             type: object
+		*             properties:
+		*               name:
+		*                 type: string
+		*                 description: Name of the teamspace to be created
+		*                 example: New Teamspace
+		*               accountId:
+		*                 type: string
+		*                 description: Frontegg account ID this teamspace associates with (optional, only if the account already exists)
+		*                 example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+		*               admin:
+		*                 type: string
+		*                 description: The email of the owner of the teamspace (optional, only if the account is intended to be accessed externally)
+		*                 example: test@test.com
+		*     responses:
+		*       200:
+		*         description: Teamspace created successfully
+		*       400:
+		*         $ref: "#/components/responses/invalidArguments"
+		*/
+		router.post('/', validateCreateTeamspaceData, createTeamspace);
 	} else {
 		/**
 		* @openapi
@@ -310,64 +415,6 @@ const establishRoutes = (isInternal) => {
 		*               format: binary
 		*/
 		router.get('/:teamspace/avatar', isMemberOfTeamspace, getAvatar);
-
-		/**
-		* @openapi
-		* /teamspaces/{teamspace}/quota:
-		*   get:
-		*     description: Gets quota information about a user
-		*     tags: [v:external, Teamspaces]
-		*     parameters:
-		*       - name: teamspace
-		*         description: name of teamspace
-		*         in: path
-		*         required: true
-		*         schema:
-		*           type: string
-		*     operationId: getQuotaInfo
-		*     responses:
-		*       401:
-		*         $ref: "#/components/responses/notLoggedIn"
-		*       200:
-		*         description: Gets the quota information of the user
-		*         content:
-		*           application/json:
-		*             schema:
-		*               type: object
-		*               properties:
-		*                 freeTier:
-		*                   type: boolean
-		*                   description: Whether or not the user has a paid subscription
-		*                   example: true
-		*                 expiryDate:
-		*                   type: number
-		*                   description: The closest expiry date of a users active plan (in epoch)
-		*                   example: 1233445
-		*                 data:
-		*                   type: object
-		*                   properties:
-		*                     used:
-		*                       type: number
-		*                       description: The number of bytes the user is currently using
-		*                       example: 1000000
-		*                     available:
-		*                       type: number
-		*                       description: The number of bytes the user can use
-		*                       example: 1000000
-		*                 seats:
-		*                   type: object
-		*                   properties:
-		*                     used:
-		*                       type: number
-		*                       description: The number of collaborators the user is currently using
-		*                       example: 1000000
-		*                     available:
-		*                       type: number
-		*                       description: The number of collaborators the user can use
-		*                       example: 1000000
-		*
-		*/
-		router.get('/:teamspace/quota', isTeamspaceAdmin, getQuotaInfo);
 
 		/**
 		* @openapi

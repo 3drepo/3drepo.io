@@ -16,8 +16,6 @@
  */
 
 import { useCallback, useContext, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
@@ -27,7 +25,7 @@ import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableConte
 import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 
@@ -75,11 +73,16 @@ export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
 	tickets: ITicket[],
+	template: ITemplate,
 };
 
-export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId, tickets: filteredItems }: TicketsTableResizableContentProps) => {
-	const { groupBy, getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
-	const { template } = useParams<DashboardTicketsParams>();
+export const TicketsTableResizableContent = ({ 
+	setTicketValue, 
+	selectedTicketId, 
+	tickets: filteredItems, 
+	template,
+}: TicketsTableResizableContentProps) => {
+	const { groupBy } = useContext(TicketsTableContext);
 	const collapsedGroups = useRef<Record<string, boolean>>({});
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
@@ -106,13 +109,14 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 		);
 	}
 	
-	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
+	const groups = groupTickets(groupBy, [template], filteredItems);
 
 	return (
 		<Container>
 			<VirtualList
 				items={groups}
 				itemHeight={45}
+				vKey='groups-list'
 				ItemComponent={({ groupName, value, tickets }) => (
 					<CollapsibleTicketsGroup
 						groupName={groupName}
@@ -124,7 +128,7 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId,
 						propertyName={groupBy}
 						onChangeCollapse={(collapsed) => onChangeCollapse(value, collapsed)}
 						expanded={collapsedGroups.current[value] === undefined ? tickets.length > 0 : !collapsedGroups.current[value] }
-						key={groupBy + groupName + template + tickets}
+						key={groupBy + groupName + template._id }
 					/>
 				)} 
 			/>

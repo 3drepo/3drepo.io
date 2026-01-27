@@ -91,6 +91,7 @@ export const TicketsTableSelectionColumn = ({
 			</Headers>
 			<SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
 				<VirtualList
+					vKey="selection-column"
 					items={chunk(tickets, TICKETS_CHUNK_SIZE)}
 					itemHeight={TICKET_TABLE_ROW_HEIGHT * TICKETS_CHUNK_SIZE}
 					ItemComponent={(ticketsChunk: ITicket[]) => (

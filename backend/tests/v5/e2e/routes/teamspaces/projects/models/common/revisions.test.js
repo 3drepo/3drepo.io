@@ -95,15 +95,18 @@ const generateBasicData = () => {
 	};
 
 	const drawRevisions = {
-		voidRevision: { ...ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING),
+		voidRevision: {
+			...ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING),
 			timestamp: new Date(100000),
 			calibration: calibrationStatuses.UNCALIBRATED,
 		},
-		nonVoidRevision: { ...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
+		nonVoidRevision: {
+			...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
 			timestamp: new Date(200000),
 			calibration: calibrationStatuses.CALIBRATED,
 		},
-		noFileRevision: { ...ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
+		noFileRevision: {
+			...ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
 			timestamp: new Date(300000),
 			calibration: calibrationStatuses.UNCONFIRMED,
 		},
@@ -157,7 +160,7 @@ const setupData = async ({ users, teamspace, project, models, drawRevisions, con
 	]);
 };
 
-const testGetRevisions = () => {
+const testGetRevisions = (isInternal = false) => {
 	describe('Get Revisions', () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, models, drawRevisions, conRevisions } = basicData;
@@ -200,28 +203,41 @@ const testGetRevisions = () => {
 			}
 
 			const params = {
-				key: users.tsAdmin.apiKey,
+				key: isInternal ? undefined : users.tsAdmin.apiKey,
 				ts: teamspace,
 				projectId: project.id,
 				modelId: model._id,
 				modelType,
 			};
+			if (isInternal && modelType !== modelTypes.CONTAINER) {
+				return [
+					['trying to access endpoint for non-container model', params, false, templates.pageNotFound],
+				];
+			}
 
-			return [
-				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
+			const commonCases = [
 				['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
-				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 				['the model does not exist', { ...params, modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
 				['the model is of wrong type', { ...params, modelId: models.federation._id }, false, modelNotFound],
 				['the user has adequate permissions (non void revisions)', params, true],
 				['the user has adequate permissions (all revisions)', { ...params, showVoid: true }, true],
 			];
+
+			const externalCases = [
+				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
+				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+
+			];
+
+			return isInternal ? commonCases : [...commonCases, ...externalCases];
 		};
 
 		const runTest = (desc, params, success, error) => {
-			const route = ({ ts, projectId, modelId, modelType, showVoid = false, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions?showVoid=${showVoid}&key=${key}`;
+			const route = ({
+				ts, projectId, modelId, modelType, showVoid = false, key,
+			}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions${ServiceHelper.createQueryString({ key: isInternal ? null : key, showVoid })}`;
 
 			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : error.status;
@@ -697,6 +713,7 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 			server = await ServiceHelper.app();
 			agent = await SuperTest(server);
 		});
+
 		testGetRevisions();
 		testCreateNewRevision();
 		testUpdateRevisionStatus();
@@ -710,6 +727,8 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 			server = await ServiceHelper.app(true);
 			agent = await SuperTest(server);
 		});
+
+		testGetRevisions(true);
 		testCreateNewRevision(true);
 	});
 });

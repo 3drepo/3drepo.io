@@ -116,7 +116,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 
-
 	const newTicketButtonIsDisabled = useMemo(() =>
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
 	[models, containerOrFederation]);
@@ -339,7 +338,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 					</FlexContainer>
 				</FiltersContainer>
 				<CardFilters />
-				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
+				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
 			</TicketsTableLayout>
 		</TicketsFiltersContextComponent>
 	);
