@@ -162,7 +162,7 @@ const getKeyByStatus = (ticket, groupBy, template: ITemplate) => {
 
 const getKeyManyValues = (ticket, groupBy) => {
 	const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
-	if (!value) return { name: UNSET, value: '' };
+	if (!value || value.length === 0) return { name: UNSET, value: '' };
 	const valueAsString = [...value].sort().join(',');
 	return { name: valueAsString, value };
 };
@@ -173,7 +173,12 @@ const getKeyBySingleValue = (ticket: ITicket, groupBy: string) =>
 const getkeyByJobsAndUsers = (ticket: ITicket, groupBy: string) => {
 	const value = selectTicketPropertyByName(getState(), ticket._id, groupBy);
 	const values = Array.isArray(value) ? value : [value];
-	const name = values && value ? values.map(getjobOrUserDisplayName).sort().join(',') : UNSET;
+	let name = values && value ? values.map(getjobOrUserDisplayName).sort().join(',') : UNSET;
+	
+	if (Array.isArray(value) && !value.length) {
+		return { name: UNSET, value: '' };
+	}
+
 	return { name, value };
 };
 
