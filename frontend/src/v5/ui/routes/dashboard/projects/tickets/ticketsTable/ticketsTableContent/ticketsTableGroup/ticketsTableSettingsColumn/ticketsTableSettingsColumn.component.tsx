@@ -36,7 +36,7 @@ export const TicketsTableSettingsColumn = ({ tickets, selectedTicketId }) => (
 			<VirtualList
 				vKey="settings-column"
 				items={chunk(tickets, TICKETS_CHUNK_SIZE)}
-				itemHeight={TICKET_TABLE_ROW_HEIGHT * TICKETS_CHUNK_SIZE}
+				itemHeight={TICKET_TABLE_ROW_HEIGHT}
 				ItemComponent={(ticketsChunk: ITicket[]) => (
 					<div key={ticketsChunk[0]._id}>
 						{ticketsChunk.map((ticket) => (
