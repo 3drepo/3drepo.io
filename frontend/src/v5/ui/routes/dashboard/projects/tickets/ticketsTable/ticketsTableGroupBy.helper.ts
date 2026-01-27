@@ -30,7 +30,7 @@ import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 
 
 export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
-export const NO_PROPERTY = formatMessage({ id: 'tickets.selectOption.property.notExisting', defaultMessage: 'No property' });
+export const NOT_APPLICABLE = formatMessage({ id: 'tickets.selectOption.property.notApplicable', defaultMessage: 'Not applicable' });
 
 const arrayAndStringCompare = (a, b) => {
 	const arrA = a.split(',');
@@ -92,17 +92,21 @@ const sortByStatus = (groups: TicketsGroup[], templates: ITemplate[]) => {
 };
 
 const sortToTicketsGroups = (groups: GroupDictionary, groupBy, templates: ITemplate[]): TicketsGroup[] => {
-	const { [UNSET]: groupsWithUnsetValue, ...grouspWithSetValue } = groups;
+	const { [UNSET]: groupWithUnsetValue, [NOT_APPLICABLE] : groupWithNotApplicable, ...grouspWithSetValue } = groups;
 	const sortedGroups:TicketsGroup[] = Object.keys(grouspWithSetValue)
 		.sort(arrayAndStringCompare)     
 		.map((key) => ({ groupName: key, ...groups[key] }));
 	
-	if (groupsWithUnsetValue) {
-		sortedGroups.push({ groupName: UNSET, ...groupsWithUnsetValue });
-	}
-	
 	if (groupBy === `properties.${BaseProperties.STATUS}`) {
 		return sortByStatus(sortedGroups, templates);
+	}
+
+	if (groupWithUnsetValue) {
+		sortedGroups.push({ groupName: UNSET, ...groupWithUnsetValue });
+	}
+	
+	if (groupWithNotApplicable) {
+		sortedGroups.push({ groupName: NOT_APPLICABLE, ...groupWithNotApplicable });
 	}
 
 	return sortedGroups;
@@ -187,7 +191,7 @@ const getKey = (ticket: ITicket, groupBy: string, templatesDict: Record<string, 
 	const propertyDefinition = findPropertyDefinition(template, groupBy);
 
 	if (!propertyDefinition) {
-		return  { name: NO_PROPERTY, value: '' };
+		return  { name: NOT_APPLICABLE, value: '' };
 	}
 	
 	const propertyType = propertyDefinition.type;
