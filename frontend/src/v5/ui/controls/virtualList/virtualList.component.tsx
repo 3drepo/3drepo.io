@@ -14,13 +14,21 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRef, useState, useEffect, createContext, useContext } from 'react';
+import { useRef, useState, useEffect, createContext, useContext, createRef, MutableRefObject } from 'react';
 
-interface Props {
-	items: any[];
+export type VListHandle = {
+	gotoIndex: (index: number, scroller?: Element ) => Promise<any>;
+	getOffsetToIndex: (index: number) => number;
+	isItemWithIndexShowing: (index: number, scroller?: Element) => boolean;
+};
+
+interface Props<T> {
+	items: T[];
 	itemHeight: number;
-	ItemComponent: (value: any, index: number, array: any[]) => JSX.Element;
-	id?: string;
+	ItemComponent: (value: T, index: number, array: any[]) => JSX.Element;
+	vKey?: string;
+	className?: string;
+	handle?: MutableRefObject<VListHandle>;
 }
 
 const emptyRect = { x:0, y:0, width:0, top:0, bottom: 0, height:0 } as DOMRect;
@@ -88,68 +96,103 @@ const getlastItem = (items: any[],
 	return Math.min(index - 1, items.length - 1);
 };
 
-const getContainerHeight = (items: any[], heights: Record<any, number>, defaultHeight: number) => {
+export const getHeightByIndex = (index: number, heights: Record<any, number>, defaultHeight: number) => {
 	let totalHeight = 0;
-	items.forEach((_, index) => totalHeight += heights[index] || defaultHeight);
+
+	for (let i = 0; i < index; i++) {
+		totalHeight += heights[i] || defaultHeight;
+	}
+
 	return totalHeight;
 };
 
 
-const VirtualListContext = createContext(undefined);
+type VirtualListContextValue = {
+	getRef?: <T>(key:string, defaultVal:T) => React.MutableRefObject<T>,
+};
+
+
+const VirtualListContext = createContext<VirtualListContextValue>(undefined);
 VirtualListContext.displayName = 'VirtualListContext';
 
+const VKeyContext = createContext<React.Key>('virtual-list');
+VKeyContext.displayName = 'VKeyContext';
 
-const NestedListsContext = ({ children }) => {
+type NestedListsContexProps = {
+	children: any,
+	parentVKey: string,
+};
+
+const NestedListsContext = ({ children }: NestedListsContexProps) => {
 	const root = useContext(VirtualListContext);
-	const refsDict = useRef<Record<any, any>>({}); 
+	const refsDict = useRef<Record<string, any>>({});
 
-	const getRef = (items, defaultVal) => {
-		const value = refsDict.current[items];
+	const getRef = (key, defaultVal) => {
+		let value = refsDict.current[key];
 		if (!value) {
-			refsDict.current[items] = defaultVal;
+			refsDict.current[key] = createRef();
+			refsDict.current[key].current = defaultVal;
 		}
 
-		return refsDict.current[items];
+		return refsDict.current[key];
 	};
-
 
 	if (root) return <>{children}</>; 
 
 	return (
-		<VirtualListContext.Provider value={{ getRef  }}>
+		<VirtualListContext.Provider value={{ getRef }}>
 			{children}
 		</VirtualListContext.Provider>
 	);
 };
 
-
-function useVRef<T>(key, defaultVal) {
+export function useVRef<T>(key:string, defaultVal: T) {
 	const vContext = useContext(VirtualListContext);
-	const ref = useRef<T>(defaultVal);
+	let ref = useRef<T>(defaultVal);
 
 	if (vContext) {
-		ref.current = vContext.getRef(key, defaultVal);
+		ref = vContext.getRef(key, defaultVal);
 	}
 	
 	return ref;
 }
 
+export const untilXFramesPassed = (frames: number) => {
+	let framesCount = frames;
+
+	return new Promise((resolve) => {
+		const waitingFrames = () => {
+			if (framesCount >= 0) {
+				window.requestAnimationFrame(waitingFrames);
+				framesCount--;
+				return;
+			}
+
+			resolve(true);
+		};
+
+		window.requestAnimationFrame(waitingFrames);
+	});
+};
+
 
 // Todo: pass a viewport
 // TODO: itemheight should be average?
 // ItemComponent must create an item which bottom is the top of the next item. In other words no gutters are allowed.
-export const VirtualList = ({ items, itemHeight, ItemComponent, id }:Props) => { 
+export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemComponent, vKey, className, handle }:Props<T>) => { 
+	const parentVKey = useContext(VKeyContext);
 	const containerRef = useRef<Element>();
 	const itemsContainer = useRef<Element>();
 	const [, setRedraw] = useState(false);
 	const sliceIndexes = useRef({ first:-1, last:-1 });
-	const itemsRef = useRef(items);
+	const itemsRef = useVRef(`${parentVKey}._items_`, items);
 	const initialized = useRef(true);
+
 
 	const renderInnerHeight = useRef(0);
 	renderInnerHeight.current = window.innerHeight;
 
-	const itemsHeight = useVRef<Record<any, number>>((items),  {}); // get rid of the elements that get deleted
+	const itemsHeight = useVRef<Record<any, number>>(`${parentVKey}._itemsHeight_`, {}); // get rid of the elements that get deleted
 	const renderContainerRect = useRef(emptyRect);
 	
 	renderContainerRect.current = containerRef.current?.getBoundingClientRect();
@@ -157,7 +200,7 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, id }:Props) => {
 	const res = getFirstItem(items, itemsHeight.current, itemHeight, renderContainerRect.current, renderInnerHeight.current);
 	let spacerStart = 0;
 	let itemsSlice = [];
-	let containerHeight = getContainerHeight(items, itemsHeight.current, itemHeight);
+	let containerHeight = getHeightByIndex(items.length, itemsHeight.current, itemHeight);
 	sliceIndexes.current.first = res?.first;
 
 	if (res) {
@@ -181,11 +224,9 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, id }:Props) => {
 		let indexChanged = false;
 		const containerRect = containerRef.current?.getBoundingClientRect();
 		let scrolled = false;
-
-		const wasScrolledOut = !intersects({ top:0, bottom: renderInnerHeight.current },  renderContainerRect.current);
-		const scrolledIn =  intersects({ top:0, bottom: innerHeight },  containerRect) && wasScrolledOut;
-		
+	
 		const children = itemsContainer.current.children;
+		const scrolledIn =  intersects({ top:0, bottom: innerHeight },  containerRect) && !children.length;
 		
 		for (let i = 0; i < children.length ; i++ ) {
 			const elementBounding = children[i].getBoundingClientRect();
@@ -241,25 +282,99 @@ export const VirtualList = ({ items, itemHeight, ItemComponent, id }:Props) => {
 	}, []);
 
 	useEffect(() => {
+		if (itemsRef.current === items) return;
 		itemsRef.current = items;
 		itemsHeight.current = {};
 	}, [items]);
 
+
+	const isItemWithIndexShowing = (index, scroller?:Element) => {
+		const isRendering = res?.first <= index && index <= (itemsSlice.length - 1 ) +  res?.first;
+		if (!isRendering || !itemsContainer.current) return false;
+		const scrollingElement = scroller || containerRef.current.parentElement;
+		const itemBounds  = itemsContainer.current.children[index - res.first].getBoundingClientRect();
+		const scrollingElementBounds = scrollingElement.getBoundingClientRect();
+		const isSmallerAndContained = itemBounds.height <= scrollingElementBounds.height &&
+				lineInRange(itemBounds.top, scrollingElementBounds.top, scrollingElementBounds.bottom) 
+				&& lineInRange(itemBounds.bottom, scrollingElementBounds.top, scrollingElementBounds.bottom);
+
+		const isLargerAndAligned =  itemBounds.height > scrollingElementBounds.height && 
+				equalsHeight(itemBounds.top, scrollingElementBounds.top);
+
+		return isSmallerAndContained || isLargerAndAligned ;
+	};
+
+
+	const getOffsetToIndex = (index) => {
+		return getHeightByIndex(index, itemsHeight.current, itemHeight);
+	};
+
+	const gotoIndex = async (index, scroller?:Element) => {
+		const scrollingElement = scroller || containerRef.current.parentElement;
+
+		if ( !isItemWithIndexShowing(index, scrollingElement)) {
+			scrollingElement.scrollTop = getHeightByIndex(index, itemsHeight.current, itemHeight);
+		} 
+
+		let done = false;
+
+		for (let i = 0 ; i < 4 && !done ; i++) {
+			await untilXFramesPassed(10);
+			var currentScroll = Math.round(scrollingElement.scrollTop);
+			var otherScroll = Math.round(getHeightByIndex(index, itemsHeight.current, itemHeight));
+			
+			
+			if (currentScroll != otherScroll && !isItemWithIndexShowing(index, scrollingElement)) {
+				scrollingElement.scrollTop = otherScroll;
+			} else {
+				done = true;
+			}
+		}
+
+		if (!done) {
+			console.warn('Warn: VirtualList couldnt goto element with index:' + index);
+		}
+
+		return true;
+	};
+
+	useEffect(() => {
+		if (!handle) return;
+		handle.current = { gotoIndex, getOffsetToIndex, isItemWithIndexShowing };
+	}, [handle, gotoIndex, isItemWithIndexShowing]);
+
+
+	let itemsContainerClassName = 'vlist-mid';
+	if (itemsSlice[0] === items[0] ) {
+		itemsContainerClassName = 'vlist-start';
+	}
+
+	if (itemsSlice[itemsSlice.length - 1] === items[items.length - 1]) {
+		itemsContainerClassName = 'vlist-end';
+	}
+
+
 	return (
-		<NestedListsContext>
+		<NestedListsContext parentVKey={vKey}>
 			<div
-				id={id}
+				id={vKey}
 				style={
 					{
 						height: containerHeight, 
 						border: 0, 
 						boxSizing:'border-box',  
 						display:'block',
-					}} ref={containerRef as any}
+					}} 
+				ref={containerRef as any}
+				className={className}
 			>
 				<div style={{ height: spacerStart } } id='startSpacer'/>
-				<div ref={itemsContainer as any}   >
-					{itemsSlice.map(ItemComponent)}
+				<div ref={itemsContainer as any}  className={itemsContainerClassName} >
+					{itemsSlice.map((e, index, arr) => {
+						var ele = ItemComponent(e, index + (res?.first || 0), arr);
+						const key = parentVKey ? `${parentVKey}.${ele.key}` : ele.key;
+						return (<VKeyContext.Provider value={key} key={key} >{ele}</VKeyContext.Provider>);
+					})}
 				</div>
 			</div>
 		</NestedListsContext>

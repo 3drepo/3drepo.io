@@ -72,7 +72,7 @@ type TicketsTableProps = {
 export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
 	const navigate = useNavigate();
 	const params = useParams<DashboardTicketsParams>();
-	const { setSelectedIds, selectedIds } = useContext(TicketsTableContext);
+	const { setSelectedIds } = useContext(TicketsTableContext);
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
 	const { teamspace, project, template, ticketId } = params;
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
@@ -116,7 +116,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-
 
 	const newTicketButtonIsDisabled = useMemo(() =>
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
@@ -341,7 +340,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 					</FlexContainer>
 				</FiltersContainer>
 				<CardFilters />
-				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
+				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
 			</TicketsTableLayout>
 		</TicketsFiltersContextComponent>
 	);
