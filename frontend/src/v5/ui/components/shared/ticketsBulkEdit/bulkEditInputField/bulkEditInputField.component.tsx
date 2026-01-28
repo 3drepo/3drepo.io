@@ -16,14 +16,11 @@
  */
 
 import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isDateType, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { TicketFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { isJobsAndUsersProperty, getSelectOptions } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.component';
 import { Value } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.styles';
 import { getFilterFromEvent } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { IChipSelectItem, ChipSelectItem } from '@controls/chip/chipSelect/chipSelect.component';
-import { getStatusPropertyValues } from '@controls/chip/statusChip/statusChip.helpers';
 import { FormNumberField, FormBooleanSelect, FormSelect, FormDateTime, FormJobsAndUsersSelect, FormMultiSelect, FormTextField } from '@controls/inputs/formInputs.component';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { MenuItem as SingleSelectMenuItem } from '@mui/material';
@@ -39,7 +36,6 @@ type InputFieldProps = {
 	formError?: string;
 };
 export const BulkEditInputField = ({ module, property, templateId, projectId, type, ...inputProps }: InputFieldProps) => {
-	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(projectId, templateId);
 	if (type === 'number') return <FormNumberField {...inputProps} />;
 	if (type === 'boolean') return <FormBooleanSelect {...inputProps} />;
 	if (isDateType(type)) return <FormDateTime {...inputProps} />;
@@ -54,24 +50,14 @@ export const BulkEditInputField = ({ module, property, templateId, projectId, ty
 			{...inputProps}
 		/>
 	);
-	if (type === 'status') {
-		const values = getStatusPropertyValues(statusConfig);
-		return (
-			<FormSelect {...inputProps}>
-				{Object.values(values).map(({ value, ...optionProps }: IChipSelectItem) => (
-					<ChipSelectItem key={value} value={value} {...optionProps} />
-				))}
-			</FormSelect>
-		);
-	}
 	if (isSelectType(type)) {
 		const selectOptions = getSelectOptions(module, property, type);
 		const SelectInput = type === 'manyOf' ? FormMultiSelect : FormSelect;
 		const MenuItem = type === 'manyOf' ? MultiSelectMenuItem : SingleSelectMenuItem;
 		return (
 			<SelectInput {...inputProps}>
-				{selectOptions.map(({ value }) => (
-					<MenuItem key={value} value={value}>
+				{selectOptions.map(({ value, ...optionProps }) => (
+					<MenuItem key={value} value={value} {...optionProps}>
 						<Value>{value}</Value>
 					</MenuItem>
 				))}
