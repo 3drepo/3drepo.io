@@ -32,7 +32,7 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelection/groupBySelection.component';
@@ -41,6 +41,19 @@ import { ModuleTitle } from '@components/viewer/cards/cardFilters/cardFilters.st
 import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 import { BulkCheckbox } from './ticketsList.styles';
 import { Tooltip } from '@mui/material';
+import { TicketsBulkUpdateContext, TicketsBulkUpdateContextComponent } from '@components/tickets/bulkUpdate/bulkUpdate.context';
+
+
+const BulkUpdateButton = () => {
+	const { toggleBulkMode, bulkMode } =  useContext(TicketsBulkUpdateContext);
+	return (
+		<Tooltip 
+			title={formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' })} 
+			onClick={toggleBulkMode}>
+			<BulkCheckbox  value={bulkMode}/>
+		</Tooltip>
+	);
+};
 
 export const TicketsListCard = () => {
 	const { teamspace, project } = useParams<ViewerParams>();
@@ -79,39 +92,41 @@ export const TicketsListCard = () => {
 
 	return (
 		<CardContainer>
-			<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]} filters={presetFilters} onChange={onFiltersChange}>
-				<CardHeader
-					icon={<TicketsIcon />}
-					title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
-					actions={(
-						<>
-							{!readOnly && (<NewTicketMenu />)}
-							{!readOnly && (<Tooltip title={formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' })}><BulkCheckbox /></Tooltip>)}
-							<FilterSelection />
-							<GroupBySelection value={groupBy} onChange={(value) => {
-								TicketsCardActionsDispatchers.setSelectedTicket(null);
-								TicketsCardActionsDispatchers.setGroupBy(value);
-							}} />
-							<TicketsEllipsisMenu />
-						</>
-					)}
-				/>
-				<CardContent onClick={() => TicketsCardActionsDispatchers.setSelectedTicket(null)}>
-					<CardFilters />
-					{groupBy !== NONE_OPTION &&
+			<TicketsBulkUpdateContextComponent>
+				<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]} filters={presetFilters} onChange={onFiltersChange}>
+					<CardHeader
+						icon={<TicketsIcon />}
+						title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
+						actions={(
+							<>
+								{!readOnly && (<NewTicketMenu />)}
+								{!readOnly && (<BulkUpdateButton />)}
+								<FilterSelection />
+								<GroupBySelection value={groupBy} onChange={(value) => {
+									TicketsCardActionsDispatchers.setSelectedTicket(null);
+									TicketsCardActionsDispatchers.setGroupBy(value);
+								}} />
+								<TicketsEllipsisMenu />
+							</>
+						)}
+					/>
+					<CardContent onClick={() => TicketsCardActionsDispatchers.setSelectedTicket(null)}>
+						<CardFilters />
+						{groupBy !== NONE_OPTION &&
 						(<ModuleTitle>
 							{formatMessage({ id: 'viewer.cards.tickets.groupedByLabel', defaultMessage: 'Grouped by: ' })}{getPropertyLabel(groupBy)}
 						</ModuleTitle>)
-					}
-					{tickets.length ? (
-						<TicketsList groupBy={groupBy} templates={templates} loading={fetchingProperties}/>
-					) : (
-						<EmptyListMessage>
-							<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />
-						</EmptyListMessage>
-					)}
-				</CardContent>
-			</TicketsFiltersContextComponent>
+						}
+						{tickets.length ? (
+							<TicketsList groupBy={groupBy} templates={templates} loading={fetchingProperties}/>
+						) : (
+							<EmptyListMessage>
+								<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />
+							</EmptyListMessage>
+						)}
+					</CardContent>
+				</TicketsFiltersContextComponent>
+			</TicketsBulkUpdateContextComponent>
 		</CardContainer>
 	);
 };
