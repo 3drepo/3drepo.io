@@ -15,10 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useParams } from 'react-router';
 import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { isDateType, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { TicketFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { isJobsAndUsersProperty, getSelectOptions } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.component';
@@ -36,10 +34,11 @@ type InputFieldProps = {
 	property: string;
 	type: TicketFilterType;
 	name: string;
+	templateId: string;
+	projectId: string;
 	formError?: string;
 };
-export const BulkEditInputField = ({ module, property, type, ...inputProps }: InputFieldProps) => {
-	const { template: templateId, project: projectId } = useParams<DashboardTicketsParams>();
+export const BulkEditInputField = ({ module, property, templateId, projectId, type, ...inputProps }: InputFieldProps) => {
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(projectId, templateId);
 	if (type === 'number') return <FormNumberField {...inputProps} />;
 	if (type === 'boolean') return <FormBooleanSelect {...inputProps} />;

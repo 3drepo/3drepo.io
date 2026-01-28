@@ -18,11 +18,12 @@
 import { CardFilterActionMenu } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import ArrowDownIcon from '@assets/icons/filled/caret-filled.svg';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { BulkEditHeaderButton, HeaderCell, HeaderCellText } from '../ticketsTableHeaders.styles';
 import { getPropertyLabel } from '../../../../ticketsTable.helper';
 import { TICKET_HEADER_POPOVER_PROPS } from '../ticketsTableHeaders.helpers';
-import { TicketsTableHeaderBulkEditForm } from './ticketsTableHeaderBulkEditForm.component';
+import { TicketsBulkEditForm } from '@components/shared/ticketsBulkEdit/ticketsBulkEditForm.component';
+import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
 
 type TicketsTableHeaderBulkEditProps = {
 	name: string;
@@ -30,6 +31,7 @@ type TicketsTableHeaderBulkEditProps = {
 
 export const TicketsTableHeaderBulkEdit = ({ name, ...props }: TicketsTableHeaderBulkEditProps) => {
 	const [active, setActive] = useState(false);
+	const { selectedIds } = useContext(TicketsTableContext);
 	return (
 		<CardFilterActionMenu
 			onClose={() => setActive(false)}
@@ -47,9 +49,7 @@ export const TicketsTableHeaderBulkEdit = ({ name, ...props }: TicketsTableHeade
 			PopoverProps={TICKET_HEADER_POPOVER_PROPS}
 		>
 			<ActionMenuContext.Consumer>
-				{({ close }) => (
-					<TicketsTableHeaderBulkEditForm name={name} onCancel={close} />
-				)}
+				{({ close }) => <TicketsBulkEditForm name={name} selectedIds={selectedIds} onCancel={close} />}
 			</ActionMenuContext.Consumer>
 		</CardFilterActionMenu>
 	);

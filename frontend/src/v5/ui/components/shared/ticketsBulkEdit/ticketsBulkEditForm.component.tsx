@@ -15,28 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { useParams } from 'react-router-dom';
 import { Button, ButtonsContainer, Container, TitleContainer } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
-import { findFilterByPropertyName } from '../ticketsTableHeaderFilter.component';
 import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { getFilterFormTitle } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { findFilterByPropertyName } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableHeaders/ticketsTableHeaderFilter.component';
 import { BulkEditInputField } from './bulkEditInputField/bulkEditInputField.component';
-import { useContext } from 'react';
-import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { useParams } from 'react-router-dom';
 
+type IBulkEditFormProps = {
+	name: string;
+	selectedIds: Set<string>;
+	onCancel: () => void;
+};
 type FormType = { value: any; };
 
-export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
+export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFormProps) => {
 	const { filters, choosablefilters } = useTicketFiltersContext();
-	const { selectedIds } = useContext(TicketsTableContext);
 	const { module, property, type } = findFilterByPropertyName([...filters, ...choosablefilters], name); 
-	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const { template: templateId, project: projectId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const propDef = findPropertyDefinition(template, name);
 	const defaultValues: FormType = {
@@ -70,20 +72,22 @@ export const TicketsTableHeaderBulkEditForm = ({ name, onCancel }) => {
 				</TitleContainer>
 				<BulkEditInputField
 					name="value"
+					templateId={templateId}
+					projectId={projectId}
 					module={module}
 					property={property}
 					type={type}
 				/>
 				<ButtonsContainer>
 					<Button onClick={onCancel} color="secondary">
-						<FormattedMessage id="ticketsTable.headers.bulkEditForm.cancel" defaultMessage="Cancel" />
+						<FormattedMessage id="ticketsBulkEditForm.cancel" defaultMessage="Cancel" />
 					</Button>
 					<ActionMenuItem disabled={!canSubmit}>
 						<Button onClick={handleSubmit} color="primary" variant="contained" disabled={!canSubmit}>
 							{isEmptyValue ? (
-								<FormattedMessage id="ticketsTable.headers.bulkEditForm.clear" defaultMessage="Clear All" />
+								<FormattedMessage id="ticketsBulkEditForm.clear" defaultMessage="Clear All" />
 							) : (
-								<FormattedMessage id="ticketsTable.headers.bulkEditForm.apply" defaultMessage="Apply" />
+								<FormattedMessage id="ticketsBulkEditForm.apply" defaultMessage="Apply" />
 							)}
 						</Button>
 					</ActionMenuItem>
