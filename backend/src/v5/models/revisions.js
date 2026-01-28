@@ -77,20 +77,6 @@ Revisions.getRevisionCount = (teamspace, model, modelType) => {
 };
 
 Revisions.getMultipleRevisionCount = async (teamspace, models, modelType) => {
-	const query = deleteIfUndefined({
-		...excludeVoids,
-		...excludeIncomplete,
-		...excludeFailed,
-		model: modelType === modelTypes.DRAWING ? { model: { $in: models } } : undefined,
-	});
-
-	const pipeline = [
-		{ $match: query },
-		{ $group: { _id: '$model', count: { $sum: 1 } } },
-	];
-
-	const results = await db.aggregate();
-
 	const counts = {};
 	await Promise.all(models.map(async (model) => {
 		counts[model] = await Revisions.getRevisionCount(teamspace, model, modelType);

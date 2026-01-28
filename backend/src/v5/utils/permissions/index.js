@@ -25,6 +25,7 @@ const { findModels, getContainerById, getDrawingById, getFederationById, getMode
 const { getProjectAdmins, modelsExistInProject } = require('../../models/projectSettings');
 const { getTeamspaceAdmins } = require('../../models/teamspaceSettings');
 const { modelTypes } = require('../../models/modelSettings.constants');
+const { stringToUUID } = require('../helper/uuids');
 
 const Permissions = {};
 
@@ -95,8 +96,14 @@ Permissions.hasReadAccessToSomeModels = async (teamspace, project, models, usern
 Permissions.hasReadAccessToModels = async (teamspace, project, models, username) => {
 	const permCheck = (perm) => MODEL_READ_ROLES.includes(perm.permission);
 	const modelPerms = await findModels(teamspace, { _id: { $in: models } }, { permissions: 1 });
-	return modelPerms.filter(({ permissions }) => permissions
-		&& permissions.some((perm) => perm.user === username && permCheck(perm)));
+	const hasAdminPerms = await hasAdminPermissions(teamspace, stringToUUID(project), username);
+	if (hasAdminPerms) {
+		return modelPerms.map((model) => model._id);
+	}
+	return modelPerms
+		.filter(({ permissions }) => permissions
+			&& permissions.some((perm) => perm.user === username && permCheck(perm)))
+		.map((model) => model._id);
 };
 
 Permissions.hasWriteAccessToModel = modelPermCheck(

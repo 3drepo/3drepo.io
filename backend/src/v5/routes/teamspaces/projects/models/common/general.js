@@ -16,7 +16,7 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const { formatModelSettings, formatModelStats } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
+const { formatBulkModelStats, formatModelSettings, formatModelStats } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const {
 	hasAccessToTeamspace,
 	hasAdminAccessToContainer,
@@ -36,6 +36,7 @@ const Federations = require('../../../../../processors/teamspaces/projects/model
 const ModelSettings = require('../../../../../processors/teamspaces/projects/models/commons/settings');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
+const { getModelsIdFromQuery } = require('../../../../../middleware/dataConverter/queryParams');
 const { getUserFromSession } = require('../../../../../utils/sessions');
 const { hasReadAccessToModels } = require('../../../../../utils/permissions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
@@ -233,17 +234,15 @@ const getModelStatsInBulk = (modelType) => async (req, res, next) => {
 	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
 	const { models } = req.query;
-	const modelsList = models.split(',');
-
-	const getStatsFn = {
+	const fn = {
 		[modelTypes.CONTAINER]: Containers.getMultipleContainersStats,
 		[modelTypes.DRAWING]: Drawings.getMultipleDrawingsStats,
 		[modelTypes.FEDERATION]: Federations.getMultipleFederationsStats,
 	};
 
 	try {
-		const availableModels = await hasReadAccessToModels(teamspace, project, modelsList, user);
-		const stats = await getStatsFn[modelType](teamspace, project, availableModels);
+		const availableModels = await hasReadAccessToModels(teamspace, project, models, user);
+		const stats = await fn[modelType](teamspace, project, availableModels);
 		req.outputData = stats;
 		await next();
 	} catch (err) {
@@ -274,7 +273,8 @@ const establishRoutes = (modelType, isInternal) => {
 	};
 
 	if (!isInternal) {
-		router.get('/stats', hasAccessToTeamspace, getModelStatsInBulk(modelType));
+		// TODO document the route and create a middleware to deal with bulk stats
+		router.get('/stats', hasAccessToTeamspace, getModelsIdFromQuery, getModelStatsInBulk(modelType), formatBulkModelStats(modelType));
 
 		/**
 		 * @openapi
