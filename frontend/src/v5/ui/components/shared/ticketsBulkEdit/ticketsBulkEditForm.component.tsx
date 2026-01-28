@@ -76,7 +76,7 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 				</TitleContainer>
 				<BulkEditInputField
 					name="value"
-					templateId={template._id}
+					templateId={template?._id}
 					projectId={projectId}
 					module={module}
 					property={property}

@@ -19,9 +19,7 @@ import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 import { Highlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
-import { DropLine } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnDropAreas/movingColumnDropAreas.styles';
 import { Headers } from './ticketsTableHeaders/ticketsTableHeaders.styles';
-import { NEW_TICKET_ROW_HEIGHT } from './newTicketRowButton/newTicketRowButton.styles';
 import { NEW_TICKET_ROW_AREA_NAME, SELECTION_COLUMN_WIDTH, SETTINGS_COLUMN_WIDTH } from './ticketsTableGroup.helper';
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
@@ -64,13 +62,6 @@ export const Table = styled(ResizableTable)<{ $canCreateTicket?: boolean }>`
 
 	${Highlighter} {
 		border-radius: 10px;
-
-		${({ $canCreateTicket }) => $canCreateTicket && css`
-			height: calc(100% - ${NEW_TICKET_ROW_HEIGHT});
-		`}
-	}
-
-	${DropLine} {
-		height: calc(100% - ${NEW_TICKET_ROW_HEIGHT});
+		height: 100%;
 	}
 `;
