@@ -25,8 +25,9 @@ import { getFilterFormTitle } from '@components/viewer/cards/cardFilters/cardFil
 import { findFilterByPropertyName } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableHeaders/ticketsTableHeaderFilter.component';
 import { BulkEditInputField } from './bulkEditInputField/bulkEditInputField.component';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { uniq } from 'lodash';
 
 type IBulkEditFormProps = {
 	name: string;
@@ -38,8 +39,11 @@ type FormType = { value: any; };
 export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFormProps) => {
 	const { filters, choosablefilters } = useTicketFiltersContext();
 	const { module, property, type } = findFilterByPropertyName([...filters, ...choosablefilters], name); 
-	const { template: templateId, project: projectId } = useParams<DashboardTicketsParams>();
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+	const { project: projectId } = useParams<DashboardTicketsParams>();
+	const selectedTickets = TicketsHooksSelectors.selectTicketsById(Array.from(selectedIds));
+	const templatesIds = uniq(selectedTickets.map((t) => t.type));
+	// Temporary method for getting template. When using this in Viewer will have to handle cases with multiple templates.
+	const template = TicketsHooksSelectors.selectTemplateById(projectId, templatesIds[0]);
 	const propDef = findPropertyDefinition(template, name);
 	const defaultValues: FormType = {
 		value: type === 'manyOf' ? [] : '',
@@ -72,7 +76,7 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 				</TitleContainer>
 				<BulkEditInputField
 					name="value"
-					templateId={templateId}
+					templateId={template._id}
 					projectId={projectId}
 					module={module}
 					property={property}
