@@ -22,7 +22,6 @@ import { ResizableTableHeader } from '@controls/resizableTableContext/resizableT
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
-	margin-bottom: 6px;
 	width: 100%;
 	height: 26px;
 `;
@@ -44,6 +43,7 @@ export const HeaderCell = styled(ResizableTableHeader)`
 	color: ${({ theme }) => theme.palette.base.main};
 	user-select: none;
 	align-items: center;
+	padding-bottom: 12px;
 
 	svg {
 		width: 16px;

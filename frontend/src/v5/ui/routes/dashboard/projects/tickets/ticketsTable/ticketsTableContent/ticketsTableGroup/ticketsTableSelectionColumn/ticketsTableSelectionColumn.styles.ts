@@ -32,9 +32,6 @@ export const CheckboxHeaderCell = styled(HeaderCell).attrs({
 })`
 	height: 27px;
 	overflow: visible;
-	&:last-of-type {
-		padding: inherit;
-	}
 `;
 
 export const SelectionColumnContainer = styled(Group)`
