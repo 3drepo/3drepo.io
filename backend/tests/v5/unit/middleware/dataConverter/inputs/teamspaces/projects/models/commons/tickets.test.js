@@ -20,6 +20,7 @@ const { times } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 
 const { generateRandomString, generateTemplate, generateTicket } = require('../../../../../../../../helper/services');
+const { isEqual } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -152,6 +153,8 @@ const testValidateNewTicket = () => {
 			});
 
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
+			TicketSchema.deserialiseUUIDsInTicket.mockResolvedValueOnce(req.body);
+			TicketSchema.processReadOnlyValues.mockResolvedValueOnce(req.body);
 
 			await Tickets.validateNewTicket(req, res, fn);
 
@@ -317,7 +320,7 @@ const testValidateUpdateTicket = () => {
 			expect(fn).not.toHaveBeenCalled();
 		});
 
-		test(`Should respond with ${templates.invalidArguments.code} if there is nothing to update`, async () => {
+		test(`Should respond with ${templates.ok.code} if there is nothing to update`, async () => {
 			const fn = jest.fn();
 			const req = { params: {}, body: { } };
 			const res = {};
@@ -331,8 +334,7 @@ const testValidateUpdateTicket = () => {
 			await Tickets.validateUpdateTicket(req, res, fn);
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).toHaveBeenCalledWith(req, res,
-				expect.objectContaining({ code: templates.invalidArguments.code }));
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok);
 			expect(fn).not.toHaveBeenCalled();
 		});
 
@@ -458,8 +460,18 @@ const testValidateUpdateMultipleTickets = () => {
 		}
 	};
 
-	const validation = (t, p, m, tem, ticket) => (ticket._id === badTicket._id
-		? Promise.reject(templates.invalidArguments) : Promise.resolve(ticket));
+	const validation = (t, p, m, tem, ticket, existingTicket) => {
+		if (ticket._id === badTicket._id) {
+			return Promise.reject(templates.invalidArguments);
+		}
+
+		if (isEqual(ticket, { ...existingTicket, _id: UUIDToString(existingTicket._id) })) {
+			return Promise.resolve({ modules: {}, properties: {} });
+		}
+
+		return Promise.resolve(ticket);
+	};
+
 	const processReadOnly = (e, ticket) => {
 		// eslint-disable-next-line no-param-reassign
 		ticket.processed = true;
@@ -483,6 +495,7 @@ const testValidateUpdateMultipleTickets = () => {
 		['ticket array contains duplicate unique properties', { body: { tickets: duplicateUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniquePropName} can not have the same value multiple times.`)],
 		['ticket array contains duplicate unique module properties', { body: { tickets: duplicateModuleUniqueProp } }, false, createResponseCode(templates.invalidArguments, `The unique property ${uniqueModuleName}.${uniqueModuleName} can not have the same value multiple times.`)],
 		['all tickets are valid', {}, true],
+		['tickets have no changes', { body: { tickets: existingTickets.slice(0, 2).map((ticket) => ({ ...ticket, _id: UUIDToString(ticket._id) })) } }, false, templates.ok],
 		['a deprecated template is provided', { query: { template: deprecatedTemplateID } }, true],
 	])('Validate update multiple tickets', (desc, additionalReq, success, expectedRes) => {
 		afterEach(() => {

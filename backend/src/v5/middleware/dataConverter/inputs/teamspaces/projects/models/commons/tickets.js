@@ -35,7 +35,7 @@ const processTicket = async (teamspace, project, model, template, author, newTic
 		template, newTicket, existingData, isImport);
 
 	if (existingData && isEqual(validatedTicket, { modules: {}, properties: {} })) {
-		throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
+		return null;
 	}
 
 	const deserialised = deserialiseUUIDsInTicket(validatedTicket, template);
@@ -54,6 +54,11 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 		}
 
 		req.body = await processTicket(teamspace, project, model, template, user, req.body, req.ticketData);
+
+		if (!isNewTicket && !req.body) {
+			respond(req, res, templates.ok);
+			return;
+		}
 
 		await next();
 	} catch (err) {
@@ -203,6 +208,30 @@ const checkAllTicketsExist = async (req, res, next) => {
 	}
 };
 
+const cleanNullTickets = async (req, res, next) => {
+	const filteredTickets = [];
+	const filteredOldTickets = [];
+
+	for (let i = 0; i < req.body.tickets.length; i++) {
+		const ticket = req.body.tickets[i];
+
+		if (ticket) {
+			filteredTickets.push(ticket);
+			filteredOldTickets.push(req.ticketsData[i]);
+		}
+	}
+
+	if (!filteredTickets.length) {
+		respond(req, res, templates.ok);
+		return;
+	}
+
+	req.body.tickets = filteredTickets;
+	req.ticketsData = filteredOldTickets;
+
+	await next();
+};
+
 TicketsMiddleware.validateImportTickets = validateMany([templateIDToParams(true), checkTicketTemplateExists,
 	bodyContainsTicketsArray, validateTicketImportData(true)]);
 
@@ -211,7 +240,7 @@ TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams(false), c
 TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists, validateTicket(false)]);
 TicketsMiddleware.validateUpdateMultipleTickets = validateMany([
 	templateIDToParams(true), checkTicketTemplateExists, bodyContainsTicketsArray,
-	checkAllTicketsExist, validateTicketImportData(false)]);
+	checkAllTicketsExist, validateTicketImportData(false), cleanNullTickets]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 

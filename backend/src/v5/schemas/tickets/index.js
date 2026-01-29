@@ -187,7 +187,6 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 			await generateModuleValidator(teamspace, project, model, template._id,
 				fullTem.modules, oldTicket?.modules, isNewTicket),
 		).default({}),
-		type: Yup.mixed().strip(),
 	};
 
 	if (isImport) {
@@ -197,7 +196,9 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 		}
 	}
 
-	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });
+	const validatedTicket = await Yup.object(validatorObj)
+		.test('at-least-one-prop-provided', 'At least one ticket property must be provided ', (value, context) => Object.keys(context.originalValue).some((key) => key in validatorObj))
+		.validate(newTicket, { stripUnknown: true });
 
 	// Run it again so we can check for unchanged properties that looked changed due to default values
 	validatorObj.modules = Yup.object(await generateModuleValidator(teamspace, project, model,
