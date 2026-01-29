@@ -110,7 +110,7 @@ export const selectTicketsWithGroups = createSelector(
 		const storeState = getState();
 		return ticketsList.map((ticket) => {
 			const ticketWithStatus = getTicketWithStatus(ticket, selectTemplateById(storeState, modelId, ticket.type));
-			return ticketWithGroups(({ ...ticketWithStatus, modelId }), groups);
+			return ticketWithGroups(({ ...ticketWithStatus }), groups);
 		});
 	},
 );
