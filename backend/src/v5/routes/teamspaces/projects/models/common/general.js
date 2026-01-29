@@ -29,6 +29,7 @@ const {
 } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
 const { validateAddModelData, validateUpdateSettingsData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/modelSettings');
+const { BYPASS_AUTH } = require('../../../../../utils/config.constants');
 const Containers = require('../../../../../processors/teamspaces/projects/models/containers');
 const Drawings = require('../../../../../processors/teamspaces/projects/models/drawings');
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
@@ -44,7 +45,7 @@ const getThumbnail = async (req, res) => {
 
 	try {
 		const { readStream, filename, size, mimeType } = await Drawings.getLatestThumbnail(teamspace, project, drawing);
-		writeStreamRespond(req, res, templates.ok, readStream, filename, size, { mimeType });
+		writeStreamRespond(req, res, templates.ok, readStream, { fileName: filename, fileSize: size, mimeType });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -96,7 +97,7 @@ const getModelList = (modelType) => async (req, res) => {
 	};
 
 	try {
-		const models = await fn[modelType](teamspace, project, user);
+		const models = await fn[modelType](teamspace, project, user, req.app.get(BYPASS_AUTH));
 		respond(req, res, templates.ok, { [`${modelType}s`]: models });
 	} catch (err) {
 		respond(req, res, err);
@@ -227,7 +228,7 @@ const getJobsWithAccess = async (req, res) => {
 	}
 };
 
-const establishRoutes = (modelType) => {
+const establishRoutes = (modelType, isInternal) => {
 	const router = Router({ mergeParams: true });
 
 	const hasAdminAccessToModel = {
@@ -248,12 +249,274 @@ const establishRoutes = (modelType) => {
 		[modelTypes.DRAWING]: async (req, res, next) => { await next(); },
 	};
 
+	if (!isInternal) {
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
+		 *   patch:
+		 *     description: Add models to the user's favourites list
+		 *     tags: [v:external, Models]
+		 *     operationId: appendModels
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: ID of project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *     requestBody:
+		 *       content:
+		 *         application/json:
+		 *           schema:
+		 *             type: object
+		 *             properties:
+		 *               models:
+		 *                 type: array
+		 *                 items:
+		 *                   type: string
+		 *                   format: uuid
+		 *           examples:
+		 *             containers:
+		 *               summary: containers
+		 *               value:
+		 *                 containers: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+		 *             federations:
+		 *               summary: federations
+		 *               value:
+		 *                 federations: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+		 *             drawings:
+		 *               summary: drawings
+		 *               value:
+		 *                 drawings: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: adds the models found in the request body to the user's favourites list
+		 */
+		router.patch('/favourites', hasAccessToTeamspace, appendFavourites(modelType));
+
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
+		 *   delete:
+		 *     description: Remove models from the user's favourites list
+		 *     tags: [v:external, Models]
+		 *     operationId: deleteModels
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: ID of project
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *       - name: ids
+		 *         description: list of model ids to remove (comma separated)
+		 *         in: query
+		 *         schema:
+		 *           type: string
+		 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: removes the models found in the request body from the user's favourites list
+		 */
+		router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(modelType));
+
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/members:
+		 *   get:
+		 *     description: Get the name of the users who have access to the model
+		 *     tags: [v:external, Models]
+		 *     operationId: getUsersWithPermissions
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *       - name: model
+		 *         description: Model ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: excludeViewers
+		 *         description: exclude users who have viewer permission
+		 *         in: query
+		 *         schema:
+		 *           type: boolean
+		 *         example: true
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: returns the users who have access to the model
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 users:
+		 *                   type: array
+		 *                   items:
+		 *                     type: string
+		 *                     example: user1
+		 */
+		router.get('/:model/members', hasReadAccessToModel[modelType], getUsersWithPermissions);
+
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
+		 *   get:
+		 *     description: Get the names of the jobs that are associated with users who have access to the model
+		 *     tags: [v:external, Models]
+		 *     operationId: getJobsWithAccess
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum: [containers, federations, drawings]
+		 *       - name: model
+		 *         description: Model ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: excludeViewers
+		 *         description: exclude users who have viewer permission
+		 *         in: query
+		 *         schema:
+		 *           type: boolean
+		 *         example: true
+		 *     responses:
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 *       200:
+		 *         description: returns the jobs that are associated with users who have access to the model
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 jobs:
+		 *                   type: array
+		 *                   items:
+		 *                     type: string
+		 *                     example: Architect
+		 */
+		router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
+
+		if (modelType === modelTypes.DRAWING) {
+			/**
+			 * @openapi
+			 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/thumbnail:
+			 *   get:
+			 *     description: Fetches the thumbnail for a drawing.
+			 *     tags: [v:external, Models]
+			 *     operationId: getThumbnail
+			 *     parameters:
+			 *       - name: teamspace
+			 *         description: Name of teamspace
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *       - name: project
+			 *         description: Project ID
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *           format: uuid
+			 *       - name: drawing
+			 *         description: Drawing ID
+			 *         in: path
+			 *         required: true
+			 *         schema:
+			 *           type: string
+			 *           format: uuid
+			 *     responses:
+			 *       401:
+			 *         $ref: "#/components/responses/notLoggedIn"
+			 *       200:
+			 *         description: returns a raster image of the thumbnail
+			 */
+			router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
+		}
+	}
+
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}:
 	 *   post:
 	 *     description: Add a new model to the specified project the user is admin of
-	 *     tags: [Models]
+	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: addModel
 	 *     parameters:
 	 *       - name: teamspace
@@ -262,14 +525,14 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -277,8 +540,8 @@ const establishRoutes = (modelType) => {
 	 *           enum: [containers, federations, drawings]
 	 *     requestBody:
 	 *       content:
-   	 *         application/json:
-   	 *           schema:
+	 *         application/json:
+	 *           schema:
 	 *             type: object
 	 *             required:
 	 *               - name
@@ -340,30 +603,30 @@ const establishRoutes = (modelType) => {
 	 *                 example: 100
 	 *                 description: Angle from North in degrees
 	 *           examples:
-     *             container:
+	 *             container:
 	 *               summary: container
-     *               value:
-     *                 name: Lego House Architecture
-     *                 unit: mm
+	 *               value:
+	 *                 name: Lego House Architecture
+	 *                 unit: mm
 	 *                 desc: The Architecture model of the Lego House
 	 *                 code: LEGO_ARCHIT_001
 	 *                 type: Architecture
 	 *                 angleFromNorth: 100
 	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-     *             federation:
+	 *             federation:
 	 *               summary: federation
-     *               value:
-     *                 name: Lego House Federation
-     *                 unit: m
+	 *               value:
+	 *                 name: Lego House Federation
+	 *                 unit: m
 	 *                 desc: The Structural model of the Lego House
 	 *                 code: LEGO_ARCHIT_002
 	 *                 angleFromNorth: 150
- 	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
+		 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
 	 *             drawing:
 	 *               summary: drawing
-     *               value:
-     *                 name: Lego House Drawing
-     *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *               value:
+	 *                 name: Lego House Drawing
+	 *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
 	 *                 desc: The Drawing of the Lego House
 	 *                 type: Structural
 	 *     responses:
@@ -391,7 +654,7 @@ const establishRoutes = (modelType) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}:
 	 *   get:
 	 *     description: Get a list of models within the specified project the user has access to
-	 *     tags: [Models]
+	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: getModelList
 	 *     parameters:
 	 *       - name: teamspace
@@ -407,7 +670,7 @@ const establishRoutes = (modelType) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -444,131 +707,27 @@ const establishRoutes = (modelType) => {
 	 *                         type: boolean
 	 *                         description: whether the model is a favourited item for the user
 	 *             examples:
-     *               containers:
+	 *               containers:
 	 *                 summary: containers
-     *                 value:
+	 *                 value:
 	 *                   containers: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Container, role: admin, isFavourite: true }]
-     *               federations:
+	 *               federations:
 	 *                 summary: federations
-     *                 value:
-     *                   federations: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Federation, role: admin, isFavourite: true }]
-     *               drawings:
+	 *                 value:
+	 *                   federations: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Federation, role: admin, isFavourite: true }]
+	 *               drawings:
 	 *                 summary: drawings
-     *                 value:
-     *                   drawings: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Drawing, role: admin, isFavourite: true }]
+	 *                 value:
+	 *                   drawings: [{ _id: 3549ddf6-885d-4977-87f1-eeac43a0e818, name: Lego House Drawing, role: admin, isFavourite: true }]
 	 */
 	router.get('/', hasAccessToTeamspace, getModelList(modelType));
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
-	 *   patch:
-	 *     description: Add models to the user's favourites list
-	 *     tags: [Models]
-	 *     operationId: appendModels
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: ID of project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               models:
-	 *                 type: array
-	 *                 items:
-	 *                   type: string
-	 *                   format: uuid
-	 *           examples:
-     *             containers:
-	 *               summary: containers
-     *               value:
-	 *                 containers: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
-     *             federations:
-	 *               summary: federations
-     *               value:
-	 *                 federations: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
-     *             drawings:
-	 *               summary: drawings
-     *               value:
-     *                 drawings: [3549ddf6-885d-4977-87f1-eeac43a0e818, a54e8776-da7c-11ec-9d64-0242ac120002]
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: adds the models found in the request body to the user's favourites list
-	 */
-	router.patch('/favourites', hasAccessToTeamspace, appendFavourites(modelType));
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/favourites:
-	 *   delete:
-	 *     description: Remove models from the user's favourites list
-	 *     tags: [Models]
-	 *     operationId: deleteModels
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: ID of project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *       - name: ids
-	 *         description: list of model ids to remove (comma separated)
-	 *         in: query
-	 *         schema:
-	 *           type: string
-	 *         example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: removes the models found in the request body from the user's favourites list
-	 */
-	router.delete('/favourites', hasAccessToTeamspace, deleteFavourites(modelType));
 
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/stats:
 	 *   get:
 	 *     description: Get the statistics and general information about a model
-	 *     tags: [Models]
+	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: getModelStats
 	 *     parameters:
 	 *       - name: teamspace
@@ -577,20 +736,20 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           enum: [containers, federations,drawings]
-   	 *       - name: model
+	 *       - name: model
 	 *         description: Model ID
 	 *         in: path
 	 *         required: true
@@ -612,11 +771,11 @@ const establishRoutes = (modelType) => {
 	 *                   type: string
 	 *                   description: Model code
 	 *                   example: STR-01
-     *                 status:
+	 *                 status:
 	 *                   type: string
 	 *                   description: Current status of the model
 	 *                   example: ok
-   	 *                 containers:
+	 *                 containers:
 	 *                   type: array
 	 *                   description: The IDs of the models the model consists of
 	 *                   items:
@@ -639,38 +798,38 @@ const establishRoutes = (modelType) => {
 	 *                     risks:
 	 *                       type: integer
 	 *                       description: The number of unmitigated risks of the model
-     *                 desc:
+	 *                 desc:
 	 *                   type: string
 	 *                   description: Model description
 	 *                   example: Floor 1 MEP with Facade
-     *                 lastUpdated:
+	 *                 lastUpdated:
 	 *                   type: integer
 	 *                   description: Timestamp(ms) of when any of the submodels was updated
 	 *                   example: 1630598072000
 	 *             examples:
 	 *               container:
 	 *                 summary: container
-     *                 value:
+	 *                 value:
 	 *                   type: Architectural
-     *                   code: STR-01
-     *                   status: ok
+	 *                   code: STR-01
+	 *                   status: ok
 	 *                   unit: mm
 	 *                   desc: Floor 1 MEP with Facade
 	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: rev1 }
 	 *               federation:
 	 *                 summary: federation
-     *                 value:
-     *                   code: STR-01
-     *                   status: ok
+	 *                 value:
+	 *                   code: STR-01
+	 *                   status: ok
 	 *                   desc: Floor 1 MEP with Facade
 	 *                   lastUpdated: 1630598072000
 	 *                   tickets: { issues: 10, risks: 5 }
 	 *                   containers: [{ group: Architectural, _id: 374bb150-065f-11ec-8edf-ab0f7cc84da8 }]
 	 *               drawing:
 	 *                 summary: drawing
-     *                 value:
-     *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
-     *                   status: ok
+	 *                 value:
+	 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                   status: ok
 	 *                   type: Architectural
 	 *                   desc: Floor 1 MEP with Facade
 	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
@@ -683,7 +842,7 @@ const establishRoutes = (modelType) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   delete:
 	 *     description: Delete model from project the user is admin of
-	 *     tags: [Models]
+	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: deleteModel
 	 *     parameters:
 	 *       - name: teamspace
@@ -692,20 +851,20 @@ const establishRoutes = (modelType) => {
 	 *         required: true
 	 *         schema:
 	 *           type: string
-   	 *       - name: project
+	 *       - name: project
 	 *         description: Project ID
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
 	 *           type: string
 	 *           enum: [containers, federations, drawings]
-   	 *       - name: model
+	 *       - name: model
 	 *         description: Model ID
 	 *         in: path
 	 *         required: true
@@ -726,7 +885,7 @@ const establishRoutes = (modelType) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   patch:
 	 *     description: Updates the settings of a model
-	 *     tags: [Models]
+	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: updateModelSettings
 	 *     parameters:
 	 *       - name: teamspace
@@ -742,7 +901,7 @@ const establishRoutes = (modelType) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -801,21 +960,21 @@ const establishRoutes = (modelType) => {
 	 *                 format: uuid
 	 *                 example: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *           examples:
-     *             container:
+	 *             container:
 	 *               summary: container
-     *               value:
-     *                 name: Lego House Container
-     *                 unit: mm
+	 *               value:
+	 *                 name: Lego House Container
+	 *                 unit: mm
 	 *                 desc: The Container model of the Lego House
 	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                 angleFromNorth: 100
 	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-     *             federation:
+	 *             federation:
 	 *               summary: federation
-     *               value:
-     *                 name: Lego House Federation
-     *                 unit: m
+	 *               value:
+	 *                 name: Lego House Federation
+	 *                 unit: m
 	 *                 desc: The Federation model of the Lego House
 	 *                 defaultView: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                 defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
@@ -823,9 +982,9 @@ const establishRoutes = (modelType) => {
 	 *                 surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
 	 *             drawing:
 	 *               summary: drawing
-     *               value:
-     *                 name: Lego House Drawing
-     *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *               value:
+	 *                 name: Lego House Drawing
+	 *                 number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
 	 *                 desc: The Drawing of the Lego House
 	 *     responses:
 	 *       401:
@@ -842,7 +1001,7 @@ const establishRoutes = (modelType) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}:
 	 *   get:
 	 *     description: Get the model settings of model
-	 *     tags: [Models]
+	 *     tags: [v:external, v:internal, Models]
 	 *     operationId: getModelSettings
 	 *     parameters:
 	 *       - name: teamspace
@@ -858,7 +1017,7 @@ const establishRoutes = (modelType) => {
 	 *         schema:
 	 *           type: string
 	 *       - name: type
- 	 *         description: Model type
+	 *         description: Model type
 	 *         in: path
 	 *         required: true
 	 *         schema:
@@ -882,12 +1041,12 @@ const establishRoutes = (modelType) => {
 	 *             schema:
 	 *               $ref: "#/components/schemas/modelSettings"
 	 *             examples:
-     *               container:
+	 *               container:
 	 *                 summary: container
-     *                 value:
+	 *                 value:
 	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-     *                   name: Lego House Container
-     *                   unit: mm
+	 *                   name: Lego House Container
+	 *                   unit: mm
 	 *                   code: MOD1
 	 *                   type: Structural
 	 *                   desc: The Container model of the Lego House
@@ -898,12 +1057,12 @@ const establishRoutes = (modelType) => {
 	 *                   defaultLegend: '374bb150-065f-11ec-8edf-ab0f7cc84da8'
 	 *                   angleFromNorth: 100
 	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
-     *               federation:
+	 *               federation:
 	 *                 summary: federation
-     *                 value:
+	 *                 value:
 	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-     *                   name: Lego House Federation
-     *                   unit: mm
+	 *                   name: Lego House Federation
+	 *                   unit: mm
 	 *                   code: MOD1
 	 *                   desc: The Federation model of the Lego House
 	 *                   timestamp: 1629976656315
@@ -915,171 +1074,15 @@ const establishRoutes = (modelType) => {
 	 *                   surveyPoints: [{ position: [23.45, 1.23, 4.32], latLong: [4.45, 7,76] }]
 	 *               drawing:
 	 *                 summary: drawing
-     *                 value:
+	 *                 value:
 	 *                   _id: 3549ddf6-885d-4977-87f1-eeac43a0e818
-     *                   name: Lego House Drawing
-     *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
+	 *                   name: Lego House Drawing
+	 *                   number: SC1-SFT-V1-01-M3-ST-30_10_30-0001
 	 *                   type: Structural
 	 *                   desc: The Drawing of the Lego House
 	 *                   calibration: { verticalRange: [0,10], units: m }
 	 */
 	router.get('/:model', hasReadAccessToModel[modelType], getModelSettings(modelType), formatModelSettings);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/members:
-	 *   get:
-	 *     description: Get the name of the users who have access to the model
-	 *     tags: [Models]
-	 *     operationId: getUsersWithPermissions
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: excludeViewers
-	 *         description: exclude users who have viewer permission
-	 *         in: query
-	 *         schema:
-	 *           type: boolean
-	 *         example: true
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: returns the users who have access to the model
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 users:
-	 *                   type: array
-	 *                   items:
-	 *                     type: string
-	 *                     example: user1
-	 */
-	router.get('/:model/members', hasReadAccessToModel[modelType], getUsersWithPermissions);
-
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/jobs:
-	 *   get:
-	 *     description: Get the names of the jobs that are associated with users who have access to the model
-	 *     tags: [Models]
-	 *     operationId: getJobsWithAccess
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: type
- 	 *         description: Model type
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           enum: [containers, federations, drawings]
-	 *       - name: model
-	 *         description: Model ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: excludeViewers
-	 *         description: exclude users who have viewer permission
-	 *         in: query
-	 *         schema:
-	 *           type: boolean
-	 *         example: true
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       404:
-	 *         $ref: "#/components/responses/teamspaceNotFound"
-	 *       200:
-	 *         description: returns the jobs that are associated with users who have access to the model
-	 *         content:
-	 *           application/json:
-	 *             schema:
-	 *               type: object
-	 *               properties:
-	 *                 jobs:
-	 *                   type: array
-	 *                   items:
-	 *                     type: string
-	 *                     example: Architect
-	 */
-	router.get('/:model/jobs', hasReadAccessToModel[modelType], getJobsWithAccess);
-
-	if (modelType === modelTypes.DRAWING) {
-	/**
-	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/thumbnail:
-	 *   get:
-	 *     description: Fetches the thumbnail for a drawing.
-	 *     tags: [Models]
-	 *     operationId: getThumbnail
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: Name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Project ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *       - name: drawing
-	 *         description: Drawing ID
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         description: returns a raster image of the thumbnail
-	 */
-		router.get('/:model/thumbnail', hasReadAccessToDrawing, getThumbnail);
-	}
 
 	return router;
 };

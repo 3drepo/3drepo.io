@@ -23,6 +23,7 @@ import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { dispatch } from '@/v5/helpers/redux.helpers';
 import { UsersActions } from '@/v5/store/users/users.redux';
+import { selectIsFederation } from '@/v5/store/federations/federations.selectors';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_EVENTS, VIEWER_CLIP_MODES } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -98,6 +99,7 @@ function* fetchData({ teamspace, model }) {
 		yield all([
 			put(ViewerGuiActions.loadModel()),
 			put(TicketsActions.resetSorting()),
+			put(TicketsCardActions.setGroupBy(null)),
 			put(GroupsActions.fetchGroups(teamspace, model, revision)),
 			put(TreeActions.fetchFullTree(teamspace, model, revision)),
 			put(IssuesActions.fetchIssues(teamspace, model, revision)),
@@ -361,7 +363,7 @@ function* setCamera({ params }) {
 }
 
 function* loadModel() {
-	const { teamspace, model } = yield select(selectUrlParams);
+	const { teamspace, project, model } = yield select(selectUrlParams);
 
 	try {
 		yield Viewer.isViewerReady();
@@ -369,8 +371,9 @@ function* loadModel() {
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 		const selectedViewpoint = yield select(selectInitialView);
+		const isFederation = (yield select(selectIsFederation))(model)
 
-		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint?.viewpoint);
+		yield Viewer.loadViewerModel(teamspace, project, model, revision || 'head', isFederation, selectedViewpoint?.viewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);
 
 		if (selectedViewpoint) { // This is to have the viewpoint state in redux the same as in unity

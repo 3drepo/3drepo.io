@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { updateCustomMetadata } = require('../../../../models/metadata');
+const Scene = {};
+const db = require('../handler/db');
 
-const Metadata = { };
+const STASH_EXT = '.stash.3drepo';
 
-Metadata.updateCustomMetadata = updateCustomMetadata;
+Scene.getSuperMeshesInRevision = (teamspace, model, revision, projection) => db.find(
+	teamspace, `${model}${STASH_EXT}`, { rev_id: revision, type: 'mesh' }, projection);
 
-module.exports = Metadata;
+module.exports = Scene;

@@ -16,10 +16,15 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
+const { getContainers, getFederationById } = require('../../../../../../models/modelSettings');
+const { BYPASS_AUTH } = require('../../../../../../utils/config.constants');
 const Yup = require('yup');
 const YupHelper = require('../../../../../../utils/helper/yup');
-const { getContainers } = require('../../../../../../models/modelSettings');
+const { getLatestRevision } = require('../../../../../../models/revisions');
+const { getUserFromSession } = require('../../../../../../utils/sessions');
+const { hasReadAccessToContainer } = require('../../../../../../utils/permissions');
 const { isString } = require('../../../../../../utils/helper/typeCheck');
+const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { modelsExistInProject } = require('../../../../../../models/projectSettings');
 const { respond } = require('../../../../../../utils/responder');
 
@@ -60,6 +65,51 @@ Federations.validateNewRevisionData = async (req, res, next) => {
 		await next();
 	} catch (err) {
 		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Federations.getAccessibleContainers = (modelType) => async (req, res, next) => {
+	try {
+		if (modelType !== modelTypes.FEDERATION) {
+			await next();
+		} else {
+			const { teamspace, project, model } = req.params;
+			const { subModels } = await getFederationById(teamspace, model, { subModels: 1 });
+
+			let containers = [];
+			if (req.app.get(BYPASS_AUTH)) {
+				containers = subModels;
+			} else {
+				const user = getUserFromSession(req.session);
+
+				await Promise.all(subModels.map(async ({ _id: containerId }) => {
+					try {
+						if (await hasReadAccessToContainer(teamspace, project, containerId, user)) {
+							containers.push({ _id: containerId });
+						}
+					} catch (err) {
+					// Do nothing. If we can't get access info, the user has no access
+					}
+				}));
+			}
+
+			const containersFound = await Promise.all(containers.map(async ({ _id: containerId }) => {
+				try {
+					const containerRev = await getLatestRevision(
+						teamspace, containerId, modelTypes.CONTAINER, { _id: 1 });
+					return { container: containerId, revision: containerRev._id };
+				} catch (err) {
+					// return undefined. If we can't get the latest revision, skip this container
+					return undefined;
+				}
+			}));
+
+			req.containers = containersFound.filter((c) => !!c);
+
+			await next();
+		}
+	} catch (err) {
+		respond(req, res, err);
 	}
 };
 

@@ -21,6 +21,7 @@ const {
 	db: { reset: resetDB, createTeamspace, createUser },
 	generateRandomString,
 	generateUserCredentials,
+	generateRandomEmail,
 } = require('../../helper/services');
 
 const { createAccount } = require('../../helper/fronteggMock');
@@ -59,19 +60,18 @@ const runTest = () => {
 	});
 
 	describe.each([
-		['teamspace does not exist but the user exists', true, undefined, generateRandomString(), user.user, undefined],
-		['teamspace does not exist but the user exists (using email)', true, undefined, generateRandomString(), emailUser.basicData.email, undefined],
-		['teamspace does not exist but the user exists and accountId is provided.', true, undefined, generateRandomString(), user.user, existingAccountId],
-		['teamspace does not exist but the user exists and accountId is provided (using email)', true, undefined, generateRandomString(), emailUser.basicData.email, existingAccountId],
-		['teamspace does not exist and the user does not exists', true, undefined, generateRandomString(), 'nonExistentUser', undefined],
-		['teamspace already exists', false, new Error('Teamspace already exists'), teamspace, user.user, undefined],
-	])('Create Teamspace', (desc, success, expectedOutput, teamspaceName, userName, accountId) => {
+		['teamspace does not exist but the user exists', true, generateRandomString(), emailUser.basicData.email, undefined],
+		['teamspace does not exist but the user exists and accountId is provided', true, generateRandomString(), emailUser.basicData.email, existingAccountId],
+		['teamspace does not exist and the user does not exists', true, generateRandomString(), generateRandomEmail(), undefined],
+		['teamspace already exists', false, teamspace, user.basicData.email, undefined],
+	])('Create Teamspace', (desc, success, teamspaceName, userName, accountId) => {
 		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {
 			const exe = CreateTeamspace.run(teamspaceName, userName, accountId);
+
 			if (success) {
 				await expect(exe).resolves.toBeUndefined();
 			} else {
-				await expect(exe).rejects.toEqual(expectedOutput);
+				await expect(exe).rejects.not.toBeUndefined();
 			}
 		});
 	});

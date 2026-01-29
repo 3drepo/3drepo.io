@@ -20,14 +20,14 @@ const SuperTest = require('supertest');
 const FS = require('fs');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, image } = require('../../../../../../helper/path');
-const { serialiseTicketTemplate } = require('../../../../../../../../src/v5/middleware/dataConverter/outputs/common/tickets.templates');
-const { queryOperators, specialQueryFields } = require('../../../../../../../../src/v5/schemas/tickets/tickets.filters');
-const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
+
+const { serialiseTicketTemplate } = require(`${src}/middleware/dataConverter/outputs/common/tickets.templates`);
+const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
-const { basePropertyLabels, propTypes, presetEnumValues, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
-const { updateOne, findOne } = require(`${src}/handler/db`);
+const { basePropertyLabels, propTypes, presetEnumValues, presetModules, supportedPatterns } = require(`${src}/schemas/tickets/templates.constants`);
+const { updateOne, findOne, insertOne } = require(`${src}/handler/db`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -35,6 +35,8 @@ const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 
 let server;
 let agent;
+
+const TICKET_HISTORY_COL = 'tickets.logs';
 
 const generateBasicData = () => ({
 	users: {
@@ -361,7 +363,8 @@ const testImportTickets = () => {
 				['the ticket data contains comments', true, getRoute(), undefined, { comments: times(10, ServiceHelper.generateImportedComment) }],
 				['the ticket data contains comments when comments are disabled', false, getRoute({ templateId: templateWithoutComments._id }), templates.invalidArguments, {
 					...ServiceHelper.generateTicket(templateWithoutComments),
-					comments: times(10, ServiceHelper.generateImportedComment) }],
+					comments: times(10, ServiceHelper.generateImportedComment),
+				}],
 				['the ticket data contains invalid comments', false, getRoute(), templates.invalidArguments, { comments: times(10, ServiceHelper.generateComment) }],
 				['the ticket data contains duplicate unique properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniquePropTicket }],
 				['the ticket data contains duplicate unique module properties', false, getRoute(), templates.invalidArguments, { ...duplicateUniqueModulePropTicket }],
@@ -452,10 +455,12 @@ const testGetTicketResource = () => {
 			const model = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
 
-			const baseRouteParams = { modelType,
+			const baseRouteParams = {
+				modelType,
 				key: users.tsAdmin.apiKey,
 				projectId: project.id,
-				model };
+				model,
+			};
 
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
@@ -639,12 +644,16 @@ const testGetTicketList = () => {
 		const numberProp = { name: ServiceHelper.generateRandomString(), type: propTypes.NUMBER };
 		const boolProp = { name: ServiceHelper.generateRandomString(), type: propTypes.BOOLEAN };
 		const dateProp = { name: ServiceHelper.generateRandomString(), type: propTypes.DATE };
-		const oneOfProp = { name: ServiceHelper.generateRandomString(),
+		const oneOfProp = {
+			name: ServiceHelper.generateRandomString(),
 			type: propTypes.ONE_OF,
-			values: times(5, () => ServiceHelper.generateRandomString()) };
-		const manyOfProp = { name: ServiceHelper.generateRandomString(),
+			values: times(5, () => ServiceHelper.generateRandomString()),
+		};
+		const manyOfProp = {
+			name: ServiceHelper.generateRandomString(),
 			type: propTypes.MANY_OF,
-			values: times(5, () => ServiceHelper.generateRandomString()) };
+			values: times(5, () => ServiceHelper.generateRandomString()),
+		};
 
 		const templatesToUse = times(3, () => {
 			const template = ServiceHelper.generateTemplate();
@@ -730,7 +739,7 @@ const testGetTicketList = () => {
 				[`${queryOperators.EXISTS} operator is used in ${propType} property`,
 					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.EXISTS}'` } }, true,
 					model.tickets.filter((t) => t.type === templateWithAllProps._id
-						&& Object.hasOwn(t.properties, propertyName))],
+					&& Object.hasOwn(t.properties, propertyName))],
 				[`${queryOperators.NOT_EXISTS} operator is used in ${propType} property`,
 					{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.NOT_EXISTS}'` } }, true,
 					model.tickets.filter((t) => t.type !== templateWithAllProps._id
@@ -763,10 +772,12 @@ const testGetTicketList = () => {
 					[`${queryOperators.CONTAINS} operator is used in ${propType} property`,
 						{ ...baseRouteParams, options: { query: `'${propertyName}::${queryOperators.CONTAINS}::${model.tickets[0].properties[propertyName].slice(0, 5)}'` } }, true,
 						model.tickets.filter((t) => t.properties[propertyName]
-							=== model.tickets[0].properties[propertyName])],
+						=== model.tickets[0].properties[propertyName])],
 					[`${queryOperators.NOT_CONTAINS} operator is used in ${propType} property`,
-						{ ...baseRouteParams,
-							options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` } },
+						{
+							...baseRouteParams,
+							options: { query: `'${propertyName}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[propertyName]}'` },
+						},
 						true,
 						model.tickets
 							.filter((t) => t.properties[propertyName] !== model.tickets[0].properties[propertyName])],
@@ -789,36 +800,46 @@ const testGetTicketList = () => {
 					{ ...baseRouteParams, options: { query: `'${manyOfProp.name}::${queryOperators.CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } }, true,
 					model.tickets
 						.filter((t) => t.properties[manyOfProp.name]?.some((val) => val.slice(0, 5)
-							=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
+						=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
 				[`${queryOperators.NOT_CONTAINS} operator is used in ${propTypes.MANY_OF} property`,
-					{ ...baseRouteParams,
-						options: { query: `'${manyOfProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` } },
+					{
+						...baseRouteParams,
+						options: { query: `'${manyOfProp.name}::${queryOperators.NOT_CONTAINS}::${model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)}'` },
+					},
 					true,
 					model.tickets
 						.filter((t) => !t.properties[manyOfProp.name]
 							?.some((val) => val.slice(0, 5)
-								=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
+							=== model.tickets[0].properties[manyOfProp.name][0].slice(0, 5)))],
 			];
 
 			const numberPropertyFilters = (propType, propertyName) => [
 				...existsPropertyFilters(propType, propertyName),
 				...equalsPropertyFilters(propType, propertyName),
-				[`${queryOperators.GREATER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
-					options: { query: `'${propertyName}::${queryOperators.GREATER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				[`${queryOperators.GREATER_OR_EQUAL_TO} operator is used in ${propType} property`, {
+					...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.GREATER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` },
+				}, true,
 				model.tickets.filter((t) => t.properties[propertyName]
 					>= model.tickets[0].properties[propertyName])],
-				[`${queryOperators.LESSER_OR_EQUAL_TO} operator is used in ${propType} property`, { ...baseRouteParams,
-					options: { query: `'${propertyName}::${queryOperators.LESSER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` } }, true,
+				[`${queryOperators.LESSER_OR_EQUAL_TO} operator is used in ${propType} property`, {
+					...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.LESSER_OR_EQUAL_TO}::${model.tickets[0].properties[propertyName]}'` },
+				}, true,
 				model.tickets.filter((t) => t.properties[propertyName]
-						<= model.tickets[0].properties[propertyName])],
-				[`${queryOperators.RANGE} operator is used in ${propType} property`, { ...baseRouteParams,
-					options: { query: `'${propertyName}::${queryOperators.RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } }, true,
+					<= model.tickets[0].properties[propertyName])],
+				[`${queryOperators.RANGE} operator is used in ${propType} property`, {
+					...baseRouteParams,
+					options: { query: `'${propertyName}::${queryOperators.RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` },
+				}, true,
 				model.tickets.filter((t) => t.properties[propertyName]
-						>= model.tickets[0].properties[propertyName] - 500
-						&& t.properties[propertyName] <= model.tickets[0].properties[propertyName] + 500)],
+					>= model.tickets[0].properties[propertyName] - 500
+					&& t.properties[propertyName] <= model.tickets[0].properties[propertyName] + 500)],
 				[`${queryOperators.NOT_IN_RANGE} operator is used in ${propType} property`,
-					{ ...baseRouteParams,
-						options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` } },
+					{
+						...baseRouteParams,
+						options: { query: `'${propertyName}::${queryOperators.NOT_IN_RANGE}::[${model.tickets[0].properties[propertyName] - 500},${model.tickets[0].properties[propertyName] + 500}]'` },
+					},
 					true,
 					model.tickets.filter((t) => !t.properties[propertyName] || (t.properties[propertyName]
 					< model.tickets[0].properties[propertyName] - 500
@@ -881,7 +902,7 @@ const testGetTicketList = () => {
 
 							const ticketContainingProps = res.body.tickets
 								.filter((t) => t.properties[propName] && t.modules[moduleName]
-								&& t.modules[moduleName][moduleProp]);
+									&& t.modules[moduleName][moduleProp]);
 
 							expect(ticketContainingProps.length).toBeTruthy();
 						}
@@ -994,7 +1015,7 @@ const testUpdateTicket = () => {
 		});
 
 		const checkTicketLogByDate = async (updatedDate) => {
-			const ticketLog = await findOne(teamspace, 'tickets.logs', { timestamp: new Date(updatedDate) });
+			const ticketLog = await findOne(teamspace, TICKET_HISTORY_COL, { timestamp: new Date(updatedDate) });
 			expect(ticketLog).not.toBeUndefined();
 		};
 
@@ -1009,7 +1030,7 @@ const testUpdateTicket = () => {
 				key: users.tsAdmin.apiKey,
 				modelType,
 				projectId:
-				project.id,
+					project.id,
 				model,
 				ticket: model.ticket,
 			};
@@ -1026,7 +1047,7 @@ const testUpdateTicket = () => {
 				['the update data does not conform to the template (trying to unset required img prop)', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredImagePropName]: null } }],
 				['the update data does not conform to the template (trying to update immutable prop with value)', baseRouteParams, false, templates.invalidArguments, { properties: { [immutableProp]: ServiceHelper.generateRandomString() } }],
 				['the update data does not conform to the template (trying to update immutable prop with default value)', baseRouteParams, false, templates.invalidArguments, { properties: { [immutablePropWithDefaultValue]: ServiceHelper.generateRandomString() } }],
-				['the update data is an empty object', baseRouteParams, false, templates.invalidArguments, { }],
+				['the update data is an empty object', baseRouteParams, false, templates.invalidArguments, {}],
 				['the update data are the same as the existing', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredPropName]: model.ticket.properties[requiredPropName] } }],
 				['the update data includes duplicate unique value', baseRouteParams, false, templates.invalidArguments, { properties: { [uniquePropName]: uniquePropValue } }],
 				['the update data conforms to the template', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString() }],
@@ -1164,7 +1185,7 @@ const testUpdateManyTickets = () => {
 		});
 
 		const checkTicketLogByDate = async (updatedDate) => {
-			const ticketLog = await findOne(teamspace, 'tickets.logs', { timestamp: new Date(updatedDate) });
+			const ticketLog = await findOne(teamspace, TICKET_HISTORY_COL, { timestamp: new Date(updatedDate) });
 			expect(ticketLog).not.toBeUndefined();
 		};
 
@@ -1266,6 +1287,141 @@ const testUpdateManyTickets = () => {
 							expect(commentRes.comments?.length).toEqual(payload.tickets[i].comments.length);
 						}
 					}));
+				} else {
+					expect(res.body.code).toEqual(expectedOutput.code);
+				}
+			});
+		};
+
+		describe.each(generateTestData(true))('Federations', runTest);
+		describe.each(generateTestData())('Containers', runTest);
+	});
+};
+
+const testGetTicketHistory = () => {
+	describe('Get ticket history', () => {
+		const { users, teamspace, project, con, fed } = generateBasicData();
+		const template = ServiceHelper.generateTemplate();
+
+		const moduleName = template.modules[1].name;
+		const modulePropName = template.modules[1].properties[0].name;
+		const propName = template.properties[2].name;
+
+		const conTicket = ServiceHelper.generateTicket(template);
+		conTicket.model = con._id;
+
+		const fedTicket = ServiceHelper.generateTicket(template);
+		fedTicket.model = fed._id;
+
+		const textPropUpdate = ServiceHelper.generateRandomString();
+		const numPropUpdate = ServiceHelper.generateRandomNumber();
+		const titleUpdate = ServiceHelper.generateRandomString();
+		const timestamp = new Date();
+
+		const getChangesObj = (ticket) => ({
+			changes: {
+				title: { from: ticket.title, to: titleUpdate },
+				properties: {
+					[propName]: { from: ticket.properties[propName], to: numPropUpdate },
+				},
+				modules: {
+					[moduleName]: {
+						[modulePropName]: { from: ticket.modules[moduleName][modulePropName], to: textPropUpdate },
+					},
+				},
+			},
+		});
+
+		const insertTicketLogs = async (ticket, author, updatedValue) => {
+			await insertOne(teamspace, TICKET_HISTORY_COL, {
+				_id: ServiceHelper.generateUUIDString(),
+				author,
+				timestamp,
+				teamspace,
+				project: stringToUUID(project.id),
+				model: ticket.model,
+				ticket: stringToUUID(ticket._id),
+				...updatedValue,
+			});
+		};
+
+		beforeAll(async () => {
+			await setupBasicData(users, teamspace, project, [con, fed], [template]);
+			await Promise.all([
+				ServiceHelper.db.createTicket(teamspace, project.id, con._id, conTicket),
+				ServiceHelper.db.createTicket(teamspace, project.id, fed._id, fedTicket),
+			]);
+
+			await Promise.all([conTicket, fedTicket].flatMap((ticket) => [
+				insertTicketLogs(ticket, users.tsAdmin.user, getChangesObj(ticket)),
+				insertTicketLogs(ticket, null,
+					{ imported: { title: ticket.title, properties: ticket.properties, modules: ticket.modules } }),
+			]));
+		});
+
+		const generateTestData = (isFed) => {
+			const modelType = isFed ? 'federation' : 'container';
+			const model = isFed ? fed : con;
+			const ticket = isFed ? fedTicket : conTicket;
+			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const wrongTypeModel = isFed ? con : fed;
+
+			const expectedLogs = [
+				{
+					imported: {
+						title: ticket.title,
+						properties: ticket.properties,
+						modules: ticket.modules,
+					},
+					author: null,
+					timestamp: timestamp.getTime(),
+				},
+				{
+					changes: {
+						title: { from: ticket.title, to: titleUpdate },
+						properties: {
+							[propName]: { from: ticket.properties[propName], to: numPropUpdate },
+						},
+						modules: {
+							[moduleName]: {
+								[modulePropName]: {
+									from: ticket.modules[moduleName][modulePropName],
+									to: textPropUpdate,
+								},
+							},
+						},
+					},
+					author: users.tsAdmin.user,
+					timestamp: timestamp.getTime(),
+				},
+			];
+
+			const getHistoryRoute = (
+				{ key = users.tsAdmin.apiKey,
+					projectId = project.id,
+					modelId = model._id,
+					ticketId = ticket._id,
+				} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/history${key ? `?key=${key}` : ''}`;
+
+			return [
+				['the user does not have a valid session', false, getHistoryRoute({ key: null }), templates.notLoggedIn],
+				['the user is not a member of the teamspace', false, getHistoryRoute({ key: users.nobody.apiKey }), templates.teamspaceNotFound],
+				['the project does not exist', false, getHistoryRoute({ projectId: ServiceHelper.generateRandomString() }), templates.projectNotFound],
+				[`the ${modelType} does not exist`, false, getHistoryRoute({ modelId: ServiceHelper.generateRandomString() }), modelNotFound],
+				[`the model provided is not a ${modelType}`, false, getHistoryRoute({ modelId: wrongTypeModel._id }), modelNotFound],
+				['the ticket does not exist', false, getHistoryRoute({ ticketId: ServiceHelper.generateRandomString() }), templates.ticketNotFound],
+				['the user does not have access to the federation', false, getHistoryRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
+				['the user provides a ticket with updates', true, getHistoryRoute(), expectedLogs],
+			];
+		};
+
+		const runTest = (desc, success, route, expectedOutput) => {
+			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
+				const res = await agent.get(route).expect(expectedStatus);
+
+				if (success) {
+					ServiceHelper.outOfOrderArrayEqual(res.body.history, expectedOutput);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -1388,5 +1544,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testGetTicketList();
 	testUpdateTicket();
 	testUpdateManyTickets();
+	testGetTicketHistory();
 	testAutomatedProperties();
 });
