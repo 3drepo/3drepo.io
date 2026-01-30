@@ -69,7 +69,7 @@ export const TicketsTableSelectionColumn = ({
 	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
 
 	const disabledIds: string[] = models.filter(({ role }) => !isCollaboratorRole(role)).map(({ _id }) => _id);
-	const allSelected = tickets.every(({ _id }) => selectedIdsSet.has(_id)) && tickets.length > 0;
+	const allSelected = tickets.every(({ _id, modelId }) => selectedIdsSet.has(_id) || disabledModelIds.includes(modelId)) && tickets.length > 0;
 
 	const onCheck = useCallback((e, ticketId) => {
 		setSelectedIds((prev) => {
@@ -86,14 +86,15 @@ export const TicketsTableSelectionColumn = ({
 	const onCheckAll = useCallback((e) => {
 		setSelectedIds((prev) => {
 			const next = new Set(prev);
-			if (e.target.checked) {
-				tickets.forEach((t) => next.add(t._id));
-			} else {
-				tickets.forEach((t) => next.delete(t._id));
-			}
+			tickets.forEach((t) => {
+				if (disabledModelIds.includes(t.modelId)) return;
+				if (e.target.checked) next.add(t._id);
+				else next.delete(t._id);
+				return;
+			});
 			return next;
 		});
-	}, [tickets]);
+	}, [tickets, disabledModelIds]);
 
 	return (
 		<div>
@@ -114,7 +115,7 @@ export const TicketsTableSelectionColumn = ({
 									selected={selectedIdsSet.has(ticket._id)}
 									onCheck={onCheck}
 									selectedTicketId={selectedTicketId}
-									disabled={disabledIds.includes(ticket.modelId)}
+									disabled={disabledModelIds.includes(ticket.modelId)}
 								/>
 							))}
 						</div>
