@@ -20,6 +20,7 @@ import { TextOverflow } from '@controls/textOverflow';
 import { Chip } from '@controls/chip/chip.component';
 import { DueDate as DueDateBase } from '@controls/dueDate/dueDate.component';
 import { CardListItem } from '@components/viewer/cards/card.styles';
+import { Checkbox } from '@mui/material';
 
 export const FlexRow = styled.div`
 	display: flex;
@@ -109,4 +110,13 @@ export const Id = styled.div`
 	line-height: 10px;
 	font-weight: 400;
 	user-select: none;
+`;
+
+export const TicketCheckbox = styled(Checkbox)`
+	display: inline;
+	display: inline;
+    padding: 0;
+    top: 2px;
+    margin-right: 6px;
+    margin-left: 0;
 `;

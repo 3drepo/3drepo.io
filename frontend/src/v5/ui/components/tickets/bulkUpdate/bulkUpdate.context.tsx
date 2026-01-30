@@ -20,25 +20,49 @@ import { createContext, useState } from 'react';
 export interface TicketsBulkUpdateContextType {
 	bulkModeOn: boolean;
 	toggleBulkMode: () => void;
+	toggleSelection: (elem) => void;
+	isSelected: (elem) => boolean;
 }
 
 const defaultValue: TicketsBulkUpdateContextType = {
 	bulkModeOn: false,
 	toggleBulkMode: () => {},
+	toggleSelection: () => {},
+	isSelected: () => false,
 };
+
 
 export const TicketsBulkUpdateContext = createContext<TicketsBulkUpdateContextType>(defaultValue);
 TicketsBulkUpdateContext.displayName = 'TicketsBulkUpdateContext';
 
 export const TicketsBulkUpdateContextComponent = ({ children }) => {
 	const [bulkModeOn, setBulkMode] = useState(false);
+	const [selectedItems, setSelectedItems] = useState(new Set<string>());
 
 	const toggleBulkMode = () =>{
+		if (bulkModeOn) {
+			setSelectedItems(new Set());
+		}
+
 		setBulkMode((t) => !t);
 	};
 
+	const toggleSelection = (elem) => {
+		const newSelection = new Set(selectedItems);
+		if (!newSelection.has(elem)) {
+			newSelection.add(elem);
+		} else {
+			newSelection.delete(elem);
+		}
+		setSelectedItems(newSelection);
+	};
+
+	const isSelected = (elem) => {
+		return selectedItems.has(elem);
+	};
+
 	return (
-		<TicketsBulkUpdateContext.Provider value={{ bulkModeOn, toggleBulkMode }}>
+		<TicketsBulkUpdateContext.Provider value={{ bulkModeOn, toggleBulkMode, toggleSelection, isSelected }}>
 			{children}
 		</TicketsBulkUpdateContext.Provider>
 	);

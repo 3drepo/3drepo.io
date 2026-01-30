@@ -16,8 +16,8 @@
  */
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { useRef } from 'react';
-import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip, DueDate } from './ticketItem.styles';
+import { useContext, useRef } from 'react';
+import { IssuePropertiesContainer, FlexRow, BottomRow, StatusChip, TicketItemContainer, Description, Id, Title, FlexColumn, PriorityChip, DueDate, TicketCheckbox } from './ticketItem.styles';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
@@ -30,6 +30,7 @@ import { PRIORITY_LEVELS_MAP } from '@controls/chip/chip.types';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { AssigneesSelect } from '@controls/assigneesSelect/assigneesSelect.component';
+import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 
 type TicketItemProps = {
 	ticket: ITicket;
@@ -37,6 +38,7 @@ type TicketItemProps = {
 
 export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const { bulkModeOn, isSelected: selectedForUpdate, toggleSelection } =  useContext(TicketsBulkUpdateContext);
 	const ref = useRef<HTMLDivElement>();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isSelected = selectedTicketId === ticket._id;
@@ -65,6 +67,11 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	};
 
 	const onClickTicket = (event: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+		if (bulkModeOn) {
+			toggleSelection(ticket._id);
+			return;
+		}
+
 		selectTicket(event);
 		TicketsCardActionsDispatchers.openTicket(ticket._id);
 	};
@@ -75,10 +82,11 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 	};
 
 	return (
-		<TicketItemContainer key={ticket._id} ref={ref} onClick={onClickTicket} $selected={isSelected}>
+		<TicketItemContainer key={ticket._id} ref={ref} onClick={onClickTicket} $selected={!bulkModeOn && isSelected}>
 			<FlexRow>
 				<FlexColumn>
 					<Title>
+						{bulkModeOn && (<TicketCheckbox checked={selectedForUpdate(ticket._id)}/>)}
 						{ticket.title}
 					</Title>
 					{description && <Description>{description}</Description>}
