@@ -553,6 +553,25 @@ const testGetMD5Hash = () => {
 	});
 };
 
+const testGetMultipleContainersStats = () => {
+	describe('Get multiple container stats', () => {
+		test('should return stats for multiple containers', async () => {
+			const teamspace = generateRandomString();
+			const containers = ['container1', 'container2', 'container3'];
+
+			const res = await Containers.getMultipleContainersStats(teamspace, project, containers);
+			expect(res).toEqual({
+				container1: formatToStats(containerSettings.container1, 0, {}),
+				container2: formatToStats(containerSettings.container2, 10, container2Rev),
+				container3: formatToStats(containerSettings.container3, 0, {}),
+			});
+			expect(ModelSettings.getContainerById).toHaveBeenCalledTimes(containers.length);
+			expect(Revisions.getRevisionCount).toHaveBeenCalledTimes(containers.length);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(containers.length);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -566,4 +585,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 	testGetMD5Hash();
+	testGetMultipleContainersStats();
 });

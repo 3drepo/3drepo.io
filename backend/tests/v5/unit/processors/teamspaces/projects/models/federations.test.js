@@ -67,6 +67,8 @@ const federationList = [
 ];
 const mockContainers = [{ _id: '1', name: 'test1', permissions: [{ user: 'user1' }] }, { _id: '2', name: 'test2', permissions: [] }, { _id: '3', name: 'test3' }];
 
+const federation1Rev = 5678;
+
 const federationSettings = {
 	federation1: {
 		_id: 1,
@@ -249,8 +251,8 @@ const testDeleteFavourites = () => {
 };
 
 const formatToStats = (settings, ticketsCount, lastUpdated) => ({
-	...(settings.desc ? { desc: settings.desc } : {}),
-	...(settings.subModels ? { containers: settings.subModels } : {}),
+	...(settings.desc ? { desc: settings.desc } : { desc: undefined }),
+	...(settings.subModels ? { containers: settings.subModels } : { containers: undefined }),
 	code: settings.properties.code,
 	unit: settings.properties.unit,
 	status: settings.status,
@@ -264,7 +266,7 @@ const testGetFederationStats = () => {
 			const ticketsCount = generateRandomNumber();
 			Tickets.getOpenTicketsCount.mockResolvedValueOnce(ticketsCount);
 			const res = await Federations.getFederationStats('teamspace', 'project', 'federation1');
-			expect(res).toEqual(formatToStats(federationSettings.federation1, ticketsCount, 5678));
+			expect(res).toEqual(formatToStats(federationSettings.federation1, ticketsCount, federation1Rev));
 		});
 		test('should return the stats if the federation exists and has subModels with no revisions', async () => {
 			const ticketsCount = generateRandomNumber();
@@ -428,7 +430,6 @@ const testGetMD5Hash = () => {
 			const containers = times(nContainers, () => ({
 				container: generateRandomString(), revision: generateRandomString() }));
 
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
 			Revisions.getRevisionByIdOrTag.mockResolvedValue(revisionMock);
 			FilesManager.getMD5FileHash.mockResolvedValue(mockMD5Hash);
 
@@ -511,6 +512,33 @@ const testGetSuperMeshesInfo = () => {
 	});
 };
 
+const testGetMultipleFederationsStats = () => {
+	describe('Get multiple federation stats', () => {
+		test('should return stats for multiple federations', async () => {
+			const teamspace = generateRandomString();
+			const federations = ['federation1', 'federation2', 'federation3'];
+
+			const ticketsCount = generateRandomNumber();
+			Tickets.getOpenTicketsCount
+				.mockResolvedValueOnce(ticketsCount)
+				.mockResolvedValueOnce(ticketsCount)
+				.mockResolvedValueOnce(ticketsCount);
+
+			const res = await Federations.getMultipleFederationsStats(teamspace, project, federations);
+
+			expect(getFederationByIdMock.mock.calls.length).toBe(3);
+			expect(getFederationByIdMock.mock.calls[0][1]).toBe('federation1');
+			expect(getFederationByIdMock.mock.calls[1][1]).toBe('federation2');
+			expect(getFederationByIdMock.mock.calls[2][1]).toBe('federation3');
+			expect(res).toEqual({
+				federation1: formatToStats(federationSettings.federation1, ticketsCount, federation1Rev),
+				federation2: formatToStats(federationSettings.federation2, ticketsCount),
+				federation3: formatToStats(federationSettings.federation3, ticketsCount),
+			});
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetFederationList();
 	testAppendFavourites();
@@ -523,4 +551,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetTicketGroupById();
 	testGetMD5Hash();
 	testGetSuperMeshesInfo();
+	testGetMultipleFederationsStats();
 });

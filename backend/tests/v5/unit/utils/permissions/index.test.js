@@ -513,11 +513,53 @@ const testHasAdminAccessToFederation = () => {
 	});
 };
 
+const testHasReadAccessToModels = () => {
+	const noAccessUser = generateRandomString();
+	const someAccessUser = generateRandomString();
+	const fullAccessUser = generateRandomString();
+	const adminUser = generateRandomString();
+
+	const findModelsResults = [
+		{ _id: generateRandomString(), permissions: [{ user: someAccessUser, permission: 'viewer' }, { user: fullAccessUser, permission: 'viewer' }] },
+		{ _id: generateRandomString(), permissions: [{ user: fullAccessUser, permission: 'viewer' }] },
+		{ _id: generateRandomString() },
+	];
+
+	describe.each([
+		['the user has no permissions on any models', noAccessUser, false],
+		['the user has permissions on 1 model', someAccessUser, true],
+		['the user has permissions on all models', fullAccessUser, true],
+		['the user is project admin', adminUser, true],
+	])('Has read access to some models', (desc, user, hasAccess) => {
+		test(`Should return ${hasAccess ? 'list of models' : 'empty list'} if ${desc}`, async () => {
+			ModelSettings.findModels.mockResolvedValueOnce(findModelsResults);
+			Projects.getProjectAdmins.mockResolvedValueOnce([adminUser]);
+
+			const res = await Permissions.hasReadAccessToModels(generateRandomString(), generateRandomString(),
+				times(3, () => generateRandomString()), user);
+			if (!hasAccess) {
+				expect(res).toEqual([]);
+				return;
+			} if (user === adminUser) {
+				expect(res).toEqual(findModelsResults.map((model) => model._id));
+				return;
+			}
+			expect(res).toEqual(
+				findModelsResults
+					.filter(
+						({ permissions }) => permissions && permissions.some((perm) => perm.user === user))
+					.map((model) => model._id),
+			);
+		});
+	});
+};
+
 describe('utils/permissions', () => {
 	testIsTeamspaceAdmin();
 	testIsProjectAdmin();
 	testHasProjectAdminPermissions();
 	testHasReadAccessToSomeModels();
+	testHasReadAccessToModels();
 	testHasReadAccessToModel();
 	testHasWriteAccessToModel();
 	testHasCommenterAccessToModel();
