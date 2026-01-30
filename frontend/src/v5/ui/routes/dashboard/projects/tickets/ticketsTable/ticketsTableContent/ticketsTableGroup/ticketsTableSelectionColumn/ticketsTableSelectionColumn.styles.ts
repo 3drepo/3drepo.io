@@ -22,9 +22,12 @@ import { Group } from '../ticketsTableGroup.styles';
 import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
 import { SELECTION_COLUMN_WIDTH } from './ticketsTableSelectionColumn.helper';
 
-export const Checkbox = styled(CheckboxBase)`
+export const Checkbox = styled(CheckboxBase)<{ disabled?: boolean }>`
 	margin: 0 auto;
 	padding: 0;
+	${({ disabled }) => disabled && `
+		opacity: 0.4;
+	`}
 `;
 
 export const CheckboxHeaderCell = styled(HeaderCell).attrs({

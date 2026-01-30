@@ -27,6 +27,10 @@ import { chunk } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
 import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.component';
+import { isCollaboratorRole } from '@/v5/store/store.helpers';
+import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
+import { formatMessage } from '@/v5/services/intl';
+import { useSelectedModels } from '../../../newTicketMenu/useSelectedModels';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
@@ -39,23 +43,32 @@ type SelectionRowType = {
 	onCheck: (e: any, ticketId: string) => void;
 	selectedTicketId: string;
 };
-const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId }: SelectionRowType) => (
-	<Row key={ticketId} $selected={selectedTicketId === ticketId}>
-		<CellContainer alwaysVisible>
-			<Checkbox checked={selected} onClick={(e) => onCheck(e, ticketId)} />
-		</CellContainer>
-	</Row>
-));
+const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId, disabled }: SelectionRowType & { disabled: boolean }) => {
+	const tooltipTitle = disabled ? formatMessage({ id: 'ticketsTable.selection.disabledTooltip', defaultMessage: 'You do not have permission to edit this ticket' }) : '';
+	return (
+		<Row key={ticketId} $selected={selectedTicketId === ticketId}>
+			<CellContainer alwaysVisible>
+				<Tooltip title={tooltipTitle}>
+					<div>
+						<Checkbox checked={selected} onClick={(e) => onCheck(e, ticketId)} disabled={disabled} />
+					</div>
+				</Tooltip>
+			</CellContainer>
+		</Row>
+	);
+});
 
 export const TicketsTableSelectionColumn = ({ 
 	tickets,
 	selectedTicketId,
 }: TicketsTableSelectionColumnProps) => {
 	const { selectedIds, setSelectedIds } = useContext(TicketsTableContext);
+	const models = useSelectedModels();
 
 	// Convert selectedIds to a Set for fast lookup
 	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
 
+	const disabledIds: string[] = models.filter(({ role }) => !isCollaboratorRole(role)).map(({ _id }) => _id);
 	const allSelected = tickets.every(({ _id }) => selectedIdsSet.has(_id)) && tickets.length > 0;
 
 	const onCheck = useCallback((e, ticketId) => {
@@ -96,12 +109,13 @@ export const TicketsTableSelectionColumn = ({
 					ItemComponent={(ticketsChunk: ITicket[]) => (
 						<div key={ticketsChunk[0]._id}>
 							{ticketsChunk.map((ticket) => (
-									<SelectionRow
-										ticketId={ticket._id}
-										selected={selectedIdsSet.has(ticket._id)}
-										onCheck={onCheck}
-										selectedTicketId={selectedTicketId}
-									/>
+								<SelectionRow
+									ticketId={ticket._id}
+									selected={selectedIdsSet.has(ticket._id)}
+									onCheck={onCheck}
+									selectedTicketId={selectedTicketId}
+									disabled={disabledIds.includes(ticket.modelId)}
+								/>
 							))}
 						</div>
 					)}
