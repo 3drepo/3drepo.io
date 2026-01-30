@@ -18,12 +18,12 @@
 import { createContext, useState } from 'react';
 
 export interface TicketsBulkUpdateContextType {
-	bulkMode: boolean;
+	bulkModeOn: boolean;
 	toggleBulkMode: () => void;
 }
 
 const defaultValue: TicketsBulkUpdateContextType = {
-	bulkMode: false,
+	bulkModeOn: false,
 	toggleBulkMode: () => {},
 };
 
@@ -31,14 +31,14 @@ export const TicketsBulkUpdateContext = createContext<TicketsBulkUpdateContextTy
 TicketsBulkUpdateContext.displayName = 'TicketsBulkUpdateContext';
 
 export const TicketsBulkUpdateContextComponent = ({ children }) => {
-	const [bulkMode, setBulkMode] = useState(false);
+	const [bulkModeOn, setBulkMode] = useState(false);
 
 	const toggleBulkMode = () =>{
 		setBulkMode((t) => !t);
 	};
 
 	return (
-		<TicketsBulkUpdateContext.Provider value={{ bulkMode, toggleBulkMode }}>
+		<TicketsBulkUpdateContext.Provider value={{ bulkModeOn, toggleBulkMode }}>
 			{children}
 		</TicketsBulkUpdateContext.Provider>
 	);

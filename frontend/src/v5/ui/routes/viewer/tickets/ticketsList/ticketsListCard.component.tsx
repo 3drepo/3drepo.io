@@ -44,15 +44,25 @@ import { Tooltip } from '@mui/material';
 import { TicketsBulkUpdateContext, TicketsBulkUpdateContextComponent } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 
 
-const BulkUpdateButton = () => {
-	const { toggleBulkMode, bulkMode } =  useContext(TicketsBulkUpdateContext);
-	return (
-		<Tooltip 
+
+const TicketsActions = ({ readOnly, groupBy }) => {
+	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
+
+	return (<>
+		{!bulkModeOn && !readOnly && (<NewTicketMenu />)}
+		{!readOnly &&  (<Tooltip 
 			title={formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' })} 
-			onClick={toggleBulkMode}>
-			<BulkCheckbox  value={bulkMode}/>
-		</Tooltip>
-	);
+		>
+			<BulkCheckbox value={bulkModeOn} onClick={toggleBulkMode}  />
+		</Tooltip>)}
+		{!bulkModeOn && (<FilterSelection />)}
+		{!bulkModeOn && (
+			<GroupBySelection value={groupBy} onChange={(value) => {
+				TicketsCardActionsDispatchers.setSelectedTicket(null);
+				TicketsCardActionsDispatchers.setGroupBy(value);
+			}} />)}
+		{!bulkModeOn && (<TicketsEllipsisMenu />)}
+	</>);
 };
 
 export const TicketsListCard = () => {
@@ -97,18 +107,7 @@ export const TicketsListCard = () => {
 					<CardHeader
 						icon={<TicketsIcon />}
 						title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
-						actions={(
-							<>
-								{!readOnly && (<NewTicketMenu />)}
-								{!readOnly && (<BulkUpdateButton />)}
-								<FilterSelection />
-								<GroupBySelection value={groupBy} onChange={(value) => {
-									TicketsCardActionsDispatchers.setSelectedTicket(null);
-									TicketsCardActionsDispatchers.setGroupBy(value);
-								}} />
-								<TicketsEllipsisMenu />
-							</>
-						)}
+						actions={(<TicketsActions readOnly={readOnly} groupBy={groupBy}/>)}
 					/>
 					<CardContent onClick={() => TicketsCardActionsDispatchers.setSelectedTicket(null)}>
 						<CardFilters />
