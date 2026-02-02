@@ -61,9 +61,7 @@ export const List = styled.div`
 	}
 `;
 
-export const NewTicketButton = styled(Button).attrs({
-	variant: 'contained',
-})`
+export const ActionMenuButton = styled(Button)`
 	margin: 0 0 0 auto;
 	padding: 7px 9px;
 	height: 30px;
