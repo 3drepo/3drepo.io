@@ -128,11 +128,31 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			}
 		}
 
-		req.body.tickets = await Promise.all(req.body.tickets.map((ticket, i) => {
+		const filteredNewTickets = [];
+		const filteredOldTickets = [];
+
+		await Promise.all(req.body.tickets.map(async (ticket, i) => {
 			const existingData = isNew ? undefined : req.ticketsData[i];
-			return processTicket(teamspace,
-				project, model, template, user, ticket, existingData, true);
+			const processedTicket = await processTicket(teamspace, project,
+				model, template, user, ticket, existingData, true);
+
+			if (processedTicket) {
+				filteredNewTickets.push(processedTicket);
+
+				if (!isNew) {
+					filteredOldTickets.push(existingData);
+				}
+			}
 		}));
+
+		// If none of the tickets had any valid changes, return ok
+		if (!filteredNewTickets.length) {
+			respond(req, res, templates.ok);
+			return;
+		}
+
+		req.body.tickets = filteredNewTickets;
+		req.ticketsData = filteredOldTickets;
 
 		await next();
 	} catch (err) {
@@ -209,30 +229,6 @@ const checkAllTicketsExist = async (req, res, next) => {
 	}
 };
 
-const cleanNullTickets = async (req, res, next) => {
-	const filteredTickets = [];
-	const filteredOldTickets = [];
-
-	for (let i = 0; i < req.body.tickets.length; i++) {
-		const ticket = req.body.tickets[i];
-
-		if (ticket) {
-			filteredTickets.push(ticket);
-			filteredOldTickets.push(req.ticketsData[i]);
-		}
-	}
-
-	if (!filteredTickets.length) {
-		respond(req, res, templates.ok);
-		return;
-	}
-
-	req.body.tickets = filteredTickets;
-	req.ticketsData = filteredOldTickets;
-
-	await next();
-};
-
 TicketsMiddleware.validateImportTickets = validateMany([templateIDToParams(true), checkTicketTemplateExists,
 	bodyContainsTicketsArray, validateTicketImportData(true)]);
 
@@ -241,7 +237,7 @@ TicketsMiddleware.validateNewTicket = validateMany([templateIDToParams(false), c
 TicketsMiddleware.validateUpdateTicket = validateMany([TicketsMiddleware.checkTicketExists, validateTicket(false)]);
 TicketsMiddleware.validateUpdateMultipleTickets = validateMany([
 	templateIDToParams(true), checkTicketTemplateExists, bodyContainsTicketsArray,
-	checkAllTicketsExist, validateTicketImportData(false), cleanNullTickets]);
+	checkAllTicketsExist, validateTicketImportData(false)]);
 
 TicketsMiddleware.templateExists = checkTicketTemplateExists;
 
