@@ -55,6 +55,7 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 
 		req.body = await processTicket(teamspace, project, model, template, user, req.body, req.ticketData);
 
+		// this is not a new ticket and there is nothing to update
 		if (!isNewTicket && !req.body) {
 			respond(req, res, templates.ok);
 			return;

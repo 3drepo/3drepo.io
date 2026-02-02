@@ -43,14 +43,30 @@ const { propTypesToValidator } = require('./validators');
 
 const Tickets = {};
 
+// This is done instead of using Yup strict because transforms are not executed when strict = true
+const noUnknownTest = (colName) => (value, context) => {
+	const allowedKeys = Object.keys(context.schema.fields);
+	const unknownKeys = Object.keys(context.originalValue).filter((k) => !allowedKeys.includes(k));
+	if (unknownKeys.length > 0) {
+		return context.createError({ path: unknownKeys[0], message: `Unknown key in ${colName}: ${unknownKeys[0]}` });
+	}
+
+	return true;
+};
+
 const generatePropertiesValidator = async (teamspace, project, model, templateId, moduleName,
 	properties, oldProperties, isNewTicket) => {
 	const obj = {};
 
 	const proms = properties.map(async (prop) => {
-		if (prop.deprecated || prop.readOnly) return;
 		let validator = propTypesToValidator(prop.type, !isNewTicket, prop.required);
 		if (validator) {
+			if (prop.deprecated || prop.readOnly) {
+				validator = validator.strip();
+				obj[prop.name] = validator;
+				return;
+			}
+
 			if (prop.values) {
 				let values;
 				switch (prop.values) {
@@ -153,7 +169,8 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 
 	await Promise.all(proms);
 
-	return Yup.object(obj).default({});
+	return Yup.object(obj).default({})
+		.test('no-unknown-props', 'Unknown key found', noUnknownTest('properties'));
 };
 
 const generateModuleValidator = async (teamspace, project, model, templateId, modules, oldModules,
@@ -186,7 +203,8 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 		modules: Yup.object(
 			await generateModuleValidator(teamspace, project, model, template._id,
 				fullTem.modules, oldTicket?.modules, isNewTicket),
-		).default({}),
+		).default({})
+			.test('no-unknown-mods', 'Unknown key found', noUnknownTest('modules')),
 	};
 
 	if (isImport) {

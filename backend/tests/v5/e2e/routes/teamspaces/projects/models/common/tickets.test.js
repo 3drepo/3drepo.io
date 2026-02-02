@@ -1222,7 +1222,7 @@ const testUpdateManyTickets = () => {
 				['the templateId provided does not exist', false, { ...baseRouteParams, templateId: ServiceHelper.generateUUIDString() }, templates.templateNotFound],
 				['the templateId provided is not a UUID string', false, { ...baseRouteParams, templateId: ServiceHelper.generateRandomString() }, templates.templateNotFound],
 				['the templateId is not provided', false, { ...baseRouteParams, templateId: null }, templates.invalidArguments],
-				['the ticket data does not conform to the template', true, baseRouteParams, undefined, () => ({ properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } })],
+				['the ticket data does not conform to the template', false, baseRouteParams, templates.invalidArguments, () => ({ properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } })],
 				['the ticket data does not contain any update (no properties provided)', false, baseRouteParams, templates.invalidArguments],
 				['the ticket data does not contain any update (properties with existing data)', true, baseRouteParams, undefined, ({ title }) => ({ title })],
 				['the tickets to update are not following the provided template', false, { ...baseRouteParams, templateId: deprecatedTemplate._id }, templates.invalidArguments, () => ({ title: ServiceHelper.generateRandomString() })],
