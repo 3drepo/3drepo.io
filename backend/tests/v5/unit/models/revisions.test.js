@@ -656,7 +656,7 @@ const testGetMultipleRevisionCount = () => {
 		test('should call getRevisionCount', async () => {
 			const countsMap = { [models[0]]: 5, [models[1]]: 10, [models[2]]: 0 };
 			const spy = jest.spyOn(Revisions, 'getRevisionCount')
-				.mockResolvedValueOnce((teamspace, model, modelType) => Promise.resolve(countsMap[model]));
+				.mockResolvedValueOnce((_, model) => Promise.resolve(countsMap[model]));
 
 			const result = await Revisions.getMultipleRevisionCount(teamspace, models, modelType);
 
