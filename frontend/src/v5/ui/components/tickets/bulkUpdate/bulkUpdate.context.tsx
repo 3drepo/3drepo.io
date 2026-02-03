@@ -19,6 +19,7 @@ import { createContext, useState } from 'react';
 
 export interface TicketsBulkUpdateContextType {
 	bulkModeOn: boolean;
+	selectedItems: Set<string>;
 	toggleBulkMode: () => void;
 	toggleSelection: (elem) => void;
 	isSelected: (elem) => boolean;
@@ -26,6 +27,7 @@ export interface TicketsBulkUpdateContextType {
 
 const defaultValue: TicketsBulkUpdateContextType = {
 	bulkModeOn: false,
+	selectedItems: new Set(),
 	toggleBulkMode: () => {},
 	toggleSelection: () => {},
 	isSelected: () => false,
@@ -62,7 +64,14 @@ export const TicketsBulkUpdateContextComponent = ({ children }) => {
 	};
 
 	return (
-		<TicketsBulkUpdateContext.Provider value={{ bulkModeOn, toggleBulkMode, toggleSelection, isSelected }}>
+		<TicketsBulkUpdateContext.Provider value={
+			{ 
+				bulkModeOn, 
+				toggleBulkMode, 
+				toggleSelection, 
+				isSelected, 
+				selectedItems, 
+			}}>
 			{children}
 		</TicketsBulkUpdateContext.Provider>
 	);

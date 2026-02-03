@@ -17,7 +17,6 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
-import { FilterForm } from '@components/viewer/cards/cardFilters/filterForm/filterForm.component';
 import { CardFilterActionMenu } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
 import { TicketFiltersSelectionList } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.component';
 import { TicketsFiltersModal, TicketsFiltersModalItem } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.styles';
@@ -25,16 +24,18 @@ import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ti
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { SearchInput } from '@controls/search/searchInput';
 import { PopoverOrigin, PopoverProps } from '@mui/material';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { ActionMenuButton } from '../ticketsList.styles';
 import { FormattedMessage } from 'react-intl';
+import { TicketsBulkEditForm } from '@components/shared/ticketsBulkEdit/ticketsBulkEditForm.component';
+import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 
 export const BulkUpdateDropdown = () => {
 	const [selectedFilter, setSelectedFilter] = useState<TicketFilter>(null);
-	const { choosablefilters: unusedFilters, displayMode, setFilter } = useTicketFiltersContext();
+	const { choosablefilters: unusedFilters, displayMode } = useTicketFiltersContext();
 	const showFiltersList = !selectedFilter?.property;
-	const disabled = !unusedFilters.length;
-
+	const { selectedItems } =  useContext(TicketsBulkUpdateContext);
+	
 	const clearFilter = () => setSelectedFilter(null);
     
 	const anchorOrigin: PopoverOrigin = {
@@ -47,12 +48,13 @@ export const BulkUpdateDropdown = () => {
 		horizontal: 'right',
 	};
 
+	const disabled = !selectedItems.size;
 	const popoverProps: Partial<PopoverProps> = { anchorOrigin, transformOrigin, marginThreshold: 20 };
 
 	return (
 		<CardFilterActionMenu
 			TriggerButton={
-				<ActionMenuButton variant="outlined" color="secondary">
+				<ActionMenuButton variant="outlined" color="secondary" disabled={disabled}>
 					<FormattedMessage id="viewer.cards.tickets.bulkUpdateButton" defaultMessage="Bulk Update" />
 				</ActionMenuButton>
 			}
@@ -73,11 +75,7 @@ export const BulkUpdateDropdown = () => {
 						<TicketFiltersSelectionList onFilterClick={setSelectedFilter} />
 					</TicketsFiltersModalItem>
 					<TicketsFiltersModalItem $visible={!showFiltersList}>
-						<FilterForm
-							{...(selectedFilter || {} as any)}
-							onSubmit={setFilter}
-							onCancel={clearFilter}
-						/>
+						{!showFiltersList && (<TicketsBulkEditForm name={selectedFilter.property} selectedIds={selectedItems} onCancel={clearFilter}/>)}
 					</TicketsFiltersModalItem>
 				</TicketsFiltersModal>
 			</SearchContextComponent>
