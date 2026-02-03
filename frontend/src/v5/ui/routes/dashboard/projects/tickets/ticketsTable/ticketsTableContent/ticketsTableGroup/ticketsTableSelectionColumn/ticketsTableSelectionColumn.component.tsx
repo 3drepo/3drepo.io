@@ -26,11 +26,11 @@ import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { chunk } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
-import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.component';
 import { isCollaboratorRole } from '@/v5/store/store.helpers';
 import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
 import { formatMessage } from '@/v5/services/intl';
 import { useSelectedModels } from '../../../newTicketMenu/useSelectedModels';
+import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.helper';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
@@ -68,7 +68,7 @@ export const TicketsTableSelectionColumn = ({
 	// Convert selectedIds to a Set for fast lookup
 	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
 
-	const disabledIds: string[] = models.filter(({ role }) => !isCollaboratorRole(role)).map(({ _id }) => _id);
+	const disabledModelIds: string[] = models.filter(({ role }) => !isCollaboratorRole(role)).map(({ _id }) => _id);
 	const allSelected = tickets.every(({ _id, modelId }) => selectedIdsSet.has(_id) || disabledModelIds.includes(modelId)) && tickets.length > 0;
 
 	const onCheck = useCallback((e, ticketId) => {
@@ -105,12 +105,14 @@ export const TicketsTableSelectionColumn = ({
 			</Headers>
 			<SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
 				<VirtualList
+					vKey="selection-column"
 					items={chunk(tickets, TICKETS_CHUNK_SIZE)}
-					itemHeight={TICKET_TABLE_ROW_HEIGHT * TICKETS_CHUNK_SIZE}
+					itemHeight={TICKET_TABLE_ROW_HEIGHT}
 					ItemComponent={(ticketsChunk: ITicket[]) => (
 						<div key={ticketsChunk[0]._id}>
 							{ticketsChunk.map((ticket) => (
 								<SelectionRow
+									key={ticket._id}
 									ticketId={ticket._id}
 									selected={selectedIdsSet.has(ticket._id)}
 									onCheck={onCheck}

@@ -343,6 +343,3 @@ export const findPropertyDefinition = (template:ITemplate,  property:string) => 
 		return findByName(template?.properties, propertyChunks[1]) as PropertyDefinition;
 	}
 };
-
-
-

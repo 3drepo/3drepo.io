@@ -15,25 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+export const TICKETS_CHUNK_SIZE = 10;
 
-export const TableIconContainer  = styled.div<{ $active?: boolean }>`
-	width: 16px;
-	height: 16px;
-	border-radius: 16%;
-	border-width: 1px;
-	border-style: solid;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.secondary.lightest };
-	}
+export const SELECTION_COLUMN_WIDTH = 54;
+export const SETTINGS_COLUMN_WIDTH = 24;
 
-	border-color: ${({ $active, theme }) => $active ? theme.palette.base.main : 'transparent'};
-`;
-
-export const GearIconContainer = styled(TableIconContainer)`
-	color: ${({ theme }) => theme.palette.base.main};
-`;
+export const NEW_TICKET_ROW_AREA_NAME = 'newTicketRow';

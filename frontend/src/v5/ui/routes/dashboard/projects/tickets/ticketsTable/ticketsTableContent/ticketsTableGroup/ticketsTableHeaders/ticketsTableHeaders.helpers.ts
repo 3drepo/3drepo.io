@@ -15,4 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-export const SELECTION_COLUMN_WIDTH = 54;
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { PopoverOrigin } from '@mui/material';
+
+export const TICKET_HEADER_POPOVER_PROPS = {
+	anchorOrigin: {
+		vertical: 'bottom',
+		horizontal: 'left',
+	} as PopoverOrigin,
+	transformOrigin: {
+		vertical: 'top',
+		horizontal: 'left',
+	} as PopoverOrigin,
+};
+
+export const NON_BULK_EDITABLE_COLUMNS = [
+	'id',
+	`properties.${BaseProperties.OWNER}`,
+	'modelName',
+	`properties.${BaseProperties.CREATED_AT}`,
+	`properties.${BaseProperties.UPDATED_AT}`,
+	BaseProperties.TITLE,
+];

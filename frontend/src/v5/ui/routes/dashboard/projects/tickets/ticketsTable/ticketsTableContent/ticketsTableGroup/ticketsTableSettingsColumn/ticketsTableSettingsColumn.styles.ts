@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2025 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,32 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Checkbox as CheckboxBase } from '@mui/material';
 import styled from 'styled-components';
-import { HeaderCell } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { Group } from '../ticketsTableGroup.styles';
 import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
-import { SELECTION_COLUMN_WIDTH } from '../ticketsTableGroup.helper';
+import { SETTINGS_COLUMN_WIDTH } from '../ticketsTableGroup.helper';
 
-export const Checkbox = styled(CheckboxBase)<{ disabled?: boolean }>`
-	margin: 0 auto;
-	padding: 0;
-	${({ disabled }) => disabled && `
-		opacity: 0.4;
-	`}
-`;
-
-export const CheckboxHeaderCell = styled(HeaderCell).attrs({
-	draggable: false,
-})`
-	height: 27px;
-	overflow: visible;
-`;
-
-export const SelectionColumnContainer = styled(Group)`
-	width: ${SELECTION_COLUMN_WIDTH}px;
+export const SettingsColumnContainer = styled(Group)`
+	width: ${SETTINGS_COLUMN_WIDTH}px;
 	gap: 0;
 	& div > ${/* sc-selector */Row} {
-		width: ${SELECTION_COLUMN_WIDTH}px;
+		width: ${SETTINGS_COLUMN_WIDTH}px;
+
+		&:first-child {
+			border-top-right-radius: 10px;
+			overflow: hidden;
+		}
 	}
 `;

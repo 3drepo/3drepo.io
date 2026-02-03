@@ -15,30 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { NewTicketRow, NewTicketText, NewTicketTextContainer } from './newTicketRowButton.styles';
+import { NewTicketRow, NewTicketRowGridArea, NewTicketText, NewTicketTextContainer } from './newTicketRowButton.styles';
 import { FormattedMessage } from 'react-intl';
 import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { NewTicketMenu } from '../../../newTicketMenu/newTicketMenu.component';
-import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { SELECTION_COLUMN_WIDTH } from '../ticketsTableSelectionColumn/ticketsTableSelectionColumn.helper';
 
 type NewTicketRowButtonProps = {
 	disabled?: boolean;
 	onNewTicket: (modelId: string) => void;
 };
-export const NewTicketRowButton = ({ onNewTicket, disabled }: NewTicketRowButtonProps) => {
-	const { getRowWidth } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames', 'columnsWidths']);
-	const rowWidth = getRowWidth();
-
-	return (
+export const NewTicketRowButton = ({ onNewTicket, disabled }: NewTicketRowButtonProps) => (
+	<NewTicketRowGridArea>
 		<NewTicketMenu
 			disabled={disabled}
 			TriggerButton={(
-				<NewTicketRow
-					disabled={disabled}
-					style={{ width: rowWidth + SELECTION_COLUMN_WIDTH }} // To account for the selection column
-				>
+				<NewTicketRow disabled={disabled}>
 					<NewTicketTextContainer>
 						<AddCircleIcon />
 						<NewTicketText>
@@ -50,5 +41,5 @@ export const NewTicketRowButton = ({ onNewTicket, disabled }: NewTicketRowButton
 			useMousePosition
 			onContainerOrFederationClick={onNewTicket}
 		/>
-	);
-};
+	</NewTicketRowGridArea>
+);
