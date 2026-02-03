@@ -39,9 +39,10 @@ import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelect
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { ModuleTitle } from '@components/viewer/cards/cardFilters/cardFilters.styles';
 import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
-import { ActionMenuButton, BulkCheckbox } from './ticketsList.styles';
+import { BulkCheckbox } from './ticketsList.styles';
 import { Tooltip } from '@mui/material';
 import { TicketsBulkUpdateContext, TicketsBulkUpdateContextComponent } from '@components/tickets/bulkUpdate/bulkUpdate.context';
+import { BulkUpdateDropdown } from './bulkUpdate/bulkUpdateDropDown.component';
 
 
 
@@ -56,9 +57,7 @@ const TicketsActions = ({ readOnly, groupBy }) => {
 			<BulkCheckbox value={bulkModeOn} onClick={toggleBulkMode}  />
 		</Tooltip>)}
 		{bulkModeOn && (
-			<ActionMenuButton variant="outlined" color="secondary">
-				<FormattedMessage id="viewer.cards.tickets.bulkUpdateButton" defaultMessage="Bulk Update" />
-			</ActionMenuButton>
+			<BulkUpdateDropdown />
 		)}
 		{!bulkModeOn && (<FilterSelection />)}
 		{!bulkModeOn && (
