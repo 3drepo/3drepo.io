@@ -33,24 +33,24 @@ export const TicketsTableHeaderBulkEdit = ({ name, ...props }: TicketsTableHeade
 	const [active, setActive] = useState(false);
 	const { selectedIds } = useContext(TicketsTableContext);
 	return (
-		<CardFilterActionMenu
-			onClose={() => setActive(false)}
-			onOpen={() => setActive(true)}
-			TriggerButton={(
-				<HeaderCell name={name} {...props}>
+		<HeaderCell name={name} {...props}>
+			<CardFilterActionMenu
+				onClose={() => setActive(false)}
+				onOpen={() => setActive(true)}
+				TriggerButton={(
 					<BulkEditHeaderButton $active={active}>
 						<HeaderCellText>
 							{getPropertyLabel(name)}
 						</HeaderCellText>
 						<ArrowDownIcon />
 					</BulkEditHeaderButton>
-				</HeaderCell>
-			)}
-			PopoverProps={TICKET_HEADER_POPOVER_PROPS}
-		>
-			<ActionMenuContext.Consumer>
-				{({ close }) => <TicketsBulkEditForm name={name} selectedIds={selectedIds} onCancel={close} />}
-			</ActionMenuContext.Consumer>
-		</CardFilterActionMenu>
+				)}
+				PopoverProps={TICKET_HEADER_POPOVER_PROPS}
+			>
+				<ActionMenuContext.Consumer>
+					{({ close }) => <TicketsBulkEditForm name={name} selectedIds={selectedIds} onCancel={close} />}
+				</ActionMenuContext.Consumer>
+			</CardFilterActionMenu>
+		</HeaderCell>
 	);
 };

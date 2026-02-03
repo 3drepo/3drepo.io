@@ -23,7 +23,7 @@ import { ResizableTableHeader } from '@controls/resizableTableContext/resizableT
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
 	width: 100%;
-	height: 26px;
+	height: 34px;
 `;
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
@@ -37,13 +37,13 @@ export const HeaderCellText = styled(TextOverflow)`
 
 export const HeaderCell = styled(ResizableTableHeader)`
 	align-self: center;
-	padding: 5px 2px 0;
+	height: 100%;
+	padding: 0 5px;
 	margin: 0;
 	${({ theme }) => theme.typography.kicker};
 	color: ${({ theme }) => theme.palette.base.main};
 	user-select: none;
 	align-items: center;
-	padding-bottom: 12px;
 
 	svg {
 		width: 16px;
