@@ -14,40 +14,43 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useContext } from 'react';
-import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
-import { HeaderCell, HeaderCellText, Headers } from './ticketsTableHeaders.styles';
-import { getPropertyLabel } from '../../../ticketsTable.helper';
+import { Headers } from './ticketsTableHeaders.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
-import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { TicketsTableHeaderFilter } from './ticketsTableHeaderFilter.component';
-
-const TicketHeaderCell = ({ name, ...props }) => {
-	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
-	const isSelected = name === sortingColumn;
-
-	return (
-		<HeaderCell name={name} onClick={() => onColumnClick(name)}>
-			<HeaderCellText {...props}>
-				{getPropertyLabel(name)}
-			</HeaderCellText>
-			{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
-			<TicketsTableHeaderFilter propertyName={name}/>
-		</HeaderCell>
-	);
-};
+import { TicketsTableHeaderBulkEdit } from './ticketsTableHeaderBulkEdit/ticketsTableHeaderBulkEdit.component';
+import { NON_BULK_EDITABLE_COLUMNS } from './ticketsTableHeaders.helpers';
+import { TicketsTableHeader } from './ticketsTableHeader.component';
+import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { useContext } from 'react';
+import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
+import { useParams } from 'react-router-dom';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { isSequencingProperty } from '@/v5/ui/routes/viewer/tickets/ticketsForm/propertiesList.component';
 
 export const TicketsTableHeaders = () => {
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
+	const { selectedIds } = useContext(TicketsTableContext);
 
+	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+
+	const canBulkEditProperty = (name: string) => {
+		const propDef = findPropertyDefinition(template, name);
+		const isReadOnly = propDef?.readOnly || propDef?.readOnlyOnUI || propDef?.deprecated;
+		return !NON_BULK_EDITABLE_COLUMNS.includes(name)
+			&& selectedIds.size > 0
+			&& !propDef?.immutable // cannot bulk edit immutable properties to prevent user error
+			&& !propDef?.unique // user is unlikely to want to bulk edit unique properties and it will usually error
+			&& !isSequencingProperty(name) // sequencing dates have complex rules (start must be before end), disallow bulk edit for now
+			&& !isReadOnly;
+	};
+	
 	return (
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
-				<TicketHeaderCell key={name} name={name} />
+				canBulkEditProperty(name) ? <TicketsTableHeaderBulkEdit key={name} name={name} /> : <TicketsTableHeader key={name} name={name} />
 			))}
-			<ColumnsVisibilitySettings />
 		</Headers>
 	);
 };

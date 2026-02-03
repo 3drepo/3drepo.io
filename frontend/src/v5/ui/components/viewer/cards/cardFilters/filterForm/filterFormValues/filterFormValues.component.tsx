@@ -55,7 +55,7 @@ export const isJobsAndUsersProperty = ( module, property, type) => {
 };
 
 
-const getSelectOptions = (module, property, type): SelectOption[] => {
+export const getSelectOptions = (module, property, type): SelectOption[] => {
 	let options = [];
 	const { templates, modelsIds } = useTicketFiltersContext();
 

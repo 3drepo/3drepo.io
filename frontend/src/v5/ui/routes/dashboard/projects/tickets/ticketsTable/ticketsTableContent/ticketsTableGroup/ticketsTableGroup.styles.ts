@@ -19,60 +19,49 @@ import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 import { Highlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
-import { DropLine } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnDropAreas/movingColumnDropAreas.styles';
 import { Headers } from './ticketsTableHeaders/ticketsTableHeaders.styles';
-import { NEW_TICKET_ROW_HEIGHT, NewTicketRow } from './newTicketRowButton/newTicketRowButton.styles';
+import { NEW_TICKET_ROW_AREA_NAME, SELECTION_COLUMN_WIDTH, SETTINGS_COLUMN_WIDTH } from './ticketsTableGroup.helper';
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
-
-const roundBorderTop = css`
-	border-top-left-radius: 10px;
-	border-top-right-radius: 10px;
-`;
-
-const roundBorderBottom = css`
-	border-bottom-left-radius: 10px;
-	border-bottom-right-radius: 10px;
-`;
-
 export const Group = styled.div<{ $empty: boolean, $hideNewticketButton: boolean }>`
 	display: grid;
 	gap: 1px;
 	width: fit-content;
 	background-color: transparent;
+`;
 
-	${({ $hideNewticketButton }) => $hideNewticketButton && css`
-		& > ${/* sc-selector */Row}:last-child{
-			${roundBorderBottom}
-			overflow: hidden;
+export const RoundedContainer = styled.div<{ hideNewTicketButton: boolean }>`
+	display: grid;
+	gap: 1px;
+	grid-template-columns: ${SELECTION_COLUMN_WIDTH}px auto ${SETTINGS_COLUMN_WIDTH}px;
+	grid-template-areas: "selection tableData settings"
+		"${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME}";
+	margin-right: 40px;
+	width: fit-content;
+	border-radius: 0 0 10px 10px;
+	>*:first-child {
+		${/* sc-selector */ Row}:first-of-type {
+			border-top-left-radius: 10px;
 		}
-	`}
-
-	${NewTicketRow} {
-		${roundBorderBottom};
-		${({ $empty }) => $empty && roundBorderTop}
+		${({ hideNewTicketButton }) => hideNewTicketButton && css`
+			${/* sc-selector */ Row}:last-of-type {
+				border-bottom-left-radius: 10px;
+			}
+		`}
+	}
+	>*:last-child {
+		${/* sc-selector */ Row}:last-of-type {
+			border-bottom-right-radius: 10px;
+		}
 	}
 `;
 
-export const Table = styled(ResizableTable)<{ $empty?: boolean, $canCreateTicket?: boolean }>`
+export const Table = styled(ResizableTable)<{ $canCreateTicket?: boolean }>`
 	overflow-x: unset;
 	width: fit-content;
 
-	${({ $empty }) => $empty && css`
-		${Group} {
-			width: unset;
-		}
-	`}
-
 	${Highlighter} {
 		border-radius: 10px;
-
-		${({ $canCreateTicket }) => $canCreateTicket && css`
-			height: calc(100% - ${NEW_TICKET_ROW_HEIGHT});
-		`}
-	}
-
-	${DropLine} {
-		height: calc(100% - ${NEW_TICKET_ROW_HEIGHT});
+		height: 100%;
 	}
 `;

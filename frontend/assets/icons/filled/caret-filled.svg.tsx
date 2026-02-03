@@ -14,18 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
-import { Button } from '@controls/button';
-import { useContext } from 'react';
-import { TicketsTableContext } from './ticketsTableContext/ticketsTableContext';
-
-// This is a temporary component
-// It is just used to check the ticket IDs are correctly selected
-export const BulkEditButton = () => {
-	const { selectedIds, onBulkEdit } = useContext(TicketsTableContext);
-	return (
-		<Button variant="contained" onClick={onBulkEdit} disabled={selectedIds.size === 0}>
-			Bulk Edit
-		</Button>
-	);
+type IProps = {
+	className?: any;
 };
+
+export default ({ className }: IProps) => (
+	<svg width="9" height="5" viewBox="0 0 9 5" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<path d="M4.25493 4.75141L0.103675 0.600155C-0.117797 0.378683 0.0390586 -3.73498e-09 0.352267 0L8.65477 9.90063e-08C8.96798 1.02741e-07 9.12484 0.378682 8.90337 0.600154L4.75211 4.75141C4.61482 4.8887 4.39222 4.8887 4.25493 4.75141Z" fill="currentColor"/>
+	</svg>
+);

@@ -26,7 +26,7 @@ import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { chunk } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
-import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.component';
+import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.helper';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
@@ -91,17 +91,19 @@ export const TicketsTableSelectionColumn = ({
 			</Headers>
 			<SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
 				<VirtualList
+					vKey="selection-column"
 					items={chunk(tickets, TICKETS_CHUNK_SIZE)}
-					itemHeight={TICKET_TABLE_ROW_HEIGHT * TICKETS_CHUNK_SIZE}
+					itemHeight={TICKET_TABLE_ROW_HEIGHT}
 					ItemComponent={(ticketsChunk: ITicket[]) => (
 						<div key={ticketsChunk[0]._id}>
 							{ticketsChunk.map((ticket) => (
-									<SelectionRow
-										ticketId={ticket._id}
-										selected={selectedIdsSet.has(ticket._id)}
-										onCheck={onCheck}
-										selectedTicketId={selectedTicketId}
-									/>
+								<SelectionRow
+									key={ticket._id}
+									ticketId={ticket._id}
+									selected={selectedIdsSet.has(ticket._id)}
+									onCheck={onCheck}
+									selectedTicketId={selectedTicketId}
+								/>
 							))}
 						</div>
 					)}

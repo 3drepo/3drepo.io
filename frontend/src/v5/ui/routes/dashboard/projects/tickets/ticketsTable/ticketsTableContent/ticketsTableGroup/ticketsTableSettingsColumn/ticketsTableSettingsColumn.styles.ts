@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2025 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,24 +16,19 @@
  */
 
 import styled from 'styled-components';
+import { Group } from '../ticketsTableGroup.styles';
+import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
+import { SETTINGS_COLUMN_WIDTH } from '../ticketsTableGroup.helper';
 
-export const TableIconContainer  = styled.div<{ $active?: boolean }>`
-	width: 16px;
-	height: 16px;
-	border-radius: 16%;
-	border-width: 1px;
-	border-style: solid;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	cursor: pointer;
-	&:hover {
-		background-color: ${({ theme }) => theme.palette.secondary.lightest };
+export const SettingsColumnContainer = styled(Group)`
+	width: ${SETTINGS_COLUMN_WIDTH}px;
+	gap: 0;
+	& div > ${/* sc-selector */Row} {
+		width: ${SETTINGS_COLUMN_WIDTH}px;
+
+		&:first-child {
+			border-top-right-radius: 10px;
+			overflow: hidden;
+		}
 	}
-
-	border-color: ${({ $active, theme }) => $active ? theme.palette.base.main : 'transparent'};
-`;
-
-export const GearIconContainer = styled(TableIconContainer)`
-	color: ${({ theme }) => theme.palette.base.main};
 `;
