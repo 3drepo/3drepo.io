@@ -23,6 +23,7 @@ export interface TicketsBulkUpdateContextType {
 	toggleBulkMode: () => void;
 	toggleSelection: (elem) => void;
 	isSelected: (elem) => boolean;
+	addOrRemoveSelection:(elems: any[], toRemove:boolean) => void
 }
 
 const defaultValue: TicketsBulkUpdateContextType = {
@@ -31,6 +32,7 @@ const defaultValue: TicketsBulkUpdateContextType = {
 	toggleBulkMode: () => {},
 	toggleSelection: () => {},
 	isSelected: () => false,
+	addOrRemoveSelection: () => {},
 };
 
 
@@ -59,6 +61,26 @@ export const TicketsBulkUpdateContextComponent = ({ children }) => {
 		setSelectedItems(newSelection);
 	};
 
+	const addOrRemoveSelection = (elems: any[], toRemove:boolean) => {
+		const newSelection = new Set(selectedItems);
+		elems.forEach((elem) => {
+			const hasElem = newSelection.has(elem);
+			// If its for removing the element but the element is not there already avoid
+			// processing. Same comparison will be true if it is to add and the element is already there
+			if (toRemove === !hasElem) {
+				return;
+			}
+
+			if (!toRemove) {
+				newSelection.add(elem);
+			} else {
+				newSelection.delete(elem);
+			}
+		});
+
+		setSelectedItems(newSelection);
+	};
+
 	const isSelected = (elem) => {
 		return selectedItems.has(elem);
 	};
@@ -71,6 +93,7 @@ export const TicketsBulkUpdateContextComponent = ({ children }) => {
 				toggleSelection, 
 				isSelected, 
 				selectedItems, 
+				addOrRemoveSelection,
 			}}>
 			{children}
 		</TicketsBulkUpdateContext.Provider>
