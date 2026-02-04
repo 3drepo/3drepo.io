@@ -97,7 +97,7 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 	const hideNewticketButton = template.deprecated;
 	const disabledModelIds: string[] = models.filter(({ role }) => !isCommenterRole(role)).map(({ _id }) => _id);
-	const hideSelectionColumn = tickets.every(({ modelId }) => disabledModelIds.includes(modelId));
+	const hideSelectionColumn = models.every(({ role }) => !isCommenterRole(role));
 
 	const assigneesSort = (items: ITicket[], order) => orderBy(
 		items.map(sortAssignees),
