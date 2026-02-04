@@ -26,15 +26,14 @@ import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { chunk } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
-import { isCollaboratorRole } from '@/v5/store/store.helpers';
 import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
 import { formatMessage } from '@/v5/services/intl';
-import { useSelectedModels } from '../../../newTicketMenu/useSelectedModels';
 import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.helper';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
 	selectedTicketId: string;
+	disabledModelIds: string[];
 };
 
 type SelectionRowType = {
@@ -61,14 +60,12 @@ const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId, disa
 export const TicketsTableSelectionColumn = ({ 
 	tickets,
 	selectedTicketId,
+	disabledModelIds,
 }: TicketsTableSelectionColumnProps) => {
 	const { selectedIds, setSelectedIds } = useContext(TicketsTableContext);
-	const models = useSelectedModels();
 
 	// Convert selectedIds to a Set for fast lookup
 	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
-
-	const disabledModelIds: string[] = models.filter(({ role }) => !isCollaboratorRole(role)).map(({ _id }) => _id);
 	const allSelected = tickets.every(({ _id, modelId }) => selectedIdsSet.has(_id) || disabledModelIds.includes(modelId)) && tickets.length > 0;
 
 	const onCheck = useCallback((e, ticketId) => {

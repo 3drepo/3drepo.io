@@ -96,6 +96,8 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const models = useSelectedModels();
 	const newTicketButtonIsDisabled = !models.filter(({ role }) => isCommenterRole(role)).length;
 	const hideNewticketButton = template.deprecated;
+	const disabledModelIds: string[] = models.filter(({ role }) => !isCommenterRole(role)).map(({ _id }) => _id);
+	const hideSelectionColumn = tickets.every(({ modelId }) => disabledModelIds.includes(modelId));
 
 	const assigneesSort = (items: ITicket[], order) => orderBy(
 		items.map(sortAssignees),
@@ -135,8 +137,8 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 		<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
 			<SortedTableContext.Consumer>
 				{({ refreshSorting, sortedItems, sortingColumn }: SortedTableType<ITicket>) => (
-					<RoundedContainer hideNewTicketButton={hideNewticketButton}>
-						<TicketsTableSelectionColumn tickets={sortedItems} selectedTicketId={selectedTicketId} />
+					<RoundedContainer $hideSelectionColumn={hideSelectionColumn} $hideNewTicketButton={hideNewticketButton}>
+						{!hideSelectionColumn && <TicketsTableSelectionColumn tickets={sortedItems} selectedTicketId={selectedTicketId} disabledModelIds={disabledModelIds} />}
 						<Table $canCreateTicket={!newTicketButtonIsDisabled}>
 							<TicketsTableGroupContent
 								tickets={tickets}
