@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,26 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+type IProps = {
+	className?: string;
+};
 
-export const IconContainer = styled.div<{ color?: string }>`
-	display: inline-block;
-	margin-right: 6px;
-	height: 16px;
-
-	svg {
-		color: ${({ color }) => color || 'currentColor'};
-		width: 16px;
-		height: 16px;
-	}
-`;
-
-export const TitleContainer = styled.span`
-	height: 16px;
-	font-weight: 500;
-	color: inherit;
-
-	width: 100%;
-	display: flex;
-	align-items: center;
-`;
+export default ({ className }: IProps) => (
+	<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+		<circle cx="8" cy="8" r="8" fill="currentColor"/>
+	</svg>
+);
