@@ -273,7 +273,99 @@ const establishRoutes = (modelType, isInternal) => {
 	};
 
 	if (!isInternal) {
-		// TODO document the route and create a middleware to deal with bulk stats
+		/**
+		 * @openapi
+		 * /teamspaces/{teamspace}/projects/{project}/{type}/stats:
+		 *   get:
+		 *     description: Get the statistics and general information about multiple models in bulk
+		 *     tags: [v:external, Models]
+		 *     operationId: getBulkModelStats
+		 *     parameters:
+		 *       - name: teamspace
+		 *         description: Name of teamspace
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: project
+		 *         description: Project ID
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *       - name: type
+		 *         description: Model type
+		 *         in: path
+		 *         required: true
+		 *         schema:
+		 *           type: string
+		 *           enum:
+		 *             - containers
+		 *             - federations
+		 *             - drawings
+		 *       - name: models
+		 *         description: List of model IDs to get stats for (comma separated)
+		 *         in: query
+		 *         schema:
+		 *           type: string
+		 *           example: a54e8776-da7c-11ec-9d64-0242ac120002,aaa1ffaa-da7c-11ec-9d64-0242ac120002
+		 *     responses:
+		 *       200:
+		 *         description: Returns the statistics of multiple models
+		 *         content:
+		 *           application/json:
+		 *             schema:
+		 *               type: object
+		 *               properties:
+		 *                 schema:
+		 *                   type: array
+		 *                   items:
+		 *                     type: object
+		 *                     properties:
+		 *                       code:
+		 *                         type: string
+		 *                         description: Model code
+		 *                         example: STR-01
+		 *                       status:
+		 *                         type: string
+		 *                         description: Current status of the model
+		 *                         example: ok
+		 *                       containers:
+		 *                         type: array
+		 *                         description: The IDs of the models the model consists of
+		 *                         items:
+		 *                           type: object
+		 *                           properties:
+		 *                             _id:
+		 *                               description: Container id
+		 *                               type: string
+		 *                               format: uuid
+		 *                             group:
+		 *                               description: Federation group the container is under (optional)
+		 *                               type: string
+		 *                               example: Architectural
+		 *                       tickets:
+		 *                         type: object
+		 *                         properties:
+		 *                           issues:
+		 *                             type: integer
+		 *                             description: The number of non-closed issues of the model
+		 *                           risks:
+		 *                             type: integer
+		 *                             description: The number of unmitigated risks of the model
+		 *                       desc:
+		 *                         type: string
+		 *                         description: Model description
+		 *                         example: Floor 1 MEP with Facade
+		 *                       lastUpdated:
+		 *                         type: integer
+		 *                         description: Timestamp (ms) of when any of the submodels was updated
+		 *                         example: 1630598072000
+		 *       401:
+		 *         $ref: "#/components/responses/notLoggedIn"
+		 *       404:
+		 *         $ref: "#/components/responses/teamspaceNotFound"
+		 */
 		router.get('/stats', hasAccessToTeamspace, getModelsIdFromQuery, getModelStatsInBulk(modelType), formatBulkModelStats(modelType));
 
 		/**
