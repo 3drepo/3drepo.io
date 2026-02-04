@@ -139,7 +139,7 @@ const moduleTypeProperties = {
 };
 
 export const getModulePanelProps = (module) => {
-	if (module.name) return { title: module.name, Icon: CustomModuleIcon };
+	if (module.name) return { title: module.name, Icon: CustomModuleIcon, color: module.color };
 	return moduleTypeProperties[module.type];
 };
 
