@@ -26,11 +26,14 @@ import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { chunk } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
+import { formatMessage } from '@/v5/services/intl';
 import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.helper';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
 	selectedTicketId: string;
+	disabledModelIds: string[];
 };
 
 type SelectionRowType = {
@@ -39,24 +42,31 @@ type SelectionRowType = {
 	onCheck: (e: any, ticketId: string) => void;
 	selectedTicketId: string;
 };
-const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId }: SelectionRowType) => (
-	<Row key={ticketId} $selected={selectedTicketId === ticketId}>
-		<CellContainer alwaysVisible>
-			<Checkbox checked={selected} onClick={(e) => onCheck(e, ticketId)} />
-		</CellContainer>
-	</Row>
-));
+const SelectionRow = memo(({ ticketId, selected, onCheck, selectedTicketId, disabled }: SelectionRowType & { disabled: boolean }) => {
+	const tooltipTitle = disabled ? formatMessage({ id: 'ticketsTable.selection.disabledTooltip', defaultMessage: 'You do not have permission to edit this ticket' }) : '';
+	return (
+		<Row key={ticketId} $selected={selectedTicketId === ticketId}>
+			<CellContainer alwaysVisible>
+				<Tooltip title={tooltipTitle}>
+					<div>
+						<Checkbox checked={selected} onClick={(e) => onCheck(e, ticketId)} disabled={disabled} />
+					</div>
+				</Tooltip>
+			</CellContainer>
+		</Row>
+	);
+});
 
 export const TicketsTableSelectionColumn = ({ 
 	tickets,
 	selectedTicketId,
+	disabledModelIds,
 }: TicketsTableSelectionColumnProps) => {
 	const { selectedIds, setSelectedIds } = useContext(TicketsTableContext);
 
 	// Convert selectedIds to a Set for fast lookup
 	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
-
-	const allSelected = tickets.every(({ _id }) => selectedIdsSet.has(_id)) && tickets.length > 0;
+	const allSelected = tickets.every(({ _id, modelId }) => selectedIdsSet.has(_id) || disabledModelIds.includes(modelId)) && tickets.length > 0;
 
 	const onCheck = useCallback((e, ticketId) => {
 		setSelectedIds((prev) => {
@@ -73,14 +83,15 @@ export const TicketsTableSelectionColumn = ({
 	const onCheckAll = useCallback((e) => {
 		setSelectedIds((prev) => {
 			const next = new Set(prev);
-			if (e.target.checked) {
-				tickets.forEach((t) => next.add(t._id));
-			} else {
-				tickets.forEach((t) => next.delete(t._id));
-			}
+			tickets.forEach((t) => {
+				if (disabledModelIds.includes(t.modelId)) return;
+				if (e.target.checked) next.add(t._id);
+				else next.delete(t._id);
+				return;
+			});
 			return next;
 		});
-	}, [tickets]);
+	}, [tickets, disabledModelIds]);
 
 	return (
 		<div>
@@ -103,6 +114,7 @@ export const TicketsTableSelectionColumn = ({
 									selected={selectedIdsSet.has(ticket._id)}
 									onCheck={onCheck}
 									selectedTicketId={selectedTicketId}
+									disabled={disabledModelIds.includes(ticket.modelId)}
 								/>
 							))}
 						</div>

@@ -30,12 +30,18 @@ export const Group = styled.div<{ $empty: boolean, $hideNewticketButton: boolean
 	background-color: transparent;
 `;
 
-export const RoundedContainer = styled.div<{ hideNewTicketButton: boolean }>`
+export const RoundedContainer = styled.div<{ $hideSelectionColumn: boolean, $hideNewTicketButton: boolean }>`
 	display: grid;
 	gap: 1px;
 	grid-template-columns: ${SELECTION_COLUMN_WIDTH}px auto ${SETTINGS_COLUMN_WIDTH}px;
 	grid-template-areas: "selection tableData settings"
 		"${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME}";
+	${({ $hideSelectionColumn }) => $hideSelectionColumn && css`
+		grid-template-columns: auto ${SETTINGS_COLUMN_WIDTH}px;
+		grid-template-areas: "tableData settings"
+			"${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME}";
+	`}
+
 	margin-right: 40px;
 	width: fit-content;
 	border-radius: 0 0 10px 10px;
@@ -43,7 +49,7 @@ export const RoundedContainer = styled.div<{ hideNewTicketButton: boolean }>`
 		${/* sc-selector */ Row}:first-of-type {
 			border-top-left-radius: 10px;
 		}
-		${({ hideNewTicketButton }) => hideNewTicketButton && css`
+		${({ $hideNewTicketButton }) => $hideNewTicketButton && css`
 			${/* sc-selector */ Row}:last-of-type {
 				border-bottom-left-radius: 10px;
 			}
