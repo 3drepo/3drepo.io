@@ -25,9 +25,10 @@ import { getFilterFormTitle } from '@components/viewer/cards/cardFilters/cardFil
 import { findFilterByPropertyName } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableHeaders/ticketsTableHeaderFilter.component';
 import { BulkEditInputField } from './bulkEditInputField/bulkEditInputField.component';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import { uniq } from 'lodash';
+import { set, uniq } from 'lodash';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 type IBulkEditFormProps = {
 	name: string;
@@ -39,11 +40,11 @@ type FormType = { value: any; };
 export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFormProps) => {
 	const { filters, choosablefilters } = useTicketFiltersContext();
 	const { module, property, type } = findFilterByPropertyName([...filters, ...choosablefilters], name); 
-	const { project: projectId } = useParams<DashboardTicketsParams>();
+	const { teamspace, project: projectId } = useParams<DashboardTicketsParams>();
 	const selectedTickets = TicketsHooksSelectors.selectTicketsById(Array.from(selectedIds));
 	const templatesIds = uniq(selectedTickets.map((t) => t.type));
 	// Temporary method for getting template. When using this in Viewer will have to handle cases with multiple templates.
-	const template = TicketsHooksSelectors.selectTemplateById(projectId, templatesIds[0]);
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templatesIds[0]);
 	const propDef = findPropertyDefinition(template, name);
 	const defaultValues: FormType = {
 		value: type === 'manyOf' ? [] : '',
@@ -60,12 +61,9 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 	const canSubmit = isValid && (!notNullable || !isEmptyValue);
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
-		// eslint-disable-next-line no-console
-		console.log('@@ SUBMIT VALUE:', filledForm);
-		// eslint-disable-next-line no-console
-		console.log('@@ FOR PROPERTY:', module, property);
-		// eslint-disable-next-line no-console
-		console.log('@@ FOR TICKETS:', selectedIds);
+		let partialTicket = {};
+		set(partialTicket, name, filledForm.value);
+		TicketsActionsDispatchers.updateManyTickets(teamspace, projectId, Array.from(selectedIds), partialTicket);
 	});
 
 	return (
