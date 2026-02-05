@@ -16,11 +16,11 @@
  */
 
 import { DialogContainer } from '@/v4/routes/components/dialogContainer';
-import { SnackbarContainer } from '@/v4/routes/components/snackbarContainer';
 import AdapterDayjs from '@mui/lab/AdapterDayjs';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import { V4DialogsOverridesContainer } from './dialogs/v4DialogsOverrides.styles';
 import { V4OverridesContainer } from './v4Overrides.styles';
+import { SnackbarHandler } from '@components/shared/snackbar/snackbar.component';
 
 export const V4Adapter = ({ children }) => (
 	<V4OverridesContainer id="v4Overrides">
@@ -28,7 +28,7 @@ export const V4Adapter = ({ children }) => (
 			<LocalizationProvider dateAdapter={AdapterDayjs}>
 				{children}
 				<DialogContainer />
-				<SnackbarContainer />
+				<SnackbarHandler />
 			</LocalizationProvider>
 		</V4DialogsOverridesContainer>
 	</V4OverridesContainer>

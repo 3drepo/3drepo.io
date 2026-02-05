@@ -19,12 +19,16 @@ import { SnackbarProps } from '@mui/material/Snackbar';
 import { isString } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
+export type ISnackConfig = SnackbarProps & {
+	timeout?: number;
+};
+
 export const { Types: SnackbarTypes, Creators: SnackbarActions } = createActions({
 	show: ['config']
 }, { prefix: 'SNACKBAR/' });
 
 export const INITIAL_STATE = {
-	snackConfig: {} as SnackbarProps,
+	snackConfig: {} as ISnackConfig,
 	isOpen: false
 };
 
