@@ -125,7 +125,9 @@ export const TicketsTableContent = (props: TicketsTableResizableContentProps) =>
 
 	return (
 		<Container ref={tableRef}>
-			<TableContent {...props} tableRef={tableRef} />
+			<div style={{ position: 'absolute' }} >
+				<TableContent {...props} tableRef={tableRef} />
+			</ div>
 		</Container>
 	);
 };
