@@ -21,7 +21,7 @@ import { IconButton, Snackbar, SnackbarContent } from '@mui/material';
 import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ISnackConfig } from '@/v4/modules/snackbar/snackbar.redux';
-import { SnackbarSpinner } from './snackbar.styles';
+import { SnackbarSpinner } from './snackbarHandler.styles';
 
 export const SnackbarHandler = () => {
 	const [isOpen, setIsOpen] = useState(false);

@@ -20,7 +20,7 @@ import AdapterDayjs from '@mui/lab/AdapterDayjs';
 import LocalizationProvider from '@mui/lab/LocalizationProvider';
 import { V4DialogsOverridesContainer } from './dialogs/v4DialogsOverrides.styles';
 import { V4OverridesContainer } from './v4Overrides.styles';
-import { SnackbarHandler } from '@components/shared/snackbar/snackbar.component';
+import { SnackbarHandler } from '@components/shared/snackbarHandler/snackbarHandler.component';
 
 export const V4Adapter = ({ children }) => (
 	<V4OverridesContainer id="v4Overrides">
