@@ -23,7 +23,8 @@ import ClashIcon from '@assets/icons/outlined/clash-outlined.svg';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
 import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
-import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
+import OutlinedCircleIcon from '@assets/icons/outlined/circle-outlined.svg';
+import FilledCircleIcon from '@assets/icons/filled/circle-filled.svg';
 import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
 import { TicketBaseKeys, SequencingProperties, BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
@@ -139,7 +140,8 @@ const moduleTypeProperties = {
 };
 
 export const getModulePanelProps = (module) => {
-	if (module.name) return { title: module.name, Icon: CustomModuleIcon };
+	const CustomModuleIcon = module.color ? FilledCircleIcon : OutlinedCircleIcon;
+	if (module.name) return { title: module.name, Icon: CustomModuleIcon, color: module.color };
 	return moduleTypeProperties[module.type];
 };
 
