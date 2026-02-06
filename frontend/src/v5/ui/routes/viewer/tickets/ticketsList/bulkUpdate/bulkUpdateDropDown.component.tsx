@@ -54,6 +54,20 @@ export const BulkUpdateDropdown = () => {
 
 	const selectableItems = templatesToFilters(templates);
 
+	// HACK: reconstructing the property name until refactor of properties list is done to just use 
+	// the property name instead of filters
+	let selectedProperty = '';
+	
+	if (selectedFilter) {
+		selectedProperty = selectedFilter.module ? `modules.${selectedFilter.module}.${selectedFilter.property}` : `properties.${selectedFilter.property}`;
+
+		// in the case of description is not in the properties field
+
+		if (selectedFilter.property === 'description') { 
+			selectedProperty = 'description';
+		}
+	}
+
 	return (
 		<CardFilterActionMenu
 			TriggerButton={
@@ -79,7 +93,7 @@ export const BulkUpdateDropdown = () => {
 					</SearchContextComponent>
 				</TicketsFiltersModalItem>
 				<TicketsFiltersModalItem $visible={!showFiltersList}>
-					{!showFiltersList && (<TicketsBulkEditForm name={selectedFilter.property} selectedIds={selectedItems} onCancel={clearFilter}/>)}
+					{!showFiltersList && (<TicketsBulkEditForm name={selectedProperty} selectedIds={selectedItems} onCancel={clearFilter}/>)}
 				</TicketsFiltersModalItem>
 			</TicketsFiltersModal>
 		</CardFilterActionMenu>
