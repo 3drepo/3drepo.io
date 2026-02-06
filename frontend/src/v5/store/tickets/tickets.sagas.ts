@@ -441,7 +441,8 @@ export function* updateManyTickets({ teamspace, projectId, ids, ticket, onSucces
 
 		let chunkSize = 1000;
 		const isFed = selectIsFederation(state);
-
+		yield put(SnackbarActions.show({ message: formatMessage({ id: 'tickets.updateManyTickets.updating', defaultMessage: 'Tickets updating...' }), spinner: true }));
+		
 		for (let modelIdTemplate of Object.keys(ticketsByModelTemplateId)) {
 			const chunks = chunk(ticketsByModelTemplateId[modelIdTemplate], chunkSize);
 			const [modelId, template] = modelIdTemplate.split('.');
@@ -455,7 +456,7 @@ export function* updateManyTickets({ teamspace, projectId, ids, ticket, onSucces
 		}
 
 		onSuccess?.();
-		yield put(SnackbarActions.show(formatMessage({ id: 'tickets.updateManyTickets.updated', defaultMessage: 'Tickets updated' })));
+		yield put(SnackbarActions.show({ message: formatMessage({ id: 'tickets.updateManyTickets.updated', defaultMessage: 'Tickets updated' }) }));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(

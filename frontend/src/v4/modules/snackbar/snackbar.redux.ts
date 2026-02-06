@@ -21,6 +21,7 @@ import { createActions, createReducer } from 'reduxsauce';
 
 export type ISnackConfig = SnackbarProps & {
 	timeout?: number;
+	spinner?: boolean;
 };
 
 export const { Types: SnackbarTypes, Creators: SnackbarActions } = createActions({

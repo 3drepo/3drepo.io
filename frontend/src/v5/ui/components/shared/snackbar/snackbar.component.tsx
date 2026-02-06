@@ -21,9 +21,10 @@ import { IconButton, Snackbar, SnackbarContent } from '@mui/material';
 import { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ISnackConfig } from '@/v4/modules/snackbar/snackbar.redux';
+import { SnackbarSpinner } from './snackbar.styles';
 
 export const SnackbarHandler = () => {
-	const [isOpen, setIsOpen] = useState(true);
+	const [isOpen, setIsOpen] = useState(false);
 	const latestSnack = useSelector(selectSnackConfig);
 	const [snack, setSnack] = useState<ISnackConfig>(latestSnack);
 	const queue: ISnackConfig[] = [];
@@ -52,6 +53,20 @@ export const SnackbarHandler = () => {
 		processQueue();
 	};
 
+	const action = snack?.spinner
+		? <SnackbarSpinner />
+		: (
+			<IconButton
+				key="close"
+				aria-label="Close"
+				color="inherit"
+				size="large"
+				onClick={() => handleClose(null, '')}
+			>
+				<Close />
+			</IconButton>
+		);
+
 	useEffect(() => {
 		if (!latestSnack?.key) return;
 		handleNewSnack(latestSnack);
@@ -70,17 +85,7 @@ export const SnackbarHandler = () => {
 		>
 			<SnackbarContent
 				message={snack?.message}
-				action={[
-					<IconButton
-						key="close"
-						aria-label="Close"
-						color="inherit"
-						size="large"
-						onClick={() => handleClose(null, '')}
-					>
-						<Close />
-					</IconButton>,
-				]}
+				action={[action]}
 			/>
 		</Snackbar>
 	);
