@@ -20,7 +20,7 @@ import { isString } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export type ISnackConfig = SnackbarProps & {
-	timeout?: number;
+	timeout?: number; // in milliseconds
 	spinner?: boolean;
 };
 

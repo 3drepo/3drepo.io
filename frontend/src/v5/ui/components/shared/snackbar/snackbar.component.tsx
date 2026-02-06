@@ -18,41 +18,35 @@
 import { selectSnackConfig } from '@/v4/modules/snackbar';
 import { Close } from '@mui/icons-material';
 import { IconButton, Snackbar, SnackbarContent } from '@mui/material';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { ISnackConfig } from '@/v4/modules/snackbar/snackbar.redux';
 import { SnackbarSpinner } from './snackbar.styles';
 
 export const SnackbarHandler = () => {
 	const [isOpen, setIsOpen] = useState(false);
+
 	const latestSnack = useSelector(selectSnackConfig);
 	const [snack, setSnack] = useState<ISnackConfig>(latestSnack);
-	const queue: ISnackConfig[] = [];
+	const queue = useRef<ISnackConfig[]>([]);
 
 	const autoHideDuration = !snack?.spinner && (snack?.timeout ?? 5000);
 
 	const processQueue = () => {
-		if (queue.length > 0) {
+		if (queue.current.length > 0) {
 			setIsOpen(true);
-			setSnack(queue.shift());
+			setSnack(queue.current.shift());
 		}
 	};
 
 	const handleNewSnack = (newSnack) => {
-		queue.push(newSnack);
+		queue.current.push(newSnack);
 		processQueue();
 	};
 
-	const handleClose = (event: React.SyntheticEvent | Event, reason?: string) => {
-		if (reason === 'clickaway') {
-			return;
-		}
-
+	const handleClose = (e, reason?: string) => {
+		if (reason === 'clickaway') return;
 		setIsOpen(false);
-	};
-
-	const handleExited = () => {
-		processQueue();
 	};
 
 	const action = snack?.spinner
@@ -82,11 +76,11 @@ export const SnackbarHandler = () => {
 			open={isOpen}
 			{...snack}
 			TransitionProps={{
-				onExited: handleExited,
+				onExited: processQueue,
 			}}
 		>
 			<SnackbarContent
-				message={snack?.message}
+				message={<span>{snack?.message}</span>}
 				action={[action]}
 			/>
 		</Snackbar>
