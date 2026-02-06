@@ -29,6 +29,8 @@ export const SnackbarHandler = () => {
 	const [snack, setSnack] = useState<ISnackConfig>(latestSnack);
 	const queue: ISnackConfig[] = [];
 
+	const autoHideDuration = !snack?.spinner && (snack?.timeout ?? 5000);
+
 	const processQueue = () => {
 		if (queue.length > 0) {
 			setIsOpen(true);
@@ -74,7 +76,7 @@ export const SnackbarHandler = () => {
 
 	return (
 		<Snackbar
-			autoHideDuration={snack?.timeout ?? 5000}
+			autoHideDuration={autoHideDuration}
 			anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
 			onClose={handleClose}
 			open={isOpen}
