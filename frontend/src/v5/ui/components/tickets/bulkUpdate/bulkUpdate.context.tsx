@@ -22,7 +22,6 @@ export interface TicketsBulkUpdateContextType {
 	selectedItems: Set<string>;
 	toggleBulkMode: () => void;
 	toggleSelection: (elem) => void;
-	isSelected: (elem) => boolean;
 	addOrRemoveSelection:(elems: any[], toRemove:boolean) => void
 }
 
@@ -31,7 +30,6 @@ const defaultValue: TicketsBulkUpdateContextType = {
 	selectedItems: new Set(),
 	toggleBulkMode: () => {},
 	toggleSelection: () => {},
-	isSelected: () => false,
 	addOrRemoveSelection: () => {},
 };
 
@@ -81,17 +79,12 @@ export const TicketsBulkUpdateContextComponent = ({ children }) => {
 		setSelectedItems(newSelection);
 	};
 
-	const isSelected = (elem) => {
-		return selectedItems.has(elem);
-	};
-
 	return (
 		<TicketsBulkUpdateContext.Provider value={
 			{ 
 				bulkModeOn, 
 				toggleBulkMode, 
 				toggleSelection, 
-				isSelected, 
 				selectedItems, 
 				addOrRemoveSelection,
 			}}>

@@ -27,13 +27,16 @@ import OutlinedCircleIcon from '@assets/icons/outlined/circle-outlined.svg';
 import FilledCircleIcon from '@assets/icons/filled/circle-filled.svg';
 import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { TicketBaseKeys, SequencingProperties, BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { TicketBaseKeys, SequencingProperties, BaseProperties, IssueProperties, SEQUENCING_START_TIME, SEQUENCING_END_TIME } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint, PropertyDefinition, TemplateModule } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { NON_BULK_EDITABLE_COLUMNS } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableHeaders/ticketsTableHeaders.helpers';
 
+
+export const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
 
 export const getEditableProperties = (template) => {
@@ -356,3 +359,14 @@ export const findPropertyDefinition = (template:ITemplate,  property:string) => 
 	}
 };
 
+export const canBulkEditProperty = (template:ITemplate, name: string) => {
+	const propDef = findPropertyDefinition(template, name);
+	const isReadOnly = propDef?.readOnly || propDef?.readOnlyOnUI || propDef?.deprecated;
+	return  !NON_BULK_EDITABLE_COLUMNS.includes(name)
+		&& propDef
+		&& !propDef?.immutable // cannot bulk edit immutable properties to prevent user error
+		&& !propDef?.unique // user is unlikely to want to bulk edit unique properties and it will usually error
+		&& !isSequencingProperty(name) // sequencing dates have complex rules (start must be before end), disallow bulk edit for now
+		&& !isReadOnly;
+};
+	

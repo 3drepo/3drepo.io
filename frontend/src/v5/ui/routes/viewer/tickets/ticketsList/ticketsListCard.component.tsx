@@ -70,11 +70,10 @@ const TicketsActions = ({ readOnly, groupBy }) => {
 };
 
 export const TicketsListCard = () => {
-	const { teamspace, project } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
-	const { containerOrFederation } = useParams<ViewerParams>();
 	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const groupBy = TicketsCardHooksSelectors.selectGroupBy();

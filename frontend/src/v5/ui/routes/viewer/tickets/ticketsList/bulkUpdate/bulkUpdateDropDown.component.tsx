@@ -29,12 +29,54 @@ import { TicketsBulkEditForm } from '@components/shared/ticketsBulkEdit/ticketsB
 import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 import { templatesToFilters } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { canBulkEditProperty } from '@/v5/store/tickets/tickets.helpers';
+
+// HACK: reconstructing the property name until refactor of properties list is done to just use 
+// the property name instead of filters
+const propertyNameFromFilter = (filter: TicketFilter) => {
+	let propertyName = filter.module ? `modules.${filter.module}.${filter.property}` : `properties.${filter.property}`;
+
+	// in the case of description is not in the properties field
+
+	if (filter.property === 'description') { 
+		propertyName = 'description';
+	}
+
+	return propertyName;
+};
 
 export const BulkUpdateDropdown = () => {
+	const { containerOrFederation } = useParams<ViewerParams>();
+
 	const [selectedFilter, setSelectedFilter] = useState<TicketFilter>(null);
 	const showFiltersList = !selectedFilter?.property;
-	const { selectedItems } =  useContext(TicketsBulkUpdateContext);
-	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
+	const { selectedItems } = useContext(TicketsBulkUpdateContext);
+
+	const templatesSet = new Set<ITemplate>();
+	const state = getState();
+
+	TicketsCardHooksSelectors.selectFilteredTickets().forEach((ticket) => {
+		if (selectedItems.has(ticket._id) ) {
+			const template = selectTemplateById(state, containerOrFederation, ticket.type);
+			templatesSet.add(template);
+		}
+	});
+
+	const templates = Array.from(templatesSet);
+
+	const selectableItems = templatesToFilters(templates).filter((filter) => {
+		const foundApplicableproperty =  templates.find((template) => canBulkEditProperty(template, propertyNameFromFilter(filter)));
+		console.log(foundApplicableproperty);
+		return foundApplicableproperty;
+	});
+	// 2 - Filter unselectableItems using the criteria from tabularview headers
+	// 3 - Show a "not everything will be updated" popup
+	// 4 - implement Dan's thingy 
 	
 	const clearFilter = () => setSelectedFilter(null);
     
@@ -51,22 +93,7 @@ export const BulkUpdateDropdown = () => {
 	const disabled = !selectedItems.size;
 	const popoverProps: Partial<PopoverProps> = { anchorOrigin, transformOrigin, marginThreshold: 20 };
 
-	const selectableItems = templatesToFilters(templates);
-
-	// HACK: reconstructing the property name until refactor of properties list is done to just use 
-	// the property name instead of filters
-	let selectedProperty = '';
-	
-	if (selectedFilter) {
-		selectedProperty = selectedFilter.module ? `modules.${selectedFilter.module}.${selectedFilter.property}` : `properties.${selectedFilter.property}`;
-
-		// in the case of description is not in the properties field
-
-		if (selectedFilter.property === 'description') { 
-			selectedProperty = 'description';
-		}
-	}
-
+	const selectedProperty = selectedFilter ? propertyNameFromFilter(selectedFilter) : '';
 	return (
 		<CardFilterActionMenu
 			TriggerButton={

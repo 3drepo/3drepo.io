@@ -38,7 +38,7 @@ type TicketItemProps = {
 
 export const TicketItem = ({ ticket }: TicketItemProps) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
-	const { bulkModeOn, isSelected: selectedForUpdate, toggleSelection } =  useContext(TicketsBulkUpdateContext);
+	const { bulkModeOn, selectedItems: bulkSelection, toggleSelection } =  useContext(TicketsBulkUpdateContext);
 	const ref = useRef<HTMLDivElement>();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isSelected = selectedTicketId === ticket._id;
@@ -86,7 +86,7 @@ export const TicketItem = ({ ticket }: TicketItemProps) => {
 			<FlexRow>
 				<FlexColumn>
 					<Title>
-						{bulkModeOn && (<TicketCheckbox checked={selectedForUpdate(ticket._id)}/>)}
+						{bulkModeOn && (<TicketCheckbox checked={bulkSelection.has(ticket._id)}/>)}
 						{ticket.title}
 					</Title>
 					{description && <Description>{description}</Description>}
