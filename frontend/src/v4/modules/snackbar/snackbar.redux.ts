@@ -36,8 +36,8 @@ export const INITIAL_STATE = {
 export const show = (state = INITIAL_STATE, action) => {
 	const parsedConfig = isString(action.config) ? {message: action.config} : action.config;
 	const config = {
+		key: (new Date()).valueOf(),
 		...parsedConfig,
-		key: (new Date()).valueOf()
 	};
 	return { ...state, snackConfig: config, isOpen: true };
 };
