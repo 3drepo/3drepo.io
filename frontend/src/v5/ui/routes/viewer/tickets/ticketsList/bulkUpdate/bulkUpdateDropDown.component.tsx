@@ -19,9 +19,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { CardFilterActionMenu } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
 import { TicketFiltersSelectionList } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.component';
-import { TicketsFiltersModal, TicketsFiltersModalItem } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.styles';
+import { TicketsFiltersModal, TicketsFiltersModalItem, TicketsFiltersSearchInput } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.styles';
 import { SearchContextComponent } from '@controls/search/searchContext';
-import { SearchInput } from '@controls/search/searchInput';
 import { PopoverOrigin, PopoverProps } from '@mui/material';
 import { useContext, useState } from 'react';
 import { ActionMenuButton } from '../ticketsList.styles';
@@ -83,7 +82,7 @@ export const BulkUpdateDropdown = () => {
 			<TicketsFiltersModal $visibleIndex={showFiltersList ? 0 : 1}>
 				<TicketsFiltersModalItem $visible={showFiltersList}>
 					<SearchContextComponent items={selectableItems} fieldsToFilter={['property', 'module']}>
-						<SearchInput
+						<TicketsFiltersSearchInput
 							placeholder={formatMessage({
 								id: 'viewer.card.tickets.filters.searchInputPlaceholder',
 								defaultMessage: 'Search for property...',

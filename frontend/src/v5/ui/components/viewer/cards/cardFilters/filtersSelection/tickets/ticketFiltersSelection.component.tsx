@@ -20,7 +20,7 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 import { useState } from 'react';
 
 import { TicketFiltersSelectionList } from './list/ticketFiltersSelectionList.component';
-import { SearchInput, TicketsFiltersModal, TicketsFiltersModalItem } from './ticketFiltersSelection.styles';
+import { TicketsFiltersSearchInput, TicketsFiltersModal, TicketsFiltersModalItem } from './ticketFiltersSelection.styles';
 import { TicketFilter } from '../../cardFilters.types';
 import { FilterForm } from '../../filterForm/filterForm.component';
 import { CardFilterActionMenu } from '../../filterForm/filterForm.styles';
@@ -84,7 +84,7 @@ export const FilterSelection = () => {
 			<SearchContextComponent items={unusedFilters} fieldsToFilter={['property', 'module']}>
 				<TicketsFiltersModal $visibleIndex={showFiltersList ? 0 : 1}>
 					<TicketsFiltersModalItem $visible={showFiltersList}>
-						<SearchInput
+						<TicketsFiltersSearchInput
 							placeholder={formatMessage({
 								id: 'viewer.card.tickets.filters.searchInputPlaceholder',
 								defaultMessage: 'Search for property...',

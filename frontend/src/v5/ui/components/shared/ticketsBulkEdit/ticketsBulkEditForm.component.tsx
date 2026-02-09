@@ -43,11 +43,14 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 	const { teamspace, containerOrFederation, project: projectId } = useParams();
 	const selectedTickets = TicketsHooksSelectors.selectTicketsById(Array.from(selectedIds));
 	const templatesIds = uniq(selectedTickets.map((t) => t.type));
+	
 	// Temporary method for getting template. When using this in Viewer will have to handle cases with multiple templates.
+	
 	// In viewer
 	const templateByModel = TicketsHooksSelectors.selectTemplateById(containerOrFederation, templatesIds[0]);
 	// In tabular view
 	const templateByProject = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templatesIds[0]);
+	
 	const template = templateByProject || templateByModel;
 	const propDef = findPropertyDefinition(template, name);
 	const defaultValues: FormType = {
