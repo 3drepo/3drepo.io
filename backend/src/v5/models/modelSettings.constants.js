@@ -74,8 +74,8 @@ ModelSettingConstants.processStatuses = {
 	QUEUED_FOR_UNITY: 'Queued for Unity',
 };
 
-ModelSettingConstants.getInfoFromCode = (code, backupMessage) => (
-	importErrorMapping[code] || backupMessage ? backupMessage : systemFailureMsg
+ModelSettingConstants.getInfoFromCode = (code) => (
+	importErrorMapping[code] || systemFailureMsg
 );
 
 ModelSettingConstants.modelTypes = {

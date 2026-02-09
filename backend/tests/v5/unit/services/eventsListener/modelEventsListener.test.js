@@ -18,7 +18,6 @@
 const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
-const { templates: bouncerTemplates, codeExists } = require('../../../../../src/v5/utils/bouncerCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup, generateRandomNumber } = require('../../../helper/services');
 
@@ -665,10 +664,8 @@ const testModelProcessingCompleted = () => {
 
 					const mailerData = {
 						errInfo: {
-							code: codeExists(data.data.errorReason.errorCode)
-								? bouncerTemplates[data.data.errorReason.errorCode].message
-								: data.data.errorReason.errorCode,
-							message: data.data.errorReason.message,
+							code: data.data.errorReason.errorCode,
+							message: getInfoFromCode(data.data.errorReason.errorCode).message,
 						},
 						teamspace: data.teamspace,
 						model: data.model,
@@ -681,7 +678,11 @@ const testModelProcessingCompleted = () => {
 					};
 
 					expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.MODEL_IMPORT_ERROR.name, mailerData, noLogArchive ? undefined : [{ filename: 'logs.zip', path: zipPath }]);
+					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+						mailTemplates.MODEL_IMPORT_ERROR.name,
+						mailerData,
+						noLogArchive ? undefined : [{ filename: 'logs.zip', path: zipPath }],
+					);
 				} else {
 					expect(ModPro.getLogArchive).not.toHaveBeenCalled();
 					expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
