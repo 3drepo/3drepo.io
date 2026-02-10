@@ -15,9 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const removeInvalidSupermeshEntries = require('./removeInvalidSupermeshEntries');
 const removeOrphanedDrawingRecords = require('./removeOrphanedDrawingRecords');
 
 const scripts = [
+	{ script: removeInvalidSupermeshEntries, desc: 'Remove invalid supermesh entries' },
 	{ script: removeOrphanedDrawingRecords, desc: 'Remove orphaned drawing records and files' },
 ];
 
