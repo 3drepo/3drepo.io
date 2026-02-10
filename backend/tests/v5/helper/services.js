@@ -39,7 +39,7 @@ const { PassThrough } = require('stream');
 const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
-
+const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS, CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -335,6 +335,11 @@ db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVA
 
 db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
 	type, project, imageData);
+
+db.createClashPlan = (teamspace, plan) => {
+	const formattedPlan = { ...plan, _id: stringToUUID(plan._id) };
+	DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
+};
 
 db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
@@ -902,6 +907,21 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	name: ServiceHelper.generateRandomString(),
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
+});
+
+ServiceHelper.generateClashPlan = (model1, model2) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	type: CLASH_PLAN_TYPES[0],
+	tolerance: 0.01,
+	selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
+	trigger: [TRIGGER_OPTIONS[0]],
+	selectionA: {
+		container: model1,
+	},
+	selectionB: {
+		container: model2,
+	},
 });
 
 ServiceHelper.app = async (bypassAuth = false) => (await createServer({ [BYPASS_AUTH]: bypassAuth })).listen(8080);
