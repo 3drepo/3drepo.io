@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { times } = require('lodash');
 const { events } = require('../../../../../src/v5/services/eventsManager/eventsManager.constants');
 const { src } = require('../../../helper/path');
 
