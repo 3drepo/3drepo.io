@@ -19,9 +19,9 @@ const { times } = require('lodash');
 const { disconnect } = require('../../../../src/v5/handler/db');
 const { determineTestGroup, resetFileshare, db: { reset: resetDB, createTeamspace, createTemplates, createTicket }, generateRandomString, generateTemplate, generateTicket, generateRandomProject, generateRandomModel } = require('../../helper/services');
 
-const { src } = require('../../helper/path');
+const { src, utilScripts } = require('../../helper/path');
 
-const RemoveTickets = require(`${src}/scripts/utility/teamspaces/removeTickets`);
+const RemoveTickets = require(`${utilScripts}/teamspaces/removeTickets`);
 
 const { getTemplateList } = require(`${src}/processors/teamspaces/settings`);
 const { getTicketList } = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
@@ -89,11 +89,11 @@ const runTest = () => {
 			const targetTemplate = data.templates[0];
 			const targetTickets = data.tickets.filter((ticket) => ticket.type === targetTemplate._id);
 			const otherTemplates = data.templates.slice(1);
-			const otherTickets = data.tickets.filter((ticket) => ticket.type !== targetTemplate[0]._id);
+			const otherTickets = data.tickets.filter((ticket) => ticket.type !== targetTemplate._id);
 
 			await RemoveTickets.run(data.teamspace, targetTemplate._id);
 
-			await checkData(data.teamspace, data.project, data.model, targetTemplate, targetTickets, false);
+			await checkData(data.teamspace, data.project, data.model, [targetTemplate], targetTickets, false);
 			await checkData(data.teamspace, data.project, data.model, otherTemplates, otherTickets, true);
 		});
 	});
