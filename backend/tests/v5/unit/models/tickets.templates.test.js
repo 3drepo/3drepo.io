@@ -211,7 +211,7 @@ const testUpdateTemplate = () => {
 
 const testDeleteTemplates = () => {
 	describe('Delete templates', () => {
-		test('Should not error if delete is successful', async () => {
+		test('Should delete many templates successfully', async () => {
 			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce();
 			const templateIds = times(3, generateUUID);
 			const teamspace = generateRandomString();
@@ -220,13 +220,49 @@ const testDeleteTemplates = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, templatesColName, { _id: { $in: templateIds } });
 		});
-		test('Should not error if templateIds is empty or undefined', async () => {
+		test('Should not call deleteMany if templateIds is empty', async () => {
 			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce();
 			const teamspace = generateRandomString();
 
 			await expect(TicketTemplates.deleteTemplates(teamspace, [])).resolves.toBeUndefined();
+			expect(fn).not.toHaveBeenCalled();
+		});
+		test('Should not call deleteMany if templateIds is undefined', async () => {
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce();
+			const teamspace = generateRandomString();
+
 			await expect(TicketTemplates.deleteTemplates(teamspace, undefined)).resolves.toBeUndefined();
-			expect(fn).toHaveBeenCalledTimes(0);
+			expect(fn).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testDeprecateTemplate = () => {
+	describe('Deprecate template', () => {
+		test('Should deprecate successfully', async () => {
+			const fn = jest.spyOn(db, 'updateMany').mockResolvedValueOnce();
+			const templateIds = times(3, generateUUID);
+			const teamspace = generateRandomString();
+
+			await expect(TicketTemplates.deprecateTemplates(teamspace, templateIds)).resolves.toBeUndefined();
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace, templatesColName, { _id: { $in: templateIds } }, { $set: { deprecated: true } },
+			);
+		});
+		test('Should not call updateMany if templateIds is empty', async () => {
+			const fn = jest.spyOn(db, 'updateMany').mockResolvedValueOnce();
+			const teamspace = generateRandomString();
+
+			await expect(TicketTemplates.deprecateTemplates(teamspace, [])).resolves.toBeUndefined();
+			expect(fn).not.toHaveBeenCalled();
+		});
+		test('Should not call updateMany if templateIds is undefined', async () => {
+			const fn = jest.spyOn(db, 'updateMany').mockResolvedValueOnce();
+			const teamspace = generateRandomString();
+
+			await expect(TicketTemplates.deprecateTemplates(teamspace, undefined)).resolves.toBeUndefined();
+			expect(fn).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -240,4 +276,5 @@ describe('models/tickets.templates', () => {
 	testAddDefaultTemplate();
 	testUpdateTemplate();
 	testDeleteTemplates();
+	testDeprecateTemplate();
 });

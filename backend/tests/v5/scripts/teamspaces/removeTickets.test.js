@@ -21,7 +21,7 @@ const { determineTestGroup, resetFileshare, db: { reset: resetDB, createTeamspac
 
 const { src } = require('../../helper/path');
 
-const RemoveTickets = require('../../../../src/scripts/utility/teamspaces/removeTickets');
+const RemoveTickets = require(`${src}/scripts/utility/teamspaces/removeTickets`);
 
 const { getTemplateList } = require(`${src}/processors/teamspaces/settings`);
 const { getTicketList } = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
@@ -54,18 +54,18 @@ const checkData = async (teamspace, project, model, templates, tickets, shouldEx
 	if (shouldExist) {
 		expect(existingTemplates.length).toBe(templates.length + 1); // +1 for CSH template
 		templates.forEach((template) => {
-			expect(!!existingTemplates.find((t) => UUIDToString(t._id) === template._id)).toBe(true);
+			expect(existingTemplates.some((t) => UUIDToString(t._id) === template._id)).toBe(true);
 		});
 		expect(allTickets.length).toBe(tickets.length);
 		tickets.forEach((ticket) => {
-			expect(!!allTickets.find((t) => UUIDToString(t._id) === ticket._id)).toBe(true);
+			expect(allTickets.some((t) => UUIDToString(t._id) === ticket._id)).toBe(true);
 		});
 	} else {
 		templates.forEach((template) => {
-			expect(!!existingTemplates.find((t) => UUIDToString(t._id) === template._id)).toBe(false);
+			expect(existingTemplates.some((t) => UUIDToString(t._id) === template._id)).toBe(false);
 		});
 		tickets.forEach((ticket) => {
-			expect(!!allTickets.find((t) => UUIDToString(t._id) === ticket._id)).toBe(false);
+			expect(allTickets.some((t) => UUIDToString(t._id) === ticket._id)).toBe(false);
 		});
 	}
 };
@@ -86,12 +86,12 @@ const runTest = () => {
 		});
 
 		test('should not remove tickets and templates if the template is not on the list', async () => {
-			const targetTemplate = data.templates.slice(0, 1);
-			const targetTickets = data.tickets.filter((ticket) => ticket.type === targetTemplate[0]._id);
+			const targetTemplate = data.templates[0];
+			const targetTickets = data.tickets.filter((ticket) => ticket.type === targetTemplate._id);
 			const otherTemplates = data.templates.slice(1);
 			const otherTickets = data.tickets.filter((ticket) => ticket.type !== targetTemplate[0]._id);
 
-			await RemoveTickets.run(data.teamspace, targetTemplate.map((template) => template._id).join(','));
+			await RemoveTickets.run(data.teamspace, targetTemplate._id);
 
 			await checkData(data.teamspace, data.project, data.model, targetTemplate, targetTickets, false);
 			await checkData(data.teamspace, data.project, data.model, otherTemplates, otherTickets, true);

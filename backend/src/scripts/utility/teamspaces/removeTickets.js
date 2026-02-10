@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -44,7 +44,6 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 		{
 			describe: 'comma separated list of template IDs that should be removed and their associated tickets',
 			type: 'string',
-			default: false,
 			demandOption: true,
 		})
 		.option('teamspace',

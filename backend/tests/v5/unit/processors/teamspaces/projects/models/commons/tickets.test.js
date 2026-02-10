@@ -45,6 +45,9 @@ const TemplatesModel = require(`${src}/models/tickets.templates`);
 jest.mock('../../../../../../../../src/v5/models/tickets.logs');
 const LogsModel = require(`${src}/models/tickets.logs`);
 
+jest.mock('../../../../../../../../src/v5/models/tickets.comments');
+const CommentsModel = require(`${src}/models/tickets.comments`);
+
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.comments');
 const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
@@ -1214,7 +1217,7 @@ const testRemoveTicketsWithTemplates = () => {
 			const ticketIds = times(10, generateUUIDString);
 
 			TicketsModel.removeAllTicketsWithTemplates.mockResolvedValueOnce(ticketIds);
-			CommentsProcessor.deleteCommentsByTicketIds.mockResolvedValueOnce(undefined);
+			CommentsModel.deleteCommentsByTicketIds.mockResolvedValueOnce(undefined);
 			LogsModel.deleteLogsByTicketIds.mockResolvedValueOnce(undefined);
 			FilesManager.removeFilesWithMeta.mockResolvedValueOnce(undefined);
 
@@ -1224,8 +1227,8 @@ const testRemoveTicketsWithTemplates = () => {
 			expect(TicketsModel.removeAllTicketsWithTemplates).toHaveBeenCalledTimes(1);
 			expect(TicketsModel.removeAllTicketsWithTemplates).toHaveBeenCalledWith(teamspace, templateIds);
 
-			expect(CommentsProcessor.deleteCommentsByTicketIds).toHaveBeenCalledTimes(1);
-			expect(CommentsProcessor.deleteCommentsByTicketIds).toHaveBeenCalledWith(teamspace, ticketIds);
+			expect(CommentsModel.deleteCommentsByTicketIds).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.deleteCommentsByTicketIds).toHaveBeenCalledWith(teamspace, ticketIds);
 
 			expect(LogsModel.deleteLogsByTicketIds).toHaveBeenCalledTimes(1);
 			expect(LogsModel.deleteLogsByTicketIds).toHaveBeenCalledWith(teamspace, ticketIds);

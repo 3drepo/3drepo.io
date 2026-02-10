@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTemplate, deleteTemplates, getAllTemplates, getTemplatesByQuery, updateTemplate } = require('../../models/tickets.templates');
+const { addTemplate, deleteTemplates, deprecateTemplates, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
 const { events } = require('../../services/eventsManager/eventsManager.constants');
 const { getRiskCategories } = require('../../models/teamspaceSettings');
 const { publish } = require('../../services/eventsManager/eventsManager');
@@ -29,15 +29,8 @@ Settings.updateTicketTemplate = async (teamspace, id, data) => {
 };
 Settings.getTemplateList = (teamspace) => getAllTemplates(teamspace, true, { _id: 1, name: 1, code: 1, deprecated: 1 });
 Settings.getRiskCategories = getRiskCategories;
-Settings.deprecateTemplates = async (teamspace, templateIds) => {
-	const templates = await getTemplatesByQuery(teamspace, { _id: { $in: templateIds } });
 
-	Promise.all(templates.map(async (template) => {
-		if (!template.deprecated) {
-			await updateTemplate(teamspace, template._id, { ...template, deprecated: true });
-		}
-	}));
-};
+Settings.deprecateTemplates = deprecateTemplates;
 
 Settings.deleteTemplates = deleteTemplates;
 

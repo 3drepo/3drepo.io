@@ -26,19 +26,19 @@ const {
 } = require('../../../../../schemas/tickets/templates.constants');
 const { cloneDeep, deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
 const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
-const { deleteCommentsByTicketIds, importComments } = require('./tickets.comments');
-
 const { deleteLogsByTicketIds, getTicketLogs } = require('../../../../../models/tickets.logs');
 const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
 const { propTypes, viewGroups } = require('../../../../../schemas/tickets/templates.constants');
 const { removeFiles, removeFilesWithMeta, storeFiles } = require('../../../../../services/filesManager');
+const { deleteCommentsByTicketIds } = require('../../../../../models/tickets.comments');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
 const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');
 const { getFileWithMetaAsStream } = require('../../../../../services/filesManager');
 const { getModelById } = require('../../../../../models/modelSettings');
+const { importComments } = require('./tickets.comments');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
@@ -388,9 +388,8 @@ Tickets.removeTicketsWithTemplates = async (teamspace, templateIds) => {
 	await Promise.all([
 		deleteCommentsByTicketIds(teamspace, ticketIds),
 		deleteLogsByTicketIds(teamspace, ticketIds),
+		removeFilesWithMeta(teamspace, TICKETS_RESOURCES_COL, { ticket: { $in: ticketIds } }),
 	]);
-
-	removeFilesWithMeta(teamspace, TICKETS_RESOURCES_COL, { ticket: { $in: ticketIds } });
 };
 
 // placeholdersToFind should be left undfined if we want to replace all placeholders
