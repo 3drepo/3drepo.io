@@ -92,19 +92,26 @@ const testGetTeamspaceListByUser = () => {
 				{ name: generateRandomString(), isAdmin: true },
 				{ name: generateRandomString(), isAdmin: false },
 			];
+			const frontEggData = times(goldenData.length + 1, (index) => (
+				{ name: goldenData[index]?.name || generateRandomString(), refId: generateRandomString() }
+			));
 			const userId = generateRandomString();
 			const username = generateRandomString();
 
 			UsersModel.getUserId.mockResolvedValueOnce(userId);
 
 			FronteggService.getAccountsByUser.mockResolvedValueOnce(
-				times(goldenData.length + 1, () => generateRandomString()));
+				frontEggData.map(({ refId }) => refId));
 
 			goldenData.forEach(({ name }) => {
 				FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(name);
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(
+					frontEggData.find(({ name: n }) => n === name).refId,
+				);
 			});
 
 			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(undefined);
+
 			Permissions.isTeamspaceAdmin.mockImplementation(
 				(ts) => goldenData.find(({ name }) => name === ts).isAdmin);
 
