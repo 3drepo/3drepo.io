@@ -16,10 +16,11 @@
  */
 
 const { times } = require('lodash');
-const { disconnect } = require('../../../../src/v5/handler/db');
 const { determineTestGroup, resetFileshare, db: { reset: resetDB, createTeamspace, createTemplates, createTicket }, generateRandomString, generateTemplate, generateTicket, generateRandomProject, generateRandomModel } = require('../../helper/services');
 
 const { src, utilScripts } = require('../../helper/path');
+
+const { disconnect } = require(`${src}/handler/db`);
 
 const RemoveTickets = require(`${utilScripts}/teamspaces/removeTickets`);
 

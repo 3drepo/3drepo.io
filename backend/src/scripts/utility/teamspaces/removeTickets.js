@@ -20,7 +20,8 @@ const { v5Path } = require('../../../interop');
 
 const { removeTicketsWithTemplates } = require(`${v5Path}/processors/teamspaces/projects/models/commons/tickets`);
 const { stringToUUID } = require(`${v5Path}/utils/helper/uuids`);
-const { deprecateTemplates, deleteTemplates } = require(`${v5Path}/processors/teamspaces/settings`);
+const { deprecateTemplates } = require(`${v5Path}/models/tickets.templates`);
+const { deleteTemplates } = require(`${v5Path}/processors/teamspaces/settings`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const run = async (teamspace, templateIdsStr) => {
