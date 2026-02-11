@@ -15,24 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TeamspacesHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Display } from '@/v5/ui/themes/media';
 import { DashboardListItem } from '@components/dashboard/dashboardList';
 import { DashboardListItemContainerTitle } from '@components/dashboard/dashboardList/dashboardListItem/components/dashboardListItemTitle';
 import { FixedOrGrowContainer } from '@controls/fixedOrGrowContainer';
 import { SkeletonBlock } from '@controls/skeletonBlock/skeletonBlock.styles';
-import { useEffect } from 'react';
 import { DashboardListItemRow } from './editFederationContainersListItem.styles';
 
 export const EditFederationContainersListItemLoading = ({ index, container }) => {
-	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
-	const project = ProjectsHooksSelectors.selectCurrentProject();
-	
-	useEffect( () => {
-		ContainersActionsDispatchers.fetchContainerStats(teamspace, project, container._id);
-	}, []);
-
 	const delay = index / 10;
 	return (
 

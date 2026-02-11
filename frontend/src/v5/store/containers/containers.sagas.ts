@@ -96,12 +96,12 @@ export function* bulkFetchContainersStats({ teamspace, projectId, containerIds }
 	try {
 		const chunkedIds = chunk(containerIds, DASHBOARD_LIST_CHUNK_SIZE);
 		for (const containersChunk of chunkedIds) {
-			const { stats } = yield API.Containers.fetchBulkContainersStats(teamspace, projectId, containersChunk);
+			const { stats } = yield API.Containers.bulkFetchContainersStats(teamspace, projectId, containersChunk);
 			yield put(ContainersActions.bulkFetchContainersStatsSuccess(projectId, stats));
 		}
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
-			currentActions: formatMessage({ id: 'containers.fetchBulkStats.error', defaultMessage: 'trying to bulk fetch containers details' }),
+			currentActions: formatMessage({ id: 'containers.bulkFetchStats.error', defaultMessage: 'trying to bulk fetch containers details' }),
 			error,
 		}));
 	}

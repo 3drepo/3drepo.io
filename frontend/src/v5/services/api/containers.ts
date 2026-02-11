@@ -39,13 +39,13 @@ export const fetchContainers = async (teamspace, projectId): Promise<FetchContai
 	return data;
 };
 
-export const fetchBulkContainersStats = async (teamspace, projectId, containerIds): Promise<ContainerStats[]> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/stats?models=${containerIds.join(',')}`);
+export const fetchContainerStats = async (teamspace, projectId, containerId): Promise<ContainerStats> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
 	return data;
 };
 
-export const fetchContainerStats = async (teamspace, projectId, containerId): Promise<ContainerStats> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/stats`);
+export const bulkFetchContainersStats = async (teamspace, projectId, containerIds): Promise<ContainerStats[]> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/stats?models=${containerIds.join(',')}`);
 	return data;
 };
 
