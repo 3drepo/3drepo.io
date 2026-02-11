@@ -114,19 +114,18 @@ export const Id = styled.div`
 
 export const TicketCheckbox = styled(Checkbox)`
 	display: inline;
-    padding: 0;
-    top: 2px;
-    margin-right: 6px;
-    margin-left: 0;
+	padding: 0;
+	top: 2px;
+	margin-right: 6px;
+	margin-left: 0;
 `;
 
 export const AllTicketsCheckbox = styled(Checkbox)`
 	height: 0;
-    margin: 0;
+	margin: 0;
 	padding: 0;
-    position: relative;
-    left: 12px;
-    display: inline;
-    top: -22px;
-}
+	position: relative;
+	left: 12px;
+	display: inline;
+	top: -22px;
 `;

@@ -96,12 +96,12 @@ export const BulkCheckbox = styled(Checkbox).attrs({
 	checkedIcon:  React.createElement(BulkCheckboxCheckedIcon),
 })`
 	color: ${({ theme }) => theme.palette.secondary.main} !important;
-    cursor: pointer;
-    background-color: transparent;
-    margin: 0;
-    height: 32px;
-    width: 20px;
-    padding: 0;
+	cursor: pointer;
+	background-color: transparent;
+	margin: 0;
+	height: 32px;
+	width: 20px;
+	padding: 0;
 
 	&:hover:not(.Mui-checked) path {
 		fill: ${({ theme }) => theme.palette.secondary.main} !important;
