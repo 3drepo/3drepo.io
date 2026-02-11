@@ -28,11 +28,12 @@ import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 import { set, uniq } from 'lodash';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
 import { selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
 import { getSelectOptions } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.component';
+import { formatMessage } from '@/v5/services/intl';
 
 type IBulkEditFormProps = {
 	name: string;
@@ -101,14 +102,31 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 
 		const finalSelectedIds = selectedTickets.filter((ticket) => 
 			appliesToTemplate[ticket.type]).map((ticket) => ticket._id);
-
-		if (finalSelectedIds.length !== selectedTickets.length) {
-			alert('Not all tickets affected');
-		}
-
+		
 		let partialTicket = {};
 		set(partialTicket, name, filledForm.value);
-		TicketsActionsDispatchers.updateManyTickets(teamspace, projectId, finalSelectedIds, partialTicket);
+		if (finalSelectedIds.length !== selectedTickets.length) {
+			DialogsActionsDispatchers.open('info', {
+				title: formatMessage({
+					id: 'bulkUpdate.partialUpdateTitle',
+					defaultMessage: 'Partial update',
+				}),
+				message: formatMessage({
+					id: 'bulkUpdate.partialUpdateMessage',
+					defaultMessage: `
+					The selected change can’t be applied to every ticket in your selection.{br} 
+					Apply the update to the tickets where it’s valid, or review your selection.`,
+				}, { br: <br /> }),
+				actionButtonLabel:  formatMessage({
+					id: 'bulkUpdate.partialUpdateAction',
+					defaultMessage: 'Apply update',
+				}),
+				onClickAction: () => TicketsActionsDispatchers.updateManyTickets(teamspace, projectId, finalSelectedIds, partialTicket),
+			});
+		} else {
+			TicketsActionsDispatchers.updateManyTickets(teamspace, projectId, finalSelectedIds, partialTicket);
+		}
+
 	});
 	return (
 		<FormProvider {...formData}>

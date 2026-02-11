@@ -80,8 +80,6 @@ export const BulkUpdateDropdown = () => {
 	const selectableItems = templatesToFilters(templates).filter((filter) => {
 		return templates.find((template) => canBulkEditProperty(template, propertyNameFromFilter(filter)));
 	});
-
-	// 4 - implement Dan's thingy 
 	
 	const clearFilter = () => setSelectedFilter(null);
     
