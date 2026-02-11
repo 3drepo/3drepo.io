@@ -43,7 +43,24 @@ import { BulkCheckbox } from './ticketsList.styles';
 import { Tooltip } from '@mui/material';
 import { TicketsBulkUpdateContext, TicketsBulkUpdateContextComponent } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 import { BulkUpdateDropdown } from './bulkUpdate/bulkUpdateDropDown.component';
+import { AllTicketsCheckbox } from './ticketItem/ticketItem.styles';
 
+
+const ToggleAllCheckbox = () => {
+	const { bulkModeOn, selectedItems, addOrRemoveSelection } = useContext(TicketsBulkUpdateContext);
+	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const checked = filteredTickets.length === selectedItems.size;
+
+	const toggleAllChecked = () => {
+		addOrRemoveSelection(filteredTickets.map((t) => t._id), checked);
+	};
+
+	if (!bulkModeOn) {
+		return null;
+	}
+	
+	return (<AllTicketsCheckbox checked={checked}  onClick={toggleAllChecked}/>);
+};
 
 
 const TicketsActions = ({ readOnly, groupBy }) => {
@@ -54,7 +71,7 @@ const TicketsActions = ({ readOnly, groupBy }) => {
 		{!readOnly &&  (<Tooltip 
 			title={formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' })} 
 		>
-			<BulkCheckbox value={bulkModeOn} onClick={toggleBulkMode}  />
+			<BulkCheckbox checked={bulkModeOn} onClick={toggleBulkMode}  />
 		</Tooltip>)}
 		{bulkModeOn && (
 			<BulkUpdateDropdown />
@@ -114,6 +131,7 @@ export const TicketsListCard = () => {
 					/>
 					<CardContent onClick={() => TicketsCardActionsDispatchers.setSelectedTicket(null)}>
 						<CardFilters />
+						<ToggleAllCheckbox />
 						{groupBy !== NONE_OPTION &&
 						(<ModuleTitle>
 							<FormattedMessage id="viewer.cards.tickets.groupedByLabel" defaultMessage="Grouped by: " /> {getPropertyLabel(groupBy)}
