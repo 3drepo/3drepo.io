@@ -16,6 +16,7 @@
  */
 
 import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
+import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { isDateType, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { TicketFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { isJobsAndUsersProperty, getSelectOptions } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.component';
@@ -31,11 +32,12 @@ type InputFieldProps = {
 	property: string;
 	type: TicketFilterType;
 	name: string;
-	templateId: string;
+	templates: ITemplate[];
+	modelsIds: string[];
 	projectId: string;
 	formError?: string;
 };
-export const BulkEditInputField = ({ module, property, templateId, projectId, type, ...inputProps }: InputFieldProps) => {
+export const BulkEditInputField = ({ module, property, templates, modelsIds, projectId, type, ...inputProps }: InputFieldProps) => {
 	if (type === 'number') return <FormNumberField {...inputProps} />;
 	if (type === 'boolean') return <FormBooleanSelect {...inputProps} />;
 	if (isDateType(type)) return <FormDateTime {...inputProps} />;
@@ -46,12 +48,12 @@ export const BulkEditInputField = ({ module, property, templateId, projectId, ty
 			transformInputValue={(v) => compact(mapFormArrayToArray(v))}
 			transformOutputValue={(e) => getFilterFromEvent(e)}
 			excludeJobs={(type === 'owner')}
-			usersAndJobs={getSelectOptions(module, property, type).map(({ value }) => value)}
+			usersAndJobs={getSelectOptions(module, property, type, templates, modelsIds).map(({ value }) => value)}
 			{...inputProps}
 		/>
 	);
 	if (isSelectType(type)) {
-		const selectOptions = getSelectOptions(module, property, type);
+		const selectOptions = getSelectOptions(module, property, type, templates, modelsIds);
 		const SelectInput = type === 'manyOf' ? FormMultiSelect : FormSelect;
 		const MenuItem = type === 'manyOf' ? MultiSelectMenuItem : SingleSelectMenuItem;
 		return (

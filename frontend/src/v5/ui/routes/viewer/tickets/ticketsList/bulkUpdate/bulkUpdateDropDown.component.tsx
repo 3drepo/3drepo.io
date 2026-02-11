@@ -47,6 +47,14 @@ const propertyNameFromFilter = (filter: TicketFilter) => {
 		propertyName = 'description';
 	}
 
+	if (filter.type === 'title') {
+		propertyName = 'title';
+	}
+
+	if (filter.type === 'ticketCode') {
+		propertyName = 'id';
+	}
+
 	return propertyName;
 };
 
@@ -70,12 +78,9 @@ export const BulkUpdateDropdown = () => {
 	const templates = Array.from(templatesSet);
 
 	const selectableItems = templatesToFilters(templates).filter((filter) => {
-		const foundApplicableproperty =  templates.find((template) => canBulkEditProperty(template, propertyNameFromFilter(filter)));
-		console.log(foundApplicableproperty);
-		return foundApplicableproperty;
+		return templates.find((template) => canBulkEditProperty(template, propertyNameFromFilter(filter)));
 	});
-	// 2 - Filter unselectableItems using the criteria from tabularview headers
-	// 3 - Show a "not everything will be updated" popup
+
 	// 4 - implement Dan's thingy 
 	
 	const clearFilter = () => setSelectedFilter(null);
@@ -94,6 +99,7 @@ export const BulkUpdateDropdown = () => {
 	const popoverProps: Partial<PopoverProps> = { anchorOrigin, transformOrigin, marginThreshold: 20 };
 
 	const selectedProperty = selectedFilter ? propertyNameFromFilter(selectedFilter) : '';
+
 	return (
 		<CardFilterActionMenu
 			TriggerButton={
