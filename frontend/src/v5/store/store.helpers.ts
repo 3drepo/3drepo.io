@@ -28,7 +28,7 @@ export const EMPTY_VIEW: View = {
 	hasThumbnail: false,
 };
 
-export const DASHBOARD_LIST_CHUNK_SIZE = 30;
+export const DASHBOARD_LIST_CHUNK_SIZE = 300;
 
 export const uniqueIds = <T>(listItems: T[]) =>
 	// eslint-disable-next-line implicit-arrow-linebreak

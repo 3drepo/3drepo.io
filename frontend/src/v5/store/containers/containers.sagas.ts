@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
 	AddFavouriteAction,
@@ -95,10 +95,15 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 export function* bulkFetchContainersStats({ teamspace, projectId, containerIds }: BulkFetchContainersStatsAction) {
 	try {
 		const chunkedIds = chunk(containerIds, DASHBOARD_LIST_CHUNK_SIZE);
-		for (const containersChunk of chunkedIds) {
-			const { stats } = yield API.Containers.bulkFetchContainersStats(teamspace, projectId, containersChunk);
-			yield put(ContainersActions.bulkFetchContainersStatsSuccess(projectId, stats));
-		}
+		yield all(
+			chunkedIds.map(function* (idsChunk) {
+				const { stats } = yield API.Containers.bulkFetchContainersStats(teamspace, projectId, idsChunk);
+				console.log('@@ stats', stats);	
+				yield put(ContainersActions.bulkFetchContainersStatsSuccess(projectId, stats));
+			}),
+		);
+		// const { stats } = yield API.Containers.bulkFetchContainersStats(teamspace, projectId, containerIds);
+		// yield put(ContainersActions.bulkFetchContainersStatsSuccess(projectId, stats));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.bulkFetchStats.error', defaultMessage: 'trying to bulk fetch containers details' }),

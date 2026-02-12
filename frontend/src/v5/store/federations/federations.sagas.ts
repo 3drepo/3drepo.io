@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
 	AddFavouriteAction,
@@ -133,10 +133,12 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 export function* bulkFetchFederationsStats({ teamspace, projectId, federationIds }: BulkFetchFederationsStatsAction) {
 	try {
 		const chunkedIds = chunk(federationIds, DASHBOARD_LIST_CHUNK_SIZE);
-		for (const federationsChunk of chunkedIds) {
-			const { stats } = yield API.Federations.bulkFetchFederationsStats(teamspace, projectId, federationsChunk);
-			yield put(FederationsActions.bulkFetchFederationsStatsSuccess(projectId, stats));
-		}
+		yield all(
+			chunkedIds.map(function* (idsChunk) {
+				const { stats } = yield API.Federations.bulkFetchFederationsStats(teamspace, projectId, idsChunk);
+				yield put(FederationsActions.bulkFetchFederationsStatsSuccess(projectId, stats));
+			}),
+		);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'federations.fetchBulkStats.error', defaultMessage: 'trying to bulk fetch federations details' }),
