@@ -49,6 +49,7 @@ import { AllTicketsCheckbox } from './ticketItem/ticketItem.styles';
 const ToggleAllCheckbox = () => {
 	const { bulkModeOn, selectedItems, addOrRemoveSelection } = useContext(TicketsBulkUpdateContext);
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const checked = filteredTickets.length === selectedItems.size;
 
 	const toggleAllChecked = () => {
@@ -59,7 +60,7 @@ const ToggleAllCheckbox = () => {
 		return null;
 	}
 	
-	return (<AllTicketsCheckbox checked={checked}  onClick={toggleAllChecked}/>);
+	return (<AllTicketsCheckbox checked={checked}  onClick={toggleAllChecked} $withFilters={filters.length > 0}/>);
 };
 
 
