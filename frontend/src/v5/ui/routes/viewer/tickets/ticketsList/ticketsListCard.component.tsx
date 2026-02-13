@@ -50,17 +50,22 @@ const ToggleAllCheckbox = () => {
 	const { bulkModeOn, selectedItems, addOrRemoveSelection } = useContext(TicketsBulkUpdateContext);
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
-	const checked = filteredTickets.length === selectedItems.size;
+	const checked = filteredTickets.length === selectedItems.size && filteredTickets.length > 0;
 
 	const toggleAllChecked = () => {
 		addOrRemoveSelection(filteredTickets.map((t) => t._id), checked);
 	};
 
+	useEffect(() => {
+		// reset selection when filters change
+		addOrRemoveSelection(Array.from(selectedItems), true);
+	}, [filters]);
+
 	if (!bulkModeOn) {
 		return null;
 	}
 	
-	return (<AllTicketsCheckbox checked={checked}  onClick={toggleAllChecked} $withFilters={filters.length > 0}/>);
+	return (<AllTicketsCheckbox checked={checked} disabled={filteredTickets.length == 0} onClick={toggleAllChecked} $withFilters={filters.length > 0}/>);
 };
 
 
