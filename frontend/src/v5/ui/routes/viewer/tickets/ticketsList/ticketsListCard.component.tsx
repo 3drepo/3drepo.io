@@ -72,11 +72,13 @@ const ToggleAllCheckbox = () => {
 const TicketsActions = ({ readOnly, groupBy }) => {
 	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
 
+	const bulkCheckboxTooltipMessage = !bulkModeOn ? 
+		formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' }) :
+		formatMessage({ id: 'viewer.cards.tickets.disableBulkUpdate', defaultMessage: 'Disable bulk update' });
+
 	return (<>
 		{!bulkModeOn && !readOnly && (<NewTicketMenu />)}
-		{!readOnly &&  (<Tooltip 
-			title={formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' })} 
-		>
+		{!readOnly &&  (<Tooltip title={bulkCheckboxTooltipMessage} >
 			<BulkCheckbox checked={bulkModeOn} onClick={toggleBulkMode}  />
 		</Tooltip>)}
 		{bulkModeOn && (
