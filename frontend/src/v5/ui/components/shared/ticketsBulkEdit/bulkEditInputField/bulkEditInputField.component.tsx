@@ -43,10 +43,10 @@ export const BulkEditInputField = ({ module, property, templates, modelsIds, pro
 	if (isDateType(type)) return <FormDateTime {...inputProps} />;
 	if (isJobsAndUsersProperty(module, property, type)) return (
 		<FormJobsAndUsersSelect
-			multiple
+			multiple={type === 'manyOf'}
 			maxItems={19}
-			transformInputValue={(v) => compact(mapFormArrayToArray(v))}
-			transformOutputValue={(e) => getFilterFromEvent(e)}
+			transformInputValue={(v) => type === 'manyOf' ? compact(mapFormArrayToArray(v)) : v}
+			transformOutputValue={(e) => type === 'manyOf' ?  getFilterFromEvent(e) : e.target.value}
 			excludeJobs={(type === 'owner')}
 			usersAndJobs={getSelectOptions(module, property, type, templates, modelsIds).map(({ value }) => value)}
 			{...inputProps}

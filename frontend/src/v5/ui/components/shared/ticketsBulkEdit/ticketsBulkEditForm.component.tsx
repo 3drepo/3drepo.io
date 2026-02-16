@@ -82,6 +82,8 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 	const canSubmit = isValid && (!notNullable || !isEmptyValue);
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
+		const values = Array.isArray(filledForm.value) ? filledForm.value.map((v) => v.value ? v.value : v) :  filledForm.value;
+
 		// Checks which template applies to the selected value
 		// for example a custom status from a template might not apply to a status from another one
 		const appliesToTemplate:Record<string, boolean> = {};
@@ -97,9 +99,9 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 				const options = new Set(getSelectOptions(module, property, type, [template], modelsIds).map((o) => o.value));
 				
 				if (type === 'manyOf'  && definition.type === 'manyOf') {
-					appliesToTemplate[template._id] = filledForm.value.every((val) =>  options.has(val));
+					appliesToTemplate[template._id] = values.every((val) =>  options.has(val));
 				} else {
-					appliesToTemplate[template._id] =  options.has(filledForm.value);
+					appliesToTemplate[template._id] =  options.has(values);
 				}
 			}
 		});
@@ -108,7 +110,8 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 			appliesToTemplate[ticket.type]).map((ticket) => ticket._id);
 		
 		let partialTicket = {};
-		set(partialTicket, name, filledForm.value);
+		set(partialTicket, name, values);
+
 		if (finalSelectedIds.length !== selectedTickets.length) {
 			DialogsActionsDispatchers.open('info', {
 				title: formatMessage({
