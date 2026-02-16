@@ -100,7 +100,6 @@ module.exports = {
 	},	crossOrigin: true,
 	cn_queue: {
 		host: 'amqp://localhost:5672',
-		worker_queue: 'jobq',
 		model_queue: 'modelq',
 		callback_queue: 'callbackq',
 		upload_dir: '/tmp/uploads',
@@ -138,5 +137,8 @@ module.exports = {
 		*/
 	    namespace: "" // namespace of deployment
     },
+	apryse: {
+		licenseKey: "" // License key for the Apryse WebViewer SDK for the PDF drawings viewer
+	},
 	termsUpdatedAt: 1520592720000,
 }

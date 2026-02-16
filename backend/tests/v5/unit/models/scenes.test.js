@@ -67,7 +67,30 @@ const testGetNodesByIds = () => {
 	});
 };
 
+const testGetNodeByQuery = () => {
+	describe('Get node by query', () => {
+		test('Should return the result from the database query', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const query = generateRandomObject();
+			const projection = generateRandomObject();
+
+			const expectedData = generateRandomObject();
+
+			const findOneFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedData);
+
+			await expect(Scenes.getNodeByQuery(teamspace, project, model, query, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(findOneFn).toHaveBeenCalledTimes(1);
+			expect(findOneFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, query, projection);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetNodesBySharedIds();
 	testGetNodesByIds();
+	testGetNodeByQuery();
 });

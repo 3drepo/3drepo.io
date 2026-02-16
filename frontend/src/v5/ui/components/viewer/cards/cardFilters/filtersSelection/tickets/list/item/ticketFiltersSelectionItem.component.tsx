@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { TYPE_TO_ICON } from '../../ticketFilters.helpers';
 import { ExpandIconContainer, MenuItem, TextOverflowContainer } from './ticketFiltersSelectionItem.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
@@ -25,7 +25,7 @@ import { SearchContext } from '@controls/search/searchContext';
 import { FilterIconContainer } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/operators/filterFormOperators.styles';
 import { getFilterFormTitle } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 
-type TicketFiltersSelectionItemProps = CardFilter & {
+type TicketFiltersSelectionItemProps = TicketFilter & {
 	onClick: () => void;
 };
 export const TicketFiltersSelectionItem = ({ module, property, type, onClick }: TicketFiltersSelectionItemProps) => {

@@ -17,7 +17,7 @@
 
 import styled from 'styled-components';
 
-export const AlreadyUsedNameContainer = styled.div`
+export const ErrorOption = styled.div`
 	color: ${({ theme }) => theme.palette.error.main};
 	padding: 12px;
 `;

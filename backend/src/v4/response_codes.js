@@ -16,6 +16,7 @@
  */
 
 "use strict";
+
 (() => {
 
 	const _ = require("lodash");
@@ -23,7 +24,9 @@
 	const { systemLogger, logLabels} = require("./logger.js");
 	const utils = require("./utils");
 	const { v5Path } = require("../interop");
+	const { BYPASS_AUTH } = require(`${v5Path}/utils/config.constants.js`);
 	const { createActivityRecord } = require(`${v5Path}/services/elastic`);
+	const { escapeXSS } = require(`${v5Path}/utils/helper/strings.js`);
 
 	/**
 	 * List of response and error codes
@@ -395,8 +398,16 @@
 		"jpg": "image/jpg"
 	};
 
-	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl} = {}) => {
-		const user = session && session.user ? session.user.username : "unknown";
+	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl, app} = {}) => {
+		const isInternal = !!app?.get(BYPASS_AUTH);
+		let user;
+		if (session?.user) {
+			user = session.user.username;
+		} else if (isInternal) {
+			user = "internal-service";
+		} else {
+			user = "unknown";
+		}
 		const currentTime = Date.now();
 		const latency = startTime ? `${currentTime - startTime}` : "???";
 
@@ -438,7 +449,7 @@
 		// Prepare error response
 		if (resCode.value) {
 			const responseObject = _.extend({}, extraInfo, {
-				place: place,
+				place: escapeXSS(place),
 				status: resCode.status,
 				message: resCode.message,
 				value: resCode.value
@@ -523,7 +534,7 @@
 		}).on("end", () => {
 			res.end();
 			systemLogger.logInfo(genResponseLogging(response, {
-				place,
+				place: escapeXSS(place),
 				httpCode: response.status,
 				contentLength: length
 			}, req), undefined, logLabels.network);

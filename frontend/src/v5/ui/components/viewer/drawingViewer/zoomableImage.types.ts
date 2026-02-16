@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-type Transform = {
+export type Transform = {
 	x: number;
 	y: number;
 	scale: number;
@@ -31,6 +31,4 @@ export type ZoomableImage = {
 	getEventsEmitter: () => HTMLElement;
 	getBoundingClientRect: () => DOMRect;
 	getNaturalSize: () => Size;
-	getImagePosition: (position: { x: number, y: number }) => { x: number, y: number };
-	getClientPosition: (position: { x: number, y: number }) => { x: number, y: number };
 };

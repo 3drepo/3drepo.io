@@ -19,25 +19,24 @@ import { Fragment } from 'react';
 import { FiltersAccordion } from './filtersAccordion/filtersAccordion.component';
 import { ModuleTitle } from './cardFilters.styles';
 import { FiltersSection } from './filtersSection/filtersSection.component';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { groupBy } from 'lodash';
+import { useTicketFiltersContext } from './ticketsFilters.context';
 
 export const CardFilters = () => {
-	const filters = TicketsCardHooksSelectors.selectCardFilters();
-	const hasFilters = Object.keys(filters).length > 0;
+	const { filters, clearFilters } = useTicketFiltersContext();
+	const hasFilters = filters.length > 0;
 
 	if (!hasFilters) return null;
 	
-	const ticketsByModule = groupBy(filters, (f) => f.module);
-	const sortedModuleNames = Object.keys(ticketsByModule).sort((a, b) => a.localeCompare(b));
+	const filtersByModule = groupBy(filters, (f) => f.module);
+	const sortedModuleNames = Object.keys(filtersByModule).sort((a, b) => a.localeCompare(b));
 
 	return (
-		<FiltersAccordion onClear={TicketsCardActionsDispatchers.resetFilters}>
+		<FiltersAccordion onClear={clearFilters}>
 			{sortedModuleNames.map((module) => (
 				<Fragment key={module}>
 					{module && (<ModuleTitle>{module}</ModuleTitle>)}
-					<FiltersSection filters={ticketsByModule[module]} />
+					<FiltersSection filters={filtersByModule[module]} />
 				</Fragment>
 			))}
 		</FiltersAccordion>

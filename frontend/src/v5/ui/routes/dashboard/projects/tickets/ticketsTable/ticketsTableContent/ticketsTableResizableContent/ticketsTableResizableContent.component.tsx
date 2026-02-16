@@ -15,34 +15,90 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SearchContext } from '@controls/search/searchContext';
-import { useContext } from 'react';
-import { useParams } from 'react-router-dom';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { useCallback, useContext, useEffect, useRef } from 'react';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import { getjobOrUserDisplayName, groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
+import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
-import {  NEW_TICKET_ID, SetTicketValue, stripModuleOrPropertyPrefix } from '../../ticketsTable.helper';
+import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
-import { selectFetchingPropertiesByTicketId } from '@/v5/store/tickets/tickets.selectors';
-import { getState } from '@/v5/helpers/redux.helpers';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
+
+type CollapsibleTicketsGroupProps = {
+	propertyValue: string;
+	groupName: string;
+	tickets: ITicket[];
+	setTicketValue: SetTicketValue;
+	selectedTicketId?: string;
+	onNewTicket: (groupByValue: string) => (modelId: string) => void;
+	propertyName: string;
+	expanded: boolean;
+	onChangeCollapse: (collapse: boolean) => void;
+};
+
+const CollapsibleTicketsGroup = ({ 
+	propertyValue, groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName, expanded, onChangeCollapse,
+}: CollapsibleTicketsGroupProps) => {
+	const ticketsIds = tickets.map(({ _id }) => _id);
+	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
+
+	return (<DashboardListCollapse
+		title={(
+			<>
+				<Title>{groupName}</Title>
+				<CircledNumber disabled={!tickets.length || isLoading}>
+					{isLoading ? <Spinner /> : tickets.length}
+				</CircledNumber>
+			</>
+		)}
+		defaultExpanded={expanded}
+		onChangeCollapse={onChangeCollapse}
+		unmountHidden
+	>
+		<TicketsTableGroup
+			tickets={tickets}
+			onNewTicket={onNewTicket(propertyValue)}
+			onEditTicket={setTicketValue}
+			selectedTicketId={selectedTicketId}
+		/>
+	</DashboardListCollapse>);
+};
 
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
+	tickets: ITicket[],
+	template: ITemplate,
 };
-export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId }: TicketsTableResizableContentProps) => {
-	const { groupBy, getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
-	const { template } = useParams<DashboardTicketsParams>();
-	const { filteredItems } = useContext(SearchContext);
+
+export const TicketsTableResizableContent = ({ 
+	setTicketValue, 
+	selectedTicketId, 
+	tickets: filteredItems, 
+	template,
+}: TicketsTableResizableContentProps) => {
+	const { groupBy } = useContext(TicketsTableContext);
+	const collapsedGroups = useRef<Record<string, boolean>>({});
+
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
-		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
+		const presetValue = { key: groupBy, value: (groupByValue === UNSET) ? null : groupByValue };
+		setTicketValue(modelId, NEW_TICKET_ID, presetValue);
 	};
 
-	if (!groupBy) {
+	const onChangeCollapse = useCallback((groupVal, collapse) => {
+		collapsedGroups.current[groupVal] = collapse;
+	}, [collapsedGroups.current]);
+
+	useEffect(() => {
+		collapsedGroups.current = {};
+	}, [groupBy]);
+
+	if (groupBy === NONE_OPTION) {
 		return (
 			<TicketsTableGroup
 				tickets={filteredItems}
@@ -52,45 +108,31 @@ export const TicketsTableResizableContent = ({ setTicketValue, selectedTicketId 
 			/>
 		);
 	}
-
-	const propertyName = stripModuleOrPropertyPrefix(groupBy || '');
-	const ticketsToDisplay = groupBy
-		? filteredItems.filter(({ _id: ticketId }) => !selectFetchingPropertiesByTicketId(getState(), ticketId).has(propertyName))
-		: filteredItems;
-
-	const isLoading = groupBy && (ticketsToDisplay.length !== filteredItems.length);
-
-	const groups = groupTickets(groupBy, filteredItems, getPropertyType(groupBy), isJobAndUsersType(groupBy));
-
-	const getGroupDisplayName = (groupName: string) => {
-		if (groupName === UNSET || !isJobAndUsersType(groupBy)) return groupName;
-		const jobsAndUsernamesArray = groupName.split(',').map((user) => user.trim());
-		return jobsAndUsernamesArray.map(getjobOrUserDisplayName).join(', ');
-	};
+	
+	const groups = groupTickets(groupBy, [template], filteredItems);
 
 	return (
 		<Container>
-			{groups.map(([groupName, tickets]) => (
-				<DashboardListCollapse
-					title={(
-						<>
-							<Title>{getGroupDisplayName(groupName)}</Title>
-							<CircledNumber disabled={!tickets.length || isLoading}>
-								{isLoading ? <Spinner /> : tickets.length}
-							</CircledNumber>
-						</>
-					)}
-					defaultExpanded={!!tickets.length}
-					key={groupBy + groupName + template + tickets}
-				>
-					<TicketsTableGroup
+			<VirtualList
+				items={groups}
+				itemHeight={45}
+				vKey='groups-list'
+				ItemComponent={({ groupName, value, tickets }) => (
+					<CollapsibleTicketsGroup
+						groupName={groupName}
 						tickets={tickets}
-						onNewTicket={onGroupNewTicket(groupName)}
-						onEditTicket={setTicketValue}
+						setTicketValue={setTicketValue}
+						onNewTicket={onGroupNewTicket}
 						selectedTicketId={selectedTicketId}
+						propertyValue={value}
+						propertyName={groupBy}
+						onChangeCollapse={(collapsed) => onChangeCollapse(value, collapsed)}
+						expanded={collapsedGroups.current[value] === undefined ? tickets.length > 0 : !collapsedGroups.current[value] }
+						key={groupBy + groupName + template._id }
 					/>
-				</DashboardListCollapse>
-			))}
+				)} 
+			/>
+			
 		</Container>
 	);
 };

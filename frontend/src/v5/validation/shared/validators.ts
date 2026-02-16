@@ -16,7 +16,7 @@
  */
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
-import { isNull, isNumber } from 'lodash';
+import { isNumber } from 'lodash';
 import * as Yup from 'yup';
 
 export const ERROR_REQUIRED_FIELD_MESSAGE = formatMessage({
@@ -106,7 +106,7 @@ export const desc = Yup.lazy((value) => (
 			formatMessage({
 				id: 'validation.model.description.error.max',
 				defaultMessage: 'Description is limited to 660 characters',
-			}))
+			})).transform((v) => v || null).nullable()
 ));
 
 export const INVALID_DATE_RANGE_MESSAGE = formatMessage({

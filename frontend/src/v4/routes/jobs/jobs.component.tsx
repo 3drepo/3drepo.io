@@ -34,8 +34,8 @@ import { Container } from './jobs.styles';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
-	type: CELL_TYPES.NAME,
-	searchBy: ['name'],
+	type: CELL_TYPES.JOB,
+	searchBy: ['job'],
 	HeadingComponent: CellUserSearch
 }, {
 	name: formatMessage({ id: 'job.assignedColours', defaultMessage: 'Assigned Colours' }),
@@ -120,7 +120,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 					onClick: this.onRemove.bind(null, job._id)
 				});
 			}
-			return { ...job, name: job._id, data };
+			return { ...job, job: job._id, data };
 		});
 	}
 

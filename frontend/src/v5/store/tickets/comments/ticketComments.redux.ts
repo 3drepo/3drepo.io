@@ -58,9 +58,7 @@ export const upsertCommentSuccess = (state: ITicketCommentsState, {
 	if (commentToUpdate) {
 		merge(commentToUpdate, comment);
 		commentToUpdate.images = comment.images;
-		if (!comment.view) {
-			delete commentToUpdate.view;
-		}
+		commentToUpdate.view = comment.view;
 	} else {
 		state.commentsByTicketId[ticketId].push({ ...comment, message: comment.message || '' } as ITicketComment);
 	}

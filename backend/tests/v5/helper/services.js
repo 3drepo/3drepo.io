@@ -29,12 +29,24 @@ const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 
+const { stopPurge } = require(`${src}/models/frontegg.cache`);
+const { tmpdir } = require('os');
+
+const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
+const path = require('path');
+const { PassThrough } = require('stream');
+
+const { isString } = require(`${src}/utils/helper/typeCheck`);
+
+const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
+const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS, CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
+const { FileStorageTypes } = require(`${src}/utils/config.constants`);
 const { editSubscriptions, grantAdminToUser, updateAddOns } = require(`${src}/models/teamspaceSettings`);
 const { initTeamspace, addTeamspaceMember } = require(`${src}/processors/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -59,7 +71,7 @@ const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
-	const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
+	const { host, model_queue, callback_queue } = config.cn_queue;
 	const conn = await amqp.connect(host);
 
 	const purgeQueue = async (queueName) => {
@@ -76,7 +88,6 @@ queue.purgeQueues = async () => {
 	};
 
 	await Promise.all([
-		purgeQueue(worker_queue),
 		purgeQueue(model_queue),
 		purgeQueue(callback_queue),
 	]);
@@ -108,7 +119,6 @@ db.createUser = async (userCredentials, tsList = [], customData = {}) => {
 
 	await DbHandler.createUser(user, password, {
 		billing: { billingInfo: {} },
-		userId: user,
 		...basicData,
 		...customData,
 		apiKey,
@@ -123,8 +133,6 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 			...ServiceHelper.generateUserCredentials(),
 			user: teamspace,
 			password: teamspace });
-	} else if (admins.length === 0) {
-		throw Error('an admin needs to be provided, or createUser needs to be set to true.');
 	}
 	const firstAdmin = createUser ? teamspace : admins[0];
 	const accountId = await initTeamspace(teamspace, firstAdmin);
@@ -328,16 +336,79 @@ db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVA
 db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
 	type, project, imageData);
 
+db.createClashPlan = (teamspace, plan) => {
+	const formattedPlan = { ...plan, _id: stringToUUID(plan._id) };
+	DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
+};
+
 db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
-db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
-	db.createRevision(teamspace, project, modelId, rev),
-	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
-	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
+const addNodes = async (teamspace, modelId, nodes) => {
+	const arrTypes = {
+		vertices: Float32Array,
+		faces: Uint32Array,
+		normals: Float32Array,
+		data: Uint8Array,
+	};
+	const collection = `${modelId}.scene`;
 
+	const processedNodes = await Promise.all(nodes.map(async (node) => {
+		const { blobData, ...nodeData } = node;
+		if (blobData) {
+			const stream = new PassThrough();
+			const elementInfo = {};
+			let offset = 0;
+			Object.keys(blobData).forEach((key) => {
+				const data = blobData[key];
+				const Type = arrTypes[key];
+				const typed = new Type(data);
+
+				const buffer = isString(data) ? Buffer.from(data) : Buffer.from(
+					typed.buffer,
+					typed.byteOffset,
+					typed.byteLength,
+				);
+				stream.write(buffer);
+				const start = offset;
+				const size = buffer.byteLength;
+
+				elementInfo[key] = {
+					start, size,
+				};
+				offset = start + size;
+			});
+
+			stream.end();
+			const name = ServiceHelper.generateUUIDString();
+			// eslint-disable-next-line no-underscore-dangle
+			nodeData._blobRef = { elements: elementInfo, buffer: { start: 0, size: offset, name } };
+
+			await FilesManager.storeFileStream(teamspace, collection, name, stream);
+		}
+
+		return nodeData;
+	}));
+
+	await DbHandler.insertMany(teamspace, collection, processedNodes);
+};
+
+db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
+	addNodes(teamspace, modelId, nodes),
+	...(meshMap ? [FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap))] : []),
 ]);
+
+db.addJSONFile = (teamspace, modelId, name, content) => FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, name, content);
+ServiceHelper.createTmpDir = () => {
+	const tmpDir = tmpdir();
+	const folder = generateUUIDString();
+	const fullPath = path.posix.join(tmpDir, folder);
+	fs.mkdirSync(fullPath, { recursive: true });
+
+	return fullPath;
+};
+
 ServiceHelper.createQueryString = (options) => {
 	const keys = Object.keys(deleteIfUndefined(options, true));
 
@@ -367,6 +438,7 @@ ServiceHelper.outOfOrderArrayEqual = (arr1, arr2) => {
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
+ServiceHelper.generateRandomEmail = () => `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`;
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
 	+ Math.random() * (end.getTime() - start.getTime()));
@@ -446,12 +518,12 @@ ServiceHelper.generateUserCredentials = () => ({
 	},
 });
 
-ServiceHelper.determineTestGroup = (path) => {
-	const match = path.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
+ServiceHelper.determineTestGroup = (filePath) => {
+	const match = filePath.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
 	if (match?.length === 3) {
 		return `${match[1].toUpperCase()} ${match[2]}`;
 	}
-	return path;
+	return filePath;
 };
 
 ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
@@ -837,7 +909,22 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = async () => (await createServer()).listen(8080);
+ServiceHelper.generateClashPlan = (model1, model2) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	type: CLASH_PLAN_TYPES[0],
+	tolerance: 0.01,
+	selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
+	trigger: [TRIGGER_OPTIONS[0]],
+	selectionA: {
+		container: model1,
+	},
+	selectionB: {
+		container: model2,
+	},
+});
+
+ServiceHelper.app = async (bypassAuth = false) => (await createServer({ [BYPASS_AUTH]: bypassAuth })).listen(8080);
 
 ServiceHelper.frontend = () => createFrontend().listen(8080);
 
@@ -897,6 +984,7 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 
 ServiceHelper.closeApp = async (server) => {
 	await queue.purgeQueues();
+	stopPurge();
 	if (server) await server.close();
 	await db.reset();
 	EventsManager.reset();
@@ -904,7 +992,7 @@ ServiceHelper.closeApp = async (server) => {
 };
 
 ServiceHelper.resetFileshare = () => {
-	const fsDir = config.fs.path;
+	const fsDir = config[FileStorageTypes.FS].path;
 	fs.rmSync(fsDir, { recursive: true });
 	fs.mkdirSync(fsDir);
 };
@@ -923,5 +1011,30 @@ ServiceHelper.generateBasicNode = (type, rev_id, parents, additionalData = {}) =
 	parents,
 	...additionalData,
 });
+
+ServiceHelper.generateMeshNode = (rev_id, parents) => {
+	const blobData = {
+		vertices: times(9, () => ServiceHelper.generateRandomNumber(-100, 100)),
+		normals: times(9, () => ServiceHelper.generateRandomNumber(-1, 1)),
+		faces: [3, ...times(3, () => Math.floor(ServiceHelper.generateRandomNumber(0, 2)))],
+	};
+
+	// javascript is 64-bit float by default, need to convert to proper typed array and back
+	blobData.vertices = Array.from(new Float32Array(blobData.vertices));
+	blobData.normals = Array.from(new Float32Array(blobData.normals));
+
+	return ServiceHelper.generateBasicNode('mesh', rev_id, parents, { blobData });
+};
+
+ServiceHelper.generateTextureNode = (rev_id, parents) => {
+	const blobData = {
+		data: ServiceHelper.generateRandomString(256),
+	};
+	const nodeData = {
+		blobData,
+		extension: 'png',
+	};
+	return ServiceHelper.generateBasicNode('texture', rev_id, parents, nodeData);
+};
 
 module.exports = ServiceHelper;

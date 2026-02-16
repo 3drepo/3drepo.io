@@ -33,7 +33,7 @@ const importQueue = require("../../services/queue");
 const C = require("../../constants");
 const systemLogger = require("../../logger.js").systemLogger;
 const History = require("../history");
-const { getRefNodes } = require("../ref");
+const { getRefNodes, getSubModels } = require("../ref");
 const { findNodesByType, getNodeById, getParentMatrix } = require("../scene");
 const utils = require("../../utils");
 const middlewares = require("../../middlewares/middlewares");
@@ -299,39 +299,24 @@ function searchTree(account, model, branch, rev, searchString, username) {
 
 }
 
-function listSubModels(account, model, branch = "master") {
-
+async function listSubModels(account, model) {
+	// This method is in the hot-path for validating permissions
+	const containers = await getSubModels(account, model);
 	const subModels = [];
-
-	return History.findByBranch(account, model, branch).then(history => {
-
-		if(history) {
-			return getRefNodes(account, model, branch);
-		} else {
-			return [];
-		}
-
-	}).then(refs => {
-
-		const proms = refs.map(ref =>
-
-			findModelSettingById(ref.owner, ref.project, { name: 1 }).then(subModel => {
-				// TODO: Why would this return null?
-				if (subModel) {
-					subModels.push({
-						database: ref.owner,
-						model: ref.project,
-						name: subModel.name
-					});
-				}
-
-			})
-
-		);
-
-		return Promise.all(proms).then(() => Promise.resolve(subModels));
-
+	const proms = containers.map((container) => {
+		findModelSettingById(account, container.model, { name: 1 }).then(subModel => {
+			// Check in case a container is somehow deleted while belonging to a federation
+			if (subModel) {
+				subModels.push({
+					database: account,
+					model: container.model,
+					name: subModel.name
+				});
+			}
+		});
 	});
+
+	return Promise.all(proms).then(() => Promise.resolve(subModels));
 }
 
 function downloadLatest(account, model) {
@@ -557,15 +542,9 @@ async function getMeshById(account, model, meshId) {
 	return 	combinedStream;
 }
 
-async function getSubModelRevisions(account, model, branch, rev) {
-	const history = await  History.getHistory(account, model, branch, rev);
-
-	if(!history) {
-		return Promise.reject(responseCodes.INVALID_TAG_NAME);
-	}
-
-	const refNodes = await getRefNodes(account, model, branch, rev);
-	const modelIds = refNodes.map((refNode) => refNode.project);
+async function getSubModelRevisions(account, model) {
+	const containers = await getSubModels(account, model);
+	const modelIds = containers.map((container) => container.model);
 	const results = {};
 
 	const param = {};
@@ -580,7 +559,7 @@ async function getSubModelRevisions(account, model, branch, rev) {
 			revisions = History.clean(revisions);
 
 			revisions.forEach(function(revision) {
-				revision.branch = history.branch || C.MASTER_BRANCH_NAME;
+				revision.branch = C.MASTER_BRANCH_NAME;
 			});
 			results[modelId].revisions = revisions;
 		}));

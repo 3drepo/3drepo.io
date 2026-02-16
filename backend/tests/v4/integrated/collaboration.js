@@ -20,7 +20,7 @@
 const request = require('supertest');
 const SessionTracker = require('../../v4/helpers/sessionTracker');
 const { expect } = require('chai');
-const app = require('../../../src/v4/services/api.js').createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require('../../../src/v4/logger.js');
 const responseCodes = require('../../../src/v4/response_codes.js');
 const async = require('async');
@@ -48,7 +48,8 @@ describe('Sharing/Unsharing a model', () => {
 	const password_commenter = 'collaborator_comm';
 
 	before(async () => {
-		await new Promise((resolve) => {
+		const app = await createAppAsync();
+		await new Promise((resolve) => {			
 			server = app.listen(8080, () => {
 				console.log('API test server is listening on port 8080!');
 				resolve();
@@ -492,8 +493,8 @@ describe('Sharing/Unsharing a model', () => {
 
 			agent.patch(`/${username}/${model}/permissions`)
 				.send(permissions)
-				.expect(404, (err, res) => {
-					expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+				.expect(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.status, (err, res) => {
+					expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 					done(err);
 				});
 		});

@@ -21,15 +21,16 @@ import { V5TeamspaceSettingsOverrides } from '@/v5/ui/v4Adapter/overrides/teamsp
 import { FormattedMessage } from 'react-intl';
 import {
 	useLocation,
-	useRouteMatch,
-	useHistory,
+	useNavigate,
+	useParams,
 } from 'react-router-dom';
 import { Header, Title } from '../projects/projectsList.styles';
+import { TeamspaceParams } from '../../../routes.constants';
 
 export const TeamspaceSettings = () => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const location = useLocation();
-	const match = useRouteMatch();
+	const { teamspace } = useParams<TeamspaceParams>();
 
 	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 	return (
@@ -39,7 +40,7 @@ export const TeamspaceSettings = () => {
 					<FormattedMessage id="teamspaceSettings.title" defaultMessage="Teamspace Settings" />
 				</Title>
 			</Header>
-			<V4TeamspaceSettings match={match} location={location} history={history} />
+			<V4TeamspaceSettings teamspace={teamspace} location={location} navigate={navigate} />
 		</V5TeamspaceSettingsOverrides>
 	);
 };

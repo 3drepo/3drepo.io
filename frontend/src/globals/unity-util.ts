@@ -868,20 +868,23 @@ export class UnityUtil {
 	 * Load comparator model for compare tool
 	 * This returns a promise which will be resolved when the comparator model is loaded
 	 * @category Compare Tool
-	 * @param account - teamspace
-	 * @param model - model ID
+	 * @param teamspace - teamspace
+	 * @param project - project
+	 * @param container - model ID
 	 * @param revision - Specific revision ID/tag to load
 	 * @return returns a promise that resolves upon comparator model finished loading.
 	 */
-	public static diffToolLoadComparator(account: string, model: string, revision = 'head'): Promise<void> {
+	public static diffToolLoadComparator(teamspace: string, project: string, container: string, revision = 'head'): Promise<void> {
 		const params: any = {
-			database: account,
-			model,
+			database: teamspace,
+			project,
+			model: container,
 		};
 
 		if (revision !== 'head') {
 			params.revID = revision;
 		}
+
 		UnityUtil.toUnity('DiffToolLoadComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 		if (!UnityUtil.loadComparatorPromise) {
@@ -896,13 +899,14 @@ export class UnityUtil {
 	 * Set an existing submodel/model as a comparator model
 	 * This will return as a base model when you have cleared the comparator (i.e. disabled diff)
 	 * @category Compare Tool
-	 * @param account - name of teamspace
-	 * @param model - model ID
+	 * @param teamspace - name of teamspace
+	 * @param container - model ID
 	 */
-	public static diffToolSetAsComparator(account: string, model: string) {
+	public static diffToolSetAsComparator(teamspace: string, project: string, container: string) {
 		const params: any = {
-			database: account,
-			model,
+			database: teamspace,
+			project,
+			model: container,
 		};
 		UnityUtil.toUnity('DiffToolAssignAsComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
@@ -1095,6 +1099,46 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Sets the scale factor used by the Gizmos that determines how precise the user needs to be to select the axis arrow or arch.
+	 * Default scale is 1.0
+	 * @category Configurations
+	 * @param newScale
+	 */
+	public static setClipGizmoSelectionScale(newScale: number) {
+		UnityUtil.toUnity('SetGizmoSelectionScale', UnityUtil.LoadingState.VIEWER_READY, newScale);
+	}
+
+	/**
+	 * Sets the size that the Gizmo will take up on the screen.
+	 * Default value is 80
+	 * @category Configurations
+	 * @param newSize
+	 */
+	public static setClipGizmoSize(newSize: number) {
+		UnityUtil.toUnity('SetGizmoSize', UnityUtil.LoadingState.VIEWER_READY, Number(newSize));
+	}
+
+	/**
+	 * Sets the size that the clip plane proxy in single plane mode will take up on the screen.
+	 * Default value is 180
+	 * @category Configurations
+	 * @param newSize
+	 */
+	public static setClipPlaneSize(newSize: number) {
+		UnityUtil.toUnity('SetClippingPlaneSize', UnityUtil.LoadingState.VIEWER_READY, Number(newSize));
+	}
+
+	/**
+	 * Sets the scale factor that controls the thickness of the axis arrows or arches of the Gizmo.
+	 * Default scale is 1.0
+	 * @category Configurations
+	 * @param newScale
+	 */
+	public static setClipGizmoAxisScale(newScale: number) {
+		UnityUtil.toUnity('SetGizmoAxisScale', UnityUtil.LoadingState.VIEWER_READY, Number(newScale));
+	}
+
+	/**
 	* Set the coefficient linking the change in Clip Box Size to proportion
 	* of the screen covered by the cursor when scaling in all three axes.
 	* @category Clipping Plane
@@ -1113,6 +1157,21 @@ export class UnityUtil {
 	 */
 	public static setClipSelectionBoxScalar(scalar: number) {
 		UnityUtil.toUnity('SetClipSelectionBoxScalar', UnityUtil.LoadingState.VIEWER_READY, scalar);
+	}
+
+	/**
+	 * When true, moving the camera will push the clip gizmo around from the
+	 * edges of the screen so that it remains in view, so long as the clip plane
+	 * is in front of the camera, so it doesn't need to pulled around manually
+	 * during navigation. The gizmo will also be constrained to the bounds of
+	 * the model. This only takes effect in single-plane mode.
+	 */
+	public static setKeepClipGizmoInView(enable: boolean) {
+		if (enable) {
+			UnityUtil.toUnity('EnableKeepClipGizmoInView', UnityUtil.LoadingState.VIEWER_READY);
+		} else {
+			UnityUtil.toUnity('DisableKeepClipGizmoInView', UnityUtil.LoadingState.VIEWER_READY);
+		}
 	}
 
 	/**
@@ -1706,20 +1765,21 @@ export class UnityUtil {
 	 * Use branch = master and revision = head to get the latest revision.
 	 * If you want to know when the model finishes loading, use [[onLoaded]]
 	 * @category Configurations
-	 * @param account - name of teamspace
+	 * @param teamspace - name of teamspace
 	 * @param model - name of model
-	 * @param branch - ID of the branch (deprecated value)
+	 * @param project - ID of the project
 	 * @param revision - ID of revision
+	 * @param isFederation - flag signaling whether the model is a container or a federation
 	 * @param initView? - the view the model should load with
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @return returns a promise that resolves when the model start loading.
 	 */
 	public static loadModel(
-		account: string,
+		teamspace: string,
+		project: string,
 		model: string,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		branch = '',
 		revision = 'head',
+		isFederation: boolean = false,
 		initView = null,
 		clearCanvas = true,
 	): Promise<void> {
@@ -1728,8 +1788,10 @@ export class UnityUtil {
 		}
 
 		const params: any = {
-			database: account,
+			database: teamspace,
+			project,
 			model,
+			isFederation,
 		};
 
 		if (revision !== 'head') {

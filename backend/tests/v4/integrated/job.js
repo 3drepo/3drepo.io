@@ -20,7 +20,7 @@
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -40,6 +40,7 @@ describe("Job", function () {
 	const job2 = { _id: "job2", color: "#000000"};
 
 	before(async function() {
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");
@@ -49,14 +50,6 @@ describe("Job", function () {
 		agent = SessionTracker(request(server));
 		await agent.login(username, password);
 
-		const mockEndTennantId  = await createAccount(username);
-		DbHandler.updateOne(username,"teamspace",{ _id: username }, { $set: { refId: mockEndTennantId}})
-
-		const jobUser = addUserToAccount(mockEndTennantId, "test-job@3drepo.org")
-		const user1 = addUserToAccount(mockEndTennantId, "test-user1@3drepo.org")
-
-		DbHandler.updateOne("admin","system.users",{ user: username }, { $set: { "customData.userId": jobUser}})
-		DbHandler.updateOne("admin","system.users",{ user: "user1" }, { $set: { "customData.userId": user1}})
 	});
 
 	after(function(done) {

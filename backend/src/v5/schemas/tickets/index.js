@@ -347,6 +347,8 @@ const genToUUIDSchema = ({ properties, modules }) => {
 						[viewGroups.COLORED]: groupStateArrays,
 						[viewGroups.HIDDEN]: groupStateArrays,
 						[viewGroups.TRANSFORMED]: groupStateArrays,
+						[viewGroups.SELECTED]: groupStateArrays,
+						[viewGroups.SHOWN]: groupStateArrays,
 					}).default(undefined).nullable(),
 				}).nullable().default(undefined);
 			}

@@ -141,7 +141,7 @@ function handleHTTPSRedirect() {
 	}
 }
 
-function runServer() {
+async function runServer() {
 
 	if (config.apm) {
 		initAPM();
@@ -162,7 +162,7 @@ function runServer() {
 	// Peform setup for various parts of the server
 	setupSSL();
 	handleHTTPSRedirect();
-	handleSubdomains(mainApp);
+	await handleSubdomains(mainApp);
 
 	const server = config.using_ssl ?
 		https.createServer(sslOptions, mainApp) :
@@ -178,17 +178,17 @@ function runServer() {
 
 }
 
-function handleSubdomains(mainApp) {
+async function handleSubdomains(mainApp) {
 	if (utils.hasField(config, "subdomains")) {
 		for (const subdomain in config.subdomains) {
 			if (utils.hasField(config.subdomains, subdomain)) {
-				setupSubdomain(mainApp, subdomain);
+				await setupSubdomain(mainApp, subdomain);
 			}
 		}
 	}
 }
 
-function setupSubdomain(mainApp, subdomain) {
+async function setupSubdomain(mainApp, subdomain) {
 	const subDomainApp = express();
 
 	const subdomainServers = config.subdomains[subdomain];
@@ -207,7 +207,7 @@ function setupSubdomain(mainApp, subdomain) {
 			if(!config.maintenanceMode || serverConfig.service === "frontend") {
 				logCreateService(serverConfig);
 				// chat server has its own port and can't attach to express
-				serverConfig.service === "chat" ? createChat(serverConfig) : createService(subDomainApp, serverConfig);
+				serverConfig.service === "chat" ? createChat(serverConfig) : await createService(subDomainApp, serverConfig);
 			}
 
 		}
@@ -252,18 +252,24 @@ function createChat(serverConfig) {
 
 let firstAPIServer = true;
 
-function createService(subDomainApp, serverConfig) {
+async function createService(subDomainApp, serverConfig) {
 	const service = `./services/${serverConfig.service}.js`;
 	// This is a dirty hack to ensure we don't init v5 multiple times.
 	// But we need v5 to be initialised on the api server for testing.
 	// We should rethink this when we migrate this file to v5.
 	const isAPI = serverConfig.service === "api";
-	const app = require(service).createApp(serverConfig, isAPI && firstAPIServer);
-	if(isAPI) {
-		firstAPIServer = false;
-	}
 
+	const appService = require(service);
+	let app;
+	if(isAPI) {
+		app = await appService.createAppAsync(serverConfig, firstAPIServer);
+		firstAPIServer = false;
+
+	} else {
+		app = appService.createApp(serverConfig);
+	}
 	subDomainApp.use(serverConfig.host_dir, app);
+
 }
 
 function serverStartFunction(serverHost, serverPort) {

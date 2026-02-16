@@ -16,27 +16,31 @@
  */
 
 
+import { useState } from 'react';
 import { Box, InfoIcon, TitleBar, Description, CloseIconContainer, Container } from './infoBox.styles';
 import CloseIcon from '@assets/icons/outlined/cross-outlined.svg';
 
 export type InfoBoxProps = {
 	title: any,
 	description: any,
-	onClickClose: () => void,
 	className?: string,
 };
-export const InfoBox = ({ title, description, onClickClose, className }: InfoBoxProps) => (
-	<Container className={className}>
-		<Box>
-			<InfoIcon />
-			<TitleBar>
-				<div>{title}</div>
-				<CloseIconContainer onClick={onClickClose}>
-					<CloseIcon />
-				</CloseIconContainer>
-			</TitleBar>
-			<span />
-			<Description>{description}</Description>
-		</Box>
-	</Container>
-);
+export const InfoBox = ({ title, description, className }: InfoBoxProps) => {
+	const [open, setOpen] = useState(true);
+	if (!open) return null;
+	return (
+		<Container className={className}>
+			<Box>
+				<InfoIcon />
+				<TitleBar>
+					<div>{title}</div>
+					<CloseIconContainer onClick={() => setOpen(false)}>
+						<CloseIcon />
+					</CloseIconContainer>
+				</TitleBar>
+				<span />
+				<Description>{description}</Description>
+			</Box>
+		</Container>
+	)
+}

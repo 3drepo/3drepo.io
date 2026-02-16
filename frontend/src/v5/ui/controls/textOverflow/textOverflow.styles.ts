@@ -15,11 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import styled, { css } from 'styled-components';
-import { Tooltip as TooltipComponent } from '@mui/material';
-
-export const Tooltip = styled(TooltipComponent)`
-	max-width: 600px;
-`;
 
 export const Container = styled.div<{ lines: number }>`
 	position: relative;

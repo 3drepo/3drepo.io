@@ -16,7 +16,6 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
@@ -69,4 +68,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	clearTransformations: ViewpointsActions.clearTransformations,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Sequences));
+export default connect(mapStateToProps, mapDispatchToProps)(Sequences);

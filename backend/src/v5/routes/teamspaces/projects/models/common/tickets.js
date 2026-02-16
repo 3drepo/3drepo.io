@@ -18,6 +18,7 @@
 const {
 	addTicket: addConTicket,
 	getTicketById: getConTicketById,
+	getTicketHistory: getConTicketHistory,
 	getTicketList: getConTicketList,
 	getTicketResourceAsStream: getConTicketResourceAsStream,
 	importTickets: importConTickets,
@@ -27,12 +28,14 @@ const {
 const {
 	addTicket: addFedTicket,
 	getTicketById: getFedTicketById,
+	getTicketHistory: getFedTicketHistory,
 	getTicketList: getFedTicketList,
 	getTicketResourceAsStream: getFedTicketResourceAsStream,
 	importTickets: importFedTickets,
 	updateTicket: updateFedTicket,
 	updateManyTickets: updateManyFedTickets,
 } = require('../../../../../processors/teamspaces/projects/models/federations');
+const { checkTicketExists, templateExists, validateImportTickets, validateNewTicket, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
 const {
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
@@ -40,8 +43,7 @@ const {
 	hasReadAccessToFederation,
 } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
-const { serialiseFullTicketTemplate, serialiseTemplatesList, serialiseTicket, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
-const { templateExists, validateImportTickets, validateNewTicket, validateUpdateMultipleTickets, validateUpdateTicket } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { serialiseFullTicketTemplate, serialiseTemplatesList, serialiseTicket, serialiseTicketHistory, serialiseTicketList } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { getAllTemplates: getAllTemplatesInProject } = require('../../../../../processors/teamspaces/projects');
@@ -114,6 +116,21 @@ const getTicketsInModel = (isFed) => async (req, res, next) => {
 		const getTicketList = isFed ? getFedTicketList : getConTicketList;
 
 		req.tickets = await getTicketList(teamspace, project, model, req.listOptions);
+
+		await next();
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const getTicketHistory = (isFed) => async (req, res, next) => {
+	const { teamspace, project, model, ticket } = req.params;
+
+	try {
+		const getHistory = isFed ? getFedTicketHistory : getConTicketHistory;
+		req.history = await getHistory(teamspace, project, model, ticket);
+
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -135,7 +152,8 @@ const getTicketResource = (isFed) => async (req, res) => {
 			resource,
 		);
 
-		writeStreamRespond(req, res, templates.ok, readStream, UUIDToString(resource), size, { mimeType });
+		writeStreamRespond(req, res, templates.ok, readStream,
+			{ fileName: UUIDToString(resource), fileSize: size, mimeType });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -194,7 +212,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/templates:
 	 *   get:
 	 *     description: Get the the available ticket templates for this model
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getModelTicketTemplates
 	 *     parameters:
 	 *       - name: teamspace
@@ -269,7 +287,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/templates/{template}:
 	 *   get:
 	 *     description: Get the full definition of a template
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getModelTicketTemplateDetails
 	 *     parameters:
 	 *       - name: teamspace
@@ -329,7 +347,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/import:
 	 *   post:
 	 *     description: Import multiple existing tickets into the model
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: importTickets
 	 *     parameters:
 	 *       - name: teamspace
@@ -458,7 +476,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
 	 *   post:
 	 *     description: Create a ticket. The Schema of the payload depends on the ticket template being used
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: createTicket
 	 *     parameters:
 	 *       - name: teamspace
@@ -550,7 +568,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
 	 *   get:
 	 *     description: Get all tickets within the model
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: GetTicketList
 	 *     parameters:
 	 *       - name: teamspace
@@ -671,7 +689,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets:
 	 *   patch:
 	 *     description: Update multiple tickets
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: updateManyTickets
 	 *     parameters:
 	 *       - name: teamspace
@@ -790,7 +808,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}:
 	 *   get:
 	 *     description: Get ticket by ID
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: GetTicket
 	 *     parameters:
 	 *       - name: teamspace
@@ -873,10 +891,85 @@ const establishRoutes = (isFed) => {
 
 	/**
 	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/history:
+	 *   get:
+	 *     description: Get ticket history
+	 *     tags: [v:external, Tickets]
+	 *     operationId: GetTicketHistory
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: type
+	 *         description: Model type
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           enum: [containers, federations]
+	 *       - name: model
+	 *         description: Container/Federation ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: ticket
+	 *         description: Ticket ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: returns the ticket history
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 history:
+	 *                   type: array
+	 *                   items:
+	 *                     type: object
+	 *                     properties:
+	 *                       author:
+	 *                         type: string
+	 *                         description: user that made the change
+	 *                         example: UserName1
+	 *                       timestamp:
+	 *                         type: number
+	 *                         description: serialized date and time of when the change was made
+	 *                         example: 1617187200000
+	 *                       changes:
+	 *                         type: object
+	 *                         description: object that describes what was changed. The schema depends on the type of change and template of the ticket
+	 *                         properties:
+	 *                           properties:
+	 *                             type: object
+	 *                             description: properties that were changed
+	 *
+	 */
+	router.get('/:ticket/history', hasReadAccess, checkTicketExists, getTicketHistory(isFed), serialiseTicketHistory);
+
+	/**
+	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/resources/{resource}:
 	 *   get:
 	 *     description: Get the binary resource associated with the given ticket
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getTicketResource
 	 *     parameters:
 	 *       - name: teamspace
@@ -936,7 +1029,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}:
 	 *   patch:
 	 *     description: Update a ticket. The Schema of the payload depends on the ticket template being used
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: updateTicket
 	 *     parameters:
 	 *       - name: teamspace

@@ -31,7 +31,7 @@ import { CALIBRATION_INVALID_RANGE_ERROR } from '@/v5/validation/drawingSchemes/
 
 interface Props { 
 	formData: any,
-	drawing?: IDrawing,
+	drawing?: Partial<IDrawing>,
 }
 
 export const DrawingForm = ({ formData, drawing }:Props) => {
@@ -125,6 +125,7 @@ export const DrawingForm = ({ formData, drawing }:Props) => {
 				control={control}
 				label={formatMessage({ id: 'drawings.form.units', defaultMessage: 'Units' })}
 				name="calibration.units"
+				formError={errors.calibration?.units}
 				disabled={!isProjectAdmin}
 			>
 				{MODEL_UNITS.map(({ value, name }) => (

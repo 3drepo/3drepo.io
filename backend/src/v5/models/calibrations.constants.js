@@ -17,6 +17,8 @@
 
 const CalibrationConstants = {};
 
+CalibrationConstants.CALIBRATIONS_COL = 'drawings.calibrations';
+
 CalibrationConstants.calibrationStatuses = {
 	UNCALIBRATED: 'uncalibrated',
 	CALIBRATED: 'calibrated',

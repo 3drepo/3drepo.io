@@ -42,7 +42,7 @@ const preventPropagation = (e) => {
 	}
 };
 type AssigneesSelectMenuProps = SelectProps & {
-	isInvalid: (val: string) => boolean;
+	isValidItem: (val: string) => boolean;
 	excludeJobs?: boolean;
 };
 export const AssigneesSelectMenu = ({
@@ -50,7 +50,7 @@ export const AssigneesSelectMenu = ({
 	onClick,
 	onClose,
 	multiple,
-	isInvalid,
+	isValidItem,
 	disabled,
 	excludeJobs,
 	...props
@@ -119,7 +119,7 @@ export const AssigneesSelectMenu = ({
 						value={_id}
 						title={_id}
 						multiple={multiple}
-						error={isInvalid(_id)}
+						error={!isValidItem(_id)}
 					/>
 				))}
 				{!excludeJobs && !jobs.length && (<NoResultsMessage />)}
@@ -135,7 +135,7 @@ export const AssigneesSelectMenu = ({
 						title={getFullnameFromUser(user)}
 						subtitle={user.job}
 						multiple={multiple}
-						error={isInvalid(user.user)}
+						error={!isValidItem(user.user)}
 					/>
 				))}
 				{!users.length && (<NoResultsMessage />)}

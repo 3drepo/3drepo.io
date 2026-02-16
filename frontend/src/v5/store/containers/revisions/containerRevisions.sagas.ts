@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { put, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
-import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainerRevisionsActionsDispatchers, ContainersActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { orderBy } from 'lodash';
 import { CreateRevisionAction,
 	FetchAction,
@@ -30,15 +30,16 @@ import { CreateRevisionAction,
 import { ContainersActions } from '../containers.redux';
 import { UploadStatus } from '../containers.types';
 import { createContainerFromRevisionBody, createFormDataFromRevisionBody } from './containerRevisions.helpers';
-import { selectRevisions } from './containerRevisions.selectors';
+import { selectRevisions, selectRevisionsNotFetched } from './containerRevisions.selectors';
 import { IContainerRevision } from './containerRevisions.types';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export function* fetch({ teamspace, projectId, containerId, onSuccess }: FetchAction) {
 	yield put(ContainerRevisionsActions.setIsPending(containerId, true));
 	try {
 		const { data: { revisions } } = yield API.ContainerRevisions.fetchRevisions(teamspace, projectId, containerId);
-		onSuccess?.();
 		yield put(ContainerRevisionsActions.fetchSuccess(containerId, revisions));
+		onSuccess?.();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'revisions.fetch.error', defaultMessage: 'trying to fetch revisions' }),
@@ -48,21 +49,30 @@ export function* fetch({ teamspace, projectId, containerId, onSuccess }: FetchAc
 	yield put(ContainerRevisionsActions.setIsPending(containerId, false));
 }
 
+export function refreshContainerRevisionsCount(teamspace, projectId, containerId) {
+	if (selectRevisionsNotFetched(getState(), containerId)) {
+		ContainerRevisionsActionsDispatchers.fetch(teamspace, projectId, containerId, () => refreshContainerRevisionsCount(teamspace, projectId, containerId));
+		return;
+	}
+
+	const revisions: IContainerRevision[] = selectRevisions(getState(), containerId);
+	const activeRevisions = revisions.filter((rev) => !rev.void);
+	const revisionsCount = activeRevisions.length;
+	const latestActiveRevision = orderBy(activeRevisions, 'timestamp').at(-1);
+	const latestRevision = revisionsCount ? latestActiveRevision.tag : null;
+	const updates = {
+		revisionsCount,
+		lastUpdated: latestActiveRevision?.timestamp || null,
+		latestRevision,
+	};
+	ContainersActionsDispatchers.updateContainerSuccess(projectId, containerId, updates);
+}
+
 export function* setVoidStatus({ teamspace, projectId, containerId, revisionId, isVoid }: SetRevisionVoidStatusAction) {
 	try {
 		yield API.ContainerRevisions.setRevisionVoidStatus(teamspace, projectId, containerId, revisionId, isVoid);
-		yield put(ContainerRevisionsActions.setVoidStatusSuccess(containerId, revisionId, isVoid));
-		const revisions: IContainerRevision[] = yield select(selectRevisions, containerId);
-		const activeRevisions = revisions.filter((rev) => !rev.void);
-		const revisionsCount = activeRevisions.length;
-		const latestActiveRevision = orderBy(activeRevisions, 'timestamp').at(-1);
-		const latestRevision = revisionsCount ? latestActiveRevision.tag : null;
-		const updates = {
-			revisionsCount,
-			lastUpdated: latestActiveRevision?.timestamp || null,
-			latestRevision,
-		};
-		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, updates));
+	 	yield put(ContainerRevisionsActions.setVoidStatusSuccess(containerId, revisionId, isVoid));
+		refreshContainerRevisionsCount(teamspace, projectId, containerId);
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'revisions.setVoid.error', defaultMessage: 'trying to set revision void status' }),

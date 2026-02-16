@@ -20,10 +20,10 @@ import { requiredNumber, numberRange, trimmedString, INVALID_DATE_RANGE_MESSAGE,
 import { MAX_LONG_TEXT_LENGTH, MAX_TEXT_LENGTH } from '@/v5/store/tickets/tickets.validators';
 import { getOperatorMaxFieldsAllowed } from '@components/viewer/cards/cardFilters/filterForm/filterForm.helpers';
 import { isRangeOperator, isDateType, isTextType, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
-import { CardFilterOperator, CardFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { TicketFilterOperator, TicketFilterType } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { formatMessage } from '@/v5/services/intl';
 
-const getValueValidator = (type: CardFilterType) => {
+const getValueValidator = (type: TicketFilterType) => {
 	if (isTextType(type)) {
 		const maxLength = type === 'longText' ? MAX_LONG_TEXT_LENGTH : MAX_TEXT_LENGTH;
 		return trimmedString
@@ -48,7 +48,7 @@ export const FilterSchema = Yup.object().shape({
 		.when(
 			['operator', '$type'],
 			// @ts-ignore
-			(operator: CardFilterOperator, filterType: CardFilterType, schema) => {
+			(operator: TicketFilterOperator, filterType: TicketFilterType, schema) => {
 				let value;
 				if (isRangeOperator(operator)) {
 					value = numberRange(isDateType(filterType) ? INVALID_DATE_RANGE_MESSAGE : INVALID_NUMBER_RANGE_MESSAGE);

@@ -17,17 +17,17 @@
 
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
-const { getUserFromSession } = require('../../../../../utils/sessions');
+const { getAccessibleContainers } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 const { hasReadAccessToFederation } = require('../../../../../middleware/permissions');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 const { serialiseRevisionArray } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions');
 
 const getFederationMD5Hash = async (req, res, next) => {
-	const { teamspace, project, federation } = req.params;
-	const user = getUserFromSession(req.session);
+	const { teamspace } = req.params;
 
 	try {
-		req.outputData = await Federations.getMD5Hash(teamspace, project, federation, user);
+		req.outputData = await Federations.getMD5Hash(teamspace, req.containers);
 		next();
 	} catch (err) {
 		/* istanbul ignore next */
@@ -43,7 +43,7 @@ const establishRoutes = () => {
      * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/files/original/info:
      *   get:
      *     description: Get the details of the original files uploaded to that federation
-     *     tags: [Files]
+     *     tags: [v:external, Files]
      *     operationId: getFederationMD5Hash
      *     parameters:
      *       - name: teamspace
@@ -122,7 +122,7 @@ const establishRoutes = () => {
      *                     filename: test_2.rvt
      *                     size: 123456780
      */
-	router.get('/original/info', hasReadAccessToFederation, getFederationMD5Hash, serialiseRevisionArray);
+	router.get('/original/info', hasReadAccessToFederation, getAccessibleContainers(modelTypes.FEDERATION), getFederationMD5Hash, serialiseRevisionArray);
 
 	return router;
 };
