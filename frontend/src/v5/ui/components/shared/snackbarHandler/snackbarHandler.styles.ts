@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2017 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,20 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connect } from 'react-redux';
-import { bindActionCreators } from 'redux';
-import { createStructuredSelector } from 'reselect';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import styled from 'styled-components';
 
-import {
-	selectSnackConfig,
-	SnackbarActions
-} from '../../../modules/snackbar';
-import { SnackbarContainer } from './snackbarContainer.component';
-
-const mapStateToProps = createStructuredSelector({
-	snack: selectSnackConfig
-});
-
-export const mapDispatchToProps = (dispatch) => bindActionCreators({}, dispatch);
-
-export default connect(mapStateToProps, mapDispatchToProps)(SnackbarContainer as any);
+export const SnackbarSpinner = styled(Spinner)`
+	height: 24px;
+	width: 24px;
+	margin: 12px;
+`;
