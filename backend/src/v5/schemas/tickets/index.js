@@ -200,7 +200,7 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 		}
 	}
 
-	const validatedTicket = await Yup.object(validatorObj).noUnknown()
+	const validatedTicket = await Yup.object(validatorObj)
 		.test('at-least-one-prop-provided', 'At least one ticket property must be provided ', (value, context) => Object.keys(context.originalValue).some((key) => key in validatorObj))
 		.validate(newTicket, { stripUnknown: false });
 
