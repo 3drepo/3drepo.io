@@ -19,6 +19,7 @@ const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { addGroupUpdateLog, addImportedLogs, addTicketLog } = require('../../../models/tickets.logs');
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
+const { getFileName, getLogArchive } = require('../../modelProcessing');
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
 const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
@@ -32,7 +33,6 @@ const { findProjectByModelId } = require('../../../models/projectSettings');
 const { generateFullSchema } = require('../../../schemas/tickets/templates');
 const { getCalibrationStatus } = require('../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { getInfoFromCode } = require('../../../models/modelSettings.constants');
-const { getLogArchive } = require('../../modelProcessing');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
 const { sendSystemEmail } = require('../../mailer');
@@ -128,7 +128,9 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 		await revisionAdded({ teamspace, project, model, revId, modelType, calibration });
 	} else if (!errorReason.userErr) {
 		try {
-			const { zipPath, logPreview, fileName } = (await getLogArchive(UUIDToString(revId))) || {};
+			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
+			const fileName = await getFileName(UUIDToString(revId));
+
 			const { errorCode, message } = errorReason;
 
 			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
