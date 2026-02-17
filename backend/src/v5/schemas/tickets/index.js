@@ -51,8 +51,7 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 		let validator = propTypesToValidator(prop.type, !isNewTicket, prop.required);
 		if (validator) {
 			if (prop.deprecated || prop.readOnly) {
-				validator = validator.strip();
-				obj[prop.name] = validator;
+				obj[prop.name] = validator.strip();
 				return;
 			}
 
