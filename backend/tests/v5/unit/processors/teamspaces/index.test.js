@@ -567,7 +567,7 @@ const testGetAvatarStream = () => {
 
 const testRemoveTeamspace = () => {
 	describe('Remove teamspace', () => {
-		test('!Should remove the teamspace and all the relevant data', async () => {
+		test('Should remove the teamspace and all the relevant data', async () => {
 			const teamspaceId = generateRandomString();
 			TeamspacesModel.getTeamspaceRefId.mockResolvedValue(teamspaceId);
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValue({ refId: teamspaceId });
