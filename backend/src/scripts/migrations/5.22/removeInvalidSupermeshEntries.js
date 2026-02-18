@@ -16,42 +16,33 @@
  */
 
 const { v5Path } = require('../../../interop');
+
+const { createConstantsObject } = require(`${v5Path}/utils/helper/objects`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { modelTypes } = require(`${v5Path}/models/modelSettings.constants`);
-const { getRevisions } = require(`${v5Path}/models/revisions`);
-const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 const { getFile, storeFile, removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { find } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
 const processCollection = async (teamspace, collection) => {
-	const modelId = collection.split('.')[0];
-	const revisions = await getRevisions(teamspace, undefined, modelId, modelTypes.CONTAINER, false, { _id: 1 });
+	const badEntries = await find(teamspace, collection,
+		{ _id: { $regex: '^revision/.+/supermeshes\\.json$' } }, { _id: 1 });
+	const goodEntries = await find(teamspace, collection,
+		{ _id: { $regex: '^[0-9a-fA-F-]+\\/supermeshes\\.json$' } }, { _id: 1 });
+
+	const goodEntryIds = createConstantsObject(goodEntries.map(({ _id }) => _id));
 
 	/* eslint-disable no-await-in-loop */
-	for (const { _id: revId } of revisions) {
-		const revIdStr = UUIDToString(revId);
-		const correctEntryId = `${revIdStr}/supermeshes.json`;
-		const wrongEntryId = `revision/${revIdStr}/supermeshes.json`;
-
+	for (const { _id } of badEntries) {
 		try {
-			const entries = await find(teamspace, collection,
-				{ _id: { $in: [wrongEntryId, correctEntryId] } }, { _id: 1 });
-
-			const wrongNameEntry = entries.find(({ _id }) => _id === wrongEntryId);
-			const correctNameEntry = entries.find(({ _id }) => _id === correctEntryId);
-
-			if (wrongNameEntry) {
-				if (!correctNameEntry) {
-					const file = await getFile(teamspace, collection, wrongEntryId);
-					await storeFile(teamspace, collection, correctEntryId, file);
-				}
-
-				await removeFilesWithMeta(teamspace, collection, { _id: wrongEntryId });
+			if (!goodEntryIds[_id]) {
+				const file = await getFile(teamspace, collection, _id);
+				await storeFile(teamspace, collection, _id.replace('revision/', ''), file);
 			}
+
+			await removeFilesWithMeta(teamspace, collection, { _id });
 		} catch (err) {
-			logger.logError(`Failed to remove files from ${teamspace}.${collection} with query: ${JSON.stringify({ _id: wrongEntryId })}`);
+			logger.logError(`Failed to remove files from ${teamspace}.${collection} with query: ${JSON.stringify({ _id })}`);
 			throw err;
 		}
 	}
