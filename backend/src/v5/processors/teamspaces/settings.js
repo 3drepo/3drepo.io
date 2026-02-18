@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { addTemplate, deleteTemplates, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
+const { addTemplate, getAllTemplates, updateTemplate } = require('../../models/tickets.templates');
 const { events } = require('../../services/eventsManager/eventsManager.constants');
 const { getRiskCategories } = require('../../models/teamspaceSettings');
 const { publish } = require('../../services/eventsManager/eventsManager');
@@ -29,7 +29,5 @@ Settings.updateTicketTemplate = async (teamspace, id, data) => {
 };
 Settings.getTemplateList = (teamspace) => getAllTemplates(teamspace, true, { _id: 1, name: 1, code: 1, deprecated: 1 });
 Settings.getRiskCategories = getRiskCategories;
-
-Settings.deleteTemplates = deleteTemplates;
 
 module.exports = Settings;
