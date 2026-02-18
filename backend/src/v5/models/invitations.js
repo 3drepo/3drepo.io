@@ -32,6 +32,12 @@ const findMany = (query, projection, sort) => db.find(ADMIN_DB, COL_NAME, query,
 Invitations.getInvitationsByTeamspace = (teamspace, projection = {}) => findMany({ 'teamSpaces.teamspace': teamspace }, projection);
 
 Invitations.removeAllInvitationsByTeamspace = async (teamspace) => {
+	const invitations = await findMany({ 'teamSpaces.teamspace': teamspace }, { _id: 1, teamSpaces: 1 });
+	const invitesToRemove = invitations.flatMap(({ _id, teamSpaces }) => (teamSpaces.length === 1 ? _id : []));
+
+	// remove any invitations that only have invitations on the teamspace specified
+	await db.deleteMany(ADMIN_DB, COL_NAME, { _id: { $in: invitesToRemove } });
+	// remove the teamspace from any remaining invitations
 	await db.updateMany(ADMIN_DB, COL_NAME, { 'teamSpaces.teamspace': teamspace }, { $pull: { teamSpaces: { teamspace } } });
 };
 
