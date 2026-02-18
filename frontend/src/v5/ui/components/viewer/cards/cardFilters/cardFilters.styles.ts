@@ -25,7 +25,7 @@ export const ModuleTitle = styled.p`
 	margin-bottom: 10px;
 	font-size: 9px;
 	line-height: 12px;
-	letter-spacing: 3px;
+	letter-spacing: 1px;
 
 	${Section} + & {
 		margin-top: 10px;

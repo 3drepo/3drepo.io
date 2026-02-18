@@ -23,6 +23,7 @@ const {
 const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../utils/responder');
 const Audit = require('../../processors/teamspaces/audits');
+const MimeTypes = require('../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const TeamspaceSettings = require('../../processors/teamspaces/settings');
 const { UUIDToString } = require('../../utils/helper/uuids');
@@ -90,7 +91,7 @@ const getAuditLogArchive = async (req, res) => {
 	try {
 		const archive = await Audit.getAuditLogArchive(teamspace, user, from, to);
 
-		writeStreamRespond(req, res, templates.ok, archive, 'audit.zip', undefined, { mimeType: 'application/zip' });
+		writeStreamRespond(req, res, templates.ok, archive, { fileName: 'audit.zip', mimeType: MimeTypes.ZIP });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -104,7 +105,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates:
 	*   post:
 	*     description: Add a new ticket template to the teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -139,7 +140,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates:
 	*   get:
 	*     description: Get the list of templates within this teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -185,7 +186,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates/{template}:
 	*   put:
 	*     description: Updates an existing ticket template
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -220,7 +221,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates/{template}:
 	*   get:
 	*     description: Get a ticket template
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -253,7 +254,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/riskCategories:
 	*   get:
 	*     description: Get the list of risk categories
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -285,7 +286,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/settings/activities/archive:
 	 *   get:
 	 *     description: Get an encrypted zip file containing the requested audit logs. The password to unlock the file will be sent to the user via email
-	 *     tags: [Teamspaces]
+	 *     tags: [v:external, Teamspaces]
 	 *     operationId: getAuditLogArchive
 	 *     parameters:
 	 *       - name: teamspace

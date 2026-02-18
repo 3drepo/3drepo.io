@@ -23,11 +23,12 @@ import ClashIcon from '@assets/icons/outlined/clash-outlined.svg';
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import SafetibaseIcon from '@assets/icons/outlined/safetibase-outlined.svg';
 import ShapesIcon from '@assets/icons/outlined/shapes-outlined.svg';
-import CustomModuleIcon from '@assets/icons/outlined/circle-outlined.svg';
+import OutlinedCircleIcon from '@assets/icons/outlined/circle-outlined.svg';
+import FilledCircleIcon from '@assets/icons/filled/circle-filled.svg';
 import { addBase64Prefix, stripBase64Prefix } from '@controls/fileUploader/imageFile.helper';
 import { useParams } from 'react-router-dom';
-import { TicketBaseKeys, SequencingProperties, BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint } from './tickets.types';
+import { TicketBaseKeys, SequencingProperties, BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { EditableTicket, Group, GroupOverride, ITemplate, ITicket, Viewpoint, PropertyDefinition, TemplateModule } from './tickets.types';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
@@ -139,7 +140,8 @@ const moduleTypeProperties = {
 };
 
 export const getModulePanelProps = (module) => {
-	if (module.name) return { title: module.name, Icon: CustomModuleIcon };
+	const CustomModuleIcon = module.color ? FilledCircleIcon : OutlinedCircleIcon;
+	if (module.name) return { title: module.name, Icon: CustomModuleIcon, color: module.color };
 	return moduleTypeProperties[module.type];
 };
 
@@ -311,4 +313,38 @@ export const fillOverridesIfEmpty = (values: Partial<ITicket>) => {
 };
 
 export const addUpdatedAtTime = (ticket) => set(ticket, `properties.${BaseProperties.UPDATED_AT}`, +new Date());
+
+export const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
+export const groupByProperties = (definitionsAsArray: PropertyDefinition[]) => definitionsAsArray
+	.filter((definition) => ['manyOf', 'oneOf', 'text'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
+	.map((definition) => definition.name);
+
+export const getTemplatePropertiesDefinitions = (template: ITemplate): PropertyDefinition[] => {
+	if (!template.properties) return [];
+	return [
+		...template.properties?.map((property) => ({ ...property, name: `properties.${property.name}` })),
+		...template.modules?.flatMap((module) => module.properties.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
+	];
+};
+
+export const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
+	propOrModule?.find((p) => p.name === name);
+
+export const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
+	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype);
+
+export const findPropertyDefinition = (template:ITemplate,  property:string) => {
+	const propertyChunks = property.split('.');
+
+	if (propertyChunks[0] === 'modules') {
+		const module = findModuleByNameOrType(template.modules, propertyChunks[1]);
+		return findByName(module?.properties, propertyChunks[2]) as PropertyDefinition;
+	}
+
+	if (propertyChunks[0] === 'properties') {
+		return findByName(template?.properties, propertyChunks[1]) as PropertyDefinition;
+	}
+};
+
+
 

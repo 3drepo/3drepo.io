@@ -19,7 +19,6 @@
 
 const expect = require("chai").expect;
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const app = require("../../../src/v4/services/api.js").createApp();
 const request = require("supertest");
 const IssueHelper =  require("../helpers/issues.js");
 const { loginUsers } =  require("../helpers/users.js");

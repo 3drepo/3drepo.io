@@ -148,9 +148,8 @@ export const EditFederationContainers = ({
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				<DashboardList>
-
 					{!isEmpty(sortedList) ? (
-						<VirtualList items={sortedList} itemHeight={81} itemContent={
+						<VirtualList items={sortedList} itemHeight={81} ItemComponent={
 							(container, index) => (
 								container.hasStatsPending ? (
 									<EditFederationContainersListItemLoading  index={index} container={container} key={container._id} />
