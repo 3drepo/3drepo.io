@@ -22,7 +22,6 @@ const { src } = require('../../../helper/path');
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
 const { determineTestGroup, generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
-const { expect } = require('chai');
 
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
@@ -568,7 +567,7 @@ const testGetAvatarStream = () => {
 
 const testRemoveTeamspace = () => {
 	describe('Remove teamspace', () => {
-		test('Should remove the teamspace and all the relevant data', async () => {
+		test('!Should remove the teamspace and all the relevant data', async () => {
 			const teamspaceId = generateRandomString();
 			TeamspacesModel.getTeamspaceRefId.mockResolvedValue(teamspaceId);
 			TeamspacesModel.getTeamspaceSetting.mockResolvedValue({ refId: teamspaceId });
