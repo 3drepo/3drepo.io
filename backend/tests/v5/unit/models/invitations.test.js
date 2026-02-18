@@ -97,8 +97,21 @@ const testInviteUserAsAdmin = () => {
 	});
 };
 
+const testRemoveAllInvitationsByTeamspace = () => {
+	describe('Remove all invitations by teamspace', () => {
+		test('should remove all invitations by teamspace', async () => {
+			const teamspace = generateRandomString();
+			const fn = jest.spyOn(db, 'updateMany').mockImplementation(() => {});
+			await Invitations.removeAllInvitationsByTeamspace(teamspace);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith('admin', 'invitations', { 'teamSpaces.teamspace': teamspace }, { $pull: { teamSpaces: { teamspace } } });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetInvitationsByTeamspace();
 	testInviteUserAsAdmin();
 	testInit();
+	testRemoveAllInvitationsByTeamspace();
 });

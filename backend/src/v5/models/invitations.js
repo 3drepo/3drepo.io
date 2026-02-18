@@ -31,6 +31,10 @@ const findMany = (query, projection, sort) => db.find(ADMIN_DB, COL_NAME, query,
 
 Invitations.getInvitationsByTeamspace = (teamspace, projection = {}) => findMany({ 'teamSpaces.teamspace': teamspace }, projection);
 
+Invitations.removeAllInvitationsByTeamspace = async (teamspace) => {
+	await db.updateMany(ADMIN_DB, COL_NAME, { 'teamSpaces.teamspace': teamspace }, { $pull: { teamSpaces: { teamspace } } });
+};
+
 Invitations.inviteUserAsAdmin = async (teamspace, email) => {
 	const job = DEFAULT_OWNER_JOB;
 	const permissions = { teamspace_admin: true };
