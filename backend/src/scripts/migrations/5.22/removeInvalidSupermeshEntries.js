@@ -26,7 +26,7 @@ const { logger } = require(`${v5Path}/utils/logger`);
 
 const processCollection = async (teamspace, collection) => {
 	const badEntries = await find(teamspace, collection,
-		{ _id: { $regex: '^revision/.+/supermeshes\\.json$' } }, { _id: 1 });
+		{ _id: { $regex: '^/revision/.+/supermeshes\\.json$' } }, { _id: 1 });
 	const goodEntries = await find(teamspace, collection,
 		{ _id: { $regex: '^[0-9a-fA-F-]+\\/supermeshes\\.json$' } }, { _id: 1 });
 
