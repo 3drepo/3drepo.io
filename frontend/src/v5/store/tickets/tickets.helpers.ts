@@ -336,16 +336,6 @@ export const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[]
 export const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
 	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype);
 
-export const getModule = (template:ITemplate,  property:string): TemplateModule => {
-	const propertyChunks = property.split('.');
-
-	if (propertyChunks[0] === 'modules') {
-		return findModuleByNameOrType(template.modules, propertyChunks[1]);
-	}
-
-	return undefined;
-};
-
 export const findPropertyDefinition = (template:ITemplate,  property:string) => {
 	const propertyChunks = property.split('.');
 

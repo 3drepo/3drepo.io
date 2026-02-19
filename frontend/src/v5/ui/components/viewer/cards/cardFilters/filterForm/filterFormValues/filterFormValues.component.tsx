@@ -59,7 +59,6 @@ export const isJobsAndUsersProperty = ( module, property, type) => {
 
 export const getSelectOptions = (module, property, type, templates, modelsIds): SelectOption[] => {
 	let options = [];
-	// const { templates, modelsIds } = useTicketFiltersContext();
 
 	if (type === 'template') {
 		return templates.map((t) => ({ value: t.code, displayValue: t.name }));
