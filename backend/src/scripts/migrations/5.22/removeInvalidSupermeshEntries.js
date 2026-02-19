@@ -16,37 +16,51 @@
  */
 
 const { v5Path } = require('../../../interop');
-
-const { createConstantsObject } = require(`${v5Path}/utils/helper/objects`);
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { getFile, storeFile, removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
+const { insertRef, getRefEntry } = require(`${v5Path}/models/fileRefs`);
+const { createConstantsObject } = require(`${v5Path}/utils/helper/objects`);
+const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { find } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const processCollection = async (teamspace, collection) => {
-	const badEntries = await find(teamspace, collection,
-		{ _id: { $regex: '^/revision/.+/supermeshes\\.json$' } }, { _id: 1 });
-	const goodEntries = await find(teamspace, collection,
-		{ _id: { $regex: '^[0-9a-fA-F-]+\\/supermeshes\\.json$' } }, { _id: 1 });
+const insertMissingRef = async (teamspace, collection, id, correctedId) => {
+	try {
+		const refInfo = await getRefEntry(teamspace, collection, id);
+		await insertRef(teamspace, collection, { ...refInfo, _id: correctedId });
+	} catch (err) {
+		logger.logError(`Failed to insert ref entry for ${teamspace}.${collection} with _id: ${correctedId}`);
+	}
+};
 
+const removeInvalidRef = async (teamspace, collection, id) => {
+	try {
+		await removeFilesWithMeta(teamspace, collection, { _id: id });
+	} catch (err) {
+		logger.logError(`Failed to remove files from ${teamspace}.${collection} with _id: ${id}`);
+	}
+};
+
+const processCollection = async (teamspace, collection) => {
+	const [badEntries, goodEntries] = await Promise.all([
+		find(teamspace, collection, { _id: { $regex: '^/revision/.+/supermeshes\\.json$' } }, { _id: 1 }),
+		find(teamspace, collection, { _id: { $regex: '^[0-9a-fA-F-]+\\/supermeshes\\.json$' } }, { _id: 1 }),
+	]);
 	const goodEntryIds = createConstantsObject(goodEntries.map(({ _id }) => _id));
 
-	/* eslint-disable no-await-in-loop */
-	for (const { _id } of badEntries) {
-		try {
-			if (!goodEntryIds[_id]) {
-				const file = await getFile(teamspace, collection, _id);
-				await storeFile(teamspace, collection, _id.replace('revision/', ''), file);
-			}
+	const missingEntries = [];
 
-			await removeFilesWithMeta(teamspace, collection, { _id });
-		} catch (err) {
-			logger.logError(`Failed to remove files from ${teamspace}.${collection} with query: ${JSON.stringify({ _id })}`);
-			throw err;
+	for (const { _id } of badEntries) {
+		const correctedId = _id.replace('/revision/', '');
+		if (!goodEntryIds[correctedId]) {
+			missingEntries.push({ _id, correctedId });
 		}
 	}
-	/* eslint-enable no-await-in-loop */
+
+	await Promise.all([
+		...missingEntries.map(({ _id, correctedId }) => insertMissingRef(teamspace, collection, _id, correctedId)),
+		...badEntries.map(({ _id }) => removeInvalidRef(teamspace, collection, _id)),
+	]);
 };
 
 const processTeamspace = async (teamspace) => {
