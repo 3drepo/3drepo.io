@@ -795,10 +795,15 @@ ServiceHelper.generateTicket = (template, internalType = false, container) => {
 	return ticket;
 };
 
-ServiceHelper.generateImportedComment = (author = ServiceHelper.generateRandomString()) => ({
-	...ServiceHelper.generateComment(author),
-	originalAuthor: ServiceHelper.generateRandomString(),
-});
+ServiceHelper.generateImportedComment = () => {
+	const comment = ServiceHelper.generateComment();
+	return {
+		createdAt: comment.createdAt,
+		message: comment.message,
+		images: comment.images,
+		originalAuthor: ServiceHelper.generateRandomString(),
+	};
+};
 
 ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) => {
 	const base64img = fs.readFileSync(image).toString('base64');

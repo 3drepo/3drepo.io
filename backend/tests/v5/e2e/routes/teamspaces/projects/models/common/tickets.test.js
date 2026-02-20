@@ -278,7 +278,7 @@ const testAddTicket = () => {
 				['the user does not have access to the federation', false, getRoute({ key: users.noProjectAccess.apiKey }), templates.notAuthorized],
 				['the templateId provided does not exist', false, getRoute(), templates.templateNotFound, { type: ServiceHelper.generateRandomString() }],
 				['the templateId is not provided', false, getRoute(), templates.invalidArguments, { type: undefined }],
-				['the ticket data does not conforms to the template', false, getRoute(), templates.invalidArguments, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
+				['the ticket data does not conform to the template', false, getRoute(), templates.invalidArguments, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
 				['the ticket data includes duplicate value for unique property', false, getRoute(), templates.invalidArguments, { properties: { [uniquePropertyName]: uniquePropValue } }],
 				['the ticket data conforms to the template', true, getRoute()],
 				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
@@ -357,7 +357,7 @@ const testImportTickets = () => {
 				['the templateId provided does not exist', false, getRoute({ templateId: ServiceHelper.generateUUIDString() }), templates.templateNotFound],
 				['the templateId provided is not a UUID string', false, getRoute({ templateId: ServiceHelper.generateRandomString() }), templates.templateNotFound],
 				['the templateId is not provided', false, getRoute({ templateId: null }), templates.invalidArguments],
-				['the ticket data does not conforms to the template', false, getRoute(), templates.invalidArguments, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
+				['the ticket data does not conform to the template', false, getRoute(), templates.invalidArguments, { properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } }],
 				['the ticket data conforms to the template', true, getRoute()],
 				['the ticket data conforms to the template but the user is a viewer', false, getRoute({ key: users.viewer.apiKey }), templates.notAuthorized],
 				['the ticket data contains comments', true, getRoute(), undefined, { comments: times(10, ServiceHelper.generateImportedComment) }],
@@ -980,14 +980,22 @@ const testUpdateTicket = () => {
 		con.ticket.properties[imageListPropName] = [FS.readFileSync(image, { encoding: 'base64' })];
 		delete con.ticket.properties[immutablePropWithDefaultValue];
 		con.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
-		const conUniqueProp = con.ticket.properties[uniquePropName];
+		con.ticket2 = {
+			...cloneDeep(con.ticket),
+			properties: { ...cloneDeep(con.ticket.properties), [uniquePropName]: ServiceHelper.generateRandomString() },
+		};
+		const conUniquePropValue = con.ticket2.properties[uniquePropName];
 
 		fed.ticket = ServiceHelper.generateTicket(template);
 		fed.ticket.properties[requiredImagePropName] = FS.readFileSync(image, { encoding: 'base64' });
 		fed.ticket.properties[imageListPropName] = [FS.readFileSync(image, { encoding: 'base64' })];
 		delete fed.ticket.properties[immutablePropWithDefaultValue];
 		fed.depTemTicket = ServiceHelper.generateTicket(deprecatedTemplate);
-		const fedUniqueProp = fed.ticket.properties[uniquePropName];
+		fed.ticket2 = {
+			...cloneDeep(fed.ticket),
+			properties: { ...cloneDeep(fed.ticket.properties), [uniquePropName]: ServiceHelper.generateRandomString() },
+		};
+		const fedUniquePropValue = fed.ticket2.properties[uniquePropName];
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed], [template, deprecatedTemplate]);
@@ -996,9 +1004,9 @@ const testUpdateTicket = () => {
 				const modelType = fed === model ? 'federation' : 'container';
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
 
-				const { ticket, depTemTicket } = model;
+				const { ticket, ticket2, depTemTicket } = model;
 				/* eslint-disable no-param-reassign */
-				await Promise.all([ticket, depTemTicket].map(async (ticketToAdd) => {
+				await Promise.all([ticket, ticket2, depTemTicket].map(async (ticketToAdd) => {
 					const res = await agent.post(addTicketRoute(model._id)).send(ticketToAdd);
 					if (!res.body._id) {
 						throw new Error(`Could not add a new ticket: ${res.body.message}`);
@@ -1024,7 +1032,7 @@ const testUpdateTicket = () => {
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
 			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
-			const uniquePropValue = isFed ? fedUniqueProp : conUniqueProp;
+			const uniquePropValue = isFed ? fedUniquePropValue : conUniquePropValue;
 
 			const baseRouteParams = {
 				key: users.tsAdmin.apiKey,
@@ -1048,7 +1056,7 @@ const testUpdateTicket = () => {
 				['the update data does not conform to the template (trying to update immutable prop with value)', baseRouteParams, false, templates.invalidArguments, { properties: { [immutableProp]: ServiceHelper.generateRandomString() } }],
 				['the update data does not conform to the template (trying to update immutable prop with default value)', baseRouteParams, false, templates.invalidArguments, { properties: { [immutablePropWithDefaultValue]: ServiceHelper.generateRandomString() } }],
 				['the update data is an empty object', baseRouteParams, false, templates.invalidArguments, {}],
-				['the update data are the same as the existing', baseRouteParams, false, templates.invalidArguments, { properties: { [requiredPropName]: model.ticket.properties[requiredPropName] } }],
+				['the update data are the same as the existing', baseRouteParams, true, undefined, { properties: { [requiredPropName]: model.ticket.properties[requiredPropName] } }],
 				['the update data includes duplicate unique value', baseRouteParams, false, templates.invalidArguments, { properties: { [uniquePropName]: uniquePropValue } }],
 				['the update data conforms to the template', baseRouteParams, true, undefined, { title: ServiceHelper.generateRandomString() }],
 				['the update data conforms to the template but the user is a viewer', { ...baseRouteParams, key: users.viewer.apiKey }, false, templates.notAuthorized, { title: ServiceHelper.generateRandomString() }],
@@ -1214,9 +1222,9 @@ const testUpdateManyTickets = () => {
 				['the templateId provided does not exist', false, { ...baseRouteParams, templateId: ServiceHelper.generateUUIDString() }, templates.templateNotFound],
 				['the templateId provided is not a UUID string', false, { ...baseRouteParams, templateId: ServiceHelper.generateRandomString() }, templates.templateNotFound],
 				['the templateId is not provided', false, { ...baseRouteParams, templateId: null }, templates.invalidArguments],
-				['the ticket data does not conforms to the template', false, baseRouteParams, templates.invalidArguments, () => ({ properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } })],
+				['the ticket data does not conform to the template', false, baseRouteParams, templates.invalidArguments, () => ({ properties: { [ServiceHelper.generateRandomString()]: ServiceHelper.generateRandomString() } })],
 				['the ticket data does not contain any update (no properties provided)', false, baseRouteParams, templates.invalidArguments],
-				['the ticket data does not contain any update (properties with existing data)', false, baseRouteParams, templates.invalidArguments, ({ title }) => ({ title })],
+				['the ticket data does not contain any update (properties with existing data)', true, baseRouteParams, undefined, ({ title }) => ({ title })],
 				['the tickets to update are not following the provided template', false, { ...baseRouteParams, templateId: deprecatedTemplate._id }, templates.invalidArguments, () => ({ title: ServiceHelper.generateRandomString() })],
 				['the ticket data conforms to a deprecated template', true, { ...baseRouteParams, templateId: deprecatedTemplate._id, tickets: [model.depTemTicket] }, undefined, () => ({ title: ServiceHelper.generateRandomString() })],
 				['the ticket data conforms to the template but the user is a viewer', false, { ...baseRouteParams, key: users.viewer.apiKey }, templates.notAuthorized, () => ({ title: ServiceHelper.generateRandomString() })],
