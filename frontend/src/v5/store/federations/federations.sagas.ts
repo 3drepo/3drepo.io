@@ -42,6 +42,10 @@ import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/ser
 import { chunk, isEqualWith } from 'lodash';
 import { compByColum, DASHBOARD_LIST_CHUNK_SIZE } from '../store.helpers';
 import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
+import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
+
+const bulkStatsStack = new AsyncFunctionExecutor((teamspace, projectId, chunkedIds) =>
+	API.Federations.bulkFetchFederationsStats(teamspace, projectId, chunkedIds), 15, ExecutionStrategy.Fifo);
 
 export function* createFederation({
 	teamspace,
@@ -135,7 +139,7 @@ export function* bulkFetchFederationsStats({ teamspace, projectId, federationIds
 		const chunkedIds = chunk(federationIds, DASHBOARD_LIST_CHUNK_SIZE);
 		yield all(
 			chunkedIds.map(function* (idsChunk) {
-				const { stats } = yield API.Federations.bulkFetchFederationsStats(teamspace, projectId, idsChunk);
+				const { stats } = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);
 				yield put(FederationsActions.bulkFetchFederationsStatsSuccess(projectId, stats));
 			}),
 		);

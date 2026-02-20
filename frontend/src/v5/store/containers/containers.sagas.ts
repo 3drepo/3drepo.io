@@ -41,9 +41,11 @@ import { ContainerStats, FetchContainerViewsResponseView, IContainer } from './c
 import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
 import { compByColum, DASHBOARD_LIST_CHUNK_SIZE } from '../store.helpers';
-import { AsyncFunctionExecutor } from '@/v5/helpers/functions.helpers';
+import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 
 const statsStack = new AsyncFunctionExecutor<ContainerStats>(API.Containers.fetchContainerStats, 30);
+const bulkStatsStack = new AsyncFunctionExecutor((teamspace, projectId, chunkedIds) =>
+	API.Containers.bulkFetchContainersStats(teamspace, projectId, chunkedIds), 15, ExecutionStrategy.Fifo);
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -92,18 +94,16 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 		}));
 	}
 }
+
 export function* bulkFetchContainersStats({ teamspace, projectId, containerIds }: BulkFetchContainersStatsAction) {
 	try {
 		const chunkedIds = chunk(containerIds, DASHBOARD_LIST_CHUNK_SIZE);
 		yield all(
 			chunkedIds.map(function* (idsChunk) {
-				const { stats } = yield API.Containers.bulkFetchContainersStats(teamspace, projectId, idsChunk);
-				console.log('@@ stats', stats);	
+				const { stats } = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);
 				yield put(ContainersActions.bulkFetchContainersStatsSuccess(projectId, stats));
 			}),
 		);
-		// const { stats } = yield API.Containers.bulkFetchContainersStats(teamspace, projectId, containerIds);
-		// yield put(ContainersActions.bulkFetchContainersStatsSuccess(projectId, stats));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.bulkFetchStats.error', defaultMessage: 'trying to bulk fetch containers details' }),
