@@ -66,7 +66,7 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 	});
 
 	const defaultValues: FormType = {
-		value: type === 'manyOf' ? [] : '',
+		value: type === 'manyOf' ? [] : null,
 	};
 	
 	const formData = useForm<FormType>({
