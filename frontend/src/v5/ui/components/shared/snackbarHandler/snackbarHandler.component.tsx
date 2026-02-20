@@ -46,6 +46,12 @@ export const SnackbarHandler = () => {
 			setSnack(newSnack);
 			return;
 		}
+		// if the new snack's key is already in the queue, update the snack in the queue
+		const indexInQueue = queue.current.map((s) => s.key).findIndex((key) => key === newSnack.key);
+		if (indexInQueue !== -1) {
+			queue.current[indexInQueue] = newSnack;
+			return;
+		}
 		queue.current.push(newSnack);
 		if (queue.current.length === 1 && !isOpen) {
 			processQueue();
