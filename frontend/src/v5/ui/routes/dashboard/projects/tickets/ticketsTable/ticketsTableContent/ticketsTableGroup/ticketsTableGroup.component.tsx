@@ -59,9 +59,11 @@ const TicketsTableGroupContent = ({
 }: TicketsTableGroupContentProps) => {
 	useWatchPropertyChange(sortingColumn, refreshSorting);
 
+	const ticketsIds = tickets.map(({ _id }) => _id);
+
 	return (
 		<>
-			{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders />}
+			{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders ticketsIds={ticketsIds}/>}
 			<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
 				<VirtualList
 					items={chunk(sortedItems, TICKETS_CHUNK_SIZE)}

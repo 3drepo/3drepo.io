@@ -26,7 +26,12 @@ import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { canBulkEditProperty } from '@/v5/store/tickets/tickets.helpers';
 
-export const TicketsTableHeaders = () => {
+type TicketsTableHeadersProps = {
+	ticketsIds: string[]
+};
+
+// The ticketsids refer to the group's tickets ids if the 
+export const TicketsTableHeaders = ({ ticketsIds }: TicketsTableHeadersProps) => {
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const { selectedIds } = useContext(TicketsTableContext);
 
@@ -37,7 +42,7 @@ export const TicketsTableHeaders = () => {
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
 				canBulkEditProperty(template, name) && selectedIds.size > 0 ? 
-					<TicketsTableHeaderBulkEdit key={name} name={name} /> : <TicketsTableHeader key={name} name={name} />
+					<TicketsTableHeaderBulkEdit key={name} name={name} ticketsIds={ticketsIds}/> : <TicketsTableHeader key={name} name={name} />
 			))}
 		</Headers>
 	);

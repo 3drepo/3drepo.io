@@ -27,11 +27,14 @@ import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTabl
 
 type TicketsTableHeaderBulkEditProps = {
 	name: string;
+	ticketsIds?: string[];
 };
 
-export const TicketsTableHeaderBulkEdit = ({ name, ...props }: TicketsTableHeaderBulkEditProps) => {
+export const TicketsTableHeaderBulkEdit = ({ name, ticketsIds, ...props }: TicketsTableHeaderBulkEditProps) => {
 	const [active, setActive] = useState(false);
 	const { selectedIds } = useContext(TicketsTableContext);
+	const groupSelectedIds = new Set(ticketsIds.filter((id) => selectedIds.has(id)));
+
 	return (
 		<HeaderCell name={name} {...props}>
 			<CardFilterActionMenu
@@ -48,7 +51,7 @@ export const TicketsTableHeaderBulkEdit = ({ name, ...props }: TicketsTableHeade
 				PopoverProps={TICKET_HEADER_POPOVER_PROPS}
 			>
 				<ActionMenuContext.Consumer>
-					{({ close }) => <TicketsBulkEditForm name={name} selectedIds={selectedIds} onCancel={close} />}
+					{({ close }) => <TicketsBulkEditForm name={name} selectedIds={groupSelectedIds} onCancel={close} />}
 				</ActionMenuContext.Consumer>
 			</CardFilterActionMenu>
 		</HeaderCell>
