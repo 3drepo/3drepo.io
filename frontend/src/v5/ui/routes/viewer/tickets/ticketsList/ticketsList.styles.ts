@@ -25,6 +25,8 @@ import { Checkbox } from '@mui/material';
 import React from 'react';
 import BulkCheckboxIcon from '@assets/icons/controls/bulk_checkbox.svg';
 import BulkCheckboxCheckedIcon from '@assets/icons/controls/bulk_checkbox_checked.svg';
+import { AllTicketsCheckboxContainer } from './bulkUpdate/bulkUpdate.styles';
+import { ModuleTitle } from '@components/viewer/cards/cardFilters/cardFilters.styles';
 
 
 export const Loader = styled(UnstyledLoader)`
@@ -106,4 +108,22 @@ export const BulkCheckbox = styled(Checkbox).attrs({
 	&:hover:not(.Mui-checked) path {
 		fill: ${({ theme }) => theme.palette.secondary.main} !important;
 	}
+`;
+
+export const GroupByLabelContainer = styled.div`
+	display: flex;
+	padding-bottom: 5px;
+
+	${AllTicketsCheckboxContainer} {
+		padding-bottom: 0;
+	}
+`;
+
+export const GroupByLabelText = styled(ModuleTitle)<{ $withBulkUpdate }>`
+	flex-grow: 1;
+	overflow: hidden;
+	margin: 0;
+	text-align: ${({ $withBulkUpdate }) => $withBulkUpdate ? 'right' : 'left'};
+	line-height: 16px;
+	padding-left: ${({ $withBulkUpdate }) => $withBulkUpdate ? '5px' : '0'};
 `;

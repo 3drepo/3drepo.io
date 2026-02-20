@@ -37,37 +37,13 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelection/groupBySelection.component';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
-import { ModuleTitle } from '@components/viewer/cards/cardFilters/cardFilters.styles';
 import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
-import { BulkCheckbox } from './ticketsList.styles';
+import { BulkCheckbox, GroupByLabelContainer, GroupByLabelText } from './ticketsList.styles';
 import { Tooltip } from '@mui/material';
 import { TicketsBulkUpdateContext, TicketsBulkUpdateContextComponent } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 import { BulkUpdateDropdown } from './bulkUpdate/bulkUpdateDropDown.component';
-import { AllTicketsCheckbox } from './ticketItem/ticketItem.styles';
-
-
-const ToggleAllCheckbox = () => {
-	const { bulkModeOn, selectedItems, addOrRemoveSelection } = useContext(TicketsBulkUpdateContext);
-	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
-	const filters = TicketsCardHooksSelectors.selectCardFilters();
-	const checked = filteredTickets.length === selectedItems.size && filteredTickets.length > 0;
-
-	const toggleAllChecked = () => {
-		addOrRemoveSelection(filteredTickets.map((t) => t._id), checked);
-	};
-
-	useEffect(() => {
-		// reset selection when filters change
-		addOrRemoveSelection(Array.from(selectedItems), true);
-	}, [filters]);
-
-	if (!bulkModeOn) {
-		return null;
-	}
-	
-	return (<AllTicketsCheckbox checked={checked} disabled={filteredTickets.length == 0} onClick={toggleAllChecked} $withFilters={filters.length > 0}/>);
-};
-
+import { ToggleAllCheckbox } from './bulkUpdate/toggleAllCheckbox.component';
+import { TextOverflow } from '@controls/textOverflow';
 
 const TicketsActions = ({ readOnly, groupBy }) => {
 	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
@@ -94,18 +70,35 @@ const TicketsActions = ({ readOnly, groupBy }) => {
 	</>);
 };
 
+const GroupByLabel = ({ groupBy }) => {
+	const {  bulkModeOn } =  useContext(TicketsBulkUpdateContext);
+
+	return (
+		<GroupByLabelContainer >
+			<ToggleAllCheckbox />
+			<GroupByLabelText $withBulkUpdate={bulkModeOn}>
+				<TextOverflow>
+					<FormattedMessage id="viewer.cards.tickets.groupedByLabel" defaultMessage="Grouped by: " /> {getPropertyLabel(groupBy)}
+				</TextOverflow>
+			</GroupByLabelText>
+		</GroupByLabelContainer>
+	);
+};
+
+
 export const TicketsListCard = () => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const readOnly = TicketsCardHooksSelectors.selectReadOnly();
 	const tickets = TicketsCardHooksSelectors.selectCurrentTickets();
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
-	const presetFilters = TicketsCardHooksSelectors.selectCardFilters();
+	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const groupBy = TicketsCardHooksSelectors.selectGroupBy();
 	const [fetchingProperties, setFetchingProperties] = useState(false);
 
-	const onFiltersChange = (filters) => {
-		TicketsCardActionsDispatchers.setFilters(filters);
+
+	const onFiltersChange = (newfilters) => {
+		TicketsCardActionsDispatchers.setFilters(newfilters);
 	};
 
 	useEffect(() => {
@@ -131,7 +124,7 @@ export const TicketsListCard = () => {
 	return (
 		<CardContainer>
 			<TicketsBulkUpdateContextComponent>
-				<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]} filters={presetFilters} onChange={onFiltersChange}>
+				<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]} filters={filters} onChange={onFiltersChange}>
 					<CardHeader
 						icon={<TicketsIcon />}
 						title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
@@ -139,12 +132,8 @@ export const TicketsListCard = () => {
 					/>
 					<CardContent onClick={() => TicketsCardActionsDispatchers.setSelectedTicket(null)}>
 						<CardFilters />
-						<ToggleAllCheckbox />
-						{groupBy !== NONE_OPTION &&
-						(<ModuleTitle>
-							<FormattedMessage id="viewer.cards.tickets.groupedByLabel" defaultMessage="Grouped by: " /> {getPropertyLabel(groupBy)}
-						</ModuleTitle>)
-						}
+						{groupBy === NONE_OPTION && <ToggleAllCheckbox $withFilters={filters.length > 0}/>}
+						{groupBy !== NONE_OPTION && <GroupByLabel groupBy={groupBy} />}
 						{tickets.length ? (
 							<TicketsList groupBy={groupBy} templates={templates} loading={fetchingProperties}/>
 						) : (

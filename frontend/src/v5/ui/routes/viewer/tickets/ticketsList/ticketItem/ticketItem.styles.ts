@@ -119,14 +119,3 @@ export const TicketCheckbox = styled(Checkbox)`
 	margin-right: 6px;
 	margin-left: 0;
 `;
-
-export const AllTicketsCheckbox = styled(Checkbox)<{ $withFilters?: boolean }>`
-	margin: 0;
-	padding: 0;
-	position: relative;
-	left: 12px;
-
-	display: inline;
-	height: ${({ $withFilters }) => ($withFilters) ?  '0' : 'auto'};
-	top: ${({ $withFilters }) => ($withFilters) ?  '-22px' : 'auto'};
-`;
