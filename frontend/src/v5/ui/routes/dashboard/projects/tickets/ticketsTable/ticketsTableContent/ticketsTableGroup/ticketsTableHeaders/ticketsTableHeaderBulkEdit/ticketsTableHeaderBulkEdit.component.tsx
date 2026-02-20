@@ -18,22 +18,19 @@
 import { CardFilterActionMenu } from '@components/viewer/cards/cardFilters/filterForm/filterForm.styles';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import ArrowDownIcon from '@assets/icons/filled/caret-filled.svg';
-import { useContext, useState } from 'react';
+import { useState } from 'react';
 import { BulkEditHeaderButton, HeaderCell, HeaderCellText } from '../ticketsTableHeaders.styles';
 import { getPropertyLabel } from '../../../../ticketsTable.helper';
 import { TICKET_HEADER_POPOVER_PROPS } from '../ticketsTableHeaders.helpers';
 import { TicketsBulkEditForm } from '@components/shared/ticketsBulkEdit/ticketsBulkEditForm.component';
-import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
 
 type TicketsTableHeaderBulkEditProps = {
 	name: string;
-	ticketsIds?: string[];
+	groupSelectedIds?: Set<string>;
 };
 
-export const TicketsTableHeaderBulkEdit = ({ name, ticketsIds, ...props }: TicketsTableHeaderBulkEditProps) => {
+export const TicketsTableHeaderBulkEdit = ({ name, groupSelectedIds, ...props }: TicketsTableHeaderBulkEditProps) => {
 	const [active, setActive] = useState(false);
-	const { selectedIds } = useContext(TicketsTableContext);
-	const groupSelectedIds = new Set(ticketsIds.filter((id) => selectedIds.has(id)));
 
 	return (
 		<HeaderCell name={name} {...props}>

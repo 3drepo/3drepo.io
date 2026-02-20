@@ -37,12 +37,14 @@ export const TicketsTableHeaders = ({ ticketsIds }: TicketsTableHeadersProps) =>
 
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
-	
+
+	const groupSelectedIds = new Set(ticketsIds.filter((id) => selectedIds.has(id)));
+
 	return (
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
-				canBulkEditProperty(template, name) && selectedIds.size > 0 ? 
-					<TicketsTableHeaderBulkEdit key={name} name={name} ticketsIds={ticketsIds}/> : <TicketsTableHeader key={name} name={name} />
+				canBulkEditProperty(template, name) && groupSelectedIds.size > 0 ? 
+					<TicketsTableHeaderBulkEdit key={name} name={name} groupSelectedIds={groupSelectedIds}/> : <TicketsTableHeader key={name} name={name} />
 			))}
 		</Headers>
 	);
