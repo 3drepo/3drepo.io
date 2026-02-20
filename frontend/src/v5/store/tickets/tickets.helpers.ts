@@ -354,7 +354,6 @@ export const canBulkEditProperty = (template:ITemplate, name: string) => {
 	const isReadOnly = propDef?.readOnly || propDef?.readOnlyOnUI || propDef?.deprecated;
 	return  !NON_BULK_EDITABLE_COLUMNS.includes(name)
 		&& propDef
-		&& !propDef?.immutable // cannot bulk edit immutable properties to prevent user error
 		&& !propDef?.unique // user is unlikely to want to bulk edit unique properties and it will usually error
 		&& !isSequencingProperty(name) // sequencing dates have complex rules (start must be before end), disallow bulk edit for now
 		&& !isReadOnly;
