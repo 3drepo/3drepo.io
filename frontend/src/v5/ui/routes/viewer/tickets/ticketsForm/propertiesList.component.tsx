@@ -24,16 +24,15 @@ import { useFormContext } from 'react-hook-form';
 import { TicketProperty } from './properties/properties.helper';
 import { UnsupportedProperty } from './properties/unsupportedProperty.component';
 import { ErrorTextGap, PropertiesListContainer } from './ticketsForm.styles';
-import { SEQUENCING_END_TIME, SEQUENCING_START_TIME, TicketsCardViews } from '../tickets.constants';
+import { TicketsCardViews } from '../tickets.constants';
 import { TicketContext } from '../ticket.context';
+import { isSequencingProperty } from '@/v5/store/tickets/tickets.helpers';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
 	module: string;
 	onPropertyBlur?: (...args) => void;
 }
-
-export const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
 
 export const PropertiesList = ({ module, properties, onPropertyBlur }: PropertiesListProps) => {
 	const { containerOrFederation } = useContext(TicketContext);

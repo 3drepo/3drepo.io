@@ -17,7 +17,7 @@
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
-import { isRangeOperator, isTextType, isSelectType, isDateType, getTemplateProperty, useGetUsersAndJobs } from '../../cardFilters.helpers';
+import { isRangeOperator, isTextType, isSelectType, isDateType, getTemplateProperty, getUsersAndJobs } from '../../cardFilters.helpers';
 import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField, FormJobsAndUsersSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect, useRef } from 'react';
@@ -30,7 +30,9 @@ import { mapFormArrayToArray, SelectOption } from '@/v5/helpers/form.helper';
 import { getOptionFromValue, getFilterFromEvent, getFiltersFromJobsAndUsers, arrToDisplayValue } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
 import { useTicketFiltersContext } from '../../ticketsFilters.context';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type FilterFormValuesProps = {
 	module: string,
@@ -55,16 +57,16 @@ export const isJobsAndUsersProperty = ( module, property, type) => {
 };
 
 
-export const getSelectOptions = (module, property, type): SelectOption[] => {
+export const getSelectOptions = (module, property, type, templates, modelsIds): SelectOption[] => {
 	let options = [];
-	const { templates, modelsIds } = useTicketFiltersContext();
 
 	if (type === 'template') {
 		return templates.map((t) => ({ value: t.code, displayValue: t.name }));
 	}
 
-	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
-	const jobsAndUsers = getFiltersFromJobsAndUsers(useGetUsersAndJobs(modelsIds));
+	
+	const riskCategories = selectRiskCategories(getState());
+	const jobsAndUsers = getFiltersFromJobsAndUsers(getUsersAndJobs(modelsIds));
 
 	if (type === 'owner') return jobsAndUsers;
 
@@ -89,6 +91,8 @@ export const getSelectOptions = (module, property, type): SelectOption[] => {
 
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
+	const { templates, modelsIds } = useTicketFiltersContext();
+
 	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -97,10 +101,15 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const error = errors.values || {};
 	const operator = watch('operator');
 
+	// This is for triggering a new re render if these federations or containers change
+	// in order to have the latests users/jobs
+	FederationsHooksSelectors.selectFederations(); 
+	ContainersHooksSelectors.selectContainers(); 
+
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
-	const selectOptions = getSelectOptions(module, property, type);
+	const selectOptions = getSelectOptions(module, property, type, templates, modelsIds);
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
 

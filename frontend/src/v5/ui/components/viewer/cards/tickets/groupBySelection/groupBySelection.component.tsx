@@ -21,7 +21,7 @@ import { Tooltip, PopoverOrigin, PopoverProps } from '@mui/material';
 import { useContext } from 'react';
 import { CardAction } from '../../cardAction/cardAction.styles';
 import { CardFilterActionMenu } from '../../cardFilters/filterForm/filterForm.styles';
-import { SearchInput, TicketsFiltersModalItem } from '../../cardFilters/filtersSelection/tickets/ticketFiltersSelection.styles';
+import { TicketsFiltersSearchInput, TicketsFiltersModalItem } from '../../cardFilters/filtersSelection/tickets/ticketFiltersSelection.styles';
 import GroupByIcon from '@assets/icons/viewer/grouped_list.svg';
 import ClearCircleIcon from '@assets/icons/controls/clear_circle.svg';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -103,7 +103,7 @@ export const GroupBySelection = ({ value: valueProp, onChange }) => {
 		>
 			<SearchContextComponent items={items} fieldsToFilter={['name']}>
 				<TicketsFiltersModalItem $visible>
-					<SearchInput
+					<TicketsFiltersSearchInput
 						placeholder={formatMessage({
 							id: 'viewer.card.tickets.groupby.searchInputPlaceholder',
 							defaultMessage: 'Search for property...',

@@ -21,14 +21,19 @@ import { ActionMenuItem } from '@controls/actionMenu';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
-import { getFilterFormTitle } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
+import { getFilterFormTitle, isSelectType } from '@components/viewer/cards/cardFilters/cardFilters.helpers';
 import { findFilterByPropertyName } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableHeaders/ticketsTableHeaderFilter.component';
 import { BulkEditInputField } from './bulkEditInputField/bulkEditInputField.component';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
-import { ProjectsHooksSelectors, TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+
 import { set, uniq } from 'lodash';
-import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { DialogsActionsDispatchers, TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { selectCurrentProjectTemplateById } from '@/v5/store/projects/projects.selectors';
+import { selectTemplateById } from '@/v5/store/tickets/tickets.selectors';
+import { getSelectOptions } from '@components/viewer/cards/cardFilters/filterForm/filterFormValues/filterFormValues.component';
+import { formatMessage } from '@/v5/services/intl';
 
 type IBulkEditFormProps = {
 	name: string;
@@ -38,34 +43,98 @@ type IBulkEditFormProps = {
 type FormType = { value: any; };
 
 export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFormProps) => {
-	const { filters, choosablefilters } = useTicketFiltersContext();
+	const { filters, choosablefilters, modelsIds: modelsIdsContext } = useTicketFiltersContext();
 	const { module, property, type } = findFilterByPropertyName([...filters, ...choosablefilters], name); 
-	const { teamspace, project: projectId } = useParams<DashboardTicketsParams>();
+	const { teamspace, containerOrFederation, project: projectId } = useParams();
 	const selectedTickets = TicketsHooksSelectors.selectTicketsById(Array.from(selectedIds));
 	const templatesIds = uniq(selectedTickets.map((t) => t.type));
+	const state = getState();
+	
 	// Temporary method for getting template. When using this in Viewer will have to handle cases with multiple templates.
-	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templatesIds[0]);
-	const propDef = findPropertyDefinition(template, name);
+	const templates = templatesIds.map((id) => {
+		// In viewer
+		const templateByModel = selectTemplateById(state, containerOrFederation, id);
+		// In tabular view
+		const templateByProject = selectCurrentProjectTemplateById(state, id);
+	
+		return templateByProject || templateByModel;
+	});
+
+	const notNullable = templates.every((template) =>  {
+		const propDef = findPropertyDefinition(template, name);
+		return propDef?.required || (propDef?.type === 'oneOf');
+	});
+
 	const defaultValues: FormType = {
 		value: type === 'manyOf' ? [] : '',
 	};
-
+	
 	const formData = useForm<FormType>({
 		defaultValues,
 		mode: 'onChange',
 	});
+
+	const modelsIds = containerOrFederation ? [containerOrFederation] : modelsIdsContext;
+
 	const { formState: { isValid }, watch } = formData;
 
 	const isEmptyValue = !watch('value');
-	const notNullable = propDef?.required || (propDef?.type === 'oneOf');
 	const canSubmit = isValid && (!notNullable || !isEmptyValue);
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
-		let partialTicket = {};
-		set(partialTicket, name, filledForm.value);
-		TicketsActionsDispatchers.updateManyTickets(teamspace, projectId, Array.from(selectedIds), partialTicket);
-	});
+		const values = Array.isArray(filledForm.value) ? filledForm.value.map((v) => v.value ? v.value : v) :  filledForm.value;
 
+		// Checks which template applies to the selected value
+		// for example a custom status from a template might not apply to a status from another one
+		const appliesToTemplate:Record<string, boolean> = {};
+		templates.forEach((template) => {
+			const definition = findPropertyDefinition(template, name);
+			appliesToTemplate[template._id] = type === definition?.type;
+
+			if (!definition) {
+				return;
+			}
+ 			
+			if (['manyOf', 'oneOf'].includes(definition.type) && isSelectType(type)) {
+				const options = new Set(getSelectOptions(module, property, type, [template], modelsIds).map((o) => o.value));
+				
+				if (type === 'manyOf'  && definition.type === 'manyOf') {
+					appliesToTemplate[template._id] = values.every((val) =>  options.has(val));
+				} else {
+					appliesToTemplate[template._id] =  options.has(values);
+				}
+			}
+		});
+
+		const finalSelectedIds = selectedTickets.filter((ticket) => 
+			appliesToTemplate[ticket.type]).map((ticket) => ticket._id);
+		
+		let partialTicket = {};
+		set(partialTicket, name, values);
+
+		if (finalSelectedIds.length !== selectedTickets.length) {
+			DialogsActionsDispatchers.open('info', {
+				title: formatMessage({
+					id: 'bulkUpdate.partialUpdateTitle',
+					defaultMessage: 'Partial update',
+				}),
+				message: formatMessage({
+					id: 'bulkUpdate.partialUpdateMessage',
+					defaultMessage: `
+					The selected change can’t be applied to every ticket in your selection.{br} 
+					Apply the update to the tickets where it’s valid, or review your selection.`,
+				}, { br: <br /> }),
+				actionButtonLabel:  formatMessage({
+					id: 'bulkUpdate.partialUpdateAction',
+					defaultMessage: 'Apply update',
+				}),
+				onClickAction: () => TicketsActionsDispatchers.updateManyTickets(teamspace, projectId, finalSelectedIds, partialTicket),
+			});
+		} else {
+			TicketsActionsDispatchers.updateManyTickets(teamspace, projectId, finalSelectedIds, partialTicket);
+		}
+
+	});
 	return (
 		<FormProvider {...formData}>
 			<Container>
@@ -74,7 +143,8 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 				</TitleContainer>
 				<BulkEditInputField
 					name="value"
-					templateId={template?._id}
+					templates={templates}
+					modelsIds={modelsIds}
 					projectId={projectId}
 					module={module}
 					property={property}

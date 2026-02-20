@@ -25,7 +25,9 @@ import { GroupedListSpacer, GroupedListToggleContainer, GroupedListToggleTitle, 
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { ChevronIconContainer } from '@components/viewer/cards/cardFilters/filtersAccordion/filtersAccordion.styles';
-import { MutableRefObject } from 'react';
+import { MutableRefObject, useContext } from 'react';
+import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
+import { TicketCheckbox } from '../ticketItem/ticketItem.styles';
 
 type GroupedListProps = {
 	handle?: MutableRefObject<VListHandle>;
@@ -35,7 +37,18 @@ type GroupedListProps = {
 
 export const TicketsGroupedList = ({ tickets, groupName, handle, loading, expanded: expandedDefault } : TicketsGroup & GroupedListProps) => {
 	const expanded = useVRef<boolean>(groupName + '.expanded', expandedDefault);
+	const { selectedItems, bulkModeOn, addOrRemoveSelection } =  useContext(TicketsBulkUpdateContext);
 
+	const ids = tickets.map(({ _id }) => _id);
+
+	const allSelected = ids.every((id) =>  selectedItems.has(id));
+
+	const clickOnBulkCheckbox = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+		event.preventDefault();
+		event.stopPropagation();
+		addOrRemoveSelection(ids, allSelected);
+	};
+	
 	return (
 		<GroupedListSpacer>
 			<List>
@@ -43,6 +56,7 @@ export const TicketsGroupedList = ({ tickets, groupName, handle, loading, expand
 					CollapseToggleComponent={(({ expanded: expandedProp }) => (
 						<GroupedListToggleContainer $expanded={expandedProp}>
 							<GroupedListToggleTitle>
+								{bulkModeOn && (<TicketCheckbox checked={allSelected} onClick={clickOnBulkCheckbox}/>)}
 								<GroupedTextOverflow>{groupName}</GroupedTextOverflow>
 								{loading && (<Spinner />)}
 								{!loading && (<CircledNumber>{tickets.length}</CircledNumber>)}
