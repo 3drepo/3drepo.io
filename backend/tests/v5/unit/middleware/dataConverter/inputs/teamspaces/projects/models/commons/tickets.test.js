@@ -153,8 +153,8 @@ const testValidateNewTicket = () => {
 			});
 
 			TicketSchema.validateTicket.mockResolvedValueOnce(req.body);
-			TicketSchema.deserialiseUUIDsInTicket.mockResolvedValueOnce(req.body);
-			TicketSchema.processReadOnlyValues.mockResolvedValueOnce(req.body);
+			TicketSchema.deserialiseUUIDsInTicket.mockReturnValueOnce(req.body);
+			TicketSchema.processReadOnlyValues.mockReturnValueOnce(req.body);
 
 			await Tickets.validateNewTicket(req, res, fn);
 

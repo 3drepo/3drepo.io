@@ -17,6 +17,7 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { deleteIfUndefined, isEqual } = require('../../../../../../../utils/helper/objects');
 const { deserialiseUUIDsInTicket, processReadOnlyValues, validateTicket: validateTicketSchema } = require('../../../../../../../schemas/tickets');
 const { getTicketById, getTicketsByQuery } = require('../../../../../../../models/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
@@ -24,7 +25,6 @@ const { getArrayDifference } = require('../../../../../../../utils/helper/arrays
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
-const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
 
@@ -128,31 +128,34 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			}
 		}
 
-		const filteredNewTickets = [];
-		const filteredOldTickets = [];
+		const filteredTickets = [];
 
 		await Promise.all(req.body.tickets.map(async (ticket, i) => {
 			const existingData = isNew ? undefined : req.ticketsData[i];
 			const processedTicket = await processTicket(teamspace, project,
 				model, template, user, ticket, existingData, true);
 
+			// if processedTicket is null, then there are no valid changes
 			if (processedTicket) {
-				filteredNewTickets.push(processedTicket);
-
-				if (!isNew) {
-					filteredOldTickets.push(existingData);
-				}
+				filteredTickets.push(deleteIfUndefined({ newTicket: processedTicket, existingData }));
 			}
 		}));
 
 		// If none of the tickets had any valid changes, return ok
-		if (!filteredNewTickets.length) {
+		if (!filteredTickets.length) {
 			respond(req, res, templates.ok);
 			return;
 		}
 
-		req.body.tickets = filteredNewTickets;
-		req.ticketsData = filteredOldTickets;
+		// empty the tickets arrays and populate with tickets that have actual changes
+		req.body.tickets = [];
+		req.ticketsData = [];
+		for (const { newTicket, existingData } of filteredTickets) {
+			req.body.tickets.push(newTicket);
+			if (existingData) {
+				req.ticketsData.push(existingData);
+			}
+		}
 
 		await next();
 	} catch (err) {
