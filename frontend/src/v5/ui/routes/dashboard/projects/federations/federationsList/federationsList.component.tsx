@@ -40,6 +40,7 @@ import { Display } from '@/v5/ui/themes/media';
 import { SearchContextType, SearchContext } from '@controls/search/searchContext';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { CollapseSideElementGroup, Container } from './federationsList.styles';
+import { VirtualList } from '@controls/virtualList/virtualList.component';
 
 type IFederationsList = {
 	emptyMessage: ReactNode;
@@ -72,6 +73,7 @@ export const FederationsList = ({
 				title={<>{title} {!isListPending && <CircledNumber>{federations.length}</CircledNumber>}</>}
 				tooltipTitles={titleTooltips}
 				isLoading={areStatsPending}
+				interactableWhileLoading
 				sideElement={(
 					<CollapseSideElementGroup>
 						<SearchInput
@@ -114,14 +116,18 @@ export const FederationsList = ({
 				</DashboardListHeader>
 				<DashboardList>
 					{!isEmpty(sortedList) ? (
-						sortedList.map((federation, index) => (federation.hasStatsPending ? (
-							<SkeletonListItem delay={index / 10} key={federation._id} />
-						) : (
-							<FederationListItem
-								key={federation._id}
-								federation={federation}
-							/>
-						)))
+						<VirtualList items={sortedList} itemHeight={80} ItemComponent={
+							(federation, index) => (
+								federation.hasStatsPending ? (
+									<SkeletonListItem  delay={index / 10} key={federation._id} />
+								) : (
+									<FederationListItem
+										key={federation._id}
+										federation={federation}
+									/>
+								)
+							)
+						}/>
 					) : (
 						<DashboardListEmptyContainer>
 							{ hasFederations ? (
