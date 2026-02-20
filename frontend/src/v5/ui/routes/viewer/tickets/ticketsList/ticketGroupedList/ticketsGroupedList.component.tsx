@@ -42,6 +42,7 @@ export const TicketsGroupedList = ({ tickets, groupName, handle, loading, expand
 	const ids = tickets.map(({ _id }) => _id);
 
 	const allSelected = ids.every((id) =>  selectedItems.has(id));
+	const someSelected = !allSelected && ids.some((id) =>  selectedItems.has(id));
 
 	const clickOnBulkCheckbox = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
 		event.preventDefault();
@@ -56,7 +57,7 @@ export const TicketsGroupedList = ({ tickets, groupName, handle, loading, expand
 					CollapseToggleComponent={(({ expanded: expandedProp }) => (
 						<GroupedListToggleContainer $expanded={expandedProp}>
 							<GroupedListToggleTitle>
-								{bulkModeOn && (<TicketCheckbox checked={allSelected} onClick={clickOnBulkCheckbox}/>)}
+								{bulkModeOn && (<TicketCheckbox checked={allSelected} indeterminate={someSelected} onClick={clickOnBulkCheckbox}/>)} 
 								<GroupedTextOverflow>{groupName}</GroupedTextOverflow>
 								{loading && (<Spinner />)}
 								{!loading && (<CircledNumber>{tickets.length}</CircledNumber>)}

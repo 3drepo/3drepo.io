@@ -30,6 +30,8 @@ export const ToggleAllCheckbox = ({ $withFilters }: ToggleAllCheckboxProps) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const checked = filteredTickets.length === selectedItems.size && filteredTickets.length > 0;
+	// const indeterminate = !checked && Array.from(selectedItems).some((id) => filteredTickets.some((t) => t._id === id));
+	const indeterminate = !checked && filteredTickets.some((t) => selectedItems.has(t._id));
 
 	const toggleAllChecked = () => {
 		addOrRemoveSelection(filteredTickets.map((t) => t._id), checked);
@@ -46,7 +48,7 @@ export const ToggleAllCheckbox = ({ $withFilters }: ToggleAllCheckboxProps) => {
 
 	return (
 		<AllTicketsCheckboxContainer variant="label" $withFilters={$withFilters}>
-			<AllTicketsCheckbox checked={checked} disabled={filteredTickets.length == 0} onClick={toggleAllChecked}/>
+			<AllTicketsCheckbox checked={checked} indeterminate={indeterminate} disabled={filteredTickets.length == 0} onClick={toggleAllChecked}/>
 			<FormattedMessage id="viewer.cards.ticket.selectAll" defaultMessage="Select All" />
 		</AllTicketsCheckboxContainer>
 	);
