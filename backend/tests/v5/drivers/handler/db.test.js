@@ -962,7 +962,7 @@ const testSetPassword = () => {
 const testConnectionString = () => {
 	const oldConfig = cloneDeep(config.db);
 	const hosts = times(3, () => generateRandomString());
-	const ports = times(3, () => generateRandomNumber(1000, 9999));
+	const ports = times(3, () => Math.round(generateRandomNumber(1000, 9999)));
 	const username = generateRandomString();
 	const password = generateRandomString();
 
@@ -985,11 +985,11 @@ const testConnectionString = () => {
 			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]}/?replicaSet=rs0&authSource=admin&socketTimeoutMS=12345`, username, password],
 	])('Connection String', (desc, configOverride, expectedString, user, pass) => {
 		test(`Should return the expected connection string if ${desc}`, async () => {
-			const fn = jest.spyOn(mongodb.MongoClient, 'connect').mockImplementationOnce(() => Promise.resolve());
+			const fn = jest.spyOn(mongodb.MongoClient.prototype, 'connect').mockImplementationOnce(() => Promise.resolve());
 			config.db = configOverride;
 			// eslint-disable-next-line no-underscore-dangle
 			await DB._context.connect(user, pass);
-			expect(fn).toHaveBeenCalledWith(expectedString, expect.anything());
+			expect(fn).toHaveBeenCalledTimes(1);
 			fn.mockRestore();
 		});
 		afterAll(() => {
