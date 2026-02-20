@@ -67,6 +67,7 @@ export const TicketsTableSelectionColumn = ({
 	// Convert selectedIds to a Set for fast lookup
 	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
 	const allSelected = tickets.every(({ _id, modelId }) => selectedIdsSet.has(_id) || disabledModelIds.includes(modelId)) && tickets.length > 0;
+	const someSelected = !allSelected && tickets.some(({ _id }) => selectedIdsSet.has(_id));
 
 	const onCheck = useCallback((e, ticketId) => {
 		setSelectedIds((prev) => {
@@ -97,7 +98,7 @@ export const TicketsTableSelectionColumn = ({
 		<div>
 			<Headers>
 				<CheckboxHeaderCell alwaysVisible>
-					<Checkbox checked={allSelected} onClick={onCheckAll} />
+					<Checkbox indeterminate={someSelected} checked={allSelected} onClick={onCheckAll} />
 				</CheckboxHeaderCell>
 			</Headers>
 			<SelectionColumnContainer $empty={!tickets?.length} $hideNewticketButton={true}>
