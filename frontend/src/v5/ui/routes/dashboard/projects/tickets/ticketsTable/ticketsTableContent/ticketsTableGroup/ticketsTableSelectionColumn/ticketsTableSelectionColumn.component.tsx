@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { memo, useCallback, useContext } from 'react';
+import { memo, useCallback, useContext, useEffect, useRef } from 'react';
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
@@ -63,11 +63,13 @@ export const TicketsTableSelectionColumn = ({
 	disabledModelIds,
 }: TicketsTableSelectionColumnProps) => {
 	const { selectedIds, setSelectedIds } = useContext(TicketsTableContext);
+	const ticketIds = tickets.map((t) => t._id);
+	const oldTicketsIds = useRef<string[]>(ticketIds);
 
 	// Convert selectedIds to a Set for fast lookup
 	const selectedIdsSet = selectedIds instanceof Set ? selectedIds : new Set(selectedIds);
 	const allSelected = tickets.every(({ _id, modelId }) => selectedIdsSet.has(_id) || disabledModelIds.includes(modelId)) && tickets.length > 0;
-	const someSelected = !allSelected && tickets.some(({ _id }) => selectedIdsSet.has(_id));
+	const someSelected = !allSelected && ticketIds.some((id) => selectedIdsSet.has(id));
 
 	const onCheck = useCallback((e, ticketId) => {
 		setSelectedIds((prev) => {
@@ -93,6 +95,20 @@ export const TicketsTableSelectionColumn = ({
 			return next;
 		});
 	}, [tickets, disabledModelIds]);
+
+	useEffect(() => {
+		const removedTicketIds = oldTicketsIds.current.filter((id) => !ticketIds.includes(id));
+		// if a change causes a selected ticket to be removed from the table
+		// it should be also removed from the selection
+		if (removedTicketIds.length) {
+			setSelectedIds((prev) => {
+				const next = new Set(prev);
+				removedTicketIds.forEach((id) => next.delete(id));
+				return next;
+			});
+		}
+		oldTicketsIds.current = ticketIds;
+	}, [ticketIds.sort().join(','), setSelectedIds]);
 
 	return (
 		<div>
