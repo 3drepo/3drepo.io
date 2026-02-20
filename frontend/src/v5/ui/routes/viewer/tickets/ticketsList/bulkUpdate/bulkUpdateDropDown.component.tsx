@@ -60,18 +60,24 @@ const propertyNameFromFilter = (filter: TicketFilter) => {
 
 export const BulkUpdateDropdown = () => {
 	const { containerOrFederation } = useParams<ViewerParams>();
-
+	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	
 	const [selectedFilter, setSelectedFilter] = useState<TicketFilter>(null);
 	const showFiltersList = !selectedFilter?.property;
-	const { selectedItems } = useContext(TicketsBulkUpdateContext);
+	const { selectedItems: selectedContextItems } = useContext(TicketsBulkUpdateContext);
 
 	const templatesSet = new Set<ITemplate>();
 	const state = getState();
 
-	TicketsCardHooksSelectors.selectFilteredTickets().forEach((ticket) => {
-		if (selectedItems.has(ticket._id) ) {
+	// If the tickets get updated and the filtering filters them out 
+	// the selectedItems must be filtered also.
+	const selectedItems = new Set<string>();
+
+	filteredTickets.forEach((ticket) => {
+		if (selectedContextItems.has(ticket._id) ) {
 			const template = selectTemplateById(state, containerOrFederation, ticket.type);
 			templatesSet.add(template);
+			selectedItems.add(ticket._id);
 		}
 	});
 
