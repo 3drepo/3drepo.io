@@ -76,6 +76,8 @@ export const SnackbarHandler = () => {
 		handleNewSnack(latestSnack);
 	}, [latestSnack]);
 
+	if (!snack.message) return null;
+
 	return (
 		<Snackbar
 			autoHideDuration={autoHideDuration}

@@ -405,6 +405,7 @@ const hasSameValue = (ticket:Partial<ITicket>, updateFields:Partial<ITicket>)=> 
 };
 
 export function* updateManyTickets({ teamspace, projectId, ids, ticket, onSuccess, onError }: UpdateManyTicketsAction) {
+	const snackbarKey = new Date().getTime();
 	try {
 		// // This is for updating all tickets in the redux state
 		const ticketsByModelTemplateId:Record<string, Partial<ITicket>[]> = {};
@@ -440,7 +441,6 @@ export function* updateManyTickets({ teamspace, projectId, ids, ticket, onSucces
 		}
 
 		let chunkSize = 1000;
-		const snackbarKey = new Date().getTime();
 		const isFed = selectIsFederation(state);
 		yield put(SnackbarActions.show({ message: formatMessage({ id: 'tickets.updateManyTickets.updating', defaultMessage: 'Tickets updating...' }), spinner: true, key: snackbarKey  }));
 		for (let modelIdTemplate of Object.keys(ticketsByModelTemplateId)) {
@@ -458,6 +458,7 @@ export function* updateManyTickets({ teamspace, projectId, ids, ticket, onSucces
 		onSuccess?.();
 		yield put(SnackbarActions.show({ message: formatMessage({ id: 'tickets.updateManyTickets.updated', defaultMessage: 'Tickets updated' }), key: snackbarKey }));
 	} catch (error) {
+		yield put(SnackbarActions.show({ key: snackbarKey  })); // This is to remove the updating snackbar in case of error
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
 				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update tickets({ticketsCount})' },
