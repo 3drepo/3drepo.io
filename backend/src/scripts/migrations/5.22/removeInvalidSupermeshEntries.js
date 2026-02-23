@@ -18,48 +18,30 @@
 const { v5Path } = require('../../../interop');
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { insertRef, getRefEntry } = require(`${v5Path}/models/fileRefs`);
+const { insertManyRefs, removeRefsByQuery } = require(`${v5Path}/models/fileRefs`);
 const { createConstantsObject } = require(`${v5Path}/utils/helper/objects`);
-const { removeFilesWithMeta } = require(`${v5Path}/services/filesManager`);
 const { find } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const insertMissingRef = async (teamspace, collection, id, correctedId) => {
-	try {
-		const refInfo = await getRefEntry(teamspace, collection, id);
-		await insertRef(teamspace, collection, { ...refInfo, _id: correctedId });
-	} catch (err) {
-		logger.logError(`Failed to insert ref entry for ${teamspace}.${collection} with _id: ${correctedId}`);
-	}
-};
-
-const removeInvalidRef = async (teamspace, collection, id) => {
-	try {
-		await removeFilesWithMeta(teamspace, collection, { _id: id });
-	} catch (err) {
-		logger.logError(`Failed to remove files from ${teamspace}.${collection} with _id: ${id}`);
-	}
-};
-
 const processCollection = async (teamspace, collection) => {
 	const [badEntries, goodEntries] = await Promise.all([
-		find(teamspace, collection, { _id: { $regex: '^/revision/.+/supermeshes\\.json$' } }, { _id: 1 }),
-		find(teamspace, collection, { _id: { $regex: '^[0-9a-fA-F-]+\\/supermeshes\\.json$' } }, { _id: 1 }),
+		find(teamspace, collection, { _id: { $regex: '^/revision/.+/supermeshes\\.json$' } }),
+		find(teamspace, collection, { _id: { $regex: '^[0-9a-fA-F-]+\\/supermeshes\\.json$' } }),
 	]);
 	const goodEntryIds = createConstantsObject(goodEntries.map(({ _id }) => _id));
 
 	const missingEntries = [];
 
-	for (const { _id } of badEntries) {
+	for (const { _id, ...rest } of badEntries) {
 		const correctedId = _id.replace('/revision/', '');
 		if (!goodEntryIds[correctedId]) {
-			missingEntries.push({ _id, correctedId });
+			missingEntries.push({ _id: correctedId, ...rest });
 		}
 	}
 
 	await Promise.all([
-		...missingEntries.map(({ _id, correctedId }) => insertMissingRef(teamspace, collection, _id, correctedId)),
-		...badEntries.map(({ _id }) => removeInvalidRef(teamspace, collection, _id)),
+		insertManyRefs(teamspace, collection, missingEntries),
+		removeRefsByQuery(teamspace, collection, { _id: { $in: badEntries.map(({ _id }) => _id) } }),
 	]);
 };
 
