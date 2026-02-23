@@ -104,7 +104,10 @@ const runCommand = async (database, cmd) => {
 // This is a temp workaround for v4 and should not be used anywhere!
 // eslint-disable-next-line no-underscore-dangle
 DBHandler._context = {
-	connect, getDB,
+	connect,
+	getDB,
+	// getURL is exposed for testing purposes, but it is not intended to be used anywhere else
+	getURL,
 };
 
 DBHandler.authenticate = async (user, password) => {

@@ -985,12 +985,9 @@ const testConnectionString = () => {
 			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]}/?replicaSet=rs0&authSource=admin&socketTimeoutMS=12345`, username, password],
 	])('Connection String', (desc, configOverride, expectedString, user, pass) => {
 		test(`Should return the expected connection string if ${desc}`, async () => {
-			const fn = jest.spyOn(mongodb.MongoClient.prototype, 'connect').mockImplementationOnce(() => Promise.resolve());
 			config.db = configOverride;
 			// eslint-disable-next-line no-underscore-dangle
-			await DB._context.connect(user, pass);
-			expect(fn).toHaveBeenCalledTimes(1);
-			fn.mockRestore();
+			expect(DB._context.getURL(user, pass)).toEqual(expectedString);
 		});
 		afterAll(() => {
 			config.db = oldConfig;

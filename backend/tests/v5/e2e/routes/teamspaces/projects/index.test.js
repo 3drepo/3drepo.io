@@ -163,22 +163,20 @@ const testCreateProject = (internalService) => {
 		test('should fail if multiple projects are being sent at similar times with the same name', async () => {
 			const payload = { name: ServiceHelper.generateRandomString() };
 			const prom1 = agent.post(route(teamspace, users.tsAdmin.apiKey)).send(payload);
-			const res = await Promise.all(				
+			const res = await Promise.all(
 				times(3, () => agent.post(route(teamspace, users.tsAdmin.apiKey)).send(payload)));
 
 			const resBodies = [];
 			let successAttemptFound = false;
-			res.forEach(({statusCode, body}) => {
-				if(statusCode === templates.ok.status) {
+			res.forEach(({ statusCode, body }) => {
+				if (statusCode === templates.ok.status) {
 					expect(successAttemptFound).toBeFalsy();
 					successAttemptFound = true;
 				} else {
 					expect(statusCode).toBe(templates.invalidArguments.status);
 					expect(body.code).toBe(templates.invalidArguments.code);
 				}
-				
 			});
-			
 		});
 	});
 };
