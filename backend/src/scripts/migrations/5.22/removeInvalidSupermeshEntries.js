@@ -43,8 +43,10 @@ const processCollection = async (teamspace, collection) => {
 	}
 
 	await Promise.all([
-		insertManyRefs(teamspace, collection, missingEntries),
-		removeRefsByQuery(teamspace, collection, { _id: { $in: idsToRemove } }),
+		missingEntries.length > 0 ? insertManyRefs(teamspace, collection, missingEntries)
+			: Promise.resolve(),
+		idsToRemove.length > 0 ? removeRefsByQuery(teamspace, collection, { _id: { $in: idsToRemove } })
+			: Promise.resolve(),
 	]);
 };
 
