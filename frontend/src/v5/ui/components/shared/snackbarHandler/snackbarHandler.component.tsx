@@ -27,10 +27,10 @@ export const SnackbarHandler = () => {
 	const [isOpen, setIsOpen] = useState(false);
 
 	const latestSnack = useSelector(selectSnackConfig);
-	const [snack, setSnack] = useState<ISnackConfig>(latestSnack);
+	const [{ spinner = false, timeout, ...snack }, setSnack] = useState<ISnackConfig>(latestSnack);
 	const queue = useRef<ISnackConfig[]>([]);
 
-	const autoHideDuration = !snack?.spinner ? (snack?.timeout ?? 5000) : undefined; // if snack has spinner, it should not autohide
+	const autoHideDuration = !spinner ? (timeout ?? 5000) : undefined; // if snack has spinner, it should not autohide
 
 	const processQueue = () => {
 		if (queue.current.length > 0) {
@@ -63,8 +63,8 @@ export const SnackbarHandler = () => {
 		setIsOpen(false);
 	};
 
-	const action = snack.spinner
-		? <SnackbarSpinner />
+	const action = spinner
+		? <SnackbarSpinner key="spinner" />
 		: (
 			<IconButton
 				key="close"
