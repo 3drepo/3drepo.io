@@ -31,17 +31,20 @@ const processCollection = async (teamspace, collection) => {
 	const goodEntryIds = createConstantsObject(goodEntries.map(({ _id }) => _id));
 
 	const missingEntries = [];
+	const idsToRemove = [];
 
 	for (const { _id, ...rest } of badEntries) {
 		const correctedId = _id.replace('/revision/', '');
 		if (!goodEntryIds[correctedId]) {
 			missingEntries.push({ _id: correctedId, ...rest });
 		}
+
+		idsToRemove.push(_id);
 	}
 
 	await Promise.all([
 		insertManyRefs(teamspace, collection, missingEntries),
-		removeRefsByQuery(teamspace, collection, { _id: { $in: badEntries.map(({ _id }) => _id) } }),
+		removeRefsByQuery(teamspace, collection, { _id: { $in: idsToRemove } }),
 	]);
 };
 
