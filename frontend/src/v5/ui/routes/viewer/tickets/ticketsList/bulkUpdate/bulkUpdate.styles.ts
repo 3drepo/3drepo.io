@@ -25,6 +25,7 @@ export const AllTicketsCheckboxContainer = styled(Typography)<{ $withFilters?: b
 	position: relative;
 	padding-left: 12px;
 	flex-shrink: 0;
+	color: ${({ theme }) => theme.palette.base.main};
 	
 	display: inline;
 	height: ${({ $withFilters }) => ($withFilters) ?  '0' : 'auto'};
