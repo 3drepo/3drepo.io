@@ -86,3 +86,5 @@ export const getPropertyLabel = (name) => {
 		.map(_.startCase)
 		.join(' : ');
 };
+
+export const TICKET_TABLE_ROW_HEIGHT = 37;

@@ -27,15 +27,10 @@ export const Row = styled(ResizableTableRow)<{ $selected?: boolean }>`
 	height: 37px;
 	cursor: pointer;
 	width: fit-content;
+	overflow: hidden;
 
 	${CellContainer} {
 		background: ${({ $selected, theme }) => ($selected ? '#edf0f8' : theme.palette.primary.contrast)};
-	}
-
-	&:first-child {
-		border-top-left-radius: 10px;
-		border-top-right-radius: 10px;
-		overflow: hidden;
 	}
 `;
 
