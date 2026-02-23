@@ -25,6 +25,8 @@ const utils = require("../utils");
 const db = require("../handler/db");
 const systemLogger = require("../logger.js").systemLogger;
 const PermissionTemplates = require("./permissionTemplates");
+const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings.js`);
+const { getAllMembersInTeamspace } = require(`${v5Path}/processors/teamspaces`);
 const { findProjectByModelId } = require(`${v5Path}/models/projectSettings.js`);
 const { cloneDeep } = require(`${v5Path}/utils/helper/objects.js`);
 const { publish } = require(`${v5Path}/services/eventsManager/eventsManager`);
@@ -33,6 +35,16 @@ const { events } = require(`${v5Path}/services/eventsManager/eventsManager.const
 const MODELS_COLL = "settings";
 
 const MODEL_CODE_REGEX = /^[a-zA-Z0-9]{0,50}$/;
+
+const getIsMemberMap = async (account) => {
+	const isMember = {};
+	const memData = await getAllMembersInTeamspace(account);
+
+	memData.forEach(({ user }) => {
+		isMember[user] = true;
+	});
+	return isMember;
+};
 
 function clean(setting) {
 	if (setting) {
@@ -108,8 +120,10 @@ ModelSetting.batchUpdatePermissions = async function(account, batchPermissions =
 	if(!batchPermissions.length) {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
+	const members = await getIsMemberMap(account);
 
-	const updatePromises = batchPermissions.map((update) => ModelSetting.updatePermissions(account, update.model, update.permissions));
+	const updatePromises = batchPermissions.map((update) => ModelSetting.updatePermissions(
+		account, update.model, update.permissions, undefined, members));
 	const [updateResponses, { _id: projectId }] = await Promise.all([
 		Promise.all(updatePromises),
 		findProjectByModelId(account, batchPermissions[0].model, { _id: 1 })
@@ -335,23 +349,27 @@ ModelSetting.getSingleModelPermissions = async function(account, model) {
  * @param {Object} teamspaces an object which keys are teamspaces ids and values are an array of modelids
  * @returns {Object} which contains the models data
   */
-ModelSetting.getModelsData = function(teamspaces) {
-	return Promise.all(
-		Object.keys(teamspaces).map((account) => {
-			const modelsIds = teamspaces[account];
+ModelSetting.getModelsData = async function(teamspaces) {
+	const res = {};
+	await Promise.all(
+		Object.keys(teamspaces).map(async (account) => {
+			try {
+				await getTeamspaceSetting(account); // just to make sure teamspace exists
+				const modelsIds = teamspaces[account];
+				const models = await db.find(account, MODELS_COLL, {_id: {$in:modelsIds}}, { name: 1, federate: 1, _id: 1});
+				const indexedModels = models.reduce((ac,c) => {
+					const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
+				} ,{});
+				res[account] = indexedModels;
+			} catch (err) {
+			// if the teamspace no longer exists, don't add an entry
 
-			return db.find(account, MODELS_COLL, {_id: {$in:modelsIds}}, { name: 1, federate: 1, _id: 1})
-				.then((models) => {
-					const res = {};
-					const indexedModels = models.reduce((ac,c) => {
-						const obj = {}; obj[c._id] = c; return Object.assign(ac,obj); // indexing by model._id
-					} ,{});
-					res[account] = indexedModels;
+			}
 
-					return res;
-				});
 		})
-	).then((modelData) => modelData.reduce((ac,cur) => Object.assign(ac, cur),{})); // Turns the array to an object (quick indexing);
+	);
+
+	return res;
 };
 
 ModelSetting.isFederation = async function(account, model) {
@@ -457,11 +475,18 @@ ModelSetting.updateHeliSpeed = async function(account, model, newSpeed) {
 	return ModelSetting.updateModelSetting(account, model, {heliSpeed: newSpeed});
 };
 
-ModelSetting.updatePermissions = async function(account, model, permissions = [], executor) {
-	const { teamspaceMemberCheck } = require("./user");
-
+ModelSetting.updatePermissions = async function(account, model, permissions = [], executor, memberRecords) {
 	if (!Array.isArray(permissions)) {
 		throw responseCodes.INVALID_ARGUMENTS;
+	}
+
+	memberRecords = memberRecords || await getIsMemberMap(account);
+	for (let i = 0; i < permissions.length; i++) {
+		// ensure users are members of the teamspace
+		if(!memberRecords || !memberRecords[permissions[i].user]) {
+			throw responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE;
+		}
+
 	}
 
 	const setting = await ModelSetting.findModelSettingById(account, model);
@@ -477,7 +502,9 @@ ModelSetting.updatePermissions = async function(account, model, permissions = []
 		checkPermissionIsValid(permission);
 		checkUserHasPermissionTemplate(permission);
 
-		await teamspaceMemberCheck(permission.user, account);
+		if(!memberRecords[permission.user]) {
+			return;
+		}
 		const index = setting.permissions.findIndex(x => x.user === permission.user);
 		if (index !== -1) {
 			if (permission.permission) {
@@ -588,8 +615,15 @@ ModelSetting.updateModelSetting = async function (account, model, updateObj) {
 };
 
 ModelSetting.removePermissionsFromModels = async (account, models, userToRemove) => {
-	await Promise.all(models.map((model)=> {
-		ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ""}]);
+	const modelsWithUserPerm = await db.find(account, MODELS_COLL, {
+		_id: { $in: models },
+		"permissions.user": userToRemove
+	}, { _id: 1});
+
+	const isMemberMap = await getIsMemberMap(account, [userToRemove]);
+
+	await Promise.all(modelsWithUserPerm.map(({_id: model})=> {
+		return ModelSetting.updatePermissions(account, model, [{ user: userToRemove, permission: ""}], undefined, isMemberMap);
 	}));
 };
 

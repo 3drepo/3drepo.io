@@ -18,9 +18,10 @@
 const { cloneDeep, times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString } = require('../../../../../../helper/services');
-const { stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateUUIDString, generateUUID } = require('../../../../../../helper/services');
+const { UUIDToString, stringToUUID } = require('../../../../../../../../src/v5/utils/helper/uuids');
 const { idTypesToKeys, idTypes } = require('../../../../../../../../src/v5/models/metadata.constants');
+const { viewGroups } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -41,8 +42,12 @@ const ScenesModel = require(`${src}/models/scenes`);
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/scenes');
 const SceneProcessor = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
-const getMetadata = (externalIdName) => times(10, () => ({ parents: times(2, () => generateRandomString()),
-	metadata: [{ key: externalIdName, value: generateRandomString() }] }));
+const { templates } = require(`${src}/utils/responseCodes`);
+
+const getMetadata = (externalIdName) => times(10, () => ({
+	parents: times(2, () => generateRandomString()),
+	metadata: [{ key: externalIdName, value: generateRandomString() }],
+}));
 
 const getSmartTicketGroupById = () => {
 	const teamspace = generateRandomString();
@@ -99,8 +104,10 @@ const getSmartTicketGroupById = () => {
 					if (options.matchedMeta.length) {
 						const ids = times(options.matchedMeta.length, generateUUIDString);
 						SceneProcessor.getMeshesWithParentIds.mockResolvedValueOnce(ids);
-						expectedData = { ...options.group,
-							objects: [{ container, _ids: ids.map(stringToUUID) }] };
+						expectedData = {
+							...options.group,
+							objects: [{ container, _ids: ids.map(stringToUUID) }],
+						};
 					} else {
 						expectedData = { ...options.group, objects: [] };
 					}
@@ -119,20 +126,28 @@ const getSmartTicketGroupById = () => {
 					SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(
 						{ key: options.externalIdName, values: expectedValues });
 
-					expectedData = { ...options.group,
-						objects: [{ container, [options.externalIdName]: expectedValues }] };
+					expectedData = {
+						...options.group,
+						objects: [{ container, [options.externalIdName]: expectedValues }],
+					};
 					if (options.unwantedMeta.length) {
 						if (options.noUnwantedExternId) {
 							SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(undefined);
 						} else {
 							const unwantedIds = options.unwantedMeta.map(({ metadata }) => metadata[0].value);
 							SceneProcessor.getExternalIdsFromMetadata.mockReturnValueOnce(
-								{ key: options.externalIdName,
-									values: unwantedIds });
-							expectedData = { ...options.group,
-								objects: [{ container,
+								{
+									key: options.externalIdName,
+									values: unwantedIds,
+								});
+							expectedData = {
+								...options.group,
+								objects: [{
+									container,
 									[options.externalIdName]: expectedValues.filter(
-										(v) => !unwantedIds.includes(v)) }] };
+										(v) => !unwantedIds.includes(v)),
+								}],
+							};
 						}
 					}
 				}
@@ -155,8 +170,12 @@ const getSmartTicketGroupById = () => {
 				expect(MetaModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, container,
 					revision, options.group.rules, {
 						parents: 1,
-						...(options.convertToMeshIds ? {} : { metadata: { $elemMatch:
-							{ $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) } } }),
+						...(options.convertToMeshIds ? {} : {
+							metadata: {
+								$elemMatch:
+								{ $or: Object.values(idTypesToKeys).flat().map((n) => ({ key: n })) },
+							},
+						}),
 					});
 			}
 		});
@@ -218,7 +237,8 @@ const getNormalTicketGroupById = () => {
 					SceneProcessor.getMeshesWithParentIds.mockResolvedValueOnce(ids);
 					expectedData.objects = expectedData.objects
 						.map(({ container: resContainer }) => ({
-							container: resContainer, _ids: ids.map(stringToUUID) }));
+							container: resContainer, _ids: ids.map(stringToUUID),
+						}));
 				}
 			}
 
@@ -377,9 +397,172 @@ const testUpdateGroup = () => {
 	describe.each(getCommonTestCases(true))('Update group', runTest);
 };
 
+const testProcessGroupsUpdate = () => {
+	describe('Process groups update', () => {
+		let groupsState;
+		let oldData;
+		let newData;
+		const fields = Object.values(viewGroups).map((groupName) => `state.${groupName}`);
+		const oldGroupId = generateUUIDString();
+		const newGroupId = generateUUIDString();
+		const oldGroup = {
+			_id: oldGroupId,
+			name: generateRandomString(),
+			description: generateRandomString(),
+			objects: [],
+		};
+		const newGroup = {
+			_id: newGroupId,
+			name: generateRandomString(),
+			description: generateRandomString(),
+			objects: [],
+		};
+
+		beforeEach(() => {
+			groupsState = {
+				old: new Set(),
+				stillUsed: new Set(),
+				toAdd: [],
+			};
+
+			oldData = {
+				state: {
+					colored: [{ group: oldGroup }],
+				},
+			};
+
+			newData = {
+				state: {
+					colored: [{ group: newGroup }],
+				},
+			};
+		});
+
+		test('should preserve old data when newData is undefined', () => {
+			newData = undefined;
+
+			Groups.processGroupsUpdate(oldData, newData, fields, groupsState);
+
+			expect(groupsState.old.has(oldGroup)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroup)).toBe(true);
+		});
+
+		test('should preserve old data when newData is undefined', () => {
+			newData = undefined;
+
+			Groups.processGroupsUpdate(oldData, newData, fields, groupsState);
+
+			expect(groupsState.old.has(oldGroup)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroup)).toBe(true);
+		});
+
+		test('should add new groups and preserve existing ones when newData is provided', () => {
+			newData = {
+				state: {
+					colored: [{ group: newGroup }],
+					hidden: [{ group: generateUUID() }],
+				},
+			};
+			Groups.processGroupsUpdate(oldData, newData, fields, groupsState);
+
+			expect(groupsState.old.has(oldGroup)).toBe(true);
+			expect(groupsState.stillUsed.has(oldGroup)).toBe(false);
+
+			// Check if new groups are added correctly
+			expect(groupsState.stillUsed.has(UUIDToString(newData.state.hidden[0].group))).toBe(true);
+			expect(groupsState.toAdd).toHaveLength(1);
+			expect(groupsState.toAdd[0]).toHaveProperty('_id');
+			expect(groupsState.toAdd[0].name).toBe(newGroup.name);
+			expect(groupsState.toAdd[0].description).toBe(newGroup.description);
+		});
+	});
+};
+
+const testCommitGroupChanges = () => {
+	describe('Commit group changes', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+
+		test('should execute correctly with valid data', async () => {
+			const toAdd = times(2, () => generateUUID());
+			const old = times(2, () => generateUUID());
+
+			const ticketId = generateUUID();
+			const data = { stillUsed: new Set([generateUUIDString(), generateUUIDString()]), toAdd, old };
+
+			GroupsModel.getGroupsByIds.mockResolvedValueOnce([{ _id: generateUUID() }, { _id: generateUUID() }]);
+
+			await Groups.commitGroupChanges(teamspace, project, model, ticketId, data);
+
+			expect(GroupsModel.getGroupsByIds).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.getGroupsByIds).toHaveBeenCalledWith(
+				teamspace, project, model, ticketId, Array.from(data.stillUsed).map((stringToUUID)), { _id: 1 });
+
+			expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model, ticketId, toAdd);
+
+			expect(GroupsModel.deleteGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model, ticketId, old);
+		});
+
+		test('should not remove the old UUID if it is being used', async () => {
+			const toAdd = times(2, () => generateUUID());
+			const old = times(2, () => generateUUID());
+
+			const ticketId = generateUUID();
+			const data = { stillUsed: new Set([generateUUIDString(), generateUUIDString(), UUIDToString(old[0])]),
+				toAdd,
+				old };
+
+			GroupsModel.getGroupsByIds.mockResolvedValueOnce([{ _id: generateUUID() }, { _id: generateUUID() },
+				{ _id: generateUUID() }]);
+
+			await Groups.commitGroupChanges(teamspace, project, model, ticketId, data);
+
+			expect(GroupsModel.getGroupsByIds).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.getGroupsByIds).toHaveBeenCalledWith(
+				teamspace, project, model, ticketId, Array.from(data.stillUsed).map((stringToUUID)), { _id: 1 });
+
+			expect(GroupsModel.addGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model, ticketId, toAdd);
+
+			expect(GroupsModel.deleteGroups).toHaveBeenCalledTimes(1);
+			expect(GroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model, ticketId, [old[1]]);
+		});
+
+		test('should throw error if groups not found', async () => {
+			const ticketId = generateUUID();
+			const data = { stillUsed: new Set(['group1', 'group2']), toAdd: [], old: [] };
+			GroupsModel.getGroupsByIds.mockResolvedValueOnce([{ _id: 'group2' }]);
+
+			await expect(Groups.commitGroupChanges(teamspace, project, model, ticketId, data))
+				.rejects
+				.toEqual({
+					...templates.invalidArguments,
+					message: 'The following groups are not found: group1',
+				});
+		});
+
+		test('should handle empty group operations', async () => {
+			const ticketIds = generateUUID();
+			const data = { };
+
+			GroupsModel.getGroupsByIds.mockResolvedValue([]);
+
+			await Groups.commitGroupChanges(teamspace, project, model, ticketIds, data);
+
+			expect(GroupsModel.addGroups).not.toHaveBeenCalled();
+			expect(GroupsModel.deleteGroups).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	getNormalTicketGroupById();
 	getSmartTicketGroupById();
 	testAddGroups();
 	testUpdateGroup();
+	testProcessGroupsUpdate();
+	testCommitGroupChanges();
 });

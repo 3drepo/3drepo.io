@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AvatarWrapper, Data, Heading, PopoverContainer, Username } from '../userPopoverCircle/userPopover/userPopover.styles';
+import { AvatarWrapper, Data, Heading, PopoverContainer, Username as Subheading } from '../userPopoverCircle/userPopover/userPopover.styles';
 import { ErrorCircle } from './errorPopoverCircle.styles';
 import { getJobAbbreviation } from '@/v5/store/jobs/jobs.helpers';
 
@@ -26,7 +26,7 @@ export const ErrorPopover = ({ value, message }) => (
 		</AvatarWrapper>
 		<Data>
 			<Heading>{value}</Heading>
-			<Username>{message}</Username>
+			<Subheading>{message}</Subheading>
 		</Data>
 	</PopoverContainer>
 );

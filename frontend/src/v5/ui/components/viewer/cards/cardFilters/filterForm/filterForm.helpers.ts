@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { CardFilterOperator } from '../cardFilters.types';
+import { TicketFilterOperator } from '../cardFilters.types';
 
-export const getOperatorMaxFieldsAllowed = (operator: CardFilterOperator) => {
+export const getOperatorMaxFieldsAllowed = (operator: TicketFilterOperator) => {
 	switch (operator) {
 		case 'ex':
 		case 'nex':

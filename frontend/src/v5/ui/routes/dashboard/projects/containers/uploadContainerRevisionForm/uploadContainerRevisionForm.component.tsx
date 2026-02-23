@@ -89,7 +89,7 @@ export const UploadContainerRevisionForm = ({
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = ContainerRevisionsHooksSelectors.selectUploadIsComplete();
-	const revisionsArePending = ContainerRevisionsHooksSelectors.selectRevisionsPending(presetContainerId);
+	const revisionsArePending = ContainerRevisionsHooksSelectors.selectRevisionsNotFetched(presetContainerId);
 	const presetContainer = ContainersHooksSelectors.selectContainerById(presetContainerId);
 	const [isUploading, setIsUploading] = useState<boolean>(false);
 
@@ -172,7 +172,7 @@ export const UploadContainerRevisionForm = ({
 		sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit),
 		MoreLink: (child: string) => (
 			<a
-				href="https://help.3drepo.io/en/articles/4798885-supported-file-formats"
+				href="https://3drepo-help.asite.com/en/articles/9707141-supported-file-formats"
 				target="_blank"
 				rel="noreferrer"
 			>

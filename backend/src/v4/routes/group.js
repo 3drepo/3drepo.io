@@ -69,14 +69,13 @@ const systemLogger = require("../logger.js").systemLogger;
  */
 
 /**
- * @api {get} /:teamspace/:model/revision(/master/head/|/:revId)/groups?[query] List all groups
+ * @api {get} /:teamspace/:model/revision/master/head/groups List all groups
  * @apiName listGroups
  * @apiGroup Groups
  * @apiDescription List all groups associated with the model.
  *
  * @apiUse Groups
  *
- * @apiParam {String} [revId] Revision unique ID
  * @apiParam (Query) {Boolean} [ifcguids] Flag that returns IFC GUIDs for group elements
  * @apiParam (Query) {Boolean} [noIssues] Flag that hides groups for issues
  * @apiParam (Query) {Boolean} [noRisks] Flag that hides groups for risks
@@ -87,16 +86,13 @@ const systemLogger = require("../logger.js").systemLogger;
  * @apiExample {get} Example usage (/master/head)
  * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups HTTP/1.1
  *
- * @apiExample {get} Example usage (/:revId)
- * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/groups HTTP/1.1
- *
  * @apiExample {get} Example usage (no issue/risk groups)
  * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups?noIssues=true&noRisks=true HTTP/1.1
  *
  * @apiExample {get} Example usage (with IFC GUIDs)
  * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups?ifcguids=true HTTP/1.1
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * [
  * 	{
@@ -149,10 +145,80 @@ const systemLogger = require("../logger.js").systemLogger;
  */
 router.get("/revision/master/head/groups", Middleware.hasViewIssueAccessToModel, listGroups);
 
-router.get("/revision/:rid/groups", Middleware.hasViewIssueAccessToModel, listGroups);
+/**
+ * @api {get} /:teamspace/:model/revision/:revId/groups List all groups
+ * @apiName listGroups
+ * @apiGroup Groups
+ * @apiDescription List all groups associated with the model.
+ *
+ * @apiUse Groups
+ *
+ * @apiParam {String} [revId] Revision unique ID
+ * @apiParam (Query) {Boolean} [ifcguids] Flag that returns IFC GUIDs for group elements
+ * @apiParam (Query) {Boolean} [noIssues] Flag that hides groups for issues
+ * @apiParam (Query) {Boolean} [noRisks] Flag that hides groups for risks
+ * @apiParam (Query) {Boolean} [noViews] Flag that hides groups for risks
+ * @apiParam (Query) {Number} [updatedSince] Only return issues that has been updated since this value (in epoch value)
+ * @apiSuccess (200) {Object[]} objects List of group objects
+ *
+ * @apiExample {get} Example usage (/:revId)
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/groups HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * [
+ * 	{
+ * 		"author":"alice",
+ * 		"color":[255,0,0],
+ * 		"createdAt":1520592300000,
+ * 		"description":"This is the description text for the first group.",
+ * 		"name":"Group 1",
+ * 		"objects":[
+ * 			{
+ * 				"account": "acme",
+ * 				"model": "00000000-0000-0000-0000-000000000000",
+ * 				"ifc_guids": [],
+ * 				"shared_ids": [
+ * 					"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
+ * 					"db18ef69-6d6e-49a0-846e-907346abb39d",
+ * 					"c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ * 					"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+ * 					"3f881fa8-2b7b-443e-920f-396c1c85e903"
+ * 				]
+ * 			}
+ * 		],
+ * 		"updatedAt":1552128300000,
+ * 		"updatedBy":"alice",
+ * 		"_id":"00000000-0000-0000-0000-000000000002"
+ * 	},
+ * 	{
+ * 		"author":"alice",
+ * 		"color":[0,255,0],
+ * 		"createdAt":1520592300000,
+ * 		"description":"(No description)",
+ * 		"name":"Group 2",
+ * 		"objects":[
+ * 			{
+ * 				"account": "acme",
+ * 				"model": "00000000-0000-0000-0000-000000000000",
+ * 				"ifc_guids": [],
+ * 				"shared_ids": [
+ * 					"c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ * 					"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d"
+ * 				]
+ * 			}
+ * 		],
+ * 		"rules":[],
+ * 		"updatedAt":1552128300000,
+ * 		"updatedBy":"alice",
+ * 		"_id":"00000000-0000-0000-0000-000000000003"
+ * 	}
+ * ]
+ */
+router.get("/revision/:revId/groups", Middleware.hasViewIssueAccessToModel, listGroups);
 
 /**
- * @api {get} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId?[query] Find group
+ * @api {get} /:teamspace/:model/revision/master/head/groups/:groupId Find group
  * @apiName findGroup
  * @apiGroup Groups
  * @apiDescription Find a group.
@@ -160,7 +226,6 @@ router.get("/revision/:rid/groups", Middleware.hasViewIssueAccessToModel, listGr
  * @apiUse Groups
  * @apiUse GroupsSuccessGroupObject
  *
- * @apiParam {String} [revId] Revision ID
  * @apiParam {String} groupId Group ID
  * @apiParam (Query) {Boolean} [ifcguids] Flag that returns IFC GUIDs for group elements
  *
@@ -173,7 +238,7 @@ router.get("/revision/:rid/groups", Middleware.hasViewIssueAccessToModel, listGr
  * @apiExample {get} Example usage (with IFC GUIDs)
  * GET /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups/00000000-0000-0000-0000-000000000004?ifcguids=true HTTP/1.1
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  * 	"author":"alice",
@@ -200,7 +265,7 @@ router.get("/revision/:rid/groups", Middleware.hasViewIssueAccessToModel, listGr
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  *
- * @apiSuccessExample {json} Success-Response (with IFC GUIDs)
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  * 	"author":"alice",
@@ -252,12 +317,107 @@ router.get("/revision/:rid/groups", Middleware.hasViewIssueAccessToModel, listGr
  * 	"_id":"00000000-0000-0000-0000-000000000004"
  * }
  */
-router.get("/revision/master/head/groups/:uid", Middleware.hasViewIssueAccessToModel, findGroup);
-
-router.get("/revision/:rid/groups/:uid", Middleware.hasViewIssueAccessToModel, findGroup);
+router.get("/revision/master/head/groups/:groupId", Middleware.hasViewIssueAccessToModel, findGroup);
 
 /**
- * @api {put} /:teamspace/:model/revision(/master/head|/:revId)/groups/:groupId/ Update group
+ * @api {get} /:teamspace/:model/revision/:revId/groups/:groupId Find group
+ * @apiName findGroup
+ * @apiGroup Groups
+ * @apiDescription Find a group.
+ *
+ * @apiUse Groups
+ * @apiUse GroupsSuccessGroupObject
+ *
+ * @apiParam {String} [revId] Revision ID
+ * @apiParam {String} groupId Group ID
+ * @apiParam (Query) {Boolean} [ifcguids] Flag that returns IFC GUIDs for group elements
+ * @apiExample {get} Example usage (/:revId)
+ *
+ * GET /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/groups/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ * 	"author":"alice",
+ * 	"color":[255,0,0],
+ * 	"createdAt":1520592300000,
+ * 	"description":"This is the description text for the first group.",
+ * 	"name":"Group 1",
+ * 	"objects":[
+ * 		{
+ * 			"account": "acme",
+ * 			"model": "00000000-0000-0000-0000-000000000000",
+ * 			"ifc_guids": [],
+ * 			"shared_ids": [
+ * 				"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
+ * 				"db18ef69-6d6e-49a0-846e-907346abb39d",
+ * 				"c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ * 				"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+ * 				"3f881fa8-2b7b-443e-920f-396c1c85e903"
+ * 			]
+ * 		}
+ * 	],
+ * 	"updatedAt":1552128300000,
+ * 	"updatedBy":"alice",
+ * 	"_id":"00000000-0000-0000-0000-000000000002"
+ * }
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ * 	"author":"alice",
+ * 	"color":[255,0,0],
+ * 	"createdAt":1520592300000,
+ * 	"description":"This is a smart group of objects with type IfcWall or IfcDoor with area > 5.",
+ * 	"name":"Smart 1",
+ * 	"objects":[
+ * 		{
+ * 			"account": "acme",
+ * 			"model": "00000000-0000-0000-0000-000000000000",
+ * 			"ifc_guids": [
+ * 				"2cx1GdQ9fAgRIWgfhfBb84",
+ * 				"13NEEUJ8DEE8fEH0aHgm2z",
+ * 				"3OLNF2_DL6hfPgh8Bw7fI7"
+ * 			],
+ * 			"shared_ids": [
+ * 				"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
+ * 				"db18ef69-6d6e-49a0-846e-907346abb39d",
+ * 				"c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ * 				"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+ * 				"3f881fa8-2b7b-443e-920f-396c1c85e903"
+ * 			]
+ * 		}
+ * 	],
+ * 	"rules":[
+ * 		{
+ * 			"field": {
+ *				"operator": "IS",
+ *				"values": ["Area"]
+ * 			},
+ * 			"operator":"GT",
+ * 			"values":[5]
+ * 		},
+ * 		{
+ * 			"field": {
+ *				"operator": "IS",
+ *				"values": ["IFC Type"]
+ * 			},
+ * 			"operator":"IS",
+ * 			"values":[
+ *				"IfcWall",
+ *				"IfcDoor"
+ * 			]
+ * 		}
+ * 	],
+ * 	"updatedAt":1552128300000,
+ * 	"updatedBy":"alice",
+ * 	"_id":"00000000-0000-0000-0000-000000000004"
+ * }
+ */
+router.get("/revision/:revId/groups/:groupId", Middleware.hasViewIssueAccessToModel, findGroup);
+
+/**
+ * @api {put} /:teamspace/:model/revision/master/head/groups/:groupId/ Update group
  * @apiName updateGroup
  * @apiGroup Groups
  * @apiDescription Update a group.
@@ -266,16 +426,12 @@ router.get("/revision/:rid/groups/:uid", Middleware.hasViewIssueAccessToModel, f
  * @apiUse GroupsBodyGroupObject
  * @apiUse GroupsSuccessGroupObject
  *
- * @apiParam {String} [revId] Revision ID
  * @apiParam {String} groupId Group ID
  *
  * @apiExample {put} Example usage (/master/head)
  * PUT /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups/00000000-0000-0000-0000-000000000002 HTTP/1.1
  *
- * @apiExample {put} Example usage (/:revId)
- * PUT /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/groups/00000000-0000-0000-0000-000000000002 HTTP/1.1
- *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  * 	"author":"alice",
@@ -301,12 +457,53 @@ router.get("/revision/:rid/groups/:uid", Middleware.hasViewIssueAccessToModel, f
  * 	"_id":"00000000-0000-0000-0000-000000000002"
  * }
  */
-router.put("/revision/master/head/groups/:uid", Middleware.hasCommenterAccessToModel, updateGroup);
-
-router.put("/revision/:rid/groups/:uid", Middleware.hasCommenterAccessToModel, updateGroup);
+router.put("/revision/master/head/groups/:groupId", Middleware.hasCommenterAccessToModel, updateGroup);
+/**
+ * @api {put} /:teamspace/:model/revision/:revId/groups/:groupId/ Update group
+ * @apiName updateGroup
+ * @apiGroup Groups
+ * @apiDescription Update a group.
+ *
+ * @apiUse Groups
+ * @apiUse GroupsBodyGroupObject
+ * @apiUse GroupsSuccessGroupObject
+ *
+ * @apiParam {String} [revId] Revision ID
+ * @apiParam {String} groupId Group ID
+ *
+ * @apiExample {put} Example usage (/:revId)
+ * PUT /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/groups/00000000-0000-0000-0000-000000000002 HTTP/1.1
+ *
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
+ * {
+ * 	"author":"alice",
+ * 	"color":[255,0,0],
+ * 	"createdAt":1520592300000,
+ * 	"description":"Updated description text.",
+ * 	"name":"Group 1",
+ * 	"objects":[
+ * 		{
+ * 			"account": "acme",
+ * 			"model": "00000000-0000-0000-0000-000000000000",
+ * 			"ifc_guids": [],
+ * 			"shared_ids": [
+ * 				"db18ef69-6d6e-49a0-846e-907346abb39d",
+ * 				"c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ * 				"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+ * 				"3f881fa8-2b7b-443e-920f-396c1c85e903"
+ * 			]
+ * 		}
+ * 	],
+ * 	"updatedAt":1552128300000,
+ * 	"updatedBy":"alice",
+ * 	"_id":"00000000-0000-0000-0000-000000000002"
+ * }
+ */
+router.put("/revision/:revId/groups/:groupId", Middleware.hasCommenterAccessToModel, updateGroup);
 
 /**
- * @api {post} /:teamspace/:model/revision(/master/head|/:revId)/groups Create group
+ * @api {post} /:teamspace/:model/revision/master/head/groups Create group
  * @apiName createGroup
  * @apiGroup Groups
  * @apiDescription Add a group to the model.
@@ -319,28 +516,6 @@ router.put("/revision/:rid/groups/:uid", Middleware.hasCommenterAccessToModel, u
  *
  * @apiExample {post} Example usage (/master/head)
  * POST /acme/00000000-0000-0000-0000-000000000000/revision/master/head/groups HTTP/1.1
- * {
- * 	"name":"Group 1",
- * 	"description":"This is the description text for the first group.",
- * 	"author":"alice",
- * 	"color":[255,0,0],
- * 	"objects":[
- * 		{
- * 			"account":"acme",
- * 			"model":"00000000-0000-0000-0000-000000000000",
- * 			"shared_ids":[
- * 				"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
- * 				"db18ef69-6d6e-49a0-846e-907346abb39d",
- * 				"c532ff34-6669-4807-b7f3-6a0ffb17b027",
- * 				"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
- * 				"3f881fa8-2b7b-443e-920f-396c1c85e903"
- * 			]
- * 		}
- * 	]
- * }
- *
- * @apiExample {post} Example usage (/:revId)
- * POST /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/groups HTTP/1.1
  * {
  * 	"name":"Group 1",
  * 	"description":"This is the description text for the first group.",
@@ -392,7 +567,7 @@ router.put("/revision/:rid/groups/:uid", Middleware.hasCommenterAccessToModel, u
  * 	]
  * }
  *
- * @apiSuccessExample {json} Success-Response (normal group)
+ * @apiSuccessExample {json} Success-Response: (normal group)
  * HTTP/1.1 200 OK
  * {
  * 	"_id":"00000000-0000-0000-0000-000000000002",
@@ -418,7 +593,7 @@ router.put("/revision/:rid/groups/:uid", Middleware.hasCommenterAccessToModel, u
  * 	"rules":[]
  * }
  *
- * @apiSuccessExample {json} Success-Response (smart group)
+ * @apiSuccessExample {json} Success-Response: (smart group)
  * HTTP/1.1 200 OK
  * {
  * 	"_id":"00000000-0000-0000-0000-000000000004",
@@ -464,23 +639,58 @@ router.put("/revision/:rid/groups/:uid", Middleware.hasCommenterAccessToModel, u
  */
 router.post("/revision/master/head/groups/", Middleware.hasCommenterAccessToModel, createGroup);
 
-router.post("/revision/:rid/groups/", Middleware.hasCommenterAccessToModel, createGroup);
+/**
+ * @api {post} /:teamspace/:model/revision/:revId/groups Create group
+ * @apiName createGroup
+ * @apiGroup Groups
+ * @apiDescription Add a group to the model.
+ *
+ * @apiUse Groups
+ * @apiUse GroupsBodyGroupObject
+ * @apiUse GroupsSuccessGroupObject
+ *
+ * @apiParam {String} [revId] Revision ID
+ *
+ * @apiExample {post} Example usage (/:revId)
+ * POST /acme/00000000-0000-0000-0000-000000000000/revision/00000000-0000-0000-0000-000000000001/groups HTTP/1.1
+ * {
+ * 	"name":"Group 1",
+ * 	"description":"This is the description text for the first group.",
+ * 	"author":"alice",
+ * 	"color":[255,0,0],
+ * 	"objects":[
+ * 		{
+ * 			"account":"acme",
+ * 			"model":"00000000-0000-0000-0000-000000000000",
+ * 			"shared_ids":[
+ * 				"24fdcf2d-b9eb-4fa2-a614-dfe2532493b3",
+ * 				"db18ef69-6d6e-49a0-846e-907346abb39d",
+ * 				"c532ff34-6669-4807-b7f3-6a0ffb17b027",
+ * 				"fec16ea6-bb7b-4f12-b39b-f06fe6bf041d",
+ * 				"3f881fa8-2b7b-443e-920f-396c1c85e903"
+ * 			]
+ * 		}
+ * 	]
+ * }
+ *
+ */
+router.post("/revision/:revId/groups/", Middleware.hasCommenterAccessToModel, createGroup);
 
 /**
- * @api {delete} /:teamspace/:model/groups?ids=[GROUPS] Delete groups
+ * @api {delete} /:teamspace/:model/groups Delete groups
  * @apiName deleteGroups
  * @apiGroup Groups
  * @apiDescription Delete groups.
  *
  * @apiUse Groups
  *
- * @apiParam (Query) {String} GROUPS Comma separated list of group IDs
+ * @apiQuery {String} ids Comma separated list of group IDs
  * @apiSuccess (200) {String} status Group deletion result (success|ERROR CODE)
  *
  * @apiExample {delete} Example usage
  * DELETE /acme/00000000-0000-0000-0000-000000000000/groups?ids=00000000-0000-0000-0000-000000000002,00000000-0000-0000-0000-000000000003 HTTP/1.1
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  * 	"status":"success"
@@ -493,6 +703,9 @@ router.delete("/groups/", Middleware.hasCommenterAccessToModel, deleteGroups);
  * @apiName exportGroups
  * @apiGroup Groups
  * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ExportFederationGroups
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 router.post("/groups/export", Middleware.hasViewIssueAccessToModel, validateGroupsExportData, exportGroups, serialiseGroupArray);
 
@@ -501,6 +714,9 @@ router.post("/groups/export", Middleware.hasViewIssueAccessToModel, validateGrou
  * @apiName importGroups
  * @apiGroup Groups
  * @apiDescription This is a back-ported endpoint from V5. For details please see V5 documentation /docs/#/Federations/ImportFederationGroups
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  */
 router.post("/groups/import", Middleware.hasViewIssueAccessToModel, validateGroupsImportData, importGroups);
 
@@ -532,8 +748,8 @@ function importGroups(req, res, next) {
 
 function listGroups(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, rid } = req.params;
-	const branch = rid ? null : "master";
+	const { account, model, revId } = req.params;
+	const branch = revId ? null : "master";
 
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 	const ids = req.query.ids ? req.query.ids.split(",") : null;
@@ -547,7 +763,7 @@ function listGroups(req, res, next) {
 		}
 	}
 
-	Group.getList(account, model, branch, rid, ids, req.query, showIfcGuids).then(groups => {
+	Group.getList(account, model, branch, revId, ids, req.query, showIfcGuids).then(groups => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, groups);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
@@ -557,11 +773,11 @@ function listGroups(req, res, next) {
 
 function findGroup(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, rid, uid } = req.params;
-	const branch = rid ? null : "master";
+	const { account, model, revId, groupId } = req.params;
+	const branch = revId ? null : "master";
 	const showIfcGuids = (req.query.ifcguids) ? JSON.parse(req.query.ifcguids) : false;
 
-	Group.findByUID(account, model, branch, rid, uid, showIfcGuids, false).then(group => {
+	Group.findByUID(account, model, branch, revId, groupId, showIfcGuids, false).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);
@@ -573,10 +789,10 @@ function createGroup(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
-	const rid = req.params.rid ? req.params.rid : null;
-	const branch = rid ? null : "master";
+	const revId = req.params.revId ? req.params.revId : null;
+	const branch = revId ? null : "master";
 
-	Group.create(account, model, branch, rid, sessionId, req.session.user.username, req.body).then(group => {
+	Group.create(account, model, branch, revId, sessionId, req.session.user.username, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
@@ -603,13 +819,13 @@ function deleteGroups(req, res, next) {
 
 function updateGroup(req, res, next) {
 	const place = utils.APIInfo(req);
-	const { account, model, uid } = req.params;
+	const { account, model, groupId } = req.params;
 	const sessionId = req.headers[C.HEADER_SOCKET_ID];
 
-	const rid = req.params.rid ? req.params.rid : null;
-	const branch = rid ? null : "master";
+	const revId = req.params.revId ? req.params.revId : null;
+	const branch = revId ? null : "master";
 
-	Group.update(account, model, branch, rid, sessionId, req.session.user.username, uid, req.body).then(group => {
+	Group.update(account, model, branch, revId, sessionId, req.session.user.username, groupId, req.body).then(group => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, group);
 	}).catch(err => {
 		systemLogger.logError(err.stack);

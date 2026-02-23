@@ -37,6 +37,7 @@ import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
 import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
+import { isEmpty } from 'lodash';
 
 const REVISION_NAME_MAX_LENGTH = 50;
 
@@ -107,7 +108,7 @@ export const UploadDrawingRevisionForm = ({
 	const {
 		control,
 		handleSubmit,
-		formState: { isValid },
+		formState: { isValid, errors },
 	} = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -208,7 +209,7 @@ export const UploadDrawingRevisionForm = ({
 					setIsUploading={setIsUploading}
 					modalLabels={uploadModalLabels({ isUploading, fileCount: fields.length })}
 					fields={fields}
-					isValid={!isUploading ? isValid : allUploadsComplete}
+					isValid={!isUploading ? (isValid && isEmpty(errors)) : allUploadsComplete}
 					supportedFileExtensions={getSupportedDrawingRevisionsFileExtensions()}
 				>
 					<UploadList

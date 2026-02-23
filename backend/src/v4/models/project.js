@@ -452,10 +452,12 @@
 	};
 
 	Project.removePermissionsFromAllProjects = async (account, userToRemove) => {
-		const projects = await Project.listProjects(account, {}, { name:1, models: 1 });
+		const projects = await Project.listProjects(account, {}, { name:1, models: 1, permissions: 1 });
 
 		await Promise.all(projects.map(async (project) => {
-			await Project.updateProject(account, project.name, { permissions: [{ user: userToRemove, permissions: [] }] });
+			if(project.permissions.some(perm => perm.user === userToRemove && perm?.permissions.length > 0)) {
+				await Project.updateProject(account, project.name, { permissions: [{ user: userToRemove, permissions: [] }] });
+			}
 			await removePermissionsFromModels(account, project.models, userToRemove);
 		}));
 	};

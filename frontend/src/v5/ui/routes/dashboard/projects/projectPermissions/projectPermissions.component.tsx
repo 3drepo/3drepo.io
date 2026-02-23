@@ -26,7 +26,6 @@ import { SuppressPermissionModalToggle } from '@components/shared/updatePermissi
 export const ProjectPermissions = () => {
 	const dispatch = useDispatch();
 	const projectName = ProjectsHooksSelectors.selectCurrentProjectDetails()?.name;
-
 	const username = CurrentUserHooksSelectors.selectUsername();
 
 	useEffect(() => {
@@ -38,6 +37,7 @@ export const ProjectPermissions = () => {
 		dispatch(UserManagementActions.fetchProject(projectName));
 		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
 	}, [projectName, username]);
+
 
 	if (!username || !projectName) {
 		return (<></>);

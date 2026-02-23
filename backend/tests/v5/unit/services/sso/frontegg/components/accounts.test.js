@@ -37,6 +37,52 @@ const role = generateRandomString();
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
 Connections.getConfig.mockResolvedValue({ userRole: role });
 
+jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/cacheService');
+const CacheService = require(`${src}/services/sso/frontegg/components/cacheService`);
+
+CacheService.getCached.mockImplementation((key, fetchFn) => fetchFn());
+CacheService.generateKey.mockReturnValue(generateRandomString());
+
+const testDoesAccountExist = () => {
+	describe('Does account exist', () => {
+		test('Should return true if it does', async () => {
+			WebRequests.get.mockResolvedValueOnce({
+				data: {},
+			});
+
+			const accountId = generateRandomString();
+
+			await expect(Accounts.doesAccountExist(accountId)).resolves.toBeTruthy();
+
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			const url = WebRequests.get.mock.calls[0][0];
+			expect(url.includes(accountId)).toBeTruthy();
+		});
+
+		test('Should return false if anything went wrong', async () => {
+			WebRequests.get.mockRejectedValueOnce({ message: generateRandomString() });
+
+			const accountId = generateRandomString();
+
+			await expect(Accounts.doesAccountExist(accountId)).resolves.toBeFalsy();
+
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			const url = WebRequests.get.mock.calls[0][0];
+			expect(url.includes(accountId)).toBeTruthy();
+		});
+	});
+};
+
 const testGetTeamspaceByAccount = () => {
 	describe('Get teamspace by account', () => {
 		test('Should return teamspace name from frontegg', async () => {
@@ -129,12 +175,28 @@ const testCreateAccount = () => {
 
 const testGetAllUsersInAccount = () => {
 	describe('Get all users in account', () => {
-		const generateResponse = (nItems, hasNext) => ({
+		const generateResponse = (nItems, hasNext, omitMetadata) => ({
 			data: {
-				items: times(nItems, () => ({ id: generateRandomString(), email: generateRandomString() })),
+				items: times(nItems, () => ({
+					id: generateRandomString(),
+					email: generateRandomString(),
+					name: generateRandomString(),
+					metadata: omitMetadata ? undefined
+						: JSON.stringify({ countryCode: generateRandomString(), company: generateRandomString() }),
+					createdAt: new Date().toISOString(),
+				})),
 				_links: { next: hasNext ? generateRandomString() : undefined },
 			},
 		});
+
+		const generateExpectedDataFromResponse = (res) => res.data.items.map(
+			({ id, email, name, metadata, createdAt }) => ({
+				id,
+				email,
+				name,
+				createdAt,
+				...JSON.parse(metadata || '{}'),
+			}));
 
 		test('Should return empty array if there are no users', async () => {
 			const accountId = generateRandomString();
@@ -157,6 +219,28 @@ const testGetAllUsersInAccount = () => {
 			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), expectedHeader);
 		});
 
+		test('Should not fail if metadata has no value', async () => {
+			const accountId = generateRandomString();
+
+			const expectedHeader = {
+				...bearerHeader,
+				[HEADER_TENANT_ID]: accountId,
+
+			};
+			const webRes = generateResponse(10, false, true);
+			WebRequests.get.mockResolvedValueOnce(webRes);
+
+			const users = await Accounts.getAllUsersInAccount(accountId);
+
+			expect(users).toEqual(generateExpectedDataFromResponse(webRes));
+
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), expectedHeader);
+		});
+
 		test('Should return list of users (no pagination)', async () => {
 			const accountId = generateRandomString();
 
@@ -170,7 +254,7 @@ const testGetAllUsersInAccount = () => {
 
 			const users = await Accounts.getAllUsersInAccount(accountId);
 
-			expect(users).toEqual(webRes.data.items);
+			expect(users).toEqual(generateExpectedDataFromResponse(webRes));
 
 			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
 			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
@@ -196,7 +280,8 @@ const testGetAllUsersInAccount = () => {
 
 			const users = await Accounts.getAllUsersInAccount(accountId);
 
-			const expectedUsers = [...webRes1.data.items, ...webRes2.data.items, ...webRes3.data.items];
+			const expectedUsers = [...generateExpectedDataFromResponse(webRes1),
+				...generateExpectedDataFromResponse(webRes2), ...generateExpectedDataFromResponse(webRes3)];
 
 			expect(users).toEqual(expectedUsers);
 
@@ -260,6 +345,8 @@ const testAddUserToAccount = () => {
 				expect(WebRequests.post).toHaveBeenCalledTimes(1);
 				expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
 					{ headers: expectedHeader });
+
+				expect(CacheService.removeCache).toHaveBeenCalledTimes(2);
 			});
 		});
 
@@ -292,6 +379,7 @@ const testAddUserToAccount = () => {
 			expect(WebRequests.post).toHaveBeenCalledTimes(1);
 			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
 				{ headers: expectedHeader });
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 
 		test('Should throw error if post request failed', async () => {
@@ -328,6 +416,7 @@ const testAddUserToAccount = () => {
 			expect(WebRequests.post).toHaveBeenCalledTimes(1);
 			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
 				{ headers: expectedHeader });
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -352,6 +441,7 @@ const testRemoveUserFromAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(2);
 		});
 
 		test('Should throw error if delete request failed', async () => {
@@ -374,6 +464,7 @@ const testRemoveUserFromAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 
 		test('Should not throw error if delete request failed with user not found', async () => {
@@ -397,6 +488,7 @@ const testRemoveUserFromAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -415,6 +507,7 @@ const testRemoveAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), bearerHeader);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should throw error if delete request failed', async () => {
@@ -431,6 +524,7 @@ const testRemoveAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), bearerHeader);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 
 		test('Should not throw error if delete request failed with a 404', async () => {
@@ -447,6 +541,7 @@ const testRemoveAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), bearerHeader);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -604,7 +699,12 @@ const testGetClaimedDomains = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	testGetTeamspaceByAccount();
+	testDoesAccountExist();
 	testCreateAccount();
 	testGetAllUsersInAccount();
 	testAddUserToAccount();

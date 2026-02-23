@@ -19,10 +19,17 @@ import DownloadIconBase from '@assets/icons/outlined/download_arrow-outlined.svg
 import { IconButton } from '@mui/material';
 import { Container as fixedOrGrowContainer } from '@/v5/ui/controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
-import { Link } from 'react-router-dom';
+import { Link, LinkProps } from 'react-router-dom';
 import { RevisionsListItemText } from './revisionsListItemText/revisionsListItemText.component';
 
-export const Container = styled(Link) <{ disabled: boolean }>`
+type IRevisionsListItemContainer = LinkProps & {
+	disabled: boolean;
+};
+
+export const Container = styled(Link).attrs(({ disabled, target, to }: IRevisionsListItemContainer) => ({
+	to: disabled ? '#' : to,
+	target: disabled ? undefined : target,
+}))<IRevisionsListItemContainer>`
 	display: flex;
 	align-items: center;
 	height: 100%;

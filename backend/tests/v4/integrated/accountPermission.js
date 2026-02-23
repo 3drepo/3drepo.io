@@ -21,7 +21,7 @@ const request = require("supertest");
 const expect = require("chai").expect;
 
 const SessionTracker = require("../../v4/helpers/sessionTracker");
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -39,13 +39,16 @@ describe("Account permission::", function () {
 	const model = '76a1ddb0-b048-45d5-9477-973cfd61b9e2';
 	let testSession;
 
-	before(function(done) {
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
+	before(async () => {
+		const app = await createAppAsync();
+		await new Promise((resolve) => {
+			server = app.listen(8080, function () {
+				console.log("API test server is listening on port 8080!");
 
-			agent = request(server);
-			testSession = SessionTracker(agent);
-			testSession.login(username, password).then(()=> {done()});
+				agent = request(server);
+				testSession = SessionTracker(agent);
+				testSession.login(username, password).then(() => {resolve()});
+			});
 		});
 	});
 
@@ -59,8 +62,8 @@ describe("Account permission::", function () {
 	it("should fail to assign permissions to a user that doesnt exist", function(done) {
 		testSession.post(`/${username}/permissions`)
 			.send({ user: "nonsense", permissions: ["create_project"]})
-			.expect(404, function(err, res) {
-				expect(res.body.value).to.equal(responseCodes.USER_NOT_FOUND.value);
+			.expect(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.status, function(err, res) {
+				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});
 	});
@@ -68,7 +71,7 @@ describe("Account permission::", function () {
 	it("should fail to assign non team space permissions to a user", function(done) {
 		testSession.post(`/${username}/permissions`)
 			.send({ user: "issue_username", permissions: ["create_project"]})
-			.expect(400, function(err, res) {
+			.expect(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.status, function(err, res) {
 				expect(res.body.value).to.equal(responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE.value);
 				done(err);
 			});

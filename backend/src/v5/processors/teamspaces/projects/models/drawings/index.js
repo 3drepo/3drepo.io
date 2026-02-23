@@ -22,7 +22,7 @@ const { addModel, getModelList } = require('../commons/modelList');
 const { appendFavourites, deleteFavourites } = require('../commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../../models/modelSettings');
 const { getCalibrationStatus, getCalibrationStatusForAllRevs } = require('./calibrations');
-const { getFile, getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../../services/filesManager');
+const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
@@ -165,10 +165,10 @@ Drawings.getImageByRevision = async (teamspace, project, drawing, revision) => {
 };
 
 Drawings.createDrawingThumbnail = async (teamspace, project, model, revision) => {
-	const { image } = await getRevisionByIdOrTag(teamspace, model, modelTypes.DRAWING, revision, { image: 1 });
+	const { readStream, mimeType } = await Drawings.getImageByRevision(teamspace, project, model, revision);
 
-	const buffer = await getFile(teamspace, DRAWINGS_HISTORY_COL, image);
-	const thumbnail = await createThumbnail(buffer);
+	const buffer = await Buffer.concat(await Array.fromAsync(readStream));
+	const thumbnail = await createThumbnail(buffer, mimeType);
 
 	if (thumbnail) {
 		const thumbnailID = generateUUID();

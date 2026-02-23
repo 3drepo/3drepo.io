@@ -47,7 +47,7 @@ const importErrorMapping = {
 	24: { message: 'This version of the file is currently not supported.', userErr: true },
 	25: { message: 'Too many objects, please consider splitting up the model.', userErr: true },
 	26: systemFailureMsg,
-	27: { message: 'Cannot find a 3D view within the file. Please create one and try again.', userErr: true },
+	27: { message: 'Cannot find a view with the specified name in the file. Please check the name of the provided view.', userErr: true },
 	28: systemFailureMsg,
 	29: { message: 'Process timed out, please reduce the model size and try again.' },
 	30: systemFailureMsg,
@@ -59,6 +59,8 @@ const importErrorMapping = {
 	36: { message: 'Failed to validate 3D Repo Server License. Please contact support.' },
 	37: { message: 'The file provided was encrypted or password protected. Please provide a file that can be opened without a password.', userErr: true },
 	38: { message: 'Failed to generate image file from drawing. If this is unexpected, please contact support.' },
+	39: { message: 'The schema of the IFC file provided is not supported (Supported schemas: 2x3, 4, 4x1, 4x2, 4x3 (Add2)).', userErr: true },
+	40: { message: 'The specified view is not a 3D view. When importing a specific view, only 3D views are supported.', userErr: true },
 };
 
 ModelSettingConstants.processStatuses = {

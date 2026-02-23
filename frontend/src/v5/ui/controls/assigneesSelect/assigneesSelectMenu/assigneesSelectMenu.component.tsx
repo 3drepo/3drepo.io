@@ -24,6 +24,7 @@ import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSele
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
 import { groupJobsAndUsers } from '../assignees.helpers';
 import { SearchContext } from '@controls/search/searchContext';
+import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME } from '@/v5/store/users/users.helpers';
 import { AssigneesSelectMenuTriggerButton } from './assigneesSelectMenuTriggerButton/assigneesSelectMenuTriggerButton.component';
 
 const NoResultsMessage = () => (
@@ -41,16 +42,16 @@ const preventPropagation = (e) => {
 	}
 };
 type AssigneesSelectMenuProps = SelectProps & {
-	isInvalid: (val: string) => boolean;
+	isValidItem: (val: string) => boolean;
 	excludeJobs?: boolean;
 };
 export const AssigneesSelectMenu = ({
 	value,
 	onClick,
+	onClose,
 	multiple,
-	isInvalid,
+	isValidItem,
 	disabled,
-	onBlur,
 	excludeJobs,
 	...props
 }: AssigneesSelectMenuProps) => {
@@ -66,7 +67,7 @@ export const AssigneesSelectMenu = ({
 	const handleClose = (e) => {
 		e.stopPropagation();
 		setOpen(false);
-		onBlur?.();
+		onClose?.(e);
 	};
 
 	if (disabled) return null;
@@ -99,7 +100,7 @@ export const AssigneesSelectMenu = ({
 						key={ju}
 						assignee={ju}
 						value={ju}
-						title={ju}
+						title={JOB_OR_USER_NOT_FOUND_NAME}
 						multiple={multiple}
 						selected
 						error
@@ -118,7 +119,7 @@ export const AssigneesSelectMenu = ({
 						value={_id}
 						title={_id}
 						multiple={multiple}
-						error={isInvalid(_id)}
+						error={!isValidItem(_id)}
 					/>
 				))}
 				{!excludeJobs && !jobs.length && (<NoResultsMessage />)}
@@ -131,10 +132,10 @@ export const AssigneesSelectMenu = ({
 						key={user.user}
 						value={user.user}
 						assignee={user.user}
-						title={`${user.firstName} ${user.lastName}`}
+						title={getFullnameFromUser(user)}
 						subtitle={user.job}
 						multiple={multiple}
-						error={isInvalid(user.user)}
+						error={!isValidItem(user.user)}
 					/>
 				))}
 				{!users.length && (<NoResultsMessage />)}

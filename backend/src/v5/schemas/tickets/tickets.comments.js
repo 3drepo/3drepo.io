@@ -16,6 +16,7 @@
  */
 
 const { UUIDToString } = require('../../utils/helper/uuids');
+const Validators = require('./validators');
 const Yup = require('yup');
 const { isUUIDString } = require('../../utils/helper/typeCheck');
 const { types } = require('../../utils/helper/yup');
@@ -40,7 +41,9 @@ const generateCommentSchema = (existingComment, isImport = false) => {
 					.test('Image ref test', 'One or more image refs do not correspond to a current comment image ref',
 						(value, { originalValue }) => !isUUIDString(originalValue)
 								|| acceptableRefs.includes(originalValue)),
-		) };
+		),
+		view: Validators.generateViewValidator(!isNewComment, true, true).noUnknown(true).strict(),
+	};
 
 	if (isImport) {
 		schemaObj.originalAuthor = types.strings.title.required();
@@ -49,8 +52,8 @@ const generateCommentSchema = (existingComment, isImport = false) => {
 
 	return Yup.object().shape(schemaObj).test(
 		'at-least-one-property',
-		'You must provide at least a message or a set of images',
-		({ message, images }) => message || images,
+		'You must provide at least a message, a set of images or a viewpoint',
+		({ message, images, view }) => message || images || view,
 	).required()
 		.noUnknown();
 };
@@ -60,6 +63,8 @@ Comments.importCommentSchema = generateCommentSchema(undefined, true);
 Comments.validateComment = (newData, existingComment) => generateCommentSchema(existingComment).validate(newData);
 
 Comments.serialiseComment = (comment) => {
+	const commentSchema = generateCommentSchema(comment);
+
 	const caster = Yup.object({
 		_id: uuidString,
 		ticket: uuidString,
@@ -67,9 +72,11 @@ Comments.serialiseComment = (comment) => {
 		updatedAt: types.timestamp,
 		importedAt: types.timestamp,
 		images: Yup.array().of(uuidString),
+		view: commentSchema.fields.view,
 		history: Yup.array().of(Yup.object({
 			timestamp: types.timestamp,
 			images: Yup.array().of(uuidString),
+			view: commentSchema.fields.view,
 		})),
 	});
 	return caster.cast(comment);

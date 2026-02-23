@@ -353,7 +353,8 @@ export class CustomTable extends PureComponent<IProps, IState> {
 	 * Renders row for each user
 	 */
 	public renderHeader = (cells) => {
-		const {currentSort} = this.state;
+		const { currentSort, processedRows} = this.state;
+		const allRowsAreDisabled = !processedRows.some((row) => !row.disabled);
 
 		return cells.map((cell, index) => {
 			const type = cell.headerType || cell.type;
@@ -363,7 +364,7 @@ export class CustomTable extends PureComponent<IProps, IState> {
 
 			const headingRootProps = {
 				...CELL_DEFAULT_PROPS[type],
-				...root
+				...root,
 			};
 
 			const hasActiveSort = currentSort.activeIndex === index;
@@ -373,13 +374,14 @@ export class CustomTable extends PureComponent<IProps, IState> {
 				activeSort: hasActiveSort,
 				sortOrder: hasActiveSort ? currentSort.order : SORT_ORDER_TYPES.ASCENDING,
 				label: cell.name,
-				...component
+				...component,
+				disabled: allRowsAreDisabled || component.disabled,
 			};
 
 			const HeadingComponent = <BasicHeadingComponent {...headingComponentProps} />;
 
 			return (
-				<Cell key={index} {...headingRootProps}>
+				<Cell key={index} {...headingRootProps} >
 					{
 						headingComponentProps.tooltipText ? (
 							<Tooltip title={headingComponentProps.tooltipText} placement="bottom-end">

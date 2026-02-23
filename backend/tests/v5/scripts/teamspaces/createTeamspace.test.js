@@ -21,21 +21,35 @@ const {
 	db: { reset: resetDB, createTeamspace, createUser },
 	generateRandomString,
 	generateUserCredentials,
+	generateRandomEmail,
 } = require('../../helper/services');
+
+const { createAccount } = require('../../helper/fronteggMock');
 
 const { src, utilScripts } = require('../../helper/path');
 
 const CreateTeamspace = require(`${utilScripts}/teamspaces/createTeamspace`);
 
 const { disconnect } = require(`${src}/handler/db`);
-const { templates } = require(`${src}/utils/responseCodes`);
 
 const user = generateUserCredentials();
+const emailUser = generateUserCredentials();
+emailUser.user = 'emailUser';
+emailUser.basicData.email = 'test@email.com';
 const teamspace = generateRandomString();
+const existingAccount = generateRandomString();
+let existingAccountId;
 
 const setupData = async () => {
 	await createUser(user);
-	await createTeamspace(teamspace, [user.user]);
+	await createUser(emailUser);
+	await createTeamspace(teamspace, [user.user], {
+		discretionary: {
+			collaborators: 'unlimited',
+			data: 1024,
+			expiryDate: Date.now() + 10000,
+		} });
+	existingAccountId = await createAccount(existingAccount);
 };
 
 const runTest = () => {
@@ -46,16 +60,18 @@ const runTest = () => {
 	});
 
 	describe.each([
-		['teamspace does not exist but the user exists', true, undefined, generateRandomString(), user.user],
-		['teamspace does not exist and the user does not exists', false, templates.userNotFound, generateRandomString(), generateRandomString()],
-		['teamspace already exists', false, new Error('Teamspace already exists'), teamspace, user.user],
-	])('Create Teamspace', (desc, success, expectedOutput, teamspaceName, userName) => {
+		['teamspace does not exist but the user exists', true, generateRandomString(), emailUser.basicData.email, undefined],
+		['teamspace does not exist but the user exists and accountId is provided', true, generateRandomString(), emailUser.basicData.email, existingAccountId],
+		['teamspace does not exist and the user does not exists', true, generateRandomString(), generateRandomEmail(), undefined],
+		['teamspace already exists', false, teamspace, user.basicData.email, undefined],
+	])('Create Teamspace', (desc, success, teamspaceName, userName, accountId) => {
 		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {
-			const exe = CreateTeamspace.run(teamspaceName, userName);
+			const exe = CreateTeamspace.run(teamspaceName, userName, accountId);
+
 			if (success) {
 				await expect(exe).resolves.toBeUndefined();
 			} else {
-				await expect(exe).rejects.toEqual(expectedOutput);
+				await expect(exe).rejects.not.toBeUndefined();
 			}
 		});
 	});

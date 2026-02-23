@@ -72,9 +72,9 @@ interface IState {
 }
 
 interface IProps {
-	match: any;
+	teamspace: string;
 	location: any;
-	history: any;
+	navigate: (to: string, options?: { replace?: boolean }) => void;
 	fetchTeamspaceSettings: (teamspace) => void;
 	updateTeamspaceSettings: (teamspace, settings) => void;
 	downloadTreatmentsTemplate: () => void;
@@ -96,7 +96,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	};
 
 	get teamspace() {
-		return this.props.match.params.teamspace;
+		return this.props.teamspace;
 	}
 
 	get treatmentsUpdatedAt() {
@@ -104,9 +104,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { match, fetchTeamspaceSettings } = this.props;
-		const { teamspace } = match.params;
-
+		const { teamspace, fetchTeamspaceSettings } = this.props;
 		fetchTeamspaceSettings(teamspace);
 	}
 
@@ -141,7 +139,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	private handleUpdateSettings = (values, { resetForm }) => {
-		const { teamspace } = this.props.match.params;
+		const { teamspace } = this.props;
 		const { topicTypes, riskCategories, file, createMitigationSuggestions } = values;
 		const settings = {
 			topicTypes,
@@ -163,9 +161,9 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleBackLink = () => {
-		this.props.history.push({ pathname: ROUTES.TEAMSPACES });
-	}
+   public handleBackLink = () => {
+		this.props.navigate(ROUTES.TEAMSPACES);
+   }
 
 	public renderTitleWithBackLink = () => (
 		<>

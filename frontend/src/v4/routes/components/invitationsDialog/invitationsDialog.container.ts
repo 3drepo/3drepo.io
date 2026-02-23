@@ -16,10 +16,10 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectUsersProvisionedEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import {
 	selectInvitations,
 	UserManagementActions
@@ -27,16 +27,15 @@ import {
 import { InvitationsDialog } from './invitationsDialog.component';
 
 const mapStateToProps = createStructuredSelector({
-	invitations: selectInvitations
+	invitations: selectInvitations,
+	usersProvisionedEnabled: selectUsersProvisionedEnabled
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	removeInvitation: UserManagementActions.removeInvitation
 }, dispatch);
 
-export default withRouter(
-	connect(
+export default connect(
 		mapStateToProps,
 		mapDispatchToProps
 	)(InvitationsDialog)
-);

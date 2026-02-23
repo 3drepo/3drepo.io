@@ -16,7 +16,6 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
@@ -37,4 +36,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	getCompareModels: CompareActions.getCompareModels
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(RevisionsSwitch));
+export default connect(mapStateToProps, mapDispatchToProps)(RevisionsSwitch);

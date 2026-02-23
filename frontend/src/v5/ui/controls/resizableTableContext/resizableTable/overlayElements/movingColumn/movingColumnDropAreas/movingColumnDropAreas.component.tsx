@@ -15,19 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TableCorner, DropAreas, Area, Container, DropLine } from './movingColumnDropAreas.styles';
 import { blockEvent } from '@/v5/helpers/events.helpers';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const MovingColumnDropAreas = () => {
-	const {
-		setMovingColumn, movingColumn, moveColumn, getWidth,
-		movingColumnDropIndex, setMovingColumnDropIndex, columnGap,
-		getIndex, getColumnOffsetLeft, getRowWidth, visibleSortedColumnsNames,
-	} = useContext(ResizableTableContext);
 	const [tableOffset, setTableOffset] = useState(0);
 	const ref = useRef(null);
+	const {
+		setMovingColumn, moveColumn, getWidth, setMovingColumnDropIndex, columnGap,
+		getIndex, getColumnOffsetLeft, getRowWidth, visibleSortedColumnsNames,
+		movingColumn, movingColumnDropIndex,
+	} = useContextWithCondition(ResizableTableContext, ['movingColumn', 'movingColumnDropIndex', 'resizingColumn', 'visibleSortedColumnsNames']);
 
 	const movingColumnIndex = getIndex(movingColumn);
 	const dropLineOffset = getColumnOffsetLeft(visibleSortedColumnsNames[movingColumnDropIndex]) ?? getRowWidth();
@@ -81,7 +82,7 @@ export const MovingColumnDropAreas = () => {
 
 	const dropColumn = () => {
 		setMovingColumn(null);
-		setMovingColumnDropIndex(-1);
+		setMovingColumnDropIndex(null);
 		moveColumn(movingColumn, movingColumnDropIndex);
 	};
 

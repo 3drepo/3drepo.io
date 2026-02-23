@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
+import { all, cancel, fork, put, select, take, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
-import { isString } from 'lodash';
+import { get, isString } from 'lodash';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -33,17 +33,23 @@ import {
 	FetchTicketGroupsAction,
 	UpsertTicketAndFetchGroupsAction,
 	UpdateTicketGroupAction,
-	FetchTicketPropertiesAction,
+	FetchTicketsPropertiesAction,
+	FetchTicketGroupsAndGoToView,
+	WatchPropertiesUpdatesAction,
+	SetPropertiesFetchedAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketById, selectTicketByIdRaw, selectTicketsGroups } from './tickets.selectors';
+import { selectTicketById, selectTicketByIdRaw, selectTicketsByContainersAndFederations, selectTicketsGroups } from './tickets.selectors';
 import { selectContainersByFederationId } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { addUpdatedAtTime } from './tickets.helpers';
-import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
+import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { goToView } from '@/v5/helpers/viewpoint.helpers';
+import EventEmitter from 'eventemitter3';
+import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -51,6 +57,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation, pro
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { propertiesToInclude });
+		yield put(TicketsActions.resetPropertiesFetched());
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -69,42 +76,54 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets
 	)(teamspace, projectId, modelId, queryParams),
-	40,
+	2,
 	ExecutionStrategy.Fifo,
 );
 
-
-export function* fetchTicketProperties({
-	teamspace, projectId, modelId, ticketId,
-	templateCode, isFederation, propertiesToInclude,
-}: FetchTicketPropertiesAction) {
+export function* fetchTicketsProperties({
+	teamspace, projectId, modelId,
+	isFederation, propertiesToInclude,
+	onSuccess,
+	onError,
+}: FetchTicketsPropertiesAction) {
 	try {
-		const { number } = yield select(selectTicketById, modelId, ticketId);
-		const filterByTemplateCode = {
-			filter: {
-				operator: 'is',
-				values: [`${templateCode}:${number}`],
-			},
-			property: 'Ticket ID',
-			type: 'ticketCode',
-		} as any;
-		const [ticket] = yield ticketPropertiesQueue.addCall(
-			isFederation,
-			teamspace,
-			projectId,
-			modelId,
-			{ propertiesToInclude, filters: filtersToQuery([filterByTemplateCode]) },
-		);
-		yield put(TicketsActions.upsertTicketSuccess(modelId, { ...ticket, _id: ticketId }));
+		const ticketsData = yield select(selectTicketsByContainersAndFederations, [modelId]);
 
+		let chunkSize = 1000;
+
+		let ticketsFetchsCount = Math.ceil(ticketsData.length / chunkSize);
+		// The format required in the query to fetch the tickets 
+		// is without the full path of the property so we strip that
+		const propertiesToIncludeParam = propertiesToInclude.map(stripModuleOrPropertyPrefix);
+		for (let i = 0 ; i < ticketsFetchsCount ; i++ ) {
+			const tickets = yield ticketPropertiesQueue.addCall(
+				isFederation,
+				teamspace,
+				projectId,
+				modelId,
+				{
+					propertiesToInclude: propertiesToIncludeParam,
+					skip: i * chunkSize,
+					limit: chunkSize,
+					sortBy: 'Created at',
+				},
+			);
+
+
+			yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
+			yield put(TicketsActions.setPropertiesFetched(tickets.map(({ _id }) => _id), propertiesToInclude, true));
+		}
+		
+		onSuccess?.();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketProperties.error', defaultMessage: 'trying to fetch {model} ticket properties' },
+				{ id: 'tickets.fetchTicketsProperties.error', defaultMessage: 'trying to fetch {model} tickets properties' },
 				{ model: getContainerOrFederationFormattedText(isFederation) },
 			),
 			error,
 		}));
+		onError?.();
 	}
 }
 
@@ -280,12 +299,29 @@ export function* fetchTicketGroups({ teamspace, projectId, modelId, ticketId, re
 		const groups = yield all(
 			groupsIds.map((groupId) => API.Tickets.fetchTicketGroup(teamspace, projectId, modelId, ticketId, groupId, isFed, revision)),
 		);
-
 		yield put(TicketsActions.fetchTicketGroupsSuccess(groups));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
-				{ id: 'tickets.fetchTicketGroups.error', defaultMessage: 'trying to fetch the groups for ticket' },
+				{ id: 'tickets.fetchTicketGroups.error', defaultMessage: 'trying to fetch the groups for a ticket' },
+			),
+			error,
+		}));
+	}
+}
+
+export function* fetchTicketGroupsAndGoToView({ teamspace, projectId, modelId, ticketId, revision }: FetchTicketGroupsAndGoToView) {
+	try {
+		yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticketId, revision));
+		yield take(TicketsTypes.FETCH_TICKET_GROUPS_SUCCESS);
+		const ticketWithGroups = yield select(selectTicketById, modelId, ticketId);
+		const defaultView = get(ticketWithGroups?.properties, AdditionalProperties.DEFAULT_VIEW);
+		if (!defaultView) return;
+		goToView(defaultView);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.fetchTicketGroupsAndGoToView.error', defaultMessage: 'trying to fetch the groups for a ticket and go to view' },
 			),
 			error,
 		}));
@@ -298,6 +334,34 @@ export function* upsertTicketAndFetchGroups({ teamspace, projectId, modelId, tic
 	yield put(TicketsActions.fetchTicketGroups(teamspace, projectId, modelId, ticket._id, revision));
 }
 
+function * watchFetchTicketProperties(propertiesNames: string[],  watch: EventEmitter) {
+	const propertiesNamesSet = new Set(propertiesNames);
+
+	while (true) {
+		const fetchedAction: SetPropertiesFetchedAction = yield take(TicketsTypes.SET_PROPERTIES_FETCHED);
+		if (fetchedAction.properties.some((p) => propertiesNamesSet.has(p))) {
+			watch.emit('update');
+		}
+	}
+}
+
+export function* watchPropertiesUpdates({ propertiesNames, watch }: WatchPropertiesUpdatesAction) {
+	const watchFetchTask = yield fork(watchFetchTicketProperties, propertiesNames, watch);
+	
+	// End the saga when the emitter watch emits 'end';
+	yield new Promise((accept) => {
+		// This means that there no listeners for the 'update' event
+		// which means the end event was already triggered;
+		if (!watch.eventNames().length) { 
+			accept('end');
+			return;
+		}
+		watch.once('end', accept);
+	});
+
+	yield cancel(watchFetchTask);
+}
+
 export default function* ticketsSaga() {
 	yield takeEvery(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeEvery(TicketsTypes.FETCH_TICKET, fetchTicket);
@@ -307,7 +371,9 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.CREATE_TICKET, createTicket);
 	yield takeLatest(TicketsTypes.FETCH_RISK_CATEGORIES, fetchRiskCategories);
 	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS, fetchTicketGroups);
+	yield takeLatest(TicketsTypes.FETCH_TICKET_GROUPS_AND_GO_TO_VIEW, fetchTicketGroupsAndGoToView);
 	yield takeLatest(TicketsTypes.UPSERT_TICKET_AND_FETCH_GROUPS, upsertTicketAndFetchGroups);
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
-	yield takeEvery(TicketsTypes.FETCH_TICKET_PROPERTIES, fetchTicketProperties);
+	yield takeEvery(TicketsTypes.FETCH_TICKETS_PROPERTIES, fetchTicketsProperties);
+	yield takeEvery(TicketsTypes.WATCH_PROPERTIES_UPDATES, watchPropertiesUpdates);
 }

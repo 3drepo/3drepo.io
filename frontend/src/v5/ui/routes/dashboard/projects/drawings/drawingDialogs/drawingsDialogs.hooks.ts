@@ -21,50 +21,74 @@ import { DrawingSettings, IDrawing } from '@/v5/store/drawings/drawings.types';
 import { DrawingFormSchema } from '@/v5/validation/drawingSchemes/drawingSchemes';
 import { nameAlreadyExists, numberAlreadyExists } from '@/v5/validation/errors.helpers';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { get } from 'lodash';
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, UseFormReturn } from 'react-hook-form';
 
-export const useDrawingForm = (defaultValues?: IDrawing) => {
+export const watchVerticalRange = (formData:  UseFormReturn<any>, prefix: string = '') => {
+	const { trigger, watch, formState: { dirtyFields } } = formData;
+	let verticalRangeField =  prefix +  'calibration.verticalRange';
+	const verticalRange = watch(verticalRangeField);
+	
+	useEffect(() => {
+		if (get(dirtyFields, verticalRangeField)?.some((v) => v)) {
+			trigger(verticalRangeField);
+		}
+	}, [verticalRange?.[0], verticalRange?.[1], dirtyFields]);
+};
+
+export const useDrawingForm = (defaultValues?: Partial<IDrawing>) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const types = DrawingsHooksSelectors.selectTypes();
 	const isTypesPending = DrawingsHooksSelectors.selectIsTypesPending();
 	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
-	
-	const drawingsNames = [];
-	const drawingNumbers = [];
 
-	DrawingsHooksSelectors.selectDrawings().forEach((d) => {
-		if (d._id === defaultValues?._id) return;
-		drawingsNames.push(d.name);
-		drawingNumbers.push(d.number);
-	});
-
-	const [alreadyExistingNames, setAlreadyExistingNames] = useState(drawingsNames);
-	const [alreadyExistingNumbers, setAlreadyExistingNumbers] = useState(drawingNumbers);
+	const allDrawings = DrawingsHooksSelectors.selectDrawings();
 	
+	// TODO: change type from array to set in every schema that uses name
+	const [existingNames, setExistingNames] = useState([]);  
+
+	const [existingNumbers, setExistingNumbers] = useState<Set<string>>(new Set()); 
+
+	useEffect(() => {
+		const names = [];
+		const numbers = new Set<string>();
+
+		allDrawings.forEach((d) => {
+			if (d._id === defaultValues?._id || !defaultValues) return;
+			names.push(d.name.toLowerCase());
+			numbers.add(d.number.toLowerCase());
+		});
+
+		setExistingNames(names);
+		setExistingNumbers(numbers);
+	}, [JSON.stringify(defaultValues), allDrawings]);
+
+
 	const formData = useForm<DrawingSettings>({
 		mode: 'onChange',
 		resolver: yupResolver(DrawingFormSchema),
-		context: { alreadyExistingNames, alreadyExistingNumbers },
+		context: { alreadyExistingNames: existingNames, existingNumbers },
 		defaultValues,
 	});
 
-	const { getValues, setValue, trigger, watch, formState: { dirtyFields } }  = formData;
-	const verticalRange = watch('calibration.verticalRange');
+	const { getValues, setValue, trigger }  = formData;
 
 	const onSubmitError = (err) => {
 		if (nameAlreadyExists(err)) {
-			setAlreadyExistingNames([getValues('name'), ...alreadyExistingNames]);
+			setExistingNames([getValues('name'), ...existingNames]);
 			trigger('name');
 		}
 
 		if (numberAlreadyExists(err)) {
-			setAlreadyExistingNumbers([getValues('number'), ...alreadyExistingNumbers]);
+			setExistingNumbers(existingNumbers.add(getValues('number')));
 			trigger('number');
 		}
 	};
 	
+	watchVerticalRange(formData);
+
 	useEffect(() => {
 		if (isTypesPending || !isAdmin) return;
 		if (!defaultValues?.type) {
@@ -77,11 +101,7 @@ export const useDrawingForm = (defaultValues?: IDrawing) => {
 		DrawingsActionsDispatchers.fetchTypes(teamspace, project);
 	}, [isAdmin]);
 
-	useEffect(() => {
-		if (dirtyFields.calibration?.verticalRange.some((v) => v)) {
-			trigger('calibration.verticalRange');
-		}
-	}, [verticalRange?.[0], verticalRange?.[1]]);
-
 	return { onSubmitError, formData };
 };
+
+

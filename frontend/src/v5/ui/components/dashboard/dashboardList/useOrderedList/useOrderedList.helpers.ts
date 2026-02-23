@@ -29,6 +29,18 @@ export const getSortingFunction = <T>(sortConfig) => {
 		const aValue = get(a, column[index]);
 		const bValue = get(b, column[index]);
 
+		if (!aValue && !bValue) {
+			return 0;
+		}
+
+		if (!aValue) {
+			return -1;
+		}
+
+		if (!bValue) {
+			return +1;
+		}
+
 		if (aValue === bValue && (index + 1 < column.length)) {
 			return direction[index] === SortingDirection.ASCENDING
 				? sortingFunction(a, b, index + 1) : sortingFunction(b, a, index + 1);

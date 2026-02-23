@@ -15,13 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { TicketCommentHistoryBlock, ITicketComment } from '@/v5/store/tickets/comments/ticketComments.types';
 import * as faker from 'faker';
 import { times } from 'lodash';
 
+const mockViewpoint = {
+	camera: {
+		type: faker.random.arrayElement(['perspective', 'orthographic']),
+		position: times(3, () => faker.datatype.number()),
+		forward: times(3, () => faker.datatype.number()),
+		up: times(3, () => faker.datatype.number()),
+	},
+	clippingPlanes: times(3, () => faker.datatype.number()),
+	screenshot: faker.random.word(),
+}
+
 export const commentHistoryMockFactory = (overrides?: Partial<TicketCommentHistoryBlock>): TicketCommentHistoryBlock => ({
 	images: [faker.random.word()],
 	message: faker.random.word(),
+	// @ts-ignore
+	view: mockViewpoint,
 	timestamp: faker.datatype.datetime(),
 	...overrides,
 });
@@ -34,6 +48,7 @@ export const commentMockFactory = (overrides?: Partial<ITicketComment>): ITicket
 	createdAt: faker.datatype.datetime().getTime(),
 	updatedAt: faker.datatype.datetime().getTime(),
 	deleted: faker.datatype.boolean(),
+	history: [commentHistoryMockFactory()],
 	...overrides,
 }) as ITicketComment;
 

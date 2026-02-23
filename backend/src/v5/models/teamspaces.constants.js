@@ -23,12 +23,12 @@ TeamspaceConstants.SECURITY_SETTINGS = {
 	DOMAIN_WHITELIST: 'allowedDomains',
 };
 
-TeamspaceConstants.SUBSCRIPTION_TYPES = [
-	'enterprise',
-	'pilot',
-	'discretionary',
-	'internal',
-];
+TeamspaceConstants.SUBSCRIPTION_TYPES = {
+	ENTERPRISE: 'enterprise',
+	PILOT: 'pilot',
+	DISCRETIONARY: 'discretionary',
+	INTERNAL: 'internal',
+};
 
 TeamspaceConstants.ADD_ONS = {
 	VR: 'vrEnabled',
@@ -37,6 +37,8 @@ TeamspaceConstants.ADD_ONS = {
 	HERE: 'hereEnabled',
 	MODULES: 'modules',
 	DAILY_DIGEST: 'dailyDigestEnabled',
+	USERS_PROVISIONED: 'usersProvisioned',
+	DISABLE_PERMISSIONS_ON_UI: 'disablePermissionsOnUI',
 };
 
 TeamspaceConstants.ADD_ONS_MODULES = {

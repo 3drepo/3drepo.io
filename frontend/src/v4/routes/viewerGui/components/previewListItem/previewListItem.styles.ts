@@ -23,9 +23,9 @@ import styled, { css } from 'styled-components';
 
 import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import { COLOR } from '../../../../styles/colors';
-import OpenInViewerButtonComponent from '../../../components/openInViewerButton/openInViewerButton.container';
+import { OpenInViewerButton as BaseOpenInViewerButton } from '../../../components/openInViewerButton/openInViewerButton.component';
 
-export const OpenInViewerButton = styled(OpenInViewerButtonComponent)`
+export const OpenInViewerButton = styled(BaseOpenInViewerButton)`
 	&& {
 		display: none;
 		top: -6px;

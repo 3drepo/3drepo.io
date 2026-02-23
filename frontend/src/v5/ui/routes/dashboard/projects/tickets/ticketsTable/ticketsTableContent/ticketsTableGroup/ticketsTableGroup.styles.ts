@@ -15,77 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import styled, { css } from 'styled-components';
 import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
 import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 import { Highlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
 import { DropLine } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnDropAreas/movingColumnDropAreas.styles';
-import { TextOverflow } from '@controls/textOverflow';
-
-export const Headers = styled(ResizableTableRow)`
-	gap: 1px;
-	width: fit-content;
-`;
+import { Headers } from './ticketsTableHeaders/ticketsTableHeaders.styles';
+import { NEW_TICKET_ROW_HEIGHT, NewTicketRow } from './newTicketRowButton/newTicketRowButton.styles';
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
-
-export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
-	${({ theme }) => theme.typography.kicker};
-	color: ${({ theme }) => theme.palette.base.main};
-	padding: 2px 0 8px 10px;
-	/* padding: 10px 0 10px 10px; */
-	text-align: start;
-	box-sizing: border-box;
-	user-select: none;
-
-	${({ $selectable }) => $selectable && css`
-		cursor: pointer;
-	`}
-`;
-
-const NEW_TICKET_ROW_HEIGHT = '37px';
-export const NewTicketRow = styled.div<{ disabled?: boolean }>`
-	width: 100%;
-	height: ${NEW_TICKET_ROW_HEIGHT};
-	cursor: pointer;
-	color: ${({ theme }) => theme.palette.base.main};
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	display: grid;
-	position: relative;
-	z-index: 11;
-
-	${({ disabled }) => disabled && css`
-		cursor: initial;
-		pointer-events: none;
-		color: ${({ theme }) => theme.palette.base.light};
-	`}
-`;
-
-export const NewTicketTextContainer = styled.div`
-	position: sticky;
-	margin-left: 15px;
-	left: 15px;
-	max-width: calc(100% - 15px);
-	width: fit-content;
-	overflow: hidden;
-	display: flex;
-	align-items: center;
-	gap: 6px;
-
-	svg {
-		min-width: 15px;
-	}
-`;
-
-export const NewTicketText = styled.span`
-	font-weight: 600;
-	${({ theme }) => theme.typography.body1}
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	width: 100%;
-`;
 
 const roundBorderTop = css`
 	border-top-left-radius: 10px;

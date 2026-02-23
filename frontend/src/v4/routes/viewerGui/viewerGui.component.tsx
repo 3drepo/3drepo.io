@@ -24,7 +24,7 @@ import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
 import { ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { AddOn } from '@/v5/store/store.types';
+import { AddOnModule } from '@/v5/store/store.types';
 import { VIEWER_EVENTS } from '../../constants/viewer';
 import { getCalibrationViewerLeftPanels, getViewerLeftPanels, VIEWER_PANELS } from '../../constants/viewerGui';
 import { getWindowHeight, getWindowWidth, renderWhenTrue } from '../../helpers/rendering';
@@ -201,11 +201,6 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 
 		const prevView = prevProps.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
 		const currView = this.props.selectedTicket?.properties?.[AdditionalProperties.DEFAULT_VIEW];
-
-		if (!isEqual(prevView, currView) || this.props.treeNodesList !== prevProps.treeNodesList) {
-			// This is for not refreshing the view when exiting a selected ticket or when the card is closed
-			goToView(currView);
-		}
 	}
 
 	public componentWillUnmount() {
@@ -309,7 +304,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		<LeftPanels>
 			{panels.map((panel) => {
 				const PanelComponent = this.panelsMap[panel];
-				if (panel === AddOn.Issues && !this.props.issuesEnabled || panel === AddOn.Risks && !this.props.risksEnabled) {
+				if (panel === AddOnModule.Issues && !this.props.issuesEnabled || panel === AddOnModule.Risks && !this.props.risksEnabled) {
 					return null;
 				}
 				return PanelComponent && <PanelComponent key={panel} id={panel + '-card'} {...this.urlParams} />;

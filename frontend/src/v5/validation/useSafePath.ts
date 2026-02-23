@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { getErrorCode, isProjectNotFound, isModelNotFound, isNotAuthed } from '@/v5/validation/errors.helpers';
-import { generatePath, useHistory } from 'react-router';
+import { generatePath, useNavigate } from 'react-router-dom';
 import { DASHBOARD_ROUTE, TEAMSPACE_ROUTE_BASE, PROJECT_ROUTE_BASE } from '@/v5/ui/routes/routes.constants';
 import { AuthHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatMessage } from '@/v5/services/intl';
@@ -25,7 +25,7 @@ export const useSafePath = (error) => {
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const accessibleProjects = ProjectsHooksSelectors.selectProjects()[teamspace] || [];
 	const hasAccessToProject = accessibleProjects.some(({ _id }) => _id === project);
-	const history = useHistory();
+	const navigate = useNavigate();
 	const authedTeamspaceMatchesSessionOne = AuthHooksSelectors.selectAuthedTeamspaceMatchesSessionOne();
 
 	const code = getErrorCode(error);
@@ -56,7 +56,7 @@ export const useSafePath = (error) => {
 
 	const redirect = () => {
 		const path = getPath();
-		history.push(path);
+		navigate(path);
 	};
 
 	return [redirect, getPathName] as [() => void, () => string];

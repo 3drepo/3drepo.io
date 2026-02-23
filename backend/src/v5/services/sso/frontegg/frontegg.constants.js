@@ -42,5 +42,6 @@ FronteggConstants.HEADER_USER_ID = 'frontegg-user-id';
 FronteggConstants.META_LABEL_TEAMSPACE = '3DR_Teamspace';
 FronteggConstants.HEADER_TENANT_ID = 'frontegg-tenant-id';
 FronteggConstants.HEADER_APP_ID = 'frontegg-application-id';
+FronteggConstants.HEADER_ENVIRONMENT_ID = 'frontegg-environment-id';
 
 module.exports = FronteggConstants;

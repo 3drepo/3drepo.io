@@ -17,10 +17,10 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
-import { CalibrationInfoBox } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationInfoBox/calibrationInfoBox.component';
 import { useContext } from 'react';
 import CalibrationIcon from '@assets/icons/filled/calibration-filled.svg';
 import VerticalCalibrationIcon from '@assets/icons/viewer/vertical_calibration.svg';
+import { DrawingInfoBox } from '@/v5/ui/routes/dashboard/projects/drawings/drawingDialogs/drawingInfoBox/drawingInfoBox.styles';
 
 
 export const Calibration3DInfoBox = () => {
@@ -28,7 +28,7 @@ export const Calibration3DInfoBox = () => {
 
 	if (step === 0) {
 		return (
-			<CalibrationInfoBox
+			<DrawingInfoBox
 				title={formatMessage({ defaultMessage: '3D Alignment', id: 'infoBox.3dAlignment.title' })}
 				description={formatMessage({
 					id: 'infoBox.3dAlignment.description',
@@ -43,7 +43,7 @@ export const Calibration3DInfoBox = () => {
 
 	if (step === 2) {
 		return (
-			<CalibrationInfoBox
+			<DrawingInfoBox
 				title={formatMessage({ defaultMessage: '2D Vertical Extents', id: 'infoBox.verticalExtents.title' })}
 				description={formatMessage({
 					id: 'infoBox.verticalExtents.description',

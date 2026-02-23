@@ -745,12 +745,12 @@ export class ViewerService {
 	 * Diffs
 	 */
 
-	public diffToolSetAsComparator(account: string, model: string) {
-		UnityUtil.diffToolSetAsComparator(account, model);
+	public diffToolSetAsComparator(account: string, project: string, model: string) {
+		UnityUtil.diffToolSetAsComparator(account, project, model);
 	}
 
-	public diffToolLoadComparator(account: string, model: string, revision: string) {
-		return UnityUtil.diffToolLoadComparator(account, model, revision);
+	public diffToolLoadComparator(account: string, project: string, model: string, revision: string) {
+		return UnityUtil.diffToolLoadComparator(account, project, model, revision);
 	}
 
 	public diffToolEnableWithDiffMode() {
@@ -807,22 +807,22 @@ export class ViewerService {
 		return await this.isModelLoaded();
 	}
 
-	public async loadViewerModel(teamspace, model, branch, revision, viewpoint) {
+	public async loadViewerModel(teamspace, project, model, revision, isFederation, viewpoint) {
 		if (!teamspace || !model) {
-			console.error('Teamspace, model, branch or revision was not defined!', teamspace, model, branch, revision);
+			console.error('Teamspace, project, model, or revision was not defined!', teamspace, project, model, revision);
 			await Promise.reject('Teamspace, model, branch or revision was not defined!');
 		} else {
-			await this.loadNewModel(teamspace, model, branch, revision, viewpoint);
+			await this.loadNewModel(teamspace, project, model, revision, isFederation, viewpoint);
 			this.initialisedPromise.resolve();
 		}
 	}
 
-	public async loadNewModel(account, model, branch, revision, viewpoint) {
+	public async loadNewModel(teamspace, project, model, revision, isFederation, viewpoint) {
 		await UnityUtil.onReady();
 		this.emit(VIEWER_EVENTS.MODEL_LOADING_START);
 		document.body.style.cursor = 'wait';
 
-		await UnityUtil.loadModel(account, model, branch, revision, viewpoint);
+		await UnityUtil.loadModel(teamspace, project, model, revision, isFederation, viewpoint);
 
 		await UnityUtil.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';
@@ -855,12 +855,12 @@ export class ViewerService {
 	 * Mesh Color
 	 */
 
-	public overrideMeshColor(account, model, meshIDs, color) {
-		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
+	public overrideMeshColor(teamspace, model, meshIDs, color) {
+		UnityUtil.overrideMeshColor(teamspace, model, meshIDs, color);
 	}
 
-	public resetMeshColor(account, model, meshIDs) {
-		UnityUtil.resetMeshColor(account, model, meshIDs);
+	public resetMeshColor(teamspace, model, meshIDs) {
+		UnityUtil.resetMeshColor(teamspace, model, meshIDs);
 	}
 
 	/**
@@ -1323,6 +1323,18 @@ export class ViewerService {
 
 	public clipToolTranslate() {
 		UnityUtil.clipToolTranslate();
+	}
+
+	public setClipGizmoSize(nPixels: number) {
+		UnityUtil.setClipGizmoSize(nPixels);
+	}
+
+	public setClipPlaneSize(nPixels: number) {
+		UnityUtil.setClipPlaneSize(nPixels);
+	}
+
+	public setClipGizmoAxisScale(scale: number) {
+		UnityUtil.setClipGizmoAxisScale(scale);
 	}
 
 	public setNavigationOn() {

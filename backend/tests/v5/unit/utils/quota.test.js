@@ -228,28 +228,8 @@ const testSufficientQuota = () => {
 	});
 };
 
-const testGetCollaboratorsAssigned = () => {
-	describe('Get collaborators used', () => {
-		test('should get the total collaborators used by the user', async () => {
-			DBHandler.find.mockResolvedValueOnce([
-				{ user: generateRandomString() },
-				{ user: generateRandomString() },
-			]);
-
-			DBHandler.find.mockResolvedValueOnce([]);
-
-			const teamspace = generateRandomString();
-			const res = await Quota.getCollaboratorsAssigned(teamspace);
-			expect(res).toEqual(2);
-
-			expect(DBHandler.find).toHaveBeenCalledTimes(2);
-		});
-	});
-};
-
 describe('utils/quota', () => {
 	testGetQuotaInfo();
 	testGetSpaceUsed();
 	testSufficientQuota();
-	testGetCollaboratorsAssigned();
 });

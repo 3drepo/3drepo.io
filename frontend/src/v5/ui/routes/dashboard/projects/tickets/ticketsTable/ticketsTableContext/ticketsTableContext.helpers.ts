@@ -15,31 +15,34 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITemplate, PropertyDefinition, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { compact } from 'lodash';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TableColumn } from '@controls/resizableTableContext/resizableTableContext';
+import { getTemplatePropertiesDefinitions } from '@/v5/store/tickets/tickets.helpers';
 
 const TABLE_COLUMNS_INVALID_PROPERTIES = ['view', 'image', 'imageList', 'coords'];
 const TABLE_COLUMNS_DEFAULT_PROPERTIES = ['id', 'modelName', BaseProperties.TITLE];
+const minWidth =  70;
+
 const TABLE_COLUMNS_DEFAULT_WIDTHS = {
-	'id': { width: 80, minWidth: 25 },
-	'modelName': { width: 170, minWidth: 25 },
-	[BaseProperties.TITLE]: { width: 380, minWidth: 25 },
-	[IssueProperties.PRIORITY]: { width: 90, minWidth: 25 },
-	[IssueProperties.ASSIGNEES]: { width: 96, minWidth: 25 },
-	[`properties.${BaseProperties.STATUS}`]: { width: 150, minWidth: 52 },
+	'id': { width: 80, minWidth },
+	'modelName': { width: 170, minWidth },
+	[BaseProperties.TITLE]: { width: 380, minWidth },
+	[IssueProperties.PRIORITY]: { width: 90, minWidth },
+	[IssueProperties.ASSIGNEES]: { width: 96, minWidth },
+	[`properties.${BaseProperties.STATUS}`]: { width: 150, minWidth },
 };
 const TABLE_COLUMNS_TYPE_TO_WIDTHS: Partial<Record<PropertyTypeDefinition, { width: number, minWidth: number }>> = {
-	'text': { width: 140, minWidth: 25 },
-	'longText': { width: 200, minWidth: 25 },
-	'boolean': { width: 140, minWidth: 25 },
-	'number': { width: 100, minWidth: 25 },
+	'text': { width: 140, minWidth },
+	'longText': { width: 200, minWidth },
+	'boolean': { width: 140, minWidth },
+	'number': { width: 100, minWidth },
 	// @ts-ignore
-	'pastDate': { width: 147, minWidth: 25 },
-	'date': { width: 147, minWidth: 25 },
-	'manyOf': { width: 140, minWidth: 25 },
-	'oneOf': { width: 140, minWidth: 25 },
+	'pastDate': { width: 147, minWidth },
+	'date': { width: 147, minWidth },
+	'manyOf': { width: 140, minWidth },
+	'oneOf': { width: 140, minWidth },
 };
 
 const getTableColumnData = ({ name, type }): TableColumn => {
@@ -48,13 +51,6 @@ const getTableColumnData = ({ name, type }): TableColumn => {
 	return { name, ...widths, stretch: name === BaseProperties.TITLE };
 };
 
-export const getTemplatePropertiesDefinitions = (template: ITemplate): PropertyDefinition[] => {
-	if (!template.properties) return [];
-	return [
-		...template.properties?.map((property) => ({ ...property, name: `properties.${property.name}` })),
-		...template.modules?.flatMap((module) => module.properties.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
-	];
-};
 
 export const getAvailableColumnsForTemplate = (template: ITemplate): TableColumn[] => {
 	const propertiesDefinition = getTemplatePropertiesDefinitions(template);

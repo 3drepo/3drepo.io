@@ -21,27 +21,27 @@ import { Info, ExternalLabel } from './importedUserPopover.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { HoverPopover } from '@controls/hoverPopover/hoverPopover.component';
 import { IUser } from '@/v5/store/users/users.redux';
+import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 
 interface IImportedUserPopover {
-	author: string;
-	originalAuthor: string;
+	importedBy: string;
 	importedAt: Date;
-	user: IUser;
+	author: IUser;
 	className?: string;
 }
-export const ImportedUserPopover = ({ className, user, author, originalAuthor, importedAt }: IImportedUserPopover) => (
-	<HoverPopover anchor={() => <UserCircle user={user} className={className} />}>
+export const ImportedUserPopover = ({ className, author, importedBy, importedAt }: IImportedUserPopover) => (
+	<HoverPopover anchor={() => <UserCircle user={author} className={className} />}>
 		<PopoverContainer>
 			<AvatarWrapper>
-				<UserCircle user={user} />
+				<UserCircle user={author} />
 			</AvatarWrapper>
 			<Data>
 				<Heading>
-					{originalAuthor} <ExternalLabel />
+					{getFullnameFromUser(author)} <ExternalLabel />
 				</Heading>
 				<Info>
-					<FormattedMessage id="importedUserPopover.author" defaultMessage="Imported by:" />
-					&nbsp;{author}
+					<FormattedMessage id="importedUserPopover.importedBy" defaultMessage="Imported by:" />
+					&nbsp;{importedBy}
 				</Info>
 				<Info>
 					<FormattedMessage id="importedUserPopover.time" defaultMessage="Imported on:" />

@@ -20,6 +20,8 @@ import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import {  useMemo } from 'react';
 
 
+const modelsKey = (models) => models.map(({ _id }) => _id).join();
+
 export const useSelectedModels = () => {
 	const [modelsIds] = useSearchParam('models', Transformers.STRING_ARRAY);
 	
@@ -28,5 +30,5 @@ export const useSelectedModels = () => {
 
 	return useMemo(() => 
 		[...containers, ...federations].filter(({ _id }) => modelsIds?.includes(_id)),
-	[containers, federations, modelsIds]);
+	[modelsKey(containers), modelsKey(federations), modelsIds]);
 };

@@ -17,9 +17,8 @@
 
 import styled from 'styled-components';
 import { MenuItem as MenuItemComponent } from '@mui/material';
-import { Link } from 'react-router-dom';
 
-export const MenuItem = styled(MenuItemComponent)<React.ComponentProps<typeof Link>>`
+export const MenuItem = styled(MenuItemComponent)`
 	${({ theme }) => theme.typography.body1};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin: 0;

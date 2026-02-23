@@ -19,11 +19,15 @@
 import { IContainerRevision, IContainerRevisionUpdate } from '@/v5/store/containers/revisions/containerRevisions.types';
 import { ContainersActionsDispatchers, ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
+import { refreshContainerRevisionsCount } from '@/v5/store/containers/revisions/containerRevisions.sagas';
 
 export const enableRealtimeContainerRevisionUpdate = (teamspace: string, project: string, containerId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerRevisionUpdate',
-		(updatedStats: IContainerRevisionUpdate) =>
-			ContainerRevisionsActionsDispatchers.updateRevisionSuccess(containerId, updatedStats));
+		(updatedStats: IContainerRevisionUpdate) => {
+			ContainerRevisionsActionsDispatchers.updateRevisionSuccess(containerId, updatedStats);
+			refreshContainerRevisionsCount(teamspace, project, containerId);
+		},
+	);
 
 export const enableRealtimeNewContainerRevisionUpdate = (teamspace: string, project: string, containerId: string) =>
 	subscribeToRoomEvent({ teamspace, project, model: containerId }, 'containerNewRevision',

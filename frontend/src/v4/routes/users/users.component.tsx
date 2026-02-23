@@ -29,7 +29,6 @@ import {
 } from 'lodash';
 import ReactDOM from 'react-dom';
 
-import { RouteComponentProps } from 'react-router';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -47,7 +46,7 @@ import { NewUserForm } from '../components/newUserForm/newUserForm.component';
 import { UserItem } from '../components/userItem/userItem.component';
 import { UserManagementTab } from '../components/userManagementTab/userManagementTab.component';
 import { LoaderContainer } from '../userManagement/userManagement.styles';
-import { PendingInvites } from './users.styles';
+import { PendingInvitesLink } from './users.styles';
 
 const USERS_TABLE_CELLS = [
 	{
@@ -80,7 +79,7 @@ const getPreparedJobs = (jobs) => {
 	return jobs.map(({ _id: name, color }) => ({ name, color, value: name }));
 };
 
-interface IProps extends RouteComponentProps<any> {
+interface IProps {
 	users: any[];
 	usersSuggestions: any[];
 	projects: any[];
@@ -90,8 +89,10 @@ interface IProps extends RouteComponentProps<any> {
 	licencesCount: number;
 	invitationsCount: number;
 	userNotExists?: boolean;
-	currentTeamspace?: string;
+	currentTeamspace: string;
 	selectedTeamspace: string;
+	usersProvisionedEnabled: boolean;
+	permissionsOnUIDisabled: boolean;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateUserJob: (username, job) => void;
@@ -120,6 +121,44 @@ const teamspacePermissions = values(TEAMSPACE_PERMISSIONS).map(
 		value
 	})
 );
+
+const PendingInvites = ({ invitationsCount, showDialog, projects, currentTeamspace, onInvitationOpen, limitReached }) => {
+	const onClick = (e: any) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		showDialog({
+			title: 'Invitations',
+			template: InvitationsDialog,
+			data: {
+				onInvitationOpen,
+				projects: filter(projects, ({ teamspace }) => teamspace === currentTeamspace),
+				limitReached
+			}
+		});
+	};
+
+	return <>(<PendingInvitesLink key="pending" onClick={onClick}>{invitationsCount ?? 0} pending</PendingInvitesLink>)</>;
+}
+
+type AssignedLicensesProps = {
+	licencesCount: number,
+	usersCount: number,
+	limit: number | string,
+	children?: JSX.Element
+};
+
+const AssignedLicenses = ({ licencesCount, usersCount, limit, children}: AssignedLicensesProps ) => {
+	if (!licencesCount) {
+		return <></>;
+	}
+
+	const limitValue = limit !== 'unlimited' ? limit || 0 : 'unlimited';
+
+	return (<>
+		Assigned licences: {usersCount} {children} out of {limitValue}
+	</>);
+}
 
 export class Users extends PureComponent<IProps, IState> {
 	public formRef = createRef<any>();
@@ -179,22 +218,26 @@ export class Users extends PureComponent<IProps, IState> {
 					value: user.job,
 					items: jobs,
 					itemTemplate: JobItem,
-					onChange: this.handleChange(user, 'job')
+					onChange: this.handleChange(user, 'job'),
+					disabled: this.props.usersProvisionedEnabled,
 				},
 				{
 					value: user.isAdmin,
 					items: teamspacePermissions,
 					onChange: this.handleChange(user, 'permissions'),
-					readOnly: user.isCurrentUser || user.isOwner,
-					disabled: user.isCurrentUser || user.isOwner
+					readOnly: user.isCurrentUser || user.isOwner || this.props.permissionsOnUIDisabled,
+					disabled: user.isCurrentUser || user.isOwner || this.props.permissionsOnUIDisabled
 				},
 				{},
-				{
+			];
+			if (!this.props.usersProvisionedEnabled) {
+				data.push({
+					// @ts-ignore
 					Icon: BinIcon,
 					disabled: user.isCurrentUser || user.isOwner,
 					onClick: this.onRemove.bind(null, user.user)
-				}
-			];
+				});
+			}
 			return { ...user, data };
 		});
 	}
@@ -265,13 +308,15 @@ export class Users extends PureComponent<IProps, IState> {
 	}
 
 	public renderNewUserFormPanel = ({ closePanel }) => {
-		const { usersSuggestions, clearUsersSuggestions, onUsersSearch } = this.props;
+		const { usersSuggestions, clearUsersSuggestions, onUsersSearch, licencesCount, limit, users } = this.props;
 
 		const formProps = {
 			ref: this.formRef,
-			title: this.getFooterLabel(),
+			title: <AssignedLicenses licencesCount={licencesCount} limit={limit} usersCount={users.length} />,
 			jobs: this.state.jobs,
 			users: usersSuggestions,
+			usersProvisionedEnabled: this.props.usersProvisionedEnabled,
+			permissionsOnUIDisabled: this.props.permissionsOnUIDisabled,
 			onSave: this.onSave,
 			clearSuggestions: clearUsersSuggestions,
 			getUsersSuggestions: onUsersSearch,
@@ -285,9 +330,13 @@ export class Users extends PureComponent<IProps, IState> {
 
 	public renderNewUserForm = (container) => {
 		const { limit } = this.state;
-		const { users } = this.props;
+		const { users, usersProvisionedEnabled } = this.props;
 
 		const isButtonDisabled = (limit || 0) as number <= users.length;
+
+		if (usersProvisionedEnabled) {
+			return null;
+		}
 
 		return (
 			<FloatingActionPanel
@@ -302,46 +351,16 @@ export class Users extends PureComponent<IProps, IState> {
 		);
 	}
 
-	public renderPendingInvites = () => {
-		const { invitationsCount, showDialog } = this.props;
-		const onClick = (e: any) => {
-			e.preventDefault();
-			e.stopPropagation();
-			showDialog({
-				title: 'Invitations',
-				template: InvitationsDialog,
-				data: {
-					onInvitationOpen: this.handleInvitationOpen,
-					projects: filter(this.props.projects, ({ teamspace }) => teamspace === this.props.currentTeamspace),
-				}
-			});
-		};
-		return ['(', <PendingInvites key="pending" disabled={!invitationsCount} onClick={onClick}>{invitationsCount} pending</PendingInvites>, ')'];
-	}
-
-	/**
-	 * Generate licences summary
-	 */
-	public getFooterLabel = (withInvitations = false) => {
-		const { licencesCount, users } = this.props;
-		const { limit } = this.state;
-
-		if (!licencesCount) {
-			return '';
-		}
-
-		const limitValue = limit !== 'unlimited' ? limit || 0 : 'unlimited';
-
-		return [
-			`Assigned licences: ${users.length} `,
-			withInvitations ? this.renderPendingInvites() : null,
-			` out of ${limitValue}`
-		];
-	}
-
 	public render() {
-		const { isPending, selectedTeamspace } = this.props;
+		const { isPending, selectedTeamspace, usersProvisionedEnabled } = this.props;
 		const { rows, containerElement } = this.state;
+		const cells = USERS_TABLE_CELLS;
+
+		if (usersProvisionedEnabled) {
+			const deleteCellIndex = cells.findIndex(({ type }) => type === CELL_TYPES.ICON_BUTTON);
+			// @ts-ignore
+			cells[deleteCellIndex] = { ...cells[deleteCellIndex], disabled: true };
+		}
 
 		if (isPending) {
 			const content = `Loading "${selectedTeamspace}" users data...`;
@@ -356,10 +375,16 @@ export class Users extends PureComponent<IProps, IState> {
 			return null;
 		}
 
+		const {licencesCount, limit, users } = this.props;
+		const limitReached =  (limit || 0) as number <= users.length;
+
 		return (
 			<>
-				<UserManagementTab footerLabel={this.getFooterLabel(true)} className={this.props.className}>
-					<CustomTable cells={USERS_TABLE_CELLS} rows={rows} />
+				<UserManagementTab footerLabel={
+					<AssignedLicenses licencesCount={licencesCount} limit={limit} usersCount={users.length} >
+						<PendingInvites {...this.props} onInvitationOpen={this.handleInvitationOpen} limitReached={limitReached} />
+					</AssignedLicenses>} className={this.props.className}>
+					<CustomTable cells={cells} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}
 			</>

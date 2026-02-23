@@ -27,6 +27,10 @@ import { drawingMockFactory } from '../drawings.fixtures';
 import { selectDrawingById } from '@/v5/store/drawings/drawings.selectors';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { isAdmin } from '@/v4/helpers/permissions';
+import { projectMockFactory } from '../../projects/projects.fixtures';
+import { selectCurrentProjects } from '@/v5/store/projects/projects.selectors';
+import { TeamspacesActions } from '@/v5/store/teamspaces/teamspaces.redux';
 
 describe('Drawing Revisions: sagas', () => {
 	const teamspace = 'teamspace';
@@ -39,10 +43,15 @@ describe('Drawing Revisions: sagas', () => {
 	const mockDrawing = drawingMockFactory({ _id: drawingId });
 	let dispatch, getState, waitForActions: WaitForActions;
 	let onSuccess, onError;
-
+	const projects = [projectMockFactory({ _id: projectId, isAdmin: true}), projectMockFactory({ isAdmin: false})];
+	
 	beforeEach(() => {
 		({ dispatch, getState, waitForActions } = createTestStore());
+
+		dispatch(ProjectsActions.fetchSuccess(teamspace, projects));
 		dispatch(ProjectsActions.setCurrentProject(projectId));
+		dispatch(TeamspacesActions.setCurrentTeamspace(teamspace));
+		
 		onSuccess = jest.fn();
 		onError = jest.fn();
 	});

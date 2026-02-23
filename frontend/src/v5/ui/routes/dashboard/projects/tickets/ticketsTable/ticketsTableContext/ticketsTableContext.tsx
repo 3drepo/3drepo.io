@@ -16,33 +16,76 @@
  */
 
 import { createContext } from 'react';
-import { ITemplate } from '@/v5/store/tickets/tickets.types';
-import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
+import { useParams } from 'react-router';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
+import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
 
 export interface TicketsTableType {
-	getPropertyType: (name: string) => string;
+	getPropertyType: (name: string) => PropertyTypeDefinition;
 	isJobAndUsersType: (name: string) => boolean;
+	groupByProperties: string[],
+	groupBy: string,
+	setGroupBy: (groupBy: React.SetStateAction<string>) => void;
+	fetchColumn: (name: string, tickets: ITicket[]) => void;
 }
 
 const defaultValue: TicketsTableType = {
 	getPropertyType: () => null,
 	isJobAndUsersType: () => false,
+	groupByProperties: [],
+	groupBy: '',
+	setGroupBy: () => {},
+	fetchColumn: () => {},
 };
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
 
 interface Props {
 	children: any;
-	template: ITemplate;
 }
-export const TicketsTableContextComponent = ({ children, template }: Props) => {
+export const TicketsTableContextComponent = ({ children }: Props) => {
+	const [groupBy, setGroupBy] = useSearchParam('groupBy');
+	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
+	const isFed = FederationsHooksSelectors.selectIsFederation();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
 		{},
 	);
 
-	const getPropertyType = (name: string) => definitionsAsObject[name]?.type;
+	const fetchColumn = (name, tickets: ITicket[]) => {
+		const idsByModelId = tickets
+			.filter(({ _id }) => !selectPropertyFetched(getState(), _id, name))
+			.reduce((acc, { _id: ticketId, modelId }) => {
+				if (!acc[modelId]) {
+					acc[modelId] = [];
+				}
+				acc[modelId].push(ticketId);
+				return acc;
+			},  {} ) as Record<string, string[]>;
+
+		Object.keys(idsByModelId).map((modelId) => {
+			const isFederation = isFed(modelId);
+			TicketsActionsDispatchers.fetchTicketsProperties(
+				teamspace,
+				project,
+				modelId,
+				isFederation,
+				[name],
+			);
+		});
+	};
+
+	const getPropertyType = (name: string) => definitionsAsObject[name]?.type as PropertyTypeDefinition;
 	const isJobAndUsersType = (name: string) => (
 		definitionsAsObject[name]?.values === 'jobsAndUsers'
 		|| ['properties.Owner', 'properties.Assignees'].includes(name)
@@ -52,6 +95,10 @@ export const TicketsTableContextComponent = ({ children, template }: Props) => {
 		<TicketsTableContext.Provider value={{
 			getPropertyType,
 			isJobAndUsersType,
+			groupByProperties: groupByProperties(definitionsAsArray),
+			groupBy: groupBy || NONE_OPTION,
+			setGroupBy,
+			fetchColumn,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>

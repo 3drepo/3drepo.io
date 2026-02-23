@@ -24,7 +24,6 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import IsolateIcon from '@mui/icons-material/VisibilityOutlined';
 
-import { RouteComponentProps } from 'react-router';
 import {
 	SELECTION_STATES,
 	TREE_ITEM_FEDERATION_TYPE,
@@ -36,13 +35,14 @@ import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
 import { Actions, Container, Name, NameWrapper, ParentOfVisible, StyledExpandableButton } from './treeNode.styles';
 
-interface IProps extends RouteComponentProps<any> {
+interface IProps {
 	style: any;
 	key: any;
 	index: number;
 	data: any;
 	settings: any;
-	match: any;
+	teamspace: string;
+	project: string;
 	isSearchResult?: boolean;
 	visibilityMap: any;
 	selectionMap: any;
@@ -245,7 +245,7 @@ export class TreeNode extends PureComponent<IProps, any> {
 	}
 
 	private handleOpenModelClick = () => {
-		const { teamspace, project } = this.props.match.params;
+		const { teamspace, project } = this.props;
 		const { model } = this.props.settings.subModels.find((subModel) => subModel.name === this.node.name);
 
 		const url = `${window.location.origin}/v5/viewer/${teamspace}/${project}/${model}`;

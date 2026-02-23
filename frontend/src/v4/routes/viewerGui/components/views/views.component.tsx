@@ -20,7 +20,7 @@ import { isEqual } from 'lodash';
 
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
-import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../../../constants/viewer';
+import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { VIEWS_ACTIONS_ITEMS, VIEWS_ACTIONS_MENU } from '../../../../constants/views';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -217,7 +217,7 @@ class ViewsBase extends PureComponent<IProps, any> {
 				if (newViewpoint) {
 					const containerRef = this.containerRef.current.containerRef;
 					this.resetActiveView();
-					this.containerRef.current.containerRef.scrollTo(0, containerRef.scrollHeight + 200);
+					this.containerRef.current.containerRef?.scrollTo(0, containerRef.scrollHeight + 200);
 				}
 			});
 		}

@@ -15,18 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { basename, extname } = require('path');
 const { checkQuotaIsSufficient, fileFilter } = require('./commons/revisions');
-const { createResponseCode, templates } = require('../../../../../../utils/responseCodes');
+const { codeExists, createResponseCode, templates } = require('../../../../../../utils/responseCodes');
+const FSHandler = require('../../../../../../handler/fs');
+const { FileStorageTypes } = require('../../../../../../utils/config.constants');
 const Yup = require('yup');
-const YupHelper = require('../../../../../../utils/helper/yup');
+const { createNewUserRecord } = require('../../../../../../processors/users');
+const { generateUUIDString } = require('../../../../../../utils/helper/uuids');
 const { getModelById } = require('../../../../../../models/modelSettings');
 const { getModelByQuery } = require('../../../../../../models/modelSettings');
+const { getUserByEmail } = require('../../../../../../models/users');
+const { getUserFromSession } = require('../../../../../../utils/sessions');
 const { isTagUnique } = require('../../../../../../models/revisions');
 const { processStatuses } = require('../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../utils/responder');
 const { singleFileUpload } = require('../../../../multer');
 const tz = require('countries-and-timezones');
 const { validateMany } = require('../../../../../common');
+const { types: yupTypes } = require('../../../../../../utils/helper/yup');
 
 const Containers = {};
 
@@ -60,35 +67,87 @@ Containers.canDeleteContainer = async (req, res, next) => {
 	}
 };
 
-const validateRevisionUpload = async (req, res, next) => {
-	const schemaBase = {
-		tag: YupHelper.types.strings.code.test('tag-not-in-use',
-			'Revision name is already used by an existing revision',
-			(value) => value === undefined || isTagUnique(req.params.teamspace,
-				req.params.container, value)).required(),
-		desc: YupHelper.types.strings.shortDescription,
-		importAnimations: Yup.bool().default(true),
-		timezone: Yup.string().test('valid-timezone',
-			'The timezone provided is not valid',
-			(value) => value === undefined || !!tz.getTimezone(value)),
-		lod: Yup.number().min(0).max(6).default(0),
-	};
-
-	const schema = Yup.object().noUnknown().required().shape(schemaBase)
-		.test('check-model-status', 'A revision is already being processed.', async () => {
-			const { teamspace, container } = req.params;
-			const { status } = await getModelById(teamspace, container, { _id: 0, status: 1 });
-			return status === processStatuses.OK || status === processStatuses.FAILED || !status;
-		});
-
+const getOwnerUserFromEmail = async (email) => {
 	try {
-		req.body = await schema.validate(req.body);
-		await next();
+		const { user } = await getUserByEmail(email, { user: 1 });
+		return user;
 	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+		if (err.code === templates.userNotFound.code) {
+			// the email is not a recognised user in the platform, setup a new user with this email
+			const id = generateUUIDString();
+			await createNewUserRecord({ email, id, name: email });
+			return id;
+		}
+		throw err;
 	}
 };
 
-Containers.validateNewRevisionData = validateMany([singleFileUpload('file', fileFilter(ACCEPTED_CONTAINER_EXT)), checkQuotaIsSufficient, validateRevisionUpload]);
+const validateRevisionUpload = (internal) => async (req, res, next) => {
+	try {
+		const schemaBase = {
+			tag: yupTypes.strings.code.test('tag-not-in-use',
+				'Revision name is already used by an existing revision',
+				(value) => value === undefined || isTagUnique(req.params.teamspace,
+					req.params.container, value)).required(),
+			desc: yupTypes.strings.shortDescription,
+			importAnimations: Yup.bool().default(true),
+			timezone: Yup.string().test('valid-timezone',
+				'The timezone provided is not valid',
+				(value) => value === undefined || !!tz.getTimezone(value)),
+			lod: Yup.number().min(0).max(6).default(0),
+		};
+
+		if (internal) {
+			schemaBase.owner = yupTypes.strings.email.required("Owner's email is required for internal uploads");
+		}
+
+		const schema = Yup.object().noUnknown().required().shape(schemaBase)
+			.test('check-model-status', 'A revision is already being processed.', async () => {
+				const { teamspace, container } = req.params;
+				const { status } = await getModelById(teamspace, container, { _id: 0, status: 1 });
+				return status === processStatuses.OK || status === processStatuses.FAILED || !status;
+			});
+
+		req.body = await schema.validate(req.body);
+
+		if (internal) {
+			req.body.owner = await getOwnerUserFromEmail(req.body.owner);
+		} else {
+			req.body.owner = getUserFromSession(req.session);
+		}
+
+		await next();
+	} catch (err) {
+		const response = codeExists(err.code) ? err : createResponseCode(templates.invalidArguments, err?.message);
+		respond(req, res, response);
+	}
+};
+
+const checkFileFromPath = async (req, res, next) => {
+	try {
+		if (!req.body.file) throw new Error('File is required');
+		const fsHandler = FSHandler.getHandler(FileStorageTypes.EXTERNAL_FS);
+		const { path, size } = await fsHandler.getFileInfo(req.body.file);
+		const file = { path, size, originalname: basename(path), readOnly: true };
+
+		// get file extension from original file name
+		const ext = extname(path).toLowerCase();
+
+		if (!ext || !ACCEPTED_CONTAINER_EXT.includes(ext)) {
+			throw templates.unsupportedFileFormat;
+		}
+
+		req.file = file;
+		delete req.body.file;
+		await next();
+	} catch (err) {
+		const response = codeExists(err.code) ? err : createResponseCode(templates.invalidArguments, err?.message);
+		respond(req, res, response);
+	}
+};
+
+Containers.validateNewRevisionData = (internal) => (internal
+	? validateMany([checkFileFromPath, checkQuotaIsSufficient, validateRevisionUpload(internal)])
+	: validateMany([singleFileUpload('file', fileFilter(ACCEPTED_CONTAINER_EXT)), checkQuotaIsSufficient, validateRevisionUpload(internal)]));
 
 module.exports = Containers;

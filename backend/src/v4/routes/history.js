@@ -59,7 +59,7 @@ router.get("/revisions.json", middlewares.hasReadAccessToModel, listRevisions);
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
- * @apiParam {String} branch Name of revision branch
+ * @apiParam {String} branch.json Name of revision branch, followed by the .json extension
  * @apiSuccess (200) Revisions object for a branch
  *
  * @apiExample {get} Example usage:

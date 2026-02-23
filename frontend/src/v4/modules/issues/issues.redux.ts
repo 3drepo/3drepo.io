@@ -16,7 +16,7 @@
  */
 
 import { DEFAULT_ISSUES_FILTERS } from '@/v4/constants/issues';
-import { cloneDeep, isEmpty, keyBy } from 'lodash';
+import { cloneDeep, get, isEmpty, keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 
 export const { Types: IssuesTypes, Creators: IssuesActions } = createActions({
@@ -254,20 +254,27 @@ const hideCloseInfo = (state = INITIAL_STATE, { issueId }) => {
 const reset = () => cloneDeep(INITIAL_STATE);
 
 const removeResourceSuccess =  (state = INITIAL_STATE, { resource, issueId }) => {
-	const resources = state.issuesMap[issueId].resources.filter((r) => r._id !== resource._id);
-	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
+	const resources = get(state.issuesMap, [issueId, 'resources']) ?? [];
+	const updatedResources = resources.filter((r) => r._id !== resource._id);
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources: updatedResources });
 
 	return { ...state, issuesMap };
 };
 
 const attachResourcesSuccess = (state = INITIAL_STATE, { resources, issueId }) => {
-	resources = resources.concat(state.issuesMap[issueId].resources || []);
+	const issue: any = get(state.issuesMap, issueId);
+	if (!issue) {
+		return state;
+	}
+
+	resources = resources.concat(issue.resources || []);
 	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
 	return { ...state, issuesMap};
 };
 
 const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, issueId }) => {
-	const resources = state.issuesMap[issueId].resources.map((resource) => {
+	const resources = get(state.issuesMap, [issueId, 'resources']) ?? [];
+	const updatedResources = resources.map((resource) => {
 		const updateIndex = resourcesIds.indexOf(resource._id);
 
 		if (updateIndex >= 0) {
@@ -277,7 +284,7 @@ const updateResourcesSuccess = (state = INITIAL_STATE, { resourcesIds, updates, 
 		}
 	});
 
-	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources });
+	const issuesMap = updateIssueProps(state.issuesMap, issueId, { resources: updatedResources });
 	return { ...state, issuesMap};
 };
 
