@@ -27,7 +27,6 @@ const {
 	db: dbHelper,
 	generateRandomNumber,
 } = require('../../helper/services');
-const mongodb = require('mongodb');
 const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 
 const DB = require(`${src}/handler/db`);
@@ -984,7 +983,7 @@ const testConnectionString = () => {
 		['all options', { host: [hosts[0], hosts[1]], port: [ports[0], ports[1]], username: '123', password: '123', replicaSet: 'rs0', authSource: 'admin', timeout: 12345 },
 			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]}/?replicaSet=rs0&authSource=admin&socketTimeoutMS=12345`, username, password],
 	])('Connection String', (desc, configOverride, expectedString, user, pass) => {
-		test(`Should return the expected connection string if ${desc}`, async () => {
+		test(`Should return the expected connection string if ${desc}`, () => {
 			config.db = configOverride;
 			// eslint-disable-next-line no-underscore-dangle
 			expect(DB._context.getURL(user, pass)).toEqual(expectedString);
