@@ -25,6 +25,7 @@ const { USERS_DB_NAME, USERS_COL } = require(`${src}/models/users.constants`);
 const Cache = require('./cache');
 
 const Accounts = {};
+Accounts.doesAccountExist = (accountId) => Cache.doesAccountExist(accountId);
 Accounts.getTeamspaceByAccount = (accountId) => Cache.getTeamspaceByAccount(accountId);
 
 Accounts.setMFAPolicy = () => Promise.resolve();

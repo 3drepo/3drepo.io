@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 const { destroySession, isSessionValid, setCSRFCookie } = require('../utils/sessions');
+const { BYPASS_AUTH } = require('../utils/config.constants');
 const { USER_AGENT_HEADER } = require('../utils/sessions.constants');
 const { logger } = require('../utils/logger');
 const { respond } = require('../utils/responder');
@@ -51,7 +52,7 @@ const checkValidSession = async (req, res, ignoreAPIKey) => {
 };
 
 const validSession = (ignoreAPIKey) => async (req, res, next) => {
-	if (await checkValidSession(req, res, ignoreAPIKey)) {
+	if (req.app.get(BYPASS_AUTH) || await checkValidSession(req, res, ignoreAPIKey)) {
 		await next();
 	} else {
 		respond(req, res, templates.notLoggedIn);

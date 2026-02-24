@@ -301,55 +301,7 @@ Schemas.schemas.ticketGroup = {
 			description: 'Description of the group',
 			example: 'All facades on level 1',
 		},
-		rules: {
-			type: 'array',
-			items: {
-				type: 'object',
-				properties: {
-					name: {
-						type: 'string',
-						description: 'name of the rule',
-						example: 'Rule 1',
-					},
-					field: {
-						type: 'object',
-						description: 'The BIM data field to query',
-						properties: {
-							operator: {
-								type: 'string',
-								enum: Object.keys(fieldOperators),
-								description: 'Operator value on the field name',
-								example: fieldOperators.IS.name,
-							},
-							values: {
-								type: 'array',
-								description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
-								items: {
-									type: 'string',
-									example: 'Family Name',
-								},
-							},
-						},
-					},
-					operator: {
-						type: 'string',
-						enum: Object.keys(valueOperators),
-						description: 'Operator value on this prop',
-						example: valueOperators.EQUALS.name,
-					},
-					value: {
-						type: 'array',
-						description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
-						items: {
-							type: 'number',
-							example: 1,
-						},
-
-					},
-				},
-			},
-			description: 'List of rules for the smart group. Rules are evaluated under a intersection (AND) logic',
-		},
+		rules: Schemas.schemas.ticketGroupRules,
 		objects: {
 			type: 'array',
 			items: {
@@ -373,6 +325,56 @@ Schemas.schemas.ticketGroup = {
 		},
 
 	},
+};
+
+Schemas.schemas.ticketGroupRules = {
+	type: 'array',
+	items: {
+		type: 'object',
+		properties: {
+			name: {
+				type: 'string',
+				description: 'name of the rule',
+				example: 'Rule 1',
+			},
+			field: {
+				type: 'object',
+				description: 'The BIM data field to query',
+				properties: {
+					operator: {
+						type: 'string',
+						enum: Object.keys(fieldOperators),
+						description: 'Operator value on the field name',
+						example: fieldOperators.IS.name,
+					},
+					values: {
+						type: 'array',
+						description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
+						items: {
+							type: 'string',
+							example: 'Family Name',
+						},
+					},
+				},
+			},
+			operator: {
+				type: 'string',
+				enum: Object.keys(valueOperators),
+				description: 'Operator value on this prop',
+				example: valueOperators.EQUALS.name,
+			},
+			value: {
+				type: 'array',
+				description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
+				items: {
+					type: 'number',
+					example: 1,
+				},
+
+			},
+		},
+	},
+	description: 'List of rules for the smart group. Rules are evaluated under a intersection (AND) logic',
 };
 
 Schemas.schemas.modelSettings = {
