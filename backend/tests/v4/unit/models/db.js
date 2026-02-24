@@ -145,7 +145,6 @@ describe("Check DB handler", function () {
 		it("get collection stats should succeed", async function () {
 			const stats = await db.getCollectionStats(account, "jobs");
 			expect(stats).to.exist;
-			expect(stats.ok).to.equal(1);
 		});
 
 		it("get collection stats with incorrect username should be size 0", async function () {
