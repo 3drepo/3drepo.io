@@ -16,17 +16,24 @@
  */
 
 import styled, { css } from 'styled-components';
+import { NEW_TICKET_ROW_AREA_NAME } from '../ticketsTableGroup.helper';
 
 export const NEW_TICKET_ROW_HEIGHT = '37px';
+export const NewTicketRowGridArea = styled.div`
+	grid-area: ${NEW_TICKET_ROW_AREA_NAME};
+`;
+
 export const NewTicketRow = styled.div<{ disabled?: boolean }>`
-	width: 100%;
 	height: ${NEW_TICKET_ROW_HEIGHT};
+	width: 100%;
 	cursor: pointer;
 	color: ${({ theme }) => theme.palette.base.main};
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	display: grid;
 	position: relative;
 	z-index: 11;
+	border-radius: 0 0 10px 10px;
+	outline: 1px solid ${({ theme }) => theme.palette.tertiary.lightest};
 
 	${({ disabled }) => disabled && css`
 		cursor: initial;
