@@ -131,17 +131,20 @@ const getFilterPropertyAsQuery = ({ module, property, type }: TicketFilter) => {
 	return property;
 };
 
-const valueToQueryValueFormat = (value, operator: TicketFilterOperator) => {
+const valueToQueryValueFormat = (value) => {
 	if (isString(value)) return wrapWith(value, '"');
-	if (isRangeOperator(operator)) return `[${value[0]},${value[1]}]`;
 	return value;
 };
 
 const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: TicketFilter) => {
 	const query = [getFilterPropertyAsQuery(moduelPropertyAndType), operator];
-	if (values?.length) {
-		query.push(values?.map((v) => valueToQueryValueFormat(v, operator)).join(','));
+	
+	if (isRangeOperator(operator)) query.push(`[${values[0]},${values[1]}]`);
+	
+	if (values?.length && !isRangeOperator(operator)) {
+		query.push(values?.map((v) => valueToQueryValueFormat(v)).join(','));
 	}
+
 	return query.join('::');
 };
 export const filtersToQuery = (filters: TicketFilter[]) => {
