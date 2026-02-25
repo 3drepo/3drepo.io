@@ -179,6 +179,7 @@ const getNonCompletedTicketFiltersByStatus = (templates: ITemplate[], containerO
 		.map((v) => v.name);
 
 	const values = uniq(completedValueNames);
+	if (!values.length) return null;
 
 	return {
 		module: '',
@@ -204,9 +205,8 @@ const getNonCompletedTicketFiltersBySafetibase = (): TicketFilter => ({
 });
 
 export const getNonCompletedTicketFilters = (templates:ITemplate[], containerOrFederation:string): TicketFilter[] => {
-	let filters = [getNonCompletedTicketFiltersByStatus(templates, containerOrFederation)];
+	let filters = compact([getNonCompletedTicketFiltersByStatus(templates, containerOrFederation)]);
 	const hasSafetibase = templates.some((t) => t?.modules?.some((module) => module.type === 'safetibase'));
-	
 	if (hasSafetibase) {
 		filters.push(getNonCompletedTicketFiltersBySafetibase());
 	}
