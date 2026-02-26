@@ -210,9 +210,9 @@ Scene.getMeshData = async (teamspace, project, container, meshId) => {
 	combinedStream.append(stringToStream(['{"matrix":', JSON.stringify(matrix)].join('')));
 	combinedStream.append(stringToStream([',"primitive":', mesh.primitive || 3].join('')));
 	combinedStream.append(stringToStream(',"vertices":['));
-	combinedStream.append(GeoMaths.vectors.toJSONStream(verticesStream, true));
+	combinedStream.append(GeoMaths.vectors.toJSONStream(verticesStream));
 	combinedStream.append(stringToStream('],"faces":['));
-	combinedStream.append(GeoMaths.faces.toJSONStream(facesStream, true));
+	combinedStream.append(GeoMaths.faces.toJSONStream(facesStream));
 	combinedStream.append(stringToStream(']}'));
 	return combinedStream;
 };
