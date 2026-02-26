@@ -46,8 +46,6 @@ enum IndexChange {
 export const TicketDetailsCard = () => {
 	const { detailsView, setDetailViewAndProps, detailsViewProps: viewProps } = useContext(TicketContext);
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
-	const [, setTicketId] = useSearchParam('ticketId');
-
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
@@ -60,7 +58,15 @@ export const TicketDetailsCard = () => {
 	const ticketWasRemoved = currentIndex === -1;
 	const disableCycleButtons = ticketWasRemoved ? listLength < 1 : listLength < 2;
 	const templateValidationSchema = getValidators(template);
+	const [,setTicketIdState] = useSearchParam('ticketId');
 
+	// HACK: This is to use setTicketId in its latest version, because otherwise it will redirect with 
+	// an old url. There should be a more general fix for this.
+	const setTicketId = useRef(setTicketIdState);
+	useEffect(() => {
+		setTicketId.current = setTicketIdState;
+	}, [setTicketIdState]);
+	
 	const getUpdatedIndex = (delta: IndexChange) => {
 		let index = ticketWasRemoved ? initialIndex.current : currentIndex;
 		if (ticketWasRemoved && delta === IndexChange.NEXT) {
@@ -141,7 +147,7 @@ export const TicketDetailsCard = () => {
 
 		setDetailViewAndProps(TicketDetailsView.Form);
 		TicketsActionsDispatchers.fetchTicket(teamspace, project, containerOrFederation, ticket._id, isFederation, revision);
-		setTicketId(ticket._id);
+		setTicketId.current(ticket._id);
 		TicketsCardActionsDispatchers.setSelectedTemplate(ticket.type);
 	}, [ticket?._id]);
 
@@ -151,7 +157,7 @@ export const TicketDetailsCard = () => {
 
 	useEffect(() => () => {
 		onBlurHandler();
-		setTicketId();
+		setTicketId.current();
 	}, []);
 
 	if (!ticket) return null;

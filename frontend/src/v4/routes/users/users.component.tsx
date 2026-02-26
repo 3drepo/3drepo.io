@@ -93,6 +93,7 @@ interface IProps {
 	selectedTeamspace: string;
 	usersProvisionedEnabled: boolean;
 	permissionsOnUIDisabled: boolean;
+	addUserIsPending: boolean;
 	addUser: (user) => void;
 	removeUser: (username) => void;
 	updateUserJob: (username, job) => void;
@@ -317,6 +318,7 @@ export class Users extends PureComponent<IProps, IState> {
 			users: usersSuggestions,
 			usersProvisionedEnabled: this.props.usersProvisionedEnabled,
 			permissionsOnUIDisabled: this.props.permissionsOnUIDisabled,
+			addUserIsPending: this.props.addUserIsPending,
 			onSave: this.onSave,
 			clearSuggestions: clearUsersSuggestions,
 			getUsersSuggestions: onUsersSearch,
