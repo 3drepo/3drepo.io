@@ -29,4 +29,7 @@ Scene.getNodesByIds = (teamspace, project, model, ids, projection) => db.find(
 Scene.getNodeByQuery = (teamspace, project, model, query, projection) => db.findOne(
 	teamspace, getCollection(model), query, projection);
 
+Scene.getNodesByQuery = (teamspace, project, model, query, projection) => db.find(
+	teamspace, getCollection(model), query, projection);
+
 module.exports = Scene;

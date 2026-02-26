@@ -40,6 +40,8 @@ const eventList = [
 	// Teamspace permission related
 	'USER_ADDED', 'USER_REMOVED', 'INVITATION_ADDED', 'INVITATION_REVOKED',
 	'TEAMSPACE_PERMISSIONS_UPDATED', 'PROJECT_PERMISSIONS_UPDATED', 'MODEL_PERMISSIONS_UPDATED',
+	// Clash related
+	'CLASH_QUEUED_TASK_CREATED',
 ];
 
 const generateEventsMap = () => {

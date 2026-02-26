@@ -21,6 +21,10 @@ const { isEqual } = require('../../../../../utils/helper/objects');
 const { respond } = require('../../../../../utils/responder');
 const { validateMany } = require('../../../../common');
 const { validatePlan } = require('../../../../../schemas/projects/clashes');
+const { getModelByQuery } = require('../../../../../models/modelSettings');
+const { stringToUUID } = require('../../../../../utils/helper/uuids');
+const { getLatestRevision } = require('../../../../../models/revisions');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 
 const Clashes = {};
 
@@ -49,6 +53,25 @@ Clashes.planExists = async (req, res, next) => {
 		await next();
 	} catch (err) {
 		respond(req, res, err);
+	}
+};
+
+Clashes.planContainersHaveRevs = async (req, res, next) => {
+	try {
+		const { teamspace } = req.params;
+		const containerIds = [
+			req.planData.selectionA.container,
+			req.planData.selectionB.container,
+		];
+
+		const { _id: rev1Id } = await getLatestRevision(teamspace, containerIds[0], modelTypes.CONTAINER, { _id: 1 });
+		req.planData.selectionA.revision = rev1Id;
+		const { _id: rev2Id } = await getLatestRevision(teamspace, containerIds[1], modelTypes.CONTAINER, { _id: 1 });
+		req.planData.selectionB.revision = rev2Id;
+
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, 'Plan containers are not part of a federation'));
 	}
 };
 
