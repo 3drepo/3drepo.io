@@ -125,6 +125,7 @@ function* resetPanelsStates() {
 			put(SequencesActions.reset()),
 			put(GisActions.resetLayers()),
 			put(MeasurementsActions.resetMeasurementTool()),
+			put(TicketsCardActions.resetState()),
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
