@@ -620,6 +620,9 @@ const testRemoveTeamspace = () => {
 
 			expect(FronteggService.removeAccount).toHaveBeenCalledTimes(1);
 			expect(FronteggService.removeAccount).toHaveBeenCalledWith(teamspaceId);
+
+			expect(InvitationsModel.removeAllInvitationsByTeamspace).toHaveBeenCalledTimes(1);
+			expect(InvitationsModel.removeAllInvitationsByTeamspace).toHaveBeenCalledWith(teamspace);
 		});
 		test('Should remove the teamspace but not the associated account', async () => {
 			const teamspaceId = generateRandomString();
@@ -673,6 +676,8 @@ const testRemoveTeamspace = () => {
 			expect(DB.dropDatabase).toHaveBeenCalledWith(teamspace);
 
 			expect(FronteggService.removeAccount).not.toHaveBeenCalled();
+			expect(InvitationsModel.removeAllInvitationsByTeamspace).toHaveBeenCalledTimes(1);
+			expect(InvitationsModel.removeAllInvitationsByTeamspace).toHaveBeenCalledWith(teamspace);
 		});
 	});
 };
