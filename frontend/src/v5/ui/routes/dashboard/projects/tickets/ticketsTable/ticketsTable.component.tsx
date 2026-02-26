@@ -209,10 +209,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		(updatedTicketId, included) => {
 			// if nothing changed do nothing;
 			if (filteredTicketsIDs.has(updatedTicketId) === included) return;
-			const newFilteredIds = new Set(filteredTicketsIDs);
-			if (included) newFilteredIds.add(updatedTicketId);
-			else newFilteredIds.delete(updatedTicketId);
-			setFilteredTicketIds(newFilteredIds);
+			setFilteredTicketIds((oldFilteredIds) => {
+				const newFilteredIds = new Set(oldFilteredIds);
+
+				if (included) newFilteredIds.add(updatedTicketId);
+				else newFilteredIds.delete(updatedTicketId);
+				
+				return newFilteredIds;
+			});
 		});
 
 	/**
