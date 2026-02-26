@@ -60,8 +60,10 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 		return templateByProject || templateByModel;
 	});
 
+	let isArrayType = true;
 	const notNullable = templates.every((template) =>  {
 		const propDef = findPropertyDefinition(template, name);
+		isArrayType = isArrayType && (['oneOf', 'manyOf'].includes(propDef?.type));
 		return propDef?.required || (propDef?.type === 'oneOf');
 	});
 
@@ -78,7 +80,8 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 
 	const { formState: { isValid }, watch } = formData;
 
-	const isEmptyValue = !watch('value');
+	const value = watch('value');
+	const isEmptyValue = !value || (isArrayType && value.length === 0);
 	const canSubmit = isValid && (!notNullable || !isEmptyValue);
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
