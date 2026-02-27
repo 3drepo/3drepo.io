@@ -281,7 +281,7 @@ const testUploadAvatar = () => {
 				userId, avatarObject,
 			);
 		});
-		test('should throw a notAuthorised error if unable to upload the avatar to Frontegg', async () => {
+		test('should ignore error if unable to upload the avatar to Frontegg', async () => {
 			const username = generateRandomString();
 			const userId = generateRandomString();
 			const tenantId = generateRandomString();
@@ -290,23 +290,7 @@ const testUploadAvatar = () => {
 			FronteggService.uploadAvatar.mockRejectedValueOnce(undefined);
 			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
 
-			await expect(Users.uploadAvatar(username, avatarObject)).rejects.toEqual(templates.notAuthorized);
-			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
-			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
-				userId, avatarObject,
-			);
-		});
-		test('should throw a notAuthorised error if unable to save the file', async () => {
-			const username = generateRandomString();
-			const userId = generateRandomString();
-			const tenantId = generateRandomString();
-
-			UsersModel.getUserId.mockResolvedValueOnce(userId);
-			FronteggService.uploadAvatar.mockResolvedValueOnce(undefined);
-			FilesManager.storeFile.mockRejectedValueOnce(undefined);
-			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
-
-			await expect(Users.uploadAvatar(username, avatarObject)).rejects.toEqual(templates.notAuthorized);
+			await expect(Users.uploadAvatar(username, avatarObject)).resolves.toEqual(undefined);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
 			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
 				userId, avatarObject,

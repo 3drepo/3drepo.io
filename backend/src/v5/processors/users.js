@@ -136,15 +136,11 @@ Users.getAvatar = async (username) => {
 };
 
 Users.uploadAvatar = async (username, fileObj) => {
-	try {
-		const userId = await getUserId(username);
-		await Promise.all([
-			uploadAvatar(userId, fileObj),
-			storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, fileObj.buffer),
-		]);
-	} catch (error) {
-		throw templates.notAuthorized;
-	}
+	const userId = await getUserId(username);
+	await Promise.all([
+		uploadAvatar(userId, fileObj).catch((err) => logger.logError(`Failed to upload avatar to IDP: ${err?.message}`)),
+		storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, fileObj.buffer),
+	]);
 };
 
 Users.generateApiKey = generateApiKey;
