@@ -185,7 +185,11 @@ export const SettingsModal = ({
 				latLong: [latitude, longitude],
 				position: [x, y, z],
 			};
+		} else {
+			settings.surveyPoint = null;
 		}
+
+
 		updateSettings(
 			teamspace,
 			project,
