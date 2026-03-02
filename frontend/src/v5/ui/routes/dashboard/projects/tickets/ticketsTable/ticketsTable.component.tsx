@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersActionsDispatchers, DialogsActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -57,6 +57,8 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
 import { isEqual } from 'lodash';
+import { open } from 'inspector';
+import { formatMessage } from '@/v5/services/intl';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -304,6 +306,30 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		setTemplate(templates[0]._id);
 		return null;
 	}
+
+	const containers = ContainersHooksSelectors.selectContainers();
+	const federations = FederationsHooksSelectors.selectFederations();
+	const accessibleIds = [...containers, ...federations].map(({ _id }) => _id);
+	useEffect(() => {
+		const selectionIncluded = (containersAndFederations as string[]).every((id) => accessibleIds.includes(id));
+		if (!selectionIncluded) {
+			DialogsActionsDispatchers.open('info', {
+				title: formatMessage({
+					id: 'ticketsTable.notAllContainersAndFederationsTitle',
+					defaultMessage: 'Inaccessible containers or federations',
+				}),
+				message: formatMessage({
+					id: 'ticketsTable.notAllContainersAndFederationsMessage',
+					defaultMessage: `
+					You don't have access to every selected container and federation.{br}
+					Check that you have been authorized to access to all the {br}
+					selected containers and federations or that none have {br} 
+					been deleted.
+					`,
+				}, { br: <br /> }),
+			});
+		}
+	}, [accessibleIds.join()]);
 
 	return (
 		// eslint-disable-next-line max-len
