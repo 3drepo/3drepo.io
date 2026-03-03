@@ -23,7 +23,7 @@ import { MenuItem } from '@mui/material';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { useForm, SubmitHandler, useWatch } from 'react-hook-form';
 import { IContainer, ContainerSettings } from '@/v5/store/containers/containers.types';
-import { IFederation, FederationSettings } from '@/v5/store/federations/federations.types';
+import { IFederation } from '@/v5/store/federations/federations.types';
 import { EMPTY_VIEW } from '@/v5/store/store.helpers';
 import { ShareTextField } from '@controls/shareTextField';
 import { FormattedMessage } from 'react-intl';
@@ -106,7 +106,7 @@ type ISettingsModal = {
 		teamspace: string,
 		project: string,
 		containerOrFederationId: string,
-		settings: ContainerSettings | FederationSettings,
+		settings: ContainerSettings,
 		onSuccess: () => void,
 		onError: (error) => void,
 	) => void;
@@ -179,7 +179,7 @@ export const SettingsModal = ({
 		code,
 		...rest
 	}) => {
-		const settings = { ...rest, angleFromNorth, code: code ?? null } as ContainerSettings | FederationSettings;
+		const settings = { ...rest, angleFromNorth, code: code ?? null } as ContainerSettings;
 		if (isNumber(latitude)) {
 			settings.surveyPoint = {
 				latLong: [latitude, longitude],
