@@ -99,7 +99,9 @@ jobs:
         run: mkdir -p submodules
 
       - name: get dump commit hash
-        run: export TEST_VERSION=`cat backend/testDBVersion`
+        run: |
+          TEST_VERSION=$(cat backend/testDBVersion)
+          echo "COMMIT_SHA=$TEST_VERSION" >> $GITHUB_ENV
     
       - name: Checkout tests repo
         uses: actions/checkout@v6
