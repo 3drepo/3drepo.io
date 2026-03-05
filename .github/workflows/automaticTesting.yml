@@ -114,7 +114,7 @@ jobs:
           lfs: true
 
       - name: Restore Test Database
-        run: pwd && ls && cd submodules/tests/backend/ && echo "cded" && pwd && ls && mongorestore -u "admintesting" -p "admintesting" --authenticationDatabase admin --quiet
+        run: cd submodules/tests/backend/ && mongorestore -u "admintesting" -p "admintesting" --authenticationDatabase admin --quiet
 
       - name: Run Backend test
         run: cd backend ; yarn test
