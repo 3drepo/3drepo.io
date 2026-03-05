@@ -28,6 +28,7 @@ const { image, src, srcV4 } = require('./path');
 const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
+const { stopPurge } = require('../../../src/v5/models/frontegg.cache');
 
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
@@ -896,6 +897,7 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 
 ServiceHelper.closeApp = async (server) => {
 	await queue.purgeQueues();
+	stopPurge();
 	if (server) await server.close();
 	await db.reset();
 	EventsManager.reset();

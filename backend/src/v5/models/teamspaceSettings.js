@@ -26,15 +26,12 @@ const {
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
-const { getUserStatusInAccount } = require('../services/sso/frontegg');
-const { membershipStatus } = require('../services/sso/frontegg/frontegg.constants');
 const { templates } = require('../utils/responseCodes');
 
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 const TeamspaceSetting = {};
 
-const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
 const teamspaceInvitesQuery = (query, projection, sort) => db.find(USERS_DB_NAME, 'invitations', query, projection, sort);
 
@@ -160,29 +157,6 @@ TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
 	return tsSettings.permissions.flatMap(
 		({ user, permissions }) => (permissions.includes(TEAMSPACE_ADMIN) ? user : []),
 	);
-};
-
-TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username, bypassStatusCheck = false) => {
-	const query = { user: username };
-	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1, userId: 1 } });
-	if (!userDoc) return false;
-	const teamspaceId = await TeamspaceSetting.getTeamspaceRefId(teamspace);
-
-	const memStatus = await getUserStatusInAccount(teamspaceId, userDoc.customData.userId);
-	if (memStatus === membershipStatus.NOT_MEMBER) {
-		return false;
-	}
-	if (!bypassStatusCheck) {
-		if (memStatus === membershipStatus.INACTIVE) {
-			throw templates.membershipInactive;
-		}
-
-		if (memStatus === membershipStatus.PENDING_INVITE) {
-			throw templates.pendingInviteAcceptance;
-		}
-	}
-
-	return true;
 };
 
 TeamspaceSetting.getMembersInfo = async (teamspace) => {

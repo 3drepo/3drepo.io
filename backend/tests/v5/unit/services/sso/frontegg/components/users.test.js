@@ -37,6 +37,12 @@ const postOptions = { headers: bearerHeader };
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
 Connections.getConfig.mockResolvedValue({});
 
+jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/cacheService');
+const CacheService = require(`${src}/services/sso/frontegg/components/cacheService`);
+
+CacheService.getCached.mockImplementation((key, fetchFn) => fetchFn());
+CacheService.generateKey.mockReturnValue(generateRandomString());
+
 const testGetUserById = () => {
 	describe('Get user by ID', () => {
 		test('Should get user information', async () => {
@@ -295,6 +301,8 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should autopopulate the metadata if available and not provided', async () => {
@@ -327,6 +335,7 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should merge the metadata if there is new and old', async () => {
@@ -363,6 +372,7 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should update user\'s first name only', async () => {
@@ -394,6 +404,7 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should update user\'s first name only', async () => {
@@ -425,6 +436,7 @@ const testUpdateUserDetails = () => {
 			expect(WebRequests.put).toHaveBeenCalledWith(
 				expect.any(String), expectedPayload, { headers: bearerHeader },
 			);
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should throw error if it failed to update user details', async () => {
@@ -441,6 +453,7 @@ const testUpdateUserDetails = () => {
 			)).rejects.not.toBeUndefined();
 
 			expect(WebRequests.put).toHaveBeenCalledTimes(1);
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -455,6 +468,19 @@ const testGetAccountsByUser = () => {
 
 			await expect(Users.getAccountsByUser(userId)).resolves.toEqual(res.data.tenantIds);
 
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			expect(WebRequests.get.mock.calls[0][0].includes(userId)).toBeTruthy();
+		});
+
+		test('Should return tenantId instead if tenantIds is not available', async () => {
+			const userId = generateRandomString();
+			const res = { data: { tenantId: generateRandomString() } };
+
+			WebRequests.get.mockResolvedValueOnce(res);
+
+			await expect(Users.getAccountsByUser(userId)).resolves.toEqual([res.data.tenantId]);
 			expect(WebRequests.get).toHaveBeenCalledTimes(1);
 			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
 

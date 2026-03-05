@@ -37,6 +37,12 @@ const role = generateRandomString();
 Connections.getBearerHeader.mockResolvedValue(bearerHeader);
 Connections.getConfig.mockResolvedValue({ userRole: role });
 
+jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/cacheService');
+const CacheService = require(`${src}/services/sso/frontegg/components/cacheService`);
+
+CacheService.getCached.mockImplementation((key, fetchFn) => fetchFn());
+CacheService.generateKey.mockReturnValue(generateRandomString());
+
 const testGetTeamspaceByAccount = () => {
 	describe('Get teamspace by account', () => {
 		test('Should return teamspace name from frontegg', async () => {
@@ -299,6 +305,8 @@ const testAddUserToAccount = () => {
 				expect(WebRequests.post).toHaveBeenCalledTimes(1);
 				expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
 					{ headers: expectedHeader });
+
+				expect(CacheService.removeCache).toHaveBeenCalledTimes(2);
 			});
 		});
 
@@ -331,6 +339,7 @@ const testAddUserToAccount = () => {
 			expect(WebRequests.post).toHaveBeenCalledTimes(1);
 			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
 				{ headers: expectedHeader });
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 
 		test('Should throw error if post request failed', async () => {
@@ -367,6 +376,7 @@ const testAddUserToAccount = () => {
 			expect(WebRequests.post).toHaveBeenCalledTimes(1);
 			expect(WebRequests.post).toHaveBeenCalledWith(expect.any(String), expectedPayload,
 				{ headers: expectedHeader });
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -391,6 +401,7 @@ const testRemoveUserFromAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(2);
 		});
 
 		test('Should throw error if delete request failed', async () => {
@@ -413,6 +424,7 @@ const testRemoveUserFromAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 
 		test('Should not throw error if delete request failed with user not found', async () => {
@@ -436,6 +448,7 @@ const testRemoveUserFromAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), header);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(userId)).toBeTruthy();
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -454,6 +467,7 @@ const testRemoveAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), bearerHeader);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
+			expect(CacheService.removeCache).toHaveBeenCalledTimes(1);
 		});
 
 		test('Should throw error if delete request failed', async () => {
@@ -470,6 +484,7 @@ const testRemoveAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), bearerHeader);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 
 		test('Should not throw error if delete request failed with a 404', async () => {
@@ -486,6 +501,7 @@ const testRemoveAccount = () => {
 			expect(WebRequests.delete).toHaveBeenCalledWith(expect.any(String), bearerHeader);
 
 			expect(WebRequests.delete.mock.calls[0][0].includes(accountId)).toBeTruthy();
+			expect(CacheService.removeCache).not.toHaveBeenCalled();
 		});
 	});
 };

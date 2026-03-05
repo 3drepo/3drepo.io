@@ -65,7 +65,7 @@ History.listByBranch = async function(account, model, branch, projection, showVo
 	}
 
 	if(branch === C.MASTER_BRANCH_NAME) {
-		query.shared_id = stringToUUID(C.MASTER_BRANCH);
+		query.shared_id = { "$in": [stringToUUID(C.MASTER_UUID), null]};
 	} else if(branch) {
 		query.shared_id = stringToUUID(branch);
 	}
@@ -91,7 +91,7 @@ History.findByBranch = async function(account, model, branch, projection, showVo
 	projection = projection || {};
 
 	if(!branch || branch === C.MASTER_BRANCH_NAME) {
-		query.shared_id = stringToUUID(C.MASTER_BRANCH);
+		query.shared_id = { "$in": [stringToUUID(C.MASTER_UUID), null]};
 	} else {
 		query.shared_id = stringToUUID(branch);
 	}

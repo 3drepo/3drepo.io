@@ -878,7 +878,14 @@ const testIsTeamspaceMember = () => {
 				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceRef);
 				UsersModel.getUserId.mockResolvedValueOnce(userId);
 
-				FronteggService.getUserStatusInAccount.mockResolvedValueOnce(memStatus);
+				if (byPassStatusCheck) {
+					const dataToReturn = memStatus === membershipStatus.NOT_MEMBER ? [] : [
+						{ id: userId },
+					];
+					FronteggService.getAllUsersInAccount.mockResolvedValueOnce(dataToReturn);
+				} else {
+					FronteggService.getUserStatusInAccount.mockResolvedValueOnce(memStatus);
+				}
 			}
 
 			await expect(Teamspaces.isTeamspaceMember(teamspace, user, byPassStatusCheck)).resolves.toBe(expectedRes);
@@ -890,8 +897,15 @@ const testIsTeamspaceMember = () => {
 			} else {
 				expect(UsersModel.getUserId).toHaveBeenCalledTimes(1);
 				expect(UsersModel.getUserId).toHaveBeenCalledWith(user);
-				expect(FronteggService.getUserStatusInAccount).toHaveBeenCalledTimes(1);
-				expect(FronteggService.getUserStatusInAccount).toHaveBeenCalledWith(teamspaceRef, userId);
+				if (byPassStatusCheck) {
+					expect(FronteggService.getAllUsersInAccount).toHaveBeenCalledTimes(1);
+					expect(FronteggService.getAllUsersInAccount).toHaveBeenCalledWith(teamspaceRef);
+					expect(FronteggService.getUserStatusInAccount).not.toHaveBeenCalled();
+				} else {
+					expect(FronteggService.getUserStatusInAccount).toHaveBeenCalledTimes(1);
+					expect(FronteggService.getUserStatusInAccount).toHaveBeenCalledWith(teamspaceRef, userId);
+					expect(FronteggService.getAllUsersInAccount).not.toHaveBeenCalled();
+				}
 			}
 		});
 	});
