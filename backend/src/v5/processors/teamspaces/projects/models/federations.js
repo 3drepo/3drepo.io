@@ -19,6 +19,7 @@ const { addModel, deleteModel, getModelList } = require('./commons/modelList');
 const { addRevision, getLatestRevision } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
+const { getOpenTicketsCount, getOpenTicketsCountForMultipleModels } = require('./commons/tickets');
 const AllJSONAssets = require('./commons/assets/json');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
@@ -27,11 +28,11 @@ const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
 
 const { getModelMD5Hash } = require('./commons/modelList');
-const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getRepoBundleInfo } = require('./commons/assets/bundles');
 const { getSuperMeshesInfo } = require('./containers');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
+const { splitArrayIntoChunks } = require('../../../../utils/helper/arrays');
 const { updateModelSubModels } = require('../../../../models/modelSettings');
 
 const { getTree, ...JSONAssets } = AllJSONAssets;
@@ -134,9 +135,33 @@ Federations.getSuperMeshesInfo = async (teamspace, federation, revision, contain
 
 Federations.getMultipleFederationsStats = async (teamspace, project, federations) => {
 	const stats = {};
-	await Promise.all(federations.map(async (federation) => {
-		stats[federation] = await Federations.getFederationStats(teamspace, project, federation);
-	}));
+
+	const [settings, ticketCounts] = await Promise.all([
+		getFederations(
+			teamspace, federations, { properties: 1, status: 1, subModels: 1, desc: 1 },
+		),
+		getOpenTicketsCountForMultipleModels(teamspace, project, federations),
+	]);
+
+	const listOfPromises = splitArrayIntoChunks(settings.map(async (setting) => {
+		stats[setting._id] = {
+			code: setting.properties?.code,
+			unit: setting.properties?.unit,
+			status: setting?.status,
+			containers: setting?.subModels,
+			desc: setting?.desc,
+			lastUpdated: await getLastUpdatesFromModels(
+				teamspace, setting.subModels ? setting.subModels.map(({ _id }) => _id) : setting.subModels,
+			),
+			tickets: ticketCounts[setting._id] || 0,
+		};
+	}), 25);
+
+	for (const promises of listOfPromises) {
+		// eslint-disable-next-line no-await-in-loop
+		await Promise.all(promises);
+	}
+
 	return stats;
 };
 

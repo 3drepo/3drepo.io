@@ -516,25 +516,47 @@ const testGetMultipleFederationsStats = () => {
 	describe('Get multiple federation stats', () => {
 		test('should return stats for multiple federations', async () => {
 			const teamspace = generateRandomString();
+			const ticketsCount = parseInt(generateRandomNumber(), 10);
 			const federations = ['federation1', 'federation2', 'federation3'];
+			const fedSettings = federations.map((federation) => ({
+				properties: federationSettings[federation].properties,
+				status: federationSettings[federation].status,
+				subModels: federationSettings[federation].subModels,
+				desc: federationSettings[federation]?.desc,
+				_id: federationSettings[federation]._id,
+			}));
+			const fedOpenTickets = {};
+			const expectedData = {};
 
-			const ticketsCount = generateRandomNumber();
-			Tickets.getOpenTicketsCount
-				.mockResolvedValueOnce(ticketsCount)
-				.mockResolvedValueOnce(ticketsCount)
-				.mockResolvedValueOnce(ticketsCount);
+			federations
+				.forEach((federation) => {
+					if (federation !== 'federation3') {
+						fedOpenTickets[federationSettings[federation]._id] = ticketsCount;
+
+						expectedData[federationSettings[federation]._id] = formatToStats(
+							federationSettings[federation],
+							ticketsCount,
+							federation === 'federation1' ? federation1Rev : undefined,
+						);
+					} else {
+						expectedData[federationSettings[federation]._id] = formatToStats(
+							federationSettings[federation],
+							0,
+							federation === 'federation1' ? federation1Rev : undefined,
+						);
+					}
+				});
+
+			ModelSettings.getFederations
+				.mockResolvedValueOnce(fedSettings);
+
+			Tickets.getOpenTicketsCountForMultipleModels
+				.mockResolvedValueOnce(fedOpenTickets);
 
 			const res = await Federations.getMultipleFederationsStats(teamspace, project, federations);
 
-			expect(getFederationByIdMock.mock.calls.length).toBe(3);
-			expect(getFederationByIdMock.mock.calls[0][1]).toBe('federation1');
-			expect(getFederationByIdMock.mock.calls[1][1]).toBe('federation2');
-			expect(getFederationByIdMock.mock.calls[2][1]).toBe('federation3');
-			expect(res).toEqual({
-				federation1: formatToStats(federationSettings.federation1, ticketsCount, federation1Rev),
-				federation2: formatToStats(federationSettings.federation2, ticketsCount),
-				federation3: formatToStats(federationSettings.federation3, ticketsCount),
-			});
+			expect(ModelSettings.getFederations).toHaveBeenCalledTimes(1);
+			expect(res).toEqual(expectedData);
 		});
 	});
 };

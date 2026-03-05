@@ -463,8 +463,8 @@ const testGetModelStats = (isInternal = false) => {
 		};
 
 		describe.each(generateTestData(modelTypes.FEDERATION))('Federations', runTest);
-		// describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
-		// describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
+		describe.each(generateTestData(modelTypes.CONTAINER))('Containers', runTest);
+		describe.each(generateTestData(modelTypes.DRAWING))('Drawings', runTest);
 	});
 };
 
