@@ -98,17 +98,21 @@ jobs:
       - name: ensure submodules folder exist
         run: mkdir -p submodules
 
+      - name: get dump commit hash
+        run: export TEST_VERSION=`cat backend/testDBVersion`
+    
       - name: Checkout tests repo
         uses: actions/checkout@v6
         with:
           repository: 3drepo/tests
           token: ${{secrets.REPO_INSTALLER_TOKEN}}
-          path: 3drepo.io/submodules/tests
+          path: submodules/tests
           sparse-checkout: backend
+          ref: ${{env.TEST_VERSION}}
           lfs: true
 
       - name: Restore Test Database
-        run: pwd && cd 3drepo.io/submodules/tests/backend/ && ls && mongorestore -u "admintesting" -p "admintesting" --authenticationDatabase admin --quiet
+        run: pwd && ls && cd submodules/tests/backend/ && echo "cded" && pwd && ls && mongorestore -u "admintesting" -p "admintesting" --authenticationDatabase admin --quiet
 
       - name: Run Backend test
         run: cd backend ; yarn test
