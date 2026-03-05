@@ -62,6 +62,10 @@ export const formatDateRange = ([from, to]) => formatMessage(
 	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
 	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
 );
+export const formatNumberRange = ([from, to]) => formatMessage(
+	{ defaultMessage: '{from} to {to}', id: 'cardFilter.numberRange.join' },
+	{ from, to },
+);
 
 
 export const DEFAULT_FILTERS: TicketFilter[] = [
@@ -131,18 +135,17 @@ const getFilterPropertyAsQuery = ({ module, property, type }: TicketFilter) => {
 	return property;
 };
 
-const valueToQueryValueFormat = (value) => {
+const valueToQueryValueFormat = (value, operator: TicketFilterOperator) => {
 	if (isString(value)) return wrapWith(value, '"');
+	if (isRangeOperator(operator)) return `[${value[0]},${value[1]}]`;
 	return value;
 };
 
 const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: TicketFilter) => {
 	const query = [getFilterPropertyAsQuery(moduelPropertyAndType), operator];
 	
-	if (isRangeOperator(operator)) query.push(`[${values[0]},${values[1]}]`);
-	
-	if (values?.length && !isRangeOperator(operator)) {
-		query.push(values?.map((v) => valueToQueryValueFormat(v)).join(','));
+	if (values?.length) {
+		query.push(values?.map((v) => valueToQueryValueFormat(v, operator)).join(','));
 	}
 
 	return query.join('::');
@@ -370,8 +373,13 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 	}
 
 	if (type === 'number') {
-		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
-		filter.displayValues = arrToDisplayValue(filter.values);
+		if (filter.operator === 'rng' || filter.operator === 'nrng') {
+			filter.values = chunk(serialisedValue.split(','), 2) as [ValueType, ValueType] [];
+			filter.displayValues = arrToDisplayValue(filter.values.map(formatNumberRange));
+		} else {
+			filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
+			filter.displayValues = arrToDisplayValue(filter.values);
+		}
 	}
 
 	if (isTextType(type)) {
