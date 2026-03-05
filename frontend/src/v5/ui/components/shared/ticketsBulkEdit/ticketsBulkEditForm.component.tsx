@@ -64,7 +64,7 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 	const notNullable = templates.every((template) =>  {
 		const propDef = findPropertyDefinition(template, name);
 		isArrayType = isArrayType && (['oneOf', 'manyOf'].includes(propDef?.type));
-		return propDef?.required || (propDef?.type === 'oneOf');
+		return propDef?.required;
 	});
 
 	const defaultValues: FormType = {
@@ -109,7 +109,7 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 				if (type === 'manyOf'  && definition.type === 'manyOf') {
 					appliesToTemplate[template._id] = values.every((val) =>  options.has(val));
 				} else {
-					appliesToTemplate[template._id] =  options.has(values);
+					appliesToTemplate[template._id] =  options.has(values) || values === null;
 				}
 			}
 		});

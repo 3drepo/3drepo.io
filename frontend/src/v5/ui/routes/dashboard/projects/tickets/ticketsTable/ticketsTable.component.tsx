@@ -57,7 +57,6 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
 import { isEqual } from 'lodash';
-import { open } from 'inspector';
 import { formatMessage } from '@/v5/services/intl';
 
 const paramToInputProps = (value, setter) => ({
