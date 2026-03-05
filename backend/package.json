@@ -2,7 +2,7 @@
   "name": "3drepo.io",
   "version": "5.22.0",
   "engines": {
-    "node": "22.x.x"
+    "node": "24.x.x"
   },
   "apidoc": {
     "title": "3D Repo V4 Backend documentation",
