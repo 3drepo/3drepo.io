@@ -110,7 +110,7 @@ jobs:
           token: ${{secrets.REPO_INSTALLER_TOKEN}}
           path: submodules/tests
           sparse-checkout: backend
-          ref: ${{env.TEST_VERSION}}
+          ref: ${{env.COMMIT_SHA}}
           lfs: true
 
       - name: Restore Test Database
