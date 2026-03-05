@@ -117,7 +117,7 @@ jobs:
         run: cd submodules/tests/backend/ && mongorestore -u "admintesting" -p "admintesting" --authenticationDatabase admin --quiet
 
       - name: Run Backend test
-        run: cd backend ; yarn test
+        run: cd backend && yarn test
   run-backend-lint:
     name: Run Backend lint
     runs-on: ubuntu-24.04
