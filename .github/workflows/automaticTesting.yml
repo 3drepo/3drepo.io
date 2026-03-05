@@ -48,7 +48,70 @@ jobs:
 
       - name: Run Backend test:v5
         run: cd backend ; yarn test:v5
+  run-backend-tests-v4:
+    name: Run Backend tests (V4)
+    runs-on: ubuntu-24.04
+    services:
+      rabbitmq:
+        image: rabbitmq:3.10.5-management
+        ports:
+          - "5672:5672"
+          - "15671:15671"
+          - "15672:15672"
+        env:
+          RABBITMQ_DEFAULT_USER: guest
+          RABBITMQ_DEFAULT_PASS: guest
 
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version-file: backend/package.json
+          cache: 'yarn'
+          cache-dependency-path: backend/yarn.lock
+
+      - name: Check out node_modules cache if available
+        uses: actions/cache@v3
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-modules-${{ hashFiles('backend/yarn.lock') }}
+
+      - name: Install Node.js dependencies
+        run: cd backend ; yarn install --network-timeout 100000 --frozen-lockfile --immutable --immutable-cache --non-interactive
+      
+      - name: Start MongoDB
+        uses: supercharge/mongodb-github-action@1.12.1
+        with:
+          mongodb-version: 8.0
+          mongodb-username: admintesting
+          mongodb-password: admintesting
+
+      - name: Install MongoDB Tools
+        run: |
+          curl -O https://fastdl.mongodb.org/tools/db/mongodb-database-tools-ubuntu2404-x86_64-100.14.1.deb
+          sudo apt install ./mongodb-database-tools-ubuntu2404-x86_64-100.14.1.deb
+
+      
+      - name: ensure submodules folder exist
+        run: mkdir -p submodules
+
+      - name: Checkout tests repo
+        uses: actions/checkout@v6
+        with:
+          repository: 3drepo/tests
+          token: ${{secrets.REPO_INSTALLER_TOKEN}}
+          path: 3drepo.io/submodules/tests
+          sparse-checkout: backend
+          lfs: true
+
+      - name: Restore Test Database
+        run: cd 3drepo.io/submodules/tests/backend/ && mongorestore -u "admintesting" -p "admintesting" --authenticationDatabase admin --quiet
+
+      - name: Run Backend test
+        run: cd backend ; yarn test
   run-backend-lint:
     name: Run Backend lint
     runs-on: ubuntu-24.04
