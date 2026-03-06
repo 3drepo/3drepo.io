@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,25 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { updateCustomMetadata } = require('../../../../models/metadata');
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { PopoverOrigin } from '@mui/material';
 
-const Metadata = { };
+export const TICKET_HEADER_POPOVER_PROPS = {
+	anchorOrigin: {
+		vertical: 'bottom',
+		horizontal: 'left',
+	} as PopoverOrigin,
+	transformOrigin: {
+		vertical: 'top',
+		horizontal: 'left',
+	} as PopoverOrigin,
+};
 
-Metadata.updateCustomMetadata = updateCustomMetadata;
-
-module.exports = Metadata;
+export const NON_BULK_EDITABLE_COLUMNS = [
+	'id',
+	`properties.${BaseProperties.OWNER}`,
+	'modelName',
+	`properties.${BaseProperties.CREATED_AT}`,
+	`properties.${BaseProperties.UPDATED_AT}`,
+	BaseProperties.TITLE,
+];

@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ITemplate, PropertyDefinition, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
+import { ITemplate, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
 import { compact } from 'lodash';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { TableColumn } from '@controls/resizableTableContext/resizableTableContext';
+import { getTemplatePropertiesDefinitions } from '@/v5/store/tickets/tickets.helpers';
 
 const TABLE_COLUMNS_INVALID_PROPERTIES = ['view', 'image', 'imageList', 'coords'];
 const TABLE_COLUMNS_DEFAULT_PROPERTIES = ['id', 'modelName', BaseProperties.TITLE];
@@ -50,13 +51,6 @@ const getTableColumnData = ({ name, type }): TableColumn => {
 	return { name, ...widths, stretch: name === BaseProperties.TITLE };
 };
 
-export const getTemplatePropertiesDefinitions = (template: ITemplate): PropertyDefinition[] => {
-	if (!template.properties) return [];
-	return [
-		...template.properties?.map((property) => ({ ...property, name: `properties.${property.name}` })),
-		...template.modules?.flatMap((module) => module.properties.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
-	];
-};
 
 export const getAvailableColumnsForTemplate = (template: ITemplate): TableColumn[] => {
 	const propertiesDefinition = getTemplatePropertiesDefinitions(template);

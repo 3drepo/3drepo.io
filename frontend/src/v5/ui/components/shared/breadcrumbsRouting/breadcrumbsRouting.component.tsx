@@ -128,7 +128,7 @@ export const BreadcrumbsRouting = () => {
 		} else { // In the case that the user is viewing a container
 			options = containers.map(({ _id, name }) => ({
 				title: name,
-				to: viewerRoute(params.teamspace, params.project, _id, null),
+				to: viewerRoute(params.teamspace, params.project, _id, null, null, false),
 				selected: _id === containerOrFederationId,
 			}));
 			breadcrumbs.push({ options: sortBreadcrumbOptions(options) });
@@ -138,7 +138,7 @@ export const BreadcrumbsRouting = () => {
 
 			const revisionOptions = revisions.map(({ _id, tag }) => ({
 				title: tag || noName,
-				to: viewerRoute(params.teamspace, params.project, params.containerOrFederation, tag || _id),
+				to: viewerRoute(params.teamspace, params.project, params.containerOrFederation, tag || _id, null, false),
 				selected: _id === revision || tag === revision,
 			}));
 

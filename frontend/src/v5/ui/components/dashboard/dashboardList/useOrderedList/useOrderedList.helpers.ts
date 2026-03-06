@@ -26,8 +26,17 @@ export const getSortingFunction = <T>(sortConfig) => {
 	const { column, direction } = sortConfig;
 
 	const sortingFunction = (a: T, b: T, index = 0): number => {
-		const aValue = get(a, column[index]);
-		const bValue = get(b, column[index]);
+		let aValue = get(a, column[index]);
+		let bValue = get(b, column[index]);
+
+		// HACK: this is for items with lastupdated undefined, it assumes it was just created
+		if (column[index] === 'lastUpdated') {
+			const now = new Date();
+			aValue = aValue || now;
+			bValue = bValue || now;
+		}
+
+
 
 		if (!aValue && !bValue) {
 			return 0;

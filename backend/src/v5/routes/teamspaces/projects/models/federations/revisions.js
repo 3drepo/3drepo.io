@@ -43,7 +43,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/revisions:
 	 *   post:
 	 *     description: Create a new revision.
-	 *     tags: [Revisions]
+	 *     tags: [v:external, Revisions]
 	 *     operationId: createNewFederationRevision
 	 *     parameters:
 	 *       - name: teamspace
