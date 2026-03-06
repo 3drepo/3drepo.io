@@ -33,10 +33,6 @@ class TeamspaceSettings {
 		return TeamspaceModelV5.createTeamspaceSettings(teamspace);
 	}
 
-	getTeamspaceSettingsCollection(account) {
-		return db.getCollection(account, colName);
-	}
-
 	grantAdminToUser(teamspace, username) {
 		return TeamspaceModelV5.grantAdminToUser(teamspace, username);
 	}
@@ -70,9 +66,8 @@ class TeamspaceSettings {
 
 			const importedMitigations = await Mitigation.importCSV(account, file);
 
-			const settingsCol = await this.getTeamspaceSettingsCollection(account, true);
 			const updatedAt = new Date();
-			await settingsCol.updateOne({_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
+			await db.updateOne(account, colName, {_id: account}, {$set: {"mitigationsUpdatedAt":updatedAt}});
 
 			return { "status":"ok", mitigationsUpdatedAt: updatedAt, records: importedMitigations.length };
 		} else {
@@ -124,8 +119,7 @@ class TeamspaceSettings {
 		}
 
 		// Update the data
-		const settingsColl = await this.getTeamspaceSettingsCollection(account, true);
-		await settingsColl.update({_id: account}, {$set: toUpdate});
+		await db.updateOne(account, colName,{_id: account}, {$set: toUpdate});
 
 		const updatedSettings = {...oldSettings, ...toUpdate};
 

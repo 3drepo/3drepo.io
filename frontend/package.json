@@ -1,9 +1,9 @@
 {
 	"name": "3drepo.io-frontend",
-	"version": "5.20.6",
+	"version": "5.21.0",
 	"description": "The frontend for 3drepo.io",
 	"engines": {
-		"node": "22.x.x"
+		"node": "24.x.x"
 	},
 	"main": "index.js",
 	"directories": {
