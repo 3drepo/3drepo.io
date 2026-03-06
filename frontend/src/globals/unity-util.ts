@@ -2718,6 +2718,10 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetMaxNumResponses', UnityUtil.LoadingState.VIEWER_READY, max);
 	}
 
+	public static setDynamicDrawLimit(max: number) {
+		UnityUtil.toUnity('SetDynamicDrawLimit', UnityUtil.LoadingState.VIEWER_READY, max);
+	}
+
 	/**
 	 * Creates the WebRequestHandler backend for the WebRequestHandler2 Component in Unity
 	 * @hidden
