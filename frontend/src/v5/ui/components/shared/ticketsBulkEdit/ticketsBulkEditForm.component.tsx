@@ -92,14 +92,14 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 		const appliesToTemplate:Record<string, boolean> = {};
 		templates.forEach((template) => {
 			const definition = findPropertyDefinition(template, name);
-			const isEditable =
-				(!definition?.readOnlyOnUI && !definition?.readOnly)// is not read only
-				&& !(definition.required && isEmptyValue); // this is not clearing a required value
-			
-			appliesToTemplate[template._id] = isEditable
+			const isEditable = definition && 
+				(!definition.readOnlyOnUI && !definition?.readOnly)// is not read only
+				&& !(definition.required && isEmptyValue) // this is not clearing a required value
 				&& (type === definition?.type); // property exists on template with same type
+				
+			appliesToTemplate[template._id] = isEditable;
 
-			if (!definition || !isEditable) {
+			if (!isEditable) {
 				return;
 			}
  			
