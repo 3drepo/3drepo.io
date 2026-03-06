@@ -150,7 +150,7 @@ export const fetchIssueFailure = (state = INITIAL_STATE) => {
 export const saveIssueSuccess = (state = INITIAL_STATE, { issue, resetComponentState = true }) => {
 	const issuesMap = updateIssueProps(state.issuesMap, issue._id, issue);
 
-	const newComponentState = { ...state.componentState };
+	const newComponentState = { ...state.componentState, savedPin: issue.position };
 
 	if (resetComponentState) {
 		newComponentState.newIssue = {};
