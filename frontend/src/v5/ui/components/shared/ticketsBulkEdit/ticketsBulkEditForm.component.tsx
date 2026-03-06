@@ -92,10 +92,11 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 		const appliesToTemplate:Record<string, boolean> = {};
 		templates.forEach((template) => {
 			const definition = findPropertyDefinition(template, name);
+			const isSelect = ['manyOf', 'oneOf'].includes(definition.type) && isSelectType(type);
 			const isEditable = definition && 
 				(!definition.readOnlyOnUI && !definition?.readOnly)// is not read only
 				&& !(definition.required && isEmptyValue) // this is not clearing a required value
-				&& (type === definition?.type); // property exists on template with same type
+				&& (type === definition?.type || isSelect); // property exists on template with same type
 				
 			appliesToTemplate[template._id] = isEditable;
 
@@ -103,7 +104,7 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 				return;
 			}
  			
-			if (['manyOf', 'oneOf'].includes(definition.type) && isSelectType(type)) {
+			if (isSelect) {
 				const options = new Set(getSelectOptions(module, property, type, [template], modelsIds).map((o) => o.value));
 				
 				if (type === 'manyOf'  && definition.type === 'manyOf') {
