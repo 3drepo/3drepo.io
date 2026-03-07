@@ -18,7 +18,7 @@
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
-const { createWriteStream, readdirSync } = require('fs');
+const { createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
@@ -166,6 +166,18 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 	}
 };
 
+ModelProcessing.getFileName = (corId) => {
+	try {
+		const filePath = Path.join(sharedDir, `${corId}.json`);
+		const jsonFile = JSON.parse(readFileSync(filePath).toString());
+		const fileName = jsonFile.file.split('/').slice(-1)[0];
+		return fileName;
+	} catch (error) {
+		logger.logError(`Failed to get file name for ${corId}: ${error.message}`);
+		return undefined;
+	}
+};
+
 ModelProcessing.getLogArchive = async (corId) => {
 	const filename = 'logs.zip';
 
@@ -184,6 +196,7 @@ ModelProcessing.getLogArchive = async (corId) => {
 		});
 
 		let logPreviewProm;
+		let fileName;
 		files.forEach((file) => {
 			if (file.endsWith('.log')) {
 				const logPath = Path.join(taskDir, file);
@@ -216,7 +229,7 @@ ModelProcessing.getLogArchive = async (corId) => {
 		archive.finalize();
 		await archiveReady;
 
-		return { zipPath, logPreview: await logPreviewProm };
+		return { zipPath, logPreview: await logPreviewProm, fileName };
 	} catch (err) {
 		logger.logError(`Error while compressing log files for import error email: ${err.message}`);
 		return undefined;

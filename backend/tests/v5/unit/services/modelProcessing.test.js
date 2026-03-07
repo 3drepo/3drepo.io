@@ -266,6 +266,23 @@ const testProcessDrawingUpload = () => {
 	});
 };
 
+const testGetFileName = () => {
+	describe('Get file name', () => {
+		test('Should return file name if the file exists', async () => {
+			const corId = generateUUIDString();
+			const fileName = `${generateRandomString()}.obj`;
+			const filePath = `${config.cn_queue.shared_storage}/${corId}.json`;
+			await fs.writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
+
+			await expect(ModelProcessing.getFileName(corId)).toEqual(fileName);
+		});
+		test('Should fail if the file does not exist', async () => {
+			const corId = generateUUIDString();
+			await expect(ModelProcessing.getFileName(corId)).toBeUndefined();
+		});
+	});
+};
+
 const testGetLogArchive = () => {
 	describe('Get log archive', () => {
 		test('Should return undefined if the path is not found', async () => {
@@ -311,5 +328,6 @@ describe('services/modelProcessing', () => {
 	testQueueModelUpload();
 	testCallbackQueueConsumer();
 	testProcessDrawingUpload();
+	testGetFileName();
 	testGetLogArchive();
 });
