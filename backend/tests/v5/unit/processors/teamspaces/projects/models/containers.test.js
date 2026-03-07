@@ -25,6 +25,7 @@ const {
 const fs = require('fs/promises');
 const path = require('path');
 const CryptoJs = require('crypto-js');
+const { times } = require('lodash');
 
 jest.mock('../../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
@@ -553,6 +554,38 @@ const testGetMD5Hash = () => {
 	});
 };
 
+const testGetMultipleContainersStats = () => {
+	describe('Get multiple container stats', () => {
+		test('should return stats for multiple containers', async () => {
+			const teamspace = generateRandomString();
+			const containers = ['container1', 'container2', 'container3'];
+			const containersData = containers.map((container) => ({
+				_id: containerSettings[container]._id,
+				name: containerSettings[container].name,
+				type: containerSettings[container].type,
+				properties: containerSettings[container].properties,
+				status: containerSettings[container].status,
+				errorReason: containerSettings[container].errorReason,
+			}));
+
+			ModelSettings.getContainers.mockResolvedValueOnce(containersData);
+			Revisions.getRevisions
+				.mockResolvedValueOnce([])
+				.mockResolvedValueOnce([container2Rev, ...times(9, {})])
+				.mockResolvedValueOnce([]);
+
+			const res = await Containers.getMultipleContainersStats(teamspace, project, containers);
+			expect(res).toEqual({
+				1: formatToStats(containerSettings.container1, 0, {}),
+				2: formatToStats(containerSettings.container2, 10, container2Rev),
+				3: formatToStats(containerSettings.container3, 0, {}),
+			});
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisions).toHaveBeenCalledTimes(containers.length);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -566,4 +599,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 	testGetMD5Hash();
+	testGetMultipleContainersStats();
 });

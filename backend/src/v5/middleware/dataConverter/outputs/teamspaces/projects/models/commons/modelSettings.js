@@ -62,4 +62,26 @@ ModelSettings.formatModelStats = (modelType) => (req, res) => {
 	respond(req, res, templates.ok, outputData);
 };
 
+ModelSettings.formatBulkModelStats = (modelType) => (req, res) => {
+	const { outputData } = req;
+
+	const data = { stats: [] };
+	Object.entries(outputData).forEach(([key, value]) => {
+		const formattedStats = { modelId: key, ...value };
+		if (modelType === modelTypes.FEDERATION) {
+			if (value.lastUpdated) formattedStats.lastUpdated = value.lastUpdated.getTime();
+		} else {
+			formattedStats.revisions.lastUpdated = value.revisions.lastUpdated
+				? value.revisions.lastUpdated.getTime() : undefined;
+			if (value.errorReason?.timestamp) {
+				formattedStats.errorReason.timestamp = value.errorReason.timestamp.getTime();
+			}
+			formattedStats.revisions.latestRevision = UUIDToString(value.revisions.latestRevision);
+		}
+		data.stats.push(formattedStats);
+	});
+
+	respond(req, res, templates.ok, data);
+};
+
 module.exports = ModelSettings;

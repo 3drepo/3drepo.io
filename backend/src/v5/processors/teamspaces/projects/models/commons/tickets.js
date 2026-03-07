@@ -382,6 +382,32 @@ Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
 	return openTicketsCount;
 };
 
+Tickets.getOpenTicketsCountForMultipleModels = async (teamspace, project, models) => {
+	const tickets = await getTicketsByQuery(
+		teamspace,
+		project,
+		null,
+		{ model: { $in: models } },
+		{ model: 1, type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 });
+
+	const modelToOpenTicketsCount = {};
+	const allTemplates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
+
+	const templateToClosedStatuses = allTemplates.reduce((obj, { _id, config }) => {
+		const closedStatuses = getClosedStatuses({ config });
+
+		return { ...obj, [UUIDToString(_id)]: closedStatuses };
+	}, {});
+
+	tickets.forEach((ticket) => {
+		if (!templateToClosedStatuses[UUIDToString(ticket.type)].includes(ticket.properties.Status)) {
+			modelToOpenTicketsCount[ticket.model] = (modelToOpenTicketsCount[ticket.model] || 0) + 1;
+		}
+	});
+
+	return modelToOpenTicketsCount;
+};
+
 // placeholdersToFind should be left undfined if we want to replace all placeholders
 const findPropertiesToUpdate = (template, placeholdersToFind) => {
 	const propertiesToUpdate = [];

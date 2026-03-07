@@ -136,7 +136,53 @@ const testFormatModelStats = () => {
 	});
 };
 
+const testFormatBulkModelStats = () => {
+	describe.each([
+		[modelTypes.FEDERATION, {
+			model1: { lastUpdated: new Date() },
+			model2: {},
+		}, 'lastUpdated field'],
+		[modelTypes.CONTAINER, {
+			model1: { revisions: {} },
+			model2: {
+				revisions: {
+					lastUpdated: new Date(),
+					latestRevision: generateUUID(),
+				},
+				errorReason: { timestamp: new Date() },
+			},
+		}, 'data to convert'],
+	])('Format bulk model stats data', (modelType, data, desc) => {
+		test(`[${modelType ? 'Federation' : 'Container'}] should format correctly with ${desc}`,
+			async () => {
+				const req = { outputData: cloneDeep(data) };
+				const res = {};
+				await ModelSettingsOutputMiddlewares.formatBulkModelStats(modelType)(req, res);
+
+				const formattedData = { stats: [] };
+				Object.entries(data).forEach(([key, value]) => {
+					const formattedStats = { modelId: key, ...value };
+					if (modelType === modelTypes.FEDERATION) {
+						if (value.lastUpdated) formattedStats.lastUpdated = value.lastUpdated.getTime();
+					} else {
+						formattedStats.revisions.lastUpdated = value.revisions.lastUpdated
+							? value.revisions.lastUpdated.getTime() : undefined;
+						if (value.errorReason?.timestamp) {
+							formattedStats.errorReason.timestamp = value.errorReason.timestamp.getTime();
+						}
+						formattedStats.revisions.latestRevision = UUIDToString(value.revisions.latestRevision);
+					}
+					formattedData.stats.push(formattedStats);
+				});
+
+				expect(respondFn).toHaveBeenCalledTimes(1);
+				expect(respondFn).toHaveBeenCalledWith(req, res, templates.ok, formattedData);
+			});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testFormatModelSettings();
 	testFormatModelStats();
+	testFormatBulkModelStats();
 });

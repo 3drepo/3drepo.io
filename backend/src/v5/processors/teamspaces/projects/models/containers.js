@@ -37,6 +37,7 @@ const { getSuperMeshesInfo } = require('./commons/scenes');
 const { logger } = require('../../../../utils/logger');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
 const { queueModelUpload } = require('../../../../services/modelProcessing');
+const { splitArrayIntoChunks } = require('../../../../utils/helper/arrays');
 const { templates } = require('../../../../utils/responseCodes');
 const { timestampToString } = require('../../../../utils/helper/dates');
 
@@ -146,5 +147,43 @@ Containers.getSettings = (teamspace, container) => getContainerById(teamspace,
 Containers.getRevisionMD5Hash = getModelMD5Hash;
 
 Containers.getSuperMeshesInfo = getSuperMeshesInfo;
+
+Containers.getMultipleContainersStats = async (teamspace, project, containers) => {
+	const stats = {};
+
+	const settings = await getContainers(
+		teamspace, containers, { _id: 1, name: 1, type: 1, properties: 1, status: 1, errorReason: 1 });
+
+	const listOfPromises = splitArrayIntoChunks(settings.map(async (setting) => {
+		const revs = await getRevisions(teamspace, project, setting._id, modelTypes.CONTAINER, true,
+			{ _id: 1, tag: 1, timestamp: 1 }, { timestamp: -1 });
+
+		stats[setting._id] = {
+			type: setting.type,
+			code: setting.properties.code,
+			status: setting.status,
+			unit: setting.properties.unit,
+			revisions: {
+				total: revs.length,
+				lastUpdated: revs[0]?.timestamp,
+				latestRevision: revs[0]?.tag || timestampToString(revs[0]?.timestamp?.getTime()),
+			},
+		};
+
+		if (setting.status === 'failed' && setting.errorReason) {
+			stats[setting._id].errorReason = {
+				message: setting.errorReason.message,
+				timestamp: setting.errorReason.timestamp,
+			};
+		}
+	}), 25);
+
+	for (const promises of listOfPromises) {
+		// eslint-disable-next-line no-await-in-loop
+		await Promise.all(promises);
+	}
+
+	return stats;
+};
 
 module.exports = Containers;
