@@ -44,6 +44,11 @@ export const fetchContainerStats = async (teamspace, projectId, containerId): Pr
 	return data;
 };
 
+export const bulkFetchContainersStats = async (teamspace, projectId, containerIds): Promise<ContainerStats[]> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/stats?models=${containerIds.join(',')}`);
+	return data;
+};
+
 export const fetchContainerViews = async (teamspace, projectId, containerId): Promise<FetchContainerViewsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/views`);
 	return data;

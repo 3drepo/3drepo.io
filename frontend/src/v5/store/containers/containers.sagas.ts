@@ -23,6 +23,7 @@ import {
 	ContainersTypes,
 	CreateContainerAction,
 	DeleteContainerAction,
+	BulkFetchContainersStatsAction,
 	FetchContainerJobsAction,
 	FetchContainersAction,
 	FetchContainerSettingsAction,
@@ -35,16 +36,16 @@ import {
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
-import { isEqualWith } from 'lodash';
+import { chunk, isEqualWith } from 'lodash';
 import { ContainerStats, FetchContainerViewsResponseView, IContainer } from './containers.types';
 import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
-import { compByColum } from '../store.helpers';
-import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { AsyncFunctionExecutor } from '@/v5/helpers/functions.helpers';
+import { compByColum, DASHBOARD_LIST_CHUNK_SIZE } from '../store.helpers';
+import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 
 const statsStack = new AsyncFunctionExecutor<ContainerStats>(API.Containers.fetchContainerStats, 30);
+const bulkStatsStack = new AsyncFunctionExecutor((teamspace, projectId, chunkedIds) =>
+	API.Containers.bulkFetchContainersStats(teamspace, projectId, chunkedIds), 15, ExecutionStrategy.Fifo);
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -94,6 +95,23 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 	}
 }
 
+export function* bulkFetchContainersStats({ teamspace, projectId, containerIds }: BulkFetchContainersStatsAction) {
+	try {
+		const chunkedIds = chunk(containerIds, DASHBOARD_LIST_CHUNK_SIZE);
+		yield all(
+			chunkedIds.map(function* (idsChunk) {
+				const { stats } = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);
+				yield put(ContainersActions.bulkFetchContainersStatsSuccess(projectId, stats));
+			}),
+		);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.bulkFetchStats.error', defaultMessage: 'trying to bulk fetch containers details' }),
+			error,
+		}));
+	}
+}
+
 export function* fetchContainers({ teamspace, projectId }: FetchContainersAction) {
 	try {
 		const { containers }: FetchContainersResponse = yield API.Containers.fetchContainers(teamspace, projectId);
@@ -108,11 +126,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 
 		statsStack.reset();
 
-		yield all(
-			containers.sort(getSortingFunction({ column: ['name'], direction:[SortingDirection.DESCENDING] })).map(
-				(container) => put(ContainersActions.fetchContainerStats(teamspace, projectId, container._id)),
-			),
-		); 
+		yield put(ContainersActions.bulkFetchContainersStats(teamspace, projectId, containers.map(({ _id }) => _id)));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchAll.error', defaultMessage: 'trying to fetch containers' }),
@@ -243,6 +257,7 @@ export default function* ContainersSaga() {
 	yield takeLatest(ContainersTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(ContainersTypes.FETCH_CONTAINERS, fetchContainers);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_STATS, fetchContainerStats);
+	yield takeLatest(ContainersTypes.BULK_FETCH_CONTAINERS_STATS, bulkFetchContainersStats);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_VIEWS, fetchContainerViews);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_SETTINGS, fetchContainerSettings);
 	yield takeLatest(ContainersTypes.UPDATE_CONTAINER_SETTINGS, updateContainerSettings);
