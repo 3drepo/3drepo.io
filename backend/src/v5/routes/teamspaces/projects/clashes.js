@@ -300,11 +300,11 @@ const establishRoutes = () => {
 
 	/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}:
-	 *   delete:
-	 *     description: Deletes a clash test plan
+	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}/runs:
+	 *   post:
+	 *     description: Create a clash test run based on the plan
 	 *     tags: [v:external, Clashes]
-	 *     operationId: deleteClashTestPlan
+	 *     operationId: createClashTestRun
 	 *     parameters:
 	 *       - name: teamspace
 	 *         description: name of teamspace
@@ -328,7 +328,17 @@ const establishRoutes = () => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Delete a clash test plan
+	 *         description: Create a clash test run based on the plan
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: The id of the new clash test run
+	 *                   example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
 	 */
 	router.post('/:planId/runs', isAdminToProject, planExists, planContainersHaveRevs, createRun);
 
