@@ -18,6 +18,7 @@
 const FSHandler = require('../handler/fs');
 const { FileStorageTypes } = require('../utils/config.constants');
 const config = require('../utils/config');
+const { init: initClashesService } = require('./clashProcessing');
 const { init: initFrontegg } = require('./sso/frontegg');
 const { initialise: initFronteggCache } = require('../models/frontegg.cache');
 const { initialise: initInvites } = require('../models/invitations');
@@ -34,6 +35,7 @@ Initialiser.initialiseSystem = () => Promise.all([
 	initNotificationService(),
 	initFrontegg(),
 	initFronteggCache(),
+	initClashesService(),
 ]);
 
 const checkFSHandler = async (storageType) => {
