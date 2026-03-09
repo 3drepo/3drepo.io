@@ -58,7 +58,7 @@
     "express-session": "1.18.2",
     "file-type": "16.5.4",
     "form-data": "4.0.4",
-    "geoip-lite": "1.4.10",
+    "geoip-lite": "2.0.0",
     "is-html-content": "1.0.0",
     "json2csv": "4.5.4",
     "lodash": "4.17.21",
