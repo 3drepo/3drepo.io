@@ -52,6 +52,4 @@ ClashProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 	}
 };
 
-ClashProcessing.init = () => listenToQueue(callbackq, () => {});
-
 module.exports = ClashProcessing;
