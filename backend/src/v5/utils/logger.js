@@ -42,6 +42,7 @@ Logger.labels = {
 	aad: 'AAD',
 	journaling: 'JRN',
 	notifications: 'NOTIF',
+	clashes: 'CLSH',
 };
 
 module.exports = Logger;

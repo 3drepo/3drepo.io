@@ -21,8 +21,6 @@ const { isEqual } = require('../../../../../utils/helper/objects');
 const { respond } = require('../../../../../utils/responder');
 const { validateMany } = require('../../../../common');
 const { validatePlan } = require('../../../../../schemas/projects/clashes');
-const { getModelByQuery } = require('../../../../../models/modelSettings');
-const { stringToUUID } = require('../../../../../utils/helper/uuids');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 
@@ -71,7 +69,7 @@ Clashes.planContainersHaveRevs = async (req, res, next) => {
 
 		await next();
 	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, 'Plan containers are not part of a federation'));
+		respond(req, res, createResponseCode(templates.invalidArguments, 'Plan containers must have at least one revision'));
 	}
 };
 

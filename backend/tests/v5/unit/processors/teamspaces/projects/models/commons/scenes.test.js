@@ -488,6 +488,57 @@ const testGetSuperMeshesInfo = () => {
 	});
 };
 
+const testGetGroupedMeshesWithParentIds = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const container = generateRandomString();
+	const revision = generateUUID();
+	const parentIds = times(10, generateUUID);
+
+	const nodesMocked = [];
+	const meshesToReturn = [];
+
+	const meshMap = {};
+
+	for (let i = 1; i <= 10; ++i) {
+		const id = generateUUIDString();
+		nodesMocked.push({ _id: stringToUUID(id) });
+		const results = times(i, generateUUIDString);
+		meshMap[id] = results;
+		meshesToReturn.push({ id, meshIds: results });
+	}
+
+	const defaultParams = {
+		nodes: nodesMocked,
+		meshMapFile: JSON.stringify(meshMap),
+		expectedResults: meshesToReturn,
+	};
+
+	describe.each([
+		['empty array if no corresponding nodes are found', { ...defaultParams, nodes: [], expectedResults: [] }],
+		['empty array if no corresponding mesh mapping is found', { ...defaultParams, nodes: times(10, () => ({ _id: generateUUID() })), expectedResults: [] }],
+		['expected mesh ids', defaultParams],
+	])('Get grouped meshes with parent Ids', (desc, { nodes, meshMapFile, expectedResults, returnString }) => {
+		test(`Should return ${desc}`, async () => {
+			Scenes.setCacheExpiration(1);
+			Scenes.clearCache();
+			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodes);
+			FilesManager.getFile.mockResolvedValueOnce(meshMapFile);
+
+			const res = await Scenes.getGroupedMeshesFromParentIds(teamspace, project, container, revision,
+				parentIds, returnString);
+			expect(res).toEqual(expectedResults);
+
+			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace,
+				project, container, revision, parentIds, { _id: 1 });
+
+			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, `${container}.stash.json_mpc`, `${UUIDToString(revision)}/idToMeshes.json`);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
 	testGetExternalIdsFromMetadata();
@@ -496,4 +547,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetTexture();
 	testGetMeshData();
 	testGetSuperMeshesInfo();
+	testGetGroupedMeshesWithParentIds();
 });
