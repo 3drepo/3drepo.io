@@ -110,8 +110,8 @@ const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 			: {
 				unit: newEntry ? types.strings.unit.required() : types.strings.unit,
 				code: newEntry ? types.strings.code : types.strings.code.nullable(),
-				surveyPoints: types.surveyPoints,
-				angleFromNorth: types.degrees,
+				surveyPoints: types.surveyPoints.nullable(),
+				angleFromNorth: types.degrees.nullable(),
 				...(newEntry
 					? {}
 					: {

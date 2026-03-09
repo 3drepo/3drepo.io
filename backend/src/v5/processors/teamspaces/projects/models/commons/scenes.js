@@ -21,13 +21,13 @@ const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuid
 const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
 const { getNodeByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
+const CombinedStream = require('combined-stream');
 const GeoMaths = require('../../../../../utils/helper/geoMaths');
-const Stream = require('stream');
 const config = require('../../../../../utils/config');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { getSuperMeshesInRevision } = require('../../../../../models/scenes.stash');
 const { nodeTypes } = require('../../../../../models/scenes.constants');
-const { pipeline } = require('stream/promises');
+const stringToStream = require('string-to-stream');
 const { templates } = require('../../../../../utils/responseCodes');
 
 const contextCache = {};
@@ -200,26 +200,21 @@ Scene.getMeshData = async (teamspace, project, container, meshId) => {
 		throw templates.meshNotFound;
 	}
 
-	const [matrix, { verticesStream, facesStream }] = await Promise.all([
-		calculateNodeMatrix(teamspace, project, container, meshNode.parents[0]),
-		// eslint-disable-next-line no-underscore-dangle
-		fetchMeshBinariesStreams(teamspace, container, meshNode._blobRef),
-	]);
+	const matrix = await calculateNodeMatrix(teamspace, project, container, meshNode.parents[0]);
+	const mesh = meshNode;
 
-	const outStream = Stream.PassThrough();
+	// eslint-disable-next-line no-underscore-dangle
+	const { verticesStream, facesStream } = await fetchMeshBinariesStreams(teamspace, container, mesh._blobRef);
 
-	outStream.write('{');
-	outStream.write(`"matrix":${JSON.stringify(matrix)},`);
-	outStream.write(`"primitive": ${meshNode.primitive || 3},`);
-	outStream.write('"vertices":[');
-	const vertexStream = GeoMaths.vectors.toJSONStream(verticesStream);
-	await pipeline(vertexStream, outStream, { end: false });
-	outStream.write('],"faces":[');
-	const faceStream = GeoMaths.faces.toJSONStream(facesStream);
-	await pipeline(faceStream, outStream, { end: false });
-	outStream.end(']}');
-
-	return outStream;
+	const combinedStream = CombinedStream.create();
+	combinedStream.append(stringToStream(['{"matrix":', JSON.stringify(matrix)].join('')));
+	combinedStream.append(stringToStream([',"primitive":', mesh.primitive || 3].join('')));
+	combinedStream.append(stringToStream(',"vertices":['));
+	combinedStream.append(GeoMaths.vectors.toJSONStream(verticesStream));
+	combinedStream.append(stringToStream('],"faces":['));
+	combinedStream.append(GeoMaths.faces.toJSONStream(facesStream));
+	combinedStream.append(stringToStream(']}'));
+	return combinedStream;
 };
 
 Scene.getSuperMeshesInfo = async (teamspace, container, revision) => {

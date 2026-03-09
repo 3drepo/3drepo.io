@@ -181,8 +181,8 @@ export class Groups extends PureComponent<IProps, IState> {
 		<>
 			<ViewerPanelContent onClick={this.resetActiveGroup}>
 				<div onClick={(event: MouseEvent<HTMLDivElement>) => event.stopPropagation()}>
-					{this.renderEmptyState(!this.props.searchEnabled && !this.state.groups.length)}
-					{this.renderNotFound(this.props.searchEnabled && !this.state.groups.length)}
+					{this.renderEmptyState((!this.props.searchEnabled && !this.state.groups.length) || (this.props.searchEnabled && !this.state.groups.length && !this.props.selectedFilters.length))}
+					{this.renderNotFound(this.props.searchEnabled && !this.state.groups.length && !!this.props.selectedFilters.length)}
 					{this.renderGroupsList(this.state.groups.length)}
 				</div>
 			</ViewerPanelContent>

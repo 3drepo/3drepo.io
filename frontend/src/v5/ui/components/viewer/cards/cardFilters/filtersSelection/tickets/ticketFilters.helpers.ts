@@ -62,6 +62,10 @@ export const formatDateRange = ([from, to]) => formatMessage(
 	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
 	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
 );
+export const formatNumberRange = ([from, to]) => formatMessage(
+	{ defaultMessage: '{from} to {to}', id: 'cardFilter.numberRange.join' },
+	{ from, to },
+);
 
 
 export const DEFAULT_FILTERS: TicketFilter[] = [
@@ -139,9 +143,11 @@ const valueToQueryValueFormat = (value, operator: TicketFilterOperator) => {
 
 const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: TicketFilter) => {
 	const query = [getFilterPropertyAsQuery(moduelPropertyAndType), operator];
+	
 	if (values?.length) {
 		query.push(values?.map((v) => valueToQueryValueFormat(v, operator)).join(','));
 	}
+
 	return query.join('::');
 };
 export const filtersToQuery = (filters: TicketFilter[]) => {
@@ -179,6 +185,7 @@ const getNonCompletedTicketFiltersByStatus = (templates: ITemplate[], containerO
 		.map((v) => v.name);
 
 	const values = uniq(completedValueNames);
+	if (!values.length) return null;
 
 	return {
 		module: '',
@@ -204,9 +211,8 @@ const getNonCompletedTicketFiltersBySafetibase = (): TicketFilter => ({
 });
 
 export const getNonCompletedTicketFilters = (templates:ITemplate[], containerOrFederation:string): TicketFilter[] => {
-	let filters = [getNonCompletedTicketFiltersByStatus(templates, containerOrFederation)];
+	let filters = compact([getNonCompletedTicketFiltersByStatus(templates, containerOrFederation)]);
 	const hasSafetibase = templates.some((t) => t?.modules?.some((module) => module.type === 'safetibase'));
-	
 	if (hasSafetibase) {
 		filters.push(getNonCompletedTicketFiltersBySafetibase());
 	}
@@ -367,8 +373,13 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 	}
 
 	if (type === 'number') {
-		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
-		filter.displayValues = arrToDisplayValue(filter.values);
+		if (filter.operator === 'rng' || filter.operator === 'nrng') {
+			filter.values = chunk(serialisedValue.split(','), 2) as [ValueType, ValueType] [];
+			filter.displayValues = arrToDisplayValue(filter.values.map(formatNumberRange));
+		} else {
+			filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
+			filter.displayValues = arrToDisplayValue(filter.values);
+		}
 	}
 
 	if (isTextType(type)) {

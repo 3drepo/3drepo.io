@@ -60,9 +60,11 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 		return templateByProject || templateByModel;
 	});
 
+	let isArrayType = true;
 	const notNullable = templates.every((template) =>  {
 		const propDef = findPropertyDefinition(template, name);
-		return propDef?.required || (propDef?.type === 'oneOf');
+		isArrayType = isArrayType && (['oneOf', 'manyOf'].includes(propDef?.type));
+		return propDef?.required;
 	});
 
 	const defaultValues: FormType = {
@@ -78,7 +80,8 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 
 	const { formState: { isValid }, watch } = formData;
 
-	const isEmptyValue = !watch('value');
+	const value = watch('value');
+	const isEmptyValue = !value || (isArrayType && value.length === 0);
 	const canSubmit = isValid && (!notNullable || !isEmptyValue);
 
 	const handleSubmit = formData.handleSubmit((filledForm: FormType) => {
@@ -89,19 +92,25 @@ export const TicketsBulkEditForm = ({ name, selectedIds, onCancel }: IBulkEditFo
 		const appliesToTemplate:Record<string, boolean> = {};
 		templates.forEach((template) => {
 			const definition = findPropertyDefinition(template, name);
-			appliesToTemplate[template._id] = type === definition?.type;
+			const isSelect = ['manyOf', 'oneOf'].includes(definition.type) && isSelectType(type);
+			const isEditable = definition && 
+				(!definition.readOnlyOnUI && !definition?.readOnly)// is not read only
+				&& !(definition.required && isEmptyValue) // this is not clearing a required value
+				&& (type === definition?.type || isSelect); // property exists on template with same type
+				
+			appliesToTemplate[template._id] = isEditable;
 
-			if (!definition) {
+			if (!isEditable) {
 				return;
 			}
  			
-			if (['manyOf', 'oneOf'].includes(definition.type) && isSelectType(type)) {
+			if (isSelect) {
 				const options = new Set(getSelectOptions(module, property, type, [template], modelsIds).map((o) => o.value));
 				
 				if (type === 'manyOf'  && definition.type === 'manyOf') {
 					appliesToTemplate[template._id] = values.every((val) =>  options.has(val));
 				} else {
-					appliesToTemplate[template._id] =  options.has(values);
+					appliesToTemplate[template._id] =  options.has(values) || values === null;
 				}
 			}
 		});

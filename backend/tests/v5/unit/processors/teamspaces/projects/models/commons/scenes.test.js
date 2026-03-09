@@ -302,12 +302,17 @@ const testGetMeshData = () => {
 
 					const resStream = await Scenes.getMeshData(teamspace, project, container, meshId);
 
-					const chunks = [];
-					for await (const chunk of resStream) {
-						chunks.push(chunk);
-					}
+					const chunks = await new Promise((resolve, reject) => {
+						const data = [];
+
+						resStream.on('data', (chunk) => data.push(chunk));
+						resStream.on('end', () => resolve(data));
+						resStream.on('error', reject);
+
+						resStream.resume(); // sometimes required for CombinedStream
+					});
 					const resString = chunks.join('');
-					const expectedString = `{"matrix":${JSON.stringify(expectedMatrix)},"primitive": 3,"vertices":[${JSON.stringify(vectorData)}],"faces":[${JSON.stringify(faceData)}]}`;
+					const expectedString = `{"matrix":${JSON.stringify(expectedMatrix)},"primitive":3,"vertices":[${JSON.stringify(vectorData)}],"faces":[${JSON.stringify(faceData)}]}`;
 					expect(resString).toEqual(expectedString);
 
 					expect(ScenesModel.getNodeByQuery).toHaveBeenCalledTimes(1 + parentMocks.length);

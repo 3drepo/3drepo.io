@@ -108,6 +108,10 @@ class View {
 		return db.updateOne(teamspace, this.getCollectionName(model), query, action);
 	}
 
+	async findOneAndDelete(teamspace, model, query) {
+		return db.findOneAndDelete(teamspace, this.getCollectionName(model), query);
+	}
+
 	async findByUID(account, model, uid, projection, noClean = false) {
 		uid = utils.stringToUUID(uid);
 
@@ -245,14 +249,12 @@ class View {
 		} else {
 			const uid = utils.stringToUUID(id);
 
-			const coll = await this.getCollection(account, model);
-
 			const  [deleteResponse] =  await Promise.all([
-				coll.findOneAndDelete({ _id: uid }),
+				this.findOneAndDelete(account, model, { _id: uid }),
 				Groups.deleteGroupsByViewId(account, model, uid)
 			]);
 
-			if (!deleteResponse.value) {
+			if (!deleteResponse) {
 				return Promise.reject(this.response("NOT_FOUND"));
 			}
 

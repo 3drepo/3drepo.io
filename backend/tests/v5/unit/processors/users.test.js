@@ -281,6 +281,21 @@ const testUploadAvatar = () => {
 				userId, avatarObject,
 			);
 		});
+		test('should ignore error if unable to upload the avatar to Frontegg', async () => {
+			const username = generateRandomString();
+			const userId = generateRandomString();
+			const tenantId = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.uploadAvatar.mockRejectedValueOnce(undefined);
+			FronteggService.getUserById.mockResolvedValueOnce({ tenantId });
+
+			await expect(Users.uploadAvatar(username, avatarObject)).resolves.toEqual(undefined);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledTimes(1);
+			expect(FronteggService.uploadAvatar).toHaveBeenCalledWith(
+				userId, avatarObject,
+			);
+		});
 	});
 };
 
