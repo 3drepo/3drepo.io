@@ -45,10 +45,11 @@ function init() {
         var teamspace = document.getElementById("teamspace").value;
         var project = document.getElementById("project").value;
         var model = document.getElementById("model").value;
-        changeStatus("Loading Model...", teamspace, project, model);
+        var modelType = document.getElementById("modelType").value;
+        changeStatus("Loading Model...");
         document.getElementById("modelSubmit").disabled = true;
         if (teamspace && project && model) {
-            UnityUtil.loadModel(teamspace, project, model)
+            UnityUtil.loadModel(teamspace, project, model, undefined, modelType === "federation")
                 .then(function () {
                     console.log("Model loaded")
                     document.getElementById("modelSubmit").disabled = false;
