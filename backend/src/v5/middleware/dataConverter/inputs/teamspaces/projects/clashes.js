@@ -16,13 +16,13 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { getLatestRevision } = require('../../../../../models/revisions');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { isEqual } = require('../../../../../utils/helper/objects');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 const { validateMany } = require('../../../../common');
 const { validatePlan } = require('../../../../../schemas/projects/clashes');
-const { getLatestRevision } = require('../../../../../models/revisions');
-const { modelTypes } = require('../../../../../models/modelSettings.constants');
 
 const Clashes = {};
 
