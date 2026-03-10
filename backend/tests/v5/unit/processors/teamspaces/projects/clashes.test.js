@@ -103,14 +103,21 @@ const testCreateRun = () => {
 		const userId = generateRandomString();
 		const runId = generateRandomString();
 
-		const checkStreamContent = (stream, expectedContent) => {
+		const checkStreamContent = (stream, expectedContent) => new Promise((resolve, reject) => {
 			const chunks = [];
+
 			stream.on('data', (chunk) => chunks.push(chunk));
+			stream.on('error', reject);
 			stream.on('end', () => {
-				const content = Buffer.concat(chunks).toString();
-				expect(content).toEqual(expectedContent);
+				try {
+					const content = Buffer.concat(chunks).toString();
+					expect(content).toEqual(expectedContent);
+					resolve();
+				} catch (err) {
+					reject(err);
+				}
 			});
-		};
+		});
 
 		test('should create and queue the run when no nodes are matched', async () => {
 			ClashRunsModel.createTestRun.mockResolvedValueOnce(runId);
@@ -132,7 +139,7 @@ const testCreateRun = () => {
 			expect(ClashProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, UUIDToString(project),
 				UUIDToString(runId), stream);
 
-			checkStreamContent(stream, JSON.stringify({
+			await checkStreamContent(stream, JSON.stringify({
 				type: planData.type,
 				tolerance: planData.tolerance,
 				selfIntersectsA: false,
