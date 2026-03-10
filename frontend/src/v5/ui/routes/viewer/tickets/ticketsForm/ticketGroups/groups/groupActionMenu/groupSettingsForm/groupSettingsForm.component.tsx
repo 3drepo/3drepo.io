@@ -186,6 +186,15 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		setFilterMenuOpen(true);
 	};
 
+	const handleGroupRulesFormSubmit = (data) => {
+		if (selectedRule) {
+			update(selectedRule.index, data);
+		} else {
+			append(data);
+		}
+		resetFilterMenu();
+	};
+
 	useEffect(() => {
 		// When no value is passed then the group is a new group
 		resetFilterMenu();
@@ -381,7 +390,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 								<GroupRulesForm
 									containerOrFederation={containerOrFederation}
 									rule={selectedRule?.value}
-									onSave={selectedRule ? (val) => update(selectedRule.index, val) : append}
+									onSubmit={handleGroupRulesFormSubmit}
 									onClose={resetFilterMenu}
 									existingRules={rules}
 								/>

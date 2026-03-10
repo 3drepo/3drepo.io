@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { PureComponent } from 'react';
-import { isEqual, uniqBy } from 'lodash';
+import { uniqBy } from 'lodash';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { Tooltip } from '@mui/material';
 
+import { ICriteriaFieldState } from '@/v4/modules/groups/groups.redux';
 import { getUpdatedCriteria, prepareCriterion } from '../../../helpers/criteria';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { ButtonMenu } from '../buttonMenu/buttonMenu.component';
@@ -35,7 +36,7 @@ import {
 	MenuItem,
 	OptionsList,
 	Placeholder,
-	SelectedCriteria,
+	Criteria,
 	StyledMoreIcon
 } from './criteriaField.styles';
 
@@ -51,16 +52,17 @@ interface IProps {
 	disabled: boolean;
 	isPasteEnabled: boolean;
 	pastedCriteria: string;
-	selectedCriterion: any;
+	selectedCriterionId: any;
 	criterionForm: any;
 	onChange: (criteria) => void;
-	setState: (criteriaState) => void;
+	onClose: (criterion) => void;
+	setCriteriaFieldState: (criteriaFieldState: Partial<ICriteriaFieldState>) => void;
 	onCriterionSelect: (event?) => void;
+	updateEditingGroup: (group) => void;
+	setSelectedCriterionId: (id: string) => void;
 }
 
 interface IState {
-	selectedCriteria?: any[];
-	criterionForm?: any;
 	menuOpen?: boolean;
 }
 
@@ -77,13 +79,11 @@ const MenuButton = ({ IconProps, Icon, ...props }) => (
 
 export class CriteriaField extends PureComponent<IProps, IState> {
 	public state = {
-		selectedCriteria: [],
-		criterionForm: null,
 		menuOpen: false,
 	};
 
 	public setMenuOpen = (menuOpen) => {
-		this.setState({ ...this.state, menuOpen });
+		this.setState({ menuOpen });
 	}
 
 	public renderPlaceholder = renderWhenTrue(() => (
@@ -104,7 +104,7 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 	public renderCriteriaChips = renderWhenTrue(() => (
 		<ChipsContainer>
 			<ChipsDeselectCatcher onClick={this.deselectCriterion} />
-			{this.state.selectedCriteria.map(this.renderCriterion)}
+			{this.getCriteria().map(this.renderCriterion)}
 		</ChipsContainer>
 	));
 
@@ -122,135 +122,88 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 		</ButtonContainer>
 	);
 
-	public componentDidMount() {
-		const { value, criterionForm, selectedCriterion } = this.props;
-		const changes = {} as IState;
-
-		if (value) {
-			changes.selectedCriteria = value;
-		}
-
-		if (criterionForm && !selectedCriterion) {
-			changes.criterionForm = criterionForm;
-		}
-
-		if (selectedCriterion) {
-			changes.criterionForm = this.getSelectedCriterionForm(changes.selectedCriteria);
-		}
-
-		this.setState(changes);
+	public getCriteria() {
+		return this.props.value;
 	}
 
-	public componentDidUpdate(prevProps) {
-		if (this.props.selectedCriterion !== prevProps.selectedCriterion) {
-			const criterionForm = this.getSelectedCriterionForm(this.state.selectedCriteria);
-			this.setState({ criterionForm });
-		} else if (!isEqual(prevProps.criterionForm, this.props.criterionForm)) {
-			this.setState({ criterionForm: this.props.criterionForm });
-		}
-
-		if (this.props.value !== prevProps.value) {
-			this.setState({selectedCriteria: this.props.value});
-		}
-
+	public getSelectedCriterionForm() {
+		const criteria = this.getCriteria().find(this.isCriterionSelected);
+		return criteria || null;
 	}
 
-	public getSelectedCriterionForm(selectedCriteria = []) {
-		const criterionForm = selectedCriteria.find(this.isCriterionActive);
-		return criterionForm || null;
-	}
+	public handleDeleteCriterion = (criterionToRemove) => () => {
+		if (this.isCriterionSelected(criterionToRemove)) {
+			this.props.setSelectedCriterionId('');
+		}
 
-	public handleDelete = (criteriaToRemove) => () => {
-		const selectedCriteria = this.props.value.filter((criteria) => {
-			return criteria._id !== criteriaToRemove._id;
+		const remainingCriteria = this.props.value.filter((criteria) => {
+			return criteria._id !== criterionToRemove._id;
 		});
 
-		if (criteriaToRemove._id === this.props.selectedCriterion) {
-			this.props.setState({ selectedCriterion: '' });
-		}
-
-		this.setState({ selectedCriteria }, this.handleChange);
+		this.handleChange(remainingCriteria);
 	}
 
 	public clearCriteria = () => {
-		this.setState({ selectedCriteria: [] }, this.handleChange);
+		this.handleChange([]);
 	}
 
 	public togglePasteMode = () => {
-		this.props.setState({
+		this.props.setCriteriaFieldState({
 			pastedCriteria: '',
-			isPasteEnabled: !this.props.isPasteEnabled
+			isPasteEnabled: !this.props.isPasteEnabled,
+			criterionForm: null,
 		});
 	}
 
 	public deselectCriterion = () => {
-		this.props.setState({ selectedCriterion: '' });
+		this.props.setSelectedCriterionId('');
 	}
 
 	public handleCriterionSubmit = (newCriterion) => {
-		const criterionForm = null;
-
-		this.setState(
-			({ selectedCriteria }) => ({
-				selectedCriteria: getUpdatedCriteria(selectedCriteria, newCriterion),
-				criterionForm
-			}),
-			() => {
-				this.handleChange();
-				this.props.setState({
-					criterionForm,
-					selectedCriterion: ''
-				});
-			}
-		);
+		this.props.updateEditingGroup({ rules: getUpdatedCriteria(this.getCriteria(), newCriterion) });
+		this.props.setSelectedCriterionId('');
 	}
 
-	public handleChange = () => {
+	public handleChange = (criteria?) => {
 		if (this.props.onChange) {
 			this.props.onChange({
 				target: {
-					value: this.state.selectedCriteria,
+					value: criteria ?? this.getCriteria(),
 					name: this.props.name
 				}
 			});
 		}
 	}
 
-	public handleNewCriterionChange = (criterionForm) => {
-		this.props.setState({ criterionForm });
-	}
-
 	public handlePasteFieldChange = (pastedCriteria) => {
-		this.props.setState({ pastedCriteria });
+		this.props.setCriteriaFieldState({ pastedCriteria, criterionForm: null });
 	}
 
 	public handlePaste = (pastedCriteria) => {
 		this.togglePasteMode();
-		this.setState((prevState) => ({
-			selectedCriteria: uniqBy([
-				...prevState.selectedCriteria,
-				...pastedCriteria.map(prepareCriterion)
-			], '_id')
-		}), this.handleChange);
+		const newCriteria = uniqBy([
+			...this.getCriteria(),
+			...pastedCriteria.map(prepareCriterion)
+		], '_id');
+		this.handleChange(newCriteria);
 	}
 
-	public handleCriteriaClick = (criterion) => () => {
-		this.props.setState({ selectedCriterion: criterion._id });
+	public handleCriterionClick = (criterion) => () => {
+		this.props.setSelectedCriterionId(criterion._id);
 	}
 
-	public isCriterionActive = (criterion) => {
-		const { selectedCriterion } = this.props;
-		return criterion._id === selectedCriterion;
+	public isCriterionSelected = (criterion) => {
+		const { selectedCriterionId } = this.props;
+		return criterion._id === selectedCriterionId;
 	}
 
 	public renderCriterion = (criterion) => (
-		<Tooltip title={criterion.name}>
+		<Tooltip title={criterion.name} key={criterion._id}>
 			<Chip
-				key={criterion._id}
-				color={this.isCriterionActive(criterion) ? 'primary' : 'default'}
+				color={this.isCriterionSelected(criterion) ? 'primary' : 'default'}
 				label={criterion.name}
-				onDelete={this.props.disabled ? null : this.handleDelete(criterion)}
-				onClick={this.handleCriteriaClick(criterion)}
+				onDelete={this.props.disabled ? null : this.handleDeleteCriterion(criterion)}
+				onClick={this.handleCriterionClick(criterion)}
 				clickable
 			/>
 		</Tooltip>
@@ -268,7 +221,7 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 		const options = [
 			{
 				Component: this.renderCopyOption,
-				disabled: !this.state.selectedCriteria?.length
+				disabled: !this.getCriteria()?.length
 			}, {
 				label: 'Paste filters',
 				onClick: this.togglePasteMode,
@@ -276,11 +229,11 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 			}, {
 				label: 'Deselect',
 				onClick: this.deselectCriterion,
-				disabled: !this.props.selectedCriterion
+				disabled: !this.props.selectedCriterionId
 			}, {
 				label: 'Clear all',
 				onClick: this.clearCriteria,
-				disabled: this.props.disabled || !this.state.selectedCriteria?.length,
+				disabled: this.props.disabled || !this.getCriteria()?.length,
 			}
 		];
 
@@ -298,13 +251,15 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 		);
 	}
 
+
 	public renderForm = () => (
 		<FormContainer>
 			<NewCriterionForm
-				criterion={this.state.criterionForm}
+				criteria={this.getCriteria()}
+				selectedCriterion={this.getSelectedCriterionForm()}
+				criterionForm={this.props.criterionForm}
 				onSubmit={this.handleCriterionSubmit}
-				alreadySelectedFilters={this.props.value}
-				selectedCriterion={this.props.selectedCriterion}
+				onClose={this.props.onClose}
 			/>
 		</FormContainer>
 	)
@@ -315,12 +270,12 @@ export class CriteriaField extends PureComponent<IProps, IState> {
 			<Container className={className}>
 				<FiltersContainer>
 					<InputLabel>{label}</InputLabel>
-					<SelectedCriteria>
+					<Criteria>
 						{this.renderPlaceholder(placeholder && !value.length && !isPasteEnabled)}
 						{this.renderCriteriaChips(!!value.length)}
 						{this.renderCriteriaPasteField(isPasteEnabled)}
 						{this.renderOptionsMenu()}
-					</SelectedCriteria>
+					</Criteria>
 				</FiltersContainer>
 				{this.renderForm()}
 			</Container>
