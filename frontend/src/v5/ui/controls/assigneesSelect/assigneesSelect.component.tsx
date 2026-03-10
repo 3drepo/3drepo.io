@@ -31,7 +31,7 @@ export const AssigneesSelect = ({
 	const { containerOrFederation } = useContext(TicketContext);
 	const { jobs, users } = getModelJobsAndUsers(containerOrFederation);
 
-	const valueAsArray = props.multiple ? props.value : [props.value].filter(Boolean);
+	const valueAsArray = typeof props.value === 'string' ? [props.value].filter(Boolean) : props.value || [];
 	const validValues = getValidValues([...jobs, ...users], excludeViewers);
 	const invalidValues = getInvalidValues(valueAsArray, validValues);
 

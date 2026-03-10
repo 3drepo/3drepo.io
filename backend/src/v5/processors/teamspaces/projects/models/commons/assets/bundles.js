@@ -15,11 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { UUIDToString } = require('../../../../../../utils/helper/uuids');
 const { getAssetList } = require('../../../../../../models/bundles');
+const { getFileAsStream } = require('../../../../../../services/filesManager');
 
-const JsonAssets = { };
+const BundleAssets = { };
 
-JsonAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => {
+const STASH_UNITY3D_EXT = '.stash.unity3d';
+const STASH_REPOBUNDLES_EXT = '.stash.repobundles';
+const UNITY3D_NAME_EXT = '.unity3d';
+
+BundleAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => {
 	const containerList = subModels || [{ container: model, revision }];
 
 	const lists = await Promise.all(containerList.map((
@@ -27,4 +33,8 @@ JsonAssets.getRepoBundleInfo = async (teamspace, model, revision, subModels) => 
 	return { models: lists.filter((entry) => !!entry) };
 };
 
-module.exports = JsonAssets;
+BundleAssets.getUnityBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}${STASH_UNITY3D_EXT}`, `${UUIDToString(bundleId)}${UNITY3D_NAME_EXT}`);
+
+BundleAssets.getRepoBundle = (teamspace, container, bundleId) => getFileAsStream(teamspace, `${container}${STASH_REPOBUNDLES_EXT}`, UUIDToString(bundleId));
+
+module.exports = BundleAssets;
