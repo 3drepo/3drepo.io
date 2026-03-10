@@ -17,7 +17,7 @@
 
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
 import { Gap } from '@controls/gap';
 import { IFormRule } from '../../groupRulesForm.helpers';
@@ -25,17 +25,26 @@ import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayF
 import { ValuesContainer } from './ruleValues.styles';
 
 export const RuleValues = ({ disabled }) => {
-	const { control, watch, formState: { errors } } = useFormContext<IFormRule>();
+	const { control, watch, formState: { errors }, setValue } = useFormContext<IFormRule>();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'values',
+		shouldUnregister: true,
 	});
 
 	const operator = watch('operator');
 	const operationType = OPERATIONS_TYPES[operator];
 	const error = errors.values || {};
+	const firstRender = useRef(true); // this is needed to differentiate between reopening card and operator change
 
-	useEffect(() => () => remove(), [operationType]);
+	useEffect(() => {
+		if (operationType && firstRender.current) {
+			firstRender.current = false;
+			return;
+		}
+		// use setValue instead of reset because reset does not fully clear/initialise field and the old value can return
+		setValue('values', [{ value: '' }], { shouldDirty: true, shouldValidate: true });
+	}, [operationType, setValue]);
 
 	useEffect(() => {
 		if (!fields.length) {

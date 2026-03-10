@@ -63,6 +63,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 		defaultValues,
 		mode: 'all',
 		resolver: yupResolver(GroupRuleSchema),
+		shouldUnregister: true,
 		context: { alreadyExistingNames: existingRules.map((r) => r.name).filter((name) => name !== rule?.name) },
 	});
 
@@ -105,9 +106,6 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 
 	useEffect(() => {
 		if (isEmpty(unsavedState)) return;
-		// Comment for Dan or Santiago
-		// I don't understand why this reset updates the values and seems to
-		// mark the different fields as dirty
 		reset(groupRuleToFormRule(unsavedState));
 	}, [JSON.stringify(unsavedState)]);
 
