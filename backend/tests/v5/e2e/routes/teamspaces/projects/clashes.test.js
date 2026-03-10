@@ -51,7 +51,7 @@ const setupBasicData = async ({ users, teamspace, project, models, revisions, vo
 			model._id,
 			model.name,
 			model.properties,
-		),
+		)),
 		revisions.map((rev, i) => ServiceHelper.db.createRevision(teamspace,
 			project.id, models[i]._id, rev, modelTypes.CONTAINER)),
 		ServiceHelper.db.createRevision(teamspace,
@@ -59,7 +59,7 @@ const setupBasicData = async ({ users, teamspace, project, models, revisions, vo
 		ServiceHelper.db.createClashPlan(teamspace, plan),
 		ServiceHelper.db.createClashPlan(teamspace, planWithNoRev),
 		ServiceHelper.db.createClashPlan(teamspace, planWithVoidRev),
-		)]);
+	]);
 };
 
 const generateBasicData = () => {
