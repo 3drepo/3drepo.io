@@ -23,7 +23,7 @@ import { containerMockFactory, prepareMockSettingsReply, prepareMockStats } from
 import { omit } from 'lodash';
 import { prepareMockRawSettingsReply } from './containers.fixtures';
 import { createTestStore } from '../test.helpers';
-import { prepareContainerSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
+import { prepareSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectContainerById, selectContainers } from '@/v5/store/containers/containers.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
@@ -202,7 +202,7 @@ describe('Containers: sagas', () => {
 		it('should fetch container settings', async () => {
 			populateStore();
 			const settings = prepareMockRawSettingsReply(containerMockFactory());
-			const frontendSettings = prepareContainerSettingsForFrontend(settings);
+			const frontendSettings = prepareSettingsForFrontend(settings);
 
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)

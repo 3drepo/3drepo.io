@@ -32,7 +32,7 @@ const {
 const { deleteFavourites, getUserByUsername, getUserByUsernameOrEmail, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
 const { deleteIfUndefined, isEmpty } = require('../../utils/helper/objects');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
-const { getInvitationsByTeamspace, inviteUserAsAdmin } = require('../../models/invitations');
+const { getInvitationsByTeamspace, inviteUserAsAdmin, removeAllInvitationsByTeamspace } = require('../../models/invitations');
 const { getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { COL_NAME } = require('../../models/projectSettings.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
@@ -110,6 +110,7 @@ Teamspaces.removeTeamspace = async (teamspace, removeAssociatedAccount = true) =
 		removeAllUsersFromTS(teamspace),
 		removeAllFilesFromTeamspace(teamspace),
 		removeAllTeamspaceNotifications(teamspace),
+		removeAllInvitationsByTeamspace(teamspace),
 	]);
 	await Promise.all([
 		dropDatabase(teamspace),

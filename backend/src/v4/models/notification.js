@@ -67,7 +67,7 @@ const unionArrayMerger = opts => (objValue, srcValue) => {
  */
 const insertNotification = async (user, type, data) => {
 	const insertion = await db.insertOne(INTERNAL_DB, NOTIFICATIONS_COLL, { user, ...generateNotification(type, data) });
-	return utils.objectIdToString(insertion.ops[0]);
+	return utils.objectIdToString(insertion.insertedId);
 };
 
 const deleteNotification = (user, _id) => {

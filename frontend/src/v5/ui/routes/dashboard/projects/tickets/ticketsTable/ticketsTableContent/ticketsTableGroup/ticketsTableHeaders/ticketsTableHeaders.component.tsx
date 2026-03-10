@@ -14,40 +14,38 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useContext } from 'react';
-import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
-import { HeaderCell, HeaderCellText, Headers } from './ticketsTableHeaders.styles';
-import { getPropertyLabel } from '../../../ticketsTable.helper';
+import { Headers } from './ticketsTableHeaders.styles';
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
-import { ColumnsVisibilitySettings } from '../columnsVisibilitySettings/columnsVisibilitySettings.component';
-import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { TicketsTableHeaderFilter } from './ticketsTableHeaderFilter.component';
+import { TicketsTableHeaderBulkEdit } from './ticketsTableHeaderBulkEdit/ticketsTableHeaderBulkEdit.component';
+import { TicketsTableHeader } from './ticketsTableHeader.component';
+import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { useContext } from 'react';
+import { useParams } from 'react-router-dom';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
+import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { canBulkEditProperty } from '@/v5/store/tickets/tickets.helpers';
 
-const TicketHeaderCell = ({ name, ...props }) => {
-	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
-	const isSelected = name === sortingColumn;
-
-	return (
-		<HeaderCell name={name} onClick={() => onColumnClick(name)}>
-			<HeaderCellText {...props}>
-				{getPropertyLabel(name)}
-			</HeaderCellText>
-			{isSelected && (<SortingArrow ascendingOrder={isDescendingOrder} />)}
-			<TicketsTableHeaderFilter propertyName={name}/>
-		</HeaderCell>
-	);
+type TicketsTableHeadersProps = {
+	ticketsIds: string[]
 };
 
-export const TicketsTableHeaders = () => {
+// The ticketsids refer to the group's tickets ids if the 
+export const TicketsTableHeaders = ({ ticketsIds }: TicketsTableHeadersProps) => {
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
+	const { selectedIds } = useContext(TicketsTableContext);
+
+	const { template: templateId } = useParams<DashboardTicketsParams>();
+	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
+
+	const groupSelectedIds = new Set(ticketsIds.filter((id) => selectedIds.has(id)));
 
 	return (
 		<Headers>
 			{visibleSortedColumnsNames.map((name) => (
-				<TicketHeaderCell key={name} name={name} />
+				canBulkEditProperty(template, name) && groupSelectedIds.size > 0 ? 
+					<TicketsTableHeaderBulkEdit key={name} name={name} groupSelectedIds={groupSelectedIds}/> : <TicketsTableHeader key={name} name={name} />
 			))}
-			<ColumnsVisibilitySettings />
 		</Headers>
 	);
 };
