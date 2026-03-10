@@ -34,7 +34,8 @@ export const ColorButton = ({ value, onChange }: ColorButtonProps) => {
 
 	const getColorAndOpacity = () => {
 		const color = value.slice(0, 7);
-		const opacity = hexToDecimal(value.slice(-2)) / 255;
+		const opacityAsHex = value.slice(7, 9);
+		const opacity = opacityAsHex ? hexToDecimal(opacityAsHex) / 255 : 1; // get opacity as decimal
 		return { color, opacity };
 	};
 	const handleChange = ({ color, opacity }) => {

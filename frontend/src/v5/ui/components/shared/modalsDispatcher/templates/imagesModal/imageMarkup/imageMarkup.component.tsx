@@ -76,7 +76,7 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 		}
 	};
 
-	const handletrokeWidthChange = (value) => {
+	const handleStrokeWidthChange = (value) => {
 		setStrokeWidth(value);
 		updateElement({ strokeWidth: value });
 	};
@@ -117,6 +117,16 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 		}
 	};
 
+	const onClear = () => {
+		markupRef.current.clearCanvas();
+		handleModeChange(MODES.BRUSH);
+	};
+
+	const onUndo = () => {
+		CanvasHistoryActionsDispatchers.undo();
+		handleModeChange(MODES.BRUSH);
+	};
+
 	return (
 		<Container $cursor={cursor}>
 			<ImageSizesRefContainer src={image} ref={imageSizesRef} />
@@ -143,8 +153,9 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 						strokeWidth={strokeWidth}
 						fontSize={fontSize}
 						color={color}
-						onClearClick={markupRef.current.clearCanvas}
-						onStrokeWidthChange={handletrokeWidthChange}
+						onClear={onClear}
+						onUndo={onUndo}
+						onStrokeWidthChange={handleStrokeWidthChange}
 						onFontSizeChange={handleFontSizeChange}
 						onColorChange={handleColorChange}
 						mode={mode}
@@ -153,7 +164,6 @@ export const ImageMarkup = ({ image, onSave, onClose }: ImageMarkupProps) => {
 						onShapeChange={handleShapeChange}
 						callout={callout}
 						onCalloutChange={handleCalloutChange}
-						selectedObjectName={selectedObjectName}
 					/>
 				</MarkupToolbarContainer>
 			)}
