@@ -16,8 +16,8 @@
  */
 
 const { codeExists, templates } = require('../utils/responseCodes');
-const { createWriteStream } = require('fs');
-const { mkdir } = require('fs/promises');
+const { mkdir, rm } = require('fs/promises');
+const fs = require('fs');
 const { pipeline } = require('stream/promises');
 const { cn_queue: queueConfig } = require('../utils/config');
 const { queueMessage } = require('../handler/queue');
@@ -33,14 +33,19 @@ const {
 } = queueConfig;
 
 ClashProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
+	const configPath = `${sharedDir}/${corId}/clashConfig.json`;
 	try {
 		await mkdir(`${sharedDir}/${corId}`);
 
-		const writableStream = createWriteStream(`${sharedDir}/${corId}/clashConfig.json`);
-		await pipeline(stream, writableStream, { end: false });
+		const writableStream = fs.createWriteStream(configPath);
+		await pipeline(stream, writableStream);
 		const msg = `processClash ${teamspace} ${project} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
 		await queueMessage(clashq, corId, msg);
 	} catch (err) {
+		await rm(configPath).catch((cleanUpErr) => {
+			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
+		});
+
 		if (err?.code && codeExists(err.code)) {
 			throw err;
 		}
