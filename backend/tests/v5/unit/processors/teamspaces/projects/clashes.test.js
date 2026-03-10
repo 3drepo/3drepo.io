@@ -193,7 +193,7 @@ const testCreateRun = () => {
 				expect(ClashProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, UUIDToString(project),
 					UUIDToString(runId), stream);
 
-				checkStreamContent(stream, JSON.stringify({
+				await checkStreamContent(stream, JSON.stringify({
 					type: plan.type,
 					tolerance: plan.tolerance,
 					selfIntersectsA: plan.selfIntersectionsCheck === true

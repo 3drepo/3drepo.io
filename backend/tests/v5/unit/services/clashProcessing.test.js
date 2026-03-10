@@ -71,7 +71,7 @@ const testQueueClashRun = () => {
 				corId, `processClash ${teamspace} ${project} $SHARED_SPACE/${corId}/clashConfig.json`);
 		});
 
-		test('should succeed with job inserted into the queue', async () => {
+		test(`should fail with ${templates.queueConnectionError.code} if createWriteStream threw the error`, async () => {
 			const corId = generateRandomString();
 			const stream = new PassThrough();
 			stream.write(data);
