@@ -33,14 +33,16 @@ import {
 	selectSelectedRisk,
 	selectShowDetails,
 	selectShowPins,
-	selectSortByField, selectSortOrder, RisksActions
+	selectSortByField, selectSortOrder, RisksActions,
+	selectRisks
 } from '../../../../modules/risks';
 import { selectSettings as selectTeamspaceSettings } from '../../../../modules/teamspace';
 import { Risks } from './risks.component';
 
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
-	risks: selectFilteredRisks,
+	filteredRisks: selectFilteredRisks,
+	unfilteredRisks: selectRisks,
 	jobs: selectJobsList,
 	activeRiskId: selectActiveRiskId,
 	activeRiskDetails: selectActiveRiskDetails,
