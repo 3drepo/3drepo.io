@@ -37,7 +37,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
 import { isEqualWith } from 'lodash';
 import { ContainerStats, FetchContainerViewsResponseView, IContainer } from './containers.types';
-import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
+import { prepareSettingsForBackend, prepareSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
 import { compByColum } from '../store.helpers';
 import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
@@ -144,7 +144,7 @@ export function* fetchContainerSettings({
 }: FetchContainerSettingsAction) {
 	try {
 		const rawSettings = yield API.Containers.fetchContainerSettings(teamspace, projectId, containerId);
-		const settings = prepareContainerSettingsForFrontend(rawSettings);
+		const settings = prepareSettingsForFrontend(rawSettings);
 		yield put(ContainersActions.fetchContainerSettingsSuccess(projectId, containerId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -200,7 +200,7 @@ export function* updateContainerSettings({
 	onError,
 }: UpdateContainerSettingsAction) {
 	try {
-		const rawSettings = prepareContainerSettingsForBackend(settings);
+		const rawSettings = prepareSettingsForBackend(settings);
 		yield API.Containers.updateContainerSettings(teamspace, projectId, containerId, rawSettings);
 		yield put(ContainersActions.updateContainerSettingsSuccess(projectId, containerId, settings));
 		onSuccess();

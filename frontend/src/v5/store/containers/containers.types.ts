@@ -145,6 +145,7 @@ export type ContainerBackendSettings = {
 	angleFromNorth?: number;
 	code?: string;
 	unit?: string;
+	author?: string;
 	defaultView?: string;
 	errorReason?: {
 		message: string;
