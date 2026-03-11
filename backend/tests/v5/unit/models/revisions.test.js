@@ -17,6 +17,8 @@
 
 const { src } = require('../../helper/path');
 
+const { times } = require('lodash');
+
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -645,6 +647,25 @@ const testAddDrawingThumbnailRef = () => {
 	});
 };
 
+const testGetMultipleRevisionCount = () => {
+	describe('getMultipleRevisionCount', () => {
+		const teamspace = generateRandomString();
+		const models = times(3, generateRandomString());
+		const modelType = modelTypes.CONTAINER;
+
+		test('should call getRevisionCount', async () => {
+			const countsMap = { [models[0]]: 5, [models[1]]: 10, [models[2]]: 0 };
+			const spy = jest.spyOn(Revisions, 'getRevisionCount')
+				.mockResolvedValueOnce((_, model) => Promise.resolve(countsMap[model]));
+
+			const result = await Revisions.getMultipleRevisionCount(teamspace, models, modelType);
+
+			expect(result).toEqual(countsMap);
+			expect(spy).toHaveBeenCalledTimes(models.length);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
@@ -660,4 +681,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateProcessingStatus();
 	testOnProcessingCompleted();
 	testAddDrawingThumbnailRef();
+	testGetMultipleRevisionCount();
 });
