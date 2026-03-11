@@ -24,7 +24,7 @@ const TEMPLATE_PATH = `${__dirname}/html/modelImportError.html`;
 
 const dataSchema = Yup.object({
 	errInfo: Yup.object({
-		code: Yup.number(),
+		code: Yup.string(),
 		message: Yup.string().default('Unknown'),
 	}).required(),
 	title: Yup.string().default('Model Import Error'),

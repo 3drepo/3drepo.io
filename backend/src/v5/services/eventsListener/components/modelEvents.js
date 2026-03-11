@@ -142,12 +142,13 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 				fileName = await getContainerFileName(UUIDToString(revId));
 			}
 
-			const { errorCode, message } = errorReason;
+			const { errorCode } = errorReason;
+			const { internalError, message } = getInfoFromCode(errorCode);
 
 			await sendSystemEmail(emailTemplates.MODEL_IMPORT_ERROR.name,
 				{
 					errInfo: {
-						code: errorCode,
+						code: `${errorCode} ${internalError}`,
 						message,
 					},
 					teamspace,
