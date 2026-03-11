@@ -166,7 +166,7 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 	}
 };
 
-ModelProcessing.getFileName = (corId) => {
+ModelProcessing.getContainerFileName = (corId) => {
 	try {
 		const filePath = Path.join(sharedDir, `${corId}.json`);
 		const jsonFile = JSON.parse(readFileSync(filePath).toString());

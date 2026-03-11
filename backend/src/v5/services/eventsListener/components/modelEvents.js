@@ -19,7 +19,7 @@ const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { addGroupUpdateLog, addImportedLogs, addTicketLog } = require('../../../models/tickets.logs');
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
-const { getFileName, getLogArchive } = require('../../modelProcessing');
+const { getContainerFileName, getLogArchive } = require('../../modelProcessing');
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
 const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
@@ -139,7 +139,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 					{ rev_id: revId }, { name: 1 }).catch(() => undefined);
 				fileName = refEntry?.name;
 			} else if (modelType === modelTypes.CONTAINER) {
-				fileName = await getFileName(UUIDToString(revId));
+				fileName = await getContainerFileName(UUIDToString(revId));
 			}
 
 			const { errorCode, message } = errorReason;
