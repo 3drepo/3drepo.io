@@ -25,6 +25,7 @@ const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updatePr
 const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
+const { DRAWINGS_HISTORY_COL } = require('../../../models/revisions.constants');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
@@ -33,6 +34,7 @@ const { findProjectByModelId } = require('../../../models/projectSettings');
 const { generateFullSchema } = require('../../../schemas/tickets/templates');
 const { getCalibrationStatus } = require('../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { getInfoFromCode } = require('../../../models/modelSettings.constants');
+const { getRefEntryByQuery } = require('../../../models/fileRefs');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
 const { sendSystemEmail } = require('../../mailer');
@@ -129,7 +131,16 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 	} else if (!errorReason.userErr) {
 		try {
 			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
-			const fileName = await getFileName(UUIDToString(revId));
+
+			let fileName = 'N/A';
+
+			if (modelType === modelTypes.DRAWING) {
+				const refEntry = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
+					{ rev_id: revId }, { name: 1 }).catch(() => undefined);
+				fileName = refEntry?.name;
+			} else if (modelType === modelTypes.CONTAINER) {
+				fileName = await getFileName(UUIDToString(revId));
+			}
 
 			const { errorCode, message } = errorReason;
 
