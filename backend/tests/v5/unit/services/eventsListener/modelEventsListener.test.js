@@ -633,7 +633,7 @@ const testModelProcessingCompleted = () => {
 			[true, false, false, true],
 			[false, false, true],
 			[true, false, false],
-			[true, false, false, undefined, generateRandomNumber(1000, 2000)],
+			[true, false, false, undefined, generateRandomNumber(1, 40)],
 		])('', (sendMail, success, userErr, noLogArchive, errorCode) => {
 			test(`Should ${sendMail ? 'not ' : ''}send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
 				const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
@@ -661,11 +661,11 @@ const testModelProcessingCompleted = () => {
 				if (sendMail) {
 					expect(ModPro.getLogArchive).toHaveBeenCalledTimes(1);
 					expect(ModPro.getLogArchive).toHaveBeenCalledWith(UUIDToString(data.revId));
-
+					const errorInfo = getInfoFromCode(data.data.errorReason.errorCode);
 					const mailerData = {
 						errInfo: {
-							code: data.data.errorReason.errorCode,
-							message: getInfoFromCode(data.data.errorReason.errorCode).message,
+							code: `${data.data.errorReason.errorCode} ${errorInfo.internalError}`,
+							message: errorInfo.message,
 						},
 						teamspace: data.teamspace,
 						model: data.model,
