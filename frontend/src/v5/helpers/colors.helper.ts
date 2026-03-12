@@ -16,7 +16,7 @@
  */
 
 import { rgbToHex as muiRgbToHex, hexToRgb as muiHexToRgb } from '@mui/material';
-import { isArray, isNumber, memoize } from 'lodash';
+import { isArray, isNumber, isString, memoize } from 'lodash';
 
 type GroupColor = {
 	color?: any,
@@ -61,6 +61,7 @@ export const componentToHex = memoize((c) => {
 
 export const getGroupHexColor = (groupColor) => {
 	if (groupColor) {
+		if (isString(groupColor)) return groupColor;
 		return '#' + groupColor.map(componentToHex).join('');
 	}
 	return '#ffffff'; // Removed the import that created a circular dependency
