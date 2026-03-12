@@ -21,7 +21,7 @@ import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
-import { TypographyOptions } from '@mui/material/styles/createTypography';
+import { TypographyVariantsOptions } from '@mui/material/styles/createTypography';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
@@ -265,7 +265,7 @@ export const palette = {
 
 export const theme = createTheme({
 	palette,
-	typography: typography as TypographyOptions,
+	typography: typography as TypographyVariantsOptions,
 	components: {
 		MuiTextField: {
 			defaultProps: {
@@ -793,11 +793,6 @@ export const theme = createTheme({
 						'&:hover': {
 							backgroundColor: COLOR.TERTIARY_LIGHTEST,
 						},
-					},
-				},
-				button: {
-					'&:hover': {
-						backgroundColor: COLOR.TERTIARY_LIGHTEST,
 					},
 				},
 				padding: {
@@ -1412,24 +1407,26 @@ export const theme = createTheme({
 		},
 		MuiDateTimePicker: {
 			defaultProps: {
-				components: {
-					OpenPickerIcon: CalendarIcon,
-					LeftArrowIcon: ThinChevronIcon,
-					RightArrowIcon: ThinChevronIcon,
-					ActionBar: CalendarActionBar,
+				slots: {
+					openPickerIcon: CalendarIcon,
+					leftArrowIcon: ThinChevronIcon,
+					rightArrowIcon: ThinChevronIcon,
+					actionBar: CalendarActionBar,
 				},
 			},
 		},
 		MuiDatePicker: {
 			defaultProps: {
-				components: {
-					OpenPickerIcon: CalendarIcon,
-					LeftArrowIcon: ThinChevronIcon,
-					RightArrowIcon: ThinChevronIcon,
-					ActionBar: CalendarActionBar,
+				slots: {
+					openPickerIcon: CalendarIcon,
+					leftArrowIcon: ThinChevronIcon,
+					rightArrowIcon: ThinChevronIcon,
+					actionBar: CalendarActionBar,
 				},
 			},
 		},
+	
+	/*
 		MuiCalendarPicker: {
 			styleOverrides: {
 				root: {
@@ -1591,6 +1588,6 @@ export const theme = createTheme({
 					},
 				},
 			},
-		},
+		},*/
 	},
 }) as any;

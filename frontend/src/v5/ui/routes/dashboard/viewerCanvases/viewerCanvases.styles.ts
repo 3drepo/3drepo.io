@@ -16,7 +16,7 @@
  */
 
 import { PropsWithChildren } from 'react';
-import BaseSplitPane, { SplitPaneProps } from 'react-split-pane';
+import { SplitPane as BaseSplitPane, SplitPaneProps } from 'react-split-pane';
 import ResizePaneIcon from '@assets/icons/outlined/horizontal_resize-outlined.svg';
 import styled, { css } from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
