@@ -135,9 +135,9 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 			let fileName = 'N/A';
 
 			if (modelType === modelTypes.DRAWING) {
-				const refEntry = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
-					{ rev_id: revId }, { name: 1 }).catch(() => undefined);
-				fileName = refEntry?.name;
+				const { name } = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
+					{ rev_id: revId }, { name: 1 });
+				fileName = name;
 			} else if (modelType === modelTypes.CONTAINER) {
 				fileName = await getContainerFileName(UUIDToString(revId));
 			}
