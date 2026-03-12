@@ -28,10 +28,10 @@ interface IProps {
 	formRef?: any;
 	commentRef?: any;
 	viewpoint: any;
+	canComment: boolean;
 }
 
-export const Footer = ({ name, created, formRef, commentRef, comment, ...props }: IProps) => {
-
+export const Footer = ({ name, created, formRef, commentRef, comment, canComment, ...props }: IProps) => {
 	const handleReplayButtonClick = () => {
 		const commentForm = formRef.current;
 		const commentTextarea = commentRef.current.textareaRef;
@@ -77,10 +77,10 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 			<Date>
 				{formatDateTime(created)}
 			</Date>
-			<IconButton onClick={handleQuoteButtonClick} size="large">
+			<IconButton onClick={handleQuoteButtonClick} size="large" disabled={!canComment}>
 				<StyledQuoteIcon />
 			</IconButton>
-			<IconButton onClick={handleReplayButtonClick} size="large">
+			<IconButton onClick={handleReplayButtonClick} size="large" disabled={!canComment}>
 				<StyledReplyIcon />
 			</IconButton>
 		</Container>
