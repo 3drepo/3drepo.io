@@ -230,4 +230,19 @@ Scene.getSuperMeshesInfo = async (teamspace, container, revision) => {
 	return { superMeshes };
 };
 
+Scene.getGroupedMeshesFromParentIds = async (teamspace, project, container, revision, parentIds) => {
+	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
+	const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
+	const result = [];
+
+	nodes.forEach(({ _id }) => {
+		const idStr = UUIDToString(_id);
+		if (idToMeshes[idStr]) {
+			result.push({ id: idStr, meshIds: idToMeshes[idStr] });
+		}
+	});
+
+	return result;
+};
+
 module.exports = Scene;
