@@ -64,8 +64,8 @@ const getConfigSetEntry = async (teamspace, project, selection, stream, setName)
 	stream.write(']}');
 };
 
-Clashes.createRun = async (teamspace, project, plan, userId) => {
-	const runId = await createTestRun(teamspace, plan, userId);
+Clashes.createRun = async (teamspace, project, plan, user) => {
+	const runId = await createTestRun(teamspace, plan, user);
 
 	const stream = new PassThrough();
 	stream.write('{');

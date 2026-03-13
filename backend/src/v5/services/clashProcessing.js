@@ -21,8 +21,8 @@ const fs = require('fs');
 const { pipeline } = require('stream/promises');
 const { cn_queue: queueConfig } = require('../utils/config');
 const { queueMessage } = require('../handler/queue');
-const clashesLabel = require('../utils/logger').labels.clashes;
-const logger = require('../utils/logger').logWithLabel(clashesLabel);
+const modProLabel = require('../utils/logger').labels.modelProcessing;
+const logger = require('../utils/logger').logWithLabel(modProLabel);
 
 const ClashProcessing = {};
 

@@ -57,19 +57,23 @@ Clashes.planExists = async (req, res, next) => {
 Clashes.planContainersHaveRevs = async (req, res, next) => {
 	try {
 		const { teamspace } = req.params;
-		const containerIds = [
-			req.planData.selectionA.container,
-			req.planData.selectionB.container,
-		];
 
-		const { _id: rev1Id } = await getLatestRevision(teamspace, containerIds[0], modelTypes.CONTAINER, { _id: 1 });
-		req.planData.selectionA.revision = rev1Id;
-		const { _id: rev2Id } = await getLatestRevision(teamspace, containerIds[1], modelTypes.CONTAINER, { _id: 1 });
-		req.planData.selectionB.revision = rev2Id;
+		await Promise.all([req.planData.selectionA, req.planData.selectionB].map(async (selectionObj) => {
+			const { _id: rev } = await getLatestRevision(teamspace, selectionObj.container,
+				modelTypes.CONTAINER, { _id: 1 });
+
+			// eslint-disable-next-line no-param-reassign
+			selectionObj.revision = rev;
+		}));
 
 		await next();
 	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, 'Plan containers must have at least one revision'));
+		if (err === templates.revisionNotFound) {
+			respond(req, res, createResponseCode(templates.invalidArguments, 'Plan containers must have at least one revision'));
+			return;
+		}
+
+		respond(req, res, err);
 	}
 };
 

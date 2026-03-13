@@ -262,7 +262,7 @@ const testPlanContainersHaveRevs = () => {
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 
-		test('should respond with error if a revision A is not found', async () => {
+		test('should respond with error if a revisionNotFound error is thrown', async () => {
 			const mockCB = jest.fn(() => {});
 			const teamspace = generateRandomString();
 			const containerA = generateRandomString();
@@ -278,7 +278,7 @@ const testPlanContainersHaveRevs = () => {
 
 			await Clashes.planContainersHaveRevs(req, {}, mockCB);
 
-			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(1);
+			expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(2);
 			expect(RevisionsModel.getLatestRevision)
 				.toHaveBeenCalledWith(teamspace, containerA, modelTypes.CONTAINER, { _id: 1 });
 
@@ -289,12 +289,11 @@ const testPlanContainersHaveRevs = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 		});
 
-		test('should respond with error if a revision B is not found', async () => {
+		test('should respond with error if another error is thrown', async () => {
 			const mockCB = jest.fn(() => {});
 			const teamspace = generateRandomString();
 			const containerA = generateRandomString();
 			const containerB = generateRandomString();
-			const revA = generateRandomString();
 			const req = {
 				params: { teamspace },
 				planData: {
@@ -303,8 +302,8 @@ const testPlanContainersHaveRevs = () => {
 				},
 			};
 
-			RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: revA });
-			RevisionsModel.getLatestRevision.mockRejectedValueOnce(templates.revisionNotFound);
+			const error = new Error(generateRandomString());
+			RevisionsModel.getLatestRevision.mockRejectedValueOnce(error);
 
 			await Clashes.planContainersHaveRevs(req, {}, mockCB);
 
@@ -315,8 +314,7 @@ const testPlanContainersHaveRevs = () => {
 				.toHaveBeenCalledWith(teamspace, containerB, modelTypes.CONTAINER, { _id: 1 });
 
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			const { message, ...invalidArgRes } = templates.invalidArguments;
-			expect(Responder.respond).toHaveBeenCalledWith(req, {}, expect.objectContaining(invalidArgRes));
+			expect(Responder.respond).toHaveBeenCalledWith(req, {}, error);
 
 			expect(mockCB).not.toHaveBeenCalled();
 		});
