@@ -355,167 +355,166 @@ function _findModel(id, account) {
 		account.projects.reduce((target, project) => target || project.models.find(m => m.model === id), null);
 }
 
-async function _createAccounts(roles, userName) {
-	const accounts = [];
-
-	const teamspaces = await getTeamspaceListByUser(userName);
-
-	await Promise.all(teamspaces.map(async ({name: teamspace}) => {
-		const tsPromises = [];
-		let settings;
-		try {
-			settings = await TeamspaceSettings.getTeamspaceSettings(teamspace);
-		} catch (err) {
-			return;
-		}
-		const permission = AccountPermissions.findByUser(settings, userName);
-
-		if (permission) {
-			// Check for admin Privileges first
-			const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
-			const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
-			const hasAvatar = await fileExists("admin", "avatars.ref" , teamspace);
-			const account = {
-				account: teamspace,
-				hasAvatar,
-				projects: [],
-				models: [],
-				fedModels: [],
-				isAdmin: isTeamspaceAdmin,
-				permissions: permission.permissions || []
-			};
-
-			// show all implied and inherted permissions
-			account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
-			accounts.push(account);
-			if (isTeamspaceAdmin || canViewProjects) {
-				// show all implied and inherted permissions
-				const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
-
-				const {_getModels} = require("./helper/model");
-				tsPromises.push(
-					// list all models under this account as they have full access
-					_getModels(account.account, null, inheritedModelPermissions).then(data => {
-						account.models = data.models;
-						account.fedModels = data.fedModels;
-					}).then(() => _addProjects(account, userName))
-				);
-			}
-		}
-
-		await Promise.all(tsPromises);
-
-		// check project scope permissions
-		const query = { "permissions": { "$elemMatch": { user: userName } } };
-		const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
-		let account = null;
-
-		account = await getProjectsForAccountsList(teamspace, accounts, userName);
-
-		// model permissions
-		const modelPromises = [];
-		const dbUserCache = {};
-		const hasAvatar = await fileExists("admin", "avatars.ref" , userName);
-		const models = await findModelSettings(teamspace, query, projection);
-
-		models.forEach(model => {
-			if (model.permissions.length > 0) {
-				if (!account) {
-					account = accounts.find(_account => _account.account === teamspace);
-					if (!account) {
-						const {_makeAccountObject} = require("./helper/model");
-						account = _makeAccountObject(teamspace);
-						account.hasAvatar = hasAvatar;
-						accounts.push(account);
-					}
-				}
-				const existingModel = _findModel(model._id, account);
-				modelPromises.push(
-					_findModelDetails(dbUserCache, userName, {
-						account: teamspace, model: model._id
-					}).then(data => {
-						const {_fillInModelDetails} = require("./helper/model");
-						return _fillInModelDetails(account.account, data.setting, data.permissions);
-
-					}).then(_model => {
-
-						if (existingModel) {
-
-							existingModel.permissions = _.uniq(existingModel.permissions.concat(_model.permissions));
-							return;
-						}
-
-						// push result to account object
-						return findOneProject(account.account, { models: _model.model }).then(projectObj => {
-							if (projectObj) {
-								let project = account.projects.find(p => p.name === projectObj.name);
-
-								if (!project) {
-									project = {
-										_id: utils.uuidToString(projectObj._id),
-										name: projectObj.name,
-										permissions: [],
-										models: []
-									};
-									account.projects.push(project);
-								}
-								project.models.push(_model);
-
-							} else {
-								_model.federate ? account.fedModels.push(_model) : account.models.push(_model);
-							}
-						});
-					})
-				);
-			}
-		});
-
-		await Promise.all(modelPromises);
-
-		// fill in all subModels name
-		accounts.forEach(_account => {
-			// all fed models
-			const allFedModels = _account.fedModels.concat(
-				_account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
-			);
-
-			// all models
-			const allModels = _account.models.concat(
-				_account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
-			);
-
-			allFedModels.forEach(fed => {
-				fed.subModels = fed.subModels.map(subModel => {
-					const subModelId = subModel?._id ;
-					const foundModel = allModels.find(m => m.model === subModelId);
-					return { database: _account.account, model: subModelId, name: foundModel?.name};
-				});
-			});
-		});
-
-		// sorting models
-		_sortAccountsAndModels(accounts);
-
-		// own acconut always ranks top of the list
-		const myAccountIndex = accounts.findIndex(_account => _account.account === userName);
-		if (myAccountIndex > -1) {
-			const myAccount = accounts[myAccountIndex];
-			accounts.splice(myAccountIndex, 1);
-			accounts.unshift(myAccount);
-		}
-
-		return accounts;
-	}));
-
-	return accounts;
-}
-
 User.getSubscriptionLimits = function(user) {
 	return UserBilling.getSubscriptionLimits(user.user);
 };
 
-User.listAccounts = async function(user) {
-	return _createAccounts(user.roles, user.user);
+const getDataFromTeamspace = async (teamspace) => {
+	const tsPromises = [];
+	let settings;
+	try {
+		settings = await TeamspaceSettings.getTeamspaceSettings(teamspace);
+	} catch (err) {
+		return;
+	}
+	const permission = AccountPermissions.findByUser(settings, userName);
+
+	if (permission) {
+		// Check for admin Privileges first
+		const isTeamspaceAdmin = permission.permissions.indexOf(C.PERM_TEAMSPACE_ADMIN) !== -1;
+		const canViewProjects = permission.permissions.indexOf(C.PERM_VIEW_PROJECTS) !== -1;
+		const hasAvatar = await fileExists("admin", "avatars.ref" , teamspace);
+		const account = {
+			account: teamspace,
+			hasAvatar,
+			projects: [],
+			models: [],
+			fedModels: [],
+			isAdmin: isTeamspaceAdmin,
+			permissions: permission.permissions || []
+		};
+
+		// show all implied and inherted permissions
+		account.permissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].account || p)));
+		accounts.push(account);
+		if (isTeamspaceAdmin || canViewProjects) {
+			// show all implied and inherted permissions
+			const inheritedModelPermissions = _.uniq(_.flatten(account.permissions.map(p => C.IMPLIED_PERM[p] && C.IMPLIED_PERM[p].model || [])));
+
+			const {_getModels} = require("./helper/model");
+			tsPromises.push(
+				// list all models under this account as they have full access
+				_getModels(account.account, null, inheritedModelPermissions).then(data => {
+					account.models = data.models;
+					account.fedModels = data.fedModels;
+				}).then(() => _addProjects(account, userName))
+			);
+		}
+	}
+
+	await Promise.all(tsPromises);
+
+	// check project scope permissions
+	const query = { "permissions": { "$elemMatch": { user: userName } } };
+	const projection = { "permissions": { "$elemMatch": { user: userName } }, "models": 1, "name": 1 };
+	let account = null;
+
+	account = await getProjectsForAccountsList(teamspace, accounts, userName);
+
+	// model permissions
+	const modelPromises = [];
+	const dbUserCache = {};
+	const hasAvatar = await fileExists("admin", "avatars.ref" , userName);
+	const models = await findModelSettings(teamspace, query, projection);
+
+	models.forEach(model => {
+		if (model.permissions.length > 0) {
+			if (!account) {
+				account = accounts.find(_account => _account.account === teamspace);
+				if (!account) {
+					const {_makeAccountObject} = require("./helper/model");
+					account = _makeAccountObject(teamspace);
+					account.hasAvatar = hasAvatar;
+					accounts.push(account);
+				}
+			}
+			const existingModel = _findModel(model._id, account);
+			modelPromises.push(
+				_findModelDetails(dbUserCache, userName, {
+					account: teamspace, model: model._id
+				}).then(data => {
+					const {_fillInModelDetails} = require("./helper/model");
+					return _fillInModelDetails(account.account, data.setting, data.permissions);
+
+				}).then(_model => {
+
+					if (existingModel) {
+
+						existingModel.permissions = _.uniq(existingModel.permissions.concat(_model.permissions));
+						return;
+					}
+
+					// push result to account object
+					return findOneProject(account.account, { models: _model.model }).then(projectObj => {
+						if (projectObj) {
+							let project = account.projects.find(p => p.name === projectObj.name);
+
+							if (!project) {
+								project = {
+									_id: utils.uuidToString(projectObj._id),
+									name: projectObj.name,
+									permissions: [],
+									models: []
+								};
+								account.projects.push(project);
+							}
+							project.models.push(_model);
+
+						} else {
+							_model.federate ? account.fedModels.push(_model) : account.models.push(_model);
+						}
+					});
+				})
+			);
+		}
+	});
+
+	await Promise.all(modelPromises);
+
+	// fill in all subModels name
+	accounts.forEach(_account => {
+		// all fed models
+		const allFedModels = _account.fedModels.concat(
+			_account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => m.federate)), [])
+		);
+
+		// all models
+		const allModels = _account.models.concat(
+			_account.projects.reduce((feds, project) => feds.concat(project.models.filter(m => !m.federate)), [])
+		);
+
+		allFedModels.forEach(fed => {
+			fed.subModels = fed.subModels.map(subModel => {
+				const subModelId = subModel?._id ;
+				const foundModel = allModels.find(m => m.model === subModelId);
+				return { database: _account.account, model: subModelId, name: foundModel?.name};
+			});
+		});
+	});
+
+	// sorting models
+	_sortAccountsAndModels(accounts);
+
+	// own acconut always ranks top of the list
+	const myAccountIndex = accounts.findIndex(_account => _account.account === userName);
+	if (myAccountIndex > -1) {
+		const myAccount = accounts[myAccountIndex];
+		accounts.splice(myAccountIndex, 1);
+		accounts.unshift(myAccount);
+	}
+
+	return accounts;
+};
+
+User.listAccounts = async function({user: userName}) {
+
+	const teamspaces = await getTeamspaceListByUser(userName);
+
+	const accounts = await Promise.all(teamspaces.map(({name: teamspace}) => {
+		return getDataFromTeamspace(teamspace);
+	}));
+
+	return accounts;
 };
 
 User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, executor) {
