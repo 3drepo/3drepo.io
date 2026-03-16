@@ -37,7 +37,6 @@ import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableCo
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
-import { GearIconContainer } from '@controls/tableIcon/tableIcon.styles';
 
 const List = () => {
 	const { filteredItems, query } = useContext(SearchContext);
@@ -150,11 +149,7 @@ export const ColumnsVisibilitySettings = () => {
 
 	return (
 		<ActionMenu
-			TriggerButton={(
-				<GearIconContainer>
-					<GearIcon />
-				</GearIconContainer>
-			)}
+			TriggerButton={<GearIcon />}
 			PopoverProps={{
 				transformOrigin: {
 					vertical: 'top',
