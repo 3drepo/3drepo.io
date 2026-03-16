@@ -76,19 +76,27 @@ Federations.newRevision = async (teamspace, project, federation, info) => {
 };
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
-	const lastUpdates = [];
+	let lastUpdate;
 	if (models) {
-		await Promise.all(models.map(async (m) => {
+		const listOfPromises = splitArrayIntoChunks(models.map(async (m) => {
 			try {
-				lastUpdates.push(await getLatestRevision(teamspace, m, modelTypes.FEDERATION, { timestamp: 1 }));
+				const latestRev = await getLatestRevision(teamspace, m, modelTypes.FEDERATION, { timestamp: 1 });
+				if (lastUpdate === undefined) lastUpdate = latestRev.timestamp;
+				if (latestRev.timestamp > lastUpdate) {
+					lastUpdate = latestRev.timestamp;
+				}
 			} catch {
 				// do nothing. A container can have 0 revision.
 			}
-		}));
+		}), 50);
+
+		await listOfPromises.reduce(
+			(prev, promises) => prev.then(() => Promise.all(promises)),
+			Promise.resolve(),
+		);
 	}
 
-	return lastUpdates.length ? lastUpdates.sort((a, b) => b.timestamp
-		- a.timestamp)[0].timestamp : undefined;
+	return lastUpdate;
 };
 
 Federations.getFederationStats = async (teamspace, project, federation) => {
@@ -155,12 +163,12 @@ Federations.getMultipleFederationsStats = async (teamspace, project, federations
 			),
 			tickets: ticketCounts[setting._id] || 0,
 		};
-	}), 25);
+	}), 50);
 
-	for (const promises of listOfPromises) {
-		// eslint-disable-next-line no-await-in-loop
-		await Promise.all(promises);
-	}
+	await listOfPromises.reduce(
+		(prev, promises) => prev.then(() => Promise.all(promises)),
+		Promise.resolve(),
+	);
 
 	return stats;
 };
