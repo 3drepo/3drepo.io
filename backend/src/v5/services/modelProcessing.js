@@ -248,7 +248,7 @@ ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 		await queueMessage(clashq, corId, msg);
 	} catch (err) {
 		await rm(configPath).catch((cleanUpErr) => {
-			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
+			logger.logError(`Failed to remove files (clean up on failure): ${cleanUpErr}`);
 		});
 
 		if (err?.code && codeExists(err.code)) {

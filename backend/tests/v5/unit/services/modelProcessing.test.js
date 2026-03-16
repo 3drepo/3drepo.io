@@ -381,6 +381,7 @@ const testQueueClashRun = () => {
 			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
 				.rejects.toEqual(templates.queueInsertionFailed);
 
+			fs.createWriteStream.mockRestore();
 			expect(Queue.queueMessage).not.toHaveBeenCalled();
 		});
 	});
