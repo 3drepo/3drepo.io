@@ -31,6 +31,7 @@ const { deleteDrawingCalibrations } = require('../../../../../models/calibration
 const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { processDrawingUpload } = require('../../../../../services/modelProcessing');
+const { splitArrayIntoChunks } = require('../../../../../utils/helper/arrays');
 const { templates } = require('../../../../../utils/responseCodes');
 
 const Drawings = { };
@@ -191,5 +192,20 @@ Drawings.deleteFavourites = async (username, teamspace, project, favouritesToRem
 
 Drawings.getSettings = (teamspace, drawing) => getDrawingById(teamspace,
 	drawing, { name: 1, number: 1, type: 1, desc: 1, calibration: 1 });
+
+Drawings.getMultipleDrawingsStats = async (teamspace, project, drawings) => {
+	const stats = {};
+
+	const listOfPromises = splitArrayIntoChunks(drawings.map(async (drawing) => {
+		stats[drawing] = await Drawings.getDrawingStats(teamspace, project, drawing);
+	}), 25);
+
+	for (const promises of listOfPromises) {
+		// eslint-disable-next-line no-await-in-loop
+		await Promise.all(promises);
+	}
+
+	return stats;
+};
 
 module.exports = Drawings;

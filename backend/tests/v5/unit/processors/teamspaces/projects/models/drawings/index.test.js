@@ -668,6 +668,47 @@ const testCreateDrawingThumbnail = () => {
 	});
 };
 
+const testGetMultipleDrawingsStats = () => {
+	describe('Get multiple drawings stats', () => {
+		const revCount = generateRandomNumber();
+		const settings = {
+			number: generateRandomNumber(),
+			type: generateRandomString(),
+			desc: generateRandomString(),
+		};
+		const latestRev = {
+			_id: generateRandomString(),
+			timestamp: generateRandomString(),
+			statusCode: generateRandomString(),
+			revCode: generateRandomString(),
+		};
+
+		test('should return multiple drawing stats', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const drawingIds = times(3, () => generateRandomString());
+			const stats = {};
+			drawingIds.forEach((id) => {
+				stats[id] = formatToStats(settings, revCount, latestRev, calibrationStatuses.CALIBRATED);
+			});
+
+			jest.spyOn(Drawings, 'getDrawingStats')
+				.mockResolvedValueOnce(formatToStats(settings, revCount, latestRev, calibrationStatuses.CALIBRATED))
+				.mockResolvedValueOnce(formatToStats(settings, revCount, latestRev, calibrationStatuses.CALIBRATED))
+				.mockResolvedValueOnce(formatToStats(settings, revCount, latestRev, calibrationStatuses.CALIBRATED));
+
+			const res = await Drawings.getMultipleDrawingsStats(
+				teamspace, project, drawingIds);
+			expect(res).toEqual(stats);
+
+			expect(Drawings.getDrawingStats).toHaveBeenCalledTimes(3);
+			expect(Drawings.getDrawingStats).toHaveBeenNthCalledWith(1, teamspace, project, drawingIds[0]);
+			expect(Drawings.getDrawingStats).toHaveBeenNthCalledWith(2, teamspace, project, drawingIds[1]);
+			expect(Drawings.getDrawingStats).toHaveBeenNthCalledWith(3, teamspace, project, drawingIds[2]);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAddDrawing();
 	testUpdateSettings();
@@ -682,4 +723,5 @@ describe(determineTestGroup(__filename), () => {
 	testCreateDrawingThumbnail();
 	testGetLatestThumbnail();
 	testGetImageByRevision();
+	testGetMultipleDrawingsStats();
 });

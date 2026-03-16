@@ -1486,6 +1486,58 @@ const testOnModelNameUpdated = () => {
 	});
 };
 
+const testGetOpenTicketsCountForMultipleModels = () => {
+	describe('Get the number of open tickets for multiple models', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const models = times(3, () => generateRandomString());
+
+		test('should return 0 if getAllTickets returns no tickets', async () => {
+			TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+			TemplatesModel.getAllTemplates.mockResolvedValueOnce([]);
+
+			await expect(Tickets.getOpenTicketsCountForMultipleModels(teamspace, project, models))
+				.resolves.toEqual({});
+
+			expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(
+				teamspace,
+				project,
+				null,
+				{ model: { $in: models } },
+				{ model: 1, type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 });
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
+		});
+
+		test('should return the number of open tickets for each model', async () => {
+			const template = generateTemplate();
+			const tickets = models.flatMap((model) => Object.values(statuses).map((status) => {
+				const ticket = generateTicket(template);
+				ticket.model = model;
+				ticket.properties.Status = status;
+				return ticket;
+			}));
+
+			TicketsModel.getTicketsByQuery.mockResolvedValueOnce(tickets);
+			TemplatesModel.getAllTemplates.mockResolvedValueOnce([template]);
+
+			await expect(Tickets.getOpenTicketsCountForMultipleModels(teamspace, project, models))
+				.resolves.toEqual(models.reduce((acc, model) => ({ ...acc, [model]: 3 }), {}));
+
+			expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(
+				teamspace,
+				project,
+				null,
+				{ model: { $in: models } },
+				{ model: 1, type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 });
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getAllTemplates).toHaveBeenCalledWith(teamspace, true, { _id: 1, config: 1 });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	beforeEach(() => {
 		jest.resetAllMocks();
@@ -1501,4 +1553,5 @@ describe(determineTestGroup(__filename), () => {
 	testInitialiseAutomatedProperties();
 	testOnTemplateUpdated();
 	testOnModelNameUpdated();
+	testGetOpenTicketsCountForMultipleModels();
 });
