@@ -39,7 +39,7 @@ const getConfigSetEntry = async (teamspace, project, selection, stream, setName)
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, container,
 		revision, rules, { _id: 1, parents: 1 });
 
-	const [matchedMeshGroups, unwantedMeshes] = await Promise.all([
+	const [groupedMatchedMeshes, unwantedMeshes] = await Promise.all([
 		matched.length ? getMeshesWithParentIds(teamspace, project, container, revision,
 			matched.flatMap(({ parents }) => parents), { groupByParent: true }) : Promise.resolve([]),
 		unwanted.length ? getMeshesWithParentIds(teamspace, project, container, revision,
@@ -51,15 +51,16 @@ const getConfigSetEntry = async (teamspace, project, selection, stream, setName)
 	stream.write(`"${setName}":{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
 	let first = true;
-	for (const matchedMeshGroup of matchedMeshGroups) {
-		const meshIds = matchedMeshGroup.meshIds.filter((meshId) => !unwantedIdsObj[meshId]);
+	for (const id of Object.keys(groupedMatchedMeshes)) {
+		const meshes = groupedMatchedMeshes[id];
+		const meshIds = meshes.filter((meshId) => !unwantedIdsObj[meshId]);
 
 		if (meshIds.length) {
 			if (!first) {
 				stream.write(',');
 			}
 
-			stream.write(JSON.stringify({ ...matchedMeshGroup, meshIds }));
+			stream.write(JSON.stringify({ id, meshIds }));
 			first = false;
 		}
 	}

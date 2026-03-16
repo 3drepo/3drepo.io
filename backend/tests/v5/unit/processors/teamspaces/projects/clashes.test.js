@@ -119,6 +119,17 @@ const testCreateRun = () => {
 			});
 		});
 
+		const generateGroupedMeshes = () => {
+			const result = {};
+
+			for (let i = 0; i < 5; i++) {
+				const id = generateRandomString();
+				result[id] = times(5, () => generateRandomString());
+			}
+
+			return result;
+		};
+
 		test('should create and queue the run when no nodes are matched', async () => {
 			ClashRunsModel.createTestRun.mockResolvedValueOnce(runId);
 			MetadataModel.getMetadataByRules.mockResolvedValueOnce({ matched: [], unwanted: [] });
@@ -161,17 +172,15 @@ const testCreateRun = () => {
 
 		const nodesA = times(5, () => ({ id: generateRandomString(), parents: [generateRandomString()] }));
 		const nodesB = times(5, () => ({ id: generateRandomString(), parents: [generateRandomString()] }));
-		const groupedMeshesA = times(5, () => ({ id: generateRandomString(),
-			meshIds: times(5, () => generateRandomString()) }));
-		const groupedMeshesB = times(5, () => ({ id: generateRandomString(),
-			meshIds: times(5, () => generateRandomString()) }));
+		const groupedMeshesA = generateGroupedMeshes();
+		const groupedMeshesB = generateGroupedMeshes();
 
 		describe.each([
 			['plan has selfIntersectionsCheck set to selectionA', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0] }],
 			['plan has selfIntersectionsCheck set to selectionB', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[1] }],
 			['plan has selfIntersectionsCheck set to true', { ...planData, selfIntersectionsCheck: true }],
-			['there are unwanted nodes for set A', undefined, groupedMeshesA.slice(0, 2).flatMap(({ meshIds }) => meshIds)],
-			['there are unwanted nodes for set B', undefined, undefined, groupedMeshesB.slice(0, 2).flatMap(({ meshIds }) => meshIds)],
+			['there are unwanted nodes for set A', undefined, Object.values(groupedMeshesA).flat().slice(0, 10)],
+			['there are unwanted nodes for set B', undefined, undefined, Object.values(groupedMeshesB).flat().slice(0, 10)],
 		])('Create a test run with rules', (desc, plan = planData, unwantedA = [], unwantedB = []) => {
 			test(`should create and queue the run when ${desc}`, async () => {
 				ClashRunsModel.createTestRun.mockResolvedValueOnce(runId);
@@ -208,13 +217,15 @@ const testCreateRun = () => {
 						teamspace,
 						container: plan.selectionA.container,
 						revision: UUIDToString(plan.selectionA.revision),
-						objects: unwantedA.length ? groupedMeshesA.slice(2, 5) : groupedMeshesA,
+						objects: Object.entries(groupedMeshesA).slice(unwantedA.length ? 2 : 0, 5)
+							.map(([id, meshIds]) => ({ id, meshIds })),
 					},
 					setB: {
 						teamspace,
 						container: plan.selectionB.container,
 						revision: UUIDToString(plan.selectionB.revision),
-						objects: unwantedB.length ? groupedMeshesB.slice(2, 5) : groupedMeshesB,
+						objects: Object.entries(groupedMeshesB).slice(unwantedB.length ? 2 : 0, 5)
+							.map(([id, meshIds]) => ({ id, meshIds })),
 					},
 				}));
 			});
