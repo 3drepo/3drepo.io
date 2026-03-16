@@ -274,7 +274,7 @@ const testContainerGetFileName = () => {
 			const corId = generateUUIDString();
 			const fileName = `${generateRandomString()}.obj`;
 			const filePath = `${config.cn_queue.shared_storage}/${corId}.json`;
-			await fs.writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
+			await fsp.writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
 
 			await expect(ModelProcessing.getContainerFileName(corId)).toEqual(fileName);
 		});
