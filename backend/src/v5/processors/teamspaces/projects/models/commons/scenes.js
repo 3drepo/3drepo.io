@@ -62,20 +62,35 @@ Scene.prepareCache = async (teamspace, model, revId, cacheExpiry = CACHE_EXPIRAT
 	await getIdToMeshesMapping(teamspace, model, revId, cacheExpiry);
 };
 
-Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds, returnString = false) => {
+Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds,
+	{ groupByParent, returnString = true } = {}) => {
 	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
 	const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
-	const meshes = new Set();
+
+	const meshes = [];
+
 	nodes.forEach(({ _id }) => {
-		const idStr = UUIDToString(_id);
-		if (idToMeshes[idStr]) {
-			idToMeshes[idStr].forEach((val) => meshes.add(val));
+		const id = UUIDToString(_id);
+		const meshIds = idToMeshes[id];
+
+		if (!meshIds?.length) {
+			return;
+		}
+
+		if (groupByParent) {
+			meshes.push({ id, meshIds });
+		} else {
+			meshes.push(...meshIds);
 		}
 	});
 
-	const meshesArr = Array.from(meshes);
+	if (groupByParent) {
+		return meshes;
+	}
 
-	return returnString ? meshesArr : meshesArr.map(stringToUUID);
+	const uniqueMeshes = Array.from(new Set(meshes));
+	const convMeshes = returnString ? uniqueMeshes : uniqueMeshes.map(stringToUUID);
+	return convMeshes;
 };
 
 Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
@@ -228,21 +243,6 @@ Scene.getSuperMeshesInfo = async (teamspace, container, revision) => {
 	};
 	const superMeshes = await getSuperMeshesInRevision(teamspace, container, revision, projection);
 	return { superMeshes };
-};
-
-Scene.getGroupedMeshesFromParentIds = async (teamspace, project, container, revision, parentIds) => {
-	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
-	const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
-	const result = [];
-
-	nodes.forEach(({ _id }) => {
-		const idStr = UUIDToString(_id);
-		if (idToMeshes[idStr]) {
-			result.push({ id: idStr, meshIds: idToMeshes[idStr] });
-		}
-	});
-
-	return result;
 };
 
 module.exports = Scene;

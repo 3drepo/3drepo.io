@@ -18,7 +18,7 @@
 const { times } = require('lodash');
 const { src } = require('../../../../helper/path');
 
-const { generateRandomString, determineTestGroup, generateRandomNumber, generateRandomObject } = require('../../../../helper/services');
+const { generateRandomString, determineTestGroup, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
 
 jest.mock('../../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);
@@ -26,8 +26,8 @@ const ClashPlansModel = require(`${src}/models/clashes.plans`);
 jest.mock('../../../../../../src/v5/models/clashes.runs');
 const ClashRunsModel = require(`${src}/models/clashes.runs`);
 
-jest.mock('../../../../../../src/v5/services/clashProcessing');
-const ClashProcessing = require(`${src}/services/clashProcessing`);
+jest.mock('../../../../../../src/v5/services/modelProcessing');
+const ModelProcessing = require(`${src}/services/modelProcessing`);
 
 jest.mock('../../../../../../src/v5/processors/teamspaces/projects/models/commons/scenes');
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
@@ -89,7 +89,7 @@ const testDeletePlan = () => {
 const testCreateRun = () => {
 	describe('Create a test run', () => {
 		const teamspace = generateRandomString();
-		const project = generateRandomString();
+		const project = generateUUID();
 		const planData = {
 			type: CLASH_PLAN_TYPES[0],
 			tolerance: generateRandomNumber(),
@@ -133,10 +133,10 @@ const testCreateRun = () => {
 			expect(MetadataModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project,
 				planData.selectionB.container, planData.selectionB.revision,
 				planData.selectionB.rules, { _id: 1, parents: 1 });
-			expect(Scenes.getGroupedMeshesFromParentIds).not.toHaveBeenCalled();
+			expect(Scenes.getMeshesWithParentIds).not.toHaveBeenCalled();
 
-			const stream = ClashProcessing.queueClashRun.mock.calls[0][3];
-			expect(ClashProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, UUIDToString(project),
+			const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
+			expect(ModelProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, project,
 				UUIDToString(runId), stream);
 
 			await checkStreamContent(stream, JSON.stringify({
@@ -161,22 +161,26 @@ const testCreateRun = () => {
 
 		const nodesA = times(5, () => ({ id: generateRandomString(), parents: [generateRandomString()] }));
 		const nodesB = times(5, () => ({ id: generateRandomString(), parents: [generateRandomString()] }));
+		const groupedMeshesA = times(5, () => ({ id: generateRandomString(),
+			meshIds: times(5, () => generateRandomString()) }));
+		const groupedMeshesB = times(5, () => ({ id: generateRandomString(),
+			meshIds: times(5, () => generateRandomString()) }));
 
 		describe.each([
 			['plan has selfIntersectionsCheck set to selectionA', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0] }],
 			['plan has selfIntersectionsCheck set to selectionB', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[1] }],
 			['plan has selfIntersectionsCheck set to true', { ...planData, selfIntersectionsCheck: true }],
-			['there are unwanted nodes for set A', undefined, nodesA.slice(0, 2)],
-			['there are unwanted nodes for set B', undefined, undefined, nodesB.slice(0, 2)],
+			['there are unwanted nodes for set A', undefined, groupedMeshesA.slice(0, 2).flatMap(({ meshIds }) => meshIds)],
+			['there are unwanted nodes for set B', undefined, undefined, groupedMeshesB.slice(0, 2).flatMap(({ meshIds }) => meshIds)],
 		])('Create a test run with rules', (desc, plan = planData, unwantedA = [], unwantedB = []) => {
 			test(`should create and queue the run when ${desc}`, async () => {
 				ClashRunsModel.createTestRun.mockResolvedValueOnce(runId);
 				MetadataModel.getMetadataByRules.mockResolvedValueOnce({ matched: nodesA, unwanted: unwantedA });
 				MetadataModel.getMetadataByRules.mockResolvedValueOnce({ matched: nodesB, unwanted: unwantedB });
-				Scenes.getGroupedMeshesFromParentIds.mockResolvedValueOnce(nodesA);
-				if (unwantedA.length) { Scenes.getGroupedMeshesFromParentIds.mockResolvedValueOnce(unwantedA); }
-				Scenes.getGroupedMeshesFromParentIds.mockResolvedValueOnce(nodesB);
-				if (unwantedB.length) { Scenes.getGroupedMeshesFromParentIds.mockResolvedValueOnce(unwantedB); }
+				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(groupedMeshesA);
+				if (unwantedA.length) { Scenes.getMeshesWithParentIds.mockResolvedValueOnce(unwantedA); }
+				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(groupedMeshesB);
+				if (unwantedB.length) { Scenes.getMeshesWithParentIds.mockResolvedValueOnce(unwantedB); }
 
 				await Clashes.createRun(teamspace, project, plan, userId);
 
@@ -189,8 +193,8 @@ const testCreateRun = () => {
 					.toHaveBeenCalledWith(teamspace, project, plan.selectionB.container,
 						plan.selectionB.revision, plan.selectionB.rules, { _id: 1, parents: 1 });
 
-				const stream = ClashProcessing.queueClashRun.mock.calls[0][3];
-				expect(ClashProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, UUIDToString(project),
+				const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
+				expect(ModelProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, project,
 					UUIDToString(runId), stream);
 
 				await checkStreamContent(stream, JSON.stringify({
@@ -204,13 +208,13 @@ const testCreateRun = () => {
 						teamspace,
 						container: plan.selectionA.container,
 						revision: UUIDToString(plan.selectionA.revision),
-						objects: nodesA.filter((m) => !unwantedA.some((u) => u.id === m.id)),
+						objects: unwantedA.length ? groupedMeshesA.slice(2, 5) : groupedMeshesA,
 					},
 					setB: {
 						teamspace,
 						container: plan.selectionB.container,
 						revision: UUIDToString(plan.selectionB.revision),
-						objects: nodesB.filter((m) => !unwantedB.some((u) => u.id === m.id)),
+						objects: unwantedB.length ? groupedMeshesB.slice(2, 5) : groupedMeshesB,
 					},
 				}));
 			});

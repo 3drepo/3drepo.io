@@ -72,22 +72,26 @@ const testGetMeshesWithParentIds = () => {
 		const results = times(i, generateUUIDString);
 		meshMap[id] = results;
 		dupMeshMap[id] = dupValues;
-		meshesToReturn.push(...results.map(stringToUUID));
+		meshesToReturn.push(...results);
 	}
+
+	const groupedMeshes = Object.entries(meshMap).map(([id, meshIds]) => ({ id, meshIds }));
 
 	const defaultParams = {
 		nodes: nodesMocked,
 		meshMapFile: JSON.stringify(meshMap),
 		expectedResults: meshesToReturn,
+		options: { returnString: true, groupByParent: false },
 	};
 
 	describe.each([
 		['empty array if no corresponding nodes are found', { ...defaultParams, nodes: [], expectedResults: [] }],
 		['empty array if no corresponding mesh mapping is found', { ...defaultParams, nodes: times(10, () => ({ _id: generateUUID() })), expectedResults: [] }],
-		['expected mesh ids', defaultParams],
-		['expected mesh ids in string form if returnString is set to true', { ...defaultParams, returnString: true, expectedResults: defaultParams.expectedResults.map(UUIDToString) }],
-		['expected mesh ids without duplicates', { ...defaultParams, meshMapFile: JSON.stringify(dupMeshMap), expectedResults: dupValues.map(stringToUUID) }],
-	])('Get meshes with parent Ids', (desc, { nodes, meshMapFile, expectedResults, returnString }) => {
+		['expected mesh ids', { ...defaultParams, options: undefined }],
+		['expected mesh ids in string form if returnString is set to false', { ...defaultParams, options: { returnString: false }, expectedResults: defaultParams.expectedResults.map(stringToUUID) }],
+		['expected mesh ids in grouped form if groupByParent is set to true', { ...defaultParams, options: { groupByParent: true }, expectedResults: groupedMeshes }],
+		['expected mesh ids without duplicates', { ...defaultParams, meshMapFile: JSON.stringify(dupMeshMap), expectedResults: dupValues }],
+	])('Get meshes with parent Ids', (desc, { nodes, meshMapFile, expectedResults, options }) => {
 		test(`Should return ${desc}`, async () => {
 			Scenes.setCacheExpiration(1);
 			Scenes.clearCache();
@@ -95,7 +99,8 @@ const testGetMeshesWithParentIds = () => {
 			FilesManager.getFile.mockResolvedValueOnce(meshMapFile);
 
 			const res = await Scenes.getMeshesWithParentIds(teamspace, project, container, revision,
-				parentIds, returnString);
+				parentIds, options);
+
 			expect(res).toEqual(expectedResults);
 
 			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(1);
@@ -493,57 +498,6 @@ const testGetSuperMeshesInfo = () => {
 	});
 };
 
-const testGetGroupedMeshesWithParentIds = () => {
-	const teamspace = generateRandomString();
-	const project = generateRandomString();
-	const container = generateRandomString();
-	const revision = generateUUID();
-	const parentIds = times(10, generateUUID);
-
-	const nodesMocked = [];
-	const meshesToReturn = [];
-
-	const meshMap = {};
-
-	for (let i = 1; i <= 10; ++i) {
-		const id = generateUUIDString();
-		nodesMocked.push({ _id: stringToUUID(id) });
-		const results = times(i, generateUUIDString);
-		meshMap[id] = results;
-		meshesToReturn.push({ id, meshIds: results });
-	}
-
-	const defaultParams = {
-		nodes: nodesMocked,
-		meshMapFile: JSON.stringify(meshMap),
-		expectedResults: meshesToReturn,
-	};
-
-	describe.each([
-		['empty array if no corresponding nodes are found', { ...defaultParams, nodes: [], expectedResults: [] }],
-		['empty array if no corresponding mesh mapping is found', { ...defaultParams, nodes: times(10, () => ({ _id: generateUUID() })), expectedResults: [] }],
-		['expected mesh ids', defaultParams],
-	])('Get grouped meshes with parent Ids', (desc, { nodes, meshMapFile, expectedResults, returnString }) => {
-		test(`Should return ${desc}`, async () => {
-			Scenes.setCacheExpiration(1);
-			Scenes.clearCache();
-			ScenesModel.getNodesBySharedIds.mockResolvedValueOnce(nodes);
-			FilesManager.getFile.mockResolvedValueOnce(meshMapFile);
-
-			const res = await Scenes.getGroupedMeshesFromParentIds(teamspace, project, container, revision,
-				parentIds, returnString);
-			expect(res).toEqual(expectedResults);
-
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledTimes(1);
-			expect(ScenesModel.getNodesBySharedIds).toHaveBeenCalledWith(teamspace,
-				project, container, revision, parentIds, { _id: 1 });
-
-			expect(FilesManager.getFile).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFile).toHaveBeenCalledWith(teamspace, `${container}.stash.json_mpc`, `${UUIDToString(revision)}/idToMeshes.json`);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testGetMeshesWithParentIds();
 	testGetExternalIdsFromMetadata();
@@ -552,5 +506,4 @@ describe(determineTestGroup(__filename), () => {
 	testGetTexture();
 	testGetMeshData();
 	testGetSuperMeshesInfo();
-	testGetGroupedMeshesWithParentIds();
 });

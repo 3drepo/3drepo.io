@@ -21,9 +21,9 @@ const { SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.co
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { createConstantsObject } = require('../../../utils/helper/objects');
 const { createTestRun } = require('../../../models/clashes.runs');
-const { getGroupedMeshesFromParentIds } = require('./models/commons/scenes');
+const { getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getMetadataByRules } = require('../../../models/metadata');
-const { queueClashRun } = require('../../../services/clashProcessing');
+const { queueClashRun } = require('../../../services/modelProcessing');
 
 const Clashes = {};
 
@@ -39,25 +39,27 @@ const getConfigSetEntry = async (teamspace, project, selection, stream, setName)
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, container,
 		revision, rules, { _id: 1, parents: 1 });
 
-	const [matchedMeshGroups, unwantedMeshGroups] = await Promise.all([
-		matched.length ? getGroupedMeshesFromParentIds(teamspace, project, container, revision,
-			matched.flatMap(({ parents }) => parents)) : Promise.resolve([]),
-		unwanted.length ? getGroupedMeshesFromParentIds(teamspace, project, container, revision,
+	const [matchedMeshGroups, unwantedMeshes] = await Promise.all([
+		matched.length ? getMeshesWithParentIds(teamspace, project, container, revision,
+			matched.flatMap(({ parents }) => parents), { groupByParent: true }) : Promise.resolve([]),
+		unwanted.length ? getMeshesWithParentIds(teamspace, project, container, revision,
 			unwanted.flatMap(({ parents }) => parents)) : Promise.resolve([]),
 	]);
 
-	const unwantedIdsObj = createConstantsObject(unwantedMeshGroups.map(({ id }) => id));
+	const unwantedIdsObj = createConstantsObject(unwantedMeshes.map((id) => id));
 
 	stream.write(`"${setName}":{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
 	let first = true;
 	for (const matchedMeshGroup of matchedMeshGroups) {
-		if (!unwantedIdsObj[matchedMeshGroup.id]) {
+		const meshIds = matchedMeshGroup.meshIds.filter((meshId) => !unwantedIdsObj[meshId]);
+
+		if (meshIds.length) {
 			if (!first) {
 				stream.write(',');
 			}
 
-			stream.write(JSON.stringify(matchedMeshGroup));
+			stream.write(JSON.stringify({ ...matchedMeshGroup, meshIds }));
 			first = false;
 		}
 	}
@@ -78,7 +80,7 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 	await getConfigSetEntry(teamspace, project, plan.selectionB, stream, 'setB');
 	stream.end('}');
 
-	await queueClashRun(teamspace, UUIDToString(project), UUIDToString(runId), stream);
+	await queueClashRun(teamspace, project, UUIDToString(runId), stream);
 	return runId;
 };
 

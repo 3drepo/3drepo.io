@@ -18,7 +18,6 @@
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
-const { createWriteStream, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
@@ -27,6 +26,8 @@ const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
 const { execFile } = require('child_process');
+const fs = require('fs');
+const { pipeline } = require('stream/promises');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
@@ -41,6 +42,7 @@ const {
 	model_queue: modelq,
 	drawing_queue: drawingq,
 	shared_storage: sharedDir,
+	clash_queue: clashq,
 } = queueConfig;
 
 const onCallbackQMsg = ({ content, properties }) => {
@@ -172,11 +174,11 @@ ModelProcessing.getLogArchive = async (corId) => {
 	try {
 		const taskDir = Path.join(sharedDir, corId);
 		const zipPath = Path.join(taskDir, filename);
-		const files = readdirSync(taskDir);
+		const files = fs.readdirSync(taskDir);
 		const archive = archiver('zip', { zlib: { level: 1 } });
 
 		const archiveReady = new Promise((resolve, reject) => {
-			const output = createWriteStream(zipPath);
+			const output = fs.createWriteStream(zipPath);
 			output.on('close', resolve);
 			output.on('error', reject);
 			archive.on('error', reject);
@@ -220,6 +222,29 @@ ModelProcessing.getLogArchive = async (corId) => {
 	} catch (err) {
 		logger.logError(`Error while compressing log files for import error email: ${err.message}`);
 		return undefined;
+	}
+};
+
+ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
+	const configPath = `${sharedDir}/${corId}/clashConfig.json`;
+	try {
+		await mkdir(`${sharedDir}/${corId}`);
+
+		const writableStream = fs.createWriteStream(configPath);
+		await pipeline(stream, writableStream);
+		const msg = `processClash ${teamspace} ${UUIDToString(project)} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
+		await queueMessage(clashq, corId, msg);
+	} catch (err) {
+		await rm(configPath).catch((cleanUpErr) => {
+			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
+		});
+
+		if (err?.code && codeExists(err.code)) {
+			throw err;
+		}
+
+		logger.logError('Failed to queue clash test run', err?.message);
+		throw templates.queueInsertionFailed;
 	}
 };
 

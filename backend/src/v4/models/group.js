@@ -176,7 +176,7 @@ async function getObjectsArray(model, branch, revId, groupData, convertSharedIDs
 		if(metadata.length) {
 			const {_id: project}  = await findProjectByModelId(account, container, {_id: 1});
 			const meshIds = await getMeshesWithParentIds(account, project, container, conRevId,
-				metadata.flatMap(({ parents }) => parents));
+				metadata.flatMap(({ parents }) => parents), { returnString: false});
 
 			const meshNodes = await findNodes(account, container, undefined, conRevId, {_id: {$in: meshIds}}, {shared_id: 1});
 			return { account, model:container, shared_ids: meshNodes.map(({shared_id}) => convertSharedIDsToString ? utils.uuidToString(shared_id) : shared_id)};
