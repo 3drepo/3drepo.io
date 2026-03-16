@@ -104,14 +104,14 @@ const testValidateUpdateSettingsData = () => {
 
 			const conFedTestCases = [
 				[modelType, { params, body: { surveyPoints: 'invalid' } }, false, 'with invalid surveyPoints'],
-				[modelType, { params, body: { surveyPoints: null } }, false, 'with null surveyPoints'],
+				[modelType, { params, body: { surveyPoints: null } }, true, 'with null surveyPoints'],
 				[modelType, { params, body: { surveyPoints: [{ position: [1, 2, 3] }] } }, false, 'with surveyPoints with no latLong'],
 				[modelType, { params, body: { surveyPoints: [{ latLong: [1, 2] }] } }, false, 'with surveyPoints with no position'],
 				[modelType, { params, body: { surveyPoints: [{ position: [1, 2, 3, 4], latLong: [1, 2] }] } }, false, 'with surveyPoints with invalid position'],
 				[modelType, { params, body: { surveyPoints: [{ position: [1, 2, 3], latLong: [1, 2, 3] }] } }, false, 'with surveyPoints with invalid latLong'],
 				[modelType, { params, body: { surveyPoints: [{ position: [1, 2, 3], latLong: [1, 2] }] } }, true, 'with valid surveyPoints'],
 				[modelType, { params, body: { angleFromNorth: 'invalid' } }, false, 'with invalid angleFromNorth'],
-				[modelType, { params, body: { angleFromNorth: null } }, false, 'with null angleFromNorth'],
+				[modelType, { params, body: { angleFromNorth: null } }, true, 'with null angleFromNorth'],
 				[modelType, { params, body: { angleFromNorth: 123 } }, true, 'with valid angleFromNorth'],
 				[modelType, { params, body: { unit: 'invalid' } }, false, 'with invalid unit'],
 				[modelType, { params, body: { unit: null } }, false, 'with null unit'],

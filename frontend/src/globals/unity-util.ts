@@ -374,7 +374,12 @@ export class UnityUtil {
 	 * Called by the viewer to retrieve cookies in the application
 	 */
 	public static getCookies() {
-		return document?.cookie;
+		try {
+			return document?.cookie;
+		} catch {
+			// iframe, powerBI etc will not be able to access cookies, this is expected behaviour
+			return undefined;
+		}
 	}
 
 	/**
