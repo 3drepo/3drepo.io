@@ -168,6 +168,18 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 	}
 };
 
+ModelProcessing.getContainerFileName = (corId) => {
+	try {
+		const filePath = Path.join(sharedDir, `${corId}.json`);
+		const jsonFile = JSON.parse(fs.readFileSync(filePath).toString());
+		const fileName = jsonFile.file.split('/').slice(-1)[0];
+		return fileName;
+	} catch (error) {
+		logger.logError(`Failed to get file name for ${corId}: ${error.message}`);
+		return undefined;
+	}
+};
+
 ModelProcessing.getLogArchive = async (corId) => {
 	const filename = 'logs.zip';
 
