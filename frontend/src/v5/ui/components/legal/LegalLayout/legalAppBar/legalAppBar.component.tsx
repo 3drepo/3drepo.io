@@ -35,7 +35,7 @@ export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
 				<LogoIcon />
 			</Link>
 			<NavLinks>
-				<NavLink as="a" href={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">
+				<NavLink as="a" href={PRIVACY_ROUTE} to={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">
 					<FormattedMessage id="legalAppBar.privacy" defaultMessage="Privacy Policy" />
 				</NavLink>
 				<NavLink to={TERMS_ROUTE} selected={activePage === 'terms'}>

@@ -110,7 +110,6 @@ export const TaskButton = styled(IconButton)`
 export const SequencePlayerColumn = styled(Grid).attrs({
 	container: true,
 	direction: 'column',
-	justify: 'flex-start',
 	alignItems: 'center'
 })`
 	&& {
@@ -131,7 +130,7 @@ export const TaskSmallDot = styled(DotIcon)`
 export const Task = styled.div`
 	align-items: flex-start;
 	display: flex;
-` as any;
+`;
 
 export const TaskItemLabel = styled.div<{ clickable?: boolean }>`
 	margin-top: 3px;
@@ -147,9 +146,7 @@ export const TaskItemLabel = styled.div<{ clickable?: boolean }>`
 export const SequenceRow = styled(Grid).attrs({
 	container: true,
 	direction: 'row',
-	justify: 'flex-start',
 	alignItems: 'flex-start',
-	item: true
 })`
 	&& {
 		width: auto;
@@ -226,9 +223,7 @@ export const SequenceItemContainer = styled(MenuItemContainer)`
 	}
 `;
 
-export const SequenceName = styled(Grid).attrs({
-	item: true,
-})`
+export const SequenceName = styled(Grid)`
 	&& {
 		font-size: 18px;
 		font-weight: 500;
@@ -240,7 +235,6 @@ export const SequenceName = styled(Grid).attrs({
 `;
 
 export const SequenceDatesContainer = styled(Grid).attrs({
-	item: true,
 	container: true,
 	direction: 'row'
 })`

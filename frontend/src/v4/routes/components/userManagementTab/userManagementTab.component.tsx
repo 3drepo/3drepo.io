@@ -38,8 +38,8 @@ export const UserManagementTab = (props: IProps) => {
 			justifyContent="space-between"
 			className={props.className}
 		>
-			<Content item header={props.withHeader}>{children}</Content>
-			{!!footerLabel && (<Footer item>{footerLabel}</Footer>)}
+			<Content header={props.withHeader}>{children}</Content>
+			{!!footerLabel && (<Footer>{footerLabel}</Footer>)}
 		</Container>
 	);
 };

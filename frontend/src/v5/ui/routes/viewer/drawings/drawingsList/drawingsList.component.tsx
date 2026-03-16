@@ -32,7 +32,7 @@ import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
 import { useSearchParam } from '../../../useSearchParam';
 
-const Table = forwardRef(({ children, ...props }, ref: any) => {
+const Table = forwardRef(({ children, ...props }: any, ref: any) => {
 	const queries = DrawingsCardHooksSelectors.selectQueries();
 	return (
 		<div ref={ref} {...props}>

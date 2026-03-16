@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { ComponentProps } from 'react';
 import { Image, ExtraImages, OverlappingContainer } from './imageWithExtraCount.styles';
 
 type ImageWithExtraCountProps = {
@@ -22,7 +23,7 @@ type ImageWithExtraCountProps = {
 	className?: string,
 	extraCount?: number,
 	onClick?: () => void,
-};
+} & Partial<ComponentProps<typeof Image>>;
 export const ImageWithExtraCount = ({
 	src,
 	extraCount,

@@ -36,7 +36,7 @@ const ViewerPanelTitle = ({title, Icon, renderActions}) => (
 );
 
 interface IProps {
-	title: string;
+	title?: string;
 	className?: string;
 	Icon?: JSX.Element;
 	pending?: boolean;
@@ -45,7 +45,7 @@ interface IProps {
 	renderActions?: () => JSX.Element | JSX.Element[];
 	id?: string;
 	style?: any;
-	children: any;
+	children?: any;
 }
 
 export class ViewerPanel extends PureComponent<IProps, any> {

@@ -21,6 +21,7 @@ import { LoaderContainer } from './loadingDialog.styles';
 
 interface IProps {
 	content?: string;
+	children?: any;
 }
 
 export const LoadingDialog: FunctionComponent<IProps> = (props) => {

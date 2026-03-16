@@ -51,6 +51,7 @@ export const ControlledFormDatePicker: Story = {
 export const ControlledFormDatePickerDefaultDate: Story = {
 	args: {
 		label: 'Controlled Date with today as default date',
-		defaultValue: new Date('2020-01-30'),
+		// todo issue 5588 no longer supported
+		// defaultValue: new Date('2020-01-30'),
 	},
 };

@@ -18,11 +18,11 @@ import { DateTimePicker as MuiDateTimePicker, DateTimePickerProps as MuiDateTime
 import { BaseCalendarPicker, BaseCalendarPickerProps } from './baseCalendarPicker/baseCalendarPicker.component';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 
-export type DateTimePickerProps = Omit<BaseCalendarPickerProps, 'PickerComponent'> & Partial<MuiDateTimePickerProps<any, any>>;
+export type DateTimePickerProps = Omit<BaseCalendarPickerProps, 'PickerComponent'> & Partial<MuiDateTimePickerProps<any>>;
 export const DateTimePicker = ({ onBlur, onChange, ...props }: DateTimePickerProps) => (
 	<BaseCalendarPicker
 		PickerComponent={MuiDateTimePicker}
-		rifmFormatter={formatDateTime}
+		format={formatDateTime}
 		onChange={(val) => {
 			onChange(val);
 			onBlur?.();

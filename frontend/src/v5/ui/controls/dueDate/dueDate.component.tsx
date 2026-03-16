@@ -38,22 +38,23 @@ export const DueDate = ({ value, disabled, tooltip, className, ...props }: DueDa
 			<DateTimePicker
 				value={value}
 				disabled={disabled}
-				renderInput={
-					({ inputRef, ...args }: any) => (
-						<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
-							<CalendarIcon />
-							{value ? (
-								<TextOverflow>
-									{formatDateTime(value)}
-								</TextOverflow>
-							) : (
-								<Tooltip title={disabled ? '' : tooltip} arrow>
-									{disabled ? DATE_UNSET_MESSAGE : SET_DATE_MESSAGE}
-								</Tooltip>
-							)}
-						</DateContainer>
-					)
-				}
+				// TODO ISSUE_5588:  fix this
+				// renderInput={
+				// 	({ inputRef, ...args }: any) => (
+				// 		<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
+				// 			<CalendarIcon />
+				// 			{value ? (
+				// 				<TextOverflow>
+				// 					{formatDateTime(value)}
+				// 				</TextOverflow>
+				// 			) : (
+				// 				<Tooltip title={disabled ? '' : tooltip} arrow>
+				// 					{disabled ? DATE_UNSET_MESSAGE : SET_DATE_MESSAGE}
+				// 				</Tooltip>
+				// 			)}
+				// 		</DateContainer>
+				// 	)
+				// }
 				{...props}
 			/>
 		</DueDateContainer>

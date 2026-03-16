@@ -76,7 +76,7 @@ const SectionHeaderStyles = css`
 `;
 
 export const Header = styled(SectionHeader)`
-	${({ section }: { section: boolean }) => section ? SectionHeaderStyles : css`
+	${({ section }) => section ? SectionHeaderStyles : css`
 		border-bottom-color: ${COLOR.BLACK_6};
 	`};
 	height: auto;

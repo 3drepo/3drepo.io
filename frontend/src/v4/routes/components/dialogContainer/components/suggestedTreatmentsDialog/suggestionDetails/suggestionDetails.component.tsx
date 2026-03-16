@@ -26,6 +26,7 @@ interface ITextWrapper {
 	inline?: boolean;
 	color?: string;
 	variant?: TypographyProps['variant'];
+	children: any;
 }
 
 const TextWrapper: FunctionComponent<ITextWrapper> = ({
@@ -86,13 +87,13 @@ export const SuggestionDetails: FunctionComponent<ISuggestionDetails> = ({
 
 	return (
 		<Grid container>
-			<TextContainer item xs={12}>
+			<TextContainer size={{xs: 12}}>
 				<Description ref={textRef} {...additionalProps()}>
 					{mitigation_details}
 				</Description>
 				{renderExpandableText(expandable)}
 			</TextContainer>
-			<TextContainer item xs={4} zeroMinWidth>
+			<TextContainer size={{xs: 4}}>
 				<TextWrapper noWrap>
 					<TextLabel>Stage:&nbsp;</TextLabel>
 					<TextWrapper inline color="textSecondary">
@@ -100,7 +101,7 @@ export const SuggestionDetails: FunctionComponent<ISuggestionDetails> = ({
 					</TextWrapper>
 				</TextWrapper>
 			</TextContainer>
-			<Grid item xs={4}>
+			<Grid size={{xs: 4}} >
 				<TextWrapper noWrap>
 					<TextLabel>Type:&nbsp;</TextLabel>
 					<TextWrapper inline color="textSecondary">

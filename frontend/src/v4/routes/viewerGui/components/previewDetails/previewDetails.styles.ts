@@ -82,9 +82,9 @@ export const Summary = styled(AccordionSummary)`
 	&& {
 		display: none;
 	}
-` as any;
+` ;
 
-export const Header = styled(AccordionSummary).attrs({
+export const Header = styled(AccordionSummary as (props) => JSX.Element).attrs({
 	classes: {
 		focused: 'focused',
 		expandIcon: 'summary-icon',
@@ -106,9 +106,9 @@ export const Header = styled(AccordionSummary).attrs({
 			display: none;
 		}
 
-		box-shadow: ${({expanded}: { expanded: boolean }) => expanded ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
+		box-shadow: ${({expanded}) => expanded ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
 	}
-` as any;
+`;
 
 export const CollapsableContent = styled.div`
 	margin-bottom: 8px;
@@ -153,7 +153,7 @@ export const ToggleButtonContainer = styled.div`
 	width: 100%;
 	z-index: 1;
 	position: static;
-` as any;
+` ;
 
 export const ToggleButton = styled(IconButton)`
 	&& {
@@ -161,11 +161,11 @@ export const ToggleButton = styled(IconButton)`
 	}
 `;
 
-export const ToggleIcon = styled(ExpandMoreIcon)`
+export const ToggleIcon = styled(ExpandMoreIcon as ({ active }) => JSX.Element)`
 	&& {
 		transform: ${(props: any) => props.active ? `rotate(180deg)` : `rotate(0deg)`};
 	}
-` as any;
+` ;
 
 export const Typography = styled(TypographyComponent)`
 	&& {

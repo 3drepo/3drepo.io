@@ -20,7 +20,7 @@ import { KickerTypography, KickerTitleTypography, LinkTypography, LabelTypograph
 type ITypographyVariants = TypographyVariant | 'kicker' | 'kickerTitle' | 'link' | 'label';
 
 type ITypography = Omit<TypographyProps, 'variant'> & {
-	variant: ITypographyVariants;
+	variant?: ITypographyVariants;
 };
 
 export const Typography = ({ variant, children, ...props }: ITypography): JSX.Element => {

@@ -16,8 +16,9 @@
  */
 
 import CircularProgress from '@mui/material/CircularProgress';
+import { Button  as BaseButton, ButtonPropsVariantOverrides} from '@mui/material';
+
 import { merge } from 'lodash';
-import { ComponentType } from 'react';
 
 import { LoaderContainer, StyledButton, StyledFab } from './submitButton.styles';
 
@@ -25,7 +26,7 @@ interface IProps {
 	children: any;
 	pending?: boolean;
 	disabled?: boolean;
-	variant?: string;
+	variant?: "contained" | "text" | "outlined" | "fab";
 	onClick?: (event) => void;
 }
 
@@ -39,7 +40,7 @@ export const SubmitButton = ({ pending, children, ...props }: IProps) => {
 
 	const isFabVariant = props.variant === 'fab';
 
-	const Button: ComponentType = isFabVariant ? StyledFab : StyledButton;
+	const Button: any = isFabVariant ? StyledFab : StyledButton;
 
 	if (additionalProps.hasOwnProperty('variant') && isFabVariant) {
 		delete additionalProps.variant;
@@ -47,7 +48,7 @@ export const SubmitButton = ({ pending, children, ...props }: IProps) => {
 
 	return (
 		<Button
-			{...additionalProps}
+			{...props}
 		>
 			{children}
 			{pending && (

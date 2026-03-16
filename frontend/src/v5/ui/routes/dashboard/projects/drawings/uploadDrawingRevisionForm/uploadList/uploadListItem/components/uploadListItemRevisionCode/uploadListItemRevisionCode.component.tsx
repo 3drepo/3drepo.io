@@ -29,7 +29,7 @@ type UploadListItemRevisionCodeProps = {
 export const UploadListItemRevisionCode = ({ disabled = false, name, ...props }: UploadListItemRevisionCodeProps ): JSX.Element => {
 	const { register } = useFormContext();
 	const { errors } = useFormState();
-	const errorMessage = get(errors, name)?.message;
+	const errorMessage = get(errors, name)?.message as string;
 	const errorAdornment = errorMessage ? {
 		InputProps: {
 			startAdornment: (
