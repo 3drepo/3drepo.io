@@ -2723,8 +2723,8 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetMaxNumResponses', UnityUtil.LoadingState.VIEWER_READY, max);
 	}
 
-	public static setDynamicDrawLimit(max: number) {
-		UnityUtil.toUnity('SetDynamicDrawLimit', UnityUtil.LoadingState.VIEWER_READY, max);
+	public static setTargetNavigationFps(fps: number) {
+		UnityUtil.toUnity('SetNavigationTargetFPS', UnityUtil.LoadingState.VIEWER_READY, fps);
 	}
 
 	/**
