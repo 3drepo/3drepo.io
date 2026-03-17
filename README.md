@@ -83,49 +83,6 @@ Within this file you must append to, or create, a line for the entry for example
 
 In the configuration file for the server, you then set hostname to `example.org` or whatever host you have redirected.
 
-## Running on WSL2
-Some prerequisites to ensure 3drepo works.
-
-By default, non-root users cannot bind to standard ports (e.g. 80/443). To allow this without running as root, grant Node.js the required capability:
-```bash
-sudo setcap 'cap_net_bind_service=+ep' $(which node)
-```
-
-Symlink developement folder to 3drepo.io (changes you make here in local will reflect on io side)
-
-```bash
-ln -sf $(pwd)/3drepo.io/config/developement/ ../3drepo.io/config/
-```
-
-To pick up correct config or whatever your env you are using.
-```bash
-export NODE_ENV=development 
-```
-
-Create teamspace:
-```bash
-cd ../3drepo.io/backend/src/scripts/utility/teamspaces/
-yarn run-script <your commands>
-```
-
-Start io:
-FIrst build io
-
-```bash
-cd frontend && yarn install 
-```
-That will run for a little while. You know it is done when it says something like "webpack compiled in XX seconds" or similar. It will not return, because it keeps watching for changes to recompile. But you can stop it here with Ctrl+C.
- 
-Then go back to 3drepo.io and run
-
-
-```bash
-cd frontend && yarn install 
-cd ../backend && yarn install
-```
-
-This should start the node server.
-
 ## Licenses
 This project is Copyright of [3D Repo Ltd](http://3drepo.org), a company registered in England and Wales No. 14772861, and is released under the open source [GNU Affero General Public License v3](http://www.gnu.org/licenses/agpl-3.0.en.html). Should you require a commercial license, please contact [support@3drepo.com](mailto:support@3drepo.com). All contributors are required to sign either the [3D Repo Individual](https://gist.github.com/jozefdobos/e177af804c9bcd217b73) or the [3D Repo Entity](https://gist.github.com/jozefdobos/c7c4c1c18cfb211c45d2) [Contributor License Agreement (CLA)](https://en.wikipedia.org/wiki/Contributor_License_Agreement).
 
