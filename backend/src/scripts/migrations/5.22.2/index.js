@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { updateCustomMetadata } = require('../../../../models/metadata');
+const updateRepobundleMetadata = require('./updateRepobundleMetadata');
 
-const Metadata = { };
+const scripts = [
+	{ script: updateRepobundleMetadata, desc: 'Update the repoAssets document for repobundle revisions to include all the latest required metadata' },
+];
 
-Metadata.updateCustomMetadata = updateCustomMetadata;
-
-module.exports = Metadata;
+module.exports = scripts;
