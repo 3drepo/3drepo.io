@@ -106,10 +106,17 @@ async function getMetadataEntryFromBundle(teamspace, collection, bundle) {
 		metadata.max.y = Math.max(metadata.max.y, m.bounds.max.y);
 		metadata.max.z = Math.max(metadata.max.z, m.bounds.max.z);
 		metadata.numVertices += m.vertexCount;
-		metadata.numFaces += m.indexCount / 3;
-		metadata.primitive = m.type; // The current generation of RepoBundles does not mix primitive types
+		metadata.primitive = m.type; // The current generation of RepoBundles does not mix primitive types within a bundle
 		if (m.vertexLayout.includes(4)) {
 			metadata.numUVChannels = 1;
+		}
+		if (m.type === 2) {
+			// RepoBundles always store baked line meshes, where each line consists of two triangles
+			metadata.numFaces += m.indexCount / 6;
+		} else if (m.type === 3) {
+			metadata.numFaces += m.indexCount / 3;
+		} else {
+			throw Error('Unknown primitive type in RepoBundle');
 		}
 	}
 	return metadata;
