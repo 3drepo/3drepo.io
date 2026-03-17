@@ -19,7 +19,7 @@ const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup, generateRandomNumber } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -31,6 +31,9 @@ const ProjectSettings = require(`${src}/models/projectSettings`);
 
 jest.mock('../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+
+jest.mock('../../../../../src/v5/models/fileRefs');
+const FileRefs = require(`${src}/models/fileRefs`);
 
 jest.mock('../../../../../src/v5/models/tickets.logs');
 const TicketLogs = require(`${src}/models/tickets.logs`);
@@ -629,12 +632,16 @@ const testNewRevision = () => {
 const testModelProcessingCompleted = () => {
 	describe(events.MODEL_IMPORT_FINISHED, () => {
 		describe.each([
-			[true, false, false],
-			[true, false, false, true],
+			[false, true, false],
+			[true, false, false, modelTypes.DRAWING],
+			[true, false, false, modelTypes.FEDERATION],
+			[true, false, false, modelTypes.CONTAINER, true],
 			[false, false, true],
 			[true, false, false],
-		])('', (sendMail, success, userErr, noLogArchive) => {
-			test(`Should ${sendMail ? 'not ' : ''}send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
+			[true, false, false],
+		])('', (sendMail, success, userErr, modelType = modelTypes.CONTAINER, noLogArchive = false) => {
+			test(`Should ${sendMail ? '' : 'not '}send an email if ${modelType} import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
+				const errorCode = success ? undefined : generateRandomNumber(2, 40);
 				const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 				const data = {
 					teamspace: generateRandomString(),
@@ -643,13 +650,23 @@ const testModelProcessingCompleted = () => {
 					success,
 					revId: generateUUID(),
 					user: generateRandomString(),
-					modelType: modelTypes.FEDERATION,
-					data: generateImportResult(success, generateRandomString(), userErr),
+					modelType,
+					data: generateImportResult(success, generateRandomString(), userErr, errorCode),
 				};
 
 				const zipPath = generateRandomString();
 				const logPreview = generateRandomString();
+				const fileName = generateRandomString();
+
 				if (sendMail) {
+					if (modelType === modelTypes.CONTAINER) {
+						ModPro.getContainerFileName.mockResolvedValueOnce(fileName);
+					}
+
+					if (modelType === modelTypes.DRAWING) {
+						FileRefs.getRefEntryByQuery.mockResolvedValueOnce({ name: fileName });
+					}
+
 					ModPro.getLogArchive.mockResolvedValueOnce(noLogArchive ? undefined : { zipPath, logPreview });
 				}
 
@@ -660,24 +677,28 @@ const testModelProcessingCompleted = () => {
 				if (sendMail) {
 					expect(ModPro.getLogArchive).toHaveBeenCalledTimes(1);
 					expect(ModPro.getLogArchive).toHaveBeenCalledWith(UUIDToString(data.revId));
-
+					const errorInfo = getInfoFromCode(data.data.errorReason.errorCode);
 					const mailerData = {
 						errInfo: {
-							code: data.data.errorReason.errorCode,
-							message: data.data.errorReason.message,
+							code: `${data.data.errorReason.errorCode} ${errorInfo.internalError}`,
+							message: errorInfo.message,
 						},
 						teamspace: data.teamspace,
 						model: data.model,
 						user: data.user,
 						project: UUIDToString(data.project),
 						revId: UUIDToString(data.revId),
-						modelType: data.modelType,
+						modelType,
 						logExcerpt: noLogArchive ? undefined : logPreview,
-
+						fileName: modelType === modelTypes.FEDERATION ? 'N/A' : fileName,
 					};
 
 					expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.MODEL_IMPORT_ERROR.name, mailerData, noLogArchive ? undefined : [{ filename: 'logs.zip', path: zipPath }]);
+					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+						mailTemplates.MODEL_IMPORT_ERROR.name,
+						mailerData,
+						noLogArchive ? undefined : [{ filename: 'logs.zip', path: zipPath }],
+					);
 				} else {
 					expect(ModPro.getLogArchive).not.toHaveBeenCalled();
 					expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();
@@ -685,7 +706,7 @@ const testModelProcessingCompleted = () => {
 			});
 		});
 
-		test('Should fail gracefully if an error was thrown', async () => {
+		test('Should fail gracefully if an error was thrown in getLogArchive', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -704,7 +725,7 @@ const testModelProcessingCompleted = () => {
 			await waitOnEvent;
 		});
 
-		test('Should fail gracefully if an error was thrown (error object)', async () => {
+		test('Should fail gracefully if an error was thrown in getLogArchive (error object)', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
