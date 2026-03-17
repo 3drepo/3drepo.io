@@ -127,7 +127,7 @@ const processRevision = async (teamspace, collection, revision) => {
 		let requiresUpdate = false;
 		const history = await findOne(teamspace, collection.replace('stash.repobundles', 'history'), { _id: revision._id }, { timestamp: 1 });
 		// For the Date constructor, the month is a zero-based index.
-		if (history.timestamp > new Date(2026, 2, 13) && history.timestamp < new Date(2026, 2, 31)) {
+		if (history.timestamp > new Date(2026, 2, 13)) {
 			// Check if this is a 5.22.1 import and rebuild if so to make the primitive
 			// types consistent with older imports. This check relies on the date
 			// range we know 5.22.1 was active.
