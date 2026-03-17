@@ -182,15 +182,15 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 		historyCol, id, buffer);
 
 	if (revision.rFile) {
-		writeReferencedData(revision.rFile[0], revision.refData);
+		await writeReferencedData(revision.rFile[0], revision.refData);
 	}
 
 	if (revision.image) {
-		writeReferencedData(revision.image, revision.imageData);
+		await writeReferencedData(revision.image, revision.imageData);
 	}
 
 	if (revision.thumbnail) {
-		writeReferencedData(revision.thumbnail, revision.thumbnailData);
+		await writeReferencedData(revision.thumbnail, revision.thumbnailData);
 	}
 	const formattedRevision = {
 		...revision,
@@ -795,10 +795,15 @@ ServiceHelper.generateTicket = (template, internalType = false, container) => {
 	return ticket;
 };
 
-ServiceHelper.generateImportedComment = (author = ServiceHelper.generateRandomString()) => ({
-	...ServiceHelper.generateComment(author),
-	originalAuthor: ServiceHelper.generateRandomString(),
-});
+ServiceHelper.generateImportedComment = () => {
+	const comment = ServiceHelper.generateComment();
+	return {
+		createdAt: comment.createdAt,
+		message: comment.message,
+		images: comment.images,
+		originalAuthor: ServiceHelper.generateRandomString(),
+	};
+};
 
 ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) => {
 	const base64img = fs.readFileSync(image).toString('base64');

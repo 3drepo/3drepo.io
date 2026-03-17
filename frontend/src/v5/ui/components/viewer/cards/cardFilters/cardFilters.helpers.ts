@@ -36,7 +36,6 @@ import { IJob } from '@/v5/store/jobs/jobs.types';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectFederationJobs, selectFederationUsers } from '@/v5/store/federations/federations.selectors';
 import { selectContainerJobs, selectContainerUsers } from '@/v5/store/containers/containers.selectors';
-import { FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 
 export const FILTER_OPERATOR_ICON: Record<TicketFilterOperator, any> = {
 	eq: EqualIcon,
@@ -112,12 +111,7 @@ export const getTemplateProperty = (template:ITemplate, module: string | undefin
 
 
 // returns an array of all users_ids and jobs_ids from the passed containers and Federations 
-export const useGetUsersAndJobs = (containersAndFederations: string[]): IUser[] | IJob[] => {
-	// This is for triggering a new re render if these federations or containers change
-	// in order to have the latests users/jobs
-	FederationsHooksSelectors.selectFederations(); 
-	ContainersHooksSelectors.selectContainers(); 
-	 
+export const getUsersAndJobs = (containersAndFederations: string[]): IUser[] | IJob[] => {
 	const usersAndJobsSet = new Set<string>();
 	const usersAndJobs: IUser[] | IJob[] = [];
 

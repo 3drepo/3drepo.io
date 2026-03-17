@@ -30,6 +30,7 @@ import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/conte
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isEqual, intersection } from 'lodash';
 import { TicketsFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
+import { SELECTION_COLUMN_WIDTH } from './ticketsTableGroup/ticketsTableGroup.helper';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
@@ -55,13 +56,13 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 			if (!isEqual(columnsRendered, initialVisibleColumns)) {
 				setVisibleSortedColumnsNames(initialVisibleColumns);
 				resetWidths();
-				stretchTable(BaseProperties.TITLE);
+				stretchTable(BaseProperties.TITLE, -SELECTION_COLUMN_WIDTH);
 			}
 		} else {
 			if (!isEqual(columnsRendered, colsParam)) {
 				setVisibleSortedColumnsNames(colsParam);
 				if (!columnsRendered.length) {
-					stretchTable(BaseProperties.TITLE);
+					stretchTable(BaseProperties.TITLE, -SELECTION_COLUMN_WIDTH);
 				}
 			}
 		}
@@ -117,7 +118,11 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		);
 	}
 	
-	return <TicketsTableResizableContent {...props} template={template} />;
+	return (
+		<div style={{ position: 'absolute' }} >
+			<TicketsTableResizableContent {...props} template={template} />
+		</ div>
+	);
 };
 
 export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {

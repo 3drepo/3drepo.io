@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
@@ -24,7 +24,7 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 import { Tooltip } from '@mui/material';
 import RemoveIcon from '@assets/icons/outlined/minus_minimal-outline.svg';
 import IncludeIcon from '@assets/icons/outlined/plus_minimal-outline.svg';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { useContainersData } from '../../../containers/containers.hooks';
 import { SuccessIconContainer, ErrorIconContainer, SuccessButton, ErrorButton } from './editFederation.styles';
@@ -32,12 +32,17 @@ import { ActionButtonProps, EditFederationContainers } from './editFederationCon
 import { IconButtonProps } from './editFederationContainersList/editFederationContainersListItem/editFederationContainersListItem.component';
 import { EditFederationContext } from '../editFederationContext';
 import { groupBy } from 'lodash';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { enableRealtimeContainerRemoved, enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
+import { enableRealtimeContainerRevisionUpdate, enableRealtimeNewContainerRevisionUpdate } from '@/v5/services/realtime/containerRevision.events';
 
 type EditFederationProps = {
 	federation: IFederation;
 };
 
 export const EditFederation = ({ federation }: EditFederationProps): JSX.Element => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { containers } = useContainersData();
 	const { includedContainersIds, setIncludedContainersIds } = useContext(EditFederationContext);
 	const isNewFederation = !federation._id;
@@ -50,6 +55,17 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 
 	const includeContainers = (ids: string[]) => setIncludedContainersIds((oldIds) => [...oldIds, ...ids]);
 	const removeContainers = (ids: string[]) => setIncludedContainersIds((oldIds) => oldIds.filter((id) => !ids.includes(id)));
+
+	useEffect(() => {
+		const subscriptions = containers.flatMap(({ _id }) => [
+			enableRealtimeContainerRemoved(teamspace, project, _id),
+			enableRealtimeContainerUpdateSettings(teamspace, project, _id),
+			enableRealtimeContainerRevisionUpdate(teamspace, project, _id),
+			enableRealtimeNewContainerRevisionUpdate(teamspace, project, _id),
+		]);
+
+		return combineSubscriptions(...subscriptions);
+	}, [containers.map(({ _id }) => _id).join()]);
 
 	return (
 		<>
