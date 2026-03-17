@@ -92,9 +92,9 @@ const testGetTeamspaceListByUser = () => {
 				{ name: generateRandomString(), isAdmin: true },
 				{ name: generateRandomString(), isAdmin: false },
 			];
-			const frontEggData = times(goldenData.length + 1, (index) => (
-				{ name: goldenData[index]?.name || generateRandomString(), refId: generateRandomString() }
-			));
+			const frontEggData = goldenData
+				.map(({ name }) => ({ name, refId: generateRandomString() }))
+				.concat({ name: generateRandomString(), refId: generateRandomString() });
 			const userId = generateRandomString();
 			const username = generateRandomString();
 
@@ -125,6 +125,43 @@ const testGetTeamspaceListByUser = () => {
 			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
 
 			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(goldenData.length + 1);
+		});
+		test('should return empty array if the refIds do not match', async () => {
+			const goldenData = [
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: false },
+			];
+
+			const frontEggData = goldenData.map(({ name }) => ({ name, refId: generateRandomString() }));
+			const refIds = goldenData.map(({ name }) => ({ name, refId: generateRandomString() }));
+			const userId = generateRandomString();
+			const username = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.getAccountsByUser.mockResolvedValueOnce(
+				frontEggData.map(({ refId }) => refId));
+			goldenData.forEach(({ name }) => {
+				FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(name);
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(
+					refIds.find(({ name: n }) => n === name).refId,
+				);
+				Permissions.isTeamspaceAdmin.mockResolvedValueOnce(
+					goldenData.find(({ name: n }) => n === name).isAdmin);
+			});
+
+			const res = await Teamspaces.getTeamspaceListByUser(username);
+			expect(res).toEqual([]);
+
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledWith(userId);
+
+			expect(UsersModel.getUserId).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
+
+			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(goldenData.length);
 		});
 		test('Should return undefined if unknown error occured', async () => {
 			const userId = generateRandomString();

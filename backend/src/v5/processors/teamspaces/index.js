@@ -127,12 +127,13 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 	const teamspaceInfo = await Promise.all(accountIds.map(async (accountId) => {
 		try {
 			const teamspace = await getTeamspaceByAccount(accountId);
-			const refId = await getTeamspaceRefId(teamspace);
-			if (teamspace && refId === accountId) {
-				const isAdmin = await isTeamspaceAdmin(teamspace, user);
-				return { name: teamspace, isAdmin };
+			if (teamspace) {
+				const refId = await getTeamspaceRefId(teamspace);
+				if (refId === accountId) {
+					const isAdmin = await isTeamspaceAdmin(teamspace, user);
+					return { name: teamspace, isAdmin };
+				}
 			}
-
 			return undefined;
 		} catch (err) {
 			return undefined;
