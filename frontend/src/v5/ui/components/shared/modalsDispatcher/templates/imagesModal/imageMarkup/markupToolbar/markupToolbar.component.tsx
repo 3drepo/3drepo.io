@@ -39,12 +39,12 @@ type MarkupToolbarProps = {
 	onSave: () => void,
 	shape: IShapeType,
 	color: string,
-	selectedObjectName: string,
 	strokeWidth: IStrokeWidth,
 	mode: IMode,
 	fontSize: IFontSize,
 	callout: ICalloutType,
-	onClearClick,
+	onClear,
+	onUndo,
 	onStrokeWidthChange,
 	onFontSizeChange,
 	onColorChange,
@@ -68,7 +68,8 @@ export const MarkupToolbar = ({
 	onModeChange,
 	callout,
 	onCalloutChange,
-	onClearClick,
+	onClear,
+	onUndo,
 	allowSaveWithoutChanges,
 }: MarkupToolbarProps) => {
 	const hasFutureHistory = !!CanvasHistoryHooksSelectors.selectAreFutureElements();
@@ -105,7 +106,7 @@ export const MarkupToolbar = ({
 				Icon={UndoIcon}
 				title={formatMessage({ id: 'imageMarkup.icon.title.undo', defaultMessage: 'Undo' })}
 				disabled={!hasPastHistory}
-				onClick={CanvasHistoryActionsDispatchers.undo}
+				onClick={onUndo}
 			/>
 			<ToolbarButton
 				Icon={RedoIcon}
@@ -116,7 +117,7 @@ export const MarkupToolbar = ({
 			<ToolbarButton
 				Icon={ResetIcon}
 				title={formatMessage({ id: 'imageMarkup.icon.title.reset', defaultMessage: 'Reset' })}
-				onClick={onClearClick}
+				onClick={onClear}
 				disabled={!hasFutureHistory && !hasPastHistory}
 			/>
 			<Divider />

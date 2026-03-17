@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { isEqual } from 'lodash';
 import { useRef, useState, useEffect, createContext, useContext, createRef, MutableRefObject } from 'react';
 
 export type VListHandle = {
@@ -283,8 +284,13 @@ export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemCompone
 
 	useEffect(() => {
 		if (itemsRef.current === items) return;
+		items.forEach((item, i) => {
+			const itemold = (itemsRef.current || {})[i];
+			if (!isEqual(itemold, item)) {
+				delete itemsHeight[i];
+			}
+		});
 		itemsRef.current = items;
-		itemsHeight.current = {};
 	}, [items]);
 
 

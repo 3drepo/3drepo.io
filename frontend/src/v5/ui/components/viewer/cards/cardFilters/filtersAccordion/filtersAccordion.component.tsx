@@ -59,6 +59,7 @@ export const FiltersAccordion = ({ children, onClear }: FiltersAccordionProps) =
 						</CollapseButton>
 					</CollapseButtonContainer>
 				)}
+				{}
 				<ClearButton onClick={onClear}>
 					<FormattedMessage id="filtersList.clearAllButton" defaultMessage="Clear all" />
 					<CloseIcon />
