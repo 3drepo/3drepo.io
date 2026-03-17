@@ -20,16 +20,16 @@ import { CardFilterActionMenu } from '@components/viewer/cards/cardFilters/filte
 import { useTicketFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
-import { PopoverOrigin } from '@mui/material';
 import SmallFunnel from '@assets/icons/filters/small_funnel.svg';
 import { useState } from 'react';
 import { TableIconContainer } from '@controls/tableIcon/tableIcon.styles';
+import { TICKET_HEADER_POPOVER_PROPS } from './ticketsTableHeaders.helpers';
 
 type FiltersSectionProps = {
 	propertyName: string;
 };
 
-const findFilterByPropertyName = (filters: TicketFilter[], propertyName: string) => {
+export const findFilterByPropertyName = (filters: TicketFilter[], propertyName: string) => {
 	const chunks = propertyName.split('.');
 
 	// if the propertyname is like title
@@ -50,17 +50,6 @@ const findFilterByPropertyName = (filters: TicketFilter[], propertyName: string)
 	return filters.find((f) => f.property === chunks[2] && f.module === chunks[1]);
 };
 
-const positioning = {
-	anchorOrigin: {
-		vertical: 'bottom',
-		horizontal: 'left',
-	} as PopoverOrigin,
-	transformOrigin: {
-		vertical: 'top',
-		horizontal: 'left',
-	} as PopoverOrigin,
-};
-
 export const TicketsTableHeaderFilter = ({ propertyName }: FiltersSectionProps) => {
 	const { setFilter, filters, choosablefilters } = useTicketFiltersContext();
 	const filter = findFilterByPropertyName([...filters, ...choosablefilters], propertyName);
@@ -79,7 +68,7 @@ export const TicketsTableHeaderFilter = ({ propertyName }: FiltersSectionProps) 
 					<SmallFunnel filled={!!filter.filter}/>
 				</TableIconContainer>
 			)}
-			PopoverProps={positioning}
+			PopoverProps={TICKET_HEADER_POPOVER_PROPS}
 		>
 			<ActionMenuContext.Consumer>
 				{({ close }) => (

@@ -1,4 +1,4 @@
-{ "VERSION" : "5.20.5",
+{ "VERSION" : "5.22.0",
   "unity" : {
 	"current" : "5.20.0",
 	"supported": []
@@ -28,7 +28,7 @@
     "supported": []
   },
   "powerbi" : {
-	  "current": "5.10.0",
+	  "current": "5.22.0",
 	  "supported": []
   }
 }

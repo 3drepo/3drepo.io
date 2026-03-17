@@ -230,12 +230,12 @@ Sequence.createSequence = async (account, model, sequenceData) => {
 
 Sequence.deleteSequence = async (account, model, sequenceId) => {
 	await Sequence.sequenceExists(account, model, sequenceId);
-	const { result } = await db.deleteOne(account, sequenceCol(model), {
+	const { deletedCount } = await db.deleteOne(account, sequenceCol(model), {
 		_id: utils.stringToUUID(sequenceId),
 		customSequence: true
 	});
 
-	if (result.n === 0) {
+	if (deletedCount === 0) {
 		throw responseCodes.SEQUENCE_READ_ONLY;
 	}
 };

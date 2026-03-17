@@ -23,6 +23,7 @@ export const Item = styled.div<{ $isMoving?: boolean, $index: number }>`
 	grid-row: 1;
 	grid-column: ${({ $index }) => $index + 1};
 	display: flex;
+	padding: 5px 5px 0;
 
 	${({ $isMoving, theme }) => $isMoving && css`
 		background-color: ${theme.palette.primary.lightest};
