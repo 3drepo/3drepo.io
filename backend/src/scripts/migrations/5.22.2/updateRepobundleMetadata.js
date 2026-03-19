@@ -17,17 +17,22 @@
 
 const { v5Path } = require('../../../interop');
 const FilesManager = require('../../../v5/services/filesManager');
-const { UUIDToString } = require('../../../v5/utils/helper/uuids');
+
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
 const { find, replaceOne, findOne } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getFile } = require(`${v5Path}/services/filesManager`);
+const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
 const zlib = require('zlib');
 
 const HEADER_LENGTH_START = 16;
 const HEADER_DATA_START = 20;
+
+let numTeamspaces = 0;
+let numCollections = 0;
+let numRevisions = 0;
 
 function getNumComponents(mapping) {
 	let maxIndex = -1;
@@ -107,11 +112,13 @@ async function getMetadataEntryFromBundle(teamspace, collection, bundle) {
 		metadata.max.z = Math.max(metadata.max.z, m.bounds.max.z);
 		metadata.numVertices += m.vertexCount;
 		metadata.primitive = m.type; // The current generation of RepoBundles does not mix primitive types within a bundle
-		if (m.vertexLayout.includes(4)) {
+		if (m.vertexLayout.includes(4)) { // The magic number 4 is the layout id for uv0. This is distinct from the id channel, even though to the pipeline they will both be in uv attributes.
 			metadata.numUVChannels = 1;
 		}
 		if (m.type === 2) {
-			// RepoBundles always store baked line meshes, where each line consists of two triangles
+			// RepoBundles always store baked line meshes, where each line
+			// consists of two triangles. The metadata document should store
+			// the number of original supermesh primitives.
 			metadata.numFaces += m.indexCount / 6;
 		} else if (m.type === 3) {
 			metadata.numFaces += m.indexCount / 3;
@@ -171,7 +178,6 @@ const processRevision = async (teamspace, collection, revision) => {
 			}
 		}
 		if (requiresUpdate) {
-			logger.logInfo(`Updating Repobundles metadata for: ${teamspace}/${collection}/${UUIDToString(revision._id)}...`);
 			await replaceOne(
 				teamspace,
 				collection,
@@ -180,6 +186,7 @@ const processRevision = async (teamspace, collection, revision) => {
 				},
 				revision,
 			);
+			numRevisions++;
 		}
 	} catch (error) {
 		logger.logInfo(`Exception processing ${teamspace}/${collection}/${UUIDToString(revision._id)}: ${error}`);
@@ -189,16 +196,19 @@ const processRevision = async (teamspace, collection, revision) => {
 const processCollection = async (teamspace, collection) => {
 	const revisionAssets = await find(teamspace, collection, {});
 	await Promise.all(revisionAssets.map((revision) => processRevision(teamspace, collection, revision)));
+	numCollections++;
 };
 
 const processTeamspace = async (teamspace) => {
 	const collections = await getCollectionsEndsWith(teamspace, '.stash.repobundles');
 	await Promise.all(collections.map((collection) => processCollection(teamspace, collection.name)));
+	numTeamspaces++;
 };
 
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
 	await Promise.all(teamspaces.map((ts) => processTeamspace(ts)));
+	logger.logInfo(`Processed ${numTeamspaces} teamspaces & ${numCollections} collections. Updated ${numRevisions} revisions.`);
 };
 
 module.exports = run;
