@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 export const TICKETS_CHUNK_SIZE = 10;
 
 export const SELECTION_COLUMN_WIDTH = 54;
