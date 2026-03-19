@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { camelCase, snakeCase } = require('lodash');
+const { camelCase, escape, snakeCase } = require('lodash');
 const crypto = require('crypto');
 
 const StringHelper = {};
@@ -48,5 +48,6 @@ StringHelper.splitName = (str) => {
 };
 
 StringHelper.escapeRegexChrs = (text) => text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+StringHelper.escapeXSS = escape;
 
 module.exports = StringHelper;

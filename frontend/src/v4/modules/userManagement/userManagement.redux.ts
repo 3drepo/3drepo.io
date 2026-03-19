@@ -27,6 +27,7 @@ export const { Types: UserManagementTypes, Creators: UserManagementActions } = c
 	setProjectsPending: ['isPending'],
 	addUser: ['user'],
 	addUserSuccess: ['user'],
+	setAddUserIsPending: ['isPending'],
 	removeUser: ['username'],
 	removeUserCascade: ['username'],
 	removeUserSuccess: ['username'],
@@ -64,7 +65,8 @@ export const INITIAL_STATE = {
 	usersPending: true,
 	projectsPending: true,
 	project: null,
-	userNotExists: false
+	userNotExists: false,
+	addUserIsPending: false,
 };
 
 const mergePermissions = (permissions, newPermissions) => permissions.map((currentPermissions) => {
@@ -110,6 +112,10 @@ export const setProjectsPending = (state = INITIAL_STATE, { isPending }) => {
 
 export const addUserSuccess = (state = INITIAL_STATE, { user, currentUser }) => {
 	return {...state, users: [...state.users, user] };
+};
+
+export const setAddUserIsPending = (state = INITIAL_STATE, { isPending }) => {
+	return {...state, addUserIsPending: isPending};
 };
 
 export const removeUserSuccess = (state = INITIAL_STATE, { username }) => {
@@ -209,6 +215,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[UserManagementTypes.SET_PROJECTS_PENDING]: setProjectsPending,
 
 	[UserManagementTypes.ADD_USER_SUCCESS]: addUserSuccess,
+	[UserManagementTypes.SET_ADD_USER_IS_PENDING]: setAddUserIsPending,
 	[UserManagementTypes.REMOVE_USER_SUCCESS]: removeUserSuccess,
 	[UserManagementTypes.SET_TEAMSPACE]: setTeamspace,
 	[UserManagementTypes.UPDATE_USER_JOB_SUCCESS]: updateUserJobSuccess,

@@ -15,19 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext } from 'react';
-import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
-import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { createContext, Dispatch, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
-import { chunk } from 'lodash';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
 
 export interface TicketsTableType {
 	getPropertyType: (name: string) => PropertyTypeDefinition;
@@ -36,6 +34,9 @@ export interface TicketsTableType {
 	groupBy: string,
 	setGroupBy: (groupBy: React.SetStateAction<string>) => void;
 	fetchColumn: (name: string, tickets: ITicket[]) => void;
+	setSelectedIds: Dispatch<React.SetStateAction<Set<string>>>
+	selectedIds: Set<string>;
+	onBulkEdit: () => void;
 }
 
 const defaultValue: TicketsTableType = {
@@ -45,6 +46,9 @@ const defaultValue: TicketsTableType = {
 	groupBy: '',
 	setGroupBy: () => {},
 	fetchColumn: () => {},
+	setSelectedIds: () => {},
+	selectedIds: new Set([]),
+	onBulkEdit: () => {},
 };
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
@@ -58,11 +62,17 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
 		{},
 	);
+
+	const onBulkEdit = () => {
+		// eslint-disable-next-line no-console
+		console.log('Editting these ids...', selectedIds);
+	};
 
 	const fetchColumn = (name, tickets: ITicket[]) => {
 		const idsByModelId = tickets
@@ -76,20 +86,14 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 			},  {} ) as Record<string, string[]>;
 
 		Object.keys(idsByModelId).map((modelId) => {
-			const ids = idsByModelId[modelId];
 			const isFederation = isFed(modelId);
-			const chunks = chunk(ids, 200);
-			chunks.forEach((idsChunk) => {
-				TicketsActionsDispatchers.fetchTicketsProperties(
-					teamspace,
-					project,
-					modelId,
-					idsChunk,
-					template.code,
-					isFederation,
-					[name],
-				);
-			});
+			TicketsActionsDispatchers.fetchTicketsProperties(
+				teamspace,
+				project,
+				modelId,
+				isFederation,
+				[name],
+			);
 		});
 	};
 
@@ -99,19 +103,21 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		|| ['properties.Owner', 'properties.Assignees'].includes(name)
 	);
 
-	const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
-	const groupByProperties = definitionsAsArray
-		.filter((definition) => ['manyOf', 'oneOf'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
-		.map((definition) => definition.name);
+	useEffect(() => {
+		setSelectedIds(new Set());
+	}, [templateId]);
 	
 	return (
 		<TicketsTableContext.Provider value={{
 			getPropertyType,
 			isJobAndUsersType,
-			groupByProperties,
+			groupByProperties: groupByProperties(definitionsAsArray),
 			groupBy: groupBy || NONE_OPTION,
 			setGroupBy,
 			fetchColumn,
+			setSelectedIds,
+			selectedIds,
+			onBulkEdit,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>

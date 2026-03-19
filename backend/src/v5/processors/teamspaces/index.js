@@ -22,20 +22,22 @@ const { createIndex, dropDatabase } = require('../../handler/db');
 const { createTeamspaceRole, grantTeamspaceRoleToUser, removeTeamspaceRole, revokeTeamspaceRoleFromUser } = require('../../models/roles');
 const {
 	createTeamspaceSettings,
+	editSubscriptions,
 	getAddOns,
 	getTeamspaceRefId,
 	grantAdminToUser,
+	removeSubscription,
 	removeUserFromAdminPrivilege,
 } = require('../../models/teamspaceSettings');
-const { deleteFavourites, getUserByUsername, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
+const { deleteFavourites, getUserByUsername, getUserByUsernameOrEmail, getUserId, getUserInfoFromEmailArray, updateUserId } = require('../../models/users');
 const { deleteIfUndefined, isEmpty } = require('../../utils/helper/objects');
 const { getFile, removeAllFilesFromTeamspace } = require('../../services/filesManager');
+const { getInvitationsByTeamspace, inviteUserAsAdmin, removeAllInvitationsByTeamspace } = require('../../models/invitations');
 const { getQuotaInfo, getSpaceUsed } = require('../../utils/quota');
 const { COL_NAME } = require('../../models/projectSettings.constants');
 const { DEFAULT_OWNER_JOB } = require('../../models/jobs.constants');
 const { addDefaultTemplates } = require('../../models/tickets.templates');
 const { createNewUserRecord } = require('../users');
-const { getInvitationsByTeamspace } = require('../../models/invitations');
 const { isTeamspaceAdmin } = require('../../utils/permissions');
 const { logger } = require('../../utils/logger');
 const { membershipStatus } = require('../../services/sso/frontegg/frontegg.constants');
@@ -61,31 +63,41 @@ const removeAllUsersFromTS = async (teamspace) => {
 
 Teamspaces.getAvatar = (teamspace) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, teamspace);
 
-Teamspaces.initTeamspace = async (teamspaceName, owner, accountId) => {
+Teamspaces.initTeamspace = async (teamspaceName, adminUser, accountId) => {
 	try {
-		let teamspaceId;
-		if (accountId) {
-			if (!await getTeamspaceByAccount(accountId)) throw templates.teamspaceNotFound;
-			teamspaceId = accountId;
-		} else {
-			teamspaceId = await createAccount(teamspaceName);
+		let firstAdmin;
+		if (adminUser) {
+			try {
+				const { user: foundUser } = await getUserByUsernameOrEmail(adminUser);
+				firstAdmin = foundUser;
+			} catch (error) {
+				if (error.code !== templates.userNotFound.code) throw error;
+			}
 		}
+
+		const teamspaceId = accountId ?? await createAccount(teamspaceName);
+
 		await Promise.all([
 			createTeamspaceRole(teamspaceName),
 			addDefaultJobs(teamspaceName),
 			createIndex(teamspaceName, COL_NAME, { name: 1 }, { unique: true }),
 		]);
+
 		await Promise.all([
 			createTeamspaceSettings(teamspaceName, teamspaceId),
 			addDefaultTemplates(teamspaceName),
 		]);
-		if (owner) {
+
+		if (firstAdmin) {
 			await Promise.all([
-				assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, owner),
-				Teamspaces.addTeamspaceMember(teamspaceName, owner),
-				grantAdminToUser(teamspaceName, owner),
+				assignUserToJob(teamspaceName, DEFAULT_OWNER_JOB, firstAdmin),
+				Teamspaces.addTeamspaceMember(teamspaceName, firstAdmin),
+				grantAdminToUser(teamspaceName, firstAdmin),
 			]);
+		} else if (adminUser) {
+			await inviteUserAsAdmin(teamspaceName, adminUser);
 		}
+		return teamspaceId;
 	} catch (err) {
 		logger.logError(`Failed to initialize teamspace for ${teamspaceName}:${err.message}`);
 		throw err;
@@ -98,6 +110,7 @@ Teamspaces.removeTeamspace = async (teamspace, removeAssociatedAccount = true) =
 		removeAllUsersFromTS(teamspace),
 		removeAllFilesFromTeamspace(teamspace),
 		removeAllTeamspaceNotifications(teamspace),
+		removeAllInvitationsByTeamspace(teamspace),
 	]);
 	await Promise.all([
 		dropDatabase(teamspace),
@@ -229,6 +242,10 @@ Teamspaces.getQuotaInfo = async (teamspace) => {
 		seats: { available: quotaInfo.collaborators, used: collaboratorsUsed },
 	};
 };
+
+Teamspaces.updateQuota = editSubscriptions;
+
+Teamspaces.removeQuota = removeSubscription;
 
 Teamspaces.addTeamspaceMember = async (teamspace, userToAdd, invitedBy) => {
 	const userQueryProjection = {

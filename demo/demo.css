@@ -18,11 +18,11 @@ html, body, #viewer, #canvas, #unity {
   margin: 0;
   display: flex;
   position: absolute;
-  width: 50%;
+  width: 70%;
   min-width: 600px;
   top: 5px;
 }
-#changeModel input, #changeModel button {
+#changeModel select, #changeModel input, #changeModel button {
   height: 24px;
   text-align: center;
   min-height: 20px;

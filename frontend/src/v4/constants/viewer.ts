@@ -118,7 +118,7 @@ export const DEFAULT_SETTINGS = {
 	maxShadowDistance: 10000,
 	numCacheThreads: 3,
 	clipPlaneBorderWidth: 0.8,
-	clipPlaneBorderColor: [0.02, 0.16, 0.32],
+	clipPlaneBorderColor: [0.047, 0.463, 0.565],
 	clipPlaneGizmoSize: 120,
 	clipPlaneVisualSize: 300,
 	clipPlaneAxisSize: 2.0,

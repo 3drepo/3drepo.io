@@ -19,7 +19,7 @@ import { all, cancel, fork, put, select, take, takeEvery, takeLatest } from 'red
 import * as API from '@/v5/services/api';
 import { formatMessage } from '@/v5/services/intl';
 import { SnackbarActions } from '@/v4/modules/snackbar';
-import { get, isString } from 'lodash';
+import { chunk, get, isEqual, isString } from 'lodash';
 import {
 	TicketsTypes,
 	TicketsActions,
@@ -37,20 +37,21 @@ import {
 	FetchTicketGroupsAndGoToView,
 	WatchPropertiesUpdatesAction,
 	SetPropertiesFetchedAction,
+	UpdateManyTicketsAction,
 } from './tickets.redux';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { getContainerOrFederationFormattedText, RELOAD_PAGE_OR_CONTACT_SUPPORT_ERROR_MESSAGE } from '../store.helpers';
 import { ITicket, ViewpointState } from './tickets.types';
-import { selectTicketById, selectTicketByIdRaw, selectTicketsById, selectTicketsGroups } from './tickets.selectors';
-import { selectContainersByFederationId } from '../federations/federations.selectors';
+import { selectTicketById, selectTicketByIdRaw, selectTicketsByContainersAndFederations, selectTicketsData, selectTicketsGroups } from './tickets.selectors';
+import { selectContainersByFederationId, selectIsFederation } from '../federations/federations.selectors';
 import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { addUpdatedAtTime } from './tickets.helpers';
-import { filtersToQuery } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 import { AdditionalProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import EventEmitter from 'eventemitter3';
 import { stripModuleOrPropertyPrefix } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 export function* fetchTickets({ teamspace, projectId, modelId, isFederation, propertiesToInclude }: FetchTicketsAction) {
 	try {
@@ -58,6 +59,7 @@ export function* fetchTickets({ teamspace, projectId, modelId, isFederation, pro
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets;
 		const tickets = yield fetchModelTickets(teamspace, projectId, modelId, { propertiesToInclude });
+		yield put(TicketsActions.resetPropertiesFetched());
 		yield put(TicketsActions.fetchTicketsSuccess(modelId, tickets));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -76,40 +78,55 @@ const ticketPropertiesQueue = new AsyncFunctionExecutor(
 			? API.Tickets.fetchFederationTickets
 			: API.Tickets.fetchContainerTickets
 	)(teamspace, projectId, modelId, queryParams),
-	20,
+	2,
+	ExecutionStrategy.Fifo,
+);
+
+const updateManyTicketsQueue = new AsyncFunctionExecutor(
+	(isFederation, teamspace, projectId, modelId, template, tickets) => (
+		isFederation
+			? API.Tickets.updateFederationManyTickets
+			: API.Tickets.updateContainerManyTickets
+	)(teamspace, projectId, modelId, template, tickets),
+	2,
 	ExecutionStrategy.Fifo,
 );
 
 export function* fetchTicketsProperties({
-	teamspace, projectId, modelId, ticketIds,
-	templateCode, isFederation, propertiesToInclude,
+	teamspace, projectId, modelId,
+	isFederation, propertiesToInclude,
+	onSuccess,
+	onError,
 }: FetchTicketsPropertiesAction) {
 	try {
+		const ticketsData = yield select(selectTicketsByContainersAndFederations, [modelId]);
 
-		const codes = (yield select(selectTicketsById, ticketIds)).map(({ number }) => `${templateCode}:${number}`);
-		const filterByTemplateCode = {
-			filter: {
-				operator: 'is',
-				values: codes,
-			},
-			property: 'Ticket ID',
-			type: 'ticketCode',
-		} as any;
-	
+		let chunkSize = 1000;
+
+		let ticketsFetchsCount = Math.ceil(ticketsData.length / chunkSize);
 		// The format required in the query to fetch the tickets 
 		// is without the full path of the property so we strip that
 		const propertiesToIncludeParam = propertiesToInclude.map(stripModuleOrPropertyPrefix);
+		for (let i = 0 ; i < ticketsFetchsCount ; i++ ) {
+			const tickets = yield ticketPropertiesQueue.addCall(
+				isFederation,
+				teamspace,
+				projectId,
+				modelId,
+				{
+					propertiesToInclude: propertiesToIncludeParam,
+					skip: i * chunkSize,
+					limit: chunkSize,
+					sortBy: 'Created at',
+				},
+			);
 
-		const tickets = yield ticketPropertiesQueue.addCall(
-			isFederation,
-			teamspace,
-			projectId,
-			modelId,
-			{ propertiesToInclude: propertiesToIncludeParam, filters: filtersToQuery([filterByTemplateCode]) },
-		);
+
+			yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
+			yield put(TicketsActions.setPropertiesFetched(tickets.map(({ _id }) => _id), propertiesToInclude, true));
+		}
 		
-		yield put(TicketsActions.upsertTicketsSuccess(modelId, tickets));
-		yield put(TicketsActions.setPropertiesFetched(ticketIds, propertiesToInclude, true));
+		onSuccess?.();
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage(
@@ -118,6 +135,7 @@ export function* fetchTicketsProperties({
 			),
 			error,
 		}));
+		onError?.();
 	}
 }
 
@@ -356,6 +374,102 @@ export function* watchPropertiesUpdates({ propertiesNames, watch }: WatchPropert
 	yield cancel(watchFetchTask);
 }
 
+const hasSameValue = (ticket:Partial<ITicket>, updateFields:Partial<ITicket>)=> {
+	let value = false;
+
+	for (let key of Object.keys(updateFields)) {
+		if (key === 'properties' || value) break;
+
+		if (ticket[key] === updateFields[key]) {
+			value = true;
+		}
+	}
+	
+	for (let key of Object.keys(updateFields.properties || {})) {
+		if (value) break;
+		if (isEqual(ticket.properties[key], updateFields.properties[key])) {
+			value = true;
+		}
+	}
+
+	for (let key of Object.keys(updateFields.modules || {})) {
+		for (let moduleProperty of Object.keys(updateFields.modules[key].properties || {})) {
+			if (value) break;
+			if (isEqual(ticket.modules[key].properties[moduleProperty], updateFields.modules[key].properties[moduleProperty])) {
+				value = true;
+			}
+		}
+	}
+
+	return value;
+};
+
+export function* updateManyTickets({ teamspace, projectId, ids, ticket, onSuccess, onError }: UpdateManyTicketsAction) {
+	const snackbarKey = new Date().getTime();
+	try {
+		// // This is for updating all tickets in the redux state
+		const ticketsByModelTemplateId:Record<string, Partial<ITicket>[]> = {};
+
+		// // This is for updating all tickets in the redux state
+		const allTicketsUpdates:Record<string, Partial<ITicket>[]> = {};
+
+		const state = getState();
+
+		const ticketsData = yield select(selectTicketsData);
+
+		for (let i = 0 ; i < ids.length ; i++) {
+			const id =  ids[i];
+			const ticketData = ticketsData[id];
+
+			// *** README *** : This validation should be removed before the release and after
+			// the backend is changed to not complain about tickets with the same original value.
+			if (!hasSameValue(ticketData, ticket)) {
+				const key = ticketData.modelId + '.' + ticketData.type;
+
+				if (!ticketsByModelTemplateId[key]) {
+					ticketsByModelTemplateId[key] = [];
+				}
+
+				ticketsByModelTemplateId[key].push({ ...ticket, _id: id });
+			}
+
+			if (!allTicketsUpdates[ticketData.modelId]) {
+				allTicketsUpdates[ticketData.modelId] = [];
+			}
+
+			allTicketsUpdates[ticketData.modelId].push({ ...ticket, _id: id });
+		}
+
+		let chunkSize = 1000;
+		const isFed = selectIsFederation(state);
+		yield put(SnackbarActions.show({ message: formatMessage({ id: 'tickets.updateManyTickets.updating', defaultMessage: 'Tickets updating...' }), spinner: true, key: snackbarKey  }));
+		for (let modelIdTemplate of Object.keys(ticketsByModelTemplateId)) {
+			const chunks = chunk(ticketsByModelTemplateId[modelIdTemplate], chunkSize);
+			const [modelId, template] = modelIdTemplate.split('.');
+			for (let i = 0; i < chunks.length ; i++) {
+				yield updateManyTicketsQueue.addCall(isFed(modelId), teamspace, projectId, modelId, template, chunks[i]);
+			} 
+		}
+
+		for (let modelId of Object.keys(allTicketsUpdates)) {
+			yield put(TicketsActions.upsertTicketsSuccess(modelId, allTicketsUpdates[modelId].map(addUpdatedAtTime)));
+		}
+
+		onSuccess?.();
+		yield put(SnackbarActions.show({ message: formatMessage({ id: 'tickets.updateManyTickets.updated', defaultMessage: 'Tickets updated' }), key: snackbarKey }));
+	} catch (error) {
+		yield put(SnackbarActions.show({ key: snackbarKey  })); // This is to remove the updating snackbar in case of error
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage(
+				{ id: 'tickets.updateTicket.error', defaultMessage: 'trying to update tickets({ticketsCount})' },
+				{ ticketsCount: ids.length },
+			),
+			error,
+		}));
+		onError?.();
+	}
+}
+
 export default function* ticketsSaga() {
 	yield takeEvery(TicketsTypes.FETCH_TICKETS, fetchTickets);
 	yield takeEvery(TicketsTypes.FETCH_TICKET, fetchTicket);
@@ -370,4 +484,5 @@ export default function* ticketsSaga() {
 	yield takeLatest(TicketsTypes.UPDATE_TICKET_GROUP, updateTicketGroup);
 	yield takeEvery(TicketsTypes.FETCH_TICKETS_PROPERTIES, fetchTicketsProperties);
 	yield takeEvery(TicketsTypes.WATCH_PROPERTIES_UPDATES, watchPropertiesUpdates);
+	yield takeLatest(TicketsTypes.UPDATE_MANY_TICKETS, updateManyTickets);
 }

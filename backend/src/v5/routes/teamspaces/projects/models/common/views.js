@@ -59,7 +59,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/views:
 	 *   get:
 	 *     description: Get the list of views available within the model
-	 *     tags: [Views]
+	 *     tags: [v:external, Views]
 	 *     operationId: ViewsList
 	 *     parameters:
 	 *       - name: teamspace
@@ -123,7 +123,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/views/{view}/thumbnail:
 	 *   get:
 	 *     description: Get the thumbnail of the view specified
-	 *     tags: [Views]
+	 *     tags: [v:external, Views]
 	 *     operationId: ViewThumbnail
 	 *     parameters:
 	 *       - name: teamspace

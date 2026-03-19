@@ -17,7 +17,6 @@
 
 import styled from 'styled-components';
 
-
 export const TableIconContainer  = styled.div<{ $active?: boolean }>`
 	width: 16px;
 	height: 16px;
@@ -36,10 +35,5 @@ export const TableIconContainer  = styled.div<{ $active?: boolean }>`
 `;
 
 export const GearIconContainer = styled(TableIconContainer)`
-	/* absolutely positioned to end of headers because adding it to the actual last
-	header cell causes settings menu to close whenever this last column is changed  */
-	position: absolute;
-	right: 0;
-
 	color: ${({ theme }) => theme.palette.base.main};
 `;
