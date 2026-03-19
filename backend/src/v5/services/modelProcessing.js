@@ -45,16 +45,39 @@ const {
 	clash_queue: clashq,
 } = queueConfig;
 
+const MESSAGE_TYPES = {
+	CLASH: 'clash',
+	IMPORT: 'import',
+	DRAWING: 'drawing',
+};
+
 const onCallbackQMsg = ({ content, properties }) => {
 	logger.logInfo(`[Received][${properties.correlationId}] ${content}`);
 	try {
-		const { status, database: teamspace, project: model, user, value, message } = JSON.parse(content);
-		if (status) {
+		const { status, teamspace, project, container, type, user, value, message, results } = JSON.parse(content);
+		if (type === MESSAGE_TYPES.CLASH) {
+			const stream = fs.createReadStream(results, { encoding: 'utf8' });
+
+			stream.on('data', (chunk) => {
+				console.log(chunk);
+			});
+
+			stream.on('end', () => {
+				console.log('Done reading');
+			});
+
+			stream.on('error', (err) => {
+				console.error('Error:', err);
+			});
+
+			publish(events.CLASH_RUN_COMPLETED,
+				{ teamspace, project, corId: properties.correlationId, results });
+		} else if (status) {
 			publish(events.QUEUED_TASK_UPDATE,
-				{ teamspace, model, corId: properties.correlationId, status });
+				{ teamspace, model: container, corId: properties.correlationId, status });
 		} else {
 			publish(events.QUEUED_TASK_COMPLETED,
-				{ teamspace, model, corId: properties.correlationId, user, value, message });
+				{ teamspace, model: container, corId: properties.correlationId, user, value, message });
 		}
 	} catch (err) {
 		logger.logError(`[${properties.correlationId}] Failed to process message: ${err?.message}`);
@@ -239,12 +262,13 @@ ModelProcessing.getLogArchive = async (corId) => {
 
 ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 	const configPath = `${sharedDir}/${corId}/clashConfig.json`;
+
 	try {
 		await mkdir(`${sharedDir}/${corId}`);
 
 		const writableStream = fs.createWriteStream(configPath);
 		await pipeline(stream, writableStream);
-		const msg = `processClash ${teamspace} ${UUIDToString(project)} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
+		const msg = `processClash ${UUIDToString(project)} ${teamspace} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
 		await queueMessage(clashq, corId, msg);
 	} catch (err) {
 		await rm(configPath).catch((cleanUpErr) => {
