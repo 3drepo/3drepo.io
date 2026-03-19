@@ -64,12 +64,13 @@ async function getRepoBundleHeader(teamspace, collection, bundle) {
 		let bytesRead = 0;
 		let bytesToRead = Number.MAX_SAFE_INTEGER;
 		let headerLength = 0;
+		let hasHeader = false;
 		stream.on('data', (chunk) => {
 			chunks.push(chunk);
 			bytesRead += chunk.length;
 			if (bytesRead >= 20 && headerLength === 0) {
 				const preamble = Buffer.concat(chunks);
-				const view = new DataView(preamble.buffer);
+				const view = new DataView(preamble.buffer, preamble.offset, preamble.length);
 				headerLength = view.getInt32(HEADER_LENGTH_START, true);
 				bytesToRead = headerLength + HEADER_DATA_START;
 			}
@@ -77,11 +78,16 @@ async function getRepoBundleHeader(teamspace, collection, bundle) {
 				const preamble = Buffer.concat(chunks);
 				const header = preamble.subarray(HEADER_DATA_START, HEADER_DATA_START + headerLength);
 				const json = header.toString();
+				hasHeader = true;
 				stream.destroy();
 				resolve(JSON.parse(json));
 			}
 		});
-		stream.on('end', () => reject(new Error(`Got to end of bundle before processing header ${teamspace} ${collection} ${bundle}`)));
+		stream.on('end', () => {
+			if (!hasHeader) {
+				reject(new Error(`Got to end of bundle before processing header ${teamspace} ${collection} ${bundle}`));
+			}
+		});
 	});
 }
 
