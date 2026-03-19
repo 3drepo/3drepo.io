@@ -1,9 +1,5 @@
 /**
-<<<<<<<< HEAD:backend/src/scripts/migrations/5.22.2/index.js
  *  Copyright (C) 2026 3D Repo Ltd
-========
- *  Copyright (C) 2025 3D Repo Ltd
->>>>>>>> f7ca39a809c21e7e0b866af76c1fa06ba2e722ab:frontend/src/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableGroup.helper.ts
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -19,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-<<<<<<<< HEAD:backend/src/scripts/migrations/5.22.2/index.js
 const updateRepobundleMetadata = require('./updateRepobundleMetadata');
 
 const scripts = [
@@ -27,11 +22,3 @@ const scripts = [
 ];
 
 module.exports = scripts;
-========
-export const TICKETS_CHUNK_SIZE = 10;
-
-export const SELECTION_COLUMN_WIDTH = 54;
-export const SETTINGS_COLUMN_WIDTH = 24;
-
-export const NEW_TICKET_ROW_AREA_NAME = 'newTicketRow';
->>>>>>>> f7ca39a809c21e7e0b866af76c1fa06ba2e722ab:frontend/src/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableGroup.helper.ts
