@@ -196,6 +196,9 @@ const processCollection = async (teamspace, collection) => {
 	// find all entries where at least one metadata element entry is missing the numSubmeshes field
 	const revisionAssets = await find(teamspace, collection, {
 		$or: [
+			{
+				metadata: { $exists: false },
+			},
 			{ metadata: {
 				$elemMatch: { numSubmeshes: { $exists: false } },
 			} },
