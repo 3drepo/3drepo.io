@@ -196,9 +196,14 @@ const processCollection = async (teamspace, collection) => {
 
 	// find all entries where at least one metadata element entry is missing the numSubmeshes field
 	const revisionAssets = await find(teamspace, collection, {
-		metadata: {
-			$elemMatch: { numSubmeshes: { $exists: false } },
-		},
+		$or: [
+			{ metadata: {
+				$elemMatch: { numSubmeshes: { $exists: false } },
+			} },
+			{
+				_id: { $in: revisionsToRedo.map((r) => r._id) },
+			},
+		],
 	});
 	const updateInstructions = await Promise.all(revisionAssets.map((revision) => processRevision(
 		teamspace, collection, revision, requireRebuildRevs.has(revision._id))));
