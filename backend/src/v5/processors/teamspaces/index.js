@@ -128,10 +128,12 @@ Teamspaces.getTeamspaceListByUser = async (user) => {
 		try {
 			const teamspace = await getTeamspaceByAccount(accountId);
 			if (teamspace) {
-				const isAdmin = await isTeamspaceAdmin(teamspace, user);
-				return { name: teamspace, isAdmin };
+				const refId = await getTeamspaceRefId(teamspace);
+				if (refId === accountId) {
+					const isAdmin = await isTeamspaceAdmin(teamspace, user);
+					return { name: teamspace, isAdmin };
+				}
 			}
-
 			return undefined;
 		} catch (err) {
 			return undefined;
