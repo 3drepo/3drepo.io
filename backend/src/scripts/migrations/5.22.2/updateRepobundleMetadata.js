@@ -20,14 +20,13 @@ const FilesManager = require('../../../v5/services/filesManager');
 
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { find } = require(`${v5Path}/handler/db`);
+const { find, bulkWrite } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getFile } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
 const zlib = require('zlib');
 const { UUIDLookUpTable } = require('../../../v5/utils/helper/uuids');
-const { bulkWrite } = require('../../../v5/handler/db');
 
 const HEADER_LENGTH_START = 16;
 const HEADER_DATA_START = 20;
