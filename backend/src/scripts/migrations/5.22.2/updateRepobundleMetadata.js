@@ -141,10 +141,7 @@ const processRevision = async (teamspace, collection, revision, forceRebuild) =>
 	try {
 		let revisedMeta = [...(revision.metadata || [])];
 
-		// For the Date constructor, the month is a zero-based index.
 		if (forceRebuild || !revision.metadata) {
-			// If the revision was processed after the date specified, we need
-			// to rebuild if so to make the primitive types consistent with older imports.
 			// If metadata is missing - this is a v1 import.
 			// We can get this information from the bundle header.
 
@@ -190,6 +187,8 @@ const processRevision = async (teamspace, collection, revision, forceRebuild) =>
 };
 
 const processCollection = async (teamspace, collection) => {
+	// If the revision was processed after the date specified, we need
+	// to rebuild if so to make the primitive types consistent with older imports.
 	const revisionsToRedo = await find(teamspace, collection.replace('stash.repobundles', 'history'),
 		{ timestamp: { $gt: new Date(2026, 2, 13) } }, { _id: 1 });
 
