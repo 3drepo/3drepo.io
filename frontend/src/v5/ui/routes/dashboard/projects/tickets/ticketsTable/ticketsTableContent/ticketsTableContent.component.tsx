@@ -31,6 +31,7 @@ import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isEqual, intersection } from 'lodash';
 import { TicketsFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { SELECTION_COLUMN_WIDTH } from './ticketsTableGroup/ticketsTableGroup.helper';
+import { SortedGroupedTableContext } from '@controls/sortedTableContext/sortedGroupedTableContext';
 
 const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
 	const edgeScrolling = useEdgeScrolling();
@@ -40,6 +41,8 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		setVisibleSortedColumnsNames,
 		getVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
+
+	const { sortedGroups } = useContext(SortedGroupedTableContext);
 	const { isFiltering } = useContext(TicketsFiltersContext);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const ignoreColumnChange = useRef(false);
@@ -107,7 +110,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		);
 	}
 
-	if (!props.tickets.length) {
+	if (!sortedGroups.length) {
 		return (
 			<EmptyPageView>
 				<FormattedMessage
