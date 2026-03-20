@@ -20,12 +20,14 @@ const FilesManager = require('../../../v5/services/filesManager');
 
 const { getTeamspaceList, getCollectionsEndsWith } = require('../../utils');
 
-const { find, replaceOne, findOne } = require(`${v5Path}/handler/db`);
+const { find } = require(`${v5Path}/handler/db`);
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getFile } = require(`${v5Path}/services/filesManager`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
 
 const zlib = require('zlib');
+const { UUIDLookUpTable } = require('../../../v5/utils/helper/uuids');
+const { bulkWrite } = require('../../../v5/handler/db');
 
 const HEADER_LENGTH_START = 16;
 const HEADER_DATA_START = 20;
@@ -135,31 +137,22 @@ async function getMetadataEntryFromBundle(teamspace, collection, bundle) {
 	return metadata;
 }
 
-const processRevision = async (teamspace, collection, revision) => {
+const processRevision = async (teamspace, collection, revision, forceRebuild) => {
 	try {
-		let requiresUpdate = false;
-		const history = await findOne(teamspace, collection.replace('stash.repobundles', 'history'), { _id: revision._id }, { timestamp: 1 });
+		let revisedMeta = [...(revision.metadata || [])];
+
 		// For the Date constructor, the month is a zero-based index.
-		if (history.timestamp > new Date(2026, 2, 13)) {
-			// Check if this is a 5.22.1 import and rebuild if so to make the primitive
-			// types consistent with older imports. This check relies on the date
-			// range we know 5.22.1 was active.
+		if (forceRebuild || !revision.metadata) {
+			// If the revision was processed after the date specified, we need
+			// to rebuild if so to make the primitive types consistent with older imports.
+			// If metadata is missing - this is a v1 import.
+			// We can get this information from the bundle header.
 
-			// eslint-disable-next-line no-param-reassign
-			delete revision.metadata;
-		}
-		if (!revision.metadata) {
-			// This is a v1 import so is missing the metadata entirely. We can
-			// get this information from the bundle header.
-
-			// eslint-disable-next-line no-param-reassign
-			revision.metadata = await Promise.all(
+			revisedMeta = await Promise.all(
 				revision.assets.map((asset) => getMetadataEntryFromBundle(teamspace, collection, asset)));
-
-			requiresUpdate = true;
 		}
-		for (let i = 0; i < revision.metadata.length; i++) {
-			if (!revision.metadata[i].numSubmeshes) {
+		for (let i = 0; i < revisedMeta.length; i++) {
+			if (!revisedMeta[i].numSubmeshes) {
 				// We can get both the number of submeshes and components/repomeshes
 				// from the mpc document.
 				const fileName = revision.jsonFiles[i];
@@ -176,44 +169,66 @@ const processRevision = async (teamspace, collection, revision) => {
 				// document will be written back to the db inside this call.
 
 				// eslint-disable-next-line no-param-reassign
-				revision.metadata[i].numSubmeshes = mapping.length;
+				revisedMeta[i].numSubmeshes = mapping.length;
 				// eslint-disable-next-line no-param-reassign
-				revision.metadata[i].numComponents = getNumComponents(mapping);
-
-				requiresUpdate = true;
+				revisedMeta[i].numComponents = getNumComponents(mapping);
 			}
 		}
-		if (requiresUpdate) {
-			await replaceOne(
-				teamspace,
-				collection,
-				{
-					_id: revision._id,
-				},
-				revision,
-			);
-			numRevisions++;
-		}
+		numRevisions++;
+
+		return {
+			updateOne: {
+				filter: { _id: revision._id },
+				update: { $set: { metadata: revisedMeta } },
+			},
+		};
 	} catch (error) {
-		logger.logInfo(`Exception processing ${teamspace}/${collection}/${UUIDToString(revision._id)}: ${error}`);
+		logger.logInfo(`Exception processing ${teamspace}/${collection}/${UUIDToString(revision._id)}: ${error.message}`);
+		// force the migration to terminate so we can investigate the issue before processing more revisions.
+		throw error;
 	}
 };
 
 const processCollection = async (teamspace, collection) => {
-	const revisionAssets = await find(teamspace, collection, {});
-	await Promise.all(revisionAssets.map((revision) => processRevision(teamspace, collection, revision)));
+	const revisionsToRedo = await find(teamspace, collection.replace('stash.repobundles', 'history'),
+		{ timestamp: { $gt: new Date(2026, 2, 13) } }, { _id: 1 });
+
+	const requireRebuildRevs = new UUIDLookUpTable(revisionsToRedo.map((r) => r._id));
+
+	// find all entries where at least one metadata element entry is missing the numSubmeshes field
+	const revisionAssets = await find(teamspace, collection, {
+		metadata: {
+			$elemMatch: { numSubmeshes: { $exists: false } },
+		},
+	});
+	const updateInstructions = await Promise.all(revisionAssets.map((revision) => processRevision(
+		teamspace, collection, revision, requireRebuildRevs.has(revision._id))));
+	if (updateInstructions.length > 0) {
+		await bulkWrite(teamspace, collection, updateInstructions);
+	}
+
+	logger.logInfo(`\t\tUpdated ${updateInstructions.length} entries`);
+
 	numCollections++;
 };
 
 const processTeamspace = async (teamspace) => {
 	const collections = await getCollectionsEndsWith(teamspace, '.stash.repobundles');
-	await Promise.all(collections.map((collection) => processCollection(teamspace, collection.name)));
+	for (const { name: collection } of collections) {
+		logger.logInfo(`\t- ${collection}`);
+		// eslint-disable-next-line no-await-in-loop
+		await processCollection(teamspace, collection);
+	}
 	numTeamspaces++;
 };
 
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
-	await Promise.all(teamspaces.map((ts) => processTeamspace(ts)));
+	for (const teamspace of teamspaces) {
+		logger.logInfo(`- ${teamspace}`);
+		// eslint-disable-next-line no-await-in-loop
+		await processTeamspace(teamspace);
+	}
 	logger.logInfo(`Processed ${numTeamspaces} teamspaces & ${numCollections} collections. Updated ${numRevisions} revisions.`);
 };
 
