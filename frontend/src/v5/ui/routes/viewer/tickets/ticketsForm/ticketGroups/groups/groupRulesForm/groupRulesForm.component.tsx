@@ -132,7 +132,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 				</InputsContainer>
 				<Buttons>
 					<ActionMenuItem>
-						<Button variant="text" color="secondary">
+						<Button variant="text" color="secondary" onClick={onClose}>
 							<FormattedMessage id="tickets.groups.filterPanel.cancel" defaultMessage="Cancel" />
 						</Button>
 					</ActionMenuItem>
