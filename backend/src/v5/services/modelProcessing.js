@@ -56,22 +56,9 @@ const onCallbackQMsg = ({ content, properties }) => {
 	try {
 		const { status, teamspace, project, container, type, user, value, message, results } = JSON.parse(content);
 		if (type === MESSAGE_TYPES.CLASH) {
-			const stream = fs.createReadStream(results, { encoding: 'utf8' });
-
-			stream.on('data', (chunk) => {
-				console.log(chunk);
-			});
-
-			stream.on('end', () => {
-				console.log('Done reading');
-			});
-
-			stream.on('error', (err) => {
-				console.error('Error:', err);
-			});
-
+			const resultsDir = results.replace(SHARED_SPACE_TAG, sharedDir);
 			publish(events.CLASH_RUN_COMPLETED,
-				{ teamspace, project, corId: properties.correlationId, results });
+				{ teamspace, project, corId: properties.correlationId, results: resultsDir });
 		} else if (status) {
 			publish(events.QUEUED_TASK_UPDATE,
 				{ teamspace, model: container, corId: properties.correlationId, status });
