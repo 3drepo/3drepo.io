@@ -124,6 +124,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
 	[models, containerOrFederation]);
 
+	const groupingFunction = (gB, ts) => (items: ITicket[]) => groupTickets(gB, ts, items);
+
 	useEffect(() => {
 		if (!models.length) return;
 		
@@ -332,8 +334,6 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			});
 		}
 	}, [accessibleIds.join()]);
-
-	const groupingFunction = (gB, ts) => (items: ITicket[]) => groupTickets(gB, ts, items);
 
 	return (
 		// eslint-disable-next-line max-len

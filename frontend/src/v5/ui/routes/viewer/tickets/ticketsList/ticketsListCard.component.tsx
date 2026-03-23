@@ -44,6 +44,10 @@ import { TicketsBulkUpdateContext, TicketsBulkUpdateContextComponent } from '@co
 import { BulkUpdateDropdown } from './bulkUpdate/bulkUpdateDropDown.component';
 import { ToggleAllCheckbox } from './bulkUpdate/toggleAllCheckbox.component';
 import { TextOverflow } from '@controls/textOverflow';
+import { SortedGroupedTableComponent } from '@controls/sortedTableContext/sortedGroupedTableContext';
+import { BaseProperties } from '../tickets.constants';
+import { ITicket } from '@/v5/store/tickets/tickets.types';
+import { customSortingFunctions, groupTickets } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 
 const TicketsActions = ({ readOnly, groupBy }) => {
 	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
@@ -96,6 +100,7 @@ export const TicketsListCard = () => {
 	const groupBy = TicketsCardHooksSelectors.selectGroupBy();
 	const [fetchingProperties, setFetchingProperties] = useState(false);
 
+	const groupingFunction = (gB, ts) => (items: ITicket[]) => groupTickets(gB, ts, items);
 
 	const onFiltersChange = (newfilters) => {
 		TicketsCardActionsDispatchers.setFilters(newfilters);
@@ -135,7 +140,14 @@ export const TicketsListCard = () => {
 						{groupBy === NONE_OPTION && <ToggleAllCheckbox $withFilters={filters.length > 0}/>}
 						{groupBy !== NONE_OPTION && <GroupByLabel groupBy={groupBy} />}
 						{tickets.length ? (
-							<TicketsList groupBy={groupBy} templates={templates} loading={fetchingProperties}/>
+							<SortedGroupedTableComponent
+								items={tickets}
+								customSortingFunctions={customSortingFunctions}
+								groupingFunction={groupingFunction(groupBy, templates)}
+								sortingColumn={BaseProperties.CREATED_AT}
+							>
+								<TicketsList groupBy={groupBy} templates={templates} loading={fetchingProperties}/>
+							</SortedGroupedTableComponent>
 						) : (
 							<EmptyListMessage>
 								<FormattedMessage id="viewer.cards.tickets.noTickets" defaultMessage="No tickets have been created yet" />
