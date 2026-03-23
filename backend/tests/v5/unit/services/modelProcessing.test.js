@@ -29,11 +29,18 @@ const FilesManager = require(`${src}/services/filesManager`);
 
 jest.mock('../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+
+jest.mock('fs', () => {
+	const actualFs = jest.requireActual('fs');
+	return { ...actualFs, createWriteStream: jest.fn(actualFs.createWriteStream) };
+});
+const { createWriteStream } = require('fs');
+
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const config = require(`${src}/utils/config`);
-const fs = require('fs');
+
 const { PassThrough } = require('stream');
 const fsp = require('fs/promises');
 const path = require('path');
@@ -291,6 +298,7 @@ const testGetLogArchive = () => {
 		test('Should return undefined if the path is not found', async () => {
 			await expect(ModelProcessing.getLogArchive(generateUUIDString())).resolves.toBeUndefined();
 		});
+
 		test('Should return with zip file if path is found but no files found', async () => {
 			const corId = generateUUIDString();
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
@@ -374,14 +382,14 @@ const testQueueClashRun = () => {
 			stream.write(data);
 			stream.end();
 
-			jest.spyOn(fs, 'createWriteStream').mockImplementation(() => {
+			createWriteStream.mockImplementationOnce(() => {
 				throw new Error(generateRandomString());
 			});
 
 			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
 				.rejects.toEqual(templates.queueInsertionFailed);
 
-			fs.createWriteStream.mockRestore();
+			// fs.createWriteStream.mockRestore();
 			expect(Queue.queueMessage).not.toHaveBeenCalled();
 		});
 	});

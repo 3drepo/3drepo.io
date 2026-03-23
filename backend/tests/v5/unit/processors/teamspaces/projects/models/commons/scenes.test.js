@@ -79,14 +79,14 @@ const testGetMeshesWithParentIds = () => {
 		nodes: nodesMocked,
 		meshMapFile: JSON.stringify(meshMap),
 		expectedResults: meshesToReturn,
-		options: { returnString: true, groupByParent: false },
+		options: { convertToString: true, groupByParent: false },
 	};
 
 	describe.each([
 		['empty array if no corresponding nodes are found', { ...defaultParams, nodes: [], expectedResults: [] }],
 		['empty array if no corresponding mesh mapping is found', { ...defaultParams, nodes: times(10, () => ({ _id: generateUUID() })), expectedResults: [] }],
 		['expected mesh ids', { ...defaultParams, options: undefined }],
-		['expected mesh ids in string form if returnString is set to false', { ...defaultParams, options: { returnString: false }, expectedResults: defaultParams.expectedResults.map(stringToUUID) }],
+		['expected mesh ids in string form if convertToString is set to false', { ...defaultParams, options: { convertToString: false }, expectedResults: defaultParams.expectedResults.map(stringToUUID) }],
 		['expected mesh ids in grouped form if groupByParent is set to true', { ...defaultParams, options: { groupByParent: true }, expectedResults: meshMap }],
 		['expected mesh ids without duplicates', { ...defaultParams, meshMapFile: JSON.stringify(dupMeshMap), expectedResults: dupValues }],
 	])('Get meshes with parent Ids', (desc, { nodes, meshMapFile, expectedResults, options }) => {

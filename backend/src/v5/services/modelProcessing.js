@@ -18,6 +18,7 @@
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
+const { createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
@@ -26,7 +27,6 @@ const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
 const { execFile } = require('child_process');
-const fs = require('fs');
 const { pipeline } = require('stream/promises');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
@@ -194,7 +194,7 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 ModelProcessing.getContainerFileName = (corId) => {
 	try {
 		const filePath = Path.join(sharedDir, `${corId}.json`);
-		const jsonFile = JSON.parse(fs.readFileSync(filePath).toString());
+		const jsonFile = JSON.parse(readFileSync(filePath).toString());
 		const fileName = jsonFile.file.split('/').slice(-1)[0];
 		return fileName;
 	} catch (error) {
@@ -209,11 +209,11 @@ ModelProcessing.getLogArchive = async (corId) => {
 	try {
 		const taskDir = Path.join(sharedDir, corId);
 		const zipPath = Path.join(taskDir, filename);
-		const files = fs.readdirSync(taskDir);
+		const files = readdirSync(taskDir);
 		const archive = archiver('zip', { zlib: { level: 1 } });
 
 		const archiveReady = new Promise((resolve, reject) => {
-			const output = fs.createWriteStream(zipPath);
+			const output = createWriteStream(zipPath);
 			output.on('close', resolve);
 			output.on('error', reject);
 			archive.on('error', reject);
@@ -266,7 +266,7 @@ ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 	try {
 		await mkdir(`${sharedDir}/${corId}`);
 
-		const writableStream = fs.createWriteStream(configPath);
+		const writableStream = createWriteStream(configPath);
 		await pipeline(stream, writableStream);
 		const msg = `processClash ${UUIDToString(project)} ${teamspace} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
 		await queueMessage(clashq, corId, msg);
