@@ -73,7 +73,7 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 		const id = UUIDToString(_id);
 		const meshIds = idToMeshes[id];
 
-		if (meshIds.length) {
+		if (meshIds?.length) {
 			if (groupByParent) {
 				results[id] = meshIds;
 			} else {
