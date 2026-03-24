@@ -17,7 +17,7 @@
 
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomNumber, generateRandomObject } = require('../../helper/services');
+const { determineTestGroup, generateRandomString, generateUUID, generateRandomNumber, generateRandomObject } = require('../../helper/services');
 
 const Ticket = require(`${src}/models/tickets`);
 const { basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
@@ -751,6 +751,37 @@ const testUpdateTickets = () => {
 	});
 };
 
+const testRemoveAllTicketsWithTemplate = () => {
+	describe('Remove all tickets with template', () => {
+		test('Should return a list of ticketIds from template that were provided', async () => {
+			const teamspace = generateRandomString();
+			const templateIds = times(10, generateUUID);
+			const dbFindOutput = templateIds.map((id) => ({ _id: id }));
+			const expectedOutput = dbFindOutput.map(({ _id }) => _id);
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			const counterRegex = new RegExp(`.+_(${templateIds.map(UUIDToString).join('|')})$`);
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(dbFindOutput);
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			const res = await Ticket.removeAllTicketsWithTemplates(teamspace, templateIds);
+
+			expect(res).toEqual(expectedOutput);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace, ticketCol, { teamspace, type: { $in: templateIds } }, { _id: 1 },
+			);
+
+			expect(deleteFn).toHaveBeenCalledTimes(2);
+			expect(deleteFn)
+				.toHaveBeenCalledWith(teamspace, ticketCol, { _id: { $in: expectedOutput } });
+			expect(deleteFn)
+				.toHaveBeenCalledWith(teamspace, ticketCounterCol, { _id: counterRegex },
+				);
+		});
+	});
+};
+
 const testGetTicketsByTemplate = () => {
 	describe('Get tickets by template', () => {
 		const teamspace = generateRandomString();
@@ -781,5 +812,6 @@ describe(determineTestGroup(__filename), () => {
 	testGetAllTickets();
 	testGetTicketsByQuery();
 	testGetTicketsByFilter();
+	testRemoveAllTicketsWithTemplate();
 	testGetTicketsByTemplate();
 });

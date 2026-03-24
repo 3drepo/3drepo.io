@@ -128,9 +128,9 @@ History.updateRevision = async function(account, model, revId, voidValue) {
 	if(utils.isBoolean(voidValue)) {
 		voidValue = voidValue ? true : undefined;
 
-		const {result} = await db.updateMany(account, getCollName(model), {_id: utils.stringToUUID(revId)} , { $set:  {void: voidValue}});
+		const {modifiedCount} = await db.updateMany(account, getCollName(model), {_id: utils.stringToUUID(revId)} , { $set:  {void: voidValue}});
 
-		if(!result.n) {
+		if(!modifiedCount) {
 			throw responseCodes.INVALID_TAG_NAME;
 		}
 

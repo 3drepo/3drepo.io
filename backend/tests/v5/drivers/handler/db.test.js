@@ -27,7 +27,6 @@ const {
 	db: dbHelper,
 	generateRandomNumber,
 } = require('../../helper/services');
-const mongodb = require('mongodb');
 const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 
 const DB = require(`${src}/handler/db`);
@@ -962,7 +961,7 @@ const testSetPassword = () => {
 const testConnectionString = () => {
 	const oldConfig = cloneDeep(config.db);
 	const hosts = times(3, () => generateRandomString());
-	const ports = times(3, () => generateRandomNumber(1000, 9999));
+	const ports = times(3, () => Math.round(generateRandomNumber(1000, 9999)));
 	const username = generateRandomString();
 	const password = generateRandomString();
 
@@ -984,13 +983,10 @@ const testConnectionString = () => {
 		['all options', { host: [hosts[0], hosts[1]], port: [ports[0], ports[1]], username: '123', password: '123', replicaSet: 'rs0', authSource: 'admin', timeout: 12345 },
 			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]}/?replicaSet=rs0&authSource=admin&socketTimeoutMS=12345`, username, password],
 	])('Connection String', (desc, configOverride, expectedString, user, pass) => {
-		test(`Should return the expected connection string if ${desc}`, async () => {
-			const fn = jest.spyOn(mongodb.MongoClient, 'connect').mockImplementationOnce(() => Promise.resolve());
+		test(`Should return the expected connection string if ${desc}`, () => {
 			config.db = configOverride;
 			// eslint-disable-next-line no-underscore-dangle
-			await DB._context.connect(user, pass);
-			expect(fn).toHaveBeenCalledWith(expectedString, expect.anything());
-			fn.mockRestore();
+			expect(DB._context.getURL(user, pass)).toEqual(expectedString);
 		});
 		afterAll(() => {
 			config.db = oldConfig;

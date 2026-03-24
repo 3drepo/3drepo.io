@@ -18,7 +18,7 @@
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
-const { createWriteStream, readdirSync } = require('fs');
+const { createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
@@ -163,6 +163,18 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 
 		logger.logError('Failed to queue model job', err?.message);
 		throw templates.queueInsertionFailed;
+	}
+};
+
+ModelProcessing.getContainerFileName = (corId) => {
+	try {
+		const filePath = Path.join(sharedDir, `${corId}.json`);
+		const jsonFile = JSON.parse(readFileSync(filePath).toString());
+		const fileName = jsonFile.file.split('/').slice(-1)[0];
+		return fileName;
+	} catch (error) {
+		logger.logError(`Failed to get file name for ${corId}: ${error.message}`);
+		return undefined;
 	}
 };
 
