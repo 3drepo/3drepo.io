@@ -46,6 +46,7 @@ module.exports = {
 			}
 		],
 		'@typescript-eslint/no-unnecessary-type-assertion': 'off',
+		'@typescript-eslint/no-redundant-type-constituents': 'off',
 		'@typescript-eslint/no-empty-function': 'off',
 		'@typescript-eslint/no-unused-expressions': 'error',
 		'@typescript-eslint/no-var-requires': 'error',

@@ -28,6 +28,7 @@ import {
 
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { JSX } from 'react';
 import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 import { TextField as TextFieldBase } from '../../../components/textField/textField.component';
 
@@ -50,7 +51,7 @@ interface IContainer {
 	isSmartGroup?: boolean;
 }
 
-export const Container = styled.div`
+export const Container = styled.div<{edit: boolean, panelName: string, isSmartGroup: boolean}>`
 	color: ${COLOR.BLACK_60};
 	background-color: ${({ edit, panelName, isSmartGroup }: IContainer) => containerStyle(edit, panelName, isSmartGroup)};
 	overflow: hidden;
@@ -203,8 +204,8 @@ const unexpandedStyles  = css`
 	${expandedStyles}
 `;
 
-export const ScrollableContainer = styled.div`
-	${({ expanded }: { expanded: boolean }) => expanded ? expandedStyles : unexpandedStyles};
+export const ScrollableContainer = styled.div<{ expanded: boolean }>`
+	${({ expanded }) => expanded ? expandedStyles : unexpandedStyles};
 	display: flex;
 	flex-direction: column;
 	max-height: 100%;

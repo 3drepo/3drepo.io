@@ -23,7 +23,7 @@ type ITypography = Omit<TypographyProps, 'variant'> & {
 	variant?: ITypographyVariants;
 };
 
-export const Typography = ({ variant, children, ...props }: ITypography): JSX.Element => {
+export const Typography = ({ variant, children, ...props }: ITypography) => {
 	if (variant === 'kicker') {
 		return <KickerTypography {...props}>{children}</KickerTypography>;
 	}

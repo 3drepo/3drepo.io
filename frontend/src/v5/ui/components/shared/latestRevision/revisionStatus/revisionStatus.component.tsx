@@ -30,7 +30,7 @@ export interface IRevisionStatus {
 	}
 }
 
-export const RevisionStatus = ({ status, error, name }: IRevisionStatus): JSX.Element => {
+export const RevisionStatus = ({ status, error, name }: IRevisionStatus) => {
 	if (status === UploadStatus.QUEUED) {
 		return (
 			<QueuedStatus>

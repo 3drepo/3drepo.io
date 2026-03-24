@@ -30,7 +30,7 @@ export const UploadListItemRevisionTag = ({
 	revisionPrefix,
 	disabled = false,
 	...props
-}: IUploadListItemRevision): JSX.Element => {
+}: IUploadListItemRevision) => {
 	const name = `${revisionPrefix}.revisionTag`;
 	const { errors } = useFormState();
 	const errorMessage = !disabled ? get(errors, name)?.message as string : '';

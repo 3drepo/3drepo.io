@@ -46,7 +46,7 @@ export const DashboardListCollapse = ({
 	interactableWhileLoading,
 	unmountHidden,
 	onChangeCollapse,
-}: IDashboardListCollapse): JSX.Element => {
+}: IDashboardListCollapse) => {
 	const [isExpanded, setIsExpanded] = useState(defaultExpanded);
 	const [unmountChildren, setUnmountChildren] = useState(!defaultExpanded);
 

@@ -28,7 +28,7 @@ type ILegalAppBar = {
 	activePage: string;
 };
 
-export const LegalAppBar = ({ activePage }: ILegalAppBar): JSX.Element => (
+export const LegalAppBar = ({ activePage }: ILegalAppBar) => (
 	<AppBarContainer>
 		<Items>
 			<Link to={DASHBOARD_ROUTE}>

@@ -23,6 +23,6 @@ interface IDashboardListSkeletonItem {
 	className?: string;
 }
 
-export const DashboardListSkeletonItem = ({ children, className }: IDashboardListSkeletonItem): JSX.Element => (
+export const DashboardListSkeletonItem = ({ children, className }: IDashboardListSkeletonItem) => (
 	<Container className={className}>{children}</Container>
 );

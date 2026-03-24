@@ -74,7 +74,7 @@ export const UploadListItem = ({
 	isSelected,
 	fileData,
 	isUploading,
-}: IUploadListItem): JSX.Element => {
+}: IUploadListItem) => {
 	const revisionPrefix = `uploads.${index}`;
 	const uploadErrorMessage: string = ContainerRevisionsHooksSelectors.selectUploadError(uploadId);
 	const { watch, trigger, setValue, setError, formState: { errors } } = useFormContext();

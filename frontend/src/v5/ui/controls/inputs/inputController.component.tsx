@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { forwardRef } from 'react';
+import { forwardRef, JSX } from 'react';
 import { get } from 'lodash';
 import { Controller, ControllerRenderProps, useFormContext } from 'react-hook-form';
 
@@ -42,12 +42,12 @@ export type InputControllerProps<T,> = T & FormInputProps & {
 };
 
 type Props<T> = InputControllerProps<T> & {
-	Input: (props: T) => JSX.Element,
+	Input: (props: T) => any,
 };
 
 export type InputControllerType = <T>(Component: Props<T>, ref) => JSX.Element;
 // eslint-disable-next-line @typescript-eslint/comma-dangle
-export const InputController: InputControllerType = forwardRef(<T,>({
+export const InputController: any = forwardRef(<T,>({
 	Input,
 	name,
 	control,
@@ -88,4 +88,4 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 			)}
 		/>
 	);
-});
+}) as any;

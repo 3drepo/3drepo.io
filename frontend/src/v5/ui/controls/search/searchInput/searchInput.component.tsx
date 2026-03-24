@@ -30,7 +30,7 @@ type ISearchInput = {
 	onClear?: () => void;
 } & TextFieldProps;
 
-export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: ISearchInput): JSX.Element => {
+export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: ISearchInput) => {
 	const { query, setQuery } = useContext(SearchContext);
 
 	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
