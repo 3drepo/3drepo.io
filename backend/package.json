@@ -73,7 +73,7 @@
     "paypal-rest-sdk": "1.8.1",
     "pdfjs-dist": "5.4.149",
     "pug": "3.0.3",
-    "serialize-javascript": "6.0.2",
+    "serialize-javascript": "7.0.3",
     "serve-favicon": "2.5.0",
     "sharp": "0.33.5",
     "slash": "3.0.0",
