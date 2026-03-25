@@ -42,6 +42,7 @@ const { serialiseComment } = require('../../../schemas/tickets/tickets.comments'
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
 const { createReadStream } = require('fs');
+const { completeTestRun } = require('../../../processors/teamspaces/projects/clashes');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -86,19 +87,7 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user }) => 
 
 const clashRunCompleted = async ({ teamspace, project, corId, results }) => {
 	try {
-		const stream = createReadStream(results, { encoding: 'utf8' });
-
-		stream.on('data', (chunk) => {
-			console.log(chunk);
-		});
-
-		stream.on('end', () => {
-			console.log('Done reading');
-		});
-
-		stream.on('error', (err) => {
-			console.error('Error:', err);
-		});
+		await completeTestRun(teamspace, project, stringToUUID(corId), results);
 	} catch (err) {
 		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${err.message}`);
 		if (err.stack) {

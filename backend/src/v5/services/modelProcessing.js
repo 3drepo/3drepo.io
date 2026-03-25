@@ -255,7 +255,7 @@ ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 
 		const writableStream = createWriteStream(configPath);
 		await pipeline(stream, writableStream);
-		const msg = `processClash ${UUIDToString(project)} ${teamspace} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
+		const msg = `processClash ${teamspace} ${UUIDToString(project)} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
 		await queueMessage(clashq, corId, msg);
 	} catch (err) {
 		await rm(configPath).catch((cleanUpErr) => {
