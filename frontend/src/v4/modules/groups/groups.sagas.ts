@@ -61,10 +61,6 @@ function* fetchGroups({teamspace, modelId, revision}) {
 	yield put(GroupsActions.togglePendingState(false));
 }
 
-function* setSelectedCriterionId({ selectedCriterionId }) {
-	yield put(GroupsActions.setCriteriaFieldState({ criterionForm: null, selectedCriterionId }));
-}
-
 function* setActiveGroup({ group }) {
 	try {
 		const activeGroupId = yield select(selectActiveGroupId);
@@ -481,5 +477,4 @@ export default function* GroupsSaga() {
 	yield takeLatest(GroupsTypes.SET_SHOW_SMART_GROUPS, setShowSmartGroups);
 	yield takeLatest(GroupsTypes.SET_SHOW_STANDARD_GROUPS, setShowStandardGroups);
 	yield takeLatest(GroupsTypes.UPDATE_GROUP_FROM_CHAT_SERVICE, updateGroupFromChatService);
-	yield takeLatest(GroupsTypes.SET_SELECTED_CRITERION_ID, setSelectedCriterionId);
 }

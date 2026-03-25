@@ -161,6 +161,10 @@ export const setCriteriaFieldState = (state = INITIAL_STATE, { criteriaFieldStat
 	}});
 };
 
+export const setSelectedCriterionId = (state = INITIAL_STATE, { selectedCriterionId }) => {
+	return setCriteriaFieldState(state, { criteriaFieldState: { selectedCriterionId, criterionForm: null } });
+}
+
 export const addToHighlighted = (state = INITIAL_STATE, { groupId }) => {
 	const highlightedGroups = new Set(state.componentState.highlightedGroups);
 	highlightedGroups.add(groupId);
@@ -306,6 +310,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[GroupsTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[GroupsTypes.SET_COMPONENT_STATE]: setComponentState,
+	[GroupsTypes.SET_SELECTED_CRITERION_ID]: setSelectedCriterionId,
 	[GroupsTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
 	[GroupsTypes.ADD_COLOR_OVERRIDE]: addColorOverride,
