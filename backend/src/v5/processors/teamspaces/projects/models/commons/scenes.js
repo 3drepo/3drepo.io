@@ -75,7 +75,7 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 
 		if (meshIds?.length) {
 			if (groupByParent) {
-				results[id] = meshIds;
+				results[id] = convertToString ? meshIds : meshIds.map(stringToUUID);
 			} else {
 				meshIds.forEach((meshId) => results.add(meshId));
 			}

@@ -86,8 +86,9 @@ const testGetMeshesWithParentIds = () => {
 		['empty array if no corresponding nodes are found', { ...defaultParams, nodes: [], expectedResults: [] }],
 		['empty array if no corresponding mesh mapping is found', { ...defaultParams, nodes: times(10, () => ({ _id: generateUUID() })), expectedResults: [] }],
 		['expected mesh ids', { ...defaultParams, options: undefined }],
-		['expected mesh ids in string form if convertToString is set to false', { ...defaultParams, options: { convertToString: false }, expectedResults: defaultParams.expectedResults.map(stringToUUID) }],
-		['expected mesh ids in grouped form if groupByParent is set to true', { ...defaultParams, options: { groupByParent: true }, expectedResults: meshMap }],
+		['expected mesh ids in string form if convertToString is false', { ...defaultParams, options: { convertToString: false }, expectedResults: defaultParams.expectedResults.map(stringToUUID) }],
+		['expected mesh ids in grouped form if groupByParent is true', { ...defaultParams, options: { groupByParent: true }, expectedResults: meshMap }],
+		['expected mesh ids in grouped form if groupByParent is true and convertToString is false', { ...defaultParams, options: { groupByParent: true, convertToString: false }, expectedResults: Object.fromEntries(Object.entries(meshMap).map(([key, value]) => [key, value.map(stringToUUID)])) }],
 		['expected mesh ids without duplicates', { ...defaultParams, meshMapFile: JSON.stringify(dupMeshMap), expectedResults: dupValues }],
 	])('Get meshes with parent Ids', (desc, { nodes, meshMapFile, expectedResults, options }) => {
 		test(`Should return ${desc}`, async () => {
