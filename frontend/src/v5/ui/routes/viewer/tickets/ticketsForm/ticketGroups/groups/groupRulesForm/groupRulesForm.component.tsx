@@ -83,7 +83,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 			...obj,
 			field: {
 				...obj.field,
-				values: obj.field.values.map(({ value }) => ({ value })),
+				values: obj.field?.values?.map(({ value }) => ({ value })),
 			},
 			values: obj.values.filter(({ value }) => value),
 		});
@@ -100,18 +100,23 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 
 	useEffect(() => {
 		if (isEmpty(unsavedState)) {
+			// console.log('@@~ Resetting to default values', rule);
 			reset(defaultValues);
+
 		}
 	}, [rule]);
 
 	useEffect(() => {
 		if (isEmpty(unsavedState)) return;
+		// console.log('@@~ Resetting to unsavedState');
 		reset(groupRuleToFormRule(unsavedState));
 	}, [JSON.stringify(unsavedState)]);
 
 	useEffect(() => () => {
 		onClose?.(formRuleToGroupRule(getValues()));
 	}, []);
+
+	// console.log('@@ base form errors', errors);
 
 	return (
 		<Form onSubmit={handleSubmit}>
