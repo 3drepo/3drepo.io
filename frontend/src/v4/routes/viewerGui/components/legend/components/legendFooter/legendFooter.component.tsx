@@ -26,10 +26,11 @@ interface IProps {
 	colors: string[];
 	updatePending: boolean;
 	newLegendEditMode: boolean;
+	isReadOnly: boolean;
 }
 
 export const LegendFooter = ({
-	isPending, prepareNewLegendItem, colors, updatePending, newLegendEditMode,
+	isPending, prepareNewLegendItem, colors, updatePending, newLegendEditMode, isReadOnly
 }: IProps) => {
 	const handleAddNewLegendItem = () => prepareNewLegendItem({
 		name: '',
@@ -41,7 +42,7 @@ export const LegendFooter = ({
 			<ViewerPanelButton
 				aria-label="Add legend"
 				onClick={handleAddNewLegendItem}
-				disabled={isPending || newLegendEditMode}
+				disabled={isPending || newLegendEditMode || isReadOnly}
 				color="secondary"
 				variant="fab"
 				id="legend-add-new-button"
