@@ -45,13 +45,25 @@ TypeChecker.isUUID = (uuid) => {
 	}
 };
 
+let fileTypeModulePromise;
+const loadFileTypeModule = () => {
+	if (!fileTypeModulePromise) {
+		fileTypeModulePromise = import('file-type');
+	}
+	return fileTypeModulePromise;
+};
+
 const getTypeFromBuffer = async (fileBuffer) => {
-	const { fileTypeFromBuffer } = await import('file-type');
-	return Buffer.isBuffer(fileBuffer) ? fileTypeFromBuffer(fileBuffer) : null;
+	if (!Buffer.isBuffer(fileBuffer)) return null;
+
+	const { fileTypeFromBuffer } = await loadFileTypeModule();
+	return fileTypeFromBuffer(fileBuffer);
 };
 const getTypeFromPath = async (filePath) => {
-	const { fileTypeFromFile } = await import('file-type');
-	return pathCheck(filePath) ? fileTypeFromFile(filePath) : null;
+	if (!pathCheck(filePath)) return null;
+
+	const { fileTypeFromFile } = await loadFileTypeModule();
+	return fileTypeFromFile(filePath);
 };
 TypeChecker.fileMimeFromBuffer = async (fileBuffer) => {
 	const type = await getTypeFromBuffer(fileBuffer);
