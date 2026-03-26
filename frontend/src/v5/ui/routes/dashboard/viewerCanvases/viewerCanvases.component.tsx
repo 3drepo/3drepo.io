@@ -39,8 +39,7 @@ export const ViewerCanvases = () => {
 	return (
 		<>
 			{isCalibrating && <CalibrationHeader />}
-			<SplitPane
-				direction="vertical"
+			<SplitPane direction="horizontal"
 				onResizeEnd={dragFinish}
 				$isCalibrating={isCalibrating}
 				$is2DOpen={is2DOpen}
