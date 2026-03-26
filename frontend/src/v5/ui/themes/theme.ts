@@ -286,7 +286,7 @@ export const theme = createTheme({
 
 						'&.Mui-disabled': {
 							color: COLOR.BASE_LIGHT,
-							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
+							WebkitTextFillColor: COLOR.BASE_LIGHT,
 						},
 
 						'&.Mui-focused:not(.Mui-error)': {
@@ -300,13 +300,13 @@ export const theme = createTheme({
 					input: {
 						// hide arrows in Chrome, Safari, Edge, Opera
 						'&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-							'-webkit-appearance': 'none',
+							WebkitAppearance: 'none',
 							margin: 0,
 						},
 
 						// hide arrows in Firefox
 						'&[type=number]': {
-							'-moz-appearance': 'textfield',
+							MozAppearance: 'textfield',
 						},
 
 					},
@@ -1001,7 +1001,7 @@ export const theme = createTheme({
 					input: {
 
 						'&:-webkit-autofill': { // Remove input background colour on chrome
-							'-webkit-box-shadow': `0 0 0 18px ${COLOR.PRIMARY_MAIN_CONTRAST} inset`,
+							WebkitBoxShadow: `0 0 0 18px ${COLOR.PRIMARY_MAIN_CONTRAST} inset`,
 						},
 					},
 					'input, textarea': {
@@ -1027,7 +1027,7 @@ export const theme = createTheme({
 						borderColor: COLOR.BASE_LIGHTEST,
 						'input, textarea, .MuiInputAdornment-root svg, .MuiSelect-select, .MuiSelect-icon': {
 							color: COLOR.BASE_LIGHT,
-							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
+							WebkitTextFillColor: COLOR.BASE_LIGHT,
 						},
 					},
 					'&.Mui-error': {
