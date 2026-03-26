@@ -73,7 +73,7 @@ export const useSyncPropsEffect = (syncProps) => {
 			};
 		}
 	
-		return null;
+		return;
 	}, []);
 
 	return synchedProps;
