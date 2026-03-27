@@ -21,7 +21,7 @@ import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
-import { TypographyOptions } from '@mui/material/styles/createTypography';
+import { TypographyVariantsOptions } from '@mui/material/styles/createTypography';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
@@ -265,7 +265,7 @@ export const palette = {
 
 export const theme = createTheme({
 	palette,
-	typography: typography as TypographyOptions,
+	typography: typography as TypographyVariantsOptions,
 	components: {
 		MuiTextField: {
 			defaultProps: {
@@ -286,7 +286,7 @@ export const theme = createTheme({
 
 						'&.Mui-disabled': {
 							color: COLOR.BASE_LIGHT,
-							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
+							WebkitTextFillColor: COLOR.BASE_LIGHT,
 						},
 
 						'&.Mui-focused:not(.Mui-error)': {
@@ -300,13 +300,13 @@ export const theme = createTheme({
 					input: {
 						// hide arrows in Chrome, Safari, Edge, Opera
 						'&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-							'-webkit-appearance': 'none',
+							WebkitAppearance: 'none',
 							margin: 0,
 						},
 
 						// hide arrows in Firefox
 						'&[type=number]': {
-							'-moz-appearance': 'textfield',
+							MozAppearance: 'textfield',
 						},
 
 					},
@@ -795,11 +795,6 @@ export const theme = createTheme({
 						},
 					},
 				},
-				button: {
-					'&:hover': {
-						backgroundColor: COLOR.TERTIARY_LIGHTEST,
-					},
-				},
 				padding: {
 					paddingTop: 8,
 					paddingBottom: 8,
@@ -1006,7 +1001,7 @@ export const theme = createTheme({
 					input: {
 
 						'&:-webkit-autofill': { // Remove input background colour on chrome
-							'-webkit-box-shadow': `0 0 0 18px ${COLOR.PRIMARY_MAIN_CONTRAST} inset`,
+							WebkitBoxShadow: `0 0 0 18px ${COLOR.PRIMARY_MAIN_CONTRAST} inset`,
 						},
 					},
 					'input, textarea': {
@@ -1032,7 +1027,7 @@ export const theme = createTheme({
 						borderColor: COLOR.BASE_LIGHTEST,
 						'input, textarea, .MuiInputAdornment-root svg, .MuiSelect-select, .MuiSelect-icon': {
 							color: COLOR.BASE_LIGHT,
-							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
+							WebkitTextFillColor: COLOR.BASE_LIGHT,
 						},
 					},
 					'&.Mui-error': {
@@ -1412,24 +1407,26 @@ export const theme = createTheme({
 		},
 		MuiDateTimePicker: {
 			defaultProps: {
-				components: {
-					OpenPickerIcon: CalendarIcon,
-					LeftArrowIcon: ThinChevronIcon,
-					RightArrowIcon: ThinChevronIcon,
-					ActionBar: CalendarActionBar,
+				slots: {
+					openPickerIcon: CalendarIcon,
+					leftArrowIcon: ThinChevronIcon,
+					rightArrowIcon: ThinChevronIcon,
+					actionBar: CalendarActionBar,
 				},
 			},
 		},
 		MuiDatePicker: {
 			defaultProps: {
-				components: {
-					OpenPickerIcon: CalendarIcon,
-					LeftArrowIcon: ThinChevronIcon,
-					RightArrowIcon: ThinChevronIcon,
-					ActionBar: CalendarActionBar,
+				slots: {
+					openPickerIcon: CalendarIcon,
+					leftArrowIcon: ThinChevronIcon,
+					rightArrowIcon: ThinChevronIcon,
+					actionBar: CalendarActionBar,
 				},
 			},
 		},
+	
+	/*
 		MuiCalendarPicker: {
 			styleOverrides: {
 				root: {
@@ -1591,6 +1588,6 @@ export const theme = createTheme({
 					},
 				},
 			},
-		},
+		},*/
 	},
 }) as any;

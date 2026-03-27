@@ -41,7 +41,7 @@ export const UploadList = ({
 	values,
 	removeUploadById,
 	isUploading,
-}: IUploadList): JSX.Element => {
+}: IUploadList) => {
 	const { selectedId, setSelectedId } = useContext(UploadFilesContext);
 	const { sortedList, setSortConfig } = useOrderedList(values, DEFAULT_SORT_CONFIG);
 

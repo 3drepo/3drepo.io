@@ -27,7 +27,7 @@ export type TicketCommentHistoryBlock = {
 export type ITicketComment = {
 	_id: string,
 	message?: string,
-	images?: string[],
+	images?: any[],
 	view?: Viewpoint,
 	author: string,
 	createdAt: Date,

@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ReactChild, ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 
 import { Container, Content, Footer } from './userManagementTab.styles';
 
 interface IProps {
-	children: ReactChild;
-	footerLabel?: string | JSX.Element;
+	children: ReactNode;
+	footerLabel?: ReactNode;
 	withHeader?: boolean;
 	className?: string;
 }
@@ -38,8 +38,8 @@ export const UserManagementTab = (props: IProps) => {
 			justifyContent="space-between"
 			className={props.className}
 		>
-			<Content item header={props.withHeader}>{children}</Content>
-			{!!footerLabel && (<Footer item>{footerLabel}</Footer>)}
+			<Content header={props.withHeader}>{children}</Content>
+			{!!footerLabel && (<Footer>{footerLabel}</Footer>)}
 		</Container>
 	);
 };

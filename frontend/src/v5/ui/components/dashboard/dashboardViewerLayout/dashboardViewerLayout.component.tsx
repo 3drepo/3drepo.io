@@ -14,9 +14,6 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ThemeProvider } from 'styled-components';
-import { ThemeProvider as MuiThemeProvider } from '@mui/material';
-import { theme } from '@/v5/ui/routes/viewer/theme';
 
 import { AppBar } from '@components/shared/appBar';
 import { Content } from './dashboardViewerLayout.styles';
@@ -28,11 +25,7 @@ export const DashboardViewerLayout = () => (
 		<AppBar />
 		<Content>
 			<ViewerCanvasesContextComponent>
-				<ThemeProvider theme={theme}>
-					<MuiThemeProvider theme={theme}>
-						<Outlet />
-					</MuiThemeProvider>
-				</ThemeProvider>
+				<Outlet />
 			</ViewerCanvasesContextComponent>
 		</Content>
 	</>

@@ -28,6 +28,7 @@ import {
 
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { JSX } from 'react';
 import {GROUP_PANEL_NAME} from '../../../../constants/groups';
 import { TextField as TextFieldBase } from '../../../components/textField/textField.component';
 
@@ -50,7 +51,7 @@ interface IContainer {
 	isSmartGroup?: boolean;
 }
 
-export const Container = styled.div`
+export const Container = styled.div<{edit: boolean, panelName: string, isSmartGroup: boolean}>`
 	color: ${COLOR.BLACK_60};
 	background-color: ${({ edit, panelName, isSmartGroup }: IContainer) => containerStyle(edit, panelName, isSmartGroup)};
 	overflow: hidden;
@@ -82,9 +83,9 @@ export const Summary = styled(AccordionSummary)`
 	&& {
 		display: none;
 	}
-` as any;
+` ;
 
-export const Header = styled(AccordionSummary).attrs({
+export const Header = styled(AccordionSummary as (props) => JSX.Element).attrs({
 	classes: {
 		focused: 'focused',
 		expandIcon: 'summary-icon',
@@ -106,9 +107,9 @@ export const Header = styled(AccordionSummary).attrs({
 			display: none;
 		}
 
-		box-shadow: ${({expanded}: { expanded: boolean }) => expanded ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
+		box-shadow: ${({expanded}) => expanded ? `0 4px 7px -4px ${COLOR.BLACK_30};` : 'none'};
 	}
-` as any;
+`;
 
 export const CollapsableContent = styled.div`
 	margin-bottom: 8px;
@@ -153,7 +154,7 @@ export const ToggleButtonContainer = styled.div`
 	width: 100%;
 	z-index: 1;
 	position: static;
-` as any;
+` ;
 
 export const ToggleButton = styled(IconButton)`
 	&& {
@@ -161,11 +162,11 @@ export const ToggleButton = styled(IconButton)`
 	}
 `;
 
-export const ToggleIcon = styled(ExpandMoreIcon)`
+export const ToggleIcon = styled(ExpandMoreIcon as ({ active }) => JSX.Element)`
 	&& {
 		transform: ${(props: any) => props.active ? `rotate(180deg)` : `rotate(0deg)`};
 	}
-` as any;
+` ;
 
 export const Typography = styled(TypographyComponent)`
 	&& {
@@ -203,8 +204,8 @@ const unexpandedStyles  = css`
 	${expandedStyles}
 `;
 
-export const ScrollableContainer = styled.div`
-	${({ expanded }: { expanded: boolean }) => expanded ? expandedStyles : unexpandedStyles};
+export const ScrollableContainer = styled.div<{ expanded: boolean }>`
+	${({ expanded }) => expanded ? expandedStyles : unexpandedStyles};
 	display: flex;
 	flex-direction: column;
 	max-height: 100%;

@@ -24,10 +24,11 @@ interface ICircleButton {
 	children: any;
 	selected?: boolean;
 	error?: boolean;
+	size?: 'small' | 'medium' | 'large';
 }
 
 export const CircleButton = ({ variant = 'primary', error, ...props }: ICircleButton) => {
-	if (error) return (<ErrorButton {...props} />)
+	if (error) return (<ErrorButton {...props} />);
 	if (variant === 'primary') return (<PrimaryButton {...props} />);
 	if (variant === 'viewer') return (<ViewerButton {...props} />);
 	return (<SecondaryButton {...props} />);

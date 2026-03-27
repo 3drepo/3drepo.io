@@ -32,7 +32,7 @@ import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 
-export const NotFound = (): JSX.Element => {
+export const NotFound = () => {
 	const { intercomLicense } = clientConfigService;
 	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
 	const authenticationFetched = AuthHooksSelectors.selectAuthenticationFetched();

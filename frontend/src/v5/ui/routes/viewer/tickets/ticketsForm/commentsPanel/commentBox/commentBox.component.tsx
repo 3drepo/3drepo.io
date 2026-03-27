@@ -108,8 +108,8 @@ export const CommentBox = ({ commentId, onCancelEdit, message = '', images = [],
 		},
 	});
 	
-	const containerRef = useRef<HTMLElement>();
-	const inputRef = useRef<any>();
+	const containerRef = useRef<HTMLElement>(null);
+	const inputRef = useRef<any>(null);
 	const isEditMode = !!commentId;
 	const newMessage = watch('message');
 

@@ -48,7 +48,7 @@ export const fileToPdf = async (file: File) => {
 };
 
 export const pdfToFile = async (pdf: PDFDocument, fileName) => {
-	const fileAsUintArray = await pdf.save();
+	const fileAsUintArray: any = await pdf.save();
 	return new File([new Blob([fileAsUintArray])], fileName);
 };
 

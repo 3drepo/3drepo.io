@@ -17,7 +17,7 @@
 import { PureComponent, createRef } from 'react';
 import Check from '@mui/icons-material/Check';
 import TreeIcon from '@assets/icons/outlined/tree-outlined.svg';
-import AutoSizer from 'react-virtualized-auto-sizer';
+import { AutoSizer } from 'react-virtualized-auto-sizer';
 import { FixedSizeList as List } from 'react-window';
 
 import { TREE_ACTIONS_ITEMS, TREE_ACTIONS_MENU, TREE_ITEM_SIZE } from '../../../../constants/tree';
@@ -123,8 +123,7 @@ export class Tree extends PureComponent<IProps, IState> {
 
 		return (
 			<div style={{ height: treeNodesHeight, flex: 1 }}>
-				<AutoSizer>
-					{({ width, height }) => (
+				<AutoSizer ChildComponent={({ width, height }) => (
 						<List
 							dataRevision={dataRevision}
 							ref={this.nodeListRef}
@@ -140,7 +139,7 @@ export class Tree extends PureComponent<IProps, IState> {
 							{this.renderTreeNode}
 						</List>
 					)}
-				</AutoSizer>
+				/>
 			</div>
 		);
 	});

@@ -22,12 +22,11 @@ import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styl
 import { VisualSettingsModalContent } from './visualSettingsModal.styles';
 
 type IVisualSettingsModal = {
-	open: boolean;
-	onClickClose: () => void;
+	open?: boolean;
+	onClickClose?: () => void;
 	visualSettings: any;
 	updateSettings: (username, settings) => void;
 	currentUser: string;
-	handleResolve: () => void;
 };
 
 export const VisualSettingsModal = ({

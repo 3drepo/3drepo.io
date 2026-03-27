@@ -49,7 +49,7 @@ const renderValue = (key, value, setSelectedDate) => {
 	}
 
 	return (
-		<Grid item xs={6}>{processedValue} <TimeIcon name={dateToSelect ? undefined : key} value={dateToSelect || value} handleOnClick={setSelectedDate} /></Grid>
+		<Grid size={{xs: 6}}>{processedValue} <TimeIcon name={dateToSelect ? undefined : key} value={dateToSelect || value} handleOnClick={setSelectedDate} /></Grid>
 	);
 }
 
@@ -66,9 +66,9 @@ export const ActivityDetails = ({ isPending, activityDetails, setSelectedDate }:
 	return (
 		<Container container direction="row" alignItems="center">
 			{activityDetails.data.map(({value, key}) => (
-				<Grid key={key} item xs={12} >
+				<Grid key={key} size={{xs: 12}}>
 					<Row container justifyContent="center">
-						<Grid item xs={6}>{key}</Grid>
+						<Grid  size={{xs: 6}}>{key}</Grid>
 						{renderValue(key, value, setSelectedDate)}
 					</Row>
 				</Grid>

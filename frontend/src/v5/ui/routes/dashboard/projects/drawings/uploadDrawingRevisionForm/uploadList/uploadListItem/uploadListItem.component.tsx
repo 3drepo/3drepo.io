@@ -81,7 +81,7 @@ export const UploadListItem = ({
 	fileData,
 	isUploading,
 	isMultiPagePdf,
-}: IUploadListItem): JSX.Element => {
+}: IUploadListItem) => {
 	const revisionPrefix:`uploads.${number}` = `uploads.${index}`;
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const projectId = ProjectsHooksSelectors.selectCurrentProject();

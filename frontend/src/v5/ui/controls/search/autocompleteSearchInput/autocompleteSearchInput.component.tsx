@@ -28,7 +28,7 @@ type AutocompleteSearchInputProps = Omit<Partial<AutocompleteProps<TextFieldProp
 	onChange: (value: string[]) => void;
 	value: string[];
 };
-export const AutocompleteSearchInput = ({ variant = 'filled', placeholder, value, onChange, ...props }: AutocompleteSearchInputProps): JSX.Element => {
+export const AutocompleteSearchInput = ({ variant = 'filled', placeholder, value, onChange, ...props }: AutocompleteSearchInputProps) => {
 	const handleChange = (event, newQueries, reason) => onChange(reason === 'clear' ? [] : newQueries);
 	const handleDeleteQuery = (deletedQuery) => onChange(value.filter((query) => query !== deletedQuery));
 	return (
