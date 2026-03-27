@@ -48,8 +48,8 @@ const testHtml = () => {
 const testSubject = () => {
 	describe('Email subject', () => {
 		test('Should return the subject title as expected', () => {
-			const teamspace_name = generateRandomString();
-			expect(externalTeamspaceExpiryList.subject({ teamspace_name })).toEqual(`Your teamspace ${teamspace_name} is about to expire`);
+			const name = generateRandomString();
+			expect(externalTeamspaceExpiryList.subject({ name })).toEqual(`Your teamspace ${name} is about to expire`);
 		});
 	});
 };
