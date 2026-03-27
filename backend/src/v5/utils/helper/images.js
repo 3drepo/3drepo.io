@@ -27,7 +27,7 @@ let pdfJsLibCache;
 
 const loadPdfJsDist = () => new Promise((resolve) => {
 	if (!pdfJsLibCache) {
-		// eslint-disable-next-line node/no-unsupported-features/es-syntax, import/extensions
+		// eslint-disable-next-line import/extensions
 		import('pdfjs-dist/legacy/build/pdf.mjs').then((pdfJsLib) => {
 			pdfJsLibCache = pdfJsLib;
 			resolve(pdfJsLibCache);
