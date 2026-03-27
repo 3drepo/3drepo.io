@@ -21,8 +21,9 @@ import ResizePaneIcon from '@assets/icons/outlined/horizontal_resize-outlined.sv
 import styled, { css } from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
 
-export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps> & { $isCalibrating: boolean, $is2DOpen }>`
+export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps> & { $isCalibrating?: boolean, $is2DOpen? }>`
 	height: calc(100vh - ${({ $isCalibrating }) => $isCalibrating ? 120 : 62}px) !important;
+	position: absolute !important;
 	.Resizer {
 		box-sizing: border-box;
 		background-clip: padding-box;
