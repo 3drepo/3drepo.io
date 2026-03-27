@@ -83,7 +83,6 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 	});
 
 	return groupByParent ? results : Array.from(results);
-
 };
 
 Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
@@ -168,10 +167,10 @@ const fetchMeshBinariesStreams = async (teamspace, container, refObj) => {
 Scene.getTexture = async (teamspace, project, container, textureId) => {
 	const textureNode = await getNodeByQuery(teamspace, project, container,
 		{ _id: textureId, type: nodeTypes.TEXTURE }, {
-		_id: 1,
-		_blobRef: 1,
-		extension: 1,
-	});
+			_id: 1,
+			_blobRef: 1,
+			extension: 1,
+		});
 
 	// eslint-disable-next-line no-underscore-dangle
 	if (!textureNode || !textureNode._blobRef) {
