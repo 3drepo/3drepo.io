@@ -132,7 +132,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = this.containerRef.current.parentNode;
+		const containerElement = this.containerRef.current?.parentNode;
 		this.setState({ containerElement });
 		this.props.fetchJobsAndColors();
 	}
