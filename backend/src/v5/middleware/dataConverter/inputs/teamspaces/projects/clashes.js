@@ -16,8 +16,10 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
+const { getLatestRevision } = require('../../../../../models/revisions');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { isEqual } = require('../../../../../utils/helper/objects');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 const { validateMany } = require('../../../../common');
 const { validatePlan } = require('../../../../../schemas/projects/clashes');
@@ -48,6 +50,29 @@ Clashes.planExists = async (req, res, next) => {
 		req.planData = await getPlanById(teamspace, planId, { _id: 0 });
 		await next();
 	} catch (err) {
+		respond(req, res, err);
+	}
+};
+
+Clashes.planContainersHaveRevs = async (req, res, next) => {
+	try {
+		const { teamspace } = req.params;
+
+		await Promise.all([req.planData.selectionA, req.planData.selectionB].map(async (selectionObj) => {
+			const { _id: rev } = await getLatestRevision(teamspace, selectionObj.container,
+				modelTypes.CONTAINER, { _id: 1 });
+
+			// eslint-disable-next-line no-param-reassign
+			selectionObj.revision = rev;
+		}));
+
+		await next();
+	} catch (err) {
+		if (err === templates.revisionNotFound) {
+			respond(req, res, createResponseCode(templates.invalidArguments, 'Plan containers must have at least one revision'));
+			return;
+		}
+
 		respond(req, res, err);
 	}
 };

@@ -42,6 +42,12 @@ const ModelSettings = require(`${src}/models/modelSettings`);
 jest.mock('../../../../../../../../src/v5/models/tickets.templates');
 const TemplatesModel = require(`${src}/models/tickets.templates`);
 
+jest.mock('../../../../../../../../src/v5/models/tickets.logs');
+const LogsModel = require(`${src}/models/tickets.logs`);
+
+jest.mock('../../../../../../../../src/v5/models/tickets.comments');
+const CommentsModel = require(`${src}/models/tickets.comments`);
+
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.comments');
 const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
@@ -1203,6 +1209,37 @@ const testGetOpenTicketsCount = () => {
 	});
 };
 
+const testRemoveTicketsWithTemplates = () => {
+	describe('Remove tickets with templates', () => {
+		test('should remove all tickets with templates, the ticket comments, logs and any resources', async () => {
+			const teamspace = generateRandomString();
+			const templateIds = times(5, generateUUID);
+			const ticketIds = times(10, generateUUIDString);
+
+			TicketsModel.removeAllTicketsWithTemplates.mockResolvedValueOnce(ticketIds);
+			CommentsModel.deleteCommentsByTicketIds.mockResolvedValueOnce(undefined);
+			LogsModel.deleteLogsByTicketIds.mockResolvedValueOnce(undefined);
+			FilesManager.removeFilesWithMeta.mockResolvedValueOnce(undefined);
+
+			await expect(Tickets.removeTicketsWithTemplates(teamspace, templateIds))
+				.resolves.toBeUndefined();
+
+			expect(TicketsModel.removeAllTicketsWithTemplates).toHaveBeenCalledTimes(1);
+			expect(TicketsModel.removeAllTicketsWithTemplates).toHaveBeenCalledWith(teamspace, templateIds);
+
+			expect(CommentsModel.deleteCommentsByTicketIds).toHaveBeenCalledTimes(1);
+			expect(CommentsModel.deleteCommentsByTicketIds).toHaveBeenCalledWith(teamspace, ticketIds);
+
+			expect(LogsModel.deleteLogsByTicketIds).toHaveBeenCalledTimes(1);
+			expect(LogsModel.deleteLogsByTicketIds).toHaveBeenCalledWith(teamspace, ticketIds);
+
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFilesWithMeta).toHaveBeenCalledWith(teamspace,
+				TICKETS_RESOURCES_COL, { ticket: { $in: ticketIds } });
+		});
+	});
+};
+
 const testInitialiseAutomatedProperties = () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
@@ -1498,6 +1535,7 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateManyTickets();
 	testGetTicketList();
 	testGetOpenTicketsCount();
+	testRemoveTicketsWithTemplates();
 	testInitialiseAutomatedProperties();
 	testOnTemplateUpdated();
 	testOnModelNameUpdated();
