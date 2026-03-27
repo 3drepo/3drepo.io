@@ -33,7 +33,7 @@ const SendInternalTeamspaceExpiryList = require(`${utilScripts}/teamspaces/sendI
 
 const User = require(`${src}/models/users`);
 
-const {editSubscriptions} = require(`${src}/models/teamspaceSettings`);
+const { editSubscriptions } = require(`${src}/models/teamspaceSettings`);
 
 jest.mock('../../../../src/v5/services/mailer');
 const mailer = require(`${src}/services/mailer`);
@@ -70,7 +70,7 @@ const setupData = async ({ users, ...teamspaces }) => {
 
 const updateExpiryDate = async (teamspace, expiryDate) => {
 	await editSubscriptions(teamspace, 'internal', { expiryDate });
-}
+};
 
 const createData = () => ({
 	teamspaceExpiringIn30Days: generateUserCredentials(),
@@ -95,9 +95,9 @@ const runTest = () => {
 	it('sends appropriate emails to appropriate users', async () => {
 		await Promise.all(
 			[
-				testData.teamspaceExpiringIn30Days.user, 
-				testData.teamspaceExpiringIn30DaysMultipleAdmins.user
-			].map(( teamspace ) => updateExpiryDate(teamspace, expiryWithinThreshold)));
+				testData.teamspaceExpiringIn30Days.user,
+				testData.teamspaceExpiringIn30DaysMultipleAdmins.user,
+			].map((teamspace) => updateExpiryDate(teamspace, expiryWithinThreshold)));
 		await SendInternalTeamspaceExpiryList.run();
 		expect(mailer.sendEmail).toHaveBeenCalledTimes(1);
 		expect(mailer.sendEmail).toHaveBeenCalledWith(
@@ -106,13 +106,13 @@ const runTest = () => {
 			expect.any(Object),
 		);
 	});
-	
+
 	it('does not send emails when no teamspaces are expiring within the threshold', async () => {
 		await Promise.all(
 			[
-				testData.teamspaceExpiringIn30Days.user, 
-				testData.teamspaceExpiringIn30DaysMultipleAdmins.user
-			].map(( teamspace ) => updateExpiryDate(teamspace, expiryOutOfThreshold)));
+				testData.teamspaceExpiringIn30Days.user,
+				testData.teamspaceExpiringIn30DaysMultipleAdmins.user,
+			].map((teamspace) => updateExpiryDate(teamspace, expiryOutOfThreshold)));
 		await SendInternalTeamspaceExpiryList.run();
 		expect(mailer.sendEmail).not.toHaveBeenCalled();
 	});
