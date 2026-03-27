@@ -120,7 +120,7 @@ function Utils() {
 	* @returns {Buffer} binuuid - Binary representation of a UUID
 	*******************************************************************************/
 	this.uuidToMongoBuf3 = function(buf) {
-		return mongo.Binary(buf, 3);
+		return new mongo.Binary(buf, 3);
 	};
 
 	/** *****************************************************************************
@@ -136,7 +136,7 @@ function Utils() {
 		const bytes = uuidparse.parse(uuid);
 		const buf   = new Buffer.from(bytes);
 
-		return mongo.Binary(buf, 3);
+		return new mongo.Binary(buf, 3);
 	};
 
 	/** *****************************************************************************

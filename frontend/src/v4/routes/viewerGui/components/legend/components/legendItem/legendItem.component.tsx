@@ -47,10 +47,11 @@ interface IProps extends ILegend {
 	resetComponentState: () => void;
 	editMode?: boolean;
 	autoFocus?: boolean;
+	readOnly?: boolean;
 }
 
 export const LegendItem = ({
-	name, color, updateLegendItem, deleteLegendItem, legendNames, editMode, setComponentState, ...props
+	name, color, readOnly, updateLegendItem, deleteLegendItem, legendNames, editMode, setComponentState, ...props
 }: IProps) => {
 	const textFieldRef = useRef(null);
 
@@ -97,6 +98,7 @@ export const LegendItem = ({
 				onChange={handleColorChange}
 				onOpen={props.onPickerOpen}
 				onClose={props.onPickerClose}
+				disabled={readOnly}
 			/>
 			<Formik
 				initialValues={{ newName: name }}
@@ -119,6 +121,7 @@ export const LegendItem = ({
 								onChange={handleSave}
 								disableShowDefaultUnderline
 								inputProps={{ maxlength: 20 }}
+								disabled={readOnly}
 								{...additionalTextFieldProps}
 							/>
 						)} />
@@ -126,11 +129,15 @@ export const LegendItem = ({
 				</Tooltip>
 			</Formik>
 			<Actions>
-				<SmallIconButton
-					Icon={RemoveIcon}
-					tooltip="Remove"
-					onClick={handleRemove}
-				/>
+				{
+					!readOnly && (
+						<SmallIconButton
+							Icon={RemoveIcon}
+							tooltip="Remove"
+							onClick={handleRemove}
+						/>
+					)
+				}
 			</Actions>
 		</Container>
 	);

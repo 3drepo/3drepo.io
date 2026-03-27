@@ -30,7 +30,8 @@ interface IProps {
 	selectedRisk: any;
 	teamspace: string;
 	model: any;
-	risks: any[];
+	filteredRisks: any[];
+	unfilteredRisks: any[];
 	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
@@ -149,7 +150,8 @@ export class Risks extends PureComponent<IProps, any> {
 		return (
 			<RisksContainer
 				isPending={this.props.isPending}
-				items={this.props.risks}
+				isEmpty={!this.props.unfilteredRisks.length}
+				items={this.props.filteredRisks}
 				activeItemId={this.props.activeRiskId}
 				showDetails={this.props.showDetails}
 				permissions={this.props.modelSettings.permissions}
