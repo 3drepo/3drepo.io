@@ -2723,6 +2723,10 @@ export class UnityUtil {
 		UnityUtil.toUnity('SetMaxNumResponses', UnityUtil.LoadingState.VIEWER_READY, max);
 	}
 
+	public static setTargetNavigationFps(fps: number) {
+		UnityUtil.toUnity('SetNavigationTargetFPS', UnityUtil.LoadingState.VIEWER_READY, fps);
+	}
+
 	/**
 	 * Creates the WebRequestHandler backend for the WebRequestHandler2 Component in Unity
 	 * @hidden
