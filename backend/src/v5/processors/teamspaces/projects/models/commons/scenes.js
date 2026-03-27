@@ -62,20 +62,27 @@ Scene.prepareCache = async (teamspace, model, revId, cacheExpiry = CACHE_EXPIRAT
 	await getIdToMeshesMapping(teamspace, model, revId, cacheExpiry);
 };
 
-Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds, returnString = false) => {
+Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds,
+	{ groupByParent, convertToString = true } = {}) => {
 	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
 	const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
-	const meshes = new Set();
+
+	const results = groupByParent ? {} : new Set();
+
 	nodes.forEach(({ _id }) => {
-		const idStr = UUIDToString(_id);
-		if (idToMeshes[idStr]) {
-			idToMeshes[idStr].forEach((val) => meshes.add(val));
+		const id = UUIDToString(_id);
+		const meshIds = idToMeshes[id];
+
+		if (meshIds?.length) {
+			if (groupByParent) {
+				results[id] = convertToString ? meshIds : meshIds.map(stringToUUID);
+			} else {
+				meshIds.forEach((meshId) => results.add(convertToString ? meshId : stringToUUID(meshId)));
+			}
 		}
 	});
 
-	const meshesArr = Array.from(meshes);
-
-	return returnString ? meshesArr : meshesArr.map(stringToUUID);
+	return groupByParent ? results : Array.from(results);
 };
 
 Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
