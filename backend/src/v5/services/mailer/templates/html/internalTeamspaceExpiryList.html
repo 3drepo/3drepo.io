@@ -10,10 +10,10 @@
 		</tr>
 	</thead>
 	<tbody>
-		<% for(const { teamspace, expiryDate } of teamspacesToExpire) { %>
+		<% for(const { name, expiryDate } of teamspaces) { %>
 			<tr>
 				<td style="padding:8px; border-bottom:1px solid #E5EDF4;">
-					<%= teamspace %>
+					<%= name %>
 				</td>
 				<td style="padding:8px; border-bottom:1px solid #E5EDF4;">
 					<%= expiryDate %>

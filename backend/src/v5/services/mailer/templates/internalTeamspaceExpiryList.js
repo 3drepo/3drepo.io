@@ -19,8 +19,8 @@ const Yup = require('yup');
 const { generateTemplateFn } = require('./common');
 
 const dataSchema = Yup.object({
-	teamspacesToExpire: Yup.array().of(Yup.object({
-		teamspace: Yup.string().required(),
+	teamspaces: Yup.array().of(Yup.object({
+		name: Yup.string().required(),
 		expiryDate: Yup.date().required(),
 	})).min(1).required(),
 }).required(true);
