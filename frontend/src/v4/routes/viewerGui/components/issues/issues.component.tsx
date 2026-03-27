@@ -34,8 +34,9 @@ interface IProps {
 	topicTypes: any[];
 	teamspace: string;
 	model: any;
-	issues: any[];
+	filteredIssues: any[];
 	jobs: any[];
+	unfilteredIssues: any[];
 	revision?: string;
 	isPending?: boolean;
 	fetchingDetailsIsPending?: boolean;
@@ -180,8 +181,9 @@ export class Issues extends PureComponent<IProps, any> {
 		return (
 			<IssuesContainer
 				isPending={this.props.isPending}
+				isEmpty={!this.props.unfilteredIssues.length}
 				fetchingDetailsIsPending={this.props.fetchingDetailsIsPending}
-				items={this.props.issues}
+				items={this.props.filteredIssues}
 				activeItemId={this.props.activeIssueId}
 				showDetails={this.props.showDetails}
 				permissions={this.props.modelSettings.permissions}

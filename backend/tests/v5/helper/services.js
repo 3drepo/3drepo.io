@@ -182,15 +182,15 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 		historyCol, id, buffer);
 
 	if (revision.rFile) {
-		writeReferencedData(revision.rFile[0], revision.refData);
+		await writeReferencedData(revision.rFile[0], revision.refData);
 	}
 
 	if (revision.image) {
-		writeReferencedData(revision.image, revision.imageData);
+		await writeReferencedData(revision.image, revision.imageData);
 	}
 
 	if (revision.thumbnail) {
-		writeReferencedData(revision.thumbnail, revision.thumbnailData);
+		await writeReferencedData(revision.thumbnail, revision.thumbnailData);
 	}
 	const formattedRevision = {
 		...revision,
