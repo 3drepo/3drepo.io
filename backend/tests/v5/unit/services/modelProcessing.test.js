@@ -16,7 +16,7 @@
  */
 
 const { src, modelFolder, objModel } = require('../../helper/path');
-const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
+const { determineTestGroup, generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/handler/queue');
 const Queue = require(`${src}/handler/queue`);
@@ -29,11 +29,20 @@ const FilesManager = require(`${src}/services/filesManager`);
 
 jest.mock('../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+
+jest.mock('fs', () => {
+	const actualFs = jest.requireActual('fs');
+	return { ...actualFs, createWriteStream: jest.fn(actualFs.createWriteStream) };
+});
+const { createWriteStream } = require('fs');
+
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const config = require(`${src}/utils/config`);
-const fs = require('fs/promises');
+
+const { PassThrough } = require('stream');
+const fsp = require('fs/promises');
 const path = require('path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -61,7 +70,7 @@ const testQueueModelUpload = () => {
 		});
 
 		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
-			await fs.copyFile(objModel, fileCreated);
+			await fsp.copyFile(objModel, fileCreated);
 
 			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
 
@@ -71,7 +80,7 @@ const testQueueModelUpload = () => {
 		});
 
 		test('should succeed with job inserted into the queue', async () => {
-			await fs.copyFile(objModel, fileCreated);
+			await fsp.copyFile(objModel, fileCreated);
 			await expect(ModelProcessing.queueModelUpload(teamspace, model, data, file)).resolves.toBeUndefined();
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
@@ -83,7 +92,7 @@ const testQueueModelUpload = () => {
 		});
 	});
 
-	afterAll(() => fs.rm(fileCreated).catch(() => {}));
+	afterAll(() => fsp.rm(fileCreated).catch(() => {}));
 };
 
 const testCallbackQueueConsumer = () => {
@@ -272,7 +281,7 @@ const testContainerGetFileName = () => {
 			const corId = generateUUIDString();
 			const fileName = `${generateRandomString()}.obj`;
 			const filePath = `${config.cn_queue.shared_storage}/${corId}.json`;
-			await fs.writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
+			await fsp.writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
 
 			await expect(ModelProcessing.getContainerFileName(corId)).toEqual(fileName);
 		});
@@ -289,10 +298,11 @@ const testGetLogArchive = () => {
 		test('Should return undefined if the path is not found', async () => {
 			await expect(ModelProcessing.getLogArchive(generateUUIDString())).resolves.toBeUndefined();
 		});
+
 		test('Should return with zip file if path is found but no files found', async () => {
 			const corId = generateUUIDString();
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fs.mkdir(taskPath);
+			await fsp.mkdir(taskPath);
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: undefined,
@@ -303,9 +313,9 @@ const testGetLogArchive = () => {
 			const corId = generateUUIDString();
 			const log = generateRandomString(100);
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fs.mkdir(taskPath);
-			await fs.writeFile(`${taskPath}/1.log`, log);
-			await fs.writeFile(`${taskPath}/2.log`, generateRandomString());
+			await fsp.mkdir(taskPath);
+			await fsp.writeFile(`${taskPath}/1.log`, log);
+			await fsp.writeFile(`${taskPath}/2.log`, generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: expect.stringContaining(log),
@@ -315,8 +325,8 @@ const testGetLogArchive = () => {
 		test('Should return with zip file if path is found but no log files are found', async () => {
 			const corId = generateUUIDString();
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fs.mkdir(taskPath);
-			await fs.writeFile(`${taskPath}/${generateRandomString()}.Notlog`,
+			await fsp.mkdir(taskPath);
+			await fsp.writeFile(`${taskPath}/${generateRandomString()}.Notlog`,
 				generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
@@ -325,10 +335,71 @@ const testGetLogArchive = () => {
 		});
 	});
 };
-describe('services/modelProcessing', () => {
+
+const testQueueClashRun = () => {
+	describe('Queue clash run', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const data = generateRandomString();
+
+		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
+			Queue.queueMessage.mockRejectedValueOnce(new Error(generateRandomString()));
+			const corId = generateRandomString();
+			const stream = new PassThrough();
+			stream.write(data);
+			stream.end();
+
+			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
+				.rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
+
+			fsp.rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
+				corId, `processClash ${teamspace} ${project} $SHARED_SPACE/${corId}/clashConfig.json`);
+		});
+
+		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
+			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
+			const corId = generateRandomString();
+			const stream = new PassThrough();
+			stream.write(data);
+			stream.end();
+
+			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
+				.rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
+
+			fsp.rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
+				corId, `processClash ${teamspace} ${project} $SHARED_SPACE/${corId}/clashConfig.json`);
+		});
+
+		test(`should fail with ${templates.queueConnectionError.code} if createWriteStream threw the error`, async () => {
+			const corId = generateRandomString();
+			const stream = new PassThrough();
+			stream.write(data);
+			stream.end();
+
+			createWriteStream.mockImplementationOnce(() => {
+				throw new Error(generateRandomString());
+			});
+
+			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
+				.rejects.toEqual(templates.queueInsertionFailed);
+
+			// fs.createWriteStream.mockRestore();
+			expect(Queue.queueMessage).not.toHaveBeenCalled();
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testQueueModelUpload();
 	testCallbackQueueConsumer();
 	testProcessDrawingUpload();
 	testContainerGetFileName();
 	testGetLogArchive();
+	testQueueClashRun();
 });
