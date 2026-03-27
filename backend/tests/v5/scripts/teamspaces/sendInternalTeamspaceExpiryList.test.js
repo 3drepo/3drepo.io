@@ -33,20 +33,14 @@ const SendInternalTeamspaceExpiryList = require(`${utilScripts}/teamspaces/sendI
 
 const User = require(`${src}/models/users`);
 
+const {editSubscriptions} = require(`${src}/models/teamspaceSettings`);
+
 jest.mock('../../../../src/v5/services/mailer');
 const mailer = require(`${src}/services/mailer`);
 
 const { disconnect } = require(`${src}/handler/db`);
 
 const setupData = async ({ users, ...teamspaces }) => {
-	const currentDate = new Date();
-	const expiryThreshold = new Date();
-	expiryThreshold.setDate(currentDate.getDate() + 30);
-	const expiryWithinThreshold = new Date();
-	expiryWithinThreshold.setDate(currentDate.getDate() + 15);
-	const expiryToday = new Date();
-	expiryToday.setHours(12, 0, 0, 0);
-
 	await Promise.all([
 		...users,
 		teamspaces.teamspaceExpiringIn30Days,
@@ -57,12 +51,12 @@ const setupData = async ({ users, ...teamspaces }) => {
 		createTeamspace(
 			teamspaces.teamspaceExpiringIn30Days.user,
 			[users[0].user],
-			{ internal: { expiryDate: expiryWithinThreshold } },
+			undefined,
 			false),
 		createTeamspace(
 			teamspaces.teamspaceExpiringIn30DaysMultipleAdmins.user,
 			users.map(({ user }) => user),
-			{ internal: { expiryDate: expiryWithinThreshold } },
+			undefined,
 			false),
 		createTeamspace(
 			teamspaces.teamspaceNotExpiring.user,
@@ -74,6 +68,10 @@ const setupData = async ({ users, ...teamspaces }) => {
 	await Promise.all(users.map(({ user }) => User.updateUserId(user, user)));
 };
 
+const updateExpiryDate = async (teamspace, expiryDate) => {
+	await editSubscriptions(teamspace, 'internal', { expiryDate });
+}
+
 const createData = () => ({
 	teamspaceExpiringIn30Days: generateUserCredentials(),
 	teamspaceExpiringIn30DaysMultipleAdmins: generateUserCredentials(),
@@ -83,20 +81,40 @@ const createData = () => ({
 
 const runTest = () => {
 	const testData = createData();
+	const currentDate = new Date();
+	const expiryWithinThreshold = new Date();
+	expiryWithinThreshold.setDate(currentDate.getDate() + 15);
+	const expiryOutOfThreshold = new Date();
+	expiryOutOfThreshold.setDate(currentDate.getDate() + 45);
+
 	beforeAll(async () => {
 		await resetDB();
 		await setupData(testData);
 	});
 
 	it('sends appropriate emails to appropriate users', async () => {
+		await Promise.all(
+			[
+				testData.teamspaceExpiringIn30Days.user, 
+				testData.teamspaceExpiringIn30DaysMultipleAdmins.user
+			].map(( teamspace ) => updateExpiryDate(teamspace, expiryWithinThreshold)));
 		await SendInternalTeamspaceExpiryList.run();
-		expect(mailer.sendEmail).toHaveBeenCalledTimes(testData.users.length + 1); // send to all the users twice for the multiple admins and once for single admin
-
+		expect(mailer.sendEmail).toHaveBeenCalledTimes(1);
 		expect(mailer.sendEmail).toHaveBeenCalledWith(
 			emailTemplates.INTERNAL_TEAMSPACE_EXPIRY_LIST.name,
 			config.mail.sender,
 			expect.any(Object),
 		);
+	});
+	
+	it('does not send emails when no teamspaces are expiring within the threshold', async () => {
+		await Promise.all(
+			[
+				testData.teamspaceExpiringIn30Days.user, 
+				testData.teamspaceExpiringIn30DaysMultipleAdmins.user
+			].map(( teamspace ) => updateExpiryDate(teamspace, expiryOutOfThreshold)));
+		await SendInternalTeamspaceExpiryList.run();
+		expect(mailer.sendEmail).not.toHaveBeenCalled();
 	});
 };
 
