@@ -85,11 +85,11 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user }) => 
 	}
 };
 
-const clashRunCompleted = async ({ teamspace, project, corId, results }) => {
+const clashRunCompleted = async ({ teamspace, corId, results }) => {
 	try {
-		await completeTestRun(teamspace, project, stringToUUID(corId), results);
+		await completeTestRun(teamspace, stringToUUID(corId), results);
 	} catch (err) {
-		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${err.message}`);
+		logger.logError(`Failed to process a complete clash run for ${teamspace} with id ${corId}: ${err.message}`);
 		if (err.stack) {
 			logger.logError(err.stack);
 		}

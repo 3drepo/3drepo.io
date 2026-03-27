@@ -86,8 +86,8 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 	return runId;
 };
 
-Clashes.completeTestRun = async (teamspace, project, corId, results) => {
-	await completeTestRun(teamspace, project, corId);
+Clashes.completeTestRun = async (teamspace, corId, results) => {
+	await completeTestRun(teamspace, corId);
 
 	const stream = createReadStream(results, { encoding: 'utf8' });
 
