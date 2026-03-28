@@ -28,7 +28,6 @@ import { matchesQuery } from '@controls/search/searchContext.helpers';
 import { formatMessage } from '@/v5/services/intl';
 import { Divider } from '@mui/material';
 import { TextOverflow } from '@controls/textOverflow';
-import { SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
@@ -37,6 +36,7 @@ import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableCo
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { SortedGroupedTableContext, SortedGroupedTableType } from '@controls/sortedTableContext/sortedGroupedTableContext';
 
 const List = () => {
 	const { filteredItems, query } = useContext(SearchContext);
@@ -133,8 +133,8 @@ const List = () => {
 export const ColumnsVisibilitySettings = () => {
 	const { getAllColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 	const columnsNames = getAllColumnsNames();
-	const { sortedItems: tickets, sortingColumn, refreshSorting } = useContext(SortedTableContext as React.Context<SortedTableType<ITicket>>);
-
+	const { sortedGroups, sortingColumn, refreshSorting } = useContext(SortedGroupedTableContext as React.Context<SortedGroupedTableType<ITicket>>);
+	const tickets = sortedGroups.reduce((acc, group) => [...acc, ...group.items], []);
 	const filteringFunction = (cols, query) => (
 		cols.filter((col) => matchesQuery(getPropertyLabel(col), query))
 	);

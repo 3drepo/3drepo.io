@@ -35,7 +35,7 @@ type GroupedListProps = {
 	expanded: boolean;
 };
 
-export const TicketsGroupedList = ({ tickets, groupName, handle, loading, expanded: expandedDefault } : TicketsGroup & GroupedListProps) => {
+export const TicketsGroupedList = ({ items: tickets, groupName, handle, loading, expanded: expandedDefault } : TicketsGroup & GroupedListProps) => {
 	const expanded = useVRef<boolean>(groupName + '.expanded', expandedDefault);
 	const { selectedItems, bulkModeOn, addOrRemoveSelection } =  useContext(TicketsBulkUpdateContext);
 

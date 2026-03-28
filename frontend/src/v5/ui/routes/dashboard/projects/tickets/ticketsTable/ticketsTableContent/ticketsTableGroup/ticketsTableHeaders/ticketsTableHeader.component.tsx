@@ -15,15 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
 import { useContext } from 'react';
 import { HeaderCell, HeaderCellText } from './ticketsTableHeaders.styles';
 import { getPropertyLabel } from '../../../ticketsTable.helper';
 import { TicketsTableHeaderFilter } from './ticketsTableHeaderFilter.component';
 import { SortingArrow } from '@controls/sortingArrow/sortingArrow.component';
+import { SortedGroupedTableContext } from '@controls/sortedTableContext/sortedGroupedTableContext';
 
 export const TicketsTableHeader = ({ name, ...props }) => {
-	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedTableContext);
+	const { isDescendingOrder, onColumnClick, sortingColumn } = useContext(SortedGroupedTableContext);
 	const isSelected = name === sortingColumn;
 
 	return (

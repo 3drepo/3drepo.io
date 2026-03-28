@@ -18,7 +18,7 @@
 import { formatMessage } from '@/v5/services/intl';
 import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import _, { Dictionary } from 'lodash';
+import { cloneDeep, Dictionary, get, orderBy, set } from 'lodash';
 import { DEFAULT_STATUS_CONFIG } from '@controls/chip/chip.types';
 import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -26,8 +26,6 @@ import { selectCurrentTeamspaceUsersByIds } from '@/v5/store/users/users.selecto
 import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME } from '@/v5/store/users/users.helpers';
 import { selectJobById } from '@/v4/modules/jobs/jobs.selectors';
 import { findPropertyDefinition } from '@/v5/store/tickets/tickets.helpers';
-
-
 
 export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
 export const NOT_APPLICABLE = formatMessage({ id: 'tickets.selectOption.property.notApplicable', defaultMessage: 'Not applicable' });
@@ -43,7 +41,7 @@ const arrayAndStringCompare = (a, b) => {
 };
 
 const ASSIGNEES_PATH = `properties.${IssueProperties.ASSIGNEES}`;
-const getAssigneesRaw = (t: ITicket) => (_.get(t, ASSIGNEES_PATH) ?? []);
+const getAssigneesRaw = (t: ITicket) => (get(t, ASSIGNEES_PATH) ?? []);
 export const getjobOrUserDisplayName = (assignee: string) => {
 	const job = selectJobById(getState(), assignee);
 	if (job) return job._id;
@@ -53,8 +51,8 @@ export const getjobOrUserDisplayName = (assignee: string) => {
 };
 
 export const sortAssignees = (ticket: ITicket): ITicket => { // <--- ???
-	const sortedAssignees = _.orderBy(getAssigneesRaw(ticket), (assignee) => getjobOrUserDisplayName(assignee).trim().toLowerCase());
-	return _.set(_.cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
+	const sortedAssignees = orderBy(getAssigneesRaw(ticket), (assignee) => getjobOrUserDisplayName(assignee).trim().toLowerCase());
+	return set(cloneDeep(ticket), ASSIGNEES_PATH, sortedAssignees);
 };
 
 export const getAssigneeDisplayNamesFromTicket = (ticket: ITicket): string[] => getAssigneesRaw(ticket).map(getjobOrUserDisplayName);
@@ -62,10 +60,10 @@ export const getAssigneeDisplayNamesFromTicket = (ticket: ITicket): string[] => 
 export type TicketsGroup = {
 	groupName: string,
 	value: any, 
-	tickets: ITicket[]
+	items: ITicket[]
 };
 
-type GroupDictionary = Dictionary<{ tickets: ITicket[], value: any }>;
+type GroupDictionary = Dictionary<{ items: ITicket[], value: any }>;
 
 const sortByStatus = (groups: TicketsGroup[], templates: ITemplate[]) => {
 	const indexByName: Record<string, number> = {};
@@ -222,11 +220,45 @@ export const groupTickets = (groupBy: string, templates: ITemplate[], tickets: I
 		}
 		
 		if (!groups[name]) {
-			groups[name] = { tickets: [], value };
+			groups[name] = { items: [], value };
 		}
 
-		groups[name].tickets.push(ticket);
+		groups[name].items.push(ticket);
 	});
 
 	return sortToTicketsGroups(groups, groupBy, templates);
+};
+
+const assigneesSort = (items: ITicket[], order) => orderBy(
+	items.map(sortAssignees),
+	[
+		(item) => getAssigneeDisplayNamesFromTicket(item).length,
+		(item) => getAssigneeDisplayNamesFromTicket(item).join(),
+	],
+	[order, order],
+);
+
+const sortTicketsByProperty = (items: ITicket[], order, column: string) =>  orderBy(
+	items,
+	(item) => {
+		const sortingElement = selectTicketPropertyByName(getState(), item._id, column);
+		return sortingElement?.toLowerCase?.().trim?.() ?? sortingElement;
+	},
+	order,
+);
+
+const ticketCodeSort = (items: ITicket[], order) => {
+	return orderBy(
+		items,
+		(item) => selectTicketPropertyByName(getState(), item._id, 'number'),
+		order,
+	);
+};
+
+export const customSortingFunctions = (column: string) => {
+	if (column === 'modelName') return null; // uses the default sorting function from sortcontext
+	if (column === `properties.${IssueProperties.ASSIGNEES}` ) return assigneesSort;
+	if (column === 'id') return ticketCodeSort;
+
+	return sortTicketsByProperty;
 };

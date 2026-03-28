@@ -58,6 +58,9 @@ import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, ser
 import { useRealtimeFiltering } from './useRealtimeFiltering';
 import { isEqual } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
+import { SortedGroupedTableComponent } from '@controls/sortedTableContext/sortedGroupedTableContext';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { customSortingFunctions, groupTickets } from './ticketsTableGroupBy.helper';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -120,6 +123,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const newTicketButtonIsDisabled = useMemo(() =>
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
 	[models, containerOrFederation]);
+
+	const groupingFunction = (gB, ts) => (items: ITicket[]) => groupTickets(gB, ts, items);
 
 	useEffect(() => {
 		if (!models.length) return;
@@ -367,7 +372,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 					</FlexContainer>
 				</FiltersContainer>
 				<CardFilters />
-				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
+				<SortedGroupedTableComponent
+					items={filteredTickets}
+					groupingFunction={groupingFunction(groupBy, templates)}
+					customSortingFunctions={customSortingFunctions}
+					sortingColumn={BaseProperties.CREATED_AT}
+				>
+					<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
+				</SortedGroupedTableComponent>
 			</TicketsTableLayout>
 		</TicketsFiltersContextComponent>
 	);
@@ -456,7 +468,9 @@ export const TabularView = () => {
 	return (
 		<TicketsTableContextComponent>
 			<ResizableTableContextComponent columns={columns} columnGap={1}>
+				{/* <SortedGroupedTableComponent> */}
 				<TicketsTable isNewTicketDirty={isNewTicketDirty} setTicketValue={setTicketValue} />
+				{/* </SortedGroupedTableComponent> */}
 			</ResizableTableContextComponent>
 			<TabularViewTicketForm setIsNewTicketDirty={setIsNewTicketDirty} setTicketValue={setTicketValue} presetValue={presetValue}/>
 		</TicketsTableContextComponent>
