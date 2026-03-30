@@ -208,7 +208,7 @@ const processCollection = async (teamspace, collection) => {
 			{
 				metadata: {
 					$elemMatch: { numSubmeshes: { $exists: false } },
-				}
+				},
 			},
 			{
 				_id: { $in: revisionsToRedo.map((r) => r._id) },
