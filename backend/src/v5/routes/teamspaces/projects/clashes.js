@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { planExists, validateNewPlanData, validateUpdatePlanData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects/clashes');
+const { planContainersHaveRevs, planExists, validateNewPlanData, validateUpdatePlanData } = require('../../../middleware/dataConverter/inputs/teamspaces/projects/clashes');
 const Clashes = require('../../../processors/teamspaces/projects/clashes');
 const { Router } = require('express');
 const { UUIDToString } = require('../../../utils/helper/uuids');
@@ -53,6 +53,18 @@ const deletePlan = async (req, res) => {
 	try {
 		await Clashes.deletePlan(teamspace, planId);
 		respond(req, res, templates.ok);
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
+const createRun = async (req, res) => {
+	const user = getUserFromSession(req.session);
+	const { teamspace, project } = req.params;
+	try {
+		const _id = await Clashes.createRun(teamspace, project, req.planData, user);
+		respond(req, res, templates.ok, { _id: UUIDToString(_id) });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -285,6 +297,50 @@ const establishRoutes = () => {
 	 *         description: Delete a clash test plan
 	 */
 	router.delete('/:planId', isAdminToProject, planExists, deletePlan);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/clashes/{planId}/runs:
+	 *   post:
+	 *     description: Create a clash test run based on the plan
+	 *     tags: [v:external, Clashes]
+	 *     operationId: createClashTestRun
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: ID of project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: planId
+	 *         description: ID of plan
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Create a clash test run based on the plan
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 _id:
+	 *                   type: string
+	 *                   format: uuid
+	 *                   description: The id of the new clash test run
+	 *                   example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 */
+	router.post('/:planId/runs', isAdminToProject, planExists, planContainersHaveRevs, createRun);
 
 	return router;
 };
