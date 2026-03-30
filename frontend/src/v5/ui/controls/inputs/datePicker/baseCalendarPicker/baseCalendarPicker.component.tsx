@@ -14,13 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useState } from 'react';
-import dayjs from 'dayjs';
+import { useEffect, useRef, useState } from 'react';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { formatMessage } from '@/v5/services/intl';
-import { TextField, Container } from './baseCalendarPicker.styles';
-import { formatDayOfWeek } from '../dateFormatHelper';
-import { StopBackgroundInteraction } from '@controls/dueDate/dueDate.styles';
+import { TextField } from './baseCalendarPicker.styles';
+import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { ClearIcon, DateTimePicker } from '@mui/x-date-pickers';
 
 export type BaseCalendarPickerProps = FormInputProps & {
 	defaultValue?: Date;
@@ -42,11 +41,14 @@ export const BaseCalendarPicker = ({
 	...props
 }: BaseCalendarPickerProps) => {
 	const [open, setOpen] = useState(false);
+	const inputRef =  useRef(null);
+	const changeAborted =  useRef(false);
 
 	const closePicker = () => setOpen(false);
 
 	const preventPropagation = (e) => {
 		if (e.key !== 'Escape') {
+			changeAborted.current = true;
 			e.preventDefault();
 			e.stopPropagation();
 		}
@@ -60,59 +62,74 @@ export const BaseCalendarPicker = ({
 		}
 	};
 
-	const onDateChange = (newValue) => {
-		const timestamp = newValue?.toDate()?.getTime() || null;
-		closePicker();
-		onChange?.(timestamp);
-		onBlur?.();
-	};
+	useEffect(() => {
+		if (inputRef.current) {
+			inputRef.current.value = value ? formatDateTime(value) : null;
+		}
+	}, [inputRef.current, value]);
 
-	return (
-		<Container onClick={handleClick} aria-hidden="true">
-			<StopBackgroundInteraction open={open} onClick={closePicker} />
-			<PickerComponent
-				renderInput={({ ref, inputRef, ...textFieldProps }) => (
-					<TextField
-						{...textFieldProps}
-						ref={inputRef}
-						inputRef={inputRef}
-						onClick={handleClick}
-						onKeyDown={(e) => e.preventDefault()}
-						error={error}
-						helperText={helperText}
-						required={required}
-						inputProps={{
-							...textFieldProps.inputProps,
-							placeholder: placeholder ?? formatMessage({
-								id: 'calendarPicker.placeholder',
-								defaultMessage: 'Choose a date',
-							}),
-						}}
-					/>
-				)}
-				disableHighlightToday
-				dayOfWeekFormatter={formatDayOfWeek}
-				disabled={disabled}
-				// onChange is a required prop in Date[Time]Picker, however it is not needed as onAccept works better
-				// (onChange triggers even when changing year, onAccept only when a date is finally chosen)
-				onChange={() => true}
-				onAccept={onDateChange}
-				value={value ? dayjs(value) : null}
-				componentsProps={{
-					actionBar: {
-						hidden: required,
-					},
-				}}
-				{...props}
-				PaperProps={{ onClick: preventPropagation }}
-				open={open}
-				onOpen={() => setOpen(true)}
-				onClose={() => {
-					// This is to signal that the date has changed (we are using onblur to save changes)
-					onBlur?.();
-					setOpen(false);
-				}}
-			/>
-		</Container>
-	);
+	return (<DateTimePicker
+		{...props}
+		closeOnSelect
+		localeText={{ 
+			clearButtonLabel:  formatMessage({
+				id: 'calendarPicker.clearButtonLabel',
+				defaultMessage: 'Clear' }),
+		}} 
+		slots={{
+			textField: (textFieldProps) => {
+				return (<TextField
+					{...textFieldProps}
+					onKeyDown={(e) => e.preventDefault()}
+					placeholder={placeholder ?? formatMessage({
+						id: 'calendarPicker.placeholder',
+						defaultMessage: 'Choose a date',
+					})}
+
+					slotProps={{
+						input: textFieldProps.InputProps,
+					}}
+
+					value={undefined}
+					inputRef={inputRef}
+					onClick={handleClick}
+				/>);
+			},
+			clearIcon: ClearIcon, 
+		}}
+
+		slotProps={{ 
+			actionBar: { actions: ['clear', 'accept', 'cancel'] },
+			desktopPaper: {
+				onMouseLeave: () => {
+					changeAborted.current = true;
+				},
+				onMouseMove: () => {
+					changeAborted.current = false;
+				},
+			},
+		}}
+
+		enableAccessibleFieldDOMStructure={false} 
+		open={open}
+
+		onChange={(val) => { 
+			inputRef.current.value = formatDateTime(val);
+		}}
+
+		onAccept={(newValue) => {
+			if (!changeAborted.current) {
+				onChange?.(newValue);
+				onBlur?.();
+			}
+			closePicker();
+		}}
+
+		onClose={() => {
+			inputRef.current.value = formatDateTime(value);
+			closePicker();
+		}}
+
+	/>);
+
 };
