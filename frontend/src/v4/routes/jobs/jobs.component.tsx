@@ -67,7 +67,6 @@ interface IProps {
 
 interface IState {
 	rows: any[];
-	containerElement: Node;
 	panelKey: number;
 	panelBottomAnchorEl: any;
 }
@@ -88,7 +87,6 @@ export class Jobs extends PureComponent<IProps, IState> {
 
 	public state = {
 		rows: [],
-		containerElement: null,
 		panelKey: Math.random(),
 		panelBottomAnchorEl: null,
 	};
@@ -132,8 +130,6 @@ export class Jobs extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = this.containerRef.current.parentNode;
-		this.setState({ containerElement });
 		this.props.fetchJobsAndColors();
 	}
 
@@ -152,9 +148,8 @@ export class Jobs extends PureComponent<IProps, IState> {
 		return <NewJobForm {...formProps} onCancel={closePanel} />;
 	}
 
-	public renderNewJobForm = (container) => (
+	public renderNewJobForm = () => (
 		<FloatingActionPanel
-			container={container}
 			key={this.state.panelKey}
 			render={this.renderNewJobFormPanel}
 			Icon={() => (
@@ -168,7 +163,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { jobs, colors, isPending, currentTeamspace, usersProvisionedEnabled } =  this.props;
-		const { containerElement, panelBottomAnchorEl } = this.state;
+		const { panelBottomAnchorEl } = this.state;
 
 		const closeNewJobForm = () => {
 			this.setState({
@@ -197,7 +192,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 						rows={this.getJobsTableRows(jobs, colors)}
 					/>
 				</UserManagementTab>
-				{containerElement && !usersProvisionedEnabled && this.renderNewJobForm(containerElement)}
+				{!usersProvisionedEnabled && this.renderNewJobForm()}
 				<Panel
 					open={Boolean(panelBottomAnchorEl)}
 					anchorEl={panelBottomAnchorEl}
