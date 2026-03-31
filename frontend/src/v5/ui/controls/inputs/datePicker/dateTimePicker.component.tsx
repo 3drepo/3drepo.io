@@ -21,7 +21,7 @@ import { TextField } from './dateTimePicker.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DateTimePicker as MUIDateTimePicker, DateTimePickerProps as MUIDateTimePickerProps } from '@mui/x-date-pickers';
 
-export type DateTimePickerPickerProps = FormInputProps & MUIDateTimePickerProps & {
+export type DateTimePickerProps = FormInputProps & MUIDateTimePickerProps & {
 	placeholder?: string;
 };
 
@@ -35,7 +35,7 @@ export const DateTimePicker = ({
 	onBlur,
 	placeholder,
 	...props
-}: DateTimePickerPickerProps) => {
+}: DateTimePickerProps) => {
 	const [open, setOpen] = useState(false);
 	const inputRef =  useRef(null);
 	const changeAborted =  useRef(false);
