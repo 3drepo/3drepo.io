@@ -1408,8 +1408,8 @@ export const theme = createTheme({
 			defaultProps: {
 				slots: {
 					openPickerIcon: CalendarIcon,
-					leftArrowIcon: ThinChevronIcon,
-					rightArrowIcon: ThinChevronIcon,
+					// leftArrowIcon: ThinChevronIcon,
+					// rightArrowIcon: ThinChevronIcon,
 				},
 			},
 		},
@@ -1433,13 +1433,14 @@ export const theme = createTheme({
 		},
 		MuiPickersLayout: {
 			styleOverrides: {
-				root: {
-					'& button:first-child': {
+				actionBar: {
+					'& :first-child': {
 						color: COLOR.ERROR_MAIN,
 					},
 					'& button': {
 						margin: 0,
 					},
+			
 				},
 			},
 		},
