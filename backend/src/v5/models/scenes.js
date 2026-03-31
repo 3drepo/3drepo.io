@@ -20,13 +20,16 @@ const db = require('../handler/db');
 
 const getCollection = (model) => `${model}.scene`;
 
-Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => db.find(
-	teamspace, getCollection(model), { rev_id: revId, shared_id: { $in: sharedIds } }, projection);
+Scene.getNodesBySharedIds = (teamspace, project, model, revId, sharedIds, projection) => Scene.getNodesByQuery(
+	teamspace, project, model, { rev_id: revId, shared_id: { $in: sharedIds } }, projection);
 
-Scene.getNodesByIds = (teamspace, project, model, ids, projection) => db.find(
-	teamspace, getCollection(model), { _id: { $in: ids } }, projection);
+Scene.getNodesByIds = (teamspace, project, model, ids, projection) => Scene.getNodesByQuery(
+	teamspace, project, model, { _id: { $in: ids } }, projection);
 
 Scene.getNodeByQuery = (teamspace, project, model, query, projection) => db.findOne(
+	teamspace, getCollection(model), query, projection);
+
+Scene.getNodesByQuery = (teamspace, project, model, query, projection) => db.find(
 	teamspace, getCollection(model), query, projection);
 
 module.exports = Scene;
