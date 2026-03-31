@@ -66,7 +66,6 @@ export const DateTimePicker = ({
 
 	return (<MUIDateTimePicker
 		{...props}
-		closeOnSelect
 		localeText={{ 
 			clearButtonLabel:  formatMessage({
 				id: 'calendarPicker.clearButtonLabel',
@@ -116,7 +115,7 @@ export const DateTimePicker = ({
 
 		onAccept={(newValue) => {
 			if (!changeAborted.current) {
-				onChange?.(newValue);
+				onChange?.(newValue.toDate());
 				onBlur?.();
 			}
 			closePicker();
