@@ -19,7 +19,7 @@ const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup, generateRandomNumber } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -633,7 +633,8 @@ const testModelProcessingCompleted = () => {
 			[true, false, false, true],
 			[false, false, true],
 			[true, false, false],
-		])('', (sendMail, success, userErr, noLogArchive) => {
+			[true, false, false, undefined, generateRandomNumber(1, 40)],
+		])('', (sendMail, success, userErr, noLogArchive, errorCode) => {
 			test(`Should ${sendMail ? 'not ' : ''}send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
 				const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 				const data = {
@@ -644,7 +645,7 @@ const testModelProcessingCompleted = () => {
 					revId: generateUUID(),
 					user: generateRandomString(),
 					modelType: modelTypes.FEDERATION,
-					data: generateImportResult(success, generateRandomString(), userErr),
+					data: generateImportResult(success, generateRandomString(), userErr, errorCode),
 				};
 
 				const zipPath = generateRandomString();
@@ -660,11 +661,11 @@ const testModelProcessingCompleted = () => {
 				if (sendMail) {
 					expect(ModPro.getLogArchive).toHaveBeenCalledTimes(1);
 					expect(ModPro.getLogArchive).toHaveBeenCalledWith(UUIDToString(data.revId));
-
+					const errorInfo = getInfoFromCode(data.data.errorReason.errorCode);
 					const mailerData = {
 						errInfo: {
-							code: data.data.errorReason.errorCode,
-							message: data.data.errorReason.message,
+							code: `${data.data.errorReason.errorCode} ${errorInfo.internalError}`,
+							message: errorInfo.message,
 						},
 						teamspace: data.teamspace,
 						model: data.model,
@@ -677,7 +678,11 @@ const testModelProcessingCompleted = () => {
 					};
 
 					expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
-					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(mailTemplates.MODEL_IMPORT_ERROR.name, mailerData, noLogArchive ? undefined : [{ filename: 'logs.zip', path: zipPath }]);
+					expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(
+						mailTemplates.MODEL_IMPORT_ERROR.name,
+						mailerData,
+						noLogArchive ? undefined : [{ filename: 'logs.zip', path: zipPath }],
+					);
 				} else {
 					expect(ModPro.getLogArchive).not.toHaveBeenCalled();
 					expect(Mailer.sendSystemEmail).not.toHaveBeenCalled();

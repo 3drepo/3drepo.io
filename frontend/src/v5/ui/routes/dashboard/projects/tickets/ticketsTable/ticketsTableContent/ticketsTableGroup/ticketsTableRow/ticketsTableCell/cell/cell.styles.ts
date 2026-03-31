@@ -25,7 +25,7 @@ export const CellContainer = styled(ResizableTableCell)<{ $isMoving?: boolean }>
 	padding: 0 10px;
 	display: flex;
 	align-items: center;
-	justify-content: flex-start;
+	justify-content: center;
 	font-weight: 500;
 	overflow: hidden;
 	box-sizing: border-box;

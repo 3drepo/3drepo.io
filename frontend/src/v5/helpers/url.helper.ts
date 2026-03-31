@@ -56,7 +56,7 @@ export const generateFullPath = (pattern: string, params: object, newSearchParam
 	const path = generatePath(pattern, params);
 	const searchParamsObj = keepOldSearchParams ? getParams() : new URLSearchParams();
 	
-	Object.entries(newSearchParams).forEach(([key, val]) => {
+	Object.entries(newSearchParams || {}).forEach(([key, val]) => {
 		if (val) {
 			searchParamsObj.set(key, val);
 		} else {

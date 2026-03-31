@@ -121,13 +121,13 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 	Handler.findOneAndUpdate = async function (database, colName, query, action, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
 		const findResult = await collection.findOneAndUpdate(query, action, {projection});
-		return findResult.value;
+		return findResult;
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
-		const findResult = await collection.findOneAndDelete(query, projection);
-		return findResult.value;
+		const findResult = await collection.findOneAndDelete(query, {projection});
+		return findResult;
 	};
 
 	Handler.deleteMany = async function (database, colName, query) {
@@ -162,7 +162,8 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 
 	Handler.getCollectionStats = function (database, colName) {
 		return _context.getDB(database).then(dbConn => {
-			return dbConn.collection(colName).stats();
+			const command = {collStats: colName};
+			return dbConn.command(command);
 		}).catch(err => {
 			Handler.disconnect();
 			return Promise.reject(err);

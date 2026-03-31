@@ -16,15 +16,16 @@
  */
 /* eslint-disable implicit-arrow-linebreak */
 
-import { FederationRevision, FederationSettings, NewFederationRealtime } from '@/v5/store/federations/federations.types';
+import { FederationRevision, NewFederationRealtime } from '@/v5/store/federations/federations.types';
 import { FederationsActionsDispatchers } from '../actionsDispatchers';
 import { subscribeToRoomEvent } from './realtime.service';
-import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { prepareSettingsForFrontend } from '@/v5/store/containers/containers.helpers';
+import { ContainerBackendSettings } from '@/v5/store/containers/containers.types';
 
 export const enableRealtimeFederationUpdateSettings = (teamspace:string, project:string, federationId:string) =>
 	subscribeToRoomEvent({ teamspace, project, model: federationId }, 'federationSettingsUpdate',
-		(settings: FederationSettings) =>
-			FederationsActionsDispatchers.fetchFederationSettingsSuccess(project, federationId, prepareFederationSettingsForFrontend(settings)));
+		(settings: ContainerBackendSettings) =>
+			FederationsActionsDispatchers.fetchFederationSettingsSuccess(project, federationId, prepareSettingsForFrontend(settings)));
 
 export const enableRealtimeNewFederation = (teamspace:string, project:string) =>
 	subscribeToRoomEvent({ teamspace, project }, 'newFederation',
