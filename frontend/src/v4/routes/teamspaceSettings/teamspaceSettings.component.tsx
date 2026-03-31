@@ -348,7 +348,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 					initialValues={{
 						topicTypes,
 						riskCategories,
-						createMitigationSuggestions
+						createMitigationSuggestions,
 					}}
 					onSubmit={this.handleUpdateSettings}
 				>

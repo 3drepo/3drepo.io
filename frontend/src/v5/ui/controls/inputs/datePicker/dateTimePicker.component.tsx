@@ -115,7 +115,7 @@ export const DateTimePicker = ({
 
 		onAccept={(newValue) => {
 			if (!changeAborted.current) {
-				onChange?.(newValue.toDate());
+				onChange?.(newValue ? newValue.toDate().getTime() : null);
 				onBlur?.();
 			}
 			closePicker();
