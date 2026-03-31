@@ -1422,169 +1422,26 @@ export const theme = createTheme({
 				},
 			},
 		},
-	
-	/*
-		MuiCalendarPicker: {
+		MuiMultiSectionDigitalClockSection: {
 			styleOverrides: {
 				root: {
-					borderRadius: 10,
-					// header section
-					'.MuiPickersCalendarHeader-root': {
-						padding: 0,
-						justifyContent: 'center',
-						color: COLOR.SECONDARY_MAIN,
-
-						// month and year
-						'& > :first-child': {
-							position: 'absolute',
-							justifyContent: 'center',
-							width: '100%',
-							'& > *': {
-								position: 'relative',
-								zIndex: 1,
-							},
-							'& button': {
-								display: 'none',
-								margin: 0,
-							},
-						},
-
-						// arrows-container
-						'& > .MuiPickersArrowSwitcher-root': {
-							position: 'absolute',
-							justifyContent: 'space-between',
-							width: '100%',
-							// actual arrows
-							button: {
-								transform: 'rotate(90deg)',
-								'&:not(:first-child)': {
-									transform: 'rotate(-90deg)',
-								},
-							},
-						},
+					minWidth: 'auto',
+					borderRadius: 0,
+					boxShadow: 'none',
+				},
+			},
+		},
+		MuiPickersLayout: {
+			styleOverrides: {
+				root: {
+					'& button:first-child': {
+						color: COLOR.ERROR_MAIN,
 					},
-					// year selection
-					'.MuiYearPicker-root': {
-						'&': {
-							position: 'relative',
-							zIndex: 1,
-							background: COLOR.PRIMARY_MAIN_CONTRAST,
-						},
-						button: {
-							'&:not(.Mui-disabled)': {
-								color: COLOR.SECONDARY_MAIN,
-								'&:hover': {
-									backgroundColor: COLOR.TERTIARY_LIGHTEST,
-								},
-							},
-							'&.Mui-disabled': {
-								color: COLOR.BASE_MAIN,
-								cursor: 'unset',
-							},
-							'&.Mui-selected': {
-								color: COLOR.PRIMARY_MAIN_CONTRAST,
-								'&:hover': {
-									backgroundColor: COLOR.PRIMARY_DARK,
-								},
-							},
-						},
-					},
-					'.MuiPickersCalendarHeader-root, .MuiYearPicker-root': {
-						button: {
-							'&:hover': {
-								background: 'transparent',
-							},
-							'.Mui-disabled': {
-								color: COLOR.BASE_MAIN,
-							},
-						},
-					},
-					// calendar body
-					'.MuiCalendarPicker-viewTransitionContainer': {
-						// week days (sun-sat)
-						'.MuiTypography-caption': {
-							color: COLOR.BASE_MAIN,
-						},
-						// day number (1-31)
-						'.MuiPickersDay-root': {
-							color: COLOR.SECONDARY_MAIN,
-							'&:focus': {
-								backgroundColor: 'transparent',
-								'&.Mui-selected': {
-									backgroundColor: COLOR.PRIMARY_MAIN,
-								},
-							},
-							'&:hover': {
-								backgroundColor: COLOR.TERTIARY_LIGHTEST,
-							},
-							'&.Mui-selected': {
-								color: COLOR.PRIMARY_MAIN_CONTRAST,
-								'&:hover': {
-									backgroundColor: COLOR.PRIMARY_DARK,
-								},
-							},
-							'&.Mui-disabled': {
-								color: COLOR.BASE_LIGHT,
-							},
-						},
+					'& button': {
+						margin: 0,
 					},
 				},
 			},
 		},
-		MuiClockPicker: {
-			styleOverrides: {
-				root: {
-					// arrows at the top
-					'.MuiClockPicker-arrowSwitcher': {
-						margin: 0,
-						'.MuiPickersArrowSwitcher-spacer': {
-							display: 'none',
-						},
-						button: {
-							margin: 0,
-							padding: 10,
-							color: COLOR.SECONDARY_MAIN,
-							transform: 'rotate(90deg)',
-							'&:not(:first-child)': {
-								transform: 'rotate(-90deg)',
-							},
-							'&:hover': {
-								backgroundColor: 'transparent',
-							},
-							'&.Mui-disabled': {
-								color: COLOR.BASE_MAIN,
-							},
-						},
-					},
-					'.MuiClock-root': {
-						// actual clock
-						'.MuiClock-clock': {
-							backgroundColor: COLOR.TERTIARY_LIGHTEST,
-							'.MuiClock-wrapper': {
-								height: '100%',
-								position: 'relative',
-								// the circle with the numbers
-								'.MuiClockNumber-root': {
-									'&:hover': {
-										backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
-									},
-									'&.Mui-selected': {
-										color: COLOR.PRIMARY_MAIN_CONTRAST,
-									},
-									'&.Mui-disabled': {
-										color: COLOR.BASE_LIGHT,
-									},
-								},
-							},
-						},
-						// bottom buttons (AM - PM)
-						'.MuiClock-pmButton, .MuiClock-amButton': {
-							bottom: 'unset',
-							top: 190,
-						},
-					},
-				},
-			},
-		},*/
 	},
-}) as any;
+}) ;
