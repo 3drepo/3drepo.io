@@ -81,7 +81,11 @@ async function getRepoBundleHeader(teamspace, collection, bundle) {
 				const json = header.toString();
 				hasHeader = true;
 				stream.destroy();
-				resolve(JSON.parse(json));
+				// some headers contains inf values which cannot be parsed by JSON.parse, so we replace them with the maximum representable number in JavaScript.
+				let sanitizedJson = json.replaceAll('-inf', '0');
+				sanitizedJson = sanitizedJson.replaceAll('inf', '1.7976931348623157E+308');
+
+				resolve(JSON.parse(sanitizedJson));
 			}
 		});
 		stream.on('end', () => {
@@ -143,7 +147,6 @@ const processRevision = async (teamspace, collection, revision, forceRebuild) =>
 		if (forceRebuild || !revision.metadata) {
 			// If metadata is missing - this is a v1 import.
 			// We can get this information from the bundle header.
-
 			revisedMeta = await Promise.all(
 				revision.assets.map((asset) => getMetadataEntryFromBundle(teamspace, collection, asset)));
 		}
@@ -155,7 +158,10 @@ const processRevision = async (teamspace, collection, revision, forceRebuild) =>
 
 				// eslint-disable-next-line no-await-in-loop
 				const fileContents = await getFile(teamspace, collection.replace('repobundles', 'json_mpc'), fileName);
-				const { mapping } = JSON.parse(fileContents.toString());
+
+				let sanitizedJson = fileContents.toString().replaceAll('-inf', '0');
+				sanitizedJson = sanitizedJson.replaceAll('inf', '1.7976931348623157E+308');
+				const { mapping } = JSON.parse(sanitizedJson);
 
 				// Unfortunately we cannot rely on the numberOfIds or maxGeoCount as these
 				// were broken in bouncer for a short while, so we just get them directly from
@@ -199,21 +205,24 @@ const processCollection = async (teamspace, collection) => {
 			{
 				metadata: { $exists: false },
 			},
-			{ metadata: {
-				$elemMatch: { numSubmeshes: { $exists: false } },
-			} },
+			{
+				metadata: {
+					$elemMatch: { numSubmeshes: { $exists: false } },
+				},
+			},
 			{
 				_id: { $in: revisionsToRedo.map((r) => r._id) },
 			},
 		],
 	});
-	const updateInstructions = await Promise.all(revisionAssets.map((revision) => processRevision(
-		teamspace, collection, revision, requireRebuildRevs.has(revision._id))));
-	if (updateInstructions.length > 0) {
-		await bulkWrite(teamspace, collection, updateInstructions);
+	const updateInstructions = await Promise.all(revisionAssets.map((revision) => (revision.assets ? processRevision(
+		teamspace, collection, revision, requireRebuildRevs.has(revision._id)) : undefined)));
+	const updates = updateInstructions.filter((u) => u !== undefined);
+	if (updates.length > 0) {
+		await bulkWrite(teamspace, collection, updates);
 	}
 
-	logger.logInfo(`\t\tUpdated ${updateInstructions.length} entries`);
+	logger.logInfo(`\t\tUpdated ${updates.length} entries`);
 
 	numCollections++;
 };
