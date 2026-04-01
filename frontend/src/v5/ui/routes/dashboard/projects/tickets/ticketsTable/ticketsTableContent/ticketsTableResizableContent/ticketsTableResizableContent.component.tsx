@@ -19,15 +19,16 @@ import { useCallback, useContext, useEffect, useRef } from 'react';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
-import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
+import { UNSET } from '../../ticketsTableGroupBy.helper';
 import { Container, Title } from './ticketsTableResizableContent.styles';
 import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
-import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
+import { NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { SortedGroupedTableContext } from '@controls/sortedTableContext/sortedGroupedTableContext';
 
 type CollapsibleTicketsGroupProps = {
 	propertyValue: string;
@@ -46,7 +47,6 @@ const CollapsibleTicketsGroup = ({
 }: CollapsibleTicketsGroupProps) => {
 	const ticketsIds = tickets.map(({ _id }) => _id);
 	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
-
 	return (<DashboardListCollapse
 		title={(
 			<>
@@ -72,17 +72,17 @@ const CollapsibleTicketsGroup = ({
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
-	tickets: ITicket[],
 	template: ITemplate,
 };
 
 export const TicketsTableResizableContent = ({ 
 	setTicketValue, 
 	selectedTicketId, 
-	tickets: filteredItems, 
 	template,
 }: TicketsTableResizableContentProps) => {
 	const { groupBy } = useContext(TicketsTableContext);
+	const { sortedGroups } = useContext(SortedGroupedTableContext);
+
 	const collapsedGroups = useRef<Record<string, boolean>>({});
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
@@ -101,23 +101,21 @@ export const TicketsTableResizableContent = ({
 	if (groupBy === NONE_OPTION) {
 		return (
 			<TicketsTableGroup
-				tickets={filteredItems}
+				tickets={sortedGroups[0].items}
 				onNewTicket={onGroupNewTicket('')}
 				onEditTicket={setTicketValue}
 				selectedTicketId={selectedTicketId}
 			/>
 		);
 	}
-	
-	const groups = groupTickets(groupBy, [template], filteredItems);
 
 	return (
 		<Container>
 			<VirtualList
-				items={groups}
+				items={sortedGroups}
 				itemHeight={45}
 				vKey='groups-list'
-				ItemComponent={({ groupName, value, tickets }) => (
+				ItemComponent={({ groupName, value, items: tickets }) => (
 					<CollapsibleTicketsGroup
 						groupName={groupName}
 						tickets={tickets}

@@ -72,7 +72,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 		selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId) ;
 	} else {
 		selectedIndex = groups.findIndex((g) => {
-			const index = g.tickets.findIndex((ticket) => ticket._id === selectedTicketId);
+			const index = g.items.findIndex((ticket) => ticket._id === selectedTicketId);
 			if (index !== -1) {
 				selectedSubIndex = index;
 				return true;

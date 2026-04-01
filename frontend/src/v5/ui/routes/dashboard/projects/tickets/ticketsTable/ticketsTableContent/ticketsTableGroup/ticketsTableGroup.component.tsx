@@ -17,46 +17,38 @@
 
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { isCommenterRole } from '@/v5/store/store.helpers';
-import { SortedTableComponent, SortedTableContext, SortedTableType } from '@controls/sortedTableContext/sortedTableContext';
-import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { Table, Group, PlaceholderForStickyFunctionality, RoundedContainer } from './ticketsTableGroup.styles';
 import { TicketsTableRow } from './ticketsTableRow/ticketsTableRow.component';
 import { useSelectedModels } from '../../newTicketMenu/useSelectedModels';
 import { SetTicketValue, TICKET_TABLE_ROW_HEIGHT } from '../../ticketsTable.helper';
-import { orderBy, chunk } from 'lodash';
+import { chunk } from 'lodash';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router';
 import { TicketsTableHeaders } from './ticketsTableHeaders/ticketsTableHeaders.component';
 import { NewTicketRowButton } from './newTicketRowButton/newTicketRowButton.component';
-import { getState } from '@/v5/helpers/redux.helpers';
-import { selectTicketPropertyByName } from '@/v5/store/tickets/tickets.selectors';
 import { useWatchPropertyChange } from '../../useWatchPropertyChange';
-import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../ticketsTableGroupBy.helper';
 import { TicketsTableSelectionColumn } from './ticketsTableSelectionColumn/ticketsTableSelectionColumn.component';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { TicketsTableSettingsColumn } from './ticketsTableSettingsColumn/ticketsTableSettingsColumn.component';
 import { TICKETS_CHUNK_SIZE } from './ticketsTableGroup.helper';
+import { useContext } from 'react';
+import { SortedGroupedTableContext } from '@controls/sortedTableContext/sortedGroupedTableContext';
 
 type TicketsTableGroupContentProps = {
 	tickets: ITicket[];
-	sortedItems: ITicket[];
-	sortingColumn: string;
-	refreshSorting: () => void;
 	selectedTicketId?: string;
 	onEditTicket: SetTicketValue;
 	hideNewticketButton: boolean;
 };
 
 const TicketsTableGroupContent = ({ 
-	tickets, 
-	sortedItems,
-	refreshSorting,
-	sortingColumn,
+	tickets,
 	selectedTicketId, 
 	onEditTicket,
 	hideNewticketButton,
 }: TicketsTableGroupContentProps) => {
+	const { refreshSorting, sortingColumn } = useContext(SortedGroupedTableContext);
 	useWatchPropertyChange(sortingColumn, refreshSorting);
 
 	const ticketsIds = tickets.map(({ _id }) => _id);
@@ -64,9 +56,9 @@ const TicketsTableGroupContent = ({
 	return (
 		<>
 			{!tickets.length ? <PlaceholderForStickyFunctionality /> : <TicketsTableHeaders ticketsIds={ticketsIds}/>}
-			<Group $empty={!sortedItems?.length} $hideNewticketButton={hideNewticketButton}>
+			<Group $empty={!tickets?.length} $hideNewticketButton={hideNewticketButton}>
 				<VirtualList
-					items={chunk(sortedItems, TICKETS_CHUNK_SIZE)}
+					items={chunk(tickets, TICKETS_CHUNK_SIZE)}
 					itemHeight={TICKET_TABLE_ROW_HEIGHT}
 					ItemComponent={(ticketsChunk: ITicket[]) => (
 						<div key={ticketsChunk[0]._id}>
@@ -101,67 +93,24 @@ export const TicketsTableGroup = ({ tickets, onEditTicket, onNewTicket, selected
 	const disabledModelIds: string[] = models.filter(({ role }) => !isCommenterRole(role)).map(({ _id }) => _id);
 	const hideSelectionColumn = models.every(({ role }) => !isCommenterRole(role));
 
-	const assigneesSort = (items: ITicket[], order) => orderBy(
-		items.map(sortAssignees),
-		[
-			(item) => getAssigneeDisplayNamesFromTicket(item).length,
-			(item) => getAssigneeDisplayNamesFromTicket(item).join(),
-		],
-		[order, order],
-	);
-
-	const sortTicketsByProperty = (items: ITicket[], order, column: string) =>  orderBy(
-		items,
-		(item) => {
-			const sortingElement = selectTicketPropertyByName(getState(), item._id, column);
-			return sortingElement?.toLowerCase?.().trim?.() ?? sortingElement;
-		},
-		order,
-	);
-
-	const ticketCodeSort = (items: ITicket[], order) => {
-		return orderBy(
-			items,
-			(item) => selectTicketPropertyByName(getState(), item._id, 'number'),
-			order,
-		);
-	};
-
-	const customSortingFunctions = (column: string) => {
-		if (column === 'modelName') return null; // uses the default sorting function from sortcontext
-		if (column === `properties.${IssueProperties.ASSIGNEES}` ) return assigneesSort;
-		if (column === 'id') return ticketCodeSort;
-
-		return sortTicketsByProperty;
-	};
-
 	return (
-		<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
-			<SortedTableContext.Consumer>
-				{({ refreshSorting, sortedItems, sortingColumn }: SortedTableType<ITicket>) => (
-					<RoundedContainer $hideSelectionColumn={hideSelectionColumn} $hideNewTicketButton={hideNewticketButton}>
-						{!hideSelectionColumn && <TicketsTableSelectionColumn tickets={sortedItems} selectedTicketId={selectedTicketId} disabledModelIds={disabledModelIds} />}
-						<Table $canCreateTicket={!newTicketButtonIsDisabled}>
-							<TicketsTableGroupContent
-								tickets={tickets}
-								selectedTicketId={selectedTicketId}
-								onEditTicket={onEditTicket}
-								hideNewticketButton={hideNewticketButton}
-								sortedItems={sortedItems}
-								sortingColumn={sortingColumn}
-								refreshSorting={refreshSorting}
-							/>
-						</Table>
-						<TicketsTableSettingsColumn tickets={sortedItems} selectedTicketId={selectedTicketId} />
-						{!hideNewticketButton &&
-							<NewTicketRowButton
-								onNewTicket={onNewTicket}
-								disabled={newTicketButtonIsDisabled}
-							/>
-						}
-					</RoundedContainer>
-				)}
-			</SortedTableContext.Consumer>
-		</SortedTableComponent>
+		<RoundedContainer $hideSelectionColumn={hideSelectionColumn} $hideNewTicketButton={hideNewticketButton}>
+			{!hideSelectionColumn && <TicketsTableSelectionColumn tickets={tickets} selectedTicketId={selectedTicketId} disabledModelIds={disabledModelIds} />}
+			<Table $canCreateTicket={!newTicketButtonIsDisabled}>
+				<TicketsTableGroupContent
+					tickets={tickets}
+					selectedTicketId={selectedTicketId}
+					onEditTicket={onEditTicket}
+					hideNewticketButton={hideNewticketButton}
+				/>
+			</Table>
+			<TicketsTableSettingsColumn tickets={tickets} selectedTicketId={selectedTicketId} />
+			{!hideNewticketButton &&
+				<NewTicketRowButton
+					onNewTicket={onNewTicket}
+					disabled={newTicketButtonIsDisabled}
+				/>
+			}
+		</RoundedContainer>
 	);
 };
