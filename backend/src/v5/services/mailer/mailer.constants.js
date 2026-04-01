@@ -18,6 +18,9 @@
 const auditLogPassword = require('./templates/auditLogPassword');
 const dailyDigest = require('./templates/dailyDigest');
 const errorNotification = require('./templates/errorNotification');
+const externalTeamspaceExpiredList = require('./templates/externalTeamspaceExpiredList');
+const externalTeamspaceExpiryList = require('./templates/externalTeamspaceExpiryList');
+const internalTeamspaceExpiryList = require('./templates/internalTeamspaceExpiryList');
 const modelImportError = require('./templates/modelImportError');
 const { toConstantCase } = require('../../utils/helper/strings');
 const zombieProcessingStatuses = require('./templates/zombieProcessingStatuses');
@@ -30,6 +33,9 @@ const templates = {
 	modelImportError,
 	zombieProcessingStatuses,
 	auditLogPassword,
+	internalTeamspaceExpiryList,
+	externalTeamspaceExpiryList,
+	externalTeamspaceExpiredList,
 };
 
 MailerConstants.templates = {};
