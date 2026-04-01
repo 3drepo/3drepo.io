@@ -97,8 +97,35 @@ const testInviteUserAsAdmin = () => {
 	});
 };
 
+const testRemoveAllInvitationsByTeamspace = () => {
+	describe('Remove all invitations by teamspace', () => {
+		test('should remove all invitations by teamspace', async () => {
+			const teamspace = generateRandomString();
+			const invitations = [
+				{ _id: generateRandomString(), teamSpaces: [{ teamspace }] },
+				{ _id: generateRandomString(), teamSpaces: [{ teamspace }, { teamspace: generateRandomString() }] },
+			];
+			const findManyMock = jest.spyOn(db, 'find').mockResolvedValueOnce(invitations);
+			const deleteManyMock = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce();
+			const updateManyMock = jest.spyOn(db, 'updateMany').mockResolvedValueOnce();
+
+			await Invitations.removeAllInvitationsByTeamspace(teamspace);
+
+			expect(findManyMock).toHaveBeenCalledTimes(1);
+			expect(findManyMock).toHaveBeenCalledWith('admin', 'invitations', { 'teamSpaces.teamspace': teamspace }, { _id: 1, teamSpaces: 1 }, undefined);
+
+			expect(deleteManyMock).toHaveBeenCalledTimes(1);
+			expect(deleteManyMock).toHaveBeenCalledWith('admin', 'invitations', { _id: { $in: [invitations[0]._id] } });
+
+			expect(updateManyMock).toHaveBeenCalledTimes(1);
+			expect(updateManyMock).toHaveBeenCalledWith('admin', 'invitations', { 'teamSpaces.teamspace': teamspace }, { $pull: { teamSpaces: { teamspace } } });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetInvitationsByTeamspace();
 	testInviteUserAsAdmin();
 	testInit();
+	testRemoveAllInvitationsByTeamspace();
 });

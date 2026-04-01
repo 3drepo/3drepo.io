@@ -17,7 +17,6 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import {
-	FederationSettings,
 	FederationStats,
 	GroupedContainer,
 	IFederation,
@@ -28,6 +27,7 @@ import { Action } from 'redux';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Constants } from '../../helpers/actions.helper';
 import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks } from '../store.types';
+import { ContainerSettings } from '../containers/containers.types';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers', 'onSuccess', 'onError'],
@@ -208,9 +208,9 @@ export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_
 export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_SUCCESS'> & ProjectAndFederationId & { views: View[] };
 export type FetchFederationSettingsAction = Action<'FETCH_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId;
-export type FetchFederationSettingsSuccessAction = Action<'FETCH_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: FederationSettings };
-export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId & { settings: FederationSettings, onSuccess: () => void, onError: (error) => void };
-export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: FederationSettings };
+export type FetchFederationSettingsSuccessAction = Action<'FETCH_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: ContainerSettings };
+export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId & { settings: ContainerSettings, onSuccess: () => void, onError: (error) => void };
+export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: ContainerSettings };
 export type DeleteFederationAction = Action<'DELETE_FEDERATION'> & TeamspaceProjectAndFederationId & SuccessAndErrorCallbacks;
 export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> & ProjectAndFederationId;
 export type UpdateFederationSuccessAction = Action<'UPDATE_FEDERATION'> & ProjectAndFederationId & { updatedFederation: IFederation };
@@ -256,7 +256,7 @@ export interface IFederationsActionCreators {
 	fetchFederationSettingsSuccess: (
 		projectId: string,
 		federationId: string,
-		settings: FederationSettings,
+		settings: ContainerSettings,
 	) => FetchFederationSettingsSuccessAction;
 	fetchFederationUsers: (
 		teamspace: string,
@@ -272,14 +272,14 @@ export interface IFederationsActionCreators {
 		teamspace: string,
 		projectId: string,
 		federationId: string,
-		settings: FederationSettings,
+		settings: ContainerSettings,
 		onSuccess: () => void,
 		onError: (error) => void,
 	) => UpdateFederationSettingsAction;
 	updateFederationSettingsSuccess: (
 		projectId: string,
 		federationId: string,
-		settings: FederationSettings,
+		settings: ContainerSettings,
 	) => UpdateFederationSettingsSuccessAction;
 	deleteFederation: (
 		teamspace: string,

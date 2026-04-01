@@ -38,7 +38,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
 import { chunk, isEqualWith } from 'lodash';
 import { ContainerStats, FetchContainerViewsResponseView, IContainer } from './containers.types';
-import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
+import { prepareSettingsForBackend, prepareSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
 import { compByColum, DASHBOARD_LIST_CHUNK_SIZE } from '../store.helpers';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
@@ -158,7 +158,7 @@ export function* fetchContainerSettings({
 }: FetchContainerSettingsAction) {
 	try {
 		const rawSettings = yield API.Containers.fetchContainerSettings(teamspace, projectId, containerId);
-		const settings = prepareContainerSettingsForFrontend(rawSettings);
+		const settings = prepareSettingsForFrontend(rawSettings);
 		yield put(ContainersActions.fetchContainerSettingsSuccess(projectId, containerId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -214,7 +214,7 @@ export function* updateContainerSettings({
 	onError,
 }: UpdateContainerSettingsAction) {
 	try {
-		const rawSettings = prepareContainerSettingsForBackend(settings);
+		const rawSettings = prepareSettingsForBackend(settings);
 		yield API.Containers.updateContainerSettings(teamspace, projectId, containerId, rawSettings);
 		yield put(ContainersActions.updateContainerSettingsSuccess(projectId, containerId, settings));
 		onSuccess();

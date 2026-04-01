@@ -49,7 +49,7 @@ export interface ResizableTableType extends SubscribableObject<StateType> {
 	getRowWidth: () => number,
 	getColumnOffsetLeft: (name: string) => number,
 	getIndex: (name: string) => number,
-	stretchTable: (name: string) => void,
+	stretchTable: (name: string, widthOffset?: number) => void,
 
 	// columns visibility
 	hideColumn: (name: string) => void,
@@ -159,12 +159,10 @@ export const ResizableTableContextComponent = ({ children, columns, columnGap = 
 		return offset;
 	};
 
-	const stretchTable = (name: string) => {
+	const stretchTable = (name: string, widthOffset: number = 0) => {
 		if (!state.tableNode) return;
-		const parentWidth = +getComputedStyle(state.tableNode).width.replace('px', '');
+		const parentWidth = +getComputedStyle(state.tableNode).width.replace('px', '') + widthOffset;
 		const tableWidth = getRowWidth();
-		if (tableWidth >= parentWidth) return;
-
 		const gap = parentWidth - tableWidth;
 		setWidth(name, getColumnWidth(getColumnByName(name)) + gap);
 	};

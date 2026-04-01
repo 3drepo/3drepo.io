@@ -202,7 +202,7 @@ const testPropertyConditions = () => {
 		['Should ignore deprecated fields', { type: propTypes.TEXT, deprecated: true }, true, generateRandomString()],
 		['Ignore values on N/A types', { type: propTypes.TEXT, values: [generateRandomString()] }, true, randomData, randomData],
 		['Should ignore read only fields', { type: propTypes.TEXT, readOnly: true }, true, generateRandomString()],
-		['Should ignore unrecognised types', { type: generateRandomString(), required: true }, true, generateRandomString()],
+		['Should fail if there are unrecognised types', { type: generateRandomString(), required: true }, false, generateRandomString()],
 	];
 
 	const addTicketPropertyConditionTests = commonPropertyConditionTests.concat([
@@ -881,7 +881,7 @@ const testCompositeTypes = () => {
 
 			await TicketSchema.validateTicket(teamspace, project, model, template, input);
 			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
-				.resolves.toEqual({ ...input, modules: {} });
+				.resolves.toEqual({ ...input, modules: {}, type: template._id });
 		});
 
 		test('Should fail if a required view property has no camera on creation', async () => {
@@ -1025,18 +1025,17 @@ const testImportedTickets = () => {
 		test('Should NOT allow users to specify creation date if it is an existing ticket', async () => {
 			const date = Date.now();
 			const { properties, ...others } = importTestInput;
-			const res = await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+			await expect(TicketSchema.validateTicket(teamspace, project, model, importTestTem,
 				{ ...others,
 					properties: {
 						...properties,
 						[basePropertyLabels.CREATED_AT]: date,
 					},
 
-				}, importTestInput, true);
+				}, importTestInput, true)).rejects.not.toBeUndefined();
+
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
-
-			expect(res.properties[basePropertyLabels.CREATED_AT]).not.toEqual(new Date(date));
 		});
 
 		const comments = times(5, () => ({
@@ -1110,6 +1109,58 @@ const testValidateTicket = () => {
 		testCompositeTypes();
 		testImportedTickets();
 
+		test('Should return error if input is an empty object', async () => {
+			const template = {
+				_id: generateUUID(),
+				properties: [],
+				modules: [],
+			};
+
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, {}))
+				.rejects.not.toBeUndefined();
+		});
+
+		test('Should return error if properties contains unknown key', async () => {
+			const propName = generateRandomString();
+			const invalidPropName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{ name: propName, type: propTypes.TEXT }],
+				modules: [],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				properties: {
+					[propName]: generateRandomString(),
+					[invalidPropName]: generateRandomString(),
+				},
+				modules: {},
+			};
+
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.rejects.not.toBeUndefined();
+		});
+
+		test('Should return error if modules contains unknown key', async () => {
+			const modName = generateRandomString();
+			const invalidModName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [],
+				modules: [{ name: modName, properties: [] }],
+			};
+
+			const input = {
+				title: generateRandomString(),
+				properties: {},
+				modules: { [invalidModName]: generateRandomString() },
+			};
+
+			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+				.rejects.not.toBeUndefined();
+		});
+
 		test('Should ignore deprecated modules', async () => {
 			const template = {
 				_id: generateUUID(),
@@ -1135,7 +1186,7 @@ const testValidateTicket = () => {
 				.resolves.toEqual({ ...input, type: template._id });
 		});
 
-		test('Should created default properties/modules object if it is not present', async () => {
+		test('Should create default properties/modules object if it is not present', async () => {
 			const template = {
 				_id: generateUUID(),
 				properties: [{

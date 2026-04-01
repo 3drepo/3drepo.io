@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { ContainersActionsDispatchers, DialogsActionsDispatchers, FederationsActionsDispatchers, JobsActionsDispatchers, ProjectsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ProjectsHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
@@ -57,6 +57,7 @@ import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.co
 import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
 import { isEqual } from 'lodash';
+import { formatMessage } from '@/v5/services/intl';
 
 const paramToInputProps = (value, setter) => ({
 	value,
@@ -71,6 +72,7 @@ type TicketsTableProps = {
 export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
 	const navigate = useNavigate();
 	const params = useParams<DashboardTicketsParams>();
+	const { setSelectedIds } = useContext(TicketsTableContext);
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
 	const { teamspace, project, template, ticketId } = params;
 	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
@@ -106,14 +108,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 	const selectedTemplate = ProjectsHooksSelectors.selectCurrentProjectTemplateById(template);
 	const isFed = FederationsHooksSelectors.selectIsFederation();
-
+	const ticketsByModelId = TicketsHooksSelectors.selectTicketsByModelIdDictionary();
+	const prevModelIdsRef = useRef<string[]>(containersAndFederations);
 
 	const [paramFilters, setParamFilters] = useSearchParam<string>('filters', undefined, true);
 
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: !ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
-
 
 	const newTicketButtonIsDisabled = useMemo(() =>
 		!containersAndFederations.length || models.filter(({ role }) => isCommenterRole(role)).length === 0,
@@ -208,10 +210,14 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		(updatedTicketId, included) => {
 			// if nothing changed do nothing;
 			if (filteredTicketsIDs.has(updatedTicketId) === included) return;
-			const newFilteredIds = new Set(filteredTicketsIDs);
-			if (included) newFilteredIds.add(updatedTicketId);
-			else newFilteredIds.delete(updatedTicketId);
-			setFilteredTicketIds(newFilteredIds);
+			setFilteredTicketIds((oldFilteredIds) => {
+				const newFilteredIds = new Set(oldFilteredIds);
+
+				if (included) newFilteredIds.add(updatedTicketId);
+				else newFilteredIds.delete(updatedTicketId);
+				
+				return newFilteredIds;
+			});
 		});
 
 	/**
@@ -276,6 +282,21 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			TicketsActionsDispatchers.setTabularViewParams(paramsToSave.current.params, paramsToSave.current.search);
 		};
 	}, []);
+	
+	useEffect(() => {
+		// Must remove selected ticket ids if their corresponding model is removed from the table
+		const prevModelIds = prevModelIdsRef.current;
+		const removedModelIds = prevModelIds.filter((id) => !containersAndFederations.includes(id));
+		if (removedModelIds.length > 0) {
+			const ticketIdsToRemove = removedModelIds.flatMap((id) => ticketsByModelId[id]);
+			setSelectedIds((prev) => {
+				const next = new Set(prev);
+				ticketIdsToRemove.forEach((id) => next.delete(id));
+				return next;
+			});
+		}
+		prevModelIdsRef.current = containersAndFederations;
+	}, [containersAndFederations]);
 
 	paramsToSave.current = { search: window.location.search, params };
 
@@ -284,6 +305,30 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		setTemplate(templates[0]._id);
 		return null;
 	}
+
+	const containers = ContainersHooksSelectors.selectContainers();
+	const federations = FederationsHooksSelectors.selectFederations();
+	const accessibleIds = [...containers, ...federations].map(({ _id }) => _id);
+	useEffect(() => {
+		const selectionIncluded = (containersAndFederations as string[]).every((id) => accessibleIds.includes(id));
+		if (!selectionIncluded) {
+			DialogsActionsDispatchers.open('info', {
+				title: formatMessage({
+					id: 'ticketsTable.notAllContainersAndFederationsTitle',
+					defaultMessage: 'Inaccessible containers or federations',
+				}),
+				message: formatMessage({
+					id: 'ticketsTable.notAllContainersAndFederationsMessage',
+					defaultMessage: `
+					You don't have access to every selected container and federation.{br}
+					Check that you have been authorized to access to all the {br}
+					selected containers and federations or that none have {br} 
+					been deleted.
+					`,
+				}, { br: <br /> }),
+			});
+		}
+	}, [accessibleIds.join()]);
 
 	return (
 		// eslint-disable-next-line max-len
@@ -322,7 +367,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 					</FlexContainer>
 				</FiltersContainer>
 				<CardFilters />
-				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} />
+				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
 			</TicketsTableLayout>
 		</TicketsFiltersContextComponent>
 	);

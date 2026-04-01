@@ -35,6 +35,7 @@ import { IUser } from '@/v5/store/users/users.redux';
 import { toDictionary } from '@/v5/helpers/toDictionary.helper';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
+import { findByName, findModuleByNameOrType } from '@/v5/store/tickets/tickets.helpers';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -60,6 +61,10 @@ export const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
 export const formatDateRange = ([from, to]) => formatMessage(
 	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
 	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
+);
+export const formatNumberRange = ([from, to]) => formatMessage(
+	{ defaultMessage: '{from} to {to}', id: 'cardFilter.numberRange.join' },
+	{ from, to },
 );
 
 
@@ -138,9 +143,11 @@ const valueToQueryValueFormat = (value, operator: TicketFilterOperator) => {
 
 const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: TicketFilter) => {
 	const query = [getFilterPropertyAsQuery(moduelPropertyAndType), operator];
+	
 	if (values?.length) {
 		query.push(values?.map((v) => valueToQueryValueFormat(v, operator)).join(','));
 	}
+
 	return query.join('::');
 };
 export const filtersToQuery = (filters: TicketFilter[]) => {
@@ -178,6 +185,7 @@ const getNonCompletedTicketFiltersByStatus = (templates: ITemplate[], containerO
 		.map((v) => v.name);
 
 	const values = uniq(completedValueNames);
+	if (!values.length) return null;
 
 	return {
 		module: '',
@@ -203,9 +211,8 @@ const getNonCompletedTicketFiltersBySafetibase = (): TicketFilter => ({
 });
 
 export const getNonCompletedTicketFilters = (templates:ITemplate[], containerOrFederation:string): TicketFilter[] => {
-	let filters = [getNonCompletedTicketFiltersByStatus(templates, containerOrFederation)];
+	let filters = compact([getNonCompletedTicketFiltersByStatus(templates, containerOrFederation)]);
 	const hasSafetibase = templates.some((t) => t?.modules?.some((module) => module.type === 'safetibase'));
-	
 	if (hasSafetibase) {
 		filters.push(getNonCompletedTicketFiltersBySafetibase());
 	}
@@ -234,12 +241,6 @@ export const getTemplateFilter = (templateCode: string): TicketFilter => ({
 const escapeString = (str: string) => str.replaceAll('.', '\\.').replaceAll(',', '\\,').replaceAll(':', '\\:');
 
 const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',').replaceAll('\\:', ':');
-
-const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
-	propOrModule?.find((p) => p.name === name);
-
-const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
-	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype); 
 
 const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, template:ITemplate) => {
 	const propertiesDefinitions = (findModuleByNameOrType(template.modules, ticketFilter.module) as TemplateModule)?.properties || template.properties;
@@ -372,8 +373,13 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 	}
 
 	if (type === 'number') {
-		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
-		filter.displayValues = arrToDisplayValue(filter.values);
+		if (filter.operator === 'rng' || filter.operator === 'nrng') {
+			filter.values = chunk(serialisedValue.split(','), 2) as [ValueType, ValueType] [];
+			filter.displayValues = arrToDisplayValue(filter.values.map(formatNumberRange));
+		} else {
+			filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
+			filter.displayValues = arrToDisplayValue(filter.values);
+		}
 	}
 
 	if (isTextType(type)) {

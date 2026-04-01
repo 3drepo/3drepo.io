@@ -27,7 +27,7 @@ import {
 	groupedContainerMockFactory,
 } from './federations.fixtures';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
-import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { prepareSettingsForFrontend } from '@/v5/store/containers/containers.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectFederationById, selectFederations } from '@/v5/store/federations/federations.selectors';
 import { createTestStore } from '../test.helpers';
@@ -218,7 +218,7 @@ describe('Federations: sagas', () => {
 			populateStore();
 			const baseFederation = prepareMockBaseFederation(mockFederation)
 			const rawSettings = prepareMockRawSettingsReply(mockFederation);
-			const settings = prepareFederationSettingsForFrontend(rawSettings);
+			const settings = prepareSettingsForFrontend(rawSettings);
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
 				.reply(200, rawSettings);
