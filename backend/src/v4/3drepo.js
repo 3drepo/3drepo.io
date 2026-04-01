@@ -47,7 +47,7 @@ process.on("unhandledRejection", async (err) => {
 		systemLogger.logError(`Failed to send email: ${mailErr.message}`);
 	}
 
-	// eslint-disable-next-line no-process-exit
+	// eslint-disable-next-line n/no-process-exit
 	process.exit(-1);
 });
 
