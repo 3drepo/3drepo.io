@@ -20,7 +20,7 @@ import { times } from 'lodash';
 import { selectAreStatsPending, selectContainersByFederationId, selectFavouriteFederations, selectFederationById, selectFederations, selectHasCollaboratorAccess, selectHasCommenterAccess, selectIsListPending } from '@/v5/store/federations/federations.selectors';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { ContainersActions } from '@/v5/store/containers/containers.redux';
-import { federationMockFactory, prepareMockContainers, prepareMockNewFederation, prepareMockSettingsReply, groupedContainerMockFactory, prepareMockStats } from './federations.fixtures';
+import { federationMockFactory, prepareMockNewFederation, prepareMockSettingsReply, groupedContainerMockFactory, prepareMockStats } from './federations.fixtures';
 import { createTestStore } from '../test.helpers';
 import { containerMockFactory, prepareMockViews } from '../containers/containers.fixtures';
 import { Role } from '@/v5/store/currentUser/currentUser.types';
@@ -76,6 +76,17 @@ describe('Federations: store', () => {
 		expect(federationFromState.lastUpdated).toEqual(new Date(stats.lastUpdated));
 		expect(federationFromState.status).toEqual(stats.status);
 		expect(federationFromState.category).toEqual(stats.category);
+	});
+	it('should bulk fetch federations\' stats', () => {
+		const mockFederations = times(3, () => federationMockFactory());
+		dispatch(FederationsActions.fetchFederationsSuccess(projectId, mockFederations));
+		const stats = times(3, (index) => ({ ...prepareMockStats(), modelId: mockFederations[index]._id }));
+		dispatch(FederationsActions.bulkFetchFederationsStatsSuccess(projectId, stats));
+		const federationFromState = selectFederationById(getState(), mockFederations[0]._id);
+		expect(federationFromState.code).toEqual(stats[0].code);
+		expect(federationFromState.lastUpdated).toEqual(new Date(stats[0].lastUpdated));
+		expect(federationFromState.status).toEqual(stats[0].status);
+		expect(federationFromState.category).toEqual(stats[0].category);
 	});
 
 	it('should fetch a federation\'s views', () => {

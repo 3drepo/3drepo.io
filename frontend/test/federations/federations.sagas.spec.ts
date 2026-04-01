@@ -141,7 +141,7 @@ describe('Federations: sagas', () => {
 				dispatch(FederationsActions.fetchFederations(teamspace, projectId));
 			}, [
 				FederationsActions.fetchFederationsSuccess(projectId, [mockFederationWithoutStats]),
-				FederationsActions.fetchFederationStats(teamspace, projectId, mockFederation._id),
+				FederationsActions.bulkFetchFederationsStats(teamspace, projectId, [mockFederation._id]),
 			]);
 		})
 
@@ -158,7 +158,7 @@ describe('Federations: sagas', () => {
 			expect(federationsInStore).toEqual([]);
 		})
 
-		it('should fetch stats', async () => {
+		it('should fetch a federations stats', async () => {
 			populateStore();
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/stats`)
@@ -168,6 +168,27 @@ describe('Federations: sagas', () => {
 				dispatch(FederationsActions.fetchFederationStats(teamspace, projectId, federationId));
 			}, [FederationsActions.fetchFederationStatsSuccess(projectId, federationId, stats)]);
 		})
+		it('should bulk fetch federations stats', async () => {
+			// populate the store with multiple federations for bulk stats fetching
+			const secondFederationId = 'secondFederationId';
+			const federations = [
+				mockFederation,
+				federationMockFactory({ _id: secondFederationId }) as any
+			];
+			const statsList = [
+				stats,
+				prepareMockStats({ _id: secondFederationId })
+			];
+			dispatch(FederationsActions.fetchFederationsSuccess(projectId, federations));
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/stats?models=${federations.map(f => f._id).join()}`)
+				.reply(200, { stats: statsList });
+
+			await waitForActions(() => {
+				dispatch(FederationsActions.bulkFetchFederationsStats(teamspace, projectId, federations.map(f => f._id)));
+			}, [FederationsActions.bulkFetchFederationsStatsSuccess(projectId, statsList)]);
+		});
 
 		it('should call updateFederationContainers endpoint', async () => {
 			populateStore();

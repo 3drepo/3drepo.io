@@ -19,6 +19,7 @@ import { all, put, select, takeEvery, takeLatest } from 'redux-saga/effects';
 import * as API from '@/v5/services/api';
 import {
 	AddFavouriteAction,
+	BulkFetchFederationsStatsAction,
 	CreateFederationAction,
 	DeleteFederationAction,
 	FederationsActions,
@@ -38,10 +39,14 @@ import { prepareFederationsData } from '@/v5/store/federations/federations.helpe
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
-import { isEqualWith } from 'lodash';
-import { compByColum } from '../store.helpers';
+import { chunk, isEqualWith } from 'lodash';
+import { compByColum, DASHBOARD_LIST_CHUNK_SIZE } from '../store.helpers';
 import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
+import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 import { prepareSettingsForFrontend, prepareSettingsForBackend } from '../containers/containers.helpers';
+
+const bulkStatsStack = new AsyncFunctionExecutor((teamspace, projectId, chunkedIds) =>
+	API.Federations.bulkFetchFederationsStats(teamspace, projectId, chunkedIds), 15, ExecutionStrategy.Fifo);
 
 export function* createFederation({
 	teamspace,
@@ -101,11 +106,7 @@ export function* fetchFederations({ teamspace, projectId }: FetchFederationsActi
 			yield put(FederationsActions.fetchFederationsSuccess(projectId, federationsWithoutStats));
 		}
 
-		yield all(
-			federations.map(
-				(federation) => put(FederationsActions.fetchFederationStats(teamspace, projectId, federation._id)),
-			),
-		);
+		yield put(FederationsActions.bulkFetchFederationsStats(teamspace, projectId, federationsWithoutStats.map(({ _id }) => _id)));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to fetch federations',
@@ -129,6 +130,23 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: 'trying to fetch federations stats',
+			error,
+		}));
+	}
+}
+
+export function* bulkFetchFederationsStats({ teamspace, projectId, federationIds }: BulkFetchFederationsStatsAction) {
+	try {
+		const chunkedIds = chunk(federationIds, DASHBOARD_LIST_CHUNK_SIZE);
+		yield all(
+			chunkedIds.map(function* (idsChunk) {
+				const { stats } = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);
+				yield put(FederationsActions.bulkFetchFederationsStatsSuccess(projectId, stats));
+			}),
+		);
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'federations.fetchBulkStats.error', defaultMessage: 'trying to bulk fetch federations details' }),
 			error,
 		}));
 	}
@@ -259,6 +277,7 @@ export default function* FederationsSagas() {
 	yield takeLatest(FederationsTypes.REMOVE_FAVOURITE, removeFavourites);
 	yield takeLatest(FederationsTypes.FETCH_FEDERATIONS, fetchFederations);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
+	yield takeLatest(FederationsTypes.BULK_FETCH_FEDERATIONS_STATS, bulkFetchFederationsStats);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_USERS, fetchFederationUsers);
