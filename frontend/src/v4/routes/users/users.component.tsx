@@ -214,6 +214,7 @@ export class Users extends PureComponent<IProps, IState> {
 				pick(user, ['firstName', 'lastName', 'company', 'user']),
 				{
 					value: user.job,
+					renderValue: (value) => <JobItem name={value} color={jobs.find((job) => job.value === value)?.color} />,
 					items: jobs,
 					itemTemplate: JobItem,
 					onChange: this.handleChange(user, 'job'),

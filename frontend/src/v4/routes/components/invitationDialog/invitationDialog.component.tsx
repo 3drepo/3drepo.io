@@ -215,6 +215,10 @@ export const InvitationDialog = (props: IProps) => {
 								placeholder="Unassigned"
 								inputId="job"
 								itemTemplate={JobItem}
+								renderValue={(value) => {
+									const job = props.jobs.find((j) => j.value === value);
+									return job ? <JobItem name={job.name} color={job.color} /> : 'Unassigned';
+								}}
 							/>
 						</FormControl>
 					)} />

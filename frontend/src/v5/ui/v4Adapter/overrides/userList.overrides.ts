@@ -128,13 +128,17 @@ export const V5UserListOverrides = styled.div`
 		${JobCell} {
 			max-width: 27%;
 			padding: 0 10px 0 0;
-			${SelectStyles} {
-				.MuiGrid-container {
-					flex-wrap: nowrap;
-					.MuiGrid-item:first-of-type {
-						min-height: 10px;
-						min-width: 10px;
-					}
+			.MuiSelect-root {
+				${SelectStyles}
+				width: 100%;
+				${Color} {
+					width: 10px;
+					height: 10px;
+				}
+
+				fieldset {
+					top: unset;
+					bottom: unset;
 				}
 			}
 		}
