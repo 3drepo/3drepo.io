@@ -2538,6 +2538,16 @@ export class UnityUtil {
 	}
 
 	/**
+	 * When set, the viewer will draw less of the model during navigation or
+	 * camera movement, in order to maintain the target Fps. If the Fps is zero
+	 * or negative, this feature is disabled.
+	 * @param fps The target framerate
+	 */
+	public static setDynamicFpsTarget(fps: number) {
+		UnityUtil.toUnity('SetNavigationTargetFps', UnityUtil.LoadingState.VIEWER_READY, fps);
+	}
+
+	/**
 	 * Move mesh/meshes by a given transformation matrix.
 	 * NOTE: this currently only works as desired in Synchro Scenarios
 	 * @category Model Interactions
