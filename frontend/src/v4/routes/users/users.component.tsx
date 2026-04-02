@@ -21,13 +21,11 @@ import {
 	filter,
 	isEmpty,
 	isEqual,
-	isNumber,
 	matches,
 	pick,
 	pickBy,
 	values
 } from 'lodash';
-import ReactDOM from 'react-dom';
 
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
@@ -111,7 +109,6 @@ interface IState {
 	rows: any[];
 	jobs: any[];
 	licencesLabel: string;
-	containerElement: Node;
 	panelKey: number;
 	limit: string | number;
 }
@@ -179,7 +176,6 @@ export class Users extends PureComponent<IProps, IState> {
 		rows: [],
 		jobs: [],
 		licencesLabel: '',
-		containerElement: null,
 		panelKey: Math.random(),
 		limit: 0
 	};
@@ -245,12 +241,10 @@ export class Users extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = this.elementRef.current.parentNode;
 		this.props.fetchQuotaAndInvitations(this.props.selectedTeamspace);
 		const preparedJobs = getPreparedJobs(this.props.jobs);
 
 		this.setState({
-			containerElement,
 			jobs: preparedJobs,
 			rows: this.getUsersTableRows(this.props.users, preparedJobs),
 			limit: this.props.limit
@@ -331,7 +325,7 @@ export class Users extends PureComponent<IProps, IState> {
 		return <NewUserForm {...formProps} onCancel={closePanel} />;
 	}
 
-	public renderNewUserForm = (container) => {
+	public renderNewUserForm = () => {
 		const { limit } = this.state;
 		const { users, usersProvisionedEnabled } = this.props;
 
@@ -347,7 +341,6 @@ export class Users extends PureComponent<IProps, IState> {
 					disabled: isButtonDisabled,
 					label: isButtonDisabled ? 'All licences assigned' : ''
 				} }
-				container={container}
 				key={this.state.panelKey}
 				render={this.renderNewUserFormPanel}
 			/>
@@ -356,7 +349,7 @@ export class Users extends PureComponent<IProps, IState> {
 
 	public render() {
 		const { isPending, selectedTeamspace, usersProvisionedEnabled } = this.props;
-		const { rows, containerElement } = this.state;
+		const { rows } = this.state;
 		const cells = USERS_TABLE_CELLS;
 
 		if (usersProvisionedEnabled) {
@@ -389,7 +382,7 @@ export class Users extends PureComponent<IProps, IState> {
 					</AssignedLicenses>} className={this.props.className}>
 					<CustomTable cells={cells} rows={rows} />
 				</UserManagementTab>
-				{containerElement && this.renderNewUserForm(containerElement)}
+				{this.renderNewUserForm()}
 			</div>
 		);
 	}
