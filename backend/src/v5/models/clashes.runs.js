@@ -35,4 +35,9 @@ ClashRuns.createTestRun = async (teamspace, plan, user) => {
 	return _id;
 };
 
+ClashRuns.completeTestRun = async (teamspace, runId) => {
+	await db.updateOne(teamspace, CLASH_RUNS_COL, { _id: runId },
+		{ $set: { status: CLASH_RUN_STATUS.COMPLETED, completedAt: new Date() } });
+};
+
 module.exports = ClashRuns;

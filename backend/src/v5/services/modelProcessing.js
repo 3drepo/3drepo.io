@@ -45,16 +45,26 @@ const {
 	clash_queue: clashq,
 } = queueConfig;
 
+const MESSAGE_TYPES = {
+	CLASH: 'clash',
+	IMPORT: 'import',
+	DRAWING: 'drawing',
+};
+
 const onCallbackQMsg = ({ content, properties }) => {
 	logger.logInfo(`[Received][${properties.correlationId}] ${content}`);
 	try {
-		const { status, database: teamspace, project: model, user, value, message } = JSON.parse(content);
-		if (status) {
+		const { status, teamspace, project, container, type, user, value, message, results } = JSON.parse(content);
+		if (type === MESSAGE_TYPES.CLASH) {
+			const resultsDir = results.replace(SHARED_SPACE_TAG, sharedDir);
+			publish(events.CLASH_RUN_COMPLETED,
+				{ teamspace, project, corId: properties.correlationId, results: resultsDir });
+		} else if (status) {
 			publish(events.QUEUED_TASK_UPDATE,
-				{ teamspace, model, corId: properties.correlationId, status });
+				{ teamspace, model: container, corId: properties.correlationId, status });
 		} else {
 			publish(events.QUEUED_TASK_COMPLETED,
-				{ teamspace, model, corId: properties.correlationId, user, value, message });
+				{ teamspace, model: container, corId: properties.correlationId, user, value, message });
 		}
 	} catch (err) {
 		logger.logError(`[${properties.correlationId}] Failed to process message: ${err?.message}`);
@@ -239,6 +249,7 @@ ModelProcessing.getLogArchive = async (corId) => {
 
 ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 	const configPath = `${sharedDir}/${corId}/clashConfig.json`;
+
 	try {
 		await mkdir(`${sharedDir}/${corId}`);
 

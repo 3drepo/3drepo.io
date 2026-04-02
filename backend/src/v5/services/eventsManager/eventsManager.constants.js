@@ -31,6 +31,8 @@ const eventList = [
 	'REVISION_UPDATED',
 	// Queue specific
 	'QUEUED_TASK_UPDATE', 'QUEUED_TASK_COMPLETED',
+	// Clash related
+	'CLASH_RUN_COMPLETED',
 	// Socket IO events
 	'CHAT_EVENT',
 	// Authentication

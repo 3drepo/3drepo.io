@@ -20,10 +20,11 @@ const { PassThrough } = require('stream');
 const { SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.constants');
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { createConstantsObject } = require('../../../utils/helper/objects');
-const { createTestRun } = require('../../../models/clashes.runs');
+const { completeTestRun, createTestRun } = require('../../../models/clashes.runs');
 const { getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getMetadataByRules } = require('../../../models/metadata');
 const { queueClashRun } = require('../../../services/modelProcessing');
+const { createReadStream } = require('fs');
 
 const Clashes = {};
 
@@ -83,6 +84,24 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 
 	await queueClashRun(teamspace, project, UUIDToString(runId), stream);
 	return runId;
+};
+
+Clashes.completeTestRun = async (teamspace, corId, results) => {
+	await completeTestRun(teamspace, corId);
+
+	const stream = createReadStream(results, { encoding: 'utf8' });
+
+	stream.on('data', (chunk) => {
+		console.log(chunk);
+	});
+
+	stream.on('end', () => {
+		console.log('Done reading');
+	});
+
+	stream.on('error', (err) => {
+		console.error('Error:', err);
+	});
 };
 
 module.exports = Clashes;
