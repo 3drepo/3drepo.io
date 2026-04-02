@@ -43,7 +43,6 @@ const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
-const getCollection = () => db.getCollection("admin", "invitations");
 
 const invitations = {};
 
@@ -51,19 +50,19 @@ const validateModels = (projectsPermissions, projectsData) => {
 	const projectIDtoData = {};
 	projectsData.forEach((data) => projectIDtoData[data._id] = data);
 	return projectsPermissions.every((project) => {
-		const models = new Set((project.models || []).map(m=> m.model));
+		const models = new Set((project.models || []).map(m => m.model));
 		const allModels = new Set(projectIDtoData[project.project].models);
 		return setContains(allModels, models);
 	});
 };
 
-const validateModelsPermissions =  (projectsPermissions = []) => {
-	return projectsPermissions.every(({models = []}) => models.every(({permission}) =>
+const validateModelsPermissions = (projectsPermissions = []) => {
+	return projectsPermissions.every(({ models = [] }) => models.every(({ permission }) =>
 		MODELS_PERMISSION.includes(permission)
 	));
 };
 
-const cleanModelPermissions = modelPermissions => modelPermissions.map(({model, permission}) => ({model, permission}));
+const cleanModelPermissions = modelPermissions => modelPermissions.map(({ model, permission }) => ({ model, permission }));
 
 const cleanPermissions = (permissions) => {
 	if (permissions.teamspace_admin) { // if the invitation will be teamspace admin , ignore the rest of the permissions that might be sent
@@ -71,27 +70,27 @@ const cleanPermissions = (permissions) => {
 	}
 
 	let projectsPermissions = permissions.projects || [];
-	projectsPermissions = projectsPermissions.map(({project, project_admin, models})=> {
+	projectsPermissions = projectsPermissions.map(({ project, project_admin, models }) => {
 		if (project_admin) {
 			return { project, project_admin };
 		}
 
-		return {project, models: cleanModelPermissions(models)};
+		return { project, models: cleanModelPermissions(models) };
 	});
 
-	return { projects: projectsPermissions};
+	return { projects: projectsPermissions };
 };
 
 const sendInvitationEmail = async (email, username, teamspace) => {
 	const refId = await getTeamspaceRefId(teamspace);
 
 	let sender;
-	if(username) {
-		const { customData: { firstName, lastName }} = await User.findByUserName(username, { "customData.firstName": 1, "customData.lastName": 1});
+	if (username) {
+		const { customData: { firstName, lastName } } = await User.findByUserName(username, { "customData.firstName": 1, "customData.lastName": 1 });
 		sender = [firstName, lastName].join(" ");
 	}
 
-	await addUserToAccount(refId, email, undefined, {teamspace, sender  });
+	await addUserToAccount(refId, email, undefined, { teamspace, sender });
 };
 
 invitations.create = async (email, teamspace, job, username, permissions = {}, checkLicenceLimit = true) => {
@@ -134,44 +133,42 @@ invitations.create = async (email, teamspace, job, username, permissions = {}, c
 	permissions = cleanPermissions(permissions);
 
 	email = email.toLowerCase();
-	const coll = await getCollection();
-	coll.ensureIndex({ "teamSpaces.teamspace": 1 }, { "background": true });
-	const result = await coll.findOne({_id:email});
+	await db.createIndex("admin", "invitations", { "teamSpaces.teamspace": 1 }, { background: true });
+	const result = await db.findOne("admin", "invitations", { _id: email });
 	const teamspaceEntry = { teamspace, job, permissions };
 
 	if (result) {
 
 		// if its a new teamspace that the user has been invited send an invitation email
-		if (result.teamSpaces.every(t=> t.teamspace !== teamspace)) {
-			if(checkLicenceLimit) {
+		if (result.teamSpaces.every(t => t.teamspace !== teamspace)) {
+			if (checkLicenceLimit) {
 				await User.hasReachedLicenceLimitCheck(teamspace);
 			}
 			await sendInvitationEmail(email, username, teamspace);
-			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
+			publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions });
 		}
 		const teamSpaces = result.teamSpaces.filter(entry => entry.teamspace !== teamspace);
 		teamSpaces.push(teamspaceEntry);
 
 		const invitation = { teamSpaces };
-		await coll.updateOne({_id:email}, { $set: invitation });
+		await db.updateOne("admin", "invitations", { _id: email }, { $set: invitation });
 
 	} else {
-		if(checkLicenceLimit) {
+		if (checkLicenceLimit) {
 			await User.hasReachedLicenceLimitCheck(teamspace);
 		}
-		const invitation = {_id:email ,teamSpaces: [teamspaceEntry] };
+		const invitation = { _id: email, teamSpaces: [teamspaceEntry] };
 		await sendInvitationEmail(email, username, teamspace);
-		await coll.insertOne(invitation);
-		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions});
+		await db.insertOne("admin", "invitations", invitation);
+		publish(events.INVITATION_ADDED, { teamspace, executor: username, email, job, permissions });
 	}
 
-	return {email, job, permissions};
+	return { email, job, permissions };
 };
 
 invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) => {
 	email = email.toLowerCase();
-	const coll = await getCollection();
-	const result = await coll.findOne({_id:email});
+	const result = await db.findOne("admin", "invitations", { _id: email });
 
 	if (!result) {
 		return null;
@@ -182,44 +179,41 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 	const userId = await doesUserExist(email);
 	const refId = await getTeamspaceRefId(teamspace);
 
-	if(userId) {
+	if (userId) {
 		await removeUserFromAccount(refId, userId);
 	}
 
-	const data =  { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry.teamspace !== teamspace) };
+	const data = { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry.teamspace !== teamspace) };
 
 	if (data.teamSpaces.length === 0) {
-		await coll.deleteOne({_id: email});
+		await db.deleteOne("admin", "invitations", { _id: email });
 	} else {
-		await coll.updateOne({_id:email}, { $set: data });
+		await db.updateOne("admin", "invitations", { _id: email }, { $set: data });
 	}
 
-	publish(events.INVITATION_REVOKED, { teamspace, executor, email, job: entryToRemove.job, permissions: entryToRemove.permissions});
+	publish(events.INVITATION_REVOKED, { teamspace, executor, email, job: entryToRemove.job, permissions: entryToRemove.permissions });
 
 	return {};
 
 };
 
 invitations.setJob = async (email, teamspace, job) => {
-	const coll = await getCollection();
-	const invitation = await coll.findOne({_id:email});
+	const invitation = await db.findOne("admin", "invitations", { _id: email });
 	invitation.teamSpaces[teamspace].job = job;
-	await coll.updateOne({_id:email}, { $set: invitation });
+	await db.updateOne("admin", "invitations", { _id: email }, { $set: invitation });
 	return true;
 };
 
 invitations.setTeamspacePermission = async (email, teamspace, permissions) => {
 	await invitations.teamspaceInvitationCheck(email, teamspace);
 	const permissionsField = "teamSpaces." + teamspace + ".permissions.teamspace";
-	const coll = await getCollection();
-	await coll.updateOne({}, { $set: { [permissionsField]: permissions } });
-	return {user:email, permissions};
+	await db.updateOne("admin", "invitations", { _id: email }, { $set: { [permissionsField]: permissions } });
+	return { user: email, permissions };
 };
 
 invitations.teamspaceInvitationCheck = async (email, teamspace) => {
-	const queryField = "teamSpaces." + teamspace ;
-	const coll = await getCollection();
-	const invitation = await coll.findOne({_id:email, [queryField]: {$exists:true}}, {_id: true});
+	const queryField = "teamSpaces." + teamspace;
+	const invitation = await db.findOne("admin", "invitations", { _id: email, [queryField]: { $exists: true } }, { _id: true });
 
 	if (!invitation) {
 		throw responseCodes.USER_NOT_FOUND;
@@ -228,22 +222,22 @@ invitations.teamspaceInvitationCheck = async (email, teamspace) => {
 	return true;
 };
 
-const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => async modelSetting=> {
-	const {permission} = modelsPermissions.find(({model}) => model === modelSetting._id);
-	return changePermissions(teamspace, modelSetting._id, modelSetting.permissions.concat({user: invitedUser, permission}));
+const applyModelPermissions = (teamspace, invitedUser, modelsPermissions) => async modelSetting => {
+	const { permission } = modelsPermissions.find(({ model }) => model === modelSetting._id);
+	return changePermissions(teamspace, modelSetting._id, modelSetting.permissions.concat({ user: invitedUser, permission }));
 };
 
-const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_admin , project, models}) => {
+const applyProjectPermissions = (teamspace, invitedUser) => async ({ project_admin, project, models }) => {
 	if (project_admin) {
 		await setUserAsProjectAdminById(teamspace, project, invitedUser);
 	} else {
-		const modelsIds = models.map(({model}) => model);
-		const modelsList = await findModelSettings(teamspace, {"_id" : {"$in" : modelsIds}});
+		const modelsIds = models.map(({ model }) => model);
+		const modelsList = await findModelSettings(teamspace, { "_id": { "$in": modelsIds } });
 		await Promise.all(modelsList.map(applyModelPermissions(teamspace, invitedUser, models)));
 	}
 };
 
-const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, permissions  }) => {
+const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, permissions }) => {
 	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
 
 	try {
@@ -255,16 +249,15 @@ const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, perm
 		if (!permissions.teamspace_admin) {
 			await Promise.all(permissions.projects.map(applyProjectPermissions(teamspace, invitedUser)));
 		}
-	} catch(err) {
+	} catch (err) {
 		systemLogger.logError("Something failed when unpacking invitation: ", err.message);
 	}
 };
 
 invitations.unpack = async (invitedUser) => {
-	const coll = await getCollection();
 	const email = invitedUser.customData.email.toLowerCase();
 	const username = invitedUser.user;
-	const result = await coll.findOne({_id: email});
+	const result = await db.findOne("admin", "invitations", { _id: email });
 
 	if (!result || !result.teamSpaces) {
 		return invitedUser;
@@ -272,16 +265,15 @@ invitations.unpack = async (invitedUser) => {
 
 	await Promise.all(result.teamSpaces.map(applyTeamspacePermissions(username)));
 
-	await coll.deleteOne({_id: email});
+	await db.deleteOne("admin", "invitations", { _id: email });
 	return invitedUser;
 };
 
 invitations.getInvitationsByTeamspace = async (teamspaceName) => {
-	const coll = await getCollection();
-	const results = await coll.find({ "teamSpaces.teamspace": teamspaceName}).toArray();
+	const results = await db.find("admin", "invitations", { "teamSpaces.teamspace": teamspaceName });
 	return results.map(invitationEntry => {
 		const email = invitationEntry._id;
-		const teamspaceData =  omit(invitationEntry.teamSpaces.find(({teamspace}) => teamspace === teamspaceName), "teamspace");
+		const teamspaceData = omit(invitationEntry.teamSpaces.find(({ teamspace }) => teamspace === teamspaceName), "teamspace");
 		return { email, ...teamspaceData };
 	});
 };
