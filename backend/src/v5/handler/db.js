@@ -61,13 +61,13 @@ const getURL = (username, password) => {
 	return urlElements.join('');
 };
 
-const connect = (username, password) => MongoClient.connect(
-	getURL(username, password),
-	{
-		useNewUrlParser: true,
-		useUnifiedTopology: true,
-	},
-);
+const connect = async (username, password) => {
+	const url = getURL(username, password);
+	const client = new MongoClient(
+		url, {});
+	await client.connect();
+	return client;
+};
 
 const getDB = async (db) => {
 	if (!dbConn) {
@@ -124,8 +124,6 @@ DBHandler.authenticate = async (user, password) => {
 	return success;
 };
 
-DBHandler.getAuthDB = () => getDB(ADMIN_DB);
-
 const ensureDefaultRoleExists = () => {
 	if (!defaultRoleProm) {
 		const createDefaultRole = async () => {
@@ -159,12 +157,16 @@ DBHandler.disconnect = async () => {
 };
 
 DBHandler.createUser = async (username, password, customData, roles = []) => {
-	const [db] = await Promise.all([
-		DBHandler.getAuthDB(),
-		ensureDefaultRoleExists(),
-	]);
+	await ensureDefaultRoleExists();
 
-	await db.addUser(username, password, { customData, roles: [...roles, { db: ADMIN_DB, role: DEFAULT_ROLE }] });
+	const command = {
+		createUser: username,
+		pwd: password,
+		customData,
+		roles: [...roles, { db: ADMIN_DB, role: DEFAULT_ROLE }],
+	};
+
+	await runCommand(ADMIN_DB, command);
 };
 
 const dropAllIndicies = async (database, colName) => {
@@ -177,8 +179,9 @@ DBHandler.dropCollection = async (database, collection) => {
 		await dropAllIndicies(database, collection);
 		const db = await getDB(database);
 		await db.dropCollection(collection);
+		/* istanbul ignore catch */
 	} catch (err) {
-		/* istanbul ignore if */
+		/* istanbul ignore next */
 		if (!err.message.includes('ns not found')) {
 			DBHandler.disconnect();
 			throw err;
@@ -248,15 +251,13 @@ DBHandler.bulkWrite = async (database, colName, instructions) => {
 
 DBHandler.findOneAndUpdate = async (database, colName, query, action, options = {}) => {
 	const collection = await getCollection(database, colName);
-	const { value } = await collection.findOneAndUpdate(query, action, deleteIfUndefined(options));
-	return value;
+	return collection.findOneAndUpdate(query, action, deleteIfUndefined(options));
 };
 
 DBHandler.findOneAndDelete = async (database, colName, query, projection) => {
 	const collection = await getCollection(database, colName);
 	const options = deleteIfUndefined({ projection });
-	const { value } = await collection.findOneAndDelete(query, options);
-	return value;
+	return collection.findOneAndDelete(query, options);
 };
 
 DBHandler.deleteMany = async (database, colName, query) => {
@@ -446,10 +447,10 @@ DBHandler.setPassword = async (user, newPassword) => {
 DBHandler.getSessionStore = /* istanbul ignore next */() => {
 	// For some reason this library is very problematic...
 	// eslint-disable-next-line global-require
-	const MongoStore = require('connect-mongo');
+	const MongoStore = require('connect-mongo').default;
 	sessionConn = connect();
-	const sessionStore = MongoStore.create({
-		clientPromise: sessionConn,
+	const sessionStore = new MongoStore({
+		clientPromise: Promise.resolve(sessionConn),
 		dbName: 'admin',
 		collectionName: 'sessions',
 		stringify: false,
