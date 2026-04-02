@@ -240,7 +240,7 @@ const { _context, disconnect } = require(`${v5Path}/handler/db`);
 		return collection.indexExists(index);
 	};
 
-	Handler.yarn = async (database, colName, indexDef, { runInBackground } = {}) => {
+	Handler.createIndex = async (database, colName, indexDef, { runInBackground } = {}) => {
 		const collection = await Handler.getCollection(database, colName);
 		const options = runInBackground ? { background: true } : undefined;
 		return collection.createIndex(indexDef, options);
