@@ -27,6 +27,7 @@ import { isEmpty } from 'lodash';
 import { useEffect, useRef } from 'react';
 import * as yup from 'yup';
 
+import { Button } from '@controls/button';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MODEL_ROLES_LIST, MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
@@ -41,13 +42,11 @@ import {
 	Container,
 	Content,
 	Footer,
-	IconButton,
 	PermissionsTable,
 	ProjectCheckboxContainer,
 	ProjectConfig,
 	TextField
 } from './invitationDialog.styles';
-import { Button } from '@controls/button';
 
 const invitationSchema = yup.object().shape({
 	email: schema.email,
@@ -133,54 +132,58 @@ export const InvitationDialog = (props: IProps) => {
 	const renderPermissions = (projects = []) => (
 		<FieldArray name="permissions" render={({ remove, push }) => (
 			<>
-				{projects.map(({ project, isAdmin }, index) => (
-					<div key={index}>
-						<ProjectConfig>
-							<Field name={`permissions.${index}.project`} render={({ field }) => (
-								<FormControl>
-									<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
-									<CellSelect
-										{...field}
-										items={getProjects(project, projects)}
-										placeholder="Select project"
-										disabledPlaceholder
-										displayEmpty
-										inputId={`project-${index}`}
-									/>
-								</FormControl>
-							)} />
-							<Button variant="outlined" color="secondary" onClick={() => remove(index)}>
-								Remove
-							</Button>
-							{project && (
-								<Field name={`permissions.${index}.isAdmin`} render={({ field, form }) => (
-									<ProjectCheckboxContainer
-										control={
-											<Checkbox
-												checked={field.value}
-												{...field}
-												onChange={handleProjectAdminChange(field, form, index)}
-												color="secondary"
-											/>
-										}
-										label="Project Admin"
+				{projects.map(({ project, isAdmin }, index) => {
+					const availableProjects = getProjects(project, projects);
+					return (
+						<div key={index}>
+							<ProjectConfig>
+								<Field name={`permissions.${index}.project`} render={({ field }) => (
+									<FormControl>
+										<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
+										<CellSelect
+											{...field}
+											items={availableProjects}
+											placeholder="Select project"
+											disabledPlaceholder
+											displayEmpty
+											inputId={`project-${index}`}
+											renderValue={(value) => availableProjects.find((p) => p.value === value)?.name || 'Select project'}
+										/>
+									</FormControl>
+								)} />
+								<Button variant="outlined" color="secondary" onClick={() => remove(index)}>
+									Remove
+								</Button>
+								{project && (
+									<Field name={`permissions.${index}.isAdmin`} render={({ field, form }) => (
+										<ProjectCheckboxContainer
+											control={
+												<Checkbox
+													checked={field.value}
+													{...field}
+													onChange={handleProjectAdminChange(field, form, index)}
+													color="secondary"
+												/>
+											}
+											label="Project Admin"
+										/>
+									)} />
+								)}
+							</ProjectConfig>
+							{project && !isAdmin && (
+								<Field name={`permissions.${index}.models`} render={({ field }) => (
+									<PermissionsTable
+										modelsNumber={props.projects[project].models.length + 1}
+										context={PermissionsTableContexts.MODELS}
+										permissions={getModelsPermissions(project, field.value)}
+										roles={MODEL_ROLES_LIST}
+										onPermissionsChange={handlePermissionsChange(field.name, field.value, field.onChange)}
 									/>
 								)} />
 							)}
-						</ProjectConfig>
-						{project && !isAdmin && (
-							<Field name={`permissions.${index}.models`} render={({ field }) => (
-								<PermissionsTable
-									modelsNumber={props.projects[project].models.length + 1}
-									context={PermissionsTableContexts.MODELS}
-									permissions={getModelsPermissions(project, field.value)}
-									roles={MODEL_ROLES_LIST}
-									onPermissionsChange={handlePermissionsChange(field.name, field.value, field.onChange)}
-								/>
-							)} />
-						)}
-					</div>
-				))}
+						</div>
+					)
+				})}
 				{values(props.projects).length !== projects.length && (
 					<AddButton
 						color="secondary"
