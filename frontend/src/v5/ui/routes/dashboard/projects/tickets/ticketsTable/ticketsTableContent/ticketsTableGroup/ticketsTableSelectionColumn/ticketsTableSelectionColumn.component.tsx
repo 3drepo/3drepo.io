@@ -113,7 +113,7 @@ export const TicketsTableSelectionColumn = ({
 	return (
 		<div>
 			<Headers>
-				<CheckboxHeaderCell alwaysVisible>
+				<CheckboxHeaderCell name="_ticketsSelection" alwaysVisible>
 					<Checkbox indeterminate={someSelected} checked={allSelected} onClick={onCheckAll} />
 				</CheckboxHeaderCell>
 			</Headers>

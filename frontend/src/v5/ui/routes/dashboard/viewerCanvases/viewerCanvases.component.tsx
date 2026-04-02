@@ -18,12 +18,13 @@
 import { Viewer3D } from '@/v4/routes/viewer3D';
 import { Viewer2D } from '@components/viewer/drawingViewer/viewer2D.component';
 import { useLocation } from 'react-router-dom';
-import { SplitPane, LeftPane } from './viewerCanvases.styles';
+import { SplitPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
 import { useContext } from 'react';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
 import { CalibrationContext } from '../projects/calibration/calibrationContext';
 import { isNumber } from 'lodash';
+import { Pane } from 'react-split-pane';
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
@@ -39,16 +40,17 @@ export const ViewerCanvases = () => {
 		<>
 			{isCalibrating && <CalibrationHeader />}
 			<SplitPane
-				split="vertical"
-				size={is2DOpen ? leftPanelRatio * 100 + '%' : '100%'}
-				onDragFinished={dragFinish}
+				direction="vertical"
+				onResizeEnd={dragFinish}
 				$isCalibrating={isCalibrating}
 				$is2DOpen={is2DOpen}
 			>
-				<LeftPane>
+				<Pane size={is2DOpen ? leftPanelRatio * 100 + '%' : '100%'}>
 					<Viewer3D location={{ pathname }} />
-				</LeftPane>
-				{is2DOpen ? <Viewer2D /> : <div />}
+				</Pane>
+				<Pane>
+					{is2DOpen ? <Viewer2D /> : <div />}
+				</Pane>
 			</SplitPane>
 		</>
 	);

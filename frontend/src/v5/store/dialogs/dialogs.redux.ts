@@ -24,6 +24,7 @@ import uuid from 'uuidv4';
 import { Constants } from '../../helpers/actions.helper';
 import { AuthenticatingModal } from '@components/shared/modalsDispatcher/templates/infoModal/authenticatingModal/authenticatingModal.component';
 import { ExtractModalProps, FunctionComponent, IDialogState, ModalType } from './dialogs.types';
+import { JSX } from 'react';
 
 export const INITIAL_STATE: IDialogState = {
 	dialogs: [],
@@ -84,7 +85,7 @@ type CloseAllAction = Action<'CLOSE_ALL'>;
 
 export interface IDialogsActionCreators {
 	open: <T extends ModalType | FunctionComponent>
-	(modalType?: T, props?: ExtractModalProps<T> | undefined, syncProps?: any | undefined) => OpenAction;
+	(modalType?: T, props?: Partial<ExtractModalProps<T>> | undefined, syncProps?: any | undefined) => OpenAction;
 	close: (id: string) => CloseAction;
 	closeAll: () => CloseAllAction;
 }

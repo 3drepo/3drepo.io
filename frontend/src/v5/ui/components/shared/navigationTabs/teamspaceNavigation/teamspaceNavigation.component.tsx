@@ -18,7 +18,7 @@ import { FormattedMessage } from 'react-intl';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Container, Link } from '../navigationTabs.styles';
 
-export const TeamspaceNavigation = (): JSX.Element => {
+export const TeamspaceNavigation = () => {
 	const isAdmin = TeamspacesHooksSelectors.selectIsTeamspaceAdmin();
 
 	return (

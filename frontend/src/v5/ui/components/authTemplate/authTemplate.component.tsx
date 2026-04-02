@@ -17,13 +17,14 @@
 
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { Background, Footer, Logo, BackgroundOverlay, LogoContainer } from './authTemplate.styles';
+import { JSX } from 'react';
 
 interface IAuthTemplate {
 	footer?: JSX.Element;
 	children?: JSX.Element | JSX.Element[];
 }
 
-export const AuthTemplate = ({ footer, children }: IAuthTemplate): JSX.Element => {
+export const AuthTemplate = ({ footer, children }: IAuthTemplate) => {
 	const backgroundSrc = clientConfigService.getCustomBackgroundImagePath();
 
 	return (

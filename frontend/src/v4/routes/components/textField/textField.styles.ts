@@ -31,7 +31,7 @@ const containerNonEditModeStyles = css`
 	align-items: flex-end;
 `;
 
-export const Container = styled.div`
+export const Container = styled.div<{editMode: boolean}>`
 	position: relative;
 	display: flex;
 	${({ editMode }: { editMode: boolean }) => editMode ? containerEditModeStyles : containerNonEditModeStyles};

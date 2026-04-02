@@ -612,7 +612,6 @@ const Buttons = (props) => {
 };
 
 interface IProps {
-	handleResolve: () => void;
 	handleClose: () => void;
 	updateSettings: (username: string, settings: any) => void;
 	visualSettings: any;

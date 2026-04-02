@@ -313,12 +313,12 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 				<SequencePlayerColumn>
 					<SequencePlayerAllInputs>
 						<SequenceRow>
-							<Grid item>
+							<Grid>
 								<IconButton disabled={this.isFirstDay} onClick={this.rewind} size="small">
 									<StepBackIcon fontSize="large" />
 								</IconButton>
 							</Grid>
-							<Grid item>
+							<Grid>
 								<FlexCol>
 									<DatePicker
 										minDateTime={dayjs(min)}
@@ -333,7 +333,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 									</SetToCurrentDateButton>
 								</FlexCol>
 							</Grid>
-							<Grid item>
+							<Grid>
 								<IconButton disabled={this.isLastDay} onClick={this.forward} size="small">
 									<StepForwardIcon fontSize="large" />
 								</IconButton>
@@ -354,10 +354,10 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 						</IntervalRow>
 					</SequencePlayerAllInputs>
 					<SliderRow>
-						<Grid item>
+						<Grid>
 							<IconButton onClick={this.onClickPlayStop} size="large"><this.PlayButtonIcon /></IconButton>
 						</Grid>
-						<Grid item>
+						<Grid>
 							<SequenceSlider
 								max={this.totalTime}
 								step={36000000}

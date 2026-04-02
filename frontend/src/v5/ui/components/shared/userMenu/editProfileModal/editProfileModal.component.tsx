@@ -56,7 +56,7 @@ export const EditProfileModal = ({ open, onClickClose, initialTab }: EditProfile
 	const user = CurrentUserHooksSelectors.selectCurrentUser();
 	const userIsMissingRequiredData = userHasMissingRequiredData(user);
 
-	const defaultPersonalValues = defaults(
+	const defaultPersonalValues: any = defaults(
 		pick(omitBy(user, isNull), ['firstName', 'lastName', 'email', 'company', 'countryCode']),
 		{ company: '', avatarFile: '' },
 	);

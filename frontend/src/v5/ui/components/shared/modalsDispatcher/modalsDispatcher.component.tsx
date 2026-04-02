@@ -41,7 +41,7 @@ const ModalTemplateContainer = ({ id, modalType, props, syncProps }: IDialogConf
 	return (<Modal open={openState} onClickClose={onClickClose} {...modalProps} />);
 };
 
-export const ModalsDispatcher = (): JSX.Element => {
+export const ModalsDispatcher = () => {
 	const dialogs = DialogsHooksSelectors.selectDialogs();
 
 	return (

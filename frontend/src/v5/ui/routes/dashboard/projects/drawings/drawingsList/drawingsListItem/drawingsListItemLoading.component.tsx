@@ -41,7 +41,7 @@ interface IDrawingListItem {
 export const DrawingListItemLoading = ({
 	drawing,
 	delay,
-}: IDrawingListItem): JSX.Element => {
+}: IDrawingListItem) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {

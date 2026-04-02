@@ -42,14 +42,14 @@ const SequenceItem = ({name, modelName, startDate, endDate, onClick}) => (
 	<SequenceItemContainer onClick={onClick}>
 		<Grid container direction="row" alignItems="center">
 			<SequenceItemIcon />
-			<Grid item>
+			<Grid>
 				<Tooltip title={name}>
 					<SequenceName>{name}</SequenceName>
 				</Tooltip>
-				<Grid item>{modelName}</Grid>
+				<Grid>{modelName}</Grid>
 				<SequenceDatesContainer>
-					<Grid item>Start: {formatDateTime(new Date(startDate))} </Grid>
-					<Grid item>End: {formatDateTime(new Date(endDate))} </Grid>
+					<Grid>Start: {formatDateTime(new Date(startDate))} </Grid>
+					<Grid>End: {formatDateTime(new Date(endDate))} </Grid>
 				</SequenceDatesContainer>
 			</Grid>
 		</Grid>

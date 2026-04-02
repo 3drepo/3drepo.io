@@ -315,7 +315,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 	private renderRightPanels = (panels) => (
 		<RightPanels>
 			{panels.includes(VIEWER_PANELS.BIM) && <Bim {...this.urlParams} />}
-			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities {...this.urlParams} />}
+			{panels.includes(VIEWER_PANELS.ACTIVITIES) && <Activities />}
 		</RightPanels>
 	)
 

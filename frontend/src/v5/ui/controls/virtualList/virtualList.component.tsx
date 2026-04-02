@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { isEqual } from 'lodash';
-import { useRef, useState, useEffect, createContext, useContext, createRef, MutableRefObject } from 'react';
+import { useRef, useState, useEffect, createContext, useContext, createRef, MutableRefObject, JSX } from 'react';
 
 export type VListHandle = {
 	gotoIndex: (index: number, scroller?: Element ) => Promise<any>;
@@ -182,8 +182,8 @@ export const untilXFramesPassed = (frames: number) => {
 // ItemComponent must create an item which bottom is the top of the next item. In other words no gutters are allowed.
 export const VirtualList =  <T extends unknown>({ items, itemHeight, ItemComponent, vKey, className, handle }:Props<T>) => { 
 	const parentVKey = useContext(VKeyContext);
-	const containerRef = useRef<Element>();
-	const itemsContainer = useRef<Element>();
+	const containerRef = useRef<Element>(null);
+	const itemsContainer = useRef<Element>(null);
 	const [, setRedraw] = useState(false);
 	const sliceIndexes = useRef({ first:-1, last:-1 });
 	const itemsRef = useVRef(`${parentVKey}._items_`, items);

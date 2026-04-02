@@ -56,7 +56,7 @@ export const FederationsList = ({
 	title,
 	titleTooltips,
 	onClickCreate,
-}: IFederationsList): JSX.Element => {
+}: IFederationsList) => {
 	// eslint-disable-next-line max-len
 	const { items: federations, filteredItems: filteredFederations } = useContext<SearchContextType<IFederation>>(SearchContext);
 	const hasFederations = federations.length > 0;

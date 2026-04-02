@@ -65,7 +65,7 @@ export const TableHeadingRadio = forwardRef((({
 			ref={ref}
 			{...otherProps}
 		>
-			<Grid item>
+			<Grid>
 				<SortLabel
 					active={activeSort}
 					direction={sortOrder}
@@ -74,7 +74,7 @@ export const TableHeadingRadio = forwardRef((({
 					{label}
 				</SortLabel>
 			</Grid>
-			<Grid item>
+			<Grid>
 				<TableHeadingRadioButton
 					checked={checked}
 					name={name || label}

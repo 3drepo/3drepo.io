@@ -21,7 +21,7 @@ import { FormModal } from '@controls/formModal/formModal.component';
 import { Typography } from '@controls/typography';
 import { memo } from 'react';
 
-export const Modal = memo(styled(FormModal)`
+export const Modal = memo(styled(FormModal as any)`
 	.MuiPaper-root {
 		min-width: 955px;
 		.MuiDialogContent-root {

@@ -42,13 +42,13 @@ export const UserItem = (props: IProps) => {
 			alignItems="flex-start"
 			style={{minWidth: 0}}
 		>
-			<Name item>
+			<Name>
 				<Highlight
 					{...highlightProps}
 					text={`${props.firstName} ${props.lastName}`}
 				/>
 			</Name>
-			<Detail item>
+			<Detail>
 				<Highlight
 					{...highlightProps}
 					text={props.company || ''}

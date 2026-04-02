@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef } from 'react';
+import { JSX, PureComponent, createRef } from 'react';
 import BinIcon from '@assets/icons/outlined/delete-outlined.svg';
 import {
 	cond,
@@ -163,6 +163,7 @@ const AssignedLicenses = ({ licencesCount, usersCount, limit, children}: Assigne
 
 export class Users extends PureComponent<IProps, IState> {
 	public formRef = createRef<any>();
+	public elementRef = createRef<HTMLDivElement>();
 	public static defaultProps = {
 		jobs: [],
 		users: []
@@ -244,7 +245,7 @@ export class Users extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = (ReactDOM.findDOMNode(this) as HTMLElement).parentNode;
+		const containerElement = this.elementRef.current.parentNode;
 		this.props.fetchQuotaAndInvitations(this.props.selectedTeamspace);
 		const preparedJobs = getPreparedJobs(this.props.jobs);
 
@@ -381,7 +382,7 @@ export class Users extends PureComponent<IProps, IState> {
 		const limitReached =  (limit || 0) as number <= users.length;
 
 		return (
-			<>
+			<div ref={this.elementRef}>
 				<UserManagementTab footerLabel={
 					<AssignedLicenses licencesCount={licencesCount} limit={limit} usersCount={users.length} >
 						<PendingInvites {...this.props} onInvitationOpen={this.handleInvitationOpen} limitReached={limitReached} />
@@ -389,7 +390,7 @@ export class Users extends PureComponent<IProps, IState> {
 					<CustomTable cells={cells} rows={rows} />
 				</UserManagementTab>
 				{containerElement && this.renderNewUserForm(containerElement)}
-			</>
+			</div>
 		);
 	}
 }

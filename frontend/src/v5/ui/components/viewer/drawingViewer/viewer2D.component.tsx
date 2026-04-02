@@ -77,9 +77,9 @@ export const Viewer2D = () => {
 	const [isMaxZoom, setIsMaxZoom] = useState(false);
 	const [viewport, setViewport] = useState({ left:0, right: 0, top: 0, bottom:0 });
 	const [isLoading, setIsLoading] = useState(false);
-	const containerRef = useRef();
-	const imgViewerRef = useRef<ZoomableImage>();
-	const imgContainerRef = useRef();
+	const containerRef = useRef(null);
+	const imgViewerRef = useRef<ZoomableImage>(null);
+	const imgContainerRef = useRef(null);
 
 	// The ViewerAttributes state is updated based on the src property. The type
 	// and src members are held in the same object to ensure they are always

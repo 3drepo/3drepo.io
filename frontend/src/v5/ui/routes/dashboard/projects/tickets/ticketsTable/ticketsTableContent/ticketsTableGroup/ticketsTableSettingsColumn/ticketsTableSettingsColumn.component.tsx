@@ -28,7 +28,7 @@ import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.helper';
 export const TicketsTableSettingsColumn = ({ tickets, selectedTicketId }) => (
 	<span>
 		<Headers>
-			<HeaderCell alwaysVisible>
+			<HeaderCell name='_ticketSettings' alwaysVisible>
 				<ColumnsVisibilitySettings />
 			</HeaderCell>
 		</Headers>

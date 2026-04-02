@@ -20,13 +20,7 @@ import styled from 'styled-components';
 
 import { COLOR } from '../../../../styles';
 
-export const PinIcon = styled(Place).attrs({
-	classes: {
-		colorSecondary: 'secondary',
-		colorPrimary: 'primary',
-		colorDisabled: 'disabled'
-	}
-})`
+export const PinIcon = styled(Place)`
 	&& {
 		&.secondary {
 			color: ${COLOR.SUNGLOW};
