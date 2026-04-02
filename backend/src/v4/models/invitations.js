@@ -132,7 +132,7 @@ invitations.create = async (email, teamspace, job, username, permissions = {}, c
 	permissions = cleanPermissions(permissions);
 
 	email = email.toLowerCase();
-	await db.createIndex("admin", "invitations", { "teamSpaces.teamspace": 1 }, { background: true });
+	await db.createIndex("admin", "invitations", { "teamSpaces.teamspace": 1 }, { runInBackground: true });
 	const result = await db.findOne("admin", "invitations", { _id: email });
 	const teamspaceEntry = { teamspace, job, permissions };
 
@@ -182,7 +182,7 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 		await removeUserFromAccount(refId, userId);
 	}
 
-	const data = { _id: email, teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry.teamspace !== teamspace) };
+	const data = { teamSpaces: result.teamSpaces.filter(teamspaceEntry => teamspaceEntry.teamspace !== teamspace) };
 
 	if (data.teamSpaces.length === 0) {
 		await db.deleteOne("admin", "invitations", { _id: email });
@@ -194,13 +194,6 @@ invitations.removeTeamspaceFromInvitation = async (email, teamspace, executor) =
 
 	return {};
 
-};
-
-invitations.setJob = async (email, teamspace, job) => {
-	const invitation = await db.findOne("admin", "invitations", { _id: email });
-	invitation.teamSpaces[teamspace].job = job;
-	await db.updateOne("admin", "invitations", { _id: email }, { $set: invitation });
-	return true;
 };
 
 invitations.setTeamspacePermission = async (email, teamspace, permissions) => {
