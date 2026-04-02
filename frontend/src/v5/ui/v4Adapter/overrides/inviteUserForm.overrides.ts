@@ -36,6 +36,9 @@ import { css } from 'styled-components';
 import { secondaryTextButtonStyling } from '../resuableOverrides.styles';
 
 const JobSelectStyles = css`
+	.MuiSelect-select {
+		align-content: center;
+	}
 	${JobColorDot} {
 		width: 10px;
 		height: 10px;
