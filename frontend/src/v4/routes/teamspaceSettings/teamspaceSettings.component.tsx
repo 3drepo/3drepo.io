@@ -340,15 +340,15 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	public renderForm = () => {
-		const { topicTypes, riskCategories, createMitigationSuggestions  } = this.state;
-
+		const {createMitigationSuggestions, topicTypes, riskCategories  } = this.state;
 		return	(
 			<Container>
 				<Formik
+					key={topicTypes.toString()}
 					initialValues={{
 						topicTypes,
 						riskCategories,
-						createMitigationSuggestions
+						createMitigationSuggestions,
 					}}
 					onSubmit={this.handleUpdateSettings}
 				>
@@ -365,10 +365,9 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 
 						<StyledGrid>
 							<Headline>Issue Types</Headline>
-							<Field
-								name="topicTypes"
-								render={({ field }) => <ChipsInput {...field} placeholder={'Enter new issue type...'} />}
-							/>
+							<Field name="topicTypes">{({ field }) =>
+								(<ChipsInput {...field} placeholder={'Enter new issue type...'} />)
+							}</Field>
 						</StyledGrid>
 
 						<StyledGrid $gridPaddingBottom>

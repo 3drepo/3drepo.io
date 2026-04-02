@@ -14,19 +14,119 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { DateTimePicker as MuiDateTimePicker, DateTimePickerProps as MuiDateTimePickerProps } from '@mui/x-date-pickers';
-import { BaseCalendarPicker, BaseCalendarPickerProps } from './baseCalendarPicker/baseCalendarPicker.component';
+import { useEffect, useRef, useState } from 'react';
+import { FormInputProps } from '@controls/inputs/inputController.component';
+import { formatMessage } from '@/v5/services/intl';
+import { TextField } from './dateTimePicker.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { DateTimePicker as MUIDateTimePicker, DateTimePickerProps as MUIDateTimePickerProps } from '@mui/x-date-pickers';
 
-export type DateTimePickerProps = Omit<BaseCalendarPickerProps, 'PickerComponent'> & Partial<MuiDateTimePickerProps<any>>;
-export const DateTimePicker = ({ onBlur, onChange, ...props }: DateTimePickerProps) => (
-	<BaseCalendarPicker
-		PickerComponent={MuiDateTimePicker}
-		format={formatDateTime}
-		onChange={(val) => {
-			onChange(val);
-			onBlur?.();
-		}}
+export type DateTimePickerProps = FormInputProps & MUIDateTimePickerProps & {
+	placeholder?: string;
+};
+
+export const DateTimePicker = ({
+	disabled,
+	helperText,
+	error,
+	required,
+	value,
+	onChange,
+	onBlur,
+	placeholder,
+	...props
+}: DateTimePickerProps) => {
+	const [open, setOpen] = useState(false);
+	const inputRef =  useRef(null);
+	const changeAborted =  useRef(false);
+
+	const closePicker = () => setOpen(false);
+
+	const preventPropagation = (e) => {
+		if (e.key !== 'Escape') {
+			changeAborted.current = true;
+			e.preventDefault();
+			e.stopPropagation();
+		}
+	};
+
+	const handleClick = (e) => {
+		if (disabled) return;
+		preventPropagation(e);
+		if (!open) {
+			setOpen(true);
+		}
+	};
+
+	useEffect(() => {
+		if (inputRef.current) {
+			inputRef.current.value = value ? formatDateTime(value) : null;
+		}
+	}, [inputRef.current, value]);
+
+	return (<MUIDateTimePicker
 		{...props}
-	/>
-);
+		localeText={{ 
+			clearButtonLabel:  formatMessage({
+				id: 'calendarPicker.clearButtonLabel',
+				defaultMessage: 'Clear' }),
+		}} 
+		slots={{
+			textField: (textFieldProps) => {
+				return (<TextField
+					{...textFieldProps}
+					onKeyDown={(e) => e.preventDefault()}
+					placeholder={placeholder ?? formatMessage({
+						id: 'calendarPicker.placeholder',
+						defaultMessage: 'Choose a date',
+					})}
+
+					slotProps={{
+						input: textFieldProps.InputProps,
+					}}
+					error={error}
+					helperText={helperText}
+					required={required}
+					value={undefined}
+					inputRef={inputRef}
+					onClick={handleClick}
+				/>);
+			},
+		}}
+
+		slotProps={{ 
+			actionBar: { actions: ['clear', 'cancel', 'accept'] },
+			desktopPaper: {
+				onMouseLeave: () => {
+					changeAborted.current = true;
+				},
+				onMouseMove: () => {
+					changeAborted.current = false;
+				},
+			},
+		}}
+
+		enableAccessibleFieldDOMStructure={false} 
+		open={open}
+
+		onChange={(val) => { 
+			inputRef.current.value = formatDateTime(val);
+		}}
+
+		onAccept={(newValue) => {
+			if (!changeAborted.current) {
+				onChange?.(newValue ? newValue.toDate().getTime() : null);
+				onBlur?.();
+			}
+			closePicker();
+		}}
+
+		onClose={() => {
+			inputRef.current.value = formatDateTime(value);
+			closePicker();
+		}}
+
+		disabled={disabled}
+		{...props}
+	/>);
+};
