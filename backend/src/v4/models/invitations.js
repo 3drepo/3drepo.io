@@ -43,7 +43,6 @@ const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
-
 const invitations = {};
 
 const validateModels = (projectsPermissions, projectsData) => {
