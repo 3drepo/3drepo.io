@@ -17,10 +17,10 @@
 
 "use strict";
 
-const {v5Path} = require("../../interop");
-const {_context, disconnect} = require(`${v5Path}/handler/db`);
+const { v5Path } = require("../../interop");
+const { _context, disconnect } = require(`${v5Path}/handler/db`);
 
-(function() {
+(function () {
 	const C = require("../constants");
 	const GridFSBucket = require("mongodb").GridFSBucket;
 	const { PassThrough } = require("stream");
@@ -29,10 +29,10 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 	async function getGridFSBucket(database, collection, chunksize = null) {
 		try {
 			const dbConn = await _context.getDB(database);
-			const options = {bucketName: collection};
+			const options = { bucketName: collection };
 
 			if (chunksize) {
-				options.chunksize =  chunksize;
+				options.chunksize = chunksize;
 			}
 
 			return new GridFSBucket(dbConn, options);
@@ -41,7 +41,7 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 			throw err;
 		}
 	}
-	const connect =  _context.connect;
+	const connect = _context.connect;
 
 	const Handler = {};
 
@@ -53,7 +53,7 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 		} catch (err) {
 			throw responseCodes.INCORRECT_USERNAME_OR_PASSWORD;
 		} finally {
-			if(conn) {
+			if (conn) {
 				conn.close();
 			}
 		}
@@ -74,8 +74,8 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 			const dbConn = await _context.getDB(database);
 			await dbConn.dropCollection(colName);
 
-		} catch(err) {
-			if(!err.message.includes("ns not found")) {
+		} catch (err) {
+			if (!err.message.includes("ns not found")) {
 				Handler.disconnect();
 				throw err;
 			}
@@ -120,13 +120,13 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 
 	Handler.findOneAndUpdate = async function (database, colName, query, action, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
-		const findResult = await collection.findOneAndUpdate(query, action, {projection});
+		const findResult = await collection.findOneAndUpdate(query, action, { projection });
 		return findResult;
 	};
 
 	Handler.findOneAndDelete = async function (database, colName, query, projection = {}) {
 		const collection = await Handler.getCollection(database, colName);
-		const findResult = await collection.findOneAndDelete(query, {projection});
+		const findResult = await collection.findOneAndDelete(query, { projection });
 		return findResult;
 	};
 
@@ -162,7 +162,7 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 
 	Handler.getCollectionStats = function (database, colName) {
 		return _context.getDB(database).then(dbConn => {
-			const command = {collStats: colName};
+			const command = { collStats: colName };
 			return dbConn.command(command);
 		}).catch(err => {
 			Handler.disconnect();
@@ -171,12 +171,12 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 	};
 
 	Handler.getFileStreamFromGridFS = function (database, collection, filename) {
-		return getGridFSBucket(database,collection).then((bucket) => {
-			return bucket.find({filename}).toArray().then(file => {
-				if(file.length === 0) {
+		return getGridFSBucket(database, collection).then((bucket) => {
+			return bucket.find({ filename }).toArray().then(file => {
+				if (file.length === 0) {
 					return Promise.reject(responseCodes.NO_FILE_FOUND);
 				}
-				return Promise.resolve({stream: bucket.openDownloadStream(file[0]._id), size: file[0].length});
+				return Promise.resolve({ stream: bucket.openDownloadStream(file[0]._id), size: file[0].length });
 			});
 		});
 	};
@@ -201,11 +201,11 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 			const fileStream = file.stream;
 			return new Promise((resolve) => {
 				const bufs = [];
-				fileStream.on("data", function(d) {
+				fileStream.on("data", function (d) {
 					bufs.push(d);
 				});
 
-				fileStream.on("end", function() {
+				fileStream.on("end", function () {
 					resolve(Buffer.concat(bufs));
 				});
 			});
@@ -214,15 +214,15 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 
 	Handler.storeFileInGridFS = function (database, collection, filename, buffer) {
 		return getGridFSBucket(database, collection).then(bucket => {
-			return new Promise(function(resolve, reject) {
+			return new Promise(function (resolve, reject) {
 				try {
 					const stream = new PassThrough();
 					stream
 						.pipe(bucket.openUploadStream(filename))
-						.on("error", function(error) {
+						.on("error", function (error) {
 							reject(error);
 						})
-						.on("finish", function() {
+						.on("finish", function () {
 							resolve(filename);
 						});
 
@@ -263,7 +263,7 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 
 	Handler.listDatabases = async (nameOnly = true) => {
 		try {
-			const res = await Handler.runCommand("admin", {listDatabases :1, nameOnly });
+			const res = await Handler.runCommand("admin", { listDatabases: 1, nameOnly });
 			return res.databases;
 		} catch (err) {
 			Handler.disconnect();
@@ -275,7 +275,7 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 		try {
 			const dbConn = await _context.getDB(database);
 			const colls = await dbConn.listCollections().toArray();
-			return colls.map(({name, options}) => ({name, options}));
+			return colls.map(({ name, options }) => ({ name, options }));
 		} catch (err) {
 			Handler.disconnect();
 			throw err;
@@ -316,7 +316,7 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 	let defaultRoleProm;
 
 	const ensureDefaultRoleExists = async () => {
-		if(!defaultRoleProm) {
+		if (!defaultRoleProm) {
 
 			const createDefaultRole = async () => {
 
@@ -337,14 +337,14 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 		defaultRoleProm = null;
 	};
 	Handler.dropDatabase = async (database) => {
-		if(!["config", "admin"].includes(database)) {
+		if (!["config", "admin"].includes(database)) {
 			try {
 				const dbConn = await _context.getDB(database);
 				const collections = await Handler.listCollections(database);
-				await Promise.all(collections.map(({name}) => dropAllIndicies(database,name)));
+				await Promise.all(collections.map(({ name }) => dropAllIndicies(database, name)));
 				await dbConn.dropDatabase();
 			} catch (err) {
-				if(err.message !== "ns not found") {
+				if (err.message !== "ns not found") {
 					Handler.disconnect();
 					throw err;
 				}
@@ -359,7 +359,7 @@ const {_context, disconnect} = require(`${v5Path}/handler/db`);
 		]);
 
 		roles.push(C.DEFAULT_ROLE_OBJ);
-		await adminDB.addUser(username, password, { customData, roles});
+		await adminDB.addUser(username, password, { customData, roles });
 	};
 
 	Handler.dropUser = async (user) => {
