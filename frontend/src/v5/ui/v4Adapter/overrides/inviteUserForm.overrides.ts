@@ -97,28 +97,13 @@ const ProjectSelectorStyles = css`
 		padding: 20px 0 10px;
 		margin-top: 20px;
 		border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
-
-		.MuiFormControl-root {
+		align-items: center;
+		> .MuiFormControl-root {
 			margin-bottom: 0;
+			margin-top: -13px;
 		}
-		${IconButton} {
-			border: 1px solid ${({ theme }) => theme.palette.secondary.main};
-			border-radius: 8px;
-			padding: 8px 16px;
-			color: ${({ theme }) => theme.palette.secondary.main};
-			${({ theme }) => theme.typography.body1};
-			font-weight: 600;
-			margin: 0 14px;
-			::before {
-				content: 'Remove';
-			}
-			svg {
-				display: none;
-			}
-			&:hover {
-				background: ${({ theme }) => theme.palette.secondary.main};
-				color: ${({ theme }) => theme.palette.primary.contrast};
-			}
+		.MuiButtonBase-root {
+			margin-top: 0;
 		}
 		${ProjectCheckboxContainer} {
 			width: 190px;
