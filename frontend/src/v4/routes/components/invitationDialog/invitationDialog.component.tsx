@@ -47,6 +47,7 @@ import {
 	ProjectConfig,
 	TextField
 } from './invitationDialog.styles';
+import { Button } from '@controls/button';
 
 const invitationSchema = yup.object().shape({
 	email: schema.email,
@@ -148,9 +149,9 @@ export const InvitationDialog = (props: IProps) => {
 									/>
 								</FormControl>
 							)} />
-							<IconButton onClick={() => remove(index)} size="large">
-								<RemoveIcon />
-							</IconButton>
+							<Button variant="outlined" color="secondary" onClick={() => remove(index)}>
+								Remove
+							</Button>
 							{project && (
 								<Field name={`permissions.${index}.isAdmin`} render={({ field, form }) => (
 									<ProjectCheckboxContainer
