@@ -50,7 +50,8 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	updateEditingGroup: GroupsActions.updateEditingGroup,
 	updateGroup: GroupsActions.updateGroup,
 	createGroup: GroupsActions.createGroup,
-	setCriteriaState: GroupsActions.setCriteriaFieldState,
+	setCriteriaFieldState: GroupsActions.setCriteriaFieldState,
+	setSelectedCriterionId: GroupsActions.setSelectedCriterionId,
 }, dispatch);
 
 export default connect(mapStateToProps, mapDispatchToProps)(GroupDetails);

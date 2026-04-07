@@ -15,32 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ClashesConstants = {};
+const updateRepobundleMetadata = require('./updateRepobundleMetadata');
 
-ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
-ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';
-
-ClashesConstants.CLASH_PLAN_TYPES = [
-	'hard',
-	'clearance',
+const scripts = [
+	{ script: updateRepobundleMetadata, desc: 'Update the repoAssets document for repobundle revisions to include all the latest required metadata' },
 ];
 
-ClashesConstants.SELF_INTERSECTIONS_CHECK_OPTIONS = [
-	'selectionA',
-	'selectionB',
-	true,
-	false,
-];
-
-ClashesConstants.TRIGGER_OPTIONS = [
-	'manual',
-	'new revision',
-];
-
-ClashesConstants.CLASH_RUN_STATUS = {
-	PLANNED: 'planned',
-	QUEUED: 'queued',
-	FAILED: 'failed',
-};
-
-module.exports = ClashesConstants;
+module.exports = scripts;
