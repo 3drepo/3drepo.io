@@ -20,7 +20,7 @@ import styled, { css } from 'styled-components';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import TextField from '@mui/material/TextField';
-import { TextField as CalendarTextField } from '@controls/inputs/datePicker/baseCalendarPicker/baseCalendarPicker.styles';
+import { TextField as CalendarTextField } from '@controls/inputs/datePicker/dateTimePicker.styles';
 
 import { COLOR } from '../../../../../styles';
 import { FileUploadInvoker } from '../../../../viewerGui/components/commentForm/commentForm.styles';
