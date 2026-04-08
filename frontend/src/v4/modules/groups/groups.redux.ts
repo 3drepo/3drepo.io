@@ -62,6 +62,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 	subscribeOnChanges: ['teamspace', 'modelId'],
 	unsubscribeFromChanges: ['teamspace', 'modelId'],
 	setCriteriaFieldState: ['criteriaFieldState'],
+	setSelectedCriterionId: ['selectedCriterionId'],
 	resetToSavedSelection: ['groupId'],
 	resetComponentState: [],
 	updateEditingGroup: ['properties'],
@@ -71,7 +72,7 @@ export const { Types: GroupsTypes, Creators: GroupsActions } = createActions({
 export interface ICriteriaFieldState {
 	pastedCriteria: string;
 	isPasteEnabled: boolean;
-	selectedCriterion: string;
+	selectedCriterionId: string;
 	criterionForm: {
 		field: {
 			operator: string;
@@ -109,7 +110,7 @@ export interface IGroupState {
 export const INITIAL_CRITERIA_FIELD_STATE = {
 	pastedCriteria: '',
 	isPasteEnabled: false,
-	selectedCriterion: '',
+	selectedCriterionId: '',
 	criterionForm: null
 };
 
@@ -159,6 +160,10 @@ export const setCriteriaFieldState = (state = INITIAL_STATE, { criteriaFieldStat
 		}
 	}});
 };
+
+export const setSelectedCriterionId = (state = INITIAL_STATE, { selectedCriterionId }) => {
+	return setCriteriaFieldState(state, { criteriaFieldState: { selectedCriterionId, criterionForm: null } });
+}
 
 export const addToHighlighted = (state = INITIAL_STATE, { groupId }) => {
 	const highlightedGroups = new Set(state.componentState.highlightedGroups);
@@ -305,6 +310,7 @@ export const reducer = createReducer(INITIAL_STATE, {
 	[GroupsTypes.TOGGLE_PENDING_STATE]: togglePendingState,
 	[GroupsTypes.TOGGLE_DETAILS_PENDING_STATE]: toggleDetailsPendingState,
 	[GroupsTypes.SET_COMPONENT_STATE]: setComponentState,
+	[GroupsTypes.SET_SELECTED_CRITERION_ID]: setSelectedCriterionId,
 	[GroupsTypes.ADD_TO_HIGHLIGHTED]: addToHighlighted,
 	[GroupsTypes.REMOVE_FROM_HIGHLIGHTED]: removeFromHighlighted,
 	[GroupsTypes.ADD_COLOR_OVERRIDE]: addColorOverride,

@@ -18,7 +18,7 @@
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
-const { createWriteStream, readdirSync } = require('fs');
+const { createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
@@ -27,6 +27,7 @@ const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
 const { execFile } = require('child_process');
+const { pipeline } = require('stream/promises');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
@@ -41,6 +42,7 @@ const {
 	model_queue: modelq,
 	drawing_queue: drawingq,
 	shared_storage: sharedDir,
+	clash_queue: clashq,
 } = queueConfig;
 
 const onCallbackQMsg = ({ content, properties }) => {
@@ -166,6 +168,18 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 	}
 };
 
+ModelProcessing.getContainerFileName = (corId) => {
+	try {
+		const filePath = Path.join(sharedDir, `${corId}.json`);
+		const jsonFile = JSON.parse(readFileSync(filePath).toString());
+		const fileName = jsonFile.file.split('/').slice(-1)[0];
+		return fileName;
+	} catch (error) {
+		logger.logError(`Failed to get file name for ${corId}: ${error.message}`);
+		return undefined;
+	}
+};
+
 ModelProcessing.getLogArchive = async (corId) => {
 	const filename = 'logs.zip';
 
@@ -220,6 +234,29 @@ ModelProcessing.getLogArchive = async (corId) => {
 	} catch (err) {
 		logger.logError(`Error while compressing log files for import error email: ${err.message}`);
 		return undefined;
+	}
+};
+
+ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
+	const configPath = `${sharedDir}/${corId}/clashConfig.json`;
+	try {
+		await mkdir(`${sharedDir}/${corId}`);
+
+		const writableStream = createWriteStream(configPath);
+		await pipeline(stream, writableStream);
+		const msg = `processClash ${teamspace} ${UUIDToString(project)} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
+		await queueMessage(clashq, corId, msg);
+	} catch (err) {
+		await rm(configPath).catch((cleanUpErr) => {
+			logger.logError(`Failed to remove files (clean up on failure): ${cleanUpErr}`);
+		});
+
+		if (err?.code && codeExists(err.code)) {
+			throw err;
+		}
+
+		logger.logError('Failed to queue clash test run', err?.message);
+		throw templates.queueInsertionFailed;
 	}
 };
 
