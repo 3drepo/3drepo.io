@@ -19,14 +19,14 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer } from './ticketsList.styles';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { untilXFramesPassed, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
-import { groupTickets, TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
+import { TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
 
-const TicketsListsContainer = ({ children, scrollerRef }) => {
+const TicketsListsContainer = ({ children, scrollerRef }: any) => {
 	return (
 		<ListContainer >
 			<div 
@@ -45,46 +45,34 @@ const TicketsListsContainer = ({ children, scrollerRef }) => {
 	);
 };
 
-export const TicketsList = ({ groupBy, templates, loading }) => {
+export const TicketsList = ({ groupBy, loading }: any) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
-	
-	const [groups, setGroups] = useState([]);
+	const groups = TicketsCardHooksSelectors.selectGroupedFilteredTickets();
+
+	// const [groups, setGroups] = useState([]);
 
 	const tableHandle = useRef<VListHandle>();
 	const subTableHandle = useRef<VListHandle>();
 	const scrollerRef = useRef<Element>();
 
-	useEffect(() => {
-		if (groupBy === NONE_OPTION) {
-			setGroups([]);
-			return;
-		} 
-		
-		setGroups(groupTickets(groupBy, templates, filteredTickets));
-	}, [groupBy, templates, filteredTickets]);
-
-
 	let selectedIndex = -1;
 	let selectedSubIndex = -1;
-	if (groupBy === NONE_OPTION) {
-		selectedIndex = filteredTickets.findIndex((ticket) => ticket._id === selectedTicketId) ;
-	} else {
-		selectedIndex = groups.findIndex((g) => {
-			const index = g.tickets.findIndex((ticket) => ticket._id === selectedTicketId);
-			if (index !== -1) {
-				selectedSubIndex = index;
-				return true;
-			}
-			return false;
-		});
-	}
+
+	selectedIndex = groups.findIndex((g) => {
+		const index = g.tickets.findIndex((ticket) => ticket._id === selectedTicketId);
+		if (index !== -1) {
+			selectedSubIndex = index;
+			return true;
+		}
+		return false;
+	});
 
 	useEffect(() => {
 		if (selectedIndex == -1) return;
 		if (groupBy === NONE_OPTION) {
-			tableHandle.current?.gotoIndex(selectedIndex, scrollerRef.current);
+			tableHandle.current?.gotoIndex(selectedSubIndex, scrollerRef.current);
 		 } else {
 			if (!tableHandle.current) {
 				return;
@@ -101,6 +89,10 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 					
 			let isShowing = subTableHandle.current?.isItemWithIndexShowing(selectedSubIndex, scrollingElement);
 
+			if (!scrollingElement) {
+				return;
+			}
+
 			if (!isShowing) {
 				scrollingElement.scrollTop = offset;
 			}
@@ -111,7 +103,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 					await untilXFramesPassed(10);
 					const currentScroll = Math.round(scrollingElement.scrollTop);
 					const otherScroll = Math.round(
-						tableHandle.current.getOffsetToIndex(selectedIndex) + 
+						(tableHandle.current?.getOffsetToIndex(selectedIndex) || 0) + 
 						(subTableHandle.current?.getOffsetToIndex(selectedSubIndex) || 0) + 
 						groupCollapseHeight,
 					);
@@ -145,7 +137,7 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 		);
 	}
 
-	if (groups.length) {
+	if (groupBy !== NONE_OPTION) {
 		return (
 			<TicketsListsContainer scrollerRef={scrollerRef}>
 				<VirtualList
