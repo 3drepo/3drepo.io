@@ -35,7 +35,7 @@ export const Modal = memo(styled(FormModal as any)`
 `, (prevProps, nextProps) => 
 	(prevProps.isValid === nextProps.isValid
 		&& (prevProps.fields.length === nextProps.fields.length )
-		&& prevProps.isUploading === nextProps.isUploading
+		&& prevProps.isuploading === nextProps.isuploading
 		&& prevProps.open === nextProps.open),
 );
 
