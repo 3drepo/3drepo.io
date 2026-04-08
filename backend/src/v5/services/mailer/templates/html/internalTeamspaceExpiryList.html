@@ -1,0 +1,24 @@
+<p>The following 3D Repo teamspaces are scheduled to expire within the next 30 days.</p>
+
+<p>Please review the list below and take any necessary action if extensions or customer outreach are required.</p>
+
+<table style="width:100%; border-collapse: collapse; margin-top: 15px;">
+	<thead>
+		<tr>
+			<th style="text-align:left; padding:8px; border-bottom:1px solid #E5EDF4;">Teamspace</th>
+			<th style="text-align:left; padding:8px; border-bottom:1px solid #E5EDF4;">Expiry Date</th>
+		</tr>
+	</thead>
+	<tbody>
+		<% for(const { name, expiryDate } of teamspaces) { %>
+			<tr>
+				<td style="padding:8px; border-bottom:1px solid #E5EDF4;">
+					<%= name %>
+				</td>
+				<td style="padding:8px; border-bottom:1px solid #E5EDF4;">
+					<%= expiryDate %>
+				</td>
+			</tr>
+		<% } %>
+	</tbody>
+</table>
