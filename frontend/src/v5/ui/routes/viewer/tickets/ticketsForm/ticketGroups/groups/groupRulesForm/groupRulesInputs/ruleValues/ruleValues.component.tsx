@@ -29,13 +29,12 @@ export const RuleValues = ({ disabled }) => {
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'values',
+		shouldUnregister: true,
 	});
 
 	const operator = watch('operator');
 	const operationType = OPERATIONS_TYPES[operator];
 	const error = errors.values || {};
-
-	useEffect(() => () => remove(), [operationType]);
 
 	useEffect(() => {
 		if (!fields.length) {
@@ -57,7 +56,7 @@ export const RuleValues = ({ disabled }) => {
 						onAdd={() => append({ value: '' })}
 						disableAdd={disabled || i !== (fields.length - 1)}
 					>
-						<FormValueField name={`values.${i}.value`} formError={error?.[i]} disabled={disabled} />
+						<FormValueField name={`values.${i}.value`} formError={error?.[i]?.value} disabled={disabled} />
 					</ArrayFieldContainer>
 				))}
 			</>
@@ -66,7 +65,7 @@ export const RuleValues = ({ disabled }) => {
 
 	// single value type
 	if (['regex', 'numberComparison'].includes(operationType)) {
-		return (<FormValueField name="values.0.value" formError={error?.[0]} disabled={disabled} />);
+		return (<FormValueField name="values.0.value" formError={error?.[0]?.value} disabled={disabled} />);
 	}
 
 	// range value type
@@ -75,12 +74,12 @@ export const RuleValues = ({ disabled }) => {
 			<ValuesContainer>
 				<FormNumberField
 					name="values.0.value"
-					formError={error?.[0]}
+					formError={error?.[0]?.value}
 					disabled={disabled}
 				/>
 				<FormNumberField
 					name="values.1.value"
-					formError={error?.[1]}
+					formError={error?.[1]?.value}
 					disabled={disabled}
 				/>
 			</ValuesContainer>

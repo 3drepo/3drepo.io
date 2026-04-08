@@ -19,7 +19,7 @@ import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
 import { isEqual } from 'lodash';
 import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
-import { nullableString } from '../shared/validators';
+import { nullableString, requiredNumber } from '../shared/validators';
 
 const requiredTrimmedString = Yup.string().trim().required(
 	formatMessage({
@@ -29,6 +29,7 @@ const requiredTrimmedString = Yup.string().trim().required(
 );
 
 const valueType = Yup.object({ value: requiredTrimmedString });
+const valueNumberType = Yup.object({ value: requiredNumber() });
 
 export const GroupRuleSchema = Yup.object().shape({
 	name: requiredTrimmedString.test(
@@ -46,9 +47,13 @@ export const GroupRuleSchema = Yup.object().shape({
 		values: Yup.array().of(valueType),
 	}),
 	operator: requiredTrimmedString,
-	values: Yup.array().when(
+	values: Yup.mixed().when(
 		'operator',
-		(operator, schema) => (OPERATIONS_TYPES[operator] === 'field' ? schema : schema.of(valueType)),
+		(operator, schema) => {
+			if (OPERATIONS_TYPES[operator] === 'field') return schema;
+			if (['number', 'numberComparison', 'numberRange'].includes(OPERATIONS_TYPES[operator])) return Yup.array().of(valueNumberType);
+			return Yup.array().of(valueType).required();
+		},
 	),
 });
 
