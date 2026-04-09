@@ -135,7 +135,7 @@ export const selectTickets = createSelector(
 			];
 			return orderBy(tickets, ticketCodeSorting, [order, order]);
 		}
-		return orderBy(tickets, (ticket) => get(ticket, property).toString().toLowerCase(), order);
+		return orderBy(tickets, (ticket) => get(ticket, property)?.toString().toLowerCase(), order);
 	},
 );
 
