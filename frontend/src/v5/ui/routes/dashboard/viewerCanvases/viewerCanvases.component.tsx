@@ -25,6 +25,8 @@ import { CalibrationHeader } from '../projects/calibration/calibrationHeader/cal
 import { CalibrationContext } from '../projects/calibration/calibrationContext';
 import { Pane } from 'react-split-pane';
 
+const MIN_PANEL_WIDTH = 68;
+
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
@@ -44,10 +46,10 @@ export const ViewerCanvases = () => {
 				$isCalibrating={isCalibrating}
 				$is2DOpen={is2DOpen}
 			>
-				<Pane size={size} minSize={68}> 
+				<Pane size={size} minSize={MIN_PANEL_WIDTH}> 
 					<Viewer3D location={{ pathname }} />
 				</Pane>
-				<Pane minSize={is2DOpen ? 68 : 0}>
+				<Pane minSize={is2DOpen ? MIN_PANEL_WIDTH : 0}>
 					{is2DOpen ? <Viewer2D /> : <div />}
 				</Pane>
 			</SplitPane>

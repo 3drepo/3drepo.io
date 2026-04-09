@@ -27,7 +27,7 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 
 	& .split-pane-divider.horizontal {
 		background-color: ${({ theme }) => theme.palette.base.light};
-    	width: 26px !important;
+		width: 26px !important;
 		margin: 0 -12px !important;
 		border-left: 12px solid transparent;
 		border-right: 12px solid transparent;
