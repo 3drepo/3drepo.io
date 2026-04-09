@@ -23,32 +23,33 @@ import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
 import { useContext } from 'react';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
 import { CalibrationContext } from '../projects/calibration/calibrationContext';
-import { isNumber } from 'lodash';
 import { Pane } from 'react-split-pane';
+
+const MIN_PANEL_WIDTH = 68;
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const { isCalibrating } = useContext(CalibrationContext);
 
-	const dragFinish = (newSize) => {
-		if (!isNumber(newSize)) return;
-		setLeftPanelRatio(newSize / window.innerWidth);
+	const dragFinish = (newSize: number[]) => {
+		setLeftPanelRatio(newSize[0] / window.innerWidth);
 	};
+
+	const size = is2DOpen ? leftPanelRatio * 100 + '%' : '100%';
 
 	return (
 		<>
 			{isCalibrating && <CalibrationHeader />}
-			<SplitPane
-				direction="vertical"
+			<SplitPane direction="horizontal"
 				onResizeEnd={dragFinish}
 				$isCalibrating={isCalibrating}
 				$is2DOpen={is2DOpen}
 			>
-				<Pane size={is2DOpen ? leftPanelRatio * 100 + '%' : '100%'}>
+				<Pane size={size} minSize={MIN_PANEL_WIDTH}> 
 					<Viewer3D location={{ pathname }} />
 				</Pane>
-				<Pane>
+				<Pane minSize={is2DOpen ? MIN_PANEL_WIDTH : 0}>
 					{is2DOpen ? <Viewer2D /> : <div />}
 				</Pane>
 			</SplitPane>
