@@ -157,6 +157,7 @@ export class RiskDetails extends PureComponent<IProps, IState> {
 			isPending={this.props.fetchingDetailsIsPending}
 			removeMessage={this.removeMessage}
 			teamspace={this.props.teamspace}
+			canComment={this.userCanComment()}
 			currentUser={this.props.currentUser.username}
 			setCameraOnViewpoint={this.setCameraOnViewpoint}
 		/>

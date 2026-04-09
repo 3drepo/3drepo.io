@@ -30,6 +30,7 @@ interface IProps {
 	teamspace: string;
 	comment: string;
 	commentWithMarkdown: string;
+	canComment: boolean;
 	viewpoint: any;
 	removeMessage: (index, guid) => void;
 	isRemovable: boolean;
@@ -37,7 +38,7 @@ interface IProps {
 }
 
 export const UserMessage = ({
-	name, commentWithMarkdown, index, guid, removeMessage, created, viewpoint, ...props
+	name, commentWithMarkdown, index, guid, removeMessage, created, viewpoint, canComment, ...props
 }: IProps) => {
 
 	const isScreenshot = viewpoint && viewpoint.screenshotPath;
@@ -57,6 +58,7 @@ export const UserMessage = ({
 					created={created}
 					comment={props.comment}
 					viewpoint={viewpoint}
+					canComment={canComment}
 				/>
 			</CommentContainer>
 			{props.isRemovable && <RemoveButton index={index} guid={guid} removeMessage={handleRemoveMessage} />}
