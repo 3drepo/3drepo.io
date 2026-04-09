@@ -45,7 +45,7 @@ import {
 } from './newUserForm.styles';
 
 interface IProps {
-	title: JSX.Element;
+	title: ReactNode;
 	jobs: any[];
 	users: any[];
 	permissionsOnUIDisabled: boolean;

@@ -85,7 +85,7 @@ export const UploadContainerRevisionForm = ({
 	presetFile,
 	open,
 	onClickClose,
-}: IUploadContainerRevisionForm): JSX.Element => {
+}: IUploadContainerRevisionForm) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const allUploadsComplete = ContainerRevisionsHooksSelectors.selectUploadIsComplete();

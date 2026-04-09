@@ -21,13 +21,12 @@ import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
-import { TypographyOptions } from '@mui/material/styles/createTypography';
+import { TypographyVariantsOptions } from '@mui/material/styles/createTypography';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 import type {} from '@mui/x-date-pickers/themeAugmentation';
-import { CalendarActionBar } from '@controls/inputs/datePicker/baseCalendarPicker/calendarActionBar/calendarActionBar.component';
 
 export const COLOR = {
 	PRIMARY_MAIN_CONTRAST: '#FFFFFF',
@@ -265,7 +264,7 @@ export const palette = {
 
 export const theme = createTheme({
 	palette,
-	typography: typography as TypographyOptions,
+	typography: typography as TypographyVariantsOptions,
 	components: {
 		MuiTextField: {
 			defaultProps: {
@@ -286,7 +285,7 @@ export const theme = createTheme({
 
 						'&.Mui-disabled': {
 							color: COLOR.BASE_LIGHT,
-							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
+							WebkitTextFillColor: COLOR.BASE_LIGHT,
 						},
 
 						'&.Mui-focused:not(.Mui-error)': {
@@ -300,13 +299,13 @@ export const theme = createTheme({
 					input: {
 						// hide arrows in Chrome, Safari, Edge, Opera
 						'&::-webkit-outer-spin-button, &::-webkit-inner-spin-button': {
-							'-webkit-appearance': 'none',
+							WebkitAppearance: 'none',
 							margin: 0,
 						},
 
 						// hide arrows in Firefox
 						'&[type=number]': {
-							'-moz-appearance': 'textfield',
+							MozAppearance: 'textfield',
 						},
 
 					},
@@ -795,11 +794,6 @@ export const theme = createTheme({
 						},
 					},
 				},
-				button: {
-					'&:hover': {
-						backgroundColor: COLOR.TERTIARY_LIGHTEST,
-					},
-				},
 				padding: {
 					paddingTop: 8,
 					paddingBottom: 8,
@@ -1006,7 +1000,7 @@ export const theme = createTheme({
 					input: {
 
 						'&:-webkit-autofill': { // Remove input background colour on chrome
-							'-webkit-box-shadow': `0 0 0 18px ${COLOR.PRIMARY_MAIN_CONTRAST} inset`,
+							WebkitBoxShadow: `0 0 0 18px ${COLOR.PRIMARY_MAIN_CONTRAST} inset`,
 						},
 					},
 					'input, textarea': {
@@ -1032,7 +1026,7 @@ export const theme = createTheme({
 						borderColor: COLOR.BASE_LIGHTEST,
 						'input, textarea, .MuiInputAdornment-root svg, .MuiSelect-select, .MuiSelect-icon': {
 							color: COLOR.BASE_LIGHT,
-							'-webkit-text-fill-color': COLOR.BASE_LIGHT,
+							WebkitTextFillColor: COLOR.BASE_LIGHT,
 						},
 					},
 					'&.Mui-error': {
@@ -1412,183 +1406,41 @@ export const theme = createTheme({
 		},
 		MuiDateTimePicker: {
 			defaultProps: {
-				components: {
-					OpenPickerIcon: CalendarIcon,
-					LeftArrowIcon: ThinChevronIcon,
-					RightArrowIcon: ThinChevronIcon,
-					ActionBar: CalendarActionBar,
+				slots: {
+					openPickerIcon: CalendarIcon,
+					// leftArrowIcon: ThinChevronIcon,
+					// rightArrowIcon: ThinChevronIcon,
 				},
 			},
 		},
 		MuiDatePicker: {
 			defaultProps: {
-				components: {
-					OpenPickerIcon: CalendarIcon,
-					LeftArrowIcon: ThinChevronIcon,
-					RightArrowIcon: ThinChevronIcon,
-					ActionBar: CalendarActionBar,
+				slots: {
+					openPickerIcon: CalendarIcon,
+					leftArrowIcon: ThinChevronIcon,
+					rightArrowIcon: ThinChevronIcon,
 				},
 			},
 		},
-		MuiCalendarPicker: {
+		MuiMultiSectionDigitalClockSection: {
 			styleOverrides: {
 				root: {
-					borderRadius: 10,
-					// header section
-					'.MuiPickersCalendarHeader-root': {
-						padding: 0,
-						justifyContent: 'center',
-						color: COLOR.SECONDARY_MAIN,
-
-						// month and year
-						'& > :first-child': {
-							position: 'absolute',
-							justifyContent: 'center',
-							width: '100%',
-							'& > *': {
-								position: 'relative',
-								zIndex: 1,
-							},
-							'& button': {
-								display: 'none',
-								margin: 0,
-							},
-						},
-
-						// arrows-container
-						'& > .MuiPickersArrowSwitcher-root': {
-							position: 'absolute',
-							justifyContent: 'space-between',
-							width: '100%',
-							// actual arrows
-							button: {
-								transform: 'rotate(90deg)',
-								'&:not(:first-child)': {
-									transform: 'rotate(-90deg)',
-								},
-							},
-						},
-					},
-					// year selection
-					'.MuiYearPicker-root': {
-						'&': {
-							position: 'relative',
-							zIndex: 1,
-							background: COLOR.PRIMARY_MAIN_CONTRAST,
-						},
-						button: {
-							'&:not(.Mui-disabled)': {
-								color: COLOR.SECONDARY_MAIN,
-								'&:hover': {
-									backgroundColor: COLOR.TERTIARY_LIGHTEST,
-								},
-							},
-							'&.Mui-disabled': {
-								color: COLOR.BASE_MAIN,
-								cursor: 'unset',
-							},
-							'&.Mui-selected': {
-								color: COLOR.PRIMARY_MAIN_CONTRAST,
-								'&:hover': {
-									backgroundColor: COLOR.PRIMARY_DARK,
-								},
-							},
-						},
-					},
-					'.MuiPickersCalendarHeader-root, .MuiYearPicker-root': {
-						button: {
-							'&:hover': {
-								background: 'transparent',
-							},
-							'.Mui-disabled': {
-								color: COLOR.BASE_MAIN,
-							},
-						},
-					},
-					// calendar body
-					'.MuiCalendarPicker-viewTransitionContainer': {
-						// week days (sun-sat)
-						'.MuiTypography-caption': {
-							color: COLOR.BASE_MAIN,
-						},
-						// day number (1-31)
-						'.MuiPickersDay-root': {
-							color: COLOR.SECONDARY_MAIN,
-							'&:focus': {
-								backgroundColor: 'transparent',
-								'&.Mui-selected': {
-									backgroundColor: COLOR.PRIMARY_MAIN,
-								},
-							},
-							'&:hover': {
-								backgroundColor: COLOR.TERTIARY_LIGHTEST,
-							},
-							'&.Mui-selected': {
-								color: COLOR.PRIMARY_MAIN_CONTRAST,
-								'&:hover': {
-									backgroundColor: COLOR.PRIMARY_DARK,
-								},
-							},
-							'&.Mui-disabled': {
-								color: COLOR.BASE_LIGHT,
-							},
-						},
-					},
+					minWidth: 'auto',
+					borderRadius: 0,
+					boxShadow: 'none',
 				},
 			},
 		},
-		MuiClockPicker: {
+		MuiPickersLayout: {
 			styleOverrides: {
-				root: {
-					// arrows at the top
-					'.MuiClockPicker-arrowSwitcher': {
+				actionBar: {
+					'& :first-child': {
+						color: COLOR.ERROR_MAIN,
+					},
+					'& button': {
 						margin: 0,
-						'.MuiPickersArrowSwitcher-spacer': {
-							display: 'none',
-						},
-						button: {
-							margin: 0,
-							padding: 10,
-							color: COLOR.SECONDARY_MAIN,
-							transform: 'rotate(90deg)',
-							'&:not(:first-child)': {
-								transform: 'rotate(-90deg)',
-							},
-							'&:hover': {
-								backgroundColor: 'transparent',
-							},
-							'&.Mui-disabled': {
-								color: COLOR.BASE_MAIN,
-							},
-						},
 					},
-					'.MuiClock-root': {
-						// actual clock
-						'.MuiClock-clock': {
-							backgroundColor: COLOR.TERTIARY_LIGHTEST,
-							'.MuiClock-wrapper': {
-								height: '100%',
-								position: 'relative',
-								// the circle with the numbers
-								'.MuiClockNumber-root': {
-									'&:hover': {
-										backgroundColor: COLOR.PRIMARY_MAIN_CONTRAST,
-									},
-									'&.Mui-selected': {
-										color: COLOR.PRIMARY_MAIN_CONTRAST,
-									},
-									'&.Mui-disabled': {
-										color: COLOR.BASE_LIGHT,
-									},
-								},
-							},
-						},
-						// bottom buttons (AM - PM)
-						'.MuiClock-pmButton, .MuiClock-amButton': {
-							bottom: 'unset',
-							top: 190,
-						},
-					},
+			
 				},
 			},
 		},

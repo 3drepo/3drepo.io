@@ -26,7 +26,7 @@ interface IFavouriteCheckbox extends Omit<CheckboxProps, 'icon' | 'checkedIcon'>
 }
 
 export const FavouriteCheckbox = forwardRef(
-	({ selected = false, ...props }: IFavouriteCheckbox, ref: Ref<HTMLButtonElement>): JSX.Element => (
+	({ selected = false, ...props }: IFavouriteCheckbox, ref: Ref<HTMLButtonElement>) => (
 		<Tooltip
 			title={
 				props.checked

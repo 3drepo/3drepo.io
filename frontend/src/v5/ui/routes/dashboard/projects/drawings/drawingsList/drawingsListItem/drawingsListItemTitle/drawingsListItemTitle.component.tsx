@@ -34,7 +34,7 @@ export const DrawingsListItemTitle = ({
 	drawing,
 	isSelected = false,
 	...props
-}: IDrawingsListItemTitle): JSX.Element => {
+}: IDrawingsListItemTitle) => {
 	const { query } = useContext(SearchContext);
 	const hasRevisions = drawing.revisionsCount > 0;
 	const canLaunchDrawing = drawing.hasStatsPending || hasRevisions;

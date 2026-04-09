@@ -54,7 +54,7 @@ export class HandleCalloutDrawing
 	}
 
 	public state = {
-		...super.state,
+		isCurrentlyDrawn: false,
 		calloutState: CalloutState.SETTING_ANCHOR,
 		lastShape: {},
 	};

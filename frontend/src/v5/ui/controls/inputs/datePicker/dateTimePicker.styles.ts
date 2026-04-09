@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2022 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -14,15 +14,36 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 import styled from 'styled-components';
+import TextFieldBase from '@mui/material/TextField';
 
-export const ClearDateAction = styled.div`
-	${({ theme }) => theme.typography.body1}
-	font-weight: 500;
-	color: ${({ theme }) => theme.palette.error.main};
-	margin-right: 22px;
-	cursor: pointer;
-	height: 32px;
-	text-align: right;
+export const TextField = styled(TextFieldBase)`
+	caret-color: transparent;
+
+	button, .MuiInputAdornment {
+		color: currentColor;
+	}
+
+	.MuiInputBase-root {
+		padding: 0;
+
+		&, & input {
+			cursor: pointer;
+		}
+
+		&.Mui-disabled {
+			&, & * {
+				cursor: context-menu;
+			}
+		}
+	}
+
+	.MuiIconButton-edgeEnd {
+		margin: 0;
+		padding: 5px 10px;
+
+		&:hover {
+			background-color: transparent;
+		}
+	}
 `;

@@ -13,7 +13,7 @@
  *
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */ 
+ */
 import { DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
@@ -41,29 +41,24 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Prop
 	const viewportRef = useRef(viewport);
 	const camInSight = useRef(false);
 	const scaleRef = useRef(viewbox.scale);
-
 	const [drawingId] = useSearchParam('drawingId');
 	const { containerOrFederation } = useParams<ViewerParams>();
 	const [position, setPosition] = useState({ x:0, y:0 });
 	const [angle, setAngle] = useState(0);
-	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation);
-	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation);
+	const transform2DTo3D = DrawingsHooksSelectors.selectTransform2DTo3D(drawingId, containerOrFederation) as ((vector: any) => Vector2);
+	const transform3DTo2D = DrawingsHooksSelectors.selectTransform3DTo2D(drawingId, containerOrFederation) as ((vector: any) => Vector2);
 	const modelLoading = useModelLoading();
 
-	useEffect(() => viewportRef.current = viewport, [viewport]);
-	useEffect(() => scaleRef.current = viewbox.scale, [viewbox.scale]);
+	useEffect(() => {viewportRef.current = viewport;}, [viewport]);
+	useEffect(() => {scaleRef.current = viewbox.scale;}, [viewbox.scale]);
 
 	useViewpointSubscription((v) => {
 		if (!transform2DTo3D) return;
 		const p = transform3DTo2D(v.position);
 		const vp = viewportRef.current;
-
-
 		const padding = (cameraPadding / scaleRef.current);
-
 		const x = clamp(p.x, vp.left + padding, vp.right - padding);
-		const y = clamp(p.y, vp.top + padding,  vp.bottom - padding); 
-
+		const y = clamp(p.y, vp.top + padding,  vp.bottom - padding);
 		const cameraInSight = p.x === x && p.y === y;
 
 		if (camInSight.current !== cameraInSight) {
@@ -72,8 +67,7 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Prop
 			setPosition({ x:0, y:0 });
 		}
 
-
-		if (cameraInSight) 
+		if (cameraInSight)
 			return;
 
 		const vpWidth = (vp.right - vp.left) * scaleRef.current;
@@ -87,7 +81,7 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Prop
 		const ang = p.sub(new Vector2(x, y)).angle();
 		setAngle(ang);
 		viewpoint.current = v;
-	}, [transform3DTo2D]); 
+	}, [transform3DTo2D]);
 
 	const [dragging, setDragging] = useState(false);
 
@@ -124,19 +118,17 @@ export const CameraOffSight = ({ onCameraSightChanged, viewport, viewbox }: Prop
 		setDragging(true);
 		const container = ev.currentTarget.parentElement;
 
-		container.addEventListener('mousemove', onMouseMove);
-		container.addEventListener('mouseup', onMouseUp);
-		container.addEventListener('mouseleave', onMouseUp);
+		container?.addEventListener('mousemove', onMouseMove);
+		container?.addEventListener('mouseup', onMouseUp);
+		container?.addEventListener('mouseleave', onMouseUp);
 	};
-
-
 
 	if (!transform3DTo2D || (camInSight.current && !dragging) || modelLoading ) {
 		return null;
 	}
 
 	return (
-		<CameraOffSightContainer id='viewerLayer2dCameraOffSight' style={{ transform: `translate(${position.x}px, ${position.y}px) ` }} 
+		<CameraOffSightContainer id='viewerLayer2dCameraOffSight' style={{ transform: `translate(${position.x}px, ${position.y}px) ` }}
 			onMouseDown={onMouseDown}>
 			{!camInSight.current && <CameraOffSightIcon arrowAngle={angle}/>}
 		</CameraOffSightContainer>

@@ -81,7 +81,7 @@ export const CreateProjectModal = ({ open, onClickClose }: CreateProjectModalPro
 						with processing the image. To add a different image, please visit {breakLine}
 						the project page and choose a file in a supported format.
 					`,
-				}, { breakLine: <br /> }),
+				}, { breakLine: <br /> }) as React.ReactNode,
 				secondaryButtonLabel: formatMessage({
 					id: 'project.creation.warning.imageNotSaved.openProject',
 					defaultMessage: 'Open Project',

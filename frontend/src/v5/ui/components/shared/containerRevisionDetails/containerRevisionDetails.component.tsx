@@ -56,7 +56,7 @@ interface IContainerRevisionDetails {
 	linkTarget?: React.HTMLAttributeAnchorTarget;
 }
 
-export const ContainerRevisionDetails = ({ containerId, revisionsCount, status, linkTarget }: IContainerRevisionDetails): JSX.Element => {
+export const ContainerRevisionDetails = ({ containerId, revisionsCount, status, linkTarget }: IContainerRevisionDetails) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isLoading = ContainerRevisionsHooksSelectors.selectIsPending(containerId);

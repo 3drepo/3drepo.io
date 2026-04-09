@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { JSX } from 'react';
 import { selectIsFocusMode, ViewerGuiActions } from '../../../../modules/viewerGui';
 import { CloseFocusModeButton } from './closeFocusModeButton.component';
 

@@ -75,7 +75,7 @@ export const DeleteButton = styled.div<{ error?: boolean }>`
 	`}
 `;
 
-export const DragAndDrop = styled(DragAndDropBase).attrs({
+export const DragAndDrop = styled(DragAndDropBase as any).attrs({
 	$dashSize: 2,
 })<{ $hidden?: boolean }>`
 	margin: 10px 15px;

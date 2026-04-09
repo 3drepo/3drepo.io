@@ -110,7 +110,9 @@ export const MetaRecord = (props: IProps) => {
 
 	const renderSubList = () => (
 		<List>
-			{!collapsed && renderNestedMetadata(data, ([index, item]) => (
+			{!collapsed && Object.entries(data).sort(sortMetadata).map((
+				[index, item]
+			) => (
 				<MetaRecord
 					key={index}
 					name={index}

@@ -52,9 +52,9 @@ export const TicketsList = ({ groupBy, templates, loading }) => {
 	
 	const [groups, setGroups] = useState([]);
 
-	const tableHandle = useRef<VListHandle>();
-	const subTableHandle = useRef<VListHandle>();
-	const scrollerRef = useRef<Element>();
+	const tableHandle = useRef<VListHandle>(null);
+	const subTableHandle = useRef<VListHandle>(null);
+	const scrollerRef = useRef<Element>(null);
 
 	useEffect(() => {
 		if (groupBy === NONE_OPTION) {

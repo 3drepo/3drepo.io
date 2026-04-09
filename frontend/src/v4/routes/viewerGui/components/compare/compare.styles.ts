@@ -36,7 +36,7 @@ export const CompareContainer = styled(ViewerPanel).attrs({
 	title: VIEWER_PANELS_TITLES[VIEWER_PANELS.COMPARE]
 })<{ empty?: boolean }>`
 	min-height: ${(({ empty }) => empty ? 0 : VIEWER_PANELS_MIN_HEIGHTS[VIEWER_PANELS.COMPARE])}px;
-`;
+` as any;
 
 interface ISliderLabel {
 	disabled?: boolean;

@@ -34,7 +34,7 @@ export const DashboardListItemTitle = ({
 	tooltipTitle = '',
 	disabled = false,
 	...containerProps
-}: IDashboardListItemTitle): JSX.Element => (
+}: IDashboardListItemTitle) => (
 	<FixedOrGrowContainer {...containerProps}>
 		<Container>
 			<Tooltip title={tooltipTitle}>

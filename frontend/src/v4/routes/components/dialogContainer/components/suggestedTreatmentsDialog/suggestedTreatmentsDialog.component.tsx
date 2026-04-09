@@ -37,6 +37,7 @@ interface ITextWrapper {
 	inline?: boolean;
 	color?: string;
 	variant?: TypographyProps['variant'];
+	children?: any;
 }
 
 const TextWrapper: FunctionComponent<ITextWrapper> = ({
@@ -126,7 +127,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 						Stage:&nbsp;
 					</TextWrapper>
 				</Label>
-				<Grid item xs={4}>
+				<Grid size={{xs: 4 }}>
 					<CellSelect
 						value={stage}
 						items={getStageOptions(suggestions)}
@@ -138,7 +139,7 @@ export const SuggestedTreatmentsDialog = ({ suggestions, setFieldValue, handleCl
 						Type:&nbsp;
 					</TextWrapper>
 				</Label>
-				<Grid item xs={4}>
+				<Grid size={{xs: 4 }}>
 					<CellSelect
 						value={type}
 						items={getTypeOptions(suggestions)}

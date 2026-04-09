@@ -54,7 +54,7 @@ interface IDrawingRevisionDetails {
 	revisionsCount: number;
 	status?: UploadStatus;
 }
-export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: IDrawingRevisionDetails): JSX.Element => {
+export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: IDrawingRevisionDetails) => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isLoading = DrawingRevisionsHooksSelectors.selectIsPending(drawingId);

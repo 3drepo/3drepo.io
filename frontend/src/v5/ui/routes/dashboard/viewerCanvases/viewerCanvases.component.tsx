@@ -18,37 +18,40 @@
 import { Viewer3D } from '@/v4/routes/viewer3D';
 import { Viewer2D } from '@components/viewer/drawingViewer/viewer2D.component';
 import { useLocation } from 'react-router-dom';
-import { SplitPane, LeftPane } from './viewerCanvases.styles';
+import { SplitPane } from './viewerCanvases.styles';
 import { ViewerCanvasesContext } from '../../viewer/viewerCanvases.context';
 import { useContext } from 'react';
 import { CalibrationHeader } from '../projects/calibration/calibrationHeader/calibrationHeader.component';
 import { CalibrationContext } from '../projects/calibration/calibrationContext';
-import { isNumber } from 'lodash';
+import { Pane } from 'react-split-pane';
+
+const MIN_PANEL_WIDTH = 68;
 
 export const ViewerCanvases = () => {
 	const { pathname } = useLocation();
 	const { is2DOpen, leftPanelRatio, setLeftPanelRatio } = useContext(ViewerCanvasesContext);
 	const { isCalibrating } = useContext(CalibrationContext);
 
-	const dragFinish = (newSize) => {
-		if (!isNumber(newSize)) return;
-		setLeftPanelRatio(newSize / window.innerWidth);
+	const dragFinish = (newSize: number[]) => {
+		setLeftPanelRatio(newSize[0] / window.innerWidth);
 	};
+
+	const size = is2DOpen ? leftPanelRatio * 100 + '%' : '100%';
 
 	return (
 		<>
 			{isCalibrating && <CalibrationHeader />}
-			<SplitPane
-				split="vertical"
-				size={is2DOpen ? leftPanelRatio * 100 + '%' : '100%'}
-				onDragFinished={dragFinish}
+			<SplitPane direction="horizontal"
+				onResizeEnd={dragFinish}
 				$isCalibrating={isCalibrating}
 				$is2DOpen={is2DOpen}
 			>
-				<LeftPane>
+				<Pane size={size} minSize={MIN_PANEL_WIDTH}> 
 					<Viewer3D location={{ pathname }} />
-				</LeftPane>
-				{is2DOpen ? <Viewer2D /> : <div />}
+				</Pane>
+				<Pane minSize={is2DOpen ? MIN_PANEL_WIDTH : 0}>
+					{is2DOpen ? <Viewer2D /> : <div />}
+				</Pane>
 			</SplitPane>
 		</>
 	);

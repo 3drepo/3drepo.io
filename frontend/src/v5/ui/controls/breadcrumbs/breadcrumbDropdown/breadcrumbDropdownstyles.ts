@@ -28,7 +28,7 @@ export const MenuList = styled(MenuComponent)`
 	}
 `;
 
-export const MenuItem = styled(MenuItemComponent).attrs({
+export const MenuItem = styled(MenuItemComponent as any).attrs({
 	component: Link,
 })<{ disabled?: boolean } & React.ComponentProps<typeof Link>>`
 	&& {

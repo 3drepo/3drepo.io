@@ -50,7 +50,7 @@ export const ColorActionMenu = styled(ActionMenu).attrs({
 	},
 })``;
 
-export const ColorOption = styled(ColorCircle).attrs({
+export const ColorOption = styled(ColorCircle).attrs<{ $size? :number }>({
 	$size: 18,
 })`
 	cursor: pointer;
@@ -73,7 +73,7 @@ export const UpdateButton = styled(Button).attrs({
 	margin: 18px 0 0 auto;
 `;
 
-export const SquaredColorOption = styled(ColorCircle).attrs({
+export const SquaredColorOption = styled(ColorCircle).attrs<{ $size?: number, $opacity?: number, $color?: string }>({
 	$size: 26,
 })<{ $opacity: number }>`
 	border-radius: 5px;

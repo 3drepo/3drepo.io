@@ -34,16 +34,16 @@ import { Container } from './activities.styles';
 import { ActivityDetails } from './components/activityDetails/';
 
 interface IProps {
-	viewer: any;
-	isPending: boolean;
-	searchEnabled: boolean;
-	searchQuery: string;
-	fetchActivities: () => void;
-	activities: any[];
-	tasks: any[];
-	setComponentState: (componentState: IActivitiesComponentState) => void;
-	showDetails: boolean;
-	fetchDetails: (id: string) => void;
+	viewer?: any;
+	isPending?: boolean;
+	searchEnabled?: boolean;
+	searchQuery?: string;
+	fetchActivities?: () => void;
+	activities?: any[];
+	tasks?: any[];
+	setComponentState?: (componentState: IActivitiesComponentState) => void;
+	showDetails?: boolean;
+	fetchDetails?: (id: string) => void;
 }
 
 interface IState {
