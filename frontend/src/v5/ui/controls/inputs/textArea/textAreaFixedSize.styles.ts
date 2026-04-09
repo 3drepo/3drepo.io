@@ -17,14 +17,17 @@
 
 import styled, { css } from 'styled-components';
 
-export const Container = styled.div<{ $error?: boolean, $height: number }>`
+export const Container = styled.div<{ $error?: boolean, $height: number, $autoHeight?: boolean }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: solid 1px;
 	border-color: ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	overflow: hidden overlay;
 	box-sizing: content-box;
-	height: ${({ $height }) => $height}px;
+	height: ${({ $height, $autoHeight }) => $autoHeight ? 'auto' : $height + 'px'};
+	min-height: ${({ $height }) => $height + 'px'};
+	transition: height 0.3s ease;
+	interpolate-size: allow-keywords;
 
 	${({ theme, $error }) => ($error ? css`
 		&& {

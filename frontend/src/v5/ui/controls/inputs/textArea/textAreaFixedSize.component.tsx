@@ -18,6 +18,7 @@
 import { FormControl, FormHelperText, InputLabel, InputProps, InputBase } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 import { Container } from './textAreaFixedSize.styles';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 export type TextAreaFixedSizeProps = FormInputProps & InputProps & {
 	height?: number,
@@ -34,23 +35,51 @@ export const TextAreaFixedSize = ({
 	height = 80,
 	className,
 	...props
-}: TextAreaFixedSizeProps) => (
-	<FormControl required={required} disabled={disabled} error={error} className={className}>
-		{label && (
-			<InputLabel id={`${name}-label`}>
-				{label}
-			</InputLabel>
-		)}
-		<Container $error={error} $height={height}>
-			<InputBase
-				id={name}
-				multiline
-				minRows={4}
-				{...props}
-				value={value}
-				defaultValue={undefined} // this is to be certain that is a controlled field
-			/>
-		</Container>
-		<FormHelperText>{helperText}</FormHelperText>
-	</FormControl>
-);
+}: TextAreaFixedSizeProps) => {
+	const [autoHeight, setAutoHeight] = useState(false);
+	const [canCollapse, setCanCollapse] = useState(false);
+	const ref = useRef<HTMLDivElement>(null);
+	const [observer, setObserver] = useState<ResizeObserver>();
+
+
+	const calculateCanCollapse = useCallback((entries: ResizeObserverEntry[]) => {
+		const h = Number(getComputedStyle(entries[0].target).height.replace('px', ''));
+		setCanCollapse(h > height);
+	}, [height, setCanCollapse]);
+
+	useEffect(() => {
+		if (observer) {
+			observer.disconnect();
+		}
+		if (ref.current) {
+			const newObserver = new ResizeObserver(calculateCanCollapse);
+			newObserver.observe(ref.current);
+			setObserver(newObserver);
+		}
+	}, [ref.current, calculateCanCollapse]);
+
+	return (
+		<FormControl required={required} disabled={disabled} error={error} className={className}>
+			{label && (
+				<InputLabel id={`${name}-label`}>
+					{label}
+				</InputLabel>
+			)}
+			<Container $error={error} $height={height} $autoHeight={autoHeight}>
+				<InputBase
+					id={name}
+					multiline
+					minRows={4}
+					{...props}
+					value={value}
+					ref={ref}
+					defaultValue={undefined} // this is to be certain that is a controlled field
+				/>
+				{canCollapse && (
+					<button style={{ position:'absolute', bottom: 0, right: 0 }} onClick={() => setAutoHeight(!autoHeight)} > {autoHeight ? 'Shrink' : 'Expand'}</button>
+				)}
+			</Container>
+			<FormHelperText>{helperText}</FormHelperText>
+		</FormControl>
+	);
+};
