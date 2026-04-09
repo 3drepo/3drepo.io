@@ -19,7 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
-import { FormTextArea, FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
+import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
 import { useContext, useEffect, useRef } from 'react';
 import _ from 'lodash';
