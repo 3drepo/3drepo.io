@@ -20,6 +20,7 @@ import { Container } from './message.styles';
 
 interface IProps {
 	comment: string;
+	canComment: boolean;
 	commentWithMarkdown: string;
 	viewpoint: any;
 	created: number;
@@ -40,7 +41,7 @@ interface IProps {
 }
 
 export const Message = ({
-	viewpoint, setCameraOnViewpoint, action, owner, comment, commentWithMarkdown,
+	viewpoint, setCameraOnViewpoint, action, owner, comment, commentWithMarkdown, canComment,
 	removeMessage, created, teamspace, ...props
 }: IProps) => {
 
@@ -79,6 +80,7 @@ export const Message = ({
 							viewpoint={viewpoint}
 							removeMessage={removeMessage}
 							isRemovable={isRemovable}
+							canComment={canComment}
 						/>
 					</Container>
 			}
