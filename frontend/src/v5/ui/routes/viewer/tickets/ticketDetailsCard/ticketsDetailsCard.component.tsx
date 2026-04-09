@@ -37,6 +37,7 @@ import { useSearchParam } from '../../../useSearchParam';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { ViewerParams } from '../../../routes.constants';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
+import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
 
 enum IndexChange {
 	PREV = -1,
@@ -52,7 +53,7 @@ export const TicketDetailsCard = () => {
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
 	
-	const groups = TicketsCardHooksSelectors.selectGroupedFilteredTickets();
+	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
 	const ticketsIds = groups.flatMap((group) => group.tickets.map((tckt) => tckt._id));
 	const currentIndex = ticketsIds.indexOf(ticketId);
 	const initialIndex = useRef(currentIndex);

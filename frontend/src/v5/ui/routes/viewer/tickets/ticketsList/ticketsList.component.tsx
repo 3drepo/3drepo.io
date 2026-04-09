@@ -24,6 +24,7 @@ import { untilXFramesPassed, VirtualList, VListHandle } from '@controls/virtualL
 import { TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
 
 
 const TicketsListsContainer = ({ children, scrollerRef }: any) => {
@@ -49,9 +50,7 @@ export const TicketsList = ({ groupBy, loading }: any) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
-	const groups = TicketsCardHooksSelectors.selectGroupedFilteredTickets();
-
-	// const [groups, setGroups] = useState([]);
+	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
 
 	const tableHandle = useRef<VListHandle>();
 	const subTableHandle = useRef<VListHandle>();

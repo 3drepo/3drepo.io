@@ -24,7 +24,6 @@ import { DEFAULT_PIN, getTicketPins, toPin } from '@/v5/ui/routes/viewer/tickets
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
 import { NONE_OPTION } from '../ticketsGroups.helpers';
-import { groupTickets, TicketsGroup } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -145,16 +144,6 @@ export const selectIsShowingPins = createSelector(
 
 export const selectGroupBy = createSelector(
 	selectTicketsCardDomain, (state) => state.groupByField || NONE_OPTION,
-);
-
-export const selectGroupedFilteredTickets = createSelector(
-	selectFilteredTickets,
-	selectGroupBy,
-	selectCurrentTemplates,
-	(tickets, groupBy, templates) => {
-		if (groupBy === NONE_OPTION) return [{ groupName: NONE_OPTION, value: NONE_OPTION, tickets }];
-		return groupTickets(groupBy, templates, tickets);
-	},
 );
 
 export const selectTicketPins = createSelector(
