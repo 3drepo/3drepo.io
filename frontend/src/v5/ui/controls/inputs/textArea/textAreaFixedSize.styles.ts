@@ -27,6 +27,7 @@ export const Container = styled.div<{ $error?: boolean, $height: number, $autoHe
 	height: ${({ $height, $autoHeight }) => $autoHeight ? 'auto' : $height + 'px'};
 	min-height: ${({ $height }) => $height + 'px'};
 	transition: height 0.3s ease;
+	/* stylelint-disable-next-line */
 	interpolate-size: allow-keywords;
 	padding-bottom: ${({ $canCollapse }) => $canCollapse ? '33px' : '0px'};
 

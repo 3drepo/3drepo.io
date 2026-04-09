@@ -44,7 +44,7 @@ export const { Types: DrawingsTypes, Creators: DrawingsActions } = createActions
 	updateDrawing: ['teamspace', 'projectId', 'drawingId', 'drawing', 'onSuccess', 'onError'],
 	updateDrawingSuccess: ['projectId', 'drawingId', 'drawing'],
 	resetDrawingStatsQueue: [],
-	setFetchedStatus: ['projectId', 'drawingId', 'status']
+	setFetchedStatus: ['projectId', 'drawingId', 'status'],
 }, { prefix: 'DRAWINGS/' }) as { Types: Constants<IDrawingsActionCreators>; Creators: IDrawingsActionCreators };
 
 const getDrawingFromState = (state: DrawingsState, projectId, drawingId) => (
@@ -107,7 +107,7 @@ export interface DrawingsState {
 const INITIAL_STATE: DrawingsState = {
 	drawingsByProject: {},
 	typesByProject: {},
-	fetched:  {}
+	fetched:  {},
 };
 
 export const drawingsReducer = createReducer<DrawingsState>(INITIAL_STATE, produceAll({
@@ -150,7 +150,13 @@ export interface IDrawingsActionCreators {
 	setFavouriteSuccess: (projectId: string, drawingId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
 	fetchDrawings: (teamspace: string, projectId: string) => FetchDrawingsAction;
 	fetchDrawingsSuccess: (projectId: string, drawings: Partial<IDrawing>[]) => FetchDrawingsSuccessAction;
-	fetchDrawingSettings: (teamspace: string, projectId: string, drawingId: string,  onSuccess?: (drawing) => void, onError?: (e:Error) => void) => FetchDrawingSettingsAction;
+	fetchDrawingSettings: (
+		teamspace: string,
+		projectId: string,
+		drawingId: string,
+		onSuccess?: (drawing) => void,
+		onError?: (e:Error) => void
+	) => FetchDrawingSettingsAction;
 	fetchDrawingStats: (teamspace: string, projectId: string, drawingId: string) => FetchDrawingStatsAction;
 	fetchDrawingStatsSuccess: (projectId: string, drawingId: string, stats: DrawingStats) => FetchDrawingStatsSuccessAction;
 	fetchCalibration: (teamspace: string, projectId: string, drawingId: string) => FetchCalibrationAction;
@@ -168,11 +174,11 @@ export interface IDrawingsActionCreators {
 	createDrawing: (teamspace: string, projectId: string, drawing: NewDrawing, onSuccess: () => void, onError: (e:Error) => void) => CreateDrawingAction;
 	createDrawingSuccess: (projectId: string, drawing: NewDrawing) => CreateDrawingSuccessAction;
 	updateDrawing: (
-		teamspace: string, 
-		projectId: string, 
-		drawingId: string, 
-		drawing: Partial<IDrawing>, 
-		onSuccess?: () => void, 
+		teamspace: string,
+		projectId: string,
+		drawingId: string,
+		drawing: Partial<IDrawing>,
+		onSuccess?: () => void,
 		onError?: (e:Error) => void
 	) => UpdateDrawingAction;
 	updateDrawingSuccess: (projectId: string, drawingId: string, drawing: Partial<IDrawing>) => UpdateDrawingSuccessAction;
