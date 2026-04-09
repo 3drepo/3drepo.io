@@ -17,8 +17,9 @@
 
 import { FormControl, FormHelperText, InputLabel, InputProps, InputBase } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { Container } from './textAreaFixedSize.styles';
+import { Container, ShowMoreButton } from './textAreaFixedSize.styles';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { FormattedMessage } from 'react-intl';
 
 export type TextAreaFixedSizeProps = FormInputProps & InputProps & {
 	height?: number,
@@ -65,7 +66,7 @@ export const TextAreaFixedSize = ({
 					{label}
 				</InputLabel>
 			)}
-			<Container $error={error} $height={height} $autoHeight={autoHeight}>
+			<Container $error={error} $height={height} $autoHeight={autoHeight} $canCollapse={canCollapse}>
 				<InputBase
 					id={name}
 					multiline
@@ -76,7 +77,13 @@ export const TextAreaFixedSize = ({
 					defaultValue={undefined} // this is to be certain that is a controlled field
 				/>
 				{canCollapse && (
-					<button style={{ position:'absolute', bottom: 0, right: 0 }} onClick={() => setAutoHeight(!autoHeight)} > {autoHeight ? 'Shrink' : 'Expand'}</button>
+					<ShowMoreButton onClick={() => setAutoHeight(!autoHeight)} > 
+						{!autoHeight
+							? <FormattedMessage id="textarea.showMore" defaultMessage="Show more" />
+							: <FormattedMessage id="textarea.showLess" defaultMessage="Show less" />
+						}
+
+					</ShowMoreButton>
 				)}
 			</Container>
 			<FormHelperText>{helperText}</FormHelperText>

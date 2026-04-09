@@ -17,7 +17,7 @@
 
 import styled, { css } from 'styled-components';
 
-export const Container = styled.div<{ $error?: boolean, $height: number, $autoHeight?: boolean }>`
+export const Container = styled.div<{ $error?: boolean, $height: number, $autoHeight?: boolean, $canCollapse?: boolean }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: solid 1px;
 	border-color: ${({ theme }) => theme.palette.base.lightest};
@@ -28,6 +28,7 @@ export const Container = styled.div<{ $error?: boolean, $height: number, $autoHe
 	min-height: ${({ $height }) => $height + 'px'};
 	transition: height 0.3s ease;
 	interpolate-size: allow-keywords;
+	padding-bottom: ${({ $canCollapse }) => $canCollapse ? '33px' : '0px'};
 
 	${({ theme, $error }) => ($error ? css`
 		&& {
@@ -51,4 +52,16 @@ export const Container = styled.div<{ $error?: boolean, $height: number, $autoHe
 	textarea {
 		color: ${({ theme, $error }) => ($error ? theme.palette.error.main : theme.palette.secondary.main)};
 	}
+`;
+
+export const ShowMoreButton = styled.button`
+	border: none;
+	cursor: pointer;
+	color: ${({ theme }) => theme.palette.tertiary.main};
+	background-color: transparent;
+	position: absolute;
+	bottom: 3px;
+	left: 4px;
+
+	${({ theme }) => theme.typography.label};
 `;
