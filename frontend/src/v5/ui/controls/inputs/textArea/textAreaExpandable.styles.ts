@@ -61,7 +61,7 @@ export const InputContainer = styled.div<{ $height: number, $autoHeight?: boolea
 export const ShowMoreButton = styled.button`
 	border: none;
 	cursor: pointer;
-	color: ${({ theme }) => theme.palette.tertiary.main};
+	color: ${({ theme }) => theme.palette.base.main};
 	background-color: transparent;
 	bottom: 3px;
 	left: 4px;
