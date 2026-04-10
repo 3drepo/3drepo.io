@@ -58,7 +58,7 @@ const onCallbackQMsg = ({ content, properties }) => {
 		if (type === MESSAGE_TYPES.CLASH) {
 			const resultsDir = results.replace(SHARED_SPACE_TAG, sharedDir);
 			publish(events.CLASH_RUN_COMPLETED,
-				{ teamspace, project, corId: properties.correlationId, results: resultsDir });
+				{ teamspace, project, container, corId: properties.correlationId, results: resultsDir });
 		} else if (status) {
 			publish(events.QUEUED_TASK_UPDATE,
 				{ teamspace, model: container, corId: properties.correlationId, status });

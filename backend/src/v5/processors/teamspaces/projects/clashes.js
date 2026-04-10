@@ -18,10 +18,10 @@
 const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
 const { PassThrough } = require('stream');
 const { SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.constants');
-const { UUIDToString, generateUUID } = require('../../../utils/helper/uuids');
+const { UUIDToString, generateUUID, generateUUIDString } = require('../../../utils/helper/uuids');
 const { createConstantsObject } = require('../../../utils/helper/objects');
 const { completeTestRun, createTestRun, getLastRunFromPlan, getTestRunByQuery } = require('../../../models/clashes.runs');
-const { getMeshesWithParentIds } = require('./models/commons/scenes');
+const { getMeshesWithParentIds, meshIdsToExternalIds } = require('./models/commons/scenes');
 const { getMetadataByRules } = require('../../../models/metadata');
 const { queueClashRun } = require('../../../services/modelProcessing');
 const { createReadStream } = require('fs');
@@ -84,7 +84,7 @@ const getConfigSetEntry = async (teamspace, project, selection, stream, setName)
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, container,
 		revision, rules, { _id: 1, parents: 1 });
 
-	stream.write(`"${setName}":{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
+	stream.write(`"${setName}":[{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
 	// if there are no rules defined and no metadata matches that means its not a BIM model
 	if (!matched.length && !rules.length) {
@@ -93,7 +93,7 @@ const getConfigSetEntry = async (teamspace, project, selection, stream, setName)
 		await writeMeshesFromMeta(teamspace, project, container, revision, matched, unwanted, stream);
 	}
 
-	stream.write(']}');
+	stream.write(']}]');
 };
 
 Clashes.createRun = async (teamspace, project, plan, user) => {
@@ -113,45 +113,6 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 	await queueClashRun(teamspace, project, UUIDToString(runId), stream);
 	return runId;
 };
-
-// const clashesResult = {
-// 	clashes: [
-// 		{
-// 			a: 'a88c3705-82a0-41d9-8b9c-11f2eb79da9c',
-// 			b: '276a7fb7-2986-4b37-970a-75eb0b7f1db3',
-// 			positions: [
-// 				[
-// 					390.93758440457151,
-// 					-23.603977256511698,
-// 					-408.39603930559542,
-// 				],
-// 				[
-// 					-0.031746104136434847,
-// 					0.54243240722551933,
-// 					-0.67853894510869661,
-// 				],
-// 			],
-// 			fingerprint: '1245678',
-// 		},
-// 		{
-// 			a: '3278c31e-f3ef-411b-8a8a-ee12004b96f7',
-// 			b: '3ffdf61a-a7b1-4652-b254-aa4ab82b8339',
-// 			positions: [
-// 				[
-// 					361.24534292277446,
-// 					313.37967989857873,
-// 					-694.55377464469609,
-// 				],
-// 				[
-// 					0.37892636217339154,
-// 					0.32061235350038431,
-// 					-0.31103874602238446,
-// 				],
-// 			],
-// 			fingerprint: '1245678',
-// 		},
-// 	],
-// };
 
 const streamToJSON = (stream) => new Promise((resolve, reject) => {
 	let data = '';
@@ -182,7 +143,7 @@ const compareRunResults = (existingRunClashes, newRunClashes) => {
 
 	for (const [key, newItem] of newMap) {
 		if (existingMap.has(key)) {
-			result.active.push({ previous: existingMap.get(key), current: newItem });
+			result.active.push(newItem);
 		} else {
 			result.new.push(newItem);
 		}
@@ -197,7 +158,7 @@ const compareRunResults = (existingRunClashes, newRunClashes) => {
 	return result;
 };
 
-Clashes.completeTestRun = async (teamspace, corId, resPath) => {
+Clashes.completeTestRun = async (teamspace, project, container, corId, resPath) => {
 	const readStream = createReadStream(resPath, { encoding: 'utf8' });
 	const clashes = await streamToJSON(readStream);
 
@@ -205,21 +166,22 @@ Clashes.completeTestRun = async (teamspace, corId, resPath) => {
 
 	try {
 		const currentRun = await getTestRunByQuery(teamspace, { _id: corId }, { plan: 1, triggeredAt: 1 });
-		const { result } = await getTestRunByQuery(teamspace,
+		const lastRun = await getTestRunByQuery(teamspace,
 			{ 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
 			{ result: 1 }, { completedAt: -1 },
 		);
 
-		const lastCompleteRunFile = await getFileAsStream(teamspace, RUN_HISTORY_COL, result);
+		const lastCompleteRunFile = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastRun.result);
 		const { new: newClashes, active, resolved } = await streamToJSON(lastCompleteRunFile.readStream);
 		lastRunClashes = [...newClashes, ...active, ...resolved];
 	} catch (err) {
 		lastRunClashes = [];
 	}
 
-	const categorizedClashes = compareRunResults(lastRunClashes, clashes.clashes);
+	const externalIds = await meshIdsToExternalIds(teamspace, project, container, corId, clashes.clashes);
+	const categorizedClashes = compareRunResults(lastRunClashes, externalIds);
 
-	const resultId = generateUUID();
+	const resultId = generateUUIDString();
 	await storeFile(teamspace, RUN_HISTORY_COL, resultId,
 		Buffer.from(JSON.stringify(categorizedClashes)));
 
