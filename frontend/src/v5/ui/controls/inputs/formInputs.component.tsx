@@ -25,7 +25,7 @@ import { NumberField } from './numberField/numberField.component';
 import { Select, SelectProps } from './select/select.component';
 import { SelectView, SelectViewProps } from './selectView/selectView.component';
 import { TextArea, TextAreaProps } from './textArea/textArea.component';
-import { TextAreaFixedSize, TextAreaFixedSizeProps } from './textArea/textAreaFixedSize.component';
+import { TextAreaExpandable, TextAreaExpandableProps } from './textArea/textAreaExpandable.component';
 import { TextField, TextFieldProps } from './textField/textField.component';
 import { DateTimePicker, DateTimePickerProps } from './datePicker/dateTimePicker.component';
 import { BooleanSelect, BooleanSelectProps } from './booleanSelect/booleanSelect.component';
@@ -36,7 +36,7 @@ import { UsersAndJobsSelect, UsersAndJobsSelectProps } from '@controls/usersAndJ
 export const FormNumberField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={NumberField} {...props} />);
 export const FormTextField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={TextField} {...props} />);
 export const FormTextArea = forwardRef((props: InputControllerProps<TextAreaProps>, ref: any) => (<InputController Input={TextArea} {...props} ref={ref} />));
-export const FormTextAreaFixedSize = forwardRef((props: InputControllerProps<TextAreaFixedSizeProps>, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));
+export const FormTextAreaExpandable = forwardRef((props: InputControllerProps<TextAreaExpandableProps>, ref) => (<InputController Input={TextAreaExpandable} {...props} ref={ref} />));
 
 // calendar inputs
 export const FormDueDate = (props: InputControllerProps<DueDateProps>) => (<InputController Input={DueDate} {...props} />);

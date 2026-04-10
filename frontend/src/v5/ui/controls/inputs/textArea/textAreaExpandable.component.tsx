@@ -17,15 +17,15 @@
 
 import { FormControl, FormHelperText, InputLabel, InputProps, InputBase } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { Container, ShowMoreButton } from './textAreaFixedSize.styles';
+import { Container, InputContainer, ShowMoreButton } from './textAreaExpandable.styles';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 
-export type TextAreaFixedSizeProps = FormInputProps & InputProps & {
+export type TextAreaExpandableProps = FormInputProps & InputProps & {
 	height?: number,
 };
 
-export const TextAreaFixedSize = ({
+export const TextAreaExpandable = ({
 	error,
 	helperText,
 	name,
@@ -36,17 +36,22 @@ export const TextAreaFixedSize = ({
 	height = 80,
 	className,
 	...props
-}: TextAreaFixedSizeProps) => {
+}: TextAreaExpandableProps) => {
 	const [autoHeight, setAutoHeight] = useState(false);
-	const [canCollapse, setCanCollapse] = useState(false);
+	const [canCollapse, setCanCollapse] = useState(true);
 	const ref = useRef<HTMLDivElement>(null);
 	const [observer, setObserver] = useState<ResizeObserver>();
 
-
 	const calculateCanCollapse = useCallback((entries: ResizeObserverEntry[]) => {
 		const h = Number(getComputedStyle(entries[0].target).height.replace('px', ''));
-		setCanCollapse(h > height);
-	}, [height, setCanCollapse]);
+		const newCanCollapse = h > height;
+		if (newCanCollapse !== canCollapse) {
+			if (newCanCollapse) {
+				setAutoHeight(false);
+			}
+			setCanCollapse(newCanCollapse);
+		}
+	}, [height, setCanCollapse, canCollapse]);
 
 	useEffect(() => {
 		if (observer) {
@@ -66,23 +71,24 @@ export const TextAreaFixedSize = ({
 					{label}
 				</InputLabel>
 			)}
-			<Container $error={error} $height={height} $autoHeight={autoHeight} $canCollapse={canCollapse}>
-				<InputBase
-					id={name}
-					multiline
-					minRows={4}
-					{...props}
-					value={value}
-					ref={ref}
-					defaultValue={undefined} // this is to be certain that is a controlled field
-				/>
+			<Container $error={error}>
+				<InputContainer $height={height} $autoHeight={autoHeight} $canCollapse={canCollapse}>
+					<InputBase
+						id={name}
+						multiline
+						minRows={4}
+						{...props}
+						value={value}
+						ref={ref}
+						defaultValue={undefined} // this is to be certain that is a controlled field
+					/>
+				</InputContainer>
 				{canCollapse && (
-					<ShowMoreButton onClick={() => setAutoHeight(!autoHeight)} > 
+					<ShowMoreButton onClick={() => setAutoHeight(!autoHeight)} onBlur={(e) => e.stopPropagation()}> 
 						{!autoHeight
 							? <FormattedMessage id="textarea.showMore" defaultMessage="Show more" />
 							: <FormattedMessage id="textarea.showLess" defaultMessage="Show less" />
 						}
-
 					</ShowMoreButton>
 				)}
 			</Container>

@@ -17,19 +17,14 @@
 
 import styled, { css } from 'styled-components';
 
-export const Container = styled.div<{ $error?: boolean, $height: number, $autoHeight?: boolean, $canCollapse?: boolean }>`
+export const Container = styled.div<{ $error?: boolean }>`
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 	border: solid 1px;
 	border-color: ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	overflow: hidden overlay;
 	box-sizing: content-box;
-	height: ${({ $height, $autoHeight }) => $autoHeight ? 'auto' : $height + 'px'};
-	min-height: ${({ $height }) => $height + 'px'};
-	transition: height 0.3s ease;
-	/* stylelint-disable-next-line */
-	interpolate-size: allow-keywords;
-	padding-bottom: ${({ $canCollapse }) => $canCollapse ? '33px' : '0px'};
+	height: auto;
 
 	${({ theme, $error }) => ($error ? css`
 		&& {
@@ -55,14 +50,21 @@ export const Container = styled.div<{ $error?: boolean, $height: number, $autoHe
 	}
 `;
 
+export const InputContainer = styled.div<{ $height: number, $autoHeight?: boolean, $canCollapse?: boolean }>`
+	height: ${({ $height, $autoHeight, $canCollapse }) => $autoHeight && $canCollapse ? 'auto' : $height  + 'px'};
+	transition: height 0.3s ease;
+	/* stylelint-disable-next-line */
+	interpolate-size: allow-keywords;
+	overflow: auto;
+`;
+
 export const ShowMoreButton = styled.button`
 	border: none;
 	cursor: pointer;
 	color: ${({ theme }) => theme.palette.tertiary.main};
 	background-color: transparent;
-	position: absolute;
 	bottom: 3px;
 	left: 4px;
-
+	position: relative;
 	${({ theme }) => theme.typography.label};
 `;

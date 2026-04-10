@@ -14,12 +14,12 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { TextAreaFixedSize } from '@controls/inputs/textArea/textAreaFixedSize.component';
+import { TextAreaExpandable } from '@controls/inputs/textArea/textAreaExpandable.component';
 import { StoryObj, Meta } from '@storybook/react';
 import { FormDecorator } from '../inputDecorators';
 
 export default {
-	title: 'Inputs/TextField/TextAreaFixedSize',
+	title: 'Inputs/TextField/TextAreaExpandable',
 	argTypes: {
 		label: {
 			type: 'string',
@@ -37,7 +37,7 @@ export default {
 			type: 'number',
 		},
 	},
-	component: TextAreaFixedSize,
+	component: TextAreaExpandable,
 	decorators: [FormDecorator],
 	parameters: { controls: { exclude: [
 		'margin',
@@ -49,9 +49,9 @@ export default {
 		'className',
 		'inputRef',
 	] } },
-} as Meta<typeof TextAreaFixedSize>;
+} as Meta<typeof TextAreaExpandable>;
 
-type Story = StoryObj<typeof TextAreaFixedSize>;
+type Story = StoryObj<typeof TextAreaExpandable>;
 
 export const ControlledFormTextArea: Story = {
 	args: {
