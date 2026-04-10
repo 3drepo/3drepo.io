@@ -16,52 +16,14 @@
  */
 
 import { Cell, Head, Row } from '@/v4/routes/components/customTable/customTable.styles';
-import { FloatingButton, FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
+import { FloatingButtonContainer } from '@/v4/routes/components/floatingActionPanel/floatingActionPanel.styles';
 import { Content as LoadingText } from '@/v4/routes/components/loader/loader.styles';
 import { Container as UserTable, Footer as LicencesFooter } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
 import { LoaderContainer } from '@/v4/routes/userManagement/userManagement.styles';
 import { PendingInvitesLink } from '@/v4/routes/users/users.styles';
 import styled, { css } from 'styled-components';
-
-const AddUserButton = css`
-	${FloatingButtonContainer} {
-		top: 26px;
-		height: 35px;
-		right: 0;
-		${FloatingButton} {
-			::after {
-				content: 'Add user';
-				${({ theme }) => theme.typography.body1};
-				margin-left: 8px;
-			}
-			border-radius: 8px;
-			width: auto;
-			text-transform: none;
-			padding: 8px 16px;
-			margin: 0;
-			background-color: ${({ theme }) => theme.palette.primary.main};
-			color: ${({ theme }) => theme.palette.primary.contrast};
-			border: none;
-			&:hover {
-				background-color: ${({ theme }) => theme.palette.primary.dark};
-			}
-			&:disabled {
-				background-color: ${({ theme }) => theme.palette.base.lightest};
-				svg {
-					color: ${({ theme }) => theme.palette.base.lightest};
-				}
-			}
-			svg {
-				border-radius: 50%;
-				color: ${({ theme }) => theme.palette.primary.main};
-				background-color: ${({ theme }) => theme.palette.primary.contrast};
-				height: 13px;
-				width: 13px;
-				padding: 2px;
-			}
-		}
-	}
-`;
+import { primaryButtonStyling } from '../resuableOverrides.styles';
+import { Color } from '@/v4/routes/components/jobItem/jobItem.styles';
 
 const SelectStyles = css`
 	.MuiInputBase-root {
@@ -91,10 +53,9 @@ const PermissionsCell = `${Row}>:nth-child(3)`;
 const BlankCell = `${Row}>:nth-child(4)`;
 const RemoveUserCell = `${Row}>:nth-child(5)`;
 
-export const V5UserListOverrides = styled.div`
+export const V5UserListOverrides = styled.div<{ isAdmin: boolean }>`
 	position: relative;
 	margin: 0;
-	${AddUserButton}
 	${LoaderContainer} {
 		background-color: transparent;
 		margin-top: 80px;
@@ -128,13 +89,17 @@ export const V5UserListOverrides = styled.div`
 		${JobCell} {
 			max-width: 27%;
 			padding: 0 10px 0 0;
-			${SelectStyles} {
-				.MuiGrid-container {
-					flex-wrap: nowrap;
-					.MuiGrid-item:first-of-type {
-						min-height: 10px;
-						min-width: 10px;
-					}
+			.MuiSelect-root {
+				${SelectStyles}
+				width: 100%;
+				${Color} {
+					width: 10px;
+					height: 10px;
+				}
+
+				fieldset {
+					top: unset;
+					bottom: unset;
 				}
 			}
 		}
@@ -175,6 +140,38 @@ export const V5UserListOverrides = styled.div`
 
 		.MuiIconButton-root:hover {
 			background-color: transparent;
+		}
+	}
+
+	${FloatingButtonContainer} {
+		top: 0;
+		right: 0;
+
+		button {
+			margin: 8px 0 8px 8px;
+			border: 0;
+			border-radius: 6px;
+			width: fit-content;
+			padding: 8px 16px;
+			text-transform: none;
+			font-size: 12px;
+			height: 35px;
+			min-height: 35px;
+			color: ${({ theme }) => theme.palette.primary.contrast};
+
+			${({ isAdmin }) => {
+		/* eslint-disable @typescript-eslint/indent */
+				if (isAdmin) return primaryButtonStyling;
+				return css`
+					pointer-events: none;
+					cursor: default;
+					background-color: ${({ theme }) => theme.palette.base.lightest};
+				`;
+			}}
+
+			svg {
+				margin-right: 10px;
+			}
 		}
 	}
 	

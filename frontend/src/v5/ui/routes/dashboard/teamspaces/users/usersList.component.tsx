@@ -30,6 +30,7 @@ export const UsersList = () => {
 	const dispatch = useDispatch();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const username = CurrentUserHooksSelectors.selectUsername();
+	const { isAdmin } = TeamspacesHooksSelectors.selectCurrentTeamspaceDetails();
 
 	useEffect(() => {
 		if (!teamspace || !username) return;
@@ -40,7 +41,7 @@ export const UsersList = () => {
 	}, [teamspace, username]);
 
 	return (
-		<V5UserListOverrides>
+		<V5UserListOverrides isAdmin={isAdmin}>
 			<Header>
 				<Title>
 					<FormattedMessage id="usersList.title" defaultMessage="Users" />
