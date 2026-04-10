@@ -19,7 +19,7 @@ const Scene = {};
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
-const { getNodeByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
+const { getNodeByQuery, getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
 const CombinedStream = require('combined-stream');
 const GeoMaths = require('../../../../../utils/helper/geoMaths');
@@ -123,6 +123,19 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	}
 
 	return undefined;
+};
+
+Scene.meshIdsToExternalIds = async (teamspace, project, container, revId, meshIds) => {
+	const externalIdKeys = Object.values(idTypesToKeys).flat();
+
+	const meshes = await getNodesByIds(teamspace, project, container, meshIds.map(stringToUUID), { parents: 1 });
+	const parents = await getNodesByIds(teamspace, project, container, meshes.flatMap(({ parents }) => parents), { shared_id: 1 });
+
+	const query = { parents: { $in: parents.map((p) => p.shared_id) }, 'metadata.key': { $in: externalIdKeys }, rev_id: revId };
+	const projection = { metadata: 1 };
+	const metadata = await getMetadataByQuery(teamspace, container, query, projection);
+
+	return Scene.getExternalIdsFromMetadata(metadata);
 };
 
 Scene.sharedIdsToExternalIds = async (teamspace, container, revId, sharedIds) => {

@@ -18,6 +18,7 @@
 const { CLASH_RUNS_COL, CLASH_RUN_STATUS } = require('./clashes.constants');
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
+const { templates } = require('../utils/responseCodes');
 
 const ClashRuns = {};
 
@@ -34,5 +35,22 @@ ClashRuns.createTestRun = async (teamspace, plan, user) => {
 
 	return _id;
 };
+
+ClashRuns.completeTestRun = async (teamspace, runId, resultId) => {
+	await db.updateOne(teamspace, CLASH_RUNS_COL, { _id: runId },
+		{ $set: { status: CLASH_RUN_STATUS.COMPLETED, completedAt: new Date(), result: resultId } });
+};
+
+ClashRuns.getTestRunByQuery = async (teamspace, query, projection, sort) => {
+	const run = await db.findOne(teamspace, CLASH_RUNS_COL, query, projection, sort);
+
+	if (!run) {
+		throw templates.testRunNotFound;
+	}
+
+	return run;
+};
+
+ClashRuns.getLastRunFromPlan = (teamspace, planId) => db.findOne(teamspace, CLASH_RUNS_COL, { 'plan._id': planId }, { sort: { createdAt: -1 } });
 
 module.exports = ClashRuns;

@@ -41,6 +41,8 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
+const { createReadStream } = require('fs');
+const { completeTestRun } = require('../../../processors/teamspaces/projects/clashes');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -77,6 +79,17 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user }) => 
 		}
 	} catch (err) {
 		logger.logError(`Failed to process a completed revision for ${teamspace}.${model}: ${err.message}`);
+		if (err.stack) {
+			logger.logError(err.stack);
+		}
+	}
+};
+
+const clashRunCompleted = async ({ teamspace, project, container, corId, results }) => {
+	try {
+		await completeTestRun(teamspace, project, container, stringToUUID(corId), results);
+	} catch (err) {
+		logger.logError(`Failed to process a complete clash run for ${teamspace} with id ${corId}: ${err.message}`);
 		if (err.stack) {
 			logger.logError(err.stack);
 		}
@@ -368,7 +381,7 @@ const ModelEventsListener = {};
 ModelEventsListener.init = () => {
 	subscribe(events.QUEUED_TASK_UPDATE, queueStatusUpdate);
 	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
-
+	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
 	subscribe(events.MODEL_IMPORT_FINISHED, modelProcessingCompleted);
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);
 	subscribe(events.REVISION_UPDATED, revisionUpdated);
