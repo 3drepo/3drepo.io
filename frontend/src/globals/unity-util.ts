@@ -2544,7 +2544,7 @@ export class UnityUtil {
 	 * @param fps The target framerate
 	 */
 	public static setDynamicFpsTarget(fps: number) {
-		UnityUtil.toUnity('SetNavigationTargetFps', UnityUtil.LoadingState.VIEWER_READY, fps);
+		UnityUtil.toUnity('SetNavigationTargetFps', UnityUtil.LoadingState.VIEWER_READY, Number(fps));
 	}
 
 	/**
