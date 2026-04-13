@@ -82,3 +82,11 @@ export const selectClipPlaneVisualSize = createSelector(
 export const selectclipPlaneAxisSize = createSelector(
 	selectSettings, (state) => state.clipPlaneAxisSize
 );
+
+export const selectDynamicFpsOptimisation = createSelector(
+	selectSettings, (state) => state.dynamicFpsOptimisation
+);
+
+export const selectDynamicFpsTarget = createSelector(
+	selectSettings, (state) => state.dynamicFpsTarget
+);
