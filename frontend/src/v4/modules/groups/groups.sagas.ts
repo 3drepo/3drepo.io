@@ -70,7 +70,8 @@ function* setActiveGroup({ group }) {
 
 		yield all([
 			put(GroupsActions.selectGroup(group)),
-			put(GroupsActions.setComponentState({ activeGroup: group ? group._id : null }))
+			put(GroupsActions.setComponentState({ activeGroup: group ? group._id : null })),
+			put(GroupsActions.setSelectedCriterionId('')),
 		]);
 
 	} catch (error) {
@@ -174,6 +175,7 @@ function* deleteGroups({ teamspace, modelId, groups }) {
 		yield all(actions);
 		if (isShowDetails && groupsToDelete.includes(activeGroupId)) {
 			yield put(GroupsActions.setComponentState({ activeGroup: null, showDetails: false }));
+			yield put(GroupsActions.setSelectedCriterionId(''));
 			const { name } = yield select(selectEditingGroupDetails);
 			yield put(SnackbarActions.show(`Group ${name} removed.`));
 		}

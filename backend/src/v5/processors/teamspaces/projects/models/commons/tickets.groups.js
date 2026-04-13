@@ -60,9 +60,9 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 			unwantedMeshIds,
 		] = await Promise.all([
 			matched.length ? getMeshesWithParentIds(teamspace, project, model, revision,
-				matched.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
+				matched.flatMap(({ parents }) => parents)) : Promise.resolve([]),
 			unwanted.length ? getMeshesWithParentIds(teamspace, project, model, revision,
-				unwanted.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
+				unwanted.flatMap(({ parents }) => parents)) : Promise.resolve([]),
 		]);
 
 		return { container: model, _ids: getArrayDifference(unwantedMeshIds, matchedMeshIds).map(stringToUUID) };
