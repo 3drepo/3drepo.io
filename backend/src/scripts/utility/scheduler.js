@@ -142,6 +142,6 @@ const run = async () => {
 };
 
 Promise.resolve(run()).catch(onError).finally(() => {
-	// eslint-disable-next-line no-process-exit
+	// eslint-disable-next-line n/no-process-exit
 	process.exit();
 });

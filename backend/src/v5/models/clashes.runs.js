@@ -15,32 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const ClashesConstants = {};
+const { CLASH_RUNS_COL, CLASH_RUN_STATUS } = require('./clashes.constants');
+const db = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
 
-ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
-ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';
+const ClashRuns = {};
 
-ClashesConstants.CLASH_PLAN_TYPES = [
-	'hard',
-	'clearance',
-];
+ClashRuns.createTestRun = async (teamspace, plan, user) => {
+	const _id = generateUUID();
 
-ClashesConstants.SELF_INTERSECTIONS_CHECK_OPTIONS = [
-	'selectionA',
-	'selectionB',
-	true,
-	false,
-];
+	await db.insertOne(teamspace, CLASH_RUNS_COL, {
+		_id,
+		triggeredBy: user,
+		triggeredAt: new Date(),
+		status: CLASH_RUN_STATUS.PLANNED,
+		plan,
+	});
 
-ClashesConstants.TRIGGER_OPTIONS = [
-	'manual',
-	'new revision',
-];
-
-ClashesConstants.CLASH_RUN_STATUS = {
-	PLANNED: 'planned',
-	QUEUED: 'queued',
-	FAILED: 'failed',
+	return _id;
 };
 
-module.exports = ClashesConstants;
+module.exports = ClashRuns;

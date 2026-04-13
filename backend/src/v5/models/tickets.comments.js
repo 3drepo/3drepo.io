@@ -148,4 +148,7 @@ TicketComments.deleteComment = async (teamspace, project, model, ticket, oldComm
 		data: { ticket, _id: oldComment._id, deleted: true, updatedAt: formattedComment.updatedAt } });
 };
 
+TicketComments.deleteCommentsByTicketIds = (teamspace, ticketIds) => db.deleteMany(teamspace,
+	TICKET_COMMENTS_COL, { ticket: { $in: ticketIds } });
+
 module.exports = TicketComments;
