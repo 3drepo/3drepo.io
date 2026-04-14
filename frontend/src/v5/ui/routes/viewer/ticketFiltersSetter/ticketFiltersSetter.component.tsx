@@ -30,10 +30,11 @@ import { getNonCompletedTicketFilters, getTicketFilterFromCodes } from '@compone
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
+	const [urlFiltersRaw] = useSearchParam('filters');
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFed = modelIsFederation(containerOrFederation);
-	
+
 	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
 
 	useEffect(() => {
@@ -48,12 +49,14 @@ export const TicketFiltersSetter = () => {
 		if (templates.length) {
 			TicketsCardActionsDispatchers.resetFilters();
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
-			const filters: TicketFilter[] = ticketCodes.length ? [getTicketFilterFromCodes(ticketCodes)] : 
+			const defaultFilters: TicketFilter[] = ticketCodes.length ? [getTicketFilterFromCodes(ticketCodes)] : 
 				getNonCompletedTicketFilters(templates, containerOrFederation);
 			
+			const urlFilters = urlFiltersRaw && JSON.parse(urlFiltersRaw);
+			const filters = !!urlFilters?.length ? urlFilters : defaultFilters;
 			TicketsCardActionsDispatchers.setFilters(filters);
 
-			if (ticketCodes.length) {
+			if (ticketCodes.length || !!urlFilters?.length) {
 				ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 			}
 
