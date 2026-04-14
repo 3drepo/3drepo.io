@@ -28,12 +28,15 @@ import { NewTicketCard } from './newTicket/newTicket.component';
 import { ViewerParams } from '../../routes.constants';
 import { TicketContextComponent } from './ticket.context';
 import { Viewer } from '@/v4/services/viewer/viewer';
+import { useSearchParam } from '../../useSearchParam';
 
 export const Tickets = () => {
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const view = TicketsCardHooksSelectors.selectView();
 	const newTicketPins = TicketsCardHooksSelectors.selectNewTicketPins();
+	const [groupByURI, setGroupByURI] = useSearchParam('groupBy');
+	const groupByState = TicketsCardHooksSelectors.selectGroupBy();
 
 	const readOnly = isFederation
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -44,6 +47,8 @@ export const Tickets = () => {
 		JobsActionsDispatchers.fetchJobs(teamspace);
 		UsersActionsDispatchers.fetchUsers(teamspace);
 		TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+		if (!groupByURI) return;
+		TicketsCardActionsDispatchers.setGroupBy(groupByURI);
 	}, []);
 
 	useEffect(() => {
@@ -52,6 +57,10 @@ export const Tickets = () => {
 			newTicketPins.forEach(({ id }) => Viewer.removePin(id));
 		}
 	}, [view]);
+
+	useEffect(() => {
+		setGroupByURI(groupByState);
+	}, [groupByState]);
 
 	return (
 		<TicketContextComponent isViewer containerOrFederation={containerOrFederation}>
