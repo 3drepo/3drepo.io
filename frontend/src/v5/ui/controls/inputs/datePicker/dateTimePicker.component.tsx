@@ -14,19 +14,31 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useRef, useState } from 'react';
-import { FormInputProps } from '@controls/inputs/inputController.component';
+import { useRef, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { TextField } from './dateTimePicker.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { DateCalendar, DateTimePicker as MUIDateTimePicker, DateTimePickerProps as MUIDateTimePickerProps, PickersActionBar, TimeClock } from '@mui/x-date-pickers';
+import { DateCalendar, TimeClock } from '@mui/x-date-pickers';
 import { ClickAwayListener, Fade, Popper  } from '@mui/material';
 import { Box } from '@mui/system';
-import dayjs from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
-export type DateTimePickerProps = FormInputProps & MUIDateTimePickerProps & {
+type PickerValue = Date | number | null;
+	
+export type DateTimePickerProps = {
+	disabled?: boolean;
+	helperText?: React.ReactNode;
+	error?: boolean;
+	required?: boolean;
+	value?: PickerValue;
+	onChange?: (value:  Date | number | null) => void;
+	onBlur?: () => void;
 	placeholder?: string;
 	renderInput?: React.ElementType;
+	minDateTime?: PickerValue;
+	maxDateTime?: PickerValue;
+	disableFuture?: boolean;
+	label?: string;
 };
 
 enum DatePickerView {
@@ -46,13 +58,16 @@ export const DateTimePicker = ({
 	onBlur,
 	placeholder,
 	renderInput,
-	...props
-}: any) => {
+	minDateTime,
+	maxDateTime,
+	disableFuture,
+	label,
+}: DateTimePickerProps) => {
 	const [view, setView] = useState(DatePickerView.calendar);
 	const [open, setOpen] = useState(false);
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-	const [calendarValue, setCalendarValue] = useState<any>();
-	const [timeValue, setTimeValue] = useState<any>(DefaultTime);
+	const [calendarValue, setCalendarValue] = useState<Dayjs | null>(null);
+	const [timeValue, setTimeValue] = useState<Dayjs | null>(DefaultTime);
 	const markForUpdateRef =  useRef(false);
 	const temporalValue = useRef(value);
 
@@ -88,7 +103,7 @@ export const DateTimePicker = ({
 					id: 'calendarPicker.placeholder',
 					defaultMessage: 'Choose a date',
 				})}
-
+				label={label}
 				error={error}
 				helperText={helperText}
 				required={required}
@@ -98,7 +113,7 @@ export const DateTimePicker = ({
 			<Popper id={id} open={open} anchorEl={anchorEl} transition  style={{ zIndex: 10000 }} >
 				{({ TransitionProps }) => (
 					<ClickAwayListener onClickAway={() => closePicker()}>
-						<Fade {...TransitionProps} timeout={350} onExited={() => {
+						<Fade {...TransitionProps} timeout={150} onExited={() => {
 							TransitionProps?.onExited?.();
 							if (!markForUpdateRef.current) return;
 							markForUpdateRef.current = false; 
@@ -107,12 +122,19 @@ export const DateTimePicker = ({
 						}}>
 							<Box sx={{ border: 0, p: 1, bgcolor: 'background.paper' }}>
 								{view === DatePickerView.calendar && (
-									<DateCalendar value={calendarValue} onChange={(newValue, selectionState) => {
-										if (selectionState === 'finish') {
-											setCalendarValue(newValue);
-											setView(DatePickerView.time);
-										}
-									}} />)}
+									<DateCalendar 
+										value={calendarValue} 
+										onChange={(newValue, selectionState) => {
+											if (selectionState === 'finish') {
+												setCalendarValue(newValue);
+												setView(DatePickerView.time);
+											}
+										}} 
+									
+										minDate={minDateTime ? dayjs(minDateTime) : undefined}
+										maxDate={maxDateTime ? dayjs(maxDateTime) : undefined}
+										disableFuture={disableFuture}
+									/>)}
 								{view === DatePickerView.time && (
 									<TimeClock
 										value={timeValue}
@@ -121,11 +143,16 @@ export const DateTimePicker = ({
 										onChange={(newValue, selectionState) => {
 											setTimeValue(newValue);
 											if (selectionState === 'finish') {
-												consolidateNewValue(calendarValue?.hour(newValue?.hour()).minute(newValue?.minute())?.toDate().getTime());
+												if (!calendarValue || !newValue) return;
+												const valueToSet = calendarValue.hour(newValue.hour()).minute(newValue.minute()).toDate().getTime();
+												consolidateNewValue(valueToSet);
 											}
 										}}
 										ampm
-										ampmInClock 
+										ampmInClock
+										minTime={minDateTime ? dayjs(minDateTime) : undefined}
+										maxTime={maxDateTime ? dayjs(maxDateTime) : undefined}
+										disableFuture={disableFuture}
 									/>
 								)}
 								<button 

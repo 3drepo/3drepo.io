@@ -62,8 +62,8 @@ const SequenceDate = ({ name, onChange, showSequenceDate, min, max, initialFocus
 	return (
 		<SequenceDateContainer>
 			<SequenceDateField
-				minDateTime={min ? dayjs(min) : null}
-				maxDateTime={max ? dayjs(max) : null}
+				minDateTime={min}
+				maxDateTime={max}
 				// shouldDisableDate={(date: any) => isDateOutsideRange(min, max, date.$d)}
 				name={name}
 				value={value}
