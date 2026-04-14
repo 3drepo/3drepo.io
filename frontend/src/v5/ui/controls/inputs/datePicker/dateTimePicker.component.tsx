@@ -31,14 +31,17 @@ export type DateTimePickerProps = {
 	error?: boolean;
 	required?: boolean;
 	value?: PickerValue;
-	onChange?: (value:  Date | number | null) => void;
+	onChange?: (value:  PickerValue) => void;
+	onAccept?: (value:  PickerValue) => void;
 	onBlur?: () => void;
 	placeholder?: string;
 	renderInput?: React.ElementType;
 	minDateTime?: PickerValue;
 	maxDateTime?: PickerValue;
 	disableFuture?: boolean;
+	disableHighlightToday?: boolean;
 	label?: string;
+	name?: string;
 };
 
 enum DatePickerView {
@@ -61,7 +64,9 @@ export const DateTimePicker = ({
 	minDateTime,
 	maxDateTime,
 	disableFuture,
+	disableHighlightToday,
 	label,
+	name,
 }: DateTimePickerProps) => {
 	const [view, setView] = useState(DatePickerView.calendar);
 	const [open, setOpen] = useState(false);
@@ -109,10 +114,12 @@ export const DateTimePicker = ({
 				required={required}
 				value={value ? formatDateTime(value) : null}
 				onClick={handleClick}
+				inputProps={{ form: { autoComplete: 'off' } }}
+				name={name}
 			/>
 			<Popper id={id} open={open} anchorEl={anchorEl} transition  style={{ zIndex: 10000 }} >
 				{({ TransitionProps }) => (
-					<ClickAwayListener onClickAway={() => closePicker()}>
+					<ClickAwayListener onClickAway={() => closePicker()} mouseEvent="onMouseDown">
 						<Fade {...TransitionProps} timeout={150} onExited={() => {
 							TransitionProps?.onExited?.();
 							if (!markForUpdateRef.current) return;
@@ -134,6 +141,7 @@ export const DateTimePicker = ({
 										minDate={minDateTime ? dayjs(minDateTime) : undefined}
 										maxDate={maxDateTime ? dayjs(maxDateTime) : undefined}
 										disableFuture={disableFuture}
+										disableHighlightToday={disableHighlightToday}
 									/>)}
 								{view === DatePickerView.time && (
 									<TimeClock
