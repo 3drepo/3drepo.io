@@ -53,8 +53,8 @@ export const DateTimePicker = ({
 	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const [calendarValue, setCalendarValue] = useState<any>();
 	const [timeValue, setTimeValue] = useState<any>(DefaultTime);
-
 	const markForUpdateRef =  useRef(false);
+	const temporalValue = useRef(value);
 
 
 	const closePicker = () => {
@@ -72,8 +72,9 @@ export const DateTimePicker = ({
 	const canopen = open && Boolean(anchorEl);
   	const id = canopen ? 'transition-popper' : undefined;
 
-	const consolidateNewValue = () => {
+	const consolidateNewValue = (newValue: any) => {
 		markForUpdateRef.current = true;
+		temporalValue.current = newValue;
 		closePicker();
 	};
 
@@ -101,8 +102,7 @@ export const DateTimePicker = ({
 							TransitionProps?.onExited?.();
 							if (!markForUpdateRef.current) return;
 							markForUpdateRef.current = false; 
-							const newValue = calendarValue?.hour(timeValue.hour()).minute(timeValue.minute());
-							onChange?.(newValue ? newValue.toDate().getTime() : null);
+							onChange?.(temporalValue.current ? temporalValue.current : null);
 							onBlur?.();
 						}}>
 							<Box sx={{ border: 0, p: 1, bgcolor: 'background.paper' }}>
@@ -121,7 +121,7 @@ export const DateTimePicker = ({
 										onChange={(newValue, selectionState) => {
 											setTimeValue(newValue);
 											if (selectionState === 'finish') {
-												consolidateNewValue();
+												consolidateNewValue(calendarValue?.hour(newValue?.hour()).minute(newValue?.minute())?.toDate().getTime());
 											}
 										}}
 										ampm
@@ -130,7 +130,7 @@ export const DateTimePicker = ({
 								)}
 								<button 
 									onClick={()=> {
-										closePicker();
+										consolidateNewValue(null);
 									}}
 								> clear date</button>
 							</Box>
