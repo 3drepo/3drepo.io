@@ -34,6 +34,8 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainersSuccess: ['projectId', 'containers'],
 	fetchContainerStats: ['teamspace', 'projectId', 'containerId'],
 	fetchContainerStatsSuccess: ['projectId', 'containerId', 'stats'],
+	bulkFetchContainersStats: ['teamspace', 'projectId', 'containerIds'],
+	bulkFetchContainersStatsSuccess: ['projectId', 'stats'],
 	fetchContainerViews: ['teamspace', 'projectId', 'containerId'],
 	fetchContainerViewsSuccess: ['projectId', 'containerId', 'views'],
 	fetchContainerSettings: ['teamspace', 'projectId', 'containerId'],
@@ -84,6 +86,23 @@ export const fetchContainerStatsSuccess = (state, {
 }) => {
 	const container = getContainerFromState(state, projectId, containerId);
 	Object.assign(container, prepareSingleContainerData(container, stats));
+};
+
+export const bulkFetchContainersStatsSuccess = (state, {
+	projectId,
+	stats,
+}) => {
+	const containers = state.containersByProject[projectId];
+	if (!containers) return;
+
+	// Build a map for quick lookup
+	const containerMap: Map<string, IContainer> = new Map(containers.map((c) => [c._id, c]));
+
+	stats.forEach((containerStats) => {
+		const container = containerMap.get(containerStats.modelId);
+		if (!container) return;
+		Object.assign(container, prepareSingleContainerData(container, containerStats));
+	});
 };
 
 export const fetchContainerViewsSuccess = (state, {
@@ -171,6 +190,7 @@ export const containersReducer = createReducer<IContainersState>(INITIAL_STATE, 
 	[ContainersTypes.FETCH_CONTAINERS_SUCCESS]: fetchContainersSuccess,
 	[ContainersTypes.SET_FAVOURITE_SUCCESS]: setFavouriteSuccess,
 	[ContainersTypes.FETCH_CONTAINER_STATS_SUCCESS]: fetchContainerStatsSuccess,
+	[ContainersTypes.BULK_FETCH_CONTAINERS_STATS_SUCCESS]: bulkFetchContainersStatsSuccess,
 	[ContainersTypes.FETCH_CONTAINER_VIEWS_SUCCESS]: fetchContainerViewsSuccess,
 	[ContainersTypes.FETCH_CONTAINER_SETTINGS_SUCCESS]: fetchContainerSettingsSuccess,
 	[ContainersTypes.UPDATE_CONTAINER_SUCCESS]: updateContainerSuccess,
@@ -196,6 +216,8 @@ export type FetchContainersAction = Action<'FETCH_CONTAINERS'> & TeamspaceAndPro
 export type FetchContainersSuccessAction = Action<'FETCH_CONTAINERS_SUCCESS'> & ProjectId & { containers: IContainer[] };
 export type FetchContainerStatsAction = Action<'FETCH_CONTAINER_STATS'> & TeamspaceProjectAndContainerId;
 export type FetchContainerStatsSuccessAction = Action<'FETCH_CONTAINER_STATS_SUCCESS'> & ProjectAndContainerId & { containerStats: ContainerStats };
+export type BulkFetchContainersStatsAction = Action<'BULK_FETCH_CONTAINERS_STATS'> & TeamspaceAndProjectId & { containerIds: string[] };
+export type BulkFetchContainersStatsSuccessAction = Action<'BULK_FETCH_CONTAINERS_STATS_SUCCESS'> & ProjectId & { stats: ContainerStats[] };
 export type FetchContainerViewsAction = Action<'FETCH_CONTAINER_VIEWS'> & TeamspaceProjectAndContainerId;
 export type FetchContainerViewsSuccessAction = Action<'FETCH_CONTAINER_VIEWS_SUCCESS'> & ProjectAndContainerId & { views: View[] };
 export type FetchContainerSettingsAction = Action<'FETCH_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId;
@@ -224,6 +246,11 @@ export interface IContainersActionCreators {
 		containerId: string,
 		stats: ContainerStats,
 	) => FetchContainerStatsSuccessAction;
+	bulkFetchContainersStats: (teamspace: string, projectId: string, containerIds: string[]) => BulkFetchContainersStatsAction;
+	bulkFetchContainersStatsSuccess: (
+		projectId: string,
+		stats: ContainerStats[],
+	) => BulkFetchContainersStatsSuccessAction;
 	createContainer: (
 		teamspace: string,
 		projectId: string,

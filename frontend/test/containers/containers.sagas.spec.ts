@@ -140,7 +140,7 @@ describe('Containers: sagas', () => {
 				dispatch(ContainersActions.fetchContainers(teamspace, projectId));
 			}, [
 				ContainersActions.fetchContainersSuccess(projectId, [mockContainerWithoutStats]),
-				ContainersActions.fetchContainerStats(teamspace, projectId, mockContainer._id),
+				ContainersActions.bulkFetchContainersStats(teamspace, projectId, [mockContainer._id]),
 			]);
 		})
 
@@ -180,6 +180,28 @@ describe('Containers: sagas', () => {
 			const containersInStore = selectContainers(getState());
 			expect(containersInStore).toEqual([mockContainer]);
 		})
+
+		it('should bulk fetch containers\' stats', async () => {
+			// populate the store with multiple containers for bulk stats fetching
+			const secondContainerId = 'secondContainerId';
+			const containers = [
+				mockContainer,
+				containerMockFactory({ _id: secondContainerId }) as any
+			];
+			const statsList = [
+				stats,
+				prepareMockStats({ _id: secondContainerId })
+			];
+			dispatch(ContainersActions.fetchContainersSuccess(projectId, containers));
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/stats?models=${containers.map(f => f._id).join()}`)
+				.reply(200, { stats: statsList });
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.bulkFetchContainersStats(teamspace, projectId, containers.map(f => f._id)));
+			}, [ContainersActions.bulkFetchContainersStatsSuccess(projectId, statsList)]);
+		});
 
 		it('should fetch container views', async () => {
 			populateStore();

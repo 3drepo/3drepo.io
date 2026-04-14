@@ -57,7 +57,7 @@ export const containerMockFactory = (overrides?: Partial<IContainer>): IContaine
 
 export const prepareMockBaseContainer = (container: IContainer) => omit(container, ['views', 'defaultView', 'surveyPoint', 'angleFromNorth'])
 
-export const prepareMockStats = (overrides?: Partial<ContainerStats>): ContainerStats => ({
+export const prepareMockStats = (overrides?: Partial<IContainer>): ContainerStats => ({
 	revisions: {
 		total: faker.datatype.number(),
 		lastUpdated: faker.datatype.number(),
@@ -68,7 +68,7 @@ export const prepareMockStats = (overrides?: Partial<ContainerStats>): Container
 	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
 	code: faker.datatype.uuid(),
 	...overrides,
-});
+}) as unknown as ContainerStats;
 
 export const getMockStats = (container: IContainer): ContainerStats => ({
 	revisions: {
