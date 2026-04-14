@@ -16,15 +16,18 @@
  */
 
 const {
-	checkModelExists,
+	checkModelsExists,
 	hasAdminAccessToContainer,
 	hasAdminAccessToDrawing,
 	hasAdminAccessToFederation,
 	hasCommenterAccessToContainer,
 	hasCommenterAccessToFederation,
 	hasReadAccessToContainer,
+	hasReadAccessToContainers,
 	hasReadAccessToDrawing,
+	hasReadAccessToDrawings,
 	hasReadAccessToFederation,
+	hasReadAccessToFederations,
 	hasWriteAccessToContainer,
 	hasWriteAccessToDrawing,
 	hasWriteAccessToFederation,
@@ -37,16 +40,19 @@ const { templates } = require('../../../utils/responseCodes');
 
 const ModelPerms = {};
 
-const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
-	const { session, params } = req;
+const permissionsCheckTemplate = (type, callback, multipleModels = false) => async (req, res, next) => {
+	const { session, params, query } = req;
 	const user = getUserFromSession(session);
-	const { teamspace, project, model } = params;
+	const { teamspace, project } = params;
+	const models = multipleModels ? query.models.split(',') : [params.model];
+
 	try {
-		const modelInProject = await checkModelExists(teamspace, project, model, type);
+		const modelInProject = await checkModelsExists(teamspace, project, models, type);
 		if (!modelInProject) {
 			throw templates.modelNotFound;
 		}
-		if (req.app.get(BYPASS_AUTH) || await callback(teamspace, project, model, user, true)) {
+		if (req.app.get(BYPASS_AUTH) || await callback(
+			teamspace, project, models, user, true)) {
 			await next();
 		} else {
 			respond(req, res, templates.notAuthorized);
@@ -57,16 +63,20 @@ const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
 };
 
 ModelPerms.hasReadAccessToContainer = permissionsCheckTemplate(modelTypes.CONTAINER, hasReadAccessToContainer);
+ModelPerms.hasReadAccessToContainers = permissionsCheckTemplate(modelTypes.CONTAINER, hasReadAccessToContainers, true);
 ModelPerms.hasWriteAccessToContainer = permissionsCheckTemplate(modelTypes.CONTAINER, hasWriteAccessToContainer);
 ModelPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(
 	modelTypes.CONTAINER, hasCommenterAccessToContainer);
 ModelPerms.hasAdminAccessToContainer = permissionsCheckTemplate(modelTypes.CONTAINER, hasAdminAccessToContainer);
 
 ModelPerms.hasReadAccessToDrawing = permissionsCheckTemplate(modelTypes.DRAWING, hasReadAccessToDrawing);
+ModelPerms.hasReadAccessToDrawings = permissionsCheckTemplate(modelTypes.DRAWING, hasReadAccessToDrawings, true);
 ModelPerms.hasWriteAccessToDrawing = permissionsCheckTemplate(modelTypes.DRAWING, hasWriteAccessToDrawing);
 ModelPerms.hasAdminAccessToDrawing = permissionsCheckTemplate(modelTypes.DRAWING, hasAdminAccessToDrawing);
 
 ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(modelTypes.FEDERATION, hasReadAccessToFederation);
+ModelPerms.hasReadAccessToFederations = permissionsCheckTemplate(
+	modelTypes.FEDERATION, hasReadAccessToFederations, true);
 ModelPerms.hasWriteAccessToFederation = permissionsCheckTemplate(modelTypes.FEDERATION, hasWriteAccessToFederation);
 ModelPerms.hasCommenterAccessToFederation = permissionsCheckTemplate(
 	modelTypes.FEDERATION, hasCommenterAccessToFederation);

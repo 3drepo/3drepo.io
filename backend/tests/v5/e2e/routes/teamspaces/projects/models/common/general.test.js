@@ -65,6 +65,35 @@ const generateBasicData = () => {
 			collaborators: [collaborator.user],
 			modelType: modelTypes.DRAWING,
 		}),
+		calibration: ServiceHelper.generateCalibration(),
+		revisions: times(2, () => ServiceHelper.generateRevisionEntry(false, false, modelTypes.CONTAINER)),
+	};
+
+	data.jobs = [
+		{ _id: ServiceHelper.generateRandomString(), users: [viewer.user] },
+		{ _id: ServiceHelper.generateRandomString(), users: [collaborator.user] },
+		{ _id: ServiceHelper.generateRandomString(), users: Object.values(data.users).map(({ user }) => user) },
+	];
+
+	return data;
+};
+
+const generateMultipleModelsBasicData = () => {
+	const viewer = ServiceHelper.generateUserCredentials();
+	const commenter = ServiceHelper.generateUserCredentials();
+	const collaborator = ServiceHelper.generateUserCredentials();
+	const data = {
+		users: {
+			tsAdmin: ServiceHelper.generateUserCredentials(),
+			noProjectAccess: ServiceHelper.generateUserCredentials(),
+			nobody: ServiceHelper.generateUserCredentials(),
+			projectAdmin: ServiceHelper.generateUserCredentials(),
+			viewer,
+			commenter,
+			collaborator,
+		},
+		teamspace: ServiceHelper.generateRandomString(),
+		project: ServiceHelper.generateRandomProject(),
 		cons: times(3, () => ServiceHelper.generateRandomModel({
 			viewers: [viewer.user],
 			commenters: [commenter.user],
@@ -382,20 +411,17 @@ const testGetModelStats = (isInternal = false) => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				wrongTypeModel = fed;
 				model = con;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				wrongTypeModel = con;
 				model = fed;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				wrongTypeModel = fed;
 				model = draw;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -1298,7 +1324,7 @@ const testGetJobsWithAccess = () => {
 
 const testGetModelStatsInBulk = () => {
 	describe('Get Model Stats in Bulk', () => {
-		const { users, teamspace, project, cons, feds, draws, calibration } = generateBasicData();
+		const { users, teamspace, project, cons, feds, draws, calibration } = generateMultipleModelsBasicData();
 
 		feds.forEach((fed) => {
 			// eslint-disable-next-line no-param-reassign
@@ -1352,6 +1378,13 @@ const testGetModelStatsInBulk = () => {
 				['the teamspace does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, ServiceHelper.generateRandomString(), project.id), false, templates.teamspaceNotFound],
 				['the project does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, teamspace, ServiceHelper.generateRandomString()), false, templates.projectNotFound],
 				['the models exist and the user has access', generateRoute(modelType, modelIds, users.tsAdmin.apiKey), true, models],
+				['some models do not exist', generateRoute(modelType, [...modelIds, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
+				['modelQuery string is not provided', `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/stats?key=${users.tsAdmin.apiKey}`, false, templates.invalidArguments],
+				['all models do not exist', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
+				['some models are of wrong type', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
+				['all models are of wrong type', generateRoute(modelType, [models[0]._id, models[0]._id], users.tsAdmin.apiKey), false, templates.invalidArguments],
+				['some models do not belong to the project', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
+				['all models do not belong to the project', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
 			];
 		};
 

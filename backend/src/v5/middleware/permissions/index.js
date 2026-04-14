@@ -18,8 +18,10 @@
 const { convertAllUUIDs, getModelIdFromParam } = require('../dataConverter/pathParams');
 const {
 	hasAdminAccessToContainer, hasAdminAccessToDrawing, hasAdminAccessToFederation, hasCommenterAccessToContainer,
-	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToDrawing,
-	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToDrawing, hasWriteAccessToFederation,
+	hasCommenterAccessToFederation, hasReadAccessToContainer,
+	hasReadAccessToContainers, hasReadAccessToDrawing,
+	hasReadAccessToDrawings, hasReadAccessToFederation, hasReadAccessToFederations,
+	hasWriteAccessToContainer, hasWriteAccessToDrawing, hasWriteAccessToFederation,
 } = require('./components/models');
 const { isActiveTeamspaceMember, isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
 const { BYPASS_AUTH } = require('../../utils/config.constants');
@@ -63,6 +65,8 @@ Permissions.isAdminToProject = validateMany([Permissions.hasAccessToTeamspace, i
 
 Permissions.hasReadAccessToContainer = validateMany([Permissions.hasAccessToTeamspace,
 	getModelIdFromParam(modelTypes.CONTAINER), hasReadAccessToContainer]);
+Permissions.hasReadAccessToContainers = validateMany([Permissions.hasAccessToTeamspace,
+	hasReadAccessToContainers]);
 Permissions.hasCommenterAccessToContainer = validateMany([Permissions.hasAccessToTeamspace,
 	getModelIdFromParam(modelTypes.CONTAINER), hasCommenterAccessToContainer]);
 Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTeamspace,
@@ -72,6 +76,8 @@ Permissions.hasAdminAccessToContainer = validateMany([Permissions.hasAccessToTea
 
 Permissions.hasReadAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace,
 	getModelIdFromParam(modelTypes.DRAWING), hasReadAccessToDrawing]);
+Permissions.hasReadAccessToDrawings = validateMany([Permissions.hasAccessToTeamspace,
+	hasReadAccessToDrawings]);
 Permissions.hasWriteAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace,
 	getModelIdFromParam(modelTypes.DRAWING), hasWriteAccessToDrawing]);
 Permissions.hasAdminAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace,
@@ -79,6 +85,8 @@ Permissions.hasAdminAccessToDrawing = validateMany([Permissions.hasAccessToTeams
 
 Permissions.hasReadAccessToFederation = validateMany([Permissions.hasAccessToTeamspace,
 	getModelIdFromParam(modelTypes.FEDERATION), hasReadAccessToFederation]);
+Permissions.hasReadAccessToFederations = validateMany([Permissions.hasAccessToTeamspace,
+	hasReadAccessToFederations]);
 Permissions.hasCommenterAccessToFederation = validateMany([Permissions.hasAccessToTeamspace,
 	getModelIdFromParam(modelTypes.FEDERATION), hasCommenterAccessToFederation]);
 Permissions.hasWriteAccessToFederation = validateMany([Permissions.hasAccessToTeamspace,

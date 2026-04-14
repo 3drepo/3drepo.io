@@ -16,25 +16,23 @@
  */
 
 const { UUIDToString, generateUUID } = require('../../../../../utils/helper/uuids');
-const { addDrawingThumbnailRef, deleteModelRevisions, getLatestRevision,
-	getRevisionByIdOrTag, getRevisionCount, getRevisions, updateRevisionStatus } = require('../../../../../models/revisions');
+const { addDrawingThumbnailRef, deleteModelRevisions, getLatestRevision, getRevisionByIdOrTag,
+	getRevisions, getRevisionsByQuery, updateRevisionStatus } = require('../../../../../models/revisions');
 const { addModel, getModelList } = require('../commons/modelList');
 const { appendFavourites, deleteFavourites } = require('../commons/favourites');
 const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = require('../../../../../models/modelSettings');
-const { getCalibrationStatus, getCalibrationStatusForAllRevs } = require('./calibrations');
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
 const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
 const { createThumbnail } = require('../../../../../utils/helper/images');
 const { deleteDrawingCalibrations } = require('../../../../../models/calibrations');
-const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
+const { getCalibrationStatusForAllRevs } = require('./calibrations');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { processDrawingUpload } = require('../../../../../services/modelProcessing');
-const { splitArrayIntoChunks } = require('../../../../../utils/helper/arrays');
 const { templates } = require('../../../../../utils/responseCodes');
 
-const Drawings = { };
+const Drawings = {};
 
 Drawings.getDrawingList = async (teamspace, project, user) => {
 	const { models } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
@@ -44,51 +42,8 @@ Drawings.getDrawingList = async (teamspace, project, user) => {
 };
 
 Drawings.getDrawingStats = async (teamspace, project, drawing) => {
-	const getLatestRevAndCalibration = async () => {
-		try {
-			const latestRev = await
-			getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
-				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
-			const calibration = await getCalibrationStatus(teamspace, project, drawing, latestRev._id);
-			return { latestRev, calibration };
-		} catch {
-			// do nothing. A drawing can have 0 revision.
-			return {};
-		}
-	};
-
-	const getDrawingStatus = async () => {
-		try {
-			const { status } = await getLatestRevision(teamspace, drawing, modelTypes.DRAWING,
-				{ status: 1 },
-				{ includeFailed: true, includeIncomplete: true });
-			return status;
-		} catch {
-			// do nothing. A drawing can have 0 revision.
-			return undefined;
-		}
-	};
-
-	const [settings, revCount, { latestRev, calibration }, status] = await Promise.all([
-		getDrawingById(teamspace, drawing, { number: 1, type: 1, desc: 1 }),
-		getRevisionCount(teamspace, drawing, modelTypes.DRAWING),
-		getLatestRevAndCalibration(),
-		getDrawingStatus(),
-	]);
-
-	return deleteIfUndefined({
-		number: settings.number,
-		status,
-		type: settings.type,
-		desc: settings.desc,
-		revisions: {
-			total: revCount,
-			...latestRev
-				? { lastUpdated: latestRev.timestamp, latestRevision: `${latestRev.statusCode}-${latestRev.revCode}` }
-				: {},
-		},
-		calibration,
-	});
+	const stats = await Drawings.getMultipleDrawingsStats(teamspace, project, [drawing]);
+	return stats[drawing];
 };
 
 Drawings.addDrawing = (teamspace, project, data) => addModel(teamspace, project,
@@ -195,15 +150,38 @@ Drawings.getSettings = (teamspace, drawing) => getDrawingById(teamspace,
 
 Drawings.getMultipleDrawingsStats = async (teamspace, project, drawings) => {
 	const stats = {};
+	const revisions = await getRevisionsByQuery(teamspace, project, null, modelTypes.DRAWING,
+		{ model: { $in: drawings } },
+		{ model: 1, statusCode: 1, revCode: 1, timestamp: 1, status: 1, incomplete: 1 },
+		{ includeFailed: true, includeIncomplete: true });
+	const drawingsSettings = await getDrawings(teamspace, drawings, { number: 1, type: 1, desc: 1 });
 
-	const listOfPromises = splitArrayIntoChunks(drawings.map(async (drawing) => {
-		stats[drawing] = await Drawings.getDrawingStats(teamspace, project, drawing);
-	}), 25);
+	await Promise.all(
+		drawings.map(
+			async (drawing) => {
+				const calibration = await getCalibrationStatusForAllRevs(teamspace, project, drawing);
+				const drawingSetting = drawingsSettings.find((d) => d._id === drawing);
+				const drawingRevisions = revisions.filter((rev) => rev.model === drawing);
+				const completeRevisions = drawingRevisions.filter(
+					(rev) => rev.status === undefined && rev.incomplete === undefined);
+				const latestRevision = completeRevisions.sort(
+					(a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
 
-	for (const promises of listOfPromises) {
-		// eslint-disable-next-line no-await-in-loop
-		await Promise.all(promises);
-	}
+				stats[drawing] = {
+					number: drawingSetting?.number,
+					type: drawingSetting?.type,
+					desc: drawingSetting?.desc,
+					calibration: calibration?.[UUIDToString(latestRevision?._id)],
+					revisions: {
+						total: completeRevisions.length,
+						lastUpdated: latestRevision?.timestamp,
+						latestRevision: latestRevision?.statusCode ? `${latestRevision.statusCode}-${latestRevision.revCode}` : undefined,
+					},
+					status: drawingRevisions.find((rev) => rev.status !== undefined)?.status,
+				};
+			},
+		),
+	);
 
 	return stats;
 };

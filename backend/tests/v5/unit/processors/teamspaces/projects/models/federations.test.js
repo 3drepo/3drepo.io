@@ -67,7 +67,10 @@ const federationList = [
 ];
 const mockContainers = [{ _id: '1', name: 'test1', permissions: [{ user: 'user1' }] }, { _id: '2', name: 'test2', permissions: [] }, { _id: '3', name: 'test3' }];
 
-const federation1Rev = 5678;
+const getLatestRevisionContainers = {
+	container1: { timestamp: 1234 },
+	container2: { timestamp: 5678 },
+};
 
 const federationSettings = {
 	federation1: {
@@ -113,6 +116,7 @@ const federationSettings = {
 			code: 'FED3',
 		},
 		status: 'processing',
+		subModels: undefined,
 	},
 };
 
@@ -156,11 +160,9 @@ Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd)
 	}
 });
 
-Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
-	if (container === 'container1') return { timestamp: 1234 };
-	if (container === 'container2') return { timestamp: 5678 };
-	throw templates.revisionNotFound;
-});
+Revisions.getLatestRevision.mockImplementation(
+	(teamspace, container) => (getLatestRevisionContainers[container]
+		? Promise.resolve(getLatestRevisionContainers[container]) : Promise.reject(templates.revisionNotFound)));
 
 // Permissions mock
 jest.mock('../../../../../../../src/v5/utils/permissions', () => ({
@@ -262,21 +264,13 @@ const formatToStats = (settings, ticketsCount, lastUpdated) => ({
 
 const testGetFederationStats = () => {
 	describe('Get federation stats', () => {
-		test('should return the stats if the federation exists and has subModels with revisions', async () => {
-			const ticketsCount = generateRandomNumber();
-			Tickets.getOpenTicketsCount.mockResolvedValueOnce(ticketsCount);
+		test('should call getMultipleFederationsStats and return the stats for the requested federation', async () => {
+			const stats = { federation1: generateRandomString() };
+			const getMultipleFederationsStatsSpy = jest.spyOn(Federations, 'getMultipleFederationsStats').mockResolvedValueOnce(stats);
 			const res = await Federations.getFederationStats('teamspace', 'project', 'federation1');
-			expect(res).toEqual(formatToStats(federationSettings.federation1, ticketsCount, federation1Rev));
-		});
-		test('should return the stats if the federation exists and has subModels with no revisions', async () => {
-			const ticketsCount = generateRandomNumber();
-			Tickets.getOpenTicketsCount.mockResolvedValueOnce(ticketsCount);
-			const res = await Federations.getFederationStats('teamspace', 'project', 'federation2');
-			expect(res).toEqual(formatToStats(federationSettings.federation2, ticketsCount));
-		});
-		test('should return the stats if the federation exists and has no subModels', async () => {
-			const res = await Federations.getFederationStats('teamspace', 'project', 'federation3');
-			expect(res).toEqual(formatToStats(federationSettings.federation3));
+			expect(getMultipleFederationsStatsSpy).toHaveBeenCalledTimes(1);
+			expect(getMultipleFederationsStatsSpy).toHaveBeenCalledWith('teamspace', 'project', ['federation1']);
+			expect(res).toEqual(stats.federation1);
 		});
 	});
 };
@@ -527,6 +521,7 @@ const testGetMultipleFederationsStats = () => {
 			}));
 			const fedOpenTickets = {};
 			const expectedData = {};
+			const lastUpdate = getLatestRevisionContainers.container2.timestamp;
 
 			federations
 				.forEach((federation) => {
@@ -536,13 +531,55 @@ const testGetMultipleFederationsStats = () => {
 						expectedData[federationSettings[federation]._id] = formatToStats(
 							federationSettings[federation],
 							ticketsCount,
-							federation === 'federation1' ? federation1Rev : undefined,
+							federation === 'federation1' ? lastUpdate : undefined,
 						);
 					} else {
 						expectedData[federationSettings[federation]._id] = formatToStats(
 							federationSettings[federation],
 							0,
-							federation === 'federation1' ? federation1Rev : undefined,
+							federation === 'federation1' ? lastUpdate : undefined,
+						);
+					}
+				});
+
+			ModelSettings.getFederations
+				.mockResolvedValueOnce(fedSettings);
+
+			Tickets.getOpenTicketsCountForMultipleModels
+				.mockResolvedValueOnce(fedOpenTickets);
+
+			const res = await Federations.getMultipleFederationsStats(teamspace, project, federations);
+
+			expect(ModelSettings.getFederations).toHaveBeenCalledTimes(1);
+			expect(res).toEqual(expectedData);
+		});
+		test('should be able to handle empty federations', async () => {
+			const teamspace = generateRandomString();
+			const ticketsCount = parseInt(generateRandomNumber(), 10);
+			const federations = ['federation3'];
+			const fedSettings = federations.map((federation) => ({
+				properties: federationSettings[federation].properties,
+				status: federationSettings[federation].status,
+				subModels: federationSettings[federation].subModels,
+				desc: federationSettings[federation]?.desc,
+				_id: federationSettings[federation]._id,
+			}));
+			const fedOpenTickets = {};
+			const expectedData = {};
+
+			federations
+				.forEach((federation) => {
+					if (federation !== 'federation3') {
+						fedOpenTickets[federationSettings[federation]._id] = ticketsCount;
+
+						expectedData[federationSettings[federation]._id] = formatToStats(
+							federationSettings[federation],
+							ticketsCount,
+						);
+					} else {
+						expectedData[federationSettings[federation]._id] = formatToStats(
+							federationSettings[federation],
+							0,
 						);
 					}
 				});

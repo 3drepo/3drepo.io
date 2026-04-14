@@ -69,7 +69,7 @@ const testExportGroups = () => {
 	const generateTestData = (isFed) => {
 		const createRoute = ({ projectId = project.id, modelId = isFed ? fed._id : container._id, apiKey = users.tsAdmin.apiKey } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${isFed ? 'federations' : 'containers'}/${modelId}/groups/export${apiKey ? `?key=${apiKey}` : ''}`;
 		const modelLabel = isFed ? 'federations' : 'containers';
-		const modelNotFoundRes = isFed ? templates.federationNotFound : templates.containerNotFound;
+		const { modelNotFound } = templates;
 
 		const incorrectModelTypeId = isFed ? container._id : fed._id;
 		const modelWithNoGroups = isFed ? fedNoGroups._id : containerNoGroups._id;
@@ -78,8 +78,8 @@ const testExportGroups = () => {
 			['the user is not authenticated', createRoute({ apiKey: null }), false, templates.notLoggedIn],
 			['the user is not a member of the teamspace', createRoute({ apiKey: users.nobody.apiKey }), false, templates.teamspaceNotFound],
 			['the project does not exist', createRoute({ projectId: 'dslfkjds' }), false, templates.projectNotFound],
-			[`the ${modelLabel} does not exist`, createRoute({ modelId: 'dslfkjds' }), false, modelNotFoundRes],
-			[`the model is not a ${modelLabel}`, createRoute({ modelId: incorrectModelTypeId }), false, modelNotFoundRes],
+			[`the ${modelLabel} does not exist`, createRoute({ modelId: 'dslfkjds' }), false, modelNotFound],
+			[`the model is not a ${modelLabel}`, createRoute({ modelId: incorrectModelTypeId }), false, modelNotFound],
 			[`the user does not have permissions to access the ${modelLabel}`, createRoute({ apiKey: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 			['the data is not of the right schema', createRoute(), false, templates.invalidArguments, { groups: 1 }],
 			['the groups array is empty', createRoute(), false, templates.invalidArguments, { groups: [] }],

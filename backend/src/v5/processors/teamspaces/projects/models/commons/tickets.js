@@ -357,29 +357,9 @@ Tickets.getTicketList = async (teamspace, project, model,
 };
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
-	const tickets = await getAllTickets(teamspace, project, model, {
-		projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 },
-	});
+	const openTickets = await Tickets.getOpenTicketsCountForMultipleModels(teamspace, project, [model]);
 
-	let openTicketsCount = 0;
-
-	const allTemplates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
-
-	const templateToClosedStatuses = allTemplates.reduce((obj, { _id, config }) => {
-		const closedStatuses = getClosedStatuses({ config });
-
-		return { ...obj, [UUIDToString(_id)]: closedStatuses };
-	}, {});
-
-	for (let i = 0; i < tickets.length; i++) {
-		const ticket = tickets[i];
-
-		if (!templateToClosedStatuses[UUIDToString(ticket.type)].includes(ticket.properties.Status)) {
-			openTicketsCount++;
-		}
-	}
-
-	return openTicketsCount;
+	return openTickets[model] || 0;
 };
 
 Tickets.getOpenTicketsCountForMultipleModels = async (teamspace, project, models) => {

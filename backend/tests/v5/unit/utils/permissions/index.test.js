@@ -36,8 +36,11 @@ const expectedSettings = {
 	],
 };
 ModelSettings.getModelById.mockImplementation(() => (expectedSettings));
+ModelSettings.getContainers.mockImplementation(() => (expectedSettings));
 ModelSettings.getContainerById.mockImplementation(() => (expectedSettings));
+ModelSettings.getFederations.mockImplementation(() => (expectedSettings));
 ModelSettings.getFederationById.mockImplementation(() => (expectedSettings));
+ModelSettings.getDrawings.mockImplementation(() => (expectedSettings));
 ModelSettings.getDrawingById.mockImplementation(() => (expectedSettings));
 Teamspaces.getTeamspaceAdmins.mockImplementation(() => (['tsAdmin']));
 Projects.getProjectAdmins.mockImplementation(() => (['projAdmin']));
@@ -396,14 +399,14 @@ const testHasAdminAccessToDrawing = () => {
 		['nobody', false],
 	])('Has admin access to drawing', (user, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
-			Projects.modelsExistInProject.mockImplementation(() => true);
+			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
 			expect(await Permissions.hasAdminAccessToDrawing('teamspace', 'project', 'model', user)).toBe(result);
 		});
 	});
 
 	describe('Drawing does not belong to the project', () => {
 		test('should return false if the drawing does not belong to the project', async () => {
-			Projects.modelsExistInProject.mockImplementation(() => false);
+			Projects.modelsExistInProject.mockResolvedValueOnce(() => false);
 			expect(await Permissions.hasAdminAccessToDrawing('teamspace', 'project', 'model', 'a')).toBe(false);
 		});
 	});
@@ -500,56 +503,75 @@ const testHasAdminAccessToFederation = () => {
 		['nobody', false],
 	])('Has admin access to federation', (user, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
-			Projects.modelsExistInProject.mockImplementation(() => true);
+			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
 			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', 'model', user)).toBe(result);
 		});
 	});
 
 	describe('Federation does not belong to the project', () => {
 		test('should return false if the federation does not belong to the project', async () => {
-			Projects.modelsExistInProject.mockImplementation(() => false);
+			Projects.modelsExistInProject.mockResolvedValueOnce(() => false);
 			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', 'model', 'a')).toBe(false);
 		});
 	});
 };
 
-const testHasReadAccessToModels = () => {
-	const noAccessUser = generateRandomString();
-	const someAccessUser = generateRandomString();
-	const fullAccessUser = generateRandomString();
-	const adminUser = generateRandomString();
-
-	const findModelsResults = [
-		{ _id: generateRandomString(), permissions: [{ user: someAccessUser, permission: 'viewer' }, { user: fullAccessUser, permission: 'viewer' }] },
-		{ _id: generateRandomString(), permissions: [{ user: fullAccessUser, permission: 'viewer' }] },
-		{ _id: generateRandomString() },
-	];
-
+const testHasReadAccessToContainers = () => {
 	describe.each([
-		['the user has no permissions on any models', noAccessUser, false],
-		['the user has permissions on 1 model', someAccessUser, true],
-		['the user has permissions on all models', fullAccessUser, true],
-		['the user is project admin', adminUser, true],
-	])('Has read access to some models', (desc, user, hasAccess) => {
-		test(`Should return ${hasAccess ? 'list of models' : 'empty list'} if ${desc}`, async () => {
-			ModelSettings.findModels.mockResolvedValueOnce(findModelsResults);
-			Projects.getProjectAdmins.mockResolvedValueOnce([adminUser]);
+		['a', false, true],
+		['b', false, true],
+		['c', false, true],
+		['projAdmin', false, false],
+		['projAdmin', true, true],
+		['tsAdmin', false, false],
+		['tsAdmin', true, true],
+		['tsAdmin', undefined, true],
+		['nobody', false, false],
+		['nobody', true, false],
+	])('Has read access to containers', (user, adminCheck, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
+			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
+			expect(await Permissions.hasReadAccessToContainers('teamspace', 'project', times(3, () => generateRandomString()), user, adminCheck)).toBe(result);
+		});
+	});
+};
 
-			const res = await Permissions.hasReadAccessToModels(generateRandomString(), generateRandomString(),
-				times(3, () => generateRandomString()), user);
-			if (!hasAccess) {
-				expect(res).toEqual([]);
-				return;
-			} if (user === adminUser) {
-				expect(res).toEqual(findModelsResults.map((model) => model._id));
-				return;
-			}
-			expect(res).toEqual(
-				findModelsResults
-					.filter(
-						({ permissions }) => permissions && permissions.some((perm) => perm.user === user))
-					.map((model) => model._id),
-			);
+const testHasReadAccessToDrawings = () => {
+	describe.each([
+		['a', false, true],
+		['b', false, true],
+		['c', false, true],
+		['projAdmin', false, false],
+		['projAdmin', true, true],
+		['tsAdmin', false, false],
+		['tsAdmin', true, true],
+		['tsAdmin', undefined, true],
+		['nobody', false, false],
+		['nobody', true, false],
+	])('Has read access to drawings', (user, adminCheck, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
+			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
+			expect(await Permissions.hasReadAccessToDrawings('teamspace', 'project', times(3, () => generateRandomString()), user, adminCheck)).toBe(result);
+		});
+	});
+};
+
+const testHasReadAccessToFederations = () => {
+	describe.each([
+		['a', false, true],
+		['b', false, true],
+		['c', false, true],
+		['projAdmin', false, false],
+		['projAdmin', true, true],
+		['tsAdmin', false, false],
+		['tsAdmin', true, true],
+		['tsAdmin', undefined, true],
+		['nobody', false, false],
+		['nobody', true, false],
+	])('Has read access to federations', (user, adminCheck, result) => {
+		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
+			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
+			expect(await Permissions.hasReadAccessToFederations('teamspace', 'project', times(3, () => generateRandomString()), user, adminCheck)).toBe(result);
 		});
 	});
 };
@@ -559,22 +581,24 @@ describe('utils/permissions', () => {
 	testIsProjectAdmin();
 	testHasProjectAdminPermissions();
 	testHasReadAccessToSomeModels();
-	testHasReadAccessToModels();
 	testHasReadAccessToModel();
 	testHasWriteAccessToModel();
 	testHasCommenterAccessToModel();
 
 	testHasReadAccessToContainer();
+	testHasReadAccessToContainers();
 	testHasWriteAccessToContainer();
 	testHasCommenterAccessToContainer();
 	testHasAdminAccessToContainer();
 
 	testHasReadAccessToDrawing();
+	testHasReadAccessToDrawings();
 	testHasWriteAccessToDrawing();
 	testHasCommenterAccessToDrawing();
 	testHasAdminAccessToDrawing();
 
 	testHasReadAccessToFederation();
+	testHasReadAccessToFederations();
 	testHasWriteAccessToFederation();
 	testHasCommenterAccessToFederation();
 	testHasAdminAccessToFederation();

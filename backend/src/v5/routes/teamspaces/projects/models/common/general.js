@@ -16,15 +16,18 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const { formatBulkModelStats, formatModelSettings, formatModelStats } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
+const { formatModelSettings, formatModelStats, serialiseModelStats } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/modelSettings');
 const {
 	hasAccessToTeamspace,
 	hasAdminAccessToContainer,
 	hasAdminAccessToDrawing,
 	hasAdminAccessToFederation,
 	hasReadAccessToContainer,
+	hasReadAccessToContainers,
 	hasReadAccessToDrawing,
+	hasReadAccessToDrawings,
 	hasReadAccessToFederation,
+	hasReadAccessToFederations,
 	isAdminToProject,
 } = require('../../../../../middleware/permissions');
 const { respond, writeStreamRespond } = require('../../../../../utils/responder');
@@ -36,9 +39,7 @@ const Federations = require('../../../../../processors/teamspaces/projects/model
 const ModelSettings = require('../../../../../processors/teamspaces/projects/models/commons/settings');
 const { Router } = require('express');
 const { canDeleteContainer } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/containers');
-const { getModelsIdFromQuery } = require('../../../../../middleware/dataConverter/queryParams');
 const { getUserFromSession } = require('../../../../../utils/sessions');
-const { hasReadAccessToModels } = require('../../../../../utils/permissions');
 const { isArray } = require('../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 
@@ -231,9 +232,8 @@ const getJobsWithAccess = async (req, res) => {
 };
 
 const getModelStatsInBulk = (modelType) => async (req, res, next) => {
-	const user = getUserFromSession(req.session);
 	const { teamspace, project } = req.params;
-	const { models } = req.query;
+	const models = req.query.models.split(',');
 	const fn = {
 		[modelTypes.CONTAINER]: Containers.getMultipleContainersStats,
 		[modelTypes.DRAWING]: Drawings.getMultipleDrawingsStats,
@@ -241,8 +241,7 @@ const getModelStatsInBulk = (modelType) => async (req, res, next) => {
 	};
 
 	try {
-		const availableModels = await hasReadAccessToModels(teamspace, project, models, user);
-		const stats = await fn[modelType](teamspace, project, availableModels);
+		const stats = await fn[modelType](teamspace, project, models);
 		req.outputData = stats;
 		await next();
 	} catch (err) {
@@ -270,6 +269,12 @@ const establishRoutes = (modelType, isInternal) => {
 		[modelTypes.CONTAINER]: canDeleteContainer,
 		[modelTypes.FEDERATION]: async (req, res, next) => { await next(); },
 		[modelTypes.DRAWING]: async (req, res, next) => { await next(); },
+	};
+
+	const hasReadAccessToModels = {
+		[modelTypes.CONTAINER]: hasReadAccessToContainers,
+		[modelTypes.FEDERATION]: hasReadAccessToFederations,
+		[modelTypes.DRAWING]: hasReadAccessToDrawings,
 	};
 
 	if (!isInternal) {
@@ -366,7 +371,7 @@ const establishRoutes = (modelType, isInternal) => {
 		 *       404:
 		 *         $ref: "#/components/responses/teamspaceNotFound"
 		 */
-		router.get('/stats', hasAccessToTeamspace, getModelsIdFromQuery, getModelStatsInBulk(modelType), formatBulkModelStats(modelType));
+		router.get('/stats', hasReadAccessToModels[modelType], getModelStatsInBulk(modelType), serialiseModelStats);
 
 		/**
 		 * @openapi
@@ -953,7 +958,7 @@ const establishRoutes = (modelType, isInternal) => {
 	 *                   revisions: { total: 2, lastUpdated: 1715354970000, latestRevision: S1-rev1 }
 	 *                   calibration: uncalibrated
 	 */
-	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats(modelType));
+	router.get('/:model/stats', hasReadAccessToModel[modelType], getModelStats(modelType), formatModelStats);
 
 	/**
 	 * @openapi

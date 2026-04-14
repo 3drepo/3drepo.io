@@ -17,8 +17,6 @@
 
 const { src } = require('../../helper/path');
 
-const { times } = require('lodash');
-
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
@@ -234,6 +232,68 @@ const testGetRevisionsByQuery = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, formattedQuery,
 				projection, { timestamp: -1 });
+		});
+
+		test('Should return the revisions including void revisions', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, { includeVoid: true });
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...excludeFailed,
+				...excludeIncomplete,
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
+		});
+
+		test('Should return the revisions including incomplete revisions', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, { includeIncomplete: true });
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...excludeVoids,
+				...excludeFailed,
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
+		});
+
+		test('Should return the revisions including failed revisions', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, { includeFailed: true });
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...excludeVoids,
+				...excludeIncomplete,
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
+		});
+
+		test('Should return the revisions including void, incomplete and failed revisions', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, { includeVoid: true, includeIncomplete: true, includeFailed: true });
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
 		});
 	});
 };
@@ -647,25 +707,6 @@ const testAddDrawingThumbnailRef = () => {
 	});
 };
 
-const testGetMultipleRevisionCount = () => {
-	describe('getMultipleRevisionCount', () => {
-		const teamspace = generateRandomString();
-		const models = times(3, generateRandomString());
-		const modelType = modelTypes.CONTAINER;
-
-		test('should call getRevisionCount', async () => {
-			const countsMap = { [models[0]]: 5, [models[1]]: 10, [models[2]]: 0 };
-			const spy = jest.spyOn(Revisions, 'getRevisionCount')
-				.mockResolvedValueOnce((_, model) => Promise.resolve(countsMap[model]));
-
-			const result = await Revisions.getMultipleRevisionCount(teamspace, models, modelType);
-
-			expect(result).toEqual(countsMap);
-			expect(spy).toHaveBeenCalledTimes(models.length);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testGetRevisionCount();
 	testGetLatestRevision();
@@ -681,5 +722,4 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateProcessingStatus();
 	testOnProcessingCompleted();
 	testAddDrawingThumbnailRef();
-	testGetMultipleRevisionCount();
 });

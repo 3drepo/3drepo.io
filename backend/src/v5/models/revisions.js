@@ -33,7 +33,7 @@ const collectionName = (modelType, model) => (modelType === modelTypes.DRAWING ?
 
 const findRevisionsByQuery = (teamspace, project, model, modelType, query, projection, sort) => db.find(teamspace,
 	collectionName(modelType, model),
-	{ ...query, ...(modelType === modelTypes.DRAWING ? { model, project } : {}) },
+	{ ...(modelType === modelTypes.DRAWING ? { model, project } : {}), ...query },
 	projection, sort);
 
 const findOneRevisionByQuery = async (teamspace, model, modelType, query, projection, sort) => {
@@ -76,14 +76,6 @@ Revisions.getRevisionCount = (teamspace, model, modelType) => {
 	return db.count(teamspace, collectionName(modelType, model), query);
 };
 
-Revisions.getMultipleRevisionCount = async (teamspace, models, modelType) => {
-	const counts = {};
-	await Promise.all(models.map(async (model) => {
-		counts[model] = await Revisions.getRevisionCount(teamspace, model, modelType);
-	}));
-	return counts;
-};
-
 Revisions.getRevisions = (teamspace, project, model, modelType, showVoid,
 	projection = {}, sort = { timestamp: -1 }) => {
 	const query = {
@@ -98,11 +90,12 @@ Revisions.getRevisions = (teamspace, project, model, modelType, showVoid,
 	return findRevisionsByQuery(teamspace, project, model, modelType, query, projection, sort);
 };
 
-Revisions.getRevisionsByQuery = (teamspace, project, model, modelType, query, projection) => {
+Revisions.getRevisionsByQuery = (teamspace, project, model, modelType, query, projection,
+	{ includeVoid, includeFailed, includeIncomplete } = {}) => {
 	const formattedQuery = deleteIfUndefined({
-		...excludeVoids,
-		...excludeIncomplete,
-		...excludeFailed,
+		...(includeVoid ? {} : { ...excludeVoids }),
+		...(includeIncomplete ? {} : { ...excludeIncomplete }),
+		...(includeFailed ? {} : { ...excludeFailed }),
 		...query,
 	});
 

@@ -17,7 +17,7 @@
 
 const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../../../../../../../helper/path');
-const { determineTestGroup, generateRandomModelProperties, generateUUID } = require('../../../../../../../../helper/services');
+const { determineTestGroup, generateRandomModelProperties, generateRandomObject, generateUUID } = require('../../../../../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
@@ -113,7 +113,7 @@ const testFormatModelStats = () => {
 			async () => {
 				const req = { outputData: cloneDeep(data) };
 				const res = {};
-				await ModelSettingsOutputMiddlewares.formatModelStats(modelType)(req, res);
+				await ModelSettingsOutputMiddlewares.formatModelStats(req, res);
 
 				const formattedStats = {
 					...data,
@@ -139,12 +139,13 @@ const testFormatModelStats = () => {
 const testFormatBulkModelStats = () => {
 	describe.each([
 		[modelTypes.FEDERATION, {
-			model1: { lastUpdated: new Date() },
-			model2: {},
+			model1: { ...generateRandomObject(), lastUpdated: new Date() },
+			model2: { ...generateRandomObject() },
 		}, 'lastUpdated field'],
 		[modelTypes.CONTAINER, {
-			model1: { revisions: {} },
+			model1: { ...generateRandomObject(), revisions: {} },
 			model2: {
+				...generateRandomObject(),
 				revisions: {
 					lastUpdated: new Date(),
 					latestRevision: generateUUID(),
@@ -157,7 +158,7 @@ const testFormatBulkModelStats = () => {
 			async () => {
 				const req = { outputData: cloneDeep(data) };
 				const res = {};
-				await ModelSettingsOutputMiddlewares.formatBulkModelStats(modelType)(req, res);
+				await ModelSettingsOutputMiddlewares.serialiseModelStats(req, res);
 
 				const formattedData = { stats: [] };
 				Object.entries(data).forEach(([key, value]) => {

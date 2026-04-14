@@ -16,12 +16,24 @@
  */
 
 const { UUIDToString } = require('../../../../../../../utils/helper/uuids');
+const Yup = require('yup');
 const { deleteIfUndefined } = require('../../../../../../../utils/helper/objects');
-const { modelTypes } = require('../../../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const { templates } = require('../../../../../../../utils/responseCodes');
+const { types } = require('../../../../../../../utils/helper/yup');
 
 const ModelSettings = {};
+
+const serialisedModelStatsSchema = Yup.lazy(() => Yup.object({
+	lastUpdated: types.timestamp.nullable(),
+	revisions: Yup.object({
+		lastUpdated: types.timestamp,
+		latestRevision: types.id,
+	}).nullable().default(undefined),
+	errorReason: Yup.object({
+		timestamp: types.timestamp,
+	}).nullable().default(undefined),
+}));
 
 ModelSettings.formatModelSettings = (req, res) => {
 	const { defaultView, defaultLegend, ...settings } = req.outputData;
@@ -45,41 +57,20 @@ ModelSettings.formatModelSettings = (req, res) => {
 	respond(req, res, templates.ok, formattedSettings);
 };
 
-ModelSettings.formatModelStats = (modelType) => (req, res) => {
+ModelSettings.formatModelStats = (req, res) => {
 	const { outputData } = req;
+	const stats = serialisedModelStatsSchema.cast(deleteIfUndefined(outputData));
 
-	if (modelType === modelTypes.FEDERATION) {
-		if (outputData.lastUpdated) outputData.lastUpdated = outputData.lastUpdated.getTime();
-	} else {
-		outputData.revisions.lastUpdated = outputData.revisions.lastUpdated
-			? outputData.revisions.lastUpdated.getTime() : undefined;
-		if (outputData.errorReason?.timestamp) {
-			outputData.errorReason.timestamp = outputData.errorReason.timestamp.getTime();
-		}
-		outputData.revisions.latestRevision = UUIDToString(outputData.revisions.latestRevision);
-	}
-
-	respond(req, res, templates.ok, outputData);
+	respond(req, res, templates.ok, stats);
 };
 
-ModelSettings.formatBulkModelStats = (modelType) => (req, res) => {
+ModelSettings.serialiseModelStats = (req, res) => {
 	const { outputData } = req;
-
-	const data = { stats: [] };
-	Object.entries(outputData).forEach(([key, value]) => {
-		const formattedStats = { modelId: key, ...value };
-		if (modelType === modelTypes.FEDERATION) {
-			if (value.lastUpdated) formattedStats.lastUpdated = value.lastUpdated.getTime();
-		} else {
-			formattedStats.revisions.lastUpdated = value.revisions.lastUpdated
-				? value.revisions.lastUpdated.getTime() : undefined;
-			if (value.errorReason?.timestamp) {
-				formattedStats.errorReason.timestamp = value.errorReason.timestamp.getTime();
-			}
-			formattedStats.revisions.latestRevision = UUIDToString(value.revisions.latestRevision);
-		}
-		data.stats.push(formattedStats);
-	});
+	const data = {
+		stats: Object.entries(outputData).map(
+			([key, value]) => ({ modelId: key, ...serialisedModelStatsSchema.cast(deleteIfUndefined(value)) }),
+		),
+	};
 
 	respond(req, res, templates.ok, data);
 };

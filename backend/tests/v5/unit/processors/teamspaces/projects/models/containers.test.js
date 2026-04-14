@@ -174,7 +174,7 @@ Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
 	throw templates.legendNotFound;
 });
 
-Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
+// Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
 Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
@@ -282,8 +282,8 @@ const formatToStats = (settings, revCount, latestRev) => {
 		unit: settings.properties.unit,
 		revisions: {
 			total: revCount,
-			lastUpdated: latestRev.timestamp,
-			latestRevision: latestRev.tag || latestRev._id,
+			lastUpdated: latestRev?.timestamp,
+			latestRevision: latestRev?.tag || latestRev?._id,
 		},
 	};
 
@@ -294,6 +294,8 @@ const formatToStats = (settings, revCount, latestRev) => {
 };
 
 const testGetContainerStats = () => {
+	const revisions = (revCount) => times(
+		revCount, () => ({ _id: generateUUIDString(), tag: generateRandomString(), timestamp: new Date() }));
 	describe.each([
 		['the container exists and have no revisions', 'container1'],
 		['the container exists and have revisions', 'container2'],
@@ -301,8 +303,11 @@ const testGetContainerStats = () => {
 		['the container exists and some previous revision processing have failed', 'container4'],
 	])('Get container stats', (desc, container) => {
 		test(`should return the stats if ${desc}[${container}]`, async () => {
+			const revs = revisions(container === 'container1' ? 0 : 5);
+			ModelSettings.getContainers.mockResolvedValueOnce([{ ...containerSettings[container], _id: container }]);
+			Revisions.getRevisions.mockResolvedValueOnce(revs);
 			const res = await Containers.getContainerStats('teamspace', 'project', container);
-			expect(res).toEqual(formatToStats(containerSettings[container], container === 'container2' ? 10 : 0, container === 'container2' ? container2Rev : {}));
+			expect(res).toEqual(formatToStats(containerSettings[container], revs.length, revs[0]));
 		});
 	});
 };
