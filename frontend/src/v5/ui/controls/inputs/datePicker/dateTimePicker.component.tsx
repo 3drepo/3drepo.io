@@ -14,20 +14,22 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useRef, useState } from 'react';
+import { ElementType, ReactNode, useRef, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { TextField } from './dateTimePicker.styles';
+import { ClearDateAction, TextField } from './dateTimePicker.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DateCalendar, TimeClock } from '@mui/x-date-pickers';
-import { ClickAwayListener, Fade, Popper  } from '@mui/material';
+import { ClickAwayListener, Fade, IconButton, InputAdornment, Popper  } from '@mui/material';
 import { Box } from '@mui/system';
 import dayjs, { Dayjs } from 'dayjs';
+import { FormattedMessage } from 'react-intl';
+import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 
 export type PickerValue = Date | number | null;
 	
 export type DateTimePickerProps = {
 	disabled?: boolean;
-	helperText?: React.ReactNode;
+	helperText?: ReactNode;
 	error?: boolean;
 	required?: boolean;
 	value?: PickerValue;
@@ -35,15 +37,15 @@ export type DateTimePickerProps = {
 	onAccept?: (value:  PickerValue) => void;
 	onBlur?: () => void;
 	placeholder?: string;
-	renderInput?: React.ElementType;
+	renderInput?: ElementType;
 	minDateTime?: PickerValue;
 	maxDateTime?: PickerValue;
 	disableFuture?: boolean;
 	disableHighlightToday?: boolean;
-	label?: string | React.ReactNode;
+	label?: string | ReactNode;
 	name?: string;
 	slots?: {
-		openPickerIcon?: React.ElementType;
+		openPickerIcon?: ElementType;
 	};
 };
 
@@ -56,9 +58,6 @@ const DefaultTime = dayjs().hour(0).minute(0);
 
 export const DateTimePicker = ({
 	disabled,
-	helperText,
-	error,
-	required,
 	value,
 	onChange,
 	onBlur,
@@ -68,8 +67,8 @@ export const DateTimePicker = ({
 	maxDateTime,
 	disableFuture,
 	disableHighlightToday,
-	label,
-	name,
+	slots,
+	...props
 }: DateTimePickerProps) => {
 	const [view, setView] = useState(DatePickerView.calendar);
 	const [open, setOpen] = useState(false);
@@ -79,10 +78,10 @@ export const DateTimePicker = ({
 	const markForUpdateRef =  useRef(false);
 	const temporalValue = useRef(value);
 
-
 	const closePicker = () => {
 		setOpen(false);
 	};
+
   	const handleClick = (event: React.MouseEvent<HTMLElement>) => {
 		if (disabled) return;
 		setAnchorEl(event.currentTarget);
@@ -102,6 +101,9 @@ export const DateTimePicker = ({
 	};
 
 	const InputComponent = renderInput || TextField;
+	const minDateTimeValue = minDateTime ? dayjs(minDateTime) : undefined;
+	const maxDateTimeValue = maxDateTime ? dayjs(maxDateTime) : undefined;
+	const PickerIconValue =  slots?.openPickerIcon || CalendarIcon;
 
 	return (
 		<div>
@@ -111,18 +113,30 @@ export const DateTimePicker = ({
 					id: 'calendarPicker.placeholder',
 					defaultMessage: 'Choose a date',
 				})}
-				label={label}
-				error={error}
-				helperText={helperText}
-				required={required}
-				value={value ? formatDateTime(value) : null}
+
+				value={value ? formatDateTime(value) : ''}
 				onClick={handleClick}
-				inputProps={{ form: { autoComplete: 'off' } }}
-				name={name}
+				disabled={disabled}
+				slotProps={{
+					input: {
+						endAdornment: 
+							(<InputAdornment  position="end">
+								<IconButton disabled={disabled} size="medium" edge="end">
+									<PickerIconValue />
+								</IconButton>
+							</InputAdornment>)
+						,
+						form: { autoComplete: 'off' }, 
+					},
+				}}
+				{...props}
 			/>
 			<Popper id={id} open={open} anchorEl={anchorEl} transition  style={{ zIndex: 10000 }} >
 				{({ TransitionProps }) => (
-					<ClickAwayListener onClickAway={() => closePicker()} mouseEvent="onMouseDown">
+					<ClickAwayListener onClickAway={(e) => {
+						e.stopImmediatePropagation();
+						closePicker();
+					}} mouseEvent="onMouseDown">
 						<Fade {...TransitionProps} timeout={150} onExited={() => {
 							TransitionProps?.onExited?.();
 							if (!markForUpdateRef.current) return;
@@ -139,10 +153,9 @@ export const DateTimePicker = ({
 												setCalendarValue(newValue);
 												setView(DatePickerView.time);
 											}
-										}} 
-									
-										minDate={minDateTime ? dayjs(minDateTime) : undefined}
-										maxDate={maxDateTime ? dayjs(maxDateTime) : undefined}
+										}}
+										minDate={minDateTimeValue}
+										maxDate={maxDateTimeValue}
 										disableFuture={disableFuture}
 										disableHighlightToday={disableHighlightToday}
 									/>)}
@@ -161,16 +174,14 @@ export const DateTimePicker = ({
 										}}
 										ampm
 										ampmInClock
-										minTime={minDateTime ? dayjs(minDateTime) : undefined}
-										maxTime={maxDateTime ? dayjs(maxDateTime) : undefined}
+										minTime={minDateTimeValue}
+										maxTime={maxDateTimeValue}
 										disableFuture={disableFuture}
 									/>
 								)}
-								<button 
-									onClick={()=> {
-										consolidateNewValue(null);
-									}}
-								> clear date</button>
+								<ClearDateAction onClick={()=> { consolidateNewValue(null);}}>
+									<FormattedMessage id="datePicker.actionBar.clear" defaultMessage="Clear date" />
+								</ClearDateAction>
 							</Box>
 						</Fade>
 					</ClickAwayListener>

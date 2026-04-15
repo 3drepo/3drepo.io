@@ -47,3 +47,13 @@ export const TextField = styled(TextFieldBase)`
 		}
 	}
 `;
+
+export const ClearDateAction = styled.div`
+	${({ theme }) => theme.typography.body1}
+	font-weight: 500;
+	color: ${({ theme }) => theme.palette.error.main};
+	margin-right: 22px;
+	cursor: pointer;
+	height: 32px;
+	text-align: right;
+`;
