@@ -19,7 +19,6 @@ import { DateTimePickerProps, DateTimePicker } from '@controls/inputs/datePicker
 import SequencingIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
 import { useContext, useEffect } from 'react';
-import dayjs from 'dayjs';
 import { SequencesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { useFormContext } from 'react-hook-form';
 import { SEQUENCING_START_TIME, SEQUENCING_END_TIME } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
@@ -40,22 +39,20 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 
 	const startTime = watch(SEQUENCING_START_TIME);
 	const endTime = watch(SEQUENCING_END_TIME);
-	const minDateTime = (props.name === SEQUENCING_START_TIME || !startTime) ? undefined : dayjs(startTime);
-	const maxDateTime = (props.name === SEQUENCING_END_TIME || !endTime) ? undefined : dayjs(endTime);
+	const minDateTime = (props.name === SEQUENCING_START_TIME || !startTime) ? undefined : startTime;
+	const maxDateTime = (props.name === SEQUENCING_END_TIME || !endTime) ? undefined : endTime;
 
 	const openSequencesCard = () => {
 		if (!hasSequences) return;
 		SequencesActionsDispatchers.showSequenceDate(new Date(value));
 	};
 
-	const handleChange = (newValue) => onChange(newValue ? newValue?.toDate()?.getTime() : newValue);
-
 	const clearValue = (e) => {
 		e.stopPropagation();
-		handleChange(null);
+		onChange?.(null);
 	};
 
-	useEffect(() => { onBlur(); }, [value]);
+	useEffect(() => { onBlur?.(); }, [value]);
 
 	return (
 		<Container>
@@ -73,11 +70,11 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 				onChange={() => true}
 				// TODO ISSUE_5588: change this because dafaultCalendrMonth is no longer supported
 				// defaultCalendarMonth={minDateTime || maxDateTime || defaultCalendarDate}
-				onAccept={handleChange}
+				onAccept={onChange}
 				minDateTime={minDateTime}
 				maxDateTime={maxDateTime}
 				{...props}
-				label={LABELS[props.name]}
+				label={LABELS[props.name as string]}
 			/>
 			{!!value && isViewer && (
 				<SequenceIconContainer onClick={openSequencesCard} disabled={!hasSequences}>

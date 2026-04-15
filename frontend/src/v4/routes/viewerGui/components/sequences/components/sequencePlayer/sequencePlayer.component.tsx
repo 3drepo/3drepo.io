@@ -321,8 +321,8 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 							<Grid>
 								<FlexCol>
 									<DatePicker
-										minDateTime={dayjs(min)}
-										maxDateTime={dayjs(max)}
+										minDateTime={min}
+										maxDateTime={max}
 										name="date"
 										value={value}
 										onChange={(e) => this.gotoDate(new Date(e.target.value))}

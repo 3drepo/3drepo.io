@@ -23,7 +23,7 @@ import { ClickAwayListener, Fade, Popper  } from '@mui/material';
 import { Box } from '@mui/system';
 import dayjs, { Dayjs } from 'dayjs';
 
-type PickerValue = Date | number | null;
+export type PickerValue = Date | number | null;
 	
 export type DateTimePickerProps = {
 	disabled?: boolean;
@@ -40,8 +40,11 @@ export type DateTimePickerProps = {
 	maxDateTime?: PickerValue;
 	disableFuture?: boolean;
 	disableHighlightToday?: boolean;
-	label?: string;
+	label?: string | React.ReactNode;
 	name?: string;
+	slots?: {
+		openPickerIcon?: React.ElementType;
+	};
 };
 
 enum DatePickerView {
