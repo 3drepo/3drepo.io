@@ -40,8 +40,8 @@ export const DueDate = ({ value, disabled, tooltip, className, ...props }: DueDa
 				value={value}
 				disabled={disabled}
 				renderInput={
-					({ inputRef, ...args }: any) => (
-						<DateContainer {...args} ref={inputRef} isOverdue={isOverdue} disabled={disabled}>
+					({ ref, ...args }: any) => (
+						<DateContainer {...args} ref={ref} isOverdue={isOverdue} disabled={disabled}>
 							<CalendarIcon />
 							{value ? (
 								<TextOverflow>

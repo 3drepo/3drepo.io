@@ -72,26 +72,25 @@ export const DateTimePicker = ({
 }: DateTimePickerProps) => {
 	const [view, setView] = useState(DatePickerView.calendar);
 	const [open, setOpen] = useState(false);
-	const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 	const [calendarValue, setCalendarValue] = useState<Dayjs | null>(null);
 	const [timeValue, setTimeValue] = useState<Dayjs | null>(DefaultTime);
 	const markForUpdateRef =  useRef(false);
 	const temporalValue = useRef(value);
+	const inputRef = useRef<HTMLDivElement>(null);
 
 	const closePicker = () => {
 		setOpen(false);
 	};
 
-  	const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  	const handleClick = () => {
 		if (disabled) return;
-		setAnchorEl(event.currentTarget);
 		setCalendarValue(value ? dayjs(value) : null);
 		setTimeValue(value ? dayjs(value) : DefaultTime);
 		setView(DatePickerView.calendar);
 		setOpen(true);
 	};
 
-	const canopen = open && Boolean(anchorEl);
+	const canopen = open && Boolean(inputRef.current);
   	const id = canopen ? 'transition-popper' : undefined;
 
 	const consolidateNewValue = (newValue: any) => {
@@ -126,12 +125,14 @@ export const DateTimePicker = ({
 								</IconButton>
 							</InputAdornment>)
 						,
-						form: { autoComplete: 'off' }, 
+						autoComplete: 'off', 
 					},
 				}}
+
+				ref={inputRef}
 				{...props}
 			/>
-			<Popper id={id} open={open} anchorEl={anchorEl} transition  style={{ zIndex: 10000 }} >
+			<Popper id={id} open={open} anchorEl={inputRef.current} transition  style={{ zIndex: 10000 }} >
 				{({ TransitionProps }) => (
 					<ClickAwayListener onClickAway={(e) => {
 						e.stopImmediatePropagation();
