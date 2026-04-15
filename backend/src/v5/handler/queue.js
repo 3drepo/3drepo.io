@@ -179,20 +179,15 @@ Queue.close = async (reset = true) => {
 };
 
 const checkQueueConfig = () => {
-	if (!queueConfig?.host) {
-		throw new Error('queue host is not set');
-	}
-
-	if (!queueConfig?.callback_queue) {
-		throw new Error('callback_queue is not set');
-	}
-
-	if (!queueConfig?.model_queue) {
-		throw new Error('model_queue is not set');
-	}
-
-	if (!queueConfig?.clash_queue) {
-		throw new Error('clash_queue is not set');
+	if (!queueConfig
+			|| !queueConfig.host
+			|| !queueConfig.shared_storage
+			|| !queueConfig.callback_queue
+			|| !queueConfig.model_queue
+			|| !queueConfig.clash_queue
+			|| !queueConfig.event_exchange
+	) {
+		throw Error('Queue is not configured correctly.');
 	}
 };
 
