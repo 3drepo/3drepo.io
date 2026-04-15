@@ -145,7 +145,7 @@ export const DateTimePicker = ({
 							onChange?.(temporalValue.current ? temporalValue.current : null);
 							onBlur?.();
 						}}>
-							<Box sx={{ border: 0, p: 1, bgcolor: 'background.paper' }}>
+							<Box sx={{ border: 0, p: 1, bgcolor: 'background.paper', boxShadow: 'rgba(0, 0, 0, 0.2) 0px 5px 5px -3px, rgba(0, 0, 0, 0.14) 0px 8px 10px 1px, rgba(0, 0, 0, 0.12) 0px 3px 14px 2px' }}>
 								{view === DatePickerView.calendar && (
 									<DateCalendar 
 										value={calendarValue} 
@@ -163,7 +163,6 @@ export const DateTimePicker = ({
 								{view === DatePickerView.time && (
 									<TimeClock
 										value={timeValue}
-										showViewSwitcher
 										views={['hours', 'minutes']}
 										onChange={(newValue, selectionState) => {
 											setTimeValue(newValue);
@@ -173,8 +172,6 @@ export const DateTimePicker = ({
 												consolidateNewValue(valueToSet);
 											}
 										}}
-										ampm
-										ampmInClock
 										minTime={minDateTimeValue}
 										maxTime={maxDateTimeValue}
 										disableFuture={disableFuture}
