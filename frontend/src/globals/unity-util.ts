@@ -153,6 +153,13 @@ export class UnityUtil {
 	private static domTextureReferenceCounter = 0;
 
 	/**
+	 * Called from Unity to retrieve joystick input.
+	 * @returns An array containing the joystick input values [leftStickX, leftStickY, rightStickX, rightStickY]
+	 */
+	/** @hidden */
+	private static virtualJoystickProvider: (() => [number, number, number, number] | null | undefined) | null = null;
+
+	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
 	 */
@@ -2739,5 +2746,26 @@ export class UnityUtil {
 	 */
 	public static createWebRequestHandler(gameObjectName: string) {
 		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
+	}
+
+	/**
+	 * Enable the virtual joystick feature.
+	 * @param fn - A provider function that returns joystick state with [leftStickX, leftStickY, rightStickX, rightStickY].
+	 */
+	public static enableVirtualJoystick(fn: () => [number, number, number, number]) {
+		if (typeof fn !== 'function') {
+			console.error('enableVirtualJoystick: fn must be a function');
+			return;
+		}
+		UnityUtil.virtualJoystickProvider = fn;
+		UnityUtil.toUnity('EnableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the virtual joystick feature.
+	 */
+	public static disableVirtualJoystick() {
+		UnityUtil.virtualJoystickProvider = null;
+		UnityUtil.toUnity('DisableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 }
