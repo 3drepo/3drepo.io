@@ -92,7 +92,7 @@ const testGetAllTemplates = () => {
 		const generateTestData = (isFed) => {
 			const modelWithTemplates = isFed ? fed : con;
 			const modelType = isFed ? 'federation' : 'container';
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const modelWrongType = isFed ? con : fed;
 			const getRoute = ({ key = users.tsAdmin.apiKey, projectId = project.id, modelId = modelWithTemplates._id } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/templates${key ? `?key=${key}` : ''}`;
 
@@ -165,7 +165,7 @@ const testGetTemplateDetails = () => {
 			const wrongTypeModel = isFed ? con : fed;
 			const modelWithTemplates = isFed ? fed : con;
 
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 
 			const getRoute = ({
 				key = users.tsAdmin.apiKey,
@@ -262,7 +262,7 @@ const testAddTicket = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const modelWithTemplates = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const uniquePropValue = isFed
 				? fedTicket.properties[uniquePropertyName]
 				: conTicket.properties[uniquePropertyName];
@@ -338,7 +338,7 @@ const testImportTickets = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const modelWithTemplates = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const duplicateUniquePropTicket = ServiceHelper.generateTicket(template);
 			duplicateUniquePropTicket.properties[uniquePropertyName] = duplicateValue;
 
@@ -453,7 +453,7 @@ const testGetTicketResource = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 
 			const baseRouteParams = {
 				modelType,
@@ -591,7 +591,7 @@ const testGetTicket = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
 
@@ -719,7 +719,7 @@ const testGetTicketList = () => {
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
 			const modelNoTickets = isFed ? fedNoTickets : conNoTickets;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const moduleName = Object.keys(model.tickets[0].modules)[0];
 			const filters = `${Object.keys(model.tickets[0].properties)[0]},${moduleName}.${Object.keys(model.tickets[0].modules[moduleName])[0]}`;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, modelType, projectId: project.id, model };
@@ -1031,7 +1031,7 @@ const testUpdateTicket = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const uniquePropValue = isFed ? fedUniquePropValue : conUniquePropValue;
 
 			const baseRouteParams = {
@@ -1201,7 +1201,7 @@ const testUpdateManyTickets = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 
 			const baseRouteParams = {
 				key: users.tsAdmin.apiKey,
@@ -1371,7 +1371,7 @@ const testGetTicketHistory = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const model = isFed ? fed : con;
 			const ticket = isFed ? fedTicket : conTicket;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const wrongTypeModel = isFed ? con : fed;
 
 			const expectedLogs = [

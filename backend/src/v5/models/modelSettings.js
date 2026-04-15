@@ -99,6 +99,8 @@ Models.getModelByQuery = async (ts, query, projection) => {
 
 Models.getModelById = (ts, model, projection) => Models.getModelByQuery(ts, { _id: model }, projection);
 
+Models.getModelsByIds = (ts, models, projection) => findModels(ts, { _id: { $in: models } }, projection);
+
 Models.isFederation = async (ts, model) => {
 	const { federate } = await Models.getModelById(ts, model, { _id: 0, federate: 1 });
 	return federate;

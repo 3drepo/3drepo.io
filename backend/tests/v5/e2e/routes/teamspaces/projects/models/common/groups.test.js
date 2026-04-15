@@ -175,7 +175,7 @@ const testImportGroups = () => {
 	const generateTestData = (isFed) => {
 		const createRoute = ({ projectId = project.id, modelId = isFed ? fed._id : container._id, apiKey = users.tsAdmin.apiKey } = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${isFed ? 'federations' : 'containers'}/${modelId}/groups/import${apiKey ? `?key=${apiKey}` : ''}`;
 		const modelLabel = isFed ? 'federations' : 'containers';
-		const modelNotFoundRes = isFed ? templates.federationNotFound : templates.containerNotFound;
+		const modelNotFoundRes = templates.modelNotFound;
 
 		const incorrectModelTypeId = isFed ? container._id : fed._id;
 

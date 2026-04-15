@@ -122,8 +122,7 @@ const testGetAssetList = (internalService) => {
 			const modelNoRev = modelType === modelTypes.CONTAINER ? conNoRev : fedNoRev;
 			const modelRevs = modelType === modelTypes.CONTAINER ? revisions : fedRevisions;
 
-			const modelNotFoundErr = modelType === modelTypes.CONTAINER
-				? templates.containerNotFound : templates.federationNotFound;
+			const modelNotFoundErr = templates.modelNotFound;
 			let rev1FullContent;
 			let rev2FullContent;
 
@@ -212,8 +211,7 @@ const testGetAssetMeta = (internalService) => {
 			const modelNoRev = modelType === modelTypes.CONTAINER ? conNoRev : fedNoRev;
 			const modelRevs = modelType === modelTypes.CONTAINER ? revisions : fedRevisions;
 
-			const modelNotFoundErr = modelType === modelTypes.CONTAINER
-				? templates.containerNotFound : templates.federationNotFound;
+			const modelNotFoundErr = templates.modelNotFound;
 			let rev1FullContent;
 			let rev2FullContent;
 
@@ -339,8 +337,7 @@ const testGetUnityMeta = (internalService) => {
 			const modelNoRev = modelType === modelTypes.CONTAINER ? conNoRev : fedNoRev;
 			const modelRevs = modelType === modelTypes.CONTAINER ? revisions : fedRevisions;
 
-			const modelNotFoundErr = modelType === modelTypes.CONTAINER
-				? templates.containerNotFound : templates.federationNotFound;
+			const modelNotFoundErr = templates.modelNotFound;
 			let rev1FullContent;
 			let rev2FullContent;
 
@@ -431,8 +428,8 @@ const testGetRepoBundle = (internalService) => {
 
 			const commonTests = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-				['the model is of the wrong type', getRoute({ modelId: fed._id }), false, templates.containerNotFound],
+				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the model is of the wrong type', getRoute({ modelId: fed._id }), false, templates.modelNotFound],
 				['an invalid bundleId is provided by the user', getRoute({ bundleId: ServiceHelper.generateUUIDString() }), false, templates.fileNotFound],
 				['a bundleId is provided by the user', getRoute({ bundleId: bundle1Id }), true, bundle1Content],
 				['another bundleId is provided by the user', getRoute({ bundleId: bundle2Id }), true, bundle2Content],
@@ -492,8 +489,8 @@ const testGetUnityBundle = (internalService) => {
 
 			const commonTests = [
 				['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-				['the model is of the wrong type', getRoute({ modelId: fed._id }), false, templates.containerNotFound],
+				['model does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the model is of the wrong type', getRoute({ modelId: fed._id }), false, templates.modelNotFound],
 				['an invalid bundleId is provided by the user', getRoute({ bundleId: ServiceHelper.generateUUIDString() }), false, templates.fileNotFound],
 				['a bundleId is provided by the user', getRoute({ bundleId: bundle1Id }), true, bundle1Content],
 				['another bundleId is provided by the user', getRoute({ bundleId: bundle2Id }), true, bundle2Content],

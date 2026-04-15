@@ -814,7 +814,7 @@ const testDeleteModel = (isInternal = false) => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 			const getRoute = ({
 				projectId = project.id,
 				key = users.tsAdmin.apiKey,
@@ -824,15 +824,12 @@ const testDeleteModel = (isInternal = false) => {
 			if (modelType === modelTypes.CONTAINER) {
 				wrongTypeModel = fed;
 				model = con;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				wrongTypeModel = con;
 				model = fed;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				wrongTypeModel = fed;
 				model = draw;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			if (isInternal && modelType !== modelTypes.CONTAINER) {
@@ -878,9 +875,9 @@ const testDeleteModel = (isInternal = false) => {
 
 					expect(getRes.body[modelType].find(({ _id }) => _id === res.body._id)).toBeUndefined();
 				} else if (success && isInternal) {
-					const getRes = await agent.get(route).expect(templates.containerNotFound.status);
+					const getRes = await agent.get(route).expect(templates.modelNotFound.status);
 
-					expect(getRes.body.code).toEqual(templates.containerNotFound.code);
+					expect(getRes.body.code).toEqual(templates.modelNotFound.code);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -921,20 +918,17 @@ const testUpdateModelSettings = (isInternal = false) => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				wrongTypeModel = fed;
 				model = con;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				wrongTypeModel = con;
 				model = fed;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				wrongTypeModel = fed;
 				model = draw;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -1045,23 +1039,20 @@ const testGetSettings = (isInternal = false) => {
 			let model;
 			let model2;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = con;
 				model2 = con2;
 				wrongTypeModel = fed;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				model = fed;
 				model2 = fed2;
 				wrongTypeModel = con;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				model = draw;
 				model2 = draw2;
 				wrongTypeModel = con;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -1156,7 +1147,7 @@ const testGetThumbnail = () => {
 		const generateTestData = () => {
 			const model = draw;
 			const wrongTypeModel = fed;
-			const modelNotFound = templates.drawingNotFound;
+			const { modelNotFound } = templates;
 
 			const getRoute = ({
 				projectId = project.id,
@@ -1204,20 +1195,17 @@ const testGetUsersWithPermissions = () => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = con;
 				wrongTypeModel = fed;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				model = fed;
 				wrongTypeModel = con;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				model = draw;
 				wrongTypeModel = con;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -1269,20 +1257,17 @@ const testGetJobsWithAccess = () => {
 		const generateTestData = (modelType) => {
 			let model;
 			let wrongTypeModel;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = con;
 				wrongTypeModel = fed;
-				modelNotFound = templates.containerNotFound;
 			} else if (modelType === modelTypes.FEDERATION) {
 				model = fed;
 				wrongTypeModel = con;
-				modelNotFound = templates.federationNotFound;
 			} else {
 				model = draw;
 				wrongTypeModel = con;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const getRoute = ({
@@ -1378,13 +1363,13 @@ const testGetModelStatsInBulk = () => {
 				['the teamspace does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, ServiceHelper.generateRandomString(), project.id), false, templates.teamspaceNotFound],
 				['the project does not exist', generateRoute(modelType, modelIds, users.tsAdmin.apiKey, teamspace, ServiceHelper.generateRandomString()), false, templates.projectNotFound],
 				['the models exist and the user has access', generateRoute(modelType, modelIds, users.tsAdmin.apiKey), true, models],
-				['some models do not exist', generateRoute(modelType, [...modelIds, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
+				['some models do not exist', generateRoute(modelType, [...modelIds, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
 				['modelQuery string is not provided', `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/stats?key=${users.tsAdmin.apiKey}`, false, templates.invalidArguments],
-				['all models do not exist', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
-				['some models are of wrong type', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
-				['all models are of wrong type', generateRoute(modelType, [models[0]._id, models[0]._id], users.tsAdmin.apiKey), false, templates.invalidArguments],
-				['some models do not belong to the project', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
-				['all models do not belong to the project', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.invalidArguments],
+				['all models do not exist', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['some models are of wrong type', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['all models are of wrong type', generateRoute(modelType, [models[0]._id, models[0]._id], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['some models do not belong to the project', generateRoute(modelType, [models[0]._id, ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
+				['all models do not belong to the project', generateRoute(modelType, [ServiceHelper.generateRandomString(), ServiceHelper.generateRandomString()], users.tsAdmin.apiKey), false, templates.modelNotFound],
 			];
 		};
 
@@ -1393,14 +1378,12 @@ const testGetModelStatsInBulk = () => {
 				const expectedStatus = succeed ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(route).expect(expectedStatus);
 				if (succeed) {
-					res.body.stats.forEach((stat) => {
-						const match = expectedOutput.find(({ _id }) => _id === stat.modelId);
-						const formattedMatch = {
-							modelId: match._id,
-							...formatToStats(match),
-						};
-						expect(stat).toEqual(formattedMatch);
-					});
+					const expectedStats = expectedOutput.map((model) => ({
+						modelId: model._id,
+						...formatToStats(model),
+					}));
+					expect(res.body.stats).toHaveLength(expectedStats.length);
+					ServiceHelper.outOfOrderArrayEqual(res.body.stats, expectedStats);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}

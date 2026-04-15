@@ -21,7 +21,7 @@ const {
 	MODEL_WRITE_ROLES,
 	PROJECT_ADMIN,
 } = require('./permissions.constants');
-const { findModels, getContainerById, getContainers, getDrawingById, getDrawings, getFederationById, getFederations, getModelById } = require('../../models/modelSettings');
+const { findModels, getContainerById, getContainers, getDrawingById, getDrawings, getFederationById, getFederations, getModelsByIds } = require('../../models/modelSettings');
 const { getProjectAdmins, modelsExistInProject } = require('../../models/projectSettings');
 const { getTeamspaceAdmins } = require('../../models/teamspaceSettings');
 const { modelTypes } = require('../../models/modelSettings.constants');
@@ -52,7 +52,7 @@ Permissions.hasProjectAdminPermissions = (perms, username) => perms.some(
 );
 
 Permissions.checkModelsExists = async (teamspace, project, models, modelType) => {
-	let getModelFn = getModelById;
+	let getModelFn = getModelsByIds;
 
 	if (modelType === modelTypes.CONTAINER) {
 		getModelFn = getContainers;
@@ -68,21 +68,25 @@ Permissions.checkModelsExists = async (teamspace, project, models, modelType) =>
 	if (!modelExists) {
 		return false;
 	}
-	return modelDetails;
+
+	return modelDetails.length ? modelDetails : false;
 };
 
 const modelPermCheck = (permCheck, modelType) => async (teamspace, project, modelsID, username, adminCheck = true) => {
-	const model = await Permissions.checkModelsExists(teamspace, project, modelsID, modelType);
-	if (!model) return false;
+	const models = await Permissions.checkModelsExists(teamspace, project, modelsID, modelType);
+	if (!models || !models.length) return false;
 	if (adminCheck) {
 		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
 		if (hasAdminPerms) {
 			return true;
 		}
 	}
-	const { permissions } = model;
 
-	return permissions && permissions.some((perm) => perm.user === username && permCheck(perm));
+	return models.every(
+		({ _id, permissions }) => modelsID.includes(_id) && permissions && permissions.some(
+			(perm) => (perm.user === username && permCheck(perm)),
+		),
+	);
 };
 
 // has read access to at least 1 model within the list
@@ -111,8 +115,8 @@ const hasAdminAccessToModel = async (teamspace, project, model, username) => {
 };
 
 Permissions.hasAdminAccessToFederation = async (teamspace, project, federation, username) => {
-	const adminAccess = await hasAdminAccessToModel(teamspace, project, federation, username);
-	const fed = await getFederationById(teamspace, federation, { _id: 1 });
+	const adminAccess = await hasAdminAccessToModel(teamspace, project, ...federation, username);
+	const fed = await getFederationById(teamspace, ...federation, { _id: 1 });
 
 	return fed && adminAccess;
 };
@@ -130,8 +134,8 @@ Permissions.hasReadAccessToFederations = modelPermCheck(
 );
 
 Permissions.hasAdminAccessToContainer = async (teamspace, project, container, username) => {
-	const adminAccess = await hasAdminAccessToModel(teamspace, project, container, username);
-	const con = await getContainerById(teamspace, container, { _id: 1 });
+	const adminAccess = await hasAdminAccessToModel(teamspace, project, ...container, username);
+	const con = await getContainerById(teamspace, ...container, { _id: 1 });
 	return con && adminAccess;
 };
 
@@ -150,8 +154,8 @@ Permissions.hasReadAccessToContainers = modelPermCheck(
 
 Permissions.hasAdminAccessToDrawing = async (teamspace, project, drawingId, username) => {
 	const [drawing, adminAccess] = await Promise.all([
-		getDrawingById(teamspace, drawingId, { _id: 1 }),
-		hasAdminAccessToModel(teamspace, project, drawingId, username),
+		getDrawingById(teamspace, ...drawingId, { _id: 1 }),
+		hasAdminAccessToModel(teamspace, project, ...drawingId, username),
 	]);
 
 	return drawing && adminAccess;

@@ -44,9 +44,12 @@ const permissionsCheckTemplate = (type, callback, multipleModels = false) => asy
 	const { session, params, query } = req;
 	const user = getUserFromSession(session);
 	const { teamspace, project } = params;
-	const models = multipleModels ? query.models.split(',') : [params.model];
 
 	try {
+		if (multipleModels && !query.models) {
+			throw templates.invalidArguments;
+		}
+		const models = multipleModels ? query.models.split(',') : [params.model];
 		const modelInProject = await checkModelsExists(teamspace, project, models, type);
 		if (!modelInProject) {
 			throw templates.modelNotFound;

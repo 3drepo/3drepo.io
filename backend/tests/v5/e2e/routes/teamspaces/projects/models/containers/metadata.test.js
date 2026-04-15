@@ -123,14 +123,14 @@ const testUpdateCustomMetadata = () => {
 
 		test('should fail if the container does not exist', async () => {
 			const res = await agent.patch(`${createRoute(project.id, ServiceHelper.generateRandomString())}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.containerNotFound.status);
-			expect(res.body.status).toEqual(templates.containerNotFound.status);
+				.expect(templates.modelNotFound.status);
+			expect(res.body.status).toEqual(templates.modelNotFound.status);
 		});
 
 		test('should fail if the container is a federation', async () => {
 			const res = await agent.patch(`${createRoute(project.id, fed._id)}?key=${users.tsAdmin.apiKey}`)
-				.expect(templates.containerNotFound.status);
-			expect(res.body.status).toEqual(templates.containerNotFound.status);
+				.expect(templates.modelNotFound.status);
+			expect(res.body.status).toEqual(templates.modelNotFound.status);
 		});
 
 		test('should fail if the metadata does not exist', async () => {
@@ -360,8 +360,8 @@ const testGetMetadata = (internalService) => {
 			if (internalService) {
 				return modelType === modelTypes.CONTAINER ? [
 					['the project does not exist', getRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-					['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-					['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.containerNotFound],
+					['the container does not exist', getRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+					['the model is not a container', getRoute({ modelId: wrongTypeModel._id }), false, templates.modelNotFound],
 					['the container does not have a revision', getRoute({ modelId: conNoRev._id }), false, templates.revisionNotFound],
 					['a revision is provided by the user', getRoute({ revId: revisions[0]._id }), true, rev1Nodes.metaNodes.map(castNode)],
 					['a revision is not provided by the user', getRoute(), true, rev2Nodes.metaNodes.map(castNode)],

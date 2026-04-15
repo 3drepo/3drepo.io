@@ -86,7 +86,7 @@ const testViewList = () => {
 		const generateTestData = (isFed) => {
 			const model = isFed ? fed : con;
 			const modelType = isFed ? 'federation' : 'container';
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const modelNoViews = isFed ? fedNoViews : conNoViews;
 			const modelWrongType = isFed ? con : fed;
 
@@ -145,7 +145,7 @@ const testViewThumbnail = () => {
 		const generateTestData = (isFed) => {
 			const model = isFed ? fed : con;
 			const modelType = isFed ? 'federation' : 'container';
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const modelWrongType = isFed ? con : fed;
 
 			const getRoute = ({

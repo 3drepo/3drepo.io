@@ -19,6 +19,8 @@ const { times } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
+const permConst = require(`${src}/utils/permissions/permissions.constants`);
+
 const Permissions = require(`${src}/utils/permissions`);
 const { PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 jest.mock('../../../../../src/v5/models/teamspaceSettings');
@@ -30,17 +32,18 @@ const ModelSettings = require(`${src}/models/modelSettings`);
 
 const expectedSettings = {
 	permissions: [
-		{ user: 'a', permission: 'viewer' },
-		{ user: 'b', permission: 'collaborator' },
-		{ user: 'c', permission: 'commenter' },
+		{ user: 'a', permission: permConst.MODEL_VIEWER },
+		{ user: 'b', permission: permConst.MODEL_COLLABORATOR },
+		{ user: 'c', permission: permConst.MODEL_COMMENTER },
 	],
 };
-ModelSettings.getModelById.mockImplementation(() => (expectedSettings));
-ModelSettings.getContainers.mockImplementation(() => (expectedSettings));
+const getModelsMock = (ts, models) => models.map((model) => ({ _id: model, ...expectedSettings }));
+ModelSettings.getModelsByIds.mockImplementation((ts, models) => getModelsMock(ts, models));
+ModelSettings.getContainers.mockImplementation((ts, models) => getModelsMock(ts, models));
 ModelSettings.getContainerById.mockImplementation(() => (expectedSettings));
-ModelSettings.getFederations.mockImplementation(() => (expectedSettings));
+ModelSettings.getFederations.mockImplementation((ts, models) => getModelsMock(ts, models));
 ModelSettings.getFederationById.mockImplementation(() => (expectedSettings));
-ModelSettings.getDrawings.mockImplementation(() => (expectedSettings));
+ModelSettings.getDrawings.mockImplementation((ts, models) => getModelsMock(ts, models));
 ModelSettings.getDrawingById.mockImplementation(() => (expectedSettings));
 Teamspaces.getTeamspaceAdmins.mockImplementation(() => (['tsAdmin']));
 Projects.getProjectAdmins.mockImplementation(() => (['projAdmin']));
@@ -138,14 +141,14 @@ const testHasReadAccessToModel = () => {
 	])('Has read access to model', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasReadAccessToModel('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasReadAccessToModel('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Container does not belong to the project', () => {
 		test('should return false if the model does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasReadAccessToModel('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasReadAccessToModel('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -165,14 +168,14 @@ const testHasWriteAccessToModel = () => {
 	])('Has write access to model', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasWriteAccessToModel('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasWriteAccessToModel('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Has write access to model (2)', () => {
 		test('should return false if the model does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasWriteAccessToModel('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasWriteAccessToModel('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -192,14 +195,14 @@ const testHasCommenterAccessToModel = () => {
 	])('Has commenter access to model', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasCommenterAccessToModel('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasCommenterAccessToModel('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Has write access to model (2)', () => {
 		test('should return false if the model does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasCommenterAccessToModel('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasCommenterAccessToModel('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -219,14 +222,14 @@ const testHasReadAccessToContainer = () => {
 	])('Has read access to container', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasReadAccessToContainer('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasReadAccessToContainer('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Container does not belong to the project', () => {
 		test('should return false if the container does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasReadAccessToContainer('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasReadAccessToContainer('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -246,14 +249,14 @@ const testHasWriteAccessToContainer = () => {
 	])('Has write access to container', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasWriteAccessToContainer('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasWriteAccessToContainer('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Has write access to container (2)', () => {
 		test('should return false if the container does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasWriteAccessToContainer('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasWriteAccessToContainer('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -273,14 +276,14 @@ const testHasCommenterAccessToContainer = () => {
 	])('Has commenter access to container', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasCommenterAccessToContainer('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasCommenterAccessToContainer('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Has write access to container (2)', () => {
 		test('should return false if the model does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasCommenterAccessToContainer('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasCommenterAccessToContainer('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -296,14 +299,14 @@ const testHasAdminAccessToContainer = () => {
 	])('Has admin access to container', (user, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasAdminAccessToContainer('teamspace', 'project', 'model', user)).toBe(result);
+			expect(await Permissions.hasAdminAccessToContainer('teamspace', 'project', ['model'], user)).toBe(result);
 		});
 	});
 
 	describe('Container does not belong to the project', () => {
 		test('should return false if the container does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasAdminAccessToContainer('teamspace', 'project', 'model', 'a')).toBe(false);
+			expect(await Permissions.hasAdminAccessToContainer('teamspace', 'project', ['model'], 'a')).toBe(false);
 		});
 	});
 };
@@ -323,14 +326,14 @@ const testHasReadAccessToDrawing = () => {
 	])('Has read access to drawing', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasReadAccessToDrawing('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasReadAccessToDrawing('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Drawing does not belong to the project', () => {
 		test('should return false if the drawing does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasReadAccessToDrawing('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasReadAccessToDrawing('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -350,14 +353,14 @@ const testHasWriteAccessToDrawing = () => {
 	])('Has write access to drawing', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasWriteAccessToDrawing('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasWriteAccessToDrawing('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Has write access to drawing (2)', () => {
 		test('should return false if the drawing does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasWriteAccessToDrawing('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasWriteAccessToDrawing('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -377,14 +380,14 @@ const testHasCommenterAccessToDrawing = () => {
 	])('Has commenter access to drawing', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasCommenterAccessToDrawing('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasCommenterAccessToDrawing('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Has write access to drawing (2)', () => {
 		test('should return false if the model does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasCommenterAccessToDrawing('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasCommenterAccessToDrawing('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -400,14 +403,14 @@ const testHasAdminAccessToDrawing = () => {
 	])('Has admin access to drawing', (user, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
 			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
-			expect(await Permissions.hasAdminAccessToDrawing('teamspace', 'project', 'model', user)).toBe(result);
+			expect(await Permissions.hasAdminAccessToDrawing('teamspace', 'project', ['model'], user)).toBe(result);
 		});
 	});
 
 	describe('Drawing does not belong to the project', () => {
 		test('should return false if the drawing does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockResolvedValueOnce(() => false);
-			expect(await Permissions.hasAdminAccessToDrawing('teamspace', 'project', 'model', 'a')).toBe(false);
+			expect(await Permissions.hasAdminAccessToDrawing('teamspace', 'project', ['model'], 'a')).toBe(false);
 		});
 	});
 };
@@ -427,14 +430,14 @@ const testHasReadAccessToFederation = () => {
 	])('Has read access to federation', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasReadAccessToFederation('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasReadAccessToFederation('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Federation does not belong to the project', () => {
 		test('should return false if the federation does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasReadAccessToFederation('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasReadAccessToFederation('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -454,14 +457,14 @@ const testHasWriteAccessToFederation = () => {
 	])('Has write access to federation', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasWriteAccessToFederation('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasWriteAccessToFederation('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Has write access to federation (2)', () => {
 		test('should return false if the federation does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasWriteAccessToFederation('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasWriteAccessToFederation('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -481,14 +484,14 @@ const testHasCommenterAccessToFederation = () => {
 	])('Has commenter access to federation', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} write access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
-			expect(await Permissions.hasCommenterAccessToFederation('teamspace', 'project', 'model', user, adminCheck)).toBe(result);
+			expect(await Permissions.hasCommenterAccessToFederation('teamspace', 'project', ['model'], user, adminCheck)).toBe(result);
 		});
 	});
 
 	describe('Has write access to federation (2)', () => {
 		test('should return false if the model does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockImplementation(() => false);
-			expect(await Permissions.hasCommenterAccessToFederation('teamspace', 'project', 'model', 'a', true)).toBe(false);
+			expect(await Permissions.hasCommenterAccessToFederation('teamspace', 'project', ['model'], 'a', true)).toBe(false);
 		});
 	});
 };
@@ -504,14 +507,14 @@ const testHasAdminAccessToFederation = () => {
 	])('Has admin access to federation', (user, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
 			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
-			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', 'model', user)).toBe(result);
+			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', ['model'], user)).toBe(result);
 		});
 	});
 
 	describe('Federation does not belong to the project', () => {
 		test('should return false if the federation does not belong to the project', async () => {
 			Projects.modelsExistInProject.mockResolvedValueOnce(() => false);
-			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', 'model', 'a')).toBe(false);
+			expect(await Permissions.hasAdminAccessToFederation('teamspace', 'project', ['model'], 'a')).toBe(false);
 		});
 	});
 };
