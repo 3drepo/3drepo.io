@@ -162,8 +162,49 @@ const testConnection = () => {
 	});
 };
 
+const testInit = () => {
+	describe('Queue initialization', () => {
+		test('Should throw error if host is not set in config', async () => {
+			const { host } = config.cn_queue;
+			config.cn_queue.host = undefined;
+			await expect(Queue.init()).rejects
+				.toEqual(expect.objectContaining({ message: 'queue host is not set' }));
+
+			config.cn_queue.host = host;
+		});
+
+		test('Should throw error if callback_queue is not set in config', async () => {
+			const { callback_queue } = config.cn_queue;
+			config.cn_queue.callback_queue = undefined;
+			await expect(Queue.init()).rejects
+				.toEqual(expect.objectContaining({ message: 'callback_queue is not set' }));
+
+			config.cn_queue.callback_queue = callback_queue;
+		});
+
+		test('Should throw error if model_queue is not set in config', async () => {
+			const { model_queue } = config.cn_queue;
+			config.cn_queue.model_queue = undefined;
+			await expect(Queue.init()).rejects
+				.toEqual(expect.objectContaining({ message: 'model_queue is not set' }));
+
+			config.cn_queue.model_queue = model_queue;
+		});
+
+		test('Should throw error if clash_queue is not set in config', async () => {
+			const { clash_queue } = config.cn_queue;
+			config.cn_queue.clash_queue = undefined;
+			await expect(Queue.init()).rejects
+				.toEqual(expect.objectContaining({ message: 'clash_queue is not set' }));
+
+			config.cn_queue.clash_queue = clash_queue;
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testQueueMessages();
 	testExchangeMessages();
 	testConnection();
+	testInit();
 });

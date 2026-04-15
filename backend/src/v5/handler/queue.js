@@ -178,7 +178,27 @@ Queue.close = async (reset = true) => {
 	if (reset) listeners = {};
 };
 
+const checkQueueConfig = () => {
+	if (!queueConfig?.host) {
+		throw new Error('queue host is not set');
+	}
+
+	if (!queueConfig?.callback_queue) {
+		throw new Error('callback_queue is not set');
+	}
+
+	if (!queueConfig?.model_queue) {
+		throw new Error('model_queue is not set');
+	}
+
+	if (!queueConfig?.clash_queue) {
+		throw new Error('clash_queue is not set');
+	}
+};
+
 Queue.init = async () => {
+	checkQueueConfig();
+
 	connClosed = false;
 	await connect();
 };
