@@ -168,7 +168,7 @@ const testInit = () => {
 			const { host } = config.cn_queue;
 			config.cn_queue.host = undefined;
 			await expect(Queue.init()).rejects
-				.toEqual(expect.objectContaining({ message: 'Queue is not configured correctly' }));
+				.toThrow('Queue is not configured correctly.');
 
 			config.cn_queue.host = host;
 		});
@@ -177,7 +177,7 @@ const testInit = () => {
 			const { shared_storage } = config.cn_queue;
 			config.cn_queue.shared_storage = undefined;
 			await expect(Queue.init()).rejects
-				.toEqual(expect.objectContaining({ message: 'Queue is not configured correctly' }));
+				.toThrow('Queue is not configured correctly.');
 
 			config.cn_queue.shared_storage = shared_storage;
 		});
@@ -186,7 +186,7 @@ const testInit = () => {
 			const { callback_queue } = config.cn_queue;
 			config.cn_queue.callback_queue = undefined;
 			await expect(Queue.init()).rejects
-				.toEqual(expect.objectContaining({ message: 'Queue is not configured correctly' }));
+				.toThrow('Queue is not configured correctly.');
 
 			config.cn_queue.callback_queue = callback_queue;
 		});
@@ -195,7 +195,7 @@ const testInit = () => {
 			const { model_queue } = config.cn_queue;
 			config.cn_queue.model_queue = undefined;
 			await expect(Queue.init()).rejects
-				.toEqual(expect.objectContaining({ message: 'Queue is not configured correctly' }));
+				.toThrow('Queue is not configured correctly.');
 
 			config.cn_queue.model_queue = model_queue;
 		});
@@ -204,7 +204,7 @@ const testInit = () => {
 			const { clash_queue } = config.cn_queue;
 			config.cn_queue.clash_queue = undefined;
 			await expect(Queue.init()).rejects
-				.toEqual(expect.objectContaining({ message: 'Queue is not configured correctly' }));
+				.toThrow('Queue is not configured correctly.');
 
 			config.cn_queue.clash_queue = clash_queue;
 		});
@@ -213,7 +213,7 @@ const testInit = () => {
 			const { event_exchange } = config.cn_queue;
 			config.cn_queue.event_exchange = undefined;
 			await expect(Queue.init()).rejects
-				.toEqual(expect.objectContaining({ message: 'Queue is not configured correctly' }));
+				.toThrow('Queue is not configured correctly.');
 
 			config.cn_queue.event_exchange = event_exchange;
 		});
