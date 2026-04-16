@@ -13,10 +13,16 @@ module.exports = {
 	},
 	transform: {
 		'^.+\\.svg$': '<rootDir>/internals/testing/svgTransform.ts',
-		'^.+\\.(js|jsx)$': 'babel-jest',
+		'^.+\\.(js|jsx)$': ['babel-jest', {
+			presets: [
+				['@babel/preset-env', { targets: { node: 'current' }, modules: 'commonjs' }],
+				['@babel/preset-react', { runtime: 'automatic' }],
+			],
+			plugins: ['@babel/plugin-transform-typescript', 'babel-plugin-styled-components'],
+		}],
 	},
 	transformIgnorePatterns: [
-		"node_modules/(?!byte-size/.*)"
+		"node_modules/(?!(byte-size|react-intl|intl-messageformat|@formatjs)/.*)"
 	],
 };
 
