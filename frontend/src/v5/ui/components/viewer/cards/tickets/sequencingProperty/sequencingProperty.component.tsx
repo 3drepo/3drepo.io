@@ -36,14 +36,12 @@ const LABELS = {
 export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTimePickerProps) => {
 	const { watch } = useFormContext();
 	const { isViewer } = useContext(TicketContext);
-	const currentSequenceDateTime = SequencesHooksSelectors.selectSelectedDate();
 	const hasSequences = SequencesHooksSelectors.selectHasSequences();
 
 	const startTime = watch(SEQUENCING_START_TIME);
 	const endTime = watch(SEQUENCING_END_TIME);
 	const minDateTime = (props.name === SEQUENCING_START_TIME || !startTime) ? undefined : dayjs(startTime);
 	const maxDateTime = (props.name === SEQUENCING_END_TIME || !endTime) ? undefined : dayjs(endTime);
-	const defaultCalendarDate = !currentSequenceDateTime ? undefined : dayjs(currentSequenceDateTime);
 
 	const openSequencesCard = () => {
 		if (!hasSequences) return;

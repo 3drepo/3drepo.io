@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useVRef, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
+import { useVRef, VirtualList } from '@controls/virtualList/virtualList.component';
 import { TicketsGroup } from '../../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { CollapseControl } from '@controls/collapseControl/collapseControl.component';
 import { List } from '../ticketsList.styles';
@@ -25,7 +25,7 @@ import { GroupedListSpacer, GroupedListToggleContainer, GroupedListToggleTitle, 
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import ChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
 import { ChevronIconContainer } from '@components/viewer/cards/cardFilters/filtersAccordion/filtersAccordion.styles';
-import { MutableRefObject, useContext } from 'react';
+import { useContext } from 'react';
 import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpdate.context';
 import { TicketCheckbox } from '../ticketItem/ticketItem.styles';
 

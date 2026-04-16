@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { isEqual } from 'lodash';
-import { useRef, useState, useEffect, createContext, useContext, createRef, MutableRefObject, JSX } from 'react';
+import { useRef, useState, useEffect, createContext, useContext, createRef, JSX } from 'react';
 
 export type VListHandle = {
 	gotoIndex: (index: number, scroller?: Element ) => Promise<any>;
