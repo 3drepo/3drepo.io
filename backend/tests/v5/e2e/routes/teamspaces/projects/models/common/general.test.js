@@ -1379,8 +1379,8 @@ const testGetModelStatsInBulk = () => {
 				const res = await agent.get(route).expect(expectedStatus);
 				if (succeed) {
 					const expectedStats = expectedOutput.map((model) => ({
-						modelId: model._id,
 						...formatToStats(model),
+						modelId: model._id,
 					}));
 					expect(res.body.stats).toHaveLength(expectedStats.length);
 					ServiceHelper.outOfOrderArrayEqual(res.body.stats, expectedStats);

@@ -90,9 +90,7 @@ const multipleModelsPermCheck = (permCheck, modelType) => async (
 	);
 };
 
-const modelPermCheck = (permCheck, modelType) => (
-	teamspace, project, modelID, username, adminCheck = true) => multipleModelsPermCheck(permCheck, modelType)(
-	teamspace, project, [modelID], username, adminCheck);
+const modelPermCheck = multipleModelsPermCheck;
 
 // has read access to at least 1 model within the list
 Permissions.hasReadAccessToSomeModels = async (teamspace, project, models, username) => {
