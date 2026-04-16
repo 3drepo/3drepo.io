@@ -16,11 +16,10 @@
  */
 import { ElementType, ReactNode, useRef, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { ClearDateAction, TextField } from './dateTimePicker.styles';
+import { ClearDateAction, PopperWrapper, TextField } from './dateTimePicker.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DateCalendar, TimeClock } from '@mui/x-date-pickers';
 import { ClickAwayListener, Fade, IconButton, InputAdornment, Popper  } from '@mui/material';
-import { Box } from '@mui/system';
 import dayjs, { Dayjs } from 'dayjs';
 import { FormattedMessage } from 'react-intl';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
@@ -145,7 +144,7 @@ export const DateTimePicker = ({
 							onChange?.(temporalValue.current ? temporalValue.current : null);
 							onBlur?.();
 						}}>
-							<Box sx={{ border: 0, p: 1, bgcolor: 'background.paper', boxShadow: 'rgba(0, 0, 0, 0.2) 0px 5px 5px -3px, rgba(0, 0, 0, 0.14) 0px 8px 10px 1px, rgba(0, 0, 0, 0.12) 0px 3px 14px 2px' }}>
+							<PopperWrapper>
 								{view === DatePickerView.calendar && (
 									<DateCalendar 
 										value={calendarValue} 
@@ -180,7 +179,7 @@ export const DateTimePicker = ({
 								<ClearDateAction onClick={()=> { consolidateNewValue(null);}}>
 									<FormattedMessage id="datePicker.actionBar.clear" defaultMessage="Clear date" />
 								</ClearDateAction>
-							</Box>
+							</PopperWrapper>
 						</Fade>
 					</ClickAwayListener>
 				)}

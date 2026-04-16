@@ -1422,6 +1422,37 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiDateCalendar: {
+			styleOverrides: {
+				root:{
+					'.MuiPickersArrowSwitcher-spacer': {
+						display: 'none',
+					},
+					'.MuiPickersArrowSwitcher-button' : {
+						margin: 0,
+						padding: 10,
+						color: COLOR.SECONDARY_MAIN,
+						transform: 'rotate(90deg)',
+						'&:not(:first-child)': {
+							transform: 'rotate(-90deg)',
+						},
+						'&:hover': {
+							backgroundColor: 'transparent',
+						},
+						'&.Mui-disabled': {
+							color: COLOR.BASE_MAIN,
+						},
+					},
+					height: '290px',
+				},
+			},
+			defaultProps: {
+				slots: {
+					leftArrowIcon: ThinChevronIcon,
+					rightArrowIcon: ThinChevronIcon,
+				},
+			},
+		},
 		MuiClock:{
 			styleOverrides: {
 				clock:{

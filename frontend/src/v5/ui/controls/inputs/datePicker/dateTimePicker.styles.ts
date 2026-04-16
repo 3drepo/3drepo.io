@@ -16,6 +16,7 @@
  */
 import styled from 'styled-components';
 import TextFieldBase from '@mui/material/TextField';
+import { Box } from '@mui/system';
 
 export const TextField = styled(TextFieldBase)`
 	caret-color: transparent;
@@ -56,4 +57,11 @@ export const ClearDateAction = styled.div`
 	cursor: pointer;
 	height: 32px;
 	text-align: right;
+`;
+
+export const PopperWrapper = styled(Box)`
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	box-shadow: rgba(0, 0, 0, 0.2) 0px 5px 5px -3px, rgba(0, 0, 0, 0.14) 0px 8px 10px 1px, rgba(0, 0, 0, 0.12) 0px 3px 14px 2px;
+	padding: 1px;
+	border: none;
 `;
