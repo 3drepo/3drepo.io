@@ -19,6 +19,8 @@ const { times } = require('lodash');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
 const permConst = require(`${src}/utils/permissions/permissions.constants`);
 
 const Permissions = require(`${src}/utils/permissions`);
@@ -38,7 +40,7 @@ const expectedSettings = {
 	],
 };
 const getModelsMock = (ts, models) => models.map((model) => ({ _id: model, ...expectedSettings }));
-ModelSettings.getModelsByIds.mockImplementation((ts, models) => getModelsMock(ts, models));
+ModelSettings.getMultipleModelsByIds.mockImplementation((ts, models) => getModelsMock(ts, models));
 ModelSettings.getContainers.mockImplementation((ts, models) => getModelsMock(ts, models));
 ModelSettings.getContainerById.mockImplementation(() => (expectedSettings));
 ModelSettings.getFederations.mockImplementation((ts, models) => getModelsMock(ts, models));
@@ -519,7 +521,7 @@ const testHasAdminAccessToFederation = () => {
 	});
 };
 
-const testHasReadAccessToContainers = () => {
+const testHasReadAccessToMultipleContainers = () => {
 	describe.each([
 		['a', false, true],
 		['b', false, true],
@@ -534,12 +536,12 @@ const testHasReadAccessToContainers = () => {
 	])('Has read access to containers', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
-			expect(await Permissions.hasReadAccessToContainers('teamspace', 'project', times(3, () => generateRandomString()), user, adminCheck)).toBe(result);
+			expect(await Permissions.hasReadAccessToMultipleContainers('teamspace', 'project', times(3, () => generateRandomString()), user, adminCheck)).toBe(result);
 		});
 	});
 };
 
-const testHasReadAccessToDrawings = () => {
+const testHasReadAccessToMultipleDrawings = () => {
 	describe.each([
 		['a', false, true],
 		['b', false, true],
@@ -554,12 +556,12 @@ const testHasReadAccessToDrawings = () => {
 	])('Has read access to drawings', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
-			expect(await Permissions.hasReadAccessToDrawings('teamspace', 'project', times(3, () => generateRandomString()), user, adminCheck)).toBe(result);
+			expect(await Permissions.hasReadAccessToMultipleDrawings('teamspace', 'project', times(3, () => generateRandomString()), user, adminCheck)).toBe(result);
 		});
 	});
 };
 
-const testHasReadAccessToFederations = () => {
+const testHasReadAccessToMultipleFederations = () => {
 	describe.each([
 		['a', false, true],
 		['b', false, true],
@@ -574,12 +576,53 @@ const testHasReadAccessToFederations = () => {
 	])('Has read access to federations', (user, adminCheck, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
-			expect(await Permissions.hasReadAccessToFederations('teamspace', 'project', times(3, () => generateRandomString()), user, adminCheck)).toBe(result);
+			expect(await Permissions.hasReadAccessToMultipleFederations('teamspace', 'project', times(3, () => generateRandomString()), user, adminCheck)).toBe(result);
 		});
 	});
 };
 
+const testCheckModelExists = () => {
+	describe('Check model exists', () => {
+		const generateTests = (modelType, callbackFn) => [
+			[modelType, callbackFn, [{ _id: generateRandomString() }], true],
+			[modelType, callbackFn, [{ _id: generateRandomString() }], false],
+			[modelType, callbackFn, [], true],
+		];
+
+		const runTest = (modelType, callbackFn, callbackFnResponse, modelExists) => {
+			test(`modelType is ${modelType} but the model ${modelExists ? 'does' : ' does not'} exist and there ${callbackFnResponse.lenght ? 'are' : 'are no '} model details`, async () => {
+				ModelSettings[callbackFn].mockResolvedValueOnce(callbackFnResponse);
+				Projects.modelsExistInProject.mockResolvedValueOnce(modelExists);
+
+				const teamspace = generateRandomString();
+				const project = generateRandomString();
+				const models = times(2, generateRandomString());
+
+				const res = await Permissions.checkModelsExists(teamspace, project, models, modelType);
+
+				expect(ModelSettings[callbackFn]).toHaveBeenCalledTimes(1);
+				expect(ModelSettings[callbackFn]).toHaveBeenCalledWith(teamspace, models, { permissions: 1 });
+				expect(Projects.modelsExistInProject).toHaveBeenCalledTimes(1);
+				expect(Projects.modelsExistInProject).toHaveBeenCalledWith(teamspace, project, models);
+
+				if (!modelExists || !callbackFnResponse.length) {
+					expect(res).toBeFalsy();
+				} else {
+					expect(res).toBeTruthy();
+				}
+			});
+		};
+
+		describe.each(generateTests(undefined, 'getMultipleModelsByIds'))('Undefined model', runTest);
+		describe.each(generateTests(modelTypes.CONTAINER, 'getContainers'))('Container model', runTest);
+		describe.each(generateTests(modelTypes.FEDERATION, 'getFederations'))('Federation model', runTest);
+		describe.each(generateTests(modelTypes.DRAWING, 'getDrawings'))('Drawing model', runTest);
+	});
+};
+
 describe('utils/permissions', () => {
+	testCheckModelExists();
+
 	testIsTeamspaceAdmin();
 	testIsProjectAdmin();
 	testHasProjectAdminPermissions();
@@ -589,19 +632,19 @@ describe('utils/permissions', () => {
 	testHasCommenterAccessToModel();
 
 	testHasReadAccessToContainer();
-	testHasReadAccessToContainers();
+	testHasReadAccessToMultipleContainers();
 	testHasWriteAccessToContainer();
 	testHasCommenterAccessToContainer();
 	testHasAdminAccessToContainer();
 
 	testHasReadAccessToDrawing();
-	testHasReadAccessToDrawings();
+	testHasReadAccessToMultipleDrawings();
 	testHasWriteAccessToDrawing();
 	testHasCommenterAccessToDrawing();
 	testHasAdminAccessToDrawing();
 
 	testHasReadAccessToFederation();
-	testHasReadAccessToFederations();
+	testHasReadAccessToMultipleFederations();
 	testHasWriteAccessToFederation();
 	testHasCommenterAccessToFederation();
 	testHasAdminAccessToFederation();

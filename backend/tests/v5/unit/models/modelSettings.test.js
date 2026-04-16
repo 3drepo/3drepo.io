@@ -887,6 +887,26 @@ const testGetUsersWithPermissions = () => {
 	});
 };
 
+const testGetMultipleModelsByIds = () => {
+	describe('Get multiple models by IDs', () => {
+		test('should return the list of models found', async () => {
+			const teamspace = generateRandomString();
+			const modelIds = [generateRandomString(), generateRandomString()];
+			const expectedData = [
+				{ _id: modelIds[0], name: generateRandomString() },
+				{ _id: modelIds[1], name: generateRandomString() },
+			];
+			DBHandler.find.mockResolvedValueOnce(expectedData);
+
+			const res = await Model.getMultipleModelsByIds(teamspace, modelIds);
+			expect(res).toEqual(expectedData);
+			expect(DBHandler.find).toHaveBeenCalledTimes(1);
+			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: { $in: modelIds } }, undefined, undefined);
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
@@ -905,4 +925,5 @@ describe('models/modelSettings', () => {
 	testIsFederation();
 	testGetModelType();
 	testGetUsersWithPermissions();
+	testGetMultipleModelsByIds();
 });

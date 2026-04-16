@@ -21,7 +21,7 @@ const {
 	MODEL_WRITE_ROLES,
 	PROJECT_ADMIN,
 } = require('./permissions.constants');
-const { findModels, getContainerById, getContainers, getDrawingById, getDrawings, getFederationById, getFederations, getModelsByIds } = require('../../models/modelSettings');
+const { findModels, getContainerById, getContainers, getDrawingById, getDrawings, getFederationById, getFederations, getMultipleModelsByIds } = require('../../models/modelSettings');
 const { getProjectAdmins, modelsExistInProject } = require('../../models/projectSettings');
 const { getTeamspaceAdmins } = require('../../models/teamspaceSettings');
 const { modelTypes } = require('../../models/modelSettings.constants');
@@ -52,7 +52,7 @@ Permissions.hasProjectAdminPermissions = (perms, username) => perms.some(
 );
 
 Permissions.checkModelsExists = async (teamspace, project, models, modelType) => {
-	let getModelFn = getModelsByIds;
+	let getModelFn = getMultipleModelsByIds;
 
 	if (modelType === modelTypes.CONTAINER) {
 		getModelFn = getContainers;
@@ -72,7 +72,8 @@ Permissions.checkModelsExists = async (teamspace, project, models, modelType) =>
 	return modelDetails.length ? modelDetails : false;
 };
 
-const modelPermCheck = (permCheck, modelType) => async (teamspace, project, modelsID, username, adminCheck = true) => {
+const multipleModelsPermCheck = (permCheck, modelType) => async (
+	teamspace, project, modelsID, username, adminCheck = true) => {
 	const models = await Permissions.checkModelsExists(teamspace, project, modelsID, modelType);
 	if (!models || !models.length) return false;
 	if (adminCheck) {
@@ -88,6 +89,10 @@ const modelPermCheck = (permCheck, modelType) => async (teamspace, project, mode
 		),
 	);
 };
+
+const modelPermCheck = (permCheck, modelType) => (
+	teamspace, project, modelID, username, adminCheck = true) => multipleModelsPermCheck(permCheck, modelType)(
+	teamspace, project, [modelID], username, adminCheck);
 
 // has read access to at least 1 model within the list
 Permissions.hasReadAccessToSomeModels = async (teamspace, project, models, username) => {
@@ -129,7 +134,7 @@ Permissions.hasCommenterAccessToFederation = modelPermCheck(
 Permissions.hasReadAccessToFederation = modelPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelTypes.FEDERATION,
 );
-Permissions.hasReadAccessToFederations = modelPermCheck(
+Permissions.hasReadAccessToMultipleFederations = multipleModelsPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelTypes.FEDERATION,
 );
 
@@ -148,7 +153,7 @@ Permissions.hasCommenterAccessToContainer = modelPermCheck(
 Permissions.hasReadAccessToContainer = modelPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelTypes.CONTAINER,
 );
-Permissions.hasReadAccessToContainers = modelPermCheck(
+Permissions.hasReadAccessToMultipleContainers = multipleModelsPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelTypes.CONTAINER,
 );
 
@@ -170,7 +175,7 @@ Permissions.hasCommenterAccessToDrawing = modelPermCheck(
 Permissions.hasReadAccessToDrawing = modelPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelTypes.DRAWING,
 );
-Permissions.hasReadAccessToDrawings = modelPermCheck(
+Permissions.hasReadAccessToMultipleDrawings = multipleModelsPermCheck(
 	(perm) => MODEL_READ_ROLES.includes(perm.permission), modelTypes.DRAWING,
 );
 
