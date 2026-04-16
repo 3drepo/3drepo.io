@@ -402,14 +402,8 @@ const testQueueClashRun = () => {
 
 const testCheckQueueConfig = () => {
 	describe('Check Queue Config', () => {
-		describe.each([
-			['host'],
-			['shared_storage'],
-			['callback_queue'],
-			['model_queue'],
-			['clash_queue'],
-			['event_exchange'],
-		])('Check Queue Config', (propName) => {
+		const params = ['host', 'shared_storage', 'callback_queue', 'model_queue', 'clash_queue', 'event_exchange'];
+		describe.each(params.map((param) => [param]))('Check Queue Config', (propName) => {
 			test(`Should fail if cn_queue.${propName} is not set in config`, async () => {
 				const originalValue = config.cn_queue[propName];
 				config.cn_queue[propName] = undefined;
