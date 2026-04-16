@@ -400,41 +400,56 @@ const testQueueClashRun = () => {
 	});
 };
 
-const testCheckQueueConfig = () => {
-	describe('Check Queue Config', () => {
+const testInit = () => {
+	describe('Init', () => {
 		const params = ['host', 'shared_storage', 'callback_queue', 'model_queue', 'clash_queue', 'event_exchange'];
 		describe.each(params.map((param) => [param]))('Check Queue Config', (propName) => {
 			test(`Should fail if cn_queue.${propName} is not set in config`, async () => {
 				const originalValue = config.cn_queue[propName];
 				config.cn_queue[propName] = undefined;
-				await expect(ModelProcessing.checkQueueConfig()).rejects.toThrow();
+				await expect(ModelProcessing.init()).rejects.toThrow();
 				config.cn_queue[propName] = originalValue;
+				expect(Queue.listenToQueue).not.toHaveBeenCalled();
 			});
 		});
 
 		test('Should fail if shared_storage path is invalid', async () => {
 			stat.mockRejectedValueOnce(new Error(generateRandomString()));
-			await expect(ModelProcessing.checkQueueConfig()).rejects.toThrow();
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
 		});
 
 		test('Should fail if shared_storage path is invalid', async () => {
 			stat.mockRejectedValueOnce(new Error(generateRandomString()));
-			await expect(ModelProcessing.checkQueueConfig()).rejects.toThrow();
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
 		});
 
-		test('Should fail if shared_storage path is not a directory	', async () => {
-			stat.mockResolvedValue({
+		test('Should fail if shared_storage path is not a directory', async () => {
+			stat.mockResolvedValueOnce({
 				isDirectory: () => false,
 			});
-			await expect(ModelProcessing.checkQueueConfig()).rejects.toThrow();
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
 		});
 
 		test('Should fail if user has no access to shared_storage', async () => {
-			stat.mockResolvedValue({
+			stat.mockResolvedValueOnce({
 				isDirectory: () => true,
 			});
 			access.mockRejectedValueOnce(new Error(generateRandomString()));
-			await expect(ModelProcessing.checkQueueConfig()).rejects.toThrow();
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should succeed if the config is set correctly', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => true,
+			});
+			access.mockResolvedValueOnce();
+			await expect(ModelProcessing.init()).resolves.toBeUndefined();
+			expect(Queue.listenToQueue).toHaveBeenCalledTimes(1);
+			expect(Queue.listenToQueue).toHaveBeenCalledWith(config.cn_queue.callback_queue, expect.any(Function));
 		});
 	});
 };
@@ -446,5 +461,5 @@ describe(determineTestGroup(__filename), () => {
 	testContainerGetFileName();
 	testGetLogArchive();
 	testQueueClashRun();
-	testCheckQueueConfig();
+	testInit();
 });

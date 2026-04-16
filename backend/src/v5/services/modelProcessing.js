@@ -261,7 +261,7 @@ ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 	}
 };
 
-ModelProcessing.checkQueueConfig = async () => {
+const checkQueueConfig = async () => {
 	const queueConfigSchema = Yup.object({
 		host: Yup.string().trim().min(1).required(),
 		shared_storage: Yup.string().trim().min(1).required(),
@@ -287,6 +287,9 @@ ModelProcessing.checkQueueConfig = async () => {
 	}
 };
 
-ModelProcessing.init = () => listenToQueue(callbackq, onCallbackQMsg);
+ModelProcessing.init = async () => {
+	await checkQueueConfig();
+	await listenToQueue(callbackq, onCallbackQMsg);
+};
 
 module.exports = ModelProcessing;
