@@ -19,8 +19,6 @@ import { createContext, useCallback, useContext, useEffect, useState } from 'rea
 import { TicketFilter } from './cardFilters.types';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { templatesToFilters } from './filtersSelection/tickets/ticketFilters.helpers';
-import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-
 
 type DisplayMode = 'card' | 'other';
 export interface TicketsFiltersContextType {
@@ -75,7 +73,6 @@ export const TicketsFiltersContextComponent = ({
 	onChange }: TicketsFiltersContextComponentProps) => {
 	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [choosablefilters, setChoosablefilters] = useState<TicketFilter[]>([]);
-	const [, setURLFilters] = useSearchParam('filters', undefined, true);
 	
 	useEffect(() => {
 		const usedFilters = new Set((filters || []).map(({ module, property, type })=> `${module}.${property}.${type}`));
@@ -110,7 +107,6 @@ export const TicketsFiltersContextComponent = ({
 	useEffect(() => {
 		if (!filters) return;
 		onChange?.(filters);
-		setURLFilters(JSON.stringify(filters));
 	}, [JSON.stringify(filters)]);
 
 	const clearFilters = () => {

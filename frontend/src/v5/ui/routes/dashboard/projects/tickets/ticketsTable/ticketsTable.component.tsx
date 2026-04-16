@@ -56,7 +56,7 @@ import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSel
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
 import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 
 const paramToInputProps = (value, setter) => ({
@@ -91,7 +91,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 	
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
-	const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
+	const jobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
 	const setTemplate = useCallback((newTemplate) => {
 		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
 		const ticketsPath = TICKETS_ROUTE;
@@ -235,13 +235,13 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			return;
 		}
 	
-	 	if (!riskCategories.length || !users.length) return;
+	 	if (!riskCategories.length || isEmpty(jobsAndUsers)) return;
 		
 		try {
 		// Dont blank the page if the url param has the wrong format
 			const newFilters = JSON.parse(paramFilters).map((f) => {
 				try {
-					return deserializeFilter(selectedTemplate, users, riskCategories, f);
+					return deserializeFilter([selectedTemplate], f, jobsAndUsers, riskCategories);
 				} catch (e) {
 					console.error('Error parsing the url filter param');
 					console.error(e);
@@ -255,7 +255,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			console.error(e);
 			return undefined;
 		}
-	}, [selectedTemplate, paramFilters, filters, users]);
+	}, [selectedTemplate, containersAndFederations, jobsAndUsers, filters, riskCategories]);
 	
 	/**
 	 * When the filter objects are changed this bit changes
@@ -264,11 +264,12 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const onChangeFilters = (newFilters) => {
 		if (!newFilters && !paramFilters) return;
 		if (!templateAlreadyFetched(selectedTemplate)) return;
+		setFilters(newFilters);
 
 		const defaultFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
 
 		let param = JSON.stringify(newFilters.map((f) => 
-			serializeFilter(selectedTemplate, riskCategories, f),
+			serializeFilter([selectedTemplate], f, jobsAndUsers, riskCategories),
 		));
 
 		// When there are no paramFilters that means the defaultfilters are there so no need to update the url

@@ -31,8 +31,6 @@ import { SelectOption } from '@/v5/helpers/form.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
-import { IUser } from '@/v5/store/users/users.redux';
-import { toDictionary } from '@/v5/helpers/toDictionary.helper';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 import { findByName, findModuleByNameOrType } from '@/v5/store/tickets/tickets.helpers';
@@ -255,13 +253,34 @@ export class InvalidPropertyOrTemplateError extends Error {
 	}
 }
 
+const getPropertyDefs = (templates: ITemplate[], module: string, property: string, type: string, jobsAndUsers, riskCategories: string[]) => {
+	return templates.reduce((acc, template) => {
+		const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
+		let propertyValues = propertyDef?.values;
+		let propertyDisplayValues = propertyDef?.values;
+		if (propertyValues === 'jobsAndUsers' || type === 'owner') {
+			propertyValues = Object.values(jobsAndUsers).map((ju) => ju.user || ju._id);
+			propertyDisplayValues = Object.values(jobsAndUsers).map((ju) => ju.user ? getFullnameFromUser(ju) : ju._id);
+		}
+		if (propertyValues === 'riskCategories') {
+			propertyValues = riskCategories;
+			propertyDisplayValues = riskCategories;
+		}
+		return {
+			values: [...acc.values, ...(propertyValues || [])],
+			displayValues: [...acc.displayValues, ...(propertyDisplayValues || [])],
+		};
+	}, { values: [], displayValues: [] });
+};
+
 // NOTE: serialization assumes there are no name clashes: that means 
 // that one name refers to one property. Eg: lets say theres a property 'number of nodes' serialization
 // assumes theres only one 'number of nodes'. In practical terms this means that serialization works 
 // assuming the filters are for one template in particular
-export const serializeFilter = (template: ITemplate, riskCategories: string[], ticketFilter: TicketFilter) => {
+export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFilter, jobsAndUsers, riskCategories: string[]) => {
 	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
 	let values = ticketFilter.filter.values;
+	const propertyDefs = getPropertyDefs(templates, ticketFilter.module, ticketFilter.property, ticketFilter.type, jobsAndUsers, riskCategories);
 
 	let filterKey = [ticketFilter.module, ticketFilter.property, ticketFilter.type].join('.');
 
@@ -276,26 +295,14 @@ export const serializeFilter = (template: ITemplate, riskCategories: string[], t
 		};
 
 		serializedValues = values.map(serializeValue).join(',');
-		
-		if (['oneOf', 'manyOf', 'status'].includes(ticketFilter.type)) {
-		
-			const propertyDef = findPropertyDefinitionByFilter(ticketFilter, template);
-			if (!propertyDef && !isBaseProperty(ticketFilter.type) ) {
-				throw (new InvalidPropertyOrTemplateError(ticketFilter.property, ticketFilter.type, template.name));
+		if (['oneOf', 'manyOf', 'status', 'owner'].includes(ticketFilter.type)) {
+			if (!propertyDefs.values.length) {
+				throw (new InvalidPropertyOrTemplateError(ticketFilter.property, ticketFilter.type, '')); // template.name ?
 			}
 
-			let options = propertyDef.values;
-
-			if (options !== 'jobsAndUsers') {
-				if (options === 'riskCategories') {
-					options = riskCategories;
-				}
-				
-				const indexes = values.map((val) => options.indexOf(val as any));
-				serializedValues = indexes.join(',');
-			}
+			const indexes = values.map((val) => propertyDefs.values.indexOf(val as any));
+			serializedValues = indexes.join(',');
 		}
-
 		serialized.push(serializedValues);
 	}
 
@@ -321,39 +328,24 @@ export const splitByNonEscaped = (str: string, char) =>  {
 	return res;
 };
 
-export const deserializeFilter = (template:ITemplate, users: IUser[], riskCategories: string[], str: string): TicketFilter => {
-	const userByUserName = toDictionary(users, (u) => u.user);
+export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUsers, riskCategories: string[]): TicketFilter => {
 	const [serialisedFields, serializedOperator, serialisedValue] = splitByNonEscaped(str, ':');
 
 	let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
 
-	const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
+	const propertyDefs: string[] = getPropertyDefs(templates, module, property, type, jobsAndUsers, riskCategories);
 
 	let filter: BaseFilter = {
 		operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
 		values: undefined,
 	};
-
-	if (!isBaseProperty(type) && (!propertyDef || propertyDef.type !== type) ) {
-		throw (new InvalidPropertyOrTemplateError(property, type, template.name));
-	}
-
-	if (['manyOf', 'oneOf'].includes(propertyDef?.type) || type === 'owner') {
-		if (propertyDef?.values === 'jobsAndUsers' || type === 'owner' ) {
-			filter.values = splitByNonEscaped(serialisedValue, ',');
-			filter.displayValues = arrToDisplayValue((filter.values as string[]).map((u) => {
-				if (userByUserName[u]) return getFullnameFromUser(userByUserName[u]);
-				return u;
-			}));
-		} else {
-			const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
-			const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
-			filter.values = indexes.filter((i) => options[i]).map((i) => options[i]);
-			filter.displayValues = arrToDisplayValue(filter.values);
-			if (!filter.values) {
-				throw (new InvalidPropertyOrTemplateError(property, type, template.name));
-			}
+	if (['manyOf', 'oneOf', 'owner', 'status'].includes(type)) {
+		if (!propertyDefs.values.length) {
+			throw (new InvalidPropertyOrTemplateError(property, type, '')); // template.name ?
 		}
+		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
+		filter.values = indexes.filter((i) => propertyDefs.values[i]).map((i) => propertyDefs.values[i]);
+		filter.displayValues = arrToDisplayValue(indexes.filter((i) => propertyDefs.displayValues[i]).map((i) => propertyDefs.displayValues[i]));
 	}
 
 	if (isDateType(type)) {
