@@ -162,67 +162,8 @@ const testConnection = () => {
 	});
 };
 
-const testInit = () => {
-	describe('Queue initialization', () => {
-		test('Should throw error if host is not set in config', async () => {
-			const { host } = config.cn_queue;
-			config.cn_queue.host = undefined;
-			await expect(Queue.init()).rejects
-				.toThrow('Queue is not configured correctly.');
-
-			config.cn_queue.host = host;
-		});
-
-		test('Should throw error if shared_storage is not set in config', async () => {
-			const { shared_storage } = config.cn_queue;
-			config.cn_queue.shared_storage = undefined;
-			await expect(Queue.init()).rejects
-				.toThrow('Queue is not configured correctly.');
-
-			config.cn_queue.shared_storage = shared_storage;
-		});
-
-		test('Should throw error if callback_queue is not set in config', async () => {
-			const { callback_queue } = config.cn_queue;
-			config.cn_queue.callback_queue = undefined;
-			await expect(Queue.init()).rejects
-				.toThrow('Queue is not configured correctly.');
-
-			config.cn_queue.callback_queue = callback_queue;
-		});
-
-		test('Should throw error if model_queue is not set in config', async () => {
-			const { model_queue } = config.cn_queue;
-			config.cn_queue.model_queue = undefined;
-			await expect(Queue.init()).rejects
-				.toThrow('Queue is not configured correctly.');
-
-			config.cn_queue.model_queue = model_queue;
-		});
-
-		test('Should throw error if clash_queue is not set in config', async () => {
-			const { clash_queue } = config.cn_queue;
-			config.cn_queue.clash_queue = undefined;
-			await expect(Queue.init()).rejects
-				.toThrow('Queue is not configured correctly.');
-
-			config.cn_queue.clash_queue = clash_queue;
-		});
-
-		test('Should throw error if event_exchange is not set in config', async () => {
-			const { event_exchange } = config.cn_queue;
-			config.cn_queue.event_exchange = undefined;
-			await expect(Queue.init()).rejects
-				.toThrow('Queue is not configured correctly.');
-
-			config.cn_queue.event_exchange = event_exchange;
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testQueueMessages();
 	testExchangeMessages();
 	testConnection();
-	testInit();
 });

@@ -38,6 +38,9 @@ const Invitations = require(`${src}/models/invitations`);
 jest.mock('../../../../src/v5/models/frontegg.cache');
 const FronteggCache = require(`${src}/models/frontegg.cache`);
 
+jest.mock('../../../../src/v5/services/modelProcessing');
+const ModelProcessing = require(`${src}/services/ModelProcessing`);
+
 jest.mock('../../../../src/v5/handler/fs', () => ({
 	getHandler: jest.fn().mockReturnValue({
 		testFilesystem: jest.fn(),
@@ -63,6 +66,7 @@ const testInitialiseSystem = () => {
 			expect(NotificationService.init).toHaveBeenCalledTimes(1);
 			expect(FronteggService.init).toHaveBeenCalledTimes(1);
 			expect(FronteggCache.initialise).toHaveBeenCalledTimes(1);
+			expect(ModelProcessing.checkQueueConfig).toHaveBeenCalledTimes(1);
 		});
 	});
 };

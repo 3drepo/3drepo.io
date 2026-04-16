@@ -23,10 +23,13 @@ const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
 const Path = require('path');
+const Yup = require('yup');
 const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
+const { constants } = require('fs');
 const { events } = require('./eventsManager/eventsManager.constants');
 const { execFile } = require('child_process');
+const fs = require('fs/promises');
 const { pipeline } = require('stream/promises');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
@@ -257,6 +260,27 @@ ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 
 		logger.logError('Failed to queue clash test run', err?.message);
 		throw templates.queueInsertionFailed;
+	}
+};
+
+ModelProcessing.checkQueueConfig = async () => {
+	const queueConfigSchema = Yup.object({
+		host: Yup.string().trim().min(1).required(),
+		shared_storage: Yup.string().trim().min(1).required(),
+		callback_queue: Yup.string().trim().min(1).required(),
+		model_queue: Yup.string().trim().min(1).required(),
+		clash_queue: Yup.string().trim().min(1).required(),
+		event_exchange: Yup.string().trim().min(1).required(),
+	});
+
+	try {
+		await queueConfigSchema.validate(queueConfig);
+		await fs.stat(queueConfig.shared_storage);
+		// eslint-disable-next-line no-bitwise
+		await fs.access(queueConfig.shared_storage, constants.R_OK | constants.W_OK);
+	} catch (err) {
+		logger.logError(`Invalid queue configuration: ${err.message}`);
+		throw new Error(`Invalid queue configuration: ${err.message}`);
 	}
 };
 

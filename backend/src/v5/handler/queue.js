@@ -178,22 +178,7 @@ Queue.close = async (reset = true) => {
 	if (reset) listeners = {};
 };
 
-const checkQueueConfig = () => {
-	if (!queueConfig
-			|| !queueConfig.host
-			|| !queueConfig.shared_storage
-			|| !queueConfig.callback_queue
-			|| !queueConfig.model_queue
-			|| !queueConfig.clash_queue
-			|| !queueConfig.event_exchange
-	) {
-		throw Error('Queue is not configured correctly.');
-	}
-};
-
 Queue.init = async () => {
-	checkQueueConfig();
-
 	connClosed = false;
 	await connect();
 };
