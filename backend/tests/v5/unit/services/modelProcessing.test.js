@@ -402,7 +402,7 @@ const testQueueClashRun = () => {
 
 const testInit = () => {
 	describe('Init', () => {
-		const params = ['host', 'shared_storage', 'callback_queue', 'model_queue', 'clash_queue', 'event_exchange'];
+		const params = ['host', 'shared_storage', 'callback_queue', 'model_queue', 'clash_queue', 'drawing_queue', 'event_exchange'];
 		describe.each(params.map((param) => [param]))('Check Queue Config', (propName) => {
 			test(`Should fail if cn_queue.${propName} is not set in config`, async () => {
 				const originalValue = config.cn_queue[propName];
@@ -411,12 +411,6 @@ const testInit = () => {
 				config.cn_queue[propName] = originalValue;
 				expect(Queue.listenToQueue).not.toHaveBeenCalled();
 			});
-		});
-
-		test('Should fail if shared_storage path is invalid', async () => {
-			stat.mockRejectedValueOnce(new Error(generateRandomString()));
-			await expect(ModelProcessing.init()).rejects.toThrow();
-			expect(Queue.listenToQueue).not.toHaveBeenCalled();
 		});
 
 		test('Should fail if shared_storage path is invalid', async () => {
