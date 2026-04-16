@@ -78,11 +78,11 @@ const multipleModelsPermCheck = (permCheck, modelType) => async (
 	if (!models || !models.length) return false;
 	if (adminCheck) {
 		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
+
 		if (hasAdminPerms) {
 			return true;
 		}
 	}
-
 	return models.every(
 		({ _id, permissions }) => modelsID.includes(_id) && permissions && permissions.some(
 			(perm) => (perm.user === username && permCheck(perm)),
@@ -90,7 +90,7 @@ const multipleModelsPermCheck = (permCheck, modelType) => async (
 	);
 };
 
-const modelPermCheck = multipleModelsPermCheck;
+const modelPermCheck = (permCheck, modelType) => multipleModelsPermCheck(permCheck, modelType);
 
 // has read access to at least 1 model within the list
 Permissions.hasReadAccessToSomeModels = async (teamspace, project, models, username) => {

@@ -49,7 +49,7 @@ const joinRoom = async (socket, data) => {
 	} else if (teamspace && project && model) {
 		channelName = `${teamspace}::${project}::${model}`;
 		try {
-			if (!await hasReadAccessToModel(teamspace, stringToUUID(project), model, username)) {
+			if (!await hasReadAccessToModel(teamspace, stringToUUID(project), [model], username)) {
 				throw { code: ERRORS.UNAUTHORISED, message: 'You do not have sufficient access rights to join the room requested' };
 			}
 		} catch (err) {

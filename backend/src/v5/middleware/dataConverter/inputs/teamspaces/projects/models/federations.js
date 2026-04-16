@@ -84,7 +84,7 @@ Federations.getAccessibleContainers = (modelType) => async (req, res, next) => {
 
 				await Promise.all(subModels.map(async ({ _id: containerId }) => {
 					try {
-						if (await hasReadAccessToContainer(teamspace, project, containerId, user)) {
+						if (await hasReadAccessToContainer(teamspace, project, [containerId], user)) {
 							containers.push({ _id: containerId });
 						}
 					} catch (err) {
