@@ -16,9 +16,9 @@
  */
 
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
+const { access, copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { codeExists, templates } = require('../utils/responseCodes');
-const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
-const { createWriteStream, readFileSync, readdirSync } = require('fs');
+const { constants, createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
@@ -26,10 +26,8 @@ const Path = require('path');
 const Yup = require('yup');
 const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
-const { constants } = require('fs');
 const { events } = require('./eventsManager/eventsManager.constants');
 const { execFile } = require('child_process');
-const fs = require('fs/promises');
 const { pipeline } = require('stream/promises');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
@@ -275,9 +273,14 @@ ModelProcessing.checkQueueConfig = async () => {
 
 	try {
 		await queueConfigSchema.validate(queueConfig);
-		await fs.stat(queueConfig.shared_storage);
+		const stats = await stat(queueConfig.shared_storage);
+
+		if (!stats.isDirectory()) {
+			throw new Error('queueConfig.shared_storage must be a directory');
+		}
+
 		// eslint-disable-next-line no-bitwise
-		await fs.access(queueConfig.shared_storage, constants.R_OK | constants.W_OK);
+		await access(queueConfig.shared_storage, constants.R_OK | constants.W_OK);
 	} catch (err) {
 		logger.logError(`Invalid queue configuration: ${err.message}`);
 		throw new Error(`Invalid queue configuration: ${err.message}`);

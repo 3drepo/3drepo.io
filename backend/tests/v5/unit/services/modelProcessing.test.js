@@ -36,8 +36,8 @@ jest.mock('fs', () => {
 });
 const { createWriteStream } = require('fs');
 
-jest.mock('fsp', () => {
-	const actualFs = jest.requireActual('fs');
+jest.mock('fs/promises', () => {
+	const actualFs = jest.requireActual('fs/promises');
 	return { ...actualFs, stat: jest.fn(actualFs.stat), access: jest.fn(actualFs.access) };
 });
 
@@ -424,7 +424,21 @@ const testCheckQueueConfig = () => {
 		});
 
 		test('Should fail if shared_storage path is invalid', async () => {
-			stat.mockResolvedValueOnce(generateRandomString());
+			stat.mockRejectedValueOnce(new Error(generateRandomString()));
+			await expect(ModelProcessing.checkQueueConfig()).rejects.toThrow();
+		});
+
+		test('Should fail if shared_storage path is not a directory	', async () => {
+			stat.mockResolvedValue({
+				isDirectory: () => false,
+			});
+			await expect(ModelProcessing.checkQueueConfig()).rejects.toThrow();
+		});
+
+		test('Should fail if user has no access to shared_storage', async () => {
+			stat.mockResolvedValue({
+				isDirectory: () => true,
+			});
 			access.mockRejectedValueOnce(new Error(generateRandomString()));
 			await expect(ModelProcessing.checkQueueConfig()).rejects.toThrow();
 		});

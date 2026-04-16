@@ -39,7 +39,7 @@ jest.mock('../../../../src/v5/models/frontegg.cache');
 const FronteggCache = require(`${src}/models/frontegg.cache`);
 
 jest.mock('../../../../src/v5/services/modelProcessing');
-const ModelProcessing = require(`${src}/services/ModelProcessing`);
+const ModelProcessing = require(`${src}/services/modelProcessing`);
 
 jest.mock('../../../../src/v5/handler/fs', () => ({
 	getHandler: jest.fn().mockReturnValue({
