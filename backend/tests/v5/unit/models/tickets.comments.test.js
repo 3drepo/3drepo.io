@@ -16,7 +16,7 @@
  */
 
 const { times } = require('lodash');
-const { generateRandomString, generateRandomNumber } = require('../../helper/services');
+const { generateRandomString, generateRandomNumber, generateUUID } = require('../../helper/services');
 const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -471,6 +471,22 @@ const testDeleteComment = () => {
 	});
 };
 
+const testDeleteCommentsByTicketIds = () => {
+	describe('Delete comments by ticket IDs', () => {
+		test('should delete comments for the provided ticket IDs', async () => {
+			const teamspace = generateRandomString();
+			const ticketIds = times(3, () => generateUUID());
+
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await Comments.deleteCommentsByTicketIds(teamspace, ticketIds);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, commentCol, { ticket: { $in: ticketIds } });
+		});
+	});
+};
+
 describe('models/tickets.comments', () => {
 	testGetCommentById();
 	testGetCommentsByTicket();
@@ -478,4 +494,5 @@ describe('models/tickets.comments', () => {
 	testImportComments();
 	testUpdateComment();
 	testDeleteComment();
+	testDeleteCommentsByTicketIds();
 });

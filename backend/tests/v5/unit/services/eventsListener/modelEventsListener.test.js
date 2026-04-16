@@ -32,6 +32,9 @@ const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
 
+jest.mock('../../../../../src/v5/models/fileRefs');
+const FileRefs = require(`${src}/models/fileRefs`);
+
 jest.mock('../../../../../src/v5/models/tickets.logs');
 const TicketLogs = require(`${src}/models/tickets.logs`);
 
@@ -629,13 +632,16 @@ const testNewRevision = () => {
 const testModelProcessingCompleted = () => {
 	describe(events.MODEL_IMPORT_FINISHED, () => {
 		describe.each([
-			[true, false, false],
-			[true, false, false, true],
+			[false, true, false],
+			[true, false, false, modelTypes.DRAWING],
+			[true, false, false, modelTypes.FEDERATION],
+			[true, false, false, modelTypes.CONTAINER, true],
 			[false, false, true],
 			[true, false, false],
-			[true, false, false, undefined, generateRandomNumber(1, 40)],
-		])('', (sendMail, success, userErr, noLogArchive, errorCode) => {
-			test(`Should ${sendMail ? 'not ' : ''}send an email if model import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
+			[true, false, false],
+		])('', (sendMail, success, userErr, modelType = modelTypes.CONTAINER, noLogArchive = false) => {
+			test(`Should ${sendMail ? '' : 'not '}send an email if ${modelType} import ${success ? 'succeeded' : 'failed'}${!success && userErr ? ' due to an user error' : ''}`, async () => {
+				const errorCode = success ? undefined : generateRandomNumber(2, 40);
 				const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 				const data = {
 					teamspace: generateRandomString(),
@@ -644,13 +650,23 @@ const testModelProcessingCompleted = () => {
 					success,
 					revId: generateUUID(),
 					user: generateRandomString(),
-					modelType: modelTypes.FEDERATION,
+					modelType,
 					data: generateImportResult(success, generateRandomString(), userErr, errorCode),
 				};
 
 				const zipPath = generateRandomString();
 				const logPreview = generateRandomString();
+				const fileName = generateRandomString();
+
 				if (sendMail) {
+					if (modelType === modelTypes.CONTAINER) {
+						ModPro.getContainerFileName.mockResolvedValueOnce(fileName);
+					}
+
+					if (modelType === modelTypes.DRAWING) {
+						FileRefs.getRefEntryByQuery.mockResolvedValueOnce({ name: fileName });
+					}
+
 					ModPro.getLogArchive.mockResolvedValueOnce(noLogArchive ? undefined : { zipPath, logPreview });
 				}
 
@@ -672,9 +688,9 @@ const testModelProcessingCompleted = () => {
 						user: data.user,
 						project: UUIDToString(data.project),
 						revId: UUIDToString(data.revId),
-						modelType: data.modelType,
+						modelType,
 						logExcerpt: noLogArchive ? undefined : logPreview,
-
+						fileName: modelType === modelTypes.FEDERATION ? 'N/A' : fileName,
 					};
 
 					expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
@@ -690,7 +706,7 @@ const testModelProcessingCompleted = () => {
 			});
 		});
 
-		test('Should fail gracefully if an error was thrown', async () => {
+		test('Should fail gracefully if an error was thrown in getLogArchive', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -709,7 +725,7 @@ const testModelProcessingCompleted = () => {
 			await waitOnEvent;
 		});
 
-		test('Should fail gracefully if an error was thrown (error object)', async () => {
+		test('Should fail gracefully if an error was thrown in getLogArchive (error object)', async () => {
 			const waitOnEvent = eventTriggeredPromise(events.MODEL_IMPORT_FINISHED);
 			const data = {
 				teamspace: generateRandomString(),

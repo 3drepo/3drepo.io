@@ -48,5 +48,9 @@ export const SortingPropertyMenu = () => (
 			property={TicketSortingProperty.TICKET_CODE}
 			title={formatMessage({ id: 'viewer.cards.tickets.sortBy.ticketCode', defaultMessage: 'Ticket code' })}
 		/>
+		<Item
+			property={TicketSortingProperty.TICKET_TITLE}
+			title={formatMessage({ id: 'viewer.cards.tickets.sortBy.title', defaultMessage: 'Title' })}
+		/>
 	</ExpandingMenu>
 );

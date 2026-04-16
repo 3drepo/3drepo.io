@@ -7,7 +7,7 @@ import { DEFAULT_FILTERS, templatesToFilters } from '@components/viewer/cards/ca
 
 
 describe('Tickets: store', () => {
-	let dispatch, getState;
+	let dispatch: (action: any) => void, getState: () => any;
 	const ticketId = 'ticketId';
 	const templateId = 'templateId';
 	const pinId = 'pinId';

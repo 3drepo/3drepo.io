@@ -19,11 +19,13 @@ const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
 const { addGroupUpdateLog, addImportedLogs, addTicketLog } = require('../../../models/tickets.logs');
 const { createModelMessage, createProjectMessage } = require('../../chat');
 const { deleteIfUndefined, setNestedProperty } = require('../../../utils/helper/objects');
+const { getContainerFileName, getLogArchive } = require('../../modelProcessing');
 const { getModelType, isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { getRevisionByIdOrTag, getRevisionFormat, onProcessingCompleted, updateProcessingStatus } = require('../../../models/revisions');
 const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateUpdated } = require('../../../processors/teamspaces/projects/models/commons/tickets');
 const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
+const { DRAWINGS_HISTORY_COL } = require('../../../models/revisions.constants');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
@@ -32,7 +34,7 @@ const { findProjectByModelId } = require('../../../models/projectSettings');
 const { generateFullSchema } = require('../../../schemas/tickets/templates');
 const { getCalibrationStatus } = require('../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { getInfoFromCode } = require('../../../models/modelSettings.constants');
-const { getLogArchive } = require('../../modelProcessing');
+const { getRefEntryByQuery } = require('../../../models/fileRefs');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
 const { sendSystemEmail } = require('../../mailer');
@@ -129,6 +131,17 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 	} else if (!errorReason.userErr) {
 		try {
 			const { zipPath, logPreview } = (await getLogArchive(UUIDToString(revId))) || {};
+
+			let fileName = 'N/A';
+
+			if (modelType === modelTypes.DRAWING) {
+				const { name } = await getRefEntryByQuery(teamspace, DRAWINGS_HISTORY_COL,
+					{ rev_id: revId }, { name: 1 });
+				fileName = name;
+			} else if (modelType === modelTypes.CONTAINER) {
+				fileName = await getContainerFileName(UUIDToString(revId));
+			}
+
 			const { errorCode } = errorReason;
 			const { internalError, message } = getInfoFromCode(errorCode);
 
@@ -144,6 +157,7 @@ const modelProcessingCompleted = async ({ teamspace, project, model, revId, user
 					project: UUIDToString(project),
 					revId: UUIDToString(revId),
 					modelType,
+					fileName,
 					logExcerpt: logPreview,
 
 				},

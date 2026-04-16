@@ -30,7 +30,7 @@ import { TicketsBulkUpdateContext } from '@components/tickets/bulkUpdate/bulkUpd
 import { TicketCheckbox } from '../ticketItem/ticketItem.styles';
 
 type GroupedListProps = {
-	handle?: MutableRefObject<VListHandle>;
+	handle?: any;
 	loading: boolean;
 	expanded: boolean;
 };
