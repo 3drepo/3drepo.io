@@ -65,10 +65,6 @@ export const SequencingProperty = ({ onChange, onBlur, value, ...props }: DateTi
 					),
 				}}
 				value={value}
-				// onChange is a required prop in DatePicker, however it is not needed as onAccept works better
-				// (onChange triggers at every change: year, minutes, hours, etc., onAccept only when a date is finally chosen)				
-				// TODO ISSUE_5588: change this because dafaultCalendrMonth is no longer supported
-				// defaultCalendarMonth={minDateTime || maxDateTime || defaultCalendarDate}
 				onChange={onChange}
 				minDateTime={minDateTime}
 				maxDateTime={maxDateTime}
