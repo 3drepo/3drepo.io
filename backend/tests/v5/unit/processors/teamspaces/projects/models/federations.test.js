@@ -18,7 +18,6 @@
 const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
 const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber, generateUUIDString, generateRandomDate } = require('../../../../../helper/services');
-const Models = require('../../../../../../../src/v5/models/modelSettings');
 
 const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -327,7 +326,10 @@ const testGetMultipleFederationsStats = () => {
 				: undefined,
 			desc: Math.random() > 0.5 ? generateRandomString() : undefined,
 		}));
-		const ticketCount = { [federations[0]]: parseInt(generateRandomNumber(), 10), [federations[1]]: parseInt(generateRandomNumber(), 10) };
+		const ticketCount = {
+			[federations[0]]: parseInt(generateRandomNumber(), 10),
+			[federations[1]]: parseInt(generateRandomNumber(), 10),
+		};
 		const formatToStats = (settings, ticketsCount, lastUpdated) => ({
 			...(settings.desc ? { desc: settings.desc } : { desc: undefined }),
 			...(settings.subModels ? { containers: settings.subModels } : { containers: undefined }),
@@ -349,16 +351,24 @@ const testGetMultipleFederationsStats = () => {
 			const res = await Federations.getMultipleFederationsStats(teamspace, project, federations);
 
 			expect(ModelSettings.getFederations).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederations).toHaveBeenCalledWith(teamspace, federations, { properties: 1, status: 1, subModels: 1, desc: 1 });
+			expect(ModelSettings.getFederations).toHaveBeenCalledWith(
+				teamspace, federations, { properties: 1, status: 1, subModels: 1, desc: 1 },
+			);
 			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledTimes(1);
 			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledWith(teamspace, project, federations);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(
 				federationSettings.reduce((acc, setting) => acc + (setting.subModels?.length || 0), 0),
 			);
 			expect(res).toEqual({
-				[federations[0]]: formatToStats(federationSettings[0], ticketCount[federations[0]], latestRevisions.timestamp),
-				[federations[1]]: formatToStats(federationSettings[1], ticketCount[federations[1]]),
-				[federations[2]]: formatToStats(federationSettings[2], 0),
+				[federations[0]]: formatToStats(
+					federationSettings[0], ticketCount[federations[0]], latestRevisions.timestamp,
+				),
+				[federations[1]]: formatToStats(
+					federationSettings[1], ticketCount[federations[1]],
+				),
+				[federations[2]]: formatToStats(
+					federationSettings[2], 0,
+				),
 			});
 		});
 		test('should be able to handle empty federations', async () => {
@@ -371,9 +381,13 @@ const testGetMultipleFederationsStats = () => {
 			const res = await Federations.getMultipleFederationsStats(teamspace, project, federations.slice(1));
 
 			expect(ModelSettings.getFederations).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederations).toHaveBeenCalledWith(teamspace, federations.slice(1), { properties: 1, status: 1, subModels: 1, desc: 1 });
+			expect(ModelSettings.getFederations).toHaveBeenCalledWith(
+				teamspace, federations.slice(1), { properties: 1, status: 1, subModels: 1, desc: 1 },
+			);
 			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledTimes(1);
-			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledWith(teamspace, project, federations.slice(1));
+			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledWith(
+				teamspace, project, federations.slice(1),
+			);
 			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
 			expect(res).toEqual(
 				{
