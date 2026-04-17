@@ -23,7 +23,6 @@ import { connect } from 'react-redux';
 import { createStructuredSelector } from 'reselect';
 import { selectHasSequences } from '@/v4/modules/sequences';
 
-import dayjs from 'dayjs';
 import {
 	FieldsRow,
 	StyledFormControl,

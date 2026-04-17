@@ -27,7 +27,6 @@ import { clamp, debounce } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { DialogsActionsDispatchers, SequencesActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
-import dayjs from 'dayjs';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
