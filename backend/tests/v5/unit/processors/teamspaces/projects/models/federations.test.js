@@ -245,7 +245,7 @@ const testGetMD5Hash = () => {
 		test('it should call getModelMD5Hash for each container passed', async () => {
 			const nContainers = 3;
 			const containers = times(nContainers, () => ({
-				container: generateRandomString(), revision: generateRandomString()
+				container: generateRandomString(), revision: generateRandomString(),
 			}));
 
 			ModelList.getModelMD5Hash.mockResolvedValueOnce();
@@ -274,7 +274,7 @@ const testGetSuperMeshesInfo = () => {
 
 		test('when federation has containers', async () => {
 			const containers = times(3, () => ({
-				container: generateRandomString(), revision: generateRandomString()
+				container: generateRandomString(), revision: generateRandomString(),
 			}));
 			const superMeshInfoMock = times(3, () => generateRandomObject());
 
@@ -322,11 +322,11 @@ const testGetMultipleFederationsStats = () => {
 				code: generateRandomString(),
 			},
 			status: ['ok', 'processing'][Math.floor(Math.random() * 2)],
-			subModels: index === 0 ?
-				times(3, () => ({ _id: generateRandomString() })) :
-				undefined,
+			subModels: index === 0
+				? times(3, () => ({ _id: generateRandomString() }))
+				: undefined,
 			desc: Math.random() > 0.5 ? generateRandomString() : undefined,
-		}))
+		}));
 		const ticketCount = { [federations[0]]: parseInt(generateRandomNumber(), 10), [federations[1]]: parseInt(generateRandomNumber(), 10) };
 		const formatToStats = (settings, ticketsCount, lastUpdated) => ({
 			...(settings.desc ? { desc: settings.desc } : { desc: undefined }),
@@ -338,11 +338,10 @@ const testGetMultipleFederationsStats = () => {
 			tickets: ticketsCount,
 		});
 
-
 		test('should return stats for multiple federations', async () => {
-		const rev1 = { timestamp: generateRandomDate() };
-		const rev2 = { timestamp: generateRandomDate() };
-		const latestRevisions = rev1.timestamp > rev2.timestamp ? rev1 : rev2;
+			const rev1 = { timestamp: generateRandomDate() };
+			const rev2 = { timestamp: generateRandomDate() };
+			const latestRevisions = rev1.timestamp > rev2.timestamp ? rev1 : rev2;
 
 			ModelSettings.getFederations.mockResolvedValueOnce(federationSettings);
 			Tickets.getOpenTicketsCountForMultipleModels.mockResolvedValueOnce(ticketCount);
@@ -354,7 +353,7 @@ const testGetMultipleFederationsStats = () => {
 			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledTimes(1);
 			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledWith(teamspace, project, federations);
 			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(
-				federationSettings.reduce((acc, setting) => acc + (setting.subModels?.length || 0), 0)
+				federationSettings.reduce((acc, setting) => acc + (setting.subModels?.length || 0), 0),
 			);
 			expect(res).toEqual({
 				[federations[0]]: formatToStats(federationSettings[0], ticketCount[federations[0]], latestRevisions.timestamp),
@@ -367,7 +366,7 @@ const testGetMultipleFederationsStats = () => {
 				.mockResolvedValueOnce(federationSettings.slice(1));
 			Tickets.getOpenTicketsCountForMultipleModels
 				.mockResolvedValueOnce({});
-			Revisions.getLatestRevision.mockResolvedValueOnce()
+			Revisions.getLatestRevision.mockResolvedValueOnce();
 
 			const res = await Federations.getMultipleFederationsStats(teamspace, project, federations.slice(1));
 
@@ -378,9 +377,9 @@ const testGetMultipleFederationsStats = () => {
 			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
 			expect(res).toEqual(
 				{
-					[federations[1]]: formatToStats(federationSettings[1],0),
-					[federations[2]]: formatToStats(federationSettings[2],0),
-				}
+					[federations[1]]: formatToStats(federationSettings[1], 0),
+					[federations[2]]: formatToStats(federationSettings[2], 0),
+				},
 			);
 		});
 	});
