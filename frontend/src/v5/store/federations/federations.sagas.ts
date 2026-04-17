@@ -140,7 +140,7 @@ export function* bulkFetchFederationsStats({ teamspace, projectId, federationIds
 		const chunkedIds = chunk(federationIds, DASHBOARD_LIST_CHUNK_SIZE);
 		yield all(
 			chunkedIds.map(function* (idsChunk) {
-				const { stats } = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);
+				const stats = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);
 				yield put(FederationsActions.bulkFetchFederationsStatsSuccess(projectId, stats));
 			}),
 		);

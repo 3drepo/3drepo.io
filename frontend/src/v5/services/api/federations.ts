@@ -51,7 +51,7 @@ export const fetchFederationStats = async (teamspace, projectId, federationId): 
 
 export const bulkFetchFederationsStats = async (teamspace, projectId, federationIds): Promise<FederationStats[]> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/stats?models=${federationIds.join(',')}`);
-	return data;
+	return data.stats;
 };
 
 export const fetchFederationViews = async (teamspace, projectId, federationId): Promise<FetchFederationViewsResponse> => {

@@ -26,7 +26,7 @@ import { prepareNewFederation, prepareSingleFederationData } from '@/v5/store/fe
 import { Action } from 'redux';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Constants } from '../../helpers/actions.helper';
-import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks } from '../store.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks, ProjectId } from '../store.types';
 import { ContainerSettings } from '../containers/containers.types';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
@@ -200,7 +200,7 @@ export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> 
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & ProjectAndFederationId & { stats: FederationStats };
 export type BulkFetchFederationsStatsAction = Action<'BULK_FETCH_FEDERATIONS_STATS'> & TeamspaceAndProjectId & { federationIds: string[] };
-export type BulkFetchFederationsStatsSuccessAction = Action<'BULK_FETCH_FEDERATIONS_STATS_SUCCESS'> & ProjectAndFederationId & { stats: FederationStats[] };
+export type BulkFetchFederationsStatsSuccessAction = Action<'BULK_FETCH_FEDERATIONS_STATS_SUCCESS'> & ProjectId & { stats: FederationStats[] };
 export type FetchFederationUsersAction = Action<'FETCH_FEDERATION_USERS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationJobsAction = Action<'FETCH_FEDERATION_JOBS'> & TeamspaceProjectAndFederationId;
 export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & TeamspaceProjectAndFederationId & { containers: GroupedContainer[] };
