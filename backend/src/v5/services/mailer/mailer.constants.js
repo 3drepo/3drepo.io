@@ -18,8 +18,8 @@
 const auditLogPassword = require('./templates/auditLogPassword');
 const dailyDigest = require('./templates/dailyDigest');
 const errorNotification = require('./templates/errorNotification');
-const externalTeamspaceExpiredList = require('./templates/externalTeamspaceExpiredList');
-const externalTeamspaceExpiryList = require('./templates/externalTeamspaceExpiryList');
+const externalTeamspaceExpiringTodayList = require('./templates/externalTeamspaceExpiringTodayList');
+const externalTeamspaceExpiringWithinThresholdList = require('./templates/externalTeamspaceExpiringWithinThresholdList');
 const internalTeamspaceExpiryList = require('./templates/internalTeamspaceExpiryList');
 const modelImportError = require('./templates/modelImportError');
 const { toConstantCase } = require('../../utils/helper/strings');
@@ -34,8 +34,8 @@ const templates = {
 	zombieProcessingStatuses,
 	auditLogPassword,
 	internalTeamspaceExpiryList,
-	externalTeamspaceExpiryList,
-	externalTeamspaceExpiredList,
+	externalTeamspaceExpiringWithinThresholdList,
+	externalTeamspaceExpiringTodayList,
 };
 
 MailerConstants.templates = {};

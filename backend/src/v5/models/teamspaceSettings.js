@@ -47,6 +47,8 @@ TeamspaceSetting.getTeamspaceSetting = async (ts, projection = { refId: 0 }) => 
 	return tsDoc;
 };
 
+
+
 TeamspaceSetting.updateSecurityRestrictions = async (ts, ssoRestricted, whiteListDomains) => {
 	const query = { _id: ts };
 
@@ -226,6 +228,20 @@ TeamspaceSetting.getRiskCategories = async (teamspace) => {
 TeamspaceSetting.getTeamspaceInvites = (teamspace, projection = { _id: 1 }) => {
 	const query = { 'teamSpaces.teamspace': teamspace };
 	return teamspaceInvitesQuery(query, projection);
+};
+
+
+TeamspaceSetting.getTeamspaceSettingByExpiry = async (teamspace, expiryStart, expiryEnd, projection = { refId: 0 }) => {
+	const query = {
+		_id: teamspace,
+		$or: Object.values(SUBSCRIPTION_TYPES).map((type) => ({
+			[`subscriptions.${type}.expiryDate`]: {
+				$gte: expiryStart,
+				$lte: expiryEnd,
+			},
+		})),
+	};
+	return teamspaceSettingQuery(teamspace, query, projection);
 };
 
 module.exports = TeamspaceSetting;

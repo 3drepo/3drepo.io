@@ -22,9 +22,10 @@ const { v5Path } = require('../../../interop');
 const { getTeamspaceList } = require('../../utils');
 
 const { sendEmail } = require(`${v5Path}/services/mailer`);
-const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
+const { getTeamspaceSettingByExpiry } = require(`${v5Path}/models/teamspaceSettings`);
 const { templates } = require(`${v5Path}/services/mailer/mailer.constants`);
 const { getUsersByQuery } = require(`${v5Path}/models/users`);
+const { TEAMSPACE_ADMIN } = require(`${v5Path}/utils/permissions/permissions.constants`);
 
 const run = async () => {
 	const teamspaces = await getTeamspaceList();
@@ -36,45 +37,48 @@ const run = async () => {
 	expiryThreshold.setHours(23, 59, 59, 999);
 
 	const listOfTeamspaces = await Promise.all(
-		teamspaces.map((teamspace) => getTeamspaceSetting(teamspace, { _id: 1, permissions: 1, subscriptions: 1 })),
-	);
-	const teamspacesOfInterest = listOfTeamspaces.filter(
-		(ts) => !!ts
-        && ts.subscriptions
-        && Object.values(ts.subscriptions).some((sub) => sub.expiryDate
-          && new Date(sub.expiryDate) <= expiryThreshold && sub.expiryDate >= startOfCurrentDay,
-        ),
+		teamspaces.map((teamspace) => getTeamspaceSettingByExpiry(teamspace, startOfCurrentDay, expiryThreshold, { _id: 1, permissions: 1, subscriptions: 1 })),
 	);
 
-	const processedTeamspacesOfInterest = await Promise.all(teamspacesOfInterest.map(async (ts) => ({
-		admins: await getUsersByQuery(
-			{ 'customData.userId': { $in: ts.permissions.filter(({ permissions }) => permissions.includes('teamspace_admin')).map(({ user }) => user) } },
-			{ 'customData.firstName': 1, 'customData.email': 1 },
-		),
-		teamspace: ts._id,
-		expiryDate: Object.values(ts.subscriptions)[0].expiryDate,
-	}),
-	));
+	const teamspacesWithAdminsAndExpiry = await Promise.all(
+		listOfTeamspaces.map(async (ts) => {
+			const admins = await getUsersByQuery(
+				{ userId: { $in: ts.permissions.filter(({ permissions }) => permissions.includes(TEAMSPACE_ADMIN)).map(({ user }) => user) } },
+				{ 'customData.firstName': 1, 'customData.email': 1 },
+			);
+			const subscriptionExpiryDates = Object.values(ts.subscriptions)
+				.map((sub) => sub && sub.expiryDate ? new Date(sub.expiryDate) : null)
+				.filter((expiryDate) => expiryDate && expiryDate >= startOfCurrentDay && expiryDate <= expiryThreshold);
+			const earliestExpiryDate = subscriptionExpiryDates.reduce((earliest, current) => (earliest && earliest <= current ? earliest : current), null);;
 
-	const teamspacesToExpire = processedTeamspacesOfInterest.filter((ts) => ts.expiryDate > currentDate);
-	const teamspacesExpiredNow = processedTeamspacesOfInterest
+			return {
+				admins,
+				teamspace: ts._id,
+				expiryDate: earliestExpiryDate,
+			}
+		}),
+	);
+
+
+	const teamspacesToExpire = teamspacesWithAdminsAndExpiry.filter((ts) => ts.expiryDate > currentDate);
+	const teamspacesExpiredNow = teamspacesWithAdminsAndExpiry
 		.filter((ts) => ts.expiryDate >= startOfCurrentDay
-        && ts.expiryDate <= endOfCurrentDay);
+			&& ts.expiryDate <= endOfCurrentDay);
 
 	await Promise.all(teamspacesToExpire.map(async (ts) => {
 		await Promise.all(ts.admins.map(({ customData: { firstName, email } }) => sendEmail(
-			templates.EXTERNAL_TEAMSPACE_EXPIRY_LIST.name,
+			templates.EXTERNAL_TEAMSPACE_EXPIRING_WITHIN_THRESHOLD_LIST.name,
 			email,
-			{ firstName, teamspace_name: ts.teamspace, expiry_date: ts.expiryDate },
+			{ firstName, teamspace: ts.teamspace, expiryDate: ts.expiryDate },
 		)));
 	},
 	));
 
 	await Promise.all(teamspacesExpiredNow.map(async (ts) => {
 		await Promise.all(ts.admins.map(({ customData: { firstName, email } }) => sendEmail(
-			templates.EXTERNAL_TEAMSPACE_EXPIRED_LIST.name,
+			templates.EXTERNAL_TEAMSPACE_EXPIRING_TODAY_LIST.name,
 			email,
-			{ firstName, teamspace_name: ts.teamspace, expiry_date: ts.expiryDate },
+			{ firstName, teamspace: ts.teamspace, expiryDate: ts.expiryDate },
 		)));
 	},
 	));

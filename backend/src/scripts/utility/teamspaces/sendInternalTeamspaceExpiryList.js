@@ -40,13 +40,20 @@ const run = async () => {
 		&& Object
 			.values(ts.subscriptions)
 			.some((sub) => sub.expiryDate && new Date(sub.expiryDate) <= expiryThreshold),
-	).map((ts) => ({
-		teamspace: ts._id,
-		expiryDate: Object.values(ts.subscriptions)[0].expiryDate,
-	}));
+	).map((ts) => {
+		const subscriptionExpiryDates = Object.values(ts.subscriptions)
+			.map((sub) => sub && sub.expiryDate? new Date(sub.expiryDate) : null)
+			.filter((expiryDate) => expiryDate && expiryDate >= currentDate && expiryDate <= expiryThreshold);
+		const earliestExpiryDate = subscriptionExpiryDates.reduce((earliest, current) => (earliest && earliest <= current ? earliest : current), null);
+
+		return {
+			teamspace: ts._id,
+			expiryDate: earliestExpiryDate,
+		}
+});
 
 	if (teamspacesToExpire.length) {
-		await sendEmail(templates.INTERNAL_TEAMSPACE_EXPIRY_LIST.name, config.mail.sender, { firstName: 'Support', teamspacesToExpire });
+		await sendEmail(templates.INTERNAL_TEAMSPACE_EXPIRY_LIST.name, config.contact.support, { firstName: 'Support', teamspacesToExpire });
 	}
 };
 

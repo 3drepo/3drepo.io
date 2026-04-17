@@ -17,18 +17,19 @@
 
 const Yup = require('yup');
 const { generateTemplateFn } = require('./common');
+const { types } = require('../../../utils/helper/yup')
 
 const dataSchema = Yup.object({
-	name: Yup.string().required(),
-	expiryDate: Yup.string().required(),
+	teamspace: Yup.string().required(),
+	expiryDate: types.date().required(),
 }).required(true);
 
-const TEMPLATE_PATH = `${__dirname}/html/externalTeamspaceExpiredList.html`;
+const TEMPLATE_PATH = `${__dirname}/html/externalTeamspaceExpiringTodayList.html`;
 
-const ExternalTeamspaceExpiredListTemplate = {};
+const ExternalTeamspaceExpiringTodayList = {};
 
-ExternalTeamspaceExpiredListTemplate.subject = ({ name }) => `Your teamspace ${name} has expired`;
+ExternalTeamspaceExpiringTodayList.subject = ({ teamspace }) => `Your teamspace ${teamspace} has expired`;
 
-ExternalTeamspaceExpiredListTemplate.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
+ExternalTeamspaceExpiringTodayList.html = generateTemplateFn(dataSchema, TEMPLATE_PATH);
 
-module.exports = ExternalTeamspaceExpiredListTemplate;
+module.exports = ExternalTeamspaceExpiringTodayList;

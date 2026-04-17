@@ -17,11 +17,12 @@
 
 const Yup = require('yup');
 const { generateTemplateFn } = require('./common');
+const { types } = require('../../../utils/helper/yup')
 
 const dataSchema = Yup.object({
 	teamspaces: Yup.array().of(Yup.object({
 		name: Yup.string().required(),
-		expiryDate: Yup.date().required(),
+		expiryDate: types.date().required(),
 	})).min(1).required(),
 }).required(true);
 
