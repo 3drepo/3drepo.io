@@ -2768,4 +2768,18 @@ export class UnityUtil {
 		UnityUtil.virtualJoystickProvider = null;
 		UnityUtil.toUnity('DisableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
+
+	/**
+	 * Enable the Gamepad feature.
+	 */
+	public static enableGamepad() {
+		UnityUtil.toUnity('EnableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the Gamepad feature.
+	 */
+	public static disableGamepad() {
+		UnityUtil.toUnity('DisableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
 }
