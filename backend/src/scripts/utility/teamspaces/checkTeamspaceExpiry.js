@@ -83,8 +83,8 @@ const runExternal = async () => {
 		.filter((ts) => ts.expiryDate >= startOfCurrentDay && ts.expiryDate <= endOfCurrentDay);
 
 	await Promise.all(teamspacesToExpire.map(async ({ teamspace, expiryDate, admins }) => {
-		await Promise.all(admins.map(({ customData: { firstName, email } }) => {
-			sendEmail(
+		await Promise.all(admins.map(async ({ customData: { firstName, email } }) => {
+			await sendEmail(
 				templates.TEAMSPACE_EXPIRING_SOON.name,
 				email,
 				{ firstName, teamspace, expiryDate },

@@ -32,8 +32,6 @@ const { templates: emailTemplates } = require(`${src}/services/mailer/mailer.con
 const checkTeamspaceExpiry = require(`${utilScripts}/teamspaces/checkTeamspaceExpiry`);
 const { editSubscriptions } = require(`${src}/models/teamspaceSettings`);
 
-const User = require(`${src}/models/users`);
-
 jest.mock('../../../../src/v5/services/mailer');
 const { sendEmail } = require(`${src}/services/mailer`);
 
