@@ -39,6 +39,9 @@ const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPAC
 const teamspaceSettingQuery = (ts, query, projection, sort) => db.findOne(ts,
 	TEAMSPACE_SETTINGS_COL, query, projection, sort);
 
+const multipleTeamspaceSettingsQuery = (ts, query, projection) => db.find(ts,
+	TEAMSPACE_SETTINGS_COL, query, projection);
+
 TeamspaceSetting.getTeamspaceSetting = async (ts, projection = { refId: 0 }) => {
 	const tsDoc = await teamspaceSettingQuery(ts, { _id: ts }, projection);
 	if (!tsDoc) {
@@ -46,8 +49,6 @@ TeamspaceSetting.getTeamspaceSetting = async (ts, projection = { refId: 0 }) => 
 	}
 	return tsDoc;
 };
-
-
 
 TeamspaceSetting.updateSecurityRestrictions = async (ts, ssoRestricted, whiteListDomains) => {
 	const query = { _id: ts };
@@ -230,8 +231,7 @@ TeamspaceSetting.getTeamspaceInvites = (teamspace, projection = { _id: 1 }) => {
 	return teamspaceInvitesQuery(query, projection);
 };
 
-
-TeamspaceSetting.getTeamspaceSettingByExpiry = async (teamspace, expiryStart, expiryEnd, projection = { refId: 0 }) => {
+TeamspaceSetting.getTeamspaceSettingByExpiry = (teamspace, expiryStart, expiryEnd, projection = { refId: 0 }) => {
 	const query = {
 		_id: teamspace,
 		$or: Object.values(SUBSCRIPTION_TYPES).map((type) => ({
@@ -241,7 +241,7 @@ TeamspaceSetting.getTeamspaceSettingByExpiry = async (teamspace, expiryStart, ex
 			},
 		})),
 	};
-	return teamspaceSettingQuery(teamspace, query, projection);
+	return multipleTeamspaceSettingsQuery(teamspace, query, projection);
 };
 
 module.exports = TeamspaceSetting;
