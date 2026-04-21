@@ -153,6 +153,13 @@ export class UnityUtil {
 	private static domTextureReferenceCounter = 0;
 
 	/**
+	 * Called from Unity to retrieve joystick input.
+	 * @returns An array containing the joystick input values [leftStickX, leftStickY, rightStickX, rightStickY]
+	 */
+	/** @hidden */
+	private static virtualJoystickProvider: (() => [number, number, number, number] | null | undefined) | null = null;
+
+	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
 	 */
@@ -2538,6 +2545,16 @@ export class UnityUtil {
 	}
 
 	/**
+	 * When set, the viewer will draw less of the model during navigation or
+	 * camera movement, in order to maintain the target Fps. If the Fps is zero
+	 * or negative, this feature is disabled.
+	 * @param fps The target framerate
+	 */
+	public static setDynamicFpsTarget(fps: number) {
+		UnityUtil.toUnity('SetNavigationTargetFps', UnityUtil.LoadingState.VIEWER_READY, Number(fps));
+	}
+
+	/**
 	 * Move mesh/meshes by a given transformation matrix.
 	 * NOTE: this currently only works as desired in Synchro Scenarios
 	 * @category Model Interactions
@@ -2729,5 +2746,51 @@ export class UnityUtil {
 	 */
 	public static createWebRequestHandler(gameObjectName: string) {
 		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
+	}
+
+	/**
+	 * Enable the virtual joystick feature.
+	 *
+	 * The viewer polls `fn` once per frame to retrieve the
+	 * current joystick state. Each axis value should be in the range **-1 to 1**, where
+	 * 0 represents the neutral (centred) position.
+	 *
+	 * @param fn - A provider function that returns the current joystick state as a
+	 * four-element tuple `[leftStickX, leftStickY, rightStickX, rightStickY]`.
+	 * Return `null` or `undefined` to indicate no input this frame.
+	 *
+	 * @example
+	 * // Simulates a static right-stick push to the right (e.g. for testing)
+	 * UnityUtil.enableVirtualJoystick(() => [0, 0, 1, 0]);
+	 */
+	public static enableVirtualJoystick(fn: () => [number, number, number, number]) {
+		if (typeof fn !== 'function') {
+			console.error('enableVirtualJoystick: fn must be a function');
+			return;
+		}
+		UnityUtil.virtualJoystickProvider = fn;
+		UnityUtil.toUnity('EnableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the virtual joystick feature.
+	 */
+	public static disableVirtualJoystick() {
+		UnityUtil.virtualJoystickProvider = null;
+		UnityUtil.toUnity('DisableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Enable the Gamepad feature.
+	 */
+	public static enableGamepad() {
+		UnityUtil.toUnity('EnableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the Gamepad feature.
+	 */
+	public static disableGamepad() {
+		UnityUtil.toUnity('DisableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 }

@@ -45,6 +45,7 @@ import { DrawingRevisionsActions, IDrawingRevisionsActionCreators } from '../sto
 import { CompareActions } from '@/v4/modules/compare';
 import { ViewpointsActions } from '@/v4/modules/viewpoints';
 import { DrawingsCardActions, IDrawingsCardActionCreators } from '../store/drawings/card/drawingsCard.redux';
+import { ICriteriaFieldState } from '@/v4/modules/groups/groups.redux';
 
 interface IBimActionCreators {
 	setIsActive: (active: boolean) => Action;
@@ -74,6 +75,7 @@ interface IGroupsActionCreators {
 	setActiveGroup: (group: any) => Action;
 	showDetails: (group: any) => Action;
 	clearSelectionHighlights: (shouldClearTree?: boolean) => Action;
+	setCriteriaFieldState: (criteriaFieldState: Partial<ICriteriaFieldState>) => Action;
 }
 
 interface ISequencesActionCreators {
