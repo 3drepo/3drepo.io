@@ -19,27 +19,27 @@ const { src } = require('../../../../helper/path');
 const { generateRandomString } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
 
-const ExternalTeamspaceExpiredList = require(`${src}/services/mailer/templates/externalTeamspaceExpiredList`);
+const TeamspaceExpiringToday = require(`${src}/services/mailer/templates/teamspaceExpiringToday`);
 
 const testHtml = () => {
-	describe('get externalTeamspaceExpiredList template html', () => {
+	describe('get teamspaceExpiringToday template html', () => {
 		const standardData = {
-			name: generateRandomString(),
+			teamspace: generateRandomString(),
 			expiryDate: new Date(),
 		};
 		describe.each([
 			['data is undefined', undefined],
-			['teamspace_name is undefined', { ...standardData, name: undefined }],
+			['teamspace is undefined', { ...standardData, teamspace: undefined }],
 		])(
 			'Error checking ', (desc, data) => {
 				test(`should throw an error if ${desc}`, async () => {
-					await expect(ExternalTeamspaceExpiredList.html(data)).rejects.toThrow();
+					await expect(TeamspaceExpiringToday.html(data)).rejects.toThrow();
 				});
 			},
 		);
 
-		test('should get externalTeamspaceExpiredList template html', async () => {
-			const res = await ExternalTeamspaceExpiredList.html(standardData);
+		test('should get teamspaceExpiringToday template html', async () => {
+			const res = await TeamspaceExpiringToday.html(standardData);
 			expect(isHtml(res)).toEqual(true);
 		});
 	});
@@ -48,13 +48,13 @@ const testHtml = () => {
 const testSubject = () => {
 	describe('Email subject', () => {
 		test('Should return the subject title as expected', () => {
-			const name = generateRandomString();
-			expect(ExternalTeamspaceExpiredList.subject({ name })).toEqual(`Your teamspace ${name} has expired`);
+			const teamspace = generateRandomString();
+			expect(TeamspaceExpiringToday.subject({ teamspace })).toEqual(`Your teamspace ${teamspace} has expired`);
 		});
 	});
 };
 
-describe('services/mailer/templates/externalTeamspaceExpiredList', () => {
+describe('services/mailer/templates/teamspaceExpiringToday', () => {
 	testHtml();
 	testSubject();
 });

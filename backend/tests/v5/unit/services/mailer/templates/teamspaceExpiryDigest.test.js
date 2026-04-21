@@ -16,30 +16,33 @@
  */
 
 const { src } = require('../../../../helper/path');
+
 const { generateRandomString } = require('../../../../helper/services');
 const isHtml = require('is-html-content');
 
-const externalTeamspaceExpiryList = require(`${src}/services/mailer/templates/externalTeamspaceExpiryList`);
+const teamspaceExpiryDigest = require(`${src}/services/mailer/templates/teamspaceExpiryDigest`);
 
 const testHtml = () => {
-	describe('get externalTeamspaceExpiryList template html', () => {
+	describe('get teamspaceExpiryDigest template html', () => {
 		const standardData = {
-			name: generateRandomString(),
-			expiryDate: new Date(),
+			teamspaces: [{
+				name: generateRandomString(),
+				expiryDate: new Date(),
+			}],
 		};
 		describe.each([
 			['data is undefined', undefined],
-			['teamspace_name is undefined', { ...standardData, name: undefined }],
+			['teamspaces is empty', { teamspaces: [] }],
 		])(
 			'Error checking ', (desc, data) => {
 				test(`should throw an error if ${desc}`, async () => {
-					await expect(externalTeamspaceExpiryList.html(data)).rejects.toThrow();
+					await expect(teamspaceExpiryDigest.html(data)).rejects.toThrow();
 				});
 			},
 		);
 
-		test('should get externalTeamspaceExpiryList template html', async () => {
-			const res = await externalTeamspaceExpiryList.html(standardData);
+		test('should get teamspaceExpiryDigest template html', async () => {
+			const res = await teamspaceExpiryDigest.html(standardData);
 			expect(isHtml(res)).toEqual(true);
 		});
 	});
@@ -48,13 +51,12 @@ const testHtml = () => {
 const testSubject = () => {
 	describe('Email subject', () => {
 		test('Should return the subject title as expected', () => {
-			const name = generateRandomString();
-			expect(externalTeamspaceExpiryList.subject({ name })).toEqual(`Your teamspace ${name} is about to expire`);
+			expect(teamspaceExpiryDigest.subject()).toEqual('Teamspaces with upcoming expiry');
 		});
 	});
 };
 
-describe('services/mailer/templates/externalTeamspaceExpiryList', () => {
+describe('services/mailer/templates/teamspaceExpiryDigest', () => {
 	testHtml();
 	testSubject();
 });
