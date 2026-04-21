@@ -44,6 +44,7 @@ import { TicketsBulkUpdateContext, TicketsBulkUpdateContextComponent } from '@co
 import { BulkUpdateDropdown } from './bulkUpdate/bulkUpdateDropDown.component';
 import { ToggleAllCheckbox } from './bulkUpdate/toggleAllCheckbox.component';
 import { TextOverflow } from '@controls/textOverflow';
+import { useSearchParam } from '../../../useSearchParam';
 
 const TicketsActions = ({ readOnly, groupBy }) => {
 	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
@@ -93,13 +94,20 @@ export const TicketsListCard = () => {
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
+	const [groupByParam, setGroupByParam] = useSearchParam('groupBy');
+	
 	const groupBy = TicketsCardHooksSelectors.selectGroupBy();
 	const [fetchingProperties, setFetchingProperties] = useState(false);
 
+	useEffect(() => {
+		if (groupByParam) {
+			TicketsCardActionsDispatchers.setGroupBy(groupByParam);
+		}
+	}, []);
 
-	const onFiltersChange = (newfilters) => {
-		TicketsCardActionsDispatchers.setFilters(newfilters);
-	};
+	useEffect(() => {
+		setGroupByParam(groupBy === NONE_OPTION ? null : groupBy);
+	}, [groupBy]);
 
 	useEffect(() => {
 		if (groupBy === NONE_OPTION) return;
@@ -124,7 +132,7 @@ export const TicketsListCard = () => {
 	return (
 		<CardContainer>
 			<TicketsBulkUpdateContextComponent>
-				<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]} filters={filters} onChange={onFiltersChange}>
+				<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]}>
 					<CardHeader
 						icon={<TicketsIcon />}
 						title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
