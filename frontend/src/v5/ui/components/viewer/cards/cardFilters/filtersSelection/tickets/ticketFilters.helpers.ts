@@ -228,11 +228,11 @@ export const getTicketFilterFromCodes = (values: string[]): TicketFilter => ({
 	},
 });
 
-export const getTemplateFilter = (templateCode: string): TicketFilter => ({
+export const getTemplateFilter = (templateCodes: string[]): TicketFilter => ({
 	type:'template',
 	property:'',
 	filter: { operator:'is', 
-		values:[templateCode],
+		values: templateCodes,
 	},
 });
 

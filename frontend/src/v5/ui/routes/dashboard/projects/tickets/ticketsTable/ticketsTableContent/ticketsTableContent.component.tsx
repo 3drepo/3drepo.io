@@ -40,7 +40,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		setVisibleSortedColumnsNames,
 		getVisibleSortedColumnsNames,
 	} = useContextWithCondition(ResizableTableContext, []);
-	const { isFiltering } = useContext(TicketsFiltersContext);
+	const { isFiltering, filteredTickets } = useContext(TicketsFiltersContext);
 	const templateWasFetched = templateAlreadyFetched(template);
 	const ignoreColumnChange = useRef(false);
 	
@@ -107,7 +107,7 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 		);
 	}
 
-	if (!props.tickets.length) {
+	if (!filteredTickets.length) {
 		return (
 			<EmptyPageView>
 				<FormattedMessage
