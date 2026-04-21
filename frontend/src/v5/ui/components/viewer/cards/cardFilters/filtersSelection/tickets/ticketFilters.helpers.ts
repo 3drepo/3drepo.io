@@ -245,11 +245,11 @@ const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, tem
 	return (findByName(propertiesDefinitions, ticketFilter.property) || findByName(propertiesDefinitions, ticketFilter.type)) as PropertyDefinition;
 };
 
-export class InvalidPropertyOrTemplateError extends Error {
-	constructor(propertyname: string, type: string, templateName: string) {
+export class InvalidPropertyError extends Error {
+	constructor(propertyname: string, type: string) {
 		// Need to pass `options` as the second parameter to install the "cause" property.
-		super('There was an error deserializing the filter the property "' + propertyname + '" of type "' + type + '" for the template "' + templateName + '"');
-		this.name = 'InvalidPropertyOrTemplateError';
+		super('There was an error deserializing the filter the property "' + propertyname + '" of type "' + type);
+		this.name = 'InvalidPropertyError';
 	}
 }
 
@@ -297,7 +297,7 @@ export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFil
 		serializedValues = values.map(serializeValue).join(',');
 		if (['oneOf', 'manyOf', 'status', 'owner'].includes(ticketFilter.type)) {
 			if (!propertyDefs.values.length) {
-				throw (new InvalidPropertyOrTemplateError(ticketFilter.property, ticketFilter.type, '')); // template.name ?
+				throw (new InvalidPropertyError(ticketFilter.property, ticketFilter.type));
 			}
 
 			const indexes = values.map((val) => propertyDefs.values.indexOf(val as any));
@@ -341,7 +341,7 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 	};
 	if (['manyOf', 'oneOf', 'owner', 'status'].includes(type)) {
 		if (!propertyDefs.values.length) {
-			throw (new InvalidPropertyOrTemplateError(property, type, '')); // template.name ?
+			throw (new InvalidPropertyError(property, type));
 		}
 		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
 		filter.values = indexes.filter((i) => propertyDefs.values[i]).map((i) => propertyDefs.values[i]);
