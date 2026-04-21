@@ -2750,7 +2750,18 @@ export class UnityUtil {
 
 	/**
 	 * Enable the virtual joystick feature.
-	 * @param fn - A provider function that returns joystick state with [leftStickX, leftStickY, rightStickX, rightStickY].
+	 *
+	 * The viewer polls `fn` once per frame to retrieve the
+	 * current joystick state. Each axis value should be in the range **-1 to 1**, where
+	 * 0 represents the neutral (centred) position.
+	 *
+	 * @param fn - A provider function that returns the current joystick state as a
+	 * four-element tuple `[leftStickX, leftStickY, rightStickX, rightStickY]`.
+	 * Return `null` or `undefined` to indicate no input this frame.
+	 *
+	 * @example
+	 * // Simulates a static right-stick push to the right (e.g. for testing)
+	 * UnityUtil.enableVirtualJoystick(() => [0, 0, 1, 0]);
 	 */
 	public static enableVirtualJoystick(fn: () => [number, number, number, number]) {
 		if (typeof fn !== 'function') {
