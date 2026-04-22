@@ -19,13 +19,12 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer } from './ticketsList.styles';
-import { useContext, useEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { untilXFramesPassed, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
 import { TicketsGroup } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
 import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
-import { TicketsFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 
 
 const TicketsListsContainer = ({ children, scrollerRef }: any) => {
@@ -48,9 +47,11 @@ const TicketsListsContainer = ({ children, scrollerRef }: any) => {
 };
 
 export const TicketsList = ({ groupBy, loading }: any) => {
-	const { isFiltering, filteredTickets } = useContext(TicketsFiltersContext);
+	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
 	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
+
 	const tableHandle = useRef<VListHandle>();
 	const subTableHandle = useRef<VListHandle>();
 	const scrollerRef = useRef<Element>();

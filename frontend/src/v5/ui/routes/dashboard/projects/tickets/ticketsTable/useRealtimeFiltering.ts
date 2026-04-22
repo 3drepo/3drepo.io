@@ -43,7 +43,7 @@ export const useRealtimeFiltering = (
 		const { number, _id: ticketId } =  selectTicketByIdRaw(getState(), m, ticket._id);
 		const templateCode = template.code;
 		const ticketCode = templateCode + ':' + number;
-		const allFilters = [...filters, getTicketFilterFromCodes([ticketCode]), getTemplateFilter([templateCode])];
+		const allFilters = [...filters, getTicketFilterFromCodes([ticketCode]), getTemplateFilter(templateCode)];
 		const res = await apiFetchFilteredTickets(t, p, m, f, allFilters);
 		callback(ticketId, res.has(ticketId));
 	};

@@ -49,9 +49,14 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { useWatchPropertyChange } from './useWatchPropertyChange';
 import { getAvailableColumnsForTemplate } from './ticketsTableContext/ticketsTableContext.helpers';
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
+import { apiFetchFilteredTickets } from '@/v5/store/tickets/card/ticketsCard.sagas';
+import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
+import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { useRealtimeFiltering } from './useRealtimeFiltering';
+import { isEmpty, isEqual } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 
 const paramToInputProps = (value, setter) => ({
@@ -81,9 +86,12 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const models = useSelectedModels();
 	// These are the modelIds which are validated
 	const modelsIds = models.map(({ _id }) => _id);
-	const [isFiltering] = useState<boolean>(true);
-	const [filteredTicketsIDs] = useState<Set<string>>(new Set());
+	const [filters, setFilters] = useState<TicketFilter[]>();
+	const [isFiltering, setIsFiltering] = useState<boolean>(true);
+	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
 	
+	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
+	const jobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
 	const setTemplate = useCallback((newTemplate) => {
 		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
 		const ticketsPath = TICKETS_ROUTE;
@@ -102,6 +110,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const ticketsByModelId = TicketsHooksSelectors.selectTicketsByModelIdDictionary();
 	const prevModelIdsRef = useRef<string[]>(containersAndFederations);
+
+	const [paramFilters, setParamFilters] = useSearchParam<string>('filters', undefined, true);
 
 	const readOnly = isFed(containerOrFederation)
 		? !FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
@@ -162,11 +172,111 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	}, [filteredTickets.map(({ _id }) => _id).join(), visibleSortedColumnsNames.join()]);
 
 	useEffect(() => {
+		setIsFiltering(true);
+
+		if (!filters) return;
+		let mounted = true;
+		(async () => {
+			const templateFilter = getTemplateFilter(selectedTemplate.code);
+			const allFilters = [...filters, templateFilter];
+
+			const idsSets:Set<string>[] =  await Promise.all(modelsIds.map(
+				(id) => apiFetchFilteredTickets(teamspace, project, id, isFed(id), allFilters)),
+			);
+
+			if (!mounted) return;
+			const idsSet = new Set<string>();
+			idsSets.forEach((idSetPerContainer) => {
+				for (let id of idSetPerContainer) {
+					idsSet.add(id);
+				}
+			});
+
+			setFilteredTicketIds(idsSet);
+			setIsFiltering(false);
+		})();
+
+		return () => { mounted = false;};
+	}, [models,  selectedTemplate?.code, JSON.stringify(filters)]);
+
+	useEffect(() => {
 		const filtTickets = tickets.filter(({ _id }) => filteredTicketsIDs.has(_id));
 		setFilteredTickets(filtTickets);
 	}, [tickets, filteredTicketsIDs]);
 
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
+
+	useRealtimeFiltering(teamspace, project, containersAndFederations, selectedTemplate, filters || [], 
+		(updatedTicketId, included) => {
+			// if nothing changed do nothing;
+			if (filteredTicketsIDs.has(updatedTicketId) === included) return;
+			setFilteredTicketIds((oldFilteredIds) => {
+				const newFilteredIds = new Set(oldFilteredIds);
+
+				if (included) newFilteredIds.add(updatedTicketId);
+				else newFilteredIds.delete(updatedTicketId);
+				
+				return newFilteredIds;
+			});
+		});
+
+	/**
+	 * This part react to the filters in the url being changed and
+	 * set the actual filters.
+	 * If there is no filters in the url it sets the default filters
+	 */
+	useEffect(() => { 
+		if (!templateAlreadyFetched(selectedTemplate)) return;
+		
+		if (!paramFilters) {
+			const newFilters  = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
+			if (isEqual(newFilters, filters)) return;
+			setFilters(newFilters);
+			return;
+		}
+	
+	 	if (!riskCategories.length || isEmpty(jobsAndUsers)) return;
+		
+		try {
+		// Dont blank the page if the url param has the wrong format
+			const newFilters = JSON.parse(paramFilters).map((f) => {
+				try {
+					return deserializeFilter([selectedTemplate], f, jobsAndUsers, riskCategories);
+				} catch (e) {
+					console.error('Error parsing the url filter param');
+					console.error(e);
+					return undefined;
+				}
+			}).filter(Boolean);
+			if (isEqual(newFilters, filters)) return;
+			setFilters(newFilters);
+		} catch (e) {
+			console.error('Error parsing the url filter param');
+			console.error(e);
+			return undefined;
+		}
+	}, [selectedTemplate, containersAndFederations, jobsAndUsers, filters, riskCategories]);
+	
+	/**
+	 * When the filter objects are changed this bit changes
+	 * the url search param.
+	 */
+	const onChangeFilters = (newFilters) => {
+		if (!newFilters && !paramFilters) return;
+		if (!templateAlreadyFetched(selectedTemplate)) return;
+		setFilters(newFilters);
+
+		const defaultFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
+
+		let param = JSON.stringify(newFilters.map((f) => 
+			serializeFilter([selectedTemplate], f, jobsAndUsers, riskCategories),
+		));
+
+		// When there are no paramFilters that means the defaultfilters are there so no need to update the url
+		if (isEqual(defaultFilters, newFilters) && !paramFilters) return;
+		if (paramFilters === param) return;
+		setParamFilters(param);
+	};
 
 	useEffect(() => {
 		return () => {
@@ -223,7 +333,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	return (
 		// eslint-disable-next-line max-len
-		<TicketsFiltersContextComponent templates={[selectedTemplate]} modelsIds={containersAndFederations} isFiltering={isFiltering}>
+		<TicketsFiltersContextComponent onChange={onChangeFilters} templates={[selectedTemplate]} modelsIds={containersAndFederations} filters={filters} isFiltering={isFiltering}>
 			<TicketsTableLayout>
 				<FiltersContainer>
 					<FlexContainer>
@@ -258,7 +368,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 					</FlexContainer>
 				</FiltersContainer>
 				<CardFilters />
-				<TicketsTableContent setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
+				<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
 			</TicketsTableLayout>
 		</TicketsFiltersContextComponent>
 	);

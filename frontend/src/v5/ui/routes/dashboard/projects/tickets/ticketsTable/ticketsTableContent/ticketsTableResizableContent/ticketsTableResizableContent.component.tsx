@@ -28,7 +28,6 @@ import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
-import { TicketsFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 
 type CollapsibleTicketsGroupProps = {
 	propertyValue: string;
@@ -73,16 +72,17 @@ const CollapsibleTicketsGroup = ({
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
+	tickets: ITicket[],
 	template: ITemplate,
 };
 
 export const TicketsTableResizableContent = ({ 
 	setTicketValue, 
 	selectedTicketId, 
+	tickets: filteredItems, 
 	template,
 }: TicketsTableResizableContentProps) => {
 	const { groupBy } = useContext(TicketsTableContext);
-	const { filteredTickets: filteredItems } = useContext(TicketsFiltersContext);
 	const collapsedGroups = useRef<Record<string, boolean>>({});
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {

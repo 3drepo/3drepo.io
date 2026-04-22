@@ -113,6 +113,7 @@ export const Viewer = () => {
 
 	return (
 		<>
+			<TicketFiltersSetter key={revision} />
 			<OpenDrawingFromUrl />
 			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
