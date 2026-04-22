@@ -48,7 +48,7 @@ interface IState {
 
 const SequenceDate = ({ name, onChange, value, showSequenceDate, min, max, initialFocusedDate, hasSequences, canEdit, ...props }) => {
 	const deleteValue = () => {
-		onChange(null)
+		onChange({ target: { name, value: null } });
 	};
 
 	return (
