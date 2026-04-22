@@ -33,6 +33,7 @@ const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const [urlFiltersRaw, setUrlFilters] = useSearchParam('filters');
+	const [groupByParam, setGroupByParam] = useSearchParam('groupBy');
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFed = modelIsFederation(containerOrFederation);
@@ -41,6 +42,7 @@ export const TicketFiltersSetter = () => {
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
 	const jobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
 	const filtersFromState = TicketsCardHooksSelectors.selectCardFilters();
+	const groupBy = TicketsCardHooksSelectors.selectGroupBy();
 
 	const defaultFiltersForTemplate = getNonCompletedTicketFilters(templates, containerOrFederation);
 
@@ -53,12 +55,20 @@ export const TicketFiltersSetter = () => {
 	, [containerOrFederation, revision, isFed]);
 
 	useEffect(() => {
+		if (groupByParam) {
+			TicketsCardActionsDispatchers.setGroupBy(groupByParam);
+		}
 		if (urlFiltersRaw.length) {
 			UsersActionsDispatchers.fetchUsers(teamspace);
 			JobsActionsDispatchers.fetchJobs(teamspace);
 			TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 		}
 	}, []);
+	
+	useEffect(() => {
+		if ((groupBy === groupByParam) || (groupBy === NONE_OPTION && !groupByParam)) return;
+		setGroupByParam(groupBy === NONE_OPTION ? null : groupBy);
+	}, [groupBy, groupByParam]);
 
 	/**
 	 * When the filter objects are changed this bit changes
@@ -72,7 +82,8 @@ export const TicketFiltersSetter = () => {
 		));
 
 		// When there are no paramFilters that means the defaultfilters are there so no need to update the url
-		if ((isEqual(defaultFiltersForTemplate, filtersFromState) && !urlFiltersRaw.length)
+		if (
+			(isEqual(defaultFiltersForTemplate, filtersFromState) && !urlFiltersRaw.length)
 			|| (urlFiltersRaw === param) || (!urlFiltersRaw.length && !filtersFromState.length) // if filters from URL and state are the same do nothing
 		) return;
 		setUrlFilters(param);
