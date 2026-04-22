@@ -19,13 +19,20 @@ import { AppBar } from '@components/shared/appBar';
 import { Content } from './dashboardViewerLayout.styles';
 import { ViewerCanvasesContextComponent } from '@/v5/ui/routes/viewer/viewerCanvases.context';
 import { Outlet } from 'react-router-dom';
+import { ThemeProvider } from 'styled-components';
+import { ThemeProvider as MuiThemeProvider } from '@mui/material';
+import { theme } from '@/v5/ui/routes/viewer/theme';
 
 export const DashboardViewerLayout = () => (
 	<>
 		<AppBar />
 		<Content>
 			<ViewerCanvasesContextComponent>
-				<Outlet />
+				<ThemeProvider theme={theme}>
+					<MuiThemeProvider theme={theme}>
+						<Outlet />
+					</MuiThemeProvider>
+				</ThemeProvider>
 			</ViewerCanvasesContextComponent>
 		</Content>
 	</>
