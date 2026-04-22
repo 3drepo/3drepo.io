@@ -26,8 +26,8 @@ interface IProps {
 	disabled?: boolean;
 	placeholder?: string;
 	className?: string;
-	onChange?: (event: PickerValue) => void;
-	onBlur?: (event: PickerValue) => void;
+	onChange?: (event: any) => void;
+	onBlur?: (event: any) => void;
 	shouldDisableDate?: (day: any) => boolean;
 	shouldDisableTime?: (day: any) => boolean;
 	minDateTime?: PickerValue;
@@ -36,13 +36,24 @@ interface IProps {
 
 export const DateField = ({
 	placeholder,
+	onChange,
+	onBlur,
 	...dateFieldProps
 }: IProps) => {
 	return (
 		<DateTimePicker
 			disableHighlightToday
 			slotProps={{input: {readOnly: true, placeholder}}}
+			onChange={(newValue) => {
+				onChange?.({
+					target: {
+						value: newValue ? newValue.valueOf() : null,
+						name: dateFieldProps.name,
+					}
+				});
+			}}
 			{...dateFieldProps}
+
 		/>
 	);
 };

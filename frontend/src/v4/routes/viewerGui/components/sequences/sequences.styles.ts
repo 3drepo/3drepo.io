@@ -22,6 +22,7 @@ import Slider from '@mui/material/Slider';
 import DotIcon from '@mui/icons-material/FiberManualRecord';
 import PlayIcon from '@assets/icons/filled/play-filled.svg';
 
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
 import {
 	VIEWER_PANELS,
 	VIEWER_PANELS_ICONS,
@@ -29,7 +30,6 @@ import {
 	VIEWER_PANELS_TITLES
 } from '../../../../constants/viewerGui';
 import { COLOR, FONT_WEIGHT } from '../../../../styles';
-import { DateField } from '../../../components/dateField/dateField.component';
 import { Loader } from '../../../components/loader/loader.component';
 import { Content as ContentComponent } from '../../../components/loader/loader.styles';
 import { MenuItemContainer } from '../previewListItem/previewListItem.styles';
@@ -174,7 +174,7 @@ export const IntervalRow = styled(SequenceRow)`
 	}
 `;
 
-export const DatePicker = styled(DateField)`
+export const DatePicker = styled(DateTimePicker)`
 	&& {
 		width: 160px;
 		margin: 0 9px 12px;

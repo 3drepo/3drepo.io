@@ -130,7 +130,8 @@ export const DateTimePicker = ({
 								</IconButton>
 							</InputAdornment>)
 						,
-						autoComplete: 'off', 
+						autoComplete: 'off',
+						readOnly: true,
 						...props.slotProps?.input,
 					},
 				}}
