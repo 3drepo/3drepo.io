@@ -19,7 +19,7 @@ const Scene = {};
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
 const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
-const { getNodeByQuery, getNodesByIds, getNodesBySharedIds } = require('../../../../../models/scenes');
+const { getNodeByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
 const CombinedStream = require('combined-stream');
 const GeoMaths = require('../../../../../utils/helper/geoMaths');
@@ -62,35 +62,23 @@ Scene.prepareCache = async (teamspace, model, revId, cacheExpiry = CACHE_EXPIRAT
 	await getIdToMeshesMapping(teamspace, model, revId, cacheExpiry);
 };
 
-Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds,
-	{ groupByParent, convertToString = true } = {}) => {
+Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds, returnString = false) => {
 	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
 	const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
-
-	const results = groupByParent ? {} : new Set();
-
+	const meshes = new Set();
 	nodes.forEach(({ _id }) => {
-		const id = UUIDToString(_id);
-		const meshIds = idToMeshes[id];
-
-		if (meshIds?.length) {
-			if (groupByParent) {
-				results[id] = convertToString ? meshIds : meshIds.map(stringToUUID);
-			} else {
-				meshIds.forEach((meshId) => results.add(meshId));
-			}
+		const idStr = UUIDToString(_id);
+		if (idToMeshes[idStr]) {
+			idToMeshes[idStr].forEach((val) => meshes.add(val));
 		}
 	});
 
-	if (groupByParent) {
-		return results;
-	}
+	const meshesArr = Array.from(meshes);
 
-	const allMeshes = Array.from(results);
-	return convertToString ? allMeshes : allMeshes.map(stringToUUID);
+	return returnString ? meshesArr : meshesArr.map(stringToUUID);
 };
 
-Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
+Scene.getExternalIdsFromMetadata = (metadata, wantedType, includeKeys) => {
 	const res = {};
 
 	Object.values(idTypes).forEach((v) => { res[v] = []; });
@@ -106,14 +94,19 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 			if (!idType || idCounted.has(idType)) return;
 
 			idCounted.add(idType);
-			res[idType].push(value);
+			res[idType].push({ key, value });
 		});
 	});
 
 	// If there is a specific type the user wanted, return them
 	// This is currently explicity used for differencing therefore we don't care if
 	// we can't represent them all - we may need to add a partial flag in the future
-	if (wantedType) return { key: wantedType, values: res[wantedType] };
+	if (wantedType) {
+		return {
+			key: wantedType,
+			values: includeKeys ? res[wantedType] : Array.from(new Set(res[wantedType].map(({ value }) => value))),
+		};
+	}
 
 	// If we are determining the type, make sure we have a record for each metadata
 	const targetCount = metadata.length;
@@ -122,25 +115,15 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 		for (const idType of Object.keys(res)) {
 			if (res[idType].length === targetCount) {
 				// convert to set to purge duplicates
-				return { key: idType, values: Array.from(new Set(res[idType])) };
+				return {
+					key: idType,
+					values: includeKeys ? res[idType] : Array.from(new Set(res[idType].map(({ value }) => value))),
+				};
 			}
 		}
 	}
 
 	return undefined;
-};
-
-Scene.meshIdsToExternalIds = async (teamspace, project, container, revId, meshIds) => {
-	const externalIdKeys = Object.values(idTypesToKeys).flat();
-
-	const meshes = await getNodesByIds(teamspace, project, container, meshIds.map(stringToUUID), { parents: 1 });
-	const parents = await getNodesByIds(teamspace, project, container, meshes.flatMap(({ parents }) => parents), { shared_id: 1 });
-
-	const query = { parents: { $in: parents.map((p) => p.shared_id) }, 'metadata.key': { $in: externalIdKeys }, rev_id: revId };
-	const projection = { metadata: 1 };
-	const metadata = await getMetadataByQuery(teamspace, container, query, projection);
-
-	return Scene.getExternalIdsFromMetadata(metadata);
 };
 
 Scene.sharedIdsToExternalIds = async (teamspace, container, revId, sharedIds) => {

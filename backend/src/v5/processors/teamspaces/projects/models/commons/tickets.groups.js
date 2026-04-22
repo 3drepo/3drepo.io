@@ -60,9 +60,9 @@ const getObjectArrayFromRules = async (teamspace, project, model, revId, rules, 
 			unwantedMeshIds,
 		] = await Promise.all([
 			matched.length ? getMeshesWithParentIds(teamspace, project, model, revision,
-				matched.flatMap(({ parents }) => parents)) : Promise.resolve([]),
+				matched.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
 			unwanted.length ? getMeshesWithParentIds(teamspace, project, model, revision,
-				unwanted.flatMap(({ parents }) => parents)) : Promise.resolve([]),
+				unwanted.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
 		]);
 
 		return { container: model, _ids: getArrayDifference(unwantedMeshIds, matchedMeshIds).map(stringToUUID) };
@@ -143,7 +143,7 @@ const convertToMeshIds = async (teamspace, project, revId, containerEntry) => {
 	const metadata = await getMetadataWithMatchingData(teamspace, container, revision,
 		idTypesToKeys[idType], containerEntry[idType], { parents: 1 });
 	const meshIds = await getMeshesWithParentIds(teamspace, project, container, revision,
-		metadata.flatMap(({ parents }) => parents));
+		metadata.flatMap(({ parents }) => parents), true);
 
 	delete formattedEntry[idType];
 	return { ...formattedEntry, _ids: meshIds };

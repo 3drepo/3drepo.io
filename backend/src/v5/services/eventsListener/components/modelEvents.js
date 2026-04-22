@@ -41,8 +41,7 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { createReadStream } = require('fs');
-const { completeTestRun } = require('../../../processors/teamspaces/projects/clashes');
+const { completeRun } = require('../../../processors/teamspaces/projects/clashes');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {
@@ -85,9 +84,9 @@ const queueTasksCompleted = async ({ teamspace, model, value, corId, user }) => 
 	}
 };
 
-const clashRunCompleted = async ({ teamspace, project, container, corId, results }) => {
+const clashRunCompleted = async ({ teamspace, project, corId, results }) => {
 	try {
-		await completeTestRun(teamspace, project, container, stringToUUID(corId), results);
+		await completeRun(teamspace, stringToUUID(project), stringToUUID(corId), results);
 	} catch (err) {
 		logger.logError(`Failed to process a complete clash run for ${teamspace} with id ${corId}: ${err.message}`);
 		if (err.stack) {
