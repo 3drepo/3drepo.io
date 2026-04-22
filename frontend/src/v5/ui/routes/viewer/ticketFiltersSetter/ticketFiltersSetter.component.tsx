@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { JobsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -26,7 +26,8 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
 import { deserializeFilter, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
@@ -51,6 +52,14 @@ export const TicketFiltersSetter = () => {
 		enableRealtimeTickets(teamspace, project, containerOrFederation, isFed, revision)
 	, [containerOrFederation, revision, isFed]);
 
+	useEffect(() => {
+		if (urlFiltersRaw.length) {
+			UsersActionsDispatchers.fetchUsers(teamspace);
+			JobsActionsDispatchers.fetchJobs(teamspace);
+			TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+		}
+	}, []);
+
 	/**
 	 * When the filter objects are changed this bit changes
 	 * the url search param.
@@ -70,29 +79,28 @@ export const TicketFiltersSetter = () => {
 	}, [JSON.stringify(filtersFromState), templates.length]);
 
 	useEffect(() => {
-		if (templates.length) {
-			let filtersToSet: TicketFilter[] = [];
-			TicketsCardActionsDispatchers.resetFilters();
-			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
-			if (ticketCodes.length) {
-				filtersToSet = [getTicketFilterFromCodes(ticketCodes)];
-			} else if (urlFiltersRaw.length) {
-				filtersToSet = JSON.parse(urlFiltersRaw).reduce((acc, urlFilter) => {
-					return [...acc, deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories)];
-				}, []);
-			} else {
-				filtersToSet = defaultFiltersForTemplate;
-			}
-			
-			TicketsCardActionsDispatchers.setFilters(filtersToSet);
-
-			if (ticketCodes.length || urlFiltersRaw?.length) {
-				ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
-			}
-
-			setTicketSearchParam();
+		if (isEmpty(jobsAndUsers) || isEmpty(riskCategories) || isEmpty(templates)) return;
+		let filtersToSet: TicketFilter[] = [];
+		TicketsCardActionsDispatchers.resetFilters();
+		const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
+		if (ticketCodes.length) {
+			filtersToSet = [getTicketFilterFromCodes(ticketCodes)];
+		} else if (urlFiltersRaw.length) {
+			filtersToSet = JSON.parse(urlFiltersRaw).reduce((acc, urlFilter) => {
+				return [...acc, deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories)];
+			}, []);
+		} else {
+			filtersToSet = defaultFiltersForTemplate;
 		}
-	}, [templates.length]); 
+		
+		TicketsCardActionsDispatchers.setFilters(filtersToSet);
+
+		if (ticketCodes.length || urlFiltersRaw?.length) {
+			ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
+		}
+
+		setTicketSearchParam();
+	}, [templates.length, jobsAndUsers, riskCategories]); 
 
 	return <></>;
 };
