@@ -324,7 +324,7 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 										maxDateTime={max}
 										name="date"
 										value={value}
-										onChange={(e) => this.gotoDate(new Date(e.target.value))}
+										onChange={(val) => this.gotoDate(new Date(val))}
 										placeholder="date"
 									/>
 									<SetToCurrentDateButton onClick={goToToday}>

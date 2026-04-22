@@ -26,8 +26,8 @@ interface IProps {
 	disabled?: boolean;
 	placeholder?: string;
 	className?: string;
-	onChange?: (event) => void;
-	onBlur?: (event) => void;
+	onChange?: (event: PickerValue) => void;
+	onBlur?: (event: PickerValue) => void;
 	shouldDisableDate?: (day: any) => boolean;
 	shouldDisableTime?: (day: any) => boolean;
 	minDateTime?: PickerValue;
@@ -35,49 +35,13 @@ interface IProps {
 }
 
 export const DateField = ({
-	onBlur,
-	onChange,
-	name,
-	value: propValue,
 	placeholder,
-	defaultValue,
 	...dateFieldProps
 }: IProps) => {
-	const [value, setValue] = useState(propValue || null);
-
-	const handleAccept = (newValue) => {
-		if (newValue) {
-			setValue(newValue);
-			onChange?.({
-				target: {
-					value: newValue.valueOf(),
-					name,
-				}
-			});
-		}
-	};
-
-	useEffect(() => {
-		setValue(propValue || null);
-	}, [propValue]);
-
 	return (
 		<DateTimePicker
-			value={value}
-			onAccept={handleAccept}
-			onChange={() => {}}
 			disableHighlightToday
-			// @ts-ignore
-			inputProps={{ readOnly: true, placeholder }}
-			components={{ ActionBar: null }}
-			renderInput={(props) => (
-				<TextField
-					defaultValue={defaultValue}
-					name={name}
-					{...props}
-					InputProps={{ endAdornment: null }}
-				/>
-			)}
+			slotProps={{input: {readOnly: true, placeholder}}}
 			{...dateFieldProps}
 		/>
 	);

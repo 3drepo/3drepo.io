@@ -19,7 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { ClearDateAction, PopperWrapper, TextField } from './dateTimePicker.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { DateCalendar, TimeClock } from '@mui/x-date-pickers';
-import { ClickAwayListener, Fade, IconButton, InputAdornment, Popper  } from '@mui/material';
+import { ClickAwayListener, Fade, IconButton, InputAdornment, Popper, InputProps } from '@mui/material';
 import dayjs, { Dayjs } from 'dayjs';
 import { FormattedMessage } from 'react-intl';
 import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
@@ -34,7 +34,7 @@ export type DateTimePickerProps = {
 	value?: PickerValue;
 	onChange?: (value:  PickerValue) => void;
 	onAccept?: (value:  PickerValue) => void;
-	onBlur?: () => void;
+	onBlur?: (value:  PickerValue) => void;
 	placeholder?: string;
 	renderInput?: ElementType;
 	minDateTime?: PickerValue;
@@ -45,6 +45,9 @@ export type DateTimePickerProps = {
 	name?: string;
 	slots?: {
 		openPickerIcon?: ElementType;
+	};
+	slotProps?: {
+		input?: InputProps;
 	};
 };
 
@@ -71,7 +74,7 @@ export const DateTimePicker = ({
 }: DateTimePickerProps) => {
 	const [view, setView] = useState(DatePickerView.calendar);
 	const [open, setOpen] = useState(false);
-	const [calendarValue, setCalendarValue] = useState<Dayjs | null>(null);
+	const [dateValue, setDateValue] = useState<Dayjs | null>(null);
 	const [timeValue, setTimeValue] = useState<Dayjs | null>(DefaultTime);
 	const markForUpdateRef =  useRef(false);
 	const temporalValue = useRef(value);
@@ -83,7 +86,7 @@ export const DateTimePicker = ({
 
   	const handleClick = () => {
 		if (disabled) return;
-		setCalendarValue(value ? dayjs(value) : null);
+		setDateValue(value ? dayjs(value) : null);
 		setTimeValue(value ? dayjs(value) : DefaultTime);
 		setView(DatePickerView.calendar);
 		setOpen(true);
@@ -99,8 +102,11 @@ export const DateTimePicker = ({
 	};
 
 	const InputComponent = renderInput || TextField;
-	const minDateTimeValue = minDateTime ? dayjs(minDateTime) : undefined;
-	const maxDateTimeValue = maxDateTime ? dayjs(maxDateTime) : undefined;
+	const minDate = minDateTime ? dayjs(minDateTime) : undefined;
+	const maxDate = maxDateTime ? dayjs(maxDateTime) : undefined;
+	const minTime = minDateTime && dateValue?.isSame(minDate, 'day') ? dayjs(minDateTime) : undefined;
+	const maxTime = maxDateTime && dateValue?.isSame(maxDate, 'day') ? dayjs(maxDateTime) : undefined;
+
 	const PickerIconValue =  slots?.openPickerIcon || CalendarIcon;
 
 	return (
@@ -125,6 +131,7 @@ export const DateTimePicker = ({
 							</InputAdornment>)
 						,
 						autoComplete: 'off', 
+						...props.slotProps?.input,
 					},
 				}}
 
@@ -140,22 +147,22 @@ export const DateTimePicker = ({
 						<Fade {...TransitionProps} timeout={150} onExited={() => {
 							TransitionProps?.onExited?.();
 							if (!markForUpdateRef.current) return;
-							markForUpdateRef.current = false; 
+							markForUpdateRef.current = false;
 							onChange?.(temporalValue.current ? temporalValue.current : null);
-							onBlur?.();
+							onBlur?.(temporalValue.current ? temporalValue.current : null);
 						}}>
 							<PopperWrapper>
 								{view === DatePickerView.calendar && (
 									<DateCalendar 
-										value={calendarValue} 
-										onChange={(newValue, selectionState) => {
+										value={dateValue} 
+										onChange={(newValue: Dayjs, selectionState) => {
 											if (selectionState === 'finish') {
-												setCalendarValue(newValue);
+												setDateValue(newValue);
 												setView(DatePickerView.time);
 											}
 										}}
-										minDate={minDateTimeValue}
-										maxDate={maxDateTimeValue}
+										minDate={minDate}
+										maxDate={maxDate}
 										disableFuture={disableFuture}
 										disableHighlightToday={disableHighlightToday}
 									/>)}
@@ -163,16 +170,16 @@ export const DateTimePicker = ({
 									<TimeClock
 										value={timeValue}
 										views={['hours', 'minutes']}
-										onChange={(newValue, selectionState) => {
+										onChange={(newValue: Dayjs, selectionState) => {
 											setTimeValue(newValue);
 											if (selectionState === 'finish') {
-												if (!calendarValue || !newValue) return;
-												const valueToSet = calendarValue.hour(newValue.hour()).minute(newValue.minute()).toDate().getTime();
+												if (!dateValue || !newValue) return;
+												const valueToSet = dateValue.hour(newValue.hour()).minute(newValue.minute()).toDate().getTime();
 												consolidateNewValue(valueToSet);
 											}
 										}}
-										minTime={minDateTimeValue}
-										maxTime={maxDateTimeValue}
+										minTime={minTime}
+										maxTime={maxTime}
 										disableFuture={disableFuture}
 									/>
 								)}
