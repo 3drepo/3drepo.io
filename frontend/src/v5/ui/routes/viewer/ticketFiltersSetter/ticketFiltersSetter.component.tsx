@@ -16,7 +16,7 @@
  */
 
 import { TicketsCardActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ViewerParams } from '../../routes.constants';
@@ -25,17 +25,23 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
-import { getNonCompletedTicketFilters, getTicketFilterFromCodes } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { deserializeFilter, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { isEqual } from 'lodash';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
-	const [urlFiltersRaw] = useSearchParam('filters');
+	const [urlFiltersRaw, setUrlFilters] = useSearchParam('filters');
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFed = modelIsFederation(containerOrFederation);
 
 	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
+	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
+	const jobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
+	const filtersFromState = TicketsCardHooksSelectors.selectCardFilters();
+
+	const defaultFiltersForTemplate = getNonCompletedTicketFilters(templates, containerOrFederation);
 
 	useEffect(() => {
 		TicketsCardActionsDispatchers.fetchFilteredTickets(teamspace, project, containerOrFederation, isFed);
@@ -45,18 +51,42 @@ export const TicketFiltersSetter = () => {
 		enableRealtimeTickets(teamspace, project, containerOrFederation, isFed, revision)
 	, [containerOrFederation, revision, isFed]);
 
+	/**
+	 * When the filter objects are changed this bit changes
+	 * the url search param.
+	*/
+	useEffect(() => {
+		if (!filtersFromState || !templates.length) return;
+
+		let param = JSON.stringify(filtersFromState.map((f) => 
+			serializeFilter(templates, f, jobsAndUsers, riskCategories),
+		));
+
+		// When there are no paramFilters that means the defaultfilters are there so no need to update the url
+		if ((isEqual(defaultFiltersForTemplate, filtersFromState) && !urlFiltersRaw.length)
+			|| (urlFiltersRaw === param) || (!urlFiltersRaw.length && !filtersFromState.length) // if filters from URL and state are the same do nothing
+		) return;
+		setUrlFilters(param);
+	}, [JSON.stringify(filtersFromState), templates.length]);
+
 	useEffect(() => {
 		if (templates.length) {
+			let filtersToSet: TicketFilter[] = [];
 			TicketsCardActionsDispatchers.resetFilters();
 			const ticketCodes = ticketSearchParam.filter((query) => TICKET_CODE_REGEX.test(query)).map((q) => q.toUpperCase());
-			const defaultFilters: TicketFilter[] = ticketCodes.length ? [getTicketFilterFromCodes(ticketCodes)] : 
-				getNonCompletedTicketFilters(templates, containerOrFederation);
+			if (ticketCodes.length) {
+				filtersToSet = [getTicketFilterFromCodes(ticketCodes)];
+			} else if (urlFiltersRaw.length) {
+				filtersToSet = JSON.parse(urlFiltersRaw).reduce((acc, urlFilter) => {
+					return [...acc, deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories)];
+				}, []);
+			} else {
+				filtersToSet = defaultFiltersForTemplate;
+			}
 			
-			const urlFilters = urlFiltersRaw && JSON.parse(urlFiltersRaw);
-			const filters = !!urlFilters?.length ? urlFilters : defaultFilters;
-			TicketsCardActionsDispatchers.setFilters(filters);
+			TicketsCardActionsDispatchers.setFilters(filtersToSet);
 
-			if (ticketCodes.length || !!urlFilters?.length) {
+			if (ticketCodes.length || urlFiltersRaw?.length) {
 				ViewerGuiActionsDispatchers.setPanelVisibility(VIEWER_PANELS.TICKETS, true);
 			}
 

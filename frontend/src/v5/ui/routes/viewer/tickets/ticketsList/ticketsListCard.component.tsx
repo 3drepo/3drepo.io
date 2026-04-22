@@ -99,6 +99,10 @@ export const TicketsListCard = () => {
 	const groupBy = TicketsCardHooksSelectors.selectGroupBy();
 	const [fetchingProperties, setFetchingProperties] = useState(false);
 
+	const onFiltersChange = (newfilters) => {
+		TicketsCardActionsDispatchers.setFilters(newfilters);
+	};
+
 	useEffect(() => {
 		if (groupByParam) {
 			TicketsCardActionsDispatchers.setGroupBy(groupByParam);
@@ -132,7 +136,7 @@ export const TicketsListCard = () => {
 	return (
 		<CardContainer>
 			<TicketsBulkUpdateContextComponent>
-				<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]}>
+				<TicketsFiltersContextComponent displayMode='card' templates={templates} modelsIds={[containerOrFederation]} filters={filters} onChange={onFiltersChange}>
 					<CardHeader
 						icon={<TicketsIcon />}
 						title={formatMessage({ id: 'viewer.cards.tickets.title', defaultMessage: 'Tickets' })}
