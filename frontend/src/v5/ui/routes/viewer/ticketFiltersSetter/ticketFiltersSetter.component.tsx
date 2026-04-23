@@ -97,9 +97,7 @@ export const TicketFiltersSetter = () => {
 		if (ticketCodes.length) {
 			filtersToSet = [getTicketFilterFromCodes(ticketCodes)];
 		} else if (urlFiltersRaw.length) {
-			filtersToSet = JSON.parse(urlFiltersRaw).reduce((acc, urlFilter) => {
-				return [...acc, deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories)];
-			}, []);
+			filtersToSet = JSON.parse(urlFiltersRaw).map((urlFilter) => deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories));
 		} else {
 			filtersToSet = defaultFiltersForTemplate;
 		}
