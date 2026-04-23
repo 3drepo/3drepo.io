@@ -34,6 +34,8 @@ import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types'
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 import { findByName, findModuleByNameOrType } from '@/v5/store/tickets/tickets.helpers';
+import { IJobOrUserList } from '@/v5/store/jobs/jobs.types';
+import { IUser } from '@/v5/store/users/users.redux';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -246,21 +248,21 @@ const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, tem
 };
 
 export class InvalidPropertyError extends Error {
-	constructor(propertyname: string, type: string) {
+	constructor(propertyname: string, type: TicketFilterType) {
 		// Need to pass `options` as the second parameter to install the "cause" property.
 		super('There was an error deserializing the filter the property "' + propertyname + '" of type "' + type);
 		this.name = 'InvalidPropertyError';
 	}
 }
 
-const getPropertyDefs = (templates: ITemplate[], module: string, property: string, type: string, jobsAndUsers, riskCategories: string[]) => {
+const getPropertyDefs = (templates: ITemplate[], module: string, property: string, type: TicketFilterType, jobsAndUsers: IJobOrUserList, riskCategories: string[]) => {
 	return templates.reduce((acc, template) => {
 		const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
 		let propertyValues = propertyDef?.values;
 		let propertyDisplayValues = propertyDef?.values;
 		if (propertyValues === 'jobsAndUsers' || type === 'owner') {
 			propertyValues = Object.values(jobsAndUsers).map((ju) => ju.user || ju._id);
-			propertyDisplayValues = Object.values(jobsAndUsers).map((ju) => ju.user ? getFullnameFromUser(ju) : ju._id);
+			propertyDisplayValues = Object.values(jobsAndUsers).map((ju) => ju.user ? getFullnameFromUser(ju as IUser) : ju._id);
 		}
 		if (propertyValues === 'riskCategories') {
 			propertyValues = riskCategories;
@@ -269,15 +271,16 @@ const getPropertyDefs = (templates: ITemplate[], module: string, property: strin
 		return {
 			values: [...acc.values, ...(propertyValues || [])],
 			displayValues: [...acc.displayValues, ...(propertyDisplayValues || [])],
+			propertyExists: propertyDef ? true : acc.propertyExists, // if a property doesnt exist on any template this will remain `false`
 		};
-	}, { values: [], displayValues: [] });
+	}, { values: [], displayValues: [], propertyExists: false });
 };
 
 // NOTE: serialization assumes there are no name clashes: that means 
 // that one name refers to one property. Eg: lets say theres a property 'number of nodes' serialization
 // assumes theres only one 'number of nodes'. In practical terms this means that serialization works 
 // assuming the filters are for one template in particular
-export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFilter, jobsAndUsers, riskCategories: string[]) => {
+export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFilter, jobsAndUsers: IJobOrUserList, riskCategories: string[]) => {
 	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
 	let values = ticketFilter.filter.values;
 	const propertyDefs = getPropertyDefs(templates, ticketFilter.module, ticketFilter.property, ticketFilter.type, jobsAndUsers, riskCategories);
@@ -328,12 +331,15 @@ export const splitByNonEscaped = (str: string, char) =>  {
 	return res;
 };
 
-export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUsers, riskCategories: string[]): TicketFilter => {
+export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUsers: IJobOrUserList, riskCategories: string[]): TicketFilter => {
 	const [serialisedFields, serializedOperator, serialisedValue] = splitByNonEscaped(str, ':');
 
 	let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
 
-	const propertyDefs: string[] = getPropertyDefs(templates, module, property, type, jobsAndUsers, riskCategories);
+	const propertyDefs = getPropertyDefs(templates, module, property, type, jobsAndUsers, riskCategories);
+	if (!propertyDefs.propertyExists && !isBaseProperty(type)) {
+		throw (new InvalidPropertyError(property, type));
+	}
 
 	let filter: BaseFilter = {
 		operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
