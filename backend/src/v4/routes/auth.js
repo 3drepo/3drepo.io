@@ -30,8 +30,6 @@ const UsersV5 = require(`${v5Path}/processors/users`);
 const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
 const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
-const FileType = require("file-type");
-
 const multer = require("multer");
 const { fileExists } = require("../models/fileRef");
 
@@ -335,11 +333,12 @@ function uploadAvatar(req, res, next) {
 		fileFilter: fileFilter
 	});
 
-	upload.single("file")(req, res, function (err) {
+	upload.single("file")(req, res, async function (err) {
 		if (err) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 		} else {
-			FileType.fromBuffer(req.file.buffer).then(type => {
+			const FileType = await import("file-type");
+			FileType.fileTypeFromBuffer(req.file.buffer).then(type => {
 				if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
 					throw (responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 				}

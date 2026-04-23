@@ -32,6 +32,7 @@ interface IProps {
 	messages: any[];
 	isPending: boolean;
 	currentUser: string;
+	canComment: boolean;
 	teamspace: string;
 	removeMessage: (index, guid) => void;
 	setCameraOnViewpoint: (viewpoint) => void;
@@ -55,7 +56,7 @@ const Loader = () => (
 
 const maxScrollTop = (element) => element.scrollHeight - element.clientHeight;
 
-export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProps) => {
+export const MessagesList = ({ teamspace, isPending, messages, canComment, ...props }: IProps) => {
 	const [filter, setFilter] = useState('comments');
 	const listRef = useRef<HTMLDivElement>();
 
@@ -90,6 +91,7 @@ export const MessagesList = ({ teamspace, isPending, messages, ...props }: IProp
 				removeMessage={props.removeMessage}
 				teamspace={teamspace}
 				currentUser={props.currentUser}
+				canComment={canComment}
 				setCameraOnViewpoint={props.setCameraOnViewpoint}
 			/>
 		)).reverse()

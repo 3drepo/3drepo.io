@@ -20,7 +20,7 @@ const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 const { templates } = require('../utils/responseCodes');
 
-const Clashes = {};
+const ClashPlans = {};
 
 const getPlanByQuery = async (teamspace, query, projection) => {
 	const res = await db.findOne(teamspace, CLASH_PLANS_COL, query, projection);
@@ -32,23 +32,23 @@ const getPlanByQuery = async (teamspace, query, projection) => {
 	return res;
 };
 
-Clashes.getPlanById = (teamspace, id, projection) => getPlanByQuery(teamspace, { _id: id }, projection);
+ClashPlans.getPlanById = (teamspace, id, projection) => getPlanByQuery(teamspace, { _id: id }, projection);
 
-Clashes.getPlanByName = (teamspace, name, projection) => getPlanByQuery(teamspace, { name }, projection);
+ClashPlans.getPlanByName = (teamspace, name, projection) => getPlanByQuery(teamspace, { name }, projection);
 
-Clashes.createPlan = async (teamspace, data, user) => {
+ClashPlans.createPlan = async (teamspace, data, user) => {
 	const _id = generateUUID();
 	await db.insertOne(teamspace, CLASH_PLANS_COL, { ...data, _id, createdAt: new Date(), createdBy: user });
 	return _id;
 };
 
-Clashes.updatePlan = async (teamspace, planId, data, user) => {
+ClashPlans.updatePlan = async (teamspace, planId, data, user) => {
 	await db.updateOne(teamspace, CLASH_PLANS_COL, { _id: planId },
 		{ $set: { ...data, updatedAt: new Date(), updatedBy: user } });
 };
 
-Clashes.deletePlan = async (teamspace, planId) => {
+ClashPlans.deletePlan = async (teamspace, planId) => {
 	await db.deleteOne(teamspace, CLASH_PLANS_COL, { _id: planId });
 };
 
-module.exports = Clashes;
+module.exports = ClashPlans;
