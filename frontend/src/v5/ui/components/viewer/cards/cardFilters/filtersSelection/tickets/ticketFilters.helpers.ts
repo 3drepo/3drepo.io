@@ -34,8 +34,6 @@ import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types'
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 import { findByName, findModuleByNameOrType } from '@/v5/store/tickets/tickets.helpers';
-import { IJobsAndUsersRecord } from '@/v5/store/jobs/jobs.types';
-import { IUser } from '@/v5/store/users/users.redux';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -266,8 +264,10 @@ const getPropertyDefs = (
 		let propertyValues = propertyDef?.values;
 		let propertyDisplayValues = propertyDef?.values;
 		if (propertyValues === 'jobsAndUsers' || type === 'owner') {
-			propertyValues = Object.values(jobsAndUsers).map((ju) => ju.user || ju._id);
-			propertyDisplayValues = Object.values(jobsAndUsers).map((ju) => ju.user ? getFullnameFromUser(ju as IUser) : ju._id);
+			// @ts-ignore
+			propertyValues = Object.values(jobsAndUsers).map((ju) => ju?.user || ju?._id);
+			// @ts-ignore
+			propertyDisplayValues = Object.values(jobsAndUsers).map((ju) => ju?.user ? getFullnameFromUser(ju) : ju?._id);
 		}
 		if (propertyValues === 'riskCategories') {
 			propertyValues = riskCategories;
@@ -287,7 +287,7 @@ const getPropertyDefs = (
 // that one name refers to one property. Eg: lets say theres a property 'number of nodes' serialization
 // assumes theres only one 'number of nodes'. In practical terms this means that serialization works 
 // assuming the filters are for one template in particular
-export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFilter, jobsAndUsers: IJobsAndUsersRecord, riskCategories: string[]) => {
+export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFilter, jobsAndUsers: any, riskCategories: string[]) => {
 	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
 	let values = ticketFilter.filter.values;
 	const propertyDefs = getPropertyDefs(templates, ticketFilter.module, ticketFilter.property, ticketFilter.type, jobsAndUsers, riskCategories);
@@ -338,15 +338,12 @@ export const splitByNonEscaped = (str: string, char) =>  {
 	return res;
 };
 
-export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUsers: IJobsAndUsersRecord, riskCategories: string[]): TicketFilter => {
+export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUsers: any, riskCategories: string[]): TicketFilter => {
 	const [serialisedFields, serializedOperator, serialisedValue] = splitByNonEscaped(str, ':');
 
 	let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
 
 	const propertyDefs = getPropertyDefs(templates, module, property, type, jobsAndUsers, riskCategories);
-	if (!propertyDefs.propertyExists && !isBaseProperty(type)) {
-		throw (new InvalidPropertyError(property, type));
-	}
 
 	let filter: BaseFilter = {
 		operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
