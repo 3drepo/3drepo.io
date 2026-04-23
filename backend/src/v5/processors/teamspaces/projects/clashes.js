@@ -39,6 +39,10 @@ Clashes.updatePlan = updatePlan;
 Clashes.deletePlan = deletePlan;
 
 const writeObjects = (container, stream, { meshes = [], unwantedMeshIds = [], metadata = [] }) => {
+	if (!meshes.length) {
+		return;
+	}
+
 	const metadataMapping = metadata.reduce((acc, { parents, ...entry }) => {
 		for (const parent of parents) {
 			acc[UUIDToString(parent)] = entry;
@@ -55,14 +59,13 @@ const writeObjects = (container, stream, { meshes = [], unwantedMeshIds = [], me
 		if (!unwantedIdsObj[idStr]) {
 			const parentId = UUIDToString(mesh.name ? mesh._id : mesh.parents[0]);
 			const meshMeta = metadataMapping[parentId];
-			const externalIds = getExternalIdsFromMetadata([meshMeta], undefined, true);
-			const externalKeyValuePair = externalIds ? externalIds.values[0] : undefined;
-			const externalIdKey = `${container}__${externalKeyValuePair?.key ?? 'internal'}__${externalKeyValuePair?.value ?? parentId}`;
+			const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
+			const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values?.[0] ?? parentId}`;
 
-			if (compositesToMeshes[externalIdKey]) {
-				compositesToMeshes[externalIdKey].push(idStr);
+			if (compositesToMeshes[compositePath]) {
+				compositesToMeshes[compositePath].push(idStr);
 			} else {
-				compositesToMeshes[externalIdKey] = [idStr];
+				compositesToMeshes[compositePath] = [idStr];
 			}
 		}
 	}
@@ -84,7 +87,7 @@ const getObjectsFromRules = async (teamspace, project, container, revision, rule
 	const matchedTransNodes = matched.flatMap(({ parents }) => parents);
 	const meshes = matched.length
 		? await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision, parents: { $in: matchedTransNodes } }, { _id: 1, parents: 1 })
-		: {};
+		: [];
 	const unwantedMeshIds = unwanted.length
 		? await getMeshesWithParentIds(teamspace, project, container, revision,
 			unwanted.flatMap(({ parents }) => parents), true)
@@ -155,19 +158,23 @@ const streamToJSON = (stream) => new Promise((resolve, reject) => {
 });
 
 const compareRunResults = (existingRunClashes, newRunClashes) => {
-	// this treats clashes the same if their a and b are the same, regardless of order
-	const makeKey = (item) => [item.a, item.b].sort().join('-');
-
-	const existingMap = new Map(existingRunClashes.map((item) => [makeKey(item), item]));
-	const newMap = new Map(newRunClashes.map((item) => [makeKey(item), item]));
+	const existingMap = new Map(existingRunClashes.map((item) => [item.index, item]));
+	const newMap = new Map(newRunClashes.map((item) => [[item.a, item.b].sort().join('-'), item]));
 
 	const result = { new: [], active: [], resolved: [] };
 
 	for (const [key, newItem] of newMap) {
+		const clashToAdd = {
+			...newItem,
+			a: { container: newItem.a.split('::')[0], idType: newItem.a.split('::')[1], id: newItem.a.split('::')[2] },
+			b: { container: newItem.b.split('::')[0], idType: newItem.b.split('::')[1], id: newItem.b.split('::')[2] },
+			index: key,
+		};
+
 		if (existingMap.has(key)) {
-			result.active.push(newItem);
+			result.active.push(clashToAdd);
 		} else {
-			result.new.push(newItem);
+			result.new.push(clashToAdd);
 		}
 	}
 

@@ -78,7 +78,7 @@ Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, p
 	return returnString ? meshesArr : meshesArr.map(stringToUUID);
 };
 
-Scene.getExternalIdsFromMetadata = (metadata, wantedType, includeKeys) => {
+Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	const res = {};
 
 	Object.values(idTypes).forEach((v) => { res[v] = []; });
@@ -102,10 +102,7 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType, includeKeys) => {
 	// This is currently explicity used for differencing therefore we don't care if
 	// we can't represent them all - we may need to add a partial flag in the future
 	if (wantedType) {
-		return {
-			key: wantedType,
-			values: includeKeys ? res[wantedType] : Array.from(new Set(res[wantedType].map(({ value }) => value))),
-		};
+		return { key: wantedType, values: Array.from(new Set(res[wantedType].map(({ value }) => value))) };
 	}
 
 	// If we are determining the type, make sure we have a record for each metadata
@@ -115,10 +112,7 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType, includeKeys) => {
 		for (const idType of Object.keys(res)) {
 			if (res[idType].length === targetCount) {
 				// convert to set to purge duplicates
-				return {
-					key: idType,
-					values: includeKeys ? res[idType] : Array.from(new Set(res[idType].map(({ value }) => value))),
-				};
+				return { key: idType, values: Array.from(new Set(res[idType].map(({ value }) => value))) };
 			}
 		}
 	}
