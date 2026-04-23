@@ -276,7 +276,7 @@ const checkQueueConfig = async () => {
 		const stats = await stat(queueConfig.shared_storage);
 
 		if (!stats.isDirectory()) {
-			throw new Error('queueConfig.shared_storage must be a directory');
+			throw new Error('cn_queue.shared_storage must be a directory');
 		}
 
 		// eslint-disable-next-line no-bitwise
