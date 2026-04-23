@@ -54,7 +54,7 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
-import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { deserializeURLFilters, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
 import { isEmpty, isEqual } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
@@ -239,15 +239,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 		
 		try {
 		// Dont blank the page if the url param has the wrong format
-			const newFilters = JSON.parse(paramFilters).map((f) => {
-				try {
-					return deserializeFilter([selectedTemplate], f, jobsAndUsers, riskCategories);
-				} catch (e) {
-					console.error('Error parsing the url filter param');
-					console.error(e);
-					return undefined;
-				}
-			}).filter(Boolean);
+			const newFilters = deserializeURLFilters([selectedTemplate], paramFilters, jobsAndUsers, riskCategories);
 			if (isEqual(newFilters, filters)) return;
 			setFilters(newFilters);
 		} catch (e) {

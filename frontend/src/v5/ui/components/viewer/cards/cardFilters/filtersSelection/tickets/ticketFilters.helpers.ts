@@ -396,3 +396,7 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 
 	return { module, property, type, filter };
 };
+
+export const deserializeURLFilters = (templates:ITemplate[], str: string, jobsAndUsers: any, riskCategories: string[]): TicketFilter[] => {
+	return JSON.parse(str).map((urlFilter) => deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories));
+};

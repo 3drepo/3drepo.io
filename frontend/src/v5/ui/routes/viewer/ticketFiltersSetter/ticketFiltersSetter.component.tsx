@@ -25,7 +25,7 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
-import { deserializeFilter, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { deserializeURLFilters, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { isEmpty, isEqual } from 'lodash';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
@@ -97,7 +97,7 @@ export const TicketFiltersSetter = () => {
 		if (ticketCodes.length) {
 			filtersToSet = [getTicketFilterFromCodes(ticketCodes)];
 		} else if (urlFiltersRaw.length) {
-			filtersToSet = JSON.parse(urlFiltersRaw).map((urlFilter) => deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories));
+			filtersToSet = deserializeURLFilters(templates, urlFiltersRaw, jobsAndUsers, riskCategories);
 		} else {
 			filtersToSet = defaultFiltersForTemplate;
 		}
