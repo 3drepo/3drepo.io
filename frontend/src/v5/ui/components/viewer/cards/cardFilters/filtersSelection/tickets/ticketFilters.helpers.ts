@@ -255,7 +255,8 @@ export class InvalidPropertyError extends Error {
 	}
 }
 
-const getPropertyDefs = (templates: ITemplate[], module: string, property: string, type: TicketFilterType, jobsAndUsers: IJobOrUserList, riskCategories: string[]) => {
+const getPropertyDefs = (
+	templates: ITemplate[], module: string, property: string, type: TicketFilterType, jobsAndUsers: IJobOrUserList, riskCategories: string[]) => {
 	return templates.reduce((acc, template) => {
 		const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
 		let propertyValues = propertyDef?.values;
