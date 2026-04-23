@@ -327,6 +327,20 @@ describe('Tickets: filters', () => {
 			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
 			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
+		it('should work with date and exists operator', () => {
+			const filter: TicketFilter = {
+				module: '',
+				property: 'Best before',
+				type: 'date',
+				filter: {
+					operator: 'ex',
+					values: [],
+				}
+			};
+
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
+		});
 
 		it('should work with past date', () => {
 			const filter: TicketFilter = {
