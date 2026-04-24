@@ -330,8 +330,8 @@ describe('Tickets: filters', () => {
 		it('should work with date and exists operator', () => {
 			const filter: TicketFilter = {
 				module: '',
-				property: 'Best before',
-				type: 'date',
+				property: 'Birthday',
+				type: 'pastDate',
 				filter: {
 					operator: 'ex',
 					values: [],
