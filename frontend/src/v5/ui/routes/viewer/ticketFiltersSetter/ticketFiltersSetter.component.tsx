@@ -16,7 +16,7 @@
  */
 
 import { JobsActionsDispatchers, TicketsActionsDispatchers, TicketsCardActionsDispatchers, UsersActionsDispatchers, ViewerGuiActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors, TicketsHooksSelectors, UsersHooksSelectors, ViewerHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useParams } from 'react-router-dom';
 import { useEffect } from 'react';
 import { ViewerParams } from '../../routes.constants';
@@ -27,22 +27,21 @@ import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
 import { deserializeURLFilters, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { isEmpty, isEqual } from 'lodash';
-import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const [urlFiltersRaw, setUrlFilters] = useSearchParam('filters');
-	const [groupByParam, setGroupByParam] = useSearchParam('groupBy');
+	const [groupByParam] = useSearchParam('groupBy');
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isFed = modelIsFederation(containerOrFederation);
 
+	const isFetching = ViewerHooksSelectors.selectIsFetching();
 	const cardFilters = TicketsCardHooksSelectors.selectCardFilters();
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
 	const jobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
 	const filtersFromState = TicketsCardHooksSelectors.selectCardFilters();
-	const groupBy = TicketsCardHooksSelectors.selectGroupBy();
 
 	const defaultFiltersForTemplate = getNonCompletedTicketFilters(templates, containerOrFederation);
 
@@ -55,6 +54,7 @@ export const TicketFiltersSetter = () => {
 	, [containerOrFederation, revision, isFed]);
 
 	useEffect(() => {
+		if (isFetching) return;
 		if (groupByParam) {
 			TicketsCardActionsDispatchers.setGroupBy(groupByParam);
 		}
@@ -63,13 +63,8 @@ export const TicketFiltersSetter = () => {
 			JobsActionsDispatchers.fetchJobs(teamspace);
 			TicketsActionsDispatchers.fetchRiskCategories(teamspace);
 		}
-	}, []);
+	}, [isFetching]);
 	
-	useEffect(() => {
-		if ((groupBy === groupByParam) || (groupBy === NONE_OPTION && !groupByParam)) return;
-		setGroupByParam(groupBy === NONE_OPTION ? null : groupBy);
-	}, [groupBy, groupByParam]);
-
 	/**
 	 * When the filter objects are changed this bit changes
 	 * the url search param.

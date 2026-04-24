@@ -44,9 +44,11 @@ import { TicketsBulkUpdateContext, TicketsBulkUpdateContextComponent } from '@co
 import { BulkUpdateDropdown } from './bulkUpdate/bulkUpdateDropDown.component';
 import { ToggleAllCheckbox } from './bulkUpdate/toggleAllCheckbox.component';
 import { TextOverflow } from '@controls/textOverflow';
+import { useSearchParam } from '../../../useSearchParam';
 
 const TicketsActions = ({ readOnly, groupBy }) => {
 	const { toggleBulkMode, bulkModeOn } =  useContext(TicketsBulkUpdateContext);
+	const [, setGroupByParam] = useSearchParam('groupBy');
 
 	const bulkCheckboxTooltipMessage = !bulkModeOn ? 
 		formatMessage({ id: 'viewer.cards.tickets.bulkUpdate', defaultMessage: 'Bulk update' }) :
@@ -65,6 +67,7 @@ const TicketsActions = ({ readOnly, groupBy }) => {
 			<GroupBySelection value={groupBy} onChange={(value) => {
 				TicketsCardActionsDispatchers.setSelectedTicket(null);
 				TicketsCardActionsDispatchers.setGroupBy(value);
+				setGroupByParam(value === NONE_OPTION ? null : value);
 			}} />)}
 		{!bulkModeOn && (<TicketsEllipsisMenu />)}
 	</>);
