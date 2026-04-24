@@ -14,9 +14,6 @@
 		"node": true,
 		"es2022": true
 	},
-	"settings": {
-		"import/resolver": "./eslint-rules/eslint-resolver.cjs"
-	},
 	"rules": {
 		"arrow-parens": [
 			"error",
