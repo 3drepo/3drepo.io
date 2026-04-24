@@ -54,6 +54,8 @@ export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'number': NumberIcon,
 };
 
+const filterTypeIsValid = (type: string): type is TicketFilterType => Object.keys(TYPE_TO_ICON).includes(type);
+
 export const arrToDisplayValue = (arr: any[]) => arr.join(', ');
 export const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
 export const formatDateRange = ([from, to]) => formatMessage(
@@ -349,6 +351,7 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 		operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
 		values: undefined,
 	};
+	if (!filter.operator || !filterTypeIsValid(type)) throw (new InvalidPropertyError(property, type));
 	if (['manyOf', 'oneOf', 'owner', 'status'].includes(type)) {
 		if (!propertyDefs.values.length) {
 			throw (new InvalidPropertyError(property, type));
@@ -395,5 +398,13 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 };
 
 export const deserializeURLFilters = (templates:ITemplate[], str: string, jobsAndUsers: any, riskCategories: string[]): TicketFilter[] => {
-	return JSON.parse(str).map((urlFilter) => deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories));
+	return JSON.parse(str).map((urlFilter) => {
+		try {
+			return deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories);
+		} catch (error) {
+			console.error('Error parsing the url filter param');
+			console.error(error);
+			return undefined;
+		}
+	}).filter(Boolean);
 };
