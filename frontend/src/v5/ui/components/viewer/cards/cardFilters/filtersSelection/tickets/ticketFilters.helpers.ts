@@ -260,6 +260,12 @@ const getPropertyDefs = (
 	const values: any[] = [];
 	const displayValues: string[] = [];
 	let propertyExists = false;
+	if (type === 'template') {
+		return {
+			values: templates.map((t) => t.code),
+			displayValues: templates.map((t) => t.name),
+		};
+	}
 
 	templates.forEach((template) => {
 		const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
@@ -307,7 +313,7 @@ export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFil
 		};
 
 		serializedValues = values.map(serializeValue).join(',');
-		if (['oneOf', 'manyOf', 'status', 'owner'].includes(ticketFilter.type)) {
+		if (isSelectType(ticketFilter.type)) {
 			if (!propertyDefs.values.length) {
 				throw (new InvalidPropertyError(ticketFilter.property, ticketFilter.type));
 			}
@@ -352,7 +358,7 @@ export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUse
 		values: undefined,
 	};
 	if (!filter.operator || !filterTypeIsValid(type)) throw (new InvalidPropertyError(property, type));
-	if (['manyOf', 'oneOf', 'owner', 'status'].includes(type)) {
+	if (isSelectType(type)) {
 		if (!propertyDefs.values.length) {
 			throw (new InvalidPropertyError(property, type));
 		}
