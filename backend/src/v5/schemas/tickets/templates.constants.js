@@ -89,7 +89,8 @@ const createPropertyEntry = (name, type, config = {}) => {
 		throw new Error(`Unrecognised configuration: ${unrecognisedOptions.join(',')}, provided ${Object.keys(config).join(',')}`);
 	}
 	return deleteIfUndefined({
-		name, type, ...config });
+		name, type, ...config
+	});
 };
 
 const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLevels, viewGroups };
@@ -139,6 +140,7 @@ TemplateConstants.presetModulesProperties = {
 	],
 	[presetModules.CLASH]: [
 		createPropertyEntry('GUID', propTypes.TEXT, { [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.UNIQUE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Clash Plan', propTypes.TEXT, { [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Group', propTypes.TEXT),
 		createPropertyEntry('Clash Point', propTypes.COORDS, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
