@@ -89,7 +89,7 @@ const createPropertyEntry = (name, type, config = {}) => {
 		throw new Error(`Unrecognised configuration: ${unrecognisedOptions.join(',')}, provided ${Object.keys(config).join(',')}`);
 	}
 	return deleteIfUndefined({
-		name, type, ...config
+		name, type, ...config,
 	});
 };
 
