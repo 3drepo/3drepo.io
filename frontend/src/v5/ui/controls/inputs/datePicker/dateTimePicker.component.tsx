@@ -14,7 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ElementType, ReactNode, useRef, useState } from 'react';
+import { ElementType, ReactNode, useEffect, useRef, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
 import { ClearDateAction, PopperWrapper, TextField } from './dateTimePicker.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
@@ -79,20 +79,22 @@ export const DateTimePicker = ({
 	const markForUpdateRef =  useRef(false);
 	const temporalValue = useRef(value);
 	const inputRef = useRef<HTMLDivElement>(null);
+	const [anchorEl, setAnchorEl] = useState(inputRef.current);
 
 	const closePicker = () => {
 		setOpen(false);
 	};
 
-  	const handleClick = () => {
+  	const handleClick = (e) => {
 		if (disabled) return;
+		e.stopPropagation();
 		setDateValue(value ? dayjs(value) : null);
 		setTimeValue(value ? dayjs(value) : DefaultTime);
 		setView(DatePickerView.calendar);
 		setOpen(true);
 	};
 
-	const canopen = open && Boolean(inputRef.current);
+	const canopen = open && Boolean(document.body.contains(anchorEl));
   	const id = canopen ? 'transition-popper' : undefined;
 
 	const consolidateNewValue = (newValue: any) => {
@@ -106,8 +108,25 @@ export const DateTimePicker = ({
 	const maxDate = maxDateTime ? dayjs(maxDateTime) : undefined;
 	const minTime = minDateTime && dateValue?.isSame(minDate, 'day') ? dayjs(minDateTime) : undefined;
 	const maxTime = maxDateTime && dateValue?.isSame(maxDate, 'day') ? dayjs(maxDateTime) : undefined;
-
+	
 	const PickerIconValue =  slots?.openPickerIcon || CalendarIcon;
+
+	useEffect(() => {
+		if (!open) {
+			if (anchorEl) setAnchorEl(null);
+			return;
+		}
+
+		const onFrame = () => {
+			if (document.body.contains(inputRef.current)) {
+				setAnchorEl(inputRef.current);
+			} else {
+				window.requestAnimationFrame(onFrame);
+			}
+		};
+
+		window.requestAnimationFrame(onFrame);
+	}, [open, anchorEl]);
 
 	return (
 		<div>
@@ -139,7 +158,8 @@ export const DateTimePicker = ({
 				ref={inputRef}
 				{...props}
 			/>
-			<Popper id={id} open={open} anchorEl={inputRef.current} transition  style={{ zIndex: 10000 }} >
+			<Popper id={id} open={canopen} anchorEl={anchorEl} transition  style={{ zIndex: 10000 }}  
+				onClick={(e) => { e.stopPropagation();}}>
 				{({ TransitionProps }) => (
 					<ClickAwayListener onClickAway={(e) => {
 						e.stopImmediatePropagation();
