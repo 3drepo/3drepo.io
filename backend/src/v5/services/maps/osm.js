@@ -30,7 +30,7 @@ OSMService.getTile = (zoomLevel, gridx, gridy) => {
 		uri = `/${config.osm.prefix}/${zoomLevel}/${gridx}/${gridy}.png?key=${config.osm.key}`;
 	}
 
-	return WebRequests.get(`https://${domain}${uri}`);
+	return WebRequests.getArrayBuffer(`https://${domain}${uri}`);
 };
 
 module.exports = OSMService;

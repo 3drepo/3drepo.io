@@ -28,6 +28,8 @@ const resources = [
 
 HereConstants.BASE_URL = 'maps.hereapi.com';
 
+HereConstants.HERE_TRAFFIC_DOMAIN = 'traffic.maps.hereapi.com';
+
 HereConstants.FEATURES = {
 	POI: 'pois:all',
 	CONGESTION_ZONES: 'congestion_zones:all',
