@@ -104,11 +104,15 @@ const testCallbackQueueConsumer = () => {
 			return Queue.listenToQueue.mock.calls[0][1];
 		};
 
-		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
+		test(`Should trigger ${events.CLASH_RUN_COMPLETED} event if there is a clash run completed message`, async () => {
+			const SHARED_SPACE_TAG = '$SHARED_SPACE';
+
 			const content = {
-				database: generateRandomString(),
-				status: generateRandomString(),
+				teamspace: generateRandomString(),
 				project: generateRandomString(),
+				type: 'clash',
+				container: generateRandomString(),
+				results: `$${SHARED_SPACE_TAG} ${generateRandomString()}`,
 			};
 			const properties = {
 				correlationId: generateRandomString(),
@@ -118,8 +122,32 @@ const testCallbackQueueConsumer = () => {
 			await callbackFn({ content: JSON.stringify(content), properties });
 
 			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
+				teamspace: content.teamspace,
+				project: content.project,
+				corId: properties.correlationId,
+				results: content.results.replace(SHARED_SPACE_TAG, config.cn_queue.shared_storage),
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				status: generateRandomString(),
+				container: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.container,
 				corId: properties.correlationId,
 				status: content.status,
 			};
@@ -129,8 +157,8 @@ const testCallbackQueueConsumer = () => {
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
 			const content = {
-				database: generateRandomString(),
-				project: generateRandomString(),
+				teamspace: generateRandomString(),
+				container: generateRandomString(),
 				user: generateRandomString(),
 				message: generateRandomString(),
 				value: 1,
@@ -143,8 +171,8 @@ const testCallbackQueueConsumer = () => {
 			await callbackFn({ content: JSON.stringify(content), properties });
 
 			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
+				teamspace: content.teamspace,
+				model: content.container,
 				corId: properties.correlationId,
 				value: content.value,
 				message: content.message,

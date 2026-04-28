@@ -27,6 +27,7 @@ const { modelTypes, processStatuses } = require('../../../models/modelSettings.c
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
 const { DRAWINGS_HISTORY_COL } = require('../../../models/revisions.constants');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
+const { completeRun } = require('../../../processors/teamspaces/projects/clashes');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
@@ -41,7 +42,6 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { completeRun } = require('../../../processors/teamspaces/projects/clashes');
 
 const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	try {

@@ -62,6 +62,9 @@ const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/c
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
+const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
+
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
@@ -274,6 +277,45 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+		});
+	});
+};
+
+const testClashRunCompleted = () => {
+	describe(events.CLASH_RUN_COMPLETED, () => {
+		test(`Should trigger completeRun if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				corId: generateRandomString(),
+				results: generateRandomString(),
+			};
+
+			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
+
+			await waitOnEvent;
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
+				stringToUUID(data.corId), data.results);
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
+			ClashesProcessor.completeRun.mockRejectedValueOnce(templates.testRunNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				corId: generateRandomString(),
+				results: generateRandomString(),
+			};
+
+			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
+
+			await waitOnEvent;
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
+				stringToUUID(data.corId), data.results);
 		});
 	});
 };
@@ -1633,6 +1675,7 @@ describe(determineTestGroup(__filename), () => {
 
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();
+	testClashRunCompleted();
 	testModelSettingsUpdate();
 	testModelProcessingCompleted();
 	testRevisionUpdated();

@@ -55,7 +55,6 @@ const writeObjects = (container, stream, { meshes = [], unwantedMeshIds = [], me
 
 	for (const mesh of meshes) {
 		const idStr = UUIDToString(mesh._id);
-
 		if (!unwantedIdsObj[idStr]) {
 			const parentId = UUIDToString(mesh.name ? mesh._id : mesh.parents[0]);
 			const meshMeta = metadataMapping[parentId];
@@ -86,7 +85,7 @@ const getObjectsFromRules = async (teamspace, project, container, revision, rule
 		revision, rules, { _id: 1, parents: 1, metadata: 1 });
 	const matchedTransNodes = matched.flatMap(({ parents }) => parents);
 	const meshes = matched.length
-		? await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision, parents: { $in: matchedTransNodes } }, { _id: 1, parents: 1 })
+		? await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision, parents: { $in: matchedTransNodes } }, { _id: 1, name: 1, parents: 1 })
 		: [];
 	const unwantedMeshIds = unwanted.length
 		? await getMeshesWithParentIds(teamspace, project, container, revision,
@@ -97,7 +96,7 @@ const getObjectsFromRules = async (teamspace, project, container, revision, rule
 };
 
 const getAllObjects = async (teamspace, project, container, revision) => {
-	const meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1, shared_id: 1 });
+	const meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1 });
 	const metadata = await getAllMetadata(teamspace, container, revision);
 
 	return { meshes, metadata };
