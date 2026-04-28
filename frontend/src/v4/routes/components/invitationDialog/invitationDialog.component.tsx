@@ -130,32 +130,35 @@ export const InvitationDialog = (props: IProps) => {
 	};
 
 	const renderPermissions = (projects = []) => (
-		<FieldArray name="permissions" render={({ remove, push }) => (
-			<>
+		<FieldArray name="permissions">
+			{({ remove, push }) => (<>
 				{projects.map(({ project, isAdmin }, index) => {
 					const availableProjects = getProjects(project, projects);
 					return (
 						<div key={index}>
 							<ProjectConfig>
-								<Field name={`permissions.${index}.project`} render={({ field }) => (
-									<FormControl>
-										<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
-										<CellSelect
-											{...field}
-											items={availableProjects}
-											placeholder="Select project"
-											disabledPlaceholder
-											displayEmpty
-											inputId={`project-${index}`}
-											renderValue={(value) => availableProjects.find((p) => p.value === value)?.name || 'Select project'}
-										/>
-									</FormControl>
-								)} />
+						<Field name={`permissions.${index}.project`}>
+							{({ field }) => (
+								<FormControl>
+									<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
+									<CellSelect
+										{...field}
+										items={availableProjects}
+										placeholder="Select project"
+										disabledPlaceholder
+										displayEmpty
+										inputId={`project-${index}`}
+										renderValue={(value) => availableProjects.find((p) => p.value === value)?.name || 'Select project'}
+									/>
+								</FormControl>
+							)}
+						</Field>
 								<Button variant="outlined" color="secondary" onClick={() => remove(index)}>
 									Remove
 								</Button>
 								{project && (
-									<Field name={`permissions.${index}.isAdmin`} render={({ field, form }) => (
+								<Field name={`permissions.${index}.isAdmin`}>
+									{({ field, form }) => (
 										<ProjectCheckboxContainer
 											control={
 												<Checkbox
@@ -167,11 +170,13 @@ export const InvitationDialog = (props: IProps) => {
 											}
 											label="Project Admin"
 										/>
-									)} />
+									)}
+								</Field>
 								)}
 							</ProjectConfig>
 							{project && !isAdmin && (
-								<Field name={`permissions.${index}.models`} render={({ field }) => (
+							<Field name={`permissions.${index}.models`}>
+								{({ field }) => (
 									<PermissionsTable
 										modelsNumber={props.projects[project].models.length + 1}
 										context={PermissionsTableContexts.MODELS}
@@ -179,7 +184,8 @@ export const InvitationDialog = (props: IProps) => {
 										roles={MODEL_ROLES_LIST}
 										onPermissionsChange={handlePermissionsChange(field.name, field.value, field.onChange)}
 									/>
-								)} />
+								)}
+							</Field>
 							)}
 						</div>
 					)
@@ -192,24 +198,27 @@ export const InvitationDialog = (props: IProps) => {
 						Add project/model permissions
 					</AddButton>
 				)}
-			</>
-		)} />
+			</>)}
+		</FieldArray>
 	);
 
-	const renderForm = ({ values: formValues }) => (
+	const renderForm = ({ values: formValues, errors, isValid, isValidating, isSubmitting }) => (
 		<Form>
 			<Container className={props.className}>
 				<Content>
-					<Field name="email" render={({ field, form }) => (
-						<TextField
-								label="Email"
-								required
-								error={form.errors.email}
-								helperText={form.errors.email}
-								{...field}
-						/>
-					)} />
-					<Field name="job" render={({ field }) => (
+					<Field name="email">
+						{({ field, form }) => (
+							<TextField
+									label="Email"
+									required
+									error={form.errors.email}
+									helperText={form.errors.email}
+									{...field}
+							/>
+						)}
+					</Field>
+					<Field name="job">
+						{({ field }) => (
 						<FormControl>
 							<InputLabel shrink htmlFor="job">Job</InputLabel>
 							<CellSelect
@@ -225,20 +234,23 @@ export const InvitationDialog = (props: IProps) => {
 								}}
 							/>
 						</FormControl>
-					)} />
+						)}
+					</Field>
 					{!props.permissionsOnUIDisabled && (
-						<Field name="isAdmin" render={({ field }) => (
-							<FormControlLabel
-								control={
-									<Checkbox
-										checked={field.value}
-										{...field}
-										color="secondary"
-									/>
-								}
-								label="Teamspace Admin"
-							/>
-						)} />
+						<Field name="isAdmin">
+							{({ field }) => (
+								<FormControlLabel
+									control={
+										<Checkbox
+											checked={field.value}
+											{...field}
+											color="secondary"
+										/>
+									}
+									label="Teamspace Admin"
+								/>
+							)}
+						</Field>
 					)}
 
 					{!formValues.isAdmin && !props.permissionsOnUIDisabled && renderPermissions(formValues.permissions)}
@@ -252,14 +264,12 @@ export const InvitationDialog = (props: IProps) => {
 					>
 						Cancel
 					</CancelButton>
-					<Field render={({ form }) => (
-						<SubmitButton
-							pending={form.isSubmitting}
-							disabled={!isEmpty(form.errors) || !form.isValid || form.isValidating || form.isSubmitting}
-						>
-							Invite
-						</SubmitButton>
-				)} />
+					<SubmitButton
+						pending={isSubmitting}
+						disabled={!isEmpty(errors) || !isValid || isValidating || isSubmitting}
+					>
+						Invite!
+					</SubmitButton>
 				</Footer>
 			</Container>
 		</Form>
@@ -280,8 +290,9 @@ export const InvitationDialog = (props: IProps) => {
 			onSubmit={handleSubmit}
 			isInitialValid={getIsInitialValid()}
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
-			render={renderForm}
 			innerRef={formRef}
-		/>
+		>
+			{renderForm}
+		</Formik>
 	);
 };
