@@ -21,18 +21,41 @@ import { EmptyPageView } from '../../../../../../components/shared/emptyPageView
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
-import { ITemplate } from '@/v5/store/tickets/tickets.types';
-import { Container, TicketsTableSpinner } from './ticketsTableContent.styles';
+import { GroupedTables, TicketsTableResizableContentProps } from './groupedTables/groupedTables.component';
+import { Container, TicketsTableSpinner } from './tabularViewTables.styles';
 import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { isEqual, intersection } from 'lodash';
 import { TicketsFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
-import { SELECTION_COLUMN_WIDTH } from './ticketsTableGroup/ticketsTableGroup.helper';
+import { SELECTION_COLUMN_WIDTH } from './ticketsTable/ticketsTable.constants';
 
-const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
+const SearchingMessage = () => (
+	<Container>
+		<EmptyPageView>
+			<TicketsTableSpinner />
+			<FormattedMessage
+				id="ticketTable.emptyView"
+				defaultMessage="We're currently searching for tickets that match your criteria."
+			/>
+		</EmptyPageView>
+	</Container>
+);
+
+const NoTicketsMessage = () => (
+	<Container>
+		<EmptyPageView>
+			<FormattedMessage
+				id="ticketTable.emptyView"
+				defaultMessage="We couldn't find any tickets to show. Please refine your selection."
+			/>
+		</EmptyPageView>
+	</Container>
+);
+
+export const TabularViewTables = ({ template, hasTickets, ...props }: TicketsTableResizableContentProps & { hasTickets: boolean }) => {
+	const tableRef = useRef(null);
 	const edgeScrolling = useEdgeScrolling();
 	const defaultColumns = TicketsHooksSelectors.selectInitialTabularColumns(template._id);
 	const {
@@ -96,41 +119,18 @@ const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableCon
 	}, [edgeScrolling]);
 
 	if (!templateWasFetched || isFiltering) {
-		return (
-			<EmptyPageView>
-				<TicketsTableSpinner />
-				<FormattedMessage
-					id="ticketTable.emptyView"
-					defaultMessage="We're currently searching for tickets that match your criteria."
-				/>
-			</EmptyPageView>
-		);
+		return (<SearchingMessage />);
 	}
 
-	if (!props.tickets.length) {
-		return (
-			<EmptyPageView>
-				<FormattedMessage
-					id="ticketTable.emptyView"
-					defaultMessage="We couldn't find any tickets to show. Please refine your selection."
-				/>
-			</EmptyPageView>
-		);
+	if (!hasTickets) {
+		return (<NoTicketsMessage />);
 	}
-	
-	return (
-		<div style={{ position: 'absolute' }} >
-			<TicketsTableResizableContent {...props} template={template} />
-		</ div>
-	);
-};
-
-export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
-	const tableRef = useRef(null);
 
 	return (
 		<Container ref={tableRef}>
-			<TableContent {...props} tableRef={tableRef} />
+			<div style={{ position: 'absolute' }} >
+				<GroupedTables {...props} template={template} />
+			</div>
 		</Container>
 	);
 };

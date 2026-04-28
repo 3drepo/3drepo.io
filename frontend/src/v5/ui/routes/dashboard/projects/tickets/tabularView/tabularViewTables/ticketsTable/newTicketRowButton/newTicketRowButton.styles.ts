@@ -16,7 +16,7 @@
  */
 
 import styled, { css } from 'styled-components';
-import { NEW_TICKET_ROW_AREA_NAME } from '../ticketsTableGroup.helper';
+import { NEW_TICKET_ROW_AREA_NAME } from '../ticketsTable.constants';
 
 export const NEW_TICKET_ROW_HEIGHT = '37px';
 export const NewTicketRowGridArea = styled.div`

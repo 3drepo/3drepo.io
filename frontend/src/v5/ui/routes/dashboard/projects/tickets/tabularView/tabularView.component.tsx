@@ -28,7 +28,7 @@ import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isCommenterRole } from '@/v5/store/store.helpers';
-import { TicketsTableContent } from './ticketsTableContent/ticketsTableContent.component';
+import { TabularViewTables } from './tabularViewTables/tabularViewTables.component';
 import { Transformers, useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
@@ -42,12 +42,12 @@ import { TicketSlide } from '../ticketsList/slides/ticketSlide.component';
 import { useSelectedModels } from './newTicketMenu/useSelectedModels';
 import { ResizableTableContext, ResizableTableContextComponent } from '@controls/resizableTableContext/resizableTableContext';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
-import { TicketsTableContext, TicketsTableContextComponent } from './ticketsTableContext/ticketsTableContext';
+import { TabularViewContext, TabularViewContextComponent } from './tabularViewContext/tabularViewContext';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { selectTicketPropertyByName, selectTicketsHaveBeenFetched } from '@/v5/store/tickets/tickets.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { useWatchPropertyChange } from './useWatchPropertyChange';
-import { getAvailableColumnsForTemplate } from './ticketsTableContext/ticketsTableContext.helpers';
+import { getAvailableColumnsForTemplate } from './tabularViewContext/tabularViewContext.helpers';
 import { TicketsFiltersContextComponent } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
 import { apiFetchFilteredTickets } from '@/v5/store/tickets/card/ticketsCard.sagas';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
@@ -72,13 +72,13 @@ type TicketsTableProps = {
 	setTicketValue: SetTicketValue,
 };
 
-export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
+const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTableProps) => {
 	const navigate = useNavigate();
 	const params = useParams<DashboardTicketsParams>();
-	const { setSelectedIds } = useContext(TicketsTableContext);
+	const { setSelectedIds } = useContext(TabularViewContext);
 	const [refreshTableFlag, setRefreshTableFlag] = useState(false);
 	const { teamspace, project, template, ticketId } = params;
-	const { groupBy, fetchColumn } = useContext(TicketsTableContext);
+	const { groupBy, fetchColumn } = useContext(TabularViewContext);
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	const paramsToSave = useRef({ search: window.location.search, params });
@@ -395,8 +395,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 					</FlexContainer>
 				</FiltersContainer>
 				<CardFilters />
-				<SortedTableComponent items={tickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
-					<TicketsTableContent tickets={filteredTickets} setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
+				<SortedTableComponent items={filteredTickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
+					<TabularViewTables hasTickets={filteredTickets.length > 0} setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
 				</SortedTableComponent>
 			</TicketsTableLayout>
 		</TicketsFiltersContextComponent>
@@ -484,11 +484,11 @@ export const TabularView = () => {
 	}, [params, navigate, setContainerOrFederation]);
 
 	return (
-		<TicketsTableContextComponent>
+		<TabularViewContextComponent>
 			<ResizableTableContextComponent columns={columns} columnGap={1}>
-				<TicketsTable isNewTicketDirty={isNewTicketDirty} setTicketValue={setTicketValue} />
+				<TabularViewLayout isNewTicketDirty={isNewTicketDirty} setTicketValue={setTicketValue} />
 			</ResizableTableContextComponent>
 			<TabularViewTicketForm setIsNewTicketDirty={setIsNewTicketDirty} setTicketValue={setTicketValue} presetValue={presetValue}/>
-		</TicketsTableContextComponent>
+		</TabularViewContextComponent>
 	);
 };

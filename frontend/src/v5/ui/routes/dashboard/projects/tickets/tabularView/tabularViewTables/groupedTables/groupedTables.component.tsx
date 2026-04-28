@@ -18,16 +18,17 @@
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
-import { TicketsTableGroup } from '../ticketsTableGroup/ticketsTableGroup.component';
+import { TicketsTable } from '../ticketsTable/ticketsTable.component';
 import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
-import { Container, Title } from './ticketsTableResizableContent.styles';
-import { TicketsTableContext } from '../../ticketsTableContext/ticketsTableContext';
+import { Container, Title } from './groupedTables.styles';
+import { TabularViewContext } from '../../tabularViewContext/tabularViewContext';
 import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
+import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
 
 type CollapsibleTicketsGroupProps = {
 	propertyValue: string;
@@ -41,7 +42,7 @@ type CollapsibleTicketsGroupProps = {
 	onChangeCollapse: (collapse: boolean) => void;
 };
 
-const CollapsibleTicketsGroup = ({ 
+const TicketsGroup = ({ 
 	propertyValue, groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName, expanded, onChangeCollapse,
 }: CollapsibleTicketsGroupProps) => {
 	const ticketsIds = tickets.map(({ _id }) => _id);
@@ -60,7 +61,7 @@ const CollapsibleTicketsGroup = ({
 		onChangeCollapse={onChangeCollapse}
 		unmountHidden
 	>
-		<TicketsTableGroup
+		<TicketsTable
 			tickets={tickets}
 			onNewTicket={onNewTicket(propertyValue)}
 			onEditTicket={setTicketValue}
@@ -72,18 +73,17 @@ const CollapsibleTicketsGroup = ({
 export type TicketsTableResizableContentProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
-	tickets: ITicket[],
 	template: ITemplate,
 };
 
-export const TicketsTableResizableContent = ({ 
+export const GroupedTables = ({ 
 	setTicketValue, 
 	selectedTicketId, 
-	tickets: filteredItems, 
 	template,
 }: TicketsTableResizableContentProps) => {
-	const { groupBy } = useContext(TicketsTableContext);
+	const { groupBy } = useContext(TabularViewContext);
 	const collapsedGroups = useRef<Record<string, boolean>>({});
+	const tickets = useContext(SortedTableContext).sortedItems;
 
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		const presetValue = { key: groupBy, value: (groupByValue === UNSET) ? null : groupByValue };
@@ -100,8 +100,8 @@ export const TicketsTableResizableContent = ({
 
 	if (groupBy === NONE_OPTION) {
 		return (
-			<TicketsTableGroup
-				tickets={filteredItems}
+			<TicketsTable
+				tickets={tickets}
 				onNewTicket={onGroupNewTicket('')}
 				onEditTicket={setTicketValue}
 				selectedTicketId={selectedTicketId}
@@ -109,7 +109,7 @@ export const TicketsTableResizableContent = ({
 		);
 	}
 	
-	const groups = groupTickets(groupBy, [template], filteredItems);
+	const groups = groupTickets(groupBy, [template], tickets);
 
 	return (
 		<Container>
@@ -117,22 +117,21 @@ export const TicketsTableResizableContent = ({
 				items={groups}
 				itemHeight={45}
 				vKey='groups-list'
-				ItemComponent={({ groupName, value, tickets }) => (
-					<CollapsibleTicketsGroup
+				ItemComponent={({ groupName, value, tickets: groupedTickets }) => (
+					<TicketsGroup
 						groupName={groupName}
-						tickets={tickets}
+						tickets={groupedTickets}
 						setTicketValue={setTicketValue}
 						onNewTicket={onGroupNewTicket}
 						selectedTicketId={selectedTicketId}
 						propertyValue={value}
 						propertyName={groupBy}
 						onChangeCollapse={(collapsed) => onChangeCollapse(value, collapsed)}
-						expanded={collapsedGroups.current[value] === undefined ? tickets.length > 0 : !collapsedGroups.current[value] }
+						expanded={collapsedGroups.current[value] === undefined ? groupedTickets.length > 0 : !collapsedGroups.current[value] }
 						key={groupBy + groupName + template._id }
 					/>
 				)} 
 			/>
-			
 		</Container>
 	);
 };
