@@ -16,7 +16,7 @@
  */
 
 import { useVRef, VirtualList } from '@controls/virtualList/virtualList.component';
-import { TicketsGroup } from '../../../../dashboard/projects/tickets/tabularView/ticketsTableGroupBy.helper';
+import { TicketsGroup } from '../../../../../components/tickets/ticketsGroupBy.helper';
 import { CollapseControl } from '@controls/collapseControl/collapseControl.component';
 import { List } from '../ticketsList.styles';
 import { TicketItem } from '../ticketItem/ticketItem.component';

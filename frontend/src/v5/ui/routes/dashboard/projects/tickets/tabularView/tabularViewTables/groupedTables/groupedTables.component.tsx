@@ -17,7 +17,7 @@
 
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { TicketsTable } from '../ticketsTable/ticketsTable.component';
-import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
+import { groupTickets, UNSET } from '../../../../../../../components/tickets/ticketsGroupBy.helper';
 import { Container } from './groupedTables.styles';
 import { TabularViewContext } from '../../tabularViewContext/tabularViewContext';
 import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';

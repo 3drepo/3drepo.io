@@ -21,7 +21,7 @@ import { TicketItem } from './ticketItem/ticketItem.component';
 import { List, ListContainer } from './ticketsList.styles';
 import { useEffect, useRef } from 'react';
 import { untilXFramesPassed, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
-import { TicketsGroup } from '../../../dashboard/projects/tickets/tabularView/ticketsTableGroupBy.helper';
+import { TicketsGroup } from '../../../../components/tickets/ticketsGroupBy.helper';
 import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';

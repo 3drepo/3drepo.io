@@ -60,7 +60,7 @@ import { isEmpty, isEqual, orderBy } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { SortedTableComponent } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { getAssigneeDisplayNamesFromTicket, sortAssignees } from './ticketsTableGroupBy.helper';
+import { getAssigneeDisplayNamesFromTicket, sortAssignees } from '../../../../../components/tickets/ticketsGroupBy.helper';
 
 const paramToInputProps = (value, setter) => ({
 	value,
