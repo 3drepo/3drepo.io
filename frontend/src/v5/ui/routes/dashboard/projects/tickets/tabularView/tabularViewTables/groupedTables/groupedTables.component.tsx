@@ -16,61 +16,18 @@
  */
 
 import { useCallback, useContext, useEffect, useRef } from 'react';
-import { DashboardListCollapse } from '@components/dashboard/dashboardList';
-import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { TicketsTable } from '../ticketsTable/ticketsTable.component';
 import { groupTickets, UNSET } from '../../ticketsTableGroupBy.helper';
-import { Container, Title } from './groupedTables.styles';
+import { Container } from './groupedTables.styles';
 import { TabularViewContext } from '../../tabularViewContext/tabularViewContext';
 import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ITemplate, ITicket } from '@/v5/store/tickets/tickets.types';
+import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
+import { TicketsTableGroup } from './ticketsGroupTable.component';
 
-type CollapsibleTicketsGroupProps = {
-	propertyValue: string;
-	groupName: string;
-	tickets: ITicket[];
-	setTicketValue: SetTicketValue;
-	selectedTicketId?: string;
-	onNewTicket: (groupByValue: string) => (modelId: string) => void;
-	propertyName: string;
-	expanded: boolean;
-	onChangeCollapse: (collapse: boolean) => void;
-};
-
-const TicketsGroup = ({ 
-	propertyValue, groupName, tickets, setTicketValue, selectedTicketId, onNewTicket, propertyName, expanded, onChangeCollapse,
-}: CollapsibleTicketsGroupProps) => {
-	const ticketsIds = tickets.map(({ _id }) => _id);
-	const isLoading = !TicketsHooksSelectors.selectPropertyFetchedForTickets(ticketsIds, propertyName);
-
-	return (<DashboardListCollapse
-		title={(
-			<>
-				<Title>{groupName}</Title>
-				<CircledNumber disabled={!tickets.length || isLoading}>
-					{isLoading ? <Spinner /> : tickets.length}
-				</CircledNumber>
-			</>
-		)}
-		defaultExpanded={expanded}
-		onChangeCollapse={onChangeCollapse}
-		unmountHidden
-	>
-		<TicketsTable
-			tickets={tickets}
-			onNewTicket={onNewTicket(propertyValue)}
-			onEditTicket={setTicketValue}
-			selectedTicketId={selectedTicketId}
-		/>
-	</DashboardListCollapse>);
-};
-
-export type TicketsTableResizableContentProps = {
+export type GroupedTablesProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
 	template: ITemplate,
@@ -80,7 +37,7 @@ export const GroupedTables = ({
 	setTicketValue, 
 	selectedTicketId, 
 	template,
-}: TicketsTableResizableContentProps) => {
+}: GroupedTablesProps) => {
 	const { groupBy } = useContext(TabularViewContext);
 	const collapsedGroups = useRef<Record<string, boolean>>({});
 	const tickets = useContext(SortedTableContext).sortedItems;
@@ -118,7 +75,7 @@ export const GroupedTables = ({
 				itemHeight={45}
 				vKey='groups-list'
 				ItemComponent={({ groupName, value, tickets: groupedTickets }) => (
-					<TicketsGroup
+					<TicketsTableGroup
 						groupName={groupName}
 						tickets={groupedTickets}
 						setTicketValue={setTicketValue}
