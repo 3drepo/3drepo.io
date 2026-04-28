@@ -19,12 +19,12 @@ const { ADD_ONS } = require('../../../../../models/teamspaces.constants');
 const HereService = require('../../../../../services/maps/here');
 const OSMService = require('../../../../../services/maps/osm');
 const config = require('../../../../../utils/config');
-const { isAddOnModuleEnabled } = require('../../../../../models/teamspaceSettings');
+const { isAddOnEnabled } = require('../../../../../models/teamspaceSettings');
 
 const Maps = {};
 
-Maps.getListOfMaps = (teamspace) => {
-	const hereEnabled = isAddOnModuleEnabled(teamspace, ADD_ONS.HERE);
+Maps.getListOfMaps = async (teamspace) => {
+	const hereEnabled = await isAddOnEnabled(teamspace, ADD_ONS.HERE);
 	const maps = [
 		{ name: 'Open Street Map', layers: [{ name: 'Map Tiles', source: 'OSM' }] },
 
@@ -79,9 +79,9 @@ Maps.getListOfMaps = (teamspace) => {
 	return maps;
 };
 
-Maps.getHereBaseInfo = () => HereService.getBaseInfo();
+Maps.getHereBaseInfo = HereService.getBaseInfo;
 
-Maps.getOSMTile = (zoomLevel, gridx, gridy) => OSMService.getTile(zoomLevel, gridx, gridy);
+Maps.getOSMTile = OSMService.getTile;
 
 Maps.getHereDefaultTile = (zoomLevel, gridx, gridy) => HereService.getTile(zoomLevel, gridx, gridy);
 
