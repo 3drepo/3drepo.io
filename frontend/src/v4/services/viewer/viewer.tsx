@@ -819,6 +819,7 @@ export class ViewerService {
 
 	public async loadNewModel(teamspace, project, model, revision, isFederation, viewpoint) {
 		await UnityUtil.onReady();
+		await this.isViewerReady();
 		this.emit(VIEWER_EVENTS.MODEL_LOADING_START);
 		document.body.style.cursor = 'wait';
 
@@ -1335,6 +1336,10 @@ export class ViewerService {
 
 	public setClipGizmoAxisScale(scale: number) {
 		UnityUtil.setClipGizmoAxisScale(scale);
+	}
+
+	public setDynamicFpsTarget(optimisation: string, target: number) {
+		UnityUtil.setDynamicFpsTarget(optimisation === 'on' ? target : 0);
 	}
 
 	public setNavigationOn() {

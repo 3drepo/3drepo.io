@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { isEqual } from 'lodash';
-import { useRef, useState, useEffect, createContext, useContext, createRef, MutableRefObject, JSX } from 'react';
+import { useRef, useState, useEffect, createContext, useContext, createRef, JSX } from 'react';
 
 export type VListHandle = {
 	gotoIndex: (index: number, scroller?: Element ) => Promise<any>;
@@ -29,7 +29,7 @@ interface Props<T> {
 	ItemComponent: (value: T, index: number, array: any[]) => JSX.Element;
 	vKey?: string;
 	className?: string;
-	handle?: MutableRefObject<VListHandle>;
+	handle?: any;
 }
 
 const emptyRect = { x:0, y:0, width:0, top:0, bottom: 0, height:0 } as DOMRect;

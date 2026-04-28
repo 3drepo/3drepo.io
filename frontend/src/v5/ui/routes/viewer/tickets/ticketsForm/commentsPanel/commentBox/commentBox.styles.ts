@@ -17,8 +17,8 @@
 
 import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
-import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
-import { Container as TextAreaContainer } from '@controls/inputs/textArea/textAreaFixedSize.styles';
+import { FormTextAreaExpandable } from '@controls/inputs/formInputs.component';
+import { Container as TextAreaContainer } from '@controls/inputs/textArea/textAreaExpandable.styles';
 import { SubmitButton } from '@controls/submitButton';
 import { ImageWithSkeleton } from '@controls/imageWithSkeleton/imageWithSkeleton.component';
 import { DragAndDrop as DragAndDropBase } from '@controls/dragAndDrop';
@@ -143,7 +143,7 @@ export const ErroredImageMessages = styled.div`
 	margin: 0 0 4px 15px;
 `;
 
-export const MessageInput = styled(FormTextAreaFixedSize)`
+export const MessageInput = styled(FormTextAreaExpandable)`
 	padding: 8px 15px 0;
 	overflow: hidden;
 
