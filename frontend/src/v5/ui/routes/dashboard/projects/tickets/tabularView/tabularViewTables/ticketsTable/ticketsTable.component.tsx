@@ -32,19 +32,19 @@ import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { TicketsTableSettingsColumn } from './ticketsTableSettingsColumn/ticketsTableSettingsColumn.component';
 import { TICKETS_CHUNK_SIZE } from './ticketsTable.constants';
 
-type TicketsTableContentProps = {
+type TicketsTableBodyProps = {
 	tickets: ITicket[];
 	selectedTicketId?: string;
 	onEditTicket: SetTicketValue;
 	hideNewticketButton: boolean;
 };
 
-const TicketsTableContent = ({ 
+const TicketsTableBody = ({ 
 	tickets, 
 	selectedTicketId, 
 	onEditTicket,
 	hideNewticketButton,
-}: TicketsTableContentProps) => {
+}: TicketsTableBodyProps) => {
 	const ticketsIds = tickets.map(({ _id }) => _id);
 
 	return (
@@ -72,13 +72,13 @@ const TicketsTableContent = ({
 	);
 };
 
-type TicketsTableGroupProps = {
+type TicketsTableProps = {
 	selectedTicketId?: string;
 	tickets: ITicket[];
 	onEditTicket: SetTicketValue;
 	onNewTicket: (modelId: string) => void;
 };
-export const TicketsTable = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableGroupProps) => {
+export const TicketsTable = ({ tickets, onEditTicket, onNewTicket, selectedTicketId }: TicketsTableProps) => {
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const models = useSelectedModels();
@@ -91,7 +91,7 @@ export const TicketsTable = ({ tickets, onEditTicket, onNewTicket, selectedTicke
 		<RoundedContainer $hideSelectionColumn={hideSelectionColumn} $hideNewTicketButton={hideNewticketButton}>
 			{!hideSelectionColumn && <TicketsTableSelectionColumn tickets={tickets} selectedTicketId={selectedTicketId} disabledModelIds={disabledModelIds} />}
 			<Table $canCreateTicket={!newTicketButtonIsDisabled}>
-				<TicketsTableContent
+				<TicketsTableBody
 					tickets={tickets}
 					selectedTicketId={selectedTicketId}
 					onEditTicket={onEditTicket}
