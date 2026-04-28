@@ -34,7 +34,7 @@ export type DateTimePickerProps = {
 	value?: PickerValue;
 	onChange?: (value:  PickerValue) => void;
 	onAccept?: (value:  PickerValue) => void;
-	onBlur?: (value:  PickerValue) => void;
+	onBlur?: () => void;
 	placeholder?: string;
 	renderInput?: ElementType;
 	minDateTime?: PickerValue;
@@ -170,7 +170,7 @@ export const DateTimePicker = ({
 							if (!markForUpdateRef.current) return;
 							markForUpdateRef.current = false;
 							onChange?.(temporalValue.current ? temporalValue.current : null);
-							onBlur?.(temporalValue.current ? temporalValue.current : null);
+							onBlur?.();
 						}}>
 							<PopperWrapper>
 								{view === DatePickerView.calendar && (
