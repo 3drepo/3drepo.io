@@ -18,7 +18,7 @@
 import { useCallback, useContext, useEffect, useRef } from 'react';
 import { TicketsTable } from '../ticketsTable/ticketsTable.component';
 import { groupTickets, UNSET } from '../../../../../../../components/tickets/ticketsGroupBy.helper';
-import { Container } from './groupedTables.styles';
+import { Container } from './ticketsTables.styles';
 import { TabularViewContext } from '../../tabularViewContext/tabularViewContext';
 import {  NEW_TICKET_ID, SetTicketValue } from '../../ticketsTable.helper';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
@@ -26,22 +26,24 @@ import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { VirtualList } from '@controls/virtualList/virtualList.component';
 import { SortedTableContext } from '@controls/sortedTableContext/sortedTableContext';
 import { TicketsTableGroup } from './ticketsGroupTable.component';
+import { useWatchPropertyChange } from '../../useWatchPropertyChange';
 
-export type GroupedTablesProps = {
+export type TicketsTablesProps = {
 	setTicketValue: SetTicketValue;
 	selectedTicketId?: string;
 	template: ITemplate,
 };
 
-export const GroupedTables = ({ 
+export const TicketsTables = ({ 
 	setTicketValue, 
 	selectedTicketId, 
 	template,
-}: GroupedTablesProps) => {
+}: TicketsTablesProps) => {
 	const { groupBy } = useContext(TabularViewContext);
 	const collapsedGroups = useRef<Record<string, boolean>>({});
-	const tickets = useContext(SortedTableContext).sortedItems;
-
+	const { refreshSorting, sortedItems: tickets, sortingColumn } = useContext(SortedTableContext);
+	useWatchPropertyChange(sortingColumn, refreshSorting);
+	
 	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
 		const presetValue = { key: groupBy, value: (groupByValue === UNSET) ? null : groupByValue };
 		setTicketValue(modelId, NEW_TICKET_ID, presetValue);

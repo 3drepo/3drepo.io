@@ -18,7 +18,7 @@ import { DashboardListCollapse } from '@components/dashboard/dashboardList';
 import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { Title } from './groupedTables.styles';
+import { Title } from './ticketsTables.styles';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { SetTicketValue } from '../../ticketsTable.helper';
 import { TicketsTable } from '../ticketsTable/ticketsTable.component';

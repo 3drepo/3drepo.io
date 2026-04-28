@@ -21,8 +21,8 @@ import { EmptyPageView } from '../../../../../../components/shared/emptyPageView
 import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
-import { GroupedTables, GroupedTablesProps } from './groupedTables/groupedTables.component';
-import { Container, TicketsTableSpinner } from './tabularViewTables.styles';
+import { TicketsTables, TicketsTablesProps } from './ticketsTables/ticketsTables.component';
+import { Container, TicketsTableSpinner } from './tabularViewTablesLayout.styles';
 import { useEdgeScrolling } from '../edgeScrolling';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
@@ -54,7 +54,7 @@ const NoTicketsMessage = () => (
 	</Container>
 );
 
-export const TabularViewTables = ({ template, hasTickets, ...props }: GroupedTablesProps & { hasTickets: boolean }) => {
+export const TabularViewTablesLayout = ({ template, hasTickets, ...props }: TicketsTablesProps & { hasTickets: boolean }) => {
 	const tableRef = useRef(null);
 	const edgeScrolling = useEdgeScrolling();
 	const defaultColumns = TicketsHooksSelectors.selectInitialTabularColumns(template._id);
@@ -129,7 +129,7 @@ export const TabularViewTables = ({ template, hasTickets, ...props }: GroupedTab
 	return (
 		<Container ref={tableRef}>
 			<div style={{ position: 'absolute' }} >
-				<GroupedTables {...props} template={template} />
+				<TicketsTables {...props} template={template} />
 			</div>
 		</Container>
 	);

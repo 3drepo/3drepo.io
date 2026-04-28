@@ -28,7 +28,7 @@ import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
 import { enableRealtimeNewTicket, enableRealtimeUpdateTicket } from '@/v5/services/realtime/ticket.events';
 import { TicketContextComponent } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { isCommenterRole } from '@/v5/store/store.helpers';
-import { TabularViewTables } from './tabularViewTables/tabularViewTables.component';
+import { TabularViewTablesLayout } from './tabularViewTables/tabularViewTablesLayout.component';
 import { Transformers, useSearchParam } from '../../../../useSearchParam';
 import { DashboardTicketsParams, TICKETS_ROUTE, TICKETS_ROUTE_WITH_TICKET, VIEWER_ROUTE } from '../../../../routes.constants';
 import { ContainersAndFederationsSelect } from '../selectMenus/containersAndFederationsFormSelect.component';
@@ -396,7 +396,7 @@ const TabularViewLayout = ({ isNewTicketDirty, setTicketValue }: TicketsTablePro
 				</FiltersContainer>
 				<CardFilters />
 				<SortedTableComponent items={filteredTickets} sortingColumn={BaseProperties.CREATED_AT} customSortingFunctions={customSortingFunctions}>
-					<TabularViewTables hasTickets={filteredTickets.length > 0} setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
+					<TabularViewTablesLayout hasTickets={filteredTickets.length > 0} setTicketValue={setTicketValue} selectedTicketId={ticketId} template={selectedTemplate}/>
 				</SortedTableComponent>
 			</TicketsTableLayout>
 		</TicketsFiltersContextComponent>
