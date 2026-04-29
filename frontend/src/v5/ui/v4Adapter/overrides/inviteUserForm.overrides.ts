@@ -24,7 +24,6 @@ import {
 	Container as Modal,
 	Content,
 	Footer,
-	IconButton,
 	PermissionsTable,
 	ProjectCheckboxContainer,
 	ProjectConfig,

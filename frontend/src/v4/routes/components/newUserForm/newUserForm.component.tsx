@@ -50,18 +50,19 @@ interface IProps {
 	users: any[];
 	permissionsOnUIDisabled: boolean;
 	addUserIsPending: boolean;
+	userNotExists: boolean;
 	onInvitationOpen: (email, job, isAdmin) => void;
 	onSave: (user) => void;
 	onCancel: () => void;
 	clearSuggestions: () => void;
 	getUsersSuggestions: (searchText) => void;
+	setUserNotExists: (userNotExists: boolean) => void;
 }
 
 interface IState {
 	name: string;
 	job: string;
 	isAdmin: boolean;
-	userNotExists: boolean;
 }
 
 export class NewUserForm extends PureComponent<IProps, IState> {
@@ -69,13 +70,17 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 		name: '',
 		job: '',
 		isAdmin: false,
-		userNotExists: false
 	};
 
 	private popperNode = null;
 
+	public setUserNotExists = (userNotExists) => {
+		this.props.setUserNotExists(userNotExists);
+	}
+
 	public handleChange = (field) => (event) => {
-		this.setState({[field]: event.target.value || '', userNotExists: false} as any);
+		this.setState({[field]: event.target.value || ''} as any);
+		this.props.setUserNotExists(false);
 	}
 
 	public handlePermissionsChange = (event, isAdmin) => {
@@ -94,10 +99,6 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 				</MenuItem>
 			);
 		});
-	}
-
-	public setUserNotExists = (userNotExists) => {
-		this.setState({ userNotExists });
 	}
 
 	public renderInputComponent = (inputProps) => {
@@ -176,7 +177,7 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 		if (
 			!this.props.addUserIsPending &&
 			prevProps.addUserIsPending !== this.props.addUserIsPending &&
-			!this.state.userNotExists
+			!this.props.userNotExists
 		) {
 			// if add user is succesful then close the form
 			this.props.onCancel();
@@ -240,14 +241,14 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 							label="Add as Teamspace Admin"
 						/>
 					)}
-					{this.renderUserNotFoundMessage(this.state.userNotExists)}
+					{this.renderUserNotFoundMessage(this.props.userNotExists)}
 					<Grid
 						container
 						direction="row">
 						<SaveButton
 							variant="contained"
 							color="secondary"
-							disabled={this.state.userNotExists || !this.state.name || !this.state.job || this.state.job.length === 0}
+							disabled={this.props.userNotExists || !this.state.name || !this.state.job || this.state.job.length === 0}
 							aria-label="Save"
 							onClick={this.handleSubmit}>
 							+ Add user

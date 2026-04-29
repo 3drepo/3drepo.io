@@ -66,6 +66,7 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	clearUsersSuggestions: UserManagementActions.clearUsersSuggestions,
 	fetchQuotaInfo: TeamspacesActions.fetchQuotaInfo,
 	showDialog: DialogActions.showDialog,
+	setUserNotExists: UserManagementActions.setUserNotExists,
 	fetchQuotaAndInvitations: UserManagementActions.fetchQuotaAndInvitations
 }, dispatch);
 
