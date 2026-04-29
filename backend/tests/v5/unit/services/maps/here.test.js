@@ -20,7 +20,7 @@ const { src } = require('../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/utils/webRequests');
-const { get } = require(`${src}/utils/webRequests`);
+const { get, getArrayBuffer } = require(`${src}/utils/webRequests`);
 
 jest.mock('../../../../../src/v5/utils/config');
 const config = require(`${src}/utils/config`);
@@ -47,8 +47,8 @@ const testGetTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here tile', async () => {
 			await HereService.getTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -62,8 +62,8 @@ const testGetAerialTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here arial tile', async () => {
 			await HereService.getAerialTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=satellite.day&apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -77,8 +77,8 @@ const testGetTrafficTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here traffic tile', async () => {
 			await HereService.getTrafficTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=logistics.day&apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -92,8 +92,8 @@ const testGetTrafficFlowTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here traffic flow tile', async () => {
 			await HereService.getTrafficFlowTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/flow/mc/${zoomLevel}/${gridx}/${gridy}/png8?apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -107,8 +107,8 @@ const testGetTerrainTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here terrain tile', async () => {
 			await HereService.getTerrainTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=topo.day&apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -122,8 +122,8 @@ const testGetHybridTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here hybrid tile', async () => {
 			await HereService.getHybridTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=explore.satellite.day&apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -137,8 +137,8 @@ const testGetGreyTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here grey tile', async () => {
 			await HereService.getGreyTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=lite.day&apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -152,8 +152,8 @@ const testGetTruckRestrictionsTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here truck restrictions tile', async () => {
 			await HereService.getTruckRestrictionsTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?features=vehicle_restrictions:active_and_inactive&style=explore.day&apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -167,8 +167,8 @@ const testGetTruckRestrictionsOverlayTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here truck restrictions overlay tile', async () => {
 			await HereService.getTruckRestrictionsOverlayTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/blank/mc/${zoomLevel}/${gridx}/${gridy}/png8?features=vehicle_restrictions:active_and_inactive&apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -182,8 +182,8 @@ const testGetLabelOverlayTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here label overlay tile', async () => {
 			await HereService.getLabelOverlayTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/label/mc/${zoomLevel}/${gridx}/${gridy}/png8?apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -197,8 +197,8 @@ const testGetTollZoneTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here toll zone tile', async () => {
 			await HereService.getTollZoneTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?features=congestion_zones:all&apiKey=${config.here.apiKey}`),
 			);
 		});
@@ -212,15 +212,15 @@ const testGetPOITile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here POI tile', async () => {
 			await HereService.getPOITile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?features=pois:all&apiKey=${config.here.apiKey}`),
 			);
 		});
 	});
 };
 
-describe(determineTestGroup('Here Service'), () => {
+describe(determineTestGroup(__filename), () => {
 	testGetBaseInfo();
 	testGetTile();
 	testGetAerialTile();

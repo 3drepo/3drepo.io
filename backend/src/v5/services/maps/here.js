@@ -42,8 +42,8 @@ const generateTileURI = (domain, resource, zoomLevel, gridx, gridy, { features, 
 };
 
 HereService.getBaseInfo = () => {
-	const uri = `${BASE_URL}/v3/info?apiKey=${config.here.apiKey}`;
-	return get(uri, { apiKey: config.here.apiKey });
+	const uri = `https://${BASE_URL}/v3/info?apiKey=${config.here.apiKey}`;
+	return get(uri);
 };
 
 HereService.getTile = (zoomLevel, gridx, gridy) => getArrayBuffer(

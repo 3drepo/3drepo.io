@@ -83,30 +83,28 @@ Maps.getHereBaseInfo = HereService.getBaseInfo;
 
 Maps.getOSMTile = OSMService.getTile;
 
-Maps.getHereDefaultTile = (zoomLevel, gridx, gridy) => HereService.getTile(zoomLevel, gridx, gridy);
+Maps.getHereDefaultTile = HereService.getTile;
 
-Maps.getHereAerialTile = (zoomLevel, gridx, gridy) => HereService.getAerialTile(zoomLevel, gridx, gridy);
+Maps.getHereAerialTile = HereService.getAerialTile;
 
-Maps.getHereTrafficTile = (zoomLevel, gridx, gridy) => HereService.getTrafficTile(zoomLevel, gridx, gridy);
+Maps.getHereTrafficTile = HereService.getTrafficTile;
 
-Maps.getHereTrafficFlowTile = (zoomLevel, gridx, gridy) => HereService.getTrafficFlowTile(zoomLevel, gridx, gridy);
+Maps.getHereTrafficFlowTile = HereService.getTrafficFlowTile;
 
-Maps.getHereTerrainTile = (zoomLevel, gridx, gridy) => HereService.getTerrainTile(zoomLevel, gridx, gridy);
+Maps.getHereTerrainTile = HereService.getTerrainTile;
 
-Maps.getHereHybridTile = (zoomLevel, gridx, gridy) => HereService.getHybridTile(zoomLevel, gridx, gridy);
+Maps.getHereHybridTile = HereService.getHybridTile;
 
-Maps.getHereGreyTile = (zoomLevel, gridx, gridy) => HereService.getGreyTile(zoomLevel, gridx, gridy);
+Maps.getHereGreyTile = HereService.getGreyTile;
 
-Maps.getHereTruckRestrictionsTile = (
-	zoomLevel, gridx, gridy) => HereService.getTruckRestrictionsTile(zoomLevel, gridx, gridy);
+Maps.getHereTruckRestrictionsTile = HereService.getTruckRestrictionsTile;
 
-Maps.getHereTruckRestrictionsOverlayTile = (
-	zoomLevel, gridx, gridy) => HereService.getTruckRestrictionsOverlayTile(zoomLevel, gridx, gridy);
+Maps.getHereTruckRestrictionsOverlayTile = HereService.getTruckRestrictionsOverlayTile;
 
-Maps.getHereLabelOverlayTile = (zoomLevel, gridx, gridy) => HereService.getLabelOverlayTile(zoomLevel, gridx, gridy);
+Maps.getHereLabelOverlayTile = HereService.getLabelOverlayTile;
 
-Maps.getHereTollZoneTile = (zoomLevel, gridx, gridy) => HereService.getTollZoneTile(zoomLevel, gridx, gridy);
+Maps.getHereTollZoneTile = HereService.getTollZoneTile;
 
-Maps.getHerePOITile = (zoomLevel, gridx, gridy) => HereService.getPOITile(zoomLevel, gridx, gridy);
+Maps.getHerePOITile = HereService.getPOITile;
 
 module.exports = Maps;

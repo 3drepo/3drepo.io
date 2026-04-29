@@ -21,7 +21,8 @@ const {
 	hasCommenterAccessToFederation, hasReadAccessToContainer, hasReadAccessToDrawing,
 	hasReadAccessToFederation, hasWriteAccessToContainer, hasWriteAccessToDrawing, hasWriteAccessToFederation,
 } = require('./components/models');
-const { isActiveTeamspaceMember, isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
+const { isActiveTeamspaceMember, isAddOnEnabled, isTeamspaceAdmin, isTeamspaceMember } = require('./components/teamspaces');
+const { ADD_ONS } = require('../../models/teamspaces.constants');
 const { BYPASS_AUTH } = require('../../utils/config.constants');
 const { isProjectAdmin } = require('./components/projects');
 const { modelTypes } = require('../../models/modelSettings.constants');
@@ -29,6 +30,7 @@ const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
 const { validSession } = require('../auth');
 const { validateMany } = require('../common');
+const { validateMapsCoordinates } = require('../dataConverter/queryParams');
 
 const Permissions = {};
 
@@ -69,6 +71,11 @@ Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTea
 	getModelIdFromParam(modelTypes.CONTAINER), hasWriteAccessToContainer]);
 Permissions.hasAdminAccessToContainer = validateMany([Permissions.hasAccessToTeamspace,
 	getModelIdFromParam(modelTypes.CONTAINER), hasAdminAccessToContainer]);
+
+Permissions.hasHereAccessToContainer = validateMany([
+	Permissions.hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE)]);
+Permissions.hasHereAccessToContainerWithCoords = validateMany([
+	Permissions.hasHereAccessToContainer, validateMapsCoordinates]);
 
 Permissions.hasReadAccessToDrawing = validateMany([Permissions.hasAccessToTeamspace,
 	getModelIdFromParam(modelTypes.DRAWING), hasReadAccessToDrawing]);

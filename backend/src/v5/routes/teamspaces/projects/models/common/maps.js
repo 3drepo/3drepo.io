@@ -15,12 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { respond, writeStreamRespond } = require('../../../../../utils/responder');
-const { ADD_ONS } = require('../../../../../models/teamspaces.constants');
+const { hasHereAccessToContainer, hasHereAccessToContainerWithCoords, hasReadAccessToContainer } = require('../../../../../middleware/permissions');
 const Maps = require('../../../../../processors/teamspaces/projects/models/commons/maps');
 const { Router } = require('express');
-const { hasReadAccessToContainer } = require('../../../../../middleware/permissions');
-const { isAddOnEnabled } = require('../../../../../middleware/permissions/components/teamspaces');
+const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
 
 const getListOfMaps = async (req, res) => {
@@ -39,7 +37,7 @@ const getHereBaseInfo = async (req, res) => {
 	try {
 		const info = await Maps.getHereBaseInfo();
 
-		respond(req, res, templates.ok, info);
+		respond(req, res, templates.ok, info.data);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -202,7 +200,6 @@ const getHerePOITile = async (req, res) => {
 	}
 };
 
-// create query params check middleware to validate the presence and type of zoomLevel, gridx and gridy
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
@@ -210,46 +207,46 @@ const establishRoutes = () => {
 	router.get('/', hasReadAccessToContainer, getListOfMaps);
 
 	/** */
-	router.get('/here', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereBaseInfo);
+	router.get('/here', hasHereAccessToContainer, getHereBaseInfo);
 
 	/** */
-	router.get('/osm/tiles', hasReadAccessToContainer, getOSMTile);
+	router.get('/osm/tiles', hasHereAccessToContainerWithCoords, getOSMTile);
 
 	// /** */
-	router.get('/here/default/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereDefaultTile);
+	router.get('/here/default/tiles', hasHereAccessToContainerWithCoords, getHereDefaultTile);
 
 	// /** */
-	router.get('/here/aerial/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereAerialTile);
+	router.get('/here/aerial/tiles', hasHereAccessToContainerWithCoords, getHereAerialTile);
 
 	// /** */
-	router.get('/here/traffic/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereTrafficTile);
+	router.get('/here/traffic/tiles', hasHereAccessToContainerWithCoords, getHereTrafficTile);
 
 	// /** */
-	router.get('/here/trafficflow/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereTrafficFlowTile);
+	router.get('/here/trafficflow/tiles', hasHereAccessToContainerWithCoords, getHereTrafficFlowTile);
 
 	// /** */
-	router.get('/here/terrain/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereTerrainTile);
+	router.get('/here/terrain/tiles', hasHereAccessToContainerWithCoords, getHereTerrainTile);
 
 	// /** */
-	router.get('/here/hybrid/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereHybridTile);
+	router.get('/here/hybrid/tiles', hasHereAccessToContainerWithCoords, getHereHybridTile);
 
 	// /** */
-	router.get('/here/grey/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereGreyTile);
+	router.get('/here/grey/tiles', hasHereAccessToContainerWithCoords, getHereGreyTile);
 
 	// /** */
-	router.get('/here/truck/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereTruckRestrictionsTile);
+	router.get('/here/truck/tiles', hasHereAccessToContainerWithCoords, getHereTruckRestrictionsTile);
 
 	// /** */
-	router.get('/here/truckoverlay/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereTruckOverlayTile);
+	router.get('/here/truckoverlay/tiles', hasHereAccessToContainerWithCoords, getHereTruckOverlayTile);
 
 	// /** */
-	router.get('/here/labeloverlay/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereLabelOverlayTile);
+	router.get('/here/labeloverlay/tiles', hasHereAccessToContainerWithCoords, getHereLabelOverlayTile);
 
 	// /** */
-	router.get('/here/tollzone/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHereTollZoneTile);
+	router.get('/here/tollzone/tiles', hasHereAccessToContainerWithCoords, getHereTollZoneTile);
 
 	// /** */
-	router.get('/here/poi/tiles', hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE), getHerePOITile);
+	router.get('/here/poi/tiles', hasHereAccessToContainerWithCoords, getHerePOITile);
 
 	return router;
 };

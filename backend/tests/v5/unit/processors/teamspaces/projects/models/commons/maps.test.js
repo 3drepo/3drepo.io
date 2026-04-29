@@ -17,7 +17,7 @@
 
 const { src } = require('../../../../../../helper/path');
 
-const { determineTestGroup } = require('../../../../../../helper/services');
+const { determineTestGroup, generateRandomString } = require('../../../../../../helper/services');
 
 const Maps = require(`${src}/processors/teamspaces/projects/models/commons/maps`);
 
@@ -35,10 +35,10 @@ const OSMService = require(`${src}/services/maps/osm`);
 
 const testGetListOfMaps = () => {
 	describe('Get list of maps', () => {
+		const teamspace = generateRandomString();
 		test('should return only Open Street Map if HERE add-on is not enabled', async () => {
 			config.here = { };
-			const teamspace = 'testTeamspace';
-			const maps = Maps.getListOfMaps(teamspace);
+			const maps = await Maps.getListOfMaps(teamspace);
 			expect(maps).toEqual([
 				{ name: 'Open Street Map', layers: [{ name: 'Map Tiles', source: 'OSM' }] },
 			]);
@@ -46,9 +46,8 @@ const testGetListOfMaps = () => {
 
 		test('should return all maps if HERE add-on is enabled and config is set', async () => {
 			config.here = { apiKey: 'testApiKey' };
-			TeamspaceSettings.isAddOnModuleEnabled.mockResolvedValueOnce(true);
-			const teamspace = 'testTeamspace';
-			const maps = Maps.getListOfMaps(teamspace);
+			TeamspaceSettings.isAddOnEnabled.mockResolvedValueOnce(true);
+			const maps = await Maps.getListOfMaps(teamspace);
 			expect(maps).toEqual([
 				{ name: 'Open Street Map', layers: [{ name: 'Map Tiles', source: 'OSM' }] },
 				{ name: 'Here',

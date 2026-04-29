@@ -20,7 +20,7 @@ const { src } = require('../../../helper/path');
 const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/utils/webRequests');
-const { get } = require(`${src}/utils/webRequests`);
+const { getArrayBuffer } = require(`${src}/utils/webRequests`);
 
 jest.mock('../../../../../src/v5/utils/config');
 const config = require(`${src}/utils/config`);
@@ -35,8 +35,8 @@ const testGetTitle = () => {
 		test('Should return OSM tile', async () => {
 			await OSMService.getTile(zoomLevel, gridx, gridy);
 
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`a.tile.openstreetmap.org/${zoomLevel}/${gridx}/${gridy}.png`),
 			);
 		});
@@ -48,12 +48,12 @@ const testGetTitle = () => {
 				key: generateRandomString(),
 			};
 			await OSMService.getTile(zoomLevel, gridx, gridy);
-			expect(get).toHaveBeenCalledTimes(1);
-			expect(get).toHaveBeenCalledWith(`https://${config.osm.domain}/${config.osm.prefix}/${zoomLevel}/${gridx}/${gridy}.png?key=${config.osm.key}`);
+			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+			expect(getArrayBuffer).toHaveBeenCalledWith(`https://${config.osm.domain}/${config.osm.prefix}/${zoomLevel}/${gridx}/${gridy}.png?key=${config.osm.key}`);
 		});
 	});
 };
 
-describe(determineTestGroup('OSM Service'), () => {
+describe(determineTestGroup(__filename), () => {
 	testGetTitle();
 });
