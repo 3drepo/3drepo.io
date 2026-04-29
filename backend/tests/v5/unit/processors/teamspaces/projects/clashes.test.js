@@ -18,6 +18,13 @@
 const { times } = require('lodash');
 const { src } = require('../../../../helper/path');
 
+jest.mock('fs', () => ({
+	...jest.requireActual('fs'),
+	createReadStream: jest.fn(),
+}));
+const fs = require('fs');
+const { PassThrough } = require('stream');
+
 const { generateRandomString, determineTestGroup, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
 
 jest.mock('../../../../../../src/v5/models/clashes.plans');
@@ -41,9 +48,14 @@ const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/m
 jest.mock('../../../../../../src/v5/models/metadata');
 const MetadataModel = require(`${src}/models/metadata`);
 
+jest.mock('../../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
+
 const { SELF_INTERSECTIONS_CHECK_OPTIONS } = require(`${src}/models/clashes.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { CLASH_PLAN_TYPES } = require(`${src}/models/clashes.constants`);
+
+const RUN_HISTORY_COL = 'clashes.runs.history';
 
 const Clashes = require(`${src}/processors/teamspaces/projects/clashes`);
 
@@ -224,23 +236,103 @@ const testCreateRun = () => {
 	});
 };
 
+const formatClash = (clash) => ({
+	...clash,
+	a: { container: clash.a.split('::')[0], idType: clash.a.split('::')[1], id: clash.a.split('::')[2] },
+	b: { container: clash.b.split('::')[0], idType: clash.b.split('::')[1], id: clash.b.split('::')[2] },
+	index: [clash.a, clash.b].sort().join('-'),
+});
+
+const generateClash = () => ({
+	a: `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`,
+	b: `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`,
+	...generateRandomObject(),
+});
+
 const testCompleteRun = () => {
 	describe('Complete Run', () => {
+		const fileContent = { clashes: times(10, () => generateClash()) };
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const corId = generateRandomString();
+		const resPath = generateRandomString();
+
 		test('should complete run when there are no previous runs', async () => {
-			const clashes = times(10, () => ({
-				a: `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`,
-				b: `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`,
-				...generateRandomObject(),
-			}));
+			fs.createReadStream.mockImplementationOnce(() => {
+				const fakeReadStream = PassThrough();
+				fakeReadStream.write(JSON.stringify(fileContent));
+				fakeReadStream.end();
+				return fakeReadStream;
+			});
 			ClashRunsModel.getTestRunByQuery.mockRejectedValueOnce(new Error());
 
-			const teamspace = generateRandomString();
-			const planId = generateRandomString();
+			await Clashes.completeRun(teamspace, project, corId, resPath);
 
-			await Clashes.completeRun(teamspace, planId);
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId },
+				{ plan: 1, triggeredAt: 1 });
+			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
 
-			expect(ClashPlansModel.completeRun).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.completeRun).toHaveBeenCalledWith(teamspace, planId);
+			const result = { new: fileContent.clashes.map(formatClash), active: [], resolved: [] };
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, expect.any(String),
+				Buffer.from(JSON.stringify(result)));
+
+			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledWith(teamspace, corId,
+				FilesManager.storeFile.mock.calls[0][2]);
+		});
+
+		test('should categorize clashes and complete run when there are previous runs', async () => {
+			const existingClashes = {
+				new: times(5, () => generateClash()).map(formatClash),
+				active: fileContent.clashes.slice(0, 5).map(formatClash),
+				resolved: [],
+			};
+			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+			const lastRun = { ...generateRandomObject(), result: generateRandomString() };
+
+			fs.createReadStream.mockImplementationOnce(() => {
+				const fakeReadStream = PassThrough();
+				fakeReadStream.write(JSON.stringify(fileContent));
+				fakeReadStream.end();
+				return fakeReadStream;
+			});
+
+			FilesManager.getFileAsStream.mockImplementationOnce(() => {
+				const fakeReadStream = PassThrough();
+				fakeReadStream.write(JSON.stringify(existingClashes));
+				fakeReadStream.end();
+				return Promise.resolve({ readStream: fakeReadStream });
+			});
+
+			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
+			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(lastRun);
+
+			await Clashes.completeRun(teamspace, project, corId, resPath);
+
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(2);
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId },
+				{ plan: 1, triggeredAt: 1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
+				{ result: 1 }, { completedAt: -1 });
+
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, lastRun.result);
+
+			const result = {
+				new: fileContent.clashes.slice(5, 10).map(formatClash),
+				active: existingClashes.active,
+				resolved: existingClashes.new,
+			};
+
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, expect.any(String),
+				Buffer.from(JSON.stringify(result)));
+
+			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledWith(teamspace, corId,
+				FilesManager.storeFile.mock.calls[0][2]);
 		});
 	});
 };
@@ -250,4 +342,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdatePlan();
 	testDeletePlan();
 	testCreateRun();
+	testCompleteRun();
 });

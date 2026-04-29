@@ -190,12 +190,12 @@ Clashes.completeRun = async (teamspace, project, corId, resPath) => {
 
 	try {
 		const { plan } = await getTestRunByQuery(teamspace, { _id: corId }, { plan: 1, triggeredAt: 1 });
-		const { result } = await getTestRunByQuery(teamspace,
+		const lastCompletedRun = await getTestRunByQuery(teamspace,
 			{ 'plan._id': plan._id, completedAt: { $exists: true } },
 			{ result: 1 }, { completedAt: -1 },
 		);
 
-		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, result);
+		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun.result);
 		const { new: newClashes, active, resolved } = await streamToJSON(readStream);
 		lastRunClashes = [...newClashes, ...active, ...resolved];
 	} catch (err) {
