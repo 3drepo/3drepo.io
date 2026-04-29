@@ -2793,4 +2793,14 @@ export class UnityUtil {
 	public static disableGamepad() {
 		UnityUtil.toUnity('DisableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
+
+	/**
+	 * Set offline fetch interceptor for mobile/Flutter integration
+	 * @param interceptor - Function that handles fetch requests
+	 */
+	public static setOfflineFetchInterceptor(interceptor: (url: string, options?: RequestInit) => Promise<Response>) {
+		if (UnityUtil.externalWebRequestHandler) {
+			UnityUtil.externalWebRequestHandler.setOfflineFetchInterceptor(interceptor);
+		}
+	}
 }
