@@ -93,128 +93,154 @@ const testDeletePlan = () => {
 };
 
 const testCreateRun = () => {
-	describe('Create a test run', () => {
-		const teamspace = generateRandomString();
-		const project = generateUUID();
-		const userId = generateRandomString();
-		const runId = generateRandomString();
-		const planData = {
-			type: CLASH_PLAN_TYPES[0],
-			tolerance: generateRandomNumber(),
-			selfIntersectionsCheck: false,
-			selectionA: { container: generateRandomString(), revision: generateRandomString() },
-			selectionB: { container: generateRandomString(),
-				revision: generateRandomString(),
-				rules: [generateRandomObject()],
-			},
-		};
+	const teamspace = generateRandomString();
+	const project = generateUUID();
+	const userId = generateRandomString();
+	const runId = generateRandomString();
+	const planData = {
+		type: CLASH_PLAN_TYPES[0],
+		tolerance: generateRandomNumber(),
+		selfIntersectionsCheck: false,
+		selectionA: { container: generateRandomString(), revision: generateRandomString() },
+		selectionB: { container: generateRandomString(),
+			revision: generateRandomString(),
+			rules: [generateRandomObject()],
+		},
+	};
+	const parentWithManyMeshes = generateRandomString();
+	const externalIds = times(10, () => ({ key: generateRandomString(), values: [generateRandomString()] }));
 
-		const checkStreamContent = (stream, expectedContent) => new Promise((resolve, reject) => {
-			const chunks = [];
-			stream.on('data', (chunk) => chunks.push(chunk));
-			stream.on('error', reject);
-			stream.on('end', () => {
-				try {
-					const content = Buffer.concat(chunks).toString();
-					expect(content).toEqual(expectedContent);
-					resolve();
-				} catch (err) {
-					reject(err);
-				}
-			});
+	const metadata = times(10, (i) => ({ _id: generateRandomString(),
+		parents: [generateRandomString()],
+		externalId: externalIds[i] }));
+
+	const meshDataObj = {
+		nonBimMeshes: times(10, (i) => ({
+			_id: generateRandomString(),
+			parents: [i % 2 === 0 ? parentWithManyMeshes : generateRandomString()],
+		})),
+		meshes: times(10, (i) => ({
+			_id: generateRandomString(),
+			parents: metadata[i].parents,
+			externalId: externalIds[i],
+		})),
+		metadata,
+		unwantedMetadata: [],
+		unwantedMeshes: [],
+	};
+
+	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0].externalId);
+
+	const checkStreamContent = (stream, expectedContent) => new Promise((resolve, reject) => {
+		const chunks = [];
+		stream.on('data', (chunk) => chunks.push(chunk));
+		stream.on('error', reject);
+		stream.on('end', () => {
+			try {
+				const content = Buffer.concat(chunks).toString();
+				expect(content).toEqual(expectedContent);
+				resolve();
+			} catch (err) {
+				reject(err);
+			}
 		});
+	});
 
-		const generateGroupedMeshes = (container, meshes, unwantedMeshes = []) => {
-			const result = {};
+	const generateGroupedMeshes = (container, meshes, unwantedMeshes = []) => {
+		const result = {};
 
-			for (const mesh of meshes.filter((m) => !unwantedMeshes.some(({ _id }) => _id === m._id))) {
-				const parentId = mesh.name ?? UUIDToString(mesh.parents[0]);
-				const compositePath = `${container}::internal::${parentId}`;
+		for (const mesh of meshes.filter(({ _id }) => !unwantedMeshes.includes(_id))) {
+			const parentId = mesh.name ?? UUIDToString(mesh.parents[0]);
+			const compositePath = `${container}::${mesh.externalId?.key ?? 'internal'}::${mesh.externalId?.values[0] ?? parentId}`;
 
-				if (!result[compositePath]) {
-					result[compositePath] = [];
-				}
-				result[compositePath].push(mesh._id);
+			if (!result[compositePath]) {
+				result[compositePath] = [];
+			}
+			result[compositePath].push(mesh._id);
+		}
+
+		return Object.entries(result).map(([id, meshIds]) => ({ id, meshIds }));
+	};
+
+	describe.each([
+		['no meshes found in set A', undefined, { ...meshDataObj, nonBimMeshes: [] }],
+		['no meshes found in set B', undefined, { ...meshDataObj, meshes: [], metadata: [] }],
+		['plan has selfIntersectionsCheck set to selectionA', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0] }],
+		['plan has selfIntersectionsCheck set to selectionB', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[1] }],
+		['plan has selfIntersectionsCheck set to true', { ...planData, selfIntersectionsCheck: true }],
+		['there are unwanted metadata', undefined, { ...meshDataObj, unwantedMetadata: metadata.slice(2), unwantedMeshes: [meshDataObj.meshes[0]._id, meshDataObj.meshes[1]._id] }],
+	])('Create Test Run', (desc, plan = planData, meshData = meshDataObj) => {
+		test(`should create and queue the run when ${desc}`, async () => {
+			ClashRunsModel.createTestRun.mockResolvedValueOnce(runId);
+
+			// mocks for set A (no rules)
+			Metadata.getAllMetadata.mockResolvedValueOnce([]);
+			ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.nonBimMeshes);
+			// mocks for set B (rules)
+			MetadataModel.getMetadataByRules.mockResolvedValueOnce(
+				{ matched: meshData.metadata, unwanted: meshData.unwantedMetadata });
+			if (meshData.metadata.length) {
+				ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.meshes);
+			}
+			if (meshData.unwantedMeshes.length) {
+				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.unwantedMeshes);
 			}
 
-			return Object.entries(result).map(([id, meshIds]) => ({ id, meshIds }));
-		};
+			await Clashes.createRun(teamspace, project, plan, userId);
 
-		const parentsA = times(2, () => generateRandomString());
-		const meshesA = times(10, (i) => ({ _id: generateRandomString(), parents: [parentsA[i % 2 === 0 ? 0 : 1]] }));
-		const metadataA = times(10, (i) => ({ _id: generateRandomString(), parents: meshesA[i].parents }));
-		const parentsB = times(2, () => generateRandomString());
-		const meshesB = times(10, (i) => ({ _id: generateRandomString(), parents: [parentsB[i % 2 === 0 ? 0 : 1]] }));
-		const metadataB = times(10, (i) => ({ _id: generateRandomString(), parents: meshesB[i].parents }));
+			expect(ClashRunsModel.createTestRun).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, plan, userId);
+			expect(Metadata.getAllMetadata).toHaveBeenCalledTimes(1);
+			expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(meshData.metadata.length ? 2 : 1);
+			expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledTimes(meshData.unwantedMeshes.length ? 1 : 0);
 
-		const meshDataObj = {
-			meshesA,
-			meshesB,
-			metadataA,
-			metadataB,
-			unwantedMetadataB: [],
-			unwantedMeshesB: [],
-		};
+			const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
+			expect(ModelProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, project,
+				UUIDToString(runId), stream);
 
-		describe.each([
-			['no meshes found in set A', undefined, { ...meshDataObj, meshesA: [], metadataA: [] }],
-			['no meshes found in set B', undefined, { ...meshDataObj, meshesB: [], metadataB: [] }],
-			['plan has selfIntersectionsCheck set to selectionA', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0] }],
-			['plan has selfIntersectionsCheck set to selectionB', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[1] }],
-			['plan has selfIntersectionsCheck set to true', { ...planData, selfIntersectionsCheck: true }],
-			['there are unwanted metadata', undefined, { ...meshDataObj, unwantedMetadataB: metadataB.slice(2), unwantedMeshesB: [meshesB[0], meshesB[1]] }],
-		])('Create a test run with rules', (desc, plan = planData, meshData = meshDataObj) => {
-			test(`should create and queue the run when ${desc}`, async () => {
-				ClashRunsModel.createTestRun.mockResolvedValueOnce(runId);
-
-				// mocks for set A (no rules)
-				Metadata.getAllMetadata.mockResolvedValueOnce(meshData.metadataA);
-				ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.meshesA);
-				// mocks for set B (rules)
-				MetadataModel.getMetadataByRules.mockResolvedValueOnce(
-					{ matched: meshData.metadataB, unwanted: meshData.unwantedMetadataB });
-				if (meshData.metadataB.length) {
-					ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.meshesB);
-				}
-				if (meshData.unwantedMeshesB.length) {
-					Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.unwantedMeshesB.map(({ _id }) => _id));
-				}
-
-				await Clashes.createRun(teamspace, project, plan, userId);
-
-				expect(ClashRunsModel.createTestRun).toHaveBeenCalledTimes(1);
-				expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, plan, userId);
-				expect(Metadata.getAllMetadata).toHaveBeenCalledTimes(1);
-				expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
-				expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(meshData.metadataB.length ? 2 : 1);
-				expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledTimes(meshData.unwantedMeshesB.length ? 1 : 0);
-
-				const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
-				expect(ModelProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, project,
-					UUIDToString(runId), stream);
-
-				await checkStreamContent(stream, JSON.stringify({
-					type: plan.type,
-					tolerance: plan.tolerance,
-					selfIntersectsA: plan.selfIntersectionsCheck === true
+			await checkStreamContent(stream, JSON.stringify({
+				type: plan.type,
+				tolerance: plan.tolerance,
+				selfIntersectsA: plan.selfIntersectionsCheck === true
 					|| plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0],
-					selfIntersectsB: plan.selfIntersectionsCheck === true
+				selfIntersectsB: plan.selfIntersectionsCheck === true
 					|| plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1],
-					setA: [{
-						teamspace,
-						container: plan.selectionA.container,
-						revision: UUIDToString(plan.selectionA.revision),
-						objects: generateGroupedMeshes(planData.selectionA.container, meshData.meshesA),
-					}],
-					setB: [{
-						teamspace,
-						container: plan.selectionB.container,
-						revision: UUIDToString(plan.selectionB.revision),
-						objects: generateGroupedMeshes(planData.selectionB.container, meshData.meshesB,
-							meshData.unwantedMeshesB),
-					}],
-				}));
-			});
+				setA: [{
+					teamspace,
+					container: plan.selectionA.container,
+					revision: UUIDToString(plan.selectionA.revision),
+					objects: generateGroupedMeshes(planData.selectionA.container, meshData.nonBimMeshes),
+				}],
+				setB: [{
+					teamspace,
+					container: plan.selectionB.container,
+					revision: UUIDToString(plan.selectionB.revision),
+					objects: generateGroupedMeshes(planData.selectionB.container, meshData.meshes,
+						meshData.unwantedMeshes),
+				}],
+			}));
+		});
+	});
+};
+
+const testCompleteRun = () => {
+	describe('Complete Run', () => {
+		test('should complete run when there are no previous runs', async () => {
+			const clashes = times(10, () => ({
+				a: `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`,
+				b: `${generateRandomString()}::${generateRandomString()}::${generateRandomString()}`,
+				...generateRandomObject(),
+			}));
+			ClashRunsModel.getTestRunByQuery.mockRejectedValueOnce(new Error());
+
+			const teamspace = generateRandomString();
+			const planId = generateRandomString();
+
+			await Clashes.completeRun(teamspace, planId);
+
+			expect(ClashPlansModel.completeRun).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.completeRun).toHaveBeenCalledWith(teamspace, planId);
 		});
 	});
 };

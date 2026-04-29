@@ -38,49 +38,41 @@ Clashes.updatePlan = updatePlan;
 
 Clashes.deletePlan = deletePlan;
 
-const writeObjects = (container, stream, { meshes = [], unwantedMeshIds = [], metadata = [] }) => {
-	if (!meshes.length) {
-		return;
-	}
-
-	const metadataMapping = metadata.reduce((acc, { parents, ...entry }) => {
-		for (const parent of parents) {
-			acc[UUIDToString(parent)] = entry;
-		}
-		return acc;
-	}, {});
-
-	const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
+const constructCompositeObject = (container, { meshes = [], unwantedMeshIds = [], metadata = [] }) => {
 	const compositesToMeshes = {};
 
-	for (const mesh of meshes) {
-		const idStr = UUIDToString(mesh._id);
-		if (!unwantedIdsObj[idStr]) {
-			const parentId = UUIDToString(mesh.name ? mesh._id : mesh.parents[0]);
-			const meshMeta = metadataMapping[parentId];
-			const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
-			const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values?.[0] ?? parentId}`;
+	if (meshes.length) {
+		const metadataMapping = metadata.reduce((acc, { parents, ...entry }) => {
+			for (const parent of parents) {
+				acc[UUIDToString(parent)] = entry;
+			}
+			return acc;
+		}, {});
 
-			if (compositesToMeshes[compositePath]) {
-				compositesToMeshes[compositePath].push(idStr);
-			} else {
-				compositesToMeshes[compositePath] = [idStr];
+		const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
+
+		for (const mesh of meshes) {
+			const idStr = UUIDToString(mesh._id);
+
+			if (!unwantedIdsObj[idStr]) {
+				const parentId = UUIDToString(mesh.name ? mesh._id : mesh.parents[0]);
+				const meshMeta = metadataMapping[parentId];
+				const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
+				const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values[0] ?? parentId}`;
+
+				if (compositesToMeshes[compositePath]) {
+					compositesToMeshes[compositePath].push(idStr);
+				} else {
+					compositesToMeshes[compositePath] = [idStr];
+				}
 			}
 		}
 	}
 
-	let first = true;
-	for (const [parentIdStr, meshIds] of Object.entries(compositesToMeshes)) {
-		if (!first) {
-			stream.write(',');
-		}
-
-		stream.write(JSON.stringify({ id: parentIdStr, meshIds }));
-		first = false;
-	}
+	return compositesToMeshes;
 };
 
-const getObjectsFromRules = async (teamspace, project, container, revision, rules) => {
+const getMeshDataFromRules = async (teamspace, project, container, revision, rules) => {
 	const { matched, unwanted } = await getMetadataByRules(teamspace, project, container,
 		revision, rules, { _id: 1, parents: 1, metadata: 1 });
 	const matchedTransNodes = matched.flatMap(({ parents }) => parents);
@@ -95,27 +87,31 @@ const getObjectsFromRules = async (teamspace, project, container, revision, rule
 	return { meshes, unwantedMeshIds, metadata: matched };
 };
 
-const getAllObjects = async (teamspace, project, container, revision) => {
+const getAllMeshData = async (teamspace, project, container, revision) => {
 	const meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1 });
 	const metadata = await getAllMetadata(teamspace, container, revision);
-
 	return { meshes, metadata };
 };
 
-const getConfigSetEntry = async (teamspace, project, selection, stream, setName) => {
+const writeConfigSetEntry = async (teamspace, project, selection, stream, setName) => {
 	const { container, revision, rules = [] } = selection;
+
+	const meshData = rules.length
+		? await getMeshDataFromRules(teamspace, project, container, revision, rules)
+		: await getAllMeshData(teamspace, project, container, revision);
+	const compositesToMeshes = constructCompositeObject(container, meshData);
 
 	stream.write(`"${setName}":[{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
-	let data = {};
+	let first = true;
+	for (const [parentIdStr, meshIds] of Object.entries(compositesToMeshes)) {
+		if (!first) {
+			stream.write(',');
+		}
 
-	if (rules.length) {
-		data = await getObjectsFromRules(teamspace, project, container, revision, rules);
-	} else {
-		data = await getAllObjects(teamspace, project, container, revision);
+		stream.write(JSON.stringify({ id: parentIdStr, meshIds }));
+		first = false;
 	}
-
-	writeObjects(container, stream, data);
 
 	stream.write(']}]');
 };
@@ -123,18 +119,18 @@ const getConfigSetEntry = async (teamspace, project, selection, stream, setName)
 Clashes.createRun = async (teamspace, project, plan, user) => {
 	const runId = await createTestRun(teamspace, plan, user);
 
-	const stream = new PassThrough();
-	stream.write('{');
-	stream.write(`"type":${JSON.stringify(plan.type)},`);
-	stream.write(`"tolerance":${JSON.stringify(plan.tolerance)},`);
-	stream.write(`"selfIntersectsA":${JSON.stringify(plan.selfIntersectionsCheck === true || plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0])},`);
-	stream.write(`"selfIntersectsB":${JSON.stringify(plan.selfIntersectionsCheck === true || plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1])},`);
-	await getConfigSetEntry(teamspace, project, plan.selectionA, stream, 'setA');
-	stream.write(',');
-	await getConfigSetEntry(teamspace, project, plan.selectionB, stream, 'setB');
-	stream.end('}');
+	const configStream = new PassThrough();
+	configStream.write('{');
+	configStream.write(`"type":${JSON.stringify(plan.type)},`);
+	configStream.write(`"tolerance":${JSON.stringify(plan.tolerance)},`);
+	configStream.write(`"selfIntersectsA":${JSON.stringify(plan.selfIntersectionsCheck === true || plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0])},`);
+	configStream.write(`"selfIntersectsB":${JSON.stringify(plan.selfIntersectionsCheck === true || plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1])},`);
+	await writeConfigSetEntry(teamspace, project, plan.selectionA, configStream, 'setA');
+	configStream.write(',');
+	await writeConfigSetEntry(teamspace, project, plan.selectionB, configStream, 'setB');
+	configStream.end('}');
 
-	await queueClashRun(teamspace, project, UUIDToString(runId), stream);
+	await queueClashRun(teamspace, project, UUIDToString(runId), configStream);
 	return runId;
 };
 
@@ -187,23 +183,20 @@ const compareRunResults = (existingRunClashes, newRunClashes) => {
 };
 
 Clashes.completeRun = async (teamspace, project, corId, resPath) => {
-	const readStream = createReadStream(resPath, { encoding: 'utf8' });
-	const content = await streamToJSON(readStream);
+	const resStream = createReadStream(resPath, { encoding: 'utf8' });
+	const content = await streamToJSON(resStream);
 
 	let lastRunClashes;
-	let plan;
 
 	try {
-		const currentRun = await getTestRunByQuery(teamspace, { _id: corId }, { plan: 1, triggeredAt: 1 });
-		plan = currentRun.plan;
-
-		const lastRun = await getTestRunByQuery(teamspace,
+		const { plan } = await getTestRunByQuery(teamspace, { _id: corId }, { plan: 1, triggeredAt: 1 });
+		const { result } = await getTestRunByQuery(teamspace,
 			{ 'plan._id': plan._id, completedAt: { $exists: true } },
 			{ result: 1 }, { completedAt: -1 },
 		);
 
-		const lastCompleteRunFile = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastRun.result);
-		const { new: newClashes, active, resolved } = await streamToJSON(lastCompleteRunFile.readStream);
+		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, result);
+		const { new: newClashes, active, resolved } = await streamToJSON(readStream);
 		lastRunClashes = [...newClashes, ...active, ...resolved];
 	} catch (err) {
 		lastRunClashes = [];
