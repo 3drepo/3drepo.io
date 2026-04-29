@@ -56,9 +56,10 @@ const testCompleteTestRun = () => {
 
 			await ClashRuns.completeTestRun(teamspace, runId, resultId);
 
+			const { completedAt } = updateFn.mock.calls[0][3].$set;
 			expect(updateFn).toHaveBeenCalledTimes(1);
 			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { _id: runId },
-				{ $set: { status: CLASH_RUN_STATUS.COMPLETED, completedAt: new Date(), result: resultId } });
+				{ $set: { status: CLASH_RUN_STATUS.COMPLETED, completedAt, result: resultId } });
 		});
 	});
 };
@@ -89,7 +90,7 @@ const testGetTestRunByQuery = () => {
 			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 
 			await expect(ClashRuns.getTestRunByQuery(teamspace, query, projection, sort))
-				.rejects.toThrow(templates.testRunNotFound);
+				.rejects.toEqual(templates.testRunNotFound);
 
 			expect(findFn).toHaveBeenCalledTimes(1);
 			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, query, projection, sort);
