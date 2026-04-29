@@ -27,7 +27,6 @@ import { clamp, debounce } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { DialogsActionsDispatchers, SequencesActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
-import dayjs from 'dayjs';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
@@ -321,11 +320,11 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 							<Grid>
 								<FlexCol>
 									<DatePicker
-										minDateTime={dayjs(min)}
-										maxDateTime={dayjs(max)}
+										minDateTime={min}
+										maxDateTime={max}
 										name="date"
 										value={value}
-										onChange={(e) => this.gotoDate(new Date(e.target.value))}
+										onChange={(val) => this.gotoDate(new Date(val))}
 										placeholder="date"
 									/>
 									<SetToCurrentDateButton onClick={goToToday}>

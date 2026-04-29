@@ -48,19 +48,21 @@ export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: IS
 	return (
 		<TextField
 			value={val}
-			InputProps={{
-				startAdornment: (
-					<StartAdornment>
-						<SearchIcon />
-					</StartAdornment>
-				),
-				endAdornment: (
-					<EndAdornment $isVisible={Boolean(val)}>
-						<IconButton onClick={onClickClear} size="large">
-							<CloseIcon />
-						</IconButton>
-					</EndAdornment>
-				),
+			slotProps={{
+				input: {
+					startAdornment: (
+						<StartAdornment>
+							<SearchIcon />
+						</StartAdornment>
+					),
+					endAdornment: (
+						<EndAdornment $isVisible={Boolean(val)}>
+							<IconButton onClick={onClickClear} size="large">
+								<CloseIcon />
+							</IconButton>
+						</EndAdornment>
+					),
+				},
 			}}
 			variant={variant}
 			{...props}

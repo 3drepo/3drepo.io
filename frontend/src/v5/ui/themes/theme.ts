@@ -1422,6 +1422,88 @@ export const theme = createTheme({
 				},
 			},
 		},
+		MuiDateCalendar: {
+			styleOverrides: {
+				root:{
+					'.MuiPickersArrowSwitcher-spacer': {
+						display: 'none',
+					},
+					'.MuiPickersArrowSwitcher-button' : {
+						margin: 0,
+						padding: 10,
+						color: COLOR.SECONDARY_MAIN,
+						transform: 'rotate(90deg)',
+						'&:not(:first-child)': {
+							transform: 'rotate(-90deg)',
+						},
+						'&:hover': {
+							backgroundColor: 'transparent',
+						},
+						'&.Mui-disabled': {
+							color: COLOR.BASE_MAIN,
+						},
+					},
+					height: '290px',
+				},
+			},
+			defaultProps: {
+				slots: {
+					leftArrowIcon: ThinChevronIcon,
+					rightArrowIcon: ThinChevronIcon,
+				},
+			},
+		},
+		MuiClock:{
+			styleOverrides: {
+				clock:{
+					backgroundColor: COLOR.TERTIARY_LIGHTEST,
+				},
+				amButton: {
+					padding: '10px',
+					height: '40px',
+					width: '40px',
+				},
+				pmButton: {
+					padding: '10px',
+					height: '40px',
+					width: '40px',
+				},
+			},
+		},
+		MuiTimeClock:{
+			defaultProps: {
+				ampm: true,
+				ampmInClock: true,
+				showViewSwitcher: true,
+				slots: {
+					leftArrowIcon: ThinChevronIcon,
+					rightArrowIcon: ThinChevronIcon,
+				},
+			},
+			styleOverrides: {
+				arrowSwitcher:{
+					margin: 0,
+					'.MuiPickersArrowSwitcher-spacer': {
+						display: 'none',
+					},
+					button: {
+						margin: 0,
+						padding: 10,
+						color: COLOR.SECONDARY_MAIN,
+						transform: 'rotate(90deg)',
+						'&:not(:first-child)': {
+							transform: 'rotate(-90deg)',
+						},
+						'&:hover': {
+							backgroundColor: 'transparent',
+						},
+						'&.Mui-disabled': {
+							color: COLOR.BASE_MAIN,
+						},
+					},
+				},
+			},
+		},
 		MuiMultiSectionDigitalClockSection: {
 			styleOverrides: {
 				root: {

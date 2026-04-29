@@ -14,119 +14,204 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { useEffect, useRef, useState } from 'react';
-import { FormInputProps } from '@controls/inputs/inputController.component';
+import { ElementType, ReactNode, useEffect, useRef, useState } from 'react';
 import { formatMessage } from '@/v5/services/intl';
-import { TextField } from './dateTimePicker.styles';
+import { ClearDateAction, PopperWrapper, TextField } from './dateTimePicker.styles';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
-import { DateTimePicker as MUIDateTimePicker, DateTimePickerProps as MUIDateTimePickerProps } from '@mui/x-date-pickers';
+import { DateCalendar, TimeClock } from '@mui/x-date-pickers';
+import { ClickAwayListener, Fade, IconButton, InputAdornment, Popper, InputProps } from '@mui/material';
+import dayjs, { Dayjs } from 'dayjs';
+import { FormattedMessage } from 'react-intl';
+import CalendarIcon from '@assets/icons/outlined/calendar-outlined.svg';
 
-export type DateTimePickerProps = FormInputProps & MUIDateTimePickerProps & {
+export type PickerValue = Date | number | null;
+	
+export type DateTimePickerProps = {
+	disabled?: boolean;
+	helperText?: ReactNode;
+	error?: boolean;
+	required?: boolean;
+	value?: PickerValue;
+	onChange?: (value:  PickerValue) => void;
+	onAccept?: (value:  PickerValue) => void;
+	onBlur?: () => void;
 	placeholder?: string;
+	renderInput?: ElementType;
+	minDateTime?: PickerValue;
+	maxDateTime?: PickerValue;
+	disableFuture?: boolean;
+	disableHighlightToday?: boolean;
+	label?: string | ReactNode;
+	name?: string;
+	slots?: {
+		openPickerIcon?: ElementType;
+	};
+	slotProps?: {
+		input?: InputProps;
+	};
 };
+
+enum DatePickerView {
+	time = 'time',
+	calendar = 'calendar',
+}
+
+const DefaultTime = dayjs().hour(0).minute(0);
 
 export const DateTimePicker = ({
 	disabled,
-	helperText,
-	error,
-	required,
 	value,
 	onChange,
 	onBlur,
 	placeholder,
+	renderInput,
+	minDateTime,
+	maxDateTime,
+	disableFuture,
+	disableHighlightToday,
+	slots,
 	...props
 }: DateTimePickerProps) => {
+	const [view, setView] = useState(DatePickerView.calendar);
 	const [open, setOpen] = useState(false);
-	const inputRef =  useRef(null);
-	const changeAborted =  useRef(false);
+	const [dateValue, setDateValue] = useState<Dayjs | null>(null);
+	const [timeValue, setTimeValue] = useState<Dayjs | null>(DefaultTime);
+	const markForUpdateRef =  useRef(false);
+	const temporalValue = useRef(value);
+	const inputRef = useRef<HTMLDivElement>(null);
+	const [anchorEl, setAnchorEl] = useState(inputRef.current);
 
-	const closePicker = () => setOpen(false);
-
-	const preventPropagation = (e) => {
-		if (e.key !== 'Escape') {
-			changeAborted.current = true;
-			e.preventDefault();
-			e.stopPropagation();
-		}
+	const closePicker = () => {
+		setOpen(false);
 	};
 
-	const handleClick = (e) => {
+  	const handleClick = (e) => {
 		if (disabled) return;
-		preventPropagation(e);
-		if (!open) {
-			setOpen(true);
-		}
+		e.stopPropagation();
+		setDateValue(value ? dayjs(value) : null);
+		setTimeValue(value ? dayjs(value) : DefaultTime);
+		setView(DatePickerView.calendar);
+		setOpen(true);
 	};
+
+	const canopen = open && Boolean(document.body.contains(anchorEl));
+  	const id = canopen ? 'transition-popper' : undefined;
+
+	const consolidateNewValue = (newValue: any) => {
+		markForUpdateRef.current = true;
+		temporalValue.current = newValue;
+		closePicker();
+	};
+
+	const InputComponent = renderInput || TextField;
+	const minDate = minDateTime ? dayjs(minDateTime) : undefined;
+	const maxDate = maxDateTime ? dayjs(maxDateTime) : undefined;
+	const minTime = minDateTime && dateValue?.isSame(minDate, 'day') ? dayjs(minDateTime) : undefined;
+	const maxTime = maxDateTime && dateValue?.isSame(maxDate, 'day') ? dayjs(maxDateTime) : undefined;
+	
+	const PickerIconValue =  slots?.openPickerIcon || CalendarIcon;
 
 	useEffect(() => {
-		if (inputRef.current) {
-			inputRef.current.value = value ? formatDateTime(value) : null;
+		if (!open) {
+			if (anchorEl) setAnchorEl(null);
+			return;
 		}
-	}, [inputRef.current, value]);
 
-	return (<MUIDateTimePicker
-		{...props}
-		localeText={{ 
-			clearButtonLabel:  formatMessage({
-				id: 'calendarPicker.clearButtonLabel',
-				defaultMessage: 'Clear' }),
-		}} 
-		slots={{
-			textField: (textFieldProps) => {
-				return (<TextField
-					{...textFieldProps}
-					onKeyDown={(e) => e.preventDefault()}
-					placeholder={placeholder ?? formatMessage({
-						id: 'calendarPicker.placeholder',
-						defaultMessage: 'Choose a date',
-					})}
-
-					slotProps={{
-						input: textFieldProps.InputProps,
-					}}
-					error={error}
-					helperText={helperText}
-					required={required}
-					value={undefined}
-					inputRef={inputRef}
-					onClick={handleClick}
-				/>);
-			},
-		}}
-
-		slotProps={{ 
-			actionBar: { actions: ['clear', 'cancel', 'accept'] },
-			desktopPaper: {
-				onMouseLeave: () => {
-					changeAborted.current = true;
-				},
-				onMouseMove: () => {
-					changeAborted.current = false;
-				},
-			},
-		}}
-
-		enableAccessibleFieldDOMStructure={false} 
-		open={open}
-
-		onChange={(val) => { 
-			inputRef.current.value = formatDateTime(val);
-		}}
-
-		onAccept={(newValue) => {
-			if (!changeAborted.current) {
-				onChange?.(newValue ? newValue.toDate().getTime() : null);
-				onBlur?.();
+		const onFrame = () => {
+			if (document.body.contains(inputRef.current)) {
+				setAnchorEl(inputRef.current);
+			} else {
+				window.requestAnimationFrame(onFrame);
 			}
-			closePicker();
-		}}
+		};
 
-		onClose={() => {
-			inputRef.current.value = formatDateTime(value);
-			closePicker();
-		}}
+		window.requestAnimationFrame(onFrame);
+	}, [open, anchorEl]);
 
-		disabled={disabled}
-		{...props}
-	/>);
+	return (
+		<div>
+			<InputComponent
+				onKeyDown={(e) => e.preventDefault()}
+				placeholder={placeholder ?? formatMessage({
+					id: 'calendarPicker.placeholder',
+					defaultMessage: 'Choose a date',
+				})}
+
+				value={value ? formatDateTime(value) : ''}
+				onClick={handleClick}
+				disabled={disabled}
+				slotProps={{
+					input: {
+						endAdornment: 
+							(<InputAdornment  position="end">
+								<IconButton disabled={disabled} size="medium" edge="end">
+									<PickerIconValue />
+								</IconButton>
+							</InputAdornment>)
+						,
+						autoComplete: 'off',
+						readOnly: true,
+						...props.slotProps?.input,
+					},
+				}}
+
+				ref={inputRef}
+				{...props}
+			/>
+			<Popper id={id} open={canopen} anchorEl={anchorEl} transition  style={{ zIndex: 10000 }}  
+				onClick={(e) => { e.stopPropagation();}}>
+				{({ TransitionProps }) => (
+					<ClickAwayListener onClickAway={(e) => {
+						e.stopImmediatePropagation();
+						closePicker();
+					}} mouseEvent="onMouseDown">
+						<Fade {...TransitionProps} timeout={150} onExited={() => {
+							TransitionProps?.onExited?.();
+							if (!markForUpdateRef.current) return;
+							markForUpdateRef.current = false;
+							onChange?.(temporalValue.current ? temporalValue.current : null);
+							onBlur?.();
+						}}>
+							<PopperWrapper>
+								{view === DatePickerView.calendar && (
+									<DateCalendar 
+										value={dateValue} 
+										onChange={(newValue: Dayjs, selectionState) => {
+											if (selectionState === 'finish') {
+												setDateValue(newValue);
+												setView(DatePickerView.time);
+											}
+										}}
+										minDate={minDate}
+										maxDate={maxDate}
+										disableFuture={disableFuture}
+										disableHighlightToday={disableHighlightToday}
+									/>)}
+								{view === DatePickerView.time && (
+									<TimeClock
+										value={timeValue}
+										views={['hours', 'minutes']}
+										onChange={(newValue: Dayjs, selectionState) => {
+											setTimeValue(newValue);
+											if (selectionState === 'finish') {
+												if (!dateValue || !newValue) return;
+												const valueToSet = dateValue.hour(newValue.hour()).minute(newValue.minute()).toDate().getTime();
+												consolidateNewValue(valueToSet);
+											}
+										}}
+										minTime={minTime}
+										maxTime={maxTime}
+										disableFuture={disableFuture}
+									/>
+								)}
+								<ClearDateAction onClick={()=> { consolidateNewValue(null);}}>
+									<FormattedMessage id="datePicker.actionBar.clear" defaultMessage="Clear date" />
+								</ClearDateAction>
+							</PopperWrapper>
+						</Fade>
+					</ClickAwayListener>
+				)}
+			</Popper>
+		</div>
+	);
 };
