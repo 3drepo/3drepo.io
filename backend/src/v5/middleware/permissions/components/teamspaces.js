@@ -72,7 +72,7 @@ TeamspacePerms.isAddOnEnabled = (addOn) => async (req, res, next) => {
 		const { teamspace } = req.params;
 		const enabled = await isAddOnEnabled(teamspace, addOn);
 		if (!enabled) {
-			respond(req, res, createResponseCode(templates.addOnModuleUnavailable, `${addOn} add-on is not enabled in this teamspace`));
+			respond(req, res, createResponseCode(templates.addOnUnavailable, `${addOn} add-on is not enabled in this teamspace`));
 			return;
 		}
 		await next();
