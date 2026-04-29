@@ -38,7 +38,7 @@ Clashes.updatePlan = updatePlan;
 
 Clashes.deletePlan = deletePlan;
 
-const constructCompositeObject = (container, { meshes = [], unwantedMeshIds = [], metadata = [] }) => {
+const constructCompositeObject = (container, meshes, unwantedMeshIds, metadata) => {
 	const compositesToMeshes = {};
 
 	if (meshes.length) {
@@ -59,7 +59,6 @@ const constructCompositeObject = (container, { meshes = [], unwantedMeshIds = []
 				const meshMeta = metadataMapping[parentId];
 				const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
 				const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values[0] ?? parentId}`;
-
 				if (compositesToMeshes[compositePath]) {
 					compositesToMeshes[compositePath].push(idStr);
 				} else {
@@ -90,16 +89,16 @@ const getMeshDataFromRules = async (teamspace, project, container, revision, rul
 const getAllMeshData = async (teamspace, project, container, revision) => {
 	const meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1 });
 	const metadata = await getAllMetadata(teamspace, container, revision);
-	return { meshes, metadata };
+	return { meshes, unwantedMeshIds: [], metadata };
 };
 
 const writeConfigSetEntry = async (teamspace, project, selection, stream, setName) => {
 	const { container, revision, rules = [] } = selection;
 
-	const meshData = rules.length
+	const { meshes, unwantedMeshIds, metadata } = rules.length
 		? await getMeshDataFromRules(teamspace, project, container, revision, rules)
 		: await getAllMeshData(teamspace, project, container, revision);
-	const compositesToMeshes = constructCompositeObject(container, meshData);
+	const compositesToMeshes = constructCompositeObject(container, meshes, unwantedMeshIds, metadata);
 
 	stream.write(`"${setName}":[{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 

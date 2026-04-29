@@ -129,6 +129,7 @@ const testCreateRun = () => {
 	const meshDataObj = {
 		nonBimMeshes: times(10, (i) => ({
 			_id: generateRandomString(),
+			name: i % 2 === 0 ? undefined : generateRandomString(),
 			parents: [i % 2 === 0 ? parentWithManyMeshes : generateRandomString()],
 		})),
 		meshes: times(10, (i) => ({
@@ -162,7 +163,7 @@ const testCreateRun = () => {
 		const result = {};
 
 		for (const mesh of meshes.filter(({ _id }) => !unwantedMeshes.includes(_id))) {
-			const parentId = mesh.name ?? UUIDToString(mesh.parents[0]);
+			const parentId = mesh.name ? mesh._id : UUIDToString(mesh.parents[0]);
 			const compositePath = `${container}::${mesh.externalId?.key ?? 'internal'}::${mesh.externalId?.values[0] ?? parentId}`;
 
 			if (!result[compositePath]) {
