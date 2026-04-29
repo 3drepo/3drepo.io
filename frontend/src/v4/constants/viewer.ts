@@ -117,6 +117,8 @@ export const DEFAULT_SETTINGS = {
 	farPlaneAlgorithm: 'box',
 	maxShadowDistance: 10000,
 	numCacheThreads: 3,
+	dynamicFpsOptimisation: 'on',
+	dynamicFpsTarget: 20,
 	clipPlaneBorderWidth: 0.8,
 	clipPlaneBorderColor: [0.047, 0.463, 0.565],
 	clipPlaneGizmoSize: 120,

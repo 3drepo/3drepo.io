@@ -36,13 +36,19 @@ jest.mock('fs', () => {
 });
 const { createWriteStream } = require('fs');
 
+jest.mock('fs/promises', () => {
+	const actualFs = jest.requireActual('fs/promises');
+	return { ...actualFs, stat: jest.fn(actualFs.stat), access: jest.fn(actualFs.access) };
+});
+
+const { access, stat, copyFile, rm, mkdir, writeFile } = require('fs/promises');
+
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const config = require(`${src}/utils/config`);
 
 const { PassThrough } = require('stream');
-const fsp = require('fs/promises');
 const path = require('path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -70,7 +76,7 @@ const testQueueModelUpload = () => {
 		});
 
 		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
-			await fsp.copyFile(objModel, fileCreated);
+			await copyFile(objModel, fileCreated);
 
 			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
 
@@ -80,7 +86,7 @@ const testQueueModelUpload = () => {
 		});
 
 		test('should succeed with job inserted into the queue', async () => {
-			await fsp.copyFile(objModel, fileCreated);
+			await copyFile(objModel, fileCreated);
 			await expect(ModelProcessing.queueModelUpload(teamspace, model, data, file)).resolves.toBeUndefined();
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
@@ -92,7 +98,7 @@ const testQueueModelUpload = () => {
 		});
 	});
 
-	afterAll(() => fsp.rm(fileCreated).catch(() => {}));
+	afterAll(() => rm(fileCreated).catch(() => {}));
 };
 
 const testCallbackQueueConsumer = () => {
@@ -309,7 +315,7 @@ const testContainerGetFileName = () => {
 			const corId = generateUUIDString();
 			const fileName = `${generateRandomString()}.obj`;
 			const filePath = `${config.cn_queue.shared_storage}/${corId}.json`;
-			await fsp.writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
+			await writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
 
 			await expect(ModelProcessing.getContainerFileName(corId)).toEqual(fileName);
 		});
@@ -330,7 +336,7 @@ const testGetLogArchive = () => {
 		test('Should return with zip file if path is found but no files found', async () => {
 			const corId = generateUUIDString();
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fsp.mkdir(taskPath);
+			await mkdir(taskPath);
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: undefined,
@@ -341,9 +347,9 @@ const testGetLogArchive = () => {
 			const corId = generateUUIDString();
 			const log = generateRandomString(100);
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fsp.mkdir(taskPath);
-			await fsp.writeFile(`${taskPath}/1.log`, log);
-			await fsp.writeFile(`${taskPath}/2.log`, generateRandomString());
+			await mkdir(taskPath);
+			await writeFile(`${taskPath}/1.log`, log);
+			await writeFile(`${taskPath}/2.log`, generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: expect.stringContaining(log),
@@ -353,8 +359,8 @@ const testGetLogArchive = () => {
 		test('Should return with zip file if path is found but no log files are found', async () => {
 			const corId = generateUUIDString();
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fsp.mkdir(taskPath);
-			await fsp.writeFile(`${taskPath}/${generateRandomString()}.Notlog`,
+			await mkdir(taskPath);
+			await writeFile(`${taskPath}/${generateRandomString()}.Notlog`,
 				generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
@@ -380,7 +386,7 @@ const testQueueClashRun = () => {
 			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
 				.rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
 
-			fsp.rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
@@ -397,7 +403,7 @@ const testQueueClashRun = () => {
 			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
 				.rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
 
-			fsp.rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
@@ -417,8 +423,55 @@ const testQueueClashRun = () => {
 			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
 				.rejects.toEqual(templates.queueInsertionFailed);
 
-			// fs.createWriteStream.mockRestore();
 			expect(Queue.queueMessage).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testInit = () => {
+	describe('Init', () => {
+		const params = ['host', 'shared_storage', 'callback_queue', 'model_queue', 'clash_queue', 'event_exchange'];
+		describe.each(params.map((param) => [param]))('Check Queue Config', (propName) => {
+			test(`Should fail if cn_queue.${propName} is not set in config`, async () => {
+				const originalValue = config.cn_queue[propName];
+				config.cn_queue[propName] = undefined;
+				await expect(ModelProcessing.init()).rejects.toThrow();
+				config.cn_queue[propName] = originalValue;
+				expect(Queue.listenToQueue).not.toHaveBeenCalled();
+			});
+		});
+
+		test('Should fail if shared_storage path is invalid', async () => {
+			stat.mockRejectedValueOnce(new Error(generateRandomString()));
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should fail if shared_storage path is not a directory', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => false,
+			});
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should fail if user has no access to shared_storage', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => true,
+			});
+			access.mockRejectedValueOnce(new Error(generateRandomString()));
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should succeed if the config is set correctly', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => true,
+			});
+			access.mockResolvedValueOnce();
+			await expect(ModelProcessing.init()).resolves.toBeUndefined();
+			expect(Queue.listenToQueue).toHaveBeenCalledTimes(1);
+			expect(Queue.listenToQueue).toHaveBeenCalledWith(config.cn_queue.callback_queue, expect.any(Function));
 		});
 	});
 };
@@ -430,4 +483,5 @@ describe(determineTestGroup(__filename), () => {
 	testContainerGetFileName();
 	testGetLogArchive();
 	testQueueClashRun();
+	testInit();
 });

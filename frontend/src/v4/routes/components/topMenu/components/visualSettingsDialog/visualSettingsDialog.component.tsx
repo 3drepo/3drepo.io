@@ -36,6 +36,7 @@ const SettingsSchema = Yup.object().shape({
 	farPlaneSamplingPoints: schema.integer(1, Number.POSITIVE_INFINITY),
 	maxShadowDistance: schema.integer(1, Number.POSITIVE_INFINITY),
 	numCacheThreads: schema.integer(1, 15),
+	dynamicFpsTarget: schema.integer(1, 60),
 	clipPlaneBorderWidth: schema.number(0, 1),
 	clipPlaneGizmoSize: schema.number(20, 1000), // this is in pixels
 	clipPlaneVisualSize: schema.number(100, 4000), // this is in pixels
@@ -86,6 +87,35 @@ const BasicSettings = (props) => {
 				<Field name="caching" render={ ({ field }) => (
 					<Switch onClick={props.onCacheChange} checked={field.value} {...field} value="true" color="secondary" />
 				)} />
+			</FormListItem>
+			<V5Divider />
+			<FormListItem>
+				FPS Optimisation
+				<Field name="dynamicFpsOptimisation" render={ ({ field }) => (
+					<SelectField {...field}>
+						<MenuItem value="on">On</MenuItem>
+						<MenuItem value="off">Off</MenuItem>
+					</SelectField>)} />
+			</FormListItem>
+			<FormListItem>
+				FPS Target
+				<Field name="dynamicFpsTarget" render={ ({ field, form }) => {
+					return (
+						<div>
+							<ErrorTooltip title={form.errors.dynamicFpsTarget || ''} placement="bottom-end">
+								<ShortInput
+									disabled={form.values.dynamicFpsOptimisation !== 'on'}
+									error={Boolean(form.errors.dynamicFpsTarget)}
+									{...field}
+									helpertext={form.errors.dynamicFpsTarget}
+								/>
+							</ErrorTooltip>
+							<V5ErrorText>
+								{form.errors.dynamicFpsTarget}
+							</V5ErrorText>
+						</div>
+					);
+				}} />
 			</FormListItem>
 			<V5Divider />
 			<FormListItem>

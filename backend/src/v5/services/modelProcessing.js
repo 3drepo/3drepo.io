@@ -16,13 +16,14 @@
  */
 
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
+const { access, copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { codeExists, templates } = require('../utils/responseCodes');
-const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
-const { createWriteStream, readFileSync, readdirSync } = require('fs');
+const { constants, createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
 const Path = require('path');
+const Yup = require('yup');
 const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
@@ -271,6 +272,35 @@ ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 	}
 };
 
-ModelProcessing.init = () => listenToQueue(callbackq, onCallbackQMsg);
+const checkQueueConfig = async () => {
+	const queueConfigSchema = Yup.object({
+		host: Yup.string().trim().min(1).required(),
+		shared_storage: Yup.string().trim().min(1).required(),
+		callback_queue: Yup.string().trim().min(1).required(),
+		model_queue: Yup.string().trim().min(1).required(),
+		clash_queue: Yup.string().trim().min(1).required(),
+		event_exchange: Yup.string().trim().min(1).required(),
+	});
+
+	try {
+		await queueConfigSchema.validate(queueConfig);
+		const stats = await stat(queueConfig.shared_storage);
+
+		if (!stats.isDirectory()) {
+			throw new Error('cn_queue.shared_storage must be a directory');
+		}
+
+		// eslint-disable-next-line no-bitwise
+		await access(queueConfig.shared_storage, constants.R_OK | constants.W_OK);
+	} catch (err) {
+		logger.logError(`Invalid queue configuration: ${err.message}`);
+		throw new Error(`Invalid queue configuration: ${err.message}`);
+	}
+};
+
+ModelProcessing.init = async () => {
+	await checkQueueConfig();
+	await listenToQueue(callbackq, onCallbackQMsg);
+};
 
 module.exports = ModelProcessing;
