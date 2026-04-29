@@ -301,7 +301,7 @@ const testClashRunCompleted = () => {
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
-			ClashesProcessor.completeRun.mockRejectedValueOnce(templates.testRunNotFound);
+			ClashesProcessor.completeRun.mockRejectedValueOnce(new Error(generateRandomString()));
 			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),

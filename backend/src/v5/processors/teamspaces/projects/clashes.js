@@ -142,11 +142,7 @@ const streamToJSON = (stream) => new Promise((resolve, reject) => {
 	});
 
 	stream.on('end', () => {
-		try {
-			resolve(JSON.parse(data));
-		} catch (err) {
-			reject(err);
-		}
+		resolve(JSON.parse(data));
 	});
 
 	stream.on('error', reject);
