@@ -57,12 +57,13 @@ const testSaveCache = () => {
 		test('Should insert the cache entry into the database', async () => {
 			const key = generateRandomString();
 			const data = generateRandomObject();
+			dbMock.count.mockResolvedValueOnce(0);
 			await FronteggCache.saveCache(key, data);
 
 			expect(dbMock.updateOne).toHaveBeenCalledTimes(1);
 			expect(dbMock.updateOne).toHaveBeenCalledWith(INTERNAL_DB, CACHE_COL,
 				{ _id: key },
-				{ $set: { data, created: expect.any(Date) } }, { upsert: true });
+				{ $set: { data, created: expect.any(Date) } }, true);
 		});
 	});
 };

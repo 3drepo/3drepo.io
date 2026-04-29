@@ -1,0 +1,293 @@
+import { UnityUtil } from '../../src/globals/unity-util';
+import { ExternalWebRequestHandler } from '../../src/globals/unity-externalwebrequesthandler';
+import { IndexedDbCache } from '../../src/globals/unity-indexedbcache';
+import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+
+const TEST_TEXT = 'Hello World Test Data';
+const TEST_JSON = { name: 'Test Model', version: 1.0, data: [1, 2, 3] };
+const TEST_BINARY = new Uint8Array([0x48, 0x65, 0x6c, 0x6c, 0x6f]);
+const LARGE_RESPONSE_SIZE = 1024 * 100;
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Creates a deterministic offline fetch interceptor for the UnityUtil tests.
+ *
+ * The handler under test accepts an interceptor with the same shape as `fetch`
+ * and then consumes the returned `Response` via `response.arrayBuffer()`.
+ * This factory returns a function that maps specific test URLs to specific
+ * response types so each test can exercise one response-handling path:
+ *
+ * - `string-test`: plain text payload
+ * - `json-test`: JSON payload with content-type header
+ * - `binary-test`: binary payload as `Uint8Array`
+ * - `large-test`: large binary payload with an artificial delay to simulate
+ *   a slower response before the handler reads and caches it
+ * - `stream-test`: streamed text payload using `ReadableStream`
+ * - `exception-test`: throws to simulate interceptor failure
+ * - any other URL: returns `404 Not Found`
+ *
+ * The small delays make the async behavior observable in tests without relying
+ * on the network, while keeping the responses fully controlled and repeatable.
+ */
+const createExactOfflineFetchInterceptor = () => async (url: string) => {
+    if (url.includes('string-test')) {
+        await delay(1);
+        return new Response(TEST_TEXT, { status: 200 });
+    }
+
+    if (url.includes('json-test')) {
+        await delay(1);
+        return new Response(JSON.stringify(TEST_JSON), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+        });
+    }
+
+    if (url.includes('binary-test')) {
+        await delay(1);
+        return new Response(TEST_BINARY, { status: 200 });
+    }
+
+    if (url.includes('large-test')) {
+        const largeData = new Uint8Array(LARGE_RESPONSE_SIZE);
+        for (let i = 0; i < LARGE_RESPONSE_SIZE; i++) {
+            largeData[i] = i % 256;
+        }
+
+        await delay(10);
+        return new Response(largeData, { status: 200 });
+    }
+
+    if (url.includes('stream-test')) {
+        const streamText = 'streamed response payload';
+        const encoded = new TextEncoder().encode(streamText);
+        const stream = new ReadableStream({
+            start(controller) {
+                controller.enqueue(encoded.slice(0, 8));
+                controller.enqueue(encoded.slice(8));
+                controller.close();
+            },
+        });
+
+        return new Response(stream, {
+            status: 200,
+            headers: { 'Content-Type': 'text/plain' },
+        });
+    }
+
+    if (url.includes('exception-test')) {
+        throw new Error('offline interceptor failed');
+    }
+
+    return new Response('Not found', { status: 404 });
+};
+
+describe('UnityUtil.setOfflineFetchInterceptor', () => {
+    let cacheMock: IndexedDbCache;
+    let handler: ExternalWebRequestHandler;
+    let sendMessageMock: jest.Mock;
+    let originalFetch: any;
+
+    const waitForOnWebResponse = () => {
+        const { promiseToResolve, resolve } = getWaitablePromise();
+        sendMessageMock.mockImplementationOnce(() => resolve(true));
+        return promiseToResolve;
+    };
+
+    beforeEach(() => {
+        originalFetch = (global as any).fetch;
+        (global as any).fetch = jest.fn();
+
+        cacheMock = {
+            read: jest.fn().mockResolvedValue(undefined),
+            write: jest.fn(),
+        } as unknown as IndexedDbCache;
+
+        handler = new ExternalWebRequestHandler(cacheMock);
+        sendMessageMock = jest.fn();
+        handler.setUnityInstance({ SendMessage: sendMessageMock }, 'WebRequestHandler');
+
+        UnityUtil.externalWebRequestHandler = handler;
+    });
+
+    afterEach(() => {
+        (global as any).fetch = originalFetch;
+        UnityUtil.externalWebRequestHandler = undefined;
+        jest.useRealTimers();
+        jest.restoreAllMocks();
+    });
+
+    it('should register interceptor through UnityUtil and handle text response', async () => {
+        const interceptor = createExactOfflineFetchInterceptor();
+        const responsePromise = waitForOnWebResponse();
+
+        UnityUtil.setOfflineFetchInterceptor(interceptor);
+        handler.createGetRequest(1, 'string-test', false);
+
+        await responsePromise;
+
+        expect(handler.offlineFetchInterceptor).toBe(interceptor);
+        expect(cacheMock.write).toHaveBeenCalledTimes(1);
+
+        const writtenBuffer = (cacheMock.write as jest.Mock).mock.calls[0][1] as ArrayBuffer;
+        expect(new TextDecoder().decode(writtenBuffer)).toBe(TEST_TEXT);
+        expect(handler.getResponseString(1)).toBe(TEST_TEXT);
+        expect(sendMessageMock).toHaveBeenCalledWith(
+            'WebRequestHandler',
+            'OnWebResponse',
+            JSON.stringify({
+                id: 1,
+                size: writtenBuffer.byteLength,
+            }),
+        );
+        expect((global as any).fetch).not.toHaveBeenCalled();
+    });
+
+    it('should register interceptor through UnityUtil and handle json response', async () => {
+        const interceptor = createExactOfflineFetchInterceptor();
+        const responsePromise = waitForOnWebResponse();
+
+        UnityUtil.setOfflineFetchInterceptor(interceptor);
+        handler.createGetRequest(2, 'json-test', false);
+
+        await responsePromise;
+
+        expect(cacheMock.write).toHaveBeenCalledTimes(1);
+
+        const writtenBuffer = (cacheMock.write as jest.Mock).mock.calls[0][1] as ArrayBuffer;
+        expect(JSON.parse(new TextDecoder().decode(writtenBuffer))).toEqual(TEST_JSON);
+        expect(JSON.parse(handler.getResponseString(2))).toEqual(TEST_JSON);
+        expect(sendMessageMock).toHaveBeenCalledWith(
+            'WebRequestHandler',
+            'OnWebResponse',
+            JSON.stringify({
+                id: 2,
+                size: writtenBuffer.byteLength,
+            }),
+        );
+        expect((global as any).fetch).not.toHaveBeenCalled();
+    });
+
+    it('should register interceptor through UnityUtil and handle binary response', async () => {
+        const interceptor = createExactOfflineFetchInterceptor();
+        const responsePromise = waitForOnWebResponse();
+
+        UnityUtil.setOfflineFetchInterceptor(interceptor);
+        handler.createGetRequest(3, 'binary-test', false);
+
+        await responsePromise;
+
+        expect(cacheMock.write).toHaveBeenCalledTimes(1);
+
+        const writtenBuffer = (cacheMock.write as jest.Mock).mock.calls[0][1] as ArrayBuffer;
+        expect(Array.from(new Uint8Array(writtenBuffer))).toEqual(Array.from(TEST_BINARY));
+        expect(Array.from(new Uint8Array(handler.requests[3].data))).toEqual(Array.from(TEST_BINARY));
+        expect(sendMessageMock).toHaveBeenCalledWith(
+            'WebRequestHandler',
+            'OnWebResponse',
+            JSON.stringify({
+                id: 3,
+                size: writtenBuffer.byteLength,
+            }),
+        );
+        expect((global as any).fetch).not.toHaveBeenCalled();
+    });
+
+    it('should handle large response and cache the result', async () => {
+
+        const interceptor = createExactOfflineFetchInterceptor();
+        const responsePromise = waitForOnWebResponse();
+
+        UnityUtil.setOfflineFetchInterceptor(interceptor);
+        handler.createGetRequest(4, 'large-test', false);
+
+        await responsePromise;
+
+        expect(cacheMock.write).toHaveBeenCalledTimes(1);
+
+        const writtenBuffer = (cacheMock.write as jest.Mock).mock.calls[0][1] as ArrayBuffer;
+        expect(writtenBuffer.byteLength).toBe(LARGE_RESPONSE_SIZE);
+        expect(sendMessageMock).toHaveBeenCalledWith(
+            'WebRequestHandler',
+            'OnWebResponse',
+            JSON.stringify({
+                id: 4,
+                size: LARGE_RESPONSE_SIZE,
+            }),
+        );
+        expect((global as any).fetch).not.toHaveBeenCalled();
+    });
+
+    it('should register interceptor through UnityUtil and handle stream response', async () => {
+        const interceptor = createExactOfflineFetchInterceptor();
+        const responsePromise = waitForOnWebResponse();
+
+        UnityUtil.setOfflineFetchInterceptor(interceptor);
+        handler.createGetRequest(5, 'stream-test', false);
+
+        await responsePromise;
+
+        expect(cacheMock.write).toHaveBeenCalledTimes(1);
+
+        const writtenBuffer = (cacheMock.write as jest.Mock).mock.calls[0][1] as ArrayBuffer;
+        expect(new TextDecoder().decode(writtenBuffer)).toBe('streamed response payload');
+        expect(handler.getResponseString(5)).toBe('streamed response payload');
+        expect(sendMessageMock).toHaveBeenCalledWith(
+            'WebRequestHandler',
+            'OnWebResponse',
+            JSON.stringify({
+                id: 5,
+                size: writtenBuffer.byteLength,
+            }),
+        );
+        expect((global as any).fetch).not.toHaveBeenCalled();
+    });
+
+    it('should return size -1 when interceptor returns 404 response', async () => {
+        const interceptor = createExactOfflineFetchInterceptor();
+        const responsePromise = waitForOnWebResponse();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        UnityUtil.setOfflineFetchInterceptor(interceptor);
+        handler.createGetRequest(6, 'missing-resource', false);
+
+        await responsePromise;
+
+        expect(cacheMock.write).not.toHaveBeenCalled();
+        expect(consoleErrorSpy).not.toHaveBeenCalled();
+        expect(sendMessageMock).toHaveBeenCalledWith(
+            'WebRequestHandler',
+            'OnWebResponse',
+            JSON.stringify({
+                id: 6,
+                size: -1,
+            }),
+        );
+        expect((global as any).fetch).not.toHaveBeenCalled();
+    });
+
+    it('should return size -1 and log error when interceptor throws exception', async () => {
+        const interceptor = createExactOfflineFetchInterceptor();
+        const responsePromise = waitForOnWebResponse();
+        const consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+        UnityUtil.setOfflineFetchInterceptor(interceptor);
+        handler.createGetRequest(7, 'exception-test', false);
+
+        await responsePromise;
+
+        expect(cacheMock.write).not.toHaveBeenCalled();
+        expect(consoleErrorSpy).toHaveBeenCalledTimes(1);
+        expect((consoleErrorSpy.mock.calls[0][0] as Error).message).toBe('offline interceptor failed');
+        expect(sendMessageMock).toHaveBeenCalledWith(
+            'WebRequestHandler',
+            'OnWebResponse',
+            JSON.stringify({
+                id: 7,
+                size: -1,
+            }),
+        );
+        expect((global as any).fetch).not.toHaveBeenCalled();
+    });
+});
