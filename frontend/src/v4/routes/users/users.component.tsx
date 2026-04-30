@@ -95,7 +95,6 @@ interface IProps {
 	permissionsOnUIDisabled: boolean;
 	addUserIsPending: boolean;
 	addUser: (user) => void;
-	setUserNotExists: (userNotExists: boolean) => void;
 	removeUser: (username) => void;
 	updateUserJob: (username, job) => void;
 	updatePermissions: (permissions) => void;
@@ -318,8 +317,6 @@ export class Users extends PureComponent<IProps, IState> {
 			usersProvisionedEnabled: this.props.usersProvisionedEnabled,
 			permissionsOnUIDisabled: this.props.permissionsOnUIDisabled,
 			addUserIsPending: this.props.addUserIsPending,
-			userNotExists: this.props.userNotExists,
-			setUserNotExists: this.props.setUserNotExists,
 			onSave: this.onSave,
 			clearSuggestions: clearUsersSuggestions,
 			getUsersSuggestions: onUsersSearch,
