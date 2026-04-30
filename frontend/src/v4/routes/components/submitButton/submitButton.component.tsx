@@ -48,7 +48,7 @@ export const SubmitButton = ({ pending, children, ...props }: IProps) => {
 
 	return (
 		<Button
-			{...props}
+			{...additionalProps}
 		>
 			{children}
 			{pending && (

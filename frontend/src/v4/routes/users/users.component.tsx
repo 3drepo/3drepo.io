@@ -21,14 +21,14 @@ import {
 	filter,
 	isEmpty,
 	isEqual,
-	isNumber,
 	matches,
 	pick,
 	pickBy,
 	values
 } from 'lodash';
-import ReactDOM from 'react-dom';
 
+import { FormattedMessage } from 'react-intl';
+import AddCircleIcon from '@assets/icons/filled/add_circle-filled.svg';
 import { TEAMSPACE_PERMISSIONS } from '../../constants/teamspace-permissions';
 import { CellSelect } from '../components/customTable/components/cellSelect/cellSelect.component';
 import { CellUserSearch } from '../components/customTable/components/cellUserSearch/cellUserSearch.component';
@@ -111,7 +111,6 @@ interface IState {
 	rows: any[];
 	jobs: any[];
 	licencesLabel: string;
-	containerElement: Node;
 	panelKey: number;
 	limit: string | number;
 }
@@ -179,7 +178,6 @@ export class Users extends PureComponent<IProps, IState> {
 		rows: [],
 		jobs: [],
 		licencesLabel: '',
-		containerElement: null,
 		panelKey: Math.random(),
 		limit: 0
 	};
@@ -218,13 +216,14 @@ export class Users extends PureComponent<IProps, IState> {
 				pick(user, ['firstName', 'lastName', 'company', 'user']),
 				{
 					value: user.job,
+					renderValue: (value) => <JobItem name={value} color={jobs.find((job) => job.value === value)?.color} />,
 					items: jobs,
 					itemTemplate: JobItem,
 					onChange: this.handleChange(user, 'job'),
 					disabled: this.props.usersProvisionedEnabled,
 				},
 				{
-					value: user.isAdmin,
+					value: teamspacePermissions.find((perm) => perm.value === user.isAdmin)?.name,
 					items: teamspacePermissions,
 					onChange: this.handleChange(user, 'permissions'),
 					readOnly: user.isCurrentUser || user.isOwner || this.props.permissionsOnUIDisabled,
@@ -245,12 +244,10 @@ export class Users extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const containerElement = this.elementRef.current.parentNode;
 		this.props.fetchQuotaAndInvitations(this.props.selectedTeamspace);
 		const preparedJobs = getPreparedJobs(this.props.jobs);
 
 		this.setState({
-			containerElement,
 			jobs: preparedJobs,
 			rows: this.getUsersTableRows(this.props.users, preparedJobs),
 			limit: this.props.limit
@@ -331,7 +328,7 @@ export class Users extends PureComponent<IProps, IState> {
 		return <NewUserForm {...formProps} onCancel={closePanel} />;
 	}
 
-	public renderNewUserForm = (container) => {
+	public renderNewUserForm = () => {
 		const { limit } = this.state;
 		const { users, usersProvisionedEnabled } = this.props;
 
@@ -347,16 +344,21 @@ export class Users extends PureComponent<IProps, IState> {
 					disabled: isButtonDisabled,
 					label: isButtonDisabled ? 'All licences assigned' : ''
 				} }
-				container={container}
 				key={this.state.panelKey}
 				render={this.renderNewUserFormPanel}
+				Icon={() => (
+					<>
+						<AddCircleIcon />
+						<FormattedMessage id="newUser.panelButton" defaultMessage="New user" />
+					</>
+				)}
 			/>
 		);
 	}
 
 	public render() {
 		const { isPending, selectedTeamspace, usersProvisionedEnabled } = this.props;
-		const { rows, containerElement } = this.state;
+		const { rows } = this.state;
 		const cells = USERS_TABLE_CELLS;
 
 		if (usersProvisionedEnabled) {
@@ -389,7 +391,7 @@ export class Users extends PureComponent<IProps, IState> {
 					</AssignedLicenses>} className={this.props.className}>
 					<CustomTable cells={cells} rows={rows} />
 				</UserManagementTab>
-				{containerElement && this.renderNewUserForm(containerElement)}
+				{this.renderNewUserForm()}
 			</div>
 		);
 	}
