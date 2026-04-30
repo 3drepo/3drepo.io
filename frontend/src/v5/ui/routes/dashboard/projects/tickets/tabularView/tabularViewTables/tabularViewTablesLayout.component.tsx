@@ -36,7 +36,7 @@ const SearchingMessage = () => (
 		<EmptyPageView>
 			<TicketsTableSpinner />
 			<FormattedMessage
-				id="ticketTable.emptyView"
+				id="ticketTable.searching"
 				defaultMessage="We're currently searching for tickets that match your criteria."
 			/>
 		</EmptyPageView>
