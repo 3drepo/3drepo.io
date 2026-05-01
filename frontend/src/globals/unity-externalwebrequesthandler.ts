@@ -137,7 +137,9 @@ export class ExternalWebRequestHandler {
 			}
 
 			const data = await response.arrayBuffer();
-			this.writeCache(url, data);
+			if (cache) {
+				this.writeCache(url, data);
+			}
 			resolve(data);
 
 		}).catch((err) => {
@@ -220,7 +222,15 @@ export class ExternalWebRequestHandler {
 		this.unityInstance.SendMessage(this.gameObjectName, 'OnWebResponse', JSON.stringify(parms));
 	}
 
-	invalidateCache(url: string): Promise<void> {
-		return this.cache.delete(url);
+	/**
+	 * Deletes all keys from the cache that contain the specified string. This
+	 * is typically used to delete all the records for a specific container. 
+	 * A record will be left in the cache recording the version number this was
+	 * last called with. Only missing or higher versions will take effect.
+	 * @param container 
+	 * @returns 
+	 */
+	invalidateCache(contains: string, version: number): Promise<void> {
+		return this.cache.delete(contains, version);
 	}
 }
