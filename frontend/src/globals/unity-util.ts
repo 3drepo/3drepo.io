@@ -2749,6 +2749,19 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Utility method for use by the viewer to invalidate cache entries, if any,
+	 * for a Container based on a bundles version number.
+	 * @hidden
+	 */
+	public static invalidateCache(json: string) {
+		const info = JSON.parse(json);
+		if (this.externalWebRequestHandler) {
+			// Currently cache invalidations are done on a per-container basis.
+			this.externalWebRequestHandler.invalidateCache(info.container, info.version);
+		}
+	}
+
+	/**
 	 * Enable the virtual joystick feature.
 	 *
 	 * The viewer polls `fn` once per frame to retrieve the

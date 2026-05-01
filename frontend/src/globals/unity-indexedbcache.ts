@@ -122,14 +122,21 @@ export class IndexedDbCache {
 		});
 	}
 
-	delete(url: string): Promise<void> {
+	/**
+	 * Deletes all keys that match the search string and leaves a record of this
+	 * operation for a particular version.
+	 * @param literal The string to search for in all the keys. All keys containing this string will be deleted.
+	 * @returns A promise that indicate all transactions are completed - however this operation is effective the moment the function returns.
+	 */
+	delete(contains: string, version: number): Promise<void> {
 		const id = this.getId();
 		return new Promise<void>((resolve) => {
 			this.transactions[id] = { resolve };
 			this.worker.postMessage({
 				message: 'Delete',
 				id,
-				key: url,
+				version,
+				contains,
 			});
 		});
 	}

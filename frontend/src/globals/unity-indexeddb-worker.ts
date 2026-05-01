@@ -38,6 +38,7 @@ export class IndexedDbCacheWorker {
 		this.objectStoreName = '3DRepoCache';
 		this.memoryCache = {};
 		this.numReadTransactions = 0;
+		this.committing = false;
 		this.createIndexedDbCache();
 
 		// Check at low frequency if there is anything going on, and if not try
@@ -78,10 +79,10 @@ export class IndexedDbCacheWorker {
 
 	/** A promise holding the state of the database. If a method requires the
 	 * database to be open before proceeding, it can await this promise. */
-	open: Promise<void>;
+	open!: Promise<void>;
 
 	createIndexedDbCache() {
-		this.open = new Promise((resolve, reject) => {
+		this.open = new Promise<void>((resolve, reject) => {
 			const request = indexedDB.open('3DRepoCacheDb', 2);
 
 			request.onerror = () => {
@@ -109,7 +110,22 @@ export class IndexedDbCacheWorker {
 				const req = objectStore.getAllKeys();
 				req.onsuccess = () => {
 					this.index = {};
-					req.result.forEach((x) => { this.index[x] = 1; }); // Give any value here - we will only check the existence of the key (property)
+					req.result.forEach((x: any) => { this.index[x] = 1; }); // Give any value here - we will only check the existence of the key (property)
+
+					// By convention, if a key is prepended with an underscore,
+					// it indicates that the record should be read into index in
+					// full.
+					for (const key of Object.keys(this.index)) {
+						if (key.startsWith('_')) {
+							const readRequest = objectStore.get(key);
+							readRequest.onsuccess = () => {
+								this.index[key] = readRequest.result;
+							};
+						}
+					}
+				};
+
+				transaction.oncomplete = () => {
 					this.sendIndexedDbUpdated({
 						state: 'Open',
 					});
@@ -368,40 +384,73 @@ export class IndexedDbCacheWorker {
 		}
 	}
 
-	createDeleteTransaction(id: number, key: string) {
+	createDeleteTransaction(id: number, contains: string, version: number) {
 		// This function deletes a key from the cache. The key is effectively
 		// deleted immediately as soon as this method returns.
 
-		// Remove from memory cache first, so we don't try to commit it later
+		// First check if we have anything to do - the invalidation should only
+		// take place if have a missing or out of date version of the literal.
 
-		delete this.memoryCache[key];
+		const semaphoreKey = `_${contains}`;
 
-		if (this.index[key] === undefined) {
-			// Key not in index, so nothing to delete
-			this.sendDeleteTransactionComplete({
-				id,
-			});
+		if (this.index[semaphoreKey] && this.index[semaphoreKey] >= version) {
 			return;
 		}
 
-		// Delete from our local index first. Indexeddb readwrite transactions
-		// complete in the order they are created (see:
-		// https://www.w3.org/TR/IndexedDB/#transaction-construct). However, our
-		// local index is not part of this and may be read during a transaction.
+		// Remove from memory cache first, so we don't try to commit it later.
+
+		Object.keys(this.memoryCache).forEach((key) => {
+			if (key.includes(contains)) {
+				delete this.memoryCache[key];
+			}
+		});
+
+		// Delete from our local index before creating any transactions.
+		// Indexeddb readwrite transactions complete in the order they are
+		// created (see: https://www.w3.org/TR/IndexedDB/#transaction-construct).
+		// However, our local index is not part of this and may be read during a
+		// transaction.
 		//
 		// Since all reads are first checked against the index, this effectively
-		// deletes the key from the point of view of any external callers.
+		// deletes the key from the point of view of any external callers, and
+		// means the caller can immediately try to access the cache again without
+		// getting a stale value, even before the promise resolves.
 
-		delete this.index[key];
+		var keysToDelete: string[] = [];
 
-		// If a key is being deleted, it is likely because it contains conflicting
-		// data, so we don't want any risk of not being fully purged.
+		Object.keys(this.index).forEach((key) => {
+			if (key.includes(contains)) { // This will also delete existing semaphores, which is intentional
+				delete this.index[key];
+				keysToDelete.push(key);
+			}
+		});
+
+		// If a key is being deleted, it is likely because it contains
+		// conflicting, so we set the durability to strict as we don't want any
+		// risk of it not being fully purged.
 
 		const transaction = this.db.transaction(this.objectStoreName, 'readwrite', {
 			durability: 'strict',
 		});
+
 		const objectStore = transaction.objectStore(this.objectStoreName);
-		const request = objectStore.delete(key);
+
+		for (const key of keysToDelete) {
+			objectStore.delete(key);
+		}
+
+		// As the penultimate step, update the index so we don't have to
+		// iterate again (in this session or the future). The semaphore is
+		// a key that holds the version. It is prefixed with an underscore
+		// so that the full value will be loaded into the index on startup,
+		// meaning we can perform the early reject above without accessing
+		// the database.
+
+		this.index[semaphoreKey] = version;
+		objectStore.put(version, semaphoreKey);
+
+		// Finally, wait for the transaction to complete (all the above
+		// requests to succeed) before resolving.
 
 		transaction.oncomplete = () => {
 			this.sendDeleteTransactionComplete({
@@ -409,9 +458,8 @@ export class IndexedDbCacheWorker {
 			});
 		};
 
-		request.onerror = (ev) => {
-			console.error(`Failed to delete ${key} from cache: ${ev.currentTarget.error}`);
-			ev.stopPropagation(); // Don't bubble up further
+		transaction.onabort = (ev) => {
+			console.error(`Failed to perform cache invalidation transaction: ${ev.currentTarget.error}`);
 		};
 	}
 }
@@ -435,8 +483,8 @@ onmessage = (e) => {
 
 	if (e.data.message === 'Delete') {
 		self.repoCache.open.then(() => {
-			const { key, id } = e.data;
-			self.repoCache.createDeleteTransaction(id, key);
+			const { contains, version, id } = e.data;
+			self.repoCache.createDeleteTransaction(id, contains, version);
 		});
 	}
 };
