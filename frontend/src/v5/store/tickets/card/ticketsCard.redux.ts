@@ -23,6 +23,7 @@ import { Constants } from '@/v5/helpers/actions.helper';
 import { EditableTicket, OverridesDicts } from '../tickets.types';
 import { TeamspaceProjectAndModel } from '../../store.types';
 import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.types';
+import { NONE_OPTION as GROUP_BY_NONE_OPTION } from '../ticketsGroups.helpers';
 
 export const { Types: TicketsCardTypes, Creators: TicketsCardActions } = createActions({
 	setSelectedTicket: ['ticketId'],
@@ -83,7 +84,7 @@ export const INITIAL_STATE: ITicketsCardState = {
 	isEditingGroups: false,
 	isShowingPins: true,
 	isFiltering: false,
-	groupByField: null,
+	groupByField: GROUP_BY_NONE_OPTION,
 };
 
 export const setSelectedTicket = (state: ITicketsCardState, { ticketId }: SetSelectedTicketAction) => {
