@@ -54,9 +54,9 @@ import { TicketFilter } from '@components/viewer/cards/cardFilters/cardFilters.t
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { FilterSelection } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFiltersSelection.component';
 import { CardFilters } from '@components/viewer/cards/cardFilters/cardFilters.component';
-import { deserializeFilter, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
+import { deserializeURLFilters, getNonCompletedTicketFilters, getTemplateFilter, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { useRealtimeFiltering } from './useRealtimeFiltering';
-import { isEqual, orderBy } from 'lodash';
+import { isEmpty, isEqual, orderBy } from 'lodash';
 import { formatMessage } from '@/v5/services/intl';
 import { SortedTableComponent } from '@controls/sortedTableContext/sortedTableContext';
 import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
@@ -82,7 +82,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
 
 	const paramsToSave = useRef({ search: window.location.search, params });
-	
+
 	const [containersAndFederations, setContainersAndFederations] = useSearchParam('models', Transformers.STRING_ARRAY, true);
 	const [containerOrFederation] = useSearchParam('containerOrFederation');
 	const [filteredTickets, setFilteredTickets] = useState<ITicket[]>([]);
@@ -92,9 +92,9 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const [filters, setFilters] = useState<TicketFilter[]>();
 	const [isFiltering, setIsFiltering] = useState<boolean>(true);
 	const [filteredTicketsIDs, setFilteredTicketIds] = useState<Set<string>>(new Set());
-	
+
 	const riskCategories = TicketsHooksSelectors.selectRiskCategories();
-	const users = UsersHooksSelectors.selectCurrentTeamspaceUsers();
+	const jobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
 	const setTemplate = useCallback((newTemplate) => {
 		const newParams = { ...params, template: newTemplate } as Required<DashboardTicketsParams>;
 		const ticketsPath = TICKETS_ROUTE;
@@ -126,7 +126,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	useEffect(() => {
 		if (!models.length) return;
-		
+
 		modelsIds.forEach((modelId) => {
 			if (selectTicketsHaveBeenFetched(getState(), modelId)) return;
 			const isFederation = isFed(modelId);
@@ -209,7 +209,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 	useWatchPropertyChange(groupBy, () => setRefreshTableFlag(!refreshTableFlag));
 
-	useRealtimeFiltering(teamspace, project, containersAndFederations, selectedTemplate, filters || [], 
+	useRealtimeFiltering(teamspace, project, containersAndFederations, selectedTemplate, filters || [],
 		(updatedTicketId, included) => {
 			// if nothing changed do nothing;
 			if (filteredTicketsIDs.has(updatedTicketId) === included) return;
@@ -218,7 +218,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 
 				if (included) newFilteredIds.add(updatedTicketId);
 				else newFilteredIds.delete(updatedTicketId);
-				
+
 				return newFilteredIds;
 			});
 		});
@@ -228,29 +228,21 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	 * set the actual filters.
 	 * If there is no filters in the url it sets the default filters
 	 */
-	useEffect(() => { 
+	useEffect(() => {
 		if (!templateAlreadyFetched(selectedTemplate)) return;
-		
+
 		if (!paramFilters) {
 			const newFilters  = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
 			if (isEqual(newFilters, filters)) return;
 			setFilters(newFilters);
 			return;
 		}
-	
-	 	if (!riskCategories.length || !users.length) return;
-		
+
+	 	if (!riskCategories.length || isEmpty(jobsAndUsers)) return;
+
 		try {
 		// Dont blank the page if the url param has the wrong format
-			const newFilters = JSON.parse(paramFilters).map((f) => {
-				try {
-					return deserializeFilter(selectedTemplate, users, riskCategories, f);
-				} catch (e) {
-					console.error('Error parsing the url filter param');
-					console.error(e);
-					return undefined;
-				}
-			}).filter(Boolean);
+			const newFilters = deserializeURLFilters([selectedTemplate], paramFilters, jobsAndUsers, riskCategories);
 			if (isEqual(newFilters, filters)) return;
 			setFilters(newFilters);
 		} catch (e) {
@@ -258,8 +250,8 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			console.error(e);
 			return undefined;
 		}
-	}, [selectedTemplate, paramFilters, filters, users]);
-	
+	}, [selectedTemplate, containersAndFederations, jobsAndUsers, filters, riskCategories]);
+
 	/**
 	 * When the filter objects are changed this bit changes
 	 * the url search param.
@@ -267,11 +259,12 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 	const onChangeFilters = (newFilters) => {
 		if (!newFilters && !paramFilters) return;
 		if (!templateAlreadyFetched(selectedTemplate)) return;
+		setFilters(newFilters);
 
 		const defaultFilters = getNonCompletedTicketFilters([selectedTemplate], containerOrFederation[0]);
 
-		let param = JSON.stringify(newFilters.map((f) => 
-			serializeFilter(selectedTemplate, riskCategories, f),
+		let param = JSON.stringify(newFilters.map((f) =>
+			serializeFilter([selectedTemplate], f, jobsAndUsers, riskCategories),
 		));
 
 		// When there are no paramFilters that means the defaultfilters are there so no need to update the url
@@ -285,7 +278,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 			TicketsActionsDispatchers.setTabularViewParams(paramsToSave.current.params, paramsToSave.current.search);
 		};
 	}, []);
-	
+
 	useEffect(() => {
 		// Must remove selected ticket ids if their corresponding model is removed from the table
 		const prevModelIds = prevModelIdsRef.current;
@@ -357,7 +350,7 @@ export const TicketsTable = ({ isNewTicketDirty, setTicketValue }: TicketsTableP
 					defaultMessage: `
 					You don't have access to every selected container and federation.{br}
 					Check that you have been authorized to access to all the {br}
-					selected containers and federations or that none have {br} 
+					selected containers and federations or that none have {br}
 					been deleted.
 					`,
 				}, { br: <br /> }),
