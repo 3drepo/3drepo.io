@@ -28,7 +28,7 @@ import { selectCurrentProjectTemplates } from '@/v5/store/projects/projects.sele
 import api from '@/v5/services/api/default';
 import { FederationsActions } from '@/v5/store/federations/federations.redux';
 import { federationMockFactory } from '../federations/federations.fixtures';
-import { AddOn } from '@/v5/store/store.types';
+import { AddOnModule } from '@/v5/store/store.types';
 
 describe('Teamspaces: sagas', () => {
 	const teamspace = 'teamspace';
@@ -59,7 +59,7 @@ describe('Teamspaces: sagas', () => {
 	afterAll(() => { spy.mockClear(); });
 
 	describe('fetch', () => {
-		const addOns = [AddOn.Risks];
+		const addOns = { modules: [AddOnModule.Risks], usersProvisioned: false, disablePermissionsOnUI: false };
 		it('should fetch projects data and dispatch FETCH_SUCCESS', async () => {
 			const projects = [mockProject];
 

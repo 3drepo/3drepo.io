@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Typography } from '@controls/typography';
+import CameraIcon from '@assets/icons/outlined/camera_side-outlined.svg';
 
 export const CommentMessage = styled(Typography).attrs({ variant: 'body1' })`
 	word-break: break-word;
@@ -80,4 +81,21 @@ export const CommentWithButtonsContainer = styled.div`
 		animation: activateButtons forwards;
 		animation-delay: .5s;
 	}
+`;
+
+export const ViewpointIcon = styled(CameraIcon)<{ disabled?: boolean; }>`
+	width: 14px;
+	height: 14px;
+	margin: 0 0 -3px 8px;
+	cursor: pointer;
+
+	&:hover {
+		color: ${({ theme }) => theme.palette.primary.main};
+	}
+
+	${({ disabled }) => disabled && css`
+		opacity: 0.3;
+		user-select: none;
+		pointer-events: none;
+	`}
 `;

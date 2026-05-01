@@ -153,6 +153,13 @@ export class UnityUtil {
 	private static domTextureReferenceCounter = 0;
 
 	/**
+	 * Called from Unity to retrieve joystick input.
+	 * @returns An array containing the joystick input values [leftStickX, leftStickY, rightStickX, rightStickY]
+	 */
+	/** @hidden */
+	private static virtualJoystickProvider: (() => [number, number, number, number] | null | undefined) | null = null;
+
+	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
 	 */
@@ -374,7 +381,12 @@ export class UnityUtil {
 	 * Called by the viewer to retrieve cookies in the application
 	 */
 	public static getCookies() {
-		return document?.cookie;
+		try {
+			return document?.cookie;
+		} catch {
+			// iframe, powerBI etc will not be able to access cookies, this is expected behaviour
+			return undefined;
+		}
 	}
 
 	/**
@@ -868,20 +880,23 @@ export class UnityUtil {
 	 * Load comparator model for compare tool
 	 * This returns a promise which will be resolved when the comparator model is loaded
 	 * @category Compare Tool
-	 * @param account - teamspace
-	 * @param model - model ID
+	 * @param teamspace - teamspace
+	 * @param project - project
+	 * @param container - model ID
 	 * @param revision - Specific revision ID/tag to load
 	 * @return returns a promise that resolves upon comparator model finished loading.
 	 */
-	public static diffToolLoadComparator(account: string, model: string, revision = 'head'): Promise<void> {
+	public static diffToolLoadComparator(teamspace: string, project: string, container: string, revision = 'head'): Promise<void> {
 		const params: any = {
-			database: account,
-			model,
+			database: teamspace,
+			project,
+			model: container,
 		};
 
 		if (revision !== 'head') {
 			params.revID = revision;
 		}
+
 		UnityUtil.toUnity('DiffToolLoadComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 
 		if (!UnityUtil.loadComparatorPromise) {
@@ -896,13 +911,14 @@ export class UnityUtil {
 	 * Set an existing submodel/model as a comparator model
 	 * This will return as a base model when you have cleared the comparator (i.e. disabled diff)
 	 * @category Compare Tool
-	 * @param account - name of teamspace
-	 * @param model - model ID
+	 * @param teamspace - name of teamspace
+	 * @param container - model ID
 	 */
-	public static diffToolSetAsComparator(account: string, model: string) {
+	public static diffToolSetAsComparator(teamspace: string, project: string, container: string) {
 		const params: any = {
-			database: account,
-			model,
+			database: teamspace,
+			project,
+			model: container,
 		};
 		UnityUtil.toUnity('DiffToolAssignAsComparator', UnityUtil.LoadingState.MODEL_LOADED, JSON.stringify(params));
 	}
@@ -1095,6 +1111,46 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Sets the scale factor used by the Gizmos that determines how precise the user needs to be to select the axis arrow or arch.
+	 * Default scale is 1.0
+	 * @category Configurations
+	 * @param newScale
+	 */
+	public static setClipGizmoSelectionScale(newScale: number) {
+		UnityUtil.toUnity('SetGizmoSelectionScale', UnityUtil.LoadingState.VIEWER_READY, newScale);
+	}
+
+	/**
+	 * Sets the size that the Gizmo will take up on the screen.
+	 * Default value is 80
+	 * @category Configurations
+	 * @param newSize
+	 */
+	public static setClipGizmoSize(newSize: number) {
+		UnityUtil.toUnity('SetGizmoSize', UnityUtil.LoadingState.VIEWER_READY, Number(newSize));
+	}
+
+	/**
+	 * Sets the size that the clip plane proxy in single plane mode will take up on the screen.
+	 * Default value is 180
+	 * @category Configurations
+	 * @param newSize
+	 */
+	public static setClipPlaneSize(newSize: number) {
+		UnityUtil.toUnity('SetClippingPlaneSize', UnityUtil.LoadingState.VIEWER_READY, Number(newSize));
+	}
+
+	/**
+	 * Sets the scale factor that controls the thickness of the axis arrows or arches of the Gizmo.
+	 * Default scale is 1.0
+	 * @category Configurations
+	 * @param newScale
+	 */
+	public static setClipGizmoAxisScale(newScale: number) {
+		UnityUtil.toUnity('SetGizmoAxisScale', UnityUtil.LoadingState.VIEWER_READY, Number(newScale));
+	}
+
+	/**
 	* Set the coefficient linking the change in Clip Box Size to proportion
 	* of the screen covered by the cursor when scaling in all three axes.
 	* @category Clipping Plane
@@ -1113,6 +1169,21 @@ export class UnityUtil {
 	 */
 	public static setClipSelectionBoxScalar(scalar: number) {
 		UnityUtil.toUnity('SetClipSelectionBoxScalar', UnityUtil.LoadingState.VIEWER_READY, scalar);
+	}
+
+	/**
+	 * When true, moving the camera will push the clip gizmo around from the
+	 * edges of the screen so that it remains in view, so long as the clip plane
+	 * is in front of the camera, so it doesn't need to pulled around manually
+	 * during navigation. The gizmo will also be constrained to the bounds of
+	 * the model. This only takes effect in single-plane mode.
+	 */
+	public static setKeepClipGizmoInView(enable: boolean) {
+		if (enable) {
+			UnityUtil.toUnity('EnableKeepClipGizmoInView', UnityUtil.LoadingState.VIEWER_READY);
+		} else {
+			UnityUtil.toUnity('DisableKeepClipGizmoInView', UnityUtil.LoadingState.VIEWER_READY);
+		}
 	}
 
 	/**
@@ -1706,20 +1777,21 @@ export class UnityUtil {
 	 * Use branch = master and revision = head to get the latest revision.
 	 * If you want to know when the model finishes loading, use [[onLoaded]]
 	 * @category Configurations
-	 * @param account - name of teamspace
+	 * @param teamspace - name of teamspace
 	 * @param model - name of model
-	 * @param branch - ID of the branch (deprecated value)
+	 * @param project - ID of the project
 	 * @param revision - ID of revision
+	 * @param isFederation - flag signaling whether the model is a container or a federation
 	 * @param initView? - the view the model should load with
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
 	 * @return returns a promise that resolves when the model start loading.
 	 */
 	public static loadModel(
-		account: string,
+		teamspace: string,
+		project: string,
 		model: string,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		branch = '',
 		revision = 'head',
+		isFederation: boolean = false,
 		initView = null,
 		clearCanvas = true,
 	): Promise<void> {
@@ -1728,8 +1800,10 @@ export class UnityUtil {
 		}
 
 		const params: any = {
-			database: account,
+			database: teamspace,
+			project,
 			model,
+			isFederation,
 		};
 
 		if (revision !== 'head') {
@@ -2471,6 +2545,16 @@ export class UnityUtil {
 	}
 
 	/**
+	 * When set, the viewer will draw less of the model during navigation or
+	 * camera movement, in order to maintain the target Fps. If the Fps is zero
+	 * or negative, this feature is disabled.
+	 * @param fps The target framerate
+	 */
+	public static setDynamicFpsTarget(fps: number) {
+		UnityUtil.toUnity('SetNavigationTargetFps', UnityUtil.LoadingState.VIEWER_READY, Number(fps));
+	}
+
+	/**
 	 * Move mesh/meshes by a given transformation matrix.
 	 * NOTE: this currently only works as desired in Synchro Scenarios
 	 * @category Model Interactions
@@ -2665,24 +2749,58 @@ export class UnityUtil {
 	}
 
 	/**
-	 * Called by the viewer on processing a repoAssets response, when it needs
-	 * to indicate something about that response to UnityUtil. Currently, there
-	 * is only one such case, where the requisite action is to invalidate a
-	 * cache entry.
+	 * Enable the virtual joystick feature.
+	 *
+	 * The viewer polls `fn` once per frame to retrieve the
+	 * current joystick state. Each axis value should be in the range **-1 to 1**, where
+	 * 0 represents the neutral (centred) position.
+	 *
+	 * @param fn - A provider function that returns the current joystick state as a
+	 * four-element tuple `[leftStickX, leftStickY, rightStickX, rightStickY]`.
+	 * Return `null` or `undefined` to indicate no input this frame.
+	 *
+	 * @example
+	 * // Simulates a static right-stick push to the right (e.g. for testing)
+	 * UnityUtil.enableVirtualJoystick(() => [0, 0, 1, 0]);
 	 */
-	public static repoAssetsAlert(alertJson: string) {
-		const alert = JSON.parse(alertJson);
-		console.debug('UnityUtil.repoAssetsAlert called with alert:', alert);
-		if (alert.version === 1) {
-			// For now, we only have one known alert, which is for a container that has
-			// had its unity assets replaced with repobundles. In this case, we should
-			// invalidate the supermeshes.json.mpc response.
-			const key = `/${alert.teamspace}/${alert.container}/revision/${alert.revision}/supermeshes.json.mpc`;
-			if (this.externalWebRequestHandler) {
-				this.externalWebRequestHandler.invalidateCache(key);
-			} else {
-				console.warn('UnityUtil.repoAssetsAlert called without an externalWebRequestHandler set');
-			}
+	public static enableVirtualJoystick(fn: () => [number, number, number, number]) {
+		if (typeof fn !== 'function') {
+			console.error('enableVirtualJoystick: fn must be a function');
+			return;
+		}
+		UnityUtil.virtualJoystickProvider = fn;
+		UnityUtil.toUnity('EnableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the virtual joystick feature.
+	 */
+	public static disableVirtualJoystick() {
+		UnityUtil.virtualJoystickProvider = null;
+		UnityUtil.toUnity('DisableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Enable the Gamepad feature.
+	 */
+	public static enableGamepad() {
+		UnityUtil.toUnity('EnableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the Gamepad feature.
+	 */
+	public static disableGamepad() {
+		UnityUtil.toUnity('DisableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Set offline fetch interceptor for mobile/Flutter integration
+	 * @param interceptor - Function that handles fetch requests
+	 */
+	public static setOfflineFetchInterceptor(interceptor: (url: string, options?: RequestInit) => Promise<Response>) {
+		if (UnityUtil.externalWebRequestHandler) {
+			UnityUtil.externalWebRequestHandler.setOfflineFetchInterceptor(interceptor);
 		}
 	}
 }

@@ -46,6 +46,7 @@ const propTypes = createConstantMapping([
 
 const propOptions = createConstantMapping([
 	'values',
+	'value',
 	'required',
 	'default',
 	'readOnly',
@@ -72,6 +73,8 @@ const viewGroups = createConstantMapping([
 	'colored',
 	'hidden',
 	'transformed',
+	'selected',
+	'shown',
 ]);
 
 const riskLevelsArr = ['Very Low', 'Low', 'Moderate', 'High', 'Very High'];
@@ -86,7 +89,8 @@ const createPropertyEntry = (name, type, config = {}) => {
 		throw new Error(`Unrecognised configuration: ${unrecognisedOptions.join(',')}, provided ${Object.keys(config).join(',')}`);
 	}
 	return deleteIfUndefined({
-		name, type, ...config });
+		name, type, ...config,
+	});
 };
 
 const TemplateConstants = { propTypes, presetEnumValues, presetModules, riskLevels, viewGroups };
@@ -136,6 +140,7 @@ TemplateConstants.presetModulesProperties = {
 	],
 	[presetModules.CLASH]: [
 		createPropertyEntry('GUID', propTypes.TEXT, { [propOptions.IMMUTABLE]: true, [propOptions.REQUIRED]: true, [propOptions.UNIQUE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Clash Report', propTypes.TEXT, { [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Group', propTypes.TEXT),
 		createPropertyEntry('Clash Point', propTypes.COORDS, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
@@ -219,5 +224,10 @@ TemplateConstants.getApplicableDefaultProperties = (config, isImport) => [
 	...customisableProperties.flatMap((createFn) => processProperty(createFn(config), config, isImport),
 	),
 ];
+TemplateConstants.supportedPatterns = createConstantMapping([
+	'model_name',
+	'template_code',
+	'ticket_number',
+]);
 
 module.exports = TemplateConstants;

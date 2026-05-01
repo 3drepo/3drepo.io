@@ -20,17 +20,16 @@ import { get, has } from 'lodash';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { useParams } from 'react-router-dom';
 import { getTicketResourceUrl, modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { AdditionalProperties } from '../../../tickets.constants';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
 
 type ITicketItemThumbnail = {
 	ticket: ITicket;
-	selectTicket: (e) => void;
+	onClick: (e) => void;
 };
 
-export const TicketItemThumbnail = ({ ticket, selectTicket }: ITicketItemThumbnail) => {
+export const TicketItemThumbnail = ({ ticket, onClick }: ITicketItemThumbnail) => {
 	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 
@@ -41,15 +40,8 @@ export const TicketItemThumbnail = ({ ticket, selectTicket }: ITicketItemThumbna
 	const thumbnailSrc = resourceId ?
 		getTicketResourceUrl(teamspace, project, containerOrFederation, ticket._id, resourceId, isFederation) : null;
 
-	const goToViewpoint = (event) => {
-		selectTicket(event);
-		
-		if (!hasViewpoint) return;
-		goToView(defaultView); 
-	};
-
 	return (
-		<ThumbnailContainer onClick={goToViewpoint}>
+		<ThumbnailContainer onClick={onClick}>
 			<Thumbnail src={thumbnailSrc} />
 			{hasViewpoint && (
 				<ViewpointOverlay>

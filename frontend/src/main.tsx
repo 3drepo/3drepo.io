@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ConnectedRouter } from 'connected-react-router';
-import { Switch, Redirect } from 'react-router-dom';
+import { Routes, Route, Navigate, BrowserRouter } from 'react-router-dom';
 import 'font-awesome/css/font-awesome.min.css';
 import 'normalize.css/normalize.css';
 import ReactDOM from 'react-dom';
@@ -25,7 +24,7 @@ import '@/v4/services/fontAwesome';
 import 'simplebar/dist/simplebar.min.css';
 
 import 'simplebar';
-import { history, sagaMiddleware, store } from '@/v4/modules/store';
+import { sagaMiddleware, store } from '@/v4/modules/store';
 import { Root as V5Root } from '@/v5/ui/routes';
 
 import { UnityUtil } from '@/globals/unity-util';
@@ -45,8 +44,9 @@ import { NotFound } from '@/v5/ui/routes/notFound';
 import { initializeGoogleTagManager } from './v5/services/googleTagManager';
 import { initializeHotjar } from './v5/services/hotjar';
 import { dispatch } from './v5/helpers/redux.helpers';
-import { Route } from './v5/services/routing/route.component';
 import { AUTH_PATH as V5_AUTH_PATH } from './v5/ui/routes/routes.constants';
+import { RouteTitle } from './v5/services/routing/routeTitle.component';
+import { InitializeConnectedRouter } from './v5/services/connectedRouter';
 
 window.UnityUtil = UnityUtil;
 
@@ -68,29 +68,20 @@ subscribeToSocketEvent(SocketEvents.CONNECT, () => setSocketIdHeader(getSocket()
 const render = () => {
 	ReactDOM.render(
 		<Provider store={store as any}>
-			<ConnectedRouter history={history}>
+			<BrowserRouter>
 				<IntlProvider {...getIntl()}>
 					<LocalizationProvider dateAdapter={AdapterDayjs}>
-						<Switch>
-							<Route exact path="/">
-								<Redirect to={{ pathname:'v5/' }} />
-							</Route>
-							<Route path={ROUTES.SIGN_UP}>
-								<Redirect to={{ pathname: V5_AUTH_PATH, search: window.location.search }} />
-							</Route>
-							<Route exact path={ROUTES.LOGIN}>
-								<Redirect to={{ pathname: V5_AUTH_PATH }} />
-							</Route>
-							<Route path="/v5">
-								<V5Root />
-							</Route>
-							<Route title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
-								<NotFound />
-							</Route>
-						</Switch>
+						<InitializeConnectedRouter />
+						<Routes>
+							<Route index element={<Navigate to="v5/dashboard" />} />
+							<Route path={ROUTES.SIGN_UP} element={<Navigate to={{ pathname: V5_AUTH_PATH, search: window.location.search }} replace />} />
+							<Route path={ROUTES.LOGIN} element={<Navigate to={V5_AUTH_PATH} replace />} />
+							<Route path="/v5/*" element={<V5Root />} />
+							<Route path="*" element={<RouteTitle title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })}><NotFound /></RouteTitle>} />
+						</Routes>
 					</LocalizationProvider>
 				</IntlProvider>
-			</ConnectedRouter>
+			</BrowserRouter>
 		</Provider>,
 		document.getElementById('app'),
 	);

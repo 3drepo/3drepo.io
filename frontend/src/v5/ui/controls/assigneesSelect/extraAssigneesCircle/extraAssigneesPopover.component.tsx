@@ -15,16 +15,23 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ExtraAssigneesList, ExtraAssigneesListItem } from './extraAssignees.styles';
+import { getAssigneeDisplayName } from '@/v5/store/users/users.helpers';
+import { pick, toArray } from 'lodash';
 
 type IExtraAssignees = {
 	assignees: string[];
 };
 
-export const ExtraAssigneesPopover = ({ assignees }: IExtraAssignees) => (
-	<ExtraAssigneesList>
-		{assignees.map((assignee) => (
-			<ExtraAssigneesListItem key={assignee}>{assignee}</ExtraAssigneesListItem>
-		))}
-	</ExtraAssigneesList>
-);
+export const ExtraAssigneesPopover = ({ assignees }: IExtraAssignees) => {
+	const allJobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds() || {};
+	const assigneeNames = toArray(pick(allJobsAndUsers, assignees)).map(getAssigneeDisplayName);
+	return (
+		<ExtraAssigneesList>
+			{assigneeNames.map((name) => (
+				<ExtraAssigneesListItem key={name}>{name}</ExtraAssigneesListItem>
+			))}
+		</ExtraAssigneesList>
+	);
+};

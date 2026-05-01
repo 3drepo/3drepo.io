@@ -27,10 +27,11 @@ import { FormattedMessage } from 'react-intl';
 import { DoubleInputLineContainer, SubTitle, Title } from './drawingForm.styles';
 import { Gap } from '@controls/gap';
 import { MODEL_UNITS } from '../../models.helpers';
+import { CALIBRATION_INVALID_RANGE_ERROR } from '@/v5/validation/drawingSchemes/drawingSchemes';
 
 interface Props { 
 	formData: any,
-	drawing?: IDrawing,
+	drawing?: Partial<IDrawing>,
 }
 
 export const DrawingForm = ({ formData, drawing }:Props) => {
@@ -38,6 +39,7 @@ export const DrawingForm = ({ formData, drawing }:Props) => {
 	const isProjectAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
 
 	const { formState: { errors }, control } = formData;
+	const hideBottomExtentError = (errors.calibration?.verticalRange || []).some((e) => e.message === CALIBRATION_INVALID_RANGE_ERROR);
 
 	return (
 		<>
@@ -100,7 +102,7 @@ export const DrawingForm = ({ formData, drawing }:Props) => {
 					id="drawings.form.calibrationInformation.description"
 				/>
 			</SubTitle>
-			<DoubleInputLineContainer>
+			<DoubleInputLineContainer $hideBottomExtentError={hideBottomExtentError}>
 				<FormNumberField
 					control={control}
 					name="calibration.verticalRange.0"
@@ -123,6 +125,7 @@ export const DrawingForm = ({ formData, drawing }:Props) => {
 				control={control}
 				label={formatMessage({ id: 'drawings.form.units', defaultMessage: 'Units' })}
 				name="calibration.units"
+				formError={errors.calibration?.units}
 				disabled={!isProjectAdmin}
 			>
 				{MODEL_UNITS.map(({ value, name }) => (

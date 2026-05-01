@@ -58,6 +58,22 @@ const testColorArr = () => {
 	});
 };
 
+const testColorStr = () => {
+	describe.each([
+		[generateRandomString(), false],
+		['AABBCC', false],
+		['#GGHHII', false],
+		['#AABBCCDD', false],
+		['#ABC', false],
+		['#AABBCC', true],
+		['#aabbcc', true],
+	])('Colour string validator', (data, res) => {
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.colorStr.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
 const testUsername = () => {
 	describe.each([
 		['1', false],
@@ -172,6 +188,7 @@ const testEmbeddedImageOrRef = () => {
 describe('utils/helper/yup', () => {
 	testId();
 	testColorArr();
+	testColorStr();
 	testUsername();
 	testTitle();
 	testShortDesc();

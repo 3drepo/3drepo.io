@@ -33,9 +33,13 @@ export const trimmedString = Yup.string().transform((value) => value && value.tr
 
 export const nullableString = Yup.string().transform((value) => value || null).nullable();
 
-export const nullableNumber = Yup.number().transform(
-	(_, val) => ((val || val === 0) ? Number(val) : null),
-).nullable(true);
+export const nullableNumber = Yup.number()
+	.transform((_, val) => ((val || val === 0) ? Number(val) : null))
+	.nullable(true)
+	.typeError(formatMessage({
+		id: 'validation.error.invalidNumber',
+		defaultMessage: 'Invalid number',
+	}));
 
 export const requiredNumber = (requiredError?) => nullableNumber.test(
 	'requiredNumber',
@@ -102,7 +106,7 @@ export const desc = Yup.lazy((value) => (
 			formatMessage({
 				id: 'validation.model.description.error.max',
 				defaultMessage: 'Description is limited to 660 characters',
-			}))
+			})).transform((v) => v || null).nullable()
 ));
 
 export const INVALID_DATE_RANGE_MESSAGE = formatMessage({
@@ -122,7 +126,7 @@ export const numberRange = (message?) => Yup.array().of(requiredNumber().test(
 		defaultMessage: 'Invalid range',
 	}),
 	(v, ctx) => {
-		if (ctx.parent.some((x) => !isNumber(x))) return true;
+		if (ctx.parent.some((n) => !isNumber(n) || isNaN(n))) return true;
 		return ctx.parent[0] < ctx.parent[1];
 	},
 ));

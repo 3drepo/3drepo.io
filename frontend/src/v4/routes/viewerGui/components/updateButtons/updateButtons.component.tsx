@@ -23,7 +23,7 @@ import { UpdateButtonsContainer } from './updateButtons.styles';
 
 interface IProps {
 	isNew: boolean;
-hasNoPermission: boolean;
+	hasNoPermission: boolean;
 	canEditViewpoint: boolean;
 	disableViewer?: boolean;
 	hasPin: boolean;
@@ -72,6 +72,7 @@ export const UpdateButtons = ({
 					takeScreenshot={props.onTakeScreenshot}
 					uploadScreenshot={props.onUploadScreenshot}
 					showScreenshotDialog={props.onShowScreenshotDialog}
+					hasNoPermission={hasNoPermission}
 					disabled={!canEditViewpoint}
 					disableScreenshot
 				/>

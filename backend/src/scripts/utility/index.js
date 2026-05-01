@@ -70,6 +70,6 @@ const parser = populateCommands(Yargs(hideBin(process.argv)))
 	.parse();
 
 Promise.resolve(parser).catch(handleErrorBeforeExit).finally(() => {
-	// eslint-disable-next-line no-process-exit
+	// eslint-disable-next-line n/no-process-exit
 	process.exit();
 });

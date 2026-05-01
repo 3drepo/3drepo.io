@@ -21,7 +21,7 @@ const responseCodes = require("../response_codes.js");
 const _ = require("lodash");
 const db = require("../handler/db");
 const utils = require("../utils");
-const { findJobByUser, usersWithJob, addUserToJob } = require("./job");
+const { usersWithJob, addUserToJob, findByJob } = require("./job");
 
 const TeamspaceSettings = require("./teamspaceSetting");
 
@@ -44,14 +44,9 @@ const { publish } = require(`${v5Path}/services/eventsManager/eventsManager.js`)
 const { getAddOns } = require(`${v5Path}/models/teamspaceSettings`);
 const { getSpaceUsed } = require(`${v5Path}/utils/quota.js`);
 const UserProcessorV5 = require(`${v5Path}/processors/users`);
-const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser} = require(`${v5Path}/processors/teamspaces`);
-const { getTeamspaceMembersInfo } = require(`${v5Path}/processors/teamspaces`);
+const { removeTeamspaceMember, addTeamspaceMember, getTeamspaceListByUser, getTeamspaceMembersInfo, getAllMembersInTeamspace, isTeamspaceMember} = require(`${v5Path}/processors/teamspaces`);
 
 const COLL_NAME = "system.users";
-
-const isMemberOfTeamspace = function (user, teamspace) {
-	return user.roles.filter(role => role.db === teamspace && role.role === C.DEFAULT_MEMBER_ROLE).length > 0;
-};
 
 const hasReachedLicenceLimit = async function (teamspace) {
 	const Invitations = require("./invitations");
@@ -194,14 +189,17 @@ User.deleteApiKey = (username) => UserProcessorV5.deleteApiKey(username);
 
 User.findUsersWithoutMembership = async function (teamspace, searchString) {
 	const regex = new RegExp(`^${searchString}$`, "i");
-	const notMembers = await db.find("admin", COLL_NAME, {
+	const [allUsers, members] = await Promise.all([db.find("admin", COLL_NAME, {
 		$or: [
 			{"customData.email": regex},
 			{"user": regex}
 		],
-		"customData.inactive": { "$exists": false },
-		"roles.db": {$ne: teamspace }
-	});
+		"customData.inactive": { "$exists": false }
+	}),
+	User.getAllUsersInTeamspace(teamspace)
+	]);
+
+	const notMembers = allUsers.filter(({user}) => !members.includes(user));
 
 	return notMembers.map(({user, customData }) => {
 		return {
@@ -526,8 +524,8 @@ User.removeTeamMember = async function (teamspace, userToRemove, cascadeRemove, 
 
 };
 
-User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor, bypassQuotaCheck = false) {
-	if(!bypassQuotaCheck) {
+User.addTeamMember = async function(teamspace, userToAdd, job, permissions, executor, fromInvite = false) {
+	if(!fromInvite) {
 		await hasReachedLicenceLimit(teamspace);
 	}
 	let userEntry = null;
@@ -545,11 +543,13 @@ User.addTeamMember = async function(teamspace, userToAdd, job, permissions, exec
 		throw (responseCodes.USER_NOT_ASSIGNED_JOB);
 	}
 
-	if (isMemberOfTeamspace(userEntry, teamspace)) {
-		throw (responseCodes.USER_ALREADY_ASSIGNED);
-	}
+	if(!fromInvite) {
+		if (await isTeamspaceMember(teamspace, userEntry.user, true)) {
+			throw (responseCodes.USER_ALREADY_ASSIGNED);
+		}
 
-	await addTeamspaceMember(teamspace, userEntry.user, executor);
+		await addTeamspaceMember(teamspace, userEntry.user, executor);
+	}
 	publish(events.USER_ADDED, { teamspace, executor, user: userEntry.user});
 
 	const promises = [];
@@ -619,45 +619,31 @@ User.getMembers = async function (teamspace) {
 };
 
 User.getAllUsersInTeamspace = async function (teamspace) {
-	const users =  await User.findUsersInTeamspace(teamspace, {user: 1});
+	const users =  await getAllMembersInTeamspace(teamspace);
 	return users.map(({user}) => user);
 };
 
-User.findUsersInTeamspace =  async function (teamspace, fields) {
-	const query = { "roles.db": teamspace, "roles.role" : C.DEFAULT_MEMBER_ROLE };
-	return await db.find("admin", COLL_NAME, query, fields);
-};
-
 User.teamspaceMemberCheck = async function (user, teamspace) {
-	const userEntry = await User.findByUserName(user, {roles: 1});
-
-	if (!userEntry) {
-		throw (responseCodes.USER_NOT_FOUND);
-	}
-
-	if (!isMemberOfTeamspace(userEntry, teamspace)) {
+	const isMember = await isTeamspaceMember(teamspace, user, true);
+	if (!isMember) {
 		throw (responseCodes.USER_NOT_ASSIGNED_WITH_LICENSE);
 	}
 };
 
 User.getTeamMemberInfo = async function(teamspace, user) {
-	const userEntry = await User.findByUserName(user);
-	if(!userEntry || !isMemberOfTeamspace(userEntry,teamspace)) {
+	const membersInfo = await getTeamspaceMembersInfo(teamspace);
+	const userData =  membersInfo.find(member => member.user === user);
+	if(!userData) {
 		throw responseCodes.USER_NOT_FOUND;
-	} else {
-		const job = await findJobByUser(teamspace, user);
-		const result = {
-			user,
-			firstName: userEntry.customData.firstName,
-			lastName: userEntry.customData.lastName,
-			company: _.get(userEntry.customData, "billing.billingInfo.company", null)
-		};
-
-		if(job) {
-			result.job = {_id: job._id, color: job.color};
-		}
-		return result;
 	}
+	if(userData?.job) {
+		// eslint-disable-next-line no-unused-vars
+		const {users, __v, ...job} = await findByJob(teamspace, userData.job);
+		userData.job = job;
+	}
+
+	return userData;
+
 };
 
 User.findByUserName = async function (username, projection) {

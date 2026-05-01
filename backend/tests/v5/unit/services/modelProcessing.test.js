@@ -16,9 +16,7 @@
  */
 
 const { src, modelFolder, objModel } = require('../../helper/path');
-const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
-
-const { times } = require('lodash');
+const { determineTestGroup, generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/handler/queue');
 const Queue = require(`${src}/handler/queue`);
@@ -31,11 +29,26 @@ const FilesManager = require(`${src}/services/filesManager`);
 
 jest.mock('../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
+
+jest.mock('fs', () => {
+	const actualFs = jest.requireActual('fs');
+	return { ...actualFs, createWriteStream: jest.fn(actualFs.createWriteStream) };
+});
+const { createWriteStream } = require('fs');
+
+jest.mock('fs/promises', () => {
+	const actualFs = jest.requireActual('fs/promises');
+	return { ...actualFs, stat: jest.fn(actualFs.stat), access: jest.fn(actualFs.access) };
+});
+
+const { access, stat, copyFile, rm, mkdir, writeFile } = require('fs/promises');
+
 const { modelTypes, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const config = require(`${src}/utils/config`);
-const fs = require('fs/promises');
+
+const { PassThrough } = require('stream');
 const path = require('path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -63,7 +76,7 @@ const testQueueModelUpload = () => {
 		});
 
 		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
-			await fs.copyFile(objModel, fileCreated);
+			await copyFile(objModel, fileCreated);
 
 			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
 
@@ -73,52 +86,19 @@ const testQueueModelUpload = () => {
 		});
 
 		test('should succeed with job inserted into the queue', async () => {
-			await fs.copyFile(objModel, fileCreated);
+			await copyFile(objModel, fileCreated);
 			await expect(ModelProcessing.queueModelUpload(teamspace, model, data, file)).resolves.toBeUndefined();
 
-			expect(Queue.queueMessage).toBeCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 
 			const corId = Queue.queueMessage.mock.calls[0][1];
 
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model, corId, status: 'queued' });
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model, corId, status: 'queued' });
 		});
 	});
 
-	afterAll(() => fs.rm(fileCreated).catch(() => {}));
-};
-
-const testQueueFederationUpdate = () => {
-	describe('queue federation update', () => {
-		const teamspace = generateRandomString();
-		const federation = generateRandomString();
-		const data = {
-			containers: times(4, () => ({ _id: generateUUIDString(), group: generateRandomString() })),
-			owner: generateRandomString(),
-		};
-
-		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
-			await expect(ModelProcessing.queueFederationUpdate(teamspace, federation, {}))
-				.rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
-		});
-		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
-			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
-			await expect(ModelProcessing.queueFederationUpdate(teamspace, federation, data))
-				.rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
-		});
-
-		test('should succeed with job inserted into the queue', async () => {
-			await expect(ModelProcessing.queueFederationUpdate(teamspace, federation, data)).resolves.toBeUndefined();
-
-			expect(Queue.queueMessage).toBeCalledTimes(1);
-			const corId = Queue.queueMessage.mock.calls[0][1];
-
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model: federation, corId, status: 'queued' });
-		});
-	});
-
-	afterEach(Queue.close);
+	afterAll(() => rm(fileCreated).catch(() => {}));
 };
 
 const testCallbackQueueConsumer = () => {
@@ -149,8 +129,8 @@ const testCallbackQueueConsumer = () => {
 				corId: properties.correlationId,
 				status: content.status,
 			};
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
 		});
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
@@ -177,46 +157,8 @@ const testCallbackQueueConsumer = () => {
 				user: content.user,
 			};
 
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
-		});
-
-		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event with container information if the task was a federation`, async () => {
-			const content = {
-				database: generateRandomString(),
-				value: 0,
-				project: generateRandomString(),
-				user: generateRandomString(),
-			};
-			const properties = {
-				correlationId: generateRandomString(),
-			};
-
-			const containers = [
-				generateRandomString(),
-				generateRandomString(),
-				generateRandomString(),
-			];
-
-			await fs.mkdir(`${config.cn_queue.shared_storage}/${properties.correlationId}`);
-			await fs.writeFile(`${config.cn_queue.shared_storage}/${properties.correlationId}/obj.json`,
-				JSON.stringify({ subProjects: containers }));
-
-			const callbackFn = await getCallbackFn();
-			await callbackFn({ content: JSON.stringify(content), properties });
-
-			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
-				corId: properties.correlationId,
-				value: content.value,
-				message: content.message,
-				user: content.user,
-				containers,
-			};
-
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
 		});
 
 		test('Should fail gracefully if the service failed to process the message', async () => {
@@ -227,14 +169,14 @@ const testCallbackQueueConsumer = () => {
 			const callbackFn = await getCallbackFn();
 			await callbackFn({ content: {}, properties });
 
-			expect(publishFn).not.toBeCalled();
+			expect(publishFn).not.toHaveBeenCalled();
 		});
 	});
 };
 
 const testProcessDrawingUpload = () => {
 	describe('Process drawing upload', () => {
-		test('Should store the file and put a message on the queue', async () => {
+		test('Should store the file and put a message on the queue if it requires further processing', async () => {
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const model = generateRandomString();
@@ -260,8 +202,8 @@ const testProcessDrawingUpload = () => {
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.drawing_queue,
 				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
 
-			expect(publishFn).toBeCalledTimes(1);
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_UPDATE, {
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, {
 				teamspace, model, corId: UUIDToString(revId), status: processStatuses.QUEUED,
 			});
 		});
@@ -293,9 +235,66 @@ const testProcessDrawingUpload = () => {
 			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.drawing_queue,
 				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
 
-			expect(publishFn).toBeCalledWith(events.QUEUED_TASK_COMPLETED, {
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
 				teamspace, model, corId: UUIDToString(revId), value: 4,
 			});
+		});
+
+		test('Should store the file and put the same reference into revision.image if no further processing is required', async () => {
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const model = generateRandomString();
+			const revInfo = generateRandomObject();
+			const owner = generateRandomString();
+			const file = { buffer: generateRandomString(), originalname: `${generateRandomString()}.pdf` };
+
+			const revId = generateUUID();
+
+			Revisions.addRevision.mockResolvedValueOnce(revId);
+
+			await ModelProcessing.processDrawingUpload(teamspace, project, model, { owner, ...revInfo }, file);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.addRevision).toHaveBeenCalledWith(teamspace, project, model, modelTypes.DRAWING,
+				expect.objectContaining({
+					author: owner,
+					...revInfo,
+				}),
+			);
+			expect(Revisions.addRevision.mock.calls[0][4].incomplete).toBeUndefined();
+			expect(Revisions.addRevision.mock.calls[0][4].image).toBeDefined();
+
+			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, `${modelTypes.DRAWING}s.history`, expect.anything(), file.buffer, {
+				name: file.originalname, rev_id: revId, project, model,
+			});
+
+			expect(Revisions.addRevision.mock.calls[0][4].image).toEqual(FilesManager.storeFile.mock.calls[0][2]);
+
+			expect(Queue.queueMessage).not.toHaveBeenCalled();
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
+				teamspace, model, corId: UUIDToString(revId), value: 0, user: owner,
+			});
+		});
+	});
+};
+
+const testContainerGetFileName = () => {
+	describe('Get container file name', () => {
+		test('Should return file name if the file exists', async () => {
+			const corId = generateUUIDString();
+			const fileName = `${generateRandomString()}.obj`;
+			const filePath = `${config.cn_queue.shared_storage}/${corId}.json`;
+			await writeFile(filePath, JSON.stringify({ file: `${generateRandomString()}/${corId}/${fileName}` }));
+
+			await expect(ModelProcessing.getContainerFileName(corId)).toEqual(fileName);
+		});
+
+		test('Should fail if the file does not exist', async () => {
+			const corId = generateUUIDString();
+			await expect(ModelProcessing.getContainerFileName(corId)).toBeUndefined();
 		});
 	});
 };
@@ -305,10 +304,11 @@ const testGetLogArchive = () => {
 		test('Should return undefined if the path is not found', async () => {
 			await expect(ModelProcessing.getLogArchive(generateUUIDString())).resolves.toBeUndefined();
 		});
+
 		test('Should return with zip file if path is found but no files found', async () => {
 			const corId = generateUUIDString();
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fs.mkdir(taskPath);
+			await mkdir(taskPath);
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: undefined,
@@ -319,9 +319,9 @@ const testGetLogArchive = () => {
 			const corId = generateUUIDString();
 			const log = generateRandomString(100);
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fs.mkdir(taskPath);
-			await fs.writeFile(`${taskPath}/1.log`, log);
-			await fs.writeFile(`${taskPath}/2.log`, generateRandomString());
+			await mkdir(taskPath);
+			await writeFile(`${taskPath}/1.log`, log);
+			await writeFile(`${taskPath}/2.log`, generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
 				logPreview: expect.stringContaining(log),
@@ -331,8 +331,8 @@ const testGetLogArchive = () => {
 		test('Should return with zip file if path is found but no log files are found', async () => {
 			const corId = generateUUIDString();
 			const taskPath = `${config.cn_queue.shared_storage}/${corId}`;
-			await fs.mkdir(taskPath);
-			await fs.writeFile(`${taskPath}/${generateRandomString()}.Notlog`,
+			await mkdir(taskPath);
+			await writeFile(`${taskPath}/${generateRandomString()}.Notlog`,
 				generateRandomString());
 			await expect(ModelProcessing.getLogArchive(corId)).resolves.toEqual({
 				zipPath: path.join(taskPath, 'logs.zip'),
@@ -341,10 +341,119 @@ const testGetLogArchive = () => {
 		});
 	});
 };
-describe('services/modelProcessing', () => {
+
+const testQueueClashRun = () => {
+	describe('Queue clash run', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const data = generateRandomString();
+
+		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
+			Queue.queueMessage.mockRejectedValueOnce(new Error(generateRandomString()));
+			const corId = generateRandomString();
+			const stream = new PassThrough();
+			stream.write(data);
+			stream.end();
+
+			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
+				.rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
+
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
+				corId, `processClash ${teamspace} ${project} $SHARED_SPACE/${corId}/clashConfig.json`);
+		});
+
+		test(`should fail with ${templates.queueConnectionError.code} if Queue handler threw the error`, async () => {
+			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
+			const corId = generateRandomString();
+			const stream = new PassThrough();
+			stream.write(data);
+			stream.end();
+
+			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
+				.rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
+
+			rm(`${config.cn_queue.shared_storage}/${corId}/clashConfig.json`).catch(() => {});
+
+			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
+			expect(Queue.queueMessage).toHaveBeenCalledWith(config.cn_queue.clash_queue,
+				corId, `processClash ${teamspace} ${project} $SHARED_SPACE/${corId}/clashConfig.json`);
+		});
+
+		test(`should fail with ${templates.queueConnectionError.code} if createWriteStream threw the error`, async () => {
+			const corId = generateRandomString();
+			const stream = new PassThrough();
+			stream.write(data);
+			stream.end();
+
+			createWriteStream.mockImplementationOnce(() => {
+				throw new Error(generateRandomString());
+			});
+
+			await expect(ModelProcessing.queueClashRun(teamspace, project, corId, stream))
+				.rejects.toEqual(templates.queueInsertionFailed);
+
+			expect(Queue.queueMessage).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testInit = () => {
+	describe('Init', () => {
+		const params = ['host', 'shared_storage', 'callback_queue', 'model_queue', 'clash_queue', 'event_exchange'];
+		describe.each(params.map((param) => [param]))('Check Queue Config', (propName) => {
+			test(`Should fail if cn_queue.${propName} is not set in config`, async () => {
+				const originalValue = config.cn_queue[propName];
+				config.cn_queue[propName] = undefined;
+				await expect(ModelProcessing.init()).rejects.toThrow();
+				config.cn_queue[propName] = originalValue;
+				expect(Queue.listenToQueue).not.toHaveBeenCalled();
+			});
+		});
+
+		test('Should fail if shared_storage path is invalid', async () => {
+			stat.mockRejectedValueOnce(new Error(generateRandomString()));
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should fail if shared_storage path is not a directory', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => false,
+			});
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should fail if user has no access to shared_storage', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => true,
+			});
+			access.mockRejectedValueOnce(new Error(generateRandomString()));
+			await expect(ModelProcessing.init()).rejects.toThrow();
+			expect(Queue.listenToQueue).not.toHaveBeenCalled();
+		});
+
+		test('Should succeed if the config is set correctly', async () => {
+			stat.mockResolvedValueOnce({
+				isDirectory: () => true,
+			});
+			access.mockResolvedValueOnce();
+			await expect(ModelProcessing.init()).resolves.toBeUndefined();
+			expect(Queue.listenToQueue).toHaveBeenCalledTimes(1);
+			expect(Queue.listenToQueue).toHaveBeenCalledWith(config.cn_queue.callback_queue, expect.any(Function));
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testQueueModelUpload();
-	testQueueFederationUpdate();
 	testCallbackQueueConsumer();
 	testProcessDrawingUpload();
+	testContainerGetFileName();
 	testGetLogArchive();
+	testQueueClashRun();
+	testInit();
 });

@@ -131,7 +131,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments/{comment}:
 	 *   get:
 	 *     description: Get the details of a comment
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getComment
 	 *     parameters:
 	 *       - name: teamspace
@@ -200,6 +200,8 @@ const establishRoutes = (isFed) => {
 	 *                     format: uuid
 	 *                     description: The Id of the comment image
 	 *                     example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                 view:
+	 *                   $ref: "#components/schemas/ticketCommentView"
 	 *                 history:
 	 *                   type: array
 	 *                   description: The update history of the comment
@@ -254,7 +256,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments:
 	 *   get:
 	 *     description: Get the comments of a ticket
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getComments
 	 *     parameters:
 	 *       - name: teamspace
@@ -337,6 +339,8 @@ const establishRoutes = (isFed) => {
 	 *                       format: uuid
 	 *                       description: The Id of the comment image
 	 *                       example: ef0855b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                   view:
+	 *                     $ref: "#components/schemas/ticketCommentView"
 	 *                   deleted:
 	 *                     type: boolean
 	 *                     example: true
@@ -369,7 +373,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments:
 	 *   post:
 	 *     description: Create a ticket comment
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: createComment
 	 *     parameters:
 	 *       - name: teamspace
@@ -419,6 +423,8 @@ const establishRoutes = (isFed) => {
 	 *                 items:
 	 *                   type: string
 	 *                   description: Image in a Base64 format
+	 *               view:
+	 *                 $ref: "#components/schemas/ticketCommentView"
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -434,7 +440,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments/{comment}:
 	 *   put:
 	 *     description: Update a ticket comment. The current images or comment are inserted into the history array of the comment
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: updateComment
 	 *     parameters:
 	 *       - name: teamspace
@@ -490,6 +496,8 @@ const establishRoutes = (isFed) => {
 	 *                   items:
 	 *                     type: string
 	 *                     description: Image in a Base64 format or an ID of an image currently used in the comment
+	 *                 view:
+	 *                   $ref: "#components/schemas/ticketCommentView"
 	 *     responses:
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
@@ -498,14 +506,14 @@ const establishRoutes = (isFed) => {
 	 *       200:
 	 *         description: comment has been successfully updated
 	 */
-	router.put('/:comment', hasCommenterAccess, validateUpdateComment, updateComment(isFed));
+	router.put('/:comment', hasCommenterAccess, checkTicketExists, validateUpdateComment, updateComment(isFed));
 
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/comments/{comment}:
 	 *   delete:
 	 *     description: Delete a ticket comment
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: deleteComment
 	 *     parameters:
 	 *       - name: teamspace

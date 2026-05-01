@@ -17,15 +17,15 @@
 
 import styled from 'styled-components';
 import { ControlsContainer as GroupCollapseHeader } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 
 export const Container = styled.div`
-	margin-bottom: -30px;
 	overflow: auto;
 	position: relative;
-	height: calc(100vh - 287px);
 	width: 100vw;
 	margin-left: -75px;
 	padding: 0 64px 30px 75px;
+	flex: 1;
 
 	${GroupCollapseHeader} {
 		position: sticky;
@@ -34,4 +34,12 @@ export const Container = styled.div`
 		width: calc(100vw - 161px);
 		margin-right: 0;
 	}
+`;
+
+export const TicketsTableSpinner = styled(Spinner).attrs({
+	borderSize: 4,
+})`
+	height: 60px;
+	width: 60px;
+	margin: 20px auto;
 `;

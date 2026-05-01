@@ -25,7 +25,8 @@ export const CollapsibleContainer = styled.div<{ $collapsed: boolean }>`
 	transition: max-height .3s;
 	overflow: hidden;
 	overflow-y: scroll;
-	max-height: ${({ $collapsed }) => $collapsed ? '56px' : 'calc(100% - 14px)'};
+	max-height: ${({ $collapsed }) => $collapsed ? '56px' : 'calc(100% - 100px)'};
+	min-height: auto;
 	margin-bottom: 10px;
 	${isFirefox('padding-right: 13px;')}
 `;
@@ -96,4 +97,7 @@ export const ChevronIconContainer = styled.div<{ $collapsed: boolean }>`
 	${({ $collapsed }) => $collapsed && css`
 		transform: rotate(0deg);
 	`}
+	svg {
+		display: block;
+	}
 `;

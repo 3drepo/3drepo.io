@@ -19,7 +19,19 @@ const { src } = require('../../helper/path');
 
 const Invitations = require(`${src}/models/invitations`);
 const db = require(`${src}/handler/db`);
-const { generateRandomString } = require('../../helper/services');
+const { generateRandomString, determineTestGroup } = require('../../helper/services');
+
+const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
+
+jest.mock('../../../../src/v5/services/sso/frontegg');
+const FronteggMock = require(`${src}/services/sso/frontegg`);
+
+jest.mock('../../../../src/v5/models/teamspaceSettings');
+const TeamspaceSettingsMock = require(`${src}/models/teamspaceSettings`);
+
+jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManagerMock = require(`${src}/services/eventsManager/eventsManager`);
 
 const testGetInvitationsByTeamspace = () => {
 	describe('Get invitations by teamspace', () => {
@@ -49,7 +61,71 @@ const testInit = () => {
 	});
 };
 
-describe('models/invitations', () => {
+const testInviteUserAsAdmin = () => {
+	describe('Invite user as admin', () => {
+		test('Should invite user as admin', async () => {
+			const teamspace = generateRandomString();
+			const email = generateRandomString();
+			const accountId = generateRandomString();
+
+			TeamspaceSettingsMock.getTeamspaceRefId.mockResolvedValueOnce(accountId);
+			const dbMock = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
+
+			await Invitations.inviteUserAsAdmin(teamspace, email);
+
+			expect(FronteggMock.addUserToAccount).toHaveBeenCalledTimes(1);
+			expect(FronteggMock.addUserToAccount).toHaveBeenCalledWith(accountId, email);
+
+			expect(dbMock).toHaveBeenCalledTimes(1);
+			expect(dbMock).toHaveBeenCalledWith('admin', 'invitations', {
+				_id: email,
+				teamSpaces: [{
+					teamspace,
+					job: DEFAULT_OWNER_JOB,
+					permissions: { teamspace_admin: true },
+				}],
+			});
+
+			expect(EventsManagerMock.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManagerMock.publish).toHaveBeenCalledWith(events.INVITATION_ADDED, {
+				teamspace,
+				email,
+				job: DEFAULT_OWNER_JOB,
+				permissions: { teamspace_admin: true },
+			});
+		});
+	});
+};
+
+const testRemoveAllInvitationsByTeamspace = () => {
+	describe('Remove all invitations by teamspace', () => {
+		test('should remove all invitations by teamspace', async () => {
+			const teamspace = generateRandomString();
+			const invitations = [
+				{ _id: generateRandomString(), teamSpaces: [{ teamspace }] },
+				{ _id: generateRandomString(), teamSpaces: [{ teamspace }, { teamspace: generateRandomString() }] },
+			];
+			const findManyMock = jest.spyOn(db, 'find').mockResolvedValueOnce(invitations);
+			const deleteManyMock = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce();
+			const updateManyMock = jest.spyOn(db, 'updateMany').mockResolvedValueOnce();
+
+			await Invitations.removeAllInvitationsByTeamspace(teamspace);
+
+			expect(findManyMock).toHaveBeenCalledTimes(1);
+			expect(findManyMock).toHaveBeenCalledWith('admin', 'invitations', { 'teamSpaces.teamspace': teamspace }, { _id: 1, teamSpaces: 1 }, undefined);
+
+			expect(deleteManyMock).toHaveBeenCalledTimes(1);
+			expect(deleteManyMock).toHaveBeenCalledWith('admin', 'invitations', { _id: { $in: [invitations[0]._id] } });
+
+			expect(updateManyMock).toHaveBeenCalledTimes(1);
+			expect(updateManyMock).toHaveBeenCalledWith('admin', 'invitations', { 'teamSpaces.teamspace': teamspace }, { $pull: { teamSpaces: { teamspace } } });
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testGetInvitationsByTeamspace();
+	testInviteUserAsAdmin();
 	testInit();
+	testRemoveAllInvitationsByTeamspace();
 });

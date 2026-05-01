@@ -34,13 +34,14 @@ import {
 	UpdateFederationSettingsAction,
 } from '@/v5/store/federations/federations.redux';
 import { FederationStats } from '@/v5/store/federations/federations.types';
-import { prepareFederationsData, prepareFederationSettingsForBackend, prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
 import { isEqualWith } from 'lodash';
 import { compByColum } from '../store.helpers';
 import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
+import { prepareSettingsForFrontend, prepareSettingsForBackend } from '../containers/containers.helpers';
 
 export function* createFederation({
 	teamspace,
@@ -156,7 +157,7 @@ export function* fetchFederationSettings({
 }: FetchFederationSettingsAction) {
 	try {
 		const rawSettings = yield API.Federations.fetchFederationSettings(teamspace, projectId, federationId);
-		const settings = prepareFederationSettingsForFrontend(rawSettings);
+		const settings = prepareSettingsForFrontend(rawSettings);
 		yield put(FederationsActions.fetchFederationSettingsSuccess(projectId, federationId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -175,7 +176,7 @@ export function* updateFederationSettings({
 	onError,
 }: UpdateFederationSettingsAction) {
 	try {
-		const rawSettings = prepareFederationSettingsForBackend(settings);
+		const rawSettings = prepareSettingsForBackend(settings);
 		yield API.Federations.updateFederationSettings(teamspace, projectId, federationId, rawSettings);
 		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, settings));
 		onSuccess();

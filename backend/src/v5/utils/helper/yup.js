@@ -43,6 +43,8 @@ YupHelper.types.color3Arr = Yup.array()
 	.of(Yup.number().min(0).max(255).integer())
 	.length(3);
 
+YupHelper.types.colorStr = Yup.string().matches(/^#[0-9A-Fa-f]{6}$/, 'The color provided is not a valid hex color string (expected format: #RRGGBB)');
+
 YupHelper.types.strings.code = YupHelper.validators.alphanumeric(
 	Yup.string().min(1).max(50).strict(true),
 );

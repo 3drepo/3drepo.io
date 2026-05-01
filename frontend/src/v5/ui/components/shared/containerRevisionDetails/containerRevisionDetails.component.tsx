@@ -21,7 +21,7 @@ import { min, range } from 'lodash';
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { ContainerRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ProjectsHooksSelectors, ContainerRevisionsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, ContainerRevisionsHooksSelectors, TeamspacesHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
@@ -47,20 +47,23 @@ import { viewerRoute } from '@/v5/services/routing/routing';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { downloadFile } from '@/v5/helpers/download.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { formatMessage } from '@/v5/services/intl';
 
 interface IContainerRevisionDetails {
 	containerId: string;
 	revisionsCount: number;
 	status?: UploadStatus
+	linkTarget?: React.HTMLAttributeAnchorTarget;
 }
 
-export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }: IContainerRevisionDetails): JSX.Element => {
+export const ContainerRevisionDetails = ({ containerId, revisionsCount, status, linkTarget }: IContainerRevisionDetails): JSX.Element => {
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const isLoading = ContainerRevisionsHooksSelectors.selectIsPending(containerId);
 	const revisions = ContainerRevisionsHooksSelectors.selectRevisions(containerId)
 		.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
 	const selected = revisions.findIndex((r) => !r.void);
+	const hasPermissionsToUpload = ContainersHooksSelectors.selectCanUploadToProject();
 
 	const handleDownloadRevision = (revisionId, filename) => {
 		downloadFile(getRevisionFileUrl(teamspace, project, containerId, revisionId), filename);
@@ -73,30 +76,28 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 	}, []);
 
 	if (!revisionsCount && !isLoading && !revisions.length) {
+		let emptyMessage = formatMessage({ id: 'containers.revisions.emptyMessage', defaultMessage: 'You haven’t added any Files.' }); 
+		
+		if (!canUploadToBackend(status)) {
+			emptyMessage = formatMessage({ id: 'containers.revisions.emptyMessageBusy', defaultMessage: 'Your files are being processed at this moment, please wait before creating new revisions for this container.' }); 
+		}
+
+		if (!hasPermissionsToUpload) {
+			emptyMessage = formatMessage({ id: 'containers.revisions.emptyMessageNoPermissions', defaultMessage: 'Empty container. Ask someone with collaborators permissions to upload a file.' }); 
+		}
+		
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
-					{
-						canUploadToBackend(status) ? (
-							<>
-								<RevisionsListEmptyText>
-									<FormattedMessage id="containers.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
-								</RevisionsListEmptyText>
-								<Button
-									startIcon={<ArrowUpCircleIcon />}
-									variant="contained"
-									color="primary"
-									onClick={() => uploadToContainer(containerId)}
-								>
-									<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
-								</Button>
-							</>
-						) : (
-							<RevisionsListEmptyText>
-								<FormattedMessage id="containers.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this container." />
-							</RevisionsListEmptyText>
-						)
-					}
+					<RevisionsListEmptyText>{emptyMessage}</RevisionsListEmptyText>
+					{(hasPermissionsToUpload && canUploadToBackend) && (<Button
+						startIcon={<ArrowUpCircleIcon />}
+						variant="contained"
+						color="primary"
+						onClick={() => uploadToContainer(containerId)}
+					>
+						<FormattedMessage id="containers.revisions.uploadFile" defaultMessage="Upload File" />
+					</Button>)}
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>
 		);
@@ -129,6 +130,7 @@ export const ContainerRevisionDetails = ({ containerId, revisionsCount, status }
 								onDownloadRevision={() => handleDownloadRevision(revision._id, revision.tag + revision.format)}
 								hasPermission={selectHasCollaboratorAccess(getState(), containerId)}
 								redirectTo={viewerRoute(teamspace, project, containerId, revision)}
+								target={linkTarget}
 							>
 								<RevisionsListItemText width={140} tabletWidth={94}> {formatDateTime(revision.timestamp)} </RevisionsListItemText>
 								<RevisionsListItemAuthor width={170} tabletWidth={155} authorName={revision.author} />

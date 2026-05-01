@@ -26,6 +26,7 @@ import { getGroupsIDsOfViewpoint, selectViewpointsGroups, selectViewpointsGroups
 import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
 import { prepareGroup } from '@/v4/helpers/groups';
 import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
+import { selectIsTreeProcessed } from '@/v4/modules/tree';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -217,6 +218,23 @@ export const goToView = async (view: Viewpoint) => {
 		isEmpty(view?.clippingPlanes)) {
 		return;
 	}
+	// Going to view needs the tree to be loaded so it can converts
+	// v5 groups to v4 groups using the loded tree
+	await new Promise((resolve) => {
+		if (selectIsTreeProcessed(getState())) {
+			resolve(true);
+			return;
+		}
+
+		let intervalId = setInterval(() =>  {
+			if (!selectIsTreeProcessed(getState())) {
+				return;
+			}
+
+			clearInterval(intervalId);
+			resolve(true);
+		}, 33);
+	});
 	
 	ViewpointsActionsDispatchers.showViewpoint(null, null, viewpointV5ToV4(view));
 };

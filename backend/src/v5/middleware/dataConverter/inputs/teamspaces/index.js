@@ -16,50 +16,75 @@
  */
 
 const { createResponseCode, templates } = require('../../../../utils/responseCodes');
+const { SUBSCRIPTION_TYPES } = require('../../../../models/teamspaces.constants');
+
 const { getUserFromSession } = require('../../../../utils/sessions');
-const { hasAccessToTeamspace } = require('../../../../models/teamspaceSettings');
 const { isTeamspaceAdmin } = require('../../../../utils/permissions');
+const { isTeamspaceMember } = require('../../../../processors/teamspaces');
 const { respond } = require('../../../../utils/responder');
+const { validateNewTeamspaceSchema } = require('../../../../schemas/teamspaces');
+const { validateSchema } = require('../../../../schemas/subscriptions');
 
 const Teamspaces = {};
 
 Teamspaces.canRemoveTeamspaceMember = async (req, res, next) => {
-	const user = getUserFromSession(req.session);
-	const { teamspace, username } = req.params;
+	try {
+		const user = getUserFromSession(req.session);
+		const { teamspace, username } = req.params;
 
-	if (username === teamspace) {
-		respond(req, res, createResponseCode(templates.notAuthorized, 'A user cannot be removed from their own teamspace.'));
-		return;
+		if (username === teamspace) {
+			respond(req, res, createResponseCode(templates.notAuthorized, 'A user cannot be removed from their own teamspace.'));
+			return;
+		}
+
+		if (username !== user && !await isTeamspaceAdmin(teamspace, user)) {
+			respond(req, res, createResponseCode(templates.notAuthorized,
+				'Admin permissions are required to remove another user from a teamspace.'));
+			return;
+		}
+
+		// ensure the user to be removed has access to teamspace
+		const userIsTsMember = await isTeamspaceMember(teamspace, username, true);
+		if (!userIsTsMember) {
+			throw createResponseCode(templates.notAuthorized,
+				'The user to be removed is not a member of the teamspace.');
+		}
+
+		await next();
+	} catch (err) {
+		respond(req, res, err);
 	}
-
-	if (username !== user && !await isTeamspaceAdmin(teamspace, user)) {
-		respond(req, res, createResponseCode(templates.notAuthorized,
-			'Admin permissions are required to remove another user from a teamspace.'));
-		return;
-	}
-
-	// ensure the user to be removed has access to teamspace
-	const userIsTsMember = await hasAccessToTeamspace(teamspace, username, true);
-	if (!userIsTsMember) {
-		respond(req, res, createResponseCode(templates.notAuthorized,
-			'The user to be removed is not a member of the teamspace.'));
-		return;
-	}
-
-	await next();
 };
 
 Teamspaces.memberExists = async (req, res, next) => {
 	const { params } = req;
 	const { teamspace, member } = params;
 	try {
-		if (await hasAccessToTeamspace(teamspace, member, true)) {
+		if (await isTeamspaceMember(teamspace, member, true)) {
 			await next();
 		} else {
 			throw templates.userNotFound;
 		}
 	} catch (err) {
 		respond(req, res, err);
+	}
+};
+
+Teamspaces.validateUpdateQuota = async (req, res, next) => {
+	try {
+		req.body = await validateSchema(SUBSCRIPTION_TYPES.ENTERPRISE, req.body, true);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
+	}
+};
+
+Teamspaces.validateCreateTeamspaceData = async (req, res, next) => {
+	try {
+		req.body = await validateNewTeamspaceSchema(req.body);
+		await next();
+	} catch (err) {
+		respond(req, res, createResponseCode(templates.invalidArguments, err?.message));
 	}
 };
 

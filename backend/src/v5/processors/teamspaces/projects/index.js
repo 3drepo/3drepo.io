@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { MODEL_CATEGORIES, statusCodes } = require('../../../models/modelSettings.constants');
+const { MODEL_CATEGORIES, modelTypes, statusCodes } = require('../../../models/modelSettings.constants');
 const { createProject, deleteProject, getProjectById, getProjectList, updateProject } = require('../../../models/projectSettings');
 const { getFile, removeFile, storeFile } = require('../../../services/filesManager');
 const {
@@ -24,15 +24,17 @@ const {
 	isTeamspaceAdmin,
 } = require('../../../utils/permissions');
 const { COL_NAME } = require('../../../models/projectSettings.constants');
+const { deleteDrawing } = require('./models/drawings');
 const { getAllTemplates } = require('../../../models/tickets.templates');
+const { getModelById } = require('../../../models/modelSettings');
 const { removeModelData } = require('../../../utils/helper/models');
 
 const Projects = {};
 
-Projects.getProjectList = async (teamspace, user) => {
+Projects.getProjectList = async (teamspace, user, bypassAuth) => {
 	const [projects, tsAdmin] = await Promise.all([
 		getProjectList(teamspace, { _id: 1, name: 1, permissions: 1, models: 1 }),
-		isTeamspaceAdmin(teamspace, user),
+		bypassAuth ? Promise.resolve(true) : isTeamspaceAdmin(teamspace, user),
 	]);
 	return (await Promise.all(projects.map(async ({ _id, name, permissions, models }) => {
 		const isAdmin = tsAdmin || hasProjectAdminPermissions(permissions, user);
@@ -46,7 +48,15 @@ Projects.createProject = (teamspace, name) => createProject(teamspace, name);
 Projects.deleteProject = async (teamspace, projectId) => {
 	const project = await getProjectById(teamspace, projectId, { models: 1 });
 
-	await Promise.all(project.models.map((model) => removeModelData(teamspace, projectId, model)));
+	await Promise.all(project.models.map(async (model) => {
+		const { modelType } = await getModelById(teamspace, model, { modelType: 1 });
+
+		if (modelType === modelTypes.DRAWING) {
+			return deleteDrawing(teamspace, projectId, model);
+		}
+
+		return removeModelData(teamspace, projectId, model);
+	}));
 
 	await deleteProject(teamspace, projectId);
 };

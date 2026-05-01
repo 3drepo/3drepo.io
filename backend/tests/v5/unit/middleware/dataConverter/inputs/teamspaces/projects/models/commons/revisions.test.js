@@ -26,7 +26,7 @@ const RevisionsModel = require(`${src}/models/revisions`);
 const Revisions = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const { generateRandomString } = require('../../../../../../../../helper/services');
+const { generateRandomString, determineTestGroup, generateUUID } = require('../../../../../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
@@ -83,40 +83,93 @@ const testValidateUpdateRevisionData = () => {
 	});
 };
 
-const testRevisionExists = () => {
-	describe('Check if a revision exists', () => {
-		const req = {
-			params: {
-				teamspace: generateRandomString(),
-				model: generateRandomString(),
-				revision: generateRandomString(),
-			},
-		};
-
-		test('should respond with revisionNotFound if the revision doesnt exist', async () => {
+const revisionTestHelper = (queryVersion) => {
+	[
+		['revision does not exist', false, true, false],
+		['revision exists', true, true, true],
+		['revision is not provided and defaults are not allowed', false, false, null, false],
+		['revision is not provided and defaults are allowed', true, false, true, true],
+		['revision is not provided, defaults are allowed but there is no revision', false, false, false, true],
+	].forEach(([desc, success, hasRevision, shouldResolve, allowDefault]) => {
+		const teamspace = generateRandomString();
+		const model = generateRandomString();
+		const revision = generateRandomString();
+		const revId = generateUUID();
+		const modelType = modelTypes.DRAWING;
+		test(`should ${success ? 'call next' : 'respond with an error'} if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});
-			RevisionsModel.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
+			const req = { params: { teamspace, model }, query: {} };
+			const res = {};
+			if (hasRevision) {
+				if (queryVersion) {
+					req.query.revId = revision;
+				} else {
+					req.params.revision = revision;
+				}
 
-			await Revisions.revisionExists(modelTypes.DRAWING)(req, {}, mockCB);
+				if (shouldResolve !== null) {
+					if (shouldResolve) {
+						RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({ _id: revId });
+					} else {
+						RevisionsModel.getRevisionByIdOrTag.mockRejectedValueOnce(templates.revisionNotFound);
+					}
+				}
+			} else if (shouldResolve !== null) {
+				if (shouldResolve) {
+					RevisionsModel.getLatestRevision.mockResolvedValueOnce({ _id: revId });
+				} else {
+					RevisionsModel.getLatestRevision.mockRejectedValueOnce(templates.revisionNotFound);
+				}
+			}
 
-			expect(mockCB).not.toHaveBeenCalled();
-			expect(Responder.respond).toHaveBeenCalledTimes(1);
-			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.revisionNotFound.code);
-		});
+			const fn = queryVersion ? Revisions.verifyRevQueryParam : Revisions.revisionExists;
+			if (allowDefault !== undefined) {
+				await fn(modelType, allowDefault)(req, res, mockCB);
+			} else {
+				await fn(modelType)(req, res, mockCB);
+			}
 
-		test('next() should be called if the revision exists', async () => {
-			const mockCB = jest.fn(() => {});
-			RevisionsModel.getRevisionByIdOrTag.mockResolvedValueOnce({});
+			if (success) {
+				expect(mockCB).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).not.toHaveBeenCalled();
+				expect(req.params.revision).toEqual(revId);
+			} else {
+				expect(mockCB).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.revisionNotFound);
+			}
 
-			await Revisions.revisionExists(modelTypes.CONTAINER)(req, {}, mockCB);
-
-			expect(mockCB).toHaveBeenCalledTimes(1);
-			expect(Responder.respond).not.toHaveBeenCalled();
+			if (shouldResolve === null) {
+				expect(RevisionsModel.getRevisionByIdOrTag).not.toHaveBeenCalled();
+				expect(RevisionsModel.getLatestRevision).not.toHaveBeenCalled();
+			} else if (hasRevision) {
+				expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledTimes(1);
+				expect(RevisionsModel.getRevisionByIdOrTag).toHaveBeenCalledWith(
+					teamspace, model, modelType, revision, { _id: 1 });
+				expect(RevisionsModel.getLatestRevision).not.toHaveBeenCalled();
+			} else {
+				expect(RevisionsModel.getLatestRevision).toHaveBeenCalledTimes(1);
+				expect(RevisionsModel.getLatestRevision).toHaveBeenCalledWith(teamspace, model, modelType, { _id: 1 });
+				expect(RevisionsModel.getRevisionByIdOrTag).not.toHaveBeenCalled();
+			}
 		});
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions', () => {
+const testRevisionExists = () => {
+	describe('Check if a revision exists', () => {
+		revisionTestHelper();
+	});
+};
+
+const testVerifyRevQueryParam = () => {
+	describe('Verify rev query param', () => {
+		revisionTestHelper(true);
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testValidateUpdateRevisionData();
 	testRevisionExists();
+	testVerifyRevQueryParam();
 });

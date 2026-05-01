@@ -27,12 +27,9 @@ import { AutocompleteSearchInput } from '@controls/search/autocompleteSearchInpu
 import { DrawingsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
-import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate, enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
+import {  enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
 import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeDrawingNewRevision, enableRealtimeDrawingRevisionUpdate } from '@/v5/services/realtime/drawingRevision.events';
-import { flattenDeep } from 'lodash';
 import { useSearchParam } from '../../../useSearchParam';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => {
@@ -61,7 +58,6 @@ const EmptyPlaceholder = forwardRef((props, ref: any) => (
 export const DrawingsList = () => {
 	const drawings = DrawingsCardHooksSelectors.selectDrawingsFilteredByQueries();
 	const { teamspace, project } = useParams<ViewerParams>();
-	const allDrawings = DrawingsHooksSelectors.selectDrawings();
 	const isLoading = DrawingsHooksSelectors.selectAreStatsPending();
 	const { open2D } = useContext(ViewerCanvasesContext);
 	const virtuosoRef = useRef<any>();
@@ -76,15 +72,6 @@ export const DrawingsList = () => {
 		</CentredContainer>
 	);
 
-	useEffect(() => {
-		const subscriptionsPerDrawing = allDrawings.map(({ _id }) => [
-			enableRealtimeDrawingRemoved(teamspace, project, _id),
-			enableRealtimeDrawingUpdate(teamspace, project, _id),
-			enableRealtimeDrawingRevisionUpdate(teamspace, project, _id),
-			enableRealtimeDrawingNewRevision(teamspace, project, _id),
-		]);
-		return combineSubscriptions(...flattenDeep(subscriptionsPerDrawing));
-	}, [allDrawings.length]);
 
 	useEffect(() => {
 		virtuosoRef.current.scrollToIndex({

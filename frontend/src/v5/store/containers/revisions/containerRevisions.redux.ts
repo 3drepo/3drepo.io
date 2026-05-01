@@ -64,6 +64,7 @@ export const updateRevisionSuccess = (state, {
 	data,
 }: UpdateRevisionSuccessAction) => {
 	const revisions = state.revisionsByContainer[containerId];
+	if (!revisions) return;
 	const index = revisions.findIndex(({ _id }) => _id === data._id);
 	revisions[index] = { ...revisions[index], ...data };
 };
@@ -131,7 +132,7 @@ export interface IContainerRevisionsActionCreators {
 	SetRevisionVoidStatusAction;
 	setVoidStatusSuccess: (containerId: string, revisionId: string, isVoid: boolean) =>
 	SetRevisionVoidStatusSuccessAction;
-	fetch: (teamspace: string, projectId: string, containerId: string, onSuccess?: OnSuccess ) => FetchAction;
+	fetch: (teamspace: string, projectId: string, containerId: string, onSuccess?: () => void ) => FetchAction;
 	fetchSuccess: (containerId: string, revisions: IContainerRevision[]) => FetchSuccessAction;
 	setIsPending: (containerId: string, isPending: boolean) => SetIsPendingAction;
 	createRevision: (teamspace: string,

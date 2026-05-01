@@ -35,13 +35,11 @@ const { isEmpty } = require(`${src}/utils/helper/objects`);
 
 const { disconnect } = require(`${src}/handler/db`);
 
-const [ENTERPRISE,, DISCRETIONARY] = SUBSCRIPTION_TYPES;
-
 const setupData = async (data) => {
 	await Promise.all(Object.keys(data).map(async (index) => {
 		const { name, sub = {}, sub2 = {} } = data[index];
 		await createTeamspace(name);
-		if (sub !== {}) {
+		if (!isEmpty(sub)) {
 			const { type, ...changes } = sub;
 			await editSubscriptions(name, type, changes);
 		}
@@ -98,7 +96,7 @@ const createData = () => ({
 	enterprise: {
 		name: generateRandomString(),
 		sub: {
-			type: ENTERPRISE,
+			type: SUBSCRIPTION_TYPES.ENTERPRISE,
 			collaborators: 10,
 			data: 10,
 			expiryDate: generateRandomDate(),
@@ -107,13 +105,13 @@ const createData = () => ({
 	multipleSubs: {
 		name: generateRandomString(),
 		sub: {
-			type: DISCRETIONARY,
+			type: SUBSCRIPTION_TYPES.DISCRETIONARY,
 			collaborators: 'unlimited',
 			data: 10,
 			expiryDate: generateRandomDate(),
 		},
 		sub2: {
-			type: ENTERPRISE,
+			type: SUBSCRIPTION_TYPES.ENTERPRISE,
 			collaborators: 1,
 			data: 10,
 			expiryDate: generateRandomDate(),

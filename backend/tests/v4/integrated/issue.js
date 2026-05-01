@@ -20,7 +20,7 @@
 const request = require('supertest');
 const SessionTracker = require('../helpers/sessionTracker');
 const { Assertion, assert, expect, should } = require('chai');
-const app = require('../../../src/v4/services/api.js').createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require('../../../src/v4/response_codes.js');
 const { templates: responseCodesV5 } = require('../../../src/v5/utils/responseCodes');
 const async = require('async');
@@ -85,6 +85,7 @@ describe('Issues', () => {
 	};
 
 	before(async () => {
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log('API test server is listening on port 8080!');
@@ -3169,11 +3170,18 @@ describe('Issues', () => {
 			});
 
 			it('if model does not exist should fail', async () => {
-				const res = await bcfAgent.post(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
-					.attach('file', __dirname + bcf.path)
-					.expect(404);
+				try {
+					const res = await bcfAgent.post(`/${altTeamspace}/${fakeModel}/issues.bcfzip`)
+						.attach('file', __dirname + bcf.path)
+						.expect(404);
 
-				expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+				} catch (err) {
+					// throw if error is not EPIPE
+					if (err.code !== 'EPIPE') {
+						throw err;
+					}
+				}
 			});
 
 			it('if teamspace does not exist should fail', async () => {

@@ -25,10 +25,10 @@ const { validateNewRevisionData } = require('../../../../../middleware/dataConve
 
 const createNewFederationRevision = async (req, res) => {
 	const revInfo = req.body;
-	const { teamspace, federation } = req.params;
+	const { teamspace, project, federation } = req.params;
 	const owner = getUserFromSession(req.session);
 	try {
-		await Federations.newRevision(teamspace, federation, { ...revInfo, owner });
+		await Federations.newRevision(teamspace, project, federation, { ...revInfo, owner });
 		respond(req, res, templates.ok);
 	} catch (err) {
 		/* istanbul ignore next */
@@ -43,7 +43,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/revisions:
 	 *   post:
 	 *     description: Create a new revision.
-	 *     tags: [Revisions]
+	 *     tags: [v:external, Revisions]
 	 *     operationId: createNewFederationRevision
 	 *     parameters:
 	 *       - name: teamspace

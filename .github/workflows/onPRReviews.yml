@@ -1,13 +1,11 @@
 name: On review update
 on:
-  pull_request:
-    types: [ready_for_review, review_requested, review_request_removed]
   pull_request_review:
-    types: [submitted]
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
-
+permissions:
+  issues: write
 jobs:
   get-details:
     name: Get PR and Issue Details
@@ -20,7 +18,7 @@ jobs:
         uses: 3drepo/extract-pr-information@v1
         with:
           pr: ${{ github.event.pull_request.number }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PROJ_MANAGEMENT_TOKEN}}
         id: commitMsgParser
 
   check-merge-ready:
@@ -34,7 +32,7 @@ jobs:
         uses: 3drepo/all-reviewers-approved@v1
         with:
           pr: ${{ github.event.pull_request.number }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          github-token: ${{ secrets.PROJ_MANAGEMENT_TOKEN}}
 
 #  if someone has been assigned a reviewer -> change issue status to "awaiting approval"
   update-project-issue-status:
@@ -77,7 +75,7 @@ jobs:
       - name: Update status on the Issue
         if: ${{ steps.setStatusOutputIssue.outputs.status }}
         id: update_status_issue
-        uses: 3drepo/update-project-action@v1.1
+        uses: 3drepo/update-project-action@2.0
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo
@@ -106,7 +104,7 @@ jobs:
       - name: Update status on the PR
         if: ${{ steps.setStatusOutputPR.outputs.status }}
         id: update_status_pr
-        uses: 3drepo/update-project-action@update-PR
+        uses: 3drepo/update-project-action@2.0
         with:
           github_token: ${{ secrets.PROJ_MANAGEMENT_TOKEN }}
           organization: 3drepo

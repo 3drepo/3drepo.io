@@ -36,7 +36,6 @@ export const enableRealtimeNewTicketFilter = (teamspace: string, project: string
 		ticketEvent(isFederation, 'NewTicket'),
 		(ticket: ITicket) => {
  			TicketsCardActionsDispatchers.applyFilterForTicket(teamspace, project, containerOrFederation, isFederation, ticket._id);
-
 		},
 	)
 );

@@ -41,9 +41,8 @@ def updateFrontend(version):
 
 def updateBackend(version):
     sedCmd("\"version\": \"[^ ]*\",", "\"version\": \"" + version +"\",", "backend/package.json");
-    sedCmd("\"version\": \"[^ ]*\"", "\"version\": \"" + version +"\"", "backend/src/v4/routes/apidoc.json");
     sedCmd("\"VERSION\" : \"[^ ]*\",", "\"VERSION\" : \"" + version +"\",", "backend/VERSION.json");
-    execExitOnFail("git add backend/package.json backend/src/v4/routes/apidoc.json backend/VERSION.json", "failed to add cmake to git")
+    execExitOnFail("git add backend/package.json  backend/VERSION.json", "failed to add cmake to git")
 
 numArguments = len(sys.argv)
 

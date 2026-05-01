@@ -265,3 +265,21 @@ export enum SnapType {
 	INTERSECTION,
 	EDGE,
 }
+
+export class SnapResults {
+	closestEdge: Vector2;
+
+	closestNode: Vector2;
+
+	closestIntersection: Vector2;
+
+	constructor() {
+		this.closestEdge = null;
+		this.closestNode = null;
+		this.closestIntersection = null;
+	}
+}
+
+export interface SnapHelper {
+	snap: (mousePos: Vector2Like, radius: number) => Promise<SnapResults>;
+}

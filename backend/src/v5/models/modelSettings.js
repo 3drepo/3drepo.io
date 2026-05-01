@@ -187,8 +187,43 @@ Models.updateModelStatus = async (teamspace, project, model, status, revId) => {
 	}
 };
 
+Models.updateModelSubModels = async (teamspace, project, model, user, revId, containers) => {
+	const query = { _id: model };
+	const set = {
+		subModels: containers,
+		timestamp: new Date(),
+	};
+
+	const updated = await updateOneModel(teamspace, query, { $set: set });
+	if (updated) {
+		const data = {
+			timestamp: set.timestamp,
+			containers: set.subModels,
+			status: processStatuses.OK,
+		};
+		publish(events.MODEL_IMPORT_FINISHED,
+			{
+				teamspace,
+				project,
+				model,
+				revId,
+				user,
+				modelType: modelTypes.FEDERATION,
+				data,
+			});
+		publish(events.MODEL_SETTINGS_UPDATE,
+			{
+				teamspace,
+				project,
+				model,
+				modelType: modelTypes.FEDERATION,
+				data,
+			});
+	}
+};
+
 Models.newRevisionProcessed = async (teamspace, project, model, revId,
-	{ retVal, success, message, userErr }, user, containers) => {
+	{ retVal, success, message, userErr }, user) => {
 	const query = { _id: model };
 	const set = {};
 	const unset = { corID: 1 };
@@ -196,13 +231,6 @@ Models.newRevisionProcessed = async (teamspace, project, model, revId,
 	if (success) {
 		unset.status = 1;
 		set.timestamp = new Date();
-		if (containers) {
-			/* LEGACY DATA: Project is container id here.
-			 *  containers used to be called models in v4, and models used to be called
-			 *  projects. This data came from 3drepobouncer, which still calls containers projects.
-			 */
-			set.subModels = containers.map(({ project: _id, group }) => deleteIfUndefined({ _id, group }));
-		}
 	} else {
 		set.status = processStatuses.FAILED;
 		set.errorReason = { message, timestamp: new Date(), errorCode: retVal };
@@ -213,15 +241,14 @@ Models.newRevisionProcessed = async (teamspace, project, model, revId,
 		// It's possible that the model was deleted whilst there's a process in the queue. In that case we don't want to
 		// trigger notifications.
 
-		const { errorReason, subModels, status, timestamp } = set;
+		const { errorReason, status, timestamp } = set;
 		const data = deleteIfUndefined({
 			timestamp,
 			errorReason: errorReason ? { ...errorReason, userErr } : undefined,
 			status: status ?? processStatuses.OK,
-			containers: subModels,
 		});
 
-		const modelType = containers ? modelTypes.FEDERATION : modelTypes.CONTAINER;
+		const modelType = modelTypes.CONTAINER;
 		publish(events.MODEL_IMPORT_FINISHED,
 			{
 				teamspace,
@@ -247,10 +274,7 @@ Models.updateModelSettings = async (teamspace, project, model, data) => {
 			} else toUnset[key] = 1;
 		} else if (value !== undefined) {
 			if (key === 'unit' || key === 'code') {
-				if (!toUpdate.properties) {
-					toUpdate.properties = {};
-				}
-				toUpdate.properties[key] = value;
+				toUpdate[`properties.${key}`] = value;
 			} else {
 				toUpdate[key] = value;
 			}

@@ -124,7 +124,6 @@ function connectQ(callback){
 				channel = ch;
 
 				ch.assertQueue(conf.cn_queue.callback_queue, { durable: true });
-				listenToQueue(ch, conf.cn_queue.worker_queue, conf.cn_queue.task_prefetch || 4);
 				listenToQueue(ch, conf.cn_queue.model_queue, conf.cn_queue.model_prefetch || 1);
 
 

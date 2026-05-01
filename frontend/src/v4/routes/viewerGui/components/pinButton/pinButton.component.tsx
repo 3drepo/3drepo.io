@@ -64,9 +64,14 @@ export class PinButton extends PureComponent<IProps, any> {
 		this.setState({ active });
 	}
 
+	public turnOffPinDropMode = () => {
+		this.togglePinListeners(false);
+		this.props.viewer.clearMeasureMode();
+	}
+
 	public componentWillUnmount = () => {
 		if (this.state.active) {
-			this.handleChangeEditMode(false);
+			this.turnOffPinDropMode();
 		}
 	}
 
@@ -78,8 +83,7 @@ export class PinButton extends PureComponent<IProps, any> {
 			await viewer.enableEdgeSnapping();
 			this.togglePinListeners(true);
 		} else {
-			this.togglePinListeners(false);
-			viewer.clearMeasureMode();
+			this.turnOffPinDropMode();
 
 			if (onSave) {
 				onSave();

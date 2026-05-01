@@ -25,6 +25,7 @@ import { ViewerActions, ViewerTypes } from './viewer.redux';
 import { selectSettings } from './viewer.selectors';
 
 const BUNDLE_FADE_PREFIX = "phBundleFade";
+const DYNAMIC_FPS_PREFIX = "dynamicFps";
 const updateHandlers = {
 	farPlaneAlgorithm: Viewer.setFarPlaneAlgorithm,
 	farPlaneSamplingPoints: Viewer.setFarPlaneSamplingPoints,
@@ -37,6 +38,10 @@ const updateHandlers = {
 	xray: Viewer.setXray,
 	clipPlaneBorderWidth: Viewer.setPlaneBorderWidth,
 	clipPlaneBorderColor: Viewer.setPlaneBorderColor,
+	clipPlaneGizmoSize: Viewer.setClipGizmoSize,
+	clipPlaneVisualSize: Viewer.setClipPlaneSize,
+	clipPlaneAxisSize: Viewer.setClipGizmoAxisScale,
+	[DYNAMIC_FPS_PREFIX]: Viewer.setDynamicFpsTarget,
 	memoryThreshold: Viewer.setStreamingMemoryThreshold,
 	unityMemory: Viewer.setUnityMemory,
 	meshFactor: Viewer.setStreamingMeshFactor,
@@ -55,6 +60,7 @@ const updateHandlers = {
 
 const callUpdateHandlers = (oldSettings, settings) => {
 	let bundleFadeDone = false;
+	let dynamicFpsDone = false;
 	keys(settings).forEach((key) => {
 		if (oldSettings[key] !== settings[key]) {
 			if (key.startsWith(BUNDLE_FADE_PREFIX)) {
@@ -70,6 +76,16 @@ const callUpdateHandlers = (oldSettings, settings) => {
 						settings[`${BUNDLE_FADE_PREFIX}Power`]
 					);
 					bundleFadeDone = true;
+				}
+			} else if (key.startsWith(DYNAMIC_FPS_PREFIX)) {
+				if (!dynamicFpsDone) {
+					const update = updateHandlers[DYNAMIC_FPS_PREFIX];
+					if (!update) {
+						return;
+					}
+
+					update(settings.dynamicFpsOptimisation, settings.dynamicFpsTarget);
+					dynamicFpsDone = true;
 				}
 			} else {
 				const update = updateHandlers[key];

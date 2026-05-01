@@ -18,11 +18,11 @@
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 import { FormInputProps } from '@controls/inputs/inputController.component';
-import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { JobsAndUsersProperty } from './jobsAndUsersProperty.component';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import { ClearIconContainer } from './selectProperty.styles';
+import { SearchSelect } from '@controls/searchSelect/searchSelect.component';
 
 type OneOfPropertyProps = FormInputProps & {
 	values: PropertyDefinition['values'];
@@ -42,7 +42,7 @@ export const OneOfProperty = ({ values, value, onBlur, immutable, ...props }: On
 	
 	const items = (values === 'riskCategories') ? TicketsHooksSelectors.selectRiskCategories() : values;
 	return (
-		<Select
+		<SearchSelect
 			{...props}
 			onClose={onBlur}
 			value={value ?? ''}
@@ -57,6 +57,6 @@ export const OneOfProperty = ({ values, value, onBlur, immutable, ...props }: On
 					{propValue}
 				</MenuItem>
 			))}
-		</Select>
+		</SearchSelect>
 	);
 };

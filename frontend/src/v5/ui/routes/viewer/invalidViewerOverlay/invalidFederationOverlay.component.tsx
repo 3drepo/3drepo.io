@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useHistory, useParams, generatePath } from 'react-router-dom';
+import { useNavigate, useParams, generatePath } from 'react-router-dom';
 import { formatMessage } from '@/v5/services/intl';
 import { IContainer } from '@/v5/store/containers/containers.types';
 import { Button } from '@controls/button';
@@ -28,9 +28,10 @@ type IInvalidFederation = {
 };
 
 export const InvalidFederationOverlay = ({ containers }: IInvalidFederation) => {
-	const history = useHistory();
-	const params = useParams<DashboardParams>();
-	const containersListRoute = generatePath(FEDERATIONS_ROUTE, params);
+	const navigate = useNavigate();
+	const { teamspace, project } = useParams<DashboardParams>();
+
+	const containersListRoute = generatePath(FEDERATIONS_ROUTE, { teamspace, project });
 
 	let message = 'Error!';
 	if (!containers.length) {
@@ -45,7 +46,7 @@ export const InvalidFederationOverlay = ({ containers }: IInvalidFederation) => 
 		});
 	}
 
-	const onClickBack = () => history.push(containersListRoute);
+	const onClickBack = () => navigate(containersListRoute);
 
 	return (
 		<OverlayContainer>
