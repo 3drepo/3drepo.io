@@ -43,10 +43,9 @@ const { serialiseComment } = require('../../../schemas/tickets/tickets.comments'
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
 
-const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
+const queueStatusUpdate = async ({ teamspace, model, modelType, corId, status }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
-		const modelType = await getModelType(teamspace, model);
 		const revId = stringToUUID(corId);
 		if (modelType === modelTypes.DRAWING) {
 			// status are stored in individual revisions on drawings. Eventually this will be the same for others.
@@ -62,10 +61,9 @@ const queueStatusUpdate = async ({ teamspace, model, corId, status }) => {
 	}
 };
 
-const queueTasksCompleted = async ({ teamspace, model, value, corId, user }) => {
+const queueTasksCompleted = async ({ teamspace, model, modelType, value, corId, user }) => {
 	try {
 		const { _id: projectId } = await findProjectByModelId(teamspace, model, { _id: 1 });
-		const modelType = await getModelType(teamspace, model);
 		const errorInfo = getInfoFromCode(value);
 		errorInfo.retVal = value;
 		const revId = stringToUUID(corId);
