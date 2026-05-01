@@ -29,7 +29,7 @@ import { useParams, generatePath } from 'react-router-dom';
 import { isEmpty, merge, set } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from './newTicketSlide.styles';
-import { hasRequiredViewerProperties, PresetValue } from '../../ticketsTable/ticketsTable.helper';
+import { hasRequiredViewerProperties, PresetValue } from '../../tabularView/ticketsTable.helper';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { IssueProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 

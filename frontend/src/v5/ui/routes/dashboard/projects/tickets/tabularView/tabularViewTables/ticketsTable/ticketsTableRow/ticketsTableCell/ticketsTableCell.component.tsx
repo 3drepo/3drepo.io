@@ -23,7 +23,7 @@ import { Chip } from '@controls/chip/chip.component';
 import { getChipPropsFromConfig } from '@controls/chip/statusChip/statusChip.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { useContext } from 'react';
-import { TicketsTableContext } from '../../../../ticketsTableContext/ticketsTableContext';
+import { TabularViewContext } from '../../../../tabularViewContext/tabularViewContext';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
 import { CellDate } from './ticketsTableCell.styles';
@@ -39,7 +39,7 @@ type TicketsTableCellProps = {
 };
 export const TicketsTableCell = ({ name, modelId, ticket }: TicketsTableCellProps) => {
 	const {  type: templateId, _id: ticketId } = ticket;
-	const { getPropertyType, isJobAndUsersType } = useContext(TicketsTableContext);
+	const { getPropertyType, isJobAndUsersType } = useContext(TabularViewContext);
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 	const statusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(templateId);
 	const container = ContainersHooksSelectors.selectContainerById(modelId);

@@ -25,6 +25,7 @@
       "WebWorker",
       "DOM.Iterable"
     ],
+    "strict": false,
     "jsx": "react-jsx",
     "removeComments": true,
     "sourceMap": true,

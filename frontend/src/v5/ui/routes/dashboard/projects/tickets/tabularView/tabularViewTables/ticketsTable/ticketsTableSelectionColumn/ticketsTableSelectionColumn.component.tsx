@@ -25,10 +25,10 @@ import { CellContainer } from '../ticketsTableRow/ticketsTableCell/cell/cell.sty
 import { Headers } from '../ticketsTableHeaders/ticketsTableHeaders.styles';
 import { chunk } from 'lodash';
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
-import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { TabularViewContext } from '../../../tabularViewContext/tabularViewContext';
 import { Tooltip } from '@controls/errorTooltip/errorTooltip.styles';
 import { formatMessage } from '@/v5/services/intl';
-import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.helper';
+import { TICKETS_CHUNK_SIZE } from '../ticketsTable.constants';
 
 type TicketsTableSelectionColumnProps = {
 	tickets: ITicket[];
@@ -62,7 +62,7 @@ export const TicketsTableSelectionColumn = ({
 	selectedTicketId,
 	disabledModelIds,
 }: TicketsTableSelectionColumnProps) => {
-	const { selectedIds, setSelectedIds } = useContext(TicketsTableContext);
+	const { selectedIds, setSelectedIds } = useContext(TabularViewContext);
 	const ticketIds = tickets.map((t) => t._id);
 	const oldTicketsIds = useRef<string[]>(ticketIds);
 

@@ -19,7 +19,7 @@ import { ResizableTableContext } from '@controls/resizableTableContext/resizable
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 import { TicketsTableHeaderBulkEdit } from './ticketsTableHeaderBulkEdit/ticketsTableHeaderBulkEdit.component';
 import { TicketsTableHeader } from './ticketsTableHeader.component';
-import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { TabularViewContext } from '../../../tabularViewContext/tabularViewContext';
 import { useContext } from 'react';
 import { useParams } from 'react-router-dom';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
@@ -33,7 +33,7 @@ type TicketsTableHeadersProps = {
 // The ticketsids refer to the group's tickets ids if the 
 export const TicketsTableHeaders = ({ ticketsIds }: TicketsTableHeadersProps) => {
 	const { visibleSortedColumnsNames } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
-	const { selectedIds } = useContext(TicketsTableContext);
+	const { selectedIds } = useContext(TabularViewContext);
 
 	const { template: templateId } = useParams<DashboardTicketsParams>();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
