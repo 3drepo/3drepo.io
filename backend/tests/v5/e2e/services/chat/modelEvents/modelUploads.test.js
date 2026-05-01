@@ -267,7 +267,7 @@ const queueUpdateTest = () => {
 
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 
-			const content = { status: 'processing', database: teamspace, project: container._id };
+			const content = { status: 'processing', teamspace, container: container._id };
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
 				JSON.stringify(content));
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
@@ -282,7 +282,8 @@ const queueUpdateTest = () => {
 
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.DRAWING_SETTINGS_UPDATE);
 
-			const content = { status: 'processing', database: teamspace, project: drawing._id };
+			const content = { status: 'processing', teamspace, drawing: drawing._id };
+
 			await queueMessage(queueConfig.callback_queue, drawingRevision._id,
 				JSON.stringify(content));
 			await expect(modelUpdatePromise).resolves.toEqual({ ...data, data: { status: content.status } });
@@ -302,7 +303,7 @@ const queueFinishedTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.CONTAINER_SETTINGS_UPDATE);
 			const newRevisionPromise = waitForEvent(socket, EVENTS.CONTAINER_NEW_REVISION);
 
-			const content = { value: 0, database: teamspace, project: container._id };
+			const content = { value: 0, teamspace, container: container._id };
 			await queueMessage(queueConfig.callback_queue, ServiceHelper.generateRandomString(),
 				JSON.stringify(content));
 			await queueMessage(queueConfig.callback_queue, containerRevision._id, JSON.stringify(content));
@@ -335,7 +336,7 @@ const queueFinishedTest = () => {
 			const modelUpdatePromise = waitForEvent(socket, EVENTS.DRAWING_SETTINGS_UPDATE);
 			const newRevisionPromise = waitForEvent(socket, EVENTS.DRAWING_NEW_REVISION);
 
-			const content = { value: 0, database: teamspace, project: drawing._id };
+			const content = { value: 0, teamspace, drawing: drawing._id };
 			await queueMessage(queueConfig.callback_queue, drawingRevision._id, JSON.stringify(content));
 
 			const modelUpdateResults = await modelUpdatePromise;
