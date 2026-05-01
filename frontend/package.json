@@ -124,13 +124,13 @@
 		"simplebar": "5.3.9",
 		"simplebar-react": "2.4.3",
 		"socket.io-client": "4.8.1",
-		"styled-components": "5.3.9",
+		"styled-components": "6.0.0",
 		"three": "0.167.1",
 		"type-fest": "2.3.2",
 		"ua-parser-js": "1.0.37",
 		"uuidv4": "5.0.1",
 		"worker-loader": "3.0.8",
-		"yup": "0.32.11",
+		"yup": "1.0.0",
 		"zxcvbn": "4.4.2"
 	},
 	"devDependencies": {
