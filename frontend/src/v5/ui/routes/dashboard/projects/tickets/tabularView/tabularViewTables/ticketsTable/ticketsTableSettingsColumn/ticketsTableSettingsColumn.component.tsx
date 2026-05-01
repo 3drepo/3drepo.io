@@ -23,12 +23,12 @@ import { CellContainer } from '../ticketsTableRow/ticketsTableCell/cell/cell.sty
 import { TICKET_TABLE_ROW_HEIGHT } from '../../../ticketsTable.helper';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { SettingsColumnContainer } from './ticketsTableSettingsColumn.styles';
-import { TICKETS_CHUNK_SIZE } from '../ticketsTableGroup.helper';
+import { TICKETS_CHUNK_SIZE } from '../ticketsTable.constants';
 
 export const TicketsTableSettingsColumn = ({ tickets, selectedTicketId }) => (
 	<span>
 		<Headers>
-			<HeaderCell alwaysVisible>
+			<HeaderCell name='_ticketSettings' alwaysVisible>
 				<ColumnsVisibilitySettings />
 			</HeaderCell>
 		</Headers>
