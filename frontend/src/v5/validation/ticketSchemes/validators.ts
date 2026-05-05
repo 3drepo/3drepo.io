@@ -48,7 +48,7 @@ export const FilterSchema = Yup.object().shape({
 		.when(
 			['operator', '$type'],
 			// @ts-ignore
-			(operator: TicketFilterOperator, filterType: TicketFilterType, schema) => {
+			([operator, filterType]: [TicketFilterOperator, TicketFilterType], schema) => {
 				let value;
 				if (isRangeOperator(operator)) {
 					value = numberRange(isDateType(filterType) ? INVALID_DATE_RANGE_MESSAGE : INVALID_NUMBER_RANGE_MESSAGE);
@@ -60,7 +60,7 @@ export const FilterSchema = Yup.object().shape({
 		)
 		.when(
 			'operator',
-			(operator, schema) => {
+			([operator], schema) => {
 				const maxFields = getOperatorMaxFieldsAllowed(operator);
 				return schema.min(Math.min(maxFields, 1));
 			},

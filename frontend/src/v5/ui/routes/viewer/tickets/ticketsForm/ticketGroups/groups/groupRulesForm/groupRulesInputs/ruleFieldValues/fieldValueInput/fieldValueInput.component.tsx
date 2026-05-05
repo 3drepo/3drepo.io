@@ -38,7 +38,11 @@ export const FieldValueInput = ({ name, autoFocus = false, disabled }) => {
 					disableClearable={!field.value}
 					disableListWrap
 					freeSolo
-					ListboxComponent={ListboxComponent}
+					slotProps={{
+						listbox: {
+							component: (props) => (<ListboxComponent {...props} searchQuery={field.value} />),
+						},
+					}}
 					options={fields}
 					onChange={(_, data) => onChange(data)}
 					onInputChange={(_, data) => onChange(data)}
@@ -47,10 +51,7 @@ export const FieldValueInput = ({ name, autoFocus = false, disabled }) => {
 					renderInput={({ InputProps, ...renderInputParams }) => (
 						<TextField
 							error={!!get(errors, name)}
-							InputProps={{
-								...InputProps,
-								autoFocus,
-							}}
+							slotProps={{ input: { ...InputProps, autoFocus } }}
 							{...renderInputParams}
 						/>
 					)}

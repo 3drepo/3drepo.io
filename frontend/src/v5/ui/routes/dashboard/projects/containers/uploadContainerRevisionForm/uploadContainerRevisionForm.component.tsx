@@ -18,7 +18,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 
-import * as Yup from 'yup';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { formatMessage } from '@/v5/services/intl';
 import { ContainerRevisionsActionsDispatchers, FederationsActionsDispatchers } from '@/v5/services/actionsDispatchers';
@@ -39,6 +38,7 @@ import { UploadList } from './uploadList/uploadList.component';
 import { SidebarForm } from './sidebarForm/sidebarForm.component';
 import { parseFileName, reduceFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
+import { revisionTag } from '@/v5/validation/containerAndFederationSchemes/validators';
 
 type UploadModalLabelTypes = {
 	isUploading: boolean;
@@ -115,9 +115,9 @@ export const UploadContainerRevisionForm = ({
 	});
 
 	const revTagMaxValue = useMemo(() => {
-		const schemaDescription =  Yup.reach(UploadsSchema, 'uploads.revisionTag').describe();
+		const schemaDescription =  revisionTag.describe();
 		const revTagMax = schemaDescription.tests.find((t) => t.name === 'max');
-		return revTagMax.params.max;
+		return revTagMax.params.max as number;
 	}, []);
 
 	const addFilesToList = (files: File[], container?: IContainer): void => {
