@@ -163,6 +163,30 @@ const testCallbackQueueConsumer = () => {
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
 		});
 
+		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message (drawing)`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				status: generateRandomString(),
+				drawing: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.drawing,
+				modelType: modelTypes.DRAWING,
+				corId: properties.correlationId,
+				status: content.status,
+			};
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
+		});
+
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
 			const content = {
 				teamspace: generateRandomString(),
@@ -182,6 +206,35 @@ const testCallbackQueueConsumer = () => {
 				teamspace: content.teamspace,
 				model: content.container,
 				modelType: modelTypes.CONTAINER,
+				corId: properties.correlationId,
+				value: content.value,
+				message: content.message,
+				user: content.user,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message (drawing)`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				drawing: generateRandomString(),
+				user: generateRandomString(),
+				message: generateRandomString(),
+				value: 1,
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.drawing,
+				modelType: modelTypes.DRAWING,
 				corId: properties.correlationId,
 				value: content.value,
 				message: content.message,
