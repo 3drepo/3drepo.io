@@ -18,6 +18,8 @@
 const { BASE_URL, FEATURES, HERE_TRAFFIC_DOMAIN, RESOURCES, STYLES } = require('./here.constants');
 const { get, getArrayBuffer } = require('../../utils/webRequests');
 const config = require('../../utils/config');
+const { logger } = require('../../utils/logger');
+const { templates } = require('../../utils/responseCodes');
 
 const HereService = {};
 
@@ -41,59 +43,163 @@ const generateTileURI = (domain, resource, zoomLevel, gridx, gridy, { features, 
 	return `https://${uriPath}?${uriQuery}`;
 };
 
-HereService.getBaseInfo = () => {
-	const uri = `https://${BASE_URL}/v3/info?apiKey=${config.here.apiKey}`;
-	return get(uri);
+HereService.getBaseInfo = async () => {
+	try {
+		const uri = `https://${BASE_URL}/v3/info?apiKey=${config.here.apiKey}`;
+		const { data } = await get(uri);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE base info: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
 };
 
-HereService.getTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy),
-);
+HereService.getTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getAerialTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.AERIAL }),
-);
+HereService.getAerialTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.AERIAL }),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE aerial tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getTrafficTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.TRAFFIC }),
-);
+HereService.getTrafficTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.TRAFFIC }),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE traffic tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getTrafficFlowTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(HERE_TRAFFIC_DOMAIN, RESOURCES.FLOW, zoomLevel, gridx, gridy, {}),
-);
+HereService.getTrafficFlowTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(HERE_TRAFFIC_DOMAIN, RESOURCES.FLOW, zoomLevel, gridx, gridy, {}),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE traffic flow tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getTerrainTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.TERRAIN }),
-);
+HereService.getTerrainTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.TERRAIN }),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE terrain tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getHybridTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.HYBRID }),
-);
+HereService.getHybridTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.HYBRID }),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE hybrid tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getGreyTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.GREY }),
-);
+HereService.getGreyTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.GREY }),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE grey tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getTruckRestrictionsTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy,
-		{ style: STYLES.TRUCK_RESTRICTIONS, features: FEATURES.VEHICLE_RESTRICTIONS },
-	),
-);
+HereService.getTruckRestrictionsTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy,
+				{ style: STYLES.TRUCK_RESTRICTIONS, features: FEATURES.VEHICLE_RESTRICTIONS },
+			),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE truck restrictions tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getTruckRestrictionsOverlayTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BLANK, zoomLevel, gridx, gridy, { features: FEATURES.VEHICLE_RESTRICTIONS }),
-);
+HereService.getTruckRestrictionsOverlayTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(
+				BASE_URL, RESOURCES.BLANK, zoomLevel, gridx, gridy, { features: FEATURES.VEHICLE_RESTRICTIONS },
+			),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE truck restrictions overlay tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getLabelOverlayTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.LABEL, zoomLevel, gridx, gridy, {}),
-);
+HereService.getLabelOverlayTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.LABEL, zoomLevel, gridx, gridy, {}),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE label overlay tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getTollZoneTile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { features: FEATURES.CONGESTION_ZONES }),
-);
+HereService.getTollZoneTile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { features: FEATURES.CONGESTION_ZONES }),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE toll zone tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
-HereService.getPOITile = (zoomLevel, gridx, gridy) => getArrayBuffer(
-	generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { features: FEATURES.POI }),
-);
+HereService.getPOITile = async (zoomLevel, gridx, gridy) => {
+	try {
+		const { data } = await getArrayBuffer(
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { features: FEATURES.POI }),
+		);
+		return data;
+	} catch (error) {
+		logger.logError(`Failed to get HERE POI tile: ${error?.response?.data} `);
+		throw templates.mapsRequestFailed;
+	}
+};
 
 module.exports = HereService;

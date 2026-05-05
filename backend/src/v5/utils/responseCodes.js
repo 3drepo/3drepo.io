@@ -106,6 +106,9 @@ ResponseCodes.templates = {
 	// Queue related
 	queueConnectionError: { message: 'There was a problem connecting to the queue. Please contact support.', status: 500 },
 	queueInsertionFailed: { message: 'Failed to insert an item into the queue. Please contact support.', status: 500 },
+
+	// MAPs related:
+	mapsRequestFailed: { message: 'Request failed to retrieve map data.', status: 400 },
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {

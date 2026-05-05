@@ -32,12 +32,11 @@ const getListOfMaps = async (req, res) => {
 	}
 };
 
-// deal with the error
 const getHereBaseInfo = async (req, res) => {
 	try {
 		const info = await Maps.getHereBaseInfo();
 
-		respond(req, res, templates.ok, info.data);
+		respond(req, res, templates.ok, info);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -47,9 +46,9 @@ const getHereBaseInfo = async (req, res) => {
 const getOSMTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getOSMTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getOSMTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, Buffer.from(tile.data), { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -59,9 +58,9 @@ const getOSMTile = async (req, res) => {
 const getHereDefaultTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereDefaultTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereDefaultTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -71,9 +70,9 @@ const getHereDefaultTile = async (req, res) => {
 const getHereAerialTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereAerialTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereAerialTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -83,9 +82,9 @@ const getHereAerialTile = async (req, res) => {
 const getHereTrafficTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereTrafficTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereTrafficTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -95,9 +94,9 @@ const getHereTrafficTile = async (req, res) => {
 const getHereTrafficFlowTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereTrafficFlowTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereTrafficFlowTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -107,9 +106,9 @@ const getHereTrafficFlowTile = async (req, res) => {
 const getHereTerrainTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereTerrainTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereTerrainTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -119,9 +118,9 @@ const getHereTerrainTile = async (req, res) => {
 const getHereHybridTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereHybridTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereHybridTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -131,9 +130,9 @@ const getHereHybridTile = async (req, res) => {
 const getHereGreyTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereGreyTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereGreyTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -143,9 +142,9 @@ const getHereGreyTile = async (req, res) => {
 const getHereTruckRestrictionsTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereTruckRestrictionsTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereTruckRestrictionsTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -155,9 +154,9 @@ const getHereTruckRestrictionsTile = async (req, res) => {
 const getHereTruckOverlayTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereTruckRestrictionsOverlayTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereTruckRestrictionsOverlayTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -167,9 +166,9 @@ const getHereTruckOverlayTile = async (req, res) => {
 const getHereLabelOverlayTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereLabelOverlayTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereLabelOverlayTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -179,9 +178,9 @@ const getHereLabelOverlayTile = async (req, res) => {
 const getHereTollZoneTile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHereTollZoneTile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHereTollZoneTile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -191,9 +190,9 @@ const getHereTollZoneTile = async (req, res) => {
 const getHerePOITile = async (req, res) => {
 	try {
 		const { zoomLevel, gridx, gridy } = req.query;
-		const tile = await Maps.getHerePOITile(zoomLevel, gridx, gridy);
+		const tileData = await Maps.getHerePOITile(zoomLevel, gridx, gridy);
 
-		respond(req, res, templates.ok, tile.data, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

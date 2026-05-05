@@ -186,7 +186,7 @@ const testGetHereInfo = () => {
 		});
 
 		test('should succeed if all parameters are valid', async () => {
-			jest.spyOn(Maps, 'getHereBaseInfo').mockResolvedValueOnce({ data: { version: 'v-test' } });
+			jest.spyOn(Maps, 'getHereBaseInfo').mockResolvedValueOnce({ version: 'v-test' });
 
 			const res = await agent.get(route()).expect(templates.ok.status);
 			expect(res.body).toEqual({ version: 'v-test' });
@@ -293,7 +293,7 @@ const testGetTiles = () => {
 
 		describe.each(endpoints)('$name', ({ name, path, method }) => {
 			test('should succeed if all parameters are valid', async () => {
-				jest.spyOn(Maps, method).mockResolvedValueOnce({ data: Buffer.from(`${name} tile`) });
+				jest.spyOn(Maps, method).mockResolvedValueOnce(Buffer.from(`${name} tile`));
 
 				const res = await agent.get(route({ path })).expect(templates.ok.status);
 				expect(res.headers['content-type']).toContain('image/png');
