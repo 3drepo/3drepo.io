@@ -18,8 +18,8 @@
 import { ITemplate } from "@/v5/store/tickets/tickets.types";
 import { getFullnameFromUser } from "@/v5/store/users/users.helpers";
 import { TicketFilter } from "@components/viewer/cards/cardFilters/cardFilters.types";
-import { arrToDisplayValue, deserializeFilter, formatDateRange, InvalidPropertyOrTemplateError, serializeFilter, splitByNonEscaped, valueToDisplayDate } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
-import { mockRiskCategories } from "./tickets.fixture";
+import { arrToDisplayValue, deserializeFilter, formatDateRange, InvalidPropertyError, serializeFilter, splitByNonEscaped, valueToDisplayDate } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
+import { mockRiskCategories, templateMockFactory } from "./tickets.fixture";
 import { initializeIntl } from "@/v5/services/intl";
 
 describe('Tickets: filters', () => {
@@ -184,7 +184,25 @@ describe('Tickets: filters', () => {
         }
     ];
 
+	const jobs = [
+		{
+			_id: 'Electrician',
+			color: '#000000',
+			isViewer: true,
+		},
+		{
+			_id: 'Technician',
+			color: '#161195',
+		},
+		{
+			_id: 'Gardener',
+			color: '#289c4d',
+		},
+	]
+
 	const risks = mockRiskCategories();
+	const jobsAndUsers = [...users, ...jobs];
+	const templates = [template, templateMockFactory()];
 
 	initializeIntl('en-GB');
 
@@ -226,8 +244,8 @@ describe('Tickets: filters', () => {
 				}
 			}
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(filter).toEqual(deserializeFilter([template], serialized, jobsAndUsers, risks));
 		});
 
 		it('should work for general jobsAndUsers', () => {
@@ -237,13 +255,13 @@ describe('Tickets: filters', () => {
 				module: '',
 				filter: {
 					operator: 'eq',
-					values: [users[2].user, 'Techinician', users[1].user],
-					displayValues: [getFullnameFromUser(users[2]), 'Techinician', getFullnameFromUser(users[1])].join(', ')
+					values: [users[2].user, jobs[1]._id, users[1].user],
+					displayValues: [getFullnameFromUser(users[2]), jobs[1]._id, getFullnameFromUser(users[1])].join(', ')
 				}
 			}
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work for jobsAndUsers in a module', () => {
@@ -253,13 +271,13 @@ describe('Tickets: filters', () => {
 				module: 'Users module',
 				filter: {
 					operator: 'eq',
-					values: ['Electrician', users[4].user, users[2].user],
-					displayValues: ['Electrician', getFullnameFromUser(users[4]), getFullnameFromUser(users[2])].join(', ')
+					values: [jobs[0]._id, users[4].user, users[2].user],
+					displayValues: [jobs[0]._id, getFullnameFromUser(users[4]), getFullnameFromUser(users[2])].join(', ')
 				}
 			}
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work for type owner', () => {
@@ -269,13 +287,13 @@ describe('Tickets: filters', () => {
 				property: 'Owner',
 				filter: {
 					operator: 'eq',
-					values: [users[0].user, 'Architect', users[3].user],
-					displayValues: [getFullnameFromUser(users[0]), 'Architect', getFullnameFromUser(users[3])].join(', ')
+					values: [users[0].user, users[3].user],
+					displayValues: [getFullnameFromUser(users[0]), getFullnameFromUser(users[3])].join(', ')
 				}
 			}
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work for type risks', () => {
@@ -290,8 +308,8 @@ describe('Tickets: filters', () => {
 				}
 			}
 
-			const serialized = serializeFilter(template, risks, filter);            
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);            
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work with general date', () => {
@@ -306,8 +324,22 @@ describe('Tickets: filters', () => {
 				}
 			};
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
+		});
+		it('should work with date and exists operator', () => {
+			const filter: TicketFilter = {
+				module: '',
+				property: 'Birthday',
+				type: 'pastDate',
+				filter: {
+					operator: 'ex',
+					values: [],
+				}
+			};
+
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work with past date', () => {
@@ -322,8 +354,8 @@ describe('Tickets: filters', () => {
 				}
 			};
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work with create at type', () => {
@@ -338,8 +370,8 @@ describe('Tickets: filters', () => {
 				}
 			};
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work with range in type', () => {
@@ -359,8 +391,8 @@ describe('Tickets: filters', () => {
 				}
 			};
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(filter).toEqual(deserializeFilter(template, users, risks, serialized));
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(filter).toEqual(deserializeFilter([template], serialized, jobsAndUsers, risks));
 		});
 
 		it('should work with sequencing module', () => {
@@ -375,8 +407,8 @@ describe('Tickets: filters', () => {
 				}
 			};
 			
-			let serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			let serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 
 			filter = {
 				module: 'sequencing',
@@ -389,8 +421,8 @@ describe('Tickets: filters', () => {
 				}
 			};
 			
-			serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		}); 
 
 		it('should work with sequencing module options', () => {
@@ -408,8 +440,8 @@ describe('Tickets: filters', () => {
 					}
 			};
 			
-			let serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			let serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work with boolean values', () => {
@@ -424,8 +456,8 @@ describe('Tickets: filters', () => {
 				}
 			}
 			
-			let serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			let serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 
 			filter = {
 				module: '',
@@ -438,8 +470,8 @@ describe('Tickets: filters', () => {
 				}
 			}
 			
-			serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work with number values', () => {
@@ -454,8 +486,8 @@ describe('Tickets: filters', () => {
 				}
 			};
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work with tickecode values', () => {
@@ -470,8 +502,8 @@ describe('Tickets: filters', () => {
 				}
 			};
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work with title values', () => {
@@ -485,8 +517,8 @@ describe('Tickets: filters', () => {
 				}
 			}
 	
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should work with general text values', () => {
@@ -501,8 +533,8 @@ describe('Tickets: filters', () => {
 				}
 			};
 	
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should support filters with "." and "," characters with text', () => {
@@ -517,8 +549,8 @@ describe('Tickets: filters', () => {
 				}
 			};
 	
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should support filters with "." and "," characters in select options', () => {
@@ -533,8 +565,24 @@ describe('Tickets: filters', () => {
 				}
 			}
 
-			const serialized = serializeFilter(template, risks, filter);
-			expect(deserializeFilter(template, users, risks, serialized)).toEqual(filter);
+			const serialized = serializeFilter([template], filter, jobsAndUsers, risks);
+			expect(deserializeFilter([template], serialized, jobsAndUsers, risks)).toEqual(filter);
+		});
+
+		it('should work when multiple templates are supplied', () => {
+			const filter: TicketFilter = {
+				module: '',
+				property: 'long text',
+				type: 'longText',
+				filter: {
+					operator: 'is',
+					values: ['tomato'],
+					displayValues: 'tomato'
+				}
+			};
+	
+			const serialized = serializeFilter(templates, filter, jobsAndUsers, risks);
+			expect(deserializeFilter(templates, serialized, jobsAndUsers, risks)).toEqual(filter);
 		});
 
 		it('should throw an error when serializing if a property doesnt exist in the template', () => {
@@ -548,12 +596,12 @@ describe('Tickets: filters', () => {
 				}
 			}
 
-			expect(() => serializeFilter(template, risks, filter)).toThrowError(InvalidPropertyOrTemplateError);
+			expect(() => serializeFilter([template], filter, jobsAndUsers, risks)).toThrowError(InvalidPropertyError);
 		});
 
 		it('should throw an error when deserializing if a property doesnt exist in the template', () => {
 			const serialized = "NonModule.Non existent:4:0,2,3";
-			expect(() => deserializeFilter(template, users, risks, serialized)).toThrowError(InvalidPropertyOrTemplateError);
+			expect(() => deserializeFilter([template], serialized, jobsAndUsers, risks)).toThrowError(InvalidPropertyError);
 		});
 
 	})
