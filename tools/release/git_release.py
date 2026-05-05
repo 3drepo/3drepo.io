@@ -41,7 +41,7 @@ def updateFrontend(version):
 
 def updateBackend(version):
     sedCmd("\"version\": \"[^ ]*\",", "\"version\": \"" + version +"\",", "backend/package.json");
-    sedCmd("\"VERSION\" : \"[^ ]*\",", "\"VERSION\" : \"" + version +"\",", "backend/VERSION.json");
+    sedCmd("\"VERSION\": \"[^ ]*\",", "\"VERSION\": \"" + version +"\",", "backend/VERSION.json");
     execExitOnFail("git add backend/package.json  backend/VERSION.json", "failed to add cmake to git")
 
 numArguments = len(sys.argv)
