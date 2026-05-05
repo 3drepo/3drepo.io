@@ -20,7 +20,7 @@ import { ResizableTable } from '@controls/resizableTableContext/resizableTable/r
 import { Row } from './ticketsTableRow/ticketsTableRow.styles';
 import { Highlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
 import { Headers } from './ticketsTableHeaders/ticketsTableHeaders.styles';
-import { NEW_TICKET_ROW_AREA_NAME, SELECTION_COLUMN_WIDTH, SETTINGS_COLUMN_WIDTH } from './ticketsTableGroup.helper';
+import { NEW_TICKET_ROW_AREA_NAME, SELECTION_COLUMN_WIDTH, SETTINGS_COLUMN_WIDTH } from './ticketsTable.constants';
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
 export const Group = styled.div<{ $empty: boolean, $hideNewticketButton: boolean }>`

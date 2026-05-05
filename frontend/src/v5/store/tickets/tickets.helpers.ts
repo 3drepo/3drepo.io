@@ -33,7 +33,7 @@ import { getSanitizedSmartGroup } from './ticketsGroups.helpers';
 import { useContext } from 'react';
 import { TicketContext } from '@/v5/ui/routes/viewer/tickets/ticket.context';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
-import { NON_BULK_EDITABLE_COLUMNS } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableContent/ticketsTableGroup/ticketsTableHeaders/ticketsTableHeaders.helpers';
+import { NON_BULK_EDITABLE_COLUMNS } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/tabularViewTables/ticketsTable/ticketsTableHeaders/ticketsTableHeaders.helpers';
 
 
 export const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
