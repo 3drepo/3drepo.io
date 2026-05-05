@@ -64,14 +64,14 @@ const publishFn = EventsManager.publish.mockImplementation(() => { });
 const testQueueModelUpload = () => {
 	const fileCreated = path.join(modelFolder, 'queueObjectTest.obj');
 	describe('queue model upload', () => {
-		const teamspace = 'teamspace';
-		const model = 'modelID';
+		const teamspace = generateRandomString();
+		const container = generateRandomString();
 		const data = { tag: '123', owner: '123' };
 		const file = { originalname: 'test.obj', path: fileCreated };
 
 		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
 			await expect(ModelProcessing.queueModelUpload(
-				teamspace, model, data, file,
+				teamspace, container, data, file,
 			)).rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
 		});
 
@@ -81,20 +81,21 @@ const testQueueModelUpload = () => {
 			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
 
 			await expect(ModelProcessing.queueModelUpload(
-				teamspace, model, data, file,
+				teamspace, container, data, file,
 			)).rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
 		});
 
 		test('should succeed with job inserted into the queue', async () => {
 			await copyFile(objModel, fileCreated);
-			await expect(ModelProcessing.queueModelUpload(teamspace, model, data, file)).resolves.toBeUndefined();
+			await expect(ModelProcessing.queueModelUpload(teamspace, container, data, file)).resolves.toBeUndefined();
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 
 			const corId = Queue.queueMessage.mock.calls[0][1];
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
-			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model, corId, status: 'queued' });
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE,
+				{ teamspace, model: container, modelType: modelTypes.CONTAINER, corId, status: 'queued' });
 		});
 	});
 
@@ -154,6 +155,7 @@ const testCallbackQueueConsumer = () => {
 			const expectedData = {
 				teamspace: content.teamspace,
 				model: content.container,
+				modelType: modelTypes.CONTAINER,
 				corId: properties.correlationId,
 				status: content.status,
 			};
@@ -179,6 +181,7 @@ const testCallbackQueueConsumer = () => {
 			const expectedData = {
 				teamspace: content.teamspace,
 				model: content.container,
+				modelType: modelTypes.CONTAINER,
 				corId: properties.correlationId,
 				value: content.value,
 				message: content.message,
@@ -232,7 +235,11 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, {
-				teamspace, model, corId: UUIDToString(revId), status: processStatuses.QUEUED,
+				teamspace,
+				model,
+				modelType: modelTypes.DRAWING,
+				corId: UUIDToString(revId),
+				status: processStatuses.QUEUED,
 			});
 		});
 
@@ -264,7 +271,11 @@ const testProcessDrawingUpload = () => {
 				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
 
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
-				teamspace, model, corId: UUIDToString(revId), value: 4,
+				teamspace,
+				model,
+				modelType: modelTypes.DRAWING,
+				corId: UUIDToString(revId),
+				value: 4,
 			});
 		});
 
@@ -303,7 +314,7 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
-				teamspace, model, corId: UUIDToString(revId), value: 0, user: owner,
+				teamspace, model, modelType: modelTypes.DRAWING, corId: UUIDToString(revId), value: 0, user: owner,
 			});
 		});
 	});
