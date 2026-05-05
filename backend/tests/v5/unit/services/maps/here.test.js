@@ -40,7 +40,9 @@ const testGetBaseInfo = () => {
 		config.here = { apiKey: generateRandomString() };
 		test('Should return Here base info', async () => {
 			get.mockResolvedValueOnce({ data: { info: 'test' } });
-			await expect(HereService.getBaseInfo()).resolves.toEqual({ info: 'test' });
+			await expect(
+				HereService.getBaseInfo(),
+			).resolves.toEqual({ info: 'test' });
 			expect(get).toHaveBeenCalledTimes(1);
 			expect(get).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/info?apiKey=${config.here.apiKey}`),
@@ -48,7 +50,9 @@ const testGetBaseInfo = () => {
 		});
 		test('Should throw error if request fails', async () => {
 			get.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(HereService.getBaseInfo()).rejects.toEqual(templates.mapsRequestFailed);
+			await expect(
+				HereService.getBaseInfo(),
+			).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get HERE base info:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
@@ -62,7 +66,9 @@ const testGetTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'tileData' });
-			await expect(HereService.getTile(zoomLevel, gridx, gridy)).resolves.toEqual('tileData');
+			await expect(
+				HereService.getTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('tileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?apiKey=${config.here.apiKey}`),
@@ -70,7 +76,9 @@ const testGetTile = () => {
 		});
 		test('Should throw error if request fails', async () => {
 			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(HereService.getTile(zoomLevel, gridx, gridy)).rejects.toEqual(templates.mapsRequestFailed);
+			await expect(
+				HereService.getTile(zoomLevel, gridx, gridy),
+			).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get HERE tile:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
@@ -84,7 +92,9 @@ const testGetAerialTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here arial tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'aerialTileData' });
-			await expect(HereService.getAerialTile(zoomLevel, gridx, gridy)).resolves.toEqual('aerialTileData');
+			await expect(
+				HereService.getAerialTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('aerialTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=satellite.day&apiKey=${config.here.apiKey}`),
@@ -92,7 +102,9 @@ const testGetAerialTile = () => {
 		});
 		test('Should throw error if request fails', async () => {
 			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(HereService.getAerialTile(zoomLevel, gridx, gridy)).rejects.toEqual(templates.mapsRequestFailed);
+			await expect(
+				HereService.getAerialTile(zoomLevel, gridx, gridy),
+			).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get HERE aerial tile:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
@@ -106,7 +118,9 @@ const testGetTrafficTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here traffic tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'trafficTileData' });
-			await expect(HereService.getTrafficTile(zoomLevel, gridx, gridy)).resolves.toEqual('trafficTileData');
+			await expect(
+				HereService.getTrafficTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('trafficTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=logistics.day&apiKey=${config.here.apiKey}`),
@@ -114,7 +128,9 @@ const testGetTrafficTile = () => {
 		});
 		test('Should throw error if request fails', async () => {
 			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(HereService.getTrafficTile(zoomLevel, gridx, gridy)).rejects.toEqual(templates.mapsRequestFailed);
+			await expect(
+				HereService.getTrafficTile(zoomLevel, gridx, gridy),
+			).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get HERE traffic tile:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
@@ -128,7 +144,9 @@ const testGetTrafficFlowTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here traffic flow tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'trafficFlowTileData' });
-			await expect(HereService.getTrafficFlowTile(zoomLevel, gridx, gridy)).resolves.toEqual('trafficFlowTileData');
+			await expect(
+				HereService.getTrafficFlowTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('trafficFlowTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/flow/mc/${zoomLevel}/${gridx}/${gridy}/png8?apiKey=${config.here.apiKey}`),
@@ -136,7 +154,9 @@ const testGetTrafficFlowTile = () => {
 		});
 		test('Should throw error if request fails', async () => {
 			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(HereService.getTrafficFlowTile(zoomLevel, gridx, gridy)).rejects.toEqual(templates.mapsRequestFailed);
+			await expect(
+				HereService.getTrafficFlowTile(zoomLevel, gridx, gridy),
+			).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get HERE traffic flow tile:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
@@ -150,7 +170,9 @@ const testGetTerrainTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here terrain tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'terrainTileData' });
-			await expect(HereService.getTerrainTile(zoomLevel, gridx, gridy)).resolves.toEqual('terrainTileData');
+			await expect(
+				HereService.getTerrainTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('terrainTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=topo.day&apiKey=${config.here.apiKey}`),
@@ -158,7 +180,9 @@ const testGetTerrainTile = () => {
 		});
 		test('Should throw error if request fails', async () => {
 			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(HereService.getTerrainTile(zoomLevel, gridx, gridy)).rejects.toEqual(templates.mapsRequestFailed);
+			await expect(
+				HereService.getTerrainTile(zoomLevel, gridx, gridy),
+			).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get HERE terrain tile:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
@@ -172,7 +196,9 @@ const testGetHybridTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here hybrid tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'hybridTileData' });
-			await expect(HereService.getHybridTile(zoomLevel, gridx, gridy)).resolves.toEqual('hybridTileData');
+			await expect(
+				HereService.getHybridTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('hybridTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=explore.satellite.day&apiKey=${config.here.apiKey}`),
@@ -181,7 +207,8 @@ const testGetHybridTile = () => {
 		test('Should throw error if request fails', async () => {
 			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
 			await expect(
-				HereService.getHybridTile(zoomLevel, gridx, gridy)).rejects.toEqual(templates.mapsRequestFailed);
+				HereService.getHybridTile(zoomLevel, gridx, gridy),
+			).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get HERE hybrid tile:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
@@ -195,7 +222,9 @@ const testGetGreyTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here grey tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'greyTileData' });
-			await expect(HereService.getGreyTile(zoomLevel, gridx, gridy)).resolves.toEqual('greyTileData');
+			await expect(
+				HereService.getGreyTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('greyTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?style=lite.day&apiKey=${config.here.apiKey}`),
@@ -203,7 +232,9 @@ const testGetGreyTile = () => {
 		});
 		test('Should throw error if request fails', async () => {
 			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(HereService.getGreyTile(zoomLevel, gridx, gridy)).rejects.toEqual(templates.mapsRequestFailed);
+			await expect(
+				HereService.getGreyTile(zoomLevel, gridx, gridy),
+			).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get HERE grey tile:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
@@ -217,7 +248,9 @@ const testGetTruckRestrictionsTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here truck restrictions tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'truckRestrictionsTileData' });
-			await expect(HereService.getTruckRestrictionsTile(zoomLevel, gridx, gridy)).resolves.toEqual('truckRestrictionsTileData');
+			await expect(
+				HereService.getTruckRestrictionsTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('truckRestrictionsTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?features=vehicle_restrictions:active_and_inactive&style=explore.day&apiKey=${config.here.apiKey}`),
@@ -241,7 +274,9 @@ const testGetTruckRestrictionsOverlayTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here truck restrictions overlay tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'truckRestrictionsOverlayTileData' });
-			await expect(HereService.getTruckRestrictionsOverlayTile(zoomLevel, gridx, gridy)).resolves.toEqual('truckRestrictionsOverlayTileData');
+			await expect(
+				HereService.getTruckRestrictionsOverlayTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('truckRestrictionsOverlayTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/blank/mc/${zoomLevel}/${gridx}/${gridy}/png8?features=vehicle_restrictions:active_and_inactive&apiKey=${config.here.apiKey}`),
@@ -265,7 +300,9 @@ const testGetLabelOverlayTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here label overlay tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'labelOverlayTileData' });
-			await expect(HereService.getLabelOverlayTile(zoomLevel, gridx, gridy)).resolves.toEqual('labelOverlayTileData');
+			await expect(
+				HereService.getLabelOverlayTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('labelOverlayTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/label/mc/${zoomLevel}/${gridx}/${gridy}/png8?apiKey=${config.here.apiKey}`),
@@ -289,7 +326,9 @@ const testGetTollZoneTile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here toll zone tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'tollZoneTileData' });
-			await expect(HereService.getTollZoneTile(zoomLevel, gridx, gridy)).resolves.toEqual('tollZoneTileData');
+			await expect(
+				HereService.getTollZoneTile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('tollZoneTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?features=congestion_zones:all&apiKey=${config.here.apiKey}`),
@@ -313,7 +352,9 @@ const testGetPOITile = () => {
 		const gridy = generateRandomNumber();
 		test('Should return Here POI tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: 'poiTileData' });
-			await expect(HereService.getPOITile(zoomLevel, gridx, gridy)).resolves.toEqual('poiTileData');
+			await expect(
+				HereService.getPOITile(zoomLevel, gridx, gridy),
+			).resolves.toEqual('poiTileData');
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
 				expect.stringContaining(`maps.hereapi.com/v3/base/mc/${zoomLevel}/${gridx}/${gridy}/png8?features=pois:all&apiKey=${config.here.apiKey}`),
@@ -321,7 +362,9 @@ const testGetPOITile = () => {
 		});
 		test('Should throw error if request fails', async () => {
 			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(HereService.getPOITile(zoomLevel, gridx, gridy)).rejects.toEqual(templates.mapsRequestFailed);
+			await expect(
+				HereService.getPOITile(zoomLevel, gridx, gridy),
+			).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get HERE POI tile:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});
