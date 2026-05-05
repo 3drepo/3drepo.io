@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Views as ViewsV5 } from '@/v5/ui/routes/viewer/views/views.component';
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty } from 'lodash';
 import { PureComponent, useContext } from 'react';
 import { AdditionalProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { goToView } from '@/v5/helpers/viewpoint.helpers';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { DrawingsListCard } from '@/v5/ui/routes/viewer/drawings/drawingsList/drawingsListCard.component';
@@ -292,6 +292,7 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		[VIEWER_PANELS.TICKETS]: Tickets,
 		[VIEWER_PANELS.GROUPS]: Groups,
 		[VIEWER_PANELS.VIEWS]: Views,
+		[VIEWER_PANELS.VIEWSV5]: ViewsV5, // Temporary, to be removed after views panel migration to v5
 		[VIEWER_PANELS.TREE]: Tree,
 		[VIEWER_PANELS.COMPARE]: Compare,
 		[VIEWER_PANELS.GIS]: Gis,
