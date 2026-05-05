@@ -37,7 +37,7 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
 import { GroupBySelection } from '@components/viewer/cards/tickets/groupBySelection/groupBySelection.component';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
-import { getPropertyLabel } from '../../../dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { getPropertyLabel } from '../../../dashboard/projects/tickets/tabularView/ticketsTable.helper';
 import { BulkCheckbox, GroupByLabelContainer, GroupByLabelText } from './ticketsList.styles';
 import { Tooltip } from '@mui/material';
 import { TicketsBulkUpdateContext, TicketsBulkUpdateContextComponent } from '@components/tickets/bulkUpdate/bulkUpdate.context';
