@@ -33,7 +33,7 @@ import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emp
 import { FormattedMessage } from 'react-intl';
 import { SearchWord } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/list/ticketFiltersSelectionList.styles';
 import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
-import { TicketsTableContext } from '../../../ticketsTableContext/ticketsTableContext';
+import { TabularViewContext } from '../../../tabularViewContext/tabularViewContext';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { ITicket } from '@/v5/store/tickets/tickets.types';
 import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
@@ -41,7 +41,7 @@ import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 const List = () => {
 	const { filteredItems, query } = useContext(SearchContext);
 	const { visibleSortedColumnsNames, hideColumn, showColumn, isVisible } = useContextWithCondition(ResizableTableContext, ['visibleSortedColumnsNames']);
-	const { groupBy } = useContext(TicketsTableContext);
+	const { groupBy } = useContext(TabularViewContext);
 
 	const groupBySelected = () => {
 		const groups = { selected: [], unselected: [] };

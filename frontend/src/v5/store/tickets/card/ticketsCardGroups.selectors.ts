@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { groupTickets, TicketsGroup } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTableGroupBy.helper';
+import { groupTickets, TicketsGroup } from '@components/tickets/ticketsGroupBy.helper';
 import { createSelector } from 'reselect';
 import { NONE_OPTION } from '../ticketsGroups.helpers';
 import { selectFilteredTickets, selectGroupBy, selectCurrentTemplates } from './ticketsCard.selectors';

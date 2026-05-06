@@ -21,7 +21,7 @@ import { ProjectsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { TabularView } from './ticketsTable/ticketsTable.component';
+import { TabularView } from './tabularView/tabularView.component';
 import { TicketsSelection } from './ticketsSelection/ticketsSelection.component';
 import { useContainersData } from '../containers/containers.hooks';
 import { useFederationsData } from '../federations/federations.hooks';
