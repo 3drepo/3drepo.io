@@ -18,12 +18,22 @@
 const { getMetadataByQuery } = require('../../../../../models/metadata');
 const { updateCustomMetadata } = require('../../../../../models/metadata');
 
-const Metadata = { };
+const Metadata = {};
 
 Metadata.updateCustomMetadata = updateCustomMetadata;
 
 Metadata.getAllMetadata = (teamspace, container, revision) => getMetadataByQuery(teamspace, container,
 	{ rev_id: revision, type: 'meta' },
 	{ metadata: 1, parents: 1 });
+
+Metadata.getModelMetadataFields = async (teamspace, container) => {
+	const rawMetadata = await getMetadataByQuery(teamspace, container, {}, { 'metadata.key': 1, _id: 0 });
+	const metadataFields = new Set();
+	rawMetadata.forEach(({ metadata }) => {
+		metadata.forEach(({ key }) => metadataFields.add(key));
+	});
+
+	return { fields: Array.from(metadataFields) };
+};
 
 module.exports = Metadata;

@@ -80,7 +80,35 @@ const getMetadata = () => {
 	});
 };
 
+const testGetModelMetadataFields = () => {
+	describe('Get model metadata fields', () => {
+		test('should return all unique metadata keys for a model', async () => {
+			const teamspace = generateRandomString();
+			const container = generateRandomString();
+			const rawMetadata = times(10, () => ({
+				metadata: times(5, () => ({
+					key: generateRandomString(),
+				})),
+			}));
+
+			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(rawMetadata);
+
+			const res = await Metadata.getModelMetadataFields(teamspace, container);
+
+			const expectedFields = new Set();
+			rawMetadata.forEach(({ metadata }) => {
+				metadata.forEach(({ key }) => expectedFields.add(key));
+			});
+
+			expect(res).toEqual({ fields: Array.from(expectedFields) });
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
+			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, {}, { 'metadata.key': 1, _id: 0 });
+		});
+	});
+};
+
 describe('processors/teamspaces/projects/models/metadata', () => {
 	testUpdateCustomMetadata();
 	getMetadata();
+	testGetModelMetadataFields();
 });
