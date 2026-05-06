@@ -125,8 +125,11 @@ export class IndexedDbCache {
 	/**
 	 * Deletes all keys that match the search string and leaves a record of this
 	 * operation for a particular version.
-	 * @param literal The string to search for in all the keys. All keys containing this string will be deleted.
-	 * @returns A promise that indicate all transactions are completed - however this operation is effective the moment the function returns.
+	 * @param contains The string to search for in all keys. All keys containing
+	 * this string will be deleted.
+	 * @param version The version for which to record this delete operation.
+	 * @returns A promise that resolves when the transaction is complete. However,
+	 * the delete request is issued as soon as the function returns.
 	 */
 	delete(contains: string, version: number): Promise<void> {
 		const id = this.getId();
