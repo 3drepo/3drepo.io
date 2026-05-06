@@ -27,7 +27,7 @@ import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
 
-export interface TicketsTableType {
+export interface TabularViewContextProps {
 	getPropertyType: (name: string) => PropertyTypeDefinition;
 	isJobAndUsersType: (name: string) => boolean;
 	groupByProperties: string[],
@@ -39,7 +39,7 @@ export interface TicketsTableType {
 	onBulkEdit: () => void;
 }
 
-const defaultValue: TicketsTableType = {
+const defaultValue: TabularViewContextProps = {
 	getPropertyType: () => null,
 	isJobAndUsersType: () => false,
 	groupByProperties: [],
@@ -50,13 +50,13 @@ const defaultValue: TicketsTableType = {
 	selectedIds: new Set([]),
 	onBulkEdit: () => {},
 };
-export const TicketsTableContext = createContext(defaultValue);
-TicketsTableContext.displayName = 'TicketsTableContext';
+export const TabularViewContext = createContext(defaultValue);
+TabularViewContext.displayName = 'TabularViewContext';
 
 interface Props {
 	children: any;
 }
-export const TicketsTableContextComponent = ({ children }: Props) => {
+export const TabularViewContextComponent = ({ children }: Props) => {
 	const [groupBy, setGroupBy] = useSearchParam('groupBy');
 	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
 	const isFed = FederationsHooksSelectors.selectIsFederation();
@@ -108,7 +108,7 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 	}, [templateId]);
 	
 	return (
-		<TicketsTableContext.Provider value={{
+		<TabularViewContext.Provider value={{
 			getPropertyType,
 			isJobAndUsersType,
 			groupByProperties: groupByProperties(definitionsAsArray),
@@ -120,6 +120,6 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 			onBulkEdit,
 		}}>
 			{children}
-		</TicketsTableContext.Provider>
+		</TabularViewContext.Provider>
 	);
 };

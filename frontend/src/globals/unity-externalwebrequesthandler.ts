@@ -46,6 +46,16 @@ export class ExternalWebRequestHandler {
 
 	apiHost: string;
 
+	/** An object providing an API to offline store */
+	offlineFetchInterceptor?: (url: string, options?: RequestInit) => Promise<Response>;
+	
+	/**
+     * Set Offline fetch interceptor (e.g., from mobile device)
+     */
+	setOfflineFetchInterceptor(interceptor: (url: string, options?: RequestInit) => Promise<Response>) {
+		this.offlineFetchInterceptor = interceptor;
+	}
+
 	/** Initialises this handler for an instance of Unity. Should be called by
 	 * the viewer once it is fully initialised. */
 	setUnityInstance(unityInstance: any, gameObjectName: string) : boolean {
@@ -114,7 +124,9 @@ export class ExternalWebRequestHandler {
 				}
 			}
 
-			const response = await fetch(this.getUrl(url), { headers });
+			// If offline interceptor is set (e.g., by Flutter), use it to fetch the resource, otherwise use the default fetch implementation
+			const response = this.offlineFetchInterceptor ? await this.offlineFetchInterceptor(url, { headers }) 
+				: await fetch(this.getUrl(url), { headers });
 
 			// Where the request gets a response outside the OK range, fetch will
 			// not raise an error, but will print to the console. In this case we

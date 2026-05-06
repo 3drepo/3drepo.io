@@ -19,6 +19,7 @@ import { ValuesOf } from '@/v5/helpers/types.helpers';
 import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 
 export const TicketSortingProperty = {
+	TICKET_TITLE: BaseProperties.TITLE,
 	TICKET_CODE: 'ticketCode',
 	UPDATED_AT: `properties.${BaseProperties.UPDATED_AT}`,
 	CREATED_AT: `properties.${BaseProperties.CREATED_AT}`,
