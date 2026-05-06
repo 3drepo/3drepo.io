@@ -19,7 +19,6 @@ import { useParams } from 'react-router-dom';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
-import { ViewerBottomActions } from '../views.styles';
 import { AddFabButton } from '@controls/button/addFabButton/addFabButton.component';
 import { formatMessage } from '@/v5/services/intl';
 import { ViewerPanelFooter } from './viewsCardFooter.styles';
@@ -40,15 +39,9 @@ export const ViewsCardFooter = () => {
 		ViewpointsActionsDispatchers.prepareNewViewpoint(teamspace, containerOrFederation, `View ${viewpoints.length + 1}`);
 	};
 
-	const handleShowPreset = (preset) => {
-		ViewpointsActionsDispatchers.showPreset(preset);
-	};
-
 	return (
 		<ViewerPanelFooter container alignItems="center">
-			<ViewerBottomActions>
-				<PresetViews showPreset={handleShowPreset} />
-			</ViewerBottomActions>
+			<PresetViews />
 			<AddFabButton
 				aria-label="Add view"
 				onClick={handleAddViewpoint}

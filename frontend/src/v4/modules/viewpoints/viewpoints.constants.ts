@@ -20,6 +20,6 @@ export const PRESET_VIEW = {
 	BOTTOM: 'bottom',
 	FRONT: 'front',
 	BACK: 'back',
-	LEFT: 'LEFT',
-	RIGHT: 'RIGHT'
+	LEFT: 'left',
+	RIGHT: 'right'
 };

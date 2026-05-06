@@ -26,14 +26,6 @@ export const Container = styled.div`
     flex: auto;
 `;
 
-export const ViewerBottomActions = styled.div`
-    height: 100%;
-    margin: 0;
-    display: flex;
-    align-items: center;
-    width: 100%;
-`;
-
 export const NewItemWrapper = styled.div`
     display: flex;
     flex: 1;

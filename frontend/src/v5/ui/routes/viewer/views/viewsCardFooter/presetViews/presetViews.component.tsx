@@ -23,11 +23,8 @@ import LeftViewIcon from '@assets/icons/twoToned/left_view-two_toned.svg';
 import RightViewIcon from '@assets/icons/twoToned/right_view-two_toned.svg';
 import TopDownIcon from '@assets/icons/twoToned/top_down-two_toned.svg';
 import BottomUpIcon from '@assets/icons/twoToned/bottom_up-two_toned.svg';
-import { StyledPresetIcon } from './presetViews.styles';
-
-interface IProps {
-	showPreset: (preset: string) => void;
-}
+import { PresetViewsContainer, StyledPresetIcon } from './presetViews.styles';
+import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
 interface IPresetViewpoint {
 	_id: string;
@@ -46,22 +43,22 @@ export const PRESET_VIEW = {
 };
 
 const DEFAULT_VIEWPOINTS: IPresetViewpoint[] = [
-	{ _id: 'default_3', name: 'Front View', preset: PRESET_VIEW.FRONT, icon: FrontViewIcon },
-	{ _id: 'default_4', name: 'Back View', preset: PRESET_VIEW.BACK, icon: BackViewIcon },
-	{ _id: 'default_5', name: 'Side View (Left)', preset: PRESET_VIEW.LEFT, icon: LeftViewIcon },
-	{ _id: 'default_6', name: 'Side View (Right)', preset: PRESET_VIEW.RIGHT, icon: RightViewIcon },
-	{ _id: 'default_1', name: 'Top Down', preset: PRESET_VIEW.TOP, icon: TopDownIcon },
-	{ _id: 'default_2', name: 'Bottom Up', preset: PRESET_VIEW.BOTTOM, icon: BottomUpIcon },
+	{ _id: 'preset_1', name: 'Front View', preset: PRESET_VIEW.FRONT, icon: FrontViewIcon },
+	{ _id: 'preset_2', name: 'Back View', preset: PRESET_VIEW.BACK, icon: BackViewIcon },
+	{ _id: 'preset_3', name: 'Side View (Left)', preset: PRESET_VIEW.LEFT, icon: LeftViewIcon },
+	{ _id: 'preset_4', name: 'Side View (Right)', preset: PRESET_VIEW.RIGHT, icon: RightViewIcon },
+	{ _id: 'preset_5', name: 'Top Down', preset: PRESET_VIEW.TOP, icon: TopDownIcon },
+	{ _id: 'preset_6', name: 'Bottom Up', preset: PRESET_VIEW.BOTTOM, icon: BottomUpIcon },
 ];
 
-export const PresetViews = ({ showPreset }: IProps) => (
-	<>
+export const PresetViews = () => (
+	<PresetViewsContainer>
 		{DEFAULT_VIEWPOINTS.map(({ icon: Icon, _id, name, preset }) => (
-			<Tooltip title={name} key={`${_id}_tooltip`}>
-				<StyledPresetIcon onClick={() => showPreset(preset)} key={_id}>
+			<Tooltip  key={`${_id}_tooltip`} title={name}>
+				<StyledPresetIcon key={_id} onClick={() => ViewpointsActionsDispatchers.showPreset(preset)}>
 					<Icon />
 				</StyledPresetIcon>
 			</Tooltip>
 		))}
-	</>
+	</PresetViewsContainer>
 );
