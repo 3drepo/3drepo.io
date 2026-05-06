@@ -17,16 +17,20 @@
 
 import { ViewpointsList } from './viewsList.styles';
 import { ViewItem } from './viewItem/viewItem.component';
+import { useContext } from 'react';
+import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 
-export const ViewsList = ({ viewpoints, editMode, activeViewpoint, setActiveViewpoint }) => {
-	const filteredViewpoints = viewpoints; // add filtering logic
+type IViewpoint = any; // TODO ???
 
-	// if (!viewpoints.length) {
-	//     return (<div>No viewpoints created</div>);
-	// }
-	// if (!filteredViewpoints.length) {
-	//     return (<div>No viewpoints available</div>);
-	// }
+export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint }) => {
+	const { items: viewpoints, filteredItems: filteredViewpoints } = useContext<SearchContextType<IViewpoint>>(SearchContext);
+	// 
+	if (!viewpoints.length) {
+	    return (<div>No viewpoints created</div>);
+	}
+	if (!filteredViewpoints.length) {
+	    return (<div>No viewpoints available</div>);
+	}
 
 	return (
 		<ViewpointsList>

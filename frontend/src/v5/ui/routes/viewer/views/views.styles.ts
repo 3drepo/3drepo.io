@@ -16,6 +16,7 @@
  */
 
 import { COLOR } from '@/v4/styles';
+import { SearchInput } from '@controls/search/searchInput';
 import { TextField } from '@mui/material';
 import styled from 'styled-components';
 
@@ -29,6 +30,11 @@ export const Container = styled.div`
 export const NewItemWrapper = styled.div`
     display: flex;
     flex: 1;
+`;
+
+export const SearchBar = styled(SearchInput)`
+    margin: 0;
+    padding: 8px;
 `;
 
 export const SearchField = styled(TextField)`

@@ -16,7 +16,7 @@
  */
 
 import { useState } from 'react';
-import { Container } from './views.styles';
+import { Container, SearchBar } from './views.styles';
 import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { formatMessage } from '@/v5/services/intl';
@@ -27,34 +27,34 @@ import { getState } from '@/v5/helpers/redux.helpers';
 import { ViewsCardActions } from './viewsCardActions/viewsCardActions.component';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { ViewsCardFooter } from './viewsCardFooter/viewsCardFooter.component';
+import { SearchContextComponent } from '@controls/search/searchContext';
 
 export const Views = () => {
 	const viewpoints = selectViewpointsList(getState());
 	const [editMode, setEditMode] = useState(false);
 	const [activeViewpoint, setActiveViewpoint] = useState(null);
-	const [sortOrder, setSortOrder] = useState(SortingDirection.ASCENDING);
-	const [searchEnabled, setSearchEnabled] = useState(false);
+	const [sortOrder, setSortOrder] = useState(SortingDirection.ASCENDING); // TODO Change this to use store
 	
 	return (
 		<CardContainer>
 			<CardHeader
 				icon={<ViewsIcon />}
 				title={formatMessage({ id: 'viewer.cards.views.title', defaultMessage: 'Views' })}
-				actions={(<ViewsCardActions sortOrder={sortOrder} setSortOrder={setSortOrder} searchEnabled={searchEnabled} setSearchEnabled={setSearchEnabled} />)}
+				actions={(<ViewsCardActions sortOrder={sortOrder} setSortOrder={setSortOrder} />)}
 			/>
 			<CardContent>
 				<Container>
-					{/* <SearchBar */}
-					<ViewsList
-						viewpoints={viewpoints}
-						editMode={editMode}
-						activeViewpoint={activeViewpoint}
-						setActiveViewpoint={setActiveViewpoint}
-					/>
+					<SearchContextComponent items={viewpoints} fieldsToFilter={['name']}>
+						<SearchBar placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search views...' })} />
+						<ViewsList
+							editMode={editMode}
+							activeViewpoint={activeViewpoint}
+							setActiveViewpoint={setActiveViewpoint}
+						/>
+					</SearchContextComponent>
 				</Container>
 			</ CardContent>
 			<ViewsCardFooter />
 		</CardContainer>
-								
 	);
 };
