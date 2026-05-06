@@ -30,8 +30,8 @@ const testValidateMapsCoordinates = () => {
 			const req = {
 				query: {
 					zoomLevel: '3',
-					gridx: '10.5',
-					gridy: '-20',
+					x: '10',
+					y: '20',
 				},
 			};
 			const res = {};
@@ -42,8 +42,8 @@ const testValidateMapsCoordinates = () => {
 			expect(next).toHaveBeenCalledTimes(1);
 			expect(req.query).toEqual({
 				zoomLevel: 3,
-				gridx: 10.5,
-				gridy: -20,
+				x: 10,
+				y: 20,
 			});
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
@@ -53,7 +53,7 @@ const testValidateMapsCoordinates = () => {
 			const req = {
 				query: {
 					zoomLevel: 3,
-					gridx: 10,
+					x: 10,
 				},
 			};
 			const res = {};
@@ -75,8 +75,58 @@ const testValidateMapsCoordinates = () => {
 			const req = {
 				query: {
 					zoomLevel: 'abc',
-					gridx: 10,
-					gridy: 20,
+					x: 10,
+					y: 20,
+				},
+			};
+			const res = {};
+			const next = jest.fn(async () => {});
+
+			await QueryParams.validateMapsCoordinates(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req,
+				res,
+				expect.objectContaining({
+					code: templates.invalidArguments.code,
+					message: expect.any(String),
+				}),
+			);
+		});
+		test('should respond with invalidArguments and not call next() if values are negative', async () => {
+			Responder.respond.mockResolvedValueOnce();
+			const req = {
+				query: {
+					zoomLevel: -1,
+					x: 10,
+					y: 20,
+				},
+			};
+			const res = {};
+			const next = jest.fn(async () => {});
+
+			await QueryParams.validateMapsCoordinates(req, res, next);
+
+			expect(next).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(
+				req,
+				res,
+				expect.objectContaining({
+					code: templates.invalidArguments.code,
+					message: expect.any(String),
+				}),
+			);
+		});
+		test('should respond with invalidArguments and not call next() if values are not integers', async () => {
+			Responder.respond.mockResolvedValueOnce();
+			const req = {
+				query: {
+					zoomLevel: 3.5,
+					x: 10,
+					y: 20,
 				},
 			};
 			const res = {};

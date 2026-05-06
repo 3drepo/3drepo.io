@@ -72,6 +72,8 @@ Permissions.hasWriteAccessToContainer = validateMany([Permissions.hasAccessToTea
 Permissions.hasAdminAccessToContainer = validateMany([Permissions.hasAccessToTeamspace,
 	getModelIdFromParam(modelTypes.CONTAINER), hasAdminAccessToContainer]);
 
+Permissions.hasAccessToContainersWithCoords = validateMany([
+	Permissions.hasReadAccessToContainer, validateMapsCoordinates]);
 Permissions.hasHereAccessToContainer = validateMany([
 	Permissions.hasReadAccessToContainer, isAddOnEnabled(ADD_ONS.HERE)]);
 Permissions.hasHereAccessToContainerWithCoords = validateMany([

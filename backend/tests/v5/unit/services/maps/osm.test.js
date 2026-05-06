@@ -34,15 +34,15 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const testGetTitle = () => {
 	describe('Get OSM Tile', () => {
 		const zoomLevel = generateRandomNumber();
-		const gridx = generateRandomNumber();
-		const gridy = generateRandomNumber();
+		const x = generateRandomNumber();
+		const y = generateRandomNumber();
 		test('Should return OSM tile', async () => {
 			getArrayBuffer.mockResolvedValueOnce({ data: Buffer.from('test') });
-			await OSMService.getTile(zoomLevel, gridx, gridy);
+			await OSMService.getTile(zoomLevel, x, y);
 
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
-				expect.stringContaining(`a.tile.openstreetmap.org/${zoomLevel}/${gridx}/${gridy}.png`),
+				expect.stringContaining(`a.tile.openstreetmap.org/${zoomLevel}/${x}/${y}.png`),
 			);
 		});
 
@@ -54,13 +54,13 @@ const testGetTitle = () => {
 				prefix: generateRandomString(),
 				key: generateRandomString(),
 			};
-			await OSMService.getTile(zoomLevel, gridx, gridy);
+			await OSMService.getTile(zoomLevel, x, y);
 			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
-			expect(getArrayBuffer).toHaveBeenCalledWith(`https://${config.osm.domain}/${config.osm.prefix}/${zoomLevel}/${gridx}/${gridy}.png?key=${config.osm.key}`);
+			expect(getArrayBuffer).toHaveBeenCalledWith(`https://${config.osm.domain}/${config.osm.prefix}/${zoomLevel}/${x}/${y}.png?key=${config.osm.key}`);
 		});
 		test('Should throw error if request fails', async () => {
 			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(OSMService.getTile(zoomLevel, gridx, gridy)).rejects.toEqual(templates.mapsRequestFailed);
+			await expect(OSMService.getTile(zoomLevel, x, y)).rejects.toEqual(templates.mapsRequestFailed);
 			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get OSM tile:'));
 			expect(logger.logError).toHaveBeenCalledTimes(1);
 		});

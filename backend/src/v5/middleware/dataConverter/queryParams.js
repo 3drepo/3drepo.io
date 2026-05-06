@@ -22,9 +22,9 @@ const yup = require('yup');
 const QueryParams = {};
 
 const mapsCoordinatesSchema = yup.object({
-	zoomLevel: yup.number().required(),
-	gridx: yup.number().required(),
-	gridy: yup.number().required(),
+	zoomLevel: yup.number().integer().min(0).required(),
+	x: yup.number().integer().min(0).required(),
+	y: yup.number().integer().min(0).required(),
 }).required();
 
 QueryParams.validateMapsCoordinates = async (req, res, next) => {

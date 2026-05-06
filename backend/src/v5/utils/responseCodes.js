@@ -48,7 +48,7 @@ ResponseCodes.templates = {
 	ssoRestricted: { message: 'This teamspace only accepts Single Signed On users. Please link your account with an authority.', status: 401 },
 	domainRestricted: { message: 'Your email does not belong in a domain that is accepted by this teamspace. Please contact your teamspace administrator.', status: 401 },
 	moduleUnavailable: { message: 'This module is not available in this teamspace.', status: 400 },
-	addOnUnavailable: { message: 'This AddOn is not available in this teamspace.', status: 400 },
+	addOnUnavailable: { message: 'This add-on is not available in this teamspace.', status: 400 },
 
 	// Project related error
 	projectNotFound: { message: 'Project not found.', status: 404 },

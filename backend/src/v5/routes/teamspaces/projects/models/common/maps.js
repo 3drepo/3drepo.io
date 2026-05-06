@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasHereAccessToContainer, hasHereAccessToContainerWithCoords, hasReadAccessToContainer } = require('../../../../../middleware/permissions');
+const { hasAccessToContainersWithCoords, hasHereAccessToContainer, hasHereAccessToContainerWithCoords, hasReadAccessToContainer } = require('../../../../../middleware/permissions');
 const Maps = require('../../../../../processors/teamspaces/projects/models/commons/maps');
 const { Router } = require('express');
 const { respond } = require('../../../../../utils/responder');
@@ -45,8 +45,8 @@ const getHereBaseInfo = async (req, res) => {
 
 const getOSMTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getOSMTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getOSMTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -57,8 +57,8 @@ const getOSMTile = async (req, res) => {
 
 const getHereDefaultTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereDefaultTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereDefaultTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -69,8 +69,8 @@ const getHereDefaultTile = async (req, res) => {
 
 const getHereAerialTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereAerialTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereAerialTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -81,8 +81,8 @@ const getHereAerialTile = async (req, res) => {
 
 const getHereTrafficTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereTrafficTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereTrafficTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -93,8 +93,8 @@ const getHereTrafficTile = async (req, res) => {
 
 const getHereTrafficFlowTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereTrafficFlowTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereTrafficFlowTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -105,8 +105,8 @@ const getHereTrafficFlowTile = async (req, res) => {
 
 const getHereTerrainTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereTerrainTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereTerrainTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -117,8 +117,8 @@ const getHereTerrainTile = async (req, res) => {
 
 const getHereHybridTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereHybridTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereHybridTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -129,8 +129,8 @@ const getHereHybridTile = async (req, res) => {
 
 const getHereGreyTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereGreyTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereGreyTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -141,8 +141,8 @@ const getHereGreyTile = async (req, res) => {
 
 const getHereTruckRestrictionsTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereTruckRestrictionsTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereTruckRestrictionsTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -153,8 +153,8 @@ const getHereTruckRestrictionsTile = async (req, res) => {
 
 const getHereTruckOverlayTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereTruckRestrictionsOverlayTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereTruckRestrictionsOverlayTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -165,8 +165,8 @@ const getHereTruckOverlayTile = async (req, res) => {
 
 const getHereLabelOverlayTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereLabelOverlayTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereLabelOverlayTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -177,8 +177,8 @@ const getHereLabelOverlayTile = async (req, res) => {
 
 const getHereTollZoneTile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHereTollZoneTile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHereTollZoneTile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -189,8 +189,8 @@ const getHereTollZoneTile = async (req, res) => {
 
 const getHerePOITile = async (req, res) => {
 	try {
-		const { zoomLevel, gridx, gridy } = req.query;
-		const tileData = await Maps.getHerePOITile(zoomLevel, gridx, gridy);
+		const { zoomLevel, x, y } = req.query;
+		const tileData = await Maps.getHerePOITile(zoomLevel, x, y);
 
 		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
 	} catch (err) {
@@ -331,13 +331,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -356,7 +356,7 @@ const establishRoutes = () => {
 	 *               type: string
 	 *               format: binary
 	 */
-	router.get('/osm/tiles', hasHereAccessToContainerWithCoords, getOSMTile);
+	router.get('/osm/tiles', hasAccessToContainersWithCoords, getOSMTile);
 
 	/**
 	 * @openapi
@@ -392,13 +392,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -453,13 +453,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -514,13 +514,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -575,13 +575,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -636,13 +636,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -697,13 +697,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -758,13 +758,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -819,13 +819,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -880,13 +880,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -941,13 +941,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -1002,13 +1002,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true
@@ -1063,13 +1063,13 @@ const establishRoutes = () => {
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridx
+	 *       - name: x
 	 *         description: Tile X coordinate
 	 *         in: query
 	 *         required: true
 	 *         schema:
 	 *           type: number
-	 *       - name: gridy
+	 *       - name: y
 	 *         description: Tile Y coordinate
 	 *         in: query
 	 *         required: true

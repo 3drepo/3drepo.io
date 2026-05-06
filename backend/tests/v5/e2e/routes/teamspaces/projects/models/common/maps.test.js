@@ -243,8 +243,8 @@ const testGetTiles = () => {
 			containerId = container._id,
 			query = {
 				zoomLevel: 10,
-				gridx: 2,
-				gridy: 3,
+				x: 2,
+				y: 3,
 			},
 		} = {}) => genRoute({ teamspace: ts, projectId, containerId, path, key, query });
 
@@ -274,19 +274,21 @@ const testGetTiles = () => {
 				expect(res.body.code).toEqual(templates.notAuthorized.code);
 			});
 
-			test(`should fail with ${templates.addOnUnavailable.code} if the HERE add-on is not enabled`, async () => {
-				const res = await agent.get(route({
-					path: '/osm/tiles',
-					ts: teamspaceNoHere,
-					projectId: projectNoHere.id,
-					containerId: containerNoHere._id,
-					key: usersNoHere.tsAdmin.apiKey,
-				})).expect(templates.addOnUnavailable.status);
-				expect(res.body.code).toEqual(templates.addOnUnavailable.code);
+			test('should succeed if the HERE add-on is not enabled but the request is for OSM tiles', async () => {
+				const res = await agent.get(
+					route({
+						path: '/osm/tiles',
+						ts: teamspaceNoHere,
+						projectId: projectNoHere.id,
+						containerId: containerNoHere._id,
+						key: usersNoHere.tsAdmin.apiKey,
+					}),
+				).expect(templates.ok.status);
+				expect(res.headers['content-type']).toContain('image/png');
 			});
 
 			test(`should fail with ${templates.invalidArguments.code} if map coordinates are invalid`, async () => {
-				const res = await agent.get(route({ path: '/osm/tiles', query: { zoomLevel: 'a', gridx: 2 } })).expect(templates.invalidArguments.status);
+				const res = await agent.get(route({ path: '/osm/tiles', query: { zoomLevel: 'a', x: 2 } })).expect(templates.invalidArguments.status);
 				expect(res.body.code).toEqual(templates.invalidArguments.code);
 			});
 		});

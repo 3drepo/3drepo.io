@@ -23,15 +23,15 @@ const { templates } = require('../../utils/responseCodes');
 
 const HereService = {};
 
-const generateTileURI = (domain, resource, zoomLevel, gridx, gridy, { features, style } = {}) => {
+const generateTileURI = (domain, resource, zoomLevel, x, y, { features, style } = {}) => {
 	const uriPath = [
 		domain,
 		'v3',
 		resource,
 		'mc',
 		zoomLevel,
-		gridx,
-		gridy,
+		x,
+		y,
 		'png8',
 	].join('/');
 	const uriQuery = [
@@ -54,10 +54,10 @@ HereService.getBaseInfo = async () => {
 	}
 };
 
-HereService.getTile = async (zoomLevel, gridx, gridy) => {
+HereService.getTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy),
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y),
 		);
 		return data;
 	} catch (error) {
@@ -66,10 +66,10 @@ HereService.getTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getAerialTile = async (zoomLevel, gridx, gridy) => {
+HereService.getAerialTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.AERIAL }),
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.AERIAL }),
 		);
 		return data;
 	} catch (error) {
@@ -78,10 +78,10 @@ HereService.getAerialTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getTrafficTile = async (zoomLevel, gridx, gridy) => {
+HereService.getTrafficTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.TRAFFIC }),
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.TRAFFIC }),
 		);
 		return data;
 	} catch (error) {
@@ -90,10 +90,10 @@ HereService.getTrafficTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getTrafficFlowTile = async (zoomLevel, gridx, gridy) => {
+HereService.getTrafficFlowTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(HERE_TRAFFIC_DOMAIN, RESOURCES.FLOW, zoomLevel, gridx, gridy, {}),
+			generateTileURI(HERE_TRAFFIC_DOMAIN, RESOURCES.FLOW, zoomLevel, x, y, {}),
 		);
 		return data;
 	} catch (error) {
@@ -102,10 +102,10 @@ HereService.getTrafficFlowTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getTerrainTile = async (zoomLevel, gridx, gridy) => {
+HereService.getTerrainTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.TERRAIN }),
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.TERRAIN }),
 		);
 		return data;
 	} catch (error) {
@@ -114,10 +114,10 @@ HereService.getTerrainTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getHybridTile = async (zoomLevel, gridx, gridy) => {
+HereService.getHybridTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.HYBRID }),
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.HYBRID }),
 		);
 		return data;
 	} catch (error) {
@@ -126,10 +126,10 @@ HereService.getHybridTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getGreyTile = async (zoomLevel, gridx, gridy) => {
+HereService.getGreyTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { style: STYLES.GREY }),
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.GREY }),
 		);
 		return data;
 	} catch (error) {
@@ -138,10 +138,10 @@ HereService.getGreyTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getTruckRestrictionsTile = async (zoomLevel, gridx, gridy) => {
+HereService.getTruckRestrictionsTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy,
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y,
 				{ style: STYLES.TRUCK_RESTRICTIONS, features: FEATURES.VEHICLE_RESTRICTIONS },
 			),
 		);
@@ -152,11 +152,11 @@ HereService.getTruckRestrictionsTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getTruckRestrictionsOverlayTile = async (zoomLevel, gridx, gridy) => {
+HereService.getTruckRestrictionsOverlayTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
 			generateTileURI(
-				BASE_URL, RESOURCES.BLANK, zoomLevel, gridx, gridy, { features: FEATURES.VEHICLE_RESTRICTIONS },
+				BASE_URL, RESOURCES.BLANK, zoomLevel, x, y, { features: FEATURES.VEHICLE_RESTRICTIONS },
 			),
 		);
 		return data;
@@ -166,10 +166,10 @@ HereService.getTruckRestrictionsOverlayTile = async (zoomLevel, gridx, gridy) =>
 	}
 };
 
-HereService.getLabelOverlayTile = async (zoomLevel, gridx, gridy) => {
+HereService.getLabelOverlayTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.LABEL, zoomLevel, gridx, gridy, {}),
+			generateTileURI(BASE_URL, RESOURCES.LABEL, zoomLevel, x, y, {}),
 		);
 		return data;
 	} catch (error) {
@@ -178,10 +178,10 @@ HereService.getLabelOverlayTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getTollZoneTile = async (zoomLevel, gridx, gridy) => {
+HereService.getTollZoneTile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { features: FEATURES.CONGESTION_ZONES }),
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { features: FEATURES.CONGESTION_ZONES }),
 		);
 		return data;
 	} catch (error) {
@@ -190,10 +190,10 @@ HereService.getTollZoneTile = async (zoomLevel, gridx, gridy) => {
 	}
 };
 
-HereService.getPOITile = async (zoomLevel, gridx, gridy) => {
+HereService.getPOITile = async (zoomLevel, x, y) => {
 	try {
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, gridx, gridy, { features: FEATURES.POI }),
+			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { features: FEATURES.POI }),
 		);
 		return data;
 	} catch (error) {

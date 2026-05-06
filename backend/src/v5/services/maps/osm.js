@@ -23,14 +23,14 @@ const { templates } = require('../../utils/responseCodes');
 
 const OSMService = {};
 
-OSMService.getTile = async (zoomLevel, gridx, gridy) => {
+OSMService.getTile = async (zoomLevel, x, y) => {
 	try {
 		let domain = 'a.tile.openstreetmap.org';
-		let uri = `/${zoomLevel}/${gridx}/${gridy}.png`;
+		let uri = `/${zoomLevel}/${x}/${y}.png`;
 
 		if (config.osm && config.osm.domain) {
 			domain = config.osm.domain;
-			uri = `/${config.osm.prefix}/${zoomLevel}/${gridx}/${gridy}.png?key=${config.osm.key}`;
+			uri = `/${config.osm.prefix}/${zoomLevel}/${x}/${y}.png?key=${config.osm.key}`;
 		}
 
 		const { data } = await WebRequests.getArrayBuffer(`https://${domain}${uri}`);
