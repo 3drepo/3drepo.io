@@ -86,10 +86,11 @@ export class IndexedDbCacheWorker {
 			const request = indexedDB.open('3DRepoCacheDb', 2);
 
 			request.onerror = () => {
-				console.error('Unable to open IndexedDb - Model Caching will be Disabled.');
+				this.index = {};
 				this.sendIndexedDbUpdated({
 					state: 'Disabled',
 				});
+				reject('Unable to open IndexedDb - Model Caching will be Disabled.');
 			};
 
 			// When onupgradeneeded completes successfully, onsuccess will be called
@@ -324,8 +325,10 @@ export class IndexedDbCacheWorker {
 				const record = this.memoryCache[key];
 				const request = objectStore.put(record, key);
 				request.onsuccess = () => {
-					delete this.memoryCache[key]; // Delete the local copy
-					this.index[key] = 1; // Update the index as we go
+					if (this.memoryCache[key]) { // If the key has been removed since the write began, don't update the index
+						delete this.memoryCache[key]; // Delete the local copy
+						this.index[key] = 1; // Update the index as we go
+					}
 				};
 			}
 
@@ -394,6 +397,9 @@ export class IndexedDbCacheWorker {
 		const semaphoreKey = `_${contains}`;
 
 		if (this.index[semaphoreKey] && this.index[semaphoreKey] >= version) {
+			this.sendDeleteTransactionComplete({
+				id,
+			});
 			return;
 		}
 
@@ -459,6 +465,9 @@ export class IndexedDbCacheWorker {
 		};
 
 		transaction.onabort = (ev) => {
+			this.sendDeleteTransactionComplete({
+				id,
+			});
 			console.error(`Failed to perform cache invalidation transaction: ${ev.currentTarget.error}`);
 		};
 	}
@@ -475,16 +484,20 @@ onmessage = (e) => {
 	}
 
 	if (e.data.message === 'Get') {
+		const { key, id } = e.data;
 		self.repoCache.open.then(() => {
-			const { key, id } = e.data;
 			self.repoCache.createGetTransaction(id, key);
+		}).catch(() => {
+			self.repoCache.sendGetTransactionComplete({ id, data: undefined });
 		});
 	}
 
 	if (e.data.message === 'Delete') {
+		const { contains, version, id } = e.data;
 		self.repoCache.open.then(() => {
-			const { contains, version, id } = e.data;
 			self.repoCache.createDeleteTransaction(id, contains, version);
+		}).catch(() => {
+			self.repoCache.sendDeleteTransactionComplete({ id });
 		});
 	}
 };
