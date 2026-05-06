@@ -14,3 +14,48 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+import { useParams } from 'react-router-dom';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { ContainersHooksSelectors, FederationsHooksSelectors, ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
+import { ViewerBottomActions } from '../views.styles';
+import { AddFabButton } from '@controls/button/addFabButton/addFabButton.component';
+import { formatMessage } from '@/v5/services/intl';
+import { ViewerPanelFooter } from './viewsCardFooter.styles';
+import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { PresetViews } from './presetViews/presetViews.component';
+
+export const ViewsCardFooter = () => {
+	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
+	const isFederation = modelIsFederation(containerOrFederation);
+	const isCommenter = isFederation
+		? FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
+		: ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
+
+	const newViewpoint = ViewpointsHooksSelectors.selectNewViewpoint();
+	const viewpoints = ViewpointsHooksSelectors.selectViewpointsList();
+
+	const handleAddViewpoint = () => {
+		ViewpointsActionsDispatchers.prepareNewViewpoint(teamspace, containerOrFederation, `View ${viewpoints.length + 1}`);
+	};
+
+	const handleShowPreset = (preset) => {
+		ViewpointsActionsDispatchers.showPreset(preset);
+	};
+
+	return (
+		<ViewerPanelFooter container alignItems="center">
+			<ViewerBottomActions>
+				<PresetViews showPreset={handleShowPreset} />
+			</ViewerBottomActions>
+			<AddFabButton
+				aria-label="Add view"
+				onClick={handleAddViewpoint}
+				tooltipText={formatMessage({ id: 'viewer.cards.views.addViewTooltip', defaultMessage: 'Add View' })}
+				disabled={!!newViewpoint || !isCommenter}
+			/>
+		</ViewerPanelFooter>
+	);
+};
+

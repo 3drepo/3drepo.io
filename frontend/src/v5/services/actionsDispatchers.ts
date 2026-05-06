@@ -116,6 +116,8 @@ interface IViewpointsActionCreators {
 	showViewpoint: (teamspace: string, modelId: string, view: any, ignoreCamera?: boolean) => Action,
 	clearColorOverrides: () => Action,
 	clearTransformations: () => Action,
+	prepareNewViewpoint: (teamspace: string, containerOrFederation: string, name: string) => Action,
+	showPreset: (preset: string) => Action,
 }
 
 export const AuthActionsDispatchers = createActionsDispatchers<IAuthActionCreators>(AuthActions);

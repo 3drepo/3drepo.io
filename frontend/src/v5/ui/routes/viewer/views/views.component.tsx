@@ -26,6 +26,7 @@ import { selectViewpointsList } from '@/v4/modules/viewpoints';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { ViewsCardActions } from './viewsCardActions/viewsCardActions.component';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { ViewsCardFooter } from './viewsCardFooter/viewsCardFooter.component';
 
 export const Views = () => {
 	const viewpoints = selectViewpointsList(getState());
@@ -51,8 +52,8 @@ export const Views = () => {
 						setActiveViewpoint={setActiveViewpoint}
 					/>
 				</Container>
-				{/* <ViewsCardFooter /> */}
 			</ CardContent>
+			<ViewsCardFooter />
 		</CardContainer>
 								
 	);
