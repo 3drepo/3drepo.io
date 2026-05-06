@@ -1803,7 +1803,7 @@ export class UnityUtil {
 		isFederation: boolean = false,
 		initView = null,
 		clearCanvas = true,
-		assetGroups: string[] | undefined = undefined,
+		assetGroups: string[] | null = null,
 	): Promise<void> {
 		if (clearCanvas && UnityUtil.loadedFlag) {
 			UnityUtil.reset(!initView);
@@ -1824,7 +1824,7 @@ export class UnityUtil {
 			params.initView = initView;
 		}
 
-		if (assetGroups && assetGroups.length) {
+		if (assetGroups?.length) {
 			params.assetGroups = assetGroups;
 		}
 
