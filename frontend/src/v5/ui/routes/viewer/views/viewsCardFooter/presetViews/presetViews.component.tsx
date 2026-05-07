@@ -25,6 +25,7 @@ import TopDownIcon from '@assets/icons/twoToned/top_down-two_toned.svg';
 import BottomUpIcon from '@assets/icons/twoToned/bottom_up-two_toned.svg';
 import { PresetViewsContainer, StyledPresetIcon } from './presetViews.styles';
 import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
 
 interface IPresetViewpoint {
 	_id: string;
@@ -43,12 +44,12 @@ export const PRESET_VIEW = {
 };
 
 const DEFAULT_VIEWPOINTS: IPresetViewpoint[] = [
-	{ _id: 'preset_1', name: 'Front View', preset: PRESET_VIEW.FRONT, icon: FrontViewIcon },
-	{ _id: 'preset_2', name: 'Back View', preset: PRESET_VIEW.BACK, icon: BackViewIcon },
-	{ _id: 'preset_3', name: 'Side View (Left)', preset: PRESET_VIEW.LEFT, icon: LeftViewIcon },
-	{ _id: 'preset_4', name: 'Side View (Right)', preset: PRESET_VIEW.RIGHT, icon: RightViewIcon },
-	{ _id: 'preset_5', name: 'Top Down', preset: PRESET_VIEW.TOP, icon: TopDownIcon },
-	{ _id: 'preset_6', name: 'Bottom Up', preset: PRESET_VIEW.BOTTOM, icon: BottomUpIcon },
+	{ _id: 'preset_1', name: formatMessage({ id: 'viewer.cards.views.frontView', defaultMessage: 'Front View' }), preset: PRESET_VIEW.FRONT, icon: FrontViewIcon },
+	{ _id: 'preset_2', name: formatMessage({ id: 'viewer.cards.views.backView', defaultMessage: 'Back View' }), preset: PRESET_VIEW.BACK, icon: BackViewIcon },
+	{ _id: 'preset_3', name: formatMessage({ id: 'viewer.cards.views.leftView', defaultMessage: 'Side View (Left)' }), preset: PRESET_VIEW.LEFT, icon: LeftViewIcon },
+	{ _id: 'preset_4', name: formatMessage({ id: 'viewer.cards.views.rightView', defaultMessage: 'Side View (Right)' }), preset: PRESET_VIEW.RIGHT, icon: RightViewIcon },
+	{ _id: 'preset_5', name: formatMessage({ id: 'viewer.cards.views.topDown', defaultMessage: 'Top Down' }), preset: PRESET_VIEW.TOP, icon: TopDownIcon },
+	{ _id: 'preset_6', name: formatMessage({ id: 'viewer.cards.views.bottomUp', defaultMessage: 'Bottom Up' }), preset: PRESET_VIEW.BOTTOM, icon: BottomUpIcon },
 ];
 
 export const PresetViews = () => (
