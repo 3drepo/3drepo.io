@@ -56,10 +56,12 @@ interface IViewItem {
 	editMode?: boolean;
 	setActiveViewpoint: (viewpoint: any | null) => void;
 	setEditMode: (mode: boolean) => void;
+	createMode: boolean;
+	setCreateMode: (mode: boolean) => void;
 }
 
 const ViewItemSchema = Yup.object().shape({ // TODO move to validators
-	newName: Yup.string().max(37),
+	name: Yup.string().max(37),
 });
 
 const ViewpointNameLabel = ({ name, defaultView, active = false }) => {
@@ -119,7 +121,7 @@ const getScreenshot = (viewpoint: any): string | null => {
 	return screenshot;
 };
 
-export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setEditMode }: IViewItem) => {
+export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setEditMode, createMode, setCreateMode }: IViewItem) => {
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const isCommenter = isFederation
@@ -149,6 +151,12 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 
 	};
 
+	const onClickCancelEdit = (e: SyntheticEvent) => {
+		e.stopPropagation();
+		setEditMode(false);
+		setCreateMode(false);
+	};
+
 	const handleShareLink = (e: SyntheticEvent) => {
 		e.stopPropagation();
 		ViewpointsActionsDispatchers.shareViewpointLink(teamspace, containerOrFederation, viewpoint._id, project, revision);
@@ -163,7 +171,7 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 	};
 
 	const onClickItem = () => {
-		if (!editMode) {
+		if (!editMode && !createMode) {
 			const vp = { ...viewpoint };
 			if (isCalibrating && calibrationStep === 2) {
 				delete vp.viewpoint?.clippingPlanes;
@@ -175,12 +183,18 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 	};
 
 	const formik = useFormik({
-		initialValues: { newName: viewpoint._id ? viewpoint.name : '' },
+		initialValues: { name: viewpoint._id ? viewpoint.name : '' },
 		validationSchema: ViewItemSchema,
 		onSubmit: (values) => {
-			const newName = values.newName || viewpoint.name;
-			ViewpointsActionsDispatchers.updateViewpoint(teamspace, containerOrFederation, viewpoint._id, newName);
-			setEditMode(false);
+			const newName = values.name || viewpoint.name;
+			if (createMode) {
+				const newViewpoint = { ...viewpoint, name: newName };
+				ViewpointsActionsDispatchers.createViewpoint(teamspace, containerOrFederation, newViewpoint);
+				setCreateMode(false);
+			} else {
+				ViewpointsActionsDispatchers.updateViewpoint(teamspace, containerOrFederation, viewpoint._id, newName);
+				setEditMode(false);
+			}
 		},
 		enableReinitialize: true,
 	});
@@ -196,19 +210,19 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 			{active && editMode && (
 				<StyledForm onSubmit={formik.handleSubmit}>
 					<NewViewpointName
-						name="newName"
-						value={formik.values.newName}
+						name="name"
+						value={formik.values.name}
 						onChange={formik.handleChange}
 						fullWidth
-						error={Boolean(formik.errors.newName)}
-						helperText={getViewNameFieldErrorMsg(formik.errors.newName)}
+						error={Boolean(formik.errors.name)}
+						helperText={getViewNameFieldErrorMsg(formik.errors.name)}
 						label={formatMessage({ id: 'views.viewItem.nameFieldLabel', defaultMessage: 'View name' })}
 						placeholder={viewpoint.name}
 						autoFocus
 						onKeyDown={(e) => e.stopPropagation()}
 					/>
 					<IconsGroup disabled={isDeletePending}>
-						<IconButton onClick={() => setEditMode(false)}>
+						<IconButton onClick={onClickCancelEdit}>
 							<CancelIcon />
 						</IconButton>
 						<SaveButton type="submit" id="views-card-save-button">{formatMessage({ id: 'views.viewItem.saveButton', defaultMessage: 'Save' })}</SaveButton>

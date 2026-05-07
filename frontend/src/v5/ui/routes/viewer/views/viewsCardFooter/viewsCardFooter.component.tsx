@@ -25,17 +25,18 @@ import { ViewerPanelFooter } from './viewsCardFooter.styles';
 import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { PresetViews } from './presetViews/presetViews.component';
 
-export const ViewsCardFooter = () => {
+export const ViewsCardFooter = ({ setActiveViewpoint, createMode, setCreateMode }) => {
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const isCommenter = isFederation
 		? FederationsHooksSelectors.selectHasCommenterAccess(containerOrFederation)
 		: ContainersHooksSelectors.selectHasCommenterAccess(containerOrFederation);
 
-	const newViewpoint = ViewpointsHooksSelectors.selectNewViewpoint();
 	const viewpoints = ViewpointsHooksSelectors.selectViewpointsList();
 
 	const handleAddViewpoint = () => {
+		setActiveViewpoint(null);
+		setCreateMode(true);
 		ViewpointsActionsDispatchers.prepareNewViewpoint(teamspace, containerOrFederation, `View ${viewpoints.length + 1}`);
 	};
 
@@ -46,7 +47,7 @@ export const ViewsCardFooter = () => {
 				aria-label="Add view"
 				onClick={handleAddViewpoint}
 				tooltipText={formatMessage({ id: 'viewer.cards.views.addViewTooltip', defaultMessage: 'Add View' })}
-				disabled={!!newViewpoint || !isCommenter}
+				disabled={createMode || !isCommenter}
 			/>
 		</ViewerPanelFooter>
 	);

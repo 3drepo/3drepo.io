@@ -20,12 +20,13 @@ import { ViewItem } from './viewItem/viewItem.component';
 import { useContext } from 'react';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { FormattedMessage } from 'react-intl';
+import { ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type IViewpoint = any; // TODO ???
 
-export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint, setEditMode }) => {
+export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint, setEditMode, createMode, setCreateMode }) => {
 	const { items: viewpoints, filteredItems: filteredViewpoints } = useContext<SearchContextType<IViewpoint>>(SearchContext);
-
+	const newViewpoint = ViewpointsHooksSelectors.selectNewViewpoint();
 	if (!filteredViewpoints.length) {
 	    return (
 			<ViewpointsList>
@@ -50,9 +51,22 @@ export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint, setEd
 					editMode={editMode}
 					setActiveViewpoint={setActiveViewpoint}
 					setEditMode={setEditMode}
+					createMode={createMode}
+					setCreateMode={setCreateMode}
 				/>
 			))}
-			{/* {this.renderNewViewpoint(this.props.newViewpoint)} */}
+			{ createMode && newViewpoint && (
+				<ViewItem
+					key={newViewpoint._id}
+					viewpoint={newViewpoint}
+					active={true}
+					editMode={true}
+					setActiveViewpoint={setActiveViewpoint}
+					setEditMode={setEditMode}
+					createMode={createMode}
+					setCreateMode={setCreateMode}
+				/>
+			)}
 		</ViewpointsList>
 	);
 };

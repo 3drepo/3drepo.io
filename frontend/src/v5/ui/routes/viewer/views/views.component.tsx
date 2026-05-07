@@ -32,6 +32,7 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 export const Views = () => {
 	const viewpoints = selectViewpointsList(getState());
 	const [editMode, setEditMode] = useState(false);
+	const [createMode, setCreateMode] = useState(false);
 	const [activeViewpoint, setActiveViewpoint] = useState(null);
 	const [sortOrder, setSortOrder] = useState(SortingDirection.ASCENDING); // TODO Change this to use store
 	
@@ -49,9 +50,11 @@ export const Views = () => {
 					activeViewpoint={activeViewpoint}
 					setActiveViewpoint={setActiveViewpoint}
 					setEditMode={setEditMode}
+					createMode={createMode}
+					setCreateMode={setCreateMode}
 				/>
 			</SearchContextComponent>
-			<ViewsCardFooter />
+			<ViewsCardFooter setActiveViewpoint={setActiveViewpoint} createMode={createMode} setCreateMode={setCreateMode} />
 		</CardContainer>
 	);
 };
