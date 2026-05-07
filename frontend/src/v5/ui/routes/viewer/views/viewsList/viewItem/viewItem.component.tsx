@@ -25,6 +25,7 @@ import { useParams } from 'react-router-dom';
 import ShareIcon from '@mui/icons-material/Share';
 import CancelIcon from '@assets/icons/controls/clear_circle.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
+import { Highlight } from '@controls/highlight';
 import { getViewNameFieldErrorMsg } from '@/v4/helpers/views';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
@@ -47,6 +48,7 @@ import { FormattedMessage } from 'react-intl';
 import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';
+import { SearchContext } from '@controls/search/searchContext';
 
 interface IViewItem {
 	viewpoint: any; // TODO
@@ -60,18 +62,21 @@ const ViewItemSchema = Yup.object().shape({ // TODO move to validators
 	newName: Yup.string().max(37),
 });
 
-const ViewpointNameLabel = ({ name, defaultView, active = false }) => (
-	<Tooltip title={name} placement="bottom">
-		<ViewpointName active={active}>
-			{name}
-			{defaultView && (
-				<Subtitle>
-					<FormattedMessage id="viewsCard.viewItem.homeView" defaultMessage="(Home View)" />
-				</Subtitle>
-			)}
-		</ViewpointName>
-	</Tooltip>
-);
+const ViewpointNameLabel = ({ name, defaultView, active = false }) => {
+	const { query } = useContext(SearchContext);
+	return (
+		<Tooltip title={name} placement="bottom">
+			<ViewpointName active={active}>
+				<Highlight search={query}>{name}</Highlight>
+				{defaultView && (
+					<Subtitle>
+						<FormattedMessage id="viewsCard.viewItem.homeView" defaultMessage="(Home View)" />
+					</Subtitle>
+				)}
+			</ViewpointName>
+		</Tooltip>
+	);
+};
 
 const ViewEllipsisMenu = ({ onSetAsDefault, onDelete, isAdmin, defaultView }) => (
 	<EllipsisMenu>
