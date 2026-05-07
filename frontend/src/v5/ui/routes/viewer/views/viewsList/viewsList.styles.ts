@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import styled from 'styled-components';
 
 
@@ -27,4 +28,8 @@ export const ViewpointsList = styled.div`
     max-height: 70vh;
     overflow: overlay;
     background-color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+
+export const EmptyList = styled(EmptyListMessage)`
+    margin: 8px;
 `;

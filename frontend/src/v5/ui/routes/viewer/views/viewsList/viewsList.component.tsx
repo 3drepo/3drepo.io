@@ -15,20 +15,29 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ViewpointsList } from './viewsList.styles';
+import { EmptyList, ViewpointsList } from './viewsList.styles';
 import { ViewItem } from './viewItem/viewItem.component';
 import { useContext } from 'react';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
+import { FormattedMessage } from 'react-intl';
 
 type IViewpoint = any; // TODO ???
 
 export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint, setEditMode }) => {
 	const { items: viewpoints, filteredItems: filteredViewpoints } = useContext<SearchContextType<IViewpoint>>(SearchContext);
-	if (!viewpoints.length) {
-	    return (<div>No viewpoints created</div>);
-	}
+
 	if (!filteredViewpoints.length) {
-	    return (<div>No viewpoints available</div>);
+	    return (
+			<ViewpointsList>
+				<EmptyList>
+					{!viewpoints.length ? (
+						<FormattedMessage id="viewer.cards.views.noViewpoints" defaultMessage="No views created" />
+					) : (
+						<FormattedMessage id="viewer.cards.views.noResults" defaultMessage="No views found. Please try another search." />
+					)}
+				</EmptyList>
+			</ViewpointsList>
+		);
 	}
 
 	return (

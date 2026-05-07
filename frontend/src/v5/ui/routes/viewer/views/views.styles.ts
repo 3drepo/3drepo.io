@@ -20,7 +20,7 @@ import styled from 'styled-components';
 
 export const SearchBar = styled(SearchInput)`
     margin: 0;
-    padding: 8px;
+    padding: 10px 8px;
     background: ${({ theme }) => theme.palette.primary.contrast};
     width: auto;
 `;
