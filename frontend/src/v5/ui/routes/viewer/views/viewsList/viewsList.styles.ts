@@ -18,8 +18,13 @@
 import styled from 'styled-components';
 
 
-export const ViewpointsList = styled.div` // TODO before this was Mui MenuList, is this necessary?
+export const ViewpointsList = styled.div`
+    display: flex;
+    flex-direction: column;
+    flex: auto;
     padding: 0;
     height: auto;
     max-height: 70vh;
+    overflow: overlay;
+    background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;

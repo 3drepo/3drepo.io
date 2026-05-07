@@ -22,9 +22,8 @@ import { SearchContext, SearchContextType } from '@controls/search/searchContext
 
 type IViewpoint = any; // TODO ???
 
-export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint }) => {
+export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint, setEditMode }) => {
 	const { items: viewpoints, filteredItems: filteredViewpoints } = useContext<SearchContextType<IViewpoint>>(SearchContext);
-	// 
 	if (!viewpoints.length) {
 	    return (<div>No viewpoints created</div>);
 	}
@@ -38,9 +37,13 @@ export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint }) => 
 				<ViewItem
 					key={viewpoint._id}
 					viewpoint={viewpoint}
+					active={activeViewpoint?._id === viewpoint._id}
+					editMode={editMode}
+					setActiveViewpoint={setActiveViewpoint}
+					setEditMode={setEditMode}
 				/>
 			))}
 			{/* {this.renderNewViewpoint(this.props.newViewpoint)} */}
 		</ViewpointsList>
 	);
-}
+};

@@ -15,20 +15,103 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { COLOR } from '@/v4/styles';
-import { MenuItem } from '@mui/material';
-import styled from 'styled-components';
+import { Button, MenuItem } from '@mui/material';
+import styled, { css } from 'styled-components';
+
+import { CircleButton } from '@controls/circleButton';
+import { TextField } from '@controls/inputs/textField/textField.component';
+import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
 
 export const ViewpointItem = styled(MenuItem)<{ active?: boolean }>`
 	padding: 8px;
-	background-color: ${({ active }) => active ? `${COLOR.BLACK_6}` : 'initial'};
-	border-bottom: 1px solid ${COLOR.BLACK_20};
+	border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
 	box-sizing: border-box;
-	color: ${({ theme }) => theme.palette.secondary.main};
-	font-weight: 500;
-	overflow: hidden;
+
+	&, &.Mui-focusVisible {
+		background-color: ${({ active, theme }) => active ? theme.palette.primary.lightest : theme.palette.primary.contrast};
+	}
 
 	${({ active }) => `
 		padding: ${active ? '12px 15px' : '12px 40px 12px 15px'};
 	`}
 ` as any;
+
+export const IconButton = styled(CircleButton)`
+	margin: 0;
+	&:hover {
+		color: ${({ theme }) => theme.palette.secondary.light};
+	}
+`;
+
+export const ViewThumbnail = styled(Thumbnail)`
+	width: 79px;
+	height: 79px;
+	border-radius: 8px;
+	border: 1px solid ${({ theme }) => theme.palette.base.lightest};
+`;
+
+export const StyledForm = styled.form`
+	display: flex;
+	align-items: center;
+	flex: 1;
+	justify-content: space-between;
+`;
+
+export const IconsGroup = styled.div<{ disabled?: boolean }>`
+	display: flex;
+	align-items: center;
+	margin-right: 0;
+	${({ disabled }) => disabled && css`
+		pointer-events: none;
+		opacity: 0.2;
+	`}
+`;
+
+export const NewViewpointName = styled(TextField)`
+	margin-left: 12px;
+	margin-right: 12px;
+`;
+
+export const NameRow = styled.div`
+	flex: 1;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+`;
+
+export const ViewpointName = styled.div<{ active?: boolean }>`
+	margin-left: 16px;
+	max-width: ${({ active }) => active ? '150px' : '260px'};
+	${({ theme }) => theme.typography.h5};
+	color: ${({ theme }) => theme.palette.secondary.main};
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+`;
+
+export const Subtitle = styled.small`
+	display: block;
+	color: ${({ theme }) => theme.palette.secondary.mid};
+`;
+
+export const SaveButton = styled(Button).attrs({
+	variant: 'outlined',
+	color: 'secondary',
+})`
+	position: relative;
+	left: 17px;
+	height: 23px;
+	min-width: 44px;
+	font-size: 10px;
+	padding: 5px 7px;
+
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.secondary.main} !important;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+
+	&:active {
+		background-color: ${({ theme }) => theme.palette.secondary.dark} !important;
+		color: ${({ theme }) => theme.palette.primary.contrast};
+	}
+`;

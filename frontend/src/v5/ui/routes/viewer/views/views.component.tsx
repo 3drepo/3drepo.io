@@ -16,8 +16,8 @@
  */
 
 import { useState } from 'react';
-import { Container, SearchBar } from './views.styles';
-import { CardContainer, CardContent } from '@components/viewer/cards/card.styles';
+import { SearchBar } from './views.styles';
+import { CardContainer } from '@components/viewer/cards/card.styles';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { formatMessage } from '@/v5/services/intl';
 import { ViewsList } from './viewsList/viewsList.component';
@@ -42,18 +42,15 @@ export const Views = () => {
 				title={formatMessage({ id: 'viewer.cards.views.title', defaultMessage: 'Views' })}
 				actions={(<ViewsCardActions sortOrder={sortOrder} setSortOrder={setSortOrder} />)}
 			/>
-			<CardContent>
-				<Container>
-					<SearchContextComponent items={viewpoints} fieldsToFilter={['name']}>
-						<SearchBar placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search views...' })} />
-						<ViewsList
-							editMode={editMode}
-							activeViewpoint={activeViewpoint}
-							setActiveViewpoint={setActiveViewpoint}
-						/>
-					</SearchContextComponent>
-				</Container>
-			</ CardContent>
+			<SearchContextComponent items={viewpoints} fieldsToFilter={['name']}>
+				<SearchBar placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search views...' })} />
+				<ViewsList
+					editMode={editMode}
+					activeViewpoint={activeViewpoint}
+					setActiveViewpoint={setActiveViewpoint}
+					setEditMode={setEditMode}
+				/>
+			</SearchContextComponent>
 			<ViewsCardFooter />
 		</CardContainer>
 	);

@@ -33,5 +33,6 @@ export const StyledPresetIcon = styled.span`
 	svg {
 		width: 24px;
 		height: 24px;
+		overflow: visible;
 	}
 `;
