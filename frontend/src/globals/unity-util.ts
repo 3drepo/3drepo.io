@@ -1803,7 +1803,7 @@ export class UnityUtil {
 		isFederation: boolean = false,
 		initView = null,
 		clearCanvas = true,
-		assetGroups: string[] | null = null,
+		assetGroups?: string[],
 	): Promise<void> {
 		if (clearCanvas && UnityUtil.loadedFlag) {
 			UnityUtil.reset(!initView);
