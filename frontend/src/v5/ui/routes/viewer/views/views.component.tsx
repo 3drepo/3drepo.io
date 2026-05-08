@@ -15,33 +15,49 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { SearchBar } from './views.styles';
 import { CardContainer } from '@components/viewer/cards/card.styles';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
 import { formatMessage } from '@/v5/services/intl';
 import { ViewsList } from './viewsList/viewsList.component';
 import ViewsIcon from '@assets/icons/outlined/view-outlined.svg';
-import { selectViewpointsList } from '@/v4/modules/viewpoints';
-import { getState } from '@/v5/helpers/redux.helpers';
 import { ViewsCardActions } from './viewsCardActions/viewsCardActions.component';
-import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { ViewsCardFooter } from './viewsCardFooter/viewsCardFooter.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
+import { ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useParams } from 'react-router-dom';
+import { ViewerParams } from '../../routes.constants';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
+import { CentredContainer } from '@controls/centredContainer';
 
 export const Views = () => {
-	const viewpoints = selectViewpointsList(getState());
+	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
+	const viewpoints = ViewpointsHooksSelectors.selectViewpointsList();
 	const [editMode, setEditMode] = useState(false);
 	const [createMode, setCreateMode] = useState(false);
 	const [activeViewpoint, setActiveViewpoint] = useState(null);
-	const [sortOrder, setSortOrder] = useState(SortingDirection.ASCENDING); // TODO Change this to use store
-	
+	const isPending = ViewpointsHooksSelectors.selectIsPending();
+	useEffect(() => {
+		ViewpointsActionsDispatchers.fetchViewpoints(teamspace, containerOrFederation);
+	}, [teamspace, containerOrFederation]);
+
+	if (isPending) {
+		return (
+			<CardContainer>
+				<CentredContainer>
+					<Spinner />
+				</CentredContainer>
+			</CardContainer>
+		);
+	}
 	return (
 		<CardContainer>
 			<CardHeader
 				icon={<ViewsIcon />}
 				title={formatMessage({ id: 'viewer.cards.views.title', defaultMessage: 'Views' })}
-				actions={(<ViewsCardActions sortOrder={sortOrder} setSortOrder={setSortOrder} />)}
+				actions={(<ViewsCardActions />)}
 			/>
 			<SearchContextComponent items={viewpoints} fieldsToFilter={['name']}>
 				<SearchBar placeholder={formatMessage({ id: 'containers.search.placeholder', defaultMessage: 'Search views...' })} />

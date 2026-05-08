@@ -19,7 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { ViewpointsActions } from '@/v4/modules/viewpoints';
+import { ViewpointsActions } from '@/v5/store/viewpoints/viewpoints.redux';
 import { selectCurrentModelTeamspace } from '@/v4/modules/model/model.selectors';
 import { ActivitiesActions } from '../../../../modules/activities';
 import { LegendActions } from '../../../../modules/legend';

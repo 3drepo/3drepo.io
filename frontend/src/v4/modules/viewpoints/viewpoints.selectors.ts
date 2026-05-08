@@ -23,7 +23,7 @@ import { selectDefaultView } from '../model';
 import { selectActiveRisk } from '../risks';
 import { selectQueryParams } from '../router/router.selectors';
 
-export const getGroupsIDsOfViewpoint = function (viewpoint) {
+const getGroupsIDsOfViewpoint = function (viewpoint) {
 	const groupsProperties = ['override_group_ids', 'transformation_group_ids',
 	'highlighted_group_id', 'hidden_group_id', 'shown_group_id'];
 
@@ -48,7 +48,7 @@ export const getGroupsIDsOfViewpoint = function (viewpoint) {
 	return ids;
 };
 
-export const getLoadedGroupsIds = function (viewpoint) {
+const getLoadedGroupsIds = function (viewpoint) {
 	const groupsProperties = ['highlighted_group', 'hidden_group', 'shown_group', 'override_groups', 'transformation_groups'];
 
 	const ids = new Set<string>();
@@ -84,7 +84,7 @@ export const isViewpointReady = (viewpoint) => {
 };
 
 
-export const selectViewpointsDomain = (state) => state.viewpoints;
+const selectViewpointsDomain = (state) => state.viewpoints;
 
 export const selectIsPending = createSelector(
 	selectViewpointsDomain, (state) => state.isPending

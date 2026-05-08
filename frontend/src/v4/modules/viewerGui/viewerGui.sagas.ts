@@ -19,6 +19,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
+import { selectInitialView, selectViewpointById } from '@/v5/store/viewpoints/viewpoints.selectors';
+import { ViewpointsActions, ViewpointsTypes } from '@/v5/store/viewpoints/viewpoints.redux';
 import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
 import { dispatch } from '@/v5/helpers/redux.helpers';
@@ -44,7 +46,6 @@ import { selectUrlParams } from '../router/router.selectors';
 import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
 import { TreeActions } from '../tree';
-import { selectInitialView, selectViewpointsDomain, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
 import { RouterActions } from '../router/router.redux';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
@@ -207,8 +208,8 @@ function* goToHomeView() {
 		const defaultView = yield select(selectDefaultView);
 		if (defaultView) {
 			const { teamspace, model } = yield select(selectUrlParams);
-			const { viewpointsMap } = yield select(selectViewpointsDomain);
-			yield put(ViewpointsActions.showViewpoint(teamspace, model, viewpointsMap[defaultView.id], false));
+			const homeViewpoint = yield select(selectViewpointById, defaultView.id);
+			yield put(ViewpointsActions.showViewpoint(teamspace, model, homeViewpoint, false));
 		} else {
 			yield Viewer.goToExtent();
 		}

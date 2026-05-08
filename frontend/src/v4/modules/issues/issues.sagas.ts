@@ -22,6 +22,7 @@ import { put, select, takeEvery, takeLatest, take  } from 'redux-saga/effects';
 import * as queryString from 'query-string';
 import { generatePath } from 'react-router-dom';
 import { generateViewpoint } from '@/v4/helpers/viewpoints';
+import { ViewpointsActions } from '@/v5/store/viewpoints/viewpoints.redux';
 import { waitForAddons } from '@/v5/store/teamspaces/teamspaces.sagas';
 import { selectIssuesEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { dispatch, getState } from '@/v5/helpers/redux.helpers';
@@ -53,7 +54,6 @@ import { selectSelectedSequence, selectSelectedStartingDate, SequencesActions } 
 import { SnackbarActions } from '../snackbar';
 import { selectTopicTypes } from '../teamspace';
 import { TreeActions } from '../tree';
-import { ViewpointsActions } from '../viewpoints';
 import { RouterActions } from '../router/router.redux';
 import { IssuesActions, IssuesTypes } from './issues.redux';
 import {

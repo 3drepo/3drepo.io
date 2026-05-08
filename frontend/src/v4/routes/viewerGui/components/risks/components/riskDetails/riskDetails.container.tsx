@@ -18,6 +18,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { ViewpointsActions } from '@/v5/store/viewpoints/viewpoints.redux';
 import { selectMeasureSlopeUnits } from '@/v4/modules/measurements';
 import { selectCurrentUser } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
@@ -45,7 +46,6 @@ import {
 	selectStartDate,
 	SequencesActions
 } from '../../../../../../modules/sequences';
-import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { RiskDetails } from './riskDetails.component';
 

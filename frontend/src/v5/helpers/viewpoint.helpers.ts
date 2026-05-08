@@ -22,11 +22,12 @@ import { selectCurrentTeamspace } from '../store/teamspaces/teamspaces.selectors
 import { ViewpointsActionsDispatchers } from '../services/actionsDispatchers';
 import { getState, dispatch } from './redux.helpers';
 import { getGroupHexColor, rgbToHex } from './colors.helper';
-import { getGroupsIDsOfViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded, ViewpointsActions } from '@/v4/modules/viewpoints';
 import { getGroup as APIgetGroup } from '@/v4/services/api/groups';
 import { prepareGroup } from '@/v4/helpers/groups';
 import { selectCurrentRevisionId, selectIsFederation } from '@/v4/modules/model/model.selectors';
 import { selectIsTreeProcessed } from '@/v4/modules/tree';
+import { selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '../store/viewpoints/viewpoints.selectors';
+import { ViewpointsActions } from '../store/viewpoints/viewpoints.redux';
 
 export const convertToV5GroupNodes = (objects) => objects.map((object) => ({
 	container: object.model as string,
@@ -239,6 +240,30 @@ export const goToView = async (view: Viewpoint) => {
 	ViewpointsActionsDispatchers.showViewpoint(null, null, viewpointV5ToV4(view));
 };
 
+const getGroupsIDsOfViewpoint = (viewpoint) => {
+	const groupsProperties = ['override_group_ids', 'transformation_group_ids',
+		'highlighted_group_id', 'hidden_group_id', 'shown_group_id'];
+
+	const ids = new Set<string>();
+
+	// This part discriminates which groups hasnt been loaded yet and add their ids to
+	// the groupsToFetch array
+	for (let i = 0; i < groupsProperties.length ; i++) {
+		const prop = groupsProperties[i];
+		if (viewpoint[prop]) {
+			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+				const groupsIds: string[] = viewpoint[prop];
+				for (let j = 0; j < groupsIds.length; j++ ) {
+					ids.add(groupsIds[j]);
+				}
+			} else {// if the property is just a groupId
+				ids.add(viewpoint[prop]);
+			}
+		}
+	}
+
+	return ids;
+};
 
 export const getViewpointWithGroups = async ({ teamspace, modelId, view }) => {
 	if (!view.viewpoint) {
@@ -273,4 +298,39 @@ export const getViewpointWithGroups = async ({ teamspace, modelId, view }) => {
 
 	const groupsMap = selectViewpointsGroups(getState());
 	return setGroupData(viewpoint, groupsMap);
+};
+
+export const getLoadedGroupsIds = function (viewpoint) {
+	const groupsProperties = ['highlighted_group', 'hidden_group', 'shown_group', 'override_groups', 'transformation_groups'];
+
+	const ids = new Set<string>();
+
+	// This part discriminates which groups hasnt been loaded yet and add their ids to
+	// the groupsToFetch array
+	for (let i = 0; i < groupsProperties.length ; i++) {
+		const prop = groupsProperties[i];
+		if (viewpoint[prop]) {
+			if (Array.isArray(viewpoint[prop])) { // if the property is an array of groupId
+				const groupsIds = viewpoint[prop];
+				for (let j = 0; j < groupsIds.length; j++ ) {
+					ids.add(groupsIds[j]._id);
+				}
+			} else {// if the property is just a groupId
+				ids.add(viewpoint[prop]._id);
+			}
+		}
+	}
+
+	return ids;
+};
+
+export const isViewpointReady = (viewpoint) => {
+	const loadedGroupsIds = getLoadedGroupsIds(viewpoint);
+	let areGroupsLoaded = true;
+
+	getGroupsIDsOfViewpoint(viewpoint).forEach((id) => {
+		areGroupsLoaded =  areGroupsLoaded && loadedGroupsIds.has(id);
+	});
+
+	return areGroupsLoaded;
 };

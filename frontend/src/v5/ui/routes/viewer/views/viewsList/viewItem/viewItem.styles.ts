@@ -16,7 +16,7 @@
  */
 
 import { Button, MenuItem } from '@mui/material';
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 
 import { CircleButton } from '@controls/circleButton';
 import { TextField } from '@controls/inputs/textField/textField.component';
@@ -57,14 +57,10 @@ export const StyledForm = styled.form`
 	justify-content: space-between;
 `;
 
-export const IconsGroup = styled.div<{ disabled?: boolean }>`
+export const IconsGroup = styled.div`
 	display: flex;
 	align-items: center;
 	margin-right: 0;
-	${({ disabled }) => disabled && css`
-		pointer-events: none;
-		opacity: 0.2;
-	`}
 `;
 
 export const NewViewpointName = styled(TextField)`

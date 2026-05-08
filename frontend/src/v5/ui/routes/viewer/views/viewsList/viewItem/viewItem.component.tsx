@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SyntheticEvent, useRef, useState, useContext } from 'react';
-import { debounce } from 'lodash';
+import { SyntheticEvent, useContext } from 'react';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Tooltip } from '@mui/material';
@@ -132,23 +131,11 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 	const defaultView = defaultViewSetting ? viewpoint._id === defaultViewSetting.id : false;
 	const { isCalibrating, step: calibrationStep } = useContext(CalibrationContext);
 
-	const [isDeletePending, setIsDeletePending] = useState(false);
-
 	const screenshot = getScreenshot(viewpoint);
-
-	const debouncedDelete = useRef(debounce((e) => {
-		if (!isDeletePending) {
-			e.stopPropagation();
-			setIsDeletePending(true);
-			ViewpointsActionsDispatchers.deleteViewpoint(teamspace, containerOrFederation, viewpoint._id);
-		}
-	}, 150, { leading: true })).current;
 
 	const handleDelete = (e) => {
 		e.persist();
-		// debouncedDelete(e);
 		ViewpointsActionsDispatchers.deleteViewpoint(teamspace, containerOrFederation, viewpoint._id);
-
 	};
 
 	const onClickCancelEdit = (e: SyntheticEvent) => {
@@ -200,12 +187,7 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 	});
 
 	return (
-		<ViewpointItem
-			disabled={viewpoint.willBeRemoved}
-			onClick={onClickItem}
-			active={!!active}
-		>
-			{viewpoint.willBeRemoved && <span>This view has been deleted</span>}
+		<ViewpointItem onClick={onClickItem} active={!!active}>
 			<ViewThumbnail src={screenshot} alt={viewpoint.name} />
 			{active && editMode && (
 				<StyledForm onSubmit={formik.handleSubmit}>
@@ -215,13 +197,13 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 						onChange={formik.handleChange}
 						fullWidth
 						error={Boolean(formik.errors.name)}
-						helperText={getViewNameFieldErrorMsg(formik.errors.name)}
+						helperText={formik.errors.name}
 						label={formatMessage({ id: 'views.viewItem.nameFieldLabel', defaultMessage: 'View name' })}
 						placeholder={viewpoint.name}
 						autoFocus
 						onKeyDown={(e) => e.stopPropagation()}
 					/>
-					<IconsGroup disabled={isDeletePending}>
+					<IconsGroup>
 						<IconButton onClick={onClickCancelEdit}>
 							<CancelIcon />
 						</IconButton>
@@ -233,7 +215,7 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 				<NameRow>
 					<ViewpointNameLabel name={viewpoint.name} defaultView={defaultView} active />
 					{active && (
-						<IconsGroup disabled={isDeletePending}>
+						<IconsGroup>
 							{isCommenter && (
 								<IconButton onClick={() => setEditMode(true)}>
 									<EditIcon />

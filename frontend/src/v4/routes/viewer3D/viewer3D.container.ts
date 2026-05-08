@@ -20,7 +20,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
-import { selectTransformations } from '@/v4/modules/viewpoints/viewpoints.selectors';
+import { selectTransformations } from '@/v5/store/viewpoints/viewpoints.selectors';
 import { selectGisLayers } from '../../modules/gis';
 import { selectHighlightedShapes as selectIssuesHighlightedShapes,
 	selectPins as selectIssuePins, selectShapes as selectIssuesShapes } from '../../modules/issues';

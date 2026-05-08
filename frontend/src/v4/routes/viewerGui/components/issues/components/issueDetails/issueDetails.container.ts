@@ -18,6 +18,7 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { ViewpointsActions } from '@/v5/store/viewpoints/viewpoints.redux';
 import { selectMeasureSlopeUnits } from '@/v4/modules/measurements';
 import { selectUsername } from '../../../../../../modules/currentUser';
 import { DialogActions } from '../../../../../../modules/dialog';
@@ -44,7 +45,6 @@ import {
 	SequencesActions
 } from '../../../../../../modules/sequences';
 import { selectTopicTypes } from '../../../../../../modules/teamspace';
-import { ViewpointsActions } from '../../../../../../modules/viewpoints';
 import { withViewer } from '../../../../../../services/viewer/viewer';
 import { IssueDetails } from './issueDetails.component';
 

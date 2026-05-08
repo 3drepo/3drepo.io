@@ -17,13 +17,12 @@
 
 import { createSelector } from 'reselect';
 import { selectTicketOverrides, selectTicketTransparencies } from '@/v5/store/tickets/card/ticketsCard.selectors';
+import { selectOverrides as selectViewsOverrides, selectTransparencies as selectViewsTransparencies } from '@/v5/store/viewpoints/viewpoints.selectors';
 import { VIEWER_PANELS } from '../../constants/viewerGui';
 import * as Bim from '../bim';
 import { selectOverrides as selectGroupsOverrides,
 	selectTransparencies as selectGroupsTransparencies } from '../groups/groups.selectors';
 import { selectIsTreeProcessed } from '../tree';
-import { selectOverrides as selectViewsOverrides,
-		selectTransparencies as selectViewsTransparencies } from '../viewpoints';
 
 export const selectViewerGuiDomain = (state) => ({...state.viewerGui});
 

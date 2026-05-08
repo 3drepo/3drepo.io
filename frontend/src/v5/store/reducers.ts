@@ -31,6 +31,7 @@ import { containerRevisionsReducer } from '@/v5/store/containers/revisions/conta
 import { ticketsCardReducer } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { ticketCommentsReducer } from '@/v5/store/tickets/comments/ticketComments.redux';
 import { viewerReducer } from '@/v5/store/viewer/viewer.redux';
+import { viewpointsReducer } from '@/v5/store/viewpoints/viewpoints.redux';
 
 // <-- IMPORT MODULE REDUCER -->
 
@@ -51,4 +52,5 @@ export default {
 	ticketComments: ticketCommentsReducer,
 	users: usersReducer,
 	viewer2: viewerReducer,
+	viewpoints: viewpointsReducer,
 };
