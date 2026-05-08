@@ -17,7 +17,7 @@
 
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateUUID } = require('../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateUUID } = require('../../../../../../helper/services');
 
 const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/metadata`);
 jest.mock('../../../../../../../../src/v5/models/metadata');
@@ -85,29 +85,23 @@ const testGetModelMetadataFields = () => {
 		test('should return all unique metadata keys for a model', async () => {
 			const teamspace = generateRandomString();
 			const container = generateRandomString();
-			const rawMetadata = times(10, () => ({
-				metadata: times(5, () => ({
-					key: generateRandomString(),
-				})),
-			}));
+			const metadataKey = generateRandomString();
+			const rawMetadataKeys = [metadataKey, metadataKey, null, generateRandomString()];
 
-			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(rawMetadata);
+			MetadataModel.getDistinctMetadataByQuery.mockResolvedValueOnce(rawMetadataKeys);
 
 			const res = await Metadata.getModelMetadataFields(teamspace, container);
 
-			const expectedFields = new Set();
-			rawMetadata.forEach(({ metadata }) => {
-				metadata.forEach(({ key }) => expectedFields.add(key));
-			});
+			const expectedFields = new Set(rawMetadataKeys.filter((key) => key !== null));
 
 			expect(res).toEqual({ fields: Array.from(expectedFields) });
-			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledTimes(1);
-			expect(MetadataModel.getMetadataByQuery).toHaveBeenCalledWith(teamspace, container, {}, { 'metadata.key': 1, _id: 0 });
+			expect(MetadataModel.getDistinctMetadataByQuery).toHaveBeenCalledTimes(1);
+			expect(MetadataModel.getDistinctMetadataByQuery).toHaveBeenCalledWith(teamspace, container, {}, 'key');
 		});
 	});
 };
 
-describe('processors/teamspaces/projects/models/metadata', () => {
+describe(determineTestGroup(__filename), () => {
 	testUpdateCustomMetadata();
 	getMetadata();
 	testGetModelMetadataFields();

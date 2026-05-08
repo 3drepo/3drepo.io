@@ -233,7 +233,7 @@ const establishRoutes = (isInternal) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/fields:
 	 *   get:
-	 *     description: Returns an array of unique metadata fields in the container.
+	 *     description: Returns an object containing an array of unique metadata fields in the container.
 	 *     tags: [v:internal, v:external, Metadata]
 	 *     operationId: getModelMetadataFields
 	 *     parameters:
