@@ -19,6 +19,7 @@ const ClashesConstants = {};
 
 ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
 ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';
+ClashesConstants.RUN_HISTORY_COL = 'clashes.runs.history';
 
 ClashesConstants.CLASH_PLAN_TYPES = [
 	'hard',
