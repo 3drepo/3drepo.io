@@ -48,12 +48,13 @@ import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';
 import { SearchContext } from '@controls/search/searchContext';
 import { ViewItemSchema } from '@/v5/validation/viewpointSchemes/viewpointSchemes';
+import { IViewpoint } from '@/v5/store/viewpoints/viewpoints.types';
 
 interface IViewItem {
-	viewpoint: any; // TODO
+	viewpoint: IViewpoint;
 	active?: boolean;
 	editMode?: boolean;
-	setActiveViewpoint: (viewpoint: any | null) => void;
+	setActiveViewpoint: (viewpoint: IViewpoint | null) => void;
 	setEditMode: (mode: boolean) => void;
 	createMode: boolean;
 	setCreateMode: (mode: boolean) => void;

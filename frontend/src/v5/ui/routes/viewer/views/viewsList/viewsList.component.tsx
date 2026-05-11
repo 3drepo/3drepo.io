@@ -21,10 +21,18 @@ import { useContext } from 'react';
 import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { FormattedMessage } from 'react-intl';
 import { ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { IViewpoint } from '@/v5/store/viewpoints/viewpoints.types';
 
-type IViewpoint = any; // TODO ???
+type IViewsList = {
+	editMode: boolean;
+	activeViewpoint: IViewpoint;
+	setActiveViewpoint: (viewpoint: IViewpoint | null) => void;
+	setEditMode: (mode: boolean) => void;
+	createMode: boolean;
+	setCreateMode: (mode: boolean) => void;
+};
 
-export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint, setEditMode, createMode, setCreateMode }) => {
+export const ViewsList = ({ editMode, activeViewpoint, setActiveViewpoint, setEditMode, createMode, setCreateMode }: IViewsList) => {
 	const { items: viewpoints, filteredItems: filteredViewpoints } = useContext<SearchContextType<IViewpoint>>(SearchContext);
 	const newViewpoint = ViewpointsHooksSelectors.selectNewViewpoint();
 	if (!filteredViewpoints.length) {

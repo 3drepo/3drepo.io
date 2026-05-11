@@ -22,6 +22,7 @@ import { prepareGroup } from '@/v4/helpers/groups';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Constants } from '@/v5/helpers/actions.helper';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
+import { IViewpoint } from './viewpoints.types';
 
 export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createActions({
 	setPendingState: ['pendingState'],
@@ -54,15 +55,6 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	clearTransformations: [],
 	reset: [],
 }, { prefix: 'VIEWPOINTS/' }) as { Types: Constants<IViewpointsActionCreators>; Creators: IViewpointsActionCreators };
-
-export interface IViewpoint {
-	_id: string;
-	name: string;
-	screenshot?: any;
-	thumbnail?: any;
-	viewpoint?: any;
-	clippingPlanes?: any[];
-}
 
 export interface IViewpointsState {
 	isPending: boolean;

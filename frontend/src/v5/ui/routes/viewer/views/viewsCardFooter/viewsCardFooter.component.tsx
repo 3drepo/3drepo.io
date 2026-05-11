@@ -24,8 +24,15 @@ import { formatMessage } from '@/v5/services/intl';
 import { ViewerPanelFooter } from './viewsCardFooter.styles';
 import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { PresetViews } from './presetViews/presetViews.component';
+import { IViewpoint } from '@/v5/store/viewpoints/viewpoints.types';
 
-export const ViewsCardFooter = ({ setActiveViewpoint, createMode, setCreateMode }) => {
+type IViewsCardFooter = {
+	setActiveViewpoint: (viewpoint: IViewpoint | null) => void;
+	createMode: boolean;
+	setCreateMode: (mode: boolean) => void;
+};
+
+export const ViewsCardFooter = ({ setActiveViewpoint, createMode, setCreateMode }: IViewsCardFooter) => {
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const isFederation = modelIsFederation(containerOrFederation);
 	const isCommenter = isFederation

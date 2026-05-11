@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ComponentType } from 'react';
 import { Tooltip } from '@mui/material';
 import FrontViewIcon from '@assets/icons/twoToned/front_view-two_toned.svg';
 import BackViewIcon from '@assets/icons/twoToned/back_view-two_toned.svg';
@@ -26,13 +25,7 @@ import BottomUpIcon from '@assets/icons/twoToned/bottom_up-two_toned.svg';
 import { PresetViewsContainer, StyledPresetIcon } from './presetViews.styles';
 import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
-
-interface IPresetViewpoint {
-	_id: string;
-	name: string;
-	preset: string;
-	icon: ComponentType<{ className?: any }>;
-}
+import { IPresetViewpoint } from '@/v5/store/viewpoints/viewpoints.types';
 
 export const PRESET_VIEW = {
 	TOP: 'top',

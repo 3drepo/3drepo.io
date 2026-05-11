@@ -31,14 +31,16 @@ import { useParams } from 'react-router-dom';
 import { ViewerParams } from '../../routes.constants';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { CentredContainer } from '@controls/centredContainer';
+import { IViewpoint } from '@/v5/store/viewpoints/viewpoints.types';
 
 export const Views = () => {
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const viewpoints = ViewpointsHooksSelectors.selectViewpointsList();
 	const [editMode, setEditMode] = useState(false);
 	const [createMode, setCreateMode] = useState(false);
-	const [activeViewpoint, setActiveViewpoint] = useState(null);
+	const [activeViewpoint, setActiveViewpoint] = useState<IViewpoint | null>(null);
 	const isPending = ViewpointsHooksSelectors.selectIsPending();
+
 	useEffect(() => {
 		ViewpointsActionsDispatchers.fetchViewpoints(teamspace, containerOrFederation);
 	}, [teamspace, containerOrFederation]);
