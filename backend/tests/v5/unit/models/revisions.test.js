@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -24,7 +25,7 @@ const Revisions = require(`${src}/models/revisions`);
 const { DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { determineTestGroup, generateUUID, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
+const { generateUUID, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);

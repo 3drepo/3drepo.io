@@ -15,10 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { FileStorageTypes } = require('../../../../src/v5/utils/config.constants');
 const { src } = require('../../helper/path');
 
-const { determineTestGroup } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/models/loginRecords');
 const LoginRecords = require(`${src}/models/loginRecords`);

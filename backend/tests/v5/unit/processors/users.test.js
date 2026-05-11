@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { templates } = require('../../../../src/v5/utils/responseCodes');
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../../../../src/v5/models/users.constants');
 const { src } = require('../../helper/path');
@@ -43,7 +44,7 @@ const Intercom = require(`${src}/services/intercom`);
 jest.mock('../../../../src/v5/services/sso/frontegg');
 const FronteggService = require(`${src}/services/sso/frontegg`);
 
-const { generateRandomString, generateRandomObject, determineTestGroup } = require('../../helper/services');
+const { generateRandomString, generateRandomObject} = require('../../helper/services');
 
 const user = {
 	user: generateRandomString(),

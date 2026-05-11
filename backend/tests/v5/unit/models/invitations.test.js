@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 const Invitations = require(`${src}/models/invitations`);
 const db = require(`${src}/handler/db`);
-const { generateRandomString, determineTestGroup } = require('../../helper/services');
+const { generateRandomString} = require('../../helper/services');
 
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);

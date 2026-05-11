@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const {
-	determineTestGroup,
 	fileExists,
 	resetSharedDir,
-	generateRandomString,
-} = require('../../helper/services');
+	generateRandomString } = require('../../helper/services');
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
 

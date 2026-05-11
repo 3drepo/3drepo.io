@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
-const { determineTestGroup, generateRandomString } = require('../../../../helper/services');
+const { generateRandomString } = require('../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { isBool } = require(`${src}/utils/helper/typeCheck`);

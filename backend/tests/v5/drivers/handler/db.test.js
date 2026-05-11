@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
 const {
-	determineTestGroup,
 	generateRandomBuffer,
 	generateRandomString,
 	generateUserCredentials,
 	outOfOrderArrayEqual,
 	db: dbHelper,
-	generateRandomNumber,
-} = require('../../helper/services');
+	generateRandomNumber } = require('../../helper/services');
 const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 
 const DB = require(`${src}/handler/db`);

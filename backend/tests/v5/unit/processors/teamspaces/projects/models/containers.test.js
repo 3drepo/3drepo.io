@@ -15,12 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
 const {
-	determineTestGroup,
 	generateRandomString,
-	generateUUIDString,
-} = require('../../../../../helper/services');
+	generateUUIDString } = require('../../../../../helper/services');
 
 const fs = require('fs/promises');
 const path = require('path');

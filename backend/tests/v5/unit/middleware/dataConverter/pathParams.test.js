@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { templates, createResponseCode } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 
 const PathParams = require(`${src}/middleware/dataConverter/pathParams`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-const { generateRandomString, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString} = require('../../../helper/services');
 const { times } = require('lodash');
 
 jest.mock('../../../../../src/v5/utils/responder');

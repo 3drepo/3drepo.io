@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src, image } = require('../../../helper/path');
 const fs = require('fs');
 
@@ -192,7 +193,7 @@ const testFileExtensionFromPath = () => {
 	});
 };
 
-describe('utils/helpers/typeCheck', () => {
+describe(determineTestGroup(__filename), () => {
 	testIsBuffer();
 	testIsString();
 	testIsObject();
