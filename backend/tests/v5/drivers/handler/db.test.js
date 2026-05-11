@@ -25,7 +25,8 @@ const {
 	generateUserCredentials,
 	outOfOrderArrayEqual,
 	db: dbHelper,
-	generateRandomNumber } = require('../../helper/services');
+	generateRandomNumber,
+} = require('../../helper/services');
 const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 
 const DB = require(`${src}/handler/db`);

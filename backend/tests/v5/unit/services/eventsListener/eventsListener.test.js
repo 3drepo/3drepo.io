@@ -18,7 +18,7 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 
-const { generateRandomString} = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/models/loginRecords');
 const LoginRecords = require(`${src}/models/loginRecords`);

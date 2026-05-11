@@ -20,7 +20,7 @@ const { src, image, dwgModel, pdfModel, emptyPdf } = require('../../../../../../
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
-const { generateRandomString} = require('../../../../../../../../helper/services');
+const { generateRandomString } = require('../../../../../../../../helper/services');
 
 jest.mock('../../../../../../../../../../src/v5/utils/quota');
 const Quota = require(`${src}/utils/quota`);

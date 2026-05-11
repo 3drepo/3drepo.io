@@ -18,7 +18,7 @@
 const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateCustomStatusValues} = require('../../../helper/services');
+const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
 const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { statusTypes, statuses } = require(`${src}/schemas/tickets/templates.constants`);

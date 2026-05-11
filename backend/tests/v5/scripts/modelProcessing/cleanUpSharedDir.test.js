@@ -19,7 +19,8 @@ const { determineTestGroup } = require('../../helper/utils');
 const {
 	fileExists,
 	resetSharedDir,
-	generateRandomString } = require('../../helper/services');
+	generateRandomString,
+} = require('../../helper/services');
 const { times } = require('lodash');
 const { utilScripts, src } = require('../../helper/path');
 

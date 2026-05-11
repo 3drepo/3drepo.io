@@ -21,7 +21,7 @@ const { times } = require('lodash');
 const { src } = require('../../helper/path');
 
 const config = require(`${src}/utils/config`);
-const { generateRandomString, generateRandomObject} = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 const { PassThrough } = require('stream');
 
 const MimeTypes = require(`${src}/utils/helper/mimeTypes`);

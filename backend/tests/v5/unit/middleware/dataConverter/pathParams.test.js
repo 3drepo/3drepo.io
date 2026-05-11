@@ -22,7 +22,7 @@ const { src } = require('../../../helper/path');
 const PathParams = require(`${src}/middleware/dataConverter/pathParams`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-const { generateRandomString} = require('../../../helper/services');
+const { generateRandomString } = require('../../../helper/services');
 const { times } = require('lodash');
 
 jest.mock('../../../../../src/v5/utils/responder');
