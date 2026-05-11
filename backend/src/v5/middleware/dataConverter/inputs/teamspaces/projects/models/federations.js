@@ -22,7 +22,7 @@ const Yup = require('yup');
 const YupHelper = require('../../../../../../utils/helper/yup');
 const { getLatestRevision } = require('../../../../../../models/revisions');
 const { getUserFromSession } = require('../../../../../../utils/sessions');
-const { hasReadAccessToContainer } = require('../../../../../../utils/permissions');
+const { hasReadAccessToContainer, hasReadAccessToMultipleContainers } = require('../../../../../../utils/permissions');
 const { isString } = require('../../../../../../utils/helper/typeCheck');
 const { modelTypes } = require('../../../../../../models/modelSettings.constants');
 const { modelsExistInProject } = require('../../../../../../models/projectSettings');
@@ -84,7 +84,7 @@ Federations.getAccessibleContainers = (modelType) => async (req, res, next) => {
 
 				await Promise.all(subModels.map(async ({ _id: containerId }) => {
 					try {
-						if (await hasReadAccessToContainer(teamspace, project, [containerId], user)) {
+						if (await hasReadAccessToContainer(teamspace, project, containerId, user)) {
 							containers.push({ _id: containerId });
 						}
 					} catch (err) {

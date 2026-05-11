@@ -124,7 +124,7 @@ Containers.getMultipleContainersStats = async (teamspace, project, containers) =
 	const settings = await getContainers(
 		teamspace, containers, { _id: 1, name: 1, type: 1, properties: 1, status: 1, errorReason: 1 });
 
-	const listOfPromises = settings.map(async (setting) => {
+	await Promise.all(settings.map(async (setting) => {
 		const revs = await getRevisions(teamspace, project, setting._id, modelTypes.CONTAINER, true,
 			{ _id: 1, tag: 1, timestamp: 1 }, { timestamp: -1 });
 
@@ -146,9 +146,7 @@ Containers.getMultipleContainersStats = async (teamspace, project, containers) =
 				timestamp: setting.errorReason.timestamp,
 			};
 		}
-	});
-
-	await Promise.all(listOfPromises);
+	}));
 
 	return stats;
 };

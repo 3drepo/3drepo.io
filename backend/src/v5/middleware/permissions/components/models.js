@@ -41,24 +41,24 @@ const { templates } = require('../../../utils/responseCodes');
 const ModelPerms = {};
 
 const permissionsCheckTemplate = (type, callback, multipleModels = false) => async (req, res, next) => {
-	const { session, params, query } = req;
+	const { session, params, models } = req;
 	const user = getUserFromSession(session);
-	const { teamspace, project } = params;
+	const { teamspace, project, model } = params;
 
 	try {
-		if (multipleModels && !query.models) {
-			throw templates.invalidArguments;
-		}
-		const models = multipleModels ? query.models.split(',') : [params.model];
-		const modelInProject = await checkModelsExists(teamspace, project, models, type);
-		if (!modelInProject) {
+		const modelsToCheck = multipleModels ? models : [model];
+		const modelsDefined = multipleModels ? models?.length : model;
+
+		if (!modelsDefined || !await checkModelsExists(teamspace, project, modelsToCheck, type)) {
 			throw templates.modelNotFound;
 		}
-		if (req.app.get(BYPASS_AUTH) || await callback(
-			teamspace, project, models, user, true)) {
+
+		if (req.app.get(BYPASS_AUTH)
+		|| await callback(teamspace, project, multipleModels ? models : model, user, true)
+		) {
 			await next();
 		} else {
-			respond(req, res, templates.notAuthorized);
+			throw templates.notAuthorized;
 		}
 	} catch (err) {
 		respond(req, res, err);

@@ -98,6 +98,7 @@
   "devDependencies": {
     "@jest/test-sequencer": "29.7.0",
     "@shelf/jest-mongodb": "4.3.2",
+    "@types/jest": "29.5.14",
     "chai": "4.2.0",
     "chai-shallow-deep-equal": "1.4.6",
     "cross-env": "7.0.3",

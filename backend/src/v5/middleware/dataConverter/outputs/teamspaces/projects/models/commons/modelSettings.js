@@ -24,16 +24,16 @@ const { types } = require('../../../../../../../utils/helper/yup');
 
 const ModelSettings = {};
 
-const serialisedModelStatsSchema = Yup.lazy(() => Yup.object({
-	lastUpdated: types.timestamp.nullable(),
+const serialisedModelStatsSchema = Yup.object({
+	lastUpdated: types.timestamp,
 	revisions: Yup.object({
 		lastUpdated: types.timestamp,
 		latestRevision: types.id,
-	}).nullable().default(undefined),
+	}).default(undefined),
 	errorReason: Yup.object({
 		timestamp: types.timestamp,
-	}).nullable().default(undefined),
-}));
+	}).default(undefined),
+});
 
 ModelSettings.formatModelSettings = (req, res) => {
 	const { defaultView, defaultLegend, ...settings } = req.outputData;
@@ -61,14 +61,14 @@ ModelSettings.formatModelStats = (req, res) => {
 	const { outputData } = req;
 	const stats = serialisedModelStatsSchema.cast(deleteIfUndefined(outputData));
 
-	respond(req, res, templates.ok, stats);
+	respond(req, res, templates.ok, deleteIfUndefined(stats));
 };
 
 ModelSettings.serialiseModelStats = (req, res) => {
 	const { outputData } = req;
 	const data = {
 		stats: Object.entries(outputData).map(
-			([key, value]) => ({ modelId: key, ...serialisedModelStatsSchema.cast(deleteIfUndefined(value)) }),
+			([key, value]) => deleteIfUndefined({ modelId: key, ...serialisedModelStatsSchema.cast(value) }),
 		),
 	};
 

@@ -362,31 +362,38 @@ Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
 	return openTickets[model] || 0;
 };
 
+const getTemplateIdToClosedStatuses = async (teamspace) => {
+	const templates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
+
+	const templateIdToClosedStatuses = {};
+
+	templates.forEach(({ _id, config }) => {
+		templateIdToClosedStatuses[UUIDToString(_id)] = getClosedStatuses({ config });
+	});
+
+	return templateIdToClosedStatuses;
+};
+
 Tickets.getOpenTicketsCountForMultipleModels = async (teamspace, project, models) => {
-	const tickets = await getTicketsByQuery(
-		teamspace,
-		project,
-		null,
-		{ model: { $in: models } },
-		{ model: 1, type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 });
+	const [tickets, templateToClosedStatuses] = await Promise.all([
+		getTicketsByQuery(
+			teamspace,
+			project,
+			null,
+			{ model: { $in: models } },
+			{ model: 1, type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 }),
+		getTemplateIdToClosedStatuses(teamspace),
+	]);
 
-	const allTemplates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
+	const modelToOpenTicketsCount = {};
 
-	const templateToClosedStatuses = allTemplates.reduce((obj, { _id, config }) => {
-		const closedStatuses = getClosedStatuses({ config });
-
-		return { ...obj, [UUIDToString(_id)]: closedStatuses };
-	}, {});
-
-	const modelToOpenTicketsCount = tickets.reduce((acc, ticket) => {
+	tickets.forEach((ticket) => {
 		const closedStatuses = templateToClosedStatuses[UUIDToString(ticket.type)];
 
 		if (!closedStatuses.includes(ticket.properties.Status)) {
-			acc[ticket.model] = (acc[ticket.model] || 0) + 1;
+			modelToOpenTicketsCount[ticket.model] = (modelToOpenTicketsCount[ticket.model] || 0) + 1;
 		}
-
-		return acc;
-	}, {});
+	});
 
 	return modelToOpenTicketsCount;
 };

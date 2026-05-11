@@ -587,11 +587,6 @@ const testGetMultipleDrawingsStats = () => {
 			revCode: generateRandomString(),
 			model: id,
 		}));
-		const singleRevCalibrations = singleRevisions.map((rev) => ({
-			_id: UUIDToString(rev._id),
-			status: calibrationStatuses.CALIBRATED,
-			model: rev.model,
-		}));
 
 		const multipleRevisions = drawingIds.map((id) => times(2, (index) => ({
 			...generateRevisionEntry(),
@@ -601,11 +596,6 @@ const testGetMultipleDrawingsStats = () => {
 			timestamp: new Date(Date.now() + index),
 			model: id,
 		}))).flat();
-		const multipleRevCalibrations = multipleRevisions.map((rev) => ({
-			_id: UUIDToString(rev._id),
-			status: calibrationStatuses.CALIBRATED,
-			model: rev.model,
-		}));
 
 		const settings = drawingIds.map((id) => ({
 			_id: id,
@@ -614,27 +604,31 @@ const testGetMultipleDrawingsStats = () => {
 			desc: generateRandomString(),
 		}));
 
-		const searchSingleRevCalibrations = (_teamspace, _project, drawing) => {
-			const calibration = singleRevCalibrations.filter(({ model }) => model === drawing)[0];
-			return { [calibration._id]: calibration.status };
-		};
+		const singleRevCalibrationData = {};
+		const multipleRevCalibrationData = {};
 
-		const searchMultipleRevCalibrations = (_teamspace, _project, drawing) => {
-			const calibrations = multipleRevCalibrations.filter(({ model }) => model === drawing);
-			return calibrations.reduce((acc, calibration) => ({ ...acc, [calibration._id]: calibration.status }), {});
-		};
+		singleRevisions.forEach((rev) => {
+			singleRevCalibrationData[rev.model] = singleRevCalibrationData[rev.model] || {};
+			singleRevCalibrationData[rev.model][UUIDToString(rev._id)] = calibrationStatuses.CALIBRATED;
+		});
+
+		multipleRevisions.forEach((rev) => {
+			multipleRevCalibrationData[rev.model] = multipleRevCalibrationData[rev.model] || {};
+			multipleRevCalibrationData[rev.model][UUIDToString(rev._id)] = calibrationStatuses.CALIBRATED;
+		});
 
 		test('should return stats for multiple drawings with one revision each', async () => {
 			Revisions.getRevisionsByQuery.mockResolvedValueOnce(singleRevisions);
 			ModelSettings.getDrawings.mockResolvedValueOnce(settings);
-			CalibrationsProc.getCalibrationStatusForAllRevs.mockImplementation(
-				(_teamspace, _project, drawing) => searchSingleRevCalibrations(teamspace, project, drawing));
+			CalibrationsProc.getCalibrationStatusForAllRevsFromMultipleDrawings
+				.mockResolvedValueOnce(singleRevCalibrationData);
 
 			const expectedStats = {};
 			drawingIds.forEach((id) => {
 				const rev = singleRevisions.filter(({ model }) => model === id);
 				const setting = settings.filter(({ _id }) => _id === id)[0];
-				const calibration = singleRevCalibrations.filter(({ model }) => model === id)[0];
+				const calibration = singleRevCalibrationData[id]
+					? singleRevCalibrationData[id][UUIDToString(rev[0]._id)] : undefined;
 
 				expectedStats[id] = {
 					number: setting.number,
@@ -645,7 +639,7 @@ const testGetMultipleDrawingsStats = () => {
 						lastUpdated: rev[0].timestamp,
 						latestRevision: `${rev[0].statusCode}-${rev[0].revCode}`,
 					},
-					calibration: calibration.status,
+					calibration,
 					status: rev[0].statusCode === processStatuses.FAILED ? processStatuses.FAILED : undefined,
 				};
 			});
@@ -658,7 +652,7 @@ const testGetMultipleDrawingsStats = () => {
 		test('should return stats for drawings with no revisions', async () => {
 			Revisions.getRevisionsByQuery.mockResolvedValueOnce([]);
 			ModelSettings.getDrawings.mockResolvedValueOnce(settings);
-			CalibrationsProc.getCalibrationStatusForAllRevs.mockResolvedValueOnce({});
+			CalibrationsProc.getCalibrationStatusForAllRevsFromMultipleDrawings.mockResolvedValueOnce({});
 
 			const expectedStats = {};
 			drawingIds.forEach((id) => {
@@ -681,14 +675,13 @@ const testGetMultipleDrawingsStats = () => {
 		test('should return stats for multiple drawings with multiple revisions each', async () => {
 			Revisions.getRevisionsByQuery.mockResolvedValueOnce(multipleRevisions);
 			ModelSettings.getDrawings.mockResolvedValueOnce(settings);
-			CalibrationsProc.getCalibrationStatusForAllRevs.mockImplementation(
-				(_teamspace, _project, drawing) => searchMultipleRevCalibrations(teamspace, project, drawing));
-
+			CalibrationsProc.getCalibrationStatusForAllRevsFromMultipleDrawings
+				.mockResolvedValueOnce(multipleRevCalibrationData);
 			const expectedStats = {};
 			drawingIds.forEach((id) => {
 				const revs = multipleRevisions.filter(({ model }) => model === id);
 				const setting = settings.filter(({ _id }) => _id === id)[0];
-				const calibrations = multipleRevCalibrations.filter(({ model }) => model === id);
+				const calibrations = multipleRevCalibrationData[id] || {};
 
 				expectedStats[id] = {
 					number: setting.number,
@@ -699,7 +692,7 @@ const testGetMultipleDrawingsStats = () => {
 						lastUpdated: revs[revs.length - 1].timestamp,
 						latestRevision: `${revs[revs.length - 1].statusCode}-${revs[revs.length - 1].revCode}`,
 					},
-					calibration: calibrations.length > 0 ? calibrations[calibrations.length - 1].status : undefined,
+					calibration: calibrations[UUIDToString(revs[revs.length - 1]._id)],
 					status: revs[revs.length - 1].statusCode === processStatuses.FAILED
 						? processStatuses.FAILED : undefined,
 				};

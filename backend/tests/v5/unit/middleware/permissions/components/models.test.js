@@ -58,7 +58,7 @@ Permissions.hasReadAccessToMultipleDrawings.mockImplementation(mockImp);
 Permissions.hasReadAccessToMultipleFederations.mockImplementation(mockImp);
 
 const testHelper = (type, label, testFn, mockedFn, multipleModels = false) => {
-	const multipleModelsTest = multipleModels ? [['models not in query', false, { mockVal: null, multipleModelsFail: true }, templates.invalidArguments]] : [];
+	const multipleModelsTest = multipleModels ? [['models not in request', false, { mockVal: null, multipleModelsFail: true }, templates.modelNotFound]] : [];
 	describe.each([
 		['user has access', true, { }],
 		['byPass is enabled', true, { mockVal: null, byPass: true }],
@@ -77,9 +77,12 @@ const testHelper = (type, label, testFn, mockedFn, multipleModels = false) => {
 
 		test(` ${success ? 'next() ' : 'respond() '}should be called if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});
+
+			const modelParam = multipleModels ? {} : { model };
+
 			const req = {
-				params: { teamspace, project, model, type },
-				query: multipleModelsFail ? {} : { models: model },
+				params: { teamspace, project, type, ...modelParam },
+				models: multipleModels && !multipleModelsFail ? [model] : undefined,
 				session: { user: { username: user } },
 				app: { get: () => byPass },
 			};
@@ -125,7 +128,8 @@ const testHelper = (type, label, testFn, mockedFn, multipleModels = false) => {
 			} else if (modelInProject) {
 				if (mockVal !== null) {
 					expect(mockedFn).toHaveBeenCalledTimes(1);
-					expect(mockedFn).toHaveBeenCalledWith(teamspace, project, [model], user, true);
+					expect(mockedFn).toHaveBeenCalledWith(teamspace, project,
+						multipleModels ? [model] : model, user, true);
 				} else {
 					expect(mockedFn).not.toHaveBeenCalled();
 				}

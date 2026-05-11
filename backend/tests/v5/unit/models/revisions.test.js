@@ -214,6 +214,24 @@ const testGetRevisionsByQuery = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
 		});
 
+		test('Should apply the sort given in the params', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const sort = generateRandomObject();
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, {}, sort);
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...excludeVoids,
+				...excludeFailed,
+				...excludeIncomplete,
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, sort);
+		});
+
 		test('Should return the revisions (drawing)', async () => {
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
 			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.DRAWING,

@@ -75,29 +75,27 @@ Federations.newRevision = async (teamspace, project, federation, info) => {
 };
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
-	const modelsUpdates = new Map();
+	const modelsUpdates = {};
 	if (models.length) {
-		const listOfPromises = models.map(async (m) => {
+		await Promise.all(models.map(async (m) => {
 			try {
-				const latestRev = await getLatestRevision(teamspace, m, modelTypes.FEDERATION, { timestamp: 1 });
+				const { timestamp } = await getLatestRevision(teamspace, m, modelTypes.CONTAINER, { timestamp: 1 });
 
-				modelsUpdates.set(m, latestRev.timestamp);
+				modelsUpdates[m] = timestamp;
 			} catch {
 				// do nothing. A container can have 0 revision.
 			}
-		});
-
-		await Promise.all(listOfPromises);
+		}));
 	}
 
 	return modelsUpdates;
 };
 
-const getFederationLastUpdates = (models, modelsLastUpdates) => {
+const determineLastUpdated = (containers, lastUpdateInfo) => {
 	let lastUpdate;
 
-	models.forEach(({ _id }) => {
-		const update = modelsLastUpdates.get(_id);
+	containers.forEach(({ _id }) => {
+		const update = lastUpdateInfo[_id];
 		if (update && (!lastUpdate || update > lastUpdate)) {
 			lastUpdate = update;
 		}
@@ -138,14 +136,13 @@ Federations.getMultipleFederationsStats = async (teamspace, project, federations
 		),
 		getOpenTicketsCountForMultipleModels(teamspace, project, federations),
 	]);
-	const modelsSet = settings.reduce((acc, setting) => {
-		if (setting.subModels?.length) {
-			setting.subModels.forEach(({ _id }) => acc.add(_id));
-		}
-		return acc;
-	}, new Set());
 
-	const modelsLastUpdates = await getLastUpdatesFromModels(teamspace, Array.from(modelsSet));
+	const containersRequired = new Set();
+	settings.forEach(({ subModels }) => {
+		subModels.forEach(({ _id }) => containersRequired.add(_id));
+	});
+
+	const containersLastUpdates = await getLastUpdatesFromModels(teamspace, Array.from(containersRequired));
 
 	settings.forEach((setting) => {
 		stats[setting._id] = {
@@ -154,9 +151,9 @@ Federations.getMultipleFederationsStats = async (teamspace, project, federations
 			status: setting?.status,
 			containers: setting?.subModels,
 			desc: setting?.desc,
-			lastUpdated: getFederationLastUpdates(
+			lastUpdated: determineLastUpdated(
 				setting?.subModels || [],
-				modelsLastUpdates,
+				containersLastUpdates,
 			),
 			tickets: ticketCounts[setting._id] || 0,
 		};
