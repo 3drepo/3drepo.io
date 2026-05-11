@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { src } = require('../../../../../../helper/path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -34,7 +35,7 @@ const RevisionsModel = require(`${src}/models/revisions`);
 const Clashes = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/clashes`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../../../../../helper/services');
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);

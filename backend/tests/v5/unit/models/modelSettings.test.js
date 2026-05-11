@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUIDString, generateUUID } = require('../../helper/services');
@@ -907,7 +908,7 @@ const testGetMultipleModelsByIds = () => {
 	});
 };
 
-describe('models/modelSettings', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetModelById();
 	testGetContainerById();
 	testGetDrawingById();

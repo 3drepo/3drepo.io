@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 const { TEAM_MEMBER } = require('../../../../src/v5/models/roles.constants');
 const { generateRandomString } = require('../../helper/services');
@@ -75,7 +76,7 @@ const testRevokeTeamspaceRoleFromUser = () => {
 	});
 };
 
-describe('models/roles', () => {
+describe(determineTestGroup(__filename), () => {
 	testCreateTeamspaceRole();
 	testRemoveTeamspaceRole();
 	testGrantTeamspaceRoleToUser();

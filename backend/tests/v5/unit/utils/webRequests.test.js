@@ -16,10 +16,10 @@
  */
 
 jest.mock('axios');
+const { determineTestGroup } = require('../../helper/utils');
 const axios = require('axios');
 const { src } = require('../../helper/path');
 const Crypto = require('crypto');
-// const { determineTestGroup } = require('../../helper/services');
 
 // We can't use the one from service helper because mocking axios upsets
 // frontegg, which is a dependency of something that is being imported in that file...
@@ -147,7 +147,7 @@ const testPutRequest = () => {
 	});
 };
 
-describe('utils/webRequests', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetRequest();
 	testGetArrayBufferRequest();
 	testPostRequest();

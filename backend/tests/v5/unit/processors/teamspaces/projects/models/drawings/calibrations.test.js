@@ -15,15 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 const {
-	determineTestGroup,
 	generateRandomString,
 	generateRandomObject,
 	generateRandomDate,
-	generateUUID,
-} = require('../../../../../../helper/services');
+	generateUUID } = require('../../../../../../helper/services');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);

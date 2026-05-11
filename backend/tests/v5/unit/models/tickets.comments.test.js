@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { generateRandomString, generateRandomNumber, generateUUID } = require('../../helper/services');
 const { src } = require('../../helper/path');
@@ -487,7 +488,7 @@ const testDeleteCommentsByTicketIds = () => {
 	});
 };
 
-describe('models/tickets.comments', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetCommentById();
 	testGetCommentsByTicket();
 	testAddComment();

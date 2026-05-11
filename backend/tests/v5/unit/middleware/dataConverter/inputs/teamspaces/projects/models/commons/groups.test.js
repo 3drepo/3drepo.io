@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const _ = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateLegacyGroup, generateUUIDString, generateRandomString } = require('../../../../../../../../helper/services');
@@ -156,7 +157,7 @@ const testValidateGroupsImportData = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/commons/groups', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateGroupsExportData();
 	testValidateGroupsImportData();
 });
