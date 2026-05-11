@@ -596,6 +596,7 @@ const testGetMultipleDrawingsStats = () => {
 			revCode: generateRandomString(),
 			timestamp: new Date(Date.now() + index),
 			model: id,
+			status: index === 1 ? processStatuses.OK : undefined,
 		}))).flat();
 
 		const settings = drawingIds.map((id) => ({

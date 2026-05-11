@@ -24,11 +24,11 @@ const { deleteModel, getDrawingById, getDrawings, updateModelSettings } = requir
 const { getCalibrationStatusForAllRevs, getCalibrationStatusForAllRevsFromMultipleDrawings } = require('./calibrations');
 const { getFileAsStream, removeFilesWithMeta, storeFile } = require('../../../../../services/filesManager');
 const { getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
+const { modelTypes, processStatuses } = require('../../../../../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../../../../../models/revisions.constants');
 const { calibrationStatuses } = require('../../../../../models/calibrations.constants');
 const { createThumbnail } = require('../../../../../utils/helper/images');
 const { deleteDrawingCalibrations } = require('../../../../../models/calibrations');
-const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { processDrawingUpload } = require('../../../../../services/modelProcessing');
 const { templates } = require('../../../../../utils/responseCodes');
 
@@ -184,7 +184,7 @@ Drawings.getMultipleDrawingsStats = async (teamspace, project, drawings) => {
 
 	Object.values(drawingsData).forEach(({ settings, revisions, calibrations }) => {
 		const completeRevisions = revisions.filter(
-			(rev) => rev.status === undefined);
+			(rev) => rev.status === undefined || rev.status === processStatuses.OK);
 		const latestRevision = completeRevisions.sort(
 			(a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
 
