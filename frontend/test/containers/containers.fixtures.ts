@@ -79,7 +79,8 @@ export const getMockStats = (container: IContainer): ContainerStats => ({
 	type: container.type,
 	status: container.status,
 	code: container.code,
-	unit: container.unit
+	unit: container.unit,
+	modelId: container._id,
 });
 
 export const prepareMockViews = (): View[] => {

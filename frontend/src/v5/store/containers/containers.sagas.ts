@@ -100,7 +100,7 @@ export function* bulkFetchContainersStats({ teamspace, projectId, containerIds }
 		const chunkedIds = chunk(containerIds, DASHBOARD_LIST_CHUNK_SIZE);
 		yield all(
 			chunkedIds.map(function* (idsChunk) {
-				const { stats } = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);
+				const stats = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);
 				yield put(ContainersActions.bulkFetchContainersStatsSuccess(projectId, stats));
 			}),
 		);

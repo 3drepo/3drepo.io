@@ -91,7 +91,7 @@ export const fetchContainerStatsSuccess = (state, {
 export const bulkFetchContainersStatsSuccess = (state, {
 	projectId,
 	stats,
-}) => {
+}: BulkFetchContainersStatsSuccessAction) => {
 	const containers = state.containersByProject[projectId];
 	if (!containers) return;
 

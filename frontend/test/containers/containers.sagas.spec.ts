@@ -190,7 +190,7 @@ describe('Containers: sagas', () => {
 			];
 			const statsList = [
 				stats,
-				prepareMockStats({ _id: secondContainerId })
+				prepareMockStats({ modelId: secondContainerId}),
 			];
 			dispatch(ContainersActions.fetchContainersSuccess(projectId, containers));
 
