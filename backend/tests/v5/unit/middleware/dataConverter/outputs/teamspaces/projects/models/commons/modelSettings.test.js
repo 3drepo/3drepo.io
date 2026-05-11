@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { deleteIfUndefined } = require('../../../../../../../../../../src/v5/utils/helper/objects');
 const { src } = require('../../../../../../../../helper/path');
-const { determineTestGroup, generateRandomModelProperties, generateRandomObject, generateUUID } = require('../../../../../../../../helper/services');
+const { generateRandomModelProperties, generateRandomObject, generateUUID } = require('../../../../../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
