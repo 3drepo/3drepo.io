@@ -75,12 +75,10 @@ Permissions.checkModelsExists = async (teamspace, project, models, modelType) =>
 const multipleModelsPermCheck = (permCheck, modelType) => async (
 	teamspace, project, modelIDs, username, adminCheck = true) => {
 	const models = await Permissions.checkModelsExists(teamspace, project, modelIDs, modelType);
-	console.log('model exists', adminCheck);
 	if (!models) return false;
 	if (adminCheck) {
 		const hasAdminPerms = await hasAdminPermissions(teamspace, project, username);
 
-		console.log(hasAdminPerms);
 		if (hasAdminPerms) {
 			return true;
 		}

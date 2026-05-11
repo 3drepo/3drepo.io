@@ -139,7 +139,7 @@ Federations.getMultipleFederationsStats = async (teamspace, project, federations
 
 	const containersRequired = new Set();
 	settings.forEach(({ subModels }) => {
-		subModels.forEach(({ _id }) => containersRequired.add(_id));
+		subModels?.forEach(({ _id }) => containersRequired.add(_id));
 	});
 
 	const containersLastUpdates = await getLastUpdatesFromModels(teamspace, Array.from(containersRequired));

@@ -612,6 +612,9 @@ const testGetMultipleDrawingsStats = () => {
 			singleRevCalibrationData[rev.model][UUIDToString(rev._id)] = calibrationStatuses.CALIBRATED;
 		});
 
+		// Adding an extra entry to ensure unindentified revisions are not included in the stats
+		singleRevisions.push(generateRandomObject());
+
 		multipleRevisions.forEach((rev) => {
 			multipleRevCalibrationData[rev.model] = multipleRevCalibrationData[rev.model] || {};
 			multipleRevCalibrationData[rev.model][UUIDToString(rev._id)] = calibrationStatuses.CALIBRATED;
