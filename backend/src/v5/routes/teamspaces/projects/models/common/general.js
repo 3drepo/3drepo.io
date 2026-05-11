@@ -233,7 +233,6 @@ const getJobsWithAccess = async (req, res) => {
 
 const getModelStatsInBulk = (modelType) => async (req, res, next) => {
 	const { teamspace, project } = req.params;
-	const models = req.query.models.split(',');
 	const fn = {
 		[modelTypes.CONTAINER]: Containers.getMultipleContainersStats,
 		[modelTypes.DRAWING]: Drawings.getMultipleDrawingsStats,
@@ -241,7 +240,7 @@ const getModelStatsInBulk = (modelType) => async (req, res, next) => {
 	};
 
 	try {
-		const stats = await fn[modelType](teamspace, project, models);
+		const stats = await fn[modelType](teamspace, project, req.models);
 		req.outputData = stats;
 		await next();
 	} catch (err) {

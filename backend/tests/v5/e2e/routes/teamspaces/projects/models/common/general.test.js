@@ -1391,8 +1391,8 @@ const testGetModelStatsInBulk = () => {
 			});
 		};
 
-		// describe.each(generateTestData(modelTypes.FEDERATION))(modelTypes.FEDERATION.toUpperCase(), runTests);
-		// describe.each(generateTestData(modelTypes.CONTAINER))(modelTypes.CONTAINER.toUpperCase(), runTests);
+		describe.each(generateTestData(modelTypes.FEDERATION))(modelTypes.FEDERATION.toUpperCase(), runTests);
+		describe.each(generateTestData(modelTypes.CONTAINER))(modelTypes.CONTAINER.toUpperCase(), runTests);
 		describe.each(generateTestData(modelTypes.DRAWING))(modelTypes.DRAWING.toUpperCase(), runTests);
 	});
 };

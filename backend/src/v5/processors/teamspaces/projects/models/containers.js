@@ -125,7 +125,7 @@ Containers.getMultipleContainersStats = async (teamspace, project, containers) =
 		teamspace, containers, { _id: 1, name: 1, type: 1, properties: 1, status: 1, errorReason: 1 });
 
 	await Promise.all(settings.map(async (setting) => {
-		const revs = await getRevisions(teamspace, project, setting._id, modelTypes.CONTAINER, true,
+		const revs = await getRevisions(teamspace, project, setting._id, modelTypes.CONTAINER, false,
 			{ _id: 1, tag: 1, timestamp: 1 }, { timestamp: -1 });
 
 		stats[setting._id] = {

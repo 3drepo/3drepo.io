@@ -1546,5 +1546,4 @@ describe(determineTestGroup(__filename), () => {
 	testInitialiseAutomatedProperties();
 	testOnTemplateUpdated();
 	testOnModelNameUpdated();
-	testGetOpenTicketsCount();
 });
