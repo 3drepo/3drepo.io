@@ -432,7 +432,7 @@ const testHasAdminAccessToDrawing = () => {
 		[generateRandomString(), false],
 	])('Has admin access to drawing', (user, result) => {
 		test(`${user} ${result ? 'have' : 'does not have'} admin access`, async () => {
-			Projects.modelsExistInProject.mockResolvedValueOnce(() => true);
+			Projects.modelsExistInProject.mockResolvedValueOnce(true);
 			expect(await Permissions.hasAdminAccessToDrawing(generateRandomString(), generateRandomString(),
 				generateRandomString(), user)).toBe(result);
 		});
@@ -440,7 +440,7 @@ const testHasAdminAccessToDrawing = () => {
 
 	describe('Drawing does not belong to the project', () => {
 		test('should return false if the drawing does not belong to the project', async () => {
-			Projects.modelsExistInProject.mockResolvedValueOnce(() => false);
+			Projects.modelsExistInProject.mockResolvedValueOnce(false);
 			expect(await Permissions.hasAdminAccessToDrawing(generateRandomString(), generateRandomString(),
 				generateRandomString(), viewerUser)).toBe(false);
 		});
