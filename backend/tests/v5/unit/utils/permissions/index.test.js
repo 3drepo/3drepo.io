@@ -463,7 +463,7 @@ const testHasReadAccessToFederation = () => {
 		test(`${user} ${result ? 'have' : 'does not have'} read access (adminCheck: ${adminCheck})`, async () => {
 			Projects.modelsExistInProject.mockImplementation(() => true);
 			expect(await Permissions.hasReadAccessToFederation(generateRandomString(), generateRandomString(),
-			 generateRandomString(), user, adminCheck)).toBe(result);
+				generateRandomString(), user, adminCheck)).toBe(result);
 		});
 	});
 

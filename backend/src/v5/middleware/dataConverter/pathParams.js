@@ -16,7 +16,6 @@
  */
 
 const { createResponseCode, templates } = require('../../utils/responseCodes');
-const { isString } = require('../../utils/helper/typeCheck');
 const { modelTypes } = require('../../models/modelSettings.constants');
 const { respond } = require('../../utils/responder');
 const { stringToUUID } = require('../../utils/helper/uuids');
