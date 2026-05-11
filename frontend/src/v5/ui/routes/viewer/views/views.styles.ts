@@ -19,8 +19,8 @@ import { SearchInput } from '@controls/search/searchInput';
 import styled from 'styled-components';
 
 export const SearchBar = styled(SearchInput)`
-    margin: 0;
-    padding: 10px 8px;
-    background: ${({ theme }) => theme.palette.primary.contrast};
-    width: auto;
+	margin: 0;
+	padding: 10px 8px;
+	background: ${({ theme }) => theme.palette.primary.contrast};
+	width: auto;
 `;

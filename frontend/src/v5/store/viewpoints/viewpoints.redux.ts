@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { keyBy, orderBy, values } from 'lodash';
+import { keyBy } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import { Action } from 'redux';
 import { prepareGroup } from '@/v4/helpers/groups';
@@ -61,9 +61,9 @@ export interface IViewpointsState {
 	viewpointsMap: Record<string, IViewpoint>;
 	viewpointsGroups: Record<string, any>;
 	viewpointsGroupsBeingLoaded: Set<string>;
-	sortOrder: string;
+	sortOrder: SortingDirection;
 	selectedViewpoint: IViewpoint | null;
-	newViewpoint: IViewpoint | null; // TODO type
+	newViewpoint: IViewpoint | null;
 }
 
 export const INITIAL_STATE: IViewpointsState = {
@@ -77,10 +77,14 @@ export const INITIAL_STATE: IViewpointsState = {
 };
 
 const prepareViewpointGroups = (viewpoint: IViewpoint): IViewpoint => {
-	if (viewpoint.viewpoint?.override_groups?.length) {
-		viewpoint.viewpoint.override_groups = viewpoint.viewpoint.override_groups.map(prepareGroup);
-	}
-	return viewpoint;
+	if (!viewpoint.viewpoint?.override_groups?.length) return viewpoint;
+	return {
+		...viewpoint,
+		viewpoint: {
+			...viewpoint.viewpoint,
+			override_groups: viewpoint.viewpoint.override_groups.map(prepareGroup),
+		},
+	};
 };
 
 const setPendingState = (state: IViewpointsState, { pendingState }: SetPendingStateAction) => {
@@ -125,8 +129,6 @@ const toggleSortOrder = (state: IViewpointsState) => {
 	const isAsc = state.sortOrder === SortingDirection.ASCENDING;
 	const newSortOrder = isAsc ? SortingDirection.DESCENDING : SortingDirection.ASCENDING;
 	state.sortOrder = newSortOrder;
-	const sorted = orderBy(values(state.viewpointsMap), ({ name }) => name.trim().toLowerCase(), [newSortOrder]);
-	state.viewpointsMap = keyBy(sorted, '_id');
 };
 
 const reset = () => ({ ...INITIAL_STATE, viewpointsGroupsBeingLoaded: new Set<string>() });

@@ -20,16 +20,16 @@ import styled from 'styled-components';
 
 
 export const ViewpointsList = styled.div`
-    display: flex;
-    flex-direction: column;
-    flex: auto;
-    padding: 0;
-    height: auto;
-    max-height: 70vh;
-    overflow: overlay;
-    background-color: ${({ theme }) => theme.palette.primary.contrast};
+	display: flex;
+	flex-direction: column;
+	flex: auto;
+	padding: 0;
+	height: auto;
+	max-height: 70vh;
+	overflow: overlay;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
 export const EmptyList = styled(EmptyListMessage)`
-    margin: 8px;
+	margin: 8px;
 `;

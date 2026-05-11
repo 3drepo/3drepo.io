@@ -27,11 +27,11 @@ export const ViewerPanelFooter = styled(Grid).attrs({
 	container: true,
 	wrap: 'nowrap',
 })<IViewerPanelFooter>`
-    background-color: ${({ theme }) => theme.palette.primary.contrast};
-    padding: ${({ padding }) => padding || '0 16px' };
-    border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
-    flex: none;
-    min-height: 65px;
-    font-size: 14px;
-    z-index: 1;
+	background-color: ${({ theme }) => theme.palette.primary.contrast};
+	padding: ${({ padding }) => padding || '0 16px' };
+	border-top: 1px solid ${({ theme }) => theme.palette.base.lightest};
+	flex: none;
+	min-height: 65px;
+	font-size: 14px;
+	z-index: 1;
 `;

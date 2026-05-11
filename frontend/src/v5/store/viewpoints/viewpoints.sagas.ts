@@ -63,12 +63,13 @@ export function* fetchViewpoints({ teamspace, modelId }: FetchViewpointsAction) 
 	try {
 		yield put(ViewpointsActions.setPendingState(true));
 		const { data: viewpoints } = yield API.getModelViewpoints(teamspace, modelId);
-		viewpoints.forEach((viewpoint) => {
+		const processedViewpoints = viewpoints.map((viewpoint) => {
 			if (viewpoint.screenshot?.thumbnail) {
-				viewpoint.screenshot.thumbnailUrl = getThumbnailUrl(viewpoint.screenshot.thumbnail);
+				return { ...viewpoint, screenshot: { ...viewpoint.screenshot, thumbnailUrl: getThumbnailUrl(viewpoint.screenshot.thumbnail) } };
 			}
+			return viewpoint;
 		});
-		yield put(ViewpointsActions.fetchViewpointsSuccess(viewpoints));
+		yield put(ViewpointsActions.fetchViewpointsSuccess(processedViewpoints));
 		yield put(ViewpointsActions.setPendingState(false));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -127,10 +128,10 @@ const onUpdated = (updatedView) => dispatch(ViewpointsActions.updateViewpointSuc
 const onDeleted = (deletedView) => dispatch(ViewpointsActions.deleteViewpointSuccess(deletedView));
 
 const onCreated = (createdView) => {
-	if (createdView.screenshot?.thumbnail) {
-		createdView.screenshot.thumbnailUrl = getThumbnailUrl(createdView.screenshot.thumbnail);
-	}
-	dispatch(ViewpointsActions.createViewpointSuccess(createdView));
+	const view = createdView.screenshot?.thumbnail
+		? { ...createdView, screenshot: { ...createdView.screenshot, thumbnailUrl: getThumbnailUrl(createdView.screenshot.thumbnail) } }
+		: createdView;
+	dispatch(ViewpointsActions.createViewpointSuccess(view));
 };
 
 export function* subscribeOnViewpointChanges({ teamspace, modelId }: SubscribeOnViewpointChangesAction) {

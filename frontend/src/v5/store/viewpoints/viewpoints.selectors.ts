@@ -26,8 +26,6 @@ import { selectQueryParams } from '@/v4/modules/router/router.selectors';
 import { IViewpointsState } from './viewpoints.redux';
 import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
 
-// Re-export helper functions consumed by other parts of the codebase
-
 const selectViewpointsDomain = (state): IViewpointsState => state.viewpoints;
 
 export const selectIsPending = createSelector(
