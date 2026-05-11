@@ -16,8 +16,8 @@
  */
 
 import { SyntheticEvent, useContext } from 'react';
-import { useFormik } from 'formik';
-import * as Yup from 'yup';
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
 import { Tooltip } from '@mui/material';
 import { useParams } from 'react-router-dom';
 
@@ -25,7 +25,6 @@ import ShareIcon from '@mui/icons-material/Share';
 import CancelIcon from '@assets/icons/controls/clear_circle.svg';
 import EditIcon from '@assets/icons/outlined/edit_comment-outlined.svg';
 import { Highlight } from '@controls/highlight';
-import { getViewNameFieldErrorMsg } from '@/v4/helpers/views';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { ContainersHooksSelectors, FederationsHooksSelectors, ModelHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -48,6 +47,7 @@ import { EllipsisMenu } from '@controls/ellipsisMenu';
 import { EllipsisMenuItem } from '@controls/ellipsisMenu/ellipsisMenuItem';
 import { formatMessage } from '@/v5/services/intl';
 import { SearchContext } from '@controls/search/searchContext';
+import { ViewItemSchema } from '@/v5/validation/viewpointSchemes/viewpointSchemes';
 
 interface IViewItem {
 	viewpoint: any; // TODO
@@ -58,10 +58,6 @@ interface IViewItem {
 	createMode: boolean;
 	setCreateMode: (mode: boolean) => void;
 }
-
-const ViewItemSchema = Yup.object().shape({ // TODO move to validators
-	name: Yup.string().max(37),
-});
 
 const ViewpointNameLabel = ({ name, defaultView, active = false }) => {
 	const { query } = useContext(SearchContext);
@@ -169,35 +165,34 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 		}
 	};
 
-	const formik = useFormik({
-		initialValues: { name: viewpoint._id ? viewpoint.name : '' },
-		validationSchema: ViewItemSchema,
-		onSubmit: (values) => {
-			const newName = values.name || viewpoint.name;
-			if (createMode) {
-				const newViewpoint = { ...viewpoint, name: newName };
-				ViewpointsActionsDispatchers.createViewpoint(teamspace, containerOrFederation, newViewpoint);
-				setCreateMode(false);
-			} else {
-				ViewpointsActionsDispatchers.updateViewpoint(teamspace, containerOrFederation, viewpoint._id, newName);
-				setEditMode(false);
-			}
-		},
-		enableReinitialize: true,
+	const { register, handleSubmit, formState: { errors } } = useForm({
+		mode: 'onChange',
+		defaultValues: { name: viewpoint._id ? viewpoint.name : '' },
+		resolver: yupResolver(ViewItemSchema),
 	});
+
+	const onSubmit = (values) => {
+		const newName = values.name || viewpoint.name;
+		if (createMode) {
+			const newViewpoint = { ...viewpoint, name: newName };
+			ViewpointsActionsDispatchers.createViewpoint(teamspace, containerOrFederation, newViewpoint);
+			setCreateMode(false);
+		} else {
+			ViewpointsActionsDispatchers.updateViewpoint(teamspace, containerOrFederation, viewpoint._id, newName);
+			setEditMode(false);
+		}
+	};
 
 	return (
 		<ViewpointItem onClick={onClickItem} active={!!active}>
 			<ViewThumbnail src={screenshot} alt={viewpoint.name} />
 			{active && editMode && (
-				<StyledForm onSubmit={formik.handleSubmit}>
+				<StyledForm onSubmit={handleSubmit(onSubmit)}>
 					<NewViewpointName
-						name="name"
-						value={formik.values.name}
-						onChange={formik.handleChange}
+						{...register('name')}
 						fullWidth
-						error={Boolean(formik.errors.name)}
-						helperText={formik.errors.name}
+						error={Boolean(errors.name)}
+						helperText={errors.name?.message}
 						label={formatMessage({ id: 'views.viewItem.nameFieldLabel', defaultMessage: 'View name' })}
 						placeholder={viewpoint.name}
 						autoFocus
@@ -207,7 +202,7 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 						<IconButton onClick={onClickCancelEdit}>
 							<CancelIcon />
 						</IconButton>
-						<SaveButton type="submit" id="views-card-save-button">{formatMessage({ id: 'views.viewItem.saveButton', defaultMessage: 'Save' })}</SaveButton>
+						<SaveButton disabled={Boolean(errors.name)} type="submit">{formatMessage({ id: 'views.viewItem.saveButton', defaultMessage: 'Save' })}</SaveButton>
 					</IconsGroup>
 				</StyledForm>
 			)}
