@@ -264,6 +264,13 @@ const establishRoutes = (isInternal) => {
 	 *         description: Returns an object containing all unique metadata fields
 	 *         content:
 	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 fields:
+	 *                   type: array
+	 *                   items:
+	 *                     type: string
 	 *             example:
 	 *               "fields": [
 	 *                 "AboveGround",

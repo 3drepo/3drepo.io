@@ -274,7 +274,7 @@ const testGetDistinctMetadataByQuery = () => {
 			const distinctFn = jest.spyOn(db, 'distinct').mockResolvedValueOnce(expectedData);
 
 			await expect(
-				Metadata.getDistinctMetadataByQuery(
+				Metadata.getMetadataKeyList(
 					teamspace, model, query, projection),
 			).resolves.toEqual(expectedData);
 

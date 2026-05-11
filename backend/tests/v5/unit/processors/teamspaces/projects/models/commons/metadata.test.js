@@ -86,17 +86,15 @@ const testGetModelMetadataFields = () => {
 			const teamspace = generateRandomString();
 			const container = generateRandomString();
 			const metadataKey = generateRandomString();
-			const rawMetadataKeys = [metadataKey, metadataKey, null, generateRandomString()];
+			const rawMetadataKeys = [metadataKey, generateRandomString()];
 
-			MetadataModel.getDistinctMetadataByQuery.mockResolvedValueOnce(rawMetadataKeys);
+			MetadataModel.getMetadataKeyList.mockResolvedValueOnce(rawMetadataKeys);
 
 			const res = await Metadata.getModelMetadataFields(teamspace, container);
 
-			const expectedFields = new Set(rawMetadataKeys.filter((key) => key !== null));
-
-			expect(res).toEqual({ fields: Array.from(expectedFields) });
-			expect(MetadataModel.getDistinctMetadataByQuery).toHaveBeenCalledTimes(1);
-			expect(MetadataModel.getDistinctMetadataByQuery).toHaveBeenCalledWith(teamspace, container, {}, 'key');
+			expect(res).toEqual({ fields: rawMetadataKeys });
+			expect(MetadataModel.getMetadataKeyList).toHaveBeenCalledTimes(1);
+			expect(MetadataModel.getMetadataKeyList).toHaveBeenCalledWith(teamspace, container);
 		});
 	});
 };

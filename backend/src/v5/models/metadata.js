@@ -76,7 +76,7 @@ Metadata.getMetadataByRules = async (teamspace, project, model, revId, rules, pr
 
 Metadata.getMetadataByQuery = (teamspace, model, query, projection) => db.find(teamspace, collectionName(model), { type: 'meta', ...query }, projection);
 
-Metadata.getDistinctMetadataByQuery = (teamspace, model, query, field) => db.distinct(teamspace, collectionName(model), `metadata.${field}`, { type: 'meta', ...query });
+Metadata.getMetadataKeyList = (teamspace, model, query) => db.distinct(teamspace, collectionName(model), 'metadata.key', { type: 'meta', ...query });
 
 Metadata.getMetadataWithMatchingData = (teamspace, container, revision, matchingKeys, matchingValues, projection) => {
 	const query = {
