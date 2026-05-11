@@ -84,11 +84,8 @@ Revisions.getRevisions = (teamspace, project, model, modelType, showVoid,
 	const query = {
 		...excludeIncomplete,
 		...excludeFailed,
+		...(showVoid ? {} : excludeVoids),
 	};
-
-	if (!showVoid) {
-		query.void = excludeVoids.void;
-	}
 
 	return findRevisionsByQuery(teamspace, project, model, modelType, query, projection, sort);
 };
