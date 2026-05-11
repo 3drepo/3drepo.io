@@ -147,7 +147,7 @@ const testPutRequest = () => {
 	});
 };
 
-describe('utils/webRequests', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetRequest();
 	testGetArrayBufferRequest();
 	testPostRequest();

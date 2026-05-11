@@ -16,7 +16,7 @@
  */
 
 const determineTestGroup = (filePath) => {
-	const match = filePath.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
+	const match = filePath.match(/^.*[\\/](e2e|unit|drivers|scripts)[\\/](.*)\.test\.js$/);
 	if (match?.length === 3) {
 		return `${match[1].toUpperCase()} ${match[2]}`;
 	}
