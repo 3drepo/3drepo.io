@@ -138,7 +138,7 @@ const testGetModelIdsFromQuery = () => {
 				expect(req.models).toEqual(parsedParams);
 			} else {
 				expect(mockCB).not.toHaveBeenCalled();
-				expect(Responder.respond).toHaveBeenCalledWith(req, res, createResponseCode(templates.invalidArguments.code, '"models" is missing from query string'));
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, createResponseCode(templates.invalidArguments, '"models" is missing from query string'));
 			}
 		});
 	});

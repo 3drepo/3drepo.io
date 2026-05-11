@@ -57,7 +57,7 @@ PathParams.getModelIdsFromQuery = (modelType) => async (req, res, next) => {
 		req.models = modelList;
 		await next();
 	} else {
-		respond(req, res, createResponseCode(templates.invalidArguments.code, '"models" is missing from query string'));
+		respond(req, res, createResponseCode(templates.invalidArguments, '"models" is missing from query string'));
 	}
 };
 
