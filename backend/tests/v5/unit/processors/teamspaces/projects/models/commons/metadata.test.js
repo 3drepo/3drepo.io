@@ -80,27 +80,7 @@ const getMetadata = () => {
 	});
 };
 
-const testGetModelMetadataFields = () => {
-	describe('Get model metadata fields', () => {
-		test('should return all unique metadata keys for a model', async () => {
-			const teamspace = generateRandomString();
-			const container = generateRandomString();
-			const metadataKey = generateRandomString();
-			const rawMetadataKeys = [metadataKey, generateRandomString()];
-
-			MetadataModel.getMetadataKeyList.mockResolvedValueOnce(rawMetadataKeys);
-
-			const res = await Metadata.getModelMetadataFields(teamspace, container);
-
-			expect(res).toEqual({ fields: rawMetadataKeys });
-			expect(MetadataModel.getMetadataKeyList).toHaveBeenCalledTimes(1);
-			expect(MetadataModel.getMetadataKeyList).toHaveBeenCalledWith(teamspace, container);
-		});
-	});
-};
-
 describe(determineTestGroup(__filename), () => {
 	testUpdateCustomMetadata();
 	getMetadata();
-	testGetModelMetadataFields();
 });

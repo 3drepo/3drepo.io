@@ -262,24 +262,21 @@ const testGetMetadataWithMatchingData = () => {
 	});
 };
 
-const testGetDistinctMetadataByQuery = () => {
-	describe('Get distinct metadata by query', () => {
-		test('should return the distinct metadata keys based on the query', async () => {
+const testGetMetadataKeyList = () => {
+	describe('Get metadata key list', () => {
+		test('should return the metadata keys', async () => {
 			const teamspace = generateRandomString();
 			const model = generateRandomString();
-			const query = generateRandomObject();
-			const projection = 'key';
 
 			const expectedData = times(10, generateRandomString);
 			const distinctFn = jest.spyOn(db, 'distinct').mockResolvedValueOnce(expectedData);
 
 			await expect(
-				Metadata.getMetadataKeyList(
-					teamspace, model, query, projection),
+				Metadata.getMetadataKeyList(teamspace, model),
 			).resolves.toEqual(expectedData);
 
 			expect(distinctFn).toHaveBeenCalledTimes(1);
-			expect(distinctFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, `metadata.${projection}`, { type: 'meta', ...query });
+			expect(distinctFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, 'metadata.key', { type: 'meta' });
 		});
 	});
 };
@@ -289,5 +286,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateCustomMetadata();
 	testGetMetadataByRules();
 	testGetMetadataWithMatchingData();
-	testGetDistinctMetadataByQuery();
+	testGetMetadataKeyList();
 });

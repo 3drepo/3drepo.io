@@ -15,8 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getMetadataByQuery, getMetadataKeyList } = require('../../../../../models/metadata');
-const { updateCustomMetadata } = require('../../../../../models/metadata');
+const { getMetadataByQuery, getMetadataKeyList, updateCustomMetadata } = require('../../../../../models/metadata');
 
 const Metadata = {};
 
@@ -26,10 +25,6 @@ Metadata.getAllMetadata = (teamspace, container, revision) => getMetadataByQuery
 	{ rev_id: revision, type: 'meta' },
 	{ metadata: 1, parents: 1 });
 
-Metadata.getModelMetadataFields = async (teamspace, container) => {
-	const metadataKeys = await getMetadataKeyList(teamspace, container);
-
-	return { fields: metadataKeys };
-};
+Metadata.getAllMetadataFieldNames = getMetadataKeyList;
 
 module.exports = Metadata;

@@ -394,6 +394,7 @@ const testGetMetadataFields = (internalService) => {
 		const { users, teamspace, project, con, fed, metadata } = generateBasicData();
 		const conNoMetadata = ServiceHelper.generateRandomModel({ modelType: modelTypes.CONTAINER });
 
+		// add an additional metadata with key duplication to ensure the returned field list is unique
 		const extraMetadata = {
 			_id: ServiceHelper.generateUUIDString(),
 			metadata: [
@@ -419,7 +420,8 @@ const testGetMetadataFields = (internalService) => {
 			key = users.tsAdmin.apiKey,
 		} = {}) => `/v5/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/metadata/fields${ServiceHelper.createQueryString({ key: internalService ? undefined : key })}`;
 
-		const expectedFields = [...new Set([...metadata.metadata, ...extraMetadata.metadata].map(({ key }) => key))];
+		const expectedFields = Array.from(
+			new Set([...metadata.metadata, ...extraMetadata.metadata].map(({ key }) => key)));
 
 		const externalTests = [
 			['the user does not have a valid session', createRoute({ key: null }), false, templates.notLoggedIn],
@@ -427,7 +429,7 @@ const testGetMetadataFields = (internalService) => {
 			['the user does not have access to the container', createRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 		];
 
-		const internalTests = [
+		const generalTests = [
 			['the project does not exist', createRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 			['the container does not exist', createRoute({ containerId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
 			['the model is not a container', createRoute({ containerId: fed._id }), false, templates.containerNotFound],
@@ -435,20 +437,22 @@ const testGetMetadataFields = (internalService) => {
 			['metadata exists in one or more entries', createRoute(), true, { fields: expectedFields }],
 		];
 
-		const testData = internalService ? internalTests : internalTests.concat(externalTests);
+		const testData = [
+			...generalTests,
+			...(internalService ? [] : externalTests),
+		];
 
 		describe.each(testData)('Containers', (desc, route, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(route).expect(expectedStatus);
 
-				if (!success) {
+				if (success) {
+					expect(res.body.fields).toEqual(expect.arrayContaining(expectedOutput.fields));
+					expect(res.body.fields).toHaveLength(expectedOutput.fields.length);
+				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
-					return;
 				}
-
-				expect(res.body.fields).toEqual(expect.arrayContaining(expectedOutput.fields));
-				expect(res.body.fields).toHaveLength(expectedOutput.fields.length);
 			});
 		});
 	});

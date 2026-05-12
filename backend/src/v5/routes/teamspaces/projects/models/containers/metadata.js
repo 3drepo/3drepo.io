@@ -54,9 +54,9 @@ const getModelMetadataFields = async (req, res) => {
 	const { teamspace, container } = req.params;
 
 	try {
-		const metadataFields = await Metadata.getModelMetadataFields(teamspace, container);
+		const fields = await Metadata.getAllMetadataFieldNames(teamspace, container);
 
-		respond(req, res, templates.ok, metadataFields);
+		respond(req, res, templates.ok, { fields });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -233,7 +233,7 @@ const establishRoutes = (isInternal) => {
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/fields:
 	 *   get:
-	 *     description: Returns an object containing an array of unique metadata fields in the container.
+	 *     description: Returns an object containing an array of unique metadata field names in the container.
 	 *     tags: [v:internal, v:external, Metadata]
 	 *     operationId: getModelMetadataFields
 	 *     parameters:
@@ -261,7 +261,7 @@ const establishRoutes = (isInternal) => {
 	 *       401:
 	 *         $ref: "#/components/responses/notLoggedIn"
 	 *       200:
-	 *         description: Returns an object containing all unique metadata fields
+	 *         description: Returns an object containing all unique metadata field names
 	 *         content:
 	 *           application/json:
 	 *             schema:
