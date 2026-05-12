@@ -70,6 +70,6 @@ export type FederationStats = {
 	containers: GroupedContainer[];
 	tickets: number;
 	category: string;
-	lastUpdated: number;
+	lastUpdated: number | Date;
 	modelId: string;
 };
