@@ -2315,6 +2315,14 @@ export class UnityUtil {
 		UnityUtil.toUnity('ShowStats', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
+	public static enableOnlineSnapping() {
+		UnityUtil.toUnity('EnableOnlineSnapping', undefined);
+	}
+
+	public static disableOnlineSnapping() {
+		UnityUtil.toUnity('DisableOnlineSnapping', undefined);
+	}
+
 	/**
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
