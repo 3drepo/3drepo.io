@@ -17,7 +17,7 @@
 
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateUUID } = require('../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateUUID } = require('../../../../../../helper/services');
 
 const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/metadata`);
 jest.mock('../../../../../../../../src/v5/models/metadata');
@@ -80,7 +80,7 @@ const getMetadata = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/models/metadata', () => {
+describe(determineTestGroup(__filename), () => {
 	testUpdateCustomMetadata();
 	getMetadata();
 });
