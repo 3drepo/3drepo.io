@@ -18,7 +18,7 @@
 const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomString, generateUUID } = require('../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateUUID } = require('../../../../../../helper/services');
 
 const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/metadata`);
 jest.mock('../../../../../../../../src/v5/models/metadata');

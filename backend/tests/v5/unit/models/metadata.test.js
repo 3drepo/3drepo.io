@@ -263,9 +263,29 @@ const testGetMetadataWithMatchingData = () => {
 	});
 };
 
+const testGetMetadataKeyList = () => {
+	describe('Get metadata key list', () => {
+		test('should return the metadata keys', async () => {
+			const teamspace = generateRandomString();
+			const model = generateRandomString();
+
+			const expectedData = times(10, generateRandomString);
+			const distinctFn = jest.spyOn(db, 'distinct').mockResolvedValueOnce(expectedData);
+
+			await expect(
+				Metadata.getMetadataKeyList(teamspace, model),
+			).resolves.toEqual(expectedData);
+
+			expect(distinctFn).toHaveBeenCalledTimes(1);
+			expect(distinctFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, 'metadata.key', { type: 'meta' });
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetMetadataById();
 	testUpdateCustomMetadata();
 	testGetMetadataByRules();
 	testGetMetadataWithMatchingData();
+	testGetMetadataKeyList();
 });
