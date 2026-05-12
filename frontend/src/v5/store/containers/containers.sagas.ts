@@ -36,12 +36,13 @@ import {
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
-import { chunk, isEqualWith } from 'lodash';
+import { isEqualWith } from 'lodash';
 import { ContainerStats, FetchContainerViewsResponseView, IContainer } from './containers.types';
 import { prepareSettingsForBackend, prepareSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
 import { compByColum, DASHBOARD_LIST_CHUNK_SIZE } from '../store.helpers';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
+import { chunkEscalated } from '@/v5/helpers/array.helper';
 
 const statsStack = new AsyncFunctionExecutor<ContainerStats>(API.Containers.fetchContainerStats, 30);
 const bulkStatsStack = new AsyncFunctionExecutor((teamspace, projectId, chunkedIds) =>
@@ -97,7 +98,7 @@ export function* fetchContainerStats({ teamspace, projectId, containerId }: Fetc
 
 export function* bulkFetchContainersStats({ teamspace, projectId, containerIds }: BulkFetchContainersStatsAction) {
 	try {
-		const chunkedIds = chunk(containerIds, DASHBOARD_LIST_CHUNK_SIZE);
+		const chunkedIds = chunkEscalated(containerIds, DASHBOARD_LIST_CHUNK_SIZE);
 		yield all(
 			chunkedIds.map(function* (idsChunk) {
 				const stats = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);

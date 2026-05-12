@@ -39,11 +39,12 @@ import { prepareFederationsData } from '@/v5/store/federations/federations.helpe
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
-import { chunk, isEqualWith } from 'lodash';
+import { isEqualWith } from 'lodash';
 import { compByColum, DASHBOARD_LIST_CHUNK_SIZE } from '../store.helpers';
 import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
 import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
 import { prepareSettingsForFrontend, prepareSettingsForBackend } from '../containers/containers.helpers';
+import { chunkEscalated } from '@/v5/helpers/array.helper';
 
 const bulkStatsStack = new AsyncFunctionExecutor((teamspace, projectId, chunkedIds) =>
 	API.Federations.bulkFetchFederationsStats(teamspace, projectId, chunkedIds), 15, ExecutionStrategy.Fifo);
@@ -137,7 +138,7 @@ export function* fetchFederationStats({ teamspace, projectId, federationId }: Fe
 
 export function* bulkFetchFederationsStats({ teamspace, projectId, federationIds }: BulkFetchFederationsStatsAction) {
 	try {
-		const chunkedIds = chunk(federationIds, DASHBOARD_LIST_CHUNK_SIZE);
+		const chunkedIds = chunkEscalated(federationIds, DASHBOARD_LIST_CHUNK_SIZE);
 		yield all(
 			chunkedIds.map(function* (idsChunk) {
 				const stats = yield bulkStatsStack.addCall(teamspace, projectId, idsChunk);
