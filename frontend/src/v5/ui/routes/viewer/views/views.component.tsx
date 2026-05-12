@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { SearchBar } from './views.styles';
 import { CardContainer } from '@components/viewer/cards/card.styles';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
@@ -26,24 +26,17 @@ import { ViewsCardActions } from './viewsCardActions/viewsCardActions.component'
 import { ViewsCardFooter } from './viewsCardFooter/viewsCardFooter.component';
 import { SearchContextComponent } from '@controls/search/searchContext';
 import { ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
-import { ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { useParams } from 'react-router-dom';
-import { ViewerParams } from '../../routes.constants';
 import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 import { CentredContainer } from '@controls/centredContainer';
 import { IViewpoint } from '@/v5/store/viewpoints/viewpoints.types';
 
 export const Views = () => {
-	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const viewpoints = ViewpointsHooksSelectors.selectViewpointsList();
 	const [editMode, setEditMode] = useState(false);
 	const [createMode, setCreateMode] = useState(false);
 	const [activeViewpoint, setActiveViewpoint] = useState<IViewpoint | null>(null);
 	const isPending = ViewpointsHooksSelectors.selectIsPending();
 
-	useEffect(() => {
-		ViewpointsActionsDispatchers.fetchViewpoints(teamspace, containerOrFederation);
-	}, [teamspace, containerOrFederation]);
 
 	if (isPending) {
 		return (
