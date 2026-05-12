@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { FederationsActions } from '@/v5/store/federations/federations.redux';
+import { FederationsActions, FederationsTypes } from '@/v5/store/federations/federations.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { omit } from 'lodash';
+import { omit, pick } from 'lodash';
 import {
 	federationMockFactory,
 	prepareMockStats,
@@ -34,6 +34,8 @@ import { createTestStore } from '../test.helpers';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { prepareMockJobs, prepareMockUsers } from '../models.fixture';
+import { chunkEscalated } from '@/v5/helpers/array.helper';
+import { DASHBOARD_LIST_CHUNK_SIZE } from '@/v5/store/store.helpers';
 
 describe('Federations: sagas', () => {
 	const teamspace = 'teamspace';
@@ -175,19 +177,32 @@ describe('Federations: sagas', () => {
 				mockFederation,
 				federationMockFactory({ _id: secondFederationId }) as any
 			];
+
 			const statsList = [
-				stats,
-				prepareMockStats({ _id: secondFederationId })
+				prepareMockStats({ modelId: mockFederation._id }),
+				prepareMockStats({ modelId: secondFederationId })
 			];
+
 			dispatch(FederationsActions.fetchFederationsSuccess(projectId, federations));
 
-			mockServer
-				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/stats?models=${federations.map(f => f._id).join()}`)
-				.reply(200, { stats: statsList });
+			const chunks = chunkEscalated(federations.map(f => f._id), DASHBOARD_LIST_CHUNK_SIZE);
+			chunks.forEach(chunk => {
+				mockServer
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/stats?models=${chunk.join()}`)
+					.reply(200, { stats: statsList.filter(stat => chunk.includes(stat.modelId)) });
+			});
 
 			await waitForActions(() => {
 				dispatch(FederationsActions.bulkFetchFederationsStats(teamspace, projectId, federations.map(f => f._id)));
-			}, [FederationsActions.bulkFetchFederationsStatsSuccess(projectId, statsList)]);
+			}, Array(chunks.length).fill(FederationsTypes.BULK_FETCH_FEDERATIONS_STATS_SUCCESS));
+
+
+			const federationsInStore = selectFederations(getState());
+
+			const simpleStatsFromStore = federationsInStore.map(f => ({...pick(f, ['code', 'desc', 'status', 'containers', 'tickets', 'category']), modelId: f._id}));
+			const expectedStats = statsList.map(stat => ({...omit(stat, ['lastUpdated'])}));
+
+			expect(simpleStatsFromStore).toEqual(expectedStats);
 		});
 
 		it('should call updateFederationContainers endpoint', async () => {

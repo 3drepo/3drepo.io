@@ -205,9 +205,8 @@ describe('Containers: sagas', () => {
 
 			await waitForActions(() => {
 				dispatch(ContainersActions.bulkFetchContainersStats(teamspace, projectId, containers.map(f => f._id)));
-
-			// The success action should be dispatched for each chunk, so we expect it to be dispatched as many times as there are chunks
-			}, Array(chunks.length).fill(ContainersTypes.BULK_FETCH_CONTAINERS_STATS_SUCCESS));
+				// The success action should be dispatched for each chunk, so we expect it to be dispatched as many times as there are chunks
+			},  Array(chunks.length).fill(ContainersTypes.BULK_FETCH_CONTAINERS_STATS_SUCCESS));
 			
 			const containersInStore = selectContainers(getState());
 			const statsFromStore = containersInStore.map((c) => ({

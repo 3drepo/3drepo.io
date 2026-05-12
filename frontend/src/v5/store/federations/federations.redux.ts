@@ -103,7 +103,7 @@ export const fetchStatsSuccess = (state, {
 export const bulkFetchFederationsStatsSuccess = (state, {
 	projectId,
 	stats,
-}) => {
+}: BulkFetchFederationsStatsSuccessAction) => {
 	const federations = state.federationsByProject[projectId];
 	if (!federations) return;
 

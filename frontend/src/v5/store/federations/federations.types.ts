@@ -71,4 +71,5 @@ export type FederationStats = {
 	tickets: number;
 	category: string;
 	lastUpdated: number;
+	modelId: string;
 };
