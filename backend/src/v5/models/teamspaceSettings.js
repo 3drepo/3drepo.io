@@ -39,6 +39,9 @@ const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPAC
 const teamspaceSettingQuery = (ts, query, projection, sort) => db.findOne(ts,
 	TEAMSPACE_SETTINGS_COL, query, projection, sort);
 
+const multipleTeamspaceSettingsQuery = (ts, query, projection) => db.find(ts,
+	TEAMSPACE_SETTINGS_COL, query, projection);
+
 TeamspaceSetting.getTeamspaceSetting = async (ts, projection = { refId: 0 }) => {
 	const tsDoc = await teamspaceSettingQuery(ts, { _id: ts }, projection);
 	if (!tsDoc) {
@@ -226,6 +229,19 @@ TeamspaceSetting.getRiskCategories = async (teamspace) => {
 TeamspaceSetting.getTeamspaceInvites = (teamspace, projection = { _id: 1 }) => {
 	const query = { 'teamSpaces.teamspace': teamspace };
 	return teamspaceInvitesQuery(query, projection);
+};
+
+TeamspaceSetting.getTeamspaceSettingByExpiry = (teamspace, expiryStart, expiryEnd, projection = { refId: 0 }) => {
+	const query = {
+		_id: teamspace,
+		$or: Object.values(SUBSCRIPTION_TYPES).map((type) => ({
+			[`subscriptions.${type}.expiryDate`]: {
+				$gte: expiryStart,
+				$lte: expiryEnd,
+			},
+		})),
+	};
+	return multipleTeamspaceSettingsQuery(teamspace, query, projection);
 };
 
 module.exports = TeamspaceSetting;

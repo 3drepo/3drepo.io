@@ -28,7 +28,7 @@ const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const { ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
+const { ADD_ONS_MODULES, SUBSCRIPTION_TYPES } = require(`${src}/models/teamspaces.constants`);
 
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
@@ -725,6 +725,35 @@ const testGetTeamspaceInvites = () => {
 	});
 };
 
+const testGetTeamspaceSettingByExpiry = () => {
+	describe('Get teamspace setting by subscription expiry', () => {
+		test('should return teamspace settings if there are subscriptions expiring within the given time frame', async () => {
+			const teamspace = generateRandomString();
+			const startDate = new Date();
+			const endDate = new Date();
+			endDate.setDate(endDate.getDate() + 2);
+			const fn = jest.spyOn(db, 'find');
+			await Teamspace.getTeamspaceSettingByExpiry(teamspace, startDate, endDate);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace,
+				TEAMSPACE_SETTINGS_COL,
+				{
+					_id: teamspace,
+					$or: Object.values(SUBSCRIPTION_TYPES).map((type) => ({
+						[`subscriptions.${type}.expiryDate`]: {
+							$gte: startDate,
+							$lte: endDate,
+						},
+					})),
+				},
+				{ refId: 0 },
+			);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testTeamspaceAdmins();
 	testGetSubscriptions();
@@ -747,4 +776,5 @@ describe(determineTestGroup(__filename), () => {
 	testGetTeamspaceRefId();
 	testGetTeamspaceSetting();
 	testGetTeamspaceInvites();
+	testGetTeamspaceSettingByExpiry();
 });
