@@ -33,8 +33,9 @@ export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const [urlFiltersRaw, setUrlFilters] = useSearchParam('filters');
 	const [groupByParam] = useSearchParam('groupBy');
+	const [sorting] = useSearchParam('sorting');
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
-	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation, revision } = useParams() as ViewerParams;
 	const isFed = modelIsFederation(containerOrFederation);
 
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
@@ -62,6 +63,16 @@ export const TicketFiltersSetter = () => {
 			UsersActionsDispatchers.fetchUsers(teamspace);
 			JobsActionsDispatchers.fetchJobs(teamspace);
 			TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+		}
+
+		if (sorting) {
+			try {
+				const [property, ascendingFlag] = sorting.split('!');
+				const order = ascendingFlag === '' ? 'asc' : 'desc';
+				TicketsActionsDispatchers.setSorting(property as any, order as any);
+			} catch (e) {
+				// do nothing if the param is wrong
+			}
 		}
 	}, [isFetching]);
 	
