@@ -26,7 +26,8 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
 import { deserializeURLFilters, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, values } from 'lodash';
+import { TicketsSortingPropertyDictionary, TicketsSortingProperty } from '@/v5/store/tickets/card/ticketsCard.types';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
@@ -68,8 +69,11 @@ export const TicketFiltersSetter = () => {
 		if (sorting) {
 			try {
 				const [property, ascendingFlag] = sorting.split('!');
-				const order = ascendingFlag === '' ? 'asc' : 'desc';
-				TicketsActionsDispatchers.setSorting(property as any, order as any);
+
+				if (values(TicketsSortingPropertyDictionary).includes(property as TicketsSortingProperty)) {
+					const order = ascendingFlag === '' ? 'asc' : 'desc';
+					TicketsActionsDispatchers.setSorting(property as any, order as any);
+				}
 			} catch (e) {
 				// do nothing if the param is wrong
 			}
