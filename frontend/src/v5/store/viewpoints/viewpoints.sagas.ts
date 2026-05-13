@@ -54,10 +54,12 @@ import {
 	UpdateViewpointAction,
 } from './viewpoints.redux';
 import { selectSelectedViewpoint } from './viewpoints.selectors';
-import { getThumbnailUrl } from '@/v4/modules/viewpoints/viewpoints.sagas';
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '../dialogs/dialogs.redux';
 import { PRESET_VIEW } from '@/v5/ui/routes/viewer/views/viewsCardFooter/presetViews/presetViews.component';
+import { getAPIUrl } from '@/v4/services/api/default';
+
+const getThumbnailUrl = (thumbnail) => getAPIUrl(thumbnail);
 
 export function* fetchViewpoints({ teamspace, modelId }: FetchViewpointsAction) {
 	try {

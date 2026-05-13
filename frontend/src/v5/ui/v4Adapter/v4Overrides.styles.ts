@@ -39,7 +39,6 @@ import newJobDialog from './overrides/newJobForm.overrides';
 import groups from './overrides/cards/groups.overrides';
 import measurements from './overrides/cards/measurements.overrides';
 import tree from './overrides/cards/tree.overrides';
-import views from './overrides/cards/views.overrides';
 import gis from './overrides/cards/gis.overrides';
 import compare from './overrides/cards/compare.overrides';
 import board from './overrides/dashboard/board.overrides';
@@ -80,12 +79,10 @@ export const V4OverridesContainer = styled.div`
 	
 	${groups}
 	${tree}
-	${views}
 	${measurements}
 	${issues}
 	${safetiBase}
 	${sequences}
-	${views}
 	${gis}
 	${compare}
 	

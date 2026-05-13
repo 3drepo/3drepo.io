@@ -39,7 +39,6 @@ export const VIEWER_PANELS = {
 	TREE: 'tree',
 	GROUPS: 'groups',
 	VIEWS: 'views',
-	VIEWSV5: 'viewsv5', // Temporary, to be removed after views panel migration to v5
 	COMPARE: 'compare',
 	SEQUENCES: 'sequences',
 	MEASUREMENTS: 'measurements',
@@ -54,7 +53,6 @@ export const VIEWER_PANELS_ICONS = {
 	[VIEWER_PANELS.TICKETS]: TicketsIcon,
 	[VIEWER_PANELS.GROUPS]: GroupsIcon,
 	[VIEWER_PANELS.VIEWS]: ViewsIcon,
-	[VIEWER_PANELS.VIEWSV5]: ViewsIcon, // Temporary, to be removed after views panel migration to v5
 	[VIEWER_PANELS.TREE]: TreeIcon,
 	[VIEWER_PANELS.COMPARE]: CompareIcon,
 	[VIEWER_PANELS.GIS]: GisIcon,
@@ -69,7 +67,6 @@ export const VIEWER_PANELS_MIN_HEIGHTS = {
 	[VIEWER_PANELS.TICKETS]: 200,
 	[VIEWER_PANELS.GROUPS]: 200,
 	[VIEWER_PANELS.VIEWS]: 200,
-	[VIEWER_PANELS.VIEWSV5]: 200, // Temporary, to be removed after views panel migration to v5
 	[VIEWER_PANELS.TREE]: 80,
 	[VIEWER_PANELS.COMPARE]: 265,
 	[VIEWER_PANELS.GIS]: 185,
@@ -84,7 +81,6 @@ export const VIEWER_PANELS_TITLES = {
 	[VIEWER_PANELS.TICKETS]: 'Tickets',
 	[VIEWER_PANELS.GROUPS]: 'Groups',
 	[VIEWER_PANELS.VIEWS]: 'Views',
-	[VIEWER_PANELS.VIEWSV5]: 'Views V5', // Temporary, to be removed after views panel migration to v5
 	[VIEWER_PANELS.TREE]: 'Tree',
 	[VIEWER_PANELS.COMPARE]: 'Compare',
 	[VIEWER_PANELS.GIS]: 'GIS',
@@ -104,7 +100,6 @@ export const getViewerLeftPanels = (issuesEnabled, risksEnabled) =>  {
 		VIEWER_PANELS.TICKETS,
 		VIEWER_PANELS.GROUPS,
 		VIEWER_PANELS.VIEWS,
-		VIEWER_PANELS.VIEWSV5, // Temporary, to be removed after views panel migration to v5
 		VIEWER_PANELS.TREE,
 		VIEWER_PANELS.COMPARE,
 		VIEWER_PANELS.GIS,
@@ -128,7 +123,6 @@ export const getViewerLeftPanels = (issuesEnabled, risksEnabled) =>  {
 export const getCalibrationViewerLeftPanels = () =>  [
 	VIEWER_PANELS.GROUPS,
 	VIEWER_PANELS.VIEWS,
-	VIEWER_PANELS.VIEWSV5, // Temporary, to be removed after views panel migration to v5
 	VIEWER_PANELS.TREE,
 ].map(getPanelConfig);
 

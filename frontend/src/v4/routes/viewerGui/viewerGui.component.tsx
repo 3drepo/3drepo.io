@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Views as ViewsV5 } from '@/v5/ui/routes/viewer/views/views.component';
+import { Views } from '@/v5/ui/routes/viewer/views/views.component';
 import { Tickets } from '@/v5/ui/routes/viewer/tickets/tickets.component';
 import { isEmpty } from 'lodash';
 import { PureComponent, useContext } from 'react';
@@ -45,7 +45,6 @@ import { Risks } from './components/risks';
 import Sequences from './components/sequences/sequences.container';
 import { Tree } from './components/tree';
 import { ViewerLoader } from './components/viewerLoader';
-import { Views } from './components/views';
 import { Container, DraggablePanels, GuiContainer, LeftPanels, LeftPanelsButtons, RightPanels } from './viewerGui.styles';
 
 interface IProps {
@@ -292,7 +291,6 @@ class ViewerGuiBase extends PureComponent<IProps, IState> {
 		[VIEWER_PANELS.TICKETS]: Tickets,
 		[VIEWER_PANELS.GROUPS]: Groups,
 		[VIEWER_PANELS.VIEWS]: Views,
-		[VIEWER_PANELS.VIEWSV5]: ViewsV5, // Temporary, to be removed after views panel migration to v5
 		[VIEWER_PANELS.TREE]: Tree,
 		[VIEWER_PANELS.COMPARE]: Compare,
 		[VIEWER_PANELS.GIS]: Gis,

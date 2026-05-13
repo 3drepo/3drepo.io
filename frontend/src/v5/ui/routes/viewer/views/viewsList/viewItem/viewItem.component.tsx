@@ -60,11 +60,11 @@ interface IViewItem {
 	setCreateMode: (mode: boolean) => void;
 }
 
-const ViewpointNameLabel = ({ name, defaultView, active = false }) => {
+const ViewpointNameLabel = ({ name, defaultView }) => {
 	const { query } = useContext(SearchContext);
 	return (
 		<Tooltip title={name} placement="bottom">
-			<ViewpointName active={active}>
+			<ViewpointName>
 				<Highlight search={query}>{name}</Highlight>
 				{defaultView && (
 					<Subtitle>
@@ -107,7 +107,7 @@ const ViewEllipsisMenu = ({ onSetAsDefault, onDelete, isAdmin, defaultView }) =>
 	</EllipsisMenu>
 );
 
-const getScreenshot = (viewpoint: any): string | null => {
+const getScreenshot = (viewpoint: IViewpoint): string | null => {
 	const screenshot = viewpoint?.screenshot || viewpoint?.viewpoint?.screenshot;
 	if (!screenshot) return null;
 	if (screenshot.thumbnailUrl) return screenshot.thumbnailUrl;
@@ -209,7 +209,7 @@ export const ViewItem = ({ viewpoint, active, editMode, setActiveViewpoint, setE
 			)}
 			{!(active && editMode) && (
 				<NameRow>
-					<ViewpointNameLabel name={viewpoint.name} defaultView={defaultView} active />
+					<ViewpointNameLabel name={viewpoint.name} defaultView={defaultView} />
 					{active && (
 						<IconsGroup>
 							{isCommenter && (

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { selectTransformations } from "@/v5/store/viewpoints/viewpoints.selectors";
 import { UnityUtil } from "@/globals/unity-util";
 import { isEqual } from "lodash";
 import { getState } from "@/v5/helpers/redux.helpers";
@@ -22,7 +23,6 @@ import { hexToRgb } from "@/v5/helpers/colors.helper";
 import { selectGetMeshesByIds, selectGetSharedIdsFromNodeIds, selectHiddenGeometryVisible, selectNodesBySharedIdsMap, selectTreeNodesList } from "../modules/tree";
 import { selectColorOverrides } from "../modules/viewerGui";
 import { Viewer } from "../services/viewer/viewer";
-import { selectTransformations } from "../modules/viewpoints/viewpoints.selectors";
 
 // This merges a viewpoint
 // TO BE REVIEWED.
@@ -161,6 +161,8 @@ function createGroupsByTransformations(transformations) {
 
 }
 export const mergeGroupsDataFromViewpoint = (viewpointTarget, viewpointOrigin) => {
+	console.log('@@viewpointTarget', viewpointTarget);
+	console.log('@@viewpointOrigin', viewpointOrigin);
 
 	Object.keys(groupPropNameMap).forEach((groupPropNameById) => {
 		const groupPropName =  groupPropNameMap[groupPropNameById];

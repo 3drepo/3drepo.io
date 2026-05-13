@@ -23,12 +23,36 @@ interface ClippingPlane {
 	clipDirection: number;
 }
 
+interface IScreenshot {
+	thumbnail: string;
+	thumbnailUrl?: string;
+}
+
+interface IViewpointDetails {
+	right: number[];
+	up: number[];
+	view_dir: number[];
+	position: number[];
+	look_at: number[];
+	near: number;
+	far: number;
+	fov: number;
+	aspect_ratio: number;
+	type: 'perspective' | 'orthographic';
+	hideIfc: boolean;
+	hidden_group_id: string;
+	highlighted_group_id: string;
+	override_group_ids: string[];
+	override_groups?: any[];
+	clippingPlanes?: ClippingPlane[];
+}
+
 export interface IViewpoint {
 	_id: string;
 	name: string;
-	screenshot?: any;
-	thumbnail?: any;
-	viewpoint?: any;
+	thumbnail?: string;
+	viewpoint: IViewpointDetails;
+	screenshot?: IScreenshot;
 	clippingPlanes?: ClippingPlane[];
 }
 
