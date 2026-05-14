@@ -2831,4 +2831,44 @@ export class UnityUtil {
 			UnityUtil.externalWebRequestHandler.setOfflineFetchInterceptor(interceptor);
 		}
 	}
+
+	/**
+	 * Shows the DrawingImageSource for the plane at the horizontal location specified by rect, 
+	 * with additional options for clipping and gizmo display. rect should be the size and location of the image, given as 
+	 * the location of three corners (bottomLeft, bottomRight, topLeft) in Project coordinates. The height will be taken from 
+	 * the current state of the Vertical Planes. If image is null, the location of the existing image is updated. If no image 
+	 * has ever been loaded, a white rectangle is shown in its place. The clip and gizmo parameters control whether the drawing 
+	 * plane is clipped and whether the gizmo is shown, respectively.
+	 * @param image - DrawingImageSource for the drawing plane
+	 * @param rect - number[] specifying the world rectangle
+	 * @param clip - boolean to enable or disable clipping
+	 * @param gizmo - boolean to show or hide the gizmo
+	 */
+	public static enableDrawingPlane(image: DrawingImageSource, rect: number[], clip: boolean = true, gizmo: boolean = true) {
+		let index = -1;
+		let dimensions = [0, 0];
+
+		if (image !== null) {
+			index = this.domTextureReferenceCounter++;
+			this.domTextureReferences[index] = image;
+			dimensions = [image.width, image.height];
+		}
+
+		const parms = {
+			worldRect: rect,
+			domId: index,
+			dimensions,
+			clip,
+			gizmo,
+		};
+
+		UnityUtil.toUnity('EnableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+	}
+
+	/** 
+	 * Disable the drawing plane
+	 */
+	public static disableDrawingPlane() {
+		UnityUtil.toUnity('DisableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
 }
