@@ -20,6 +20,8 @@ import { PureComponent } from 'react';
 import { isEqual } from 'lodash';
 import { Rnd } from 'react-rnd';
 
+import { CREATE_ISSUE } from '@/v4/constants/issue-permissions';
+import { hasPermissions } from '@/v4/helpers/permissions';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { ILegend, ILegendComponentState } from '../../../../modules/legend/legend.redux';
 import { EmptyStateInfo } from '../../../components/components.styles';
@@ -49,21 +51,26 @@ interface IProps {
 		y: number;
 	};
 	height: number;
+	modelSettings: any;
 }
 
 interface IState {
 	legend: ILegend[];
 	draggableDisabled: boolean;
+	hasPermissions: boolean;
 }
 
 export class Legend extends PureComponent<IProps, IState> {
 	public state = {
 		legend: [],
 		draggableDisabled: false,
+		hasPermissions: false,
 	};
 
 	public componentDidMount() {
-		const { legend, fetchLegend } = this.props;
+		const { legend, fetchLegend, modelSettings } = this.props;
+		const canEdit = hasPermissions('change_model_settings', modelSettings.permissions)
+		this.setState({ hasPermissions: canEdit })
 
 		if (!legend || !legend.length) {
 			fetchLegend();
@@ -105,6 +112,7 @@ export class Legend extends PureComponent<IProps, IState> {
 			menuActions={this.renderActionsMenu}
 			hideLock
 			hideSearch
+			menuDisabled={!this.state.hasPermissions}
 			onMenuOpen={() => this.setState({ draggableDisabled: true })}
 			onMenuClose={() => this.setState({ draggableDisabled: false })}
 		/>
@@ -127,6 +135,7 @@ export class Legend extends PureComponent<IProps, IState> {
 					{...item}
 					onPickerOpen={() => this.setState({ draggableDisabled: true })}
 					onPickerClose={() => this.setState({ draggableDisabled: false })}
+					readOnly={!this.state.hasPermissions}
 				/>
 			))}
 			{this.renderNewLegendItem(this.props.newLegendEditMode)}
@@ -156,7 +165,7 @@ export class Legend extends PureComponent<IProps, IState> {
 				>
 					{this.renderEmptyState(!this.state.legend.length && !this.props.newLegendEditMode)}
 					{this.renderLegendList()}
-					<LegendFooter isPending={isPending} />
+					<LegendFooter isPending={isPending} isReadOnly={!this.state.hasPermissions} />
 				</ViewerPanel>
 			</Rnd>
 		);

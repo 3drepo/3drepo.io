@@ -15,20 +15,24 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
-import { Group } from '../ticketsTableGroup.styles';
-import { Row } from '../ticketsTableRow/ticketsTableRow.styles';
-import { SETTINGS_COLUMN_WIDTH } from '../ticketsTableGroup.helper';
+const { CLASH_RUNS_COL, CLASH_RUN_STATUS } = require('./clashes.constants');
+const db = require('../handler/db');
+const { generateUUID } = require('../utils/helper/uuids');
 
-export const SettingsColumnContainer = styled(Group)`
-	width: ${SETTINGS_COLUMN_WIDTH}px;
-	gap: 0;
-	& div > ${/* sc-selector */Row} {
-		width: ${SETTINGS_COLUMN_WIDTH}px;
+const ClashRuns = {};
 
-		&:first-child {
-			border-top-right-radius: 10px;
-			overflow: hidden;
-		}
-	}
-`;
+ClashRuns.createTestRun = async (teamspace, plan, user) => {
+	const _id = generateUUID();
+
+	await db.insertOne(teamspace, CLASH_RUNS_COL, {
+		_id,
+		triggeredBy: user,
+		triggeredAt: new Date(),
+		status: CLASH_RUN_STATUS.PLANNED,
+		plan,
+	});
+
+	return _id;
+};
+
+module.exports = ClashRuns;

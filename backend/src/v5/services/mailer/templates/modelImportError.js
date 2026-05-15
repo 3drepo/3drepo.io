@@ -24,7 +24,7 @@ const TEMPLATE_PATH = `${__dirname}/html/modelImportError.html`;
 
 const dataSchema = Yup.object({
 	errInfo: Yup.object({
-		code: Yup.number(),
+		code: Yup.string(),
 		message: Yup.string().default('Unknown'),
 	}).required(),
 	title: Yup.string().default('Model Import Error'),
@@ -35,6 +35,7 @@ const dataSchema = Yup.object({
 	modelType: Yup.string().oneOf(Object.values(modelTypes)).required(),
 	user: Yup.string().required(),
 	revId: Yup.string().required(),
+	fileName: Yup.string().default('No file found.'),
 	logExcerpt: Yup.string().default('No logs found.').transform(
 		(val) => val.replaceAll('<', '&lt;').replaceAll('>', '&gt;').replace(/(\r\n|\n|\r)/gm, '<br>')),
 
