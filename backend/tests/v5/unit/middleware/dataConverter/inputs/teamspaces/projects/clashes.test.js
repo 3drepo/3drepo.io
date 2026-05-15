@@ -149,36 +149,37 @@ const testValidateNewPlanData = () => {
 	describe.each(testCases)('Validate new plan data', (desc, success, data, expectedData) => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
-		ModelSettingsModel.getContainerById.mockImplementation(
-			(t, containerId) => (recognisedContainer.includes(containerId)
-				? Promise.resolve({}) : Promise.reject()));
-		ModelSettingsModel.getFederationById.mockImplementation(
-			(t, federationId) => ([recognisedFederation, federationNotInProject].includes(federationId)
-				? Promise.resolve({}) : Promise.reject()),
-		);
-		ProjectSettingsModel.modelsExistInProject.mockImplementation(
-			(t, p, modelIds) => Promise.resolve(modelIds.every(
-				(id) => recognisedContainer.includes(id) || recognisedFederation === id)
-						&& !modelIds.includes(containerNotInProject)));
-		PermUtils.hasCommenterAccessToFederation.mockImplementation(
-			(t, p, f, username) => Promise.resolve(username === knownUsername));
-		TicketSchema.validateTicket.mockImplementation((t, p, f, tem, u, updateData) => {
-			if (isEqual(updateData, expectedTicketFormat)) return Promise.resolve();
-			return Promise.reject(createResponseCode(templates.invalidArguments, 'Ticket values at creation do not match expected format'));
-		});
-
-		TicketTemplateModel.getTemplateById.mockImplementation((t, templateId) => {
-			if (UUIDToString(templateId) === templateInTeamspace) {
-				return Promise.resolve({});
-			}
-
-			if (UUIDToString(templateId) === deprecatedTemplate) {
-				return Promise.resolve({ deprecated: true });
-			}
-			return Promise.reject(createResponseCode(templates.templateNotFound));
-		});
 
 		test(`should ${success ? 'succeed' : 'fail'} ${desc}`, async () => {
+			ModelSettingsModel.getContainerById.mockImplementation(
+				(t, containerId) => (recognisedContainer.includes(containerId)
+					? Promise.resolve({}) : Promise.reject()));
+			ModelSettingsModel.getFederationById.mockImplementation(
+				(t, federationId) => ([recognisedFederation, federationNotInProject].includes(federationId)
+					? Promise.resolve({}) : Promise.reject()),
+			);
+			ProjectSettingsModel.modelsExistInProject.mockImplementation(
+				(t, p, modelIds) => Promise.resolve(modelIds.every(
+					(id) => recognisedContainer.includes(id) || recognisedFederation === id)
+							&& !modelIds.includes(containerNotInProject)));
+			PermUtils.hasCommenterAccessToFederation.mockImplementation(
+				(t, p, f, username) => Promise.resolve(username === knownUsername));
+			TicketSchema.validateTicket.mockImplementation((t, p, f, tem, u, updateData) => {
+				if (isEqual(updateData, expectedTicketFormat)) return Promise.resolve();
+				return Promise.reject(createResponseCode(templates.invalidArguments, 'Ticket values at creation do not match expected format'));
+			});
+
+			TicketTemplateModel.getTemplateById.mockImplementation((t, templateId) => {
+				if (UUIDToString(templateId) === templateInTeamspace) {
+					return Promise.resolve({});
+				}
+
+				if (UUIDToString(templateId) === deprecatedTemplate) {
+					return Promise.resolve({ deprecated: true });
+				}
+				return Promise.reject(createResponseCode(templates.templateNotFound));
+			});
+
 			const mockCB = jest.fn(() => {});
 			const req = {
 				params: { teamspace, project },
@@ -328,43 +329,44 @@ const testValidateUpdatePlanData = () => {
 	describe.each(testCases)('Validate update plan data', (desc, success, data, expectedData, planId = knownPlanId) => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
-		ModelSettingsModel.getContainerById.mockImplementation(
-			(t, containerId) => (recognisedContainer.includes(containerId)
-				? Promise.resolve({}) : Promise.reject()));
-		ModelSettingsModel.getFederationById.mockImplementation(
-			(t, federationId) => ([...recognisedFederations, federationNotInProject].includes(federationId)
-				? Promise.resolve({}) : Promise.reject()));
-		ProjectSettingsModel.modelsExistInProject.mockImplementation(
-			(t, pro, modelIds) => Promise.resolve(modelIds.every(
-				(id) => recognisedContainer.includes(id) || recognisedFederations.includes(id))
-						&& !modelIds.includes(containerNotInProject)));
-		PermUtils.hasCommenterAccessToFederation.mockImplementation(
-			(t, pro, f, username) => Promise.resolve(knownUsernames.includes(username)));
-		TicketSchema.validateTicket.mockImplementation((t, pro, f, tem, u, updateData) => {
-			if (isEqual(updateData, expectedTicketFormat)
-				|| isEqual(updateData, oldTicketFormat)) return Promise.resolve();
-			return Promise.reject(createResponseCode(templates.invalidArguments,
-				'Ticket values at creation do not match expected format'));
-		});
-		ClashPlansModel.getPlanById.mockImplementation((t, id) => {
-			if (UUIDToString(id) === UUIDToString(knownPlanId)) {
-				return Promise.resolve(oldPlanData);
-			}
-			return Promise.reject(templates.clashPlanNotFound);
-		});
-
-		TicketTemplateModel.getTemplateById.mockImplementation((t, templateId) => {
-			if (templatesInTeamspace.includes(UUIDToString(templateId))) {
-				return Promise.resolve({});
-			}
-
-			if (UUIDToString(templateId) === deprecatedTemplate) {
-				return Promise.resolve({ deprecated: true });
-			}
-			return Promise.reject(createResponseCode(templates.templateNotFound));
-		});
 
 		test(`should ${success ? 'succeed' : 'fail'} ${desc}`, async () => {
+			ModelSettingsModel.getContainerById.mockImplementation(
+				(t, containerId) => (recognisedContainer.includes(containerId)
+					? Promise.resolve({}) : Promise.reject()));
+			ModelSettingsModel.getFederationById.mockImplementation(
+				(t, federationId) => ([...recognisedFederations, federationNotInProject].includes(federationId)
+					? Promise.resolve({}) : Promise.reject()));
+			ProjectSettingsModel.modelsExistInProject.mockImplementation(
+				(t, pro, modelIds) => Promise.resolve(modelIds.every(
+					(id) => recognisedContainer.includes(id) || recognisedFederations.includes(id))
+							&& !modelIds.includes(containerNotInProject)));
+			PermUtils.hasCommenterAccessToFederation.mockImplementation(
+				(t, pro, f, username) => Promise.resolve(knownUsernames.includes(username)));
+			TicketSchema.validateTicket.mockImplementation((t, pro, f, tem, u, updateData) => {
+				if (isEqual(updateData, expectedTicketFormat)
+					|| isEqual(updateData, oldTicketFormat)) return Promise.resolve();
+				return Promise.reject(createResponseCode(templates.invalidArguments,
+					'Ticket values at creation do not match expected format'));
+			});
+			ClashPlansModel.getPlanById.mockImplementation((t, id) => {
+				if (UUIDToString(id) === UUIDToString(knownPlanId)) {
+					return Promise.resolve(oldPlanData);
+				}
+				return Promise.reject(templates.clashPlanNotFound);
+			});
+
+			TicketTemplateModel.getTemplateById.mockImplementation((t, templateId) => {
+				if (templatesInTeamspace.includes(UUIDToString(templateId))) {
+					return Promise.resolve({});
+				}
+
+				if (UUIDToString(templateId) === deprecatedTemplate) {
+					return Promise.resolve({ deprecated: true });
+				}
+				return Promise.reject(createResponseCode(templates.templateNotFound));
+			});
+
 			const mockCB = jest.fn(() => {});
 			const req = {
 				params: { teamspace, project, planId },

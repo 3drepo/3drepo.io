@@ -129,7 +129,7 @@ const validatePlanData = async (req, res, next) => {
 		req.body = deleteIfUndefined(await schema.validate(req.body), false);
 		if (req.body.tickets) {
 			req.body.tickets = await validateTicketData(
-				teamspace, project, req.body.tickets, req.planData.tickets);
+				teamspace, project, req.body.tickets, req.planData?.tickets);
 		}
 
 		if (req.planData) {
