@@ -1784,7 +1784,16 @@ export class UnityUtil {
 	 * @param isFederation - flag signaling whether the model is a container or a federation
 	 * @param initView? - the view the model should load with
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
+	 * @param assetGroups? - When specified, only load the assets that belong to the groups in the list. To include assets without a groups, include an empty string ("") as part of the list.
 	 * @return returns a promise that resolves when the model start loading.
+	 * @example 
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "16854ce0-6e82-11ea-9043-f5b42de4172c")
+	 * @example
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "11da8980-6e82-11ea-a9b4-253aa7f93e55", "e2bf461d-b1a8-4068-b26f-75925a14345f")
+	 * @example
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", 28157fce-c424-469c-ac3b-38aaee07d0a5, 'head', true)
+	 * @example
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", 28157fce-c424-469c-ac3b-38aaee07d0a5, 'head', true, null, true, ["Level 0", "Level 1", ""])
 	 */
 	public static loadModel(
 		teamspace: string,
@@ -1794,6 +1803,7 @@ export class UnityUtil {
 		isFederation: boolean = false,
 		initView = null,
 		clearCanvas = true,
+		assetGroups?: string[],
 	): Promise<void> {
 		if (clearCanvas && UnityUtil.loadedFlag) {
 			UnityUtil.reset(!initView);
@@ -1813,6 +1823,11 @@ export class UnityUtil {
 		if (initView) {
 			params.initView = initView;
 		}
+
+		if (assetGroups?.length) {
+			params.assetGroups = assetGroups;
+		}
+
 		UnityUtil.onLoaded();
 		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model: `, params);
@@ -2746,6 +2761,19 @@ export class UnityUtil {
 	 */
 	public static createWebRequestHandler(gameObjectName: string) {
 		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
+	}
+
+	/**
+	 * Utility method for use by the viewer to invalidate cache entries, if any,
+	 * for a Container based on a bundles version number.
+	 * @hidden
+	 */
+	public static invalidateCache(json: string) {
+		const info = JSON.parse(json);
+		if (this.externalWebRequestHandler) {
+			// Currently cache invalidations are done on a per-container basis.
+			this.externalWebRequestHandler.invalidateCache(info.container, info.version);
+		}
 	}
 
 	/**
