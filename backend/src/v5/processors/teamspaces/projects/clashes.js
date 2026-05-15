@@ -18,7 +18,11 @@
 const { RUN_HISTORY_COL, SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.constants');
 const { UUIDToString, generateUUIDString } = require('../../../utils/helper/uuids');
 const { completeTestRun, createTestRun, getTestRunByQuery } = require('../../../models/clashes.runs');
-const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
+const {
+	createPlan: createPlanModel,
+	deletePlan: deletePlanModel,
+	updatePlan: updatePlanModel,
+} = require('../../../models/clashes.plans');
 const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, storeFile } = require('../../../services/filesManager');
 const { PassThrough } = require('stream');
@@ -31,11 +35,12 @@ const { queueClashRun } = require('../../../services/modelProcessing');
 
 const Clashes = {};
 
-Clashes.createPlan = createPlan;
+Clashes.createPlan = (teamspace, project, data, user) => createPlanModel(teamspace, project, data, user);
 
-Clashes.updatePlan = updatePlan;
+Clashes.updatePlan = (teamspace, project, planId, data, user) => updatePlanModel(
+	teamspace, project, planId, data, user);
 
-Clashes.deletePlan = deletePlan;
+Clashes.deletePlan = (teamspace, project, planId) => deletePlanModel(teamspace, project, planId);
 
 const constructCompositeObject = (container, meshes, unwantedMeshIds, metadata) => {
 	const compositesToMeshes = {};

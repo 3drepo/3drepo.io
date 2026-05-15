@@ -91,19 +91,21 @@ const generateBasicData = () => {
 	const planWithNoRun = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
 	const planWithNoRev = ServiceHelper.generateClashPlan(models[0]._id, models[2]._id);
 	const planWithVoidRev = ServiceHelper.generateClashPlan(models[0]._id, models[3]._id);
+	const project = ServiceHelper.generateRandomProject();
+	const applyProject = (planData) => ({ ...planData, project: project.id });
 
 	return ({
 		users: { tsAdmin, nonAdminUser, unlicencedUser, projectAdmin },
 		teamspace: ServiceHelper.generateRandomString(),
-		project: ServiceHelper.generateRandomProject(),
+		project,
 		models,
 		revisions,
 		voidRev: ServiceHelper.generateRevisionEntry(true),
-		plan,
-		planWithNoRun,
-		planWithNoRev,
-		planWithVoidRev,
-		plans: [plan, planWithNoRun, planWithNoRev, planWithVoidRev],
+		plan: applyProject(plan),
+		planWithNoRun: applyProject(planWithNoRun),
+		planWithNoRev: applyProject(planWithNoRev),
+		planWithVoidRev: applyProject(planWithVoidRev),
+		plans: [plan, planWithNoRun, planWithNoRev, planWithVoidRev].map(applyProject),
 		plannedClashRun1: ServiceHelper.generateClashRun(plan),
 		plannedClashRun2: ServiceHelper.generateClashRun(planWithNoRun),
 		completedClashRun: { ...ServiceHelper.generateClashRun(plan), status: CLASH_RUN_STATUS.COMPLETED },
@@ -138,10 +140,11 @@ const testCreatePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const plan = await getPlanById(ts, stringToUUID(res.body._id));
+					const plan = await getPlanById(ts, proj, stringToUUID(res.body._id));
 					expect(plan).toEqual({
 						...planData,
 						_id: plan._id,
+						project: proj,
 						createdBy: user.user,
 						createdAt: plan.createdAt,
 					});
@@ -183,10 +186,11 @@ const testUpdatePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const plan = await getPlanById(ts, stringToUUID(planId));
+					const plan = await getPlanById(ts, proj, stringToUUID(planId));
 					expect(plan).toEqual({
 						...planData,
 						_id: plan._id,
+						project: proj,
 						updatedAt: plan.updatedAt,
 						updatedBy: user.user,
 					});
@@ -222,7 +226,7 @@ const testDeletePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const planExists = await getPlanById(ts, stringToUUID(planId)).catch(() => false);
+					const planExists = await getPlanById(ts, proj, stringToUUID(planId)).catch(() => false);
 					expect(planExists).toBe(false);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
