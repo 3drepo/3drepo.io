@@ -112,7 +112,7 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 	}
 
 	const creatorHasCommenterAccess = await hasCommenterAccessToFederation(teamspace,
-		project, ticketData.federation, ticketData.creator).catch(() => false);
+		project, ticketData.federation, ticketData.creator);
 
 	if (!creatorHasCommenterAccess) {
 		throw createResponseCode(templates.invalidArguments, 'Creator specified does not have permissions to create ticket on the specified federation');
