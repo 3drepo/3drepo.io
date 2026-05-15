@@ -14,6 +14,7 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+import { serializeSorting } from '@/v5/helpers/ticketsSorting.helpers';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { formatMessage } from '@/v5/services/intl';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -27,10 +28,8 @@ const Item = ({ property, title }: { property: TicketsSortingProperty, title: st
 	const [, setSortingParam] = useSearchParam('sorting');
 	const handleClick = () => {
 		TicketsActionsDispatchers.setSorting(property, sorting.order);
-		let sortingValue = `${property}${sorting.order === 'asc' ? '!' : ''}`;
-		setSortingParam(sortingValue);
+		setSortingParam(serializeSorting(property, sorting.order));
 	};
-
 
 	return (
 		<ExpandingMenuItem

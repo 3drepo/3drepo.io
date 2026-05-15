@@ -28,6 +28,7 @@ import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events'
 import { deserializeURLFilters, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
 import { isEmpty, isEqual, values } from 'lodash';
 import { TicketsSortingPropertyDictionary, TicketsSortingProperty } from '@/v5/store/tickets/card/ticketsCard.types';
+import { deserializeSorting } from '@/v5/helpers/ticketsSorting.helpers';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
@@ -68,11 +69,10 @@ export const TicketFiltersSetter = () => {
 
 		if (sorting) {
 			try {
-				const [property, ascendingFlag] = sorting.split('!');
+				const  [property, order] = deserializeSorting(sorting);
 
-				if (values(TicketsSortingPropertyDictionary).includes(property as TicketsSortingProperty)) {
-					const order = ascendingFlag === '' ? 'asc' : 'desc';
-					TicketsActionsDispatchers.setSorting(property as any, order as any);
+				if (property && order) {
+					TicketsActionsDispatchers.setSorting(property, order);
 				}
 			} catch (e) {
 				// do nothing if the param is wrong
