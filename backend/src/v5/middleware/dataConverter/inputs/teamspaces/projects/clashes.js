@@ -47,7 +47,7 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		const fn = isFederation ? getFederationById : getContainerById;
 
 		const modelExists = await fn(teamspace, id, { _id: 1 }).catch(() => false);
-		return modelExists ? modelsExistInProject(teamspace, project, [id]).catch(() => false) : false;
+		return modelExists ? modelsExistInProject(teamspace, project, [id])
 	};
 
 	const imposeCondition = (schema, required, canRemove) => {
