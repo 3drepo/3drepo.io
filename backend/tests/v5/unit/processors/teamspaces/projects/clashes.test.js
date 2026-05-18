@@ -63,13 +63,15 @@ const testCreatePlan = () => {
 	describe('Create Plan', () => {
 		test('should call createPlan with the teamspace and data provided', async () => {
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const data = generateRandomString();
+			const user = generateRandomString();
 			ClashPlansModel.createPlan.mockResolvedValueOnce(data);
 
-			await expect(Clashes.createPlan(teamspace, data)).resolves.toEqual(data);
+			await expect(Clashes.createPlan(teamspace, project, data, user)).resolves.toEqual(data);
 
 			expect(ClashPlansModel.createPlan).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.createPlan).toHaveBeenCalledWith(teamspace, data);
+			expect(ClashPlansModel.createPlan).toHaveBeenCalledWith(teamspace, project, data, user);
 		});
 	});
 };
@@ -78,14 +80,15 @@ const testUpdatePlan = () => {
 	describe('Update Plan', () => {
 		test('should call updatePlan with the teamspace and data provided', async () => {
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const planId = generateRandomString();
 			const data = generateRandomString();
 			const user = generateRandomString();
 
-			await Clashes.updatePlan(teamspace, planId, data, user);
+			await Clashes.updatePlan(teamspace, project, planId, data, user);
 
 			expect(ClashPlansModel.updatePlan).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.updatePlan).toHaveBeenCalledWith(teamspace, planId, data, user);
+			expect(ClashPlansModel.updatePlan).toHaveBeenCalledWith(teamspace, project, planId, data, user);
 		});
 	});
 };
@@ -94,12 +97,13 @@ const testDeletePlan = () => {
 	describe('Delete Plan', () => {
 		test('should call deletePlan with the teamspace and data provided', async () => {
 			const teamspace = generateRandomString();
+			const project = generateUUID();
 			const planId = generateRandomString();
 
-			await Clashes.deletePlan(teamspace, planId);
+			await Clashes.deletePlan(teamspace, project, planId);
 
 			expect(ClashPlansModel.deletePlan).toHaveBeenCalledTimes(1);
-			expect(ClashPlansModel.deletePlan).toHaveBeenCalledWith(teamspace, planId);
+			expect(ClashPlansModel.deletePlan).toHaveBeenCalledWith(teamspace, project, planId);
 		});
 	});
 };
@@ -181,6 +185,7 @@ const testCreateRun = () => {
 		['plan has selfIntersectionsCheck set to selectionA', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0] }],
 		['plan has selfIntersectionsCheck set to selectionB', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[1] }],
 		['plan has selfIntersectionsCheck set to true', { ...planData, selfIntersectionsCheck: true }],
+		['plan has additional properties', { ...planData, ...generateRandomObject() }],
 		['there are unwanted metadata', undefined, { ...meshDataObj, unwantedMetadata: metadata.slice(2), unwantedMeshes: [meshDataObj.meshes[0]._id, meshDataObj.meshes[1]._id] }],
 	])('Create Test Run', (desc, plan = planData, meshData = meshDataObj) => {
 		test(`should create and queue the run when ${desc}`, async () => {
@@ -202,7 +207,15 @@ const testCreateRun = () => {
 			await Clashes.createRun(teamspace, project, plan, userId);
 
 			expect(ClashRunsModel.createTestRun).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, plan, userId);
+			const expectedPlanData = {
+				_id: plan._id,
+				type: plan.type,
+				tolerance: plan.tolerance,
+				selfIntersectionsCheck: plan.selfIntersectionsCheck,
+				selectionA: plan.selectionA,
+				selectionB: plan.selectionB,
+			};
+			expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, expectedPlanData, userId);
 			expect(Metadata.getAllMetadata).toHaveBeenCalledTimes(1);
 			expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(meshData.metadata.length ? 2 : 1);

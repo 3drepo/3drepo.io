@@ -18,7 +18,11 @@
 const { RUN_HISTORY_COL, SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.constants');
 const { UUIDToString, generateUUIDString } = require('../../../utils/helper/uuids');
 const { completeTestRun, createTestRun, getTestRunByQuery } = require('../../../models/clashes.runs');
-const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
+const {
+	createPlan,
+	deletePlan,
+	updatePlan,
+} = require('../../../models/clashes.plans');
 const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, storeFile } = require('../../../services/filesManager');
 const { PassThrough } = require('stream');
@@ -115,17 +119,20 @@ const writeConfigSetEntry = async (teamspace, project, selection, stream, setNam
 };
 
 Clashes.createRun = async (teamspace, project, plan, user) => {
-	const runId = await createTestRun(teamspace, plan, user);
+	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
+	const { _id, type, tolerance, selfIntersectionsCheck, selectionA, selectionB } = plan;
+	const runId = await createTestRun(teamspace, {
+		_id, type, tolerance, selfIntersectionsCheck, selectionA, selectionB }, user);
 
 	const configStream = new PassThrough();
 	configStream.write('{');
-	configStream.write(`"type":${JSON.stringify(plan.type)},`);
-	configStream.write(`"tolerance":${JSON.stringify(plan.tolerance)},`);
-	configStream.write(`"selfIntersectsA":${JSON.stringify(plan.selfIntersectionsCheck === true || plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0])},`);
-	configStream.write(`"selfIntersectsB":${JSON.stringify(plan.selfIntersectionsCheck === true || plan.selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1])},`);
-	await writeConfigSetEntry(teamspace, project, plan.selectionA, configStream, 'setA');
+	configStream.write(`"type":${JSON.stringify(type)},`);
+	configStream.write(`"tolerance":${JSON.stringify(tolerance)},`);
+	configStream.write(`"selfIntersectsA":${JSON.stringify(selfIntersectionsCheck === true || selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[0])},`);
+	configStream.write(`"selfIntersectsB":${JSON.stringify(selfIntersectionsCheck === true || selfIntersectionsCheck === SELF_INTERSECTIONS_CHECK_OPTIONS[1])},`);
+	await writeConfigSetEntry(teamspace, project, selectionA, configStream, 'setA');
 	configStream.write(',');
-	await writeConfigSetEntry(teamspace, project, plan.selectionB, configStream, 'setB');
+	await writeConfigSetEntry(teamspace, project, selectionB, configStream, 'setB');
 	configStream.end('}');
 
 	await queueClashRun(teamspace, project, UUIDToString(runId), configStream);
