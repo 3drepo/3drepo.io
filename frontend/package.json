@@ -184,7 +184,7 @@
 		"path": "0.12.7",
 		"postcss": "8.4.31",
 		"postcss-scss": "4.0.9",
-		"storybook": "7.6.20",
+		"storybook": "7.6.21",
 		"style-loader": "3.3.1",
 		"stylelint": "14.5.1",
 		"stylelint-config-recommended": "7.0.0",
