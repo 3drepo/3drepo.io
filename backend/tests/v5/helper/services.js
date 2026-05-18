@@ -931,20 +931,33 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.generateClashPlan = (model1, model2) => ({
-	_id: ServiceHelper.generateUUIDString(),
-	name: ServiceHelper.generateRandomString(),
-	type: CLASH_PLAN_TYPES[0],
-	tolerance: 0.01,
-	selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
-	trigger: [TRIGGER_OPTIONS[0]],
-	selectionA: {
-		container: model1,
-	},
-	selectionB: {
-		container: model2,
-	},
-});
+ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
+	let tickets;
+	if (ticketInfo?.federation && ticketInfo.template && ticketInfo.creator) {
+		const { federation, template, creator } = ticketInfo;
+		const ticket = ServiceHelper.generateTicket(template, false, federation);
+		const valuesAtCreation = Object.keys(ticket.properties).map(
+			(key) => ({ property: key, value: ticket.properties[key] }));
+		tickets = {
+			federation: federation._id, template: template._id, valuesAtCreation, creator,
+		};
+	}
+	return deleteIfUndefined({
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		type: CLASH_PLAN_TYPES[0],
+		tolerance: 0.01,
+		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
+		trigger: [TRIGGER_OPTIONS[0]],
+		selectionA: {
+			container: model1,
+		},
+		selectionB: {
+			container: model2,
+		},
+		tickets,
+	});
+};
 
 ServiceHelper.generateClashes = (plan) => times(20, () => ({
 	a: `${plan.selectionA.container}::internal::${ServiceHelper.generateRandomString()}`,

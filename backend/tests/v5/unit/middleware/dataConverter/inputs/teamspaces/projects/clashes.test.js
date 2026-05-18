@@ -164,7 +164,7 @@ const testValidateNewPlanData = () => {
 							&& !modelIds.includes(containerNotInProject)));
 			PermUtils.hasCommenterAccessToFederation.mockImplementation(
 				(t, p, f, username) => Promise.resolve(username === knownUsername));
-			TicketSchema.validateTicket.mockImplementation((t, p, f, tem, u, updateData) => {
+			TicketSchema.validateTicket.mockImplementation((t, p, f, tem, updateData) => {
 				if (isEqual(updateData, expectedTicketFormat)) return Promise.resolve();
 				return Promise.reject(createResponseCode(templates.invalidArguments, 'Ticket values at creation do not match expected format'));
 			});
@@ -343,7 +343,7 @@ const testValidateUpdatePlanData = () => {
 							&& !modelIds.includes(containerNotInProject)));
 			PermUtils.hasCommenterAccessToFederation.mockImplementation(
 				(t, pro, f, username) => Promise.resolve(knownUsernames.includes(username)));
-			TicketSchema.validateTicket.mockImplementation((t, pro, f, tem, u, updateData) => {
+			TicketSchema.validateTicket.mockImplementation((t, pro, f, tem, updateData) => {
 				if (isEqual(updateData, expectedTicketFormat)
 					|| isEqual(updateData, oldTicketFormat)) return Promise.resolve();
 				return Promise.reject(createResponseCode(templates.invalidArguments,

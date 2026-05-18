@@ -34,6 +34,8 @@ const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const fs = require('fs');
 const path = require('path');
+const { UUIDToString } = require('../../../../../../src/v5/utils/helper/uuids');
+const { deleteIfUndefined } = require('../../../../../../src/v5/utils/helper/objects');
 
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
 
@@ -47,8 +49,8 @@ const formatClash = (clash) => ({
 	index: [clash.a, clash.b].sort().join('-'),
 });
 
-const setupBasicData = async ({ users, teamspace, project, models, revisions, voidRev,
-	plans, plannedClashRun1, plannedClashRun2, clashes, completedClashRun }) => {
+const setupBasicData = async ({ users, teamspace, project, models, federation, revisions, voidRev,
+	plans, plannedClashRun1, plannedClashRun2, clashes, completedClashRun, template }) => {
 	await ServiceHelper.db.createUser(users.tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
@@ -61,8 +63,8 @@ const setupBasicData = async ({ users, teamspace, project, models, revisions, vo
 	const categorizedClashes = { new: clashes.map(formatClash), active: [], resolved: [] };
 	await Promise.all([
 		ServiceHelper.db.createProject(teamspace, project.id, project.name,
-			models.map((m) => m._id), [users.projectAdmin.user]),
-		...models.map((model) => ServiceHelper.db.createModel(
+			[...models, federation].map((m) => m._id), [users.projectAdmin.user]),
+		...[...models, federation].map((model) => ServiceHelper.db.createModel(
 			teamspace,
 			model._id,
 			model.name,
@@ -76,16 +78,22 @@ const setupBasicData = async ({ users, teamspace, project, models, revisions, vo
 		ServiceHelper.db.createClashRun(teamspace, plannedClashRun1),
 		ServiceHelper.db.createClashRun(teamspace, plannedClashRun2),
 		ServiceHelper.db.createClashRun(teamspace, completedClashRun, categorizedClashes),
+		ServiceHelper.db.createTemplates(teamspace, [template]),
 	]);
 };
 
 const generateBasicData = () => {
-	const [tsAdmin, nonAdminUser, unlicencedUser, projectAdmin] = times(4,
+	const [tsAdmin, nonAdminUser, unlicencedUser, projectAdmin, commenterOnFed, viewerOnFed] = times(6,
 		() => ServiceHelper.generateUserCredentials());
 
 	const models = times(4, () => ServiceHelper.generateRandomModel());
+	const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION,
+		viewers: [viewerOnFed.user],
+		commenters: [commenterOnFed.user] });
 
 	const revisions = times(2, () => ServiceHelper.generateRevisionEntry());
+
+	const template = ServiceHelper.generateTemplate();
 
 	const plan = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
 	const planWithNoRun = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
@@ -95,10 +103,11 @@ const generateBasicData = () => {
 	const applyProject = (planData) => ({ ...planData, project: project.id });
 
 	return ({
-		users: { tsAdmin, nonAdminUser, unlicencedUser, projectAdmin },
+		users: { tsAdmin, nonAdminUser, unlicencedUser, projectAdmin, commenterOnFed, viewerOnFed },
 		teamspace: ServiceHelper.generateRandomString(),
 		project,
 		models,
+		federation,
 		revisions,
 		voidRev: ServiceHelper.generateRevisionEntry(true),
 		plan: applyProject(plan),
@@ -110,6 +119,7 @@ const generateBasicData = () => {
 		plannedClashRun2: ServiceHelper.generateClashRun(planWithNoRun),
 		completedClashRun: { ...ServiceHelper.generateClashRun(plan), status: CLASH_RUN_STATUS.COMPLETED },
 		clashes: ServiceHelper.generateClashes(plan),
+		template,
 	});
 };
 
@@ -117,13 +127,14 @@ const testCreatePlan = () => {
 	describe('Create clash test plan', () => {
 		const route = (ts, project, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes${key ? `?key=${key}` : ''}`;
 		const basicData = generateBasicData();
-		const { users, teamspace, project, models } = basicData;
+		const { users, teamspace, project, models, template, federation } = basicData;
 
-		const generatePlanData = () => ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
+		const generatePlanData = (includeTicketObject, creator = users.tsAdmin.user) => ServiceHelper.generateClashPlan(
+			models[0]._id, models[1]._id, includeTicketObject ? { federation, template, creator } : undefined);
 
-		beforeAll(async () => {
-			await setupBasicData(basicData);
-		});
+		beforeAll(() => Promise.all([
+			setupBasicData(basicData),
+		]));
 
 		describe.each([
 			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
@@ -133,6 +144,10 @@ const testCreatePlan = () => {
 			['payload is invalid', { planData: { ...generatePlanData(), type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
 			['user has access to a project', { user: users.projectAdmin }, true],
 			['user is teamspace admin', {}, true],
+			['payload contains ticket object', { planData: generatePlanData(true) }, true],
+			['payload contains ticket object but creator is not specified', { planData: { ...generatePlanData(true), creator: undefined } }, true],
+			['!creator is a commenter', { planData: generatePlanData(true, users.commenterOnFed.user) }, true],
+			['creator is a viewer', { planData: generatePlanData(true, users.viewerOnFed.user) }, false, templates.invalidArguments],
 		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planData = generatePlanData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 				const res = await agent.post(route(ts, proj, user.apiKey))
@@ -140,14 +155,23 @@ const testCreatePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const plan = await getPlanById(ts, proj, stringToUUID(res.body._id));
+					const { tickets, ...plan } = await getPlanById(ts, proj, stringToUUID(res.body._id));
+					const { tickets: expectedTicketsObject, ...expectedPlanData } = planData;
 					expect(plan).toEqual({
-						...planData,
+						...expectedPlanData,
 						_id: plan._id,
 						project: proj,
 						createdBy: user.user,
 						createdAt: plan.createdAt,
 					});
+
+					if (tickets) {
+						tickets.template = UUIDToString(tickets.template);
+						expect(tickets).toEqual({
+							creator: users.tsAdmin.user,
+							...expectedTicketsObject,
+						});
+					}
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -161,13 +185,23 @@ const testUpdatePlan = () => {
 		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}${key ? `?key=${key}` : ''}`;
 
 		const basicData = generateBasicData();
-		const { users, teamspace, project, plan: existingPlan } = basicData;
+
+		const { users, teamspace, project, plan: existingPlan, federation, template, models } = basicData;
+
+		const clashPlanWithTicketsConfig = {
+			...ServiceHelper.generateClashPlan(
+				models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user }),
+			project: project.id,
+		};
 
 		beforeAll(async () => {
-			await setupBasicData(basicData);
+			await Promise.all([
+				setupBasicData(basicData),
+				ServiceHelper.db.createClashPlan(teamspace, clashPlanWithTicketsConfig),
+			]);
 		});
 
-		const generateUpdateData = () => ({ ...existingPlan, name: ServiceHelper.generateRandomString() });
+		const generateUpdateData = () => ({ name: ServiceHelper.generateRandomString() });
 
 		describe.each([
 			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
@@ -175,10 +209,14 @@ const testUpdatePlan = () => {
 			['user is not a member of the teamspace', { user: users.unlicencedUser }, false, templates.teamspaceNotFound],
 			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
-			['payload is invalid', { planData: { ...existingPlan, type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
-			['payload is invalid (no changes)', { planData: existingPlan }, false, templates.invalidArguments],
+			['payload is invalid', { planData: { type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
+			['payload is invalid (no changes)', { planData: { name: existingPlan.name } }, false, templates.invalidArguments],
+			['cannot remove required fields', { planData: { name: null } }, false, templates.invalidArguments],
+			// note: order matters here, this must be done before "the no change test" as it uses the same payload
 			['user has access to a project', { user: users.projectAdmin }, true],
 			['user is teamspace admin', {}, true],
+			['can remove optional field tickets.valuesAtCreation', { planId: clashPlanWithTicketsConfig._id, planData: { tickets: { valuesAtCreation: null } } }, true],
+			['can remove optional ticketsObject', { planId: clashPlanWithTicketsConfig._id, planData: { tickets: null } }, true],
 		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planId = existingPlan._id, planData = generateUpdateData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 				const res = await agent.patch(route(ts, proj, planId, user.apiKey))
@@ -186,14 +224,27 @@ const testUpdatePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
+					const ticketTest = planId === clashPlanWithTicketsConfig._id;
+					const orgPlanData = ticketTest
+						? clashPlanWithTicketsConfig : existingPlan;
 					const plan = await getPlanById(ts, proj, stringToUUID(planId));
-					expect(plan).toEqual({
+					const expectedPlan = {
+						...orgPlanData,
 						...planData,
 						_id: plan._id,
 						project: proj,
 						updatedAt: plan.updatedAt,
 						updatedBy: user.user,
-					});
+					};
+
+					if (ticketTest && planData.tickets) {
+						// this is a bit messy but I can't think of a better way.
+						expectedPlan.tickets = { ...orgPlanData.tickets };
+						delete expectedPlan.tickets.valuesAtCreation;
+					} else {
+						delete expectedPlan.tickets;
+					}
+					expect(plan).toEqual(deleteIfUndefined(expectedPlan, true));
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}

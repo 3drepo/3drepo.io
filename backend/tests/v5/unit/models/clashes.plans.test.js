@@ -122,6 +122,95 @@ const testUpdatePlan = () => {
 			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
 				{ $set: { ...data, updatedAt, updatedBy: user } });
 		});
+		test('Should unset fields with null values', async () => {
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const planId = generateRandomString();
+			const user = generateRandomString();
+			const data = { [generateRandomString()]: null, [generateRandomString()]: 'value' };
+
+			await ClashPlans.updatePlan(teamspace, project, planId, data, user);
+
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			const expectedData = { $set: { updatedAt, updatedBy: user }, $unset: {} };
+
+			Object.keys(data).forEach((key) => {
+				if (data[key] === null) {
+					expectedData.$unset[key] = 1;
+				} else {
+					expectedData.$set[key] = data[key];
+				}
+			});
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
+				expectedData);
+		});
+		test('Should have a combination of $set and $unset if there are both null and non-null fields', async () => {
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const planId = generateRandomString();
+			const user = generateRandomString();
+			const data = { [generateRandomString()]: null, [generateRandomString()]: null, ...generateRandomObject() };
+
+			await ClashPlans.updatePlan(teamspace, project, planId, data, user);
+
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			const expectedData = { $set: { updatedAt, updatedBy: user }, $unset: {} };
+
+			Object.keys(data).forEach((key) => {
+				if (data[key] === null) {
+					expectedData.$unset[key] = 1;
+				} else {
+					expectedData.$set[key] = data[key];
+				}
+			});
+
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
+				expectedData);
+		});
+
+		test('should work with nested objects and unset nested fields with null values', async () => {
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const planId = generateRandomString();
+			const user = generateRandomString();
+			const data = {
+				field1: null,
+				field2: 'value',
+				nested: {
+					nestedField1: null,
+					nestedField2: 'nestedValue',
+				},
+			};
+
+			await ClashPlans.updatePlan(teamspace, project, planId, data, user);
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			const expectedData = { $set: { updatedAt, updatedBy: user }, $unset: {} };
+
+			Object.keys(data).forEach((key) => {
+				if (data[key] === null) {
+					expectedData.$unset[key] = 1;
+				} else if (typeof data[key] === 'object' && !Array.isArray(data[key])) {
+					Object.keys(data[key]).forEach((nestedKey) => {
+						if (data[key][nestedKey] === null) {
+							expectedData.$unset[`${key}.${nestedKey}`] = 1;
+						} else {
+							expectedData.$set[`${key}.${nestedKey}`] = data[key][nestedKey];
+						}
+					});
+				} else {
+					expectedData.$set[key] = data[key];
+				}
+			});
+
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
+				expectedData);
+		});
 	});
 };
 
