@@ -35,6 +35,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const fs = require('fs');
 const path = require('path');
 const { UUIDToString } = require('../../../../../../src/v5/utils/helper/uuids');
+const { deleteIfUndefined } = require('../../../../../../src/v5/utils/helper/objects');
 
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
 
@@ -126,8 +127,8 @@ const testCreatePlan = () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, models, template, federation } = basicData;
 
-		const generatePlanData = (includeTicketObject) => ServiceHelper.generateClashPlan(
-			models[0]._id, models[1]._id, includeTicketObject ? { federation, template } : undefined);
+		const generatePlanData = (includeTicketObject, creator = users.tsAdmin.user) => ServiceHelper.generateClashPlan(
+			models[0]._id, models[1]._id, includeTicketObject ? { federation, template, creator } : undefined);
 
 		beforeAll(() => Promise.all([
 			setupBasicData(basicData),
@@ -142,14 +143,11 @@ const testCreatePlan = () => {
 			['user has access to a project', { user: users.projectAdmin }, true],
 			['user is teamspace admin', {}, true],
 			['payload contains ticket object', { planData: generatePlanData(true) }, true],
-			['creator is a commenter', { planData: generatePlanData(true), creator: users.commenterOnFed.user }, true],
-			['creator is a viewer', { planData: generatePlanData(true), creator: users.viewerOnFed.user }, false, templates.invalidArguments],
-		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planData = generatePlanData(), creator }, success, expectedRes) => {
+			['payload contains ticket object but creator is not specified', { planData: { ...generatePlanData(true), creator: undefined } }, true],
+			['!creator is a commenter', { planData: generatePlanData(true, users.commenterOnFed.user) }, true],
+			['creator is a viewer', { planData: generatePlanData(true, users.viewerOnFed.user) }, false, templates.invalidArguments],
+		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planData = generatePlanData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
-				if (creator) {
-					// eslint-disable-next-line no-param-reassign
-					planData.tickets.creator = creator;
-				}
 				const res = await agent.post(route(ts, proj, user.apiKey))
 					.send(planData)
 					.expect(expectedRes?.status || templates.ok.status);
@@ -184,13 +182,20 @@ const testUpdatePlan = () => {
 		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}${key ? `?key=${key}` : ''}`;
 
 		const basicData = generateBasicData();
-		const { users, teamspace, project, plan: existingPlan } = basicData;
+
+		const { users, teamspace, project, plan: existingPlan, federation, template, models } = basicData;
+
+		const clashPlanWithTicketsConfig = ServiceHelper.generateClashPlan(
+			models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user });
 
 		beforeAll(async () => {
-			await setupBasicData(basicData);
+			await Promise.all([
+				setupBasicData(basicData),
+				ServiceHelper.db.createClashPlan(teamspace, clashPlanWithTicketsConfig),
+			]);
 		});
 
-		const generateUpdateData = () => ({ ...existingPlan, name: ServiceHelper.generateRandomString() });
+		const generateUpdateData = () => ({ name: ServiceHelper.generateRandomString() });
 
 		describe.each([
 			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
@@ -198,10 +203,14 @@ const testUpdatePlan = () => {
 			['user is not a member of the teamspace', { user: users.unlicencedUser }, false, templates.teamspaceNotFound],
 			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
-			['payload is invalid', { planData: { ...existingPlan, type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
-			['payload is invalid (no changes)', { planData: existingPlan }, false, templates.invalidArguments],
+			['payload is invalid', { planData: { type: ServiceHelper.generateRandomString() } }, false, templates.invalidArguments],
+			['payload is invalid (no changes)', { planData: { name: existingPlan.name } }, false, templates.invalidArguments],
+			['cannot remove required fields', { planData: { name: null } }, false, templates.invalidArguments],
+			// note: order matters here, this must be done before "the no change test" as it uses the same payload
 			['user has access to a project', { user: users.projectAdmin }, true],
 			['user is teamspace admin', {}, true],
+			['can remove optional field tickets.valuesAtCreation', { planId: clashPlanWithTicketsConfig._id, planData: { tickets: { valuesAtCreation: null } } }, true],
+			['can remove optional ticketsObject', { planId: clashPlanWithTicketsConfig._id, planData: { tickets: null } }, true],
 		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planId = existingPlan._id, planData = generateUpdateData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 				const res = await agent.patch(route(ts, proj, planId, user.apiKey))
@@ -209,13 +218,26 @@ const testUpdatePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
+					const ticketTest = planId === clashPlanWithTicketsConfig._id;
+					const orgPlanData = ticketTest
+						? clashPlanWithTicketsConfig : existingPlan;
 					const plan = await getPlanById(ts, stringToUUID(planId));
-					expect(plan).toEqual({
+					const expectedPlan = {
+						...orgPlanData,
 						...planData,
 						_id: plan._id,
 						updatedAt: plan.updatedAt,
 						updatedBy: user.user,
-					});
+					};
+
+					if (ticketTest && planData.tickets) {
+						// this is a bit messy but I can't think of a better way.
+						expectedPlan.tickets = { ...orgPlanData.tickets };
+						delete expectedPlan.tickets.valuesAtCreation;
+					} else {
+						delete expectedPlan.tickets;
+					}
+					expect(plan).toEqual(deleteIfUndefined(expectedPlan, true));
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}

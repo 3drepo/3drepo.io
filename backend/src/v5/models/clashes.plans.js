@@ -18,6 +18,8 @@
 const { CLASH_PLANS_COL } = require('./clashes.constants');
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
+const { isEmpty } = require('../utils/helper/objects');
+const { isObject } = require('../utils/helper/typeCheck');
 const { templates } = require('../utils/responseCodes');
 
 const ClashPlans = {};
@@ -43,8 +45,28 @@ ClashPlans.createPlan = async (teamspace, data, user) => {
 };
 
 ClashPlans.updatePlan = async (teamspace, planId, data, user) => {
-	await db.updateOne(teamspace, CLASH_PLANS_COL, { _id: planId },
-		{ $set: { ...data, updatedAt: new Date(), updatedBy: user } });
+	const toSet = { updatedAt: new Date(), updatedBy: user };
+	const toUnset = {};
+	const collectUpdates = (searchObj, prefix = '') => {
+		Object.keys(searchObj).forEach((key) => {
+			if (isObject(searchObj[key])) {
+				collectUpdates(searchObj[key], `${prefix}${key}.`);
+			} else if (searchObj[key] === null) {
+				toUnset[`${prefix}${key}`] = 1;
+			} else {
+				toSet[`${prefix}${key}`] = searchObj[key];
+			}
+		});
+	};
+	collectUpdates(data);
+
+	const updateQuery = { $set: toSet };
+
+	if (!isEmpty(toUnset)) {
+		updateQuery.$unset = toUnset;
+	}
+
+	await db.updateOne(teamspace, CLASH_PLANS_COL, { _id: planId }, updateQuery);
 };
 
 ClashPlans.deletePlan = async (teamspace, planId) => {

@@ -71,8 +71,9 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 			property: Yup.string().required(),
 			module: Yup.string(),
 			value: Yup.mixed().required(),
-		})).min(1).default(undefined), false, true),
-	});
+		}).noUnknown(true)).min(1)
+			.default(undefined), false, true),
+	}).noUnknown(true);
 
 	return Yup.object().shape({
 		name: imposeCondition(types.strings.title, true, false),
@@ -108,7 +109,7 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
 		await validateTicket(teamspace, project, ticketData.federation,
-			template, ticketData.creator, propertiesToUpdate, { });
+			template, propertiesToUpdate, { });
 	}
 
 	const creatorHasCommenterAccess = await hasCommenterAccessToFederation(teamspace,
@@ -148,6 +149,7 @@ const validatePlanData = async (req, res, next) => {
 					delete req.body[key];
 				}
 			});
+
 			if (isEmpty(req.body)) {
 				throw createResponseCode(templates.invalidArguments, 'No valid properties to update');
 			}

@@ -933,12 +933,13 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 
 ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 	let tickets;
-	if (ticketInfo?.federation && ticketInfo.template) {
-		const { federation, template } = ticketInfo;
+	if (ticketInfo?.federation && ticketInfo.template && ticketInfo.creator) {
+		const { federation, template, creator } = ticketInfo;
 		const ticket = ServiceHelper.generateTicket(template, false, federation);
-		const valuesAtCreation = Object.keys(ticket.properties).map((key) => ({ key, value: ticket.properties[key] }));
+		const valuesAtCreation = Object.keys(ticket.properties).map(
+			(key) => ({ property: key, value: ticket.properties[key] }));
 		tickets = {
-			federation: federation._id, template: template._id, valuesOnCreation: valuesAtCreation,
+			federation: federation._id, template: template._id, valuesAtCreation, creator,
 		};
 	}
 	return deleteIfUndefined({
