@@ -77,13 +77,13 @@ export const TicketSlide = ({ template, ticketId, clearTicketId }: TicketSlidePr
 	};
 
 	useEffect(()=> {
-		const ticketInRedux = selectTicketById(getState(), containerOrFederation, ticketId) 
+		const ticketInRedux = selectTicketById(getState(), containerOrFederation, ticketId);
 
 		if (!isEqual(ticketInRedux, ticket) && ticketInRedux) {
 			setTicket(ticketInRedux);
 		}
 
-	},[ticketData, setTicket, ticket]);
+	}, [ticketData, setTicket, ticket]);
 
 	useEffect(() => {
 		formData.reset(ticket);

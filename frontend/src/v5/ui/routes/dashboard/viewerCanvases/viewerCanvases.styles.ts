@@ -16,67 +16,48 @@
  */
 
 import { PropsWithChildren } from 'react';
-import BaseSplitPane, { SplitPaneProps } from 'react-split-pane';
+import { SplitPane as BaseSplitPane, SplitPaneProps } from 'react-split-pane';
 import ResizePaneIcon from '@assets/icons/outlined/horizontal_resize-outlined.svg';
 import styled, { css } from 'styled-components';
 import { ComponentToString } from '@/v5/helpers/react.helper';
-import { OverlappingContainer } from '@controls/overlappingContainer/overlappingContainer.styles';
 
-export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps> & { $isCalibrating: boolean, $is2DOpen }>`
+export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps> & { $isCalibrating?: boolean, $is2DOpen?: boolean }>`
 	height: calc(100vh - ${({ $isCalibrating }) => $isCalibrating ? 120 : 62}px) !important;
-	.Resizer {
-		box-sizing: border-box;
+	position: absolute !important;
+
+	& .split-pane-divider.horizontal {
+		background-color: ${({ theme }) => theme.palette.base.light};
+		width: 26px !important;
+		margin: 0 -12px !important;
+		border-left: 12px solid transparent;
+		border-right: 12px solid transparent;
+		flex-shrink: 0;
+		cursor: pointer;
 		background-clip: padding-box;
 		z-index: 1;
 
-		/* Hide nodule when 2d viewer is hidden */
-		&:has(+ .Pane2:empty) {
-			display: none;
+		&:hover {
+			background-color: ${({ theme }) => theme.palette.tertiary.light};
 		}
-		&.vertical {
-			background-color: ${({ theme }) => theme.palette.base.light};
+		&:active {
+			background-color: ${({ theme }) => theme.palette.tertiary.mid};
+		}
+
+		/* Panel resizer nodule */
+		:is(&:hover, &:active)::after {
+			content: url('data:image/svg+xml;utf8,${ComponentToString(ResizePaneIcon)}');
+			padding-top: 3px;
+			height: 40px;
 			width: 24px;
-			margin: 0 -12px;
-			border-left: 12px solid transparent;
-			border-right: 11px solid transparent;
-			flex-shrink: 0;
-			cursor: pointer;
-
-			&:hover {
-				background-color: ${({ theme }) => theme.palette.tertiary.light};
-			}
-			&:active {
-				background-color: ${({ theme }) => theme.palette.tertiary.mid};
-			}
-
-			/* Panel resizer nodule */
-			:is(&:hover, &:active)::after {
-				content: url('data:image/svg+xml;utf8,${ComponentToString(ResizePaneIcon)}');
-				padding-top: 3px;
-				height: 40px;
-				width: 24px;
-				border-radius: 4px;
-				background-color: inherit;
-				box-sizing: border-box;
-				position: absolute;
-				bottom: 112px;
-				align-content: center;
-				text-align: center;
-				transform: translate(-50%, -50%);
-			}
+			border-radius: 4px;
+			background-color: inherit;
+			box-sizing: border-box;
+			position: absolute;
+			bottom: 112px;
+			align-content: center;
+			text-align: center;
+			transform: translate(-50%, -50%);
 		}
-	}
-
-	.Pane1 { 
-		/* Adds minimum size to panes (only when Pane2 is open) */
-		min-width: 68px;
-		max-width: calc(100% - 68px);
-		&:has(~ .Pane2:empty) {
-			max-width: 100%;
-		}
-	}
-	.Pane2 {
-		display: contents;
 	}
 
 	${({ $is2DOpen }) => !$is2DOpen && css`
@@ -87,10 +68,4 @@ export const SplitPane = styled(BaseSplitPane)<PropsWithChildren<SplitPaneProps>
 			max-width: 100%;
 		}
 	`}
-`;
-
-export const LeftPane = styled(OverlappingContainer)`
-	width: 100%;
-	height: 100%;
-	pointer-events: none;
 `;

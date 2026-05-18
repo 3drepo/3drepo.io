@@ -16,8 +16,10 @@
  */
 import { formatInfoUnit } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
+import { MinFileData } from '@components/shared/uploadFiles/uploadFiles.helpers';
 import { isNumber } from 'lodash';
 import * as Yup from 'yup';
+
 
 export const ERROR_REQUIRED_FIELD_MESSAGE = formatMessage({
 	id: 'validation.error.required',
@@ -35,7 +37,7 @@ export const nullableString = Yup.string().transform((value) => value || null).n
 
 export const nullableNumber = Yup.number()
 	.transform((_, val) => ((val || val === 0) ? Number(val) : null))
-	.nullable(true)
+	.nullable()
 	.typeError(formatMessage({
 		id: 'validation.error.invalidNumber',
 		defaultMessage: 'Invalid number',
@@ -58,14 +60,14 @@ export const uploadFile = Yup.mixed().nullable().test(
 		id: 'validation.revisions.file.error.emptyFile',
 		defaultMessage: 'File is empty',
 	}),
-	({ size }) => size > 0,
+	({ size }: MinFileData) => size > 0,
 ).test(
 	'fileSize',
 	formatMessage({
 		id: 'validation.revisions.file.error.tooLarge',
 		defaultMessage: 'File exceeds size limit of {sizeLimit}',
 	}, { sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit) }),
-	({ size }) => size && (size < ClientConfig.uploadSizeLimit),
+	({ size }: MinFileData) => size && (size < ClientConfig.uploadSizeLimit),
 );
 
 export const alphaNumericHyphens = /^[\w-]*$/;

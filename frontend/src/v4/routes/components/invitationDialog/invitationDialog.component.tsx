@@ -27,6 +27,7 @@ import { isEmpty } from 'lodash';
 import { useEffect, useRef } from 'react';
 import * as yup from 'yup';
 
+import { Button } from '@controls/button';
 import { TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { MODEL_ROLES_LIST, MODEL_ROLES_TYPES } from '../../../constants/model-permissions';
@@ -41,7 +42,6 @@ import {
 	Container,
 	Content,
 	Footer,
-	IconButton,
 	PermissionsTable,
 	ProjectCheckboxContainer,
 	ProjectConfig,
@@ -130,56 +130,66 @@ export const InvitationDialog = (props: IProps) => {
 	};
 
 	const renderPermissions = (projects = []) => (
-		<FieldArray name="permissions" render={({ remove, push }) => (
-			<>
-				{projects.map(({ project, isAdmin }, index) => (
-					<div key={index}>
-						<ProjectConfig>
-							<Field name={`permissions.${index}.project`} render={({ field }) => (
+		<FieldArray name="permissions">
+			{({ remove, push }) => (<>
+				{projects.map(({ project, isAdmin }, index) => {
+					const availableProjects = getProjects(project, projects);
+					return (
+						<div key={index}>
+							<ProjectConfig>
+						<Field name={`permissions.${index}.project`}>
+							{({ field }) => (
 								<FormControl>
 									<InputLabel shrink htmlFor={`project-${index}`}>Project</InputLabel>
 									<CellSelect
 										{...field}
-										items={getProjects(project, projects)}
+										items={availableProjects}
 										placeholder="Select project"
 										disabledPlaceholder
 										displayEmpty
 										inputId={`project-${index}`}
+										renderValue={(value) => availableProjects.find((p) => p.value === value)?.name || 'Select project'}
 									/>
 								</FormControl>
-							)} />
-							<IconButton onClick={() => remove(index)} size="large">
-								<RemoveIcon />
-							</IconButton>
-							{project && (
-								<Field name={`permissions.${index}.isAdmin`} render={({ field, form }) => (
-									<ProjectCheckboxContainer
-										control={
-											<Checkbox
-												checked={field.value}
-												{...field}
-												onChange={handleProjectAdminChange(field, form, index)}
-												color="secondary"
-											/>
-										}
-										label="Project Admin"
-									/>
-								)} />
 							)}
-						</ProjectConfig>
-						{project && !isAdmin && (
-							<Field name={`permissions.${index}.models`} render={({ field }) => (
-								<PermissionsTable
-									modelsNumber={props.projects[project].models.length + 1}
-									context={PermissionsTableContexts.MODELS}
-									permissions={getModelsPermissions(project, field.value)}
-									roles={MODEL_ROLES_LIST}
-									onPermissionsChange={handlePermissionsChange(field.name, field.value, field.onChange)}
-								/>
-							)} />
-						)}
-					</div>
-				))}
+						</Field>
+								<Button variant="outlined" color="secondary" onClick={() => remove(index)}>
+									Remove
+								</Button>
+								{project && (
+								<Field name={`permissions.${index}.isAdmin`}>
+									{({ field, form }) => (
+										<ProjectCheckboxContainer
+											control={
+												<Checkbox
+													checked={field.value}
+													{...field}
+													onChange={handleProjectAdminChange(field, form, index)}
+													color="secondary"
+												/>
+											}
+											label="Project Admin"
+										/>
+									)}
+								</Field>
+								)}
+							</ProjectConfig>
+							{project && !isAdmin && (
+							<Field name={`permissions.${index}.models`}>
+								{({ field }) => (
+									<PermissionsTable
+										modelsNumber={props.projects[project].models.length + 1}
+										context={PermissionsTableContexts.MODELS}
+										permissions={getModelsPermissions(project, field.value)}
+										roles={MODEL_ROLES_LIST}
+										onPermissionsChange={handlePermissionsChange(field.name, field.value, field.onChange)}
+									/>
+								)}
+							</Field>
+							)}
+						</div>
+					)
+				})}
 				{values(props.projects).length !== projects.length && (
 					<AddButton
 						color="secondary"
@@ -188,24 +198,27 @@ export const InvitationDialog = (props: IProps) => {
 						Add project/model permissions
 					</AddButton>
 				)}
-			</>
-		)} />
+			</>)}
+		</FieldArray>
 	);
 
-	const renderForm = ({ values: formValues }) => (
+	const renderForm = ({ values: formValues, errors, isValid, isValidating, isSubmitting }) => (
 		<Form>
 			<Container className={props.className}>
 				<Content>
-					<Field name="email" render={({ field, form }) => (
-						<TextField
-								label="Email"
-								required
-								error={form.errors.email}
-								helperText={form.errors.email}
-								{...field}
-						/>
-					)} />
-					<Field name="job" render={({ field }) => (
+					<Field name="email">
+						{({ field, form }) => (
+							<TextField
+									label="Email"
+									required
+									error={form.errors.email}
+									helperText={form.errors.email}
+									{...field}
+							/>
+						)}
+					</Field>
+					<Field name="job">
+						{({ field }) => (
 						<FormControl>
 							<InputLabel shrink htmlFor="job">Job</InputLabel>
 							<CellSelect
@@ -215,22 +228,29 @@ export const InvitationDialog = (props: IProps) => {
 								placeholder="Unassigned"
 								inputId="job"
 								itemTemplate={JobItem}
+								renderValue={(value) => {
+									const job = props.jobs.find((j) => j.value === value);
+									return job ? <JobItem name={job.name} color={job.color} /> : 'Unassigned';
+								}}
 							/>
 						</FormControl>
-					)} />
+						)}
+					</Field>
 					{!props.permissionsOnUIDisabled && (
-						<Field name="isAdmin" render={({ field }) => (
-							<FormControlLabel
-								control={
-									<Checkbox
-										checked={field.value}
-										{...field}
-										color="secondary"
-									/>
-								}
-								label="Teamspace Admin"
-							/>
-						)} />
+						<Field name="isAdmin">
+							{({ field }) => (
+								<FormControlLabel
+									control={
+										<Checkbox
+											checked={field.value}
+											{...field}
+											color="secondary"
+										/>
+									}
+									label="Teamspace Admin"
+								/>
+							)}
+						</Field>
 					)}
 
 					{!formValues.isAdmin && !props.permissionsOnUIDisabled && renderPermissions(formValues.permissions)}
@@ -244,14 +264,12 @@ export const InvitationDialog = (props: IProps) => {
 					>
 						Cancel
 					</CancelButton>
-					<Field render={({ form }) => (
-						<SubmitButton
-							pending={form.isSubmitting}
-							disabled={!isEmpty(form.errors) || !form.isValid || form.isValidating || form.isSubmitting}
-						>
-							Invite
-						</SubmitButton>
-				)} />
+					<SubmitButton
+						pending={isSubmitting}
+						disabled={!isEmpty(errors) || !isValid || isValidating || isSubmitting}
+					>
+						Invite!
+					</SubmitButton>
 				</Footer>
 			</Container>
 		</Form>
@@ -272,8 +290,9 @@ export const InvitationDialog = (props: IProps) => {
 			onSubmit={handleSubmit}
 			isInitialValid={getIsInitialValid()}
 			initialValues={{ email: props.email, job: props.job, isAdmin: props.isAdmin, permissions: props.permissions }}
-			render={renderForm}
 			innerRef={formRef}
-		/>
+		>
+			{renderForm}
+		</Formik>
 	);
 };

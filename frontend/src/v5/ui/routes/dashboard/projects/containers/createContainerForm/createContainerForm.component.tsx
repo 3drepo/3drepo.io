@@ -43,7 +43,7 @@ interface IFormInput {
 	type: string;
 }
 
-export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer): JSX.Element => {
+export const CreateContainerForm = ({ open, onClickClose }: ICreateContainer) => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const {
 		handleSubmit,

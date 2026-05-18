@@ -33,25 +33,23 @@ export const DateRangeInput = ({ name, formError }) => {
 	return (
 		<RangeContainer $showOneError={isInvalidRangeError}>
 			<FormDateTime
-				maxDate={toDate}
+				maxDateTime={toDate}
 				name={`${name}.0`}
 				formError={formError?.[0]}
 				placeholder={formatMessage({
 					id: 'dateRangeInputs.dateFrom',
 					defaultMessage: 'Date from',
 				})}
-				disableOpenPicker
 			/>
 			<RangeInputSeparator />
 			<FormDateTime
-				minDate={fromDate}
+				minDateTime={fromDate}
 				name={`${name}.1`}
 				formError={formError?.[1]}
 				placeholder={formatMessage({
 					id: 'dateRangeInputs.dateTo',
 					defaultMessage: 'Date to',
 				})}
-				disableOpenPicker
 			/>
 		</RangeContainer>
 	);

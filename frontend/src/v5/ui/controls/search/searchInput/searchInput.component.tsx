@@ -30,7 +30,7 @@ type ISearchInput = {
 	onClear?: () => void;
 } & TextFieldProps;
 
-export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: ISearchInput): JSX.Element => {
+export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: ISearchInput) => {
 	const { query, setQuery } = useContext(SearchContext);
 
 	const onChange = (event: ChangeEvent<HTMLTextAreaElement | HTMLInputElement>) => {
@@ -48,19 +48,21 @@ export const SearchInput = ({ onClear, value, variant = 'filled', ...props }: IS
 	return (
 		<TextField
 			value={val}
-			InputProps={{
-				startAdornment: (
-					<StartAdornment>
-						<SearchIcon />
-					</StartAdornment>
-				),
-				endAdornment: (
-					<EndAdornment $isVisible={Boolean(val)}>
-						<IconButton onClick={onClickClear} size="large">
-							<CloseIcon />
-						</IconButton>
-					</EndAdornment>
-				),
+			slotProps={{
+				input: {
+					startAdornment: (
+						<StartAdornment>
+							<SearchIcon />
+						</StartAdornment>
+					),
+					endAdornment: (
+						<EndAdornment $isVisible={Boolean(val)}>
+							<IconButton onClick={onClickClear} size="large">
+								<CloseIcon />
+							</IconButton>
+						</EndAdornment>
+					),
+				},
 			}}
 			variant={variant}
 			{...props}

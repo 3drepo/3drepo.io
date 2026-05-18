@@ -43,7 +43,7 @@ const defaultValues = {
 	code: '',
 };
 
-export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation): JSX.Element => {
+export const CreateFederationForm = ({ open, onClickClose }: ICreateFederation) => {
 	const [alreadyExistingNames, setAlreadyExistingNames] = useState([]);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [isSettingsPhase, setIsSettingsPhase] = useState(true);

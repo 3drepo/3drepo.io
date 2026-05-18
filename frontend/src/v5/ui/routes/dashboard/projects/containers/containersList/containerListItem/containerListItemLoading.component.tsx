@@ -41,7 +41,7 @@ interface IContainerListItem {
 export const ContainerListItemLoading = ({
 	container,
 	delay,
-}: IContainerListItem): JSX.Element => {
+}: IContainerListItem) => {
 	const { teamspace, project } = useParams<DashboardParams>();
 
 	const onChangeFavourite = ({ currentTarget: { checked } }) => {

@@ -60,8 +60,8 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel,
 		mode: 'onChange',
 		resolver: yupResolver(FilterSchema),
 		context: { type },
-		shouldUnregister: true,
 	});
+
 	const { formState: { isValid, dirtyFields }, reset, getValues } = formData;
 
 	const operatorValue = getValues('operator');
@@ -94,8 +94,8 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel,
 			}
 		}
 		const isRange = isRangeOperator(filledForm.operator);
-		const displayValues = arrToDisplayValue(newValues.map((newVal) => {
-			const option = getOptionFromValue(newVal, filledForm.selectOptions);
+		const displayValues = arrToDisplayValue(newValues.map((newVal: any) => {
+			const option = getOptionFromValue(newVal, filledForm.selectOptions || []);
 			if (isDateType(type)) return (isRange ? formatDateRange(newVal) : valueToDisplayDate(newVal));
 			if (type === 'boolean' && isBoolean(newValues[0])) return newValues[0] ? TRUE_LABEL : FALSE_LABEL; 
 			if (isRange) {
@@ -115,31 +115,33 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel,
 
 	return (
 		<FormProvider {...formData}>
-			<Container>
-				<TitleContainer>
-					{getFilterFormTitle([module, property])}
-				</TitleContainer>
-				<FilterFormOperators type={type} />
-				{property && (
-					<FilterFormValues module={module} property={property} type={type} />
-				)}
-				<ButtonsContainer>
-					<Button onClick={handleCancel} color="secondary">
-						{cancelButton
-							? <FormattedMessage id="viewer.card.tickets.filters.form.cancel" defaultMessage="Cancel" />
-							: <FormattedMessage id="viewer.card.tickets.filters.form.back" defaultMessage="Back" />
-						}
-					</Button>
-					<ActionMenuItem disabled={!canSubmit}>
-						<Button onClick={handleSubmit} color="primary" variant="contained" disabled={!canSubmit}>
+			<form onSubmit={handleSubmit}>
+				<Container>
+					<TitleContainer>
+						{getFilterFormTitle([module, property])}
+					</TitleContainer>
+					<FilterFormOperators type={type} />
+					{property && (
+						<FilterFormValues module={module} property={property} type={type} />
+					)}
+					<ButtonsContainer>
+						<Button onClick={handleCancel} color="secondary">
 							{cancelButton
-								? <FormattedMessage id="viewer.card.tickets.filters.form.update" defaultMessage="Update" />
-								: <FormattedMessage id="viewer.card.tickets.filters.form.apply" defaultMessage="Apply" />
+								? <FormattedMessage id="viewer.card.tickets.filters.form.cancel" defaultMessage="Cancel" />
+								: <FormattedMessage id="viewer.card.tickets.filters.form.back" defaultMessage="Back" />
 							}
 						</Button>
-					</ActionMenuItem>
-				</ButtonsContainer>
-			</Container>
+						<ActionMenuItem disabled={!canSubmit}>
+							<Button onClick={handleSubmit} color="primary" variant="contained" disabled={!canSubmit}>
+								{cancelButton
+									? <FormattedMessage id="viewer.card.tickets.filters.form.update" defaultMessage="Update" />
+									: <FormattedMessage id="viewer.card.tickets.filters.form.apply" defaultMessage="Apply" />
+								}
+							</Button>
+						</ActionMenuItem>
+					</ButtonsContainer>
+				</Container>
+			</form>
 		</FormProvider>
 	);
 };

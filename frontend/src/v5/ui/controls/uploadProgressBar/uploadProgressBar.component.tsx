@@ -33,7 +33,7 @@ export const UploadProgressBar = ({
 	noLabel = false,
 	hidden = false,
 	...props
-}: IUploadProgressBar): JSX.Element => (
+}: IUploadProgressBar) => (
 	<LabelledProgressBar uploadstatus={uploadStatus} hidden={hidden}>
 		<LinearProgress value={progress} {...props} />
 		<ProgressBarLabelLight hidden={noLabel}>{`${progress}%`}</ProgressBarLabelLight>

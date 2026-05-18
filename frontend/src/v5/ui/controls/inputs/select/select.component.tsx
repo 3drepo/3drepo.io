@@ -23,7 +23,9 @@ import {
 } from '@mui/material';
 import { FormInputProps } from '@controls/inputs/inputController.component';
 
-export type SelectProps = Omit<MuiSelectProps, 'variant'> & FormInputProps & { children?: any[] };
+
+// TODO Issue 5588 ignoring the type of children from here, check if this has any consequence
+export type SelectProps = Omit<MuiSelectProps, 'variant' | 'children'> &  FormInputProps & { children?: any[] };
 
 export const Select = ({
 	required = false,

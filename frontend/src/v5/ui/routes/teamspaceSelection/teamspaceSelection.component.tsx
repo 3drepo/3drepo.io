@@ -23,10 +23,10 @@ import { useEffect, useRef, useState } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { FadeMessageTrigger, Content, PricingLink, ScrollBar, WelcomeMessage } from './teamspaceSelection.styles';
 
-export const TeamspaceSelection = (): JSX.Element => {
+export const TeamspaceSelection = () => {
 	const firstName = CurrentUserHooksSelectors.selectFirstName();
 	const [isVisible, setIsVisible] = useState(true);
-	const welcomeRef = useRef();
+	const welcomeRef = useRef(null);
 
 	useEffect(() => {
 		if (welcomeRef.current) {
