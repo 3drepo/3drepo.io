@@ -74,7 +74,7 @@ const setupBasicData = async ({ users, teamspace, project, models, federation, r
 			project.id, models[i]._id, rev, modelTypes.CONTAINER)),
 		ServiceHelper.db.createRevision(teamspace,
 			project.id, models[3]._id, voidRev, modelTypes.CONTAINER),
-		...plans.map((plan) => ServiceHelper.db.createClashPlan(teamspace, plan)),
+		...plans.map((plan) => ServiceHelper.db.createClashPlan(teamspace, project.id, plan)),
 		ServiceHelper.db.createClashRun(teamspace, plannedClashRun1),
 		ServiceHelper.db.createClashRun(teamspace, plannedClashRun2),
 		ServiceHelper.db.createClashRun(teamspace, completedClashRun, categorizedClashes),
@@ -99,11 +99,12 @@ const generateBasicData = () => {
 	const planWithNoRun = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
 	const planWithNoRev = ServiceHelper.generateClashPlan(models[0]._id, models[2]._id);
 	const planWithVoidRev = ServiceHelper.generateClashPlan(models[0]._id, models[3]._id);
+	const project = ServiceHelper.generateRandomProject();
 
 	return ({
 		users: { tsAdmin, nonAdminUser, unlicencedUser, projectAdmin, commenterOnFed, viewerOnFed },
 		teamspace: ServiceHelper.generateRandomString(),
-		project: ServiceHelper.generateRandomProject(),
+		project,
 		models,
 		federation,
 		revisions,
@@ -144,7 +145,7 @@ const testCreatePlan = () => {
 			['user is teamspace admin', {}, true],
 			['payload contains ticket object', { planData: generatePlanData(true) }, true],
 			['payload contains ticket object but creator is not specified', { planData: { ...generatePlanData(true), creator: undefined } }, true],
-			['!creator is a commenter', { planData: generatePlanData(true, users.commenterOnFed.user) }, true],
+			['creator is a commenter', { planData: generatePlanData(true, users.commenterOnFed.user) }, true],
 			['creator is a viewer', { planData: generatePlanData(true, users.viewerOnFed.user) }, false, templates.invalidArguments],
 		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planData = generatePlanData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
@@ -153,7 +154,8 @@ const testCreatePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const { tickets, ...plan } = await getPlanById(ts, stringToUUID(res.body._id));
+					const { tickets, ...plan } = await getPlanById(ts,
+						stringToUUID(proj), stringToUUID(res.body._id));
 					const { tickets: expectedTicketsObject, ...expectedPlanData } = planData;
 					expect(plan).toEqual({
 						...expectedPlanData,
@@ -185,13 +187,15 @@ const testUpdatePlan = () => {
 
 		const { users, teamspace, project, plan: existingPlan, federation, template, models } = basicData;
 
-		const clashPlanWithTicketsConfig = ServiceHelper.generateClashPlan(
-			models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user });
+		const clashPlanWithTicketsConfig = {
+			...ServiceHelper.generateClashPlan(
+				models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user }),
+		};
 
 		beforeAll(async () => {
 			await Promise.all([
 				setupBasicData(basicData),
-				ServiceHelper.db.createClashPlan(teamspace, clashPlanWithTicketsConfig),
+				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithTicketsConfig),
 			]);
 		});
 
@@ -221,7 +225,7 @@ const testUpdatePlan = () => {
 					const ticketTest = planId === clashPlanWithTicketsConfig._id;
 					const orgPlanData = ticketTest
 						? clashPlanWithTicketsConfig : existingPlan;
-					const plan = await getPlanById(ts, stringToUUID(planId));
+					const plan = await getPlanById(ts, stringToUUID(proj), stringToUUID(planId));
 					const expectedPlan = {
 						...orgPlanData,
 						...planData,
@@ -270,7 +274,8 @@ const testDeletePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const planExists = await getPlanById(ts, stringToUUID(planId)).catch(() => false);
+					const planExists = await getPlanById(ts, stringToUUID(proj),
+						stringToUUID(planId)).catch(() => false);
 					expect(planExists).toBe(false);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);

@@ -349,7 +349,7 @@ const testValidateUpdatePlanData = () => {
 				return Promise.reject(createResponseCode(templates.invalidArguments,
 					'Ticket values at creation do not match expected format'));
 			});
-			ClashPlansModel.getPlanById.mockImplementation((t, id) => {
+			ClashPlansModel.getPlanById.mockImplementation((t, p, id) => {
 				if (UUIDToString(id) === UUIDToString(knownPlanId)) {
 					return Promise.resolve(oldPlanData);
 				}
@@ -401,6 +401,7 @@ const testPlanExists = () => {
 			const req = {
 				params: {
 					teamspace: generateRandomString(),
+					project: generateRandomString(),
 					planId: generateRandomString(),
 				},
 			};
@@ -411,7 +412,7 @@ const testPlanExists = () => {
 			expect(mockCB).not.toHaveBeenCalled();
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById)
-				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId);
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.params.planId);
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.clashPlanNotFound);
 		});
@@ -422,6 +423,7 @@ const testPlanExists = () => {
 			const req = {
 				params: {
 					teamspace: generateRandomString(),
+					project: generateRandomString(),
 					planId: generateRandomString(),
 				},
 			};
@@ -433,7 +435,7 @@ const testPlanExists = () => {
 			expect(req.planData).toEqual(plan);
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById)
-				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId);
+				.toHaveBeenCalledWith(req.params.teamspace, req.params.project, req.params.planId);
 			expect(Responder.respond).not.toHaveBeenCalled();
 		});
 	});

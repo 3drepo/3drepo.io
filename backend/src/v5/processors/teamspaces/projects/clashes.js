@@ -18,7 +18,11 @@
 const { RUN_HISTORY_COL, SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.constants');
 const { UUIDToString, generateUUIDString } = require('../../../utils/helper/uuids');
 const { completeTestRun, createTestRun, getTestRunByQuery } = require('../../../models/clashes.runs');
-const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
+const {
+	createPlan,
+	deletePlan,
+	updatePlan,
+} = require('../../../models/clashes.plans');
 const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, storeFile } = require('../../../services/filesManager');
 const { PassThrough } = require('stream');

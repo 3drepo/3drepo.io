@@ -162,10 +162,10 @@ const validatePlanData = async (req, res, next) => {
 };
 
 Clashes.planExists = async (req, res, next) => {
-	const { teamspace, planId } = req.params;
+	const { teamspace, project, planId } = req.params;
 
 	try {
-		req.planData = await getPlanById(teamspace, planId);
+		req.planData = await getPlanById(teamspace, project, planId);
 		await next();
 	} catch (err) {
 		respond(req, res, err);

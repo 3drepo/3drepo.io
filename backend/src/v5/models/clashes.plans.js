@@ -24,8 +24,8 @@ const { templates } = require('../utils/responseCodes');
 
 const ClashPlans = {};
 
-const getPlanByQuery = async (teamspace, query, projection) => {
-	const res = await db.findOne(teamspace, CLASH_PLANS_COL, query, projection);
+const getPlanByQuery = async (teamspace, project, query, projection) => {
+	const res = await db.findOne(teamspace, CLASH_PLANS_COL, { ...query, project }, projection);
 
 	if (!res) {
 		throw templates.clashPlanNotFound;
@@ -34,17 +34,19 @@ const getPlanByQuery = async (teamspace, query, projection) => {
 	return res;
 };
 
-ClashPlans.getPlanById = (teamspace, id, projection) => getPlanByQuery(teamspace, { _id: id }, projection);
+ClashPlans.getPlanById = (teamspace, project, id, projection = { project: 0 }) => getPlanByQuery(
+	teamspace, project, { _id: id }, projection);
 
-ClashPlans.getPlanByName = (teamspace, name, projection) => getPlanByQuery(teamspace, { name }, projection);
+ClashPlans.getPlanByName = (teamspace, project, name, projection = { project: 0 }) => getPlanByQuery(
+	teamspace, project, { name }, projection);
 
-ClashPlans.createPlan = async (teamspace, data, user) => {
+ClashPlans.createPlan = async (teamspace, project, data, user) => {
 	const _id = generateUUID();
-	await db.insertOne(teamspace, CLASH_PLANS_COL, { ...data, _id, createdAt: new Date(), createdBy: user });
+	await db.insertOne(teamspace, CLASH_PLANS_COL, { ...data, project, _id, createdAt: new Date(), createdBy: user });
 	return _id;
 };
 
-ClashPlans.updatePlan = async (teamspace, planId, data, user) => {
+ClashPlans.updatePlan = async (teamspace, project, planId, data, user) => {
 	const toSet = { updatedAt: new Date(), updatedBy: user };
 	const toUnset = {};
 	const collectUpdates = (searchObj, prefix = '') => {
@@ -66,11 +68,11 @@ ClashPlans.updatePlan = async (teamspace, planId, data, user) => {
 		updateQuery.$unset = toUnset;
 	}
 
-	await db.updateOne(teamspace, CLASH_PLANS_COL, { _id: planId }, updateQuery);
+	await db.updateOne(teamspace, CLASH_PLANS_COL, { _id: planId, project }, updateQuery);
 };
 
-ClashPlans.deletePlan = async (teamspace, planId) => {
-	await db.deleteOne(teamspace, CLASH_PLANS_COL, { _id: planId });
+ClashPlans.deletePlan = async (teamspace, project, planId) => {
+	await db.deleteOne(teamspace, CLASH_PLANS_COL, { _id: planId, project });
 };
 
 module.exports = ClashPlans;
