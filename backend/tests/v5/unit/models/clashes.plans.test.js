@@ -31,12 +31,11 @@ const testGetPlanById = () => {
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const planId = generateRandomString();
-			const projection = { _id: 1 };
 
-			await expect(ClashPlans.getPlanById(teamspace, project, planId, projection))
+			await expect(ClashPlans.getPlanById(teamspace, project, planId))
 				.resolves.toEqual(data);
 
-			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project }, { project: 0 });
 		});
 
 		test('should throw clash plan not found if it is not available', async () => {
@@ -62,12 +61,11 @@ const testGetPlanByName = () => {
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const name = generateRandomString();
-			const projection = { _id: 1 };
 
-			await expect(ClashPlans.getPlanByName(teamspace, project, name, projection))
+			await expect(ClashPlans.getPlanByName(teamspace, project, name))
 				.resolves.toEqual(data);
 
-			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { name, project }, projection);
+			expect(fn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { name, project }, { project: 0 });
 		});
 
 		test('should throw clash plan not found if it is not available', async () => {
