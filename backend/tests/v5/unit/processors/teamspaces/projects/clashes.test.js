@@ -185,6 +185,7 @@ const testCreateRun = () => {
 		['plan has selfIntersectionsCheck set to selectionA', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0] }],
 		['plan has selfIntersectionsCheck set to selectionB', { ...planData, selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[1] }],
 		['plan has selfIntersectionsCheck set to true', { ...planData, selfIntersectionsCheck: true }],
+		['plan has additional properties', { ...planData, ...generateRandomObject() }],
 		['there are unwanted metadata', undefined, { ...meshDataObj, unwantedMetadata: metadata.slice(2), unwantedMeshes: [meshDataObj.meshes[0]._id, meshDataObj.meshes[1]._id] }],
 	])('Create Test Run', (desc, plan = planData, meshData = meshDataObj) => {
 		test(`should create and queue the run when ${desc}`, async () => {
@@ -206,7 +207,15 @@ const testCreateRun = () => {
 			await Clashes.createRun(teamspace, project, plan, userId);
 
 			expect(ClashRunsModel.createTestRun).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, plan, userId);
+			const expectedPlanData = {
+				_id: plan._id,
+				type: plan.type,
+				tolerance: plan.tolerance,
+				selfIntersectionsCheck: plan.selfIntersectionsCheck,
+				selectionA: plan.selectionA,
+				selectionB: plan.selectionB,
+			};
+			expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, expectedPlanData, userId);
 			expect(Metadata.getAllMetadata).toHaveBeenCalledTimes(1);
 			expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(meshData.metadata.length ? 2 : 1);
