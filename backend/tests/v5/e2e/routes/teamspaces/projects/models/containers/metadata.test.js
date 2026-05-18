@@ -50,9 +50,11 @@ const generateBasicData = () => {
 		],
 	};
 
-	const perms = { viewers: [users.viewer.user],
+	const perms = {
+		viewers: [users.viewer.user],
 		commenters: [users.commenter.user],
-		collaborators: [users.collaborator.user] };
+		collaborators: [users.collaborator.user]
+	};
 
 	const data = {
 		users,
@@ -399,10 +401,13 @@ const testGetMetadataFields = (internalService) => {
 		const extraMetadata = {
 			_id: ServiceHelper.generateUUIDString(),
 			metadata: [
-				{ key: metadata.metadata[0].key,
+				{
+					key: metadata.metadata[0].key,
 					value: ServiceHelper.generateRandomString(),
-					custom: true },
-				{ key: ServiceHelper.generateRandomString(),
+					custom: true
+				},
+				{
+					key: ServiceHelper.generateRandomString(),
 					value: ServiceHelper.generateRandomString(),
 					custom: true,
 				},
@@ -432,8 +437,8 @@ const testGetMetadataFields = (internalService) => {
 
 		const generalTests = [
 			['the project does not exist', createRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
-			['the container does not exist', createRoute({ containerId: ServiceHelper.generateRandomString() }), false, templates.containerNotFound],
-			['the model is not a container', createRoute({ containerId: fed._id }), false, templates.containerNotFound],
+			['the container does not exist', createRoute({ containerId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+			['the model is not a container', createRoute({ containerId: fed._id }), false, templates.modelNotFound],
 			['the container does not have metadata', createRoute({ containerId: conNoMetadata._id }), true, { fields: [] }],
 			['metadata exists in one or more entries', createRoute(), true, { fields: expectedFields }],
 		];
