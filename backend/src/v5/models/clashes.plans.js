@@ -34,13 +34,11 @@ const getPlanByQuery = async (teamspace, project, query, projection) => {
 	return res;
 };
 
-ClashPlans.getPlanById = (teamspace, project, id, projection) => (
-	getPlanByQuery(teamspace, project, { _id: id }, projection)
-);
+ClashPlans.getPlanById = (teamspace, project, id, projection = { project: 0 }) => getPlanByQuery(
+	teamspace, project, { _id: id }, projection);
 
-ClashPlans.getPlanByName = (teamspace, project, name, projection) => (
-	getPlanByQuery(teamspace, project, { name }, projection)
-);
+ClashPlans.getPlanByName = (teamspace, project, name, projection = { project: 0 }) => getPlanByQuery(
+	teamspace, project, { name }, projection);
 
 ClashPlans.createPlan = async (teamspace, project, data, user) => {
 	const _id = generateUUID();

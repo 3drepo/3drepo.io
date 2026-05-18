@@ -74,7 +74,7 @@ const setupBasicData = async ({ users, teamspace, project, models, federation, r
 			project.id, models[i]._id, rev, modelTypes.CONTAINER)),
 		ServiceHelper.db.createRevision(teamspace,
 			project.id, models[3]._id, voidRev, modelTypes.CONTAINER),
-		...plans.map((plan) => ServiceHelper.db.createClashPlan(teamspace, plan)),
+		...plans.map((plan) => ServiceHelper.db.createClashPlan(teamspace, project, plan)),
 		ServiceHelper.db.createClashRun(teamspace, plannedClashRun1),
 		ServiceHelper.db.createClashRun(teamspace, plannedClashRun2),
 		ServiceHelper.db.createClashRun(teamspace, completedClashRun, categorizedClashes),
@@ -100,7 +100,6 @@ const generateBasicData = () => {
 	const planWithNoRev = ServiceHelper.generateClashPlan(models[0]._id, models[2]._id);
 	const planWithVoidRev = ServiceHelper.generateClashPlan(models[0]._id, models[3]._id);
 	const project = ServiceHelper.generateRandomProject();
-	const applyProject = (planData) => ({ ...planData, project: project.id });
 
 	return ({
 		users: { tsAdmin, nonAdminUser, unlicencedUser, projectAdmin, commenterOnFed, viewerOnFed },
@@ -110,11 +109,11 @@ const generateBasicData = () => {
 		federation,
 		revisions,
 		voidRev: ServiceHelper.generateRevisionEntry(true),
-		plan: applyProject(plan),
-		planWithNoRun: applyProject(planWithNoRun),
-		planWithNoRev: applyProject(planWithNoRev),
-		planWithVoidRev: applyProject(planWithVoidRev),
-		plans: [plan, planWithNoRun, planWithNoRev, planWithVoidRev].map(applyProject),
+		plan,
+		planWithNoRun,
+		planWithNoRev,
+		planWithVoidRev,
+		plans: [plan, planWithNoRun, planWithNoRev, planWithVoidRev],
 		plannedClashRun1: ServiceHelper.generateClashRun(plan),
 		plannedClashRun2: ServiceHelper.generateClashRun(planWithNoRun),
 		completedClashRun: { ...ServiceHelper.generateClashRun(plan), status: CLASH_RUN_STATUS.COMPLETED },
@@ -146,7 +145,7 @@ const testCreatePlan = () => {
 			['user is teamspace admin', {}, true],
 			['payload contains ticket object', { planData: generatePlanData(true) }, true],
 			['payload contains ticket object but creator is not specified', { planData: { ...generatePlanData(true), creator: undefined } }, true],
-			['!creator is a commenter', { planData: generatePlanData(true, users.commenterOnFed.user) }, true],
+			['creator is a commenter', { planData: generatePlanData(true, users.commenterOnFed.user) }, true],
 			['creator is a viewer', { planData: generatePlanData(true, users.viewerOnFed.user) }, false, templates.invalidArguments],
 		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planData = generatePlanData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
@@ -191,13 +190,12 @@ const testUpdatePlan = () => {
 		const clashPlanWithTicketsConfig = {
 			...ServiceHelper.generateClashPlan(
 				models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user }),
-			project: project.id,
 		};
 
 		beforeAll(async () => {
 			await Promise.all([
 				setupBasicData(basicData),
-				ServiceHelper.db.createClashPlan(teamspace, clashPlanWithTicketsConfig),
+				ServiceHelper.db.createClashPlan(teamspace, project, clashPlanWithTicketsConfig),
 			]);
 		});
 
@@ -232,7 +230,6 @@ const testUpdatePlan = () => {
 						...orgPlanData,
 						...planData,
 						_id: plan._id,
-						project: proj,
 						updatedAt: plan.updatedAt,
 						updatedBy: user.user,
 					};
