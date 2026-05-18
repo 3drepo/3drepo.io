@@ -14,12 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
+const { isObject, isUUID } = require('../utils/helper/typeCheck');
 const { CLASH_PLANS_COL } = require('./clashes.constants');
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
 const { isEmpty } = require('../utils/helper/objects');
-const { isObject } = require('../utils/helper/typeCheck');
 const { templates } = require('../utils/responseCodes');
 
 const ClashPlans = {};
@@ -51,7 +50,7 @@ ClashPlans.updatePlan = async (teamspace, project, planId, data, user) => {
 	const toUnset = {};
 	const collectUpdates = (searchObj, prefix = '') => {
 		Object.keys(searchObj).forEach((key) => {
-			if (isObject(searchObj[key])) {
+			if (isObject(searchObj[key]) && !isUUID(searchObj[key])) {
 				collectUpdates(searchObj[key], `${prefix}${key}.`);
 			} else if (searchObj[key] === null) {
 				toUnset[`${prefix}${key}`] = 1;

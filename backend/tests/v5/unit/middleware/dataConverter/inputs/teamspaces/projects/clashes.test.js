@@ -194,7 +194,7 @@ const testValidateNewPlanData = () => {
 				expect(Responder.respond).not.toHaveBeenCalled();
 				expect(req.body).toEqual(expectedData ?? data);
 			} else {
-				expect(mockCB).not.toHaveBeenCalledTimes(1);
+				expect(mockCB).not.toHaveBeenCalled();
 				expect(Responder.respond).toHaveBeenCalledTimes(1);
 				const { message, ...others } = templates.invalidArguments;
 				expect(Responder.respond).toHaveBeenCalledWith(req, res, expect.objectContaining(others));

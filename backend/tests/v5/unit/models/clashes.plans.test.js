@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { isObject, isUUID } = require('../../../../src/v5/utils/helper/typeCheck');
 const { src } = require('../../helper/path');
 const { generateRandomString, determineTestGroup, generateRandomObject, generateUUID } = require('../../helper/services');
 
@@ -120,6 +121,7 @@ const testUpdatePlan = () => {
 			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
 				{ $set: { ...data, updatedAt, updatedBy: user } });
 		});
+
 		test('Should unset fields with null values', async () => {
 			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
 			const teamspace = generateRandomString();
@@ -193,6 +195,38 @@ const testUpdatePlan = () => {
 				if (data[key] === null) {
 					expectedData.$unset[key] = 1;
 				} else if (typeof data[key] === 'object' && !Array.isArray(data[key])) {
+					Object.keys(data[key]).forEach((nestedKey) => {
+						if (data[key][nestedKey] === null) {
+							expectedData.$unset[`${key}.${nestedKey}`] = 1;
+						} else {
+							expectedData.$set[`${key}.${nestedKey}`] = data[key][nestedKey];
+						}
+					});
+				} else {
+					expectedData.$set[key] = data[key];
+				}
+			});
+
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_PLANS_COL, { _id: planId, project },
+				expectedData);
+		});
+
+		test('should not try to recurse on the object if the data is a UUID', async () => {
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValue();
+			const teamspace = generateRandomString();
+			const project = generateUUID();
+			const planId = generateRandomString();
+			const user = generateRandomString();
+			const data = { field1: generateRandomString(), field2: generateUUID(), nested: { field: generateUUID() } };
+
+			await ClashPlans.updatePlan(teamspace, project, planId, data, user);
+			const { updatedAt } = updateFn.mock.calls[0][3].$set;
+			const expectedData = { $set: { updatedAt, updatedBy: user } };
+			Object.keys(data).forEach((key) => {
+				if (data[key] === null) {
+					expectedData.$unset[key] = 1;
+				} else if (isObject(data[key]) && !isUUID(data[key]) && !Array.isArray(data[key])) {
 					Object.keys(data[key]).forEach((nestedKey) => {
 						if (data[key][nestedKey] === null) {
 							expectedData.$unset[`${key}.${nestedKey}`] = 1;

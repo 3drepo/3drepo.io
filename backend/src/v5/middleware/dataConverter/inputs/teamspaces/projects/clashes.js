@@ -23,7 +23,7 @@ const { isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { types, transformer: { uniqueArray } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
-const { getArrayDifference } = require('../../../../../utils/helper/arrays');
+const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
@@ -142,7 +142,7 @@ const validatePlanData = async (req, res, next) => {
 						delete req.body[key];
 					}
 				} else if (isArray(bodyVal)) {
-					if (getArrayDifference(req.planData[key], bodyVal).length === 0) {
+					if (getCommonElements(req.planData[key], bodyVal).length === req.planData[key].length) {
 						delete req.body[key];
 					}
 				} else if (bodyVal === req.planData[key]) {
