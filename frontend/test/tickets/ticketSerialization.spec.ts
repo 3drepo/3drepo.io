@@ -21,6 +21,8 @@ import { TicketFilter } from "@components/viewer/cards/cardFilters/cardFilters.t
 import { arrToDisplayValue, deserializeFilter, formatDateRange, InvalidPropertyError, serializeFilter, splitByNonEscaped, valueToDisplayDate } from "@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers";
 import { mockRiskCategories, templateMockFactory } from "./tickets.fixture";
 import { initializeIntl } from "@/v5/services/intl";
+import { TicketsSortingPropertyDictionary } from "@/v5/store/tickets/card/ticketsCard.types";
+import { deserializeSorting, serializeSorting } from "@/v5/helpers/ticketsSorting.helpers";
 
 describe('Tickets: filters', () => {
 	const template: ITemplate = {
@@ -231,7 +233,7 @@ describe('Tickets: filters', () => {
 		});
 	});
 
-	describe('serialization', () => {
+	describe('filters serialization', () => {
 		it('should work for property of type manyOf', () => {
 			const filter:TicketFilter = {
 				module: '',
@@ -605,4 +607,49 @@ describe('Tickets: filters', () => {
 		});
 
 	})
+
+
+
+
+	describe('sorting serialization', () => {
+		it('should work with a TicketsSortingProperty types ascending', () => {
+			const sortableProperties = Object.values(TicketsSortingPropertyDictionary);
+
+			const possibleSortings = sortableProperties.map(property => ({
+				property,
+				order: 'asc' 
+			}));
+
+			possibleSortings.forEach(({ property, order}) => {
+				const serialized = serializeSorting(property, order);
+				expect(deserializeSorting(serialized)).toEqual([ property, order ]);
+			});
+		});
+
+		it('should work with a TicketsSortingProperty types descending', () => {
+			const sortableProperties = Object.values(TicketsSortingPropertyDictionary);
+
+			const possibleSortings = sortableProperties.map(property => ({
+				property,
+				order: 'desc' 
+			}));
+
+			possibleSortings.forEach(({ property, order}) => {
+				const serialized = serializeSorting(property, order);
+				expect(deserializeSorting(serialized)).toEqual([ property, order ]);
+			});
+		});
+
+
+		it('should work only with a property from sorting property name', () => {
+			const property = 'Start Time';
+		
+			let serialized = serializeSorting(property, 'asc');
+			expect(deserializeSorting(serialized)).toEqual([]);
+
+			serialized = serializeSorting(property, 'desc');
+			expect(deserializeSorting(serialized)).toEqual([]);
+	
+		});
+	});
 });
