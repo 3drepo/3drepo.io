@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../../helper/services');
 
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const { basePropertyLabels, statuses } = require(`${src}/schemas/tickets/templates.constants`);

@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateUUID } = require('../../../../../../helper/services');
+const { generateRandomString, generateUUID } = require('../../../../../../helper/services');
 
 const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/metadata`);
 jest.mock('../../../../../../../../src/v5/models/metadata');
