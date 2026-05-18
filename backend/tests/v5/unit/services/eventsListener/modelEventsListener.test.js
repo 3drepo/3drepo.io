@@ -62,6 +62,9 @@ const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/c
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
+const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
+
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
@@ -112,6 +115,7 @@ const testQueueTaskUpdate = () => {
 				model: generateRandomString(),
 				corId: generateRandomString(),
 				status: generateRandomString(),
+				modelType: modelTypes.CONTAINER,
 			};
 			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 			await waitOnEvent;
@@ -123,13 +127,13 @@ const testQueueTaskUpdate = () => {
 		test(`Should trigger updateProcessingStatus if there is a ${events.QUEUED_TASK_UPDATE} (${modelTypes.DRAWING})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_UPDATE);
 			const data = {
 				teamspace: generateRandomString(),
 				model: generateRandomString(),
 				corId: generateUUIDString(),
 				status: generateRandomString(),
+				modelType: modelTypes.DRAWING,
 			};
 			await EventsManager.publish(events.QUEUED_TASK_UPDATE, data);
 			await waitOnEvent;
@@ -182,7 +186,6 @@ const testQueueTaskCompleted = () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
 
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.CONTAINER);
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -198,9 +201,6 @@ const testQueueTaskCompleted = () => {
 			await waitOnEvent;
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
-
-			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
 
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(1);
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledWith(data.teamspace, project, data.model,
@@ -212,7 +212,7 @@ const testQueueTaskCompleted = () => {
 		test(`Should trigger onProcessingCompleted if there is a ${events.QUEUED_TASK_COMPLETED} (${modelTypes.DRAWING})`, async () => {
 			const project = generateRandomString();
 			ProjectSettings.findProjectByModelId.mockResolvedValueOnce({ _id: project });
-			ModelSettings.getModelType.mockResolvedValueOnce(modelTypes.DRAWING);
+
 			const waitOnEvent = eventTriggeredPromise(events.QUEUED_TASK_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
@@ -220,6 +220,7 @@ const testQueueTaskCompleted = () => {
 				corId: generateRandomString(),
 				value: 0,
 				user: generateRandomString(),
+				modelType: modelTypes.DRAWING,
 			};
 			EventsManager.publish(events.QUEUED_TASK_COMPLETED, data);
 			const dataInfo = getInfoFromCode(data.value);
@@ -228,9 +229,6 @@ const testQueueTaskCompleted = () => {
 			await waitOnEvent;
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
-
-			expect(ModelSettings.getModelType).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getModelType).toHaveBeenCalledWith(data.teamspace, data.model);
 
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledTimes(1);
 			expect(Revisions.onProcessingCompleted).toHaveBeenCalledWith(data.teamspace, project, data.model,
@@ -274,6 +272,63 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
+		});
+	});
+};
+
+const testClashRunCompleted = () => {
+	describe(events.CLASH_RUN_COMPLETED, () => {
+		test(`Should trigger completeRun if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				corId: generateRandomString(),
+				results: generateRandomString(),
+			};
+
+			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
+
+			await waitOnEvent;
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
+				stringToUUID(data.corId), data.results);
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
+			ClashesProcessor.completeRun.mockRejectedValueOnce(templates.testRunNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				corId: generateRandomString(),
+				results: generateRandomString(),
+			};
+
+			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
+
+			await waitOnEvent;
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
+				stringToUUID(data.corId), data.results);
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}  (Rejected with an error object)`, async () => {
+			ClashesProcessor.completeRun.mockRejectedValueOnce(new Error(generateRandomString()));
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				project: generateRandomString(),
+				corId: generateRandomString(),
+				results: generateRandomString(),
+			};
+
+			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
+
+			await waitOnEvent;
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
+				stringToUUID(data.corId), data.results);
 		});
 	});
 };
@@ -1633,6 +1688,7 @@ describe(determineTestGroup(__filename), () => {
 
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();
+	testClashRunCompleted();
 	testModelSettingsUpdate();
 	testModelProcessingCompleted();
 	testRevisionUpdated();

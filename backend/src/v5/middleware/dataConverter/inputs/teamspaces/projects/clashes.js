@@ -32,7 +32,8 @@ const validatePlanData = async (req, res, next) => {
 		req.body = await validatePlan(teamspace, project, req.body);
 
 		if (req.planData) {
-			if (isEqual(req.planData, req.body)) {
+			const { _id, ...existingPlanData } = req.planData;
+			if (isEqual(existingPlanData, req.body)) {
 				throw createResponseCode(templates.invalidArguments, 'No valid properties to update');
 			}
 		}
@@ -47,7 +48,7 @@ Clashes.planExists = async (req, res, next) => {
 	const { teamspace, planId } = req.params;
 
 	try {
-		req.planData = await getPlanById(teamspace, planId, { _id: 0 });
+		req.planData = await getPlanById(teamspace, planId);
 		await next();
 	} catch (err) {
 		respond(req, res, err);
