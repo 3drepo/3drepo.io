@@ -282,10 +282,51 @@ const testNotUserProvisioned = () => {
 	});
 };
 
+const testIsAddOnEnabled = () => {
+	describe('isAddOnEnabled', () => {
+		const addOn = generateRandomString();
+		const teamspace = generateRandomString();
+		const mockCB = jest.fn(() => {});
+
+		test('next() should be called if add-on is enabled', async () => {
+			TeamspaceSettings.isAddOnEnabled.mockResolvedValueOnce(true);
+			await TSMiddlewares.isAddOnEnabled(addOn)({ params: { teamspace } }, {}, mockCB);
+
+			expect(mockCB).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledWith(teamspace, addOn);
+		});
+
+		test('should respond with add-on module unavailable if the add-on is not enabled', async () => {
+			TeamspaceSettings.isAddOnEnabled.mockResolvedValueOnce(false);
+			await TSMiddlewares.isAddOnEnabled(addOn)({ params: { teamspace } }, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(templates.addOnUnavailable.code);
+			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledWith(teamspace, addOn);
+		});
+
+		test('should respond with error if the isAddOnEnabled throws error', async () => {
+			const error = new Error();
+			TeamspaceSettings.isAddOnEnabled.mockRejectedValueOnce(error);
+			await TSMiddlewares.isAddOnEnabled(addOn)({ params: { teamspace } }, {}, mockCB);
+
+			expect(mockCB).not.toHaveBeenCalled();
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond.mock.results[0].value.code).toEqual(error.code);
+			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledTimes(1);
+			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledWith(teamspace, addOn);
+		});
+	});
+};
+
 describe('middleware/permissions/components/teamspaces', () => {
 	testIsTeamspaceMember();
 	testIsActiveTeamspaceMember();
 	testIsTeamspaceAdmin();
 	testIsAddOnModuleEnabled();
 	testNotUserProvisioned();
+	testIsAddOnEnabled();
 });

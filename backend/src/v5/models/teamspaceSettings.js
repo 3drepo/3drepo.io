@@ -116,6 +116,11 @@ TeamspaceSetting.getAddOns = async (teamspace) => {
 	return addOns || {};
 };
 
+TeamspaceSetting.isAddOnEnabled = async (teamspace, addOn) => {
+	const addOns = await TeamspaceSetting.getAddOns(teamspace);
+	return !!addOns[addOn];
+};
+
 TeamspaceSetting.isAddOnModuleEnabled = async (teamspace, moduleName) => {
 	const addOns = await TeamspaceSetting.getAddOns(teamspace, moduleName);
 	return !!addOns[ADD_ONS.MODULES]?.includes(moduleName);
