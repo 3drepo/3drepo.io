@@ -74,7 +74,7 @@ const setupBasicData = async ({ users, teamspace, project, models, federation, r
 			project.id, models[i]._id, rev, modelTypes.CONTAINER)),
 		ServiceHelper.db.createRevision(teamspace,
 			project.id, models[3]._id, voidRev, modelTypes.CONTAINER),
-		...plans.map((plan) => ServiceHelper.db.createClashPlan(teamspace, project, plan)),
+		...plans.map((plan) => ServiceHelper.db.createClashPlan(teamspace, project.id, plan)),
 		ServiceHelper.db.createClashRun(teamspace, plannedClashRun1),
 		ServiceHelper.db.createClashRun(teamspace, plannedClashRun2),
 		ServiceHelper.db.createClashRun(teamspace, completedClashRun, categorizedClashes),
@@ -154,12 +154,12 @@ const testCreatePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const { tickets, ...plan } = await getPlanById(ts, proj, stringToUUID(res.body._id));
+					const { tickets, ...plan } = await getPlanById(ts,
+						stringToUUID(proj), stringToUUID(res.body._id));
 					const { tickets: expectedTicketsObject, ...expectedPlanData } = planData;
 					expect(plan).toEqual({
 						...expectedPlanData,
 						_id: plan._id,
-						project: proj,
 						createdBy: user.user,
 						createdAt: plan.createdAt,
 					});
@@ -195,7 +195,7 @@ const testUpdatePlan = () => {
 		beforeAll(async () => {
 			await Promise.all([
 				setupBasicData(basicData),
-				ServiceHelper.db.createClashPlan(teamspace, project, clashPlanWithTicketsConfig),
+				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithTicketsConfig),
 			]);
 		});
 
@@ -225,7 +225,7 @@ const testUpdatePlan = () => {
 					const ticketTest = planId === clashPlanWithTicketsConfig._id;
 					const orgPlanData = ticketTest
 						? clashPlanWithTicketsConfig : existingPlan;
-					const plan = await getPlanById(ts, proj, stringToUUID(planId));
+					const plan = await getPlanById(ts, stringToUUID(proj), stringToUUID(planId));
 					const expectedPlan = {
 						...orgPlanData,
 						...planData,
@@ -274,7 +274,8 @@ const testDeletePlan = () => {
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const planExists = await getPlanById(ts, proj, stringToUUID(planId)).catch(() => false);
+					const planExists = await getPlanById(ts, stringToUUID(proj),
+						stringToUUID(planId)).catch(() => false);
 					expect(planExists).toBe(false);
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
