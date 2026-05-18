@@ -143,7 +143,7 @@ const testValidateNewPlanData = () => {
 		['without creator specified', false, { ...planData, tickets: { ...ticketData, creator: undefined } }, { tickets: ticketData }],
 		['with unknown template', false, { ...planData, tickets: { ...ticketData, template: generateRandomString() } }],
 		['with deprecated template', false, { ...planData, tickets: { ...ticketData, template: deprecatedTemplate } }],
-		['with erroroneous creation values', false, { ...planData, tickets: { ...ticketData, valuesAtCreation: generateRandomObject() } }],
+		['with erroneous creation values', false, { ...planData, tickets: { ...ticketData, valuesAtCreation: generateRandomObject() } }],
 	];
 
 	describe.each(testCases)('Validate new plan data', (desc, success, data, expectedData) => {
