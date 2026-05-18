@@ -53,7 +53,7 @@ const generateBasicData = () => {
 	const perms = {
 		viewers: [users.viewer.user],
 		commenters: [users.commenter.user],
-		collaborators: [users.collaborator.user]
+		collaborators: [users.collaborator.user],
 	};
 
 	const data = {
@@ -404,7 +404,7 @@ const testGetMetadataFields = (internalService) => {
 				{
 					key: metadata.metadata[0].key,
 					value: ServiceHelper.generateRandomString(),
-					custom: true
+					custom: true,
 				},
 				{
 					key: ServiceHelper.generateRandomString(),
