@@ -26,8 +26,7 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
 import { deserializeURLFilters, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { isEmpty, isEqual, values } from 'lodash';
-import { TicketsSortingPropertyDictionary, TicketsSortingProperty } from '@/v5/store/tickets/card/ticketsCard.types';
+import { isEmpty, isEqual } from 'lodash';
 import { deserializeSorting } from '@/v5/helpers/ticketsSorting.helpers';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
