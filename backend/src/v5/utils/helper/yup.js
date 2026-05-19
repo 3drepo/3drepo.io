@@ -140,7 +140,8 @@ const imageValidityTests = (yupType, isNullable) => yupType.test('image-validity
 });
 
 YupHelper.types.embeddedImage = (isNullable) => imageValidityTests(
-	Yup.mixed().transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
+	(isNullable ? Yup.mixed().nullable() : Yup.mixed())
+		.transform((n, orgVal) => (orgVal ? Buffer.from(orgVal, 'base64') : n)),
 	isNullable,
 );
 
