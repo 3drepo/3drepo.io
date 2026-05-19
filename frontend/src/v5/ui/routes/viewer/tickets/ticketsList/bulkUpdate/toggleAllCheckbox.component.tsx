@@ -30,7 +30,6 @@ export const ToggleAllCheckbox = ({ $withFilters }: ToggleAllCheckboxProps) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const filters = TicketsCardHooksSelectors.selectCardFilters();
 	const checked = filteredTickets.length === selectedItems.size && filteredTickets.length > 0;
-	// const indeterminate = !checked && Array.from(selectedItems).some((id) => filteredTickets.some((t) => t._id === id));
 	const indeterminate = !checked && filteredTickets.some((t) => selectedItems.has(t._id));
 
 	const toggleAllChecked = () => {

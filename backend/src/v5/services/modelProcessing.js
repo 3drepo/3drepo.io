@@ -16,17 +16,19 @@
  */
 
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
+const { access, copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { codeExists, templates } = require('../utils/responseCodes');
-const { copyFile, mkdir, rm, writeFile } = require('fs/promises');
-const { createWriteStream, readdirSync } = require('fs');
+const { constants, createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
 const Path = require('path');
+const Yup = require('yup');
 const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
 const { execFile } = require('child_process');
+const { pipeline } = require('stream/promises');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
@@ -41,6 +43,7 @@ const {
 	model_queue: modelq,
 	drawing_queue: drawingq,
 	shared_storage: sharedDir,
+	clash_queue: clashq,
 } = queueConfig;
 
 const onCallbackQMsg = ({ content, properties }) => {
@@ -166,6 +169,18 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 	}
 };
 
+ModelProcessing.getContainerFileName = (corId) => {
+	try {
+		const filePath = Path.join(sharedDir, `${corId}.json`);
+		const jsonFile = JSON.parse(readFileSync(filePath).toString());
+		const fileName = jsonFile.file.split('/').slice(-1)[0];
+		return fileName;
+	} catch (error) {
+		logger.logError(`Failed to get file name for ${corId}: ${error.message}`);
+		return undefined;
+	}
+};
+
 ModelProcessing.getLogArchive = async (corId) => {
 	const filename = 'logs.zip';
 
@@ -223,6 +238,58 @@ ModelProcessing.getLogArchive = async (corId) => {
 	}
 };
 
-ModelProcessing.init = () => listenToQueue(callbackq, onCallbackQMsg);
+ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
+	const configPath = `${sharedDir}/${corId}/clashConfig.json`;
+	try {
+		await mkdir(`${sharedDir}/${corId}`);
+
+		const writableStream = createWriteStream(configPath);
+		await pipeline(stream, writableStream);
+		const msg = `processClash ${teamspace} ${UUIDToString(project)} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
+		await queueMessage(clashq, corId, msg);
+	} catch (err) {
+		await rm(configPath).catch((cleanUpErr) => {
+			logger.logError(`Failed to remove files (clean up on failure): ${cleanUpErr}`);
+		});
+
+		if (err?.code && codeExists(err.code)) {
+			throw err;
+		}
+
+		logger.logError('Failed to queue clash test run', err?.message);
+		throw templates.queueInsertionFailed;
+	}
+};
+
+const checkQueueConfig = async () => {
+	const queueConfigSchema = Yup.object({
+		host: Yup.string().trim().min(1).required(),
+		shared_storage: Yup.string().trim().min(1).required(),
+		callback_queue: Yup.string().trim().min(1).required(),
+		model_queue: Yup.string().trim().min(1).required(),
+		clash_queue: Yup.string().trim().min(1).required(),
+		event_exchange: Yup.string().trim().min(1).required(),
+	});
+
+	try {
+		await queueConfigSchema.validate(queueConfig);
+		const stats = await stat(queueConfig.shared_storage);
+
+		if (!stats.isDirectory()) {
+			throw new Error('cn_queue.shared_storage must be a directory');
+		}
+
+		// eslint-disable-next-line no-bitwise
+		await access(queueConfig.shared_storage, constants.R_OK | constants.W_OK);
+	} catch (err) {
+		logger.logError(`Invalid queue configuration: ${err.message}`);
+		throw new Error(`Invalid queue configuration: ${err.message}`);
+	}
+};
+
+ModelProcessing.init = async () => {
+	await checkQueueConfig();
+	await listenToQueue(callbackq, onCallbackQMsg);
+};
 
 module.exports = ModelProcessing;

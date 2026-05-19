@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectSettings } from '@/v4/modules/model';
 import {
 	selectComponentState, selectIsCurrentLegendDefault, selectIsPending, selectLegend, selectNewLegendEditMode,
 	LegendActions,
@@ -28,6 +29,7 @@ import { Legend } from './legend.component';
 const mapStateToProps = createStructuredSelector({
 	isPending: selectIsPending,
 	legend: selectLegend,
+	modelSettings: selectSettings,
 	isCurrentLegendDefault: selectIsCurrentLegendDefault,
 	componentState: selectComponentState,
 	newLegendEditMode: selectNewLegendEditMode,
