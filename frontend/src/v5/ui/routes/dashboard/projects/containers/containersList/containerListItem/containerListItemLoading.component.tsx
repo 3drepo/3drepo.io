@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import {
 	DashboardListItemIcon,
@@ -51,10 +50,6 @@ export const ContainerListItemLoading = ({
 			ContainersActionsDispatchers.removeFavourite(teamspace, project, container._id);
 		}
 	};
-
-	useEffect( () => {
-		ContainersActionsDispatchers.fetchContainerStats(teamspace, project, container._id);
-	}, []);
 
 	return (
 		<DashboardListItem>
