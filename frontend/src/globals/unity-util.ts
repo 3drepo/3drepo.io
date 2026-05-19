@@ -27,6 +27,14 @@ declare let createUnityInstance;
 
 type DrawingImageSource = ImageBitmap | ImageData | HTMLImageElement | HTMLCanvasElement | OffscreenCanvas;
 
+// The contents of this type will change in line with the needs of
+// the Test Automation or Profiling Tools.
+type ModelStatistics = {
+	bundlesLoaded: number,
+	bundleLoadingTasks: number,
+	frameCount: number,
+};
+
 export class UnityUtil {
 	/** @hidden */
 	private static errorCallback: any;
@@ -72,6 +80,14 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static externalWebRequestHandler;
+
+	/** Stores an offset into the WASM heap were the model statistics counters
+	 * can be found. These are in the same order as the Statistics in the
+	 * viewer's GUI display. This is an internal property and subject to change
+	 * without notice.
+	 *  @hidden
+	*/
+	public static modelStatisticsArrayOffset: number = 0;
 
 	/** A URL pointing to the domain hosting a Unity distribution. E.g. www.3drepo.io/.
 	 * This is where the Unity Build folder and the IndexedDb worker can be found. */
@@ -1904,17 +1920,17 @@ export class UnityUtil {
 	/**
 	 * Override the colour of given object(s)
 	 * @category Object Highlighting
-	 * @param account - teamspace the meshes resides in
-	 * @param model - model ID the meshes resides in
+	 * @param teamspace - teamspace the meshes resides in
+	 * @param container - model ID the meshes resides in
 	 * @param meshIDs - unique IDs of the meshes to operate on
 	 * @param color - RGB value of the override color (note: alpha will be ignored)
 	 * @return returns a promise which will resolve after Unity has invoked its overrideMeshColor function
 	 */
-	public static overrideMeshColor(account: string, model: string, meshIDs: [string], color: [number]) {
+	public static overrideMeshColor(teamspace: string, container: string, meshIDs: string[], color: number[]) {
 		return UnityUtil.multipleCallInChunks(meshIDs.length, (start, end) => {
 			const param: any = {};
-			if (account && model) {
-				param.nameSpace = `${account}.${model}`;
+			if (teamspace && container) {
+				param.nameSpace = `${teamspace}.${container}`;
 			}
 			param.ids = meshIDs.slice(start, end);
 			param.color = color;
@@ -2074,15 +2090,15 @@ export class UnityUtil {
 	 * object with a single field, ssByte, containing the screenshot in
 	 * base64.
 	 * @category Model Interactions
-	 * @return returns a promise which will resolve with an object with a screenshot in base64 format
+	 * @return returns a promise which will resolve with a base64 encoded string holding the screenshot
 	 */
-	public static requestScreenShot(): Promise<object> {
+	public static requestScreenShot(): Promise<string> {
 		const newScreenshotPromise = new Promise((resolve, reject) => {
 			this.screenshotPromises.push({ resolve, reject });
 		});
 		UnityUtil.toUnity('RequestScreenShot', UnityUtil.LoadingState.VIEWER_READY, undefined);
 
-		return newScreenshotPromise as Promise<object>;
+		return newScreenshotPromise as Promise<string>;
 	}
 
 	/**
@@ -2221,7 +2237,7 @@ export class UnityUtil {
 	 * Change the camera configuration
 	 * teamspace and model is only needed if the viewpoint is relative to a model
 	 * @category Navigations
-	 * @param pos - 3D point in space where the camera should be
+	 * @param position - 3D point in space where the camera should be
 	 * @param up - Up vector
 	 * @param forward - forward vector
 	 * @param lookAt - point in space the camera is looking at. (pivot point)
@@ -2230,11 +2246,11 @@ export class UnityUtil {
 	 * @param animationTime - how long the camera should spend during the transition from the current viewpoint to this one
 	 */
 	public static setViewpoint(
-		pos: [number],
-		up: [number],
-		forward: [number],
-		lookAt: [number],
-		projectionType?: boolean,
+		position: number[],
+		up: number[],
+		forward: number[],
+		lookAt: number[],
+		projectionType?: string,
 		orthographicSize?: number,
 		account?: string,
 		model?: string,
@@ -2259,7 +2275,7 @@ export class UnityUtil {
 			param.animationTime = 1;
 		}
 
-		param.position = pos;
+		param.position = position;
 		param.up = up;
 		param.forward = forward;
 		param.lookAt = lookAt;
@@ -2344,7 +2360,7 @@ export class UnityUtil {
 	 * @param visibility - true = visible, false = invisible
 	 * @return returns a promise which will resolve after Unity has invoked its toggleVisibility function
 	 */
-	public static toggleVisibility(account: string, model: string, ids: [string], visibility: boolean) {
+	public static toggleVisibility(account: string, model: string, ids: string[], visibility: boolean) {
 		return UnityUtil.multipleCallInChunks(ids.length, (start, end) => {
 			const param: any = {};
 			if (account && model) {
@@ -2817,5 +2833,27 @@ export class UnityUtil {
 		if (UnityUtil.externalWebRequestHandler) {
 			UnityUtil.externalWebRequestHandler.setOfflineFetchInterceptor(interceptor);
 		}
+	}
+
+
+	/** Polls the viewer for a number of model statistics. This is an internal
+	 * API for the use of the Automated Tests and is subject to change without
+	 * notice.
+	 * @hidden
+	 */
+	public static getModelStatistics(): ModelStatistics {
+		const statistics: ModelStatistics = {
+			bundlesLoaded: 0,
+			bundleLoadingTasks: 0,
+			frameCount: 0,
+		};
+		if (UnityUtil.modelStatisticsArrayOffset) {
+			const ptr64 = UnityUtil.modelStatisticsArrayOffset >> 3;
+			const heap = UnityUtil.unityInstance.Module.HEAPF64;
+			statistics.bundlesLoaded = heap[ptr64 + 23];
+			statistics.bundleLoadingTasks = heap[ptr64 + 20];
+			statistics.frameCount = heap[ptr64 + 30];
+		}
+		return statistics;
 	}
 }
