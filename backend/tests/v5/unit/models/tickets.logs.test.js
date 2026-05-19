@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateUUID, generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
+const { generateUUID, generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const TicketLogs = require(`${src}/models/tickets.logs`);
 const db = require(`${src}/handler/db`);

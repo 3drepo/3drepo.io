@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
 const {
-	determineTestGroup,
 	generateRandomString,
-	generateUUIDString,
-} = require('../../../../../helper/services');
+	generateUUIDString } = require('../../../../../helper/services');
 
 const fs = require('fs/promises');
 const path = require('path');
 const CryptoJs = require('crypto-js');
+const { times } = require('lodash');
 
 jest.mock('../../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
@@ -173,7 +173,7 @@ Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
 	throw templates.legendNotFound;
 });
 
-Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
+// Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
 Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
@@ -281,8 +281,8 @@ const formatToStats = (settings, revCount, latestRev) => {
 		unit: settings.properties.unit,
 		revisions: {
 			total: revCount,
-			lastUpdated: latestRev.timestamp,
-			latestRevision: latestRev.tag || latestRev._id,
+			lastUpdated: latestRev?.timestamp,
+			latestRevision: latestRev?.tag || latestRev?._id,
 		},
 	};
 
@@ -293,6 +293,8 @@ const formatToStats = (settings, revCount, latestRev) => {
 };
 
 const testGetContainerStats = () => {
+	const revisions = (revCount) => times(
+		revCount, () => ({ _id: generateUUIDString(), tag: generateRandomString(), timestamp: new Date() }));
 	describe.each([
 		['the container exists and have no revisions', 'container1'],
 		['the container exists and have revisions', 'container2'],
@@ -300,8 +302,11 @@ const testGetContainerStats = () => {
 		['the container exists and some previous revision processing have failed', 'container4'],
 	])('Get container stats', (desc, container) => {
 		test(`should return the stats if ${desc}[${container}]`, async () => {
+			const revs = revisions(container === 'container1' ? 0 : 5);
+			ModelSettings.getContainers.mockResolvedValueOnce([{ ...containerSettings[container], _id: container }]);
+			Revisions.getRevisions.mockResolvedValueOnce(revs);
 			const res = await Containers.getContainerStats('teamspace', 'project', container);
-			expect(res).toEqual(formatToStats(containerSettings[container], container === 'container2' ? 10 : 0, container === 'container2' ? container2Rev : {}));
+			expect(res).toEqual(formatToStats(containerSettings[container], revs.length, revs[0]));
 		});
 	});
 };
@@ -553,6 +558,38 @@ const testGetMD5Hash = () => {
 	});
 };
 
+const testGetMultipleContainersStats = () => {
+	describe('Get multiple container stats', () => {
+		test('should return stats for multiple containers', async () => {
+			const teamspace = generateRandomString();
+			const containers = ['container1', 'container2', 'container3'];
+			const containersData = containers.map((container) => ({
+				_id: containerSettings[container]._id,
+				name: containerSettings[container].name,
+				type: containerSettings[container].type,
+				properties: containerSettings[container].properties,
+				status: containerSettings[container].status,
+				errorReason: containerSettings[container].errorReason,
+			}));
+
+			ModelSettings.getContainers.mockResolvedValueOnce(containersData);
+			Revisions.getRevisions
+				.mockResolvedValueOnce([])
+				.mockResolvedValueOnce([container2Rev, ...times(9, {})])
+				.mockResolvedValueOnce([]);
+
+			const res = await Containers.getMultipleContainersStats(teamspace, project, containers);
+			expect(res).toEqual({
+				1: formatToStats(containerSettings.container1, 0, {}),
+				2: formatToStats(containerSettings.container2, 10, container2Rev),
+				3: formatToStats(containerSettings.container3, 0, {}),
+			});
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisions).toHaveBeenCalledTimes(containers.length);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -566,4 +603,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 	testGetMD5Hash();
+	testGetMultipleContainersStats();
 });

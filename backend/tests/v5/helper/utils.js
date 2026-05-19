@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,23 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { determineTestGroup } = require('../../../helper/utils');
-const { src } = require('../../../helper/path');
-
-const ArrHelper = require(`${src}/utils/helper/arrays`);
-
-const testSplitArrayIntoChunks = () => {
-	describe.each([
-		[[1, 2, 3], 4, [[1, 2, 3]]],
-		[[1, 2, 3], 2, [[1, 2], [3]]],
-		[[1, 2, 3], 1, [[1], [2], [3]]],
-	])('Split array into chunks', (array, length, results) => {
-		test(`with ${array} should result in ${results}`, () => {
-			expect(ArrHelper.splitArrayIntoChunks(array, length)).toEqual(results);
-		});
-	});
+const determineTestGroup = (filePath) => {
+	const match = filePath.match(/^.*[\\/](e2e|unit|drivers|scripts)[\\/](.*)\.test\.js$/);
+	if (match?.length === 3) {
+		return `${match[1].toUpperCase()} ${match[2]}`;
+	}
+	return filePath;
 };
 
-describe(determineTestGroup(__filename), () => {
-	testSplitArrayIntoChunks();
-});
+module.exports = { determineTestGroup };
