@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { generateRandomString, generateUUID, generateRandomBuffer } = require('../../../helper/services');
 const { src, image } = require('../../../helper/path');
 const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
@@ -185,7 +186,7 @@ const testEmbeddedImageOrRef = () => {
 	});
 };
 
-describe('utils/helper/yup', () => {
+describe(determineTestGroup(__filename), () => {
 	testId();
 	testColorArr();
 	testColorStr();

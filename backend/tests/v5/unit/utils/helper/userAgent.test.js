@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 
 const UserAgentHelper = require(`${src}/utils/helper/userAgent`);
@@ -145,7 +146,7 @@ const testIsFromWebBrowser = () => {
 	});
 };
 
-describe('utils/helper/userAgent', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetUserAgentInfo();
 	testIsFromWebBrowser();
 });

@@ -81,6 +81,12 @@ export class IndexedDbCache {
 				this.transactions[id].resolve(ev.data.parms.data);
 				delete this.transactions[id];
 			}
+
+			if (ev.data.type === 'OnDeleteTransactionComplete') {
+				const { id } = ev.data.parms;
+				this.transactions[id].resolve();
+				delete this.transactions[id];
+			}
 		};
 		this.worker.postMessage({ message: 'createIndexedDb' });
 	}
@@ -113,6 +119,28 @@ export class IndexedDbCache {
 			message: 'Set',
 			key: url,
 			record,
+		});
+	}
+
+	/**
+	 * Deletes all keys that match the search string and leaves a record of this
+	 * operation for a particular version.
+	 * @param contains The string to search for in all keys. All keys containing
+	 * this string will be deleted.
+	 * @param version The version for which to record this delete operation.
+	 * @returns A promise that resolves when the transaction is complete. However,
+	 * the delete request is issued as soon as the function returns.
+	 */
+	delete(contains: string, version: number): Promise<void> {
+		const id = this.getId();
+		return new Promise<void>((resolve) => {
+			this.transactions[id] = { resolve };
+			this.worker.postMessage({
+				message: 'Delete',
+				id,
+				version,
+				contains,
+			});
 		});
 	}
 }

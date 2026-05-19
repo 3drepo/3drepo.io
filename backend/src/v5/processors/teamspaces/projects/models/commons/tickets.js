@@ -357,29 +357,45 @@ Tickets.getTicketList = async (teamspace, project, model,
 };
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
-	const tickets = await getAllTickets(teamspace, project, model, {
-		projection: { type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 },
+	const openTickets = await Tickets.getOpenTicketsCountForMultipleModels(teamspace, project, [model]);
+
+	return openTickets[model] || 0;
+};
+
+const getTemplateIdToClosedStatuses = async (teamspace) => {
+	const templates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
+
+	const templateIdToClosedStatuses = {};
+
+	templates.forEach(({ _id, config }) => {
+		templateIdToClosedStatuses[UUIDToString(_id)] = getClosedStatuses({ config });
 	});
 
-	let openTicketsCount = 0;
+	return templateIdToClosedStatuses;
+};
 
-	const allTemplates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
+Tickets.getOpenTicketsCountForMultipleModels = async (teamspace, project, models) => {
+	const [tickets, templateToClosedStatuses] = await Promise.all([
+		getTicketsByQuery(
+			teamspace,
+			project,
+			null,
+			{ model: { $in: models } },
+			{ model: 1, type: 1, [`properties.${basePropertyLabels.STATUS}`]: 1 }),
+		getTemplateIdToClosedStatuses(teamspace),
+	]);
 
-	const templateToClosedStatuses = allTemplates.reduce((obj, { _id, config }) => {
-		const closedStatuses = getClosedStatuses({ config });
+	const modelToOpenTicketsCount = {};
 
-		return { ...obj, [UUIDToString(_id)]: closedStatuses };
-	}, {});
+	tickets.forEach((ticket) => {
+		const closedStatuses = templateToClosedStatuses[UUIDToString(ticket.type)];
 
-	for (let i = 0; i < tickets.length; i++) {
-		const ticket = tickets[i];
-
-		if (!templateToClosedStatuses[UUIDToString(ticket.type)].includes(ticket.properties.Status)) {
-			openTicketsCount++;
+		if (!closedStatuses.includes(ticket.properties.Status)) {
+			modelToOpenTicketsCount[ticket.model] = (modelToOpenTicketsCount[ticket.model] || 0) + 1;
 		}
-	}
+	});
 
-	return openTicketsCount;
+	return modelToOpenTicketsCount;
 };
 
 Tickets.removeTicketsWithTemplates = async (teamspace, templateIds) => {

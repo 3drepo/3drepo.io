@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
-const { determineTestGroup, generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
+const { generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
 
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 

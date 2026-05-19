@@ -26,7 +26,7 @@ import { IGroupRule } from '@/v5/store/tickets/tickets.types';
 import { formatMessage } from '@/v5/services/intl';
 import { FormTextField } from '@controls/inputs/formInputs.component';
 import { useEffect } from 'react';
-import { isEqual } from 'lodash';
+import { isEmpty, isEqual } from 'lodash';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Buttons, Form, InputsContainer } from './groupRulesForm.styles';
 import { IFormRule, formRuleToGroupRule, groupRuleToFormRule } from './groupRulesForm.helpers';
@@ -35,7 +35,7 @@ import { RuleFieldOperator } from './groupRulesInputs/ruleFieldOperator/ruleFiel
 import { RuleOperator } from './groupRulesInputs/ruleOperator/ruleOperator.component';
 import { RuleValues } from './groupRulesInputs/ruleValues/ruleValues.component';
 
-const DEFAULT_VALUES: IFormRule = {
+const DEFAULT_RULE: IGroupRule = {
 	name: '',
 	field: {
 		operator: 'IS',
@@ -48,18 +48,22 @@ const DEFAULT_VALUES: IFormRule = {
 type IGroupRules = {
 	containerOrFederation: string;
 	rule?: IGroupRule;
-	existingRules: IGroupRule[],
-	onSave: (rule: IGroupRule) => void;
-	onClose: () => void;
+	existingRules: IGroupRule[];
+	// An object that includes the fields to change as soon as the form is initiated to
+	// mark them as dirty 
+	unsavedState?: IGroupRule;
+	onSubmit?: (rule: IGroupRule) => void;
+	onClose?: (currentFormValues: IGroupRule) => void;
 };
 
-export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [], containerOrFederation }: IGroupRules) => {
-	const defaultValues = rule ? groupRuleToFormRule(rule) : DEFAULT_VALUES;
+export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], containerOrFederation, unsavedState }: IGroupRules) => {
+	const defaultValues = groupRuleToFormRule(rule ?? DEFAULT_RULE);
 
 	const formData = useForm<IFormRule>({
 		defaultValues,
 		mode: 'all',
 		resolver: yupResolver(GroupRuleSchema),
+		shouldUnregister: true,
 		context: { alreadyExistingNames: existingRules.map((r) => r.name).filter((name) => name !== rule?.name) },
 	});
 
@@ -75,22 +79,44 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [], cont
 
 	const getIsDirty = () => {
 		const formValues = getValues();
-		// @ts-ignore
-		formValues.field.values = formValues.field.values.map(({ value }) => ({ value }));
-		formValues.values = formValues.values.filter(({ value }) => value);
-		return !isEqual(defaultValues, formValues);
+		const cleanValuesForComparison = (obj: IFormRule) => ({
+			...obj,
+			field: {
+				...obj.field,
+				values: obj.field?.values?.map(({ value }) => ({ value })),
+			},
+			values: obj.values.filter(({ value }) => value),
+		});
+		return !isEqual(cleanValuesForComparison(defaultValues), cleanValuesForComparison(formValues));
 	};
 
-	const handleSave = (body: IFormRule) => onSave(formRuleToGroupRule(body));
+	const handleSave = (body: IFormRule) => onSubmit(formRuleToGroupRule(body));
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
 		e.stopPropagation();
 		formData.handleSubmit(handleSave)(e);
-		onClose();
 	};
 
-	useEffect(() => { reset(defaultValues); }, [rule]);
+	useEffect(() => {
+		if (isEmpty(unsavedState)) {
+			// console.log('@@~ Resetting to default values', rule);
+			reset(defaultValues);
+
+		}
+	}, [rule]);
+
+	useEffect(() => {
+		if (isEmpty(unsavedState)) return;
+		// console.log('@@~ Resetting to unsavedState');
+		reset(groupRuleToFormRule(unsavedState));
+	}, [JSON.stringify(unsavedState)]);
+
+	useEffect(() => () => {
+		onClose?.(formRuleToGroupRule(getValues()));
+	}, []);
+
+	// console.log('@@ base form errors', errors);
 
 	return (
 		<Form onSubmit={handleSubmit}>
@@ -98,7 +124,7 @@ export const GroupRulesForm = ({ onSave, onClose, rule, existingRules = [], cont
 				<InputsContainer>
 					<FormTextField
 						required
-						autoFocus
+						autoFocus={!unsavedState}
 						name="name"
 						label={formatMessage({ id: 'tickets.groups.filterPanel.name', defaultMessage: 'Name' })}
 						formError={errors.name}
