@@ -43,7 +43,7 @@ const dataSchema = Yup.object({
 
 const ModelImportErrorTemplate = {};
 ModelImportErrorTemplate.subject = (data) => {
-	const { domain, title, modelType } = dataSchema.cast(data);
+	const { domain, title, modelType } = dataSchema.cast(data, { assert: false });
 	return `[${domain}][${modelType}] ${title}`;
 };
 
