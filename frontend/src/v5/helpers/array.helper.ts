@@ -32,5 +32,5 @@ export const chunkEscalated = <T>(array: T[], chunkSizes: number[]): T[][] => {
 		}
 	}
 
-    return chunks;
+	return chunks;
 };
