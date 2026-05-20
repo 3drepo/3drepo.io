@@ -23,6 +23,7 @@ import { mockRiskCategories, templateMockFactory } from "./tickets.fixture";
 import { initializeIntl } from "@/v5/services/intl";
 import { TicketsSortingPropertyDictionary } from "@/v5/store/tickets/card/ticketsCard.types";
 import { deserializeSorting, serializeSorting } from "@/v5/helpers/ticketsSorting.helpers";
+import { removeHiddenPropertiesFromTemplates } from "@/v5/store/tickets/ticketsTemplates.helpers";
 
 describe('Tickets: filters', () => {
 	const template: ITemplate = {
@@ -232,7 +233,7 @@ describe('Tickets: filters', () => {
 
 		});
 
-		it('should not include hidden properties in available filters', () => {
+		it('should not include hidden properties in available filters for sanitized templates', () => {
 			const templateWithHiddenProperties = templateMockFactory({
 				properties: [
 					{ name: 'Visible property', type: 'text' },
@@ -249,7 +250,7 @@ describe('Tickets: filters', () => {
 				],
 			});
 
-			const filters = templatesToFilters([templateWithHiddenProperties]);
+			const filters = templatesToFilters(removeHiddenPropertiesFromTemplates([templateWithHiddenProperties]));
 
 			expect(filters).toEqual(expect.arrayContaining([
 				expect.objectContaining({ property: 'Visible property' }),

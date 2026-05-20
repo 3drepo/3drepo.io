@@ -51,11 +51,9 @@ const TICKET_PROPERTIES_LABEL = {
 
 export const stripModuleOrPropertyPrefix = (name) => name.replace(/^(properties|modules)\./, '');
 
-const isPropertyVisible = ({ hiddenOnUI }) => !hiddenOnUI;
-
 export const hasRequiredViewerProperties = (template) => {
-	const modules = template.modules?.flatMap((module) => module.properties?.filter(isPropertyVisible) || []) || [];
-	const properties = modules.concat((template.properties || []).filter(isPropertyVisible));
+	const modules = template.modules?.flatMap((module) => module.properties) || [];
+	const properties = modules.concat(template.properties || []);
 	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
 };
 

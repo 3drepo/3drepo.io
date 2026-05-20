@@ -38,29 +38,16 @@ import { NON_BULK_EDITABLE_COLUMNS } from '@/v5/ui/routes/dashboard/projects/tic
 
 export const isSequencingProperty = (inputName: string) => [SEQUENCING_START_TIME, SEQUENCING_END_TIME].includes(inputName);
 export const modelIsFederation = (modelId: string) => !!FederationsHooksSelectors.selectFederationById(modelId);
-export const isPropertyVisible = ({ hiddenOnUI }: Partial<PropertyDefinition>) => !hiddenOnUI;
-export const getVisibleProperties = (properties: PropertyDefinition[] = []) => properties.filter(isPropertyVisible);
-
-export const getTemplateWithoutHiddenProperties = (template: Partial<ITemplate> = {}): Partial<ITemplate> => ({
-	...template,
-	properties: getVisibleProperties(template.properties || []),
-	modules: (template.modules || [])
-		.map((module) => ({
-			...module,
-			properties: getVisibleProperties(module.properties || []),
-		}))
-		.filter(({ properties }) => properties.length),
-});
 
 export const getEditableProperties = (template) => {
-	const propertyIsEditable = (property) => !property.readOnly && isPropertyVisible(property);
+	const propertyIsEditable = ({ readOnly }) => !readOnly;
 
 	// Doesnt return the config or anything else; this is used in the new ticket form in order to not show the comments.
 	return {
 		properties: (template.properties || []).filter(propertyIsEditable),
 		modules: (template.modules || []).map((module) => ({
 			...module,
-			properties: (module.properties || []).filter(propertyIsEditable),
+			properties: module.properties.filter(propertyIsEditable),
 		})),
 	};
 };
@@ -338,10 +325,8 @@ export const groupByProperties = (definitionsAsArray: PropertyDefinition[]) => d
 export const getTemplatePropertiesDefinitions = (template: Partial<ITemplate>): PropertyDefinition[] => {
 	if (!template) return [];
 	return [
-		...getVisibleProperties(template.properties || [])
-			.map((property) => ({ ...property, name: `properties.${property.name}` })),
-		...(template.modules || []).flatMap((module) => getVisibleProperties(module.properties || [])
-			.map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
+		...(template.properties || []).map((property) => ({ ...property, name: `properties.${property.name}` })),
+		...(template.modules || []).flatMap((module) => (module.properties || []).map((property) => ({ ...property, name: `modules.${module.type || module.name}.${property.name}` }))),
 	];
 };
 
@@ -366,7 +351,7 @@ export const findPropertyDefinition = (template:ITemplate,  property:string) => 
 
 export const canBulkEditProperty = (template:ITemplate, name: string) => {
 	const propDef = findPropertyDefinition(template, name);
-	const isReadOnly = propDef?.readOnly || propDef?.readOnlyOnUI || propDef?.deprecated || propDef?.hiddenOnUI;
+	const isReadOnly = propDef?.readOnly || propDef?.readOnlyOnUI || propDef?.deprecated;
 	return  !NON_BULK_EDITABLE_COLUMNS.includes(name)
 		&& propDef
 		&& !propDef?.unique // user is unlikely to want to bulk edit unique properties and it will usually error

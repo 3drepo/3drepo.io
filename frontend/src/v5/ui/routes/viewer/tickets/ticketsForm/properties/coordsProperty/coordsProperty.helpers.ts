@@ -20,7 +20,6 @@ import { AdditionalProperties, TicketBaseKeys } from '../../../tickets.constants
 import { IPin, PinType } from '@/v4/services/viewer/viewer';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { hexToGLColor, rgbToHex } from '@/v5/helpers/colors.helper';
-import { getVisibleProperties } from '@/v5/store/tickets/tickets.helpers';
 
 export const NEW_TICKET_ID = 'temporaryIdForNewTickets';
 const DEFAULT_COLOR = COLOR.PRIMARY_MAIN;
@@ -117,11 +116,11 @@ export const getTicketPins = (templates, ticket, ticketPinId) => {
 		return toPin(pinPath, selectedTemplate, ticket, isSelected);
 	};
 
-	pinArray.push(...getVisibleProperties(selectedTemplate.properties).map(moduleToPins(TicketBaseKeys.PROPERTIES)));
+	pinArray.push(...selectedTemplate.properties.map(moduleToPins(TicketBaseKeys.PROPERTIES)));
 	selectedTemplate.modules.forEach((module) => {
 		const moduleName = module.name || module.type;
 		if (!ticket.modules[moduleName]) return;
-		pinArray.push(...getVisibleProperties(module.properties).map(moduleToPins(`${TicketBaseKeys.MODULES}.${moduleName}`)));
+		pinArray.push(...module.properties.map(moduleToPins(`${TicketBaseKeys.MODULES}.${moduleName}`)));
 	});
 	return compact(pinArray);
 };

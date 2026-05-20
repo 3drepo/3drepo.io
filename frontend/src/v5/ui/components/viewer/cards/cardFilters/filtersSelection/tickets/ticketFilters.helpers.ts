@@ -33,7 +33,7 @@ import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selec
 import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
-import { findByName, findModuleByNameOrType, isPropertyVisible } from '@/v5/store/tickets/tickets.helpers';
+import { findByName, findModuleByNameOrType } from '@/v5/store/tickets/tickets.helpers';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -83,7 +83,6 @@ export const isBaseProperty = (propertyType) => DEFAULT_FILTERS.some(({ type }) 
 const isBasePropertyName = (name) => ['Owner', 'Created at', 'Updated at', 'Status'].includes(name);
 
 const propertiesToValidFilters = (properties: PropertyDefinition[], module: string = ''): TicketFilter[] => properties
-	.filter(isPropertyVisible)
 	.filter(({ name, type }) => !(!module && isBasePropertyName(name)) && Object.keys(TYPE_TO_ICON).includes(type))
 	.map(({ name, type }) => ({
 		module,

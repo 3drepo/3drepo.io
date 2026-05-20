@@ -26,7 +26,7 @@ import { UnsupportedProperty } from './properties/unsupportedProperty.component'
 import { ErrorTextGap, PropertiesListContainer } from './ticketsForm.styles';
 import { TicketsCardViews } from '../tickets.constants';
 import { TicketContext } from '../ticket.context';
-import { getVisibleProperties, isSequencingProperty } from '@/v5/store/tickets/tickets.helpers';
+import { isSequencingProperty } from '@/v5/store/tickets/tickets.helpers';
 
 interface PropertiesListProps {
 	properties: PropertyDefinition[];
@@ -42,12 +42,11 @@ export const PropertiesList = ({ module, properties, onPropertyBlur }: Propertie
 	const isNewTicket = TicketsCardHooksSelectors.selectView() === TicketsCardViews.New;
 	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticketFromStore = TicketsHooksSelectors.selectTicketById(containerOrFederation, selectedTicketId);
-	const visibleProperties = getVisibleProperties(properties);
 
-	if (!visibleProperties.length) return null;
+	if (!properties.length) return null;
 	return (
 		<PropertiesListContainer>
-			{visibleProperties.map(({
+			{properties.map(({
 				name,
 				type: basicType,
 				readOnly: disabled,
