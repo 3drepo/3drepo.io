@@ -88,16 +88,16 @@ const testAddTemplate = () => {
 		beforeAll(() => setupTestData(basicData));
 
 		describe.each([
-			['user does not have a valid session', false, templates.notLoggedIn, () => ({ data: templateToUse })],
-			['user is not a teamspace admin', false, templates.notAuthorized, () => ({ key: basicData.normalUser.apiKey, data: templateToUse })],
-			['teamspace does not exist', false, templates.teamspaceNotFound, () => ({ key: basicData.tsAdmin.apiKey, ts: generateRandomString(), data: templateToUse })],
-			['user is not a member of the teamspace', false, templates.teamspaceNotFound, () => ({ key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name, data: templateToUse })],
-			['user is a ts admin and there is a valid template', true, undefined, () => ({ key: basicData.tsAdmin.apiKey, data: templateToUse })],
-			['template is empty object', false, templates.invalidArguments, () => ({ key: basicData.tsAdmin.apiKey, data: {} })],
-			['template is invalid (invalid unique property)', false, templates.invalidArguments, () => ({ key: basicData.tsAdmin.apiKey, data: { ...templateToUse, properties: [{ name: generateRandomString(), type: propTypes.LONG_TEXT, unique: true }] } })],
+			['user does not have a valid session', false, templates.notLoggedIn, { data: templateToUse }],
+			['user is not a teamspace admin', false, templates.notAuthorized, { key: basicData.normalUser.apiKey, data: templateToUse }],
+			['teamspace does not exist', false, templates.teamspaceNotFound, { key: basicData.tsAdmin.apiKey, ts: generateRandomString(), data: templateToUse }],
+			['user is not a member of the teamspace', false, templates.teamspaceNotFound, { key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name, data: templateToUse }],
+			['user is a ts admin and there is a valid template', true, undefined, { key: basicData.tsAdmin.apiKey, data: templateToUse }],
+			['template is empty object', false, templates.invalidArguments, { key: basicData.tsAdmin.apiKey, data: {} }],
+			['template is invalid (invalid unique property)', false, templates.invalidArguments, { key: basicData.tsAdmin.apiKey, data: { ...templateToUse, properties: [{ name: generateRandomString(), type: propTypes.LONG_TEXT, unique: true }] } }],
 		])('Add template', (desc, success, expectedRes, getTestData) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code} if`} ${desc}`, async () => {
-				const { key, ts, data } = getTestData();
+				const { key, ts, data } = getTestData;
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const res = await agent.post(addTemplateRoute(basicData, key, ts)).send(data).expect(expectedStatus);
 				if (success) {
@@ -128,30 +128,20 @@ const testUpdateTemplate = () => {
 		const updateTemplateRoute = (key, ts = basicData.teamspace.name, id = templateToUse._id) => `/v5/teamspaces/${ts}/settings/tickets/templates/${id}${key ? `?key=${key}` : ''}`;
 
 		describe.each([
-			['user does not have a valid session', false, templates.notLoggedIn, () => ({ data: templateToUse })],
-			['user is not a teamspace admin', false, templates.notAuthorized, () => ({ key: basicData.normalUser.apiKey, data: templateToUse })],
-			['teamspace does not exist', false, templates.teamspaceNotFound, () => ({ key: basicData.tsAdmin.apiKey, ts: generateRandomString(), data: templateToUse })],
-			['user is not a member of the teamspace', false, templates.teamspaceNotFound, () => ({ key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name, data: templateToUse })],
-			['user is a ts admin and there is a valid template', true, undefined, () => ({ key: basicData.tsAdmin.apiKey, data: { ...templateToUse, name: 'abc' }, expectedBody: { ...templateToUse, name: 'abc' } })],
-			['updated template should retain old properties as deprecated', true, undefined, () => ({
-				key: basicData.tsAdmin.apiKey,
-				data: { ...templateToUse, properties: [{ name: 'newProp', type: propTypes.NUMBER }] },
-				expectedBody: {
-					...templateToUse,
-					properties: [
-						{ name: 'newProp', type: propTypes.NUMBER },
-						...deprecateProperties(templateToUse.properties),
-					],
-				},
-			})],
-			['template is invalid', false, templates.invalidArguments, () => ({ key: basicData.tsAdmin.apiKey, data: {} })],
-			['template name is already used by another template', false, templates.invalidArguments, () => ({ key: basicData.tsAdmin.apiKey, data: { ...templateToUse, name: templateThatClashes.name } })],
-			['template code is already used by another template', false, templates.invalidArguments, () => ({ key: basicData.tsAdmin.apiKey, data: { ...templateToUse, code: templateThatClashes.code } })],
-			['template is invalid (invalid unique property)', false, templates.invalidArguments, () => ({ key: basicData.tsAdmin.apiKey, data: { ...templateToUse, properties: [{ name: generateRandomString(), type: propTypes.LONG_TEXT, unique: true }] } })],
-			['template id is invalid', false, templates.templateNotFound, () => ({ key: basicData.tsAdmin.apiKey, id: generateRandomString(), data: templateToUse })],
+			['user does not have a valid session', false, templates.notLoggedIn, { data: templateToUse }],
+			['user is not a teamspace admin', false, templates.notAuthorized, { key: basicData.normalUser.apiKey, data: templateToUse }],
+			['teamspace does not exist', false, templates.teamspaceNotFound, { key: basicData.tsAdmin.apiKey, ts: generateRandomString(), data: templateToUse }],
+			['user is not a member of the teamspace', false, templates.teamspaceNotFound, { key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name, data: templateToUse }],
+			['user is a ts admin and there is a valid template', true, undefined, { key: basicData.tsAdmin.apiKey, data: { ...templateToUse, name: 'abc' }, expectedBody: { ...templateToUse, name: 'abc' } }],
+			['updated template should retain old properties as deprecated', true, undefined, { key: basicData.tsAdmin.apiKey, data: { ...templateToUse, properties: [{ name: 'newProp', type: propTypes.NUMBER }] }, expectedBody: { ...templateToUse, properties: [{ name: 'newProp', type: propTypes.NUMBER }, ...deprecateProperties(templateToUse.properties)] } }],
+			['template is invalid', false, templates.invalidArguments, { key: basicData.tsAdmin.apiKey, data: {} }],
+			['template name is already used by another template', false, templates.invalidArguments, { key: basicData.tsAdmin.apiKey, data: { ...templateToUse, name: templateThatClashes.name } }],
+			['template code is already used by another template', false, templates.invalidArguments, { key: basicData.tsAdmin.apiKey, data: { ...templateToUse, code: templateThatClashes.code } }],
+			['template is invalid (invalid unique property)', false, templates.invalidArguments, { key: basicData.tsAdmin.apiKey, data: { ...templateToUse, properties: [{ name: generateRandomString(), type: propTypes.LONG_TEXT, unique: true }] } }],
+			['template id is invalid', false, templates.templateNotFound, { key: basicData.tsAdmin.apiKey, id: generateRandomString(), data: templateToUse }],
 		])('', (desc, success, expectedRes, getTestData) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
-				const { key, ts, id, data, expectedBody } = getTestData();
+				const { key, ts, id, data, expectedBody } = getTestData;
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const res = await agent.put(updateTemplateRoute(key, ts, id)).send(data).expect(expectedStatus);
 				if (success) {
@@ -176,15 +166,15 @@ const testGetTemplate = () => {
 		});
 
 		describe.each([
-			['user does not have a valid session', false, templates.notLoggedIn, () => ({ id: templateToUse._id })],
-			['user is not a teamspace admin', false, templates.notAuthorized, () => ({ key: basicData.normalUser.apiKey, id: templateToUse._id })],
-			['teamspace does not exist', false, templates.teamspaceNotFound, () => ({ key: basicData.tsAdmin.apiKey, ts: generateRandomString(), id: templateToUse._id })],
-			['user is not a member of the teamspace', false, templates.teamspaceNotFound, () => ({ key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name, id: templateToUse._id })],
-			['user is a ts admin and there is a valid template', true, undefined, () => ({ key: basicData.tsAdmin.apiKey, id: templateToUse._id, expectedBody: templateToUse })],
-			['template id does not exist', false, templates.templateNotFound, () => ({ key: basicData.tsAdmin.apiKey, id: generateRandomString() })],
+			['user does not have a valid session', false, templates.notLoggedIn, { id: templateToUse._id }],
+			['user is not a teamspace admin', false, templates.notAuthorized, { key: basicData.normalUser.apiKey, id: templateToUse._id }],
+			['teamspace does not exist', false, templates.teamspaceNotFound, { key: basicData.tsAdmin.apiKey, ts: generateRandomString(), id: templateToUse._id }],
+			['user is not a member of the teamspace', false, templates.teamspaceNotFound, { key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name, id: templateToUse._id }],
+			['user is a ts admin and there is a valid template', true, undefined, { key: basicData.tsAdmin.apiKey, id: templateToUse._id, expectedBody: templateToUse }],
+			['template id does not exist', false, templates.templateNotFound, { key: basicData.tsAdmin.apiKey, id: generateRandomString() }],
 		])('', (desc, success, expectedRes, getTestData) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
-				const { key, ts, id, expectedBody } = getTestData();
+				const { key, ts, id, expectedBody } = getTestData;
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const res = await agent.get(getTemplateRoute(basicData, key, id, ts)).expect(expectedStatus);
 				if (success) {
@@ -209,14 +199,14 @@ const testGetTemplateList = () => {
 		});
 
 		describe.each([
-			['user does not have a valid session', false, templates.notLoggedIn, () => ({})],
-			['user is not a teamspace admin', false, templates.notAuthorized, () => ({ key: basicData.normalUser.apiKey })],
-			['teamspace does not exist', false, templates.teamspaceNotFound, () => ({ key: basicData.tsAdmin.apiKey, ts: generateRandomString() })],
-			['user is not a member of the teamspace', false, templates.teamspaceNotFound, () => ({ key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name })],
-			['user is a ts admin', true, undefined, () => ({ key: basicData.tsAdmin.apiKey })],
+			['user does not have a valid session', false, templates.notLoggedIn, {}],
+			['user is not a teamspace admin', false, templates.notAuthorized, { key: basicData.normalUser.apiKey }],
+			['teamspace does not exist', false, templates.teamspaceNotFound, { key: basicData.tsAdmin.apiKey, ts: generateRandomString() }],
+			['user is not a member of the teamspace', false, templates.teamspaceNotFound, { key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name }],
+			['user is a ts admin', true, undefined, { key: basicData.tsAdmin.apiKey }],
 		])('', (desc, success, expectedRes, getTestData) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
-				const { key, ts } = getTestData();
+				const { key, ts } = getTestData;
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const res = await agent.get(route(key, ts)).expect(expectedStatus);
 				if (success) {
@@ -239,13 +229,13 @@ const testGetRiskCategories = () => {
 		beforeAll(() => setupTestData(basicData));
 
 		describe.each([
-			['user does not have a valid session', false, templates.notLoggedIn, () => ({})],
-			['teamspace does not exist', false, templates.teamspaceNotFound, () => ({ key: basicData.tsAdmin.apiKey, ts: generateRandomString() })],
-			['user is not a member of the teamspace', false, templates.teamspaceNotFound, () => ({ key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name })],
-			['user is a member of teamspace', true, undefined, () => ({ key: basicData.normalUser.apiKey })],
+			['user does not have a valid session', false, templates.notLoggedIn, {}],
+			['teamspace does not exist', false, templates.teamspaceNotFound, { key: basicData.tsAdmin.apiKey, ts: generateRandomString() }],
+			['user is not a member of the teamspace', false, templates.teamspaceNotFound, { key: basicData.normalUser.apiKey, ts: basicData.noTemplatesTS.name }],
+			['user is a member of teamspace', true, undefined, { key: basicData.normalUser.apiKey }],
 		])('', (desc, success, expectedRes, getTestData) => {
 			test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
-				const { key, ts } = getTestData();
+				const { key, ts } = getTestData;
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 				const res = await agent.get(route(key, ts)).expect(expectedStatus);
 				if (success) {
@@ -266,17 +256,17 @@ const testGetAuditLogArchive = () => {
 		beforeAll(() => setupTestData(basicData));
 
 		describe.each([
-			['user does not have a valid session', false, templates.notLoggedIn, () => ({})],
-			['teamspace does not exist', false, templates.teamspaceNotFound, () => ({ key: basicData.tsAdmin.apiKey, ts: generateRandomString() })],
-			['user is not a member of the teamspace', false, templates.teamspaceNotFound, () => ({ key: basicData.nobody.apiKey })],
-			['user is not a teamspace admin', false, templates.notAuthorized, () => ({ key: basicData.normalUser.apiKey })],
-			['user is a teamspace admin', true, undefined, () => ({ key: basicData.tsAdmin.apiKey })],
-			['user is a teamspace admin but there are no activities', true, undefined, () => ({ key: basicData.tsAdmin.apiKey, ts: basicData.noTemplatesTS.name })],
-			['query is invalid', false, templates.invalidArguments, () => ({ key: basicData.tsAdmin.apiKey, query: { from: Date.now() + 10000, to: Date.now() - 10000 } })],
+			['user does not have a valid session', false, templates.notLoggedIn, {}],
+			['teamspace does not exist', false, templates.teamspaceNotFound, { key: basicData.tsAdmin.apiKey, ts: generateRandomString() }],
+			['user is not a member of the teamspace', false, templates.teamspaceNotFound, { key: basicData.nobody.apiKey }],
+			['user is not a teamspace admin', false, templates.notAuthorized, { key: basicData.normalUser.apiKey }],
+			['user is a teamspace admin', true, undefined, { key: basicData.tsAdmin.apiKey }],
+			['user is a teamspace admin but there are no activities', true, undefined, { key: basicData.tsAdmin.apiKey, ts: basicData.noTemplatesTS.name }],
+			['query is invalid', false, templates.invalidArguments, { key: basicData.tsAdmin.apiKey, query: { from: Date.now() + 10000, to: Date.now() - 10000 } }],
 		])('', (desc, success, expectedRes, getTestData) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
 				Mailer.sendEmail.mockClear();
-				const { key, ts, query } = getTestData();
+				const { key, ts, query } = getTestData;
 				const expectedStatus = success ? templates.ok.status : expectedRes.status;
 
 				const res = await agent.get(route(key, ts, query))
