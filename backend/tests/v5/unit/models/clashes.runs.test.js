@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const { CLASH_RUN_STATUS, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const ClashRuns = require(`${src}/models/clashes.runs`);
@@ -90,27 +91,10 @@ const testGetTestRunByQuery = () => {
 			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
 
 			await expect(ClashRuns.getTestRunByQuery(teamspace, query, projection, sort))
-				.rejects.toEqual(templates.testRunNotFound);
+				.rejects.toEqual(templates.clashRunNotFound);
 
 			expect(findFn).toHaveBeenCalledTimes(1);
 			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, query, projection, sort);
-		});
-	});
-};
-
-const testGetLastRunFromPlan = () => {
-	describe('Get last run from plan', () => {
-		test('should get the last run from a plan', async () => {
-			const teamspace = generateRandomString();
-			const planId = generateRandomString();
-			const result = generateRandomObject();
-			const findFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(result);
-
-			const run = await ClashRuns.getLastRunFromPlan(teamspace, planId);
-			expect(run).toEqual(result);
-
-			expect(findFn).toHaveBeenCalledTimes(1);
-			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { 'plan._id': planId }, { sort: { createdAt: -1 } });
 		});
 	});
 };
@@ -119,5 +103,4 @@ describe(determineTestGroup(__filename), () => {
 	testCreateTestRun();
 	testCompleteTestRun();
 	testGetTestRunByQuery();
-	testGetLastRunFromPlan();
 });

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../helper/path');
 
@@ -25,7 +26,7 @@ jest.mock('fs', () => ({
 const fs = require('fs');
 const { PassThrough } = require('stream');
 
-const { generateRandomString, determineTestGroup, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
+const { generateRandomString, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
 
 jest.mock('../../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);
@@ -250,15 +251,15 @@ const generateClash = () => ({
 	...generateRandomObject(),
 });
 
-const testCompleteRun = () => {
-	describe('Complete Run', () => {
+const testProcessClashResults = () => {
+	describe('Process Clash Results', () => {
 		const fileContent = { clashes: times(10, () => generateClash()) };
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const corId = generateRandomString();
 		const resPath = generateRandomString();
 
-		test('should complete run when there are no previous runs', async () => {
+		test('should process clash results when there are no previous runs', async () => {
 			fs.createReadStream.mockImplementationOnce(() => {
 				const fakeReadStream = PassThrough();
 				fakeReadStream.write(JSON.stringify(fileContent));
@@ -267,7 +268,7 @@ const testCompleteRun = () => {
 			});
 			ClashRunsModel.getTestRunByQuery.mockRejectedValueOnce(new Error());
 
-			await Clashes.completeRun(teamspace, project, corId, resPath);
+			await Clashes.processClashResults(teamspace, project, corId, resPath);
 
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId },
@@ -284,7 +285,7 @@ const testCompleteRun = () => {
 				FilesManager.storeFile.mock.calls[0][2]);
 		});
 
-		test('should categorize clashes and complete run when there are previous runs', async () => {
+		test('should categorize clashes and process clash results when there are previous runs', async () => {
 			const existingClashes = {
 				new: times(5, () => generateClash()).map(formatClash),
 				active: fileContent.clashes.slice(0, 5).map(formatClash),
@@ -310,7 +311,7 @@ const testCompleteRun = () => {
 			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
 			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(lastRun);
 
-			await Clashes.completeRun(teamspace, project, corId, resPath);
+			await Clashes.processClashResults(teamspace, project, corId, resPath);
 
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(2);
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId },
@@ -343,5 +344,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdatePlan();
 	testDeletePlan();
 	testCreateRun();
-	testCompleteRun();
+	testProcessClashResults();
 });

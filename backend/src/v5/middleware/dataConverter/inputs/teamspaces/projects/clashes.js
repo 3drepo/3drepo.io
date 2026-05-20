@@ -20,6 +20,7 @@ const { getLatestRevision } = require('../../../../../models/revisions');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { isEqual } = require('../../../../../utils/helper/objects');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
+const { pick } = require('lodash');
 const { respond } = require('../../../../../utils/responder');
 const { validateMany } = require('../../../../common');
 const { validatePlan } = require('../../../../../schemas/projects/clashes');
@@ -27,13 +28,17 @@ const { validatePlan } = require('../../../../../schemas/projects/clashes');
 const Clashes = {};
 
 const validatePlanData = async (req, res, next) => {
+	const fieldsToCompare = ['name', 'type', 'tolerance', 'selfIntersectionsCheck', 'trigger', 'selectionA', 'selectionB'];
+
 	try {
 		const { teamspace, project } = req.params;
 		req.body = await validatePlan(teamspace, project, req.body);
 
 		if (req.planData) {
-			const { _id, ...existingPlanData } = req.planData;
-			if (isEqual(existingPlanData, req.body)) {
+			const existingPlanData = pick(req.planData, fieldsToCompare);
+			const incomingPlanData = pick(req.body, fieldsToCompare);
+
+			if (isEqual(existingPlanData, incomingPlanData)) {
 				throw createResponseCode(templates.invalidArguments, 'No valid properties to update');
 			}
 		}

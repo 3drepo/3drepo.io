@@ -100,13 +100,41 @@ Calibrations.getCalibrationStatus = async (teamspace, project, drawing, revision
 	}
 };
 
-Calibrations.getCalibrationStatusForAllRevs = async (teamspace, project, drawing) => {
-	const allRevisions = await getRevisions(teamspace, project, drawing, modelTypes.DRAWING, true,
-		{ _id: 1, void: 1 }, { timestamp: 1 });
+Calibrations.getCalibrationStatusForAllRevsFromMultipleDrawings = async (teamspace, project, drawings) => {
+	const allRevisions = await getRevisionsByQuery(teamspace, project, undefined,
+		modelTypes.DRAWING, { model: { $in: drawings } },
+		{ _id: 1, void: 1 }, {}, { timestamp: 1 });
+	const revisionsByDrawing = {};
+	allRevisions.forEach((entry) => {
+		if (!revisionsByDrawing[entry.model]) {
+			revisionsByDrawing[entry.model] = [];
+		}
+		revisionsByDrawing[entry.model].push(entry);
+	});
+
+	const res = {};
+
+	for (const drawing of drawings) {
+		// eslint-disable-next-line no-await-in-loop
+		res[drawing] = await Calibrations.getCalibrationStatusForAllRevs(
+			teamspace, project, drawing, revisionsByDrawing[drawing]);
+	}
+
+	return res;
+};
+
+Calibrations.getCalibrationStatusForAllRevs = async (teamspace, project, drawing, revisions) => {
+	let allRevisions = revisions;
+	if (!allRevisions) {
+		allRevisions = await getRevisions(teamspace, project, drawing, modelTypes.DRAWING, true,
+			{ _id: 1, void: 1 }, { timestamp: 1 });
+	}
+
 	const revCalibrations = await getCalibrationForMultipleRevisions(teamspace,
 		allRevisions.map(({ _id }) => _id), { _id: 1 });
 
 	const revIdToHasCalib = getRevIdToCalibMap(revCalibrations);
+
 	const results = {};
 
 	let defaultCalibStatus = calibrationStatuses.UNCALIBRATED;

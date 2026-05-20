@@ -27,7 +27,6 @@ const { modelTypes, processStatuses } = require('../../../models/modelSettings.c
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
 const { DRAWINGS_HISTORY_COL } = require('../../../models/revisions.constants');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
-const { completeRun } = require('../../../processors/teamspaces/projects/clashes');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
 const { templates: emailTemplates } = require('../../mailer/mailer.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
@@ -38,10 +37,12 @@ const { getInfoFromCode } = require('../../../models/modelSettings.constants');
 const { getRefEntryByQuery } = require('../../../models/fileRefs');
 const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
+const { processClashResults } = require('../../../processors/teamspaces/projects/clashes');
 const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
+const { updateTestRun } = require('../../../models/clashes.runs');
 
 const queueStatusUpdate = async ({ teamspace, model, modelType, corId, status }) => {
 	try {
@@ -82,9 +83,23 @@ const queueTasksCompleted = async ({ teamspace, model, modelType, value, corId, 
 	}
 };
 
-const clashRunCompleted = async ({ teamspace, project, corId, results }) => {
+const clashRunStatusUpdate = async ({ teamspace, corId, status }) => {
 	try {
-		await completeRun(teamspace, stringToUUID(project), stringToUUID(corId), results);
+		await updateTestRun(teamspace, stringToUUID(corId), { status });
+	} catch (err) {
+		logger.logError(`Failed to update the status of clash run for ${teamspace} with id ${corId}: ${err.message}`);
+		if (err.stack) {
+			logger.logError(err.stack);
+		}
+	}
+};
+
+const clashRunCompleted = async ({ teamspace, corId, results, value }) => {
+	try {
+		const resInfo = getInfoFromCode(value);
+		resInfo.retVal = value;
+
+		await processClashResults(teamspace, stringToUUID(corId), results, resInfo);
 	} catch (err) {
 		logger.logError(`Failed to process a complete clash run for ${teamspace} with id ${corId}: ${err.message}`);
 		if (err.stack) {
@@ -378,6 +393,7 @@ const ModelEventsListener = {};
 ModelEventsListener.init = () => {
 	subscribe(events.QUEUED_TASK_UPDATE, queueStatusUpdate);
 	subscribe(events.QUEUED_TASK_COMPLETED, queueTasksCompleted);
+	subscribe(events.CLASH_RUN_UPDATE, clashRunStatusUpdate);
 	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
 	subscribe(events.MODEL_IMPORT_FINISHED, modelProcessingCompleted);
 	subscribe(events.MODEL_SETTINGS_UPDATE, modelSettingsUpdated);

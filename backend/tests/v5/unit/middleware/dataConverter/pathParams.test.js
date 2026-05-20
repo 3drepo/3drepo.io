@@ -15,12 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
+const { templates, createResponseCode } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 
 const PathParams = require(`${src}/middleware/dataConverter/pathParams`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { generateRandomString } = require('../../../helper/services');
+const { times } = require('lodash');
+
+jest.mock('../../../../../src/v5/utils/responder');
+const Responder = require(`${src}/utils/responder`);
 
 const testConvertAllUUIDs = () => {
 	describe('Convert UUIDs in params', () => {
@@ -110,7 +116,37 @@ const testGetModelIdFromParam = () => {
 	});
 };
 
-describe('middleware/dataConverter/pathParams', () => {
+const testGetModelIdsFromQuery = () => {
+	const modelList = times(3, () => generateRandomString());
+	const modelListString = modelList.join(',');
+	describe.each([
+		['federation array is provided', true, { federations: modelListString }, modelTypes.FEDERATION, modelList],
+		['container array is provided', true, { containers: modelListString }, modelTypes.CONTAINER, modelList],
+		['drawing array is provided', true, { drawings: modelListString }, modelTypes.DRAWING, modelList],
+		['models is not provided', false, {}, modelTypes.DRAWING],
+		['the wrong model type is provided', false, { containers: modelListString }, modelTypes.DRAWING],
+		['model array is provided instead', true, { models: modelListString }, modelTypes.DRAWING, modelList],
+
+	])('Get Model Ids from req query', (desc, success, query, modelType, parsedParams) => {
+		test(`Should ${success ? 'call next()' : `respond with ${templates.invalidArguments.code}`} if ${desc}`, async () => {
+			const mockCB = jest.fn();
+			const req = { query };
+			const res = { };
+			await PathParams.getModelIdsFromQuery(modelType)(req, res, mockCB);
+
+			if (success) {
+				expect(mockCB).toHaveBeenCalledTimes(1);
+				expect(req.models).toEqual(parsedParams);
+			} else {
+				expect(mockCB).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, createResponseCode(templates.invalidArguments, '"models" is missing from query string'));
+			}
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testConvertAllUUIDs();
 	testGetModelIdFromParam();
+	testGetModelIdsFromQuery();
 });
