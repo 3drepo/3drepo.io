@@ -27,7 +27,7 @@ const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
 
 const { getModelMD5Hash } = require('./commons/modelList');
-const { getOpenTicketsCount } = require('./commons/tickets');
+const { getOpenTicketsCountForMultipleModels } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
 const { getRepoBundleInfo } = require('./commons/assets/bundles');
 const { getSuperMeshesInfo } = require('./containers');
@@ -75,43 +75,38 @@ Federations.newRevision = async (teamspace, project, federation, info) => {
 };
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
-	const lastUpdates = [];
-	if (models) {
+	const modelsUpdates = {};
+	if (models.length) {
 		await Promise.all(models.map(async (m) => {
 			try {
-				lastUpdates.push(await getLatestRevision(teamspace, m, modelTypes.FEDERATION, { timestamp: 1 }));
+				const { timestamp } = await getLatestRevision(teamspace, m, modelTypes.CONTAINER, { timestamp: 1 });
+
+				modelsUpdates[m] = timestamp;
 			} catch {
 				// do nothing. A container can have 0 revision.
 			}
 		}));
 	}
 
-	return lastUpdates.length ? lastUpdates.sort((a, b) => b.timestamp
-		- a.timestamp)[0].timestamp : undefined;
+	return modelsUpdates;
+};
+
+const determineLastUpdated = (containers, lastUpdateInfo) => {
+	let lastUpdate;
+
+	containers.forEach(({ _id }) => {
+		const update = lastUpdateInfo[_id];
+		if (update && (!lastUpdate || update > lastUpdate)) {
+			lastUpdate = update;
+		}
+	});
+	return lastUpdate;
 };
 
 Federations.getFederationStats = async (teamspace, project, federation) => {
-	const { properties, status, subModels: containers, desc } = await getFederationById(teamspace, federation, {
-		properties: 1,
-		status: 1,
-		subModels: 1,
-		desc: 1,
-	});
+	const stats = await Federations.getMultipleFederationsStats(teamspace, project, [federation]);
 
-	const [ticketsCount, lastUpdates] = await Promise.all([
-		getOpenTicketsCount(teamspace, project, federation),
-		getLastUpdatesFromModels(teamspace, containers ? containers.map(({ _id }) => _id) : containers),
-	]);
-
-	return {
-		code: properties.code,
-		unit: properties.unit,
-		status,
-		containers,
-		desc,
-		lastUpdated: lastUpdates,
-		tickets: ticketsCount,
-	};
+	return stats[federation];
 };
 
 Federations.updateSettings = updateModelSettings;
@@ -130,6 +125,41 @@ Federations.getSuperMeshesInfo = async (teamspace, federation, revision, contain
 		return { teamspace, model: container, superMeshes: data };
 	}));
 	return { subModels: supermeshData };
+};
+
+Federations.getMultipleFederationsStats = async (teamspace, project, federations) => {
+	const stats = {};
+
+	const [settings, ticketCounts] = await Promise.all([
+		getFederations(
+			teamspace, federations, { properties: 1, status: 1, subModels: 1, desc: 1 },
+		),
+		getOpenTicketsCountForMultipleModels(teamspace, project, federations),
+	]);
+
+	const containersRequired = new Set();
+	settings.forEach(({ subModels }) => {
+		subModels?.forEach(({ _id }) => containersRequired.add(_id));
+	});
+
+	const containersLastUpdates = await getLastUpdatesFromModels(teamspace, Array.from(containersRequired));
+
+	settings.forEach((setting) => {
+		stats[setting._id] = {
+			code: setting.properties?.code,
+			unit: setting.properties?.unit,
+			status: setting?.status,
+			containers: setting?.subModels,
+			desc: setting?.desc,
+			lastUpdated: determineLastUpdated(
+				setting?.subModels || [],
+				containersLastUpdates,
+			),
+			tickets: ticketCounts[setting._id] || 0,
+		};
+	});
+
+	return stats;
 };
 
 module.exports = Federations;

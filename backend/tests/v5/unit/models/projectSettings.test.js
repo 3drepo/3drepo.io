@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { errCodes } = require('../../../../src/v5/handler/db.constants');
 const { src } = require('../../helper/path');
 const { generateRandomString } = require('../../helper/services');
@@ -312,7 +313,7 @@ const testRemoveUserFromAllProjects = () => {
 	});
 };
 
-describe('models/projectSettings', () => {
+describe(determineTestGroup(__filename), () => {
 	testProjectAdmins();
 	testGetProjectList();
 	testAddProjectModel();
