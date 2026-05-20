@@ -157,7 +157,7 @@ export class UnityUtil {
 	 * @returns An array containing the joystick input values [leftStickX, leftStickY, rightStickX, rightStickY]
 	 */
 	/** @hidden */
-	private static virtualJoystickProvider: (() => [number, number, number, number] | null | undefined) | null = null;
+	private static virtualJoystickProvider: (() => [number, number, number, number, number] | null | undefined) | null = null;
 
 	/**
 	 * Contains a list of calls to make during the Unity Update method. One
@@ -2779,19 +2779,20 @@ export class UnityUtil {
 	/**
 	 * Enable the virtual joystick feature.
 	 *
-	 * The viewer polls `fn` once per frame to retrieve the
-	 * current joystick state. Each axis value should be in the range **-1 to 1**, where
-	 * 0 represents the neutral (centred) position.
+	 * The viewer polls `fn` once per frame to retrieve the current joystick
+	 * state. Each axis value should be in the range **-1 to 1**, where 0
+	 * represents the neutral (centred) position.
 	 *
-	 * @param fn - A provider function that returns the current joystick state as a
-	 * four-element tuple `[leftStickX, leftStickY, rightStickX, rightStickY]`.
+	 * @param fn - A provider function that returns the current joystick state
+	 * as a give-element tuple
+	 * `[leftStickX, leftStickY, rightStickX, rightStickY, trigger]`.
 	 * Return `null` or `undefined` to indicate no input this frame.
 	 *
 	 * @example
 	 * // Simulates a static right-stick push to the right (e.g. for testing)
-	 * UnityUtil.enableVirtualJoystick(() => [0, 0, 1, 0]);
+	 * UnityUtil.enableVirtualJoystick(() => [0, 0, 1, 0, 0]);
 	 */
-	public static enableVirtualJoystick(fn: () => [number, number, number, number]) {
+	public static enableVirtualJoystick(fn: () => [number, number, number, number, number]) {
 		if (typeof fn !== 'function') {
 			console.error('enableVirtualJoystick: fn must be a function');
 			return;
