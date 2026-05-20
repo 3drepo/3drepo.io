@@ -26,7 +26,7 @@ jest.mock('fs', () => ({
 const fs = require('fs');
 const { PassThrough } = require('stream');
 
-const { generateRandomString, determineTestGroup, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
+const { generateRandomString, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
 
 jest.mock('../../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);

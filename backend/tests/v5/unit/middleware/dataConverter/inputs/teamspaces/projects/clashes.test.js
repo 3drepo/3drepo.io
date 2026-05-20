@@ -35,7 +35,7 @@ const RevisionsModel = require(`${src}/models/revisions`);
 const Clashes = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/clashes`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { determineTestGroup, generateRandomString, generateRandomObject, generateClashPlan } = require('../../../../../../helper/services');
+const { generateRandomString, generateRandomObject, generateClashPlan } = require('../../../../../../helper/services');
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);

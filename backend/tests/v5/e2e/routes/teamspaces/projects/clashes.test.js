@@ -349,7 +349,7 @@ const testParseClashResults = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
