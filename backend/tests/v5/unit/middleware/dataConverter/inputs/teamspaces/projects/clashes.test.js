@@ -34,7 +34,7 @@ const RevisionsModel = require(`${src}/models/revisions`);
 const Clashes = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/clashes`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../../../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject, generateClashPlan } = require('../../../../../../helper/services');
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -88,7 +88,7 @@ const testValidateUpdatePlanData = () => {
 					project: generateRandomString(),
 					planId: generateRandomString(),
 				},
-				body: generateRandomObject(),
+				body: generateClashPlan(),
 			};
 			ClashPlansModel.getPlanById.mockRejectedValueOnce(templates.clashPlanNotFound);
 
@@ -105,22 +105,23 @@ const testValidateUpdatePlanData = () => {
 
 		test('next() should be called if the plan exists', async () => {
 			const mockCB = jest.fn(() => {});
-			const plan = generateRandomObject();
+			const plan = generateClashPlan();
+			const extraProps = { createdAt: new Date(), createdBy: generateRandomString() };
 			const req = {
 				params: {
 					teamspace: generateRandomString(),
 					project: generateRandomString(),
 					planId: generateRandomString(),
 				},
-				body: generateRandomObject(),
+				body: { ...plan, name: generateRandomString() },
 			};
-			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+			ClashPlansModel.getPlanById.mockResolvedValueOnce({ ...plan, ...extraProps });
 			ClashesSchema.validatePlan.mockResolvedValueOnce(req.body);
 
 			await Clashes.validateUpdatePlanData(req, {}, mockCB);
 
 			expect(mockCB).toHaveBeenCalled();
-			expect(req.planData).toEqual(plan);
+			expect(req.planData).toEqual({ ...plan, ...extraProps });
 			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.getPlanById)
 				.toHaveBeenCalledWith(req.params.teamspace, req.params.planId);
@@ -131,16 +132,17 @@ const testValidateUpdatePlanData = () => {
 
 		test('should respond with error if validation fails', async () => {
 			const mockCB = jest.fn(() => {});
-			const plan = generateRandomObject();
+			const plan = generateClashPlan();
+			const extraProps = { createdAt: new Date(), createdBy: generateRandomString() };
 			const req = {
 				params: {
 					teamspace: generateRandomString(),
 					project: generateRandomString(),
 					planId: generateRandomString(),
 				},
-				body: generateRandomObject(),
+				body: { ...plan, name: generateRandomString() },
 			};
-			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+			ClashPlansModel.getPlanById.mockResolvedValueOnce({ ...plan, ...extraProps });
 			ClashesSchema.validatePlan.mockRejectedValueOnce(templates.invalidArguments);
 
 			await Clashes.validateUpdatePlanData(req, {}, mockCB);
@@ -157,7 +159,8 @@ const testValidateUpdatePlanData = () => {
 
 		test('should respond with error if there are no changes', async () => {
 			const mockCB = jest.fn(() => {});
-			const plan = generateRandomObject();
+			const plan = generateClashPlan();
+			const extraProps = { createdAt: new Date(), createdBy: generateRandomString() };
 			const req = {
 				params: {
 					teamspace: generateRandomString(),
@@ -166,7 +169,7 @@ const testValidateUpdatePlanData = () => {
 				},
 				body: plan,
 			};
-			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+			ClashPlansModel.getPlanById.mockResolvedValueOnce({ ...plan, ...extraProps });
 			ClashesSchema.validatePlan.mockResolvedValueOnce(req.body);
 
 			await Clashes.validateUpdatePlanData(req, {}, mockCB);
