@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createResponseCode, templates } = require('../../utils/responseCodes');
-const { respond } = require('../../utils/responder');
+const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { respond } = require('../../../../../../../utils/responder');
 const yup = require('yup');
 
-const QueryParams = {};
+const Maps = {};
 
 const mapsCoordinatesSchema = yup.object({
 	zoomLevel: yup.number().integer().min(0).required(),
@@ -27,7 +27,7 @@ const mapsCoordinatesSchema = yup.object({
 	y: yup.number().integer().min(0).required(),
 }).required();
 
-QueryParams.validateMapsCoordinates = async (req, res, next) => {
+Maps.validateMapsCoordinates = async (req, res, next) => {
 	try {
 		req.query = await mapsCoordinatesSchema.validate(req.query);
 		await next();
@@ -36,4 +36,4 @@ QueryParams.validateMapsCoordinates = async (req, res, next) => {
 	}
 };
 
-module.exports = QueryParams;
+module.exports = Maps;

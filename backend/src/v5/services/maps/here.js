@@ -15,189 +15,47 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { BASE_URL, FEATURES, HERE_TRAFFIC_DOMAIN, RESOURCES, STYLES } = require('./here.constants');
-const { get, getArrayBuffer } = require('../../utils/webRequests');
+const { hereMapVariants, tileConfig } = require('./here.constants');
 const config = require('../../utils/config');
+const { getArrayBuffer } = require('../../utils/webRequests');
 const { logger } = require('../../utils/logger');
 const { templates } = require('../../utils/responseCodes');
 
 const HereService = {};
 
-const generateTileURI = (domain, resource, zoomLevel, x, y, { features, style } = {}) => {
-	const uriPath = [
-		domain,
-		'v3',
-		resource,
-		'mc',
-		zoomLevel,
-		x,
-		y,
-		'png8',
-	].join('/');
-	const uriQuery = [
-		features ? `features=${features}` : null,
-		style ? `style=${style}` : null,
-		`apiKey=${config.here.apiKey}`,
-	].filter(Boolean).join('&');
+const generateTileURI = (domain, resource, zoomLevel, x, y, { features, style }) => {
+	const query = new URLSearchParams({
+		apiKey: config.here.apiKey,
+	});
 
-	return `https://${uriPath}?${uriQuery}`;
+	if (features) query.append('features', features);
+	if (style) query.append('style', style);
+
+	return `https://${domain}/v3/${resource}/mc/${zoomLevel}/${x}/${y}/png8?${query.toString()}`;
 };
 
-HereService.getBaseInfo = async () => {
-	try {
-		const uri = `https://${BASE_URL}/v3/info?apiKey=${config.here.apiKey}`;
-		const { data } = await get(uri);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE base info: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
+HereService.getAvailableMaps = () => hereMapVariants.map(({ name, source }) => ({
+	name,
+	layers: [
+		{ name: source === 'HERE_AERIAL' ? 'Aerial Imagery' : 'Map Tiles', source },
+		{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
+		{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
+	],
+}));
 
-HereService.getTile = async (zoomLevel, x, y) => {
+HereService.getTile = async (mapType, zoomLevel, x, y) => {
 	try {
+		const mapTileConfig = tileConfig[mapType];
 		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y),
+			generateTileURI(mapTileConfig.url, mapTileConfig.resource, zoomLevel, x, y, {
+				style: mapTileConfig?.style,
+				features: mapTileConfig?.features,
+			}),
 		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
 
-HereService.getAerialTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.AERIAL }),
-		);
 		return data;
 	} catch (error) {
-		logger.logError(`Failed to get HERE aerial tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getTrafficTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.TRAFFIC }),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE traffic tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getTrafficFlowTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(HERE_TRAFFIC_DOMAIN, RESOURCES.FLOW, zoomLevel, x, y, {}),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE traffic flow tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getTerrainTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.TERRAIN }),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE terrain tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getHybridTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.HYBRID }),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE hybrid tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getGreyTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { style: STYLES.GREY }),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE grey tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getTruckRestrictionsTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y,
-				{ style: STYLES.TRUCK_RESTRICTIONS, features: FEATURES.VEHICLE_RESTRICTIONS },
-			),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE truck restrictions tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getTruckRestrictionsOverlayTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(
-				BASE_URL, RESOURCES.BLANK, zoomLevel, x, y, { features: FEATURES.VEHICLE_RESTRICTIONS },
-			),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE truck restrictions overlay tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getLabelOverlayTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.LABEL, zoomLevel, x, y, {}),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE label overlay tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getTollZoneTile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { features: FEATURES.CONGESTION_ZONES }),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE toll zone tile: ${error?.response?.data} `);
-		throw templates.mapsRequestFailed;
-	}
-};
-
-HereService.getPOITile = async (zoomLevel, x, y) => {
-	try {
-		const { data } = await getArrayBuffer(
-			generateTileURI(BASE_URL, RESOURCES.BASE, zoomLevel, x, y, { features: FEATURES.POI }),
-		);
-		return data;
-	} catch (error) {
-		logger.logError(`Failed to get HERE POI tile: ${error?.response?.data} `);
+		logger.logError(`Failed to get HERE tile for map type ${mapType}: ${error?.response?.data} `);
 		throw templates.mapsRequestFailed;
 	}
 };

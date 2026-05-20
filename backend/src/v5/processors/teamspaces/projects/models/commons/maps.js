@@ -18,93 +18,30 @@
 const { ADD_ONS } = require('../../../../../models/teamspaces.constants');
 const HereService = require('../../../../../services/maps/here');
 const OSMService = require('../../../../../services/maps/osm');
-const config = require('../../../../../utils/config');
 const { isAddOnEnabled } = require('../../../../../models/teamspaceSettings');
+const { mapProviders } = require('../../../../../services/maps/maps.constants');
+const { templates } = require('../../../../../utils/responseCodes');
 
 const Maps = {};
 
 Maps.getListOfMaps = async (teamspace) => {
 	const hereEnabled = await isAddOnEnabled(teamspace, ADD_ONS.HERE);
-	const maps = [
-		{ name: 'Open Street Map', layers: [{ name: 'Map Tiles', source: 'OSM' }] },
-
-	];
-	if (hereEnabled && config.here && config.here.apiKey) {
-		maps.push(...[
-			{ name: 'Here',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
-				] },
-			{ name: 'Here (Terrain)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_TERRAIN' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
-				] },
-			{ name: 'Here (Satellite)',
-				layers: [
-					{ name: 'Aerial Imagery', source: 'HERE_AERIAL' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
-				] },
-			{ name: 'Here (Hybrid)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_HYBRID' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
-				] },
-			{ name: 'Here (Street)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_STREET' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
-				] },
-			{ name: 'Here (Toll Zone)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_TOLL_ZONE' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
-				] },
-			{ name: 'Here (POI)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_POI' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
-				] },
-		]);
-	}
+	const maps = hereEnabled
+		? [...await OSMService.getAvailableMaps(), ...await HereService.getAvailableMaps()]
+		: [...await OSMService.getAvailableMaps()];
 
 	return maps;
 };
 
-Maps.getHereBaseInfo = HereService.getBaseInfo;
-
-Maps.getOSMTile = OSMService.getTile;
-
-Maps.getHereDefaultTile = HereService.getTile;
-
-Maps.getHereAerialTile = HereService.getAerialTile;
-
-Maps.getHereTrafficTile = HereService.getTrafficTile;
-
-Maps.getHereTrafficFlowTile = HereService.getTrafficFlowTile;
-
-Maps.getHereTerrainTile = HereService.getTerrainTile;
-
-Maps.getHereHybridTile = HereService.getHybridTile;
-
-Maps.getHereGreyTile = HereService.getGreyTile;
-
-Maps.getHereTruckRestrictionsTile = HereService.getTruckRestrictionsTile;
-
-Maps.getHereTruckRestrictionsOverlayTile = HereService.getTruckRestrictionsOverlayTile;
-
-Maps.getHereLabelOverlayTile = HereService.getLabelOverlayTile;
-
-Maps.getHereTollZoneTile = HereService.getTollZoneTile;
-
-Maps.getHerePOITile = HereService.getPOITile;
+Maps.getTile = (mapProvider, mapType, zoomLevel, x, y) => {
+	switch (mapProvider) {
+	case mapProviders.HERE:
+		return HereService.getTile(mapType, zoomLevel, x, y);
+	case mapProviders.OSM:
+		return OSMService.getTile(mapType, zoomLevel, x, y);
+	default:
+		throw templates.invalidArguments;
+	}
+};
 
 module.exports = Maps;

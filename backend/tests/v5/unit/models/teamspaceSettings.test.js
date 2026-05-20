@@ -730,7 +730,7 @@ const testIsAddOnEnabled = () => {
 		const teamspace = generateRandomString();
 
 		test('should return true if addOn is enabled', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ addOns: { [ADD_ONS.VR]: true } });
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ addOns: { [ADD_ONS.VR]: true } });
 			const addOnName = ADD_ONS.VR;
 
 			await expect(Teamspace.isAddOnEnabled(teamspace, addOnName)).resolves.toEqual(true);
@@ -740,7 +740,7 @@ const testIsAddOnEnabled = () => {
 				addOnsProjection, undefined);
 		});
 		test('should return false if addOn is not found', async () => {
-			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ addOns: { } });
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ addOns: { } });
 			const addOnName = ADD_ONS.VR;
 
 			await expect(Teamspace.isAddOnEnabled(teamspace, addOnName)).resolves.toEqual(false);

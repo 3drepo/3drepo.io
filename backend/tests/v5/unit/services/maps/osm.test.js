@@ -17,7 +17,7 @@
 
 const { src } = require('../../../helper/path');
 
-const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../helper/services');
+const { determineTestGroup, generateRandomNumber } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/utils/webRequests');
 const { getArrayBuffer } = require(`${src}/utils/webRequests`);
@@ -31,42 +31,57 @@ const config = require(`${src}/utils/config`);
 const OSMService = require(`${src}/services/maps/osm`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
+const testGetAvailableMaps = () => {
+	describe('Get Available Maps', () => {
+		test('should return available maps with correct structure', () => {
+			const maps = OSMService.getAvailableMaps();
+			expect(maps).toEqual([
+				{ name: 'Open Street Map',
+					layers: [
+						{ name: 'Map Tiles', source: 'OSM' },
+					],
+				},
+			]);
+		});
+	});
+};
+
 const testGetTitle = () => {
 	describe('Get OSM Tile', () => {
 		const zoomLevel = generateRandomNumber();
 		const x = generateRandomNumber();
 		const y = generateRandomNumber();
-		test('Should return OSM tile', async () => {
-			getArrayBuffer.mockResolvedValueOnce({ data: Buffer.from('test') });
-			await OSMService.getTile(zoomLevel, x, y);
-
-			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
+		test('should return tile data for valid request', async () => {
+			const tileData = new ArrayBuffer(8);
+			config.osm = { domain: 'osm.com', prefix: '/tiles', key: 'testKey' };
+			getArrayBuffer.mockResolvedValueOnce({ data: tileData });
+			const result = await OSMService.getTile('default', zoomLevel, x, y);
+			expect(result).toBe(tileData);
 			expect(getArrayBuffer).toHaveBeenCalledWith(
-				expect.stringContaining(`a.tile.openstreetmap.org/${zoomLevel}/${x}/${y}.png`),
+				`https://osm.com/tiles/${zoomLevel}/${x}/${y}.png?key=testKey`,
 			);
 		});
 
-		test('Should return OSM tile with custom config', async () => {
-			getArrayBuffer.mockResolvedValueOnce({ data: Buffer.from('test') });
-
-			config.osm = {
-				domain: generateRandomString(),
-				prefix: generateRandomString(),
-				key: generateRandomString(),
-			};
-			await OSMService.getTile(zoomLevel, x, y);
-			expect(getArrayBuffer).toHaveBeenCalledTimes(1);
-			expect(getArrayBuffer).toHaveBeenCalledWith(`https://${config.osm.domain}/${config.osm.prefix}/${zoomLevel}/${x}/${y}.png?key=${config.osm.key}`);
+		test('should throw an error if OSM config is missing', async () => {
+			config.osm = null;
+			await expect(OSMService.getTile('default', zoomLevel, x, y)).rejects.toEqual(templates.mapsRequestFailed);
+			expect(logger.logError).toHaveBeenCalled();
 		});
-		test('Should throw error if request fails', async () => {
-			getArrayBuffer.mockRejectedValueOnce(new Error('Request failed'));
-			await expect(OSMService.getTile(zoomLevel, x, y)).rejects.toEqual(templates.mapsRequestFailed);
-			expect(logger.logError).toHaveBeenCalledWith(expect.stringContaining('Failed to get OSM tile:'));
-			expect(logger.logError).toHaveBeenCalledTimes(1);
+
+		test('should throw an error if web request fails', async () => {
+			config.osm = { domain: 'osm.com', prefix: '/tiles', key: 'testKey' };
+			getArrayBuffer.mockRejectedValueOnce({ response: { data: 'Error message' } });
+			await expect(OSMService.getTile('default', zoomLevel, x, y)).rejects.toEqual(templates.mapsRequestFailed);
+			expect(logger.logError).toHaveBeenCalledWith('Failed to get OSM tile: Error message ');
+		});
+
+		test('should throw an error for invalid map type', async () => {
+			await expect(() => OSMService.getTile('invalidType', zoomLevel, x, y)).toThrow(templates.invalidArguments);
 		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
+	testGetAvailableMaps();
 	testGetTitle();
 });

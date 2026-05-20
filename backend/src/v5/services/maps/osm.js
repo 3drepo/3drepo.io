@@ -23,23 +23,35 @@ const { templates } = require('../../utils/responseCodes');
 
 const OSMService = {};
 
-OSMService.getTile = async (zoomLevel, x, y) => {
+const getDefaultTile = async (zoomLevel, x, y) => {
 	try {
-		let domain = 'a.tile.openstreetmap.org';
-		let uri = `/${zoomLevel}/${x}/${y}.png`;
+		const { domain, prefix, key } = config.osm;
+		const query = new URLSearchParams({
+			key,
+		});
+		const uri = `https://${domain}${prefix}/${zoomLevel}/${x}/${y}.png?${query.toString()}`;
 
-		if (config.osm && config.osm.domain) {
-			domain = config.osm.domain;
-			uri = `/${config.osm.prefix}/${zoomLevel}/${x}/${y}.png?key=${config.osm.key}`;
-		}
-
-		const { data } = await WebRequests.getArrayBuffer(`https://${domain}${uri}`);
+		const { data } = await WebRequests.getArrayBuffer(uri);
 
 		return data;
 	} catch (error) {
 		logger.logError(`Failed to get OSM tile: ${error?.response?.data} `);
 		throw templates.mapsRequestFailed;
 	}
+};
+
+OSMService.getAvailableMaps = () => [
+	{
+		name: 'Open Street Map',
+		layers: [
+			{ name: 'Map Tiles', source: 'OSM' },
+		],
+	},
+];
+
+OSMService.getTile = (mapType, zoomLevel, x, y) => {
+	if (mapType === 'default') return getDefaultTile(zoomLevel, x, y);
+	throw templates.invalidArguments;
 };
 
 module.exports = OSMService;

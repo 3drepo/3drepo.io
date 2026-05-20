@@ -48,7 +48,7 @@ ResponseCodes.templates = {
 	ssoRestricted: { message: 'This teamspace only accepts Single Signed On users. Please link your account with an authority.', status: 401 },
 	domainRestricted: { message: 'Your email does not belong in a domain that is accepted by this teamspace. Please contact your teamspace administrator.', status: 401 },
 	moduleUnavailable: { message: 'This module is not available in this teamspace.', status: 400 },
-	addOnUnavailable: { message: 'This add-on is not available in this teamspace.', status: 400 },
+	addOnUnavailable: { message: 'This feature is not available in this teamspace.', status: 400 },
 
 	// Project related error
 	projectNotFound: { message: 'Project not found.', status: 404 },
@@ -107,8 +107,12 @@ ResponseCodes.templates = {
 	queueConnectionError: { message: 'There was a problem connecting to the queue. Please contact support.', status: 500 },
 	queueInsertionFailed: { message: 'Failed to insert an item into the queue. Please contact support.', status: 500 },
 
+	// Configuration related
+	configurationError: { message: 'There is a problem with the system configuration. Please contact support.', status: 500 },
+
 	// MAPs related:
-	mapsRequestFailed: { message: 'Request failed to retrieve map data.', status: 400 },
+	mapsRequestFailed: { message: 'Failed to retrieve map data, please try again later.', status: 500 },
+
 };
 
 Object.keys(ResponseCodes.templates).forEach((key) => {

@@ -51,6 +51,7 @@ RoutesManager.init = (app) => {
 	// // Federations
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets', CreateAssetsRoutes(modelTypes.FEDERATION, internal));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/assets/bundles', CreateBundleRoutes(modelTypes.FEDERATION, internal));
+	app.use('/v5/teamspaces/:teamspace/projects/:project/federations/:model/maps', CreateMapsRoutes(modelTypes.FEDERATION));
 
 	// Containers
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers', CreateModelGeneralRoutes(modelTypes.CONTAINER, internal));
@@ -58,7 +59,7 @@ RoutesManager.init = (app) => {
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets', CreateAssetsRoutes(modelTypes.CONTAINER, internal));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:model/assets/bundles', CreateBundleRoutes(modelTypes.CONTAINER, internal));
 	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/metadata', CreateMetadataRoutes(internal));
-	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps', CreateMapsRoutes());
+	app.use('/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps', CreateMapsRoutes(modelTypes.CONTAINER));
 
 	if (!internal) {
 		// Auth
