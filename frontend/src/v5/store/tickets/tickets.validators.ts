@@ -20,7 +20,7 @@ import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants'
 import { nullableNumber, requiredNumber, trimmedString } from '@/v5/validation/shared/validators';
 import * as Yup from 'yup';
 import { isEmpty } from 'lodash';
-import { getEditableProperties } from './tickets.helpers';
+import { getEditableProperties, getTemplateWithoutHiddenProperties } from './tickets.helpers';
 import { ITemplate, PropertyDefinition, Viewpoint } from './tickets.types';
 
 export const MAX_TEXT_LENGTH = 120;
@@ -142,7 +142,7 @@ export const getTicketValidator = (template) => {
 
 export const getValidators = (template: ITemplate) => {
 	if (!template) return null;
-	const { properties, modules } = template;
+	const { properties, modules } = getTemplateWithoutHiddenProperties(template);
 	const validators: any = { title: getTitleValidator() };
 
 	validators.properties = propertiesValidator(properties || []);

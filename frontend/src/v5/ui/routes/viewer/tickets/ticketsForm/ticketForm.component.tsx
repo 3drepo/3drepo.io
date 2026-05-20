@@ -17,7 +17,7 @@
 import { ITemplate, ITicket, TemplateModule } from '@/v5/store/tickets/tickets.types';
 import { some } from 'lodash';
 import { Accordion } from '@controls/accordion/accordion.component';
-import { getModulePanelProps } from '@/v5/store/tickets/tickets.helpers';
+import { getModulePanelProps, getTemplateWithoutHiddenProperties } from '@/v5/store/tickets/tickets.helpers';
 import { CardContent, PanelsContainer, ModuleTitle } from './ticketsForm.styles';
 import { TicketsTopPanel } from './ticketsTopPanel/ticketsTopPanel.component';
 import { PropertiesList } from './propertiesList.component';
@@ -54,6 +54,7 @@ interface Props {
 }
 
 export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) => {
+	const visibleTemplate = getTemplateWithoutHiddenProperties(template);
 	const scrollPanelIntoView = ({ target }, isExpanding) => {
 		if (!isExpanding) return;
 		const panel = target.closest('.MuiAccordion-root');
@@ -70,13 +71,13 @@ export const TicketForm = ({ template, ticket, focusOnTitle, ...rest }: Props) =
 		<CardContent id={SCROLLBAR_ID}>
 			<TicketsTopPanel
 				title={ticket.title}
-				properties={template.properties || []}
+				properties={visibleTemplate.properties || []}
 				focusOnTitle={focusOnTitle}
 				{...rest}
 			/>
 			<PanelsContainer>
 				{
-					(template.modules || []).map((module, idx) => (
+					(visibleTemplate.modules || []).map((module, idx) => (
 						<ModulePanel
 							key={module.name || module.type}
 							module={module}
