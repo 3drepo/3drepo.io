@@ -54,6 +54,7 @@ const propOptions = createConstantMapping([
 	'availableIf',
 	'immutable',
 	'readOnlyOnUI',
+	'hiddenOnUI',
 	'unique',
 ]);
 
