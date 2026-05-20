@@ -19,7 +19,7 @@ const { src } = require('../../../../../../../../helper/path');
 
 const Maps = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/maps`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { determineTestGroup } = require('../../../../../../../../helper/services');
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);

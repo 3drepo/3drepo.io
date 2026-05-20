@@ -19,6 +19,7 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const { modelTypes } = require('../../../../../../../../src/v5/models/modelSettings.constants');
+const { determineTestGroup } = require('../../../../../../helper/utils');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateAddOns } = require(`${src}/models/teamspaceSettings`);
@@ -139,7 +140,7 @@ const testGetListOfMaps = (isInternal = false) => {
 
 			const internalCases = [
 				['the project does not exist', genRoute({ teamspace, projectId: ServiceHelper.generateRandomString(), modelId: model._id, modelType, key: users.tsAdmin.apiKey }), false, templates.projectNotFound],
-				['the container does not exist', genRoute({ teamspace, projectId: project.id, modelId: ServiceHelper.generateRandomString(), modelType, key: users.tsAdmin.apiKey }), false, modelType === modelTypes.CONTAINER ? templates.containerNotFound : templates.federationNotFound],
+				['the model does not exist', genRoute({ teamspace, projectId: project.id, modelId: ServiceHelper.generateRandomString(), modelType, key: users.tsAdmin.apiKey }), false, templates.modelNotFound],
 				['the HERE add-on is not enabled', genRoute({ teamspace: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, modelType, key: usersNoHere.tsAdmin.apiKey }), true],
 				['all the parameters are valid', genRoute({ teamspace, projectId: project.id, modelId: model._id, modelType, key: users.tsAdmin.apiKey }), true],
 			];
@@ -239,7 +240,7 @@ const testGetTiles = (isInternal = false) => {
 
 			const internalCases = [
 				['the project does not exist', genRoute({ teamspace, projectId: ServiceHelper.generateRandomString(), modelId: model._id, modelType, key: users.tsAdmin.apiKey }), false, templates.projectNotFound],
-				['the model does not exist', genRoute({ teamspace, projectId: project.id, modelId: ServiceHelper.generateRandomString(), modelType, key: users.tsAdmin.apiKey }), false, modelType === modelTypes.CONTAINER ? templates.containerNotFound : templates.federationNotFound],
+				['the model does not exist', genRoute({ teamspace, projectId: project.id, modelId: ServiceHelper.generateRandomString(), modelType, key: users.tsAdmin.apiKey }), false, templates.modelNotFound],
 				['map coordinates are invalid', genRoute({ teamspace, projectId: project.id, modelId: model._id, modelType, path: '/here/default/tiles', key: users.tsAdmin.apiKey, query: { zoomLevel: 'a', x: 2 } }), false, templates.invalidArguments, { configureHERE: true, provider: 'HERE' }],
 				['the HERE add-on is not enabled', genRoute({ teamspace: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, modelType, path: '/here/default/tiles', key: usersNoHere.tsAdmin.apiKey }), false, templates.addOnUnavailable, { configureHERE: true, provider: 'HERE' }],
 				...hereEndpoints.map(({ name, path }) => [`test for ${name} tiles - should succeed if all parameters are valid`, genRoute({ teamspace, projectId: project.id, modelId: model._id, modelType, path, key: users.tsAdmin.apiKey, query: { zoomLevel: 10, x: 2, y: 3 } }), true, {}, { configureHERE: true, provider: 'HERE' }]),
@@ -298,7 +299,7 @@ const testGetTiles = (isInternal = false) => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
 

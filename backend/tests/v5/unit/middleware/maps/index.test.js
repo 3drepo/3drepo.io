@@ -16,7 +16,8 @@
  */
 
 const { src } = require('../../../helper/path');
-const { determineTestGroup, generateRandomString } = require('../../../helper/services');
+const { determineTestGroup } = require('../../../helper/utils');
+const { generateRandomString } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/utils/config');
 const config = require(`${src}/utils/config`);

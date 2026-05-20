@@ -17,7 +17,9 @@
 
 const { src } = require('../../../../../../helper/path');
 
-const { determineTestGroup, generateRandomString, generateRandomNumber } = require('../../../../../../helper/services');
+const { determineTestGroup } = require('../../../../../../helper/utils');
+
+const { generateRandomString, generateRandomNumber } = require('../../../../../../helper/services');
 
 const Maps = require(`${src}/processors/teamspaces/projects/models/commons/maps`);
 const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);

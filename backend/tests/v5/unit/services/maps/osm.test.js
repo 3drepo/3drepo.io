@@ -17,7 +17,9 @@
 
 const { src } = require('../../../helper/path');
 
-const { determineTestGroup, generateRandomNumber } = require('../../../helper/services');
+const { determineTestGroup } = require('../../../helper/utils');
+
+const { generateRandomNumber } = require('../../../helper/services');
 
 jest.mock('../../../../../src/v5/utils/webRequests');
 const { getArrayBuffer } = require(`${src}/utils/webRequests`);
