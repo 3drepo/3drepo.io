@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup, generateRandomNumber } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, generateRandomNumber } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 

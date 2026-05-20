@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
 const fs = require('fs');
@@ -107,7 +108,7 @@ const testSingleFileUpload = () => {
 	});
 };
 
-describe('middleware/dataConverter/multer', () => {
+describe(determineTestGroup(__filename), () => {
 	testSingleImageUpload();
 	testSingleFileUpload();
 });

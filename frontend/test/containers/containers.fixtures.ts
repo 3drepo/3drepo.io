@@ -68,7 +68,7 @@ export const prepareMockStats = (overrides?: Partial<ContainerStats>): Container
 	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
 	code: faker.datatype.uuid(),
 	...overrides,
-});
+}) as unknown as ContainerStats;
 
 export const getMockStats = (container: IContainer): ContainerStats => ({
 	revisions: {
@@ -79,7 +79,8 @@ export const getMockStats = (container: IContainer): ContainerStats => ({
 	type: container.type,
 	status: container.status,
 	code: container.code,
-	unit: container.unit
+	unit: container.unit,
+	modelId: container._id,
 });
 
 export const prepareMockViews = (): View[] => {

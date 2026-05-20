@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const { CLASH_RUN_STATUS, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const ClashRuns = require(`${src}/models/clashes.runs`);
