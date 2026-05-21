@@ -154,7 +154,7 @@ export class UnityUtil {
 
 	/**
 	 * Called from Unity to retrieve joystick input.
-	 * @returns An array containing the joystick input values [leftStickX, leftStickY, rightStickX, rightStickY]
+	 * @returns An array containing the joystick input values [leftStickX, leftStickY, rightStickX, rightStickY, rightTrigger]
 	 */
 	/** @hidden */
 	private static virtualJoystickProvider: (() => [number, number, number, number, number] | null | undefined) | null = null;
@@ -2784,7 +2784,7 @@ export class UnityUtil {
 	 * represents the neutral (centred) position.
 	 *
 	 * @param fn - A provider function that returns the current joystick state
-	 * as a give-element tuple
+	 * as a five-element tuple
 	 * `[leftStickX, leftStickY, rightStickX, rightStickY, trigger]`.
 	 * Return `null` or `undefined` to indicate no input this frame.
 	 *
