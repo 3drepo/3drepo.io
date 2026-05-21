@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hereMapVariants, tileConfig } = require('./here.constants');
+const { opaqueTiles, overlayTiles, tileConfig } = require('./here.constants');
 const config = require('../../utils/config');
 const { getArrayBuffer } = require('../../utils/webRequests');
 const { logger } = require('../../utils/logger');
@@ -34,14 +34,12 @@ const generateTileURI = (domain, resource, zoomLevel, x, y, { features, style })
 	return `https://${domain}/v3/${resource}/mc/${zoomLevel}/${x}/${y}/png8?${query.toString()}`;
 };
 
-HereService.getAvailableMaps = () => hereMapVariants.map(({ name, source }) => ({
+HereService.getAvailableMaps = () => opaqueTiles.map(({ name, source }) => ({
 	name,
-	layers: [
-		{ name: source === 'HERE_AERIAL' ? 'Aerial Imagery' : 'Map Tiles', source },
-		{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-		{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
-	],
+	layers: [{ name: 'Map Tiles', source }, ...overlayTiles].map((layer) => ({ ...layer })),
 }));
+
+HereService.isValidMapType = (mapType) => !!tileConfig[mapType];
 
 HereService.getTile = async (mapType, zoomLevel, x, y) => {
 	try {

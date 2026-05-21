@@ -16,10 +16,22 @@
  */
 
 const { createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { ADD_ONS } = require('../../../../../../../models/teamspaces.constants');
+const HereService = require('../../../../../../../services/maps/here');
+const OSMService = require('../../../../../../../services/maps/osm');
+const config = require('../../../../../../../utils/config');
+const { isAddOnEnabled } = require('../../../../../../../models/teamspaceSettings');
+const { logger } = require('../../../../../../../utils/logger');
+const { mapProviders } = require('../../../../../../../services/maps/maps.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const yup = require('yup');
 
 const Maps = {};
+
+const mapServicesByProvider = {
+	[mapProviders.HERE]: HereService,
+	[mapProviders.OSM]: OSMService,
+};
 
 const mapsCoordinatesSchema = yup.object({
 	zoomLevel: yup.number().integer().min(0).required(),
@@ -27,12 +39,33 @@ const mapsCoordinatesSchema = yup.object({
 	y: yup.number().integer().min(0).required(),
 }).required();
 
-Maps.validateMapsCoordinates = async (req, res, next) => {
+const validateMapAccess = async (teamspace, mapProvider, mapType) => {
+	if (!Object.values(mapProviders).includes(mapProvider)) {
+		throw createResponseCode(templates.invalidArguments, `Unknown map provider: ${mapProvider}`);
+	}
+
+	if (!config[mapProvider]) {
+		throw createResponseCode(templates.mapsRequestFailed, `Map provider ${mapProvider} is not configured for this deployment`);
+	}
+
+	if (!mapServicesByProvider[mapProvider].isValidMapType(mapType)) {
+		throw createResponseCode(templates.invalidArguments, `Unknown map type: ${mapType}`);
+	}
+
+	if (mapProvider === mapProviders.HERE) {
+		if (await isAddOnEnabled(teamspace, ADD_ONS.HERE)) return;
+		throw templates.addOnUnavailable;
+	}
+};
+
+Maps.validateMapRequest = async (req, res, next) => {
 	try {
+		const { teamspace, mapProvider, mapType } = req.params;
+		await validateMapAccess(teamspace, mapProvider, mapType);
 		req.query = await mapsCoordinatesSchema.validate(req.query);
 		await next();
 	} catch (err) {
-		respond(req, res, createResponseCode(templates.invalidArguments, err.message));
+		respond(req, res, err?.code ? err : createResponseCode(templates.invalidArguments, err.message));
 	}
 };
 

@@ -83,7 +83,20 @@ const testGetTitle = () => {
 	});
 };
 
+const testIsValidMapType = () => {
+	describe('Is valid map type', () => {
+		test('should return true if the map type is supported', () => {
+			expect(OSMService.isValidMapType('default')).toBe(true);
+		});
+
+		test('should return false if the map type is not supported', () => {
+			expect(OSMService.isValidMapType('invalidType')).toBe(false);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetAvailableMaps();
 	testGetTitle();
+	testIsValidMapType();
 });

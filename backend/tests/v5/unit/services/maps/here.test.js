@@ -134,7 +134,21 @@ const testGetTile = () => {
 	});
 };
 
+const testIsValidMapType = () => {
+	describe('Is valid map type', () => {
+		test('should return true if the map type is supported', () => {
+			expect(HereService.isValidMapType(mapTypes.DEFAULT)).toBe(true);
+			expect(HereService.isValidMapType(mapTypes.TERRAIN)).toBe(true);
+		});
+
+		test('should return false if the map type is not supported', () => {
+			expect(HereService.isValidMapType('invalid_type')).toBe(false);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetAvailableMaps();
 	testGetTile();
+	testIsValidMapType();
 });

@@ -18,11 +18,10 @@
 const { hasReadAccessToContainer, hasReadAccessToFederation } = require('../../../../../middleware/permissions');
 const Maps = require('../../../../../processors/teamspaces/projects/models/commons/maps');
 const { Router } = require('express');
-const { hasMapProviderAccessToModel } = require('../../../../../middleware/maps');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
-const { validateMapsCoordinates } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/maps');
+const { validateMapRequest } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/maps');
 
 const getListOfMaps = async (req, res) => {
 	try {
@@ -59,7 +58,7 @@ const establishRoutes = (modelType) => {
 
 	router.get('/', hasReadAccess[modelType], getListOfMaps);
 
-	router.get('/:mapProvider/:mapType/tiles', hasReadAccess[modelType], hasMapProviderAccessToModel, validateMapsCoordinates, getTile);
+	router.get('/:mapProvider/:mapType/tiles', hasReadAccess[modelType], validateMapRequest, getTile);
 
 	return router;
 };

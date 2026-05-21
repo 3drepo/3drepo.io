@@ -27,14 +27,14 @@ router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", routeDecommissioned(
 router.get("/:model/maps/hereinfo/", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here"));
 router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/default/tiles"));
 router.get("/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/aerial/tiles"));
-router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/traffic/tiles"));
+router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", routeDecommissioned());
 router.get("/:model/maps/heretrafficflow/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/trafficflow/tiles"));
 router.get("/:model/maps/hereterrain/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/terrain/tiles"));
 router.get("/:model/maps/herehybrid/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/hybrid/tiles"));
 router.get("/:model/maps/heregrey/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/grey/tiles"));
-router.get("/:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/truck/tiles"));
+router.get("/:model/maps/heretruck/:zoomLevel/:gridx/:gridy.png", routeDecommissioned());
 router.get("/:model/maps/heretruckoverlay/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/truckoverlay/tiles"));
-router.get("/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/labeloverlay/tiles"));
+router.get("/:model/maps/herelabeloverlay/:zoomLevel/:gridx/:gridy.png", routeDecommissioned());
 router.get("/:model/maps/heretollzone/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/tollzone/tiles"));
 router.get("/:model/maps/herepoi/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/poi/tiles"));
 router.get("/:model/maps/herebuildings/:lat/:long/tile.json", routeDecommissioned());

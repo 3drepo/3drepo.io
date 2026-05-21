@@ -19,9 +19,13 @@ const WebRequests = require('../../utils/webRequests');
 
 const config = require('../../utils/config');
 const { logger } = require('../../utils/logger');
-const { templates } = require('../../utils/responseCodes');
+const { createResponseCode, templates } = require('../../utils/responseCodes');
 
 const OSMService = {};
+
+const mapTypes = {
+	DEFAULT: 'default',
+};
 
 const getDefaultTile = async (zoomLevel, x, y) => {
 	try {
@@ -49,9 +53,11 @@ OSMService.getAvailableMaps = () => [
 	},
 ];
 
+OSMService.isValidMapType = (mapType) => mapTypes.DEFAULT === mapType;
+
 OSMService.getTile = (mapType, zoomLevel, x, y) => {
-	if (mapType === 'default') return getDefaultTile(zoomLevel, x, y);
-	throw templates.invalidArguments;
+	if (mapTypes.DEFAULT === mapType) return getDefaultTile(zoomLevel, x, y);
+	throw createResponseCode(templates.invalidArguments, `Unknown map type: ${mapType}`);
 };
 
 module.exports = OSMService;

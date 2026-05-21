@@ -22,7 +22,6 @@ const HereConstants = {};
 const resources = createConstantsObject([
 	'base',
 	'flow',
-	'label',
 	'blank',
 ]);
 
@@ -35,9 +34,7 @@ const features = {
 };
 
 const styles = {
-	TRUCK_RESTRICTIONS: 'explore.day',
 	AERIAL: 'satellite.day',
-	TRAFFIC: 'logistics.day',
 	TERRAIN: 'topo.day',
 	HYBRID: 'explore.satellite.day',
 	GREY: 'lite.day',
@@ -45,75 +42,80 @@ const styles = {
 
 const BASE_URL = 'maps.hereapi.com';
 
+const mapTypes = {
+	DEFAULT: 'default',
+	AERIAL: 'aerial',
+	TRAFFIC_FLOW: 'trafficflow',
+	TERRAIN: 'terrain',
+	HYBRID: 'hybrid',
+	GREY: 'grey',
+	TRUCK_OVERLAY: 'truckoverlay',
+	TOLL_ZONE: 'tollzone',
+	POI: 'poi',
+};
+
+HereConstants.mapTypes = mapTypes;
+
+HereConstants.opaqueTiles = [
+	{ name: 'Here', mapType: mapTypes.DEFAULT, source: 'HERE' },
+	{ name: 'Here (Terrain)', mapType: mapTypes.TERRAIN, source: 'HERE_TERRAIN' },
+	{ name: 'Here (Satellite)', mapType: mapTypes.AERIAL, source: 'HERE_AERIAL' },
+	{ name: 'Here (Hybrid)', mapType: mapTypes.HYBRID, source: 'HERE_HYBRID' },
+	{ name: 'Here (Grey)', mapType: mapTypes.GREY, source: 'HERE_GREY' },
+	{ name: 'Here (Traffic Flow)', mapType: mapTypes.TRAFFIC_FLOW, source: 'HERE_TRAFFIC_FLOW' },
+	{ name: 'Here (Truck Restrictions)', mapType: mapTypes.TRUCK_OVERLAY, source: 'HERE_TRUCK_OVERLAY' },
+	{ name: 'Here (Toll Zones)', mapType: mapTypes.TOLL_ZONE, source: 'HERE_TOLL_ZONE' },
+	{ name: 'Here (POI)', mapType: mapTypes.POI, source: 'HERE_POI' },
+];
+HereConstants.overlayTiles = [
+	{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
+	{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
+];
+
 HereConstants.tileConfig = {
-	default: {
+	[mapTypes.DEFAULT]: {
 		url: BASE_URL,
 		resource: resources.base,
 	},
-	aerial: {
+	[mapTypes.AERIAL]: {
 		url: BASE_URL,
 		resource: resources.base,
 		style: styles.AERIAL,
 	},
-	traffic: {
-		url: BASE_URL,
-		resource: resources.base,
-		style: styles.TRAFFIC,
-	},
-	trafficflow: {
+	[mapTypes.TRAFFIC_FLOW]: {
 		url: HERE_TRAFFIC_DOMAIN,
 		resource: resources.flow,
 	},
-	terrain: {
-		url: BASE_URL,
-		resource: resources.base,
-		style: styles.TERRAIN,
-	},
-	hybrid: {
+	[mapTypes.HYBRID]: {
 		url: BASE_URL,
 		resource: resources.base,
 		style: styles.HYBRID,
 	},
-	grey: {
+	[mapTypes.GREY]: {
 		url: BASE_URL,
 		resource: resources.base,
 		style: styles.GREY,
 	},
-	truck: {
-		url: BASE_URL,
-		resource: resources.base,
-		style: styles.TRUCK_RESTRICTIONS,
-		features: features.VEHICLE_RESTRICTIONS,
-	},
-	truckoverlay: {
-		url: BASE_URL,
-		resource: resources.blank,
-		features: features.VEHICLE_RESTRICTIONS,
-	},
-	labeloverlay: {
-		url: BASE_URL,
-		resource: resources.label,
-	},
-	tollzone: {
+	[mapTypes.TOLL_ZONE]: {
 		url: BASE_URL,
 		resource: resources.base,
 		features: features.CONGESTION_ZONES,
 	},
-	poi: {
+	[mapTypes.POI]: {
 		url: BASE_URL,
 		resource: resources.base,
 		features: features.POI,
 	},
+	[mapTypes.TERRAIN]: {
+		url: BASE_URL,
+		resource: resources.base,
+		style: styles.TERRAIN,
+	},
+	[mapTypes.TRUCK_OVERLAY]: {
+		url: BASE_URL,
+		resource: resources.blank,
+		features: features.VEHICLE_RESTRICTIONS,
+	},
 };
-
-HereConstants.hereMapVariants = [
-	{ name: 'Here', source: 'HERE' },
-	{ name: 'Here (Terrain)', source: 'HERE_TERRAIN' },
-	{ name: 'Here (Satellite)', source: 'HERE_AERIAL' },
-	{ name: 'Here (Hybrid)', source: 'HERE_HYBRID' },
-	{ name: 'Here (Street)', source: 'HERE_STREET' },
-	{ name: 'Here (Toll Zone)', source: 'HERE_TOLL_ZONE' },
-	{ name: 'Here (POI)', source: 'HERE_POI' },
-];
 
 module.exports = HereConstants;
