@@ -92,6 +92,10 @@ const testValidateMapRequest = () => {
 				const isValidMapType = jest.spyOn(service, 'isValidMapType').mockReturnValueOnce(false);
 
 				Responder.respond.mockResolvedValueOnce();
+				configureMapProviders({
+					configureHere: mapProvider === mapProviders.HERE,
+					configureOsm: mapProvider === mapProviders.OSM,
+				});
 
 				try {
 					await Maps.validateMapRequest(req, res, next);

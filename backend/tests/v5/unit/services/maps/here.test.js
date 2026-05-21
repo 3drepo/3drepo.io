@@ -28,6 +28,7 @@ jest.mock('../../../../../src/v5/utils/config');
 const config = require(`${src}/utils/config`);
 
 const HereService = require(`${src}/services/maps/here`);
+const { mapTypes } = require(`${src}/services/maps/here.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const testGetAvailableMaps = () => {
@@ -36,44 +37,44 @@ const testGetAvailableMaps = () => {
 			const arrayOfMaps = [{ name: 'Here',
 				layers: [
 					{ name: 'Map Tiles', source: 'HERE' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
+					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
+					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
 				] },
 			{ name: 'Here (Terrain)',
 				layers: [
 					{ name: 'Map Tiles', source: 'HERE_TERRAIN' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
+					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
+					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
 				] },
 			{ name: 'Here (Satellite)',
 				layers: [
-					{ name: 'Aerial Imagery', source: 'HERE_AERIAL' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
+					{ name: 'Map Tiles', source: 'HERE_AERIAL' },
+					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
+					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
 				] },
 			{ name: 'Here (Hybrid)',
 				layers: [
 					{ name: 'Map Tiles', source: 'HERE_HYBRID' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
+					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
+					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
 				] },
-			{ name: 'Here (Street)',
+			{ name: 'Here (STREET)',
 				layers: [
-					{ name: 'Map Tiles', source: 'HERE_STREET' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
+					{ name: 'Map Tiles', source: 'HERE_GREY' },
+					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
+					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
 				] },
-			{ name: 'Here (Toll Zone)',
+			{ name: 'Here (Toll Zones)',
 				layers: [
 					{ name: 'Map Tiles', source: 'HERE_TOLL_ZONE' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
+					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
+					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
 				] },
 			{ name: 'Here (POI)',
 				layers: [
 					{ name: 'Map Tiles', source: 'HERE_POI' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
+					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
+					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
 				] },
 			];
 			const maps = HereService.getAvailableMaps();
@@ -95,8 +96,7 @@ const testGetTile = () => {
 			['tile config has features only', { mapType: 'truckoverlay', tileLayer: 'blank', queryParams: { features: 'vehicle_restrictions:active_and_inactive' } }, true, null],
 			// grey uses only style without features
 			['tile config has style only', { mapType: 'grey', tileLayer: 'base', queryParams: { style: 'lite.day' } }, true, null],
-			// truck uses both features and style
-			['tile config has both features and style', { mapType: 'truck', tileLayer: 'base', queryParams: { features: 'vehicle_restrictions:active_and_inactive', style: 'explore.day' } }, true, null],
+			['traffic flow uses the HERE traffic domain', { mapType: 'trafficflow', domain: 'traffic.maps.hereapi.com', tileLayer: 'flow' }, true, null],
 			['map type is invalid', { mapType: 'invalid_type' }, false, templates.mapsRequestFailed],
 		];
 
@@ -106,7 +106,7 @@ const testGetTile = () => {
 				config.here = { apiKey: generateRandomString() };
 			});
 
-			describe.each(tests)('', (desc, { mapType, tileLayer = 'base', queryParams = {} }, success, expectedOutput) => {
+			describe.each(tests)('', (desc, { domain = 'maps.hereapi.com', mapType, tileLayer = 'base', queryParams = {} }, success, expectedOutput) => {
 				test(`should ${success ? 'return tile data' : `throw ${expectedOutput.code}`} when ${desc}`, async () => {
 					if (success) {
 						const query = new URLSearchParams({
@@ -120,7 +120,7 @@ const testGetTile = () => {
 						expect(tile).toBe('tile data');
 						expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 						expect(getArrayBuffer).toHaveBeenCalledWith(
-							expect.stringContaining(`https://maps.hereapi.com/v3/${tileLayer}/mc/${zoomLevel}/${x}/${y}/png8?${query.toString()}`),
+							expect.stringContaining(`https://${domain}/v3/${tileLayer}/mc/${zoomLevel}/${x}/${y}/png8?${query.toString()}`),
 						);
 					} else {
 						await expect(HereService.getTile(mapType, zoomLevel, x, y)).rejects.toEqual(expectedOutput);

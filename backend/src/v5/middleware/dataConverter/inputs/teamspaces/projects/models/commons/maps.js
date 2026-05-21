@@ -21,7 +21,6 @@ const HereService = require('../../../../../../../services/maps/here');
 const OSMService = require('../../../../../../../services/maps/osm');
 const config = require('../../../../../../../utils/config');
 const { isAddOnEnabled } = require('../../../../../../../models/teamspaceSettings');
-const { logger } = require('../../../../../../../utils/logger');
 const { mapProviders } = require('../../../../../../../services/maps/maps.constants');
 const { respond } = require('../../../../../../../utils/responder');
 const yup = require('yup');

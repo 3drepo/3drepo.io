@@ -61,9 +61,7 @@ HereConstants.opaqueTiles = [
 	{ name: 'Here (Terrain)', mapType: mapTypes.TERRAIN, source: 'HERE_TERRAIN' },
 	{ name: 'Here (Satellite)', mapType: mapTypes.AERIAL, source: 'HERE_AERIAL' },
 	{ name: 'Here (Hybrid)', mapType: mapTypes.HYBRID, source: 'HERE_HYBRID' },
-	{ name: 'Here (Grey)', mapType: mapTypes.GREY, source: 'HERE_GREY' },
-	{ name: 'Here (Traffic Flow)', mapType: mapTypes.TRAFFIC_FLOW, source: 'HERE_TRAFFIC_FLOW' },
-	{ name: 'Here (Truck Restrictions)', mapType: mapTypes.TRUCK_OVERLAY, source: 'HERE_TRUCK_OVERLAY' },
+	{ name: 'Here (Street)', mapType: mapTypes.GREY, source: 'HERE_GREY' },
 	{ name: 'Here (Toll Zones)', mapType: mapTypes.TOLL_ZONE, source: 'HERE_TOLL_ZONE' },
 	{ name: 'Here (POI)', mapType: mapTypes.POI, source: 'HERE_POI' },
 ];

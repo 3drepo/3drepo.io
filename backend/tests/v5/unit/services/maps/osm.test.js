@@ -77,8 +77,9 @@ const testGetTitle = () => {
 			expect(logger.logError).toHaveBeenCalledWith('Failed to get OSM tile: Error message ');
 		});
 
-		test('should throw an error for invalid map type', async () => {
-			await expect(() => OSMService.getTile('invalidType', zoomLevel, x, y)).toThrow(templates.invalidArguments);
+		test('should throw an error for invalid map type', () => {
+			expect(() => OSMService.getTile('invalidType', zoomLevel, x, y))
+				.toThrow('Unknown map type: invalidType');
 		});
 	});
 };
