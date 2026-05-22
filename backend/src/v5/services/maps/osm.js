@@ -20,6 +20,7 @@ const WebRequests = require('../../utils/webRequests');
 
 const config = require('../../utils/config');
 const { logger } = require('../../utils/logger');
+const { mapProviders } = require('./maps.constants');
 
 const OSMService = {};
 
@@ -48,7 +49,7 @@ OSMService.getAvailableMaps = () => [
 	{
 		name: 'Open Street Maps',
 		layers: [
-			{ name: 'Map Tiles', source: 'OSM', mapType: mapTypes.DEFAULT },
+			{ name: 'Map Tiles', source: `${mapProviders.OSM}/${mapTypes.DEFAULT}` },
 		],
 	},
 ];

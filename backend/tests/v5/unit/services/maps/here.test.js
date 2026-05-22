@@ -30,17 +30,21 @@ const config = require(`${src}/utils/config`);
 
 const HereService = require(`${src}/services/maps/here`);
 const { mapTypes } = require(`${src}/services/maps/here.constants`);
+const { mapProviders } = require(`${src}/services/maps/maps.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const testGetAvailableMaps = () => {
 	describe('Get Available Maps', () => {
 		test('should return available maps with correct structure', () => {
-			const expectedMaps = opaqueTiles.map(({ name, source, mapType }) => ({
+			const expectedMaps = opaqueTiles.map(({ name, mapType }) => ({
 				name,
 				layers: [
-					{ name: 'Map Tiles', source, mapType },
+					{ name: 'Map Tiles', mapType },
 					...overlayTiles.map((data) => data),
-				],
+				].map(({ name: layerName, mapType: layerMapType }) => ({
+					name: layerName,
+					source: `${mapProviders.HERE}/${layerMapType}`,
+				})),
 			}));
 			const maps = HereService.getAvailableMaps();
 			expect(Array.isArray(maps)).toBe(true);

@@ -32,17 +32,17 @@ const mapTypes = {
 HereConstants.mapTypes = mapTypes;
 
 HereConstants.opaqueTiles = [
-	{ name: 'Here', mapType: mapTypes.DEFAULT, source: 'HERE' },
-	{ name: 'Here (Terrain)', mapType: mapTypes.TERRAIN, source: 'HERE_TERRAIN' },
-	{ name: 'Here (Satellite)', mapType: mapTypes.AERIAL, source: 'HERE_AERIAL' },
-	{ name: 'Here (Hybrid)', mapType: mapTypes.HYBRID, source: 'HERE_HYBRID' },
-	{ name: 'Here (Street)', mapType: mapTypes.GREY, source: 'HERE_GREY' },
-	{ name: 'Here (Toll Zones)', mapType: mapTypes.TOLL_ZONE, source: 'HERE_TOLL_ZONE' },
-	{ name: 'Here (POI)', mapType: mapTypes.POI, source: 'HERE_POI' },
+	{ name: 'Here', mapType: mapTypes.DEFAULT },
+	{ name: 'Here (Terrain)', mapType: mapTypes.TERRAIN },
+	{ name: 'Here (Satellite)', mapType: mapTypes.AERIAL },
+	{ name: 'Here (Hybrid)', mapType: mapTypes.HYBRID },
+	{ name: 'Here (Street)', mapType: mapTypes.GREY },
+	{ name: 'Here (Toll Zones)', mapType: mapTypes.TOLL_ZONE },
+	{ name: 'Here (POI)', mapType: mapTypes.POI },
 ];
 HereConstants.overlayTiles = [
-	{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
-	{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
+	{ name: 'Traffic Flow', mapType: mapTypes.TRAFFIC_FLOW },
+	{ name: 'Truck Restrictions', mapType: mapTypes.TRUCK_OVERLAY },
 ];
 
 module.exports = HereConstants;

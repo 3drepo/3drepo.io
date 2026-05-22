@@ -32,6 +32,7 @@ jest.mock('../../../../../src/v5/utils/config');
 const config = require(`${src}/utils/config`);
 
 const OSMService = require(`${src}/services/maps/osm`);
+const { mapProviders } = require(`${src}/services/maps/maps.constants`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 const testGetAvailableMaps = () => {
@@ -41,7 +42,7 @@ const testGetAvailableMaps = () => {
 			expect(maps).toEqual([
 				{ name: 'Open Street Maps',
 					layers: [
-						{ name: 'Map Tiles', source: 'OSM', mapType: 'default' },
+						{ name: 'Map Tiles', source: `${mapProviders.OSM}/default` },
 					],
 				},
 			]);

@@ -21,6 +21,7 @@ const { mapTypes, opaqueTiles, overlayTiles } = require('./here.constants');
 const config = require('../../utils/config');
 const { getArrayBuffer } = require('../../utils/webRequests');
 const { logger } = require('../../utils/logger');
+const { mapProviders } = require('./maps.constants');
 const { templates } = require('../../utils/responseCodes');
 
 const HereService = {};
@@ -104,9 +105,10 @@ const generateTileURI = (domain, resource, zoomLevel, x, y, mapConfig) => {
 	return `https://${domain}/v3/${resource}/mc/${zoomLevel}/${x}/${y}/png8?${query.toString()}`;
 };
 
-HereService.getAvailableMaps = () => opaqueTiles.map(({ name, source, mapType }) => ({
+HereService.getAvailableMaps = () => opaqueTiles.map(({ name, mapType }) => ({
 	name,
-	layers: [{ name: 'Map Tiles', source, mapType }, ...overlayTiles].map((layer) => ({ ...layer })),
+	layers: [{ name: 'Map Tiles', mapType }, ...overlayTiles].map(
+		({ name: layerName, mapType: layerMapType }) => ({ name: layerName, source: `${mapProviders.HERE}/${layerMapType}` })),
 }));
 
 HereService.isValidMapType = (mapType) => !!tileConfig[mapType];
