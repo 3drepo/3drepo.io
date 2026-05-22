@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 
 const { templates } = require('../../../../src/v5/utils/responseCodes');
@@ -218,7 +219,7 @@ const testUpdateRef = () => {
 	});
 };
 
-describe('models/fileRefs', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetTotalSize();
 	testGetAllRemovableEntriesByType();
 	testGetRefEntry();

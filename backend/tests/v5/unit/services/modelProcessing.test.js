@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src, modelFolder, objModel } = require('../../helper/path');
-const { determineTestGroup, generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
+const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/handler/queue');
 const Queue = require(`${src}/handler/queue`);

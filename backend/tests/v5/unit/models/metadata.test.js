@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
 
-const { determineTestGroup, generateUUID, generateRandomString, generateRandomObject } = require('../../helper/services');
+const { generateUUID, generateRandomString, generateRandomObject } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/models/metadata.rules');
 const RulesModel = require(`${src}/models/metadata.rules`);
