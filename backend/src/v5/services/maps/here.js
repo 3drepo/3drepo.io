@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { mapTypes, opaqueTiles, overlayTiles } = require('./here.constants');
-const config = require('../../utils/config');
 const { createConstantsObject, deleteIfUndefined } = require('../../utils/helper/objects');
+const { mapTypes, opaqueTiles, overlayTiles } = require('./here.constants');
+
+const config = require('../../utils/config');
 const { getArrayBuffer } = require('../../utils/webRequests');
 const { logger } = require('../../utils/logger');
 const { templates } = require('../../utils/responseCodes');
