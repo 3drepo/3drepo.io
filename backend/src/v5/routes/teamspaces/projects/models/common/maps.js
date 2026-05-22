@@ -28,7 +28,7 @@ const getListOfMaps = async (req, res) => {
 	try {
 		const { teamspace } = req.params;
 		const maps = await Maps.getListOfMaps(teamspace);
-		respond(req, res, templates.ok, maps);
+		respond(req, res, templates.ok, { maps });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

@@ -17,13 +17,17 @@
 
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
-const { src } = require('../../../../../../helper/path');
-const { modelTypes } = require('../../../../../../../../src/v5/models/modelSettings.constants');
 const { determineTestGroup } = require('../../../../../../helper/utils');
-const { deleteIfUndefined } = require('../../../../../../../../src/v5/utils/helper/objects');
-const { mapTypes } = require('../../../../../../../../src/v5/services/maps/here.constants');
-const { mapProviders } = require('../../../../../../../../src/v5/services/maps/maps.constants');
-const { mimeTypes } = require('../../../../../../../../src/v5/utils/responder');
+const { src } = require('../../../../../../helper/path');
+
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+const { mapTypes } = require(`${src}/services/maps/here.constants`);
+const { mapProviders } = require(`${src}/services/maps/maps.constants`);
+const { mimeTypes } = require(`${src}/utils/responder`);
+const { getAvailableMaps: getOSMMaps } = require(`${src}/services/maps/osm`);
+const { getAvailableMaps: getHereMaps } = require(`${src}/services/maps/here`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateAddOns } = require(`${src}/models/teamspaceSettings`);
@@ -101,6 +105,9 @@ const testGetListOfMaps = (isInternal = false) => {
 		const { teamspace, project, container, federation,
 			teamspaceNoHere, projectNoHere, containerNoHere, federationNoHere, users } = data;
 
+		const osmOnly = getOSMMaps();
+		const allMaps = [...getHereMaps(), ...osmOnly];
+
 		const generateTestCases = (modelType) => {
 			const model = modelType === modelTypes.CONTAINER ? container : federation;
 			const modelNoHere = modelType === modelTypes.CONTAINER ? containerNoHere : federationNoHere;
@@ -124,8 +131,8 @@ const testGetListOfMaps = (isInternal = false) => {
 			const commonCases = [
 				['the project does not exist', genRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 				['the model does not exist', genRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
-				['the HERE add-on is not enabled', genRoute({ ts: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, key: users.tsAdmin.apiKey }), true],
-				['all the parameters are valid', genRoute(), true],
+				['the HERE add-on is not enabled', genRoute({ ts: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, key: users.tsAdmin.apiKey }), true, osmOnly],
+				['the HERE addon is enabled', genRoute(), true, allMaps],
 			];
 
 			return isInternal ? commonCases : [...externalCases, ...commonCases];
@@ -137,8 +144,7 @@ const testGetListOfMaps = (isInternal = false) => {
 				const res = await agent.get(route).expect(expectedStatus);
 
 				if (success) {
-					expect(Array.isArray(res.body)).toEqual(true);
-					expect(res.body).toContainEqual({ name: 'Open Street Maps', layers: [{ name: 'Map Tiles', source: 'OSM', mapType: 'default' }] });
+					ServiceHelper.outOfOrderArrayEqual(res.body.maps, expectedOutput);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
@@ -162,6 +168,7 @@ const testGetTiles = (isInternal = false) => {
 
 		const generateTestData = (modelType) => {
 			const model = modelType === modelTypes.CONTAINER ? container : federation;
+			const wrongModelTypeModel = modelType === modelTypes.CONTAINER ? federation : container;
 			const modelNoHere = modelType === modelTypes.CONTAINER ? containerNoHere : federationNoHere;
 
 			const genRoute = ({
@@ -186,6 +193,7 @@ const testGetTiles = (isInternal = false) => {
 			const commonCases = [
 				['the project does not exist', genRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
 				['the model does not exist', genRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				[`the model is not a ${modelType}`, genRoute({ modelId: wrongModelTypeModel._id }), false, templates.modelNotFound],
 				['map coordinates are invalid', genRoute({ query: { x: ServiceHelper.generateRandomNumber } }), false, templates.invalidArguments],
 				...Object.values(mapTypes).map((mapType) => [`test for here ${mapType} tiles - should succeed`, genRoute({ mapProvider: mapProviders.HERE, mapType }), true]),
 				['the HERE mapType is invalid', genRoute({ mapProvider: mapProviders.HERE, mapType: ServiceHelper.generateRandomString() }), false, templates.invalidArguments],
