@@ -16,8 +16,9 @@
  */
 
 const { determineTestGroup } = require('../../../../../../../../helper/utils');
-const { generateRandomString } = require('../../../../../../../../helper/services');
+const { generateRandomNumber, generateRandomString } = require('../../../../../../../../helper/services');
 const { src } = require('../../../../../../../../helper/path');
+const { createResponseCode } = require('../../../../../../../../../../src/v5/utils/responseCodes');
 
 jest.mock('../../../../../../../../../../src/v5/models/teamspaceSettings');
 jest.mock('../../../../../../../../../../src/v5/utils/config');
@@ -25,9 +26,7 @@ jest.mock('../../../../../../../../../../src/v5/utils/logger');
 jest.mock('../../../../../../../../../../src/v5/utils/responder');
 
 const config = require(`${src}/utils/config`);
-const HereService = require(`${src}/services/maps/here`);
 const Maps = require(`${src}/middleware/dataConverter/inputs/teamspaces/projects/models/commons/maps`);
-const OSMService = require(`${src}/services/maps/osm`);
 const { mapProviders } = require(`${src}/services/maps/maps.constants`);
 const Responder = require(`${src}/utils/responder`);
 const TeamspaceSettings = require(`${src}/models/teamspaceSettings`);
@@ -54,71 +53,37 @@ const resetMapMocks = () => {
 };
 
 const testValidateMapRequest = () => {
-	describe('validateMapRequest', () => {
+	describe('Validate map request', () => {
 		const teamspace = generateRandomString();
-		const validQuery = { zoomLevel: 3, x: 10, y: 20 };
+		const validQuery = {
+			zoomLevel: Math.floor(generateRandomNumber(0, 20)),
+			x: Math.floor(generateRandomNumber(0, 1000)),
+			y: Math.floor(generateRandomNumber(0, 1000)),
+		};
 		const invalidMapProvider = generateRandomString();
 		const invalidMapType = 'traffic';
-
-		const tests = [
-			['OSM request is valid', { mapProvider: mapProviders.OSM, mapType: 'default' }, validQuery, true, null, { configureOsm: true }],
-			['HERE request is valid and the add-on is enabled', { mapProvider: mapProviders.HERE, mapType: 'default' }, validQuery, true, null, { configureHere: true }],
-			['map provider is not supported', { mapProvider: invalidMapProvider, mapType: 'default' },
-				validQuery, false, templates.invalidArguments, {}, `Unknown map provider: ${invalidMapProvider}`],
-			['OSM map type is invalid', { mapProvider: mapProviders.OSM, mapType: invalidMapType },
-				validQuery, false, templates.invalidArguments, { configureOsm: true }, `Unknown map type: ${invalidMapType}`],
-			['HERE map type is invalid', { mapProvider: mapProviders.HERE, mapType: invalidMapType },
-				validQuery, false, templates.invalidArguments, { configureHere: true }, `Unknown map type: ${invalidMapType}`],
-			['HERE is not configured', { mapProvider: mapProviders.HERE, mapType: 'default' }, validQuery, false, templates.mapsRequestFailed],
-			['OSM is not configured', { mapProvider: mapProviders.OSM, mapType: 'default' }, validQuery, false, templates.mapsRequestFailed],
-			['HERE is configured but the add-on is disabled', { mapProvider: mapProviders.HERE, mapType: 'default' }, validQuery, false, templates.addOnUnavailable, { configureHere: true, isHereEnabled: false }],
-			['access validation fails before coordinates', { mapProvider: mapProviders.HERE, mapType: 'default' }, { zoomLevel: 'abc' }, false, templates.addOnUnavailable, { configureHere: true, isHereEnabled: false }],
-			['a required coordinate is missing', { mapProvider: mapProviders.OSM, mapType: 'default' }, { zoomLevel: 3, x: 10 }, false, templates.invalidArguments, { configureOsm: true }],
-			['a coordinate is not numeric', { mapProvider: mapProviders.OSM, mapType: 'default' }, { zoomLevel: 'abc', x: 10, y: 20 }, false, templates.invalidArguments, { configureOsm: true }],
-			['a coordinate is negative', { mapProvider: mapProviders.OSM, mapType: 'default' }, { zoomLevel: -1, x: 10, y: 20 }, false, templates.invalidArguments, { configureOsm: true }],
-			['a coordinate is not an integer', { mapProvider: mapProviders.OSM, mapType: 'default' }, { zoomLevel: 3.5, x: 10, y: 20 }, false, templates.invalidArguments, { configureOsm: true }],
-		];
 
 		beforeEach(resetMapMocks);
 
 		describe.each([
-			['HERE', mapProviders.HERE, HereService],
-			['OSM', mapProviders.OSM, OSMService],
-		])('%s map type validation', (desc, mapProvider, service) => {
-			test('should delegate map type validation to the map service', async () => {
-				const req = { params: { teamspace, mapProvider, mapType: 'default' }, query: validQuery };
-				const res = {};
-				const next = jest.fn(async () => { });
-				const isValidMapType = jest.spyOn(service, 'isValidMapType').mockReturnValueOnce(false);
-
-				Responder.respond.mockResolvedValueOnce();
-				configureMapProviders({
-					configureHere: mapProvider === mapProviders.HERE,
-					configureOsm: mapProvider === mapProviders.OSM,
-				});
-
-				try {
-					await Maps.validateMapRequest(req, res, next);
-
-					expect(isValidMapType).toHaveBeenCalledTimes(1);
-					expect(isValidMapType).toHaveBeenCalledWith('default');
-					expect(next).not.toHaveBeenCalled();
-					expect(Responder.respond).toHaveBeenCalledWith(
-						req,
-						res,
-						expect.objectContaining({
-							code: templates.invalidArguments.code,
-							message: 'Unknown map type: default',
-						}),
-					);
-				} finally {
-					isValidMapType.mockRestore();
-				}
-			});
-		});
-
-		describe.each(tests)('', (desc, params, query, success, expectedOutput,
-			{ configureHere = false, configureOsm = false, isHereEnabled = true } = {}, expectedMessage) => {
+			['OSM request is valid', { mapProvider: mapProviders.OSM, mapType: 'default' }, validQuery, true],
+			['HERE request is valid and the add-on is enabled', { mapProvider: mapProviders.HERE, mapType: 'default' }, validQuery, true],
+			['map provider is not supported', { mapProvider: invalidMapProvider, mapType: 'default' },
+				validQuery, false, templates.invalidArguments, undefined, `Unknown map provider: ${invalidMapProvider}`],
+			['OSM map type is invalid', { mapProvider: mapProviders.OSM, mapType: invalidMapType },
+				validQuery, false, createResponseCode(templates.invalidArguments, `Unknown map type: ${invalidMapType}`)],
+			['HERE map type is invalid', { mapProvider: mapProviders.HERE, mapType: invalidMapType },
+				validQuery, false, createResponseCode(templates.invalidArguments, `Unknown map type: ${invalidMapType}`)],
+			['HERE is not configured', { mapProvider: mapProviders.HERE, mapType: 'default' }, validQuery, false, templates.mapsRequestFailed, { configureHere: false }],
+			['OSM is not configured', { mapProvider: mapProviders.OSM, mapType: 'default' }, validQuery, false, templates.mapsRequestFailed, { configureOsm: false }],
+			['HERE is configured but the add-on is disabled', { mapProvider: mapProviders.HERE, mapType: 'default' }, validQuery, false, templates.addOnUnavailable, { isHereEnabled: false }],
+			['access validation fails before coordinates', { mapProvider: mapProviders.HERE, mapType: 'default' }, { zoomLevel: 'abc' }, false, templates.addOnUnavailable, { isHereEnabled: false }],
+			['a required coordinate is missing', { mapProvider: mapProviders.OSM, mapType: 'default' }, { ...validQuery, y: undefined }, false, templates.invalidArguments],
+			['a coordinate is not numeric', { mapProvider: mapProviders.OSM, mapType: 'default' }, { ...validQuery, zoomLevel: 'abc' }, false, templates.invalidArguments],
+			['a coordinate is negative', { mapProvider: mapProviders.OSM, mapType: 'default' }, { ...validQuery, zoomLevel: -1 }, false, templates.invalidArguments],
+			['a coordinate is not an integer', { mapProvider: mapProviders.OSM, mapType: 'default' }, { ...validQuery, zoomLevel: 3.5 }, false, templates.invalidArguments],
+		])('', (desc, params, query, success, expectedOutput,
+			{ configureHere = true, configureOsm = true, isHereEnabled = true } = {}, expectedMessage) => {
 			test(`should ${success ? 'call next()' : `respond with ${expectedOutput.code}`} when ${desc}`, async () => {
 				const req = { params: { teamspace, ...params }, query };
 				const res = {};
@@ -142,8 +107,7 @@ const testValidateMapRequest = () => {
 					expect(Responder.respond).toHaveBeenCalledTimes(1);
 					expect(Responder.respond).toHaveBeenCalledWith(
 						req,
-						res,
-						expect.objectContaining({
+						res, expect.objectContaining({
 							code: expectedOutput.code,
 							...(expectedMessage ? { message: expectedMessage } : {}),
 						}),

@@ -19,7 +19,10 @@ const { src } = require('../../../../../../helper/path');
 
 const { determineTestGroup } = require('../../../../../../helper/utils');
 
-const { generateRandomString, generateRandomNumber } = require('../../../../../../helper/services');
+const { generateRandomString, generateRandomNumber, generateRandomObject } = require('../../../../../../helper/services');
+const { times } = require('lodash');
+const { mapProviders } = require('../../../../../../../../src/v5/services/maps/maps.constants');
+const { createResponseCode } = require('../../../../../../../../src/v5/utils/responseCodes');
 
 const Maps = require(`${src}/processors/teamspaces/projects/models/commons/maps`);
 const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
@@ -37,36 +40,31 @@ const OSMService = require(`${src}/services/maps/osm`);
 const testGetListOfMaps = () => {
 	describe('Get list of maps', () => {
 		const teamspace = generateRandomString();
-		const OSMMaps = [{ name: 'Open Street Map', layers: [{ name: 'Map Tiles', source: 'OSM' }] }];
-		const HereMaps = [
-			{ name: 'Here',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW' },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY' },
-				] },
-		];
+		const OSMMaps = times(2, () => generateRandomObject());
+		const HereMaps = times(2, () => generateRandomObject());
 		test('should return only Open Street Map if HERE add-on is not enabled', async () => {
 			TeamspaceSettings.isAddOnEnabled.mockResolvedValueOnce(false);
-			OSMService.getAvailableMaps.mockResolvedValueOnce(OSMMaps);
+			OSMService.getAvailableMaps.mockReturnValueOnce(OSMMaps);
 			const maps = await Maps.getListOfMaps(teamspace);
 			expect(maps).toEqual(OSMMaps);
 
+			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledWith(teamspace, ADD_ONS.HERE);
-			expect(OSMService.getAvailableMaps).toHaveBeenCalled();
+			expect(OSMService.getAvailableMaps).toHaveBeenCalledTimes(1);
 			expect(HereService.getAvailableMaps).not.toHaveBeenCalled();
 		});
 
 		test('should return all maps if HERE add-on is enabled and config is set', async () => {
 			TeamspaceSettings.isAddOnEnabled.mockResolvedValueOnce(true);
-			OSMService.getAvailableMaps.mockResolvedValueOnce(OSMMaps);
-			HereService.getAvailableMaps.mockResolvedValueOnce(HereMaps);
+			OSMService.getAvailableMaps.mockReturnValueOnce(OSMMaps);
+			HereService.getAvailableMaps.mockReturnValueOnce(HereMaps);
 			const maps = await Maps.getListOfMaps(teamspace);
 			expect(maps).toEqual([...OSMMaps, ...HereMaps]);
 
+			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledTimes(1);
 			expect(TeamspaceSettings.isAddOnEnabled).toHaveBeenCalledWith(teamspace, ADD_ONS.HERE);
-			expect(OSMService.getAvailableMaps).toHaveBeenCalled();
-			expect(HereService.getAvailableMaps).toHaveBeenCalled();
+			expect(OSMService.getAvailableMaps).toHaveBeenCalledTimes(1);
+			expect(HereService.getAvailableMaps).toHaveBeenCalledTimes(1);
 		});
 	});
 };
@@ -77,28 +75,25 @@ const testGetTile = () => {
 		const zoomLevel = generateRandomNumber();
 		const x = generateRandomNumber();
 		const y = generateRandomNumber();
-		test('should call HereService.getTile if map provider is HERE', () => {
-			const mapProvider = 'here';
-
-			HereService.getTile.mockReturnValueOnce('tile data');
-			const tile = Maps.getTile(mapProvider, mapType, zoomLevel, x, y);
-			expect(tile).toBe('tile data');
+		test('should call HereService.getTile if map provider is HERE', async () => {
+			const tileData = generateRandomString();
+			HereService.getTile.mockResolvedValueOnce(tileData);
+			await expect(Maps.getTile(mapProviders.HERE, mapType, zoomLevel, x, y)).resolves.toBe(tileData);
 			expect(HereService.getTile).toHaveBeenCalledWith(mapType, zoomLevel, x, y);
 		});
 
-		test('should call OSMService.getTile if map provider is OSM', () => {
-			const mapProvider = 'osm';
-
-			OSMService.getTile.mockReturnValueOnce('tile data');
-			const tile = Maps.getTile(mapProvider, mapType, zoomLevel, x, y);
-			expect(tile).toBe('tile data');
+		test('should call OSMService.getTile if map provider is OSM', async () => {
+			const tileData = generateRandomString();
+			OSMService.getTile.mockResolvedValueOnce(tileData);
+			await expect(Maps.getTile(mapProviders.OSM, mapType, zoomLevel, x, y)).resolves.toBe(tileData);
 			expect(OSMService.getTile).toHaveBeenCalledWith(mapType, zoomLevel, x, y);
 		});
 
 		test('should throw an error if map provider is invalid', () => {
-			const mapProvider = 'invalid_provider';
-
-			expect(() => Maps.getTile(mapProvider, mapType, zoomLevel, x, y)).toThrow(templates.invalidArguments);
+			const invalidProvider = generateRandomString();
+			expect(() => Maps.getTile(
+				invalidProvider, mapType, zoomLevel, x, y)).toThrow(
+				createResponseCode(templates.invalidArguments, `Invalid map provider: ${invalidProvider}`).message);
 			expect(HereService.getTile).not.toHaveBeenCalled();
 			expect(OSMService.getTile).not.toHaveBeenCalled();
 		});

@@ -20,6 +20,7 @@ const { src } = require('../../../helper/path');
 const { determineTestGroup } = require('../../../helper/utils');
 
 const { generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
+const { opaqueTiles, overlayTiles } = require('../../../../../src/v5/services/maps/here.constants');
 
 jest.mock('../../../../../src/v5/utils/webRequests');
 const { getArrayBuffer } = require(`${src}/utils/webRequests`);
@@ -34,52 +35,16 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const testGetAvailableMaps = () => {
 	describe('Get Available Maps', () => {
 		test('should return available maps with correct structure', () => {
-			const arrayOfMaps = [{ name: 'Here',
+			const expectedMaps = opaqueTiles.map(({ name, source, mapType }) => ({
+				name,
 				layers: [
-					{ name: 'Map Tiles', source: 'HERE' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
-				] },
-			{ name: 'Here (Terrain)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_TERRAIN' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
-				] },
-			{ name: 'Here (Satellite)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_AERIAL' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
-				] },
-			{ name: 'Here (Hybrid)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_HYBRID' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
-				] },
-			{ name: 'Here (STREET)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_GREY' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
-				] },
-			{ name: 'Here (Toll Zones)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_TOLL_ZONE' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
-				] },
-			{ name: 'Here (POI)',
-				layers: [
-					{ name: 'Map Tiles', source: 'HERE_POI' },
-					{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
-					{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
-				] },
-			];
+					{ name: 'Map Tiles', source, mapType },
+					...overlayTiles.map((data) => data),
+				],
+			}));
 			const maps = HereService.getAvailableMaps();
 			expect(Array.isArray(maps)).toBe(true);
-			outOfOrderArrayEqual(maps, arrayOfMaps);
+			outOfOrderArrayEqual(maps, expectedMaps);
 		});
 	});
 };
@@ -101,23 +66,20 @@ const testGetTile = () => {
 		];
 
 		const runTests = () => {
-			beforeEach(() => {
-				jest.resetAllMocks();
-				config.here = { apiKey: generateRandomString() };
-			});
-
 			describe.each(tests)('', (desc, { domain = 'maps.hereapi.com', mapType, tileLayer = 'base', queryParams = {} }, success, expectedOutput) => {
 				test(`should ${success ? 'return tile data' : `throw ${expectedOutput.code}`} when ${desc}`, async () => {
+					config.here = { apiKey: generateRandomString() };
 					if (success) {
 						const query = new URLSearchParams({
 							apiKey: config.here.apiKey,
 							...queryParams,
 						});
 
-						getArrayBuffer.mockResolvedValueOnce({ data: 'tile data' });
+						const expectedData = generateRandomString();
+						getArrayBuffer.mockResolvedValueOnce({ data: expectedData });
 
 						const tile = await HereService.getTile(mapType, zoomLevel, x, y);
-						expect(tile).toBe('tile data');
+						expect(tile).toBe(expectedData);
 						expect(getArrayBuffer).toHaveBeenCalledTimes(1);
 						expect(getArrayBuffer).toHaveBeenCalledWith(
 							expect.stringContaining(`https://${domain}/v3/${tileLayer}/mc/${zoomLevel}/${x}/${y}/png8?${query.toString()}`),
@@ -137,12 +99,13 @@ const testGetTile = () => {
 const testIsValidMapType = () => {
 	describe('Is valid map type', () => {
 		test('should return true if the map type is supported', () => {
-			expect(HereService.isValidMapType(mapTypes.DEFAULT)).toBe(true);
-			expect(HereService.isValidMapType(mapTypes.TERRAIN)).toBe(true);
+			Object.values(mapTypes).forEach((type) => {
+				expect(HereService.isValidMapType(type)).toBe(true);
+			});
 		});
 
 		test('should return false if the map type is not supported', () => {
-			expect(HereService.isValidMapType('invalid_type')).toBe(false);
+			expect(HereService.isValidMapType(generateRandomString())).toBe(false);
 		});
 	});
 };

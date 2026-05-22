@@ -15,20 +15,21 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { ADD_ONS } = require('../../../../../models/teamspaces.constants');
 const HereService = require('../../../../../services/maps/here');
 const OSMService = require('../../../../../services/maps/osm');
 const { isAddOnEnabled } = require('../../../../../models/teamspaceSettings');
 const { mapProviders } = require('../../../../../services/maps/maps.constants');
-const { templates } = require('../../../../../utils/responseCodes');
 
 const Maps = {};
 
 Maps.getListOfMaps = async (teamspace) => {
 	const hereEnabled = await isAddOnEnabled(teamspace, ADD_ONS.HERE);
+	const osmMaps = OSMService.getAvailableMaps();
 	const maps = hereEnabled
-		? [...await OSMService.getAvailableMaps(), ...await HereService.getAvailableMaps()]
-		: [...await OSMService.getAvailableMaps()];
+		? [...osmMaps, ...HereService.getAvailableMaps()]
+		: osmMaps;
 
 	return maps;
 };
@@ -40,7 +41,7 @@ Maps.getTile = (mapProvider, mapType, zoomLevel, x, y) => {
 	case mapProviders.OSM:
 		return OSMService.getTile(mapType, zoomLevel, x, y);
 	default:
-		throw templates.invalidArguments;
+		throw createResponseCode(templates.invalidArguments, `Invalid map provider: ${mapProvider}`);
 	}
 };
 

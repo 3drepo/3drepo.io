@@ -38,9 +38,9 @@ const testGetAvailableMaps = () => {
 		test('should return available maps with correct structure', () => {
 			const maps = OSMService.getAvailableMaps();
 			expect(maps).toEqual([
-				{ name: 'Open Street Map',
+				{ name: 'Open Street Maps',
 					layers: [
-						{ name: 'Map Tiles', source: 'OSM' },
+						{ name: 'Map Tiles', source: 'OSM', mapType: 'default' },
 					],
 				},
 			]);

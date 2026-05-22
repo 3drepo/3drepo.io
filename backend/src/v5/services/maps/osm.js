@@ -15,11 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../../utils/responseCodes');
 const WebRequests = require('../../utils/webRequests');
 
 const config = require('../../utils/config');
 const { logger } = require('../../utils/logger');
-const { createResponseCode, templates } = require('../../utils/responseCodes');
 
 const OSMService = {};
 
@@ -46,9 +46,9 @@ const getDefaultTile = async (zoomLevel, x, y) => {
 
 OSMService.getAvailableMaps = () => [
 	{
-		name: 'Open Street Map',
+		name: 'Open Street Maps',
 		layers: [
-			{ name: 'Map Tiles', source: 'OSM' },
+			{ name: 'Map Tiles', source: 'OSM', mapType: mapTypes.DEFAULT },
 		],
 	},
 ];

@@ -15,32 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { createConstantsObject } = require('../../utils/helper/objects');
-
 const HereConstants = {};
-
-const resources = createConstantsObject([
-	'base',
-	'flow',
-	'blank',
-]);
-
-const HERE_TRAFFIC_DOMAIN = 'traffic.maps.hereapi.com';
-
-const features = {
-	POI: 'pois:all',
-	CONGESTION_ZONES: 'congestion_zones:all',
-	VEHICLE_RESTRICTIONS: 'vehicle_restrictions:active_and_inactive',
-};
-
-const styles = {
-	AERIAL: 'satellite.day',
-	TERRAIN: 'topo.day',
-	HYBRID: 'explore.satellite.day',
-	GREY: 'lite.day',
-};
-
-const BASE_URL = 'maps.hereapi.com';
 
 const mapTypes = {
 	DEFAULT: 'default',
@@ -69,51 +44,5 @@ HereConstants.overlayTiles = [
 	{ name: 'Traffic Flow', source: 'HERE_TRAFFIC_FLOW', mapType: mapTypes.TRAFFIC_FLOW },
 	{ name: 'Truck Restrictions', source: 'HERE_TRUCK_OVERLAY', mapType: mapTypes.TRUCK_OVERLAY },
 ];
-
-HereConstants.tileConfig = {
-	[mapTypes.DEFAULT]: {
-		url: BASE_URL,
-		resource: resources.base,
-	},
-	[mapTypes.AERIAL]: {
-		url: BASE_URL,
-		resource: resources.base,
-		style: styles.AERIAL,
-	},
-	[mapTypes.TRAFFIC_FLOW]: {
-		url: HERE_TRAFFIC_DOMAIN,
-		resource: resources.flow,
-	},
-	[mapTypes.HYBRID]: {
-		url: BASE_URL,
-		resource: resources.base,
-		style: styles.HYBRID,
-	},
-	[mapTypes.GREY]: {
-		url: BASE_URL,
-		resource: resources.base,
-		style: styles.GREY,
-	},
-	[mapTypes.TOLL_ZONE]: {
-		url: BASE_URL,
-		resource: resources.base,
-		features: features.CONGESTION_ZONES,
-	},
-	[mapTypes.POI]: {
-		url: BASE_URL,
-		resource: resources.base,
-		features: features.POI,
-	},
-	[mapTypes.TERRAIN]: {
-		url: BASE_URL,
-		resource: resources.base,
-		style: styles.TERRAIN,
-	},
-	[mapTypes.TRUCK_OVERLAY]: {
-		url: BASE_URL,
-		resource: resources.blank,
-		features: features.VEHICLE_RESTRICTIONS,
-	},
-};
 
 module.exports = HereConstants;

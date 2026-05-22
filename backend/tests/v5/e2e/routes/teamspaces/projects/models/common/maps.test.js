@@ -20,6 +20,10 @@ const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 const { modelTypes } = require('../../../../../../../../src/v5/models/modelSettings.constants');
 const { determineTestGroup } = require('../../../../../../helper/utils');
+const { deleteIfUndefined } = require('../../../../../../../../src/v5/utils/helper/objects');
+const { mapTypes } = require('../../../../../../../../src/v5/services/maps/here.constants');
+const { mapProviders } = require('../../../../../../../../src/v5/services/maps/maps.constants');
+const { mimeTypes } = require('../../../../../../../../src/v5/utils/responder');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateAddOns } = require(`${src}/models/teamspaceSettings`);
@@ -32,7 +36,7 @@ const config = require(`${src}/utils/config`);
 let server;
 let agent;
 
-const generateBasicData = (modelType) => ({
+const generateBasicData = () => ({
 	users: {
 		tsAdmin: ServiceHelper.generateUserCredentials(),
 		viewer: ServiceHelper.generateUserCredentials(),
@@ -41,111 +45,90 @@ const generateBasicData = (modelType) => ({
 		projectAdmin: ServiceHelper.generateUserCredentials(),
 	},
 	teamspace: ServiceHelper.generateRandomString(),
+	teamspaceNoHere: ServiceHelper.generateRandomString(),
 	project: ServiceHelper.generateRandomProject(),
-	model: ServiceHelper.generateRandomModel({ modelType }),
+	projectNoHere: ServiceHelper.generateRandomProject(),
+	container: ServiceHelper.generateRandomModel(),
+	containerNoHere: ServiceHelper.generateRandomModel(),
+	federation: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
+	federationNoHere: ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION }),
 });
 
-const setupBasicData = async (
+const setupBasicData = async ({
 	users,
 	teamspace,
+	teamspaceNoHere,
 	project,
-	model,
-	hereEnabled = true,
-) => {
+	projectNoHere,
+	container,
+	containerNoHere,
+	federation,
+	federationNoHere,
+}) => {
 	const { tsAdmin, noProjectAccess, nobody } = users;
 
 	await ServiceHelper.db.createUser(tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+	await ServiceHelper.db.createTeamspace(teamspaceNoHere, [tsAdmin.user]);
 
 	await Promise.all([
 		ServiceHelper.db.createUser(noProjectAccess, [teamspace]),
 		ServiceHelper.db.createUser(nobody),
+		updateAddOns(teamspace, { [ADD_ONS.HERE]: true }),
+		ServiceHelper.db.createModel(teamspace, container._id, container.name, container.properties),
+		ServiceHelper.db.createModel(teamspace, federation._id, federation.name, federation.properties),
+		ServiceHelper.db.createModel(teamspaceNoHere, containerNoHere._id,
+			containerNoHere.name, containerNoHere.properties),
+		ServiceHelper.db.createModel(teamspaceNoHere, federationNoHere._id,
+			federationNoHere.name, federationNoHere.properties),
 	]);
 
-	await ServiceHelper.db.createModel(teamspace, model._id, model.name, model.properties);
-	await ServiceHelper.db.createProject(teamspace, project.id, project.name, [model._id]);
-
-	if (hereEnabled) {
-		await updateAddOns(teamspace, { [ADD_ONS.HERE]: true });
-	}
-};
-
-const genRoute = ({
-	teamspace,
-	projectId,
-	modelId,
-	modelType,
-	path = '',
-	key,
-	query,
-}) => {
-	const queryString = ServiceHelper.createQueryString({ ...query, key });
-	return `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/maps${path}${queryString}`;
+	await Promise.all([
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, federation._id]),
+		ServiceHelper.db.createProject(teamspaceNoHere, projectNoHere.id,
+			projectNoHere.name, [containerNoHere._id, federationNoHere._id]),
+	]);
 };
 
 const testGetListOfMaps = (isInternal = false) => {
 	describe('Get list of maps', () => {
-		const generateTest = (modelType) => {
-			const {
-				users,
-				teamspace,
-				project,
-				model,
-			} = generateBasicData(modelType);
-			const { users: usersNoHere,
-				teamspace: teamspaceNoHere,
-				project: projectNoHere,
-				model: modelNoHere,
-			} = generateBasicData(modelType);
+		const data = generateBasicData();
 
-			beforeAll(async () => {
-				await setupBasicData(users, teamspace, project, model, true);
-				await setupBasicData(usersNoHere, teamspaceNoHere, projectNoHere, modelNoHere, false);
-			});
+		beforeAll(async () => {
+			await setupBasicData(data);
+		});
+
+		const { teamspace, project, container, federation,
+			teamspaceNoHere, projectNoHere, containerNoHere, federationNoHere, users } = data;
+
+		const generateTestCases = (modelType) => {
+			const model = modelType === modelTypes.CONTAINER ? container : federation;
+			const modelNoHere = modelType === modelTypes.CONTAINER ? containerNoHere : federationNoHere;
+
+			const genRoute = ({
+				ts = teamspace,
+				projectId = project.id,
+				modelId = model._id,
+				key = users.tsAdmin.apiKey,
+			} = {}) => {
+				const queryString = ServiceHelper.createQueryString(deleteIfUndefined({ key }));
+				return `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/maps${queryString}`;
+			};
 
 			const externalCases = [
-				['the user does not have a valid session',
-					genRoute({
-						teamspace,
-						projectId: project.id,
-						modelId: model._id,
-						modelType,
-						key: null,
-					}),
-					false,
-					templates.notLoggedIn,
-				],
-				['the user is not a member of the teamspace',
-					genRoute({
-						teamspace,
-						projectId: project.id,
-						modelId: model._id,
-						modelType,
-						key: users.nobody.apiKey,
-					}),
-					false,
-					templates.teamspaceNotFound,
-				],
-				['the user does not have access to the container',
-					genRoute({
-						teamspace,
-						projectId: project.id,
-						modelId: model._id,
-						modelType,
-						key: users.noProjectAccess.apiKey,
-					}),
-					false,
-					templates.notAuthorized],
+				['the user does not have a valid session', genRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', genRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the container', genRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 			];
 
-			const internalCases = [
-				['the project does not exist', genRoute({ teamspace, projectId: ServiceHelper.generateRandomString(), modelId: model._id, modelType, key: users.tsAdmin.apiKey }), false, templates.projectNotFound],
-				['the model does not exist', genRoute({ teamspace, projectId: project.id, modelId: ServiceHelper.generateRandomString(), modelType, key: users.tsAdmin.apiKey }), false, templates.modelNotFound],
-				['the HERE add-on is not enabled', genRoute({ teamspace: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, modelType, key: usersNoHere.tsAdmin.apiKey }), true],
-				['all the parameters are valid', genRoute({ teamspace, projectId: project.id, modelId: model._id, modelType, key: users.tsAdmin.apiKey }), true],
+			const commonCases = [
+				['the project does not exist', genRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the model does not exist', genRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['the HERE add-on is not enabled', genRoute({ ts: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, key: users.tsAdmin.apiKey }), true],
+				['all the parameters are valid', genRoute(), true],
 			];
 
-			return isInternal ? internalCases : [...externalCases, ...internalCases];
+			return isInternal ? commonCases : [...externalCases, ...commonCases];
 		};
 
 		const runTests = (desc, route, success, expectedOutput) => {
@@ -155,147 +138,93 @@ const testGetListOfMaps = (isInternal = false) => {
 
 				if (success) {
 					expect(Array.isArray(res.body)).toEqual(true);
-					expect(res.body).toContainEqual({ name: 'Open Street Map', layers: [{ name: 'Map Tiles', source: 'OSM' }] });
+					expect(res.body).toContainEqual({ name: 'Open Street Maps', layers: [{ name: 'Map Tiles', source: 'OSM', mapType: 'default' }] });
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
 				}
 			});
 		};
 
-		describe.each(generateTest(modelTypes.CONTAINER))('Container maps - %s', runTests);
-		describe.each(generateTest(modelTypes.FEDERATION))('Federation maps - %s', runTests);
+		describe.each(generateTestCases(modelTypes.CONTAINER))('Container', runTests);
+		describe.each(generateTestCases(modelTypes.FEDERATION))('Federation', runTests);
 	});
 };
 const testGetTiles = (isInternal = false) => {
 	describe('Get tiles', () => {
-		const hereEndpoints = [
-			{ name: 'HERE default', path: '/here/default/tiles' },
-			{ name: 'HERE aerial', path: '/here/aerial/tiles' },
-			{ name: 'HERE traffic', path: '/here/traffic/tiles' },
-			{ name: 'HERE traffic flow', path: '/here/trafficflow/tiles' },
-			{ name: 'HERE terrain', path: '/here/terrain/tiles' },
-			{ name: 'HERE hybrid', path: '/here/hybrid/tiles' },
-			{ name: 'HERE grey', path: '/here/grey/tiles' },
-			{ name: 'HERE truck restrictions', path: '/here/truck/tiles' },
-			{ name: 'HERE truck restrictions overlay', path: '/here/truckoverlay/tiles' },
-			{ name: 'HERE label overlay', path: '/here/labeloverlay/tiles' },
-			{ name: 'HERE toll zone', path: '/here/tollzone/tiles' },
-			{ name: 'HERE POI', path: '/here/poi/tiles' },
-		];
+		const data = generateBasicData();
 
-		const generateTest = (modelType) => {
-			const {
-				users,
-				teamspace,
-				project,
-				model,
-			} = generateBasicData(modelType);
+		beforeAll(async () => {
+			await setupBasicData(data);
+		});
 
-			const {
-				users: usersNoHere,
-				teamspace: teamspaceNoHere,
-				project: projectNoHere,
-				model: modelNoHere,
-			} = generateBasicData(modelType);
+		const { teamspace, project, container, federation,
+			teamspaceNoHere, projectNoHere, containerNoHere, federationNoHere, users } = data;
 
-			beforeAll(async () => {
-				await setupBasicData(users, teamspace, project, model, true);
-				await setupBasicData(usersNoHere, teamspaceNoHere, projectNoHere, modelNoHere, false);
-			});
+		const generateTestData = (modelType) => {
+			const model = modelType === modelTypes.CONTAINER ? container : federation;
+			const modelNoHere = modelType === modelTypes.CONTAINER ? containerNoHere : federationNoHere;
+
+			const genRoute = ({
+				ts = teamspace,
+				projectId = project.id,
+				modelId = model._id,
+				mapProvider = mapProviders.OSM,
+				mapType = mapTypes.DEFAULT,
+				key = users.tsAdmin.apiKey,
+				query = { zoomLevel: 10, x: 2, y: 3 },
+			} = {}) => {
+				const queryString = ServiceHelper.createQueryString(deleteIfUndefined({ key, ...query }));
+				return `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/maps/${mapProvider}/${mapType}/tiles${queryString}`;
+			};
 
 			const externalCases = [
-				['the user does not have a valid session',
-					genRoute({
-						teamspace,
-						projectId: project.id,
-						modelId: model._id,
-						modelType,
-						key: null,
-					}),
-					false,
-					templates.notLoggedIn,
-				],
-				['the user is not a member of the teamspace',
-					genRoute({
-						teamspace,
-						projectId: project.id,
-						modelId: model._id,
-						modelType,
-						key: users.nobody.apiKey,
-					}),
-					false,
-					templates.teamspaceNotFound,
-				],
-				['the user does not have access to the model',
-					genRoute({
-						teamspace,
-						projectId: project.id,
-						modelId: model._id,
-						modelType,
-						key: users.noProjectAccess.apiKey,
-					}),
-					false,
-					templates.notAuthorized],
+				['the user does not have a valid session', genRoute({ key: null }), false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', genRoute({ key: users.nobody.apiKey }), false, templates.teamspaceNotFound],
+				['the user does not have access to the container', genRoute({ key: users.noProjectAccess.apiKey }), false, templates.notAuthorized],
 			];
 
-			const internalCases = [
-				['the project does not exist', genRoute({ teamspace, projectId: ServiceHelper.generateRandomString(), modelId: model._id, modelType, key: users.tsAdmin.apiKey }), false, templates.projectNotFound],
-				['the model does not exist', genRoute({ teamspace, projectId: project.id, modelId: ServiceHelper.generateRandomString(), modelType, key: users.tsAdmin.apiKey }), false, templates.modelNotFound],
-				['map coordinates are invalid', genRoute({ teamspace, projectId: project.id, modelId: model._id, modelType, path: '/here/default/tiles', key: users.tsAdmin.apiKey, query: { zoomLevel: 'a', x: 2 } }), false, templates.invalidArguments, { configureHERE: true, provider: 'HERE' }],
-				['the HERE add-on is not enabled', genRoute({ teamspace: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, modelType, path: '/here/default/tiles', key: usersNoHere.tsAdmin.apiKey }), false, templates.addOnUnavailable, { configureHERE: true, provider: 'HERE' }],
-				...hereEndpoints.map(({ name, path }) => [`test for ${name} tiles - should succeed if all parameters are valid`, genRoute({ teamspace, projectId: project.id, modelId: model._id, modelType, path, key: users.tsAdmin.apiKey, query: { zoomLevel: 10, x: 2, y: 3 } }), true, {}, { configureHERE: true, provider: 'HERE' }]),
-				['the OSM configuration is missing', genRoute({ teamspace, projectId: project.id, modelId: model._id, modelType, path: '/osm/default/tiles', key: users.tsAdmin.apiKey, query: { zoomLevel: 10, x: 2, y: 3 } }), false, templates.mapsRequestFailed, { provider: 'OSM', configureOSM: 'missing' }],
-				['the OSM mapType is invalid', genRoute({ teamspace, projectId: project.id, modelId: model._id, modelType, path: '/osm/invalid/tiles', key: users.tsAdmin.apiKey, query: { zoomLevel: 10, x: 2, y: 3 } }), false, templates.invalidArguments, { provider: 'OSM', configureOSM: 'valid' }],
-				['the HERE add-on is not enabled but the request is for OSM tiles and the OSM configuration is present', genRoute({ path: '/osm/default/tiles', teamspace: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, modelType, key: usersNoHere.tsAdmin.apiKey, query: { zoomLevel: 10, x: 2, y: 3 } }), true, {}, { provider: 'OSM', configureOSM: 'valid' }],
+			const commonCases = [
+				['the project does not exist', genRoute({ projectId: ServiceHelper.generateRandomString() }), false, templates.projectNotFound],
+				['the model does not exist', genRoute({ modelId: ServiceHelper.generateRandomString() }), false, templates.modelNotFound],
+				['map coordinates are invalid', genRoute({ query: { x: ServiceHelper.generateRandomNumber } }), false, templates.invalidArguments],
+				...Object.values(mapTypes).map((mapType) => [`test for here ${mapType} tiles - should succeed`, genRoute({ mapProvider: mapProviders.HERE, mapType }), true]),
+				['the HERE mapType is invalid', genRoute({ mapProvider: mapProviders.HERE, mapType: ServiceHelper.generateRandomString() }), false, templates.invalidArguments],
+				['the OSM mapType is invalid', genRoute({ mapProvider: mapProviders.OSM, mapType: ServiceHelper.generateRandomString() }), false, templates.invalidArguments],
+				['Unknown map provider is provided', genRoute({ mapProvider: ServiceHelper.generateRandomString() }), false, templates.invalidArguments],
+				['the HERE add-on is not enabled but the request is for OSM tiles', genRoute({ ts: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id }), true],
+				['the HERE add-on is not enabled and the request is for HERE tiles', genRoute({ ts: teamspaceNoHere, projectId: projectNoHere.id, modelId: modelNoHere._id, mapProvider: mapProviders.HERE }), false, templates.addOnUnavailable],
 			];
 
-			return isInternal ? internalCases : internalCases.concat(externalCases);
+			return isInternal ? commonCases : [...externalCases, ...commonCases];
 		};
 
-		const runTests = (desc, route, success, expectedOutput, { configureHERE = false, provider = 'HERE', configureOSM = null } = {}) => {
+		const runTests = (desc, route, success, expectedOutput) => {
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
-				if (configureHERE) {
-					config.here = {
-						apiKey: ServiceHelper.generateRandomString(),
-					};
-				}
+				config[mapProviders.HERE] = { apiKey: ServiceHelper.generateRandomString() };
+				config[mapProviders.OSM] = {
+					domain: ServiceHelper.generateRandomString(),
+					prefix: ServiceHelper.generateRandomString(),
+					key: ServiceHelper.generateRandomString(),
+				};
 
-				if (configureOSM === 'missing') {
-					config.osm = null;
-				}
-
-				if (configureOSM === 'valid') {
-					config.osm = {
-						domain: ServiceHelper.generateRandomString(),
-						prefix: ServiceHelper.generateRandomString(),
-						key: ServiceHelper.generateRandomString(),
-					};
-				}
-
-				getArrayBuffer.mockResolvedValueOnce({ data: Buffer.from('test') });
+				const bufferData = Buffer.from(ServiceHelper.generateRandomString());
+				if (success) getArrayBuffer.mockResolvedValueOnce({ data: bufferData });
 
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 				const res = await agent.get(route).expect(expectedStatus);
 
 				if (success) {
-					expect(res.headers['content-type']).toContain('image/png');
+					expect(res.headers['content-type']).toContain(mimeTypes.png);
 					expect(Buffer.isBuffer(res.body)).toEqual(true);
-					expect(res.body.length).toBeGreaterThan(0);
+					expect(res.body).toEqual(bufferData);
 				} else {
 					expect(res.body.code).toEqual(expectedOutput.code);
-					if (provider === 'OSM') {
-						expect(getArrayBuffer).not.toHaveBeenCalled();
-					}
 				}
 			});
 		};
 
-		afterEach(() => {
-			jest.restoreAllMocks();
-		});
-
-		describe.each(generateTest(modelTypes.CONTAINER))('Container maps - %s', runTests);
-		describe.each(generateTest(modelTypes.FEDERATION))('Federation maps - %s', runTests);
+		describe.each(generateTestData(modelTypes.CONTAINER))('Container', runTests);
+		describe.each(generateTestData(modelTypes.FEDERATION))('Federation', runTests);
 	});
 };
 

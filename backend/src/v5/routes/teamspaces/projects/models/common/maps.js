@@ -17,6 +17,7 @@
 
 const { hasReadAccessToContainer, hasReadAccessToFederation } = require('../../../../../middleware/permissions');
 const Maps = require('../../../../../processors/teamspaces/projects/models/commons/maps');
+const MimeTypes = require('../../../../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
@@ -41,7 +42,7 @@ const getTile = async (req, res) => {
 		const { zoomLevel, x, y } = req.query;
 		const tileData = await Maps.getTile(mapProvider, mapType, zoomLevel, x, y);
 
-		respond(req, res, templates.ok, tileData, { mimeType: 'image/png' });
+		respond(req, res, templates.ok, tileData, { mimeType: MimeTypes.PNG });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
