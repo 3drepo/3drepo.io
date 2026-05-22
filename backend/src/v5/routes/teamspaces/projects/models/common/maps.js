@@ -42,7 +42,7 @@ const getTile = async (req, res) => {
 		const { zoomLevel, x, y } = req.query;
 		const tileData = await Maps.getTile(mapProvider, mapType, zoomLevel, x, y);
 
-		respond(req, res, templates.ok, tileData, { mimeType: MimeTypes.PNG });
+		respond(req, res, templates.ok, tileData, { mimeType: MimeTypes.PNG, cache: true });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

@@ -32,7 +32,7 @@ const { getAvailableMaps: getHereMaps } = require(`${src}/services/maps/here`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { updateAddOns } = require(`${src}/models/teamspaceSettings`);
 const { ADD_ONS } = require(`${src}/models/teamspaces.constants`);
-jest.mock('../../../../../../../../src/v5/utils//webRequests');
+jest.mock('../../../../../../../../src/v5/utils/webRequests');
 const { getArrayBuffer } = require(`${src}/utils/webRequests`);
 
 const config = require(`${src}/utils/config`);

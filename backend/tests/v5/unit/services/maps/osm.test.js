@@ -19,7 +19,8 @@ const { src } = require('../../../helper/path');
 
 const { determineTestGroup } = require('../../../helper/utils');
 
-const { generateRandomNumber } = require('../../../helper/services');
+const { generateRandomNumber, generateRandomString } = require('../../../helper/services');
+const { createResponseCode } = require('../../../../../src/v5/utils/responseCodes');
 
 jest.mock('../../../../../src/v5/utils/webRequests');
 const { getArrayBuffer } = require(`${src}/utils/webRequests`);
@@ -48,8 +49,8 @@ const testGetAvailableMaps = () => {
 	});
 };
 
-const testGetTitle = () => {
-	describe('Get OSM Tile', () => {
+const testGetTile = () => {
+	describe('Get Tile', () => {
 		const zoomLevel = generateRandomNumber();
 		const x = generateRandomNumber();
 		const y = generateRandomNumber();
@@ -78,8 +79,10 @@ const testGetTitle = () => {
 		});
 
 		test('should throw an error for invalid map type', () => {
-			expect(() => OSMService.getTile('invalidType', zoomLevel, x, y))
-				.toThrow('Unknown map type: invalidType');
+			const mapType = generateRandomString();
+			const expectedErr = createResponseCode(templates.invalidArguments, `Unknown map type: ${mapType}`);
+			expect(() => OSMService.getTile(mapType, zoomLevel, x, y))
+				.toThrow(expectedErr);
 		});
 	});
 };
@@ -98,6 +101,6 @@ const testIsValidMapType = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testGetAvailableMaps();
-	testGetTitle();
+	testGetTile();
 	testIsValidMapType();
 });

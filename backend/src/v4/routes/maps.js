@@ -24,7 +24,7 @@ const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 router.get("/:model/maps/", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps"));
 router.get("/:model/maps/osm/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/osm/default/tiles"));
-router.get("/:model/maps/hereinfo/", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here"));
+router.get("/:model/maps/hereinfo/", routeDecommissioned());
 router.get("/:model/maps/here/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/default/tiles"));
 router.get("/:model/maps/hereaerial/:zoomLevel/:gridx/:gridy.png", routeDecommissioned("GET", "/v5/teamspaces/:teamspace/projects/:project/containers/:container/maps/here/aerial/tiles"));
 router.get("/:model/maps/heretraffic/:zoomLevel/:gridx/:gridy.png", routeDecommissioned());
