@@ -26,13 +26,40 @@ const { templates } = require(`${src}/utils/responseCodes`);
 
 const testCreateTestRun = () => {
 	describe('Create test run', () => {
-		test('should create a test run', async () => {
+		test('should create a test run and create an index', async () => {
 			const teamspace = generateRandomString();
 			const user = generateRandomString();
 			const plan = generateRandomObject();
 			const createFn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+			const createIndexFn = jest.spyOn(db, 'createIndex').mockResolvedValueOnce(undefined);
 
 			const _id = await ClashRuns.createTestRun(teamspace, plan, user);
+
+			expect(createIndexFn).toHaveBeenCalledTimes(1);
+			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, createdAt: -1 }, { runInBackground: true });
+
+			expect(createFn).toHaveBeenCalledTimes(1);
+			expect(createFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{
+					_id,
+					triggeredBy: user,
+					triggeredAt: createFn.mock.calls[0][2].triggeredAt,
+					status: CLASH_RUN_STATUS.PLANNED,
+					plan,
+				});
+		});
+
+		test('should create a test run and handle error if index creation fails', async () => {
+			const teamspace = generateRandomString();
+			const user = generateRandomString();
+			const plan = generateRandomObject();
+			const createFn = jest.spyOn(db, 'insertOne').mockResolvedValueOnce(undefined);
+			const createIndexFn = jest.spyOn(db, 'createIndex').mockRejectedValueOnce(new Error());
+
+			const _id = await ClashRuns.createTestRun(teamspace, plan, user);
+
+			expect(createIndexFn).toHaveBeenCalledTimes(1);
+			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, createdAt: -1 }, { runInBackground: true });
 
 			expect(createFn).toHaveBeenCalledTimes(1);
 			expect(createFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
@@ -61,6 +88,25 @@ const testCompleteTestRun = () => {
 			expect(updateFn).toHaveBeenCalledTimes(1);
 			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { _id: runId },
 				{ $set: { status: CLASH_RUN_STATUS.COMPLETED, completedAt, result: resultId } });
+		});
+	});
+};
+
+const testSetTestRunToFailed = () => {
+	describe('Set test run to failed', () => {
+		test('should set a test run to failed', async () => {
+			const teamspace = generateRandomString();
+			const runId = generateRandomString();
+			const message = generateRandomString();
+			const errorCode = generateRandomString();
+			const updateFn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await ClashRuns.setTestRunToFailed(teamspace, runId, message, errorCode);
+
+			const { timestamp } = updateFn.mock.calls[0][3].$set.errorReason;
+			expect(updateFn).toHaveBeenCalledTimes(1);
+			expect(updateFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { _id: runId },
+				{ $set: { status: CLASH_RUN_STATUS.FAILED, errorReason: { message, timestamp, errorCode } } });
 		});
 	});
 };
@@ -102,5 +148,6 @@ const testGetTestRunByQuery = () => {
 describe(determineTestGroup(__filename), () => {
 	testCreateTestRun();
 	testCompleteTestRun();
+	testSetTestRunToFailed();
 	testGetTestRunByQuery();
 });

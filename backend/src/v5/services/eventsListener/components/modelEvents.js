@@ -25,6 +25,7 @@ const { initialiseAutomatedProperties, onModelNameUpdated, onTemplateUpdated } =
 const { isFederation: isFederationCheck, newRevisionProcessed, updateModelStatus } = require('../../../models/modelSettings');
 const { modelTypes, processStatuses } = require('../../../models/modelSettings.constants');
 const { publish, subscribe } = require('../../eventsManager/eventsManager');
+const { setTestRunToFailed, updateTestRun } = require('../../../models/clashes.runs');
 const { DRAWINGS_HISTORY_COL } = require('../../../models/revisions.constants');
 const { EVENTS: chatEvents } = require('../../chat/chat.constants');
 const { createDrawingThumbnail } = require('../../../processors/teamspaces/projects/models/drawings');
@@ -42,7 +43,6 @@ const { sendSystemEmail } = require('../../mailer');
 const { serialiseComment } = require('../../../schemas/tickets/tickets.comments');
 const { serialiseGroup } = require('../../../schemas/tickets/tickets.groups');
 const { serialiseTicket } = require('../../../schemas/tickets');
-const { updateTestRun } = require('../../../models/clashes.runs');
 
 const queueStatusUpdate = async ({ teamspace, model, modelType, corId, status }) => {
 	try {
@@ -99,7 +99,11 @@ const clashRunCompleted = async ({ teamspace, corId, results, value }) => {
 		const resInfo = getInfoFromCode(value);
 		resInfo.retVal = value;
 
-		await processClashResults(teamspace, stringToUUID(corId), results, resInfo);
+		if (resInfo.success) {
+			await processClashResults(teamspace, stringToUUID(corId), results);
+		} else {
+			await setTestRunToFailed(teamspace, stringToUUID(corId), resInfo.message, resInfo.retVal);
+		}
 	} catch (err) {
 		logger.logError(`Failed to process a complete clash run for ${teamspace} with id ${corId}: ${err.message}`);
 		if (err.stack) {
