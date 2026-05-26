@@ -1337,6 +1337,10 @@ export class ViewerService {
 		UnityUtil.setClipGizmoAxisScale(scale);
 	}
 
+	public setDynamicFpsTarget(optimisation: string, target: number) {
+		UnityUtil.setDynamicFpsTarget(optimisation === 'on' ? target : 0);
+	}
+
 	public setNavigationOn() {
 		UnityUtil.setNavigationOn();
 	}

@@ -15,17 +15,18 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times } = require('lodash');
 const { Readable } = require('stream');
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID,
+const { generateRandomString, generateRandomObject, generateUUID,
 	generateUUIDString, generateRandomNumber,
 	generateRevisionEntry, generateRandomBuffer } = require('../../../../../../helper/services');
 
 const MimeTypes = require(`${src}/utils/helper/mimeTypes`);
 
-const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 
 jest.mock('../../../../../../../../src/v5/models/calibrations');
 const Calibrations = require(`${src}/models/calibrations`);
@@ -175,113 +176,19 @@ const testGetRevisions = () => {
 	});
 };
 
-const formatToStats = (settings, revCount, latestRev, calibration, latestStatus) => (deleteIfUndefined({
-	number: settings.number,
-	status: latestStatus?.status,
-	type: settings.type,
-	desc: settings.desc,
-	revisions: {
-		total: revCount,
-		lastUpdated: latestRev?.timestamp,
-		latestRevision: latestRev ? `${latestRev.statusCode}-${latestRev.revCode}` : undefined,
-	},
-	calibration,
-}));
-
 const testGetDrawingStats = () => {
 	describe('Get drawing stats', () => {
-		const teamspace = generateRandomString();
-		const project = generateRandomString();
-		const drawing = generateRandomString();
-		const revCount = generateRandomNumber();
-		const settings = {
-			number: generateRandomNumber(),
-			type: generateRandomString(),
-			desc: generateRandomString(),
-		};
-		const latestRev = {
-			_id: generateRandomString(),
-			timestamp: generateRandomString(),
-			statusCode: generateRandomString(),
-			revCode: generateRandomString(),
-		};
-
-		test('should return the drawing stats', async () => {
-			ModelSettings.getDrawingById.mockResolvedValueOnce(settings);
-			Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
-			Revisions.getLatestRevision.mockResolvedValueOnce(latestRev);
-			Revisions.getLatestRevision.mockResolvedValueOnce(latestRev);
-			CalibrationsProc.getCalibrationStatus.mockResolvedValueOnce(calibrationStatuses.CALIBRATED);
+		test('should call getMultipleDrawingsStats with the correct parameters', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const drawing = generateRandomString();
+			const spy = jest.spyOn(Drawings, 'getMultipleDrawingsStats').mockResolvedValueOnce({ [drawing]: 'stats' });
 
 			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
 
-			expect(res).toEqual(formatToStats(settings, revCount, latestRev, calibrationStatuses.CALIBRATED));
-			expect(ModelSettings.getDrawingById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getDrawingById).toHaveBeenCalledWith(teamspace, drawing,
-				{ number: 1, type: 1, desc: 1 });
-			expect(Revisions.getRevisionCount).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionCount).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
-				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
-			expect(CalibrationsProc.getCalibrationStatus).toHaveBeenCalledTimes(1);
-			expect(CalibrationsProc.getCalibrationStatus).toHaveBeenCalledWith(
-				teamspace, project, drawing, latestRev._id);
-		});
-
-		test('should return the drawing stats even if there are no revisions', async () => {
-			ModelSettings.getDrawingById.mockResolvedValueOnce(settings);
-			Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
-			Revisions.getLatestRevision.mockRejectedValueOnce(undefined);
-			Revisions.getLatestRevision.mockRejectedValueOnce(undefined);
-
-			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
-
-			expect(res).toEqual(formatToStats(settings, revCount));
-			expect(ModelSettings.getDrawingById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getDrawingById).toHaveBeenCalledWith(teamspace, drawing,
-				{ number: 1, type: 1, desc: 1 });
-			expect(Revisions.getRevisionCount).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionCount).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
-				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
-			expect(CalibrationsProc.getCalibrationStatus).not.toHaveBeenCalled();
-		});
-
-		test('!!!should return the drawing stats with a failed status if there was a failed revision', async () => {
-			const failedRev = { status: processStatuses.FAILED };
-			ModelSettings.getDrawingById.mockResolvedValueOnce(settings);
-			Revisions.getRevisionCount.mockResolvedValueOnce(revCount);
-			Revisions.getLatestRevision.mockRejectedValueOnce(undefined);
-			Revisions.getLatestRevision.mockResolvedValueOnce(failedRev);
-
-			const res = await Drawings.getDrawingStats(teamspace, project, drawing);
-
-			expect(res).toEqual(formatToStats(settings, revCount, undefined, undefined, failedRev));
-			expect(ModelSettings.getDrawingById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getDrawingById).toHaveBeenCalledWith(teamspace, drawing,
-				{ number: 1, type: 1, desc: 1 });
-			expect(Revisions.getRevisionCount).toHaveBeenCalledTimes(1);
-			expect(Revisions.getRevisionCount).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(2);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledWith(teamspace, drawing, modelTypes.DRAWING,
-				{ _id: 1, statusCode: 1, revCode: 1, timestamp: 1 });
-			expect(CalibrationsProc.getCalibrationStatus).not.toHaveBeenCalled();
-		});
-
-		test('should fail if getDrawingById fails', async () => {
-			const err = new Error(generateRandomString());
-
-			ModelSettings.getDrawingById.mockRejectedValueOnce(err);
-			await expect(Drawings.getDrawingStats(teamspace, project, drawing)).rejects.toEqual(err);
-		});
-
-		test('should fail if getRevisionCount fails', async () => {
-			const err = new Error(generateRandomString());
-
-			Revisions.getRevisionCount.mockRejectedValueOnce(err);
-			await expect(Drawings.getDrawingStats(teamspace, project, drawing)).rejects.toEqual(err);
+			expect(res).toEqual('stats');
+			expect(spy).toHaveBeenCalledTimes(1);
+			expect(spy).toHaveBeenCalledWith(teamspace, project, [drawing]);
 		});
 	});
 };
@@ -668,6 +575,141 @@ const testCreateDrawingThumbnail = () => {
 	});
 };
 
+const testGetMultipleDrawingsStats = () => {
+	describe('Get multiple drawings stats', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const drawingIds = times(3, () => generateRandomString());
+
+		const singleRevisions = drawingIds.map((id) => ({
+			...generateRevisionEntry(),
+			_id: generateUUID(),
+			statusCode: generateRandomString(),
+			revCode: generateRandomString(),
+			model: id,
+		}));
+
+		const multipleRevisions = drawingIds.map((id) => times(2, (index) => ({
+			...generateRevisionEntry(),
+			_id: generateUUID(),
+			statusCode: generateRandomString(),
+			revCode: generateRandomString(),
+			timestamp: new Date(Date.now() + index),
+			model: id,
+			status: index === 1 ? processStatuses.OK : undefined,
+		}))).flat();
+
+		const settings = drawingIds.map((id) => ({
+			_id: id,
+			number: generateRandomNumber(),
+			type: generateRandomString(),
+			desc: generateRandomString(),
+		}));
+
+		const singleRevCalibrationData = {};
+		const multipleRevCalibrationData = {};
+
+		singleRevisions.forEach((rev) => {
+			singleRevCalibrationData[rev.model] = singleRevCalibrationData[rev.model] || {};
+			singleRevCalibrationData[rev.model][UUIDToString(rev._id)] = calibrationStatuses.CALIBRATED;
+		});
+
+		// Adding an extra entry to ensure unindentified revisions are not included in the stats
+		singleRevisions.push(generateRandomObject());
+
+		multipleRevisions.forEach((rev) => {
+			multipleRevCalibrationData[rev.model] = multipleRevCalibrationData[rev.model] || {};
+			multipleRevCalibrationData[rev.model][UUIDToString(rev._id)] = calibrationStatuses.CALIBRATED;
+		});
+
+		test('should return stats for multiple drawings with one revision each', async () => {
+			Revisions.getRevisionsByQuery.mockResolvedValueOnce(singleRevisions);
+			ModelSettings.getDrawings.mockResolvedValueOnce(settings);
+			CalibrationsProc.getCalibrationStatusForAllRevsFromMultipleDrawings
+				.mockResolvedValueOnce(singleRevCalibrationData);
+
+			const expectedStats = {};
+			drawingIds.forEach((id) => {
+				const rev = singleRevisions.filter(({ model }) => model === id);
+				const setting = settings.filter(({ _id }) => _id === id)[0];
+				const calibration = singleRevCalibrationData[id]
+					? singleRevCalibrationData[id][UUIDToString(rev[0]._id)] : undefined;
+
+				expectedStats[id] = {
+					number: setting.number,
+					type: setting.type,
+					desc: setting.desc,
+					revisions: {
+						total: rev.length,
+						lastUpdated: rev[0].timestamp,
+						latestRevision: `${rev[0].statusCode}-${rev[0].revCode}`,
+					},
+					calibration,
+					status: rev[0].statusCode === processStatuses.FAILED ? processStatuses.FAILED : undefined,
+				};
+			});
+
+			const res = await Drawings.getMultipleDrawingsStats(teamspace, project, drawingIds);
+
+			expect(res).toEqual(expectedStats);
+		});
+
+		test('should return stats for drawings with no revisions', async () => {
+			Revisions.getRevisionsByQuery.mockResolvedValueOnce([]);
+			ModelSettings.getDrawings.mockResolvedValueOnce(settings);
+			CalibrationsProc.getCalibrationStatusForAllRevsFromMultipleDrawings.mockResolvedValueOnce({});
+
+			const expectedStats = {};
+			drawingIds.forEach((id) => {
+				const setting = settings.filter(({ _id }) => _id === id)[0];
+
+				expectedStats[id] = {
+					number: setting.number,
+					type: setting.type,
+					desc: setting.desc,
+					revisions: {
+						total: 0,
+					},
+				};
+			});
+
+			const res = await Drawings.getMultipleDrawingsStats(teamspace, project, drawingIds);
+
+			expect(res).toEqual(expectedStats);
+		});
+		test('should return stats for multiple drawings with multiple revisions each', async () => {
+			Revisions.getRevisionsByQuery.mockResolvedValueOnce(multipleRevisions);
+			ModelSettings.getDrawings.mockResolvedValueOnce(settings);
+			CalibrationsProc.getCalibrationStatusForAllRevsFromMultipleDrawings
+				.mockResolvedValueOnce(multipleRevCalibrationData);
+			const expectedStats = {};
+			drawingIds.forEach((id) => {
+				const revs = multipleRevisions.filter(({ model }) => model === id);
+				const setting = settings.filter(({ _id }) => _id === id)[0];
+				const calibrations = multipleRevCalibrationData[id] || {};
+
+				expectedStats[id] = {
+					number: setting.number,
+					type: setting.type,
+					desc: setting.desc,
+					revisions: {
+						total: revs.length,
+						lastUpdated: revs[revs.length - 1].timestamp,
+						latestRevision: `${revs[revs.length - 1].statusCode}-${revs[revs.length - 1].revCode}`,
+					},
+					calibration: calibrations[UUIDToString(revs[revs.length - 1]._id)],
+					status: revs[revs.length - 1].statusCode === processStatuses.FAILED
+						? processStatuses.FAILED : undefined,
+				};
+			});
+
+			const res = await Drawings.getMultipleDrawingsStats(teamspace, project, drawingIds);
+
+			expect(res).toEqual(expectedStats);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAddDrawing();
 	testUpdateSettings();
@@ -682,4 +724,5 @@ describe(determineTestGroup(__filename), () => {
 	testCreateDrawingThumbnail();
 	testGetLatestThumbnail();
 	testGetImageByRevision();
+	testGetMultipleDrawingsStats();
 });
