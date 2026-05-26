@@ -37,6 +37,7 @@ import { useSearchParam } from '../../../useSearchParam';
 import { TicketContext, TicketDetailsView } from '../ticket.context';
 import { ViewerParams } from '../../../routes.constants';
 import { CardHeader } from '@components/viewer/cards/cardHeader.component';
+import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
 
 enum IndexChange {
 	PREV = -1,
@@ -48,18 +49,20 @@ export const TicketDetailsCard = () => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
 	const isAlertOpen = DialogsHooksSelectors.selectIsAlertOpen();
 	const isFederation = modelIsFederation(containerOrFederation);
-	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 	const ticket = TicketsHooksSelectors.selectTicketById(containerOrFederation, ticketId);
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, ticket?.type);
-	const currentIndex = filteredTickets.findIndex((tckt) => tckt._id === ticket._id);
+	
+	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
+	const ticketsIds = groups.flatMap((group) => group.tickets.map((tckt) => tckt._id));
+	const currentIndex = ticketsIds.indexOf(ticketId);
 	const initialIndex = useRef(currentIndex);
-	const listLength = filteredTickets.length;
+	const listLength = ticketsIds.length;
 	const ticketWasRemoved = currentIndex === -1;
-	const disableCycleButtons = ticketWasRemoved ? listLength < 1 : listLength < 2;
+	const disableCycleButtons = listLength < 2;
 	const templateValidationSchema = getValidators(template);
 	const [,setTicketIdState] = useSearchParam('ticketId');
-
+	
 	// HACK: This is to use setTicketId in its latest version, because otherwise it will redirect with 
 	// an old url. There should be a more general fix for this.
 	const setTicketId = useRef(setTicketIdState);
@@ -72,11 +75,11 @@ export const TicketDetailsCard = () => {
 		if (ticketWasRemoved && delta === IndexChange.NEXT) {
 			index--;
 		}
-		return (index + delta) % listLength;
+		return (index + delta + listLength) % listLength;
 	};
 
 	const changeTicketIndex = (delta: IndexChange) => {
-		const updatedId = filteredTickets.at(getUpdatedIndex(delta))._id;
+		const updatedId = ticketsIds[getUpdatedIndex(delta)];
 		TicketsCardActionsDispatchers.setSelectedTicket(updatedId);
 	};
 
