@@ -222,45 +222,6 @@ const establishRoutes = (isInternal) => {
 
 		/**
 	 * @openapi
-	 * /teamspaces/{teamspace}/projects/{project}:
-	 *   patch:
-	 *     description: Edits a project
-	 *     tags: [v:external, Projects]
-	 *     operationId: updateProject
-	 *     parameters:
-	 *       - name: teamspace
-	 *         description: name of teamspace
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *       - name: project
-	 *         description: Id of the project
-	 *         in: path
-	 *         required: true
-	 *         schema:
-	 *           type: string
-	 *           format: uuid
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             properties:
-	 *               name:
-	 *                 type: string
-	 *                 description: The new name of the project
-	 *                 example: project 1
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/notLoggedIn"
-	 *       200:
-	 *         description: Update the project settings
-	 */
-		router.patch('/:project', isAdminToProject, validateProjectData, updateProject);
-
-		/**
-	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/image:
 	 *   get:
 	 *     description: Gets a project image
@@ -536,6 +497,45 @@ const establishRoutes = (isInternal) => {
 	 *
 	 */
 	router.get('/', hasAccessToTeamspace, getProjectList);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}:
+	 *   patch:
+	 *     description: Edits a project
+	 *     tags: [v:external, v:internal, Projects]
+	 *     operationId: updateProject
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Id of the project
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     requestBody:
+	 *       content:
+	 *         application/json:
+	 *           schema:
+	 *             type: object
+	 *             properties:
+	 *               name:
+	 *                 type: string
+	 *                 description: The new name of the project
+	 *                 example: project 1
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Update the project settings
+	 */
+	router.patch('/:project', isAdminToProject, validateProjectData, updateProject);
 
 	return router;
 };

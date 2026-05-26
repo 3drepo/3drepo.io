@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
 const { cloneDeep } = require('lodash');
 
 const { generateRandomString } = require('../../../../../helper/services');
@@ -104,6 +105,6 @@ const testSerialiseTicketTemplate = () => {
 	});
 };
 
-describe('middleware/dataConverter/outputs/common/tickets.templates', () => {
+describe(determineTestGroup(__filename), () => {
 	testSerialiseTicketTemplate();
 });

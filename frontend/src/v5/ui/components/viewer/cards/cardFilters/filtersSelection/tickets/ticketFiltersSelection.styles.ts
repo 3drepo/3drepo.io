@@ -18,7 +18,7 @@
 import { SearchInput as SearchInputBase } from '@controls/search/searchInput';
 import styled, { css } from 'styled-components';
 
-export const SearchInput = styled(SearchInputBase)`
+export const TicketsFiltersSearchInput = styled(SearchInputBase)`
 	margin: 0;
 	padding: 10px;
 

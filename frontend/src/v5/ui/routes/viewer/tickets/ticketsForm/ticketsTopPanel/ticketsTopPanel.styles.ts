@@ -30,7 +30,7 @@ export const TopPanel = styled.div`
 `;
 
 export const CreationInfo = styled(BaseCreationInfo)`
-	margin: 0 10px;
+	padding: 0 10px;
 `;
 
 export const DescriptionProperty = styled.div`

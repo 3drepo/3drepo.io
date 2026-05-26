@@ -20,4 +20,9 @@ const Constants = {};
 // flag set in api service to bypass authentication/authorisation checks - This should only be enabled in internal facing environments
 Constants.BYPASS_AUTH = 'bypassAuth';
 
+Constants.FileStorageTypes = {
+	FS: 'fs',
+	EXTERNAL_FS: 'externalFS',
+};
+
 module.exports = Constants;

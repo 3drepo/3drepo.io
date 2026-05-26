@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
-const { determineTestGroup, generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
+const { generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
 
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
@@ -30,6 +31,9 @@ const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { DEFAULT_OWNER_JOB } = require(`${src}/models/jobs.constants`);
 
 const Teamspaces = require(`${src}/processors/teamspaces`);
+
+jest.mock('../../../../../src/v5/models/invitations');
+const InvitationsMock = require(`${src}/models/invitations`);
 
 jest.mock('../../../../../src/v5/processors/users');
 const Users = require(`${src}/processors/users`);
@@ -89,19 +93,26 @@ const testGetTeamspaceListByUser = () => {
 				{ name: generateRandomString(), isAdmin: true },
 				{ name: generateRandomString(), isAdmin: false },
 			];
+			const frontEggData = goldenData
+				.map(({ name }) => ({ name, refId: generateRandomString() }))
+				.concat({ name: generateRandomString(), refId: generateRandomString() });
 			const userId = generateRandomString();
 			const username = generateRandomString();
 
 			UsersModel.getUserId.mockResolvedValueOnce(userId);
 
 			FronteggService.getAccountsByUser.mockResolvedValueOnce(
-				times(goldenData.length + 1, () => generateRandomString()));
+				frontEggData.map(({ refId }) => refId));
 
 			goldenData.forEach(({ name }) => {
 				FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(name);
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(
+					frontEggData.find(({ name: n }) => n === name).refId,
+				);
 			});
 
 			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(undefined);
+
 			Permissions.isTeamspaceAdmin.mockImplementation(
 				(ts) => goldenData.find(({ name }) => name === ts).isAdmin);
 
@@ -115,6 +126,43 @@ const testGetTeamspaceListByUser = () => {
 			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
 
 			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(goldenData.length + 1);
+		});
+		test('should return empty array if the refIds do not match', async () => {
+			const goldenData = [
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: false },
+			];
+
+			const frontEggData = goldenData.map(({ name }) => ({ name, refId: generateRandomString() }));
+			const refIds = goldenData.map(({ name }) => ({ name, refId: generateRandomString() }));
+			const userId = generateRandomString();
+			const username = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.getAccountsByUser.mockResolvedValueOnce(
+				frontEggData.map(({ refId }) => refId));
+			goldenData.forEach(({ name }) => {
+				FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(name);
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(
+					refIds.find(({ name: n }) => n === name).refId,
+				);
+				Permissions.isTeamspaceAdmin.mockResolvedValueOnce(
+					goldenData.find(({ name: n }) => n === name).isAdmin);
+			});
+
+			const res = await Teamspaces.getTeamspaceListByUser(username);
+			expect(res).toEqual([]);
+
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledWith(userId);
+
+			expect(UsersModel.getUserId).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
+
+			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(goldenData.length);
 		});
 		test('Should return undefined if unknown error occured', async () => {
 			const userId = generateRandomString();
@@ -222,9 +270,10 @@ const testInitTeamspace = () => {
 			FronteggService.createAccount.mockResolvedValueOnce(teamspaceId);
 			FronteggService.getUserById.mockResolvedValueOnce(true);
 			TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
+			UsersModel.getUserByUsernameOrEmail.mockResolvedValueOnce({ user: username });
 			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { email } });
 
-			await Teamspaces.initTeamspace(teamspace, username);
+			await Teamspaces.initTeamspace(teamspace, email);
 
 			expect(FronteggService.createAccount).toHaveBeenCalledTimes(1);
 			expect(FronteggService.createAccount).toHaveBeenCalledWith(teamspace);
@@ -232,6 +281,8 @@ const testInitTeamspace = () => {
 			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
 			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
 
+			expect(UsersModel.getUserByUsernameOrEmail).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsernameOrEmail).toHaveBeenCalledWith(email);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, expect.any(Object));
 
@@ -253,6 +304,7 @@ const testInitTeamspace = () => {
 			expect(FronteggService.addUserToAccount).toHaveBeenCalledWith(teamspaceId, email, ' ', undefined);
 			expect(TeamspacesModel.grantAdminToUser).toHaveBeenCalledTimes(1);
 			expect(TeamspacesModel.grantAdminToUser).toHaveBeenCalledWith(teamspace, username);
+			expect(InvitationsMock.inviteUserAsAdmin).not.toHaveBeenCalled();
 		});
 
 		test('should initialize a teamspace and use the provided accountId if it exists', async () => {
@@ -261,19 +313,18 @@ const testInitTeamspace = () => {
 			const email = generateRandomString();
 			const teamspaceId = generateRandomString();
 
-			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(generateRandomString());
 			FronteggService.getUserById.mockResolvedValueOnce(true);
 			TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(teamspaceId);
 			UsersModel.getUserByUsername.mockResolvedValueOnce({ customData: { email } });
+			UsersModel.getUserByUsernameOrEmail.mockResolvedValueOnce({ user: username });
 
-			await Teamspaces.initTeamspace(teamspace, username, teamspaceId);
-
-			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(1);
-			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledWith(teamspaceId);
+			await Teamspaces.initTeamspace(teamspace, email, teamspaceId);
 
 			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledTimes(1);
 			expect(TeamspacesModel.getTeamspaceRefId).toHaveBeenCalledWith(teamspace);
 
+			expect(UsersModel.getUserByUsernameOrEmail).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsernameOrEmail).toHaveBeenCalledWith(email);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledTimes(1);
 			expect(UsersModel.getUserByUsername).toHaveBeenCalledWith(username, expect.any(Object));
 
@@ -295,48 +346,22 @@ const testInitTeamspace = () => {
 			expect(FronteggService.addUserToAccount).toHaveBeenCalledWith(teamspaceId, email, ' ', undefined);
 			expect(TeamspacesModel.grantAdminToUser).toHaveBeenCalledTimes(1);
 			expect(TeamspacesModel.grantAdminToUser).toHaveBeenCalledWith(teamspace, username);
-		});
-
-		test(`should throw an error of "${templates.teamspaceNotFound.message}" if accountId provided but not found`, async () => {
-			const username = generateRandomString();
-			const teamspace = generateRandomString();
-			const teamspaceId = generateRandomString();
-
-			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(undefined);
-
-			await expect(Teamspaces.initTeamspace(teamspace, username, teamspaceId))
-				.rejects.toEqual(templates.teamspaceNotFound);
-
-			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(1);
-			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledWith(teamspaceId);
-
-			expect(TeamspacesModel.getTeamspaceRefId).not.toHaveBeenCalled();
-
-			expect(UsersModel.getUserByUsername).not.toHaveBeenCalled();
-
-			expect(RolesModel.createTeamspaceRole).not.toHaveBeenCalled();
-			expect(JobsModel.addDefaultJobs).not.toHaveBeenCalled();
-
-			expect(TeamspacesModel.createTeamspaceSettings).not.toHaveBeenCalled();
-			expect(JobsModel.assignUserToJob).not.toHaveBeenCalled();
-			expect(TemplatesModel.addDefaultTemplates).not.toHaveBeenCalled();
-
-			expect(RolesModel.grantTeamspaceRoleToUser).not.toHaveBeenCalled();
-			expect(FronteggService.addUserToAccount).not.toHaveBeenCalled();
-			expect(TeamspacesModel.grantAdminToUser).not.toHaveBeenCalled();
+			expect(InvitationsMock.inviteUserAsAdmin).not.toHaveBeenCalled();
 		});
 
 		test('should not call any owner functions if an owner is not provided', async () => {
 			const teamspace = generateRandomString();
 			const teamspaceId = generateRandomString();
+			const email = generateRandomString();
 
-			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(generateRandomString());
+			UsersModel.getUserByUsernameOrEmail.mockRejectedValueOnce(templates.userNotFound);
+
 			FronteggService.getUserById.mockResolvedValueOnce(true);
 
-			await Teamspaces.initTeamspace(teamspace, undefined, teamspaceId);
+			await Teamspaces.initTeamspace(teamspace, email, teamspaceId);
 
-			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(1);
-			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledWith(teamspaceId);
+			expect(UsersModel.getUserByUsernameOrEmail).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserByUsernameOrEmail).toHaveBeenCalledWith(email);
 
 			expect(RolesModel.createTeamspaceRole).toHaveBeenCalledTimes(1);
 			expect(RolesModel.createTeamspaceRole).toHaveBeenCalledWith(teamspace);
@@ -352,10 +377,41 @@ const testInitTeamspace = () => {
 			expect(RolesModel.grantTeamspaceRoleToUser).not.toHaveBeenCalled();
 			expect(FronteggService.addUserToAccount).not.toHaveBeenCalled();
 			expect(TeamspacesModel.grantAdminToUser).not.toHaveBeenCalled();
+
+			expect(InvitationsMock.inviteUserAsAdmin).toHaveBeenCalledTimes(1);
+			expect(InvitationsMock.inviteUserAsAdmin).toHaveBeenCalledWith(teamspace, email);
+		});
+
+		test('should create invite for the owner if they are not already a member of the platform', async () => {
+			const teamspace = generateRandomString();
+			const teamspaceId = generateRandomString();
+
+			FronteggService.getUserById.mockResolvedValueOnce(true);
+
+			await Teamspaces.initTeamspace(teamspace, undefined, teamspaceId);
+
+			expect(UsersModel.getUserByUsernameOrEmail).not.toHaveBeenCalled();
+
+			expect(RolesModel.createTeamspaceRole).toHaveBeenCalledTimes(1);
+			expect(RolesModel.createTeamspaceRole).toHaveBeenCalledWith(teamspace);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledTimes(1);
+			expect(JobsModel.addDefaultJobs).toHaveBeenCalledWith(teamspace);
+
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledTimes(1);
+			expect(TeamspacesModel.createTeamspaceSettings).toHaveBeenCalledWith(teamspace, teamspaceId);
+			expect(JobsModel.assignUserToJob).not.toHaveBeenCalled();
+			expect(TemplatesModel.addDefaultTemplates).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.addDefaultTemplates).toHaveBeenCalledWith(teamspace);
+
+			expect(RolesModel.grantTeamspaceRoleToUser).not.toHaveBeenCalled();
+			expect(FronteggService.addUserToAccount).not.toHaveBeenCalled();
+			expect(TeamspacesModel.grantAdminToUser).not.toHaveBeenCalled();
+
+			expect(InvitationsMock.inviteUserAsAdmin).not.toHaveBeenCalled();
 		});
 
 		test('should initialize a teamspace even if an error is thrown ', async () => {
-			RolesModel.createTeamspaceRole.mockRejectedValueOnce(templates.unknown);
+			UsersModel.getUserByUsernameOrEmail.mockRejectedValueOnce(templates.unknown);
 			await expect(Teamspaces.initTeamspace(generateRandomString(), generateRandomString()))
 				.rejects.toEqual(templates.unknown);
 		});
@@ -609,6 +665,9 @@ const testRemoveTeamspace = () => {
 
 			expect(FronteggService.removeAccount).toHaveBeenCalledTimes(1);
 			expect(FronteggService.removeAccount).toHaveBeenCalledWith(teamspaceId);
+
+			expect(InvitationsModel.removeAllInvitationsByTeamspace).toHaveBeenCalledTimes(1);
+			expect(InvitationsModel.removeAllInvitationsByTeamspace).toHaveBeenCalledWith(teamspace);
 		});
 		test('Should remove the teamspace but not the associated account', async () => {
 			const teamspaceId = generateRandomString();
@@ -662,6 +721,8 @@ const testRemoveTeamspace = () => {
 			expect(DB.dropDatabase).toHaveBeenCalledWith(teamspace);
 
 			expect(FronteggService.removeAccount).not.toHaveBeenCalled();
+			expect(InvitationsModel.removeAllInvitationsByTeamspace).toHaveBeenCalledTimes(1);
+			expect(InvitationsModel.removeAllInvitationsByTeamspace).toHaveBeenCalledWith(teamspace);
 		});
 	});
 };

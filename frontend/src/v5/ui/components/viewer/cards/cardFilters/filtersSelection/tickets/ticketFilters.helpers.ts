@@ -31,10 +31,9 @@ import { SelectOption } from '@/v5/helpers/form.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
 import { selectStatusConfigByTemplateId } from '@/v5/store/tickets/tickets.selectors';
 import { TicketStatusTypes, TreatmentStatuses } from '@controls/chip/chip.types';
-import { IUser } from '@/v5/store/users/users.redux';
-import { toDictionary } from '@/v5/helpers/toDictionary.helper';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { FALSE_LABEL, TRUE_LABEL } from '@controls/inputs/booleanSelect/booleanSelect.component';
+import { findByName, findModuleByNameOrType } from '@/v5/store/tickets/tickets.helpers';
 
 export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'template': TemplateIcon,
@@ -55,11 +54,17 @@ export const TYPE_TO_ICON: Record<TicketFilterType, any> = {
 	'number': NumberIcon,
 };
 
+const filterTypeIsValid = (type: string): type is TicketFilterType => Object.keys(TYPE_TO_ICON).includes(type);
+
 export const arrToDisplayValue = (arr: any[]) => arr.join(', ');
 export const valueToDisplayDate = (value) => formatSimpleDate(new Date(value));
 export const formatDateRange = ([from, to]) => formatMessage(
 	{ defaultMessage: '{from} to {to}', id: 'cardFilter.dateRange.join' },
 	{ from: valueToDisplayDate(from), to: valueToDisplayDate(to) },
+);
+export const formatNumberRange = ([from, to]) => formatMessage(
+	{ defaultMessage: '{from} to {to}', id: 'cardFilter.numberRange.join' },
+	{ from, to },
 );
 
 
@@ -138,9 +143,11 @@ const valueToQueryValueFormat = (value, operator: TicketFilterOperator) => {
 
 const filterToQueryElement = ({ filter: { operator, values }, ...moduelPropertyAndType }: TicketFilter) => {
 	const query = [getFilterPropertyAsQuery(moduelPropertyAndType), operator];
+	
 	if (values?.length) {
 		query.push(values?.map((v) => valueToQueryValueFormat(v, operator)).join(','));
 	}
+
 	return query.join('::');
 };
 export const filtersToQuery = (filters: TicketFilter[]) => {
@@ -178,6 +185,7 @@ const getNonCompletedTicketFiltersByStatus = (templates: ITemplate[], containerO
 		.map((v) => v.name);
 
 	const values = uniq(completedValueNames);
+	if (!values.length) return null;
 
 	return {
 		module: '',
@@ -203,9 +211,8 @@ const getNonCompletedTicketFiltersBySafetibase = (): TicketFilter => ({
 });
 
 export const getNonCompletedTicketFilters = (templates:ITemplate[], containerOrFederation:string): TicketFilter[] => {
-	let filters = [getNonCompletedTicketFiltersByStatus(templates, containerOrFederation)];
+	let filters = compact([getNonCompletedTicketFiltersByStatus(templates, containerOrFederation)]);
 	const hasSafetibase = templates.some((t) => t?.modules?.some((module) => module.type === 'safetibase'));
-	
 	if (hasSafetibase) {
 		filters.push(getNonCompletedTicketFiltersBySafetibase());
 	}
@@ -235,32 +242,63 @@ const escapeString = (str: string) => str.replaceAll('.', '\\.').replaceAll(',',
 
 const unescapeString = (str: string) => str.replaceAll('\\.', '.').replaceAll('\\,', ',').replaceAll('\\:', ':');
 
-const findByName = (propOrModule: (PropertyDefinition | TemplateModule)[], name:string) =>
-	propOrModule?.find((p) => p.name === name);
-
-const findModuleByNameOrType = (templateModules: TemplateModule[], nameOrtype: string) => 
-	templateModules.find((t) => t.name === nameOrtype || t.type === nameOrtype); 
-
 const findPropertyDefinitionByFilter = (ticketFilter: Partial<TicketFilter>, template:ITemplate) => {
 	const propertiesDefinitions = (findModuleByNameOrType(template.modules, ticketFilter.module) as TemplateModule)?.properties || template.properties;
 	return (findByName(propertiesDefinitions, ticketFilter.property) || findByName(propertiesDefinitions, ticketFilter.type)) as PropertyDefinition;
 };
 
-export class InvalidPropertyOrTemplateError extends Error {
-	constructor(propertyname: string, type: string, templateName: string) {
+export class InvalidPropertyError extends Error {
+	constructor(propertyname: string, type: TicketFilterType) {
 		// Need to pass `options` as the second parameter to install the "cause" property.
-		super('There was an error deserializing the filter the property "' + propertyname + '" of type "' + type + '" for the template "' + templateName + '"');
-		this.name = 'InvalidPropertyOrTemplateError';
+		super('There was an error deserializing the filter the property "' + propertyname + '" of type "' + type);
+		this.name = 'InvalidPropertyError';
 	}
 }
+
+const getPropertyDefs = (
+	templates: ITemplate[], module: string, property: string, type: TicketFilterType, jobsAndUsers: any, riskCategories: string[]) => {
+	const values: any[] = [];
+	const displayValues: string[] = [];
+	let propertyExists = false;
+	if (type === 'template') {
+		return {
+			values: templates.map((t) => t.code),
+			displayValues: templates.map((t) => t.name),
+		};
+	}
+
+	templates.forEach((template) => {
+		const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
+		let propertyValues = propertyDef?.values;
+		let propertyDisplayValues = propertyDef?.values;
+		if (propertyValues === 'jobsAndUsers' || type === 'owner') {
+			// @ts-ignore
+			propertyValues = Object.values(jobsAndUsers).map((ju) => ju?.user || ju?._id);
+			// @ts-ignore
+			propertyDisplayValues = Object.values(jobsAndUsers).map((ju) => ju?.user ? getFullnameFromUser(ju) : ju?._id);
+		}
+		if (propertyValues === 'riskCategories') {
+			propertyValues = riskCategories;
+			propertyDisplayValues = riskCategories;
+		}
+		if (propertyDef) {
+			propertyExists = true;
+		}
+		values.push(...(propertyValues || []));
+		displayValues.push(...(propertyDisplayValues || []));
+	});
+	if (!propertyExists && !isBaseProperty(type)) throw (new InvalidPropertyError(property, type)); 
+	return { values: uniq(values), displayValues: uniq(displayValues) };
+};
 
 // NOTE: serialization assumes there are no name clashes: that means 
 // that one name refers to one property. Eg: lets say theres a property 'number of nodes' serialization
 // assumes theres only one 'number of nodes'. In practical terms this means that serialization works 
 // assuming the filters are for one template in particular
-export const serializeFilter = (template: ITemplate, riskCategories: string[], ticketFilter: TicketFilter) => {
+export const serializeFilter = (templates: ITemplate[],  ticketFilter: TicketFilter, jobsAndUsers: any, riskCategories: string[]) => {
 	const t = TicketFilterOperatorEnum[ticketFilter.filter.operator];
 	let values = ticketFilter.filter.values;
+	const propertyDefs = getPropertyDefs(templates, ticketFilter.module, ticketFilter.property, ticketFilter.type, jobsAndUsers, riskCategories);
 
 	let filterKey = [ticketFilter.module, ticketFilter.property, ticketFilter.type].join('.');
 
@@ -275,26 +313,14 @@ export const serializeFilter = (template: ITemplate, riskCategories: string[], t
 		};
 
 		serializedValues = values.map(serializeValue).join(',');
-		
-		if (['oneOf', 'manyOf', 'status'].includes(ticketFilter.type)) {
-		
-			const propertyDef = findPropertyDefinitionByFilter(ticketFilter, template);
-			if (!propertyDef && !isBaseProperty(ticketFilter.type) ) {
-				throw (new InvalidPropertyOrTemplateError(ticketFilter.property, ticketFilter.type, template.name));
+		if (isSelectType(ticketFilter.type)) {
+			if (!propertyDefs.values.length) {
+				throw (new InvalidPropertyError(ticketFilter.property, ticketFilter.type));
 			}
 
-			let options = propertyDef.values;
-
-			if (options !== 'jobsAndUsers') {
-				if (options === 'riskCategories') {
-					options = riskCategories;
-				}
-				
-				const indexes = values.map((val) => options.indexOf(val as any));
-				serializedValues = indexes.join(',');
-			}
+			const indexes = values.map((val) => propertyDefs.values.indexOf(val as any));
+			serializedValues = indexes.join(',');
 		}
-
 		serialized.push(serializedValues);
 	}
 
@@ -320,47 +346,35 @@ export const splitByNonEscaped = (str: string, char) =>  {
 	return res;
 };
 
-export const deserializeFilter = (template:ITemplate, users: IUser[], riskCategories: string[], str: string): TicketFilter => {
-	const userByUserName = toDictionary(users, (u) => u.user);
+export const deserializeFilter = (templates:ITemplate[], str: string, jobsAndUsers: any, riskCategories: string[]): TicketFilter => {
 	const [serialisedFields, serializedOperator, serialisedValue] = splitByNonEscaped(str, ':');
 
 	let [module, property, type] = serialisedFields.split('.') as [string, string, TicketFilterType];
 
-	const propertyDef = findPropertyDefinitionByFilter({ module, property, type }, template);
+	const propertyDefs = getPropertyDefs(templates, module, property, type, jobsAndUsers, riskCategories);
 
 	let filter: BaseFilter = {
 		operator: TicketFilterOperatorEnum[serializedOperator].toString() as TicketFilterOperator,
 		values: undefined,
 	};
-
-	if (!isBaseProperty(type) && (!propertyDef || propertyDef.type !== type) ) {
-		throw (new InvalidPropertyOrTemplateError(property, type, template.name));
-	}
-
-	if (['manyOf', 'oneOf'].includes(propertyDef?.type) || type === 'owner') {
-		if (propertyDef?.values === 'jobsAndUsers' || type === 'owner' ) {
-			filter.values = splitByNonEscaped(serialisedValue, ',');
-			filter.displayValues = arrToDisplayValue((filter.values as string[]).map((u) => {
-				if (userByUserName[u]) return getFullnameFromUser(userByUserName[u]);
-				return u;
-			}));
-		} else {
-			const options = propertyDef.values === 'riskCategories' ? riskCategories : propertyDef.values;
-			const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
-			filter.values = indexes.filter((i) => options[i]).map((i) => options[i]);
-			filter.displayValues = arrToDisplayValue(filter.values);
-			if (!filter.values) {
-				throw (new InvalidPropertyOrTemplateError(property, type, template.name));
-			}
+	if (!filter.operator || !filterTypeIsValid(type)) throw (new InvalidPropertyError(property, type));
+	if (isSelectType(type)) {
+		if (!propertyDefs.values.length) {
+			throw (new InvalidPropertyError(property, type));
 		}
+		const indexes = splitByNonEscaped(serialisedValue, ',').map((indexStr) => parseInt(indexStr, 10));
+		filter.values = indexes.filter((i) => propertyDefs.values[i]).map((i) => propertyDefs.values[i]);
+		filter.displayValues = arrToDisplayValue(indexes.filter((i) => propertyDefs.displayValues[i]).map((i) => propertyDefs.displayValues[i]));
 	}
 
 	if (isDateType(type)) {
 		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
-				
+
 		if (filter.operator === 'rng' || filter.operator === 'nrng') {
 			filter.values = chunk(filter.values, 2) as [ValueType, ValueType] [];
 			filter.displayValues = arrToDisplayValue(filter.values.map(formatDateRange));
+		} else if (filter.operator === 'ex' || filter.operator === 'nex') {
+			filter.values = [];
 		} else {
 			filter.displayValues = arrToDisplayValue(filter.values.map(valueToDisplayDate));
 		}
@@ -372,8 +386,13 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 	}
 
 	if (type === 'number') {
-		filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
-		filter.displayValues = arrToDisplayValue(filter.values);
+		if (filter.operator === 'rng' || filter.operator === 'nrng') {
+			filter.values = chunk(serialisedValue.split(','), 2) as [ValueType, ValueType] [];
+			filter.displayValues = arrToDisplayValue(filter.values.map(formatNumberRange));
+		} else {
+			filter.values = splitByNonEscaped(serialisedValue, ',').map((v) => parseInt(v, 10));
+			filter.displayValues = arrToDisplayValue(filter.values);
+		}
 	}
 
 	if (isTextType(type)) {
@@ -382,4 +401,16 @@ export const deserializeFilter = (template:ITemplate, users: IUser[], riskCatego
 	}
 
 	return { module, property, type, filter };
+};
+
+export const deserializeURLFilters = (templates:ITemplate[], str: string, jobsAndUsers: any, riskCategories: string[]): TicketFilter[] => {
+	return JSON.parse(str).map((urlFilter) => {
+		try {
+			return deserializeFilter(templates, urlFilter, jobsAndUsers, riskCategories);
+		} catch (error) {
+			console.error('Error parsing the url filter param');
+			console.error(error);
+			return undefined;
+		}
+	}).filter(Boolean);
 };

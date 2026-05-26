@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
 
-const { determineTestGroup, generateRandomString } = require('../../../../../helper/services');
+const { generateRandomString } = require('../../../../../helper/services');
 
 jest.mock('../../../../../../../src/v5/services/sso/frontegg/components/connections');
 const Connections = require(`${src}/services/sso/frontegg/components/connections`);
@@ -42,6 +43,46 @@ const CacheService = require(`${src}/services/sso/frontegg/components/cacheServi
 
 CacheService.getCached.mockImplementation((key, fetchFn) => fetchFn());
 CacheService.generateKey.mockReturnValue(generateRandomString());
+
+const testDoesAccountExist = () => {
+	describe('Does account exist', () => {
+		test('Should return true if it does', async () => {
+			WebRequests.get.mockResolvedValueOnce({
+				data: {},
+			});
+
+			const accountId = generateRandomString();
+
+			await expect(Accounts.doesAccountExist(accountId)).resolves.toBeTruthy();
+
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			const url = WebRequests.get.mock.calls[0][0];
+			expect(url.includes(accountId)).toBeTruthy();
+		});
+
+		test('Should return false if anything went wrong', async () => {
+			WebRequests.get.mockRejectedValueOnce({ message: generateRandomString() });
+
+			const accountId = generateRandomString();
+
+			await expect(Accounts.doesAccountExist(accountId)).resolves.toBeFalsy();
+
+			expect(Connections.getConfig).toHaveBeenCalledTimes(1);
+			expect(Connections.getBearerHeader).toHaveBeenCalledTimes(1);
+
+			expect(WebRequests.get).toHaveBeenCalledTimes(1);
+			expect(WebRequests.get).toHaveBeenCalledWith(expect.any(String), bearerHeader);
+
+			const url = WebRequests.get.mock.calls[0][0];
+			expect(url.includes(accountId)).toBeTruthy();
+		});
+	});
+};
 
 const testGetTeamspaceByAccount = () => {
 	describe('Get teamspace by account', () => {
@@ -659,7 +700,12 @@ const testGetClaimedDomains = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
 	testGetTeamspaceByAccount();
+	testDoesAccountExist();
 	testCreateAccount();
 	testGetAllUsersInAccount();
 	testAddUserToAccount();

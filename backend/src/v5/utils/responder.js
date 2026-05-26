@@ -110,7 +110,7 @@ Responder.respond = (req, res, resCode, body, { cache, customHeaders, mimeType =
 	}
 };
 
-Responder.writeStreamRespond = (req, res, resCode, readStream, fileName, fileSize, { encoding, mimeType } = {}) => {
+Responder.writeStreamRespond = (req, res, resCode, readStream, { fileName, fileSize, encoding, mimeType } = {}) => {
 	const headers = {
 		'Content-Length': fileSize,
 	};

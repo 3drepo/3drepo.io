@@ -15,16 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
 const { src, modelFolder, objModel } = require('../../../../../helper/path');
 const {
-	determineTestGroup,
 	generateRandomString,
-	generateUUIDString,
-} = require('../../../../../helper/services');
+	generateUUIDString } = require('../../../../../helper/services');
 
 const fs = require('fs/promises');
 const path = require('path');
 const CryptoJs = require('crypto-js');
+const { times } = require('lodash');
 
 jest.mock('../../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
@@ -173,7 +173,7 @@ Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
 	throw templates.legendNotFound;
 });
 
-Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
+// Revisions.getRevisionCount.mockImplementation((teamspace, container) => (container === 'container2' ? 10 : 0));
 Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 	if (container === 'container2') return container2Rev;
 	throw templates.revisionNotFound;
@@ -204,34 +204,25 @@ jest.mock('../../../../../../../src/v5/utils/permissions', () => ({
 	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
 }));
 
-const determineResults = (username) => modelList.flatMap(({ permissions, _id, name }) => {
-	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
+const determineResults = (username, bypass) => modelList.flatMap(({ permissions, _id, name }) => {
+	const isAdmin = bypass || username === 'projAdmin' || username === 'tsAdmin';
 	const hasModelPerm = permissions && permissions.find((entry) => entry.user === username);
-	const isFavourite = username === 'user1' && user1Favourites.includes(_id);
+	const isFavourite = !bypass && username === 'user1' && user1Favourites.includes(_id);
 	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
 });
 
 const testGetContainerList = () => {
-	describe('Get container list by user', () => {
-		test('should return the whole list if the user is a teamspace admin', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'tsAdmin');
-			expect(res).toEqual(determineResults('tsAdmin'));
-		});
-		test('should return the whole list if the user is a project admin', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'projAdmin');
-			expect(res).toEqual(determineResults('projAdmin'));
-		});
-		test('should return a partial list if the user has model access in some containers', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'user1');
-			expect(res).toEqual(determineResults('user1'));
-		});
-		test('should return a partial list if the user has model access in some containers (2)', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'user2');
-			expect(res).toEqual(determineResults('user2'));
-		});
-		test('should return empty array if the user has no access', async () => {
-			const res = await Containers.getContainerList('teamspace', 'xxx', 'nobody');
-			expect(res).toEqual([]);
+	describe.each([
+		['the whole list if auth bypassed', undefined, true],
+		['the whole list if the user is a teamspace admin', 'tsAdmin', false],
+		['the whole list if the user is a project admin', 'projAdmin', false],
+		['a partial list if the user has model access in some containers', 'user1', false],
+		['a partial list if the user has model access in some containers (2)', 'user2', false],
+		['an empty list if the user has no access', 'nobody', false],
+	])('Get container list by user', (desc, username, bypass) => {
+		test(`should return ${desc}`, async () => {
+			const res = await Containers.getContainerList('teamspace', 'xxx', username, bypass);
+			expect(res).toEqual(determineResults(username, bypass));
 		});
 	});
 };
@@ -290,8 +281,8 @@ const formatToStats = (settings, revCount, latestRev) => {
 		unit: settings.properties.unit,
 		revisions: {
 			total: revCount,
-			lastUpdated: latestRev.timestamp,
-			latestRevision: latestRev.tag || latestRev._id,
+			lastUpdated: latestRev?.timestamp,
+			latestRevision: latestRev?.tag || latestRev?._id,
 		},
 	};
 
@@ -302,6 +293,8 @@ const formatToStats = (settings, revCount, latestRev) => {
 };
 
 const testGetContainerStats = () => {
+	const revisions = (revCount) => times(
+		revCount, () => ({ _id: generateUUIDString(), tag: generateRandomString(), timestamp: new Date() }));
 	describe.each([
 		['the container exists and have no revisions', 'container1'],
 		['the container exists and have revisions', 'container2'],
@@ -309,8 +302,11 @@ const testGetContainerStats = () => {
 		['the container exists and some previous revision processing have failed', 'container4'],
 	])('Get container stats', (desc, container) => {
 		test(`should return the stats if ${desc}[${container}]`, async () => {
+			const revs = revisions(container === 'container1' ? 0 : 5);
+			ModelSettings.getContainers.mockResolvedValueOnce([{ ...containerSettings[container], _id: container }]);
+			Revisions.getRevisions.mockResolvedValueOnce(revs);
 			const res = await Containers.getContainerStats('teamspace', 'project', container);
-			expect(res).toEqual(formatToStats(containerSettings[container], container === 'container2' ? 10 : 0, container === 'container2' ? container2Rev : {}));
+			expect(res).toEqual(formatToStats(containerSettings[container], revs.length, revs[0]));
 		});
 	});
 };
@@ -428,6 +424,15 @@ const testNewRevision = () => {
 			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
 			await expect(Containers.newRevision(teamspace, model, data, file)).resolves.toBe(undefined);
 			await expect(fileExists(fileCreated)).resolves.toBe(false);
+			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
+		});
+
+		test('should not remove the file if readOnly is set to true', async () => {
+			await fs.copyFile(objModel, fileCreated);
+			ModelSettings.getContainerById.mockResolvedValueOnce({ properties: { unit: 'm' } });
+			await expect(Containers.newRevision(teamspace, model, data,
+				{ ...file, readOnly: true })).resolves.toBe(undefined);
+			await expect(fileExists(fileCreated)).resolves.toBe(true);
 			expect(QueueHandler.queueMessage).toHaveBeenCalledTimes(1);
 		});
 
@@ -553,6 +558,38 @@ const testGetMD5Hash = () => {
 	});
 };
 
+const testGetMultipleContainersStats = () => {
+	describe('Get multiple container stats', () => {
+		test('should return stats for multiple containers', async () => {
+			const teamspace = generateRandomString();
+			const containers = ['container1', 'container2', 'container3'];
+			const containersData = containers.map((container) => ({
+				_id: containerSettings[container]._id,
+				name: containerSettings[container].name,
+				type: containerSettings[container].type,
+				properties: containerSettings[container].properties,
+				status: containerSettings[container].status,
+				errorReason: containerSettings[container].errorReason,
+			}));
+
+			ModelSettings.getContainers.mockResolvedValueOnce(containersData);
+			Revisions.getRevisions
+				.mockResolvedValueOnce([])
+				.mockResolvedValueOnce([container2Rev, ...times(9, {})])
+				.mockResolvedValueOnce([]);
+
+			const res = await Containers.getMultipleContainersStats(teamspace, project, containers);
+			expect(res).toEqual({
+				1: formatToStats(containerSettings.container1, 0, {}),
+				2: formatToStats(containerSettings.container2, 10, container2Rev),
+				3: formatToStats(containerSettings.container3, 0, {}),
+			});
+			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
+			expect(Revisions.getRevisions).toHaveBeenCalledTimes(containers.length);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetContainerList();
 	testGetContainerStats();
@@ -566,4 +603,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdateRevisionStatus();
 	testDownloadRevisionFiles();
 	testGetMD5Hash();
+	testGetMultipleContainersStats();
 });

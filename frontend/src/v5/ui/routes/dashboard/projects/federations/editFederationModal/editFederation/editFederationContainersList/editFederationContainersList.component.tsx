@@ -148,7 +148,6 @@ export const EditFederationContainers = ({
 					</DashboardListHeaderLabel>
 				</DashboardListHeader>
 				<DashboardList>
-
 					{!isEmpty(sortedList) ? (
 						<VirtualList items={sortedList} itemHeight={81} ItemComponent={
 							(container, index) => (

@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { getContainerById, getDrawingById, getFederationById } = require('../../../models/modelSettings');
 const {
+	checkModelsExists,
 	hasAdminAccessToContainer,
 	hasAdminAccessToDrawing,
 	hasAdminAccessToFederation,
@@ -25,6 +25,9 @@ const {
 	hasReadAccessToContainer,
 	hasReadAccessToDrawing,
 	hasReadAccessToFederation,
+	hasReadAccessToMultipleContainers,
+	hasReadAccessToMultipleDrawings,
+	hasReadAccessToMultipleFederations,
 	hasWriteAccessToContainer,
 	hasWriteAccessToDrawing,
 	hasWriteAccessToFederation,
@@ -32,38 +35,30 @@ const {
 const { BYPASS_AUTH } = require('../../../utils/config.constants');
 const { getUserFromSession } = require('../../../utils/sessions');
 const { modelTypes } = require('../../../models/modelSettings.constants');
-const { modelsExistInProject } = require('../../../models/projectSettings');
 const { respond } = require('../../../utils/responder');
 const { templates } = require('../../../utils/responseCodes');
 
 const ModelPerms = {};
 
-const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
-	const { session, params } = req;
+const permissionsCheckTemplate = (type, callback, multipleModels = false) => async (req, res, next) => {
+	const { session, params, models } = req;
 	const user = getUserFromSession(session);
 	const { teamspace, project, model } = params;
 
 	try {
-		let getModelFn;
+		const modelsToCheck = multipleModels ? models : [model];
+		const modelsDefined = multipleModels ? models?.length : model;
 
-		if (type === modelTypes.CONTAINER) {
-			getModelFn = getContainerById;
-		} else if (type === modelTypes.FEDERATION) {
-			getModelFn = getFederationById;
-		} else {
-			getModelFn = getDrawingById;
-		}
-
-		await getModelFn(teamspace, model, { permissions: 1 });
-
-		if (!await modelsExistInProject(teamspace, project, [model])) {
+		if (!modelsDefined || !await checkModelsExists(teamspace, project, modelsToCheck, type)) {
 			throw templates.modelNotFound;
 		}
 
-		if (req.app.get(BYPASS_AUTH) || await callback(teamspace, project, model, user, true)) {
-			next();
+		if (req.app.get(BYPASS_AUTH)
+		|| await callback(teamspace, project, multipleModels ? models : model, user, true)
+		) {
+			await next();
 		} else {
-			respond(req, res, templates.notAuthorized);
+			throw templates.notAuthorized;
 		}
 	} catch (err) {
 		respond(req, res, err);
@@ -71,16 +66,22 @@ const permissionsCheckTemplate = (type, callback) => async (req, res, next) => {
 };
 
 ModelPerms.hasReadAccessToContainer = permissionsCheckTemplate(modelTypes.CONTAINER, hasReadAccessToContainer);
+ModelPerms.hasReadAccessToMultipleContainers = permissionsCheckTemplate(modelTypes.CONTAINER,
+	hasReadAccessToMultipleContainers, true);
 ModelPerms.hasWriteAccessToContainer = permissionsCheckTemplate(modelTypes.CONTAINER, hasWriteAccessToContainer);
 ModelPerms.hasCommenterAccessToContainer = permissionsCheckTemplate(
 	modelTypes.CONTAINER, hasCommenterAccessToContainer);
 ModelPerms.hasAdminAccessToContainer = permissionsCheckTemplate(modelTypes.CONTAINER, hasAdminAccessToContainer);
 
 ModelPerms.hasReadAccessToDrawing = permissionsCheckTemplate(modelTypes.DRAWING, hasReadAccessToDrawing);
+ModelPerms.hasReadAccessToMultipleDrawings = permissionsCheckTemplate(modelTypes.DRAWING,
+	hasReadAccessToMultipleDrawings, true);
 ModelPerms.hasWriteAccessToDrawing = permissionsCheckTemplate(modelTypes.DRAWING, hasWriteAccessToDrawing);
 ModelPerms.hasAdminAccessToDrawing = permissionsCheckTemplate(modelTypes.DRAWING, hasAdminAccessToDrawing);
 
 ModelPerms.hasReadAccessToFederation = permissionsCheckTemplate(modelTypes.FEDERATION, hasReadAccessToFederation);
+ModelPerms.hasReadAccessToMultipleFederations = permissionsCheckTemplate(
+	modelTypes.FEDERATION, hasReadAccessToMultipleFederations, true);
 ModelPerms.hasWriteAccessToFederation = permissionsCheckTemplate(modelTypes.FEDERATION, hasWriteAccessToFederation);
 ModelPerms.hasCommenterAccessToFederation = permissionsCheckTemplate(
 	modelTypes.FEDERATION, hasCommenterAccessToFederation);

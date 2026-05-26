@@ -152,7 +152,8 @@ const getTicketResource = (isFed) => async (req, res) => {
 			resource,
 		);
 
-		writeStreamRespond(req, res, templates.ok, readStream, UUIDToString(resource), size, { mimeType });
+		writeStreamRespond(req, res, templates.ok, readStream,
+			{ fileName: UUIDToString(resource), fileSize: size, mimeType });
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);

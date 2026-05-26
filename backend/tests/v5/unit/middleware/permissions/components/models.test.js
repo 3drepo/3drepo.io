@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
-const { determineTestGroup, generateRandomString } = require('../../../../helper/services');
+const { generateRandomString } = require('../../../../helper/services');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { isBool } = require(`${src}/utils/helper/typeCheck`);
@@ -26,12 +27,6 @@ const Responder = require(`${src}/utils/responder`);
 
 jest.mock('../../../../../../src/v5/utils/permissions');
 const Permissions = require(`${src}/utils/permissions`);
-
-jest.mock('../../../../../../src/v5/models/modelSettings');
-const ModelSettings = require(`${src}/models/modelSettings`);
-
-jest.mock('../../../../../../src/v5/models/projectSettings');
-const ProjectSettings = require(`${src}/models/projectSettings`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
@@ -59,7 +54,12 @@ Permissions.hasReadAccessToFederation.mockImplementation(mockImp);
 Permissions.hasWriteAccessToFederation.mockImplementation(mockImp);
 Permissions.hasCommenterAccessToFederation.mockImplementation(mockImp);
 
-const testHelper = (type, label, testFn, mockedFn) => {
+Permissions.hasReadAccessToMultipleContainers.mockImplementation(mockImp);
+Permissions.hasReadAccessToMultipleDrawings.mockImplementation(mockImp);
+Permissions.hasReadAccessToMultipleFederations.mockImplementation(mockImp);
+
+const testHelper = (type, label, testFn, mockedFn, multipleModels = false) => {
+	const multipleModelsTest = multipleModels ? [['models not in request', false, { mockVal: null, multipleModelsFail: true }, templates.modelNotFound]] : [];
 	describe.each([
 		['user has access', true, { }],
 		['byPass is enabled', true, { mockVal: null, byPass: true }],
@@ -67,22 +67,23 @@ const testHelper = (type, label, testFn, mockedFn) => {
 		[`${label} threw ${templates.projectNotFound.code}`, false, { mockVal: templates.projectNotFound }, templates.projectNotFound],
 		['model not found', false, { mockVal: null, modelByIdFail: templates.modelNotFound }, templates.modelNotFound],
 		['model not in project', false, { mockVal: null, modelInProject: false }, templates.modelNotFound],
+		...multipleModelsTest,
 	])(label, (desc, success,
-		{ mockVal = true, byPass = false, modelByIdFail, modelInProject = true }, expectedRes) => {
+		{ mockVal = true, byPass = false, modelByIdFail, modelInProject = true, multipleModelsFail = false },
+		expectedRes) => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const user = generateRandomString();
 
-		const getModelByIdMapping = {
-			[modelTypes.CONTAINER]: ModelSettings.getContainerById,
-			[modelTypes.FEDERATION]: ModelSettings.getFederationById,
-			[modelTypes.DRAWING]: ModelSettings.getDrawingById,
-		};
 		test(` ${success ? 'next() ' : 'respond() '}should be called if ${desc}`, async () => {
 			const mockCB = jest.fn(() => {});
+
+			const modelParam = multipleModels ? {} : { model };
+
 			const req = {
-				params: { teamspace, project, model, type },
+				params: { teamspace, project, type, ...modelParam },
+				models: multipleModels && !multipleModelsFail ? [model] : undefined,
 				session: { user: { username: user } },
 				app: { get: () => byPass },
 			};
@@ -90,9 +91,9 @@ const testHelper = (type, label, testFn, mockedFn) => {
 			Sessions.getUserFromSession.mockReturnValueOnce(user);
 
 			if (modelByIdFail) {
-				getModelByIdMapping[type].mockRejectedValueOnce(modelByIdFail);
-			} else {
-				ProjectSettings.modelsExistInProject.mockResolvedValueOnce(modelInProject);
+				Permissions.checkModelsExists.mockRejectedValueOnce(modelByIdFail);
+			} else if (!multipleModelsFail) {
+				Permissions.checkModelsExists.mockResolvedValueOnce(modelInProject);
 				if (modelInProject) {
 					if (mockVal !== null) {
 						if (isBool(mockVal)) {
@@ -119,26 +120,22 @@ const testHelper = (type, label, testFn, mockedFn) => {
 				expect(mockCB).not.toHaveBeenCalledTimes(1);
 			}
 
-			expect(getModelByIdMapping[type]).toHaveBeenCalledTimes(1);
-			expect(getModelByIdMapping[type]).toHaveBeenCalledWith(teamspace, model, { permissions: 1 });
-
+			if (!multipleModelsFail) {
+				expect(Permissions.checkModelsExists).toHaveBeenCalledTimes(1);
+				expect(Permissions.checkModelsExists).toHaveBeenCalledWith(teamspace, project, [model], type);
+			}
 			if (modelByIdFail) {
-				expect(ProjectSettings.modelsExistInProject).not.toHaveBeenCalled();
 				expect(mockedFn).not.toHaveBeenCalled();
-			} else {
-				expect(ProjectSettings.modelsExistInProject).toHaveBeenCalledTimes(1);
-				expect(ProjectSettings.modelsExistInProject).toHaveBeenCalledWith(teamspace, project, [model]);
-
-				if (modelInProject) {
-					if (mockVal !== null) {
-						expect(mockedFn).toHaveBeenCalledTimes(1);
-						expect(mockedFn).toHaveBeenCalledWith(teamspace, project, model, user, true);
-					} else {
-						expect(mockedFn).not.toHaveBeenCalled();
-					}
+			} else if (modelInProject) {
+				if (mockVal !== null) {
+					expect(mockedFn).toHaveBeenCalledTimes(1);
+					expect(mockedFn).toHaveBeenCalledWith(teamspace, project,
+						multipleModels ? [model] : model, user, true);
 				} else {
 					expect(mockedFn).not.toHaveBeenCalled();
 				}
+			} else {
+				expect(mockedFn).not.toHaveBeenCalled();
 			}
 		});
 	});
@@ -180,16 +177,31 @@ const testHasAdminAccessToDrawing = () => {
 	testHelper(modelTypes.DRAWING, 'hasAdminAccessToDrawing', ModelMiddleware.hasAdminAccessToDrawing, Permissions.hasAdminAccessToDrawing);
 };
 
+const testHasReadAccessToMultipleContainers = () => {
+	testHelper(modelTypes.CONTAINER, 'hasReadAccessToMultipleContainers', ModelMiddleware.hasReadAccessToMultipleContainers, Permissions.hasReadAccessToMultipleContainers, true);
+};
+
+const testHasReadAccessToMultipleDrawings = () => {
+	testHelper(modelTypes.DRAWING, 'hasReadAccessToMultipleDrawings', ModelMiddleware.hasReadAccessToMultipleDrawings, Permissions.hasReadAccessToMultipleDrawings, true);
+};
+
+const testHasReadAccessToMultipleFederations = () => {
+	testHelper(modelTypes.FEDERATION, 'hasReadAccessToMultipleFederations', ModelMiddleware.hasReadAccessToMultipleFederations, Permissions.hasReadAccessToMultipleFederations, true);
+};
+
 describe(determineTestGroup(__filename), () => {
 	testHasReadAccessToContainer();
+	testHasReadAccessToMultipleContainers();
 	testHasWriteAccessToContainer();
 	testHasCommenterAccessToContainer();
 	testHasAdminAccessToContainer();
 
 	testHasReadAccessToFederation();
+	testHasReadAccessToMultipleFederations();
 	testHasWriteAccessToFederation();
 	testHasCommenterAccessToFederation();
 
+	testHasReadAccessToMultipleDrawings();
 	testHasAdminAccessToDrawing();
 	testHasAdminAccessToFederation();
 });

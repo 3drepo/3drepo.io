@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../helper/services');
 const { src, image } = require('../../helper/path');
@@ -31,19 +32,15 @@ const FronteggService = require(`${src}/services/sso/frontegg`);
 // This is the user being used for tests
 const testUser = ServiceHelper.generateUserCredentials();
 const userWithFsAvatar = ServiceHelper.generateUserCredentials();
-const userWithGridFsAvatar = ServiceHelper.generateUserCredentials();
 
 const teamspace = ServiceHelper.generateRandomString();
 const fsAvatarData = ServiceHelper.generateRandomString();
-const gridFsAvatarData = ServiceHelper.generateRandomString();
 const setupData = async () => {
 	await ServiceHelper.db.createUser(testUser);
 	await ServiceHelper.db.createTeamspace(teamspace, [testUser.user]);
 	await Promise.all([
 		ServiceHelper.db.createUser(userWithFsAvatar, [teamspace]),
-		ServiceHelper.db.createUser(userWithGridFsAvatar, [teamspace]),
 		ServiceHelper.db.createAvatar(userWithFsAvatar.user, 'fs', fsAvatarData),
-		ServiceHelper.db.createAvatar(userWithGridFsAvatar.user, 'gridfs', gridFsAvatarData),
 	]);
 };
 
@@ -263,7 +260,7 @@ const testUploadAvatar = () => {
 		});
 
 		test('should fail if the user has a session via an API key', async () => {
-			const res = await agent.put(`/v5/user/avatar?key=${userWithGridFsAvatar.apiKey}`)
+			const res = await agent.put(`/v5/user/avatar?key=${userWithFsAvatar.apiKey}`)
 				.expect(templates.notLoggedIn.status);
 			expect(res.body.code).toEqual(templates.notLoggedIn.code);
 		});
@@ -272,7 +269,7 @@ const testUploadAvatar = () => {
 			let testSession;
 			beforeAll(async () => {
 				testSession = SessionTracker(agent);
-				await testSession.login(userWithGridFsAvatar);
+				await testSession.login(userWithFsAvatar);
 			});
 
 			test('should remove old avatar and upload a new one if the user is logged in', async () => {
@@ -411,7 +408,7 @@ const testVerify = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

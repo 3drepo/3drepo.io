@@ -49,6 +49,7 @@ interface IProps {
 	jobs: any[];
 	users: any[];
 	permissionsOnUIDisabled: boolean;
+	addUserIsPending: boolean;
 	onInvitationOpen: (email, job, isAdmin) => void;
 	onSave: (user) => void;
 	onCancel: () => void;
@@ -169,8 +170,15 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 
 	public handleSubmit = async () => {
 		this.handleSave();
-		await new Promise(r => setTimeout(r, 200));
-		if (!this.state.userNotExists) {
+	};
+
+	componentDidUpdate(prevProps) {
+		if (
+			!this.props.addUserIsPending &&
+			prevProps.addUserIsPending !== this.props.addUserIsPending &&
+			!this.state.userNotExists
+		) {
+			// if add user is succesful then close the form
 			this.props.onCancel();
 		}
 	};

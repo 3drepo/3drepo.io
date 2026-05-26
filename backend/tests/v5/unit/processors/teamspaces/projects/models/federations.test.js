@@ -15,368 +15,30 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../helper/utils');
+const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
-const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber, outOfOrderArrayEqual, generateUUIDString } = require('../../../../../helper/services');
+const { generateRandomString, generateRandomObject, generateRandomNumber, generateUUIDString, generateRandomDate } = require('../../../../../helper/services');
 
-const CryptoJs = require('crypto-js');
+const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
-jest.mock('../../../../../../../src/v5/models/projectSettings');
-const ProjectSettings = require(`${src}/models/projectSettings`);
+jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/containers');
+const ContainersProcessor = require(`${src}/processors/teamspaces/projects/models/containers`);
+jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/favourites');
+const Favourites = require(`${src}/processors/teamspaces/projects/models/commons/favourites`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
-jest.mock('../../../../../../../src/v5/models/users');
-const Users = require(`${src}/models/users`);
+jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/modelList');
+const ModelList = require(`${src}/processors/teamspaces/projects/models/commons/modelList`);
+jest.mock('../../../../../../../src/v5/models/projectSettings');
+const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../src/v5/models/revisions');
 const Revisions = require(`${src}/models/revisions`);
-const TicketGroup = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
-const Federations = require(`${src}/processors/teamspaces/projects/models/federations`);
-const Views = require(`${src}/models/views`);
-jest.mock('../../../../../../../src/v5/models/views');
-const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets');
-const Legends = require(`${src}/models/legends`);
-jest.mock('../../../../../../../src/v5/models/legends');
-const { templates } = require(`${src}/utils/responseCodes`);
-
-jest.mock('../../../../../../../src/v5/services/filesManager');
-const FilesManager = require(`${src}/services/filesManager`);
-jest.mock('../../../../../../../src/v5/models/fileRefs');
-const FilesRef = require(`${src}/models/fileRefs`);
-
-jest.mock('../../../../../../../src/v5/utils/helper/models');
-const ModelHelper = require(`${src}/utils/helper/models`);
-
-const newFederationId = 'newFederationId';
-ModelSettings.addModel.mockImplementation(() => newFederationId);
-ModelSettings.deleteModel.mockImplementation((ts, project, model) => {
-	if (Number.isInteger(model)) {
-		return Promise.resolve(undefined);
-	}
-	return Promise.reject(templates.federationNotFound);
-});
-
-const federationList = [
-	{ _id: 1, name: 'federation 1', permissions: [{ user: 'user1', permission: 'collaborator' }, { user: 'user2', permission: 'collaborator' }] },
-	{ _id: 2, name: 'federation 2', permissions: [{ user: 'user2', permission: 'commenter' }] },
-	{ _id: 3, name: 'federation 3', permissions: [{ user: 'user1', permission: 'viewer' }] },
-	{ _id: 4, name: 'federation 4', permissions: [] },
-	{ _id: 5, name: 'federation 5' },
-];
-const mockContainers = [{ _id: '1', name: 'test1', permissions: [{ user: 'user1' }] }, { _id: '2', name: 'test2', permissions: [] }, { _id: '3', name: 'test3' }];
-
-const federationSettings = {
-	federation1: {
-		_id: 1,
-		name: 'federation 1',
-		type: 'type 1',
-		properties: {
-			unit: 'm',
-			code: 'FED1',
-		},
-		status: 'ok',
-		subModels: [{ _id: 'container1', group: generateRandomString() }, { _id: 'container2' }],
-		defaultView: 2,
-		defaultLegend: 3,
-		permissions: [1, 2, 3],
-		angleFromNorth: 10,
-		timestamp: new Date(),
-		surveyPoints: [123],
-		desc: 'This is a fed',
-		errorReason: {
-			message: 'error reason',
-			timestamp: 123,
-			errorCode: 1,
-		},
-	},
-	federation2: {
-		_id: 2,
-		name: 'federation 2',
-		type: 'type 2',
-		properties: {
-			unit: 'mm',
-			code: 'FED2',
-		},
-		status: 'processing',
-		subModels: ['container3'],
-	},
-	federation3: {
-		_id: 3,
-		name: 'federation 3',
-		type: 'type 3',
-		properties: {
-			unit: 'mm',
-			code: 'FED3',
-		},
-		status: 'processing',
-	},
-};
-
-const user1Favourites = [1];
-const project = { _id: 1, name: 'project', models: federationList.map(({ _id }) => _id) };
-
-ProjectSettings.getProjectById.mockImplementation(() => project);
-ModelSettings.getFederations.mockImplementation(() => federationList);
-const getFederationByIdMock = ModelSettings.getFederationById.mockImplementation((teamspace,
-	federation) => federationSettings[federation]);
-
-Users.getFavourites.mockImplementation((user) => (user === 'user1' ? user1Favourites : []));
-Views.getViewById.mockImplementation((teamspace, model, view) => {
-	if (view === 1) {
-		return 1;
-	}
-	throw templates.viewNotFound;
-});
-
-Legends.checkLegendExists.mockImplementation((teamspace, model, legend) => {
-	if (legend === 1) {
-		return 1;
-	}
-	throw templates.legendNotFound;
-});
-
-Users.appendFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
-	for (const favourite of favouritesToAdd) {
-		if (user1Favourites.indexOf(favourite) === -1) {
-			user1Favourites.push(favourite);
-		}
-	}
-});
-
-Users.deleteFavourites.mockImplementation((username, teamspace, favouritesToAdd) => {
-	for (const favourite of favouritesToAdd) {
-		const index = user1Favourites.indexOf(favourite);
-		if (index !== -1) {
-			user1Favourites.splice(index, 1);
-		}
-	}
-});
-
-Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
-	if (container === 'container1') return { timestamp: 1234 };
-	if (container === 'container2') return { timestamp: 5678 };
-	throw templates.revisionNotFound;
-});
-
-// Permissions mock
-jest.mock('../../../../../../../src/v5/utils/permissions', () => ({
-	...jest.requireActual('../../../../../../../src/v5/utils/permissions'),
-	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
-	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
-	hasReadAccessToContainer: jest.fn().mockImplementation((teamspace, proj, modelID, username) => username === 'tsAdmin'
-	|| username === 'projAdmin' || mockContainers.filter((element) => element._id === modelID)[0].permissions.some((element) => element.user === username),
-	),
-}));
-
-const determineResults = (username) => federationList.flatMap(({ permissions, _id, name }) => {
-	const isAdmin = username === 'projAdmin' || username === 'tsAdmin';
-	const hasModelPerm = permissions && permissions.find((entry) => entry.user === username);
-	const isFavourite = username === 'user1' && user1Favourites.includes(_id);
-	return isAdmin || hasModelPerm ? { _id, name, role: isAdmin ? 'admin' : hasModelPerm.permission, isFavourite } : [];
-});
-
-const testGetFederationList = () => {
-	describe('Get federation list by user', () => {
-		test('should return the whole list if the user is a teamspace admin', async () => {
-			const res = await Federations.getFederationList('teamspace', 'xxx', 'tsAdmin');
-			expect(res).toEqual(determineResults('tsAdmin'));
-		});
-		test('should return the whole list if the user is a project admin', async () => {
-			const res = await Federations.getFederationList('teamspace', 'xxx', 'projAdmin');
-			expect(res).toEqual(determineResults('projAdmin'));
-		});
-		test('should return a partial list if the user has model access in some federations', async () => {
-			const res = await Federations.getFederationList('teamspace', 'xxx', 'user1');
-			expect(res).toEqual(determineResults('user1'));
-		});
-		test('should return a partial list if the user has model access in some federations (2)', async () => {
-			const res = await Federations.getFederationList('teamspace', 'xxx', 'user2');
-			expect(res).toEqual(determineResults('user2'));
-		});
-		test('should return empty array if the user has no access', async () => {
-			const res = await Federations.getFederationList('teamspace', 'xxx', 'nobody');
-			expect(res).toEqual([]);
-		});
-	});
-};
-
-const testAppendFavourites = () => {
-	describe('Add federations to favourites', () => {
-		test('new federations should be added to favourites if user has all permissions', async () => {
-			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [3])).resolves.toEqual(undefined);
-		});
-
-		test('should return error if one or more federations are not found', async () => {
-			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, -1]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: -1' });
-		});
-
-		test('should return error if the federations list provided is empty', async () => {
-			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', []))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
-		});
-
-		test('should return error if user has no permissions on one or more models', async () => {
-			await expect(Federations.appendFavourites('user1', 'teamspace', 'project', [1, 2]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: 2' });
-		});
-	});
-};
-
-const testDeleteFavourites = () => {
-	describe('Remove federations from favourites', () => {
-		test('federations should be removed from favourites if user has all permissions', async () => {
-			await expect(Federations.deleteFavourites('tsAdmin', 'teamspace', 'project', [1])).resolves.toEqual(undefined);
-		});
-
-		test('should return error if one or more federations are not found', async () => {
-			await expect(Federations.deleteFavourites('tsAdmin', 'teamspace', 'project', [1, -1]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: -1' });
-		});
-
-		test('should return error if the federations list provided is empty', async () => {
-			await expect(Federations.deleteFavourites('user1', 'teamspace', 'project', []))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The favourites list provided is empty' });
-		});
-
-		test('should return error if user has no permissions on one or more models', async () => {
-			await expect(Federations.deleteFavourites('user1', 'teamspace', 'project', [2]))
-				.rejects.toEqual({ ...templates.invalidArguments, message: 'The following models were not found: 2' });
-		});
-	});
-};
-
-const formatToStats = (settings, ticketsCount, lastUpdated) => ({
-	...(settings.desc ? { desc: settings.desc } : {}),
-	...(settings.subModels ? { containers: settings.subModels } : {}),
-	code: settings.properties.code,
-	unit: settings.properties.unit,
-	status: settings.status,
-	lastUpdated,
-	tickets: ticketsCount,
-});
-
-const testGetFederationStats = () => {
-	describe('Get federation stats', () => {
-		test('should return the stats if the federation exists and has subModels with revisions', async () => {
-			const ticketsCount = generateRandomNumber();
-			Tickets.getOpenTicketsCount.mockResolvedValueOnce(ticketsCount);
-			const res = await Federations.getFederationStats('teamspace', 'project', 'federation1');
-			expect(res).toEqual(formatToStats(federationSettings.federation1, ticketsCount, 5678));
-		});
-		test('should return the stats if the federation exists and has subModels with no revisions', async () => {
-			const ticketsCount = generateRandomNumber();
-			Tickets.getOpenTicketsCount.mockResolvedValueOnce(ticketsCount);
-			const res = await Federations.getFederationStats('teamspace', 'project', 'federation2');
-			expect(res).toEqual(formatToStats(federationSettings.federation2, ticketsCount));
-		});
-		test('should return the stats if the federation exists and has no subModels', async () => {
-			const res = await Federations.getFederationStats('teamspace', 'project', 'federation3');
-			expect(res).toEqual(formatToStats(federationSettings.federation3));
-		});
-	});
-};
-
-const testAddFederation = () => {
-	describe('Add federation', () => {
-		test('should return the federation ID on success', async () => {
-			const data = {
-				name: 'federation name',
-				code: 'code99',
-				unit: 'mm',
-				federate: true,
-			};
-			const res = await Federations.addFederation('teamspace', 'project', 'tsAdmin', data);
-			expect(res).toEqual(newFederationId);
-			expect(ProjectSettings.addModelToProject.mock.calls.length).toBe(1);
-		});
-	});
-};
-
-const testNewRevision = () => {
-	describe('Add new federation revision', () => {
-		test('should succeed', async () => {
-			ModelSettings.updateModelSubModels.mockResolvedValueOnce();
-			Revisions.addRevision.mockResolvedValueOnce();
-
-			const teamspace = generateRandomString();
-			const projectId = generateRandomString();
-			const model = generateRandomString();
-			const owner = generateRandomString();
-			const containers = [
-				{
-					_id: generateUUIDString(),
-					group: generateRandomString(),
-				},
-				{
-					_id: generateUUIDString(),
-					group: generateRandomString(),
-				},
-				{
-					_id: generateUUIDString(),
-				},
-			];
-			const info = {
-				owner,
-				containers,
-			};
-
-			await Federations.newRevision(teamspace, projectId, model, info);
-
-			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
-			const createRevisionArguments = Revisions.addRevision.mock.calls[0];
-
-			expect(createRevisionArguments[0]).toEqual(teamspace);
-			expect(createRevisionArguments[1]).toEqual(projectId);
-			expect(createRevisionArguments[2]).toEqual(model);
-			expect(createRevisionArguments[3]).toEqual(modelTypes.FEDERATION);
-			const revision = createRevisionArguments[4];
-			expect(revision.author).toEqual(info.owner);
-			expect(revision.containers).toEqual(info.containers);
-
-			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledWith(
-				teamspace,
-				projectId,
-				model,
-				owner,
-				revision._id,
-				containers,
-			);
-		});
-	});
-};
-
-const testDeleteFederation = () => {
-	describe('Delete federation', () => {
-		test('should succeed', async () => {
-			ModelHelper.removeModelData.mockResolvedValueOnce();
-			ProjectSettings.removeModelFromProject.mockResolvedValueOnce();
-
-			const teamspace = generateRandomString();
-			const projectId = generateRandomString();
-			const model = generateRandomString();
-			await Federations.deleteFederation(teamspace, projectId, model);
-
-			expect(ModelHelper.removeModelData).toHaveBeenCalledTimes(1);
-			expect(ModelHelper.removeModelData).toHaveBeenCalledWith(teamspace, projectId, model);
-			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledTimes(1);
-			expect(ProjectSettings.removeModelFromProject).toHaveBeenCalledWith(teamspace, projectId, model);
-		});
-	});
-};
-
-const testGetSettings = () => {
-	describe('Get federation settings', () => {
-		test('should return the federation settings', async () => {
-			const projection = { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 };
-			const res = await Federations.getSettings('teamspace', 'federation1');
-			expect(res).toEqual(federationSettings.federation1);
-			expect(getFederationByIdMock.mock.calls.length).toBe(1);
-			expect(getFederationByIdMock.mock.calls[0][2]).toEqual(projection);
-		});
-	});
-};
+const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
+jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.groups');
+const TicketGroup = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 
 const testGetTicketGroupById = () => {
 	describe('Get ticket group by Id', () => {
@@ -388,154 +50,366 @@ const testGetTicketGroupById = () => {
 		const groupId = generateRandomString();
 
 		test('Should retrieve containers then call the general getTicketGroupById', async () => {
-			const containers = [generateRandomString(), generateRandomString()];
+			const containers = times(2, () => ({ container: generateRandomString() }));
+			TicketGroup.getTicketGroupById.mockResolvedValueOnce();
 
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers.map((_id) => ({ _id })) });
+			await Federations.getTicketGroupById(
+				teamspace, projectId, federation, revId, ticket, groupId, true, containers,
+			);
 
-			const expectedData = generateRandomObject();
-			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
-
-			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket, groupId, true))
-				.resolves.toEqual(expectedData);
-
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federation,
-				{ subModels: 1 });
-
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, true, containers);
+			expect(TicketGroup.getTicketGroupById).toHaveBeenCalledTimes(1);
+			expect(TicketGroup.getTicketGroupById).toHaveBeenCalledWith(
+				teamspace, projectId, federation, revId, ticket, groupId, true, containers.map((c) => c.container));
 		});
 
 		test('Should retrieve containers then call the general getTicketGroupById even if there\'s no containers', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ });
+			TicketGroup.getTicketGroupById.mockResolvedValueOnce();
 
-			const expectedData = generateRandomObject();
-			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
+			await Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket, groupId, false, []);
 
-			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket,
-				groupId, false)).resolves.toEqual(expectedData);
+			expect(TicketGroup.getTicketGroupById).toHaveBeenCalledTimes(1);
+			expect(TicketGroup.getTicketGroupById).toHaveBeenCalledWith(
+				teamspace, projectId, federation, revId, ticket, groupId, false, undefined);
+		});
+	});
+};
 
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federation,
-				{ subModels: 1 });
+const testAddFederation = () => {
+	describe('Add federation', () => {
+		const teamspace = generateRandomString();
+		const projectId = generateRandomString();
+		const federation = generateRandomString();
+		test('should call addModel', async () => {
+			ModelList.addModel.mockResolvedValueOnce();
+
+			await Federations.addFederation(teamspace, projectId, federation);
+
+			expect(ModelList.addModel).toHaveBeenCalledTimes(1);
+			expect(ModelList.addModel).toHaveBeenCalledWith(teamspace, projectId, { ...federation, federate: true });
+		});
+	});
+};
+
+const testGetFederationList = () => {
+	describe('Get federation list by user', () => {
+		const teamspace = generateRandomString();
+		const projectId = generateRandomString();
+		const user = generateRandomString();
+		const project = { _id: generateRandomString(), models: times(5, () => generateRandomString()) };
+
+		test('should call all dependent functions inside.', async () => {
+			const result = generateRandomObject();
+			ProjectSettings.getProjectById.mockResolvedValueOnce(project);
+			ModelSettings.getFederations.mockResolvedValueOnce(project.models);
+			ModelList.getModelList.mockResolvedValueOnce(result);
+
+			await expect(Federations.getFederationList(teamspace, projectId, user))
+				.resolves.toEqual(result);
+
+			expect(ProjectSettings.getProjectById).toHaveBeenCalledTimes(1);
+			expect(ProjectSettings.getProjectById)
+				.toHaveBeenCalledWith(teamspace, projectId, { permissions: 1, models: 1 });
+
+			expect(ModelSettings.getFederations).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getFederations)
+				.toHaveBeenCalledWith(teamspace, project.models, { _id: 1, name: 1, permissions: 1 });
+
+			expect(ModelList.getModelList).toHaveBeenCalledTimes(1);
+			expect(ModelList.getModelList).toHaveBeenCalledWith(teamspace, projectId, user, project.models);
+		});
+	});
+};
+
+const testAppendFavourites = () => {
+	describe('Add federations to favourites', () => {
+		const username = generateRandomString();
+		const teamspace = generateRandomString();
+		const projectId = generateRandomString();
+		const favouritesToAdd = times(5, () => generateRandomString());
+		const accessibleFederations = times(5, () => generateRandomString());
+
+		test('should call all dependent functions inside.', async () => {
+			const fn = jest.spyOn(Federations, 'getFederationList').mockResolvedValueOnce(accessibleFederations);
+			await Federations.appendFavourites(username, teamspace, projectId, favouritesToAdd);
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, false, undefined);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, username);
+
+			expect(Favourites.appendFavourites).toHaveBeenCalledTimes(1);
+			expect(Favourites.appendFavourites)
+				.toHaveBeenCalledWith(username, teamspace, accessibleFederations, favouritesToAdd);
+		});
+	});
+};
+
+const testDeleteFavourites = () => {
+	describe('Remove federations from favourites', () => {
+		const username = generateRandomString();
+		const teamspace = generateRandomString();
+		const projectId = generateRandomString();
+		const favouritesToRemove = times(5, () => generateRandomString());
+		const accessibleFederations = times(5, () => generateRandomString());
+
+		test('should call all dependent functions inside.', async () => {
+			const fn = jest.spyOn(Federations, 'getFederationList').mockResolvedValueOnce(accessibleFederations);
+			await Federations.deleteFavourites(username, teamspace, projectId, favouritesToRemove);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, username);
+
+			expect(Favourites.deleteFavourites).toHaveBeenCalledTimes(1);
+			expect(Favourites.deleteFavourites)
+				.toHaveBeenCalledWith(username, teamspace, accessibleFederations, favouritesToRemove);
+		});
+	});
+};
+
+const testNewRevision = () => {
+	describe('Add new federation revision', () => {
+		const teamspace = generateRandomString();
+		const projectId = generateRandomString();
+		const federation = generateRandomString();
+		const info = {
+			owner: generateRandomString(),
+			containers: times(2, () => generateRandomObject()),
+		};
+		const revisionId = generateUUIDString();
+
+		test('should call addRevision and updateModelSubModels', async () => {
+			Revisions.addRevision.mockResolvedValueOnce(revisionId);
+			ModelSettings.updateModelSubModels.mockResolvedValueOnce();
+
+			await Federations.newRevision(teamspace, projectId, federation, info);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			expect(Revisions.addRevision)
+				.toHaveBeenCalledWith(
+					teamspace,
+					projectId,
+					federation,
+					modelTypes.FEDERATION,
+					{ containers: info.containers, author: info.owner },
+				);
+
+			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledWith(
+				teamspace,
+				projectId,
+				federation,
+				info.owner,
+				revisionId,
+				info.containers,
+			);
+		});
+	});
+};
+
+const testGetFederationStats = () => {
+	describe('Get federation stats', () => {
+		test('should call getMultipleFederationsStats and return the stats for the requested federation', async () => {
+			const stats = { federation1: generateRandomString() };
+			const getMultipleFederationsStatsSpy = jest.spyOn(Federations, 'getMultipleFederationsStats').mockResolvedValueOnce(stats);
+			const res = await Federations.getFederationStats('teamspace', 'project', 'federation1');
+			expect(getMultipleFederationsStatsSpy).toHaveBeenCalledTimes(1);
+			expect(getMultipleFederationsStatsSpy).toHaveBeenCalledWith('teamspace', 'project', ['federation1']);
+			expect(res).toEqual(stats.federation1);
+		});
+	});
+};
+
+const testGetSettings = () => {
+	describe('Get federation settings', () => {
+		const teamspace = generateRandomString();
+		const federation = generateRandomString();
+
+		test('should call getFederationById', async () => {
+			ModelSettings.getFederationById.mockResolvedValueOnce();
+
+			await Federations.getSettings(teamspace, federation);
+
+			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getFederationById)
+				.toHaveBeenCalledWith(
+					teamspace,
+					federation,
+					{ corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 },
+				);
 		});
 	});
 };
 
 const testGetMD5Hash = () => {
 	describe('Get MD5 hashes for each container in the federation', () => {
-		const revisionMock = { _id: Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date(), tag: 'tag' };
-		const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
-		const mockMD5Hash = { hash: CryptoJs.MD5(revisionMock._id).toString(), size: fileEntry.size };
-		ModelSettings.getContainers.mockImplementation((teamspace, containers) => {
-			if (containers.length > 1) {
-				return mockContainers;
-			}
+		const teamspace = generateRandomString();
 
-			return mockContainers.filter((container) => container._id === containers[0]);
+		test('it should call getModelMD5Hash for each container passed', async () => {
+			const nContainers = 3;
+			const containers = times(nContainers, () => ({
+				container: generateRandomString(), revision: generateRandomString(),
+			}));
+
+			ModelList.getModelMD5Hash.mockResolvedValueOnce();
+
+			await Federations.getMD5Hash(teamspace, containers);
+
+			expect(ModelList.getModelMD5Hash).toHaveBeenCalledTimes(nContainers);
+			containers.forEach(({ container, revision }, index) => {
+				expect(ModelList.getModelMD5Hash).toHaveBeenNthCalledWith(index + 1, teamspace, container, revision);
+			});
 		});
-		ModelSettings.getContainerById.mockImplementation(
-			(ts, container) => mockContainers.filter((cntr) => cntr._id === container));
-		ProjectSettings.modelsExistInProject.mockResolvedValue(true);
 
-		test('should get an empty array if user does not have rights to the container', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
+		test('it should not call getModelMD5Hash if no containers are passed', async () => {
+			await expect(Federations.getMD5Hash(teamspace, [])).resolves.toEqual([]);
 
-			await expect(Federations.getMD5Hash('teamspace', 'federation', 'NoAcessUser')).resolves.toEqual([]);
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getContainers).toHaveBeenCalledWith('teamspace', ['1', '2', '3'], { _id: 1, name: 1, permissions: 1 });
-			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
+			expect(ModelList.getModelMD5Hash).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testGetSuperMeshesInfo = () => {
+	describe('Get super meshes info for federation', () => {
+		const teamspace = generateRandomString();
+		const federationId = generateRandomString();
+		const revisionId = generateRandomString();
+
+		test('when federation has containers', async () => {
+			const containers = times(3, () => ({
+				container: generateRandomString(), revision: generateRandomString(),
+			}));
+			const superMeshInfoMock = times(3, () => generateRandomObject());
+
+			superMeshInfoMock.forEach((info) => {
+				ContainersProcessor.getSuperMeshesInfo.mockResolvedValueOnce(info);
+			});
+
+			const expectedData = superMeshInfoMock.map((info, index) => ({
+				teamspace,
+				model: containers[index].container,
+				superMeshes: info,
+			}));
+
+			await expect(Federations.getSuperMeshesInfo(teamspace, federationId, revisionId, containers))
+				.resolves.toEqual({ subModels: expectedData });
+
+			expect(ContainersProcessor.getSuperMeshesInfo).toHaveBeenCalledTimes(containers.length);
+			containers.forEach(({ container: model, revision }) => {
+				expect(ContainersProcessor.getSuperMeshesInfo).toHaveBeenCalledWith(
+					teamspace,
+					model,
+					revision,
+				);
+			});
+		});
+
+		test('when federation has no containers', async () => {
+			await expect(Federations.getSuperMeshesInfo(teamspace, federationId, revisionId, []))
+				.resolves.toEqual({ subModels: [] });
+
+			expect(ContainersProcessor.getSuperMeshesInfo).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testGetMultipleFederationsStats = () => {
+	describe('Get multiple federation stats', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const federations = times(3, () => generateRandomString());
+		const federationSettings = times(3, (index) => ({
+			_id: federations[index],
+			properties: {
+				unit: generateRandomString(),
+				code: generateRandomString(),
+			},
+			status: ['ok', 'processing'][Math.floor(Math.random() * 2)],
+			subModels: index === 0
+				? times(3, () => ({ _id: generateRandomString() }))
+				: undefined,
+			desc: Math.random() > 0.5 ? generateRandomString() : undefined,
+		}));
+		const ticketCount = {
+			[federations[0]]: parseInt(generateRandomNumber(), 10),
+			[federations[1]]: parseInt(generateRandomNumber(), 10),
+		};
+		const formatToStats = (settings, ticketsCount, lastUpdated) => ({
+			...(settings.desc ? { desc: settings.desc } : { desc: undefined }),
+			...(settings.subModels ? { containers: settings.subModels } : { containers: undefined }),
+			code: settings.properties.code,
+			unit: settings.properties.unit,
+			status: settings.status,
+			lastUpdated,
+			tickets: ticketsCount,
+		});
+
+		test('should return stats for multiple federations', async () => {
+			const rev1 = { timestamp: generateRandomDate() };
+			const rev2 = { timestamp: generateRandomDate() };
+			const latestRevisions = rev1.timestamp > rev2.timestamp ? rev1 : rev2;
+
+			ModelSettings.getFederations.mockResolvedValueOnce(federationSettings);
+			Tickets.getOpenTicketsCountForMultipleModels.mockResolvedValueOnce(ticketCount);
+			Revisions.getLatestRevision.mockResolvedValueOnce(rev1).mockResolvedValueOnce(rev2);
+			const res = await Federations.getMultipleFederationsStats(teamspace, project, federations);
+
+			expect(ModelSettings.getFederations).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getFederations).toHaveBeenCalledWith(
+				teamspace, federations, { properties: 1, status: 1, subModels: 1, desc: 1 },
+			);
+			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledTimes(1);
+			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledWith(teamspace, project, federations);
+			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(
+				federationSettings.reduce((acc, setting) => acc + (setting.subModels?.length || 0), 0),
+			);
+			expect(res).toEqual({
+				[federations[0]]: formatToStats(
+					federationSettings[0], ticketCount[federations[0]], latestRevisions.timestamp,
+				),
+				[federations[1]]: formatToStats(
+					federationSettings[1], ticketCount[federations[1]],
+				),
+				[federations[2]]: formatToStats(
+					federationSettings[2], 0,
+				),
+			});
+		});
+		test('should be able to handle empty federations', async () => {
+			ModelSettings.getFederations
+				.mockResolvedValueOnce(federationSettings.slice(1));
+			Tickets.getOpenTicketsCountForMultipleModels
+				.mockResolvedValueOnce({});
+			Revisions.getLatestRevision.mockResolvedValueOnce();
+
+			const res = await Federations.getMultipleFederationsStats(teamspace, project, federations.slice(1));
+
+			expect(ModelSettings.getFederations).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.getFederations).toHaveBeenCalledWith(
+				teamspace, federations.slice(1), { properties: 1, status: 1, subModels: 1, desc: 1 },
+			);
+			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledTimes(1);
+			expect(Tickets.getOpenTicketsCountForMultipleModels).toHaveBeenCalledWith(
+				teamspace, project, federations.slice(1),
+			);
 			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
-		});
-
-		test('it should return just the containers users have access to', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
-			Revisions.getLatestRevision.mockResolvedValueOnce(revisionMock);
-			FilesManager.getMD5FileHash.mockResolvedValueOnce(mockMD5Hash);
-
-			await expect(Federations.getMD5Hash('teamspace', 'project', 'federation', 'user1')).resolves.toEqual([{ container: '1',
-				tag: revisionMock.tag,
-				timestamp: revisionMock.timestamp,
-				hash: CryptoJs.MD5(revisionMock._id).toString(),
-				filename: revisionMock.rFile[0],
-				size: fileEntry.size }]);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith('teamspace', 'federation', { subModels: 1 });
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getContainers).toHaveBeenCalledWith('teamspace', ['1', '2', '3'], { _id: 1, name: 1, permissions: 1 });
-			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(1);
-			expect(Revisions.getLatestRevision).toHaveBeenCalledWith('teamspace', '1', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
-			expect(FilesManager.getMD5FileHash).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getMD5FileHash).toHaveBeenCalledWith('teamspace', '1.history', 'success!');
-		});
-
-		test('it should return an array with all the containers if admin', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
-			Revisions.getLatestRevision.mockResolvedValue(revisionMock);
-			FilesManager.getMD5FileHash.mockResolvedValue(mockMD5Hash);
-			FilesRef.getRefEntry.mockResolvedValue(fileEntry);
-
-			outOfOrderArrayEqual(await Federations.getMD5Hash('teamspace', 'project', 'federation', 'tsAdmin'), [
+			expect(res).toEqual(
 				{
-					container: '1',
-					tag: revisionMock.tag,
-					timestamp: revisionMock.timestamp,
-					hash: CryptoJs.MD5(revisionMock._id).toString(),
-					filename: revisionMock.rFile[0],
-					size: fileEntry.size,
-				}, {
-					container: '2',
-					tag: revisionMock.tag,
-					timestamp: revisionMock.timestamp,
-					hash: CryptoJs.MD5(revisionMock._id).toString(),
-					filename: revisionMock.rFile[0],
-					size: fileEntry.size,
-				}, {
-					container: '3',
-					tag: revisionMock.tag,
-					timestamp: revisionMock.timestamp,
-					hash: CryptoJs.MD5(revisionMock._id).toString(),
-					filename: revisionMock.rFile[0],
-					size: fileEntry.size,
-				}]);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith('teamspace', 'federation', { subModels: 1 });
-			expect(ModelSettings.getContainers).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getContainers).toHaveBeenCalledWith('teamspace', ['1', '2', '3'], { _id: 1, name: 1, permissions: 1 });
-			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
-			expect(Revisions.getLatestRevision).toHaveBeenCalledTimes(3);
-			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(1, 'teamspace', '1', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
-			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(2, 'teamspace', '2', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
-			expect(Revisions.getLatestRevision).toHaveBeenNthCalledWith(3, 'teamspace', '3', 'container', { fileSize: 1, rFile: 1, tag: 1, timestamp: 1 });
-		});
-
-		test('it should return an empty array if the federation has no containers added', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ });
-
-			await expect(Federations.getMD5Hash('teamspace', 'project', 'federation', 'tsAdmin')).resolves.toEqual([]);
-
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith('teamspace', 'federation', { subModels: 1 });
-			expect(ModelSettings.getContainers).not.toHaveBeenCalled();
-			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
-			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
+					[federations[1]]: formatToStats(federationSettings[1], 0),
+					[federations[2]]: formatToStats(federationSettings[2], 0),
+				},
+			);
 		});
 	});
 };
 
 describe(determineTestGroup(__filename), () => {
+	testGetTicketGroupById();
+	testAddFederation();
 	testGetFederationList();
 	testAppendFavourites();
 	testDeleteFavourites();
-	testGetFederationStats();
-	testAddFederation();
-	testDeleteFederation();
 	testNewRevision();
+	testGetFederationStats();
 	testGetSettings();
-	testGetTicketGroupById();
 	testGetMD5Hash();
+	testGetSuperMeshesInfo();
+	testGetMultipleFederationsStats();
 });

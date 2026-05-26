@@ -22,12 +22,31 @@ import { CALIBRATION_SORT_ORDER } from '@/v5/ui/routes/dashboard/projects/calibr
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
 import { get, isArray } from 'lodash';
 
+const sortLoadingItemsToEnd = (sortRest) => (a, b) => {
+	if (a.hasOwnProperty('hasStatsPending') && b.hasOwnProperty('hasStatsPending') && a.hasStatsPending !== b.hasStatsPending) {
+		if (a.hasStatsPending) {
+			return 1;
+		} else {
+			return -1;
+		}
+	}
+
+	return sortRest(a, b);
+};
+
 export const getSortingFunction = <T>(sortConfig) => {
 	const { column, direction } = sortConfig;
 
 	const sortingFunction = (a: T, b: T, index = 0): number => {
-		const aValue = get(a, column[index]);
-		const bValue = get(b, column[index]);
+		let aValue = get(a, column[index]);
+		let bValue = get(b, column[index]);
+
+		// HACK: this is for items with lastupdated undefined, it assumes it was just created
+		if (column[index] === 'lastUpdated') {
+			const now = new Date();
+			aValue = aValue || now;
+			bValue = bValue || now;
+		}
 
 		if (!aValue && !bValue) {
 			return 0;
@@ -73,5 +92,7 @@ export const getSortingFunction = <T>(sortConfig) => {
 		return 0;
 	};
 
-	return  direction[0] === SortingDirection.ASCENDING ? sortingFunction : (a: T, b: T) => sortingFunction(b, a);
+	return direction[0] === SortingDirection.ASCENDING ? 
+		sortLoadingItemsToEnd(sortingFunction) :
+		sortLoadingItemsToEnd((a: T, b: T) => sortingFunction(b, a));
 };

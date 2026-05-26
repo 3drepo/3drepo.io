@@ -23,6 +23,7 @@ import { ITicketsCardState } from './ticketsCard.redux';
 import { DEFAULT_PIN, getTicketPins, toPin } from '@/v5/ui/routes/viewer/tickets/ticketsForm/properties/coordsProperty/coordsProperty.helpers';
 import { IPin } from '@/v4/services/viewer/viewer';
 import { selectSelectedDate } from '@/v4/modules/sequences';
+import { NONE_OPTION } from '../ticketsGroups.helpers';
 
 const selectTicketsCardDomain = (state): ITicketsCardState => state.ticketsCard || {};
 
@@ -137,9 +138,12 @@ export const selectFilteredTickets = createSelector(
 	},
 );
 
-
 export const selectIsShowingPins = createSelector(
 	selectTicketsCardDomain, (state) => state.isShowingPins,
+);
+
+export const selectGroupBy = createSelector(
+	selectTicketsCardDomain, (state) => state.groupByField || NONE_OPTION,
 );
 
 export const selectTicketPins = createSelector(

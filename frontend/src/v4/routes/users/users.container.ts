@@ -30,7 +30,8 @@ import {
 	selectUsersSuggestions,
 	selectUserNotExists,
 	UserManagementActions,
-	selectIsTeamspaceAdmin
+	selectIsTeamspaceAdmin,
+	selectAddUserIsPending
 } from '../../modules/userManagement';
 import { DialogActions } from '../../modules/dialog';
 import { selectJobs } from '../../modules/jobs';
@@ -50,6 +51,7 @@ const mapStateToProps = createStructuredSelector({
 	currentTeamspace: selectCurrentTeamspace,
 	selectedTeamspace: selectCurrentTeamspace,
 	isPending: selectUsersPending,
+	addUserIsPending: selectAddUserIsPending,
 	isTeamspaceAdmin: selectIsTeamspaceAdmin,
 	usersProvisionedEnabled: selectUsersProvisionedEnabled,
 	permissionsOnUIDisabled: selectPermissionsOnUIDisabled,

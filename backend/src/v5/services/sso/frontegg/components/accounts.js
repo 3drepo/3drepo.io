@@ -26,28 +26,43 @@ const { logger } = require('../../../../utils/logger');
 const Accounts = {};
 
 const contextLabels = {
-	teamspaceByAccount: 'teamspaceByAccount',
+	getAccountInfo: 'getAccountInfo',
 	allUsersInAccount: 'allUsersInAccount',
 	userStatusInAccount: 'userStatusInAccount',
 
 };
 
-Accounts.getTeamspaceByAccount = (accountId) => getCached(
-	generateKey({ accountId, context: contextLabels.teamspaceByAccount }),
+const getAccountInfo = (accountId) => getCached(
+	generateKey({ accountId, context: contextLabels.getAccountInfo }),
 	async () => {
-		try {
-			const { vendorDomain } = await getConfig();
-			const { data: { metadata } } = await get(`${vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
-			const metaJson = JSON.parse(metadata);
-			return metaJson[META_LABEL_TEAMSPACE];
-		} catch (err) {
+		const { vendorDomain } = await getConfig();
+		const { data } = await get(`${vendorDomain}/tenants/resources/tenants/v2/${accountId}`, await getBearerHeader());
+		return data;
+	});
+
+Accounts.doesAccountExist = async (accountId) => {
+	try {
+		await getAccountInfo(accountId);
+		return true;
+	} catch (err) {
+		return false;
+	}
+};
+
+Accounts.getTeamspaceByAccount = async (accountId) => {
+	try {
+		const { metadata } = await getAccountInfo(accountId);
+
+		const metaJson = JSON.parse(metadata);
+		return metaJson[META_LABEL_TEAMSPACE];
+	} catch (err) {
 		// I've seen frontegg to be in a state where it's giving me account ID that no longer exist, we also
 		// could possibly run into a race condition where the account has been deleted since we've got this ID
 		// So just return undefined instead of causing trouble elsewhere.
-			logger.logError(`Failed to get account(${accountId}) from Accounts: ${err.message}`);
-			return undefined;
-		}
-	});
+		logger.logError(`Failed to get account(${accountId}) from Accounts: ${err.message}`);
+		return undefined;
+	}
+};
 
 Accounts.setMFAPolicy = async (accountId, policySetting) => {
 	try {

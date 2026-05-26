@@ -174,6 +174,7 @@ const moduleSchema = Yup.object().shape({
 	name: types.strings.title.notOneOf(Object.values(presetModules)).matches(blackListedChrsRegex),
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
+	color: types.colorStr.test('color-on-preset-module', 'Color cannot be set on a preset module.', (value, context) => !(value && context.parent.type)),
 	properties: propertyArray.when('type', (type, schema) => {
 		if (type) {
 			const propertiesToCheck = presetModulesProperties[type];

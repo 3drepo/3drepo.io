@@ -16,10 +16,8 @@
  */
 
 import * as faker from 'faker';
-import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { ContainerSettings, ContainerBackendSettings, UploadStatus } from '@/v5/store/containers/containers.types';
 import {
-	FederationBackendSettings,
-	FederationSettings,
 	FederationStats,
 	GroupedContainer,
 	IFederation,
@@ -80,7 +78,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	...overrides,
 });
 
-export const prepareMockStats = (overrides?: Partial<IFederation>) => ({
+export const prepareMockStats = (overrides?: Partial<FederationStats>): FederationStats => ({
 	code: faker.datatype.uuid(),
 	desc: faker.random.words(3),
 	status: UploadStatus.OK,
@@ -91,6 +89,7 @@ export const prepareMockStats = (overrides?: Partial<IFederation>) => ({
 	},
 	category: faker.random.word(),
 	lastUpdated: faker.datatype.number(),
+	modelId: faker.datatype.uuid(),
 	...overrides,
 }) as unknown as FederationStats;
 
@@ -101,18 +100,18 @@ export const prepareMockNewFederation = (federation: IFederation): NewFederation
 	desc: federation.desc,
 });
 
-const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<FederationSettings, 'surveyPoint'> => ({
+const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<ContainerSettings, 'surveyPoint'> => ({
 	angleFromNorth: federation.angleFromNorth,
 	defaultView: federation.defaultView,
 	...prepareMockNewFederation(federation),
 });
 
-export const prepareMockSettingsReply = (federation: IFederation): FederationSettings => ({
+export const prepareMockSettingsReply = (federation: IFederation): ContainerSettings => ({
 	...prepareMockSettingsWithoutSurveyPoint(federation),
 	surveyPoint: federation.surveyPoint,
 });
 
-export const prepareMockRawSettingsReply = (federation: IFederation): FederationBackendSettings => ({
+export const prepareMockRawSettingsReply = (federation: IFederation): ContainerBackendSettings => ({
 	...prepareMockSettingsWithoutSurveyPoint(federation),
 	surveyPoints: [federation.surveyPoint],
 });

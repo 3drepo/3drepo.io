@@ -15,11 +15,16 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src, dwgModel, dwgModelUppercaseExt, image } = require('../../../../../../helper/path');
-const { writeFileSync, unlinkSync } = require('fs');
+const { writeFileSync, unlinkSync, copyFileSync } = require('fs');
 const CryptoJs = require('crypto-js');
+
+const config = require(`${src}/utils/config`);
+const { FileStorageTypes } = require(`${src}/utils/config.constants`);
+const path = require('path');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { modelTypes, statusCodes } = require(`${src}/models/modelSettings.constants`);
@@ -68,6 +73,11 @@ const generateBasicData = () => {
 			name: ServiceHelper.generateRandomString(),
 			properties: ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
 		},
+		conWithNoRev2: {
+			_id: ServiceHelper.generateUUIDString(),
+			name: ServiceHelper.generateRandomString(),
+			properties: ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+		},
 		queuedStatusCont: {
 			_id: ServiceHelper.generateUUIDString(),
 			name: ServiceHelper.generateRandomString(),
@@ -86,15 +96,18 @@ const generateBasicData = () => {
 	};
 
 	const drawRevisions = {
-		voidRevision: { ...ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING),
+		voidRevision: {
+			...ServiceHelper.generateRevisionEntry(true, true, modelTypes.DRAWING),
 			timestamp: new Date(100000),
 			calibration: calibrationStatuses.UNCALIBRATED,
 		},
-		nonVoidRevision: { ...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
+		nonVoidRevision: {
+			...ServiceHelper.generateRevisionEntry(false, true, modelTypes.DRAWING),
 			timestamp: new Date(200000),
 			calibration: calibrationStatuses.CALIBRATED,
 		},
-		noFileRevision: { ...ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
+		noFileRevision: {
+			...ServiceHelper.generateRevisionEntry(false, false, modelTypes.DRAWING),
 			timestamp: new Date(300000),
 			calibration: calibrationStatuses.UNCONFIRMED,
 		},
@@ -148,7 +161,7 @@ const setupData = async ({ users, teamspace, project, models, drawRevisions, con
 	]);
 };
 
-const testGetRevisions = () => {
+const testGetRevisions = (isInternal = false) => {
 	describe('Get Revisions', () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, models, drawRevisions, conRevisions } = basicData;
@@ -180,39 +193,50 @@ const testGetRevisions = () => {
 
 		const generateTestData = (modelType) => {
 			let model;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = models.conWithRev;
-				modelNotFound = templates.containerNotFound;
 			} else {
 				model = models.drawWithRev;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const params = {
-				key: users.tsAdmin.apiKey,
+				key: isInternal ? undefined : users.tsAdmin.apiKey,
 				ts: teamspace,
 				projectId: project.id,
 				modelId: model._id,
 				modelType,
 			};
+			if (isInternal && modelType !== modelTypes.CONTAINER) {
+				return [
+					['trying to access endpoint for non-container model', params, false, templates.pageNotFound],
+				];
+			}
 
-			return [
-				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
+			const commonCases = [
 				['the teamspace does not exist', { ...params, ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
-				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
-				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 				['the model does not exist', { ...params, modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
 				['the model is of wrong type', { ...params, modelId: models.federation._id }, false, modelNotFound],
 				['the user has adequate permissions (non void revisions)', params, true],
 				['the user has adequate permissions (all revisions)', { ...params, showVoid: true }, true],
 			];
+
+			const externalCases = [
+				['the user does not have a valid session', { ...params, key: null }, false, templates.notLoggedIn],
+				['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
+				['the user does not have access to the model', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
+
+			];
+
+			return isInternal ? commonCases : [...commonCases, ...externalCases];
 		};
 
 		const runTest = (desc, params, success, error) => {
-			const route = ({ ts, projectId, modelId, modelType, showVoid = false, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions?showVoid=${showVoid}&key=${key}`;
+			const route = ({
+				ts, projectId, modelId, modelType, showVoid = false, key,
+			}) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions${ServiceHelper.createQueryString({ key: isInternal ? null : key, showVoid })}`;
 
 			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
 				const expectedStatus = success ? templates.ok.status : error.status;
@@ -235,7 +259,7 @@ const testGetRevisions = () => {
 	});
 };
 
-const testCreateNewRevision = () => {
+const testCreateNewRevision = (internal = false) => {
 	describe('Create New Revision', () => {
 		const basicData = generateBasicData();
 		const { users, teamspace, project, models, drawRevisions, conRevisions } = basicData;
@@ -257,16 +281,17 @@ const testCreateNewRevision = () => {
 		const generateTestData = (modelType) => {
 			let model;
 			let modelWithNoRev;
-			let modelNotFound;
+			let modelWithNoRev2;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = models.conWithRev;
 				modelWithNoRev = models.conWithNoRev;
-				modelNotFound = templates.containerNotFound;
+
+				modelWithNoRev2 = models.conWithNoRev2;
 			} else {
 				model = models.drawWithRev;
 				modelWithNoRev = models.drawWithNoRev;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const generateParams = () => deleteIfUndefined({
@@ -279,6 +304,7 @@ const testCreateNewRevision = () => {
 				tag: modelType === modelTypes.CONTAINER ? ServiceHelper.generateRandomString(10) : undefined,
 				statusCode: modelType === modelTypes.DRAWING ? statusCodes[0].code : undefined,
 				revCode: modelType === modelTypes.DRAWING ? ServiceHelper.generateRandomString(10) : undefined,
+				owner: users.tsAdmin.basicData.email,
 			});
 
 			const drawingCases = [
@@ -292,15 +318,23 @@ const testCreateNewRevision = () => {
 				['model status is processing', { ...generateParams(), modelId: models.processingStatusCont._id }, false, templates.invalidArguments],
 				['tag is invalid', { ...generateParams(), tag: ServiceHelper.generateRandomString(51) }, false, templates.invalidArguments],
 				['tag is already used', { ...generateParams(), tag: conRevisions.nonVoidRevision.tag }, false, templates.invalidArguments],
+				...(internal ? [
+					['owner is not provided', { ...generateParams(), owner: undefined }, false, templates.invalidArguments],
+					['owner not a known user', { ...generateParams(), owner: ServiceHelper.generateRandomEmail(), modelId: modelWithNoRev2?._id }, true],
+					['owner not an email', { ...generateParams(), owner: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
+				] : []),
 			];
 
-			return [
+			const externalCases = [
 				['the user does not have a valid session', { ...generateParams(), key: null }, false, templates.notLoggedIn],
-				['the teamspace does not exist', { ...generateParams(), ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
 				['the user is not a member of the teamspace', { ...generateParams(), key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 				['the user does not have access to the model', { ...generateParams(), key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the user is viewer', { ...generateParams(), key: users.viewer.apiKey }, false, templates.notAuthorized],
 				['the user is commenter', { ...generateParams(), key: users.commenter.apiKey }, false, templates.notAuthorized],
+			];
+
+			const commonCases = [
+				['the teamspace does not exist', { ...generateParams(), ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
 				['the project does not exist', { ...generateParams(), projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
 				['the model does not exist', { ...generateParams(), modelId: ServiceHelper.generateRandomString() }, false, modelNotFound],
 				['the model is of wrong type', { ...generateParams(), modelId: models.federation._id }, false, modelNotFound],
@@ -310,30 +344,69 @@ const testCreateNewRevision = () => {
 				['the file is larger than the user quota', { ...generateParams(), file: exceedQuotaDwgPath }, false, templates.quotaLimitExceeded],
 				['the file is valid', generateParams(), true],
 				['the file is valid with uppercase extension', { ...generateParams(), file: dwgModelUppercaseExt, modelId: modelWithNoRev._id }, true],
+			];
+
+			const allCases = [
+				...commonCases,
+				...(internal ? [] : externalCases),
 				...(modelType === modelTypes.DRAWING ? drawingCases : containerCases),
 			];
+
+			if (internal && modelType === modelTypes.DRAWING) {
+				// we don't allow drawings to be created internally, this should all return pageNotFound error.
+				return allCases.map(([desc, params]) => [desc, params, false, templates.pageNotFound]);
+			}
+
+			return allCases;
+		};
+
+		const generateRequest = (params) => {
+			const route = ({ ts, projectId, modelId, modelType, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions${internal ? '' : `?key=${key}`}`;
+			if (params.modelType === modelTypes.DRAWING) {
+				return agent.post(route(params))
+					.set('Content-Type', 'multipart/form-data')
+					.field('statusCode', params.statusCode)
+					.field('revCode', params.revCode)
+					.attach('file', params.file);
+			} if (internal) {
+				if (params.file) {
+					const externalFsPath = config[FileStorageTypes.EXTERNAL_FS].path;
+					// Copy the file in params.file to externalFS
+					const destPath = path.join(externalFsPath, path.basename(params.file));
+					copyFileSync(params.file, destPath);
+				}
+				return agent.post(route(params))
+					.send({
+						tag: params.tag,
+						file: params.file ? path.basename(params.file) : undefined,
+						owner: params.owner,
+					});
+			}
+			return agent.post(route(params))
+				.set('Content-Type', 'multipart/form-data')
+				.field('tag', params.tag)
+				.attach('file', params.file);
 		};
 
 		const runTest = (desc, params, success, error) => {
-			const route = ({ ts, projectId, modelId, modelType, key }) => `/v5/teamspaces/${ts}/projects/${projectId}/${modelType}s/${modelId}/revisions?key=${key}`;
-
 			test(`should ${success ? 'succeed' : `fail with ${error.code}`} if ${desc}`, async () => {
 				const expectedResult = success ? templates.ok : error;
 
-				const req = params.modelType === modelTypes.DRAWING
-					? agent.post(route(params))
-						.set('Content-Type', 'multipart/form-data')
-						.field('statusCode', params.statusCode)
-						.field('revCode', params.revCode)
-						.attach('file', params.file)
-					: agent.post(route(params))
-						.set('Content-Type', 'multipart/form-data')
-						.field('tag', params.tag)
-						.attach('file', params.file);
+				try {
+					const req = generateRequest(params);
+					const res = await req;
+					// const res = await req.expect(expectedResult.status);
+					expect(res.body.code).toEqual(success ? undefined : error.code);
+				} catch (err) {
+					if (err.code === 'EPIPE') {
+					// when the file is too big and the server early rejects, supertest throws an error before we can get the response body
+						expect([templates.maxSizeExceeded.code,
+							templates.quotaLimitExceeded.code, templates.pageNotFound.code]
+							.includes(expectedResult.code)).toBe(true);
+					}
 
-				const res = await req.expect(expectedResult.status);
-
-				expect(res.body.code).toEqual(success ? undefined : error.code);
+					throw err;
+				}
 			});
 		};
 
@@ -355,18 +428,16 @@ const testUpdateRevisionStatus = () => {
 			let model;
 			let nonVoidrevision;
 			let voidRevision;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = models.conWithRev;
 				nonVoidrevision = conRevisions.nonVoidRevision;
 				voidRevision = conRevisions.voidRevision;
-				modelNotFound = templates.containerNotFound;
 			} else {
 				model = models.drawWithRev;
 				nonVoidrevision = drawRevisions.nonVoidRevision;
 				voidRevision = drawRevisions.voidRevision;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const params = {
@@ -439,20 +510,18 @@ const testDownloadRevisionFiles = () => {
 			let revision;
 			let noFileRevision;
 			let voidRevision;
-			let modelNotFound;
+			const { modelNotFound } = templates;
 
 			if (modelType === modelTypes.CONTAINER) {
 				model = models.conWithRev;
 				revision = conRevisions.nonVoidRevision;
 				noFileRevision = conRevisions.noFileRevision;
 				voidRevision = conRevisions.voidRevision;
-				modelNotFound = templates.containerNotFound;
 			} else {
 				model = models.drawWithRev;
 				revision = drawRevisions.nonVoidRevision;
 				noFileRevision = drawRevisions.noFileRevision;
 				voidRevision = drawRevisions.voidRevision;
-				modelNotFound = templates.drawingNotFound;
 			}
 
 			const params = {
@@ -542,8 +611,8 @@ const testGetRevisionMD5Hash = () => {
 				['the user is viewer.', { ...params, key: users.viewer.apiKey }, true],
 				['the user is commenter.', { ...params, key: users.commenter.apiKey }, true],
 				['the project does not exist.', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-				['the model does not exist.', { ...params, modelId: ServiceHelper.generateRandomString() }, false, templates.containerNotFound],
-				['the model is of wrong type.', { ...params, modelId: models.federation._id }, false, templates.containerNotFound],
+				['the model does not exist.', { ...params, modelId: ServiceHelper.generateRandomString() }, false, templates.modelNotFound],
+				['the model is of wrong type.', { ...params, modelId: models.federation._id }, false, templates.modelNotFound],
 				['the revision does not exist.', { ...params, revision: ServiceHelper.generateRevisionEntry() }, false, templates.revisionNotFound],
 				['the revision has a file.', params, true],
 				['the revision has a file (void revision).', { ...params, revision: voidRevision }, false, templates.revisionNotFound],
@@ -582,7 +651,7 @@ const testGetImage = () => {
 			const model = models.drawWithRev;
 			const revision = drawRevisions.nonVoidRevision;
 			const { noFileRevision } = drawRevisions;
-			const modelNotFound = templates.drawingNotFound;
+			const { modelNotFound } = templates;
 
 			const params = {
 				key: users.tsAdmin.apiKey,
@@ -628,21 +697,31 @@ const testGetImage = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
-	beforeAll(async () => {
-		server = await ServiceHelper.app();
-		agent = await SuperTest(server);
+describe(determineTestGroup(__filename), () => {
+	afterEach(() => server.close());
+	afterAll(() => ServiceHelper.closeApp(server));
+
+	describe('External Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app();
+			agent = await SuperTest(server);
+		});
+
+		testGetRevisions();
+		testCreateNewRevision();
+		testUpdateRevisionStatus();
+		testDownloadRevisionFiles();
+		testGetImage();
+		testGetRevisionMD5Hash();
 	});
 
-	afterAll(() => Promise.all([
-		ServiceHelper.queue.purgeQueues(),
-		ServiceHelper.closeApp(server),
-	]));
+	describe('Internal Service', () => {
+		beforeAll(async () => {
+			server = await ServiceHelper.app(true);
+			agent = await SuperTest(server);
+		});
 
-	testGetRevisions();
-	testCreateNewRevision();
-	testUpdateRevisionStatus();
-	testDownloadRevisionFiles();
-	testGetImage();
-	testGetRevisionMD5Hash();
+		testGetRevisions(true);
+		testCreateNewRevision(true);
+	});
 });

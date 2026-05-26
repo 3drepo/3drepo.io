@@ -56,6 +56,10 @@ export const selectUsers = createSelector(
 		({users}, teamspace, {username}) => orderByFullName(users).map(prepareUserData.bind(null, teamspace, username))
 );
 
+export const selectAddUserIsPending = createSelector(
+	selectUserManagementDomain, (state) => state.addUserIsPending
+);
+
 export const selectUsersSuggestions = createSelector(
 	selectUserManagementDomain, (state) => state.usersSuggestions
 );

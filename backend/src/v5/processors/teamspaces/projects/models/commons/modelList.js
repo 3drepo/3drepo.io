@@ -16,12 +16,12 @@
  */
 
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
-const { getLatestRevision, getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions');
 const { USERS_DB_NAME } = require('../../../../../models/users.constants');
 const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');
 const { getMD5FileHash } = require('../../../../../services/filesManager');
+const { getRevisionByIdOrTag } = require('../../../../../models/revisions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { removeModelData } = require('../../../../../utils/helper/models');
 
@@ -40,18 +40,18 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 	await removeModelFromProject(teamspace, project, model);
 };
 
-ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
+ModelList.getModelList = async (teamspace, project, user, modelSettings, bypassPerms = false) => {
 	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 
-	const [isTSAdmin, favourites] = await Promise.all([
+	const [isTSAdmin, favourites] = bypassPerms ? [true, []] : await Promise.all([
 		isTeamspaceAdmin(teamspace, user),
 		getFavourites(user, teamspace),
 	]);
 
 	const isAdmin = isTSAdmin || hasProjectAdminPermissions(permissions, user);
 
-	return modelSettings.flatMap(({ _id, name, permissions: modelPerms }) => {
-		const perm = modelPerms ? modelPerms.find((entry) => entry.user === user) : undefined;
+	return modelSettings.flatMap(({ _id, name, permissions: modelPerms = [] }) => {
+		const perm = modelPerms.find((entry) => entry.user === user);
 		return (!isAdmin && !perm)
 			? [] : {
 				_id,
@@ -63,18 +63,10 @@ ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
 };
 
 ModelList.getModelMD5Hash = async (teamspace, container, revision) => {
-	let rev;
-
-	if (revision) {
-		rev = await getRevisionByIdOrTag(
-			teamspace, container, modelTypes.CONTAINER, revision,
-			{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 },
-			{ includeVoid: false });
-	} else {
-		rev = await getLatestRevision(
-			teamspace, container, modelTypes.CONTAINER,
-			{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 });
-	}
+	const rev = await getRevisionByIdOrTag(
+		teamspace, container, modelTypes.CONTAINER, revision,
+		{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 },
+		{ includeVoid: false });
 
 	if (!rev.rFile?.length) return {};
 

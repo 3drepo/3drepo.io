@@ -20,7 +20,6 @@ import { TicketFilter } from './cardFilters.types';
 import { ITemplate } from '@/v5/store/tickets/tickets.types';
 import { templatesToFilters } from './filtersSelection/tickets/ticketFilters.helpers';
 
-
 type DisplayMode = 'card' | 'other';
 export interface TicketsFiltersContextType {
 	choosablefilters:  TicketFilter[];
@@ -124,7 +123,7 @@ export const TicketsFiltersContextComponent = ({
 			choosablefilters,
 			isFiltering,
 			templates, 
-			modelsIds, 
+			modelsIds,
 		}}>
 			{children}
 		</TicketsFiltersContext.Provider>

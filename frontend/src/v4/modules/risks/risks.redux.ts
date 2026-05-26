@@ -177,7 +177,7 @@ export const fetchRiskFailure = (state = INITIAL_STATE) => {
 export const saveRiskSuccess = (state = INITIAL_STATE, { risk, resetComponentState =  true }) => {
 	const risksMap = updateRiskProps(state.risksMap, risk._id, risk);
 
-	const newComponentState = { ...state.componentState };
+	const newComponentState = { ...state.componentState, savedPin: risk.position };
 
 	if (resetComponentState) {
 		newComponentState.newRisk = {};

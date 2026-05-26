@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateCustomStatusValues, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
 const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { statusTypes, statuses } = require(`${src}/schemas/tickets/templates.constants`);
@@ -1039,6 +1040,10 @@ const testValidate = () => {
 		['module with name contains full stop', createSkeleton([{ name: `.${generateRandomString()}` }]), false],
 		['module with name contains comma', createSkeleton([{ name: `,${generateRandomString()}` }]), false],
 		['module with a property that has the same name as a root property', { ...createSkeleton([{ name: generateRandomString(), properties: [{ name: 'a', type: propTypes.TEXT }] }]), properties: [{ name: 'a', type: propTypes.TEXT }] }, true],
+		['module with a valid color', createSkeleton([{ name: generateRandomString(), color: '#AABBCC' }]), true],
+		['module with an invalid color', createSkeleton([{ name: generateRandomString(), color: generateRandomString() }]), false],
+		['module with an invalid color (missing #)', createSkeleton([{ name: generateRandomString(), color: 'AABBCC' }]), false],
+		['module with a valid color (preset module)', createSkeleton([{ type: presetModules.SEQUENCING, color: '#AABBCC' }]), false],
 		['all modules provided are valid', createSkeleton([
 			{ type: presetModules.SEQUENCING }, { name: generateRandomString() }]), true],
 		['2 modules with same property name', createSkeleton([
