@@ -41,6 +41,7 @@ ResponseCodes.templates = {
 
 	// Teamspace related error
 	teamspaceNotFound: { message: 'Teamspace not found.', status: 404 },
+	userProvisioned: { message: 'Teamspace users and roles are managed externally', status: 403 },
 
 	membershipInactive: { message: 'Your membership to this teamspace is currently inactive, please contact a teamspace admin.', status: 403 },
 	pendingInviteAcceptance: { message: 'You have not responded to the invitation email, please accept before proceeding.', status: 403 },
@@ -53,6 +54,8 @@ ResponseCodes.templates = {
 
 	// Model related error
 	modelNotFound: { message: 'Model not found.', status: 404 },
+	meshNotFound: { message: 'Mesh not found.', status: 404 },
+	textureNotFound: { message: 'Texture not found.', status: 404 },
 
 	// Federation related error
 	federationNotFound: { message: 'Federation not found.', status: 404 },
@@ -89,6 +92,9 @@ ResponseCodes.templates = {
 
 	// Legend related error
 	legendNotFound: { message: 'Legend not found.', status: 404 },
+
+	// Clashes related error
+	clashPlanNotFound: { message: 'Clash plan not found.', status: 404 },
 
 	// endpoint decommissioned
 	endpointDecommissioned: { message: 'Endpoint no longer available.', status: 410 },

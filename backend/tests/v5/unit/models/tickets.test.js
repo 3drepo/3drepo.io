@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomNumber, generateRandomObject } = require('../../helper/services');
+const { generateRandomString, generateUUID, generateRandomNumber, generateRandomObject } = require('../../helper/services');
 
 const Ticket = require(`${src}/models/tickets`);
 const { basePropertyLabels } = require(`${src}/schemas/tickets/templates.constants`);
@@ -387,7 +388,6 @@ const testUpdateTickets = () => {
 					[propToUpdate]: newPropValue,
 					[basePropertyLabels.UPDATED_AT]: date,
 				},
-				modules: {},
 			});
 
 			expectedCmd.push({ updateOne: { filter: { _id, teamspace, project, model },
@@ -419,7 +419,6 @@ const testUpdateTickets = () => {
 		const changeSet = [];
 
 		times(ticketCount, () => {
-			const date = new Date();
 			const oldPropValue = generateRandomString();
 			const newPropValue = generateRandomString();
 			const _id = generateRandomString();
@@ -427,7 +426,6 @@ const testUpdateTickets = () => {
 			const moduleName = generateRandomString();
 
 			updateData.push({
-				properties: { [basePropertyLabels.UPDATED_AT]: date },
 				modules: { [moduleName]: { [propToUpdate]: newPropValue } },
 			});
 
@@ -441,14 +439,13 @@ const testUpdateTickets = () => {
 				update: {
 					$set: {
 						[`modules.${moduleName}.${propToUpdate}`]: newPropValue,
-						[`properties.${basePropertyLabels.UPDATED_AT}`]: date,
 					},
 				} } });
 
 			changeSet.push({
 				ticket: { _id, type },
 				author,
-				timestamp: date,
+				timestamp: expect.any(Date),
 				changes: {
 					modules: { [moduleName]: { [propToUpdate]: { from: oldPropValue, to: newPropValue } } },
 				} });
@@ -755,6 +752,59 @@ const testUpdateTickets = () => {
 	});
 };
 
+const testRemoveAllTicketsWithTemplate = () => {
+	describe('Remove all tickets with template', () => {
+		test('Should return a list of ticketIds from template that were provided', async () => {
+			const teamspace = generateRandomString();
+			const templateIds = times(10, generateUUID);
+			const dbFindOutput = templateIds.map((id) => ({ _id: id }));
+			const expectedOutput = dbFindOutput.map(({ _id }) => _id);
+			// eslint-disable-next-line security/detect-non-literal-regexp
+			const counterRegex = new RegExp(`.+_(${templateIds.map(UUIDToString).join('|')})$`);
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(dbFindOutput);
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			const res = await Ticket.removeAllTicketsWithTemplates(teamspace, templateIds);
+
+			expect(res).toEqual(expectedOutput);
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				teamspace, ticketCol, { teamspace, type: { $in: templateIds } }, { _id: 1 },
+			);
+
+			expect(deleteFn).toHaveBeenCalledTimes(2);
+			expect(deleteFn)
+				.toHaveBeenCalledWith(teamspace, ticketCol, { _id: { $in: expectedOutput } });
+			expect(deleteFn)
+				.toHaveBeenCalledWith(teamspace, ticketCounterCol, { _id: counterRegex },
+				);
+		});
+	});
+};
+
+const testGetTicketsByTemplate = () => {
+	describe('Get tickets by template', () => {
+		const teamspace = generateRandomString();
+
+		const template = generateRandomString();
+
+		test('Should return whatever the query returns', async () => {
+			const expectedOutput = { [generateRandomString()]: generateRandomString() };
+			const projection = { [generateRandomString()]: generateRandomString() };
+
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedOutput);
+
+			await expect(Ticket.getTicketsByTemplateId(teamspace, template, projection))
+				.resolves.toEqual(expectedOutput);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, ticketCol,
+				{ teamspace, type: template }, projection);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAddTicketsWithTemplate();
 	testRemoveAllTickets();
@@ -763,4 +813,6 @@ describe(determineTestGroup(__filename), () => {
 	testGetAllTickets();
 	testGetTicketsByQuery();
 	testGetTicketsByFilter();
+	testRemoveAllTicketsWithTemplate();
+	testGetTicketsByTemplate();
 });

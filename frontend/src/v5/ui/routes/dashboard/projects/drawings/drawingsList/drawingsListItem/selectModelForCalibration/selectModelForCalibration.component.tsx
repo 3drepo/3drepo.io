@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useHistory } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { FormModal } from '@controls/formModal/formModal.component';
 import { ListSubheader, MenuItem } from '@mui/material';
 import { DrawingsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -35,7 +35,7 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
 	const selectedDrawing = DrawingsHooksSelectors.selectDrawingById(drawingId);
-	const history = useHistory();
+	const navigate = useNavigate();
 	const containersData = useContainersData();
 	const federationsData = useFederationsData();
 	const { handleSubmit, control, watch } = useForm();
@@ -48,7 +48,7 @@ export const SelectModelForCalibration = ({ drawingId, onClickClose, ...props })
 
 	const onSubmit = () => {
 		const path = viewerRoute(teamspace, project, modelId, undefined, { drawingId, isCalibrating: true }, false);
-		history.push(path);
+		navigate(path);
 		onClickClose();
 	};
 

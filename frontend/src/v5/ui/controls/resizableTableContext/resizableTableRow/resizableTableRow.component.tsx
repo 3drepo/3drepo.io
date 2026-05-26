@@ -15,13 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useContext } from 'react';
 import { ResizableTableContext } from '../resizableTableContext';
 import { Row } from './resizableTableRow.styles';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
 
 export const ResizableTableRow = (props) => {
-	const { getVisibleColumnsWidths, columnGap } = useContext(ResizableTableContext);
-	const gridTemplateColumns = getVisibleColumnsWidths().map((w) => `${w}px`).join(' ');
-	
-	return (<Row style={{ gridTemplateColumns, gap: columnGap }} {...props} />);
+	const { columnGap } = useContextWithCondition(ResizableTableContext, []);
+	return (<Row $gap={columnGap} {...props} />);
 };

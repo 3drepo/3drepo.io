@@ -27,15 +27,21 @@ import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMen
 import { ListSubheader } from './selectMenus.styles';
 
 type ContainersAndFederationsSelectProps = { isNewTicketDirty?: boolean } & SelectProps;
-export const ContainersAndFederationsSelect = ({ isNewTicketDirty, ...props }: ContainersAndFederationsSelectProps) => {
+export const ContainersAndFederationsSelect = ({ isNewTicketDirty, onChange, ...props }: ContainersAndFederationsSelectProps) => {
 	const containers = ContainersHooksSelectors.selectContainers();
 	const federations = FederationsHooksSelectors.selectFederations();
+	const containersAndFederations = [...containers, ...federations];
 
 	const getRenderText = (ids: any[] | null = []) => {
-		const itemsLength = ids.length;
+		const selectedContainersOrFederations = containersAndFederations.filter(({ _id }) => ids.includes(_id));
+		const itemsLength = selectedContainersOrFederations.length;
+
 		if (itemsLength === 1) {
-			const [id] = ids;
-			return ((containers.find(({ _id }) => _id === id) || federations.find(({ _id }) => _id === id)) || {}).name;
+			return selectedContainersOrFederations[0].name;
+		}
+
+		if (itemsLength === 0) {
+			return undefined;
 		}
 
 		return formatMessage({
@@ -55,6 +61,7 @@ export const ContainersAndFederationsSelect = ({ isNewTicketDirty, ...props }: C
 			{...props}
 			label={formatMessage({ id: 'ticketTable.modelSelection.placeholder', defaultMessage: 'Select Federation / Container' })}
 			renderValue={(ids: any[] | null = []) => (<b>{getRenderText(ids)}</b>)}
+			onChange={onChange}
 			onOpen={handleOpen}
 		>
 			<ListSubheader>

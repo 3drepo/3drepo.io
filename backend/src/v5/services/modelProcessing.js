@@ -16,17 +16,19 @@
  */
 
 const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
+const { access, copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { codeExists, templates } = require('../utils/responseCodes');
-const { copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
-const { createWriteStream, readdirSync } = require('fs');
+const { constants, createWriteStream, readFileSync, readdirSync } = require('fs');
 const { listenToQueue, queueMessage } = require('../handler/queue');
 const { modelTypes, processStatuses } = require('../models/modelSettings.constants');
 const { DRAWINGS_HISTORY_COL } = require('../models/revisions.constants');
 const Path = require('path');
+const Yup = require('yup');
 const { addRevision } = require('../models/revisions');
 const archiver = require('archiver');
 const { events } = require('./eventsManager/eventsManager.constants');
 const { execFile } = require('child_process');
+const { pipeline } = require('stream/promises');
 const { publish } = require('./eventsManager/eventsManager');
 const { cn_queue: queueConfig } = require('../utils/config');
 const processingLabel = require('../utils/logger').labels.modelProcessing;
@@ -38,13 +40,13 @@ const ModelProcessing = {};
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
 const {
 	callback_queue: callbackq,
-	worker_queue: jobq,
 	model_queue: modelq,
 	drawing_queue: drawingq,
 	shared_storage: sharedDir,
+	clash_queue: clashq,
 } = queueConfig;
 
-const onCallbackQMsg = async ({ content, properties }) => {
+const onCallbackQMsg = ({ content, properties }) => {
 	logger.logInfo(`[Received][${properties.correlationId}] ${content}`);
 	try {
 		const { status, database: teamspace, project: model, user, value, message } = JSON.parse(content);
@@ -52,18 +54,8 @@ const onCallbackQMsg = async ({ content, properties }) => {
 			publish(events.QUEUED_TASK_UPDATE,
 				{ teamspace, model, corId: properties.correlationId, status });
 		} else {
-			const fedDataPath = `${sharedDir}/${properties.correlationId}/obj.json`;
-
-			const isFed = !!await stat(fedDataPath).catch(() => false);
-			const fedData = { };
-			if (isFed) {
-				// eslint-disable-next-line
-				const { subProjects } = require(fedDataPath);
-				fedData.containers = subProjects;
-			}
-
 			publish(events.QUEUED_TASK_COMPLETED,
-				{ teamspace, model, corId: properties.correlationId, user, value, message, ...fedData });
+				{ teamspace, model, corId: properties.correlationId, user, value, message });
 		}
 	} catch (err) {
 		logger.logError(`[${properties.correlationId}] Failed to process message: ${err?.message}`);
@@ -108,14 +100,26 @@ ModelProcessing.processDrawingUpload = async (teamspace, project, model, revInfo
 	const fileId = generateUUID();
 	const { owner, ...revData } = revInfo;
 
+	const incomplete = format !== '.pdf';
+
+	if (incomplete) {
+		revData.incomplete = true;
+	} else {
+		revData.image = fileId;
+	}
+
 	const rev_id = await addRevision(teamspace, project, model, modelTypes.DRAWING,
-		{ ...revData, author: owner, format, rFile: [fileId], incomplete: true });
+		{ ...revData, author: owner, format, rFile: [fileId] });
 
 	const fileMeta = { name: file.originalname, rev_id, project, model };
 	await storeFile(teamspace, DRAWINGS_HISTORY_COL, fileId, file.buffer, fileMeta);
 
-	const queueMeta = { format, size: file.buffer.length, owner };
-	await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta, file.buffer);
+	if (incomplete) {
+		const queueMeta = { format, size: file.buffer.length, owner };
+		await queueDrawingUpload(teamspace, project, model, UUIDToString(rev_id), queueMeta, file.buffer);
+	} else {
+		publish(events.QUEUED_TASK_COMPLETED, { teamspace, model, corId: UUIDToString(rev_id), value: 0, user: owner });
+	}
 };
 
 ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname, path }) => {
@@ -165,40 +169,15 @@ ModelProcessing.queueModelUpload = async (teamspace, model, data, { originalname
 	}
 };
 
-ModelProcessing.queueFederationUpdate = async (teamspace, federation, info) => {
-	const revId = generateUUIDString();
+ModelProcessing.getContainerFileName = (corId) => {
 	try {
-		const data = {
-			...info,
-			database: teamspace,
-			project: federation,
-			subProjects: info.containers.map(({ _id, group }) => ({ database: teamspace, project: _id, group })),
-			revId,
-		};
-		delete data.containers;
-
-		const filePath = `${SHARED_SPACE_TAG}/${revId}/obj.json`;
-
-		await mkdir(`${sharedDir}/${revId}`);
-		await writeFile(`${sharedDir}/${revId}/obj.json`, JSON.stringify(data));
-
-		await queueMessage(jobq, revId, `genFed ${filePath} ${teamspace}`);
-		publish(events.QUEUED_TASK_UPDATE, { teamspace,
-			model: federation,
-			corId: revId,
-			status: processStatuses.QUEUED });
-	} catch (err) {
-		// Clean up files we created
-		rm(`${sharedDir}/${revId}/obj.json`).catch((cleanUpErr) => {
-			logger.logError(`Failed to remove files (clean up on failure : ${cleanUpErr}`);
-		});
-
-		if (err?.code && codeExists(err.code)) {
-			throw err;
-		}
-
-		logger.logError('Failed to queue federate job', err?.message);
-		throw templates.queueInsertionFailed;
+		const filePath = Path.join(sharedDir, `${corId}.json`);
+		const jsonFile = JSON.parse(readFileSync(filePath).toString());
+		const fileName = jsonFile.file.split('/').slice(-1)[0];
+		return fileName;
+	} catch (error) {
+		logger.logError(`Failed to get file name for ${corId}: ${error.message}`);
+		return undefined;
 	}
 };
 
@@ -259,6 +238,58 @@ ModelProcessing.getLogArchive = async (corId) => {
 	}
 };
 
-ModelProcessing.init = () => listenToQueue(callbackq, onCallbackQMsg);
+ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
+	const configPath = `${sharedDir}/${corId}/clashConfig.json`;
+	try {
+		await mkdir(`${sharedDir}/${corId}`);
+
+		const writableStream = createWriteStream(configPath);
+		await pipeline(stream, writableStream);
+		const msg = `processClash ${teamspace} ${UUIDToString(project)} ${SHARED_SPACE_TAG}/${corId}/clashConfig.json`;
+		await queueMessage(clashq, corId, msg);
+	} catch (err) {
+		await rm(configPath).catch((cleanUpErr) => {
+			logger.logError(`Failed to remove files (clean up on failure): ${cleanUpErr}`);
+		});
+
+		if (err?.code && codeExists(err.code)) {
+			throw err;
+		}
+
+		logger.logError('Failed to queue clash test run', err?.message);
+		throw templates.queueInsertionFailed;
+	}
+};
+
+const checkQueueConfig = async () => {
+	const queueConfigSchema = Yup.object({
+		host: Yup.string().trim().min(1).required(),
+		shared_storage: Yup.string().trim().min(1).required(),
+		callback_queue: Yup.string().trim().min(1).required(),
+		model_queue: Yup.string().trim().min(1).required(),
+		clash_queue: Yup.string().trim().min(1).required(),
+		event_exchange: Yup.string().trim().min(1).required(),
+	});
+
+	try {
+		await queueConfigSchema.validate(queueConfig);
+		const stats = await stat(queueConfig.shared_storage);
+
+		if (!stats.isDirectory()) {
+			throw new Error('cn_queue.shared_storage must be a directory');
+		}
+
+		// eslint-disable-next-line no-bitwise
+		await access(queueConfig.shared_storage, constants.R_OK | constants.W_OK);
+	} catch (err) {
+		logger.logError(`Invalid queue configuration: ${err.message}`);
+		throw new Error(`Invalid queue configuration: ${err.message}`);
+	}
+};
+
+ModelProcessing.init = async () => {
+	await checkQueueConfig();
+	await listenToQueue(callbackq, onCallbackQMsg);
+};
 
 module.exports = ModelProcessing;

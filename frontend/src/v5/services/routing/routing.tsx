@@ -18,7 +18,7 @@ import { IContainer } from '@/v5/store/containers/containers.types';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { IProject } from '@/v5/store/projects/projects.types';
 import { generatePath } from 'react-router';
-import { VIEWER_ROUTE, PROJECT_ROUTE_BASE, PROJECT_ROUTE, TICKETS_SELECTION_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { VIEWER_ROUTE, PROJECT_ROUTE_BASE, PROJECT_ROUTE, TICKETS_SELECTION_ROUTE, VIEWER_REVISION_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { IContainerRevision } from '@/v5/store/containers/revisions/containerRevisions.types';
 import { generateFullPath } from '@/v5/helpers/url.helper';
 
@@ -62,7 +62,8 @@ export const viewerRoute = (
 		revision: revisionId,
 	};
 
-	return generateFullPath(VIEWER_ROUTE, params, newSearchParams, keepSearchParams);
+	const route = revisionId ? VIEWER_REVISION_ROUTE : VIEWER_ROUTE;
+	return generateFullPath(route, params, newSearchParams, keepSearchParams);
 };
 
 export const ticketsSelectionRoute = (

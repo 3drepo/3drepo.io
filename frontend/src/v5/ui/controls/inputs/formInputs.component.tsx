@@ -25,18 +25,18 @@ import { NumberField } from './numberField/numberField.component';
 import { Select, SelectProps } from './select/select.component';
 import { SelectView, SelectViewProps } from './selectView/selectView.component';
 import { TextArea, TextAreaProps } from './textArea/textArea.component';
-import { TextAreaFixedSize, TextAreaFixedSizeProps } from './textArea/textAreaFixedSize.component';
+import { TextAreaExpandable, TextAreaExpandableProps } from './textArea/textAreaExpandable.component';
 import { TextField, TextFieldProps } from './textField/textField.component';
 import { DateTimePicker, DateTimePickerProps } from './datePicker/dateTimePicker.component';
 import { BooleanSelect, BooleanSelectProps } from './booleanSelect/booleanSelect.component';
 import { MultiSelect } from './multiSelect/multiSelect.component';
-import { JobsAndUsersProperty, JobsAndUsersPropertyProps } from '../../routes/viewer/tickets/ticketsForm/properties/jobsAndUsersProperty.component';
+import { UsersAndJobsSelect, UsersAndJobsSelectProps } from '@controls/usersAndJobsSelect/usersAndJobsSelect.component';
 
 // text inputs
 export const FormNumberField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={NumberField} {...props} />);
 export const FormTextField = (props: InputControllerProps<TextFieldProps>) => (<InputController Input={TextField} {...props} />);
 export const FormTextArea = forwardRef((props: InputControllerProps<TextAreaProps>, ref: any) => (<InputController Input={TextArea} {...props} ref={ref} />));
-export const FormTextAreaFixedSize = forwardRef((props: InputControllerProps<TextAreaFixedSizeProps>, ref) => (<InputController Input={TextAreaFixedSize} {...props} ref={ref} />));
+export const FormTextAreaExpandable = forwardRef((props: InputControllerProps<TextAreaExpandableProps>, ref) => (<InputController Input={TextAreaExpandable} {...props} ref={ref} />));
 
 // calendar inputs
 export const FormDueDate = (props: InputControllerProps<DueDateProps>) => (<InputController Input={DueDate} {...props} />);
@@ -48,7 +48,7 @@ export const FormSelect = (props: InputControllerProps<SelectProps>) => (<InputC
 export const FormMultiSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={MultiSelect} {...props} />);
 export const FormChipSelect = (props: InputControllerProps<ChipSelectProps>) => (<InputController Input={({ inputRef, ...chipProps }: any) => <ChipSelect {...chipProps} />} {...props} />);
 export const FormSearchSelect = (props: InputControllerProps<SelectProps>) => (<InputController Input={SearchSelect} {...props} />);
-export const FormJobsAndUsersSelect = (props: InputControllerProps<JobsAndUsersPropertyProps>) => (<InputController Input={JobsAndUsersProperty} {...props} />);
+export const FormJobsAndUsersSelect = (props: InputControllerProps<UsersAndJobsSelectProps>) => (<InputController Input={UsersAndJobsSelect} {...props} />);
 export const FormBooleanSelect = (props: InputControllerProps<BooleanSelectProps>) => (<InputController Input={BooleanSelect} {...props} />);
 
 // control inputs

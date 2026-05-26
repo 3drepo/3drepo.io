@@ -21,7 +21,7 @@ import { min, range } from 'lodash';
 import { Button } from '@controls/button';
 import ArrowUpCircleIcon from '@assets/icons/filled/arrow_up_circle-filled.svg';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { ProjectsHooksSelectors, TeamspacesHooksSelectors, DrawingRevisionsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ProjectsHooksSelectors, TeamspacesHooksSelectors, DrawingRevisionsHooksSelectors, DrawingsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
 import { canUploadToBackend } from '@/v5/store/drawings/drawings.helpers';
 import { uploadToDrawing } from '@/v5/ui/routes/dashboard/projects/drawings/uploadDrawingRevisionForm/uploadDrawingRevisionForm.helpers';
@@ -47,6 +47,7 @@ import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
 import { downloadFile } from '@/v5/helpers/download.helper';
 import { getState } from '@/v5/helpers/redux.helpers';
+import { formatMessage } from '@/v5/services/intl';
 
 interface IDrawingRevisionDetails {
 	drawingId: string;
@@ -59,7 +60,8 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 	const isLoading = DrawingRevisionsHooksSelectors.selectIsPending(drawingId);
 	const revisions = DrawingRevisionsHooksSelectors.selectRevisions(drawingId);
 	const selected = revisions.findIndex((r) => !r.void);
-
+	const hasPermissionsToUpload = DrawingsHooksSelectors.selectCanUploadToProject();
+	
 	const handleDownloadRevision = async (revision: IDrawingRevision) => {
 		await downloadFile(getRevisionFileUrl(teamspace, project, drawingId, revision._id));
 	};
@@ -71,30 +73,28 @@ export const DrawingRevisionDetails = ({ drawingId, revisionsCount, status }: ID
 	}, []);
 
 	if (!revisionsCount && !isLoading && !revisions.length) {
+		let emptyMessage = formatMessage({ id: 'drawings.revisions.emptyMessage', defaultMessage: 'You haven’t added any Files.' }); 
+		
+		if (!canUploadToBackend(status)) {
+			emptyMessage = formatMessage({ id: 'drawings.revisions.emptyMessageBusy', defaultMessage: 'Your files are being processed at this moment, please wait before creating new revisions for this container.' }); 
+		}
+
+		if (!hasPermissionsToUpload) {
+			emptyMessage = formatMessage({ id: 'drawings.revisions.emptyMessageNoPermissions', defaultMessage: 'Empty drawing. Ask someone with collaborators permissions to upload a file.' }); 
+		}
+
 		return (
 			<RevisionsListEmptyWrapper>
 				<RevisionsListEmptyContainer>
-					{
-						canUploadToBackend(status) ? (
-							<>
-								<RevisionsListEmptyText>
-									<FormattedMessage id="drawings.revisions.emptyMessage" defaultMessage="You haven’t added any Files." />
-								</RevisionsListEmptyText>
-								<Button
-									startIcon={<ArrowUpCircleIcon />}
-									variant="contained"
-									color="primary"
-									onClick={() => uploadToDrawing(drawingId)}
-								>
-									<FormattedMessage id="drawings.revisions.uploadFile" defaultMessage="Upload File" />
-								</Button>
-							</>
-						) : (
-							<RevisionsListEmptyText>
-								<FormattedMessage id="drawings.revisions.emptyMessageBusy" defaultMessage="Your files are being processed at this moment, please wait before creating new revisions for this drawing." />
-							</RevisionsListEmptyText>
-						)
-					}
+					<RevisionsListEmptyText>{emptyMessage}</RevisionsListEmptyText>
+					{(hasPermissionsToUpload && canUploadToBackend) && (<Button
+						startIcon={<ArrowUpCircleIcon />}
+						variant="contained"
+						color="primary"
+						onClick={() => uploadToDrawing(drawingId)}
+					>
+						<FormattedMessage id="drawings.revisions.uploadFile" defaultMessage="Upload File" />
+					</Button>)}
 				</RevisionsListEmptyContainer>
 			</RevisionsListEmptyWrapper>
 		);

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
@@ -65,7 +66,7 @@ const setupBasicData = async (users, teamspace, project, models) => {
 const testGetComment = () => {
 	describe('Get comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -95,7 +96,7 @@ const testGetComment = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
 
 			return [
@@ -144,7 +145,7 @@ const testGetComment = () => {
 const testGetCommentsList = () => {
 	describe('Get comments list', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -186,7 +187,7 @@ const testGetCommentsList = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType, orderChecker: orderCheck('createdAt', true) };
 
 			return [
@@ -256,15 +257,18 @@ const testGetCommentsList = () => {
 const testCreateComment = () => {
 	describe('Create comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 		const comment = ServiceHelper.generateComment();
+
+		const noCommentTemplate = ServiceHelper.generateTemplate(false, false, { comments: false });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
-			await ServiceHelper.db.createTemplates(teamspace, [template]);
+			await ServiceHelper.db.createTemplates(teamspace, [template, noCommentTemplate]);
 
 			await Promise.all([fed, con].map(async (model) => {
 				const ticket = ServiceHelper.generateTicket(template);
+				const noCommentTicket = ServiceHelper.generateTicket(noCommentTemplate);
 
 				const modelType = fed === model ? 'federation' : 'container';
 				const addTicketRoute = (modelId) => `/v5/teamspaces/${teamspace}/projects/${project.id}/${modelType}s/${modelId}/tickets?key=${users.tsAdmin.apiKey}`;
@@ -273,6 +277,11 @@ const testCreateComment = () => {
 				ticket._id = ticketRes.body._id;
 				// eslint-disable-next-line no-param-reassign
 				model.ticket = ticket;
+
+				const noCommentTicketRes = await agent.post(addTicketRoute(model._id)).send(noCommentTicket);
+				noCommentTicket._id = noCommentTicketRes.body._id;
+				// eslint-disable-next-line no-param-reassign
+				model.noCommentTicket = noCommentTicket;
 			}));
 		});
 
@@ -280,8 +289,10 @@ const testCreateComment = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
-			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
+			const { modelNotFound } = templates;
+			const baseRouteParams = {
+				key: users.tsAdmin.apiKey, projectId: project.id, model, modelType, allowComments: true,
+			};
 
 			return [
 				['the user does not have a valid session', { ...baseRouteParams, key: null }, false, templates.notLoggedIn],
@@ -291,15 +302,19 @@ const testCreateComment = () => {
 				[`the model provided is not a ${modelType}`, { ...baseRouteParams, model: wrongTypeModel }, false, modelNotFound],
 				[`the user does not have access to the ${modelType}`, { ...baseRouteParams, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 				['the ticket does not exist', { ...baseRouteParams, ticketId: ServiceHelper.generateRandomString() }, false, templates.ticketNotFound],
+				['the ticket does not allow comments', { ...baseRouteParams, allowComments: false }, false, templates.invalidArguments],
 				['the ticket id is valid', baseRouteParams, true],
 			];
 		};
 
-		const runTest = (desc, { model, ...routeParams }, success, expectedOutput) => {
+		const runTest = (desc, { model, allowComments, ...routeParams }, success, expectedOutput) => {
 			const postRoute = ({ key, projectId, modelId, ticketId, modelType }) => `/v5/teamspaces/${teamspace}/projects/${projectId}/${modelType}s/${modelId}/tickets/${ticketId}/comments/${key ? `?key=${key}` : ''}`;
 
 			test(`should ${success ? 'succeed' : `fail with ${expectedOutput.code}`} if ${desc}`, async () => {
-				const endpoint = postRoute({ modelId: model._id, ticketId: model.ticket?._id, ...routeParams });
+				const endpoint = postRoute({
+					modelId: model._id,
+					ticketId: allowComments ? model.ticket?._id : model.noCommentTicket?._id,
+					...routeParams });
 				const expectedStatus = success ? templates.ok.status : expectedOutput.status;
 
 				const res = await agent.post(endpoint).send(comment).expect(expectedStatus);
@@ -323,7 +338,7 @@ const testCreateComment = () => {
 const testUpdateComment = () => {
 	describe('Update comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -352,7 +367,7 @@ const testUpdateComment = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
 
 			return [
@@ -417,7 +432,7 @@ const testUpdateComment = () => {
 const testDeleteComment = () => {
 	describe('Delete comment', () => {
 		const { users, teamspace, project, con, fed } = generateBasicData();
-		const template = ServiceHelper.generateTemplate();
+		const template = ServiceHelper.generateTemplate(false, false, { comments: true });
 
 		beforeAll(async () => {
 			await setupBasicData(users, teamspace, project, [con, fed]);
@@ -445,7 +460,7 @@ const testDeleteComment = () => {
 			const modelType = isFed ? 'federation' : 'container';
 			const wrongTypeModel = isFed ? con : fed;
 			const model = isFed ? fed : con;
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const baseRouteParams = { key: users.tsAdmin.apiKey, projectId: project.id, model, modelType };
 
 			return [
@@ -505,7 +520,7 @@ const testDeleteComment = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

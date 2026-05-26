@@ -31,7 +31,7 @@ export const HiddenSelect = styled(Select).attrs({
 		},
 		anchorOrigin: {
 			vertical: 'top',
-			horizontal: 'right',
+			horizontal: 'left',
 		},
 		transformOrigin: {
 			vertical: 'top',
@@ -43,8 +43,7 @@ export const HiddenSelect = styled(Select).attrs({
 	width: 0;
 	overflow: hidden;
 	position: absolute;
-	right: 0;
-	top: 0;
+	top: 24px;
 `;
 
 export const SearchInput = styled(SearchInputBase).attrs({

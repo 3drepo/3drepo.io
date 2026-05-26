@@ -18,22 +18,151 @@ import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { List } from './ticketsList.styles';
+import { List, ListContainer } from './ticketsList.styles';
+import { useEffect, useRef } from 'react';
+import { untilXFramesPassed, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
+import { TicketsGroup } from '../../../../components/tickets/ticketsGroupBy.helper';
+import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
 
-export const TicketsList = () => {
+
+const TicketsListsContainer = ({ children, scrollerRef }: any) => {
+	return (
+		<ListContainer >
+			<div 
+				ref={scrollerRef }
+				style={{
+					overflowY: 'auto',
+					position: 'relative',
+					height: '100%',
+				}}
+			>
+				<div style={{ position:'absolute' }}>
+					{children}
+				</div>
+			</div>
+		</ListContainer>
+	);
+};
+
+export const TicketsList = ({ groupBy, loading }: any) => {
 	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
+	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
+
+	const tableHandle = useRef<VListHandle>();
+	const subTableHandle = useRef<VListHandle>();
+	const scrollerRef = useRef<Element>();
+
+	let selectedIndex = -1;
+	let selectedSubIndex = -1;
+
+	selectedIndex = groups.findIndex((g) => {
+		const index = g.tickets.findIndex((ticket) => ticket._id === selectedTicketId);
+		if (index !== -1) {
+			selectedSubIndex = index;
+			return true;
+		}
+		return false;
+	});
+
+	useEffect(() => {
+		if (selectedIndex == -1) return;
+		if (groupBy === NONE_OPTION) {
+			tableHandle.current?.gotoIndex(selectedSubIndex, scrollerRef.current);
+		 } else {
+			if (!tableHandle.current) {
+				return;
+			}
+			const groupCollapseHeight = 50;
+
+			const scrollingElement = scrollerRef.current;
+
+			// For going to an index on a sublist there's no built in mechanism for now
+			// so it's done manually
+			const offset = tableHandle.current.getOffsetToIndex(selectedIndex) + 
+						(subTableHandle.current?.getOffsetToIndex(selectedSubIndex) || 0) + 
+						groupCollapseHeight;
+					
+			let isShowing = subTableHandle.current?.isItemWithIndexShowing(selectedSubIndex, scrollingElement);
+
+			if (!scrollingElement) {
+				return;
+			}
+
+			if (!isShowing) {
+				scrollingElement.scrollTop = offset;
+			}
+
+			(async () => {
+				let done = false;
+				for (let i = 0 ; i < 10 && !done ; i++) {
+					await untilXFramesPassed(10);
+					const currentScroll = Math.round(scrollingElement.scrollTop);
+					const otherScroll = Math.round(
+						(tableHandle.current?.getOffsetToIndex(selectedIndex) || 0) + 
+						(subTableHandle.current?.getOffsetToIndex(selectedSubIndex) || 0) + 
+						groupCollapseHeight,
+					);
+		
+					isShowing = subTableHandle.current?.isItemWithIndexShowing(selectedSubIndex, scrollingElement);
+
+					if (currentScroll != otherScroll && !isShowing) {
+						scrollingElement.scrollTop = otherScroll;
+					} else {
+						done = true;
+					}
+				}
+			})();
+
+		}
+	}, [selectedTicketId, groupBy, tableHandle.current, subTableHandle.current]);
+
+	if (isFiltering) {
+		return (
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.tickets.searching" defaultMessage="Searching..." />
+			</EmptyListMessage>
+		);
+	}
+
+	if (!filteredTickets.length) {
+		return (
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+			</EmptyListMessage>
+		);
+	}
+
+	if (groupBy !== NONE_OPTION) {
+		return (
+			<TicketsListsContainer scrollerRef={scrollerRef}>
+				<VirtualList
+					handle={tableHandle}
+					vKey='groups-list'
+					items={groups}
+					itemHeight={30}
+					ItemComponent={(group: TicketsGroup, index) => 
+						<TicketsGroupedList expanded={index === selectedIndex } loading={loading} key={group.groupName} {...group} handle={index === selectedIndex ? subTableHandle : undefined }/>
+					}
+				/>
+			</TicketsListsContainer>
+		);
+	}
 
 	return (
-		<>
-			{filteredTickets.length ? (
-				<List>
-					{filteredTickets.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}
-				</List>
-			) : (
-				<EmptyListMessage>
-					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
-				</EmptyListMessage>
-			)}
-		</>
+		<TicketsListsContainer scrollerRef={scrollerRef}>
+			<List>
+				<VirtualList 
+					handle={tableHandle}
+					vKey='groups-list'
+					items={filteredTickets}
+					itemHeight={30}
+					ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}
+				/>
+			</List>
+		</TicketsListsContainer>
 	);
 };

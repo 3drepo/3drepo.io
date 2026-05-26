@@ -17,7 +17,6 @@
 
 import { selectUrlParams } from '@/v4/modules/router/router.selectors';
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 import { selectGisLayers, GisActions } from '../../../../modules/gis';
@@ -43,4 +42,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	resetVisibleLayers: GisActions.resetLayers,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Gis));
+export default connect(mapStateToProps, mapDispatchToProps)(Gis);

@@ -19,19 +19,19 @@ import { PureComponent } from 'react';
 
 import { isEmpty } from 'lodash';
 
-import { RouteComponentProps } from 'react-router';
-import { RISK_DEFAULT_HIDDEN_LEVELS, RISK_FILTERS } from '../../../../constants/risks';
+import { RISK_FILTERS } from '../../../../constants/risks';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/risks';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { RisksContainer } from './risks.styles';
 
-interface IProps  extends RouteComponentProps<any> {
+interface IProps {
 	selectedRisk: any;
 	teamspace: string;
 	model: any;
-	risks: any[];
+	filteredRisks: any[];
+	unfilteredRisks: any[];
 	jobs: any[];
 	revision?: string;
 	isPending?: boolean;
@@ -150,7 +150,8 @@ export class Risks extends PureComponent<IProps, any> {
 		return (
 			<RisksContainer
 				isPending={this.props.isPending}
-				items={this.props.risks}
+				isEmpty={!this.props.unfilteredRisks.length}
+				items={this.props.filteredRisks}
 				activeItemId={this.props.activeRiskId}
 				showDetails={this.props.showDetails}
 				permissions={this.props.modelSettings.permissions}

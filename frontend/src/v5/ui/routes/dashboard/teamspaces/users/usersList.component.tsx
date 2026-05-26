@@ -32,7 +32,7 @@ export const UsersList = () => {
 	const username = CurrentUserHooksSelectors.selectUsername();
 
 	useEffect(() => {
-		if (!teamspace) return;
+		if (!teamspace || !username) return;
 
 		UsersActionsDispatchers.fetchUsers(teamspace); // V5
 		dispatch(UserManagementActions.fetchTeamspaceUsers()); // V4

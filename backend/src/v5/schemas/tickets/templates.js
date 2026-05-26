@@ -23,7 +23,8 @@ const {
 	presetModulesProperties,
 	propTypes,
 	statusTypes,
-	statuses } = require('./templates.constants');
+	statuses,
+	supportedPatterns } = require('./templates.constants');
 
 const { isArray, isString } = require('../../utils/helper/typeCheck');
 const { types, utils: { stripWhen } } = require('../../utils/helper/yup');
@@ -69,6 +70,12 @@ const uniqueTypeBlackList = [
 	propTypes.COORDS,
 ];
 
+const complexTypes = [
+	propTypes.IMAGE,
+	propTypes.IMAGE_LIST,
+	propTypes.VIEW,
+];
+
 const propSchema = Yup.object().shape({
 	name: types.strings.title.required().min(1).matches(blackListedChrsRegex),
 	type: Yup.string().oneOf(Object.values(propTypes)).required(),
@@ -76,9 +83,27 @@ const propSchema = Yup.object().shape({
 	required: defaultFalse,
 	immutable: defaultFalse,
 	readOnlyOnUI: defaultFalse,
+	readOnly: defaultFalse,
 	unique: Yup.lazy((value) => Yup.boolean().strip(!value)
 		.when('type', (typeVal, schema) => schema.test('Unique check', `Unique attribute cannot be applied to properties of type: ${uniqueTypeBlackList.join(', ')}`,
 			(uniqueVal) => !(uniqueVal && uniqueTypeBlackList.includes(typeVal))))),
+	value: Yup.string().when(['readOnly', 'type'], (readOnlyVal, propType, schema) => schema
+		.test('ReadOnly check', 'Value configuration is only supported if the property is read-only', (v) => v === undefined || readOnlyVal)
+		.test('text properties only', `Value configuration is only supported if the property type is ${propTypes.TEXT} or ${propTypes.LONG_TEXT}`, (v) => v === undefined || propType === propTypes.TEXT || propType === propTypes.LONG_TEXT)
+		.test('Pattern string check', `Value contains unrecognised placeholders (accepted patterns: ${Object.values(supportedPatterns).join(', ')})`, (value) => {
+			// string can contain pattern wrapped around {}, and they can only be of supported values
+			if (value === undefined) return true;
+			const regex = /\{(.*?)\}/g;
+			let match = regex.exec(value);
+
+			while (match !== null) {
+				if (!Object.values(supportedPatterns).includes(match[1])) {
+					return false;
+				}
+				match = regex.exec(value);
+			}
+			return true;
+		})),
 	values: Yup.mixed().when('type', (val, schema) => {
 		if (val === propTypes.MANY_OF || val === propTypes.ONE_OF) {
 			return schema.test('Values check', 'Property values must of be an array of unique values or the name of a preset', (value) => {
@@ -124,12 +149,12 @@ const propSchema = Yup.object().shape({
 
 		if (type === propTypes.ANY_OF) return res.oneOf(values);
 
-		if (type === propTypes.IMAGE || type === propTypes.IMAGE_LIST) return Yup.mixed().strip();
+		if (complexTypes.includes(type)) return Yup.mixed().test('invalid-default', `Default value cannot be set for property type "${type}"`, (value) => !value);
 
 		return res;
 	}),
 
-});
+}).test('ReadOnly and required', 'A read-only property cannot be required', ({ readOnly, required }) => !(readOnly && required));
 
 const propertyArray = Yup.array().of(propSchema).default([]).test('Property names', 'Property names must be unique inside the same context', (arr) => {
 	const propNames = new Set();
@@ -149,6 +174,7 @@ const moduleSchema = Yup.object().shape({
 	name: types.strings.title.notOneOf(Object.values(presetModules)).matches(blackListedChrsRegex),
 	type: Yup.string().oneOf(Object.values(presetModules)),
 	deprecated: defaultFalse,
+	color: types.colorStr.test('color-on-preset-module', 'Color cannot be set on a preset module.', (value, context) => !(value && context.parent.type)),
 	properties: propertyArray.when('type', (type, schema) => {
 		if (type) {
 			const propertiesToCheck = presetModulesProperties[type];
@@ -186,6 +212,13 @@ const configSchema = Yup.object().shape({
 		values: Yup.array().of(customStatus).min(1).required()
 			.test('Custom status', 'values must be unique', (vals) => uniqueElements(vals.map(({ name }) => name)).length === vals.length),
 		default: Yup.mixed().when('values', (values) => (values ? Yup.string().oneOf(values.map(({ name }) => name)).required() : Yup.mixed())),
+	}).default(undefined),
+	tabular: Yup.object({
+		columns: Yup.array().of(Yup.object({
+			property: Yup.string().required(),
+			module: Yup.string().notRequired().default(undefined),
+		}),
+		).min(1).required(),
 	}).default(undefined),
 }).default({});
 
@@ -226,6 +259,33 @@ const pinMappingTest = (val, context) => {
 	return true;
 };
 
+const validTabularPropsTest = (val, context) => {
+	const template = TemplateSchema.generateFullSchema(val);
+
+	if (!template.config?.tabular?.columns) return true;
+
+	for (const column of template.config.tabular.columns) {
+		const propModule = column.module ? template.modules.find(
+			({ type, name }) => type === column.module || name === column.module) : {};
+
+		const propCollection = column.module ? propModule?.properties : template.properties;
+
+		const prop = propCollection
+			? propCollection.find(({ name }) => name === column.property)
+			: undefined;
+
+		const propPath = column.module ? `${column.module}.${column.property}` : column.property;
+
+		if (!prop) {
+			return context.createError({ message: `Property "${propPath}" could not be found in the template` });
+		} if (prop.deprecated || propModule.deprecated) {
+			return context.createError({ message: `Property "${propPath}" has been deprecated` });
+		}
+	}
+
+	return true;
+};
+
 const schema = Yup.object().shape({
 	name: nameSchema.required(),
 	code: Yup.string().length(3).required(),
@@ -245,8 +305,9 @@ const schema = Yup.object().shape({
 
 		return true;
 	}),
-
-}).test(pinMappingTest).noUnknown();
+}).test(pinMappingTest)
+	.test(validTabularPropsTest)
+	.noUnknown();
 
 TemplateSchema.getClosedStatuses = (template) => {
 	if (template?.config?.status) {

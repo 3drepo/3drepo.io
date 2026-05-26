@@ -22,6 +22,7 @@ import { FormattedMessage } from 'react-intl';
 import { UserPopover } from '../popoverCircles/userPopoverCircle/userPopover/userPopover.component';
 import { PopoverContainer } from '../popoverCircles/userPopoverCircle/userPopover/userPopover.styles';
 import { CreationInfoContainer, NoShrinkLabel, ShrinkValue, NoShrinkValue } from './creationInfo.styles';
+import { getFullnameFromUser } from '@/v5/store/users/users.helpers';
 
 type ICreationInfo = {
 	owner: string;
@@ -42,7 +43,7 @@ export const CreationInfo = ({
 
 	const UserFullName = () => (
 		<ShrinkValue>
-			<HoverPopover anchor={(props) => <span {...props}>{ownerDetails.firstName} {ownerDetails.lastName}</span>}>
+			<HoverPopover anchor={(props) => <span {...props}>{getFullnameFromUser(ownerDetails)}</span>}>
 				<UserPopover user={ownerDetails} />
 			</HoverPopover>
 		</ShrinkValue>

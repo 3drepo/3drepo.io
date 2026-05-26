@@ -101,6 +101,7 @@ export function* fetchTeamspaceUsers() {
 
 export function* addUser({ user }) {
 	try {
+		yield put(UserManagementActions.setAddUserIsPending(true));
 		const isUserNotExists = yield select(selectUserNotExists);
 		if (isUserNotExists) {
 			yield put(UserManagementActions.setUserNotExists(false));
@@ -115,12 +116,15 @@ export function* addUser({ user }) {
 
 		const { used } = yield select(selectCurrentQuotaSeats);
 		yield put(TeamspacesActions.setUsedQuotaSeats(teamspace, used + 1));
+		yield put(UserManagementActions.setUserNotExists(false));
+		yield put(UserManagementActions.setAddUserIsPending(false));
 	} catch (error) {
 		if (error.response.status === 404) {
 			yield put(UserManagementActions.setUserNotExists(true));
 		} else {
 			yield put(DialogActions.showEndpointErrorDialog('add', 'licence', error));
 		}
+		yield put(UserManagementActions.setAddUserIsPending(false));
 	}
 }
 

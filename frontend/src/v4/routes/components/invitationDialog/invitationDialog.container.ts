@@ -18,10 +18,13 @@
 import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
+import { selectPermissionsOnUIDisabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import { UserManagementActions } from '../../../modules/userManagement';
 import { InvitationDialog } from './invitationDialog.component';
 
-const mapStateToProps = createStructuredSelector({});
+const mapStateToProps = createStructuredSelector({
+	permissionsOnUIDisabled: selectPermissionsOnUIDisabled
+});
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	sendInvitation: UserManagementActions.sendInvitation

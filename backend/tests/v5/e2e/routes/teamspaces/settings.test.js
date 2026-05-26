@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
@@ -89,7 +90,7 @@ const testAddTemplate = () => {
 		['template is empty object', tsAdmin.apiKey, undefined, {}, false, templates.invalidArguments],
 		['template is invalid (invalid unique property)', tsAdmin.apiKey, undefined, { ...templateToUse, properties: [{ name: generateRandomString(), type: propTypes.LONG_TEXT, unique: true }] }, false, templates.invalidArguments],
 	])('Add template', (desc, key, ts, data, success, expectedRes) => {
-		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code}`} if ${desc}`, async () => {
+		test(`should ${success ? 'succeed if' : `fail with ${expectedRes.code} if`} ${desc}`, async () => {
 			const expectedStatus = success ? templates.ok.status : expectedRes.status;
 			const res = await agent.post(addTemplateRoute(key, ts)).send(data).expect(expectedStatus);
 			if (success) {
@@ -263,7 +264,7 @@ const testGetAuditLogArchive = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

@@ -21,6 +21,7 @@ import { PureComponent, createRef } from 'react';
 import { CALLOUTS, IFontSize, IStrokeWidth, SHAPES } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/imageMarkup.types';
 import { viewportSize } from '@/v4/helpers/viewportSize';
 import { aspectRatio } from '@/v4/helpers/aspectRatio';
+import { CanvasHistoryActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { MarkupToolbar } from '@components/shared/modalsDispatcher/templates/imagesModal/imageMarkup/markupToolbar/markupToolbar.component';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { LoaderContainer } from '../../board/board.styles';
@@ -166,28 +167,39 @@ export class ScreenshotDialog extends PureComponent<IProps, any> {
 		this.setState({ activeShape: newShape });
 	};
 
-	public renderTools = renderWhenTrue(() => (
-		<MarkupToolbarContainer>
-			<MarkupToolbar
-				onSave={this.handleSave}
-				shape={this.state.activeShape}
-				color={this.state.color}
-				selectedObjectName={this.state.selectedObjectName}
-				strokeWidth={this.state.strokeWidth as IStrokeWidth}
-				mode={this.state.mode}
-				fontSize={this.state.fontSize as IFontSize}
-				callout={this.state.callout}
-				onClearClick={this.markupRef.current.clearCanvas}
-				onStrokeWidthChange={this.handleBrushSizeChange}
-				onFontSizeChange={this.handleTextSizeChange}
-				onColorChange={this.handleColorChange}
-				onShapeChange={this.handleShapeChange}
-				onModeChange={this.handleModeChange}
-				onCalloutChange={this.handleCalloutChange}
-				allowSaveWithoutChanges
-			/>
-		</MarkupToolbarContainer>
-	));
+	public renderTools = renderWhenTrue(() => {
+		const onUndo = () => {
+			CanvasHistoryActionsDispatchers.undo();
+			this.handleModeChange(MODES.BRUSH);
+		}
+		const onClear = () => {
+			this.markupRef.current.clearCanvas();
+			this.handleModeChange(MODES.BRUSH);
+
+		}
+		return (
+			<MarkupToolbarContainer>
+				<MarkupToolbar
+					onSave={this.handleSave}
+					shape={this.state.activeShape}
+					color={this.state.color}
+					strokeWidth={this.state.strokeWidth as IStrokeWidth}
+					mode={this.state.mode}
+					onUndo={onUndo}
+					fontSize={this.state.fontSize as IFontSize}
+					callout={this.state.callout}
+					onClear={onClear}
+					onStrokeWidthChange={this.handleBrushSizeChange}
+					onFontSizeChange={this.handleTextSizeChange}
+					onColorChange={this.handleColorChange}
+					onShapeChange={this.handleShapeChange}
+					onModeChange={this.handleModeChange}
+					onCalloutChange={this.handleCalloutChange}
+					allowSaveWithoutChanges
+				/>
+			</MarkupToolbarContainer>
+		)
+	});
 
 	public renderLoader = renderWhenTrue(() => (
 		<LoaderContainer>

@@ -23,4 +23,4 @@ export const setStore = (newStore) => store = newStore;
 
 export const dispatch = (action: AnyAction) => store.dispatch(action);
 
-export const getState = () => store.getState();
+export const getState = () => store.getState() as object;

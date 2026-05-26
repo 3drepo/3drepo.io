@@ -32,22 +32,24 @@ const {
 
 const { Router } = require('express');
 const { checkTicketExists } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets');
+const { getAccessibleContainers } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 const { getUserFromSession } = require('../../../../../utils/sessions');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { respond } = require('../../../../../utils/responder');
 const { serialiseGroup } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets.groups');
-const { stringToUUID } = require('../../../../../utils/helper/uuids');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateUpdateGroup } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/tickets.groups');
+const { verifyRevQueryParam } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/commons/revisions');
 
 const getGroup = (isFed) => async (req, res, next) => {
-	const { params, query } = req;
-	const { teamspace, project, model, ticket, group } = params;
+	const { params, query, containers } = req;
+	const { teamspace, project, model, ticket, group, revision } = params;
 
 	try {
 		const convertToMeshIds = query.convertIds !== 'false';
 		const getGroupById = isFed ? getFedGroup : getConGroup;
-		req.groupData = await getGroupById(teamspace, project, model, stringToUUID(query.revId), ticket, group,
-			convertToMeshIds);
+		req.groupData = await getGroupById(teamspace, project, model, revision, ticket, group,
+			convertToMeshIds, containers);
 		await next();
 	} catch (err) {
 		// istanbul ignore next
@@ -73,6 +75,7 @@ const updateGroup = (isFed) => async (req, res) => {
 
 const establishRoutes = (isFed) => {
 	const router = Router({ mergeParams: true });
+	const modelType = isFed ? modelTypes.FEDERATION : modelTypes.CONTAINER;
 	const hasReadAccess = isFed ? hasReadAccessToFederation : hasReadAccessToContainer;
 	const hasCommenterAccess = isFed ? hasCommenterAccessToFederation : hasCommenterAccessToContainer;
 
@@ -81,7 +84,7 @@ const establishRoutes = (isFed) => {
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/groups/{group}:
 	 *   get:
 	 *     description: Get the details of a group associated to a ticket
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: getGroup
 	 *     parameters:
 	 *       - name: teamspace
@@ -143,14 +146,14 @@ const establishRoutes = (isFed) => {
 	 *             schema:
    	 *               $ref: "#/components/schemas/ticketGroup"
 	 */
-	router.get('/:group', hasReadAccess, checkTicketExists, getGroup(isFed), serialiseGroup);
+	router.get('/:group', hasReadAccess, checkTicketExists, verifyRevQueryParam(modelType), getAccessibleContainers(modelType), getGroup(isFed), serialiseGroup);
 
 	/**
 	 * @openapi
 	 * /teamspaces/{teamspace}/projects/{project}/{type}/{model}/tickets/{ticket}/groups/{group}:
 	 *   patch:
 	 *     description: Update a group
-	 *     tags: [Tickets]
+	 *     tags: [v:external, Tickets]
 	 *     operationId: updateGroup
 	 *     parameters:
 	 *       - name: teamspace

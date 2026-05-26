@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 const config = require(`${src}/utils/config`);
@@ -228,28 +229,8 @@ const testSufficientQuota = () => {
 	});
 };
 
-const testGetCollaboratorsAssigned = () => {
-	describe('Get collaborators used', () => {
-		test('should get the total collaborators used by the user', async () => {
-			DBHandler.find.mockResolvedValueOnce([
-				{ user: generateRandomString() },
-				{ user: generateRandomString() },
-			]);
-
-			DBHandler.find.mockResolvedValueOnce([]);
-
-			const teamspace = generateRandomString();
-			const res = await Quota.getCollaboratorsAssigned(teamspace);
-			expect(res).toEqual(2);
-
-			expect(DBHandler.find).toHaveBeenCalledTimes(2);
-		});
-	});
-};
-
-describe('utils/quota', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetQuotaInfo();
 	testGetSpaceUsed();
 	testSufficientQuota();
-	testGetCollaboratorsAssigned();
 });

@@ -121,19 +121,12 @@ const boardContainerStyles = css`
 		display: none;
 	}
 
-	/* general select styling */
-	.MuiInputBase-root.Mui-focused .MuiSelect-select {
-		box-shadow: 0 0 2px ${({ theme }) => theme.palette.primary.main};
+	.MuiOutlinedInput-root {
+		width: 100%;
 	}
 
 	.MuiSelect-select {
 		padding-left: 15px;
-		border-style: solid;
-		border-width: 1px;
-		
-		& ~ svg {
-			top: -26px;
-		}
 	}
 
 	/* background */

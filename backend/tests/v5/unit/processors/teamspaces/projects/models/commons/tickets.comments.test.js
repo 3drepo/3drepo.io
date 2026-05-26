@@ -15,10 +15,11 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 
 const { src } = require('../../../../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject, generateUUID, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
+const { generateRandomString, generateRandomObject, generateUUID, generateUUIDString, generateRandomBuffer } = require('../../../../../../helper/services');
 
 const Comments = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
@@ -26,6 +27,9 @@ jest.mock('../../../../../../../../src/v5/models/tickets.comments');
 const CommentsModel = require(`${src}/models/tickets.comments`);
 
 const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
+
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.groups');
+const GroupsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 
 jest.mock('../../../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
@@ -57,6 +61,9 @@ const testAddComment = () => {
 			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model,
 				ticket, commentData, author);
 
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(1);
+			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(1);
+
 			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
@@ -82,6 +89,8 @@ const testAddComment = () => {
 			expect(CommentsModel.addComment).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.addComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
 				{ ...commentData, images: [imgRef] }, author);
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(1);
+			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(1);
 
 			const meta = { teamspace, project, model, ticket };
 			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
@@ -125,6 +134,8 @@ const testImportComments = () => {
 			expect(CommentsModel.importComments).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
 				commentData, author);
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(nIterations * nIterations);
+			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(nIterations);
 
 			expect(FilesManager.storeFiles).not.toHaveBeenCalled();
 
@@ -159,6 +170,9 @@ const testImportComments = () => {
 			expect(CommentsModel.importComments).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.importComments).toHaveBeenCalledWith(teamspace, project, model,
 				expect.any(Array), author);
+
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(nIterations * nIterations);
+			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(nIterations);
 
 			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);
 			const storeFilesParams = commentsWithRefs.flatMap(({ ticket, comments }, i) => comments.map(
@@ -198,6 +212,8 @@ const testUpdateComment = () => {
 			await expect(Comments.updateComment(teamspace, project, model, ticket, oldComment, updateData))
 				.resolves.toEqual(undefined);
 
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(1);
+			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.updateComment).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
 				oldComment, updateData);
@@ -219,6 +235,9 @@ const testUpdateComment = () => {
 			expect(CommentsModel.updateComment).toHaveBeenCalledTimes(1);
 			expect(CommentsModel.updateComment).toHaveBeenCalledWith(teamspace, project, model, ticket,
 				oldComment, updateData);
+
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(1);
+			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(1);
 
 			const meta = { teamspace, project, model, ticket };
 			expect(FilesManager.storeFiles).toHaveBeenCalledTimes(1);

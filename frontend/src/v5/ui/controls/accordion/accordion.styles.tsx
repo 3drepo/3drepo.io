@@ -17,13 +17,13 @@
 
 import styled from 'styled-components';
 
-export const IconContainer = styled.div`
+export const IconContainer = styled.div<{ color?: string }>`
 	display: inline-block;
 	margin-right: 6px;
 	height: 16px;
 
 	svg {
-		color: currentColor;
+		color: ${({ color }) => color || 'currentColor'};
 		width: 16px;
 		height: 16px;
 	}

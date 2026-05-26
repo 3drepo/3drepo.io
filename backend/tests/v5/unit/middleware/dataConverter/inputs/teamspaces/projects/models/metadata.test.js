@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../helper/utils');
 const { src } = require('../../../../../../../helper/path');
 const { generateRandomString, generateRandomNumber } = require('../../../../../../../helper/services');
 
@@ -97,6 +98,6 @@ const testValidateUpdateCustomMetadata = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/metadata', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateUpdateCustomMetadata();
 });

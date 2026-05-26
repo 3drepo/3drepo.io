@@ -23,14 +23,15 @@ const app = require("../../../src/v4/services/frontend.js").createApp();
 
 describe("Config", function () {
 	let server;
+	
 
 	before(function(done) {
 
 		server = app.listen(8080, function () {
 			done();
 		});
-
 	});
+
 
 	after(function(done) {
 		server.close(function() {
