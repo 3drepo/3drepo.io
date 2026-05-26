@@ -36,6 +36,7 @@ export const ColorGrid = styled.div`
 
 export const ColorActionMenu = styled(ActionMenu).attrs({
 	PopoverProps: {
+		disablePortal: true,
 		anchorOrigin: {
 			vertical: 'bottom',
 			horizontal: 'right',

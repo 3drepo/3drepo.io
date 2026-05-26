@@ -646,7 +646,7 @@ export const theme = createTheme({
 					backgroundColor: 'rgba(18, 30, 51, 0.9)',
 					backdropFilter: 'blur(10px)',
 					'.MuiPaper-root': {
-						boxShadow: 'none',
+						'--Paper-shadow': 'none',
 					},
 				},
 				paperFullWidth: {
