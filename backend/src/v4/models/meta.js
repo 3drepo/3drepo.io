@@ -475,9 +475,9 @@ const findModelMeshIdsByRulesQueries = async (account, model, rules, branch, rev
 		unwantedMeshIds
 	] = await Promise.all([
 		matched.length ? getMeshesWithParentIds(account, project, model, revId,
-			matched.flatMap(({ parents }) => parents), true) : Promise.resolve([]),
+			matched.flatMap(({ parents }) => parents)) : Promise.resolve([]),
 		unwanted.length ? getMeshesWithParentIds(account, project, model,  revId,
-			unwanted.flatMap(({ parents }) => parents), true) : Promise.resolve([])
+			unwanted.flatMap(({ parents }) => parents)) : Promise.resolve([])
 	]);
 
 	const meshes =  getArrayDifference(unwantedMeshIds, matchedMeshIds);

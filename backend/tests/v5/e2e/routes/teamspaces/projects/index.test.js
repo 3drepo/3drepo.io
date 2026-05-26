@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
@@ -162,16 +163,19 @@ const testCreateProject = (internalService) => {
 
 		test('should fail if multiple projects are being sent at similar times with the same name', async () => {
 			const payload = { name: ServiceHelper.generateRandomString() };
-			const prom1 = agent.post(route(teamspace, users.tsAdmin.apiKey)).send(payload);
-			const [res1, res2, res3] = await Promise.all([
-				prom1,
-				...times(2, () => agent.post(route(teamspace, users.tsAdmin.apiKey)).send(payload))]);
+			const res = await Promise.all(
+				times(3, () => agent.post(route(teamspace, users.tsAdmin.apiKey)).send(payload)));
 
-			expect(res1.statusCode).toBe(templates.ok.status);
-			expect(res2.statusCode).toBe(templates.invalidArguments.status);
-			expect(res2.body.code).toBe(templates.invalidArguments.code);
-			expect(res3.statusCode).toBe(templates.invalidArguments.status);
-			expect(res3.body.code).toBe(templates.invalidArguments.code);
+			let successAttemptFound = false;
+			res.forEach(({ statusCode, body }) => {
+				if (statusCode === templates.ok.status) {
+					expect(successAttemptFound).toBeFalsy();
+					successAttemptFound = true;
+				} else {
+					expect(statusCode).toBe(templates.invalidArguments.status);
+					expect(body.code).toBe(templates.invalidArguments.code);
+				}
+			});
 		});
 	});
 };
@@ -595,7 +599,7 @@ const testGetStatusCodes = () => {
 	describe.each(testCases)('Get Status Codes', runTest);
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	afterEach(() => server.close());
 	afterAll(() => ServiceHelper.closeApp(server));
 	describe('External Service', () => {

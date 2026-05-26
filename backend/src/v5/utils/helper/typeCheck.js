@@ -15,7 +15,6 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { fromBuffer: fileTypeFromBuffer, fromFile: fileTypeFromFile } = require('file-type');
 const UUIDParse = require('uuid-parse');
 const _ = require('lodash');
 const { existsSync: pathCheck } = require('fs');
@@ -46,8 +45,26 @@ TypeChecker.isUUID = (uuid) => {
 	}
 };
 
-const getTypeFromBuffer = (fileBuffer) => (Buffer.isBuffer(fileBuffer) ? fileTypeFromBuffer(fileBuffer) : null);
-const getTypeFromPath = (filePath) => (pathCheck(filePath) ? fileTypeFromFile(filePath) : null);
+let fileTypeModulePromise;
+const loadFileTypeModule = () => {
+	if (!fileTypeModulePromise) {
+		fileTypeModulePromise = import('file-type');
+	}
+	return fileTypeModulePromise;
+};
+
+const getTypeFromBuffer = async (fileBuffer) => {
+	if (!Buffer.isBuffer(fileBuffer)) return null;
+
+	const { fileTypeFromBuffer } = await loadFileTypeModule();
+	return fileTypeFromBuffer(fileBuffer);
+};
+const getTypeFromPath = async (filePath) => {
+	if (!pathCheck(filePath)) return null;
+
+	const { fileTypeFromFile } = await loadFileTypeModule();
+	return fileTypeFromFile(filePath);
+};
 TypeChecker.fileMimeFromBuffer = async (fileBuffer) => {
 	const type = await getTypeFromBuffer(fileBuffer);
 	return type?.mime;

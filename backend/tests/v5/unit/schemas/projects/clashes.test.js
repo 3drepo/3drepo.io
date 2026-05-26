@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 const { fieldOperators, valueOperators } = require('../../../../../src/v5/models/metadata.rules.constants');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { determineTestGroup, generateRandomString, generateUUIDString, generateRandomNumber } = require('../../../helper/services');
+const { generateRandomString, generateUUIDString, generateRandomNumber } = require('../../../helper/services');
 
 const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require(`${src}/models/clashes.constants`);
 

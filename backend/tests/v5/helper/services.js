@@ -182,15 +182,15 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 		historyCol, id, buffer);
 
 	if (revision.rFile) {
-		writeReferencedData(revision.rFile[0], revision.refData);
+		await writeReferencedData(revision.rFile[0], revision.refData);
 	}
 
 	if (revision.image) {
-		writeReferencedData(revision.image, revision.imageData);
+		await writeReferencedData(revision.image, revision.imageData);
 	}
 
 	if (revision.thumbnail) {
-		writeReferencedData(revision.thumbnail, revision.thumbnailData);
+		await writeReferencedData(revision.thumbnail, revision.thumbnailData);
 	}
 	const formattedRevision = {
 		...revision,
@@ -517,14 +517,6 @@ ServiceHelper.generateUserCredentials = () => ({
 		},
 	},
 });
-
-ServiceHelper.determineTestGroup = (filePath) => {
-	const match = filePath.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
-	if (match?.length === 3) {
-		return `${match[1].toUpperCase()} ${match[2]}`;
-	}
-	return filePath;
-};
 
 ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
 	id: ServiceHelper.generateUUIDString(),

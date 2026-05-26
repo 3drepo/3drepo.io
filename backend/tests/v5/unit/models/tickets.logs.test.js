@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateUUID, generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
+const { generateUUID, generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const TicketLogs = require(`${src}/models/tickets.logs`);
 const db = require(`${src}/handler/db`);
@@ -116,6 +117,22 @@ const testAddImportedLog = () => {
 	});
 };
 
+const testDeleteLogsByTicketIds = () => {
+	describe('Delete ticket logs by ticket ids', () => {
+		test('Should delete ticket logs by ticket ids', async () => {
+			const teamspace = generateRandomString();
+			const ticketIds = times(5, generateUUID);
+			const fn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await TicketLogs.deleteLogsByTicketIds(teamspace, ticketIds);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, 'tickets.logs',
+				{ ticket: { $in: ticketIds } });
+		});
+	});
+};
+
 const testGetTicketLogs = () => {
 	describe('Get ticket logs', () => {
 		test('Should return ticket logs', async () => {
@@ -148,5 +165,6 @@ describe(determineTestGroup(__filename), () => {
 	testAddTicketLog();
 	testAddGroupUpdateLog();
 	testAddImportedLog();
+	testDeleteLogsByTicketIds();
 	testGetTicketLogs();
 });

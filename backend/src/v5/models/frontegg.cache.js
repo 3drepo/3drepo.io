@@ -43,7 +43,7 @@ Cache.saveCache = async (key, data) => {
 	await updateOne(INTERNAL_DB, CACHE_COL,
 		{ _id: key },
 		{ $set: { data, created: new Date() } },
-		{ upsert: true });
+		true);
 };
 
 Cache.purgeCacheWithKeyContaining = async (key) => {
