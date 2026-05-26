@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { CLASH_PLAN_TYPES } = require('../../models/clashes.constants');
 const { deleteIfUndefined } = require('../../utils/helper/objects');
 const { getArrayDifference } = require('../../utils/helper/arrays');
 const { toConstantCase } = require('../../utils/helper/strings');
@@ -63,6 +64,7 @@ const presetModules = createConstantMapping([
 	'shapes',
 	'safetibase',
 	'clash',
+	'cloudClash',
 ]);
 
 const presetEnumValues = createConstantMapping([
@@ -109,7 +111,7 @@ TemplateConstants.statusTypes = createConstantMapping(['open', 'active', 'review
 TemplateConstants.riskLevelsToNum = (value) => riskLevelsArr.indexOf(value);
 
 const riskLevelConfig = { [propOptions.VALUES]: riskLevelsArr, [propOptions.DEFAULT]: riskLevels.VERY_LOW };
-const clashElementTypes = ['Revit', 'IFC', 'DWG', 'DGN', 'Unknown'];
+const clashElementTypes = ['Revit', 'IFC', 'DWG', 'DGN', '3D Repo ID', 'Unknown'];
 
 TemplateConstants.presetModulesProperties = {
 	[presetModules.SEQUENCING]: [
@@ -154,6 +156,18 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Assigned to', propTypes.TEXT),
 		createPropertyEntry('Approved by', propTypes.TEXT),
 		createPropertyEntry('Approved at', propTypes.DATE),
+	],
+	[presetModules.CLOUD_CLASH]: [
+		createPropertyEntry('Clash Plan ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
+		createPropertyEntry('Clash Run ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
+		createPropertyEntry('Clash Plan Name', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Clash Type', propTypes.ONE_OF, { [propOptions.VALUES]: CLASH_PLAN_TYPES, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Clash Point', propTypes.COORDS, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Object A ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: clashElementTypes, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Object A ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Object B ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: clashElementTypes, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
+		createPropertyEntry('Object B ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 	],
 
 };
