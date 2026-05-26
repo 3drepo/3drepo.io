@@ -26,10 +26,10 @@ import { selectCurrentProject, selectCurrentProjectTemplateById } from '../proje
 import { selectFederationById } from '../federations/federations.selectors';
 import { selectContainerById } from '../containers/containers.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
-import { TicketSortingProperty } from './card/ticketsCard.types';
+import { TicketsSortingPropertyDictionary } from './card/ticketsCard.types';
 import { TICKETS_ROUTE_WITH_TICKET, TICKETS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { generatePath } from 'react-router';
-import { DEFAULT_COLUMNS, INITIAL_COLUMNS_NO_OVERRIDES } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { DEFAULT_COLUMNS, INITIAL_COLUMNS_NO_OVERRIDES } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
 
 export const sortTicketsByCreationDate = (tickets: any[]) => orderBy(tickets, `properties.${BaseProperties.CREATED_AT}`, 'desc');
 
@@ -128,7 +128,7 @@ export const selectTickets = createSelector(
 	selectTicketsWithGroups,
 	selectSorting,
 	(tickets, { property, order }) => {
-		if (property === TicketSortingProperty.TICKET_CODE) {
+		if (property === TicketsSortingPropertyDictionary.TICKET_CODE) {
 			const ticketCodeSorting = [
 				(ticket) => selectTemplateById(getState(), ticket.modelId, ticket.type).code,
 				(ticket) => ticket.number,

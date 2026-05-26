@@ -26,7 +26,7 @@ import GroupByIcon from '@assets/icons/viewer/grouped_list.svg';
 import ClearCircleIcon from '@assets/icons/controls/clear_circle.svg';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
-import { getPropertyLabel } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
+import { getPropertyLabel } from '@/v5/ui/routes/dashboard/projects/tickets/tabularView/ticketsTable.helper';
 import { uniq } from 'lodash';
 import { ActionMenuItem } from '@controls/actionMenu';
 import { MenuItem } from '../../cardFilters/filtersSelection/tickets/list/item/ticketFiltersSelectionItem.styles';
