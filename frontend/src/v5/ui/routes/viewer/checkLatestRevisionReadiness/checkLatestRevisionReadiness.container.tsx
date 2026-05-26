@@ -20,11 +20,11 @@ import { formatMessage } from '@/v5/services/intl';
 import { ContainersHooksSelectors, FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { canUploadToBackend } from '@/v5/store/containers/containers.helpers';
 import { useEffect } from 'react';
-import { useHistory, generatePath, useParams } from 'react-router-dom';
+import { useNavigate, generatePath, useParams } from 'react-router-dom';
 import { TEAMSPACE_ROUTE_BASE, ViewerParams } from '../../routes.constants';
 
 export const CheckLatestRevisionReadiness = (): JSX.Element => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const { teamspace, containerOrFederation } = useParams<ViewerParams>();
 	const isContainer = ContainersHooksSelectors.selectContainerById(containerOrFederation);
 	const isFederation = FederationsHooksSelectors.selectContainersByFederationId(containerOrFederation);
@@ -39,16 +39,16 @@ export const CheckLatestRevisionReadiness = (): JSX.Element => {
 					id: 'viewer.latestRevisionNotReady.message',
 					defaultMessage: 'Until processing has completed, we can only show the latest available revision.',
 				}),
-				primaryButtonLabel: formatMessage({
+				closeButtonLabel: formatMessage({
 					id: 'viewer.latestRevisionNotReady.primaryLabel',
 					defaultMessage: 'Go to viewer',
 				}), 
-				secondaryButtonLabel: formatMessage({
+				actionButtonLabel: formatMessage({
 					id: 'infoModal.action.secondaryDefault',
 					defaultMessage: 'Go back to Teamspace',
 				}),
-				onClickSecondary: () => {
-					history.push(generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }));
+				onClickAction: () => {
+					navigate(generatePath(TEAMSPACE_ROUTE_BASE, { teamspace }));
 				},
 			});
 		}

@@ -72,6 +72,40 @@ const testIsObject = () => {
 	});
 };
 
+const testIsBooleanString = () => {
+	describe.each(
+		[
+			['abc', false],
+			['true', true],
+			['True', true],
+			['TRUE', true],
+			['false', true],
+			['False', true],
+			['FALSE', true],
+			[undefined, false],
+		],
+	)('Is Boolean String', (item, isTrue) => {
+		test(`${item} should return ${isTrue}`, () => {
+			expect(TypeChecker.isBooleanString(item)).toBe(isTrue);
+		});
+	});
+};
+
+const testIsNumberString = () => {
+	describe.each(
+		[
+			['abc', false],
+			['true', false],
+			['12345', true],
+			[undefined, false],
+		],
+	)('Is Number String', (item, isTrue) => {
+		test(`${item} should return ${isTrue}`, () => {
+			expect(TypeChecker.isNumberString(item)).toBe(isTrue);
+		});
+	});
+};
+
 const testIsUUIDString = () => {
 	describe.each(
 		[
@@ -142,12 +176,31 @@ const testFileExtensionFromBuffer = () => {
 	});
 };
 
+const testFileExtensionFromPath = () => {
+	describe.each(
+		[
+			['Valid path', image, 'png'],
+			['Empty string', '', undefined],
+			['Number', 3, undefined],
+			['Null value', null, undefined],
+			['Undefined value', undefined, undefined],
+		],
+	)('Get file extension', (description, data, extension) => {
+		test(`${description} should return ${extension}`, async () => {
+			await expect(TypeChecker.fileExtensionFromPath(data)).resolves.toBe(extension);
+		});
+	});
+};
+
 describe('utils/helpers/typeCheck', () => {
 	testIsBuffer();
 	testIsString();
 	testIsObject();
 	testIsUUIDString();
+	testIsBooleanString();
+	testIsNumberString();
 	testFileMimeFromBuffer();
 	testFileExtensionFromBuffer();
+	testFileExtensionFromPath();
 	testIsUUID();
 });

@@ -15,102 +15,131 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SearchContext, SearchContextType } from '@controls/search/searchContext';
 import { NoResults, SearchInputContainer } from '@controls/searchSelect/searchSelect.styles';
 import { ListSubheader } from '@mui/material';
-import { get, partition } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { SelectProps } from '@controls/inputs/select/select.component';
-import { useCallback, useContext, useState, useEffect } from 'react';
-import { IUser } from '@/v5/store/users/users.redux';
-import { IJob } from '@/v5/store/jobs/jobs.types';
+import { useContext, useState } from 'react';
 import { AssigneesSelectMenuItem } from './assigneesSelectMenuItem/assigneesSelectMenuItem.component';
 import { HiddenSelect, HorizontalRule, SearchInput } from './assigneesSelectMenu.styles';
+import { groupJobsAndUsers } from '../assignees.helpers';
+import { SearchContext } from '@controls/search/searchContext';
+import { getFullnameFromUser, JOB_OR_USER_NOT_FOUND_NAME } from '@/v5/store/users/users.helpers';
+import { AssigneesSelectMenuTriggerButton } from './assigneesSelectMenuTriggerButton/assigneesSelectMenuTriggerButton.component';
 
-const isUser = (assignee) => get(assignee, 'user');
+const NoResultsMessage = () => (
+	<NoResults>
+		<FormattedMessage
+			id="form.searchSelect.menuContent.emptyList"
+			defaultMessage="No results"
+		/>
+	</NoResults>
+);
 
 const preventPropagation = (e) => {
 	if (e.key !== 'Escape') {
 		e.stopPropagation();
 	}
 };
-
+type AssigneesSelectMenuProps = SelectProps & {
+	isValidItem: (val: string) => boolean;
+	excludeJobs?: boolean;
+};
 export const AssigneesSelectMenu = ({
-	open,
 	value,
 	onClick,
+	onClose,
 	multiple,
+	isValidItem,
+	disabled,
+	excludeJobs,
 	...props
-}: SelectProps) => {
-	const [users, setUsers] = useState([]);
-	const [jobs, setJobs] = useState([]);
-	const { filteredItems } = useContext<SearchContextType<IJob | IUser>>(SearchContext);
-	const onClickList = useCallback((e) => {
-		preventPropagation(e);
-		onClick?.(e);
-	}, []);
-	useEffect(() => {
-		const [filteredUsers, filteredJobs] = partition(filteredItems, isUser);
-		setUsers(filteredUsers);
-		setJobs(filteredJobs);
-	}, [filteredItems.length]);
+}: AssigneesSelectMenuProps) => {
+	const [open, setOpen] = useState(false);
+	const { filteredItems } = useContext(SearchContext);
+	const { users, jobs, notFound } = groupJobsAndUsers(filteredItems);
+
+	const openSelect = (e) => {
+		e.stopPropagation();
+		setOpen(true);
+	};
+
+	const handleClose = (e) => {
+		e.stopPropagation();
+		setOpen(false);
+		onClose?.(e);
+	};
+
+	if (disabled) return null;
 
 	return (
-		// @ts-ignore
-		<HiddenSelect
-			open={open}
-			value={value}
-			onClick={onClickList}
-			multiple={multiple}
-			{...props}
-		>
-			<SearchInputContainer>
-				<SearchInput onClick={preventPropagation} onKeyDown={preventPropagation} />
-			</SearchInputContainer>
-			<ListSubheader>
-				<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
-			</ListSubheader>
-			{jobs.length > 0 && jobs.map(({ _id }) => (
-				<AssigneesSelectMenuItem
-					key={_id}
-					assignee={_id}
-					value={_id}
-					title={_id}
-					multiple={multiple}
-				/>
-			))}
-			{!jobs.length && (
-				<NoResults>
-					<FormattedMessage
-						id="form.searchSelect.menuContent.emptyList"
-						defaultMessage="No results"
+		<>
+			<AssigneesSelectMenuTriggerButton onClick={openSelect} />
+			{/* @ts-ignore */}
+			<HiddenSelect
+				value={value}
+				onClick={onClick}
+				multiple={multiple}
+				onClose={handleClose}
+				open={open}
+				{...props}
+			>
+				<SearchInputContainer>
+					<SearchInput onClick={preventPropagation} onKeyDown={preventPropagation} />
+				</SearchInputContainer>
+				{/* The following "invalid" components cannot be grouped together inside a fragment
+					Because MuiSelect passes props to the MenuItem components and it can
+					only do so if they are direct children */}
+				{notFound.length > 0 && (
+					<ListSubheader>
+						<FormattedMessage id="assigneesSelectMenu.notFoundHeading" defaultMessage="Users and Jobs not found" />
+					</ListSubheader>
+				)}
+				{notFound.map(({ notFoundName: ju }) => (
+					<AssigneesSelectMenuItem
+						key={ju}
+						assignee={ju}
+						value={ju}
+						title={JOB_OR_USER_NOT_FOUND_NAME}
+						multiple={multiple}
+						selected
+						error
 					/>
-				</NoResults>
-			)}
-
-			<HorizontalRule />
-
-			<ListSubheader>
-				<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
-			</ListSubheader>
-			{users.length > 0 && users.map((user) => (
-				<AssigneesSelectMenuItem
-					key={user.user}
-					value={user.user}
-					assignee={user.user}
-					title={`${user.firstName} ${user.lastName}`}
-					subtitle={user.job}
-					multiple={multiple}
-				/>
-			))}
-			{!users.length && (
-				<NoResults>
-					<FormattedMessage
-						id="form.searchSelect.menuContent.emptyList"
-						defaultMessage="No results"
+				))}
+				{notFound.length > 0 && (<HorizontalRule />)}
+				{!excludeJobs && (
+					<ListSubheader>
+						<FormattedMessage id="assigneesSelectMenu.jobsHeading" defaultMessage="Jobs" />
+					</ListSubheader>
+				)}
+				{!excludeJobs && jobs.length > 0 && jobs.map(({ _id }) => (
+					<AssigneesSelectMenuItem
+						key={_id}
+						assignee={_id}
+						value={_id}
+						title={_id}
+						multiple={multiple}
+						error={!isValidItem(_id)}
 					/>
-				</NoResults>
-			)}
-		</HiddenSelect>
+				))}
+				{!excludeJobs && !jobs.length && (<NoResultsMessage />)}
+				{!excludeJobs && (<HorizontalRule />)}
+				<ListSubheader>
+					<FormattedMessage id="assigneesSelectMenu.usersHeading" defaultMessage="Users" />
+				</ListSubheader>
+				{users.length > 0 && users.map((user) => (
+					<AssigneesSelectMenuItem
+						key={user.user}
+						value={user.user}
+						assignee={user.user}
+						title={getFullnameFromUser(user)}
+						subtitle={user.job}
+						multiple={multiple}
+						error={!isValidItem(user.user)}
+					/>
+				))}
+				{!users.length && (<NoResultsMessage />)}
+			</HiddenSelect>
+		</>
 	);
 };

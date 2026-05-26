@@ -32,7 +32,7 @@ export const ImageWithSkeleton = ({ src, onClick, variant = 'primary', ...props 
 
 	return (
 		<>
-			<Image src={src} onLoad={handleImageLoaded} isLoading={isLoading} onClick={onClick} {...props} />
+			<Image src={src} onLoad={handleImageLoaded} $isLoading={isLoading} onClick={onClick} {...props} />
 			{isLoading && <SkeletonImage {...props} $variant={variant} />}
 		</>
 	);

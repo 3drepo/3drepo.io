@@ -22,8 +22,8 @@ const { generateRandomString } = require('../../../helper/services');
 jest.mock('../../../../../src/v5/models/projectSettings');
 const Projects = require(`${src}/models/projectSettings`);
 
-jest.mock('../../../../../src/v5/utils/permissions/permissions');
-const Permissions = require(`${src}/utils/permissions/permissions`);
+jest.mock('../../../../../src/v5/utils/permissions');
+const Permissions = require(`${src}/utils/permissions`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 

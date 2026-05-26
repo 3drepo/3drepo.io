@@ -28,19 +28,19 @@ import { ActionMenuSection, ActionMenuItem, ActionMenuItemLink } from '@controls
 import { selectSettings, ViewerActions } from '@/v4/modules/viewer';
 import { CurrentUserHooksSelectors } from '@/v5/services/selectorsHooks';
 import { useSelector } from 'react-redux';
-import { dispatch } from '@/v4/modules/store';
 import {
 	ActionMenu,
 	AvatarContainer,
 	AvatarSection,
 	UserFullName,
-	UserUserName,
+	UserEmail,
 	SignOutButton,
 	EditProfileButton,
 	TruncatableName,
 } from './userMenu.styles';
 import { EditProfileModal } from './editProfileModal/editProfileModal.component';
 import { VisualSettingsModal } from './visualSettingsModal/visualSettingsModal.component';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 
 type UserMenuProps = {
 	user: ICurrentUser;
@@ -80,7 +80,7 @@ export const UserMenu = ({ user } : UserMenuProps) => {
 								&nbsp;
 							<TruncatableName>{user.lastName}</TruncatableName>
 						</UserFullName>
-						<UserUserName>{user.username}</UserUserName>
+						<UserEmail>{user.email}</UserEmail>
 						<ActionMenuItem>
 							<EditProfileButton onClick={onClickEditProfile}>
 								<FormattedMessage

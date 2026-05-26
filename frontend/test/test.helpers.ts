@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createStore, combineReducers, applyMiddleware, Action } from 'redux';
-import reducers from '@/v5/store/reducers';
+import { createStore, applyMiddleware, Action } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import rootSaga from '@/v4/modules/sagas';
 import { isEqual, isFunction } from 'lodash';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { setStore } from '@/v5/helpers/redux.helpers';
+import createReducer from '@/v4/modules/reducers';
 
 
 export type WaitActionCallback = ((state?: object, action?:Action, previousState?: object) => boolean);
@@ -58,20 +59,28 @@ export const createTestStore = () => {
 		return waitingActions.length === 0;
 	};
 
-	const mainReducer = combineReducers(reducers);
+	const mainReducer = createReducer();
 
+	let currentState;
 
-	const store = createStore((state: any, action) =>{
-		const st = mainReducer(state, action);		
+    const store = createStore((state: any, action) =>{
+        const st = mainReducer(state, action);
 
-		if (discountMatchingActions(st, action, state) && resolvePromise) {
-			resolvePromise(true);
-			resolvePromise = null;
-		}
-		
-		return st;
-	}		
-	, middlewares);
+        currentState = st;
+
+        if (discountMatchingActions(st, action, state) && resolvePromise) {
+            resolvePromise(true);
+            resolvePromise = null;
+        }
+        
+        return st;
+    }       
+    , middlewares);
+
+    const getState = () => currentState;
+
+    store.getState = getState;
+	setStore(store)
 	
 	const waitForActions:WaitForActions = (dispatchingfunction, waitActions) =>  { 
 		waitingActions = waitActions;

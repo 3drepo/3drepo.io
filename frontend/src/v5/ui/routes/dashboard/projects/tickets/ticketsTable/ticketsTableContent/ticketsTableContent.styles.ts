@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,29 +16,30 @@
  */
 
 import styled from 'styled-components';
-import { CollapsedItemContainer, Container as DashboardList } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
+import { ControlsContainer as GroupCollapseHeader } from '@components/dashboard/dashboardList/dashboardListCollapse/dashboardListCollapse.styles';
+import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
 
 export const Container = styled.div`
-	${DashboardList} {
-		&:not(:first-of-type) {
-			padding-top: 17px;
-		}
-		
-		&:not(:last-of-type) {
-			padding-bottom: 17px;
-			border-bottom: 1px solid ${({ theme }) => theme.palette.base.lightest};
-		}
+	overflow: auto;
+	position: relative;
+	width: 100vw;
+	margin-left: -75px;
+	padding: 0 64px 30px 75px;
+	flex: 1;
 
-		${CollapsedItemContainer} {
-			margin-top: 28px;
-		}
+	${GroupCollapseHeader} {
+		position: sticky;
+		left: 0;
+		overflow: unset;
+		width: calc(100vw - 161px);
+		margin-right: 0;
 	}
 `;
 
-export const Title = styled.div`
-	display: inline;
-	max-width: calc(100% - 30px);
-	text-overflow: ellipsis;
-	overflow: hidden;
-	margin-right: 5px;
+export const TicketsTableSpinner = styled(Spinner).attrs({
+	borderSize: 4,
+})`
+	height: 60px;
+	width: 60px;
+	margin: 20px auto;
 `;

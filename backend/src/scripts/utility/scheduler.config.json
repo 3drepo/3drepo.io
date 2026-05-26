@@ -1,7 +1,8 @@
 {
 	"daily": [
 		{ "name": "cleanUpSharedDir" },
-		{ "name": "removeUnverifiedUsers" }
+		{ "name": "removeUnverifiedUsers" },
+		{ "name": "sendDailyDigest" }
 	],
 	"weekly": [
 		{"name": "removeIncompleteRevisions"}

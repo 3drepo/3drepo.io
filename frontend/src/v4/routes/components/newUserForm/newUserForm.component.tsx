@@ -45,9 +45,11 @@ import {
 } from './newUserForm.styles';
 
 interface IProps {
-	title: string | ReactNode[];
+	title: JSX.Element;
 	jobs: any[];
 	users: any[];
+	permissionsOnUIDisabled: boolean;
+	addUserIsPending: boolean;
 	onInvitationOpen: (email, job, isAdmin) => void;
 	onSave: (user) => void;
 	onCancel: () => void;
@@ -119,8 +121,8 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 		return suggestion.user;
 	}
 
-	public onSuggestionSelected = (event, {suggestion}) => {
-		this.setState({name: this.getSuggestionValue(suggestion)});
+	public onSuggestionSelected = (event) => {
+		this.setState({ name: this.state.name });
 	}
 
 	private debounceUsersSuggestion = debounce(this.props.getUsersSuggestions, 1000);
@@ -168,14 +170,21 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 
 	public handleSubmit = async () => {
 		this.handleSave();
-		await new Promise(r => setTimeout(r, 200));
-		if (!this.state.userNotExists) {
+	};
+
+	componentDidUpdate(prevProps) {
+		if (
+			!this.props.addUserIsPending &&
+			prevProps.addUserIsPending !== this.props.addUserIsPending &&
+			!this.state.userNotExists
+		) {
+			// if add user is succesful then close the form
 			this.props.onCancel();
 		}
 	};
 
 	public render() {
-		const { clearSuggestions, jobs, users, title } = this.props;
+		const { clearSuggestions, jobs, users, title, permissionsOnUIDisabled } = this.props;
 		return (
 			<Container>
 				<Grid
@@ -194,7 +203,7 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 							renderSuggestion={this.renderUserSuggestion}
 							inputProps={ {
 								onChange: this.handleChange('name'),
-								label: 'Username or email address',
+								label: 'Email address',
 								value: this.state.name,
 								inputRef: (node) => {
 									this.popperNode = node;
@@ -219,16 +228,18 @@ export class NewUserForm extends PureComponent<IProps, IState> {
 						</StyledSelect>
 					</FormControl>
 
-					<FormControlLabel
-						control={
-							<Checkbox
-								color="secondary"
-								checked={this.state.isAdmin}
-								onChange={this.handlePermissionsChange}
-							/>
-						}
-						label="Add as Teamspace Admin"
-					/>
+					{!permissionsOnUIDisabled && (
+						<FormControlLabel
+							control={
+								<Checkbox
+									color="secondary"
+									checked={this.state.isAdmin}
+									onChange={this.handlePermissionsChange}
+								/>
+							}
+							label="Add as Teamspace Admin"
+						/>
+					)}
 					{this.renderUserNotFoundMessage(this.state.userNotExists)}
 					<Grid
 						container

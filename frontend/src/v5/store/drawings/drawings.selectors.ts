@@ -32,14 +32,22 @@ import { Calibration } from './drawings.types';
 
 const selectDrawingsDomain = (state): DrawingsState => state?.drawings || ({ drawingsByProjectByProject: {} });
 
-export const selectDrawings = createSelector(
+const selectDrawingsByProject = createSelector(
 	selectDrawingsDomain,
 	selectCurrentProject,
+	(state, currentProject) => state.drawingsByProject[currentProject] ?? [],
+);
+  
+export const selectRawDrawingById =  createSelector(
+	selectDrawingsByProject,
+	(_, id: string) => id,
+	(drawings, id) => drawings.find((drawing) => drawing._id === id) || {},
+);
+  
+export const selectDrawings = createSelector(
+	selectDrawingsByProject,
 	selectRevisionsByDrawing, // This selector is used here to recalculate the value after the revisions are fetched
-	(state, currentProject) => {
-		const drawings = (state.drawingsByProject[currentProject] ?? []).map((drawing) => fullDrawing(drawing as any));
-		return orderBy(drawings, 'lastUpdated', 'desc');
-	},
+	(drawings) => orderBy(drawings.map(fullDrawing), 'lastUpdated', 'desc'),
 );
 
 export const selectFavouriteDrawings = createSelector(
@@ -90,6 +98,15 @@ export const selectIsTypesPending = createSelector(
 	// Checks if the types for the project have been fetched
 	(state, currentProject) => !state.typesByProject[currentProject],
 );
+
+export const selectDrawingFetched = createSelector(
+	selectDrawingsDomain,
+	selectCurrentProject,
+	(state, drawingId) => drawingId,
+	// Checks if the settings for the drawing were fetched
+	(state, currentProject, drawingId) => !!state.fetched[currentProject + '.' + drawingId],
+);
+
 
 export const selectCalibration = createSelector(
 	selectDrawingById,

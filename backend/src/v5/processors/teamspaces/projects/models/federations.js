@@ -16,27 +16,33 @@
  */
 
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
+const { addRevision, getLatestRevision } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
 const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
+const AllJSONAssets = require('./commons/assets/json');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
-const { getLatestRevision } = require('../../../../models/revisions');
+
+const { getModelMD5Hash } = require('./commons/modelList');
 const { getOpenTicketsCount } = require('./commons/tickets');
 const { getProjectById } = require('../../../../models/projectSettings');
+const { getRepoBundleInfo } = require('./commons/assets/bundles');
+const { getSuperMeshesInfo } = require('./containers');
 const { modelTypes } = require('../../../../models/modelSettings.constants');
-const { queueFederationUpdate } = require('../../../../services/modelProcessing');
+const { updateModelSubModels } = require('../../../../models/modelSettings');
 
-const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
+const { getTree, ...JSONAssets } = AllJSONAssets;
+
+const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups, ...JSONAssets };
 
 // Override
-Federations.getTicketGroupById = async (teamspace, project, federation, revId, ticket, groupId, convertToMeshIds) => {
-	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
-	return TicketGroups.getTicketGroupById(teamspace, project, federation, revId,
-		ticket, groupId, convertToMeshIds, containers ? containers.map(({ _id }) => _id) : undefined);
-};
+Federations.getTicketGroupById = (
+	teamspace, project, federation, revId, ticket, groupId, convertToMeshIds, containers,
+) => TicketGroups.getTicketGroupById(teamspace, project, federation, revId,
+	ticket, groupId, convertToMeshIds, containers?.length ? containers.map(({ container }) => container) : undefined);
 
 Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
 	{ ...federation, federate: true });
@@ -60,7 +66,13 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
 };
 
-Federations.newRevision = queueFederationUpdate;
+Federations.newRevision = async (teamspace, project, federation, info) => {
+	const revisionId = await addRevision(teamspace, project, federation, modelTypes.FEDERATION, {
+		containers: info.containers,
+		author: info.owner,
+	});
+	await updateModelSubModels(teamspace, project, federation, info.owner, revisionId, info.containers);
+};
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
 	const lastUpdates = [];
@@ -75,7 +87,7 @@ const getLastUpdatesFromModels = async (teamspace, models) => {
 	}
 
 	return lastUpdates.length ? lastUpdates.sort((a, b) => b.timestamp
-        - a.timestamp)[0].timestamp : undefined;
+		- a.timestamp)[0].timestamp : undefined;
 };
 
 Federations.getFederationStats = async (teamspace, project, federation) => {
@@ -106,5 +118,18 @@ Federations.updateSettings = updateModelSettings;
 
 Federations.getSettings = (teamspace, federation) => getFederationById(teamspace,
 	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
+
+Federations.getMD5Hash = (teamspace, containers) => Promise.all(
+	containers.map(({ container, revision }) => getModelMD5Hash(teamspace, container, revision)));
+
+Federations.getRepoBundleInfo = getRepoBundleInfo;
+
+Federations.getSuperMeshesInfo = async (teamspace, federation, revision, containers) => {
+	const supermeshData = await Promise.all(containers.map(async ({ container, revision: containerRev }) => {
+		const data = await getSuperMeshesInfo(teamspace, container, containerRev);
+		return { teamspace, model: container, superMeshes: data };
+	}));
+	return { subModels: supermeshData };
+};
 
 module.exports = Federations;

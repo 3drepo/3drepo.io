@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { downloadAuthUrl } from '@/v5/helpers/download.helper';
 import { isApiUrl } from '@/v5/services/api/default';
-import { downloadAuthUrl } from './authenticatedResource.hooks';
-
 
 export const AuthAnchor = (props: React.DetailedHTMLProps<React.AnchorHTMLAttributes<HTMLAnchorElement>, HTMLAnchorElement>) => {
 	const a = document.createElement('a');

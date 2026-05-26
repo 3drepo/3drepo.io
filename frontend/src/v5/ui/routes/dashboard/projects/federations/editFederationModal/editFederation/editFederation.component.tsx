@@ -16,7 +16,7 @@
  */
 
 import { formatMessage } from '@/v5/services/intl';
-import { FederationsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { FederationsHooksSelectors, ProjectsHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CONTAINERS_SEARCH_FIELDS } from '@/v5/store/containers/containers.helpers';
 import { IFederation } from '@/v5/store/federations/federations.types';
 import { DashboardListEmptyText, Divider } from '@components/dashboard/dashboardList/dashboardList.styles';
@@ -24,40 +24,54 @@ import { SearchContextComponent } from '@controls/search/searchContext';
 import { Tooltip } from '@mui/material';
 import RemoveIcon from '@assets/icons/outlined/minus_minimal-outline.svg';
 import IncludeIcon from '@assets/icons/outlined/plus_minimal-outline.svg';
-import { useCallback, useContext } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { IContainer } from '@/v5/store/containers/containers.types';
 import { useContainersData } from '../../../containers/containers.hooks';
 import { SuccessIconContainer, ErrorIconContainer, SuccessButton, ErrorButton } from './editFederation.styles';
 import { ActionButtonProps, EditFederationContainers } from './editFederationContainersList/editFederationContainersList.component';
 import { IconButtonProps } from './editFederationContainersList/editFederationContainersListItem/editFederationContainersListItem.component';
 import { EditFederationContext } from '../editFederationContext';
+import { groupBy } from 'lodash';
+import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
+import { enableRealtimeContainerRemoved, enableRealtimeContainerUpdateSettings } from '@/v5/services/realtime/container.events';
+import { enableRealtimeContainerRevisionUpdate, enableRealtimeNewContainerRevisionUpdate } from '@/v5/services/realtime/containerRevision.events';
 
 type EditFederationProps = {
 	federation: IFederation;
 };
 
 export const EditFederation = ({ federation }: EditFederationProps): JSX.Element => {
+	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
+	const project = ProjectsHooksSelectors.selectCurrentProject();
 	const { containers } = useContainersData();
-	const { includedContainers, setIncludedContainers } = useContext(EditFederationContext);
+	const { includedContainersIds, setIncludedContainersIds } = useContext(EditFederationContext);
 	const isNewFederation = !federation._id;
 	const isCollaboratorFromId = FederationsHooksSelectors.selectHasCollaboratorAccess(federation._id);
 	const isCollaborator = isNewFederation || isCollaboratorFromId;
-	const availableContainers = containers.filter(({ _id }) => !includedContainers.find((c) => c._id === _id));
+	const { available = [], included = [] } = groupBy(
+		containers,
+		(c) => includedContainersIds.includes(c._id) ? 'included' : 'available',
+	);
 
-	const includeContainers = (newContainers: IContainer[]) => {
-		setIncludedContainers((oldIncludedContainers) => [...oldIncludedContainers, ...newContainers]);
-	};
+	const includeContainers = (ids: string[]) => setIncludedContainersIds((oldIds) => [...oldIds, ...ids]);
+	const removeContainers = (ids: string[]) => setIncludedContainersIds((oldIds) => oldIds.filter((id) => !ids.includes(id)));
 
-	const removeContainers = (containersToRemove: IContainer[]) => {
-		const containersIds = containersToRemove.map(({ _id }) => _id);
-		setIncludedContainers((oldIncludedContainers) => oldIncludedContainers.filter(({ _id }) => !containersIds.includes(_id)));
-	};
+	useEffect(() => {
+		const subscriptions = containers.flatMap(({ _id }) => [
+			enableRealtimeContainerRemoved(teamspace, project, _id),
+			enableRealtimeContainerUpdateSettings(teamspace, project, _id),
+			enableRealtimeContainerRevisionUpdate(teamspace, project, _id),
+			enableRealtimeNewContainerRevisionUpdate(teamspace, project, _id),
+		]);
+
+		return combineSubscriptions(...subscriptions);
+	}, [containers.map(({ _id }) => _id).join()]);
 
 	return (
 		<>
-			<SearchContextComponent items={includedContainers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
+			<SearchContextComponent items={included} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
 				<EditFederationContainers
+					isIncluded
 					title={
 						formatMessage({
 							id: 'modal.editFederation.containers.title',
@@ -76,9 +90,9 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 							/>
 						</DashboardListEmptyText>
 					)}
-					actionButton={({ children, disabled, filteredContainers }: ActionButtonProps) => isCollaborator && (
+					actionButton={({ children, disabled, filteredContainersIds }: ActionButtonProps) => isCollaborator && (
 						<ErrorButton
-							onClick={() => removeContainers(filteredContainers)}
+							onClick={() => removeContainers(filteredContainersIds)}
 							disabled={disabled}
 						>
 							{children}
@@ -97,9 +111,9 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 							<ErrorIconContainer
 								onClick={(event) => {
 									event.stopPropagation();
-									removeContainers([container]);
+									removeContainers([container._id]);
 								}}
-								dark={isSelected}
+								$dark={isSelected}
 								hidden={!isCollaborator}
 							>
 								<RemoveIcon />
@@ -109,7 +123,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 				/>
 			</SearchContextComponent>
 			<Divider />
-			<SearchContextComponent items={availableContainers} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
+			<SearchContextComponent items={available} fieldsToFilter={CONTAINERS_SEARCH_FIELDS}>
 				<EditFederationContainers
 					title={
 						formatMessage({
@@ -129,7 +143,7 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 							/>
 						</DashboardListEmptyText>
 					)}
-					actionButton={({ children, disabled, filteredContainers, ...buttonProps }) => isCollaborator && (
+					actionButton={({ children, disabled, filteredContainersIds: filteredContainers, ...buttonProps }) => isCollaborator && (
 						<SuccessButton
 							onClick={() => includeContainers(filteredContainers)}
 							disabled={disabled}
@@ -151,9 +165,9 @@ export const EditFederation = ({ federation }: EditFederationProps): JSX.Element
 							<SuccessIconContainer
 								onClick={(event) => {
 									event.stopPropagation();
-									includeContainers([container]);
+									includeContainers([container._id]);
 								}}
-								dark={isSelected}
+								$dark={isSelected}
 								hidden={!isCollaborator}
 							>
 								<IncludeIcon />

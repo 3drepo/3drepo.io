@@ -19,12 +19,12 @@ import { Container } from './dashedContainer.styles';
 type DashedContainerProps = {
 	children: any;
 	className?: string;
-	borderRadius?: number;
-	strokeColor?: string;
-	strokeWidth?: number;
-	dashSize?: number;
-	gapSize?: number;
-	zeroPadding?: boolean;
+	$borderRadius?: number;
+	$strokeColor?: string;
+	$strokeWidth?: number;
+	$dashSize?: number;
+	$gapSize?: number;
+	$zeroPadding?: boolean;
 	onClick?: (e) => void;
 };
 

@@ -22,13 +22,12 @@ import { Constants } from '../../helpers/actions.helper';
 import { ModelId, TeamspaceId, TeamspaceProjectAndModel } from '../store.types';
 import { ITemplate, ITicket, NewTicket, Group } from './tickets.types';
 import { mergeWithArray } from '../store.helpers';
-
-const getTicketByModelId = (state, modelId, ticketId) => (
-	state.ticketsByModelId?.[modelId].find(({ _id }) => _id === ticketId)
-);
+import { DEFAULT_TICKETS_SORTING, TicketsSorting, TicketsSortingOrder, TicketsSortingProperty } from './card/ticketsCard.types';
+import EventEmitter from 'eventemitter3';
+import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 
 export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
-	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation', 'filters'],
+	fetchTickets: ['teamspace', 'projectId', 'modelId', 'isFederation', 'propertiesToInclude'],
 	fetchTicket: ['teamspace', 'projectId', 'modelId', 'ticketId', 'isFederation', 'revision'],
 	fetchTicketsSuccess: ['modelId', 'tickets'],
 	fetchTemplates: ['teamspace', 'projectId', 'modelId', 'isFederation', 'getDetails'],
@@ -41,34 +40,61 @@ export const { Types: TicketsTypes, Creators: TicketsActions } = createActions({
 	fetchRiskCategories: ['teamspace'],
 	fetchRiskCategoriesSuccess: ['riskCategories'],
 	fetchTicketGroups: ['teamspace', 'projectId', 'modelId', 'ticketId', 'revision'],
+	fetchTicketGroupsAndGoToView: ['teamspace', 'projectId', 'modelId', 'ticketId', 'revision'],
 	fetchTicketGroupsSuccess: ['groups'],
 	upsertTicketAndFetchGroups: ['teamspace', 'projectId', 'modelId', 'ticket', 'revision'],
 	updateTicketGroup: ['teamspace', 'projectId', 'modelId', 'ticketId', 'group', 'isFederation'],
 	updateTicketGroupSuccess: ['group'],
 	clearGroups: [],
+	setSorting: ['property', 'order'],
+	resetSorting: [],
+	setPropertiesFetched: ['ticketIds', 'properties', 'fetched'],
+	fetchTicketsProperties: ['teamspace', 'projectId', 'modelId', 'isFederation', 'propertiesToInclude', 'onSuccess'],
+	upsertTicketsSuccess: ['modelId', 'tickets'],
+	watchPropertiesUpdates: ['propertiesNames', 'watch'],
+	setTabularViewParams: ['params', 'search'],
+	updateManyTickets: ['teamspace', 'projectId', 'ids', 'ticket', 'onSuccess', 'onError'],
+	resetPropertiesFetched: [],
 }, { prefix: 'TICKETS/' }) as { Types: Constants<ITicketsActionCreators>; Creators: ITicketsActionCreators };
 
 export const INITIAL_STATE: ITicketsState = {
 	ticketsByModelId: {},
+	ticketsData: {},
 	templatesByModelId: {},
 	groupsByGroupId: {},
 	riskCategories: [],
+	sorting: DEFAULT_TICKETS_SORTING,
+	fetchedProperties: {}, // This is used to track which properties have been fetched for each ticket
+	tabularViewParams: { params: {}, search:'' },
 };
 
 export const fetchTicketsSuccess = (state: ITicketsState, { modelId, tickets }: FetchTicketsSuccessAction) => {
-	state.ticketsByModelId[modelId] = tickets;
+	const ticketIds: string[] = [];
+	tickets.forEach((ticket) => {
+		state.ticketsData[ticket._id] = { ...ticket, modelId };
+		ticketIds.push(ticket._id);
+	});
+	
+	state.ticketsByModelId[modelId] = ticketIds;
 };
 
 export const upsertTicketSuccess = (state: ITicketsState, { modelId, ticket }: UpsertTicketSuccessAction) => {
 	if (!state.ticketsByModelId[modelId]) state.ticketsByModelId[modelId] = [];
 
-	const modelTicket = getTicketByModelId(state, modelId, ticket._id);
+	const existingTicket = state.ticketsData[ticket._id];
 
-	mergeWithArray(modelTicket, ticket);
-
-	if (!modelTicket) {
-		state.ticketsByModelId[modelId].push(ticket as ITicket);
+	if (existingTicket) {
+		// Update existing ticket
+		mergeWithArray(existingTicket, ticket);
+	} else {
+		// Add new ticket
+		state.ticketsData[ticket._id] = { ...ticket, modelId } as any;
+		state.ticketsByModelId[modelId].push(ticket._id);
 	}
+};
+
+export const upsertTicketsSuccess = (state: ITicketsState, { modelId, tickets }: UpsertTicketsSuccessAction) => {
+	tickets.forEach((ticket) => upsertTicketSuccess(state, { modelId, ticket } as UpsertTicketSuccessAction));
 };
 
 export const replaceTemplateSuccess = (state: ITicketsState, { modelId, template }: ReplaceTemplateSuccessAction) => {
@@ -108,30 +134,69 @@ export const clearGroups = (state: ITicketsState) => {
 	state.groupsByGroupId = {};
 };
 
+export const setSorting = (state: ITicketsState, { property, order }: SetSortingAction) => {
+	state.sorting = { property, order };
+};
+
+export const resetSorting = (state: ITicketsState) => {
+	state.sorting = { ...DEFAULT_TICKETS_SORTING };
+};
+
+export const setPropertiesFetched = (state: ITicketsState, { ticketIds, properties, fetched }: SetPropertiesFetchedAction) => {
+	for (const property of properties) {
+		for (const ticketId of ticketIds) {
+			if (!state.fetchedProperties[ticketId]) {
+				state.fetchedProperties[ticketId] = {};
+			}
+		
+			state.fetchedProperties[ticketId][property] = fetched;
+		}
+	}
+};
+
+export const setTabularViewParams = (state: ITicketsState, { params, search }: SetTabularViewParamsAction) => {
+	state.tabularViewParams = { params, search };
+};
+
+const resetPropertiesFetched = (state:ITicketsState) => {
+	state.fetchedProperties = {};
+};
+
 export const ticketsReducer = createReducer(INITIAL_STATE, produceAll({
 	[TicketsTypes.FETCH_TICKETS_SUCCESS]: fetchTicketsSuccess,
 	[TicketsTypes.FETCH_TEMPLATES_SUCCESS]: fetchTemplatesSuccess,
 	[TicketsTypes.UPSERT_TICKET_SUCCESS]: upsertTicketSuccess,
+	[TicketsTypes.UPSERT_TICKETS_SUCCESS]: upsertTicketsSuccess,
 	[TicketsTypes.REPLACE_TEMPLATE_SUCCESS]: replaceTemplateSuccess,
 	[TicketsTypes.FETCH_RISK_CATEGORIES_SUCCESS]: fetchRiskCategoriesSuccess,
 	[TicketsTypes.FETCH_TICKET_GROUPS_SUCCESS]: fetchTicketGroupsSuccess,
 	[TicketsTypes.UPDATE_TICKET_GROUP_SUCCESS]: updateTicketGroupSuccess,
 	[TicketsTypes.CLEAR_GROUPS]: clearGroups,
+	[TicketsTypes.SET_SORTING]: setSorting,
+	[TicketsTypes.RESET_SORTING]: resetSorting,
+	[TicketsTypes.SET_PROPERTIES_FETCHED]: setPropertiesFetched,
+	[TicketsTypes.SET_TABULAR_VIEW_PARAMS]: setTabularViewParams,
+	[TicketsTypes.RESET_PROPERTIES_FETCHED]: resetPropertiesFetched,
 }));
 
 export interface ITicketsState {
-	ticketsByModelId: Record<string, ITicket[]>,
+	ticketsByModelId: Record<string, string[]>,
+	ticketsData: Record<string, ITicket>,
 	templatesByModelId: Record<string, ITemplate[]>,
 	riskCategories: string[],
 	groupsByGroupId: Record<string, Group>,
+	sorting: TicketsSorting,
+	fetchedProperties: Record<string, Record<string, boolean>>, // Tracks which properties have been fetched for each ticket
+	tabularViewParams: { params: Partial<DashboardTicketsParams>, search: string }
 }
 
-export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, filters?: string[] };
+export type FetchTicketsAction = Action<'FETCH_TICKETS'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[] };
 export type FetchTicketAction = Action<'FETCH_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, isFederation: boolean, revision?: string };
 export type UpdateTicketAction = Action<'UPDATE_TICKET'> & TeamspaceProjectAndModel & { ticketId: string, ticket: Partial<ITicket>, isFederation: boolean, onError?: () => void };
 export type CreateTicketAction = Action<'CREATE_TICKET'> & TeamspaceProjectAndModel & { ticket: NewTicket, isFederation: boolean, onSuccess: (ticketId) => void, onError: () => void };
 export type FetchTicketsSuccessAction = Action<'FETCH_TICKETS_SUCCESS'> & ModelId & { tickets: ITicket[] };
 export type UpsertTicketSuccessAction = Action<'UPSERT_TICKET_SUCCESS'> & ModelId & { ticket: Partial<ITicket> };
+export type UpsertTicketsSuccessAction = Action<'UPSERT_TICKETS_SUCCESS'> & ModelId & { tickets: Partial<ITicket>[] };
 export type UpsertTicketAndFetchGroupsAction = Action<'UPSERT_TICKET_AND_FETCH_GROUPS'> & TeamspaceProjectAndModel & { ticket: Partial<ITicket>, revision?: string };
 export type ReplaceTemplateSuccessAction = Action<'REPLACE_TEMPLATE_SUCCESS'> & ModelId & { template: ITemplate };
 export type FetchTemplatesAction = Action<'FETCH_TEMPLATES'> & TeamspaceProjectAndModel & { isFederation: boolean, getDetails?: boolean };
@@ -140,10 +205,20 @@ export type FetchTemplatesSuccessAction = Action<'FETCH_TEMPLATES_SUCCESS'> & Mo
 export type FetchRiskCategoriesAction = Action<'FETCH_RISK_CATEGORIES'> & TeamspaceId;
 export type FetchRiskCategoriesSuccessAction = Action<'FETCH_RISK_CATEGORIES_SUCCESS'> & { riskCategories: string[] };
 export type FetchTicketGroupsAction = Action<'FETCH_TICKET_GROUPS'> & TeamspaceProjectAndModel & { ticketId: string, groupId: string, revision?: string };
+export type FetchTicketGroupsAndGoToView = Action<'FETCH_TICKET_GROUPS_AND_GO_TO_VIEW'> & TeamspaceProjectAndModel & { ticketId: string, revision?: string };
 export type FetchTicketGroupsSuccessAction = Action<'FETCH_TICKET_GROUPS_SUCCESS'> & { groups: Group[] };
 export type UpdateTicketGroupAction = Action<'UPDATE_TICKET_GROUP'> & TeamspaceProjectAndModel & { ticketId: string, group: Group, isFederation: boolean };
 export type UpdateTicketGroupSuccessAction = Action<'UPDATE_TICKET_GROUP_SUCCESS'> & { group: Group };
 export type ClearGroupsAction = Action<'CLEAR_GROUPS'>;
+export type SetSortingAction = Action<'SET_SORTING'> & TicketsSorting;
+export type ResetSortingAction = Action<'RESET_SORTING'>;
+export type ResetPropertiesFetchedAction = Action<'RESET_PROPERTIES_FETCHED'>;
+export type SetPropertiesFetchedAction = Action<'SET_PROPERTIES_FETCHED'> & { ticketIds: string[], properties: string[], fetched: boolean };
+export type FetchTicketsPropertiesAction = Action<'FETCH_TICKETS_PROPERTIES'> & TeamspaceProjectAndModel & { isFederation: boolean, propertiesToInclude?: string[],  onSuccess: () => void, onError: () => void };
+export type WatchPropertiesUpdatesAction = Action<'WATCH_PROPERTIES_UPDATES'> & { propertiesNames: string[], watch: EventEmitter };
+export type SetTabularViewParamsAction = Action<'SET_TABULAR_VIEW_PARAMS'> & { params: DashboardTicketsParams, search: string };
+export type UpdateManyTicketsAction = Action<'UPDATE_MANY_TICKETS'> & TeamspaceProjectAndModel & { ids: string[], ticket: Partial<ITicket>, onSuccess?: () => void, onError?: () => void };
+
 
 export interface ITicketsActionCreators {
 	fetchTickets: (
@@ -151,8 +226,16 @@ export interface ITicketsActionCreators {
 		projectId: string,
 		modelId: string,
 		isFederation: boolean,
-		filters?: string[],
+		propertiesToInclude?: string[],
 	) => FetchTicketsAction;
+	fetchTicketsProperties: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		isFederation: boolean,
+		propertiesToInclude: string[],
+		onSuccess?: () => void,
+	) => FetchTicketsPropertiesAction;
 	fetchTicket: (
 		teamspace: string,
 		projectId: string,
@@ -199,6 +282,7 @@ export interface ITicketsActionCreators {
 		isFederation: boolean,
 	) => FetchTemplateAction;
 	upsertTicketSuccess: (modelId: string, ticket: Partial<ITicket>) => UpsertTicketSuccessAction;
+	upsertTicketsSuccess: (modelId: string, tickets: Partial<ITicket>[]) => UpsertTicketSuccessAction;
 	upsertTicketAndFetchGroups: (
 		teamspace: string,
 		projectId: string,
@@ -210,6 +294,13 @@ export interface ITicketsActionCreators {
 	fetchRiskCategories: (teamspace: string) => FetchRiskCategoriesAction;
 	fetchRiskCategoriesSuccess: (riskCategories: string[]) => FetchRiskCategoriesSuccessAction;
 	fetchTicketGroups: (
+		teamspace: string,
+		projectId: string,
+		modelId: string,
+		ticketId: string,
+		revision?: string,
+	) => FetchTicketGroupsAction;
+	fetchTicketGroupsAndGoToView: (
 		teamspace: string,
 		projectId: string,
 		modelId: string,
@@ -230,5 +321,19 @@ export interface ITicketsActionCreators {
 	updateTicketGroupSuccess: (
 		group: Group,
 	) => UpdateTicketGroupSuccessAction;
+	updateManyTickets: (
+		teamspace: string,
+		projectId: string,
+		ids: string[], 
+		ticket: Partial<ITicket>, 
+		onSuccess?: () => void,
+		onError?: () => void 
+	) => UpdateManyTicketsAction;
+	resetPropertiesFetched: () => ResetPropertiesFetchedAction;
 	clearGroups: () => ClearGroupsAction;
+	setSorting: (property: TicketsSortingProperty, order: TicketsSortingOrder) => SetSortingAction,
+	resetSorting: () => ResetSortingAction,
+	setPropertiesFetched: (ticketIds: string[], properties: string[], fetched: boolean) => SetPropertiesFetchedAction,
+	watchPropertiesUpdates: (properties: string[], watch: EventEmitter) => WatchPropertiesUpdatesAction,
+	setTabularViewParams: (params: Partial<DashboardTicketsParams>, search: string) => SetTabularViewParamsAction
 }

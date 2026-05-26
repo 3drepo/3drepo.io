@@ -18,12 +18,9 @@
 import styled from 'styled-components';
 import { DialogContent } from '@mui/material';
 
-export const MODAL_BODY_MAX_HEIGHT = 'calc(70vh - 46px)';
-
-
 export const ModalBody = styled(DialogContent)`
 	padding: 27px 58px 65px;
 	display: block;
 	overflow: overlay;
-	max-height: ${MODAL_BODY_MAX_HEIGHT};
+	max-height: calc(70vh - 17px);
 `;

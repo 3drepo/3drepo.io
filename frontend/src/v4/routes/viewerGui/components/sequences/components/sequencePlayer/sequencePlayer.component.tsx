@@ -23,13 +23,13 @@ import StepBackIcon from '@mui/icons-material/FastRewind';
 import PlayArrow from '@mui/icons-material/PlayArrow';
 import Replay from '@mui/icons-material/Replay';
 import Stop from '@mui/icons-material/Stop';
-import { debounce } from 'lodash';
+import { clamp, debounce } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { DialogsActionsDispatchers, SequencesActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 
+import dayjs from 'dayjs';
 import { STEP_SCALE } from '../../../../../../constants/sequences';
 import { VIEWER_PANELS } from '../../../../../../constants/viewerGui';
-import { isDateOutsideRange } from '../../../../../../helpers/dateTime';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { MODAL_TODAY_NOT_AVAILABLE_BODY, getDateByStep, getDateWithinBoundaries, getSelectedFrameIndex } from '../../../../../../modules/sequences/sequences.helper';
 import {
@@ -213,7 +213,8 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 		} else {
 			const { frames } = this.props;
 			const index = getSelectedFrameIndex(frames, value);
-			const newValue = frames[index + stepInterval * direction]?.dateTime;
+			const newIndex = clamp(index + stepInterval * direction, 0, frames.length - 1);
+			const newValue = frames[newIndex]?.dateTime;
 			if (newValue) {
 				this.setValue(newValue);
 			}
@@ -320,7 +321,8 @@ export class SequencePlayer extends PureComponent<IProps, IState> {
 							<Grid item>
 								<FlexCol>
 									<DatePicker
-										shouldDisableDate={(date: any) => isDateOutsideRange(this.props.min, this.props.max, date.$d)}
+										minDateTime={dayjs(min)}
+										maxDateTime={dayjs(max)}
 										name="date"
 										value={value}
 										onChange={(e) => this.gotoDate(new Date(e.target.value))}

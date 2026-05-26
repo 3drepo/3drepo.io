@@ -34,18 +34,18 @@ import { FormattedMessage } from 'react-intl';
 import { DrawingsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
 import { formatMessage } from '@/v5/services/intl';
-import { useParams, useHistory, useLocation } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect } from 'react';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { viewerRoute } from '@/v5/services/routing/routing';
 import { Highlight } from '@controls/highlight';
 import { DrawingRevisionsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { getDrawingThumbnailSrc } from '@/v5/store/drawings/drawings.helpers';
-import { deleteAuthUrlFromCache, downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
 import { Thumbnail } from '@controls/thumbnail/thumbnail.component';
 import { Tooltip } from '@mui/material';
+import { deleteAuthUrlFromCache } from '@/v5/helpers/download.helper';
 
 const STATUS_CODE_TEXT = formatMessage({ id: 'drawings.list.item.statusCode', defaultMessage: 'Status code' });
 const REVISION_CODE_TEXT = formatMessage({ id: 'drawings.list.item.revisionCode', defaultMessage: 'Revision code' });
@@ -56,7 +56,7 @@ type DrawingItemProps = {
 };
 export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
-	const history = useHistory();
+	const navigate = useNavigate();
 	const { pathname, search } = useLocation();
 	const { setOrigin } = useContext(CalibrationContext);
 	const queries = DrawingsCardHooksSelectors.selectQueries();
@@ -64,29 +64,20 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 	const [statusCode, revCode] = latestRevision?.split('-');
 	const areStatsPending = !revCode;
 	const [selectedDrawingId] = useSearchParam('drawingId');
-	const [thumbnail, setThumbnail] = useState('');
 	const thumbnailSrc = getDrawingThumbnailSrc(teamspace, project, drawing._id);
 
 	const onCalibrateClick = () => {
 		const path = viewerRoute(teamspace, project, containerOrFederation, revision, { drawingId, isCalibrating: true }, false);
-		history.push(path);
+		navigate(path);
 		setOrigin(pathname + search);
 	};
 
 	useEffect(() => {
-		if (!latestRevision) {
+		if (latestRevision) {
 			DrawingRevisionsActionsDispatchers.fetch(teamspace, project, drawing._id);
+		} else {
+			return () => { deleteAuthUrlFromCache(thumbnailSrc); };
 		}
-	}, [latestRevision]);
-
-	useEffect(() => {
-		if (!latestRevision) return;
-		
-		downloadAuthUrl(thumbnailSrc)
-			.then(setThumbnail)
-			.catch(() => setThumbnail(''));
-
-		return () => { deleteAuthUrlFromCache(thumbnailSrc); };
 	}, [latestRevision]);
 
 	const LoadingCodes = () => (
@@ -135,7 +126,7 @@ export const DrawingItem = ({ drawing, onClick }: DrawingItemProps) => {
 		<Container onClick={onClick} key={drawing._id} $selected={drawing._id === selectedDrawingId}>
 			<MainBody>
 				<ImageContainer>
-					<Thumbnail src={thumbnail} />
+					<Thumbnail src={thumbnailSrc} key={latestRevision} />
 				</ImageContainer>
 				<InfoContainer>
 					<BreakingLine>

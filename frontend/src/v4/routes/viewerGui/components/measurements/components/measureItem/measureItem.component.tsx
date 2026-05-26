@@ -22,6 +22,7 @@ import RemoveIcon from '@mui/icons-material/Close';
 import { Formik } from 'formik';
 import { cond, matches, stubTrue } from 'lodash';
 
+import { DEGREES_SYMBOL, MAX_SLOPE_IN_PERCENTAGE, SLOPE_UNITS, slopeUnitsToSymbol } from '@/v4/constants/measure';
 import { MEASURE_TYPE } from '../../../../../../modules/measurements/measurements.constants';
 import { ColorPicker } from '../../../../../components/colorPicker/colorPicker.component';
 import { SmallIconButton } from '../../../../../components/smallIconButon/smallIconButton.component';
@@ -30,7 +31,6 @@ import {
 	AxisLabel,
 	AxisValue,
 	Container,
-	DegreesSymbol,
 	MeasurementPoint,
 	MeasurementValue,
 	StyledForm,
@@ -65,9 +65,14 @@ const roundNumber = (num: number, numDP: number) => {
 	return Math.round((num + Number.EPSILON) * factor) / factor;
 };
 
+const toDeg = (angle) => angle * 180 / Math.PI;
 export const getValue = (measureValue: number, units: string, type: number, modelUnits: string) => {
-	if (type === MEASURE_TYPE.ANGLE) {
-		return (measureValue * 180 / Math.PI).toFixed(2);
+	if (type === MEASURE_TYPE.ANGLE || units === SLOPE_UNITS.DEGREES) {
+		return toDeg(measureValue).toFixed(2);
+	}
+	if (type === MEASURE_TYPE.SLOPE) {
+		const isVertical = measureValue >= MAX_SLOPE_IN_PERCENTAGE;
+		return isVertical ? 'Vertical' : Math.trunc(Math.tan(measureValue) * 100);
 	}
 	const isAreaMeasurement = type === MEASURE_TYPE.AREA;
 
@@ -88,17 +93,19 @@ export const getValue = (measureValue: number, units: string, type: number, mode
 };
 
 export const getUnits = (units: string, type: number) => {
-	if (type === MEASURE_TYPE.AREA) {
-		return (
-			<>
-				{units}<sup>2</sup>
-			</>
-		);
+	switch (type) {
+		case MEASURE_TYPE.AREA:
+			return (
+				<>
+					{units}<sup>2</sup>
+				</>
+			);
+		case MEASURE_TYPE.SLOPE:
+			return slopeUnitsToSymbol(units);
+		case MEASURE_TYPE.ANGLE:
+			return DEGREES_SYMBOL;
+		default: return units;
 	}
-	if (type === MEASURE_TYPE.ANGLE) {
-		return <DegreesSymbol />;
-	}
-	return units;
 };
 
 const chopGLAlpha = (color) => color.slice(0, 3);
@@ -126,7 +133,12 @@ export const MeasureItem = ({
 	};
 
 	const isPointTypeMeasure = type === MEASURE_TYPE.POINT;
-	const isAngleTypeMeasure = type === MEASURE_TYPE.ANGLE;
+
+	const isVerticalSlopePercentage = (
+		type === MEASURE_TYPE.SLOPE &&
+		units === SLOPE_UNITS.PERCENTAGE &&
+		value >= MAX_SLOPE_IN_PERCENTAGE
+	);
 
 	return (
 		<Container tall={Number(isPointTypeMeasure)}>
@@ -152,7 +164,7 @@ export const MeasureItem = ({
 				</Tooltip>
 			</Formik>
 			<Actions>
-				{isPointTypeMeasure && (
+				{isPointTypeMeasure ? (
 					<div>
 						<MeasurementPoint>
 							<AxisLabel>x:</AxisLabel>
@@ -167,9 +179,11 @@ export const MeasureItem = ({
 							<AxisValue>{getValue(position[1], units, type, props.modelUnit)} {getUnits(units, type)}</AxisValue>
 						</MeasurementPoint>
 					</div>
+				) : (
+					<MeasurementValue>
+						{getValue(value, units, type, props.modelUnit)} {!isVerticalSlopePercentage && getUnits(units, type)}
+					</MeasurementValue>
 				)}
-				{isAngleTypeMeasure && (<MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>)}
-				{!isPointTypeMeasure && !isAngleTypeMeasure && (<MeasurementValue>{getValue(value, units, type, props.modelUnit)} {getUnits(units, type)}</MeasurementValue>)}
 				<ColorPicker
 					value={chopGLAlpha(customColor || color)}
 					onChange={handleColorChange}

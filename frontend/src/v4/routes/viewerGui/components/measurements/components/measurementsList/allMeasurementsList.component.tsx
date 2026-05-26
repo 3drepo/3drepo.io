@@ -27,7 +27,9 @@ export interface IProps {
 	lengthMeasurements: IMeasure[];
 	areaMeasurements: IMeasure[];
 	angleMeasurements: IMeasure[];
+	slopeMeasurements: IMeasure[];
 	units: string;
+	slopeUnits: string;
 	removeMeasurement: (uuid) => void;
 	setMeasurementColor: (uuid, color) => void;
 	setMeasurementName: (uuid, type, name) => void;
@@ -35,7 +37,7 @@ export interface IProps {
 	canEdit?: boolean;
 }
 
-export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, pointMeasurements, angleMeasurements, ...props}: IProps) => {
+export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, pointMeasurements, angleMeasurements, slopeMeasurements, ...props}: IProps) => {
 	const [colors, setColors] = useState([]);
 
 	useEffect(() => {
@@ -44,7 +46,8 @@ export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, point
 			...(angleMeasurements || []),
 			...(areaMeasurements || []),
 			...(lengthMeasurements || []),
-			...(pointMeasurements || [])
+			...(pointMeasurements || []),
+			...(slopeMeasurements || []),
 		].map(({customColor, color}) => GLToHexColor(customColor || color));
 
 		setColors(Array.from(new Set(addColors)));
@@ -53,20 +56,24 @@ export const AllMeasurementsList = ({areaMeasurements, lengthMeasurements, point
 	return (
 		<div>
 			{
-				!isEmpty(pointMeasurements) &&
-				<MeasurementsList {...props} measureType={MEASURE_TYPE.POINT} measurements={pointMeasurements} colors={colors} />
-			}
-			{
-				!isEmpty(lengthMeasurements) &&
-				<MeasurementsList {...props} measureType={MEASURE_TYPE.LENGTH} measurements={lengthMeasurements} colors={colors} />
+				!isEmpty(angleMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.ANGLE} measurements={angleMeasurements} colors={colors} />
 			}
 			{
 				!isEmpty(areaMeasurements) &&
 				<MeasurementsList {...props} measureType={MEASURE_TYPE.AREA} measurements={areaMeasurements} colors={colors} />
 			}
 			{
-				!isEmpty(angleMeasurements) &&
-				<MeasurementsList {...props} measureType={MEASURE_TYPE.ANGLE} measurements={angleMeasurements} colors={colors} />
+				!isEmpty(lengthMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.LENGTH} measurements={lengthMeasurements} colors={colors} />
+			}
+			{
+				!isEmpty(pointMeasurements) &&
+				<MeasurementsList {...props} measureType={MEASURE_TYPE.POINT} measurements={pointMeasurements} colors={colors} />
+			}
+			{
+				!isEmpty(slopeMeasurements) &&
+				<MeasurementsList {...props} units={props.slopeUnits} measureType={MEASURE_TYPE.SLOPE} measurements={slopeMeasurements} colors={colors} />
 			}
 		</div>
 	);

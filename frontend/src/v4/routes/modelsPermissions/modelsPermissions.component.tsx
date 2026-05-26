@@ -192,7 +192,7 @@ export class ModelsPermissions extends PureComponent<IProps, IState> {
 						onSearch={this.handleModelsSearch}
 					/>
 					{ !models.length ?
-							<TextOverlay content="Select a project to view the models' list" /> :
+							<TextOverlay content={formatMessage({ id: 'userPermissions.noModels', defaultMessage: 'This project does not contain any containers, federations, or drawings'})} /> :
 							null
 					}
 				</ModelsContainer>

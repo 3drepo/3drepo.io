@@ -15,127 +15,73 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useRouteMatch, useLocation, Switch, Redirect } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { GlobalStyle } from '@/v5/ui/themes/global';
 import { formatMessage } from '@/v5/services/intl';
 import { NotFound } from '@/v5/ui/routes/notFound';
 import { DashboardProjectLayout } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.component';
 import { DashboardViewerLayout } from '@components/dashboard/dashboardViewerLayout/dashboardViewerLayout.component';
-import { Route } from '@/v5/services/routing/route.component';
-import { AuthenticatedRoute } from '@/v5/services/routing/authenticatedRoute.component';
-import { discardSlash } from '@/v5/helpers/url.helper';
-import { PasswordForgot } from '../login/passwordForgot';
-import { PasswordChange } from '../login/passwordChange';
+import { AuthenticationRedirect } from '@/v5/services/routing/authenticationRedirect.component';
 import { TeamspaceSelection } from '../teamspaceSelection';
-import { TeamspaceContent } from './teamspaces/teamspaceContent/teamspaceContent.component';
-import { ProjectContent } from './projects/projectContent/projectContent';
-import { Login } from '../login';
+import { AuthPage } from '../authPage/authPage.component';
 import { Viewer } from '../viewer/viewer';
-import {
-	DASHBOARD_ROUTE,
-	LOGIN_PATH,
-	PASSWORD_CHANGE_PATH,
-	PASSWORD_FORGOT_PATH,
-	PROJECT_ROUTE_BASE,
-	PROJECT_ROUTE_BASE_TAB,
-	REGISTER_VERIFY_PATH,
-	SIGN_UP_PATH,
-	SIGN_UP_SSO_PATH,
-	TEAMSPACE_ROUTE_BASE,
-	TEAMSPACE_ROUTE_BASE_TAB,
-	VIEWER_ROUTE,
-} from '../routes.constants';
-import { LegalRoutes } from '../legal';
-import { UserSignup } from '../userSignup/userSignup.component';
-import { UserVerification } from '../userVerification/userVerification.component';
+import { PRIVACY_ROUTE } from '../routes.constants';
 import { TeamspaceLayout } from './teamspaces/teamspaceLayout/teamspaceLayout.component';
-import { UserSignupSSO } from '../userSignup/userSignUpSSO/userSignUpSSO.component';
 import { useEffect } from 'react';
 import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { AuthHooksSelectors, TeamspacesHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CalibrationContextComponent } from './projects/calibration/calibrationContext';
+import { authBroadcastChannel } from '@/v5/store/auth/authBrodcastChannel';
+import { RouteTitle } from '@/v5/services/routing/routeTitle.component';
+import { TermsLegalPaper } from '@components/legal/terms.component';
+import { LegalLayout } from '@components/legal/LegalLayout/legalLayout.component';
+import { CookiesLegalPaper } from '@components/legal/cookies.component';
+import { TeamspaceContent } from './teamspaces/teamspaceContent/teamspaceContent.component';
+import { ProjectContent } from './projects/projectContent/projectContent';
 
 export const MainRoute = () => {
-	const { path } = useRouteMatch();
-	const { pathname } = useLocation();
 	const authenticationFetched: boolean = AuthHooksSelectors.selectAuthenticationFetched();
+
 
 	useEffect(() => {
 		if (!authenticationFetched) {
 			AuthActionsDispatchers.authenticate();
+		} else {
+			authBroadcastChannel.onmessage = (ev) => AuthActionsDispatchers.setSessionAuthenticatedTeamspaceSuccess(ev.data);
 		}
 	}, [authenticationFetched]);
 
 	return (
 		<CalibrationContextComponent>
 			<GlobalStyle />
-			<Switch>
-				<Route title={formatMessage({ id: 'pageTitle.login', defaultMessage: 'Log in' })} exact path={LOGIN_PATH}>
-					<Login />
+			<Routes>
+				<Route path="auth" element={<RouteTitle title={formatMessage({ id: 'pageTitle.auth', defaultMessage: 'Authenticate' })}><AuthPage /></RouteTitle>} />
+				<Route element={<LegalLayout />}>
+					<Route path="terms" element={<RouteTitle title={formatMessage({ id: 'pageTitle.terms', defaultMessage: 'Terms & Conditions' })}><TermsLegalPaper /></RouteTitle>} />
+					<Route path="cookies" element={<RouteTitle title={formatMessage({ id: 'pageTitle.cookies', defaultMessage: 'Cookies' })}><CookiesLegalPaper /></RouteTitle>} />
+					<Route path="privacy" element={<Navigate to={PRIVACY_ROUTE} replace />} />
 				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={SIGN_UP_PATH}>
-					<UserSignup />
+				<Route index element={<Navigate to="dashboard" replace />} />
+				<Route element={<AuthenticationRedirect />}>
+					<Route path="dashboard" element={<RouteTitle title={formatMessage({ id: 'pageTitle.teamspaceSelection', defaultMessage: 'Teamspaces' })}><TeamspaceSelection /></RouteTitle>} />
+					<Route path="dashboard/:teamspace" element={<TeamspaceLayout />}>
+						<Route path="t/*" element={<TeamspaceContent />} />
+						<Route index element={<Navigate to="t/projects" replace />} />
+					</Route>
+					<Route path="dashboard/:teamspace/:project" element={<DashboardProjectLayout />}>
+						<Route path="t/*" element={<ProjectContent />} />
+						<Route index element={<Navigate to="t/federations" replace />} />
+					</Route>
+					<Route path="viewer/:teamspace/:project/:containerOrFederation/:revision?" element={<DashboardViewerLayout />}>
+						<Route index element={
+							<RouteTitle title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })}>
+								<Viewer />
+							</RouteTitle>
+						} />
+					</ Route>
+					<Route path="*" element={<RouteTitle title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })}><NotFound /></RouteTitle>} />
 				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.signUp', defaultMessage: 'Create Account' })} exact path={SIGN_UP_SSO_PATH}>
-					<UserSignupSSO />
-				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.userVerification', defaultMessage: 'Verify Email' })} exact path={REGISTER_VERIFY_PATH}>
-					<UserVerification />
-				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.passwordForgot', defaultMessage: 'Forgotten Password' })} exact path={PASSWORD_FORGOT_PATH}>
-					<PasswordForgot />
-				</Route>
-				<Route title={formatMessage({ id: 'pageTitle.passwordChange', defaultMessage: 'Change Password' })} exact path={PASSWORD_CHANGE_PATH}>
-					<PasswordChange />
-				</Route>
-				<Route exact path={`${path}/(terms|privacy|cookies)`}>
-					<LegalRoutes path={path} />
-				</Route>
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.teamspaceSelection', defaultMessage: 'Teamspaces' })} exact path={DASHBOARD_ROUTE}>
-					<TeamspaceSelection />
-				</AuthenticatedRoute>
-				<AuthenticatedRoute exact path={`${TEAMSPACE_ROUTE_BASE}/(t|t/.*)?`}>
-					<TeamspaceLayout>
-						<Switch>
-							<Route exact path={TEAMSPACE_ROUTE_BASE}>
-								<Redirect to={`${discardSlash(pathname)}/t/projects`} />
-							</Route>
-							<Route exact path={TEAMSPACE_ROUTE_BASE_TAB}>
-								<Redirect to={`${discardSlash(pathname)}/projects`} />
-							</Route>
-							<Route path={`${TEAMSPACE_ROUTE_BASE}/`}>
-								<TeamspaceContent />
-							</Route>
-						</Switch>
-					</TeamspaceLayout>
-				</AuthenticatedRoute>
-				<AuthenticatedRoute path={PROJECT_ROUTE_BASE}>
-					<DashboardProjectLayout>
-						<Switch>
-							<Route exact path={PROJECT_ROUTE_BASE}>
-								<Redirect to={`${discardSlash(pathname)}/t/federations`} />
-							</Route>
-							<Route exact path={PROJECT_ROUTE_BASE_TAB}>
-								<Redirect to={`${discardSlash(pathname)}/federations`} />
-							</Route>
-							<Route path={PROJECT_ROUTE_BASE}>
-								<ProjectContent />
-							</Route>
-						</Switch>
-					</DashboardProjectLayout>
-				</AuthenticatedRoute>
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.viewer', defaultMessage: ':containerOrFederation :revision - Viewer' })} path={VIEWER_ROUTE}>
-					<DashboardViewerLayout>
-						<Viewer />
-					</DashboardViewerLayout>
-				</AuthenticatedRoute>
-				<AuthenticatedRoute exact path={path}>
-					<Redirect to={`${discardSlash(pathname)}/dashboard`} />
-				</AuthenticatedRoute>
-				<AuthenticatedRoute title={formatMessage({ id: 'pageTitle.notFound', defaultMessage: 'Page Not Found' })} path="*">
-					<NotFound />
-				</AuthenticatedRoute>
-			</Switch>
+			</Routes>
 		</CalibrationContextComponent>
 	);
 };

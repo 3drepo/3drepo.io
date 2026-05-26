@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions/permissions');
+const { hasReadAccessToDrawing, hasWriteAccessToDrawing } = require('../../../../../middleware/permissions');
 const Calibrations = require('../../../../../processors/teamspaces/projects/models/drawings/calibrations');
 const { Router } = require('express');
 const { formatCalibration } = require('../../../../../middleware/dataConverter/outputs/teamspaces/projects/models/drawings/calibrations');
@@ -60,7 +60,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/calibrations:
 	 *   post:
 	 *     description: Create a new calibration.
-	 *     tags: [Calibrations]
+	 *     tags: [v:external, Calibrations]
 	 *     operationId: createNewCalibration
 	 *     parameters:
 	 *       - name: teamspace
@@ -166,7 +166,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/calibrations:
 	 *   get:
 	 *     description: Gets the latest available calibration for the revision.
-	 *     tags: [Calibrations]
+	 *     tags: [v:external, Calibrations]
 	 *     operationId: getCalibration
 	 *     parameters:
 	 *       - name: teamspace

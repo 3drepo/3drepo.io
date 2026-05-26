@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2023 3D Repo Ltd
+ *  Copyright (C) 2025 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -16,18 +16,17 @@
  */
 
 import { DialogsActionsDispatchers, TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useEffect } from 'react';
+import { useSearchParam } from '../../useSearchParam';
 import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty } from 'lodash';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
 import { formatMessage } from '@/v5/services/intl';
+import { useParams } from 'react-router-dom';
 import { ViewerParams } from '../../routes.constants';
-import { useSearchParam } from '../../useSearchParam';
 
 export const OpenTicketFromUrl = () => {
-	const [ticketId, setTicketId] = useSearchParam('ticketId');
 	const { containerOrFederation } = useParams<ViewerParams>();
-
+	const [ticketId, setTicketId] = useSearchParam('ticketId');
 	const tickets = TicketsHooksSelectors.selectTickets(containerOrFederation);
 	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
 	const hasTicketData = !isEmpty(tickets) && !isEmpty(templates);

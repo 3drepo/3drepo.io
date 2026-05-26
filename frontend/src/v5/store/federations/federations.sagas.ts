@@ -23,22 +23,25 @@ import {
 	DeleteFederationAction,
 	FederationsActions,
 	FederationsTypes,
+	FetchFederationJobsAction,
 	FetchFederationsAction,
 	FetchFederationSettingsAction,
 	FetchFederationStatsAction,
+	FetchFederationUsersAction,
 	FetchFederationViewsAction,
 	RemoveFavouriteAction,
 	UpdateFederationContainersAction,
 	UpdateFederationSettingsAction,
 } from '@/v5/store/federations/federations.redux';
 import { FederationStats } from '@/v5/store/federations/federations.types';
-import { prepareFederationsData, prepareFederationSettingsForBackend, prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { prepareFederationsData } from '@/v5/store/federations/federations.helpers';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
 import { formatMessage } from '@/v5/services/intl';
 import { FetchFederationsResponse, FetchFederationViewsResponse } from '@/v5/services/api/federations';
 import { isEqualWith } from 'lodash';
 import { compByColum } from '../store.helpers';
 import { selectFederationById, selectFederations, selectIsListPending } from './federations.selectors';
+import { prepareSettingsForFrontend, prepareSettingsForBackend } from '../containers/containers.helpers';
 
 export function* createFederation({
 	teamspace,
@@ -154,7 +157,7 @@ export function* fetchFederationSettings({
 }: FetchFederationSettingsAction) {
 	try {
 		const rawSettings = yield API.Federations.fetchFederationSettings(teamspace, projectId, federationId);
-		const settings = prepareFederationSettingsForFrontend(rawSettings);
+		const settings = prepareSettingsForFrontend(rawSettings);
 		yield put(FederationsActions.fetchFederationSettingsSuccess(projectId, federationId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
@@ -173,12 +176,50 @@ export function* updateFederationSettings({
 	onError,
 }: UpdateFederationSettingsAction) {
 	try {
-		const rawSettings = prepareFederationSettingsForBackend(settings);
+		const rawSettings = prepareSettingsForBackend(settings);
 		yield API.Federations.updateFederationSettings(teamspace, projectId, federationId, rawSettings);
 		yield put(FederationsActions.updateFederationSettingsSuccess(projectId, federationId, settings));
 		onSuccess();
 	} catch (error) {
 		onError(error);
+	}
+}
+
+export function* fetchFederationUsers({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationUsersAction) {
+	try {
+		const { users: nonViewerUsers } = yield API.Federations.fetchFederationUsers(teamspace, projectId, federationId, true);
+		const { users: allUsers } = yield API.Federations.fetchFederationUsers(teamspace, projectId, federationId);
+		const users = allUsers.map((user) => ({ user, isViewer: !nonViewerUsers.includes(user) }));
+
+		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, { users }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'federations.fetchUsers.error', defaultMessage: 'trying to fetch federation users' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchFederationJobs({
+	teamspace,
+	projectId,
+	federationId,
+}: FetchFederationJobsAction) {
+	try {
+		const { jobs: nonViewerJobs } = yield API.Federations.fetchFederationJobs(teamspace, projectId, federationId, true);
+		const { jobs: allJobs } = yield API.Federations.fetchFederationJobs(teamspace, projectId, federationId);
+		const jobs = allJobs.map((job) => ({ _id: job, isViewer: !nonViewerJobs.includes(job) }));
+
+		yield put(FederationsActions.updateFederationSuccess(projectId, federationId, { jobs }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'federations.fetchJobs.error', defaultMessage: 'trying to fetch federation Jobs' }),
+			error,
+		}));
 	}
 }
 
@@ -220,6 +261,8 @@ export default function* FederationsSagas() {
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_STATS, fetchFederationStats);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_VIEWS, fetchFederationViews);
 	yield takeEvery(FederationsTypes.FETCH_FEDERATION_SETTINGS, fetchFederationSettings);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_USERS, fetchFederationUsers);
+	yield takeEvery(FederationsTypes.FETCH_FEDERATION_JOBS, fetchFederationJobs);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_SETTINGS, updateFederationSettings);
 	yield takeLatest(FederationsTypes.DELETE_FEDERATION, deleteFederation);
 	yield takeLatest(FederationsTypes.UPDATE_FEDERATION_CONTAINERS, updateFederationContainers);

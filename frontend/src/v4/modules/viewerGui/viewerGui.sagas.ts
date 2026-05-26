@@ -17,11 +17,13 @@
 
 import { formatMessage } from '@/v5/services/intl';
 import { DialogsActions } from '@/v5/store/dialogs/dialogs.redux';
-import { goBack } from 'connected-react-router';
 import { all, put, select, take, takeLatest } from 'redux-saga/effects';
 
 import { TicketsCardActions } from '@/v5/store/tickets/card/ticketsCard.redux';
 import { TicketsActions } from '@/v5/store/tickets/tickets.redux';
+import { dispatch } from '@/v5/helpers/redux.helpers';
+import { UsersActions } from '@/v5/store/users/users.redux';
+import { selectIsFederation } from '@/v5/store/federations/federations.selectors';
 import { INITIAL_HELICOPTER_SPEED, VIEWER_GIZMO_MODES, VIEWER_EVENTS, VIEWER_CLIP_MODES } from '../../constants/viewer';
 import * as API from '../../services/api';
 import { MultiSelect } from '../../services/viewer/multiSelect';
@@ -41,9 +43,9 @@ import { selectRisksMap, RisksActions } from '../risks';
 import { selectUrlParams } from '../router/router.selectors';
 import { SequencesActions } from '../sequences';
 import { StarredActions } from '../starred';
-import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 import { selectInitialView, selectViewpointsDomain, ViewpointsActions, ViewpointsTypes } from '../viewpoints';
+import { RouterActions } from '../router/router.redux';
 import { ViewerGuiActions, ViewerGuiTypes } from './viewerGui.redux';
 import {
 	selectClippingMode,
@@ -84,7 +86,8 @@ function* fetchData({ teamspace, model }) {
 			put(ModelActions.fetchMetaKeys(teamspace, model)),
 			put(TreeActions.setIsTreeProcessed(false)),
 			put(ViewpointsActions.fetchViewpoints(teamspace, model)),
-			put(CommentsActions.fetchUsers(teamspace))
+			put(CommentsActions.fetchUsers(teamspace)),
+			put(UsersActions.fetchUsers(teamspace)),
 		]);
 
 		yield all([
@@ -120,6 +123,9 @@ function* resetPanelsStates() {
 			put(SequencesActions.reset()),
 			put(GisActions.resetLayers()),
 			put(MeasurementsActions.resetMeasurementTool()),
+			put(TicketsCardActions.resetState()),
+			put(TicketsActions.resetSorting()),
+
 		]);
 	} catch (error) {
 		yield put(DialogActions.showErrorDialog('reset', 'panels data', error));
@@ -358,7 +364,7 @@ function* setCamera({ params }) {
 }
 
 function* loadModel() {
-	const { teamspace, model } = yield select(selectUrlParams);
+	const { teamspace, project, model } = yield select(selectUrlParams);
 
 	try {
 		yield Viewer.isViewerReady();
@@ -366,8 +372,9 @@ function* loadModel() {
 		const revision = yield select(selectCurrentRevisionId);
 		const modelSettings = yield select(selectSettings);
 		const selectedViewpoint = yield select(selectInitialView);
+		const isFederation = (yield select(selectIsFederation))(model)
 
-		yield Viewer.loadViewerModel(teamspace, model, 'master', revision || 'head', selectedViewpoint?.viewpoint);
+		yield Viewer.loadViewerModel(teamspace, project, model, revision || 'head', isFederation, selectedViewpoint?.viewpoint);
 		yield Viewer.updateViewerSettings(modelSettings);
 
 		if (selectedViewpoint) { // This is to have the viewpoint state in redux the same as in unity
@@ -382,7 +389,7 @@ function* loadModel() {
 					' You will now be redirected to the previous page.'
 			})
 		yield put(DialogActions.showDialog({ title: formatMessage({id: 'viewerGui.loadModel.error.title', defaultMessage: 'Model Error'}), content }));
-		yield put(goBack());
+		yield put(RouterActions.goBack());
 	}
 }
 

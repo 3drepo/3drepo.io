@@ -38,6 +38,10 @@ export const { Types: ContainersTypes, Creators: ContainersActions } = createAct
 	fetchContainerViewsSuccess: ['projectId', 'containerId', 'views'],
 	fetchContainerSettings: ['teamspace', 'projectId', 'containerId'],
 	fetchContainerSettingsSuccess: ['projectId', 'containerId', 'settings'],
+	fetchContainerUsers: ['teamspace', 'projectId', 'containerId'],
+	fetchContainerUsersSuccess: ['projectId', 'containerId', 'users'],
+	fetchContainerJobs: ['teamspace', 'projectId', 'containerId'],
+	fetchContainerJobsSuccess: ['projectId', 'containerId', 'jobs'],
 	updateContainerSuccess: ['projectId', 'containerId', 'container'],
 	updateContainerSettings: ['teamspace', 'projectId', 'containerId', 'settings', 'onSuccess', 'onError'],
 	updateContainerSettingsSuccess: ['projectId', 'containerId', 'settings'],
@@ -196,6 +200,8 @@ export type FetchContainerViewsAction = Action<'FETCH_CONTAINER_VIEWS'> & Teamsp
 export type FetchContainerViewsSuccessAction = Action<'FETCH_CONTAINER_VIEWS_SUCCESS'> & ProjectAndContainerId & { views: View[] };
 export type FetchContainerSettingsAction = Action<'FETCH_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId;
 export type FetchContainerSettingsSuccessAction = Action<'FETCH_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings };
+export type FetchContainerUsersAction = Action<'FETCH_CONTAINER_USERS'> & TeamspaceProjectAndContainerId;
+export type FetchContainerJobsAction = Action<'FETCH_CONTAINER_JOBS'> & TeamspaceProjectAndContainerId;
 export type UpdateContainerSettingsAction = Action<'UPDATE_CONTAINER_SETTINGS'> & TeamspaceProjectAndContainerId & SuccessAndErrorCallbacks & { settings: ContainerSettings };
 export type UpdateContainerSuccessAction = Action<'UPDATE_CONTAINER_SUCCESS'> & ProjectAndContainerId & { container: Partial<IContainer> };
 export type UpdateContainerSettingsSuccessAction = Action<'UPDATE_CONTAINER_SETTINGS_SUCCESS'> & ProjectAndContainerId & { settings: ContainerSettings };
@@ -245,6 +251,16 @@ export interface IContainersActionCreators {
 		containerId: string,
 		settings: ContainerSettings,
 	) => FetchContainerSettingsSuccessAction;
+	fetchContainerUsers: (
+		teamspace: string,
+		projectId: string,
+		containerId: string,
+	) => FetchContainerUsersAction,
+	fetchContainerJobs: (
+		teamspace: string,
+		projectId: string,
+		containerId: string,
+	) => FetchContainerJobsAction,
 	updateContainerSettings: (
 		teamspace: string,
 		projectId: string,

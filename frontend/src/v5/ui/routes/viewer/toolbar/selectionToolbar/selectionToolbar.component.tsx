@@ -25,7 +25,7 @@ import EyeIsolateIcon from '@assets/icons/viewer/eye_isolate.svg';
 import ResetTransformationsIcons from '@assets/icons/viewer/reset_transformations.svg';
 import { formatMessage } from '@/v5/services/intl';
 import { GroupsActionsDispatchers, TreeActionsDispatchers, ViewerGuiActionsDispatchers, ViewpointsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { TreeHooksSelectors, ViewerGuiHooksSelectors, ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { ModelHooksSelectors, TreeHooksSelectors, ViewerGuiHooksSelectors, ViewpointsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { isEmpty, isNull } from 'lodash';
 import { FormattedMessage } from 'react-intl';
 import { Section, Container, ClearIcon, LozengeButton } from './selectionToolbar.styles';
@@ -49,6 +49,10 @@ export const SectionToolbar = () => {
 	const isBoxClippingMode = clippingMode === VIEWER_CLIP_MODES.BOX;
 	const hasTransformations = !isEmpty(ViewpointsHooksSelectors.selectTransformations());
 	const planesAreUnset = verticalPlanes.some(isNull);
+
+	const revisionId = ModelHooksSelectors.selectCurrentRevisionId();
+
+	useEffect(() => { GroupsActionsDispatchers.clearSelectionHighlights(); }, [revisionId]);
 
 	const onClickAlign = () => {
 		Viewer.clipToolRealign();

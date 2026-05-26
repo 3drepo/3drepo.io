@@ -70,6 +70,9 @@ const runTest = (data) => {
 			[ADD_ONS.SRC]: true,
 			[ADD_ONS.HERE]: true,
 			[ADD_ONS.POWERBI]: true,
+			[ADD_ONS.DAILY_DIGEST]: true,
+			[ADD_ONS.USERS_PROVISIONED]: true,
+			[ADD_ONS.DISABLE_PERMISSIONS_ON_UI]: true,
 			[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES).join(','),
 		}],
 		['the request enables some add ons', true, undefined, data.noAddOn, {
@@ -82,6 +85,8 @@ const runTest = (data) => {
 			[ADD_ONS.SRC]: true,
 			[ADD_ONS.HERE]: true,
 			[ADD_ONS.POWERBI]: true,
+			[ADD_ONS.USERS_PROVISIONED]: true,
+			[ADD_ONS.DISABLE_PERMISSIONS_ON_UI]: true,
 			[ADD_ONS.MODULES]: Object.values(ADD_ONS_MODULES).join(','),
 		}],
 		['the request disables all add ons', true, undefined, data.withAllAddOns,
@@ -103,13 +108,11 @@ const runTest = (data) => {
 		});
 
 		test(`Should ${success ? 'succeed' : 'fail with an error'} if ${desc}`, async () => {
+			const { removeAll, ...addOnsToChange } = params;
 			const exe = UpdateAddOns.run(teamspace.name,
-				params[ADD_ONS.VR],
-				params[ADD_ONS.SRC],
-				params[ADD_ONS.HERE],
-				params[ADD_ONS.POWERBI],
-				params[ADD_ONS.MODULES],
-				params.removeAll);
+				params.removeAll,
+				addOnsToChange,
+			);
 			if (success) {
 				let expectedModules = teamspace.addOns[ADD_ONS_MODULES];
 				if (params[ADD_ONS.MODULES]) {

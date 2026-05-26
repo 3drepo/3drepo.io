@@ -23,19 +23,20 @@ const { getCommonElements } = require(`${v5Path}/utils/helper/arrays`);
 const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
 const { idTypes, idTypesToKeys } = require(`${v5Path}/models/metadata.constants`);
 const { getMetadataWithMatchingData } = require(`${v5Path}/models/metadata`);
-const { sharedIdsToExternalIds, getMeshesWithParentIds } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scenes`);
+const { sharedIdsToExternalIds, getMeshesWithParentIds, prepareCache } = require(`${v5Path}/processors/teamspaces/projects/models/commons/scenes`);
 const { findProjectByModelId } = require(`${v5Path}/models/projectSettings.js`);
 
 const utils = require("../utils");
 const responseCodes = require("../response_codes.js");
 const Meta = require("./meta");
 const { findNodes } = require("./scene");
-const { getHistory } = require("./history");
+const { getHistory, findLatest } = require("./history");
 const { validateRules } = require("./helper/rule");
 const db = require("../handler/db");
 const ChatEvent = require("./chatEvent");
 
 const { systemLogger } = require("../logger.js");
+const { getSubModels } = require("./ref.js");
 
 const fieldTypes = {
 	"description": "[object String]",
@@ -362,21 +363,46 @@ Group.getList = async function (account, model, branch, revId, ids, queryParams,
 	if (ids) {
 		query._id = {$in: utils.stringsToUUIDs(ids)};
 	}
+	const submodels = new Set();
+	const [groups, modelRev] = await Promise.all([
+		db.find(account, getGroupCollectionName(model), query),
+		getHistory(account, model, branch, revId).catch(() => undefined)
 
-	const results = await db.find(account, getGroupCollectionName(model), query);
+	]);
 
-	const sharedIdConversionPromises = [];
+	if(modelRev) {
+		await getSubModels(account, model, branch, revId, async (ts, subModel) => {
+			const revNode = await findLatest(ts, subModel, {_id: 1});
 
-	results.forEach(result => {
-		const getObjIdProm = getObjectIds(account, model, branch, revId, result, true, showIfcGuids)
-			.then((sharedIdObjects) => {
-				result.objects = sharedIdObjects;
-				return clean(result);
-			}).catch(() => clean(result));
-		sharedIdConversionPromises.push(getObjIdProm);
-	});
+			if(revNode) {
+				submodels.add({model: subModel, revId: revNode._id});
+				await prepareCache(ts, subModel, revNode._id);
+			}
 
-	return Promise.all(sharedIdConversionPromises);
+		});
+	}
+
+	let models = [];
+	if(submodels.size) {
+		models = Array.from(submodels);
+	} else if(modelRev) {
+		await prepareCache(account, model, modelRev._id);
+		models = [{model, revId: modelRev._id}];
+	}
+
+	return Promise.all(groups.map(async group => {
+		try {
+			const sharedIdObjects = await Promise.all(models.map(({model: container, revId: conRevId}) =>
+				getObjectIds(account, container, undefined, conRevId, group, true, showIfcGuids)));
+			group.objects = sharedIdObjects.flat();
+
+		} catch (err) {
+			systemLogger.logError(`Failed to get object ids for group ${group._id}: ${err.message}`);
+		}
+
+		return clean(group);
+	}));
+
 };
 
 Group.update = async function (account, model, branch = "master", revId = null, sessionId, user = "", groupId, data) {

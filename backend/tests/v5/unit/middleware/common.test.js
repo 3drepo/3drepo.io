@@ -16,6 +16,11 @@
  */
 
 const { src } = require('../../helper/path');
+const { generateRandomString } = require('../../helper/services');
+
+const { templates } = require(`${src}/utils/responseCodes`);
+jest.mock('../../../../src/v5/utils/responder');
+const Responder = require(`${src}/utils/responder`);
 
 const Common = require(`${src}/middleware/common`);
 
@@ -63,6 +68,31 @@ const testValidateMany = () => {
 	});
 };
 
+const testRouteDecommissioned = () => {
+	describe('Route Decommissioned', () => {
+		const req = {};
+		const res = {};
+		test('with no newEndpoint suggestion should respond with standard message', async () => {
+			await Common.routeDecommissioned()(req, res);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.endpointDecommissioned);
+		});
+
+		test('with newEndpoint suggestion should respond with endpointDecommissioned and custom message', async () => {
+			const newEndpoint = generateRandomString();
+			const verb = generateRandomString();
+
+			await Common.routeDecommissioned(verb, newEndpoint)(req, res);
+			expect(Responder.respond).toHaveBeenCalledTimes(1);
+			expect(Responder.respond).toHaveBeenCalledWith(req, res, expect.objectContaining({
+				code: templates.endpointDecommissioned.code,
+				message: `This endpoint is no longer available. Please use ${verb} ${newEndpoint} instead.`,
+			}));
+		});
+	});
+};
+
 describe('middleware/common', () => {
 	testValidateMany();
+	testRouteDecommissioned();
 });

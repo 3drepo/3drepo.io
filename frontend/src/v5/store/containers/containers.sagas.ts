@@ -23,9 +23,11 @@ import {
 	ContainersTypes,
 	CreateContainerAction,
 	DeleteContainerAction,
+	FetchContainerJobsAction,
 	FetchContainersAction,
 	FetchContainerSettingsAction,
 	FetchContainerStatsAction,
+	FetchContainerUsersAction,
 	FetchContainerViewsAction,
 	RemoveFavouriteAction,
 	UpdateContainerSettingsAction,
@@ -35,14 +37,14 @@ import { formatMessage } from '@/v5/services/intl';
 import { FetchContainersResponse } from '@/v5/services/api/containers';
 import { isEqualWith } from 'lodash';
 import { ContainerStats, FetchContainerViewsResponseView, IContainer } from './containers.types';
-import { prepareContainerSettingsForBackend, prepareContainerSettingsForFrontend, prepareContainersData } from './containers.helpers';
+import { prepareSettingsForBackend, prepareSettingsForFrontend, prepareContainersData } from './containers.helpers';
 import { selectContainerById, selectContainers, selectIsListPending } from './containers.selectors';
 import { compByColum } from '../store.helpers';
 import { getSortingFunction } from '@components/dashboard/dashboardList/useOrderedList/useOrderedList.helpers';
 import { SortingDirection } from '@components/dashboard/dashboardList/dashboardList.types';
-import { LifoQueue } from '@/v5/helpers/functions.helpers';
+import { AsyncFunctionExecutor } from '@/v5/helpers/functions.helpers';
 
-const statsQueue = new LifoQueue<ContainerStats>(API.Containers.fetchContainerStats, 30);
+const statsStack = new AsyncFunctionExecutor<ContainerStats>(API.Containers.fetchContainerStats, 30);
 
 export function* addFavourites({ containerId, teamspace, projectId }: AddFavouriteAction) {
 	try {
@@ -73,7 +75,7 @@ export function* removeFavourites({ containerId, teamspace, projectId }: RemoveF
 export function* fetchContainerStats({ teamspace, projectId, containerId }: FetchContainerStatsAction) {
 	try {
 		const container: IContainer = yield select(selectContainerById, containerId);
-		const stats = yield statsQueue.enqueue(teamspace, projectId, containerId);
+		const stats = yield statsStack.addCall(teamspace, projectId, containerId);
 		
 		const basicDataEqual = compByColum(['unit', 'type'])(container, stats);
 		// eslint-disable-next-line max-len
@@ -104,7 +106,7 @@ export function* fetchContainers({ teamspace, projectId }: FetchContainersAction
 			yield put(ContainersActions.fetchContainersSuccess(projectId, containersWithoutStats));
 		}
 
-		statsQueue.resetQueue();
+		statsStack.reset();
 
 		yield all(
 			containers.sort(getSortingFunction({ column: ['name'], direction:[SortingDirection.DESCENDING] })).map(
@@ -142,11 +144,48 @@ export function* fetchContainerSettings({
 }: FetchContainerSettingsAction) {
 	try {
 		const rawSettings = yield API.Containers.fetchContainerSettings(teamspace, projectId, containerId);
-		const settings = prepareContainerSettingsForFrontend(rawSettings);
+		const settings = prepareSettingsForFrontend(rawSettings);
 		yield put(ContainersActions.fetchContainerSettingsSuccess(projectId, containerId, settings));
 	} catch (error) {
 		yield put(DialogsActions.open('alert', {
 			currentActions: formatMessage({ id: 'containers.fetchSettings.error', defaultMessage: 'trying to fetch container settings' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchContainerUsers({
+	teamspace,
+	projectId,
+	containerId,
+}: FetchContainerUsersAction) {
+	try {
+		const { users: nonViewerUsers } = yield API.Containers.fetchContainerUsers(teamspace, projectId, containerId, true);
+		const { users: allUsers } = yield API.Containers.fetchContainerUsers(teamspace, projectId, containerId);
+		const users = allUsers.map((user) => ({ user, isViewer: !nonViewerUsers.includes(user) }));
+		
+		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, { users }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.fetchUsers.error', defaultMessage: 'trying to fetch container users' }),
+			error,
+		}));
+	}
+}
+
+export function* fetchContainerJobs({
+	teamspace,
+	projectId,
+	containerId,
+}: FetchContainerJobsAction) {
+	try {
+		const { jobs: nonViewerJobs } = yield API.Containers.fetchContainerJobs(teamspace, projectId, containerId, true);
+		const { jobs: allJobs } = yield API.Containers.fetchContainerJobs(teamspace, projectId, containerId);
+		const jobs = allJobs.map((job) => ({ _id: job, isViewer: !nonViewerJobs.includes(job) }));
+		yield put(ContainersActions.updateContainerSuccess(projectId, containerId, { jobs }));
+	} catch (error) {
+		yield put(DialogsActions.open('alert', {
+			currentActions: formatMessage({ id: 'containers.fetchJobs.error', defaultMessage: 'trying to fetch container Jobs' }),
 			error,
 		}));
 	}
@@ -161,7 +200,7 @@ export function* updateContainerSettings({
 	onError,
 }: UpdateContainerSettingsAction) {
 	try {
-		const rawSettings = prepareContainerSettingsForBackend(settings);
+		const rawSettings = prepareSettingsForBackend(settings);
 		yield API.Containers.updateContainerSettings(teamspace, projectId, containerId, rawSettings);
 		yield put(ContainersActions.updateContainerSettingsSuccess(projectId, containerId, settings));
 		onSuccess();
@@ -196,7 +235,7 @@ export function* deleteContainer({ teamspace, projectId, containerId, onSuccess,
 }
 
 export function* resetContainerStatsQueue() {
-	statsQueue.resetQueue();
+	statsStack.reset();
 }
 
 export default function* ContainersSaga() {
@@ -207,6 +246,8 @@ export default function* ContainersSaga() {
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_VIEWS, fetchContainerViews);
 	yield takeEvery(ContainersTypes.FETCH_CONTAINER_SETTINGS, fetchContainerSettings);
 	yield takeLatest(ContainersTypes.UPDATE_CONTAINER_SETTINGS, updateContainerSettings);
+	yield takeEvery(ContainersTypes.FETCH_CONTAINER_USERS, fetchContainerUsers);
+	yield takeEvery(ContainersTypes.FETCH_CONTAINER_JOBS, fetchContainerJobs);
 	yield takeEvery(ContainersTypes.CREATE_CONTAINER, createContainer);
 	yield takeLatest(ContainersTypes.DELETE_CONTAINER, deleteContainer);
 	yield takeEvery(ContainersTypes.RESET_CONTAINER_STATS_QUEUE, resetContainerStatsQueue);

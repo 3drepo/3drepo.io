@@ -15,33 +15,99 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { SearchContext } from '@controls/search/searchContext';
-import { useContext } from 'react';
+import { useContext, useEffect, useRef } from 'react';
 import { FormattedMessage } from 'react-intl';
-import { useParams } from 'react-router-dom';
-import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
-import _ from 'lodash';
-import { DashboardListCollapse } from '@components/dashboard/dashboardList';
-import { CircledNumber } from '@controls/circledNumber/circledNumber.styles';
-import { TicketsTableGroup } from './ticketsTableGroup/ticketsTableGroup.component';
-import {  groupTickets, NEW_TICKET_ID, NONE_OPTION, SetTicketValue, UNSET } from '../ticketsTable.helper';
 import { EmptyPageView } from '../../../../../../components/shared/emptyPageView/emptyPageView.styles';
-import { Container, Title } from './ticketsTableContent.styles';
+import { ResizableTableContext } from '@controls/resizableTableContext/resizableTableContext';
+import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { templateAlreadyFetched } from '@/v5/store/tickets/tickets.helpers';
+import { TicketsTableResizableContent, TicketsTableResizableContentProps } from './ticketsTableResizableContent/ticketsTableResizableContent.component';
+import { ITemplate } from '@/v5/store/tickets/tickets.types';
+import { Container, TicketsTableSpinner } from './ticketsTableContent.styles';
+import { useEdgeScrolling } from '../edgeScrolling';
+import { BaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { useContextWithCondition } from '@/v5/helpers/contextWithCondition/contextWithCondition.hooks';
+import { Transformers, useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { isEqual, intersection } from 'lodash';
+import { TicketsFiltersContext } from '@components/viewer/cards/cardFilters/ticketsFilters.context';
+import { SELECTION_COLUMN_WIDTH } from './ticketsTableGroup/ticketsTableGroup.helper';
 
-type TicketsTableContentProps = {
-	setTicketValue: SetTicketValue;
-	groupBy: string
-	selectedTicketId?: string;
-};
-export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy }: TicketsTableContentProps) => {
-	const { filteredItems } = useContext(SearchContext);
-	const { template } = useParams<DashboardTicketsParams>();
+const TableContent = ({ template, tableRef, ...props }: TicketsTableResizableContentProps & { template: ITemplate, tableRef }) => {
+	const edgeScrolling = useEdgeScrolling();
+	const defaultColumns = TicketsHooksSelectors.selectInitialTabularColumns(template._id);
+	const {
+		stretchTable, getAllColumnsNames, subscribe, resetWidths,
+		setVisibleSortedColumnsNames,
+		getVisibleSortedColumnsNames,
+	} = useContextWithCondition(ResizableTableContext, []);
+	const { isFiltering } = useContext(TicketsFiltersContext);
+	const templateWasFetched = templateAlreadyFetched(template);
+	const ignoreColumnChange = useRef(false);
 	
-	const onGroupNewTicket = (groupByValue: string) => (modelId: string) => {
-		setTicketValue(modelId, NEW_TICKET_ID, (groupByValue === UNSET) ? null : groupByValue);
+	const [colsParam, setColsParams] = useSearchParam('cols', Transformers.STRING_ARRAY, true);
+
+	const setVisibleColumn = () => {
+		ignoreColumnChange.current = true;
+		const columnsRendered =  [...getVisibleSortedColumnsNames()];
+		
+		if (!colsParam.length) {
+			const allColumns = getAllColumnsNames();
+			const initialVisibleColumns = intersection([...defaultColumns], allColumns);
+			if (!isEqual(columnsRendered, initialVisibleColumns)) {
+				setVisibleSortedColumnsNames(initialVisibleColumns);
+				resetWidths();
+				stretchTable(BaseProperties.TITLE, -SELECTION_COLUMN_WIDTH);
+			}
+		} else {
+			if (!isEqual(columnsRendered, colsParam)) {
+				setVisibleSortedColumnsNames(colsParam);
+				if (!columnsRendered.length) {
+					stretchTable(BaseProperties.TITLE, -SELECTION_COLUMN_WIDTH);
+				}
+			}
+		}
+
+		ignoreColumnChange.current = false;
 	};
 
-	if (!filteredItems.length) {
+	useEffect(() => {
+		if (!templateWasFetched) return;
+		setVisibleColumn();
+		return subscribe(['visibleSortedColumnsNames'], (cols) => {
+			if (ignoreColumnChange.current) return;
+			setColsParams(cols);
+		});
+	}, [template, templateWasFetched, defaultColumns, setColsParams]);
+
+	useEffect(() => {
+		if (!templateWasFetched) return;
+		setVisibleColumn();
+	}, [colsParam]);
+
+	useEffect(() => {
+		const onMovingColumnChange = (movingColumn) => {
+			if (movingColumn) {
+				edgeScrolling.start(tableRef.current);
+			} else {
+				edgeScrolling.stop();
+			}
+		};
+		return subscribe(['movingColumn'], onMovingColumnChange);
+	}, [edgeScrolling]);
+
+	if (!templateWasFetched || isFiltering) {
+		return (
+			<EmptyPageView>
+				<TicketsTableSpinner />
+				<FormattedMessage
+					id="ticketTable.emptyView"
+					defaultMessage="We're currently searching for tickets that match your criteria."
+				/>
+			</EmptyPageView>
+		);
+	}
+
+	if (!props.tickets.length) {
 		return (
 			<EmptyPageView>
 				<FormattedMessage
@@ -51,41 +117,20 @@ export const TicketsTableContent = ({ setTicketValue, selectedTicketId, groupBy 
 			</EmptyPageView>
 		);
 	}
+	
+	return (
+		<div style={{ position: 'absolute' }} >
+			<TicketsTableResizableContent {...props} template={template} />
+		</ div>
+	);
+};
 
-	if (groupBy === NONE_OPTION || !groupBy) {
-		return (
-			<TicketsTableGroup
-				tickets={filteredItems}
-				onNewTicket={onGroupNewTicket('')}
-				onEditTicket={setTicketValue}
-				selectedTicketId={selectedTicketId}
-			/>
-		);
-	}
-
-	const groups = groupTickets(groupBy, filteredItems);
+export const TicketsTableContent = (props: TicketsTableResizableContentProps) => {
+	const tableRef = useRef(null);
 
 	return (
-		<Container>
-			{_.entries(groups).map(([groupName, tickets]) => (
-				<DashboardListCollapse
-					title={(
-						<>
-							<Title>{groupName}</Title>
-							<CircledNumber disabled={!tickets.length}>{tickets.length}</CircledNumber>
-						</>
-					)}
-					defaultExpanded={!!tickets.length}
-					key={groupBy + groupName + template + tickets}
-				>
-					<TicketsTableGroup
-						tickets={tickets}
-						onNewTicket={onGroupNewTicket(groupName)}
-						onEditTicket={setTicketValue}
-						selectedTicketId={selectedTicketId}
-					/>
-				</DashboardListCollapse>
-			))}
+		<Container ref={tableRef}>
+			<TableContent {...props} tableRef={tableRef} />
 		</Container>
 	);
 };

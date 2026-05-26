@@ -15,60 +15,35 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { TICKETS_RESOURCES_COL, operatorToQuery } = require('../../../../../models/tickets.constants');
 const { UUIDToString, generateUUID, stringToUUID } = require('../../../../../utils/helper/uuids');
-const { addGroups, deleteGroups, getGroupsByIds } = require('./tickets.groups');
-const { addTicketsWithTemplate, getAllTickets, getTicketById, updateTickets } = require('../../../../../models/tickets');
+const { addTicketsWithTemplate, getAllTickets, getTicketById, getTicketsByFilter, getTicketsByQuery, getTicketsByTemplateId, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
 	presetModules,
-	propTypes,
-	statusTypes,
-	statuses,
-	viewGroups,
+	supportedPatterns,
 } = require('../../../../../schemas/tickets/templates.constants');
-const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
-const { deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
-const { getFileWithMetaAsStream, removeFiles, storeFiles } = require('../../../../../services/filesManager');
+const { cloneDeep, deleteIfUndefined, isEmpty } = require('../../../../../utils/helper/objects');
+const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
+
+const { getAllTemplates, getTemplatesByQuery } = require('../../../../../models/tickets.templates');
 const { getNestedProperty, setNestedProperty } = require('../../../../../utils/helper/objects');
-const { isBuffer, isUUID } = require('../../../../../utils/helper/typeCheck');
-const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
+const { propTypes, viewGroups } = require('../../../../../schemas/tickets/templates.constants');
+const { removeFiles, storeFiles } = require('../../../../../services/filesManager');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateFullSchema } = require('../../../../../schemas/tickets/templates');
-const { getAllTemplates } = require('../../../../../models/tickets.templates');
 const { getArrayDifference } = require('../../../../../utils/helper/arrays');
+const { getClosedStatuses } = require('../../../../../schemas/tickets/templates');
+const { getFileWithMetaAsStream } = require('../../../../../services/filesManager');
+const { getModelById } = require('../../../../../models/modelSettings');
+const { getTicketLogs } = require('../../../../../models/tickets.logs');
 const { importComments } = require('./tickets.comments');
+const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
+const { specialQueryFields } = require('../../../../../schemas/tickets/tickets.filters');
 
 const Tickets = {};
-
-const processGroupsUpdate = (oldData, newData, fields, groupsState) => {
-	fields.forEach((fieldName) => {
-		const oldProp = getNestedProperty(oldData, fieldName) ?? [];
-		const newProp = getNestedProperty(newData, fieldName) ?? [];
-
-		oldProp.forEach(({ group }) => {
-			groupsState.old.add(UUIDToString(group));
-
-			if (newData === undefined || (newData && newData.state === undefined)) {
-				// New data is not specified so we are preserving the old ones
-				groupsState.stillUsed.add(UUIDToString(group));
-			}
-		});
-
-		newProp.forEach((propData) => {
-			const { group } = propData;
-			if (isUUID(group)) {
-				groupsState.stillUsed.add(UUIDToString(group));
-			} else {
-				const groupId = generateUUID();
-				groupsState.toAdd.push({ ...group, _id: groupId });
-				// eslint-disable-next-line no-param-reassign
-				propData.group = groupId;
-			}
-		});
-	});
-};
 
 /**
  * Special properties:
@@ -160,31 +135,15 @@ const processSpecialProperties = (template, oldTickets, updatedTickets) => {
 		});
 	});
 
-	return res.map(({ groups: { toRemove, old, stillUsed, ...otherGroups }, ...others }) => {
-		const toRemoveCalculated = getArrayDifference(Array.from(stillUsed),
-			Array.from(old)).map(stringToUUID);
-
-		return { groups: { toRemove: toRemoveCalculated, stillUsed, ...otherGroups }, ...others };
-	});
+	return res;
 };
 
 const processExternalData = async (teamspace, project, model, ticketIds, data) => {
 	const refsToRemove = [];
 	const binariesToSave = [];
+
 	await Promise.all(ticketIds.map(async (ticketId, i) => {
 		const { binaries, groups } = data[i];
-
-		if (groups.stillUsed.size) {
-			const stillUsed = Array.from(groups.stillUsed);
-			const existingGroups = await getGroupsByIds(teamspace, project, model, ticketId,
-				stillUsed.map(stringToUUID), { _id: 1 });
-
-			if (existingGroups.length !== stillUsed.length) {
-				const notFoundGroups = getArrayDifference(existingGroups.map(({ _id }) => UUIDToString(_id)),
-					stillUsed);
-				throw createResponseCode(templates.invalidArguments, `The following groups are not found: ${notFoundGroups.join(',')}`);
-			}
-		}
 
 		refsToRemove.push(...binaries.toRemove);
 
@@ -192,11 +151,7 @@ const processExternalData = async (teamspace, project, model, ticketIds, data) =
 			id: ref, data: bin, meta: { teamspace, project, model, ticket: ticketId },
 		})));
 
-		await Promise.all([
-			groups.toAdd.length ? addGroups(teamspace, project, model, ticketId, groups.toAdd) : Promise.resolve(),
-			groups.toRemove.length ? deleteGroups(teamspace, project, model, ticketId,
-				groups.toRemove) : Promise.resolve(),
-		]);
+		await commitGroupChanges(teamspace, project, model, ticketId, groups);
 	}));
 
 	const promsToWait = [];
@@ -304,6 +259,8 @@ Tickets.getTicketResourceAsStream = (teamspace, project, model, ticket, resource
 
 Tickets.getTicketById = getTicketById;
 
+Tickets.getTicketHistory = getTicketLogs;
+
 const propertyToFilterName = (property) => {
 	if (property.includes('.')) {
 		const [moduleName, moduleProp] = property.split('.');
@@ -328,8 +285,34 @@ const filtersToProjection = (filters) => {
 	return projectionObject;
 };
 
-Tickets.getTicketList = (teamspace, project, model,
-	{ filters = [], updatedSince, sortBy, sortDesc }) => {
+const getQueryInfoFromQueryFilters = async (teamspace, queryFilters) => {
+	const queries = [];
+	let templateQuery;
+	let ticketCodeQuery;
+
+	queryFilters.forEach(({ propertyName, operator, value }) => {
+		if (propertyName === specialQueryFields.TEMPLATE) {
+			templateQuery = operatorToQuery[operator]('code', value);
+		} else if (propertyName === specialQueryFields.TICKET_CODE) {
+			ticketCodeQuery = operatorToQuery[operator](propertyName, value);
+		} else {
+			queries.push({ ...operatorToQuery[operator](propertyName, value) });
+		}
+	});
+
+	if (templateQuery) {
+		const temps = await getTemplatesByQuery(teamspace, templateQuery, { _id: 1 });
+		queries.push({ type: { $in: temps.map(({ _id }) => _id) } });
+	}
+
+	return {
+		query: queries.length ? { $and: queries } : {},
+		ticketCodeQuery,
+	};
+};
+
+Tickets.getTicketList = async (teamspace, project, model,
+	{ filters = [], queryFilters = [], updatedSince, sortBy, sortDesc, limit, skip }) => {
 	const { SAFETIBASE, SEQUENCING } = presetModules;
 	const {
 		[SAFETIBASE]: safetibaseProps,
@@ -362,8 +345,15 @@ Tickets.getTicketList = (teamspace, project, model,
 	if (sortBy && propertyToFilterName(sortBy)) {
 		sort = { [propertyToFilterName(sortBy)]: sortDesc ? -1 : 1 };
 	}
+	if (queryFilters.length) {
+		const queryInfo = await getQueryInfoFromQueryFilters(teamspace, queryFilters);
 
-	return getAllTickets(teamspace, project, model, deleteIfUndefined({ projection, updatedSince, sort }));
+		return getTicketsByFilter(teamspace, project, model,
+			deleteIfUndefined({ projection, updatedSince, sort, limit, skip, ...queryInfo }));
+	}
+
+	return getAllTickets(teamspace, project, model,
+		deleteIfUndefined({ projection, updatedSince, sort, limit, skip }));
 };
 
 Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
@@ -376,10 +366,7 @@ Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
 	const allTemplates = await getAllTemplates(teamspace, true, { _id: 1, config: 1 });
 
 	const templateToClosedStatuses = allTemplates.reduce((obj, { _id, config }) => {
-		const closedStatuses = config.status
-			? config.status.values
-				.flatMap((s) => (s.type === statusTypes.DONE || s.type === statusTypes.VOID ? s.name : []))
-			: [statuses.CLOSED, statuses.VOID];
+		const closedStatuses = getClosedStatuses({ config });
 
 		return { ...obj, [UUIDToString(_id)]: closedStatuses };
 	}, {});
@@ -393,6 +380,127 @@ Tickets.getOpenTicketsCount = async (teamspace, project, model) => {
 	}
 
 	return openTicketsCount;
+};
+
+// placeholdersToFind should be left undfined if we want to replace all placeholders
+const findPropertiesToUpdate = (template, placeholdersToFind) => {
+	const propertiesToUpdate = [];
+
+	const findProps = (props, moduleName) => {
+		const modulePrefix = moduleName ? `modules.${moduleName}.` : 'properties.';
+		props.forEach(({ name, value }) => {
+			if (value !== undefined) {
+				if (placeholdersToFind) {
+					const found = placeholdersToFind.some((ph) => value.includes(`{${ph}}`));
+					if (found) {
+						propertiesToUpdate.push({ name: `${modulePrefix}${name}`, value });
+					}
+				} else {
+					propertiesToUpdate.push({ name: `${modulePrefix}${name}`, value });
+				}
+			}
+		});
+	};
+
+	findProps(template.properties);
+	template.modules.forEach(({ type, name, properties }) => {
+		findProps(properties, type ?? name);
+	});
+
+	return propertiesToUpdate;
+};
+
+const updatePropertiesWithAutomatedValue = async (teamspace, tickets, template, propertiesToUpdate) => {
+	const patternToVal = {};
+	const updatedTickets = tickets.map((ticket) => cloneDeep(ticket));
+
+	const modelIdToName = {};
+	const modelToUpdates = {};
+
+	patternToVal[supportedPatterns.TEMPLATE_CODE] = template.code;
+
+	for (let i = 0; i < tickets.length; i++) {
+		const ticket = tickets[i];
+		const ticketData = {};
+		patternToVal[supportedPatterns.TICKET_NUMBER] = ticket.number;
+		if (!modelIdToName[ticket.model]) {
+			// eslint-disable-next-line no-await-in-loop
+			const model = await getModelById(teamspace, ticket.model, { name: 1 });
+
+			modelIdToName[ticket.model] = model.name;
+			modelToUpdates[ticket.model] = {
+				project: ticket.project,
+				model: ticket.model,
+				tickets: [],
+				update: [],
+			};
+		}
+		patternToVal[supportedPatterns.MODEL_NAME] = modelIdToName[ticket.model];
+
+		propertiesToUpdate.forEach(({ name, value }) => {
+			let updatedVal = value;
+			Object.keys(patternToVal).forEach((patternVal) => {
+				updatedVal = updatedVal.replaceAll(`{${patternVal}}`, patternToVal[patternVal]);
+			});
+			setNestedProperty(ticketData, name, updatedVal);
+			setNestedProperty(updatedTickets[i], name, updatedVal);
+		});
+		modelToUpdates[ticket.model].update.push(ticketData);
+		modelToUpdates[ticket.model].tickets.push(ticket);
+	}
+
+	await Promise.all(Object.values(modelToUpdates).map(
+		async ({ project, model, tickets: oldTickets, update: updateData }) => {
+			await updateTickets(teamspace, project, model, oldTickets, updateData, 'system');
+		}));
+
+	return updatedTickets;
+};
+
+const updatePropertiesWithPattern = async (teamspace, project, model, template, pattern) => {
+	const propertiesToUpdate = findPropertiesToUpdate(template, pattern ? [pattern] : undefined);
+
+	if (propertiesToUpdate.length) {
+		const projection = { _id: 1, number: 1, project: 1, model: 1 };
+		let tickets;
+		if (project && model) {
+			tickets = await getTicketsByQuery(teamspace, project, model,
+				{ type: template._id }, projection);
+		} else {
+			tickets = await getTicketsByTemplateId(teamspace, template._id, projection);
+		}
+
+		if (tickets.length) {
+			await updatePropertiesWithAutomatedValue(teamspace,
+				tickets, template, propertiesToUpdate);
+		}
+	}
+};
+
+Tickets.onModelNameUpdated = async (teamspace, project, model) => {
+	const templates = await getTemplatesByQuery(teamspace, { $or: [
+		{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+		{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+	] });
+
+	await Promise.all(templates.map(async (template) => {
+		await updatePropertiesWithPattern(teamspace, project, model, template, supportedPatterns.MODEL_NAME);
+	}));
+};
+
+Tickets.onTemplateUpdated = async (teamspace, template) => {
+	await updatePropertiesWithPattern(teamspace, undefined, undefined, template);
+};
+
+Tickets.initialiseAutomatedProperties = async (teamspace, project, model, tickets, template) => {
+	const propertiesToUpdate = findPropertiesToUpdate(template);
+	if (propertiesToUpdate.length) {
+		const updatedTickets = await updatePropertiesWithAutomatedValue(
+			teamspace, tickets.map((ticket) => ({ project, model, ...ticket })), template, propertiesToUpdate);
+		return updatedTickets;
+	}
+
+	return tickets;
 };
 
 module.exports = Tickets;

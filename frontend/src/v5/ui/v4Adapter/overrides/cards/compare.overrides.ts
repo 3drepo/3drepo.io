@@ -21,6 +21,7 @@ import { FilterPanel } from '@/v4/routes/viewerGui/components/compare/components
 import { SelectField } from '@/v4/routes/viewerGui/components/compare/components/revisionsSelect/revisionsSelect.styles';
 import { css } from 'styled-components';
 import { ViewerPanelButton, ViewerPanelFooter } from '@/v4/routes/viewerGui/components/viewerPanel/viewerPanel.styles';
+import { SliderWrapper } from '@/v4/routes/viewerGui/components/compare/compare.styles';
 
 export default css`
 	${Revisions} {
@@ -91,5 +92,9 @@ export default css`
 		&:hover {
 			background-color: ${({ theme }) => theme.palette.error.dark};
 		}
+	}
+
+	${SliderWrapper} {
+		width: 270px;
 	}
 `;

@@ -62,6 +62,7 @@ export interface IUser {
 	hasAvatar?: boolean;
 	avatarUrl: string;
 	isNotTeamspaceMember?: boolean;
+	isViewer?: boolean;
 }
 
 export type FetchUsersAction = Action<'FETCH_USERS'> & TeamspaceId;

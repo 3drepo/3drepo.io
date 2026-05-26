@@ -15,55 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { isSsoUser, validateUnlinkData } = require('../../middleware/sso');
 const { Router } = require('express');
-const Users = require('../../processors/users');
-const { getUserFromSession } = require('../../utils/sessions');
-const { isLoggedIn } = require('../../middleware/auth');
-const { respond } = require('../../utils/responder');
-const { templates } = require('../../utils/responseCodes');
-
-const unlink = async (req, res) => {
-	try {
-		const username = getUserFromSession(req.session);
-		const { password } = req.body;
-		await Users.unlinkFromSso(username, password);
-		respond(req, res, templates.ok);
-	} catch (err) {
-		/* istanbul ignore next */
-		respond(req, res, err);
-	}
-};
+const { routeDecommissioned } = require('../../middleware/common');
 
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 
-	/**
-	 * @openapi
-	 * /sso/unlink:
-	 *   post:
-	 *     description: Unlinks an SSO user's account from SSO
-	 *     tags: [Sso]
-	 *     operationId: ssoUnlink
-	 *     requestBody:
-	 *       content:
-	 *         application/json:
-	 *           schema:
-	 *             type: object
-	 *             required:
-	 *               - password
-	 *             properties:
-	 *               password:
-	 *                 type: string
-	 *                 description: The new password of the user
-	 *                 example: password123
-	 *     responses:
-	 *       401:
-	 *         $ref: "#/components/responses/invalidArguments"
-	 *       200:
-	 *         description: Unlinks the users account from SSO
-	 */
-	router.post('/unlink', isLoggedIn, isSsoUser, validateUnlinkData, unlink);
+	router.post('/unlink', routeDecommissioned());
 
 	return router;
 };

@@ -57,4 +57,6 @@ export const CardContent = styled(CardContentPadded)`
 export const ModuleTitle = styled(FormLabel)`
 	font-weight: 500;
 	color: inherit;
+	line-height: 13px;
+	display: flex;
 `;

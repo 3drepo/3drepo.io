@@ -126,6 +126,8 @@ Queue.listenToQueue = async (queue, callback) => {
 	listeners[queue].callbacks.push(callback);
 
 	await listenToQueue(conn, queue, callback);
+
+	logger.logInfo(`Listening to queue [${queue}]...`);
 };
 
 Queue.listenToExchange = async (exchange, callback) => {
@@ -133,6 +135,7 @@ Queue.listenToExchange = async (exchange, callback) => {
 	listeners[exchange] = listeners[exchange] || { callbacks: [], isExchange: true };
 	listeners[exchange].callbacks.push(callback);
 	await listenToExchange(conn, exchange, callback);
+	logger.logInfo(`Listening to exchange [${exchange}]...`);
 };
 
 Queue.queueMessage = async (queueName, correlationId, msg) => {
@@ -145,6 +148,7 @@ Queue.queueMessage = async (queueName, correlationId, msg) => {
 
 	await channel.sendToQueue(queueName, dataBuf, meta);
 	await channel.close();
+	logger.logDebug(`Added message[${correlationId}] to queue [${queueName}]`);
 };
 
 Queue.broadcastMessage = async (exchangeName, msg) => {

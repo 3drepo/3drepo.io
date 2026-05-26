@@ -19,26 +19,30 @@ import { isEmpty } from 'lodash';
 import { renderWhenTrue } from '../../../../../../helpers/rendering';
 import { batchGroupBy } from '../../../../../../modules/canvasHistory/canvasHistory.helpers';
 import { COLOR } from '../../../../../../styles';
-import { MODES } from '../../../markupStage/markupStage.helpers';
 
 import { SHAPE_TYPES } from '../../shape/shape.constants';
-import { TypingHandler } from '../../typingHandler/typingHandler.component';
+import { TypingCalloutHandler } from '../../typingHandler/typingCalloutHandler.component';
 import { createDrawnLine, createShape, getDrawFunction } from '../drawingHandler.helpers';
 import {
 	HandleBaseDrawing, IHandleBaseDrawingProps, IHandleBaseDrawingStates,
 } from '../handleBaseDrawing/handleBaseDrawing.component';
 import { getLinePoints } from './handleCalloutDrawing.helpers';
 
+enum CalloutState {
+	SETTING_ANCHOR = 'settingAnchor',
+	POSITIONING_TEXT_BOX = 'positioningTextBox',
+};
+
 export interface IHandleCalloutDrawingProps extends IHandleBaseDrawingProps {
 	textSize: number;
 	activeShape: number;
 	handleNewDrawnShape: (shape: number, attrs, updateState?: boolean) => void;
 	handleNewDrawnLine: (line, type?, updateState?: boolean) => void;
-	handleNewText: (position, text?: string, updateState?: boolean) => void;
+	handleNewText: (position, text?: string, width?: number, updateState?: boolean) => void;
 }
 
 export interface IHandleCalloutDrawingStates extends IHandleBaseDrawingStates {
-	calloutState: number;
+	calloutState: typeof CalloutState;
 	lastShape: any;
 }
 
@@ -51,7 +55,7 @@ export class HandleCalloutDrawing
 
 	public state = {
 		...super.state,
-		calloutState: 1,
+		calloutState: CalloutState.SETTING_ANCHOR,
 		lastShape: {},
 	};
 
@@ -81,13 +85,13 @@ export class HandleCalloutDrawing
 			this.activeShape = this.props.activeShape;
 		}
 
-		if (this.state.calloutState === 1) {
+		if (this.state.calloutState === CalloutState.SETTING_ANCHOR) {
 			if (this.activeShape === SHAPE_TYPES.CALLOUT_DOT) {
 				this.subscribeDotDrawingEvents();
 			} else {
 				this.subscribeShapeDrawingEvents();
 			}
-		} else if (this.state.calloutState === 2) {
+		} else if (this.state.calloutState === CalloutState.POSITIONING_TEXT_BOX) {
 			this.subscribeLineDrawingEvents();
 		}
 	}
@@ -166,37 +170,35 @@ export class HandleCalloutDrawing
 	}
 
 	public handleMouseMoveLine = () => {
-		if (this.state.isCurrentlyDrawn) {
-			if (isEmpty(this.lastShape)) {
-				this.layer.clearBeforeDraw();
-				const { x, y } = this.pointerPosition;
+		if (this.state.isCurrentlyDrawn && isEmpty(this.lastShape)) {
+			this.layer.clearBeforeDraw();
+			const { x, y } = this.pointerPosition;
 
-				this.lastPointerPosition = this.initialPointerPosition = {
-					x,
-					y
-				};
+			this.lastPointerPosition = this.initialPointerPosition = {
+				x,
+				y
+			};
 
-				const initialPositionProps = {
-					x: this.lastPointerPosition.x,
-					y: this.initialPointerPosition.y
-				};
+			const initialPositionProps = {
+				x: this.lastPointerPosition.x,
+				y: this.initialPointerPosition.y
+			};
 
-				const commonProps = {
-					stroke: this.props.color,
-					strokeWidth: this.props.size,
-					draggable: false,
-					fill: COLOR.WHITE,
-				};
+			const commonProps = {
+				stroke: this.props.color,
+				strokeWidth: this.props.size,
+				draggable: false,
+				fill: COLOR.WHITE,
+			};
 
-				this.lastShape = createShape(SHAPE_TYPES.RECTANGLE, commonProps, initialPositionProps);
-				this.layer.add(this.lastShape);
-				this.setState({
-					lastShape : this.lastShape,
-				});
-			} else {
-				this.lastLine.points(getLinePoints(this.shape, this.lastShape));
-				this.layer.batchDraw();
-			}
+			this.lastShape = createShape(SHAPE_TYPES.RECTANGLE, commonProps, initialPositionProps);
+			this.layer.add(this.lastShape);
+			this.setState({
+				lastShape : this.lastShape,
+			});
+		} else {
+			this.lastLine.points(getLinePoints(this.shape, this.lastShape));
+			this.layer.batchDraw();
 		}
 	}
 
@@ -222,7 +224,7 @@ export class HandleCalloutDrawing
 		this.layer.batchDraw();
 		this.lastPointerPosition = this.pointerPosition;
 
-		this.setState({ calloutState: 2 });
+		this.setState({ calloutState: CalloutState.POSITIONING_TEXT_BOX });
 		this.shape = this.lastShape;
 		this.lastShape = {};
 
@@ -270,30 +272,29 @@ export class HandleCalloutDrawing
 		this.layer.add(this.lastShape);
 	}
 
-	public addText = (position, text) => {
+	public addText = (position, text, width) => {
 		batchGroupBy.start();
 		this.saveCallout();
-		this.props.handleNewText(position, text, false);
+		this.props.handleNewText(position, text, width, false);
 		batchGroupBy.end();
 		setTimeout(() => {
-			this.setState({ calloutState: 1, isCurrentlyDrawn: false });
+			this.setState({ calloutState: CalloutState.SETTING_ANCHOR, isCurrentlyDrawn: false });
 		});
 	}
 
 	public drawShape = () => {
 		const draw = getDrawFunction(
-				this.calloutShapeNormalizedMap[this.activeShape],
-				this.lastShape,
-				this.initialPointerPosition,
-				this.pointerPosition,
+			this.calloutShapeNormalizedMap[this.activeShape],
+			this.lastShape,
+			this.initialPointerPosition,
+			this.pointerPosition,
 		);
 		draw();
 		this.layer.batchDraw();
 	}
 
 	public renderEditableTextarea = renderWhenTrue(() => (
-		<TypingHandler
-			mode={MODES.TEXT}
+		<TypingCalloutHandler
 			stage={this.props.stage}
 			layer={this.layer}
 			color={this.props.color}
@@ -301,12 +302,15 @@ export class HandleCalloutDrawing
 			size={this.props.size}
 			onRefreshDrawingLayer={this.handleRefreshDrawingLayer}
 			onAddNewText={this.addText}
-			selected={this.props.selected}
 			boxRef={this.state.lastShape}
 		/>
 	));
 
 	public render() {
-		return this.renderEditableTextarea(this.state.calloutState === 2);
+		return this.renderEditableTextarea(
+			this.state.calloutState === CalloutState.POSITIONING_TEXT_BOX &&
+			this.props.stage &&
+			!this.props.selected
+		);
 	}
 }

@@ -50,6 +50,7 @@ export const { Types: ViewpointsTypes, Creators: ViewpointsActions } = createAct
 	toggleSortOrder: [],
 	fetchViewpointGroups: ['teamspace', 'modelId', 'view'],
 	addViewpointGroupsBeingLoaded: ['ids'],
+	viewpointReady: [],
 	clearColorOverrides: [],
 	clearTransformations: [],
 	reset: [],

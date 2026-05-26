@@ -19,18 +19,17 @@ const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
 
-const { generateRandomString } = require('../../helper/services');
+const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const Teamspace = require(`${src}/models/teamspaceSettings`);
+const { USERS_DB_NAME } = require(`${src}/models/users.constants`);
 const { ADD_ONS, DEFAULT_TOPIC_TYPES, DEFAULT_RISK_CATEGORIES, SECURITY, SECURITY_SETTINGS } = require(`${src}/models/teamspaces.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { TEAMSPACE_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
-const { TEAM_MEMBER } = require(`${src}/models/roles.constants`);
 const { ADD_ONS_MODULES } = require(`${src}/models/teamspaces.constants`);
 
-const USER_COL = 'system.users';
 const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 const generateSecurityConfig = (sso, whiteList) => {
@@ -41,63 +40,6 @@ const generateSecurityConfig = (sso, whiteList) => {
 			[SECURITY_SETTINGS.DOMAIN_WHITELIST]: whiteList,
 		}),
 	};
-};
-
-const testHasAccessToTeamspace = () => {
-	describe('Has access to teamspace', () => {
-		const teamspace = generateRandomString();
-		const user = generateRandomString();
-		const domain = `${generateRandomString()}.com`;
-
-		test('should return false if the user do not have access to teamspace', async () => {
-			const findFn = jest.spyOn(db, 'findOne');
-			findFn.mockResolvedValueOnce();
-
-			const res = await Teamspace.hasAccessToTeamspace(teamspace, user);
-
-			expect(res).toBeFalsy();
-			expect(findFn).toHaveBeenCalledTimes(1);
-		});
-
-		const genUserData = ({ inDomain, sso } = {}) => ({
-			_id: user,
-			customData: {
-				email: `${generateRandomString()}@${inDomain ? domain : `${generateRandomString()}.com`}`,
-				sso: sso ? { something: 1 } : undefined,
-			},
-		});
-
-		describe.each([
-			['non SSO user has access to a teamspace with no restriction', genUserData(), {}, true],
-			['non SSO-user has access to the SSO restricted teamspace', genUserData(), generateSecurityConfig(true), false, templates.ssoRestricted],
-			['SSO-user has access to the SSO restricted teamspace', genUserData({ sso: true }), generateSecurityConfig(true), true],
-			['SSO-user has access to the SSO restricted teamspace but not in whitelist domain', genUserData({ sso: true }), generateSecurityConfig(true, [domain]), false, templates.domainRestricted],
-			['SSO-user has access to the SSO restricted teamspace and is in whitelist domain', genUserData({ sso: true, inDomain: true }), generateSecurityConfig(true, [domain]), true],
-			['non SSO-user has access to the SSO restricted teamspace and is in whitelist domain', genUserData({ inDomain: true }), generateSecurityConfig(true, [domain]), false, templates.ssoRestricted],
-			['non SSO-user has access to the teamspace and is in whitelist domain', genUserData({ inDomain: true }), generateSecurityConfig(false, [domain]), true],
-			['non SSO-user has access to the teamspace but is not in whitelist domain', genUserData({ }), generateSecurityConfig(false, [domain]), false, templates.domainRestricted],
-			['SSO-user has access to the teamspace and is in whitelist domain', genUserData({ inDomain: true, sso: true }), generateSecurityConfig(false, [domain]), true],
-			['SSO-user has access to the teamspace but is not in whitelist domain', genUserData({ sso: true }), generateSecurityConfig(false, [domain]), false, templates.domainRestricted],
-		])('', (desc, userData, teamspaceSettings, success, retVal) => {
-			test(`Should ${success ? 'return true' : `throw with ${retVal.code}`} if ${desc}`, async () => {
-				const findFn = jest.spyOn(db, 'findOne');
-				// first call fetches the user data
-				findFn.mockResolvedValueOnce(userData);
-				// second call fetches teamspace settings
-				findFn.mockResolvedValueOnce(teamspaceSettings);
-
-				const test = expect(Teamspace.hasAccessToTeamspace(teamspace, user));
-
-				if (success) {
-					await test.resolves.toBeTruthy();
-				} else {
-					await test.rejects.toEqual(retVal);
-				}
-
-				expect(findFn).toHaveBeenCalledTimes(2);
-			});
-		});
-	});
 };
 
 const testTeamspaceAdmins = () => {
@@ -307,6 +249,12 @@ const testRemoveSubscription = () => {
 	});
 };
 
+const addOnsProjection = {};
+
+Object.values(ADD_ONS).forEach((val) => {
+	addOnsProjection[`addOns.${val}`] = 1;
+});
+
 const testRemoveAddOns = () => {
 	describe('Remove teamspace addOns', () => {
 		test('should get rid of all addOns', async () => {
@@ -314,13 +262,7 @@ const testRemoveAddOns = () => {
 
 			const teamspace = generateRandomString();
 
-			const unsetObj = {
-				[`addOns.${ADD_ONS.VR}`]: 1,
-				[`addOns.${ADD_ONS.SRC}`]: 1,
-				[`addOns.${ADD_ONS.HERE}`]: 1,
-				[`addOns.${ADD_ONS.POWERBI}`]: 1,
-				[`addOns.${ADD_ONS.MODULES}`]: 1,
-			};
+			const unsetObj = addOnsProjection;
 
 			await expect(Teamspace.removeAddOns(teamspace)).resolves.toBeUndefined();
 			expect(fn).toHaveBeenCalledTimes(1);
@@ -339,6 +281,7 @@ const testGetAddOns = () => {
 					[ADD_ONS.SRC]: true,
 					[ADD_ONS.HERE]: true,
 					[ADD_ONS.POWERBI]: true,
+					[ADD_ONS.DAILY_DIGEST]: true,
 					[ADD_ONS.MODULES]: [ADD_ONS_MODULES.ISSUES],
 				} });
 
@@ -349,17 +292,13 @@ const testGetAddOns = () => {
 				[ADD_ONS.SRC]: true,
 				[ADD_ONS.HERE]: true,
 				[ADD_ONS.POWERBI]: true,
+				[ADD_ONS.DAILY_DIGEST]: true,
 				[ADD_ONS.MODULES]: [ADD_ONS_MODULES.ISSUES],
 			});
 
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, {
-				[`addOns.${ADD_ONS.VR}`]: 1,
-				[`addOns.${ADD_ONS.SRC}`]: 1,
-				[`addOns.${ADD_ONS.HERE}`]: 1,
-				[`addOns.${ADD_ONS.POWERBI}`]: 1,
-				[`addOns.${ADD_ONS.MODULES}`]: 1,
-			}, undefined);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				addOnsProjection, undefined);
 		});
 
 		test('should get all applicable addOns (no addOns)', async () => {
@@ -369,13 +308,8 @@ const testGetAddOns = () => {
 
 			await expect(Teamspace.getAddOns(teamspace)).resolves.toEqual({});
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, {
-				[`addOns.${ADD_ONS.VR}`]: 1,
-				[`addOns.${ADD_ONS.SRC}`]: 1,
-				[`addOns.${ADD_ONS.HERE}`]: 1,
-				[`addOns.${ADD_ONS.POWERBI}`]: 1,
-				[`addOns.${ADD_ONS.MODULES}`]: 1,
-			}, undefined);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				addOnsProjection, undefined);
 		});
 	});
 };
@@ -383,13 +317,6 @@ const testGetAddOns = () => {
 const testIsAddOnModuleEnabled = () => {
 	describe('Is addOn module enabled', () => {
 		const teamspace = generateRandomString();
-		const projection = {
-			[`addOns.${ADD_ONS.VR}`]: 1,
-			[`addOns.${ADD_ONS.SRC}`]: 1,
-			[`addOns.${ADD_ONS.HERE}`]: 1,
-			[`addOns.${ADD_ONS.POWERBI}`]: 1,
-			[`addOns.${ADD_ONS.MODULES}`]: 1,
-		};
 
 		test('should return true if module is enabled', async () => {
 			const fn = jest.spyOn(db, 'findOne').mockResolvedValue({ addOns: { [ADD_ONS.MODULES]: [ADD_ONS_MODULES.ISSUES] } });
@@ -399,7 +326,7 @@ const testIsAddOnModuleEnabled = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
-				projection, undefined);
+				addOnsProjection, undefined);
 		});
 
 		test('should return false if module is not enabled', async () => {
@@ -410,7 +337,7 @@ const testIsAddOnModuleEnabled = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
-				projection, undefined);
+				addOnsProjection, undefined);
 		});
 
 		test('should return false if no modules are enabled', async () => {
@@ -421,7 +348,7 @@ const testIsAddOnModuleEnabled = () => {
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
-				projection, undefined);
+				addOnsProjection, undefined);
 		});
 	});
 };
@@ -498,35 +425,19 @@ const testCreateTeamspaceSettings = () => {
 	describe('Create teamspace settings', () => {
 		test('should create teamspace settings', async () => {
 			const teamspace = generateRandomString();
+			const teamspaceId = generateRandomString();
 			const expectedSettings = {
 				_id: teamspace,
+				refId: teamspaceId,
 				topicTypes: DEFAULT_TOPIC_TYPES,
 				riskCategories: DEFAULT_RISK_CATEGORIES,
 				permissions: [],
 			};
 
 			const fn = jest.spyOn(db, 'insertOne').mockImplementation(() => {});
-			await Teamspace.createTeamspaceSettings(teamspace);
+			await Teamspace.createTeamspaceSettings(teamspace, teamspaceId);
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, 'teamspace', expectedSettings);
-		});
-	});
-};
-
-const testGetAllUsersInTeamspace = () => {
-	describe('Get all users in teamspace', () => {
-		test('should get all users in a teamspace', async () => {
-			const teamspace = generateRandomString();
-			const users = [
-				{ id: generateRandomString(), user: generateRandomString() },
-				{ id: generateRandomString(), user: generateRandomString() },
-			];
-			const fn = jest.spyOn(db, 'find').mockResolvedValue(users);
-			const res = await Teamspace.getAllUsersInTeamspace(teamspace);
-			expect(res).toEqual(users.map((u) => u.user));
-			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith('admin', USER_COL, { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER },
-				{ user: 1 }, undefined);
 		});
 	});
 };
@@ -728,9 +639,94 @@ const testUpdateSecurityRestrictions = () => {
 	});
 };
 
-describe('models/teamspaceSettings', () => {
+const testSetTeamspaceRefId = () => {
+	describe('Set teamspace ref Id', () => {
+		test('Should update the reference ID as instructed', async () => {
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce();
+			const refId = generateRandomString();
+			const teamspace = generateRandomString();
+			await Teamspace.setTeamspaceRefId(teamspace, refId);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace }, { $set: { refId } });
+		});
+	});
+};
+
+const testGetTeamspaceRefId = () => {
+	describe('Get teamspace ref Id', () => {
+		test('Should get the reference ID as instructed', async () => {
+			const refId = generateRandomString();
+			const teamspace = generateRandomString();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce({ refId });
+			await expect(Teamspace.getTeamspaceRefId(teamspace)).resolves.toEqual(refId);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				{ refId: 1 }, undefined);
+		});
+	});
+};
+
+const testGetTeamspaceSetting = () => {
+	describe('Get teamspace setting', () => {
+		test('should return settings if found', async () => {
+			const teamspace = generateRandomString();
+			const res = generateRandomObject();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(res);
+			await expect(Teamspace.getTeamspaceSetting(teamspace)).resolves.toEqual(res);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				{ refId: 0 }, undefined);
+		});
+
+		test('should return settings if found (with projection)', async () => {
+			const teamspace = generateRandomString();
+			const res = generateRandomObject();
+			const projection = generateRandomObject();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(res);
+			await expect(Teamspace.getTeamspaceSetting(teamspace, projection)).resolves.toEqual(res);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				projection, undefined);
+		});
+
+		test(`should throw with ${templates.teamspaceNotFound.code} if teamspace was not found`, async () => {
+			const teamspace = generateRandomString();
+			const projection = generateRandomObject();
+			const fn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(undefined);
+			await expect(Teamspace.getTeamspaceSetting(teamspace, projection))
+				.rejects.toEqual(templates.teamspaceNotFound);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, TEAMSPACE_SETTINGS_COL, { _id: teamspace },
+				projection, undefined);
+		});
+	});
+};
+
+const testGetTeamspaceInvites = () => {
+	describe('Get a list of teamspace invitations', () => {
+		test('Should return a list of emails', async () => {
+			const ts = generateRandomString();
+			const fn = jest.spyOn(db, 'find');
+			await Teamspace.getTeamspaceInvites(ts);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(
+				USERS_DB_NAME, 'invitations',
+				{ 'teamSpaces.teamspace': ts },
+				{ _id: 1 },
+				undefined,
+			);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testTeamspaceAdmins();
-	testHasAccessToTeamspace();
 	testGetSubscriptions();
 	testEditSubscriptions();
 	testRemoveSubscription();
@@ -740,7 +736,6 @@ describe('models/teamspaceSettings', () => {
 	testUpdateAddOns();
 	testGetMembersInfo();
 	testCreateTeamspaceSettings();
-	testGetAllUsersInTeamspace();
 	testRemoveUserFromAdminPrivileges();
 	testGetTeamspaceActiveLicenses();
 	testGetTeamspaceExpiredLicenses();
@@ -748,4 +743,8 @@ describe('models/teamspaceSettings', () => {
 	testGrantAdminPermissionToUser();
 	testGetSecurityRestrictions();
 	testUpdateSecurityRestrictions();
+	testSetTeamspaceRefId();
+	testGetTeamspaceRefId();
+	testGetTeamspaceSetting();
+	testGetTeamspaceInvites();
 });

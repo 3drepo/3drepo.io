@@ -18,12 +18,11 @@
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { useEffect } from 'react';
-import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
-import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
 import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
 import { Gap } from '@controls/gap';
-import { ValueIconContainer, ValuesContainer } from '../groupRulesInputs.styles';
 import { IFormRule } from '../../groupRulesForm.helpers';
+import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
+import { ValuesContainer } from './ruleValues.styles';
 
 export const RuleValues = ({ disabled }) => {
 	const { control, watch, formState: { errors } } = useFormContext<IFormRule>();
@@ -51,15 +50,15 @@ export const RuleValues = ({ disabled }) => {
 		return (
 			<>
 				{fields.map((field, i) => (
-					<ValuesContainer key={field.id}>
+					<ArrayFieldContainer
+						key={field.id}
+						onRemove={() => remove(i)}
+						disableRemove={disabled || fields.length === 1}
+						onAdd={() => append({ value: '' })}
+						disableAdd={disabled || i !== (fields.length - 1)}
+					>
 						<FormValueField name={`values.${i}.value`} formError={error?.[i]} disabled={disabled} />
-						<ValueIconContainer onClick={() => remove(i)} disabled={disabled || fields.length === 1}>
-							<RemoveValueIcon />
-						</ValueIconContainer>
-						<ValueIconContainer onClick={() => append({ value: '' })} disabled={disabled || i !== (fields.length - 1)}>
-							<AddValueIcon />
-						</ValueIconContainer>
-					</ValuesContainer>
+					</ArrayFieldContainer>
 				))}
 			</>
 		);

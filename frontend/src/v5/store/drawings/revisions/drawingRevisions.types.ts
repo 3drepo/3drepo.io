@@ -16,6 +16,7 @@
  */
 
 import { Calibration, CalibrationStatus } from '../drawings.types';
+import { UploadFieldArray } from '@components/shared/uploadFiles/uploadFilesContext';
 
 export interface StatusCode {
 	code: string,
@@ -43,7 +44,7 @@ export interface IDrawingRevisionUploadStatus {
 
 export type CreateDrawingRevisionBody = {
 	name: string;
-	description?: string;
+	revisionDesc: string;
 	file: File;
 	statusCode: string;
 	revCode: string;
@@ -72,4 +73,8 @@ export type UploadItemFields = CreateDrawingRevisionBody & {
 	uploadId: string;
 	progress: number;
 	extension: string;
+	isMultiPagePdf?: boolean;
 };
+
+
+export type DrawingUploadForm = UploadFieldArray<UploadItemFields>;

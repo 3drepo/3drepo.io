@@ -33,7 +33,7 @@ export const ListContainer = styled.ul`
 export const DashboardListEmptyContainer = styled(DashedContainer)`
 	display: flex;
 	align-items: center;
-	height: 80px;
+	height: 83px;
 	background-color: transparent;
 	padding-left: 30px;
 `;

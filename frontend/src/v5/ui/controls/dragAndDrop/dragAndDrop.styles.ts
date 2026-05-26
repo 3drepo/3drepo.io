@@ -16,25 +16,21 @@
  */
 
 import styled, { css } from 'styled-components';
-import Dropzone from 'react-dropzone';
 import { DashedContainer as DashedContainerBase } from '@controls/dashedContainer/dashedContainer.component';
 
-export const Container = styled.div`
-	display: contents;
-`;
-
-export const DropArea = styled(Dropzone)`
+export const DropArea = styled.div`
 	position: relative;
 	width: 100%;
 	height: 100%;
+	display: contents;
 `;
 
-export const DashedContainer = styled(DashedContainerBase).attrs(({ theme, $dragOverlay }: any) => ({
-	dashSize: 5,
+export const DashedContainer = styled(DashedContainerBase).attrs(({ theme, $isDragActive }: any) => ({
+	$dashSize: 5,
 	strokeColor: theme.palette.primary.main,
-	gapSize: $dragOverlay ? 0 : 5,
-	borderRadius: 10,
-}))<{ $dragOverlay?: boolean }>`
+	$gapSize: $isDragActive ? 0 : 5,
+	$borderRadius: 10,
+}))<{ $isDragActive?: boolean }>`
 	width: 100%;
 	height: 100%;
 	padding: 30px;
@@ -45,7 +41,7 @@ export const DashedContainer = styled(DashedContainerBase).attrs(({ theme, $drag
 	align-items: center;
 	flex-direction: column;
 	
-	${({ $dragOverlay, theme: { palette } }) => css`
-		background-color: ${$dragOverlay ? palette.primary.lightest : palette.primary.contrast};
+	${({ $isDragActive, theme: { palette } }) => css`
+		background-color: ${$isDragActive ? palette.primary.lightest : palette.primary.contrast};
 	`}
 `;

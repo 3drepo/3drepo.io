@@ -19,8 +19,8 @@ import { invoke } from 'lodash';
 import { takeLatest } from 'redux-saga/effects';
 
 import { setSocketIdHeader } from '@/v4/services/api/default';
-import { dispatch } from '../store';
 
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import { clientConfigService } from '../../services/clientConfig';
 import { ChatActions, ChatTypes } from './chat.redux';

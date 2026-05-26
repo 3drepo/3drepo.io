@@ -16,10 +16,8 @@
  */
 
 import * as faker from 'faker';
-import { UploadStatus } from '@/v5/store/containers/containers.types';
+import { ContainerSettings, ContainerBackendSettings, UploadStatus } from '@/v5/store/containers/containers.types';
 import {
-	FederationBackendSettings,
-	FederationSettings,
 	FederationStats,
 	GroupedContainer,
 	IFederation,
@@ -69,6 +67,14 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 		],
 	},
 	unit: faker.random.arrayElement(['mm', 'cm', 'dm', 'm', 'ft']),
+	jobs: [
+		{ _id: faker.random.word(), isViewer: true },
+		{ _id: faker.random.word(), isViewer: false },
+	],
+	users: [
+		{ user: faker.random.word(), isViewer: true },
+		{ user: faker.random.word(), isViewer: false },
+	],
 	...overrides,
 });
 
@@ -93,18 +99,18 @@ export const prepareMockNewFederation = (federation: IFederation): NewFederation
 	desc: federation.desc,
 });
 
-const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<FederationSettings, 'surveyPoint'> => ({
+const prepareMockSettingsWithoutSurveyPoint = (federation: IFederation): Omit<ContainerSettings, 'surveyPoint'> => ({
 	angleFromNorth: federation.angleFromNorth,
 	defaultView: federation.defaultView,
 	...prepareMockNewFederation(federation),
 });
 
-export const prepareMockSettingsReply = (federation: IFederation): FederationSettings => ({
+export const prepareMockSettingsReply = (federation: IFederation): ContainerSettings => ({
 	...prepareMockSettingsWithoutSurveyPoint(federation),
 	surveyPoint: federation.surveyPoint,
 });
 
-export const prepareMockRawSettingsReply = (federation: IFederation): FederationBackendSettings => ({
+export const prepareMockRawSettingsReply = (federation: IFederation): ContainerBackendSettings => ({
 	...prepareMockSettingsWithoutSurveyPoint(federation),
 	surveyPoints: [federation.surveyPoint],
 });

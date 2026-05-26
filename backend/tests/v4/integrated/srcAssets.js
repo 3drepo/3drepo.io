@@ -17,9 +17,9 @@
 "use strict";
 
 const request = require("supertest");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const {should, assert, expect, Assertion } = require("chai");
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
@@ -38,6 +38,7 @@ describe("ModelAssets", function () {
 	let noAccessAgent;
 
 	before(async function() {
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");
@@ -89,7 +90,7 @@ describe("ModelAssets", function () {
 		it("from invalid teamspace should fail", function(done) {
 			agent.get(`/invalidTeamspaceNameHere/${model}/revision/master/head/srcAssets.json`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).eq(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 
@@ -123,10 +124,10 @@ describe("ModelAssets", function () {
 	});
 
 	describe("Get SRC list (No Access)", function() {
-		it("from the latest revision should fail", function(done) {
+		it("!from the latest revision should fail", function(done) {
 			noAccessAgent.get(`/${username}/${model}/revision/master/head/srcAssets.json`)
-				.expect(401, (err, res) => {
-					expect(res.body.value).eq(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404, (err, res) => {
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -154,7 +155,7 @@ describe("ModelAssets", function () {
 		it("from invalid teamspace should fail", function(done) {
 			agent.get(`/invalidTeamspaceNameHere/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
 				.expect(404, (err, res) => {
-					expect(res.body.value).eq(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 
@@ -182,8 +183,8 @@ describe("ModelAssets", function () {
 	describe("Get SRC file (No Access)", function() {
 		it("of a valid ID should fail", function(done) {
 			noAccessAgent.get(`/${username}/${model}/c4e6d66f-33ab-4dc5-97b6-e3d9a644cde4.src.mpc`)
-				.expect(401, (err,res) => {
-					expect(res.body.value).eq(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404, (err,res) => {
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});

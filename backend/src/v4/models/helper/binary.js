@@ -89,49 +89,51 @@ class BinToVector3dStringStream extends Transform {
 	}
 }
 
-const binToFacesString = (buffer, isLittleEndian = false) => {
-	const bufferLength = buffer.length;
-	const getUint32 =  (!isLittleEndian ? buffer.readUInt32BE : buffer.readUInt32LE).bind(buffer);
-
-	const INT_BYTE_SIZE = 4;
-
-	// The first element is the number of vertices in the face (e.g. two for lines, three for triangles, etc.)
-	// The vertex count is present for each face, but as a rule faces of different counts are not mixed in the same array
-	// so we only need to define this once.
-	const FACE_SIZE = getUint32(0);
-	const ITEM_LEAP = INT_BYTE_SIZE * (FACE_SIZE + 1);
-
-	let result = "";
-
-	for (let i = 0; i < bufferLength ; i = i + ITEM_LEAP) {
-		if (i !== 0) {
-			result += ",";
-		}
-		for (let j = 1; j <= FACE_SIZE; j++) {
-			result += getUint32(i + j * INT_BYTE_SIZE);
-			if (j < FACE_SIZE) {
-				result += ",";
-			}
-		}
-	}
-
-	return result;
-};
-
 class BinToFaceStringStream extends Transform {
 	constructor(opts = {}) {
 		super(opts);
 		this.started = false;
+		this.i = 0; // The offset into the whole stream, in indices; used to determine where we are relative to a face boundary
 		this.isLittleEndian = opts.isLittleEndian;
 	}
 
 	_transform(chunk, encoding, callback) {
-		if (this.started) {
-			this.push(",");
+		const getUint32 =  (!this.isLittleEndian ? chunk.readUInt32BE : chunk.readUInt32LE).bind(chunk);
+		const INT_BYTE_SIZE = 4;
+		const numIndices = chunk.length / INT_BYTE_SIZE;
+
+		// When we begin for the first time, infer the primitive. This will be
+		// constant for a given face array, so we only need to do it once.
+
+		if (this.i === 0) {
+			this.primitive = getUint32(0);
+			this.stride = this.primitive + 1;
 		}
 
-		this.started = true;
-		this.push(binToFacesString(chunk, this.isLittleEndian));
+		// Faces are returned in a flat array, so all we need to do is iterate
+		// over the chunk, skipping the first "index" of each face (which is not
+		// really an index but the index count). This can be done by keeping
+		// track of where we are relative to the very first chunk.
+
+		// This method assumes the chunks are always multiples of 4 (i.e. 32 bit
+		// integers).
+		// A face may straddle the boundary of a chunk, but an index within
+		// a face will not.
+
+		let result = "";
+		for (let j = 0; j < numIndices; j++) {
+			if ((this.i % this.stride) !== 0) { // The face always starts with the index count, which should be skipped
+				if (this.started) {
+					result += ",";
+				} else {
+					this.started = true;
+				}
+				result += getUint32(j * INT_BYTE_SIZE); // byte stride is the size of a uint32
+			}
+			this.i++;
+		}
+
+		this.push(result);
 		callback();
 	}
 }

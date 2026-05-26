@@ -24,14 +24,15 @@ import { generatePath, useParams } from 'react-router-dom';
 import { VIEWER_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { Overlay, Link } from './viewerInputContainer.styles';
+import { NEW_TICKET_ID } from '@/v5/ui/routes/dashboard/projects/tickets/ticketsTable/ticketsTable.helper';
 
-export const ViewerInputContainer = (props) => {
+export const ViewerInputContainer = ({ inputRef = undefined, ...props }) => {
 	const { isViewer, containerOrFederation } = useContext(TicketContext);
 	const { teamspace, project } = useParams<ViewerParams>();
 	
 	const ticketId = TicketsCardHooksSelectors.selectSelectedTicketId();
 
-	if (isViewer) return (<InputContainer {...props} />);
+	if (isViewer) return (<InputContainer ref={inputRef} {...props} />);
 
 	const getOpenInViewerLink = () => {
 		if (!containerOrFederation) return '/';
@@ -40,12 +41,13 @@ export const ViewerInputContainer = (props) => {
 			project,
 			containerOrFederation,
 		});
-		return pathname + (ticketId ? `?ticketId=${ticketId}` : '');
+		if (ticketId === NEW_TICKET_ID) return pathname;
+		return pathname + `?ticketId=${ticketId}`;
 	};
 
 	return (
 		<OverlappingContainer>
-			<InputContainer {...props} />
+			<InputContainer ref={inputRef} {...props} />
 			{!isViewer && (
 				<Overlay>
 					<FormattedMessage

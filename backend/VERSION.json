@@ -1,34 +1,51 @@
-{ "VERSION" : "5.12.1",
-  "unity" : {
-	"current" : "2.20.0",
-	"supported": []
+{
+  "VERSION": "5.22.3",
+  "unity": {
+    "current": "5.20.0",
+    "supported": []
   },
-  "civil" :{
-	"current" : "5.10.1",
-	"supported": []
+  "civil": {
+    "current": "5.22.0",
+    "supported": [
+      "5.20.0",
+      "5.18.0",
+      "5.16.0",
+      "5.16.1"
+    ]
   },
-  "navis" :{
-	"current" : "5.10.2",
-	"supported": []
+  "navis": {
+    "current": "5.22.1",
+    "supported": [
+      "5.22.0",
+      "5.20.0",
+      "5.18.0",
+      "5.16.0",
+      "5.16.1"
+    ]
   },
-   "revit" :{
-	"current" : "5.10.1",
-	"supported": []
+  "revit": {
+    "current": "5.22.0",
+    "supported": [
+      "5.20.0",
+      "5.18.0",
+      "5.16.0",
+      "5.16.1"
+    ]
   },
-  "unitydll" : {
-	"current": "4.4.0",
-	"supported" : []
+  "unitydll": {
+    "current": "5.4.0",
+    "supported": []
   },
-  "vba" : {
-	"current" : "5.8.0",
-	"supported": []
+  "vba": {
+    "current": "5.8.0",
+    "supported": []
   },
-  "unreal" : {
-    "current" : "1.2.2",
-    "supported": ["1.2.1", "1.2.0", "1.0.1"]
+  "unreal": {
+    "current": "5.2.2",
+    "supported": []
   },
-  "powerbi" : {
-	  "current": "5.10.0",
-	  "supported": ["5.10.0"]
+  "powerbi": {
+    "current": "5.22.0",
+    "supported": []
   }
 }

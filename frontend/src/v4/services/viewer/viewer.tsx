@@ -21,6 +21,7 @@ import { UnityUtil } from '@/globals/unity-util';
 import { isEmpty, isString } from 'lodash';
 import { COLOR } from '@/v5/ui/themes/theme';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
+import { SLOPE_UNITS } from '@/v4/constants/measure';
 import { IS_DEVELOPMENT } from '../../constants/environment';
 import {
 	VIEWER_EVENTS,
@@ -38,9 +39,11 @@ interface IViewerConstructor {
 	name?: string;
 }
 
+export type PinType = 'issue' | 'risk' | 'bookmark' | 'ticket' | null;
+
 export interface IPin {
 	id: string;
-	type?: 'issue' | 'risk' | 'bookmark' | 'ticket' | null;
+	type?: PinType
 	position: number[];
 	norm?: number[];
 	colour: number[];
@@ -53,6 +56,7 @@ export class ViewerService {
 	public viewer: HTMLElement;
 	public currentNavMode = null;
 	public units = 'm';
+	public measuringSlopeUnits = SLOPE_UNITS.DEGREES;
 	public convertToM = 1.0;
 	public isInitialised = false;
 	public measuringUnits = '';
@@ -77,6 +81,7 @@ export class ViewerService {
 
 	public measureMode: string;
 	public measureModeLabels: boolean;
+	public isSnappingCursorEnabled: boolean;
 
 	public constructor({ name = 'viewer', ...config}: IViewerConstructor) {
 		this.name = name;
@@ -395,6 +400,12 @@ export class ViewerService {
 		UnityUtil.setMeasureToolUnits(units);
 	}
 
+	public async setMeasuringSlopeUnits(slopeUnits) {
+		this.measuringSlopeUnits = slopeUnits;
+		await this.isViewerReady();
+		UnityUtil.setMeasureToolSlopeUnits(slopeUnits);
+	}
+
 	public getMeasuringUnits() {
 		return this.measuringUnits;
 	}
@@ -414,14 +425,34 @@ export class ViewerService {
 		UnityUtil.setMeasureToolMeasurementName(uuid, name);
 	}
 
+	public async enableSnappingCursor() {
+		await this.isViewerReady();
+		UnityUtil.enableCursor();
+		this.isSnappingCursorEnabled = true;
+	}
+
+	public async disableSnappingCursor() {
+		await this.isViewerReady();
+		UnityUtil.disableCursor();
+		this.isSnappingCursorEnabled = false;
+	}
+
 	public async enableEdgeSnapping() {
 		await this.isViewerReady();
 		UnityUtil.enableSnapping();
+		// Slope has its own icon that can overlap with snapping icon.
+		// When both are active, edge snapping icon should not be visible
+		if (this.measureMode === VIEWER_MEASURING_MODE.SLOPE) {
+			this.disableSnappingCursor();
+		} else {
+			this.enableSnappingCursor();
+		}
 	}
 
 	public async disableEdgeSnapping() {
 		await this.isViewerReady();
 		UnityUtil.disableSnapping();
+		this.disableSnappingCursor();
 	}
 
 	public async enableMeasureXYZDisplay() {
@@ -714,12 +745,12 @@ export class ViewerService {
 	 * Diffs
 	 */
 
-	public diffToolSetAsComparator(account: string, model: string) {
-		UnityUtil.diffToolSetAsComparator(account, model);
+	public diffToolSetAsComparator(account: string, project: string, model: string) {
+		UnityUtil.diffToolSetAsComparator(account, project, model);
 	}
 
-	public diffToolLoadComparator(account: string, model: string, revision: string) {
-		return UnityUtil.diffToolLoadComparator(account, model, revision);
+	public diffToolLoadComparator(account: string, project: string, model: string, revision: string) {
+		return UnityUtil.diffToolLoadComparator(account, project, model, revision);
 	}
 
 	public diffToolEnableWithDiffMode() {
@@ -776,22 +807,22 @@ export class ViewerService {
 		return await this.isModelLoaded();
 	}
 
-	public async loadViewerModel(teamspace, model, branch, revision, viewpoint) {
+	public async loadViewerModel(teamspace, project, model, revision, isFederation, viewpoint) {
 		if (!teamspace || !model) {
-			console.error('Teamspace, model, branch or revision was not defined!', teamspace, model, branch, revision);
+			console.error('Teamspace, project, model, or revision was not defined!', teamspace, project, model, revision);
 			await Promise.reject('Teamspace, model, branch or revision was not defined!');
 		} else {
-			await this.loadNewModel(teamspace, model, branch, revision, viewpoint);
+			await this.loadNewModel(teamspace, project, model, revision, isFederation, viewpoint);
 			this.initialisedPromise.resolve();
 		}
 	}
 
-	public async loadNewModel(account, model, branch, revision, viewpoint) {
+	public async loadNewModel(teamspace, project, model, revision, isFederation, viewpoint) {
 		await UnityUtil.onReady();
 		this.emit(VIEWER_EVENTS.MODEL_LOADING_START);
 		document.body.style.cursor = 'wait';
 
-		await UnityUtil.loadModel(account, model, branch, revision, viewpoint);
+		await UnityUtil.loadModel(teamspace, project, model, revision, isFederation, viewpoint);
 
 		await UnityUtil.onLoaded().then((bbox) => {
 			document.body.style.cursor = 'initial';
@@ -824,12 +855,12 @@ export class ViewerService {
 	 * Mesh Color
 	 */
 
-	public overrideMeshColor(account, model, meshIDs, color) {
-		UnityUtil.overrideMeshColor(account, model, meshIDs, color);
+	public overrideMeshColor(teamspace, model, meshIDs, color) {
+		UnityUtil.overrideMeshColor(teamspace, model, meshIDs, color);
 	}
 
-	public resetMeshColor(account, model, meshIDs) {
-		UnityUtil.resetMeshColor(account, model, meshIDs);
+	public resetMeshColor(teamspace, model, meshIDs) {
+		UnityUtil.resetMeshColor(teamspace, model, meshIDs);
 	}
 
 	/**
@@ -1292,6 +1323,22 @@ export class ViewerService {
 
 	public clipToolTranslate() {
 		UnityUtil.clipToolTranslate();
+	}
+
+	public setClipGizmoSize(nPixels: number) {
+		UnityUtil.setClipGizmoSize(nPixels);
+	}
+
+	public setClipPlaneSize(nPixels: number) {
+		UnityUtil.setClipPlaneSize(nPixels);
+	}
+
+	public setClipGizmoAxisScale(scale: number) {
+		UnityUtil.setClipGizmoAxisScale(scale);
+	}
+
+	public setDynamicFpsTarget(optimisation: string, target: number) {
+		UnityUtil.setDynamicFpsTarget(optimisation === 'on' ? target : 0);
 	}
 
 	public setNavigationOn() {

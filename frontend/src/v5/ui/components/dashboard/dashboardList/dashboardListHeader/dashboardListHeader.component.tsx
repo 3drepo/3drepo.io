@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Dispatch, useState, cloneElement } from 'react';
+import { Dispatch, useState, cloneElement, useEffect } from 'react';
 import { slice } from 'lodash';
 import { SortingDirection } from '../dashboardList.types';
 import { ISortConfig } from '../useOrderedList';
@@ -49,18 +49,21 @@ export const DashboardListHeader = ({
 			}
 			setSort((prev) => ({ column: [colName, ...slice(prev.column, 1)], direction: [newDirection, ...slice(prev.direction, 1)] }));
 			// @ts-ignore
-			onSortingChange((prev) => ({ column: [colName, ...slice(prev.column, 1)], direction: [newDirection, ...slice(prev.direction, 1)] }));
 		};
 
 		const sortingDirection = (colName === sort?.column[0] ? sort.direction[0] : undefined);
 		return { sortingDirection, onClick, sort: true };
 	};
 
+	useEffect(() => {
+		onSortingChange(sort);
+	}, [sort, onSortingChange]);
+
 	return (
 		<DashboardListHeaderContainer className={className}>
-			{children.map((child) => (
+			{children.map((child, index) => (
 				cloneElement(child, {
-					key: child.props.name,
+					key: child.props.name || index,
 					...registerSort(child.props.name),
 					...child.props,
 				})

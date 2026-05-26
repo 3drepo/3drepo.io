@@ -118,7 +118,7 @@ export const ContainerEllipsisMenu = ({
 					defaultMessage: 'Edit Permissions',
 				})}
 				to={{
-					pathname: './user_permissions',
+					pathname: '../user_permissions',
 					search: `?modelId=${container._id}`,
 				}}
 				hidden={!isProjectAdmin}

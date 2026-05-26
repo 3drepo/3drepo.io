@@ -18,17 +18,9 @@ import { Button, DialogContent, DialogContentText, DialogTitle } from '@mui/mate
 import { FormattedMessage } from 'react-intl';
 import { ModalContent, Actions, WarningIcon, CloseButton, Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import CloseIcon from '@assets/icons/outlined/close-outlined.svg';
+import { WarningModalProps } from './warningModal.types';
 
-interface IWarningModal {
-	message: string,
-	title: string,
-	onClickClose: () => void,
-	open: boolean,
-	secondaryButtonLabel?: string,
-	onClickSecondary?: () => void,
-}
-
-export const WarningModal = ({ title, message, onClickClose, open, secondaryButtonLabel, onClickSecondary }: IWarningModal) => (
+export const WarningModal = ({ title, message, onClickClose, open, secondaryButtonLabel, onClickSecondary }: WarningModalProps) => (
 	<Modal open={open} onClose={onClickClose}>
 		<ModalContent>
 			<WarningIcon />

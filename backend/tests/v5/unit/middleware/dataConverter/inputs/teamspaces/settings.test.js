@@ -46,8 +46,23 @@ const testValidateNewTicketSchema = () => {
 			TemplateModelSchema.getTemplateByCode.mockRejectedValueOnce({});
 			const name = generateRandomString();
 			const code = generateRandomString();
+			const properties = times(3, () => ({ name: generateRandomString() }));
+			const modules = [
+				{
+					type: presetModules.SAFETIBASE,
+					properties: times(2, () => ({ name: generateRandomString() })),
+				},
+			];
+			const config = {
+				tabular: {
+					columns: [
+						{ property: properties[0].name },
+						{ property: modules[0].properties[0].name, module: modules[0].type },
+					],
+				},
+			};
 			const teamspace = generateRandomString();
-			const req = { body: { name, code }, params: { teamspace } };
+			const req = { body: { name, code, properties, modules, config }, params: { teamspace } };
 			const res = {};
 			const next = jest.fn();
 
@@ -442,8 +457,46 @@ const testCheckTicketTemplateExists = () => {
 	});
 };
 
+const testValidateGetAuditLogParams = () => {
+	const validQuery = { from: Date.now().toString(), to: (Date.now() + 10000).toString() };
+	const validQueryCasted = {
+		from: new Date(Number(validQuery.from)),
+		to: new Date(Number(validQuery.to)),
+	};
+
+	describe.each([
+		['No query object', undefined, true, {}],
+		['from is not a valid timestamp', { ...validQuery, from: generateRandomString() }, false],
+		['to is not a valid timestamp', { ...validQuery, to: generateRandomString() }, false],
+		['both from and to are valid', validQuery, true, validQueryCasted],
+		['from is missing', { ...validQuery, from: undefined }, true, { ...validQueryCasted, from: undefined }],
+		['to is missing', { ...validQuery, to: undefined }, true, { ...validQueryCasted, to: undefined }],
+		['from param is greater than to param', { from: Date.now(), to: Date.now() - 10000 }],
+	])('Validate get audit log params', (desc, query, success, expectedOutput) => {
+		test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+			const req = { query: cloneDeep(query) };
+			const res = {};
+			const next = jest.fn();
+
+			await TeamspaceSettings.validateGetAuditLogParams(req, res, next);
+
+			if (success) {
+				expect(next).toHaveBeenCalledTimes(1);
+				expect(req.query).toEqual(expectedOutput);
+				expect(Responder.respond).not.toHaveBeenCalled();
+			} else {
+				expect(next).not.toHaveBeenCalled();
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, {},
+					expect.objectContaining({ code: templates.invalidArguments.code }));
+			}
+		});
+	});
+};
+
 describe('middleware/dataConverter/inputs/teamspaces', () => {
 	testValidateNewTicketSchema();
 	testValidateUpdateTicketSchema();
 	testCheckTicketTemplateExists();
+	testValidateGetAuditLogParams();
 });

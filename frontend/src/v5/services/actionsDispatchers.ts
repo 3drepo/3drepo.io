@@ -88,6 +88,7 @@ interface IJobsActionCreators {
 
 interface IMeasurementsActionCreators {
 	setMeasureMode: (mode: MeasureMode | '') => Action;
+	setMeasureSlopeUnits: (units: 'Percentage' | 'Degrees') => Action;
 }
 
 interface IViewerGuiActionCreators {

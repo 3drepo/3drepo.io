@@ -26,6 +26,11 @@ import { isEmpty } from 'lodash';
 
 import { Switch } from '@mui/material';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { DateTimePicker } from '@controls/inputs/datePicker/dateTimePicker.component';
+import { FormattedMessage } from 'react-intl';
+import { formatMessage } from '@/v5/services/intl';
+import { DialogsActionsDispatchers, TeamspacesActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import dayjs from 'dayjs';
 import { ROUTES } from '../../constants/routes';
 import { ChipsInput } from '../components/chipsInput/chipsInput.component';
 import { Loader } from '../components/loader/loader.component';
@@ -36,11 +41,13 @@ import {
 	ButtonContainer,
 	Container,
 	CreateMitigationsGrid,
+	DateInputsGrid,
 	DataText,
 	FileGrid,
 	Headline,
 	InfoColumnWrapper,
 	LoaderContainer,
+	PermissionsLogContainer,
 	StyledButton,
 	StyledForm,
 	StyledGrid,
@@ -60,12 +67,14 @@ interface IState {
 	riskCategories?: string[];
 	fileName: string;
 	createMitigationSuggestions: boolean;
+	permissionsLogStart: number;
+	permissionsLogEnd: number;
 }
 
 interface IProps {
-	match: any;
+	teamspace: string;
 	location: any;
-	history: any;
+	navigate: (to: string, options?: { replace?: boolean }) => void;
 	fetchTeamspaceSettings: (teamspace) => void;
 	updateTeamspaceSettings: (teamspace, settings) => void;
 	downloadTreatmentsTemplate: () => void;
@@ -73,6 +82,7 @@ interface IProps {
 	teamspaceSettings: any;
 	isSettingsLoading: boolean;
 	treatmentsUpdatedAt: any;
+	isTeamspaceAdmin: boolean;
 }
 
 export class TeamspaceSettings extends PureComponent<IProps, IState> {
@@ -81,10 +91,12 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		riskCategories: [],
 		fileName: '',
 		createMitigationSuggestions: false,
+		permissionsLogStart: null,
+		permissionsLogEnd: null,
 	};
 
 	get teamspace() {
-		return this.props.match.params.teamspace;
+		return this.props.teamspace;
 	}
 
 	get treatmentsUpdatedAt() {
@@ -92,9 +104,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { match, fetchTeamspaceSettings } = this.props;
-		const { teamspace } = match.params;
-
+		const { teamspace, fetchTeamspaceSettings } = this.props;
 		fetchTeamspaceSettings(teamspace);
 	}
 
@@ -129,7 +139,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	private handleUpdateSettings = (values, { resetForm }) => {
-		const { teamspace } = this.props.match.params;
+		const { teamspace } = this.props;
 		const { topicTypes, riskCategories, file, createMitigationSuggestions } = values;
 		const settings = {
 			topicTypes,
@@ -151,9 +161,9 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleBackLink = () => {
-		this.props.history.push({ pathname: ROUTES.TEAMSPACES });
-	}
+   public handleBackLink = () => {
+		this.props.navigate(ROUTES.TEAMSPACES);
+   }
 
 	public renderTitleWithBackLink = () => (
 		<>
@@ -266,6 +276,69 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		);
 	}
 
+	private renderPermissionLogOption = () => {
+		const { isTeamspaceAdmin } = this.props;
+		if (!isTeamspaceAdmin) {
+			return null;
+		}
+		return (
+			<PermissionsLogContainer gap="10px" container direction="column" wrap="nowrap">
+				<Headline color="textPrimary" variant="subtitle1">
+					<FormattedMessage id="teamspaceSettings.permissionsLog.heading" defaultMessage="Audit log" />
+				</Headline>
+				<DataText variant="body1">
+					<FormattedMessage
+						id="teamspaceSettings.permissionsLog.subHeading"
+						defaultMessage="Download the audit trail of all access-related actions performed within the specified date range"
+					/>
+				</DataText>
+				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
+					<DateInputsGrid>
+						<DateTimePicker
+							disableFuture
+							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.startDate', defaultMessage: 'Start Date' })}
+							maxDateTime={dayjs(this.state.permissionsLogEnd)}
+							value={this.state.permissionsLogStart}
+							onChange={(permissionsLogStart) => this.setState({ permissionsLogStart })}
+						/>
+						<DateTimePicker
+							disableFuture
+							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.endDate', defaultMessage: 'End Date' })}
+							minDateTime={dayjs(this.state.permissionsLogStart)}
+							value={this.state.permissionsLogEnd}
+							onChange={(permissionsLogEnd) => this.setState({ permissionsLogEnd })}
+						/>
+						<Button
+							disabled={!this.state.permissionsLogStart && !this.state.permissionsLogEnd}
+							color="primary"
+							variant="contained"
+							onClick={() => DialogsActionsDispatchers.open('info', {
+								title: formatMessage({ id: 'teamspaceSettings.permissionsLog.modal.title', defaultMessage: 'Encrypted Download' }),
+								message: formatMessage({
+									id: 'teamspaceSettings.permissionsLog.modal.message',
+									defaultMessage: 'A password will be sent to your email for this encrypted download.',
+								}),
+								closeButtonLabel: formatMessage({
+									id: 'teamspaceSettings.permissionsLog.modal.primaryLabel',
+									defaultMessage: 'Cancel',
+								}),
+								actionButtonLabel: formatMessage({
+									id: 'teamspaceSettings.permissionsLog.modal',
+									defaultMessage: 'Continue',
+								}),
+								highlightActionButton: true,
+								onClickAction: () => TeamspacesActionsDispatchers.fetchActivityLog(this.teamspace, this.state.permissionsLogStart, this.state.permissionsLogEnd)
+							},
+						)}
+						>
+							<FormattedMessage id="teamspaceSettings.permissionsLog.download" defaultMessage="Download" />
+						</Button>
+					</DateInputsGrid>
+				</FileGrid>
+			</PermissionsLogContainer>
+		);
+	}
+
 	public renderForm = () => {
 		const { topicTypes, riskCategories, createMitigationSuggestions  } = this.state;
 
@@ -282,11 +355,11 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 					<StyledForm>
 						<StyledGrid>
 							<TextField
-									value={this.teamspace}
-									label="Teamspace"
-									margin="dense"
-									fullWidth
-									disabled
+								value={this.teamspace}
+								label="Teamspace"
+								margin="dense"
+								fullWidth
+								disabled
 							/>
 						</StyledGrid>
 
@@ -298,7 +371,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 							/>
 						</StyledGrid>
 
-						<StyledGrid gridPaddingBottom>
+						<StyledGrid $gridPaddingBottom>
 							<Headline>Risk Categories</Headline>
 							<Field
 								name="riskCategories"
@@ -308,6 +381,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 
 						{this.renderTreatmentSuggestionsSection()}
 						{this.renderCreateMitigationSuggestionsOption()}
+						{this.renderPermissionLogOption()}
 						<ButtonContainer container direction="column" alignItems="flex-end">
 							<Field render={({ form }) =>
 								<Button

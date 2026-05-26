@@ -19,11 +19,11 @@ import styled from 'styled-components';
 import { DashedContainer } from '../dashedContainer.component';
 
 export const EmptyListMessage = styled(DashedContainer).attrs({
-	strokeColor: '#c0c8d5', // TODO - fix when new palette is released
-	dashSize: 2,
-	gapSize: 2,
-	strokeWidth: 2,
-	zeroPadding: true,
+	$strokeColor: '#c0c8d5', // TODO - fix when new palette is released
+	$dashSize: 2,
+	$gapSize: 2,
+	$strokeWidth: 2,
+	$zeroPadding: true,
 })`
 	text-align: center;
 	font-size: 13px;

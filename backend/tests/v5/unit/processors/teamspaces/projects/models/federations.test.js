@@ -15,13 +15,20 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { times } = require('lodash');
 const { src } = require('../../../../../helper/path');
-const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber } = require('../../../../../helper/services');
+const { generateRandomString, generateRandomObject, determineTestGroup, generateRandomNumber, outOfOrderArrayEqual, generateUUIDString } = require('../../../../../helper/services');
+
+const CryptoJs = require('crypto-js');
+
+jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/containers');
+const ContainersProcessor = require(`${src}/processors/teamspaces/projects/models/containers`);
 
 jest.mock('../../../../../../../src/v5/models/projectSettings');
 const ProjectSettings = require(`${src}/models/projectSettings`);
 jest.mock('../../../../../../../src/v5/models/modelSettings');
 const ModelSettings = require(`${src}/models/modelSettings`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 jest.mock('../../../../../../../src/v5/models/users');
 const Users = require(`${src}/models/users`);
 jest.mock('../../../../../../../src/v5/models/revisions');
@@ -35,6 +42,9 @@ jest.mock('../../../../../../../src/v5/processors/teamspaces/projects/models/com
 const Legends = require(`${src}/models/legends`);
 jest.mock('../../../../../../../src/v5/models/legends');
 const { templates } = require(`${src}/utils/responseCodes`);
+
+jest.mock('../../../../../../../src/v5/services/filesManager');
+const FilesManager = require(`${src}/services/filesManager`);
 
 jest.mock('../../../../../../../src/v5/utils/helper/models');
 const ModelHelper = require(`${src}/utils/helper/models`);
@@ -55,6 +65,7 @@ const federationList = [
 	{ _id: 4, name: 'federation 4', permissions: [] },
 	{ _id: 5, name: 'federation 5' },
 ];
+const mockContainers = [{ _id: '1', name: 'test1', permissions: [{ user: 'user1' }] }, { _id: '2', name: 'test2', permissions: [] }, { _id: '3', name: 'test3' }];
 
 const federationSettings = {
 	federation1: {
@@ -150,10 +161,13 @@ Revisions.getLatestRevision.mockImplementation((teamspace, container) => {
 });
 
 // Permissions mock
-jest.mock('../../../../../../../src/v5/utils/permissions/permissions', () => ({
-	...jest.requireActual('../../../../../../../src/v5/utils/permissions/permissions'),
+jest.mock('../../../../../../../src/v5/utils/permissions', () => ({
+	...jest.requireActual('../../../../../../../src/v5/utils/permissions'),
 	isTeamspaceAdmin: jest.fn().mockImplementation((teamspace, user) => user === 'tsAdmin'),
 	hasProjectAdminPermissions: jest.fn().mockImplementation((perm, user) => user === 'projAdmin'),
+	hasReadAccessToContainer: jest.fn().mockImplementation((teamspace, proj, modelID, username) => username === 'tsAdmin'
+	|| username === 'projAdmin' || mockContainers.filter((element) => element._id === modelID)[0].permissions.some((element) => element.user === username),
+	),
 }));
 
 const determineResults = (username) => federationList.flatMap(({ permissions, _id, name }) => {
@@ -281,6 +295,60 @@ const testAddFederation = () => {
 	});
 };
 
+const testNewRevision = () => {
+	describe('Add new federation revision', () => {
+		test('should succeed', async () => {
+			ModelSettings.updateModelSubModels.mockResolvedValueOnce();
+			Revisions.addRevision.mockResolvedValueOnce();
+
+			const teamspace = generateRandomString();
+			const projectId = generateRandomString();
+			const model = generateRandomString();
+			const owner = generateRandomString();
+			const containers = [
+				{
+					_id: generateUUIDString(),
+					group: generateRandomString(),
+				},
+				{
+					_id: generateUUIDString(),
+					group: generateRandomString(),
+				},
+				{
+					_id: generateUUIDString(),
+				},
+			];
+			const info = {
+				owner,
+				containers,
+			};
+
+			await Federations.newRevision(teamspace, projectId, model, info);
+
+			expect(Revisions.addRevision).toHaveBeenCalledTimes(1);
+			const createRevisionArguments = Revisions.addRevision.mock.calls[0];
+
+			expect(createRevisionArguments[0]).toEqual(teamspace);
+			expect(createRevisionArguments[1]).toEqual(projectId);
+			expect(createRevisionArguments[2]).toEqual(model);
+			expect(createRevisionArguments[3]).toEqual(modelTypes.FEDERATION);
+			const revision = createRevisionArguments[4];
+			expect(revision.author).toEqual(info.owner);
+			expect(revision.containers).toEqual(info.containers);
+
+			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledTimes(1);
+			expect(ModelSettings.updateModelSubModels).toHaveBeenCalledWith(
+				teamspace,
+				projectId,
+				model,
+				owner,
+				revision._id,
+				containers,
+			);
+		});
+	});
+};
+
 const testDeleteFederation = () => {
 	describe('Delete federation', () => {
 		test('should succeed', async () => {
@@ -322,39 +390,123 @@ const testGetTicketGroupById = () => {
 		const groupId = generateRandomString();
 
 		test('Should retrieve containers then call the general getTicketGroupById', async () => {
-			const containers = [generateRandomString(), generateRandomString()];
-
-			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: containers.map((_id) => ({ _id })) });
-
+			const containers = times(2, () => ({ container: generateRandomString() }));
 			const expectedData = generateRandomObject();
 			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
 
-			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket, groupId, true))
+			await expect(Federations.getTicketGroupById(
+				teamspace, projectId, federation, revId, ticket, groupId, true, containers))
 				.resolves.toEqual(expectedData);
 
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federation,
-				{ subModels: 1 });
-
 			expect(fn).toHaveBeenCalledTimes(1);
-			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, true, containers);
+			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation,
+				revId, ticket, groupId, true, containers.map((c) => c.container));
 		});
 
 		test('Should retrieve containers then call the general getTicketGroupById even if there\'s no containers', async () => {
-			ModelSettings.getFederationById.mockResolvedValueOnce({ });
-
 			const expectedData = generateRandomObject();
 			const fn = jest.spyOn(TicketGroup, 'getTicketGroupById').mockResolvedValueOnce(expectedData);
 
 			await expect(Federations.getTicketGroupById(teamspace, projectId, federation, revId, ticket,
-				groupId, false)).resolves.toEqual(expectedData);
-
-			expect(ModelSettings.getFederationById).toHaveBeenCalledTimes(1);
-			expect(ModelSettings.getFederationById).toHaveBeenCalledWith(teamspace, federation,
-				{ subModels: 1 });
+				groupId, false, [])).resolves.toEqual(expectedData);
 
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, projectId, federation, revId, ticket, groupId, false, undefined);
+		});
+	});
+};
+
+const testGetMD5Hash = () => {
+	describe('Get MD5 hashes for each container in the federation', () => {
+		const revisionMock = { _id: Buffer.from('testBuffer'), rFile: ['success!'], timestamp: new Date(), tag: 'tag' };
+		const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
+		const mockMD5Hash = { hash: CryptoJs.MD5(revisionMock._id).toString(), size: fileEntry.size };
+		const teamspace = generateRandomString();
+
+		test('it should return an array with all the containers if admin', async () => {
+			const nContainers = 3;
+			const containers = times(nContainers, () => ({
+				container: generateRandomString(), revision: generateRandomString() }));
+
+			ModelSettings.getFederationById.mockResolvedValueOnce({ subModels: [{ _id: '1' }, { _id: '2' }, { _id: '3' }] });
+			Revisions.getRevisionByIdOrTag.mockResolvedValue(revisionMock);
+			FilesManager.getMD5FileHash.mockResolvedValue(mockMD5Hash);
+
+			const expectedResults = containers.map(({ container }) => ({
+				container,
+				tag: revisionMock.tag,
+				timestamp: revisionMock.timestamp,
+				hash: CryptoJs.MD5(revisionMock._id).toString(),
+				filename: revisionMock.rFile[0],
+				size: fileEntry.size,
+			}));
+
+			outOfOrderArrayEqual(await Federations.getMD5Hash(teamspace, containers), expectedResults);
+
+			expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledTimes(nContainers);
+
+			containers.forEach(({ container, revision }) => {
+				expect(Revisions.getRevisionByIdOrTag).toHaveBeenCalledWith(
+					teamspace,
+					container,
+					modelTypes.CONTAINER,
+					revision,
+					{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 },
+					{ includeVoid: false },
+				);
+			});
+
+			expect(FilesManager.getMD5FileHash).toHaveBeenCalledTimes(nContainers);
+		});
+
+		test('it should return an empty array if the federation has no containers added', async () => {
+			await expect(Federations.getMD5Hash(teamspace, [])).resolves.toEqual([]);
+
+			expect(Revisions.getRevisionByIdOrTag).not.toHaveBeenCalled();
+			expect(Revisions.getLatestRevision).not.toHaveBeenCalled();
+		});
+	});
+};
+
+const testGetSuperMeshesInfo = () => {
+	describe('Get super meshes info for federation', () => {
+		const teamspace = generateRandomString();
+		const federationId = generateRandomString();
+		const revisionId = generateRandomString();
+
+		test('when federation has containers', async () => {
+			const containers = times(3, () => ({
+				container: generateRandomString(), revision: generateRandomString() }));
+			const superMeshInfoMock = times(3, () => generateRandomObject());
+
+			superMeshInfoMock.forEach((info) => {
+				ContainersProcessor.getSuperMeshesInfo.mockResolvedValueOnce(info);
+			});
+
+			const expectedData = superMeshInfoMock.map((info, index) => ({
+				teamspace,
+				model: containers[index].container,
+				superMeshes: info,
+			}));
+
+			await expect(Federations.getSuperMeshesInfo(teamspace, federationId, revisionId, containers))
+				.resolves.toEqual({ subModels: expectedData });
+
+			expect(ContainersProcessor.getSuperMeshesInfo).toHaveBeenCalledTimes(containers.length);
+			containers.forEach(({ container: model, revision }) => {
+				expect(ContainersProcessor.getSuperMeshesInfo).toHaveBeenCalledWith(
+					teamspace,
+					model,
+					revision,
+				);
+			});
+		});
+
+		test('when federation has no containers', async () => {
+			await expect(Federations.getSuperMeshesInfo(teamspace, federationId, revisionId, []))
+				.resolves.toEqual({ subModels: [] });
+
+			expect(ContainersProcessor.getSuperMeshesInfo).not.toHaveBeenCalled();
 		});
 	});
 };
@@ -366,6 +518,9 @@ describe(determineTestGroup(__filename), () => {
 	testGetFederationStats();
 	testAddFederation();
 	testDeleteFederation();
+	testNewRevision();
 	testGetSettings();
 	testGetTicketGroupById();
+	testGetMD5Hash();
+	testGetSuperMeshesInfo();
 });

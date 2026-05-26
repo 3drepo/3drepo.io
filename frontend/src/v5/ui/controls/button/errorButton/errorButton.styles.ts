@@ -62,6 +62,6 @@ const darkStyling = css`
 
 export const ErrorButton = styled(MuiButton).attrs({
 	variant: 'outlined',
-})<{ dark?: boolean }>`
-	${({ dark }) => (dark ? darkStyling : lightStyling)}
+})<{ $dark?: boolean }>`
+	${({ $dark }) => ($dark ? darkStyling : lightStyling)}
 `;

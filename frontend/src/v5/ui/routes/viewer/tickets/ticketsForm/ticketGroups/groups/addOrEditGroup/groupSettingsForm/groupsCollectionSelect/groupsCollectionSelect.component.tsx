@@ -15,10 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Select } from '@controls/inputs/select/select.component';
 import { MenuItem } from '@mui/material';
 import { formatMessage } from '@/v5/services/intl';
-import { MenuItemPrefix } from './groupsCollectionSelect.styles';
+import { CollectionSelect, MenuItemPrefix } from './groupsCollectionSelect.styles';
 
 const NONE = formatMessage({
 	id: 'ticketsGroupSettings.form.groupCollection.option.none',
@@ -32,13 +31,18 @@ type GroupsCollectionSelectProps = {
 	prefixes: string[][];
 	disabled?: boolean;
 };
-export const GroupsCollectionSelect = ({ value, onChange, prefixes, ...props }: GroupsCollectionSelectProps) => (
-	<Select value={JSON.stringify(value || [])} onChange={(e) => onChange(JSON.parse(e.target.value as string))} {...props}>
-		<MenuItem value={JSON.stringify([])}>{NONE}</MenuItem>
+
+const renderValue = (val)=>  val == '[]' ? NONE : JSON.parse(val).join(' / ');
+
+export const GroupsCollectionSelect = ({ value, prefixes, onChange, ...props }: GroupsCollectionSelectProps) => (
+	<CollectionSelect value={JSON.stringify(value || [])} 
+		onChange={(e) => onChange(JSON.parse(e.target.value as string))} 
+		renderValue={renderValue} {...props} 
+	>
+		<MenuItem key="none" value="[]">{NONE}</MenuItem>
 		{prefixes.map((prefix) => (
 			<MenuItemPrefix
 				key={JSON.stringify(prefix)}
-				selected={JSON.stringify(prefix) === JSON.stringify(value)}
 				value={JSON.stringify(prefix)}
 				$depth={prefix.length - 1}
 			>
@@ -46,5 +50,5 @@ export const GroupsCollectionSelect = ({ value, onChange, prefixes, ...props }: 
 				<span>{prefix.at(-1)}</span>
 			</MenuItemPrefix>
 		))}
-	</Select>
+	</CollectionSelect>
 );

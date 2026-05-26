@@ -32,7 +32,7 @@ interface IProps {
 	children: ReactChild;
 }
 
-export const UserPopover = ({ user: { firstName, lastName, company, user, job }, children }: IProps) => {
+export const UserPopover = ({ user: { firstName, lastName, company, job }, children }: IProps) => {
 	return (
 		<Container>
 			<AvatarWrapper>
@@ -40,7 +40,6 @@ export const UserPopover = ({ user: { firstName, lastName, company, user, job },
 			</AvatarWrapper>
 			<UserData>
 				<Name>{lastName}, {firstName}</Name>
-				<Details>{user}</Details>
 				<Details>{company}</Details>
 				<Details>{job?._id}</Details>
 			</UserData>

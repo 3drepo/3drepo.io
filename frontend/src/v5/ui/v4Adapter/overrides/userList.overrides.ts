@@ -20,7 +20,7 @@ import { FloatingButton, FloatingButtonContainer } from '@/v4/routes/components/
 import { Content as LoadingText } from '@/v4/routes/components/loader/loader.styles';
 import { Container as UserTable, Footer as LicencesFooter } from '@/v4/routes/components/userManagementTab/userManagementTab.styles';
 import { LoaderContainer } from '@/v4/routes/userManagement/userManagement.styles';
-import { PendingInvites } from '@/v4/routes/users/users.styles';
+import { PendingInvitesLink } from '@/v4/routes/users/users.styles';
 import styled, { css } from 'styled-components';
 
 const AddUserButton = css`
@@ -55,8 +55,8 @@ const AddUserButton = css`
 				border-radius: 50%;
 				color: ${({ theme }) => theme.palette.primary.main};
 				background-color: ${({ theme }) => theme.palette.primary.contrast};
-				height: 9px;
-				width: 9px;
+				height: 13px;
+				width: 13px;
 				padding: 2px;
 			}
 		}
@@ -65,16 +65,20 @@ const AddUserButton = css`
 
 const SelectStyles = css`
 	.MuiInputBase-root {
+		width: 100%;
 		svg { /* Chevron icon */
 			top: 15px;
 		}
 		.MuiSelect-select {
-			border: 1px solid ${({ theme }) => theme.palette.secondary.lightest};
 			padding-left: 10px;
+			width: 100%;
 			&, .MuiGrid-root {
 				${({ theme }) => theme.typography.body1};
 				line-height: 35px;
 				color: ${({ theme }) => theme.palette.secondary.main};
+			}
+
+			.MuiGrid-root {
 				width: auto;
 			}
 		}
@@ -181,7 +185,7 @@ export const V5UserListOverrides = styled.div`
 		padding: 10px 0;
 		align-items: baseline;
 		height: 26px;
-		${PendingInvites} {
+		${PendingInvitesLink} {
 			cursor: pointer;
 			margin: 0;
 			text-decoration: none;

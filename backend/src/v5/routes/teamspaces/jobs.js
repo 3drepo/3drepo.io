@@ -18,7 +18,7 @@
 const Jobs = require('../../processors/teamspaces/jobs');
 const { Router } = require('express');
 
-const { hasAccessToTeamspace } = require('../../middleware/permissions/permissions');
+const { hasAccessToTeamspace } = require('../../middleware/permissions');
 
 const { respond } = require('../../utils/responder');
 const { templates } = require('../../utils/responseCodes');
@@ -43,7 +43,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/jobs:
 	*   get:
 	*     description: Get the list of jobs within this teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace

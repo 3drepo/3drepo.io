@@ -23,17 +23,7 @@ import { ModalBody } from '@controls/formModal/modalBody/modalBody.styles';
 import { Modal } from '@components/shared/modalsDispatcher/modalsDispatcher.styles';
 import { Form } from '@controls/formModal/formModal.styles';
 import { MailToButton } from './shareModal.styles';
-
-type IShareModal = {
-	// the title in the modal
-	title: string;
-	// the title in the email
-	name: string;
-	open: boolean;
-	subject: string;
-	link: string;
-	onClickClose: () => void;
-};
+import { ShareModalProps } from './shareModal.types';
 
 export const ShareModal = ({
 	title,
@@ -42,7 +32,7 @@ export const ShareModal = ({
 	onClickClose,
 	link,
 	open,
-}: IShareModal) => (
+}: ShareModalProps) => (
 	<Modal open={open} onClose={onClickClose}>
 		<Form>
 			<ModalHeader onClickClose={onClickClose} title={title} />

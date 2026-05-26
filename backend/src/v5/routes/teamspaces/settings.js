@@ -20,16 +20,17 @@ const {
 	validateNewTicketSchema,
 	validateUpdateTicketSchema,
 } = require('../../middleware/dataConverter/inputs/teamspaces/settings');
-const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions/permissions');
+const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../middleware/permissions');
+const { respond, writeStreamRespond } = require('../../utils/responder');
+const Audit = require('../../processors/teamspaces/audits');
+const MimeTypes = require('../../utils/helper/mimeTypes');
 const { Router } = require('express');
 const TeamspaceSettings = require('../../processors/teamspaces/settings');
-
 const { UUIDToString } = require('../../utils/helper/uuids');
-
 const { castTicketSchemaOutput } = require('../../middleware/dataConverter/outputs/teamspaces/settings');
-
-const { respond } = require('../../utils/responder');
+const { getUserFromSession } = require('../../utils/sessions');
 const { templates } = require('../../utils/responseCodes');
+const { validateGetAuditLogParams } = require('../../middleware/dataConverter/inputs/teamspaces/settings');
 
 const addTicketTemplate = async (req, res) => {
 	try {
@@ -82,14 +83,29 @@ const getTemplateList = async (req, res) => {
 	}
 };
 
+const getAuditLogArchive = async (req, res) => {
+	const { teamspace } = req.params;
+	const { from, to } = req.query;
+	const user = getUserFromSession(req.session);
+
+	try {
+		const archive = await Audit.getAuditLogArchive(teamspace, user, from, to);
+
+		writeStreamRespond(req, res, templates.ok, archive, { fileName: 'audit.zip', mimeType: MimeTypes.ZIP });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = () => {
 	const router = Router({ mergeParams: true });
 	/**
 	* @openapi
 	* /teamspaces/{teamspace}/settings/tickets/templates:
 	*   post:
-	*     description: Add a new ticket tempate to the teamspace
-	*     tags: [Teamspaces]
+	*     description: Add a new ticket template to the teamspace
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -124,7 +140,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates:
 	*   get:
 	*     description: Get the list of templates within this teamspace
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -170,7 +186,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates/{template}:
 	*   put:
 	*     description: Updates an existing ticket template
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -205,7 +221,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/templates/{template}:
 	*   get:
 	*     description: Get a ticket template
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -238,7 +254,7 @@ const establishRoutes = () => {
 	* /teamspaces/{teamspace}/settings/tickets/riskCategories:
 	*   get:
 	*     description: Get the list of risk categories
-	*     tags: [Teamspaces]
+	*     tags: [v:external, Teamspaces]
 	*     parameters:
 	*       - name: teamspace
 	*         description: name of teamspace
@@ -264,6 +280,47 @@ const establishRoutes = () => {
 	*                   example: ["Commerical Issue", "Environmental Issue", "Safety Issue - Struck"]
 	*/
 	router.get('/tickets/riskCategories', hasAccessToTeamspace, getRiskCategories);
+
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/settings/activities/archive:
+	 *   get:
+	 *     description: Get an encrypted zip file containing the requested audit logs. The password to unlock the file will be sent to the user via email
+	 *     tags: [v:external, Teamspaces]
+	 *     operationId: getAuditLogArchive
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: from
+	 *         description: Only return logs that have been created after a certain time (in epoch timestamp)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: number
+	 *       - name: to
+	 *         description: Only return logs that have been created after before certain time (in epoch timestamp)
+	 *         in: query
+	 *         required: false
+	 *         schema:
+	 *           type: number
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       404:
+	 *         $ref: "#/components/responses/teamspaceNotFound"
+	 *       200:
+	 *         description: downloads the encrypted zip file
+	 *         content:
+	 *           application/octet-stream:
+	 *             schema:
+	 *               type: string
+	 *               format: binary
+	 */
+	router.get('/activities/archive', isTeamspaceAdmin, validateGetAuditLogParams, getAuditLogArchive);
 
 	return router;
 };

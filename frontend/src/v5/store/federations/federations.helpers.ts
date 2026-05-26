@@ -19,8 +19,6 @@ import {
 	FederationStats,
 	IFederation,
 	MinimumFederation,
-	FederationBackendSettings,
-	FederationSettings,
 	NewFederation,
 } from '@/v5/store/federations/federations.types';
 import { UploadStatus } from '@/v5/store/containers/containers.types';
@@ -73,22 +71,3 @@ export const prepareFederationsData = (
 	const federationStats = stats?.[index];
 	return prepareSingleFederationData(federation, federationStats);
 });
-
-export const prepareFederationSettingsForFrontend = ({
-	surveyPoints,
-	...otherProps
-}: FederationBackendSettings):FederationSettings => ({
-	surveyPoint: surveyPoints?.[0],
-	...otherProps,
-});
-
-export const prepareFederationSettingsForBackend = ({
-	surveyPoint,
-	...otherProps
-}: FederationSettings) => {
-	if (!surveyPoint) return otherProps;
-	return {
-		surveyPoints: [surveyPoint],
-		...otherProps,
-	};
-};

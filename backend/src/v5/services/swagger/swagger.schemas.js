@@ -111,6 +111,23 @@ const ticketTemplateConfigSchema = {
 		defaultImage: helpers.boolDef('Include a default image - this will be ignored if defaultView is set to true (default: false)'),
 		pin: helpers.boolDef('Include a pin (default: false)'),
 		status: ticketTemplateStatusConfig,
+		tabular: {
+			type: 'object',
+			description: 'Tabular configuration',
+			properties: {
+				columns: {
+					type: 'array',
+					description: 'Columns to show in the tabular view',
+					items: {
+						type: 'object',
+						properties: {
+							property: helpers.stringDef('Name of the property', 'Level of Risk'),
+							module: helpers.stringDef('Name of the module', 'safetibase'),
+						},
+					},
+				},
+			},
+		},
 	},
 };
 
@@ -284,55 +301,7 @@ Schemas.schemas.ticketGroup = {
 			description: 'Description of the group',
 			example: 'All facades on level 1',
 		},
-		rules: {
-			type: 'array',
-			items: {
-				type: 'object',
-				properties: {
-					name: {
-						type: 'string',
-						description: 'name of the rule',
-						example: 'Rule 1',
-					},
-					field: {
-						type: 'object',
-						description: 'The BIM data field to query',
-						properties: {
-							operator: {
-								type: 'string',
-								enum: Object.keys(fieldOperators),
-								description: 'Operator value on the field name',
-								example: fieldOperators.IS.name,
-							},
-							values: {
-								type: 'array',
-								description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
-								items: {
-									type: 'string',
-									example: 'Family Name',
-								},
-							},
-						},
-					},
-					operator: {
-						type: 'string',
-						enum: Object.keys(valueOperators),
-						description: 'Operator value on this prop',
-						example: valueOperators.EQUALS.name,
-					},
-					value: {
-						type: 'array',
-						description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
-						items: {
-							type: 'number',
-							example: 1,
-						},
-
-					},
-				},
-			},
-			description: 'List of rules for the smart group. Rules are evaluated under a intersection (AND) logic',
-		},
+		rules: Schemas.schemas.ticketGroupRules,
 		objects: {
 			type: 'array',
 			items: {
@@ -356,6 +325,56 @@ Schemas.schemas.ticketGroup = {
 		},
 
 	},
+};
+
+Schemas.schemas.ticketGroupRules = {
+	type: 'array',
+	items: {
+		type: 'object',
+		properties: {
+			name: {
+				type: 'string',
+				description: 'name of the rule',
+				example: 'Rule 1',
+			},
+			field: {
+				type: 'object',
+				description: 'The BIM data field to query',
+				properties: {
+					operator: {
+						type: 'string',
+						enum: Object.keys(fieldOperators),
+						description: 'Operator value on the field name',
+						example: fieldOperators.IS.name,
+					},
+					values: {
+						type: 'array',
+						description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
+						items: {
+							type: 'string',
+							example: 'Family Name',
+						},
+					},
+				},
+			},
+			operator: {
+				type: 'string',
+				enum: Object.keys(valueOperators),
+				description: 'Operator value on this prop',
+				example: valueOperators.EQUALS.name,
+			},
+			value: {
+				type: 'array',
+				description: 'The values to use in respective of the operator. This is evaluated under the union (OR) logic',
+				items: {
+					type: 'number',
+					example: 1,
+				},
+
+			},
+		},
+	},
+	description: 'List of rules for the smart group. Rules are evaluated under a intersection (AND) logic',
 };
 
 Schemas.schemas.modelSettings = {
@@ -473,6 +492,142 @@ Schemas.schemas.modelSettings = {
 					type: 'string',
 					description: 'The error code',
 					example: 14,
+				},
+			},
+		},
+	},
+};
+
+Schemas.schemas.ticketCommentView = {
+	description: 'Storing spacial coordinates representing what the commenter is seeing',
+	type: 'object',
+	properties: {
+		camera: {
+			description: 'Details about the 3D camera\'s position, orientation and projection',
+			type: 'object',
+			properties: {
+				position: {
+					type: 'array',
+					items: {
+						type: 'number',
+					},
+					minItems: 3,
+					maxItems: 3,
+				},
+				up: {
+					type: 'array',
+					items: {
+						type: 'number',
+					},
+					minItems: 3,
+					maxItems: 3,
+				},
+				forward: {
+					type: 'array',
+					items: {
+						type: 'number',
+					},
+					minItems: 3,
+					maxItems: 3,
+				},
+				type: {
+					type: 'string',
+					enum: ['orthographic ', 'perspective'],
+				},
+			},
+		},
+		clippingPlanes: {
+			description: 'Array of planes defining which direction the model gets clipped.',
+			type: 'array',
+			items: {
+				type: 'object',
+				properties: {
+					normal: {
+						type: 'array',
+						items: {
+							type: 'number',
+						},
+						maxItems: 3,
+					},
+					distance: {
+						type: 'number',
+					},
+					clipDirection: {
+						type: 'number',
+						minimum: -1,
+						maximum: 1,
+					},
+				},
+				minItems: 0,
+			},
+		},
+		state: {
+			description: 'Details about the state of the model.',
+			type: 'object',
+			properties: {
+				showHidden: {
+					type: 'boolean',
+				},
+				selected: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							color: {
+								type: 'array',
+								items: {
+									type: 'number',
+									minimum: 0,
+									maximum: 255,
+								},
+								minItems: 3,
+								maxItems: 3,
+							},
+							group: Schemas.schemas.ticketGroup,
+						},
+					},
+				},
+				colored: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							color: {
+								type: 'array',
+								items: {
+									type: 'number',
+									minimum: 0,
+									maximum: 255,
+								},
+								minItems: 3,
+								maxItems: 3,
+							},
+							opacity: {
+								type: 'number',
+								minimum: 0,
+								maximum: 1,
+							},
+							group: Schemas.schemas.ticketGroup,
+						},
+					},
+				},
+				hidden: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							group: Schemas.schemas.ticketGroup,
+						},
+					},
+				},
+				shown: {
+					type: 'array',
+					items: {
+						type: 'object',
+						properties: {
+							group: Schemas.schemas.ticketGroup,
+						},
+					},
 				},
 			},
 		},

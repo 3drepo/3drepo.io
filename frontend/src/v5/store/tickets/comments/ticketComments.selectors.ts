@@ -17,13 +17,19 @@
 
 import { createSelector } from 'reselect';
 import { ITicketCommentsState } from './ticketComments.redux';
+import { selectTicketsGroups } from '../tickets.selectors';
+import { commentWithGroups } from './ticketComments.helpers';
 
 const selectCommentsDomain = (state): ITicketCommentsState => state.ticketComments || {};
 
 export const selectComments = createSelector(
 	selectCommentsDomain,
 	(state, ticketId) => ticketId,
-	(state, ticketId) => (state.commentsByTicketId[ticketId] || []),
+	selectTicketsGroups,
+	(state, ticketId, groups) => {
+		const commentsWithGroups = (state.commentsByTicketId[ticketId] || []).map(commentWithGroups(groups));
+		return commentsWithGroups;
+	},
 );
 
 export const selectCommentById = createSelector(

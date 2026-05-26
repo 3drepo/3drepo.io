@@ -23,6 +23,7 @@ import { generatePath } from 'react-router-dom';
 import { prefixBaseDomain } from '@/v5/helpers/url.helper';
 import { getAPIUrl } from '@/v4/services/api/default';
 import { CHAT_CHANNELS } from '@/v4/constants/chat';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { VIEWER_CLIP_MODES } from '@/v4/constants/viewer';
 import { getViewpointWithGroups } from '@/v5/helpers/viewpoint.helpers';
 import { ROUTES } from '../../constants/routes';
@@ -36,14 +37,13 @@ import { ModelActions } from '../model';
 import { selectCurrentRevisionId } from '../model';
 import { SequencesActions } from '../sequences';
 import { SnackbarActions } from '../snackbar';
-import { dispatch } from '../store';
 import { TreeActions } from '../tree';
 import { waitForTreeToBeReady } from '../tree/tree.sagas';
 import { ViewerGuiActions } from '../viewerGui';
 import { ChatActions } from '../chat/chat.redux';
 import { PRESET_VIEW } from './viewpoints.constants';
 import { ViewpointsActions, ViewpointsTypes } from './viewpoints.redux';
-import { isViewpointLoaded, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
+import { isViewpointReady, selectSelectedViewpoint, selectViewpointsGroups, selectViewpointsGroupsBeingLoaded } from '.';
 
 export const getThumbnailUrl = (thumbnail) => getAPIUrl(thumbnail);
 
@@ -194,8 +194,8 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 		let viewpointsGroups = yield select(selectViewpointsGroups);
 
-		while (!isViewpointLoaded(viewpoint, viewpointsGroups)) {
-			yield take(ViewpointsTypes.FETCH_GROUP_SUCCESS);
+		while (!isViewpointReady(viewpoint)) {
+			yield take(ViewpointsTypes.VIEWPOINT_READY);
 			viewpointsGroups = yield select(selectViewpointsGroups);
 		}
 
@@ -220,8 +220,9 @@ export function* showViewpoint({teamspace, modelId, view, ignoreCamera}) {
 
 export function* fetchViewpointGroups({teamspace, modelId, view}) {
 	try  {
-		const groupsObject = getViewpointWithGroups({teamspace, modelId, view});
+		const groupsObject = yield getViewpointWithGroups({teamspace, modelId, view});
 		mergeGroupsDataFromViewpoint(view.viewpoint, groupsObject);
+		yield put(ViewpointsActions.viewpointReady());
 	} catch {
 		// groups doesnt exists, still continue
 	}

@@ -24,7 +24,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { FormattedMessage } from 'react-intl';
 import { GroupIconComponent } from '@/v5/ui/routes/viewer/groups/groupItem/groupIcon/groupIcon.component';
 import { TicketButton } from '@/v5/ui/routes/viewer/tickets/ticketButton/ticketButton.styles';
-import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { CircularProgress } from '@mui/material';
 import { isString } from 'lodash';
 import EditIcon from '@assets/icons/outlined/edit-outlined.svg';
@@ -57,7 +57,7 @@ export const GroupItem = ({ override, index }: GroupProps) => {
 		deleteGroup,
 		editGroup,
 	} = useContext(TicketGroupsContext);
-	const isAdmin = ProjectsHooksSelectors.selectIsProjectAdmin();
+	const isAdmin = !TicketsCardHooksSelectors.selectReadOnly();
 	const { group, color, opacity } = override;
 	const checked = getGroupIsChecked(index);
 	const isHidden = groupType === 'hidden';

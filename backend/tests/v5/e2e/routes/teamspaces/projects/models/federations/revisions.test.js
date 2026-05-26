@@ -20,6 +20,7 @@ const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 
 let server;
 let agent;
@@ -40,14 +41,61 @@ const project = {
 	name: ServiceHelper.generateRandomString(),
 };
 
+const containers = [
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
+		},
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+		},
+	},
+];
+
+const containersNoRev = [
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
+		},
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.CONTAINER),
+		},
+	},
+];
+
 const models = [
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(),
-			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
 			federate: true,
+			subModels: containers.map((model) => ({ _id: model._id })),
+		},
+	},
+	{
+		_id: ServiceHelper.generateUUIDString(),
+		name: ServiceHelper.generateRandomString(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(modelTypes.FEDERATION),
+			permissions: [{ user: users.viewer.user, permission: 'viewer' }, { user: users.commenter.user, permission: 'commenter' }],
+			federate: true,
+			subModels: containersNoRev.map((model) => ({ _id: model._id })),
 		},
 	},
 	{
@@ -55,37 +103,73 @@ const models = [
 		name: ServiceHelper.generateRandomString(),
 		properties: {
 			...ServiceHelper.generateRandomModelProperties(),
-			permissions: [{ user: users.viewer, permission: 'viewer' }, { user: users.commenter, permission: 'commenter' }],
 			federate: true,
+			subModels: [],
 		},
 	},
 	{
 		_id: ServiceHelper.generateUUIDString(),
 		name: ServiceHelper.generateRandomString(),
-		properties: ServiceHelper.generateRandomModelProperties(),
+		properties: {
+			...ServiceHelper.generateRandomModelProperties(),
+		},
 	},
 ];
 
-const container = models[2];
+const container = models[3];
 const anotherFed = models[1];
+const conRevisions = ServiceHelper.generateRevisionEntry();
 
 const setupData = async () => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 	const customData = { starredModels: {
 		[teamspace]: models.flatMap(({ _id, isFavourite }) => (isFavourite ? _id : [])),
 	} };
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
+	const { tsAdmin, ...otherUsers } = users;
+	await ServiceHelper.db.createUser(tsAdmin, [], customData);
+	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+
+	const userProms = Object.keys(otherUsers).map(
+		(key) => ServiceHelper.db.createUser(users[key], [teamspace], customData));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
 		teamspace,
 		model._id,
 		model.name,
 		model.properties,
 	));
+	const containerProms = containers.map((subModel) => ServiceHelper.db.createModel(
+		teamspace,
+		subModel._id,
+		subModel.name,
+		subModel.properties,
+	));
+	const containerNoRevProms = containersNoRev.map((subModel) => ServiceHelper.db.createModel(
+		teamspace,
+		subModel._id,
+		subModel.name,
+		subModel.properties,
+	));
+	const revisionsProms = containers.map((subModel) => ServiceHelper.db.createRevision(
+		teamspace,
+		project.id,
+		subModel._id,
+		conRevisions,
+		modelTypes.CONTAINER,
+	));
+
+	const projectModels = [
+		...models.map(({ _id }) => _id),
+		...containers.map(({ _id }) => _id),
+		...containerNoRevProms.map(({ _id }) => _id),
+	];
+
 	return Promise.all([
 		...userProms,
 		...modelProms,
+		...containerProms,
+		...containerNoRevProms,
+		...revisionsProms,
+		ServiceHelper.db.createProject(teamspace, project.id, project.name, projectModels),
 		ServiceHelper.db.createUser(nobody),
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map(({ _id }) => _id)),
 	]);
 };
 
@@ -190,5 +274,6 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 		ServiceHelper.queue.purgeQueues(),
 		ServiceHelper.closeApp(server),
 	]));
+
 	testNewRevision();
 });

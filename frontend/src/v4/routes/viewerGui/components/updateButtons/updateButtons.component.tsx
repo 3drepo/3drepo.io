@@ -23,7 +23,7 @@ import { UpdateButtonsContainer } from './updateButtons.styles';
 
 interface IProps {
 	isNew: boolean;
-hasNoPermission: boolean;
+	hasNoPermission: boolean;
 	canEditViewpoint: boolean;
 	disableViewer?: boolean;
 	hasPin: boolean;
@@ -41,7 +41,7 @@ export const UpdateButtons = ({
 }: IProps) => (
 	<FieldsRow container alignItems="center" justifyContent="space-between">
 		{renderWhenTrueOtherwise(() => (
-			<UpdateButtonsContainer center={!isNew}>
+			<UpdateButtonsContainer $center={!isNew}>
 				<PinButton
 					onChange={onChangePin}
 					onSave={onSavePin}
@@ -72,6 +72,7 @@ export const UpdateButtons = ({
 					takeScreenshot={props.onTakeScreenshot}
 					uploadScreenshot={props.onUploadScreenshot}
 					showScreenshotDialog={props.onShowScreenshotDialog}
+					hasNoPermission={hasNoPermission}
 					disabled={!canEditViewpoint}
 					disableScreenshot
 				/>

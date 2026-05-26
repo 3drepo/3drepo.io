@@ -17,6 +17,7 @@
 
 import { put, select, takeLatest} from 'redux-saga/effects';
 
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { CHAT_CHANNELS } from '../../constants/chat';
 import {
 	DeleteAllNotificationsDialog
@@ -25,7 +26,6 @@ import * as API from '../../services/api';
 import { ChatActions } from '../chat';
 import { selectCurrentUser } from '../currentUser';
 import { DialogActions } from '../dialog';
-import { dispatch } from '../store';
 import { selectNotifications, NotificationsActions, NotificationsTypes } from './index';
 
 const getNotificationById = (notifications, id) => {

@@ -16,6 +16,7 @@
  */
 
 "use strict";
+
 (() => {
 
 	const _ = require("lodash");
@@ -23,7 +24,9 @@
 	const { systemLogger, logLabels} = require("./logger.js");
 	const utils = require("./utils");
 	const { v5Path } = require("../interop");
+	const { BYPASS_AUTH } = require(`${v5Path}/utils/config.constants.js`);
 	const { createActivityRecord } = require(`${v5Path}/services/elastic`);
+	const { escapeXSS } = require(`${v5Path}/utils/helper/strings.js`);
 
 	/**
 	 * List of response and error codes
@@ -395,8 +398,16 @@
 		"jpg": "image/jpg"
 	};
 
-	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl} = {}) => {
-		const user = session && session.user ? session.user.username : "unknown";
+	const genResponseLogging = ({status, code}, {contentLength}, {session, startTime, method, originalUrl, app} = {}) => {
+		const isInternal = !!app?.get(BYPASS_AUTH);
+		let user;
+		if (session?.user) {
+			user = session.user.username;
+		} else if (isInternal) {
+			user = "internal-service";
+		} else {
+			user = "unknown";
+		}
 		const currentTime = Date.now();
 		const latency = startTime ? `${currentTime - startTime}` : "???";
 
@@ -416,6 +427,10 @@
 	 */
 	responseCodes.respond = function (place, req, res, next, resCode, extraInfo, format, cache, customHeaders) {
 
+		// Topology is closed mongo error is typically coming from the session management and the library
+		// doesn't let us recover from it (so far). So kill this pod and let it respawn.
+		const killServer = resCode?.name === "MongoError" && resCode?.message?.includes && resCode.message.includes("Topology is closed") ? resCode : false;
+
 		resCode = utils.mongoErrorToResCode(resCode);
 
 		if (!resCode || valid_values.indexOf(resCode.value) === -1) {
@@ -434,7 +449,7 @@
 		// Prepare error response
 		if (resCode.value) {
 			const responseObject = _.extend({}, extraInfo, {
-				place: place,
+				place: escapeXSS(place),
 				status: resCode.status,
 				message: resCode.message,
 				value: resCode.value
@@ -490,6 +505,10 @@
 			// log bandwidth and http status code
 			systemLogger.logInfo(genResponseLogging(resCode, meta, req), undefined, logLabels.network);
 		}
+
+		if (killServer) {
+			return Promise.reject(killServer);
+		}
 	};
 
 	responseCodes.writeStreamRespond =  function (place, req, res, next, readStream, customHeaders) {
@@ -515,7 +534,7 @@
 		}).on("end", () => {
 			res.end();
 			systemLogger.logInfo(genResponseLogging(response, {
-				place,
+				place: escapeXSS(place),
 				httpCode: response.status,
 				contentLength: length
 			}, req), undefined, logLabels.network);

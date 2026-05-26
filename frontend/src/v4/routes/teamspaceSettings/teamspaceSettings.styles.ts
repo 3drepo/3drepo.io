@@ -26,6 +26,13 @@ import ArrowBack from '@mui/icons-material/ArrowBack';
 import { Form } from 'formik';
 import { COLOR } from '../../styles';
 
+export const DateInputsGrid = styled(Grid)`
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat(2, 197px) auto;
+	align-items: flex-end;
+`;
+
 export const StyledTextField = styled(TextField)``;
 
 export const FieldsRow = styled(Grid)`
@@ -48,13 +55,23 @@ export const FieldsRow = styled(Grid)`
 	}
 `;
 
-export const StyledGrid = styled(Grid)<{ gridPaddingBottom?: boolean }>`
-	padding: ${({ gridPaddingBottom }) => gridPaddingBottom ? '12px 24px 24px' : '12px 24px'};
+export const StyledGrid = styled(Grid)<{ $gridPaddingBottom?: boolean }>`
+	padding: ${({ $gridPaddingBottom }) => $gridPaddingBottom ? '12px 24px 24px' : '12px 24px'};
 `;
 
 export const SuggestionsContainer = styled(Grid)`
 	&& {
 		padding: 0 24px 24px;
+	}
+`;
+
+export const PermissionsLogContainer = styled(Grid)`
+	margin: 24px 0;
+	.MuiTextField-root, .MuiButton-root {
+		margin: 0;
+	}
+	.MuiInputBase-root, .MuiOutlinedInput-notchedOutline {
+		height: 26px;
 	}
 `;
 

@@ -27,8 +27,7 @@ import { selectPathname } from '@/v4/modules/router/router.selectors';
 import { withViewer } from '@/v4/services/viewer/viewer';
 import { bindActionCreators } from 'redux';
 import { COLOR } from '@/v4/styles';
-import { isApiUrl } from '@/v5/services/api/default';
-import { downloadAuthUrl } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { downloadAuthUrl } from '@/v5/helpers/download.helper';
 import { ROUTES } from '../../../../constants/routes';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { DrawingHandler } from '../components/drawingHandler/drawingHandler.component';
@@ -188,10 +187,10 @@ class BaseMarkupStage extends PureComponent<IProps, any> {
 		}
 	}
 
-	public addNewText = (position, text?: string, updateState: boolean = true) => {
+	public addNewText = (position, text: string, width?: number, updateState: boolean = true) => {
 		if (!this.props.selectedObjectName) {
 			position.y = position.y + 1;
-			const newText = getNewText(this.props.color, this.props.fontSize, position, text);
+			const newText = getNewText(this.props.color, this.props.fontSize, position, text, width);
 			this.props.addElement(newText);
 
 			if (updateState) {

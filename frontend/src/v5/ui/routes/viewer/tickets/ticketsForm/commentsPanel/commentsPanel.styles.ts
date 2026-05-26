@@ -19,6 +19,7 @@ import styled from 'styled-components';
 import { Accordion as AccordionBase } from '@controls/accordion/accordion.component';
 import { TableVirtuoso } from 'react-virtuoso';
 import { isFirefox } from '@/v4/styles';
+import { CommentBox } from './commentBox/commentBox.component';
 
 export const Accordion = styled(AccordionBase)`
 	&& {
@@ -41,26 +42,35 @@ export const VirtualisedList = styled(TableVirtuoso).attrs({
 })`
 	box-sizing: border-box;
 	overflow-x: hidden;
-
-	table {
-		display: flex;
-		justify-content: center;
-
-		tbody {
-			width: 100%;
-			padding-left: 14px;
-
-			${isFirefox('padding-right: 14px;')}
-
-			tr {
-				display: flex;
-				flex-direction: column;
-				width: 100%;
-			}
-		}
-	}
 `;
 
 export const EmptyCommentsBox = styled.div`
 	padding: 15px;
+`;
+
+export const Table = styled.div`
+	display: flex;
+	justify-content: center;
+`;
+
+export const TableBody = styled.div`
+	width: 100%;
+	padding-left: 14px;
+
+	${isFirefox('padding-right: 14px;')}
+`;
+
+export const TableRow = styled.div`
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+`;
+
+export const FillerRow = styled.div<{ height: number }>`
+	height: ${({ height }) => height}px;
+`;
+
+export const CreateCommentBox = styled(CommentBox)`
+	border: solid 0 ${({ theme }) => theme.palette.secondary.lightest};
+	border-top-width: 1px;
 `;

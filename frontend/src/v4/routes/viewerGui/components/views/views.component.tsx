@@ -14,12 +14,13 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { PureComponent, createRef } from 'react';
+import { PureComponent, createRef, useContext } from 'react';
 import AddIcon from '@mui/icons-material/Add';
 import { isEqual } from 'lodash';
 
+import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { SORT_ORDER_TYPES } from '../../../../constants/sorting';
-import { VIEWER_CLIP_MODES, VIEWER_EVENTS } from '../../../../constants/viewer';
+import { VIEWER_EVENTS } from '../../../../constants/viewer';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { VIEWS_ACTIONS_ITEMS, VIEWS_ACTIONS_MENU } from '../../../../constants/views';
 import { renderWhenTrue } from '../../../../helpers/rendering';
@@ -60,6 +61,8 @@ interface IProps {
 	project?: string;
 	revision?: string;
 	modelSettings: any;
+	isCalibrating: boolean;
+	calibrationStep: number;
 	fetchViewpoints: (teamspace, modelId) => void;
 	createViewpoint: (teamspace, modelId, view) => void;
 	prepareNewViewpoint: (teamspace, modelId, viewName) => void;
@@ -80,7 +83,7 @@ interface IProps {
 	toggleSortOrder: () => void;
 }
 
-export class Views extends PureComponent<IProps, any> {
+class ViewsBase extends PureComponent<IProps, any> {
 	public state = {
 		filteredViewpoints: []
 	};
@@ -214,7 +217,7 @@ export class Views extends PureComponent<IProps, any> {
 				if (newViewpoint) {
 					const containerRef = this.containerRef.current.containerRef;
 					this.resetActiveView();
-					this.containerRef.current.containerRef.scrollTo(0, containerRef.scrollHeight + 200);
+					this.containerRef.current.containerRef?.scrollTo(0, containerRef.scrollHeight + 200);
 				}
 			});
 		}
@@ -243,8 +246,13 @@ export class Views extends PureComponent<IProps, any> {
 
 	public handleViewpointItemClick = (viewpoint) => () => {
 		if (!this.props.editMode) {
-			const { teamspace, model } = this.props;
-			this.props.setActiveViewpoint(teamspace, model, viewpoint);
+			const { teamspace, model, isCalibrating, calibrationStep } = this.props;
+			const vp = { ...viewpoint };
+			if (isCalibrating && calibrationStep === 2) {
+				delete vp.viewpoint.clippingPlanes;
+				delete vp.clippingPlanes;
+			}
+			this.props.setActiveViewpoint(teamspace, model, vp);
 		}
 	}
 
@@ -374,3 +382,8 @@ export class Views extends PureComponent<IProps, any> {
 		);
 	}
 }
+
+export const Views = (props: Omit<IProps, 'isCalibrating' | 'calibrationStep'>) => {
+	const { isCalibrating, step } = useContext(CalibrationContext);
+	return <ViewsBase {...props} isCalibrating={isCalibrating} calibrationStep={step} />
+};

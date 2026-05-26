@@ -19,7 +19,7 @@ import { formatMessage } from '@/v5/services/intl';
 import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { PropertyDefinition } from '@/v5/store/tickets/tickets.types';
 
-import { FormTextAreaFixedSize } from '@controls/inputs/formInputs.component';
+import { FormTextAreaExpandable } from '@controls/inputs/formInputs.component';
 import { useFormContext } from 'react-hook-form';
 import { useContext, useEffect, useRef } from 'react';
 import _ from 'lodash';
@@ -58,7 +58,7 @@ export const TicketsTopPanel = ({
 	const updatedAt = getValues(`properties.${BaseProperties.UPDATED_AT}`);
 
 	const topPanelProperties: string[] = Object.values({ ...BaseProperties, ...IssueProperties });
-	const extraProperties = properties.filter(({ name }) => !topPanelProperties.includes(name));
+	const propertiesToInclude = properties.filter(({ name }) => !topPanelProperties.includes(name));
 	const hasIssueProperties = properties.some((property) => property.name === IssueProperties.PRIORITY);
 
 	useEffect(() => {
@@ -84,7 +84,7 @@ export const TicketsTopPanel = ({
 				/>
 			)}
 			<DescriptionProperty>
-				<FormTextAreaFixedSize
+				<FormTextAreaExpandable 
 					name={`properties.${BaseProperties.DESCRIPTION}`}
 					onBlur={onPropertyBlur}
 					placeholder={formatMessage({
@@ -104,7 +104,7 @@ export const TicketsTopPanel = ({
 				)}
 			</FlexContainer>
 			{hasIssueProperties && (<AssigneesProperty onBlur={onPropertyBlur} readOnly={readOnly} />)}
-			<PropertiesList module="properties" properties={extraProperties} onPropertyBlur={onPropertyBlur} />
+			<PropertiesList module="properties" properties={propertiesToInclude} onPropertyBlur={onPropertyBlur} />
 		</TopPanel>
 	);
 };

@@ -45,6 +45,8 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 
 		if (isFederation) {
 			yield put(FederationsActions.fetchFederationStats(teamspace, project, containerOrFederation));
+			yield put(FederationsActions.fetchFederationJobs(teamspace, project, containerOrFederation));
+			yield put(FederationsActions.fetchFederationUsers(teamspace, project, containerOrFederation));
 			yield take(FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS);
 			// selectContainersByFederationId only returns containers user has permissions to
 			const assignedContainers = yield select(selectContainersByFederationId, containerOrFederation);
@@ -53,6 +55,8 @@ function* fetchData({ teamspace, containerOrFederation, project }: FetchDataActi
 			yield put(FederationsActions.fetchFederationSettings(teamspace, project, containerOrFederation));
 			yield take(FederationsTypes.FETCH_FEDERATION_SETTINGS_SUCCESS);
 		} else {
+			yield put(ContainersActions.fetchContainerJobs(teamspace, project, containerOrFederation));
+			yield put(ContainersActions.fetchContainerUsers(teamspace, project, containerOrFederation));
 			containerToFetchStatsOf = [containerOrFederation];
 		}
 

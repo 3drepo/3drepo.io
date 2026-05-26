@@ -24,7 +24,6 @@ const {
 	SUBSCRIPTION_TYPES,
 } = require('./teamspaces.constants');
 const { TEAMSPACE_ADMIN } = require('../utils/permissions/permissions.constants');
-const { TEAM_MEMBER } = require('./roles.constants');
 const { USERS_DB_NAME } = require('./users.constants');
 const db = require('../handler/db');
 const { templates } = require('../utils/responseCodes');
@@ -33,14 +32,14 @@ const TEAMSPACE_SETTINGS_COL = 'teamspace';
 
 const TeamspaceSetting = {};
 
-const teamspaceQuery = (query, projection, sort) => db.findOne(USERS_DB_NAME, 'system.users', query, projection, sort);
 const findMany = (query, projection, sort) => db.find(USERS_DB_NAME, 'system.users', query, projection, sort);
+const teamspaceInvitesQuery = (query, projection, sort) => db.find(USERS_DB_NAME, 'invitations', query, projection, sort);
 
 const teamspaceSettingUpdate = (ts, query, actions) => db.updateOne(ts, TEAMSPACE_SETTINGS_COL, query, actions);
 const teamspaceSettingQuery = (ts, query, projection, sort) => db.findOne(ts,
 	TEAMSPACE_SETTINGS_COL, query, projection, sort);
 
-TeamspaceSetting.getTeamspaceSetting = async (ts, projection) => {
+TeamspaceSetting.getTeamspaceSetting = async (ts, projection = { refId: 0 }) => {
 	const tsDoc = await teamspaceSettingQuery(ts, { _id: ts }, projection);
 	if (!tsDoc) {
 		throw templates.teamspaceNotFound;
@@ -106,13 +105,11 @@ TeamspaceSetting.removeSubscription = (ts, type) => {
 	return teamspaceSettingUpdate(ts, { _id: ts }, { $unset: { [field]: 1 } });
 };
 
-const possibleAddOns = {
-	[`addOns.${ADD_ONS.VR}`]: 1,
-	[`addOns.${ADD_ONS.HERE}`]: 1,
-	[`addOns.${ADD_ONS.SRC}`]: 1,
-	[`addOns.${ADD_ONS.POWERBI}`]: 1,
-	[`addOns.${ADD_ONS.MODULES}`]: 1,
-};
+const possibleAddOns = {};
+
+Object.values(ADD_ONS).forEach((addOnVal) => {
+	possibleAddOns[`addOns.${addOnVal}`] = 1;
+});
 
 TeamspaceSetting.getAddOns = async (teamspace) => {
 	const { addOns } = await TeamspaceSetting.getTeamspaceSetting(teamspace, possibleAddOns);
@@ -162,27 +159,6 @@ TeamspaceSetting.getTeamspaceAdmins = async (teamspace) => {
 	);
 };
 
-TeamspaceSetting.hasAccessToTeamspace = async (teamspace, username) => {
-	const query = { user: username, 'roles.db': teamspace };
-	const userDoc = await teamspaceQuery(query, { _id: 1, customData: { sso: 1, email: 1 } });
-	if (!userDoc) return false;
-
-	const restrictions = await TeamspaceSetting.getSecurityRestrictions(teamspace);
-
-	if (restrictions[SECURITY_SETTINGS.SSO_RESTRICTED] && !userDoc.customData.sso) {
-		throw templates.ssoRestricted;
-	}
-
-	if (restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST]) {
-		const userDomain = userDoc.customData.email.split('@')[1].toLowerCase();
-		if (!restrictions[SECURITY_SETTINGS.DOMAIN_WHITELIST].includes(userDomain)) {
-			throw templates.domainRestricted;
-		}
-	}
-
-	return !!userDoc;
-};
-
 TeamspaceSetting.getMembersInfo = async (teamspace) => {
 	const query = { 'roles.db': teamspace };
 	const projection = { user: 1, 'customData.firstName': 1, 'customData.lastName': 1, 'customData.billing.billingInfo.company': 1 };
@@ -200,7 +176,7 @@ TeamspaceSetting.getMembersInfo = async (teamspace) => {
 
 TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace) => {
 	const currentDate = new Date();
-	const query = { $or: SUBSCRIPTION_TYPES.flatMap((type) => [{ [`subscriptions.${type}`]: { $exists: true }, [`subscriptions.${type}.expiryDate`]: null },
+	const query = { $or: Object.values(SUBSCRIPTION_TYPES).flatMap((type) => [{ [`subscriptions.${type}`]: { $exists: true }, [`subscriptions.${type}.expiryDate`]: null },
 		{ [`subscriptions.${type}.expiryDate`]: { $gt: currentDate } },
 	]) };
 	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
@@ -208,16 +184,26 @@ TeamspaceSetting.getTeamspaceActiveLicenses = (teamspace) => {
 
 TeamspaceSetting.getTeamspaceExpiredLicenses = (teamspace) => {
 	const currentDate = new Date();
-	const query = { $or: SUBSCRIPTION_TYPES.map((type) => ({ [`subscriptions.${type}.expiryDate`]: { $lt: currentDate } })) };
+	const query = { $or: Object.values(SUBSCRIPTION_TYPES).map((type) => ({ [`subscriptions.${type}.expiryDate`]: { $lt: currentDate } })) };
 	return teamspaceSettingQuery(teamspace, query, { _id: 1, subscriptions: 1 });
 };
 
-TeamspaceSetting.createTeamspaceSettings = async (teamspace) => {
+TeamspaceSetting.createTeamspaceSettings = async (teamspace, teamspaceId) => {
 	const settings = { _id: teamspace,
+		refId: teamspaceId,
 		topicTypes: DEFAULT_TOPIC_TYPES,
 		riskCategories: DEFAULT_RISK_CATEGORIES,
 		permissions: [] };
 	await db.insertOne(teamspace, TEAMSPACE_SETTINGS_COL, settings);
+};
+
+TeamspaceSetting.setTeamspaceRefId = async (teamspace, refId) => {
+	await teamspaceSettingUpdate(teamspace, { _id: teamspace }, { $set: { refId } });
+};
+
+TeamspaceSetting.getTeamspaceRefId = async (teamspace) => {
+	const { refId } = await TeamspaceSetting.getTeamspaceSetting(teamspace, { refId: 1 });
+	return refId;
 };
 
 const grantPermissionToUser = async (teamspace, username, permission) => {
@@ -228,13 +214,6 @@ const grantPermissionToUser = async (teamspace, username, permission) => {
 TeamspaceSetting.grantAdminToUser = (teamspace, username) => grantPermissionToUser(teamspace,
 	username, TEAMSPACE_ADMIN);
 
-TeamspaceSetting.getAllUsersInTeamspace = async (teamspace) => {
-	const query = { 'roles.db': teamspace, 'roles.role': TEAM_MEMBER };
-	const users = await findMany(query, { user: 1 });
-
-	return users.map(({ user }) => user);
-};
-
 TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
 	await teamspaceSettingUpdate(teamspace, { _id: teamspace }, { $pull: { permissions: { user } } });
 };
@@ -242,6 +221,11 @@ TeamspaceSetting.removeUserFromAdminPrivilege = async (teamspace, user) => {
 TeamspaceSetting.getRiskCategories = async (teamspace) => {
 	const { riskCategories } = await teamspaceSettingQuery(teamspace, { _id: teamspace }, { riskCategories: 1 });
 	return riskCategories;
+};
+
+TeamspaceSetting.getTeamspaceInvites = (teamspace, projection = { _id: 1 }) => {
+	const query = { 'teamSpaces.teamspace': teamspace };
+	return teamspaceInvitesQuery(query, projection);
 };
 
 module.exports = TeamspaceSetting;

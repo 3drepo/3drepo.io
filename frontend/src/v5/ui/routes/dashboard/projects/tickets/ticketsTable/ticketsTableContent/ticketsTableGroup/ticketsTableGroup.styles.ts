@@ -15,80 +15,59 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { Container as FixedOrGrowContainer } from '@controls/fixedOrGrowContainer/fixedOrGrowContainer.styles';
-import { Typography } from '@controls/typography';
 import styled, { css } from 'styled-components';
+import { ResizableTable } from '@controls/resizableTableContext/resizableTable/resizableTable.component';
+import { Row } from './ticketsTableRow/ticketsTableRow.styles';
+import { Highlighter } from '@controls/resizableTableContext/resizableTable/overlayElements/movingColumn/movingColumnHighlighter/movingColumnHighlighter.styles';
+import { Headers } from './ticketsTableHeaders/ticketsTableHeaders.styles';
+import { NEW_TICKET_ROW_AREA_NAME, SELECTION_COLUMN_WIDTH, SETTINGS_COLUMN_WIDTH } from './ticketsTableGroup.helper';
 
-export const Headers = styled.div`
-	display: flex;
-	gap: 1px;
-	margin-bottom: 10px;
-	width: 100%;
-	width: min(90vw, 1289px);
-`;
-
-export const IconContainer = styled.div<{ $flip?: boolean }>`
-	animation: all .2s;
-	display: inline-flex;
-	margin-right: 5px;
-
-	${({ $flip }) => $flip && css`
-		transform: rotate(180deg);
-	`}
-`;
-
-export const Header = styled(FixedOrGrowContainer)<{ $selectable: boolean }>`
-	${({ theme }) => theme.typography.kicker};
-	color: ${({ theme }) => theme.palette.base.main};
-	padding-left: 10px;
-	text-align: start;
-	box-sizing: border-box;
-	user-select: none;
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
-
-	${({ $selectable }) => $selectable && css`
-		cursor: pointer;
-	`}
-
-	${({ width }) => width ? css`
-		flex: 0 0 ${width};
-	` : css`
-		flex: 1;
-		min-width: 300px;
-	`}
-`;
-
-export const Group = styled.div`
+export const PlaceholderForStickyFunctionality = styled(Headers)``;
+export const Group = styled.div<{ $empty: boolean, $hideNewticketButton: boolean }>`
 	display: grid;
-	border-radius: 10px;
-	overflow: hidden;
 	gap: 1px;
+	width: fit-content;
 	background-color: transparent;
 `;
 
-export const NewTicketRow = styled.div<{ disabled?: boolean }>`
-	width: 100%;
-	height: 37px;
-	font-weight: 600;
-	cursor: pointer;
-	color: ${({ theme }) => theme.palette.base.main};
-	background-color: ${({ theme }) => theme.palette.primary.contrast};
-	display: flex;
-	align-items: center;
-	padding-left: 15px;
-	gap: 6px;
-
-	${({ disabled }) => disabled && css`
-		cursor: initial;
-		pointer-events: none;
-		color: ${({ theme }) => theme.palette.base.light};
+export const RoundedContainer = styled.div<{ $hideSelectionColumn: boolean, $hideNewTicketButton: boolean }>`
+	display: grid;
+	gap: 1px;
+	grid-template-columns: ${SELECTION_COLUMN_WIDTH}px auto ${SETTINGS_COLUMN_WIDTH}px;
+	grid-template-areas: "selection tableData settings"
+		"${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME}";
+	${({ $hideSelectionColumn }) => $hideSelectionColumn && css`
+		grid-template-columns: auto ${SETTINGS_COLUMN_WIDTH}px;
+		grid-template-areas: "tableData settings"
+			"${NEW_TICKET_ROW_AREA_NAME} ${NEW_TICKET_ROW_AREA_NAME}";
 	`}
+
+	margin-right: 40px;
+	width: fit-content;
+	border-radius: 0 0 10px 10px;
+	>*:first-child {
+		${/* sc-selector */ Row}:first-of-type {
+			border-top-left-radius: 10px;
+		}
+		${({ $hideNewTicketButton }) => $hideNewTicketButton && css`
+			${/* sc-selector */ Row}:last-of-type {
+				border-bottom-left-radius: 10px;
+			}
+		`}
+	}
+	>*:last-child {
+		${/* sc-selector */ Row}:last-of-type {
+			border-bottom-right-radius: 10px;
+		}
+	}
 `;
 
-export const NewTicketText = styled(Typography).attrs({
-	variant: 'body1',
-})`
-	font-weight: 600;
+export const Table = styled(ResizableTable)<{ $canCreateTicket?: boolean }>`
+	overflow-x: unset;
+	width: fit-content;
+
+	${Highlighter} {
+		border-radius: 10px;
+		height: 100%;
+	}
 `;

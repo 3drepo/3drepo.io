@@ -18,7 +18,8 @@
 import styled from 'styled-components';
 import { hexToOpacity } from '@/v5/helpers/colors.helper';
 import { CoverImage } from '@controls/coverImage/coverImage.component';
-import { Content as ProjectContent } from '../../projects/projectContent/projectContent.styles';
+import { GRADIENT } from '@/v5/ui/themes/theme';
+import { InnerContainer } from '@components/dashboard/dashboardProjectLayout/dashboardProjectLayout.styles';
 
 export const Container = styled.div`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
@@ -27,7 +28,7 @@ export const Container = styled.div`
 	flex-direction: column;
 `;
 
-export const Content = styled(ProjectContent)`
+export const Content = styled(InnerContainer)`
 	margin-top: 32px;
 	flex-direction: column;
 	display: flex;
@@ -37,7 +38,7 @@ export const Content = styled(ProjectContent)`
 `;
 
 export const TopBar = styled.div`
-	background: ${({ theme }) => theme.palette.gradient.secondary};
+	background: ${GRADIENT.SECONDARY};
 	padding: 30px 75px;
 	display: flex;
 	flex-direction: row;

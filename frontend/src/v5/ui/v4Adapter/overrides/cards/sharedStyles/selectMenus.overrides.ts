@@ -82,6 +82,7 @@ export const EditableFieldStyles = css`
 		border-radius: 8px;
 		min-height: 32px;
 		padding: 4px 10px;
+		box-sizing: unset;
 		margin-top: 0px;
 		margin-bottom: 0px;
 		font-size: 0.75rem;
@@ -124,6 +125,9 @@ export const FieldsRowStyles = css`
 		}
 		${StyledFormControl} {
 			margin: 0;
+			.MuiOutlinedInput-root {
+				width: 100%;
+			}
 			&:last-child {
 				margin-left: 5px;
 			}
@@ -173,12 +177,4 @@ export default css`
 		${EditableFieldStyles}
 	}
 	${FieldsRowStyles}
-
-	.MuiSelect-select {
-		border: 1px solid ${({ theme }) => theme.palette.base.lightest};
-	}
-
-	.Mui-focused .MuiSelect-select {
-		border-color: ${({ theme }) => theme.palette.primary.main};
-	}
 `;

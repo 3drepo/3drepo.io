@@ -27,12 +27,6 @@ const updateMany = (ts, query, action) => db.updateMany(ts, COL_NAME, query, act
 
 Jobs.getJobsToUsers = (teamspace) => findMany(teamspace, {}, { _id: 1, users: 1 });
 
-Jobs.getJobNames = async (teamspace) => {
-	const jobs = await findMany(teamspace, {}, { _id: 1 });
-
-	return jobs.map(({ _id }) => _id);
-};
-
 Jobs.getJobs = (teamspace) => findMany(teamspace, {}, { _id: 1, color: 1 });
 
 Jobs.addDefaultJobs = async (teamspace) => {
@@ -45,6 +39,11 @@ Jobs.assignUserToJob = async (teamspace, job, username) => {
 
 Jobs.removeUserFromJobs = async (teamspace, userToRemove) => {
 	await updateMany(teamspace, { users: userToRemove }, { $pull: { users: userToRemove } });
+};
+
+Jobs.getJobsByUsers = async (teamspace, users) => {
+	const jobs = await findMany(teamspace, { users: { $in: users } }, { _id: 1 });
+	return jobs.map((j) => j._id);
 };
 
 module.exports = Jobs;

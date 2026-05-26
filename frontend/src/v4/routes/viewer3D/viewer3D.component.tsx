@@ -16,13 +16,14 @@
  */
 import { PureComponent, createRef, useContext } from 'react';
 import { difference, differenceBy, isEqual } from 'lodash';
-import { dispatch } from '@/v4/modules/store';
 import { DialogActions } from '@/v4/modules/dialog';
 import { Toolbar } from '@/v5/ui/routes/viewer/toolbar/toolbar.component';
 import { CalibrationToolbar } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationToolbar/calibrationToolbar.component';
-import { LifoQueue } from '@/v5/helpers/functions.helpers';
+import { AsyncFunctionExecutor, ExecutionStrategy } from '@/v5/helpers/functions.helpers';
+import { dispatch } from '@/v5/helpers/redux.helpers';
 import { CalibrationContext } from '@/v5/ui/routes/dashboard/projects/calibration/calibrationContext';
 import { useViewerCalibrationSetup } from '@/v5/ui/routes/dashboard/projects/calibration/useViewerCalibrationSetup';
+import { MeasurementsActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import {queuableFunction} from '../../helpers/async';
 
 import { ROUTES } from '../../constants/routes';
@@ -51,6 +52,7 @@ interface IProps {
 	riskPins: any[];
 	measurementPins: any[];
 	measurementsAngle: any[];
+	measurementsSlope: any[];
 	measurementsArea: any[];
 	measurementsLength: any[];
 	transformations: any[];
@@ -70,7 +72,7 @@ interface IProps {
 
 export class Viewer3DBase extends PureComponent<IProps, any> {
 	private containerRef = createRef<HTMLDivElement>();
-	public state = { updatesQueue: new LifoQueue((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, false) };
+	public state = { updatesQueue: new AsyncFunctionExecutor((prevProps, currProps) => this.onComponentDidUpdate(prevProps, currProps), 1, ExecutionStrategy.Fifo, false) };
 
 	private handleUnityError = (message: string, reload: boolean, isUnity: boolean) => {
 		let errorType = '3D Repo Error';
@@ -104,6 +106,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	public componentDidMount() {
 		const { viewer } = this.props;
 		viewer.setupInstance(this.containerRef.current, this.handleUnityError);
+		MeasurementsActionsDispatchers.setMeasureSlopeUnits('Percentage');
 	}
 
 	public async renderGisCoordinates(coordinates) {
@@ -188,7 +191,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	}
 
 	public async componentDidUpdate(prevProps: IProps) {
-		this.state.updatesQueue.enqueue(prevProps, this.props);
+		this.state.updatesQueue.addCall(prevProps, this.props);
 	}
 
 	public async onComponentDidUpdate(prevProps, currProps) {
@@ -196,7 +199,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 			gisCoordinates, gisLayers, transparencies, transformations,
 			viewerManipulationEnabled, viewer, issuesShapes, issuesHighlightedShapes,
 			risksShapes, risksHighlightedShapes,
-			ticketPins, measurementsAngle, measurementsArea, measurementsLength
+			ticketPins, measurementsAngle, measurementsSlope, measurementsArea, measurementsLength
 		} = currProps;
 
 		if (colorOverrides && !isEqual(colorOverrides, prevProps.colorOverrides)) {
@@ -255,6 +258,10 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 			await this.renderMeasurements(prevProps.measurementsAngle, measurementsAngle);
 		}
 
+		if (!isEqual(prevProps.measurementsSlope, measurementsSlope)) {
+			await this.renderMeasurements(prevProps.measurementsSlope, measurementsSlope);
+		}
+
 		if (!isEqual(prevProps.measurementsLength, measurementsLength)) {
 			await this.renderMeasurements(prevProps.measurementsLength, measurementsLength);
 		}
@@ -275,7 +282,7 @@ export class Viewer3DBase extends PureComponent<IProps, any> {
 	public render() {
 		return (
 			<ViewerContainer visible={this.shouldBeVisible} >
-				<Calibration3DInfoBox />
+				{this.props.isCalibrating && <Calibration3DInfoBox />}
 				<div ref={this.containerRef} className={this.props.className} />
 				{this.props.isCalibrating ? <CalibrationToolbar /> : <Toolbar />}
 			</ ViewerContainer>
@@ -292,6 +299,7 @@ const getCalibrationProps = (props) => ({
 	measurementsArea: [],
 	measurementsLength: [],
 	measurementsAngle: [],
+	measurementsSlope: [],
 });
 
 export const Viewer3D = (props: Omit<IProps, 'isCalibrating'>) => {

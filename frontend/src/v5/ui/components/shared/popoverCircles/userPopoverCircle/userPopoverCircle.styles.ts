@@ -18,7 +18,7 @@
 import { getUserInitials } from '@/v5/store/users/users.helpers';
 import styled from 'styled-components';
 import { IUser } from '@/v5/store/users/users.redux';
-import { IPopoverCircle, PopoverCircle } from '../popoverCircle.styles';
+import { IPopoverCircle, PopoverCircle } from '../popoverCircle.component';
 
 type IUserCircle = Omit<IPopoverCircle, 'children'> & {
 	user: IUser;

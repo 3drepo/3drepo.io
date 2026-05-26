@@ -16,10 +16,10 @@
  */
 import * as Yup from 'yup';
 import { revisionDesc } from '../containerAndFederationSchemes/validators';
-import { desc, name, alphaNumericHyphens, uploadFile, trimmedString, requiredNumber } from '../shared/validators';
+import { desc, name, alphaNumericHyphens, trimmedString, numberRange } from '../shared/validators';
 import { formatMessage } from '@/v5/services/intl';
 import { selectRevisions } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
-import { getState } from '@/v4/modules/store';
+import { getState } from '@/v5/helpers/redux.helpers';
 
 const number = Yup.string()
 	.matches(alphaNumericHyphens,
@@ -45,23 +45,21 @@ const number = Yup.string()
 		}),
 		(value, testContext) => {
 			if (!testContext.options?.context) return true;
-			return !testContext.options.context.alreadyExistingNumbers?.map((n) => n.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
+			const { existingNumbers } = testContext.options?.context as { existingNumbers: Set<string> };
+			return !existingNumbers?.has(value?.toLowerCase().trim());
 		},
 	);
 
+export const CALIBRATION_INVALID_RANGE_ERROR = formatMessage({
+	id: 'validation.drawing.calibration.error.invalidRange',
+	defaultMessage: 'Bottom extent should be smaller than top',
+});
 const calibration = Yup.object().shape({
 	units: Yup.string().required(formatMessage({
 		id: 'validation.drawing.calibration.units.error.required',
 		defaultMessage: 'Units is a required field',
 	})),
-	verticalRange: Yup.array().of(requiredNumber().test(
-		'bottomShouldBeSmallerThanTop',
-		formatMessage({
-			id: 'validation.drawing.calibration.error.invalidRange',
-			defaultMessage: 'Bottom extent should be smaller than top',
-		}),
-		(v, ctx) => ctx.parent[0] < ctx.parent[1],
-	)),
+	verticalRange: numberRange(CALIBRATION_INVALID_RANGE_ERROR),
 });
 
 export const DrawingFormSchema =  Yup.object().shape({
@@ -77,18 +75,20 @@ const testCombinationIsUnique = (val, testContext) => {
 	const revisions = selectRevisions(getState(), testContext.parent.drawingId);
 	return !revisions.some((rev) => isSameCode(rev.statusCode, testContext.parent.statusCode) && isSameCode(rev.revCode, testContext.parent.revCode));
 };
+
 const statusCodeAndRevisionCodeMustBeUniqueMessage = formatMessage({
 	id: 'validation.drawing.statusCode.error.characters',
-	defaultMessage: 'The conmbination of Status Code and Revision Code must be unique',
+	defaultMessage: 'The combination of Status Code and Revision Code must be unique',
 });
+
+export const isUniqueRevisionStatusError = (error) => error === statusCodeAndRevisionCodeMustBeUniqueMessage;
+
 export const ListItemSchema = Yup.object().shape({
-	file: uploadFile,
 	statusCode: Yup.string().required(
 		formatMessage({
 			id: 'validation.drawing.statusCode.error.required',
 			defaultMessage: 'Status Code is a required field',
-		}),
-	).test(
+		})).test(
 		'statusCodeAndRevisionCodeAreUnique',
 		statusCodeAndRevisionCodeMustBeUniqueMessage,
 		testCombinationIsUnique,
@@ -97,22 +97,18 @@ export const ListItemSchema = Yup.object().shape({
 		formatMessage({
 			id: 'validation.drawing.revCode.error.characters',
 			defaultMessage: 'Revision Code can only consist of letters, numbers, hyphens or underscores',
-		}),
-	).required(
+		})).required(
 		formatMessage({
 			id: 'validation.drawing.revCode.error.required',
 			defaultMessage: 'Revision Code is a required field',
-		}),
-	).max(10,
+		})).max(10,
 		formatMessage({
 			id: 'validation.drawing.revCode.error.max',
 			defaultMessage: 'Revision Code is limited to 10 characters',
-		}),
-	).test(
+		})).test(
 		'statusCodeAndRevisionCodeAreUnique',
 		statusCodeAndRevisionCodeMustBeUniqueMessage,
-		testCombinationIsUnique,
-	),
+		testCombinationIsUnique),
 	revisionDesc,
 });
 
@@ -127,6 +123,7 @@ export const SidebarSchema = Yup.object().shape({
 	),
 	drawingDesc: desc,
 	calibration,
+	revisionDesc: desc,
 });
 
 export const UploadsSchema = Yup.object().shape({

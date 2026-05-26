@@ -95,8 +95,9 @@ const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 
 	const commonProps = {
 		name: newEntry ? name.required() : name,
-		desc: types.strings.shortDescription,
-		...(modelType === modelTypes.FEDERATION ? {} : { type: newEntry ? Yup.string().required() : Yup.string() }),
+		desc: newEntry ? types.strings.shortDescription : types.strings.shortDescription.nullable(),
+		...(modelType === modelTypes.FEDERATION ? {} : { type: newEntry ? Yup.string().required()
+			: Yup.string() }),
 	};
 
 	const schema = {
@@ -108,9 +109,9 @@ const generateSchema = (newEntry, modelType, teamspace, project, modelId) => {
 			}
 			: {
 				unit: newEntry ? types.strings.unit.required() : types.strings.unit,
-				code: types.strings.code,
-				surveyPoints: types.surveyPoints,
-				angleFromNorth: types.degrees,
+				code: newEntry ? types.strings.code : types.strings.code.nullable(),
+				surveyPoints: types.surveyPoints.nullable(),
+				angleFromNorth: types.degrees.nullable(),
 				...(newEntry
 					? {}
 					: {

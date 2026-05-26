@@ -15,14 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { AddOn } from '@/v5/store/store.types';
-import api from './default';
+import { AddOns } from '@/v5/store/store.types';
+import api, { generateV5ApiUrl } from './default';
+import { clientConfigService } from '@/v4/services/clientConfig';
+import { compact } from 'lodash';
 
 export const fetchTeamspaces = (): Promise<any> => api.get('teamspaces');
 
 export const fetchQuota = (teamspace: string): Promise<any> => api.get(`teamspaces/${teamspace}/quota`);
 
-export const fetchAddons = async (teamspace: string): Promise<AddOn[]> => {
+export const fetchAddons = async (teamspace: string): Promise<AddOns> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/addOns`);
-	return data.modules;
+	return data;
+};
+
+export const getActivityLogURL = (teamspace: string, from: Date, to: Date): string => {
+	const fromQuery = from && `from=${from}`;
+	const toQuery = to && `to=${to}`;
+	const rangeQuery = compact([fromQuery, toQuery]).join('&');
+
+	return generateV5ApiUrl(
+		`teamspaces/${teamspace}/settings/activities/archive?${rangeQuery}`,
+		clientConfigService.GET_API,
+	);
 };

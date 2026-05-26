@@ -16,8 +16,6 @@
  */
 
 import { DialogProps as IDialogProps } from '@mui/material/Dialog';
-import { push } from 'connected-react-router';
-import { generatePath } from 'react-router';
 import { get, omit } from 'lodash';
 import { createActions, createReducer } from 'reduxsauce';
 import uuid from 'uuidv4';
@@ -25,8 +23,6 @@ import { ErrorDialog } from '@/v4/routes/components/dialogContainer/components/e
 import { ConfirmDialog } from '@/v4/routes/components/dialogContainer/components/confirmDialog/confirmDialog.component';
 import { RevisionsDialog } from '@/v4/routes/components/dialogContainer/components/revisionsDialog/revisionsDialog.component';
 import { NewUpdateDialog } from '@/v4/routes/components/dialogContainer/components/newUpdateDialog/newUpdateDialog.component';
-import { RedirectToTeamspaceDialog } from '@/v4/routes/components/dialogContainer/components/redirectToTeamspaceDialog/redirectToTeamspaceDialog.component';
-import { ROUTES } from '../../constants/routes';
 
 export interface IDialogConfig {
 	id: number;
@@ -54,6 +50,7 @@ interface IDialogState {
 export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showDialog: ['config'],
 	showEndpointErrorDialog: ['method', 'dataType', 'error'],
+	showEndpointErrorDialogSuccess: ['method', 'dataType', 'error'],
 	showErrorDialog: ['method', 'dataType', 'message', 'status'],
 	showConfirmDialog: ['config'],
 	showRevisionsDialog: ['config'],
@@ -62,7 +59,6 @@ export const { Types: DialogTypes, Creators: DialogActions } = createActions({
 	showScreenshotDialog: ['config'],
 	showNewUpdateDialog: ['config'],
 	showLoggedOutDialog: [],
-	showRedirectToTeamspaceDialog: ['error', 'teamspace'],
 }, { prefix: 'DIALOG/' });
 
 export const INITIAL_STATE = {
@@ -100,7 +96,7 @@ const showErrorDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, {config});
 };
 
-const showEndpointErrorDialog = (state = INITIAL_STATE, { method, dataType, error }) => {
+const showEndpointErrorDialogSuccess = (state = INITIAL_STATE, { method, dataType, error }) => {
 	const isImplementationError = !error.response;
 	if (isImplementationError) {
 		console.error(error);
@@ -171,35 +167,14 @@ const showLoggedOutDialog = (state = INITIAL_STATE, action) => {
 	return showDialog(state, { config });
 };
 
-const showRedirectToTeamspaceDialog = (state = INITIAL_STATE, action) => {
-	const { method, dataType, error, teamspace } = action;
-	const status = get(error.response, 'status', 'Implementation error');
-	const message = get(error.response, 'data.message', error.message);
-	const teamspaceRoute = generatePath(ROUTES.V5_TEAMSPACE, { teamspace });
-	const config = {
-		title: 'Error',
-		content: 'We cannot load the model due to the following:',
-		template: RedirectToTeamspaceDialog,
-		onCancel: () => push(teamspaceRoute),
-		onConfirm: () => push(teamspaceRoute),
-		data: {
-			status,
-			message,
-		}
-	};
-
-	return showDialog(state, { config });
-};
-
 export const reducer = createReducer({...INITIAL_STATE}, {
 	[DialogTypes.HIDE_DIALOG]: hideDialog,
 	[DialogTypes.SHOW_DIALOG]: showDialog,
 	[DialogTypes.SHOW_ERROR_DIALOG]: showErrorDialog,
-	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG]: showEndpointErrorDialog,
+	[DialogTypes.SHOW_ENDPOINT_ERROR_DIALOG_SUCCESS]: showEndpointErrorDialogSuccess,
 	[DialogTypes.SHOW_CONFIRM_DIALOG]: showConfirmDialog,
 	[DialogTypes.SHOW_REVISIONS_DIALOG]: showRevisionsDialog,
 	[DialogTypes.SHOW_SCREENSHOT_DIALOG]: showScreenshotDialog,
 	[DialogTypes.SHOW_NEW_UPDATE_DIALOG]: showNewUpdateDialog,
 	[DialogTypes.SHOW_LOGGED_OUT_DIALOG]: showLoggedOutDialog,
-	[DialogTypes.SHOW_REDIRECT_TO_TEAMSPACE_DIALOG]: showRedirectToTeamspaceDialog,
 });

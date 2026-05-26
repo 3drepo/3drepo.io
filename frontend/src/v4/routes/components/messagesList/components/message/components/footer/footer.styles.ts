@@ -51,7 +51,7 @@ export const Date = styled(Typography)`
 	}
 `;
 
-export const Username = styled(Typography)`
+export const Fullname = styled(Typography)`
 	${commonTextStyle};
 
 	&& {

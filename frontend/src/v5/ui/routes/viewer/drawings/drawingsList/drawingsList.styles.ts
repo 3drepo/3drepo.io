@@ -32,3 +32,7 @@ export const TableRow = styled.div`
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
 `;
+
+export const FillerRow = styled.div<{ height: number }>`
+	height: ${({ height }) => height}px;
+`;

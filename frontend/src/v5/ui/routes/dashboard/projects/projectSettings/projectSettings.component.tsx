@@ -35,7 +35,7 @@ import { testImageExists } from '@controls/fileUploader/imageFile.helper';
 import { Gap } from '@controls/gap';
 import { Form, Section, Header, SubmitButton, SuccessMessage, ImageInfo } from './projectSettings.styles';
 import { ProjectImageInput } from './projectImageInput/projectImageInput.component';
-import { deleteAuthUrlFromCache } from '@components/authenticatedResource/authenticatedResource.hooks';
+import { deleteAuthUrlFromCache } from '@/v5/helpers/download.helper';
 
 type IFormInput = {
 	name: string,

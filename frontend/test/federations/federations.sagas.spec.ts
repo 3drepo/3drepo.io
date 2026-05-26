@@ -27,12 +27,13 @@ import {
 	groupedContainerMockFactory,
 } from './federations.fixtures';
 import { prepareSingleFederationData } from '@/v5/store/federations/federations.helpers';
-import { prepareFederationSettingsForFrontend } from '@/v5/store/federations/federations.helpers';
+import { prepareSettingsForFrontend } from '@/v5/store/containers/containers.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectFederationById, selectFederations } from '@/v5/store/federations/federations.selectors';
 import { createTestStore } from '../test.helpers';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
+import { prepareMockJobs, prepareMockUsers } from '../models.fixture';
 
 describe('Federations: sagas', () => {
 	const teamspace = 'teamspace';
@@ -196,7 +197,7 @@ describe('Federations: sagas', () => {
 			populateStore();
 			const baseFederation = prepareMockBaseFederation(mockFederation)
 			const rawSettings = prepareMockRawSettingsReply(mockFederation);
-			const settings = prepareFederationSettingsForFrontend(rawSettings);
+			const settings = prepareSettingsForFrontend(rawSettings);
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`)
 				.reply(200, rawSettings);
@@ -372,6 +373,113 @@ describe('Federations: sagas', () => {
 
 			expect(onSuccess).not.toHaveBeenCalled();
 			expect(onError).toHaveBeenCalled();
+		})
+	})
+
+	describe('fetchJobs', () => {
+		beforeEach(() => populateStore({ ...mockFederation, jobs: undefined }));
+	
+		test('should fetch jobs', async () => {
+			const { viewerJobs, nonViewerJobs, modelJobs } = prepareMockJobs();
+
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/jobs?excludeViewers=${true}`)
+				.reply(200, { jobs: nonViewerJobs })
+	
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/jobs?excludeViewers=${false}`)
+				.reply(200, { jobs: [...viewerJobs, ...nonViewerJobs] })
+	
+			await waitForActions(() => {
+				dispatch(FederationsActions.fetchFederationJobs(teamspace, projectId, federationId));
+			}, [FederationsActions.updateFederationSuccess(projectId, federationId, { jobs: modelJobs })]);
+	
+			expect(selectFederations(getState())[0].jobs).toEqual(modelJobs);
+		})
+	
+		test('should fetch jobs even if there is none', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/jobs?excludeViewers=${true}`)
+				.reply(200, { jobs: [] })
+	
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/jobs?excludeViewers=${false}`)
+				.reply(200, { jobs: [] })
+	
+	
+			await waitForActions(() => {
+				dispatch(FederationsActions.fetchFederationJobs(teamspace, projectId, federationId));
+			}, [FederationsActions.updateFederationSuccess(projectId, federationId, { jobs: [] })]);
+	
+			expect(selectFederations(getState())[0].jobs).toEqual([]);
+		})
+	
+		it('should call fetchJobs endpoint with 404', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/jobs?excludeViewers=${true}`)
+				.reply(404);
+	
+			const federationsBefore = selectFederations(getState());
+	
+			await waitForActions(() => {
+				dispatch(FederationsActions.fetchFederationJobs(teamspace, projectId, federationId));
+			}, [DialogsTypes.OPEN]);
+	
+			const federationsAfter = selectFederations(getState());
+			expect(federationsBefore).toEqual(federationsAfter);
+		})
+	})
+	
+	describe('fetchUsers', () => {
+		beforeEach(() => populateStore({ ...mockFederation, users: undefined }));
+	
+		test('should fetch users', async () => {
+			const { viewerUsers, nonViewerUsers, modelUsers } = prepareMockUsers();
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/members?excludeViewers=${true}`)
+				.reply(200, { users: nonViewerUsers })
+	
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/members?excludeViewers=${false}`)
+				.reply(200, { users: [...viewerUsers, ...nonViewerUsers] })
+	
+			await waitForActions(() => {
+				dispatch(FederationsActions.fetchFederationUsers(teamspace, projectId, federationId));
+			}, [FederationsActions.updateFederationSuccess(projectId, federationId, { users: modelUsers })]);
+	
+			expect(selectFederations(getState())[0].users).toEqual(modelUsers);
+		})
+	
+		test('should fetch users even if there is none', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/members?excludeViewers=${true}`)
+				.reply(200, { users: [] })
+	
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/members?excludeViewers=${false}`)
+				.reply(200, { users: [] })
+	
+	
+			await waitForActions(() => {
+				dispatch(FederationsActions.fetchFederationUsers(teamspace, projectId, federationId));
+			}, [FederationsActions.updateFederationSuccess(projectId, federationId, { users: [] })]);
+	
+			expect(selectFederations(getState())[0].users).toEqual([]);
+		})
+	
+		it('should call fetchUsers endpoint with 404', async () => {
+			mockServer
+				.get(`/teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/members?excludeViewers=${true}`)
+				.reply(404);
+	
+			const federationsBefore = selectFederations(getState());
+	
+			await waitForActions(() => {
+				dispatch(FederationsActions.fetchFederationUsers(teamspace, projectId, federationId));
+			}, [DialogsTypes.OPEN]);
+	
+			const federationsAfter = selectFederations(getState());
+			expect(federationsBefore).toEqual(federationsAfter);
 		})
 	})
 })

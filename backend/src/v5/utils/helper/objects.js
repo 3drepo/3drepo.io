@@ -41,4 +41,14 @@ Objects.deleteIfUndefined = (obj, includeNull) => {
 	return res;
 };
 
+// turn [A, B, C] to {A:A, B:B, C:C}
+Objects.createConstantsObject = (constArray) => {
+	const retVal = {};
+	constArray?.forEach((val) => {
+		retVal[val] = val;
+	});
+
+	return retVal;
+};
+
 module.exports = Objects;

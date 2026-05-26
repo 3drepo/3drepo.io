@@ -16,13 +16,13 @@
  */
 
 import {
-	FederationBackendSettings,
 	MinimumFederation,
 	FederationStats,
 } from '@/v5/store/federations/federations.types';
 import { View } from '@/v5/store/store.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
+import { ContainerBackendSettings } from '@/v5/store/containers/containers.types';
 
 export const createFederation = async (teamspace, projectId, newFederation): Promise<CreateFederationResponse> => {
 	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/federations`, newFederation);
@@ -54,7 +54,7 @@ export const fetchFederationViews = async (teamspace, projectId, federationId): 
 	return data;
 };
 
-export const fetchFederationSettings = async (teamspace, projectId, federationId): Promise<FederationBackendSettings> => {
+export const fetchFederationSettings = async (teamspace, projectId, federationId): Promise<ContainerBackendSettings> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
 	return data;
 };
@@ -72,6 +72,26 @@ export const updateFederationContainers = async (teamspace, projectId, federatio
 		containers,
 	})
 );
+
+export const fetchFederationUsers = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+	excludeViewers: boolean = false,
+) => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/members?excludeViewers=${excludeViewers}`);
+	return data;
+};
+
+export const fetchFederationJobs = async (
+	teamspace: string,
+	projectId: string,
+	modelId: string,
+	excludeViewers: boolean = false,
+) => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${modelId}/jobs?excludeViewers=${excludeViewers}`);
+	return data;
+};
 
 /**
  * Types

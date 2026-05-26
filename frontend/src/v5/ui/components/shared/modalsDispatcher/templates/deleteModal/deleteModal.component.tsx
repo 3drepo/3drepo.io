@@ -41,17 +41,8 @@ import { formatMessage } from '@/v5/services/intl';
 import { useState } from 'react';
 import { Gap } from '@controls/gap';
 import { Button } from '@controls/button';
+import { DeleteModalProps } from './deleteModal.types';
 
-interface IDeleteModal {
-	onClickClose?: () => void,
-	onClickConfirm: () => Promise<void>,
-	name: string,
-	message?: string,
-	confidenceCheck?: boolean,
-	titleLabel?: string,
-	confirmLabel?: string,
-	open: boolean,
-}
 
 export const DeleteModal = ({
 	onClickConfirm,
@@ -62,7 +53,7 @@ export const DeleteModal = ({
 	titleLabel,
 	confirmLabel,
 	open,
-}: IDeleteModal) => {
+}: DeleteModalProps) => {
 	const [submitError, setSubmitError] = useState(null);
 	const interceptorError = useErrorInterceptor();
 	const { control, watch, handleSubmit, formState: { isSubmitting } } = useForm({

@@ -98,8 +98,8 @@ const EditIssue = css`
 			${ShowModelButtonContainer} {
 				top: 3px;
 				position: relative;
-
-				width: 100%;
+				margin-left: auto;
+				width: 48px;
 				display: flex;
 				justify-content: flex-end;
 				cursor: initial;

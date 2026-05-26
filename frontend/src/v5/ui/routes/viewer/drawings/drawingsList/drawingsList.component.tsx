@@ -19,7 +19,7 @@ import { DrawingItem } from './drawingItem/drawingItem.component';
 import { CentredContainer } from '@controls/centredContainer';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { IDrawing } from '@/v5/store/drawings/drawings.types';
-import { VirtualisedList, TableRow } from './drawingsList.styles';
+import { VirtualisedList, TableRow, FillerRow } from './drawingsList.styles';
 import { CardContent, CardList } from '@components/viewer/cards/card.styles';
 import { forwardRef, useContext, useEffect, useRef } from 'react';
 import { ViewerCanvasesContext } from '../../viewerCanvases.context';
@@ -27,18 +27,15 @@ import { AutocompleteSearchInput } from '@controls/search/autocompleteSearchInpu
 import { DrawingsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
-import { enableRealtimeDrawingRemoved, enableRealtimeDrawingUpdate, enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
+import {  enableRealtimeNewDrawing } from '@/v5/services/realtime/drawings.events';
 import { useParams } from 'react-router';
 import { ViewerParams } from '../../../routes.constants';
-import { combineSubscriptions } from '@/v5/services/realtime/realtime.service';
-import { enableRealtimeDrawingNewRevision, enableRealtimeDrawingRevisionUpdate } from '@/v5/services/realtime/drawingRevision.events';
-import { flattenDeep } from 'lodash';
 import { useSearchParam } from '../../../useSearchParam';
 
 const Table = forwardRef(({ children, ...props }, ref: any) => {
 	const queries = DrawingsCardHooksSelectors.selectQueries();
 	return (
-		<table ref={ref} {...props}>
+		<div ref={ref} {...props}>
 			<CardContent>
 				<AutocompleteSearchInput
 					value={queries}
@@ -46,7 +43,7 @@ const Table = forwardRef(({ children, ...props }, ref: any) => {
 				/>
 				{children}
 			</CardContent>
-		</table>
+		</div>
 	);
 });
 
@@ -61,7 +58,6 @@ const EmptyPlaceholder = forwardRef((props, ref: any) => (
 export const DrawingsList = () => {
 	const drawings = DrawingsCardHooksSelectors.selectDrawingsFilteredByQueries();
 	const { teamspace, project } = useParams<ViewerParams>();
-	const allDrawings = DrawingsHooksSelectors.selectDrawings();
 	const isLoading = DrawingsHooksSelectors.selectAreStatsPending();
 	const { open2D } = useContext(ViewerCanvasesContext);
 	const virtuosoRef = useRef<any>();
@@ -76,15 +72,6 @@ export const DrawingsList = () => {
 		</CentredContainer>
 	);
 
-	useEffect(() => {
-		const subscriptionsPerDrawing = allDrawings.map(({ _id }) => [
-			enableRealtimeDrawingRemoved(teamspace, project, _id),
-			enableRealtimeDrawingUpdate(teamspace, project, _id),
-			enableRealtimeDrawingRevisionUpdate(teamspace, project, _id),
-			enableRealtimeDrawingNewRevision(teamspace, project, _id),
-		]);
-		return combineSubscriptions(...flattenDeep(subscriptionsPerDrawing));
-	}, [allDrawings.length]);
 
 	useEffect(() => {
 		virtuosoRef.current.scrollToIndex({
@@ -105,6 +92,7 @@ export const DrawingsList = () => {
 				Table,
 				TableBody: CardList,
 				TableRow,
+				FillerRow,
 				EmptyPlaceholder,
 			}}
 			itemContent={(index, drawing: IDrawing) => (

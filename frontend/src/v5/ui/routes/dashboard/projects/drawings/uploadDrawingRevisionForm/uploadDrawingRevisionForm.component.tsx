@@ -36,6 +36,8 @@ import { DrawingRevisionsActionsDispatchers, DrawingsActionsDispatchers } from '
 import { UploadList } from './uploadList/uploadList.component';
 import { parseFileName, reduceFileData, isPdf, getPdfFirstPage, fileToPdf, pdfToFile } from '@components/shared/uploadFiles/uploadFiles.helpers';
 import { UploadItemFields } from '@/v5/store/drawings/revisions/drawingRevisions.types';
+import { formatInfoUnit } from '@/v5/helpers/intl.helper';
+import { isEmpty } from 'lodash';
 
 const REVISION_NAME_MAX_LENGTH = 50;
 
@@ -106,7 +108,7 @@ export const UploadDrawingRevisionForm = ({
 	const {
 		control,
 		handleSubmit,
-		formState: { isValid },
+		formState: { isValid, errors },
 	} = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -171,8 +173,12 @@ export const UploadDrawingRevisionForm = ({
 
 	const supportedFilesMessage = formatMessage({
 		id: 'drawing.uploads.dropzone.message',
-		defaultMessage: 'Supported file formats: PDF and DWG{br}Note: AutoCalibration is only possible with DWG formats.',
-	}, { br: <br /> });
+		defaultMessage:`
+			Supported file formats: PDF and DWG{br}
+			Note: AutoCalibration is only possible with DWG formats.{br}
+			Maximum file size: {sizeLimit}
+		`,
+	}, { br: <br />, sizeLimit: formatInfoUnit(ClientConfig.uploadSizeLimit) });
 
 	useEffect(() => {
 		if (presetFile) {
@@ -203,7 +209,7 @@ export const UploadDrawingRevisionForm = ({
 					setIsUploading={setIsUploading}
 					modalLabels={uploadModalLabels({ isUploading, fileCount: fields.length })}
 					fields={fields}
-					isValid={!isUploading ? isValid : allUploadsComplete}
+					isValid={!isUploading ? (isValid && isEmpty(errors)) : allUploadsComplete}
 					supportedFileExtensions={getSupportedDrawingRevisionsFileExtensions()}
 				>
 					<UploadList

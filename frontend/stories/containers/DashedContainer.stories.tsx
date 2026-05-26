@@ -22,24 +22,24 @@ export default {
 	title: 'Containers/DashedContainer',
 	component: DashedContainer,
 	argTypes: {
-		borderRadius: {
+		$borderRadius: {
 			type: 'number',
 		},
-		strokeColor: {
+		$strokeColor: {
 			description: 'The colour should be an HEX value of 6 digits (excluding the hash)',
 			type: 'string',
 		},
-		strokeWidth: {
+		$strokeWidth: {
 			type: 'number',
 		},
-		dashSize: {
+		$dashSize: {
 			type: 'number',
 		},
-		gapSize: {
+		$gapSize: {
 			description: 'The space between one dash and the next one',
 			type: 'number',
 		},
-		zeroPadding: {
+		$zeroPadding: {
 			description: 'If true, the dashed border can be overllaped by the content',
 			type: 'boolean',
 		},
@@ -58,24 +58,24 @@ type Story = StoryObj<typeof DashedContainer>;
 
 export const NoRadius: Story = {
 	args: {
-		borderRadius: 0,
-		strokeColor: '#000000',
+		$borderRadius: 0,
+		$strokeColor: '#000000',
 		children: 'this is an example of a dashed container with 0 border radius',
 	},
 };
 
 export const BigRadius: Story = {
 	args: {
-		borderRadius: 20,
-		strokeColor: '#fe27d8',
+		$borderRadius: 20,
+		$strokeColor: '#fe27d8',
 		children: 'this is an example of a dashed container with big border radius',
 	},
 };
 
 export const Gapped: Story = {
 	args: {
-		dashSize: 10,
-		gapSize: 10,
+		$dashSize: 10,
+		$gapSize: 10,
 		children: `
 			this is an example of a dashed container with longer dashes and more gap in between.
 			the content has not padding
@@ -85,9 +85,9 @@ export const Gapped: Story = {
 
 export const Button: Story = {
 	args: {
-		strokeColor: '#09c1d4',
-		strokeWidth: 6,
-		zeroPadding: true,
+		$strokeColor: '#09c1d4',
+		$strokeWidth: 6,
+		$zeroPadding: true,
 		children: <ControlsButton variant="text">This is an example with a button</ControlsButton>,
 	},
 };

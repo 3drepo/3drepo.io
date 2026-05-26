@@ -27,10 +27,25 @@ import { theme } from '@/v5/ui/themes/theme';
 import { IntercomProvider } from 'react-use-intercom';
 import { clientConfigService } from '@/v4/services/clientConfig';
 import { GlobalStyle } from '@/v5/ui/themes/global';
-
+import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
+import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useEffect } from 'react';
+import { formatMessage } from '@/v5/services/intl';
 
 export const NotFound = (): JSX.Element => {
 	const { intercomLicense } = clientConfigService;
+	const isAuthenticated = AuthHooksSelectors.selectIsAuthenticated();
+	const authenticationFetched = AuthHooksSelectors.selectAuthenticationFetched();
+
+	const message = isAuthenticated ? formatMessage({ id: 'notFound.message.authenticated', defaultMessage: 'You can return to your dashboard, or contact our support team if you can\'t find what you\'re looking for.' })
+		: formatMessage({ id: 'notFound.message.unauthenticated', defaultMessage: 'You can contact our support team if you can\'t find what you\'re looking for.' });
+
+	useEffect(() => {
+		if (!authenticationFetched) {
+			AuthActionsDispatchers.authenticate();
+		}
+	}, [authenticationFetched]);
+
 	return (
 		<ThemeProvider theme={theme}>
 			<MuiThemeProvider theme={theme}>
@@ -43,23 +58,24 @@ export const NotFound = (): JSX.Element => {
 							<FormattedMessage id="notFound.title" defaultMessage="Sorry, but the page you were looking for could not be found." />
 						</Title>
 						<Message>
-							<FormattedMessage
-								id="notFound.message"
-								defaultMessage="You can return to our dashboard, or contact our support team if you can't find what you're looking for."
-							/>
+							{authenticationFetched && message}
 						</Message>
 						<ButtonsContainer>
-							<Button
-								variant="contained"
-								color="primary"
-								component={Link}
-								to="/v5/dashboard"
-							>
-								<FormattedMessage
-									id="notFound.goToDashboardButton.label"
-									defaultMessage="Go to your Dashboard"
-								/>
-							</Button>
+							{
+								isAuthenticated && (
+									<Button
+										variant="contained"
+										color="primary"
+										component={Link}
+										to="/v5/dashboard"
+									>
+										<FormattedMessage
+											id="notFound.goToDashboardButton.label"
+											defaultMessage="Go to your Dashboard"
+										/>
+									</Button>
+								)
+							}
 							<Button
 								variant="outlined"
 								color="primary"

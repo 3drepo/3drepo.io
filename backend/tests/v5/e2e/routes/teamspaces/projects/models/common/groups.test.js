@@ -108,9 +108,12 @@ const testExportGroups = () => {
 	describe('Export groups', () => {
 		beforeAll(async () => {
 			const models = [container, fed, containerNoGroups, fedNoGroups];
-			await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+			const { tsAdmin, ...otherUsers } = users;
 
-			const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key === 'nobody' ? [] : [teamspace]));
+			await ServiceHelper.db.createUser(tsAdmin);
+			await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+
+			const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 			const modelProms = models.map((model) => ServiceHelper.db.createModel(
 				teamspace,
 				model._id,
@@ -212,9 +215,12 @@ const testImportGroups = () => {
 	describe('Import groups', () => {
 		beforeAll(async () => {
 			const models = [container, fed];
-			await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+			const { tsAdmin, ...otherUsers } = users;
 
-			const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key === 'nobody' ? [] : [teamspace]));
+			await ServiceHelper.db.createUser(tsAdmin);
+			await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+
+			const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 			const modelProms = models.map((model) => ServiceHelper.db.createModel(
 				teamspace,
 				model._id,

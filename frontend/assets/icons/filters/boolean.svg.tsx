@@ -1,0 +1,29 @@
+/**
+ *  Copyright (C) 2024 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+type IProps = {
+	className?: any;
+};
+
+export default ({ className }: IProps) => (
+	<svg className={className} width="11" height="12" viewBox="0 0 11 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+		<path d="M4.46077 3.19909C4.58097 3.02254 4.53529 2.78199 4.35875 2.66179C4.1822 2.54159 3.94164 2.58727 3.82144 2.76381L2.87604 4.1524L2.22314 3.52449C2.06919 3.37644 1.82438 3.38122 1.67634 3.53516C1.52829 3.6891 1.53307 3.93391 1.68701 4.08196L2.66994 5.02727C2.75202 5.10621 2.86472 5.14495 2.97799 5.13318C3.09126 5.12141 3.19358 5.06031 3.25767 4.96617L4.46077 3.19909Z" fill="currentColor"/>
+		<path fillRule="evenodd" clipRule="evenodd" d="M0 3.57227C0 1.8755 1.3755 0.5 3.07227 0.5C4.76903 0.5 6.14453 1.8755 6.14453 3.57227C6.14453 5.26903 4.76903 6.64453 3.07227 6.64453C1.3755 6.64453 0 5.26903 0 3.57227ZM3.07227 1.27344C1.80266 1.27344 0.773438 2.30266 0.773438 3.57227C0.773438 4.84187 1.80266 5.87109 3.07227 5.87109C4.34187 5.87109 5.37109 4.84187 5.37109 3.57227C5.37109 2.30266 4.34187 1.27344 3.07227 1.27344Z" fill="currentColor"/>
+		<path d="M6.81901 7.31406C6.97003 7.16304 7.21489 7.16304 7.36591 7.31406L7.92903 7.87718L8.49215 7.31406C8.64318 7.16304 8.88803 7.16304 9.03906 7.31406C9.19008 7.46508 9.19008 7.70994 9.03906 7.86096L8.47593 8.42408L9.03908 8.98723C9.1901 9.13826 9.1901 9.38311 9.03908 9.53413C8.88806 9.68516 8.6432 9.68516 8.49218 9.53413L7.92903 8.97099L7.36589 9.53413C7.21486 9.68515 6.97001 9.68515 6.81898 9.53413C6.66796 9.38311 6.66796 9.13825 6.81898 8.98723L7.38213 8.42408L6.81901 7.86097C6.66799 7.70994 6.66799 7.46509 6.81901 7.31406Z" fill="currentColor"/>
+		<path fillRule="evenodd" clipRule="evenodd" d="M4.85547 8.42773C4.85547 6.73097 6.23097 5.35547 7.92773 5.35547C9.6245 5.35547 11 6.73097 11 8.42773C11 10.1245 9.6245 11.5 7.92773 11.5C6.23097 11.5 4.85547 10.1245 4.85547 8.42773ZM7.92773 6.12891C6.65813 6.12891 5.62891 7.15813 5.62891 8.42773C5.62891 9.69734 6.65813 10.7266 7.92773 10.7266C9.19734 10.7266 10.2266 9.69734 10.2266 8.42773C10.2266 7.15813 9.19734 6.12891 7.92773 6.12891Z" fill="currentColor"/>
+	</svg>
+);

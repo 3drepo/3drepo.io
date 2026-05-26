@@ -17,8 +17,9 @@
 
 import 'path-data-polyfill';
 import { Vector2, Vector2Like } from 'three';
-import { Line2, CubicBezier } from './types';
+import { Line2, CubicBezier, SnapResults } from './types';
 import { RTree, RTreeBuilder } from './rTree';
+import DOMPurify from 'dompurify';
 
 // The following interface extension makes TypeScript aware that the getPathData
 // member has been implemented by the path-data-polyfill for all Geometry
@@ -209,20 +210,6 @@ class SvgParser {
 	}
 }
 
-export class SnapResults {
-	closestEdge: Vector2;
-
-	closestNode: Vector2;
-
-	closestIntersection: Vector2;
-
-	constructor() {
-		this.closestEdge = null;
-		this.closestNode = null;
-		this.closestIntersection = null;
-	}
-}
-
 /**
  * Allows snapping to an SVG based on path primitives
  */
@@ -247,7 +234,7 @@ export class SVGSnapHelper {
 	async load(src: string) {
 		const res = await fetch(src);
 		const text = await res.text();
-		this.container.innerHTML = text;
+		this.container.innerHTML = DOMPurify.sanitize(text);
 		this.initialise();
 	}
 
@@ -295,21 +282,19 @@ export class SVGSnapHelper {
 	 * the provided search radius, and returns a structure with the closest
 	 * of each three types, individually.
 	 */
-	snap(position: Vector2, radius: number): SnapResults {
+	snap(position: Vector2, radius: number): Promise<SnapResults> {
 
 		const results = new SnapResults();
 
-		if (!this.rtree) { // The svg is loaded asynchronously, so if this is called before the tree has been built return an empty response
-			return results;
+		if (this.rtree) { // The svg is loaded asynchronously, so if this is called before the tree has been built return an empty response
+			const queryResults = this.rtree.query(position, radius);
+		
+			results.closestEdge = queryResults.closestEdge;
+			results.closestNode = queryResults.closestNode;
+			results.closestIntersection = queryResults.closestIntersection;
 		}
 
-		const queryResults = this.rtree.query(position, radius);
-
-		results.closestEdge = queryResults.closestEdge;
-		results.closestNode = queryResults.closestNode;
-		results.closestIntersection = queryResults.closestIntersection;
-
-		return results;
+		return Promise.resolve(results); // The SnapHandler interface expects snap to be asynchronous, though the SVG Snap Handler actually runs synchronously
 	}
 }
 

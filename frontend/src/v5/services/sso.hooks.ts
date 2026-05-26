@@ -16,14 +16,13 @@
  */
 
 import { isNull, omitBy, values } from 'lodash';
-import { useHistory } from 'react-router-dom';
-import { addParams, getParams } from '../helpers/url.helper';
-import { errorMessages, postActions, signin } from './api/sso';
+import { useNavigate } from 'react-router-dom';
+import { getParams } from '../helpers/url.helper';
+import { errorMessages, postActions, ssoLogin } from './api/sso';
 import { formatMessage } from './intl';
-import { AuthHooksSelectors } from './selectorsHooks';
 
 export const useSSOParams = () => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const allParams = getParams();
 	const error = allParams.get('error');
 	const action = values(postActions).filter((postAction) => allParams.get(postAction))[0];
@@ -31,20 +30,18 @@ export const useSSOParams = () => {
 	const reset = () => {
 		allParams.delete('error');
 		allParams.delete(action);
-		history.replace({ search: allParams.toString() });
+		navigate({ search: allParams.toString() }, { replace: true });
 	};
 
 	const actionParamValue = allParams.get(action);
 	const searchParams = new URLSearchParams(omitBy({ error, [action]: actionParamValue }, isNull)).toString();
 
 	return [{ searchParams, error, action }, reset] as
-	[{ searchParams: string, error: string | null, action: string | null }, () => void ];
+		[{ searchParams: string, error: string | null, action: string | null }, () => void ];
 };
 
 export const useSSOLogin = () => {
 	const [{ error }] = useSSOParams();
-
-	const returnUrl = AuthHooksSelectors.selectReturnUrl();
 
 	const errorMessage = error
 		? formatMessage({
@@ -53,9 +50,11 @@ export const useSSOLogin = () => {
 		},
 		{ errorMessage: errorMessages[error] }) : null;
 
-	const redirectUri = addParams(returnUrl.pathname, returnUrl.search);
-
-	return [errorMessage, () => signin(redirectUri).then(({ data }) => {
-		window.location.href = data.link;
-	})] as [ string | null, ()=> void];
+	return [
+		async (redirectUri, email) => {
+			const { data } = await ssoLogin(redirectUri, email);
+			window.location.href = data.link;
+		},
+		errorMessage,
+	] as [(redirectUri: string, email: string) => void, string | null];
 };

@@ -109,8 +109,8 @@ export const SelectPinButton = styled.div<{ color: string, isSelected: boolean; 
 
 	> svg {
 		color: ${({ color, theme }) => color || theme.palette.primary.main};
-		height: 20px;
-		width: auto;
+		max-height: 20px;
+		max-width: 20px;
 		overflow: visible;
 	}
 `;

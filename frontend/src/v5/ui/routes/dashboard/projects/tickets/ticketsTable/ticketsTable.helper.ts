@@ -15,30 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { BaseProperties, IssueProperties, SafetibaseProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { BaseProperties, IssueProperties, SafetibaseProperties, SequencingProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
 import { formatMessage } from '@/v5/services/intl';
 import _ from 'lodash';
-import { PriorityLevels, RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
-import { IStatusConfig, ITicket } from '@/v5/store/tickets/tickets.types';
-import { TicketsHooksSelectors } from '@/v5/services/selectorsHooks';
+import { RiskLevels, TreatmentStatuses } from '@controls/chip/chip.types';
 
-export const NONE_OPTION = 'None';
-
-export const UNSET = formatMessage({ id: 'tickets.selectOption.property.unset', defaultMessage: 'Unset' });
-const NO_DUE_DATE = formatMessage({ id: 'groupBy.dueDate.unset', defaultMessage: 'No due date' });
-const OVERDUE = formatMessage({ id: 'groupBy.dueDate.overdue', defaultMessage: 'Overdue' });
-
-const getOptionsForGroupsWithDueDate = () => [
-	OVERDUE,
-	formatMessage({ id: 'groupBy.dueDate.inOneWeek', defaultMessage: 'in 1 week' }),
-	formatMessage({ id: 'groupBy.dueDate.inTwoWeeks', defaultMessage: 'in 2 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inThreeWeeks', defaultMessage: 'in 3 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inFourWeeks', defaultMessage: 'in 4 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inFiveWeeks', defaultMessage: 'in 5 weeks' }),
-	formatMessage({ id: 'groupBy.dueDate.inSixPlusWeeks', defaultMessage: 'in 6+ weeks' }),
-];
-
-export type SetTicketValue =  (modelId: string, ticketId?: string, groupValue?: string) => void;
+export type PresetValue = { key: string, value: string }; 
+export type SetTicketValue =  (modelId?: string, ticket_id?: string, presValue?: PresetValue, replace?: boolean) => void;
 
 export const NEW_TICKET_ID = 'new';
 
@@ -47,96 +30,61 @@ export const SAFETIBASE_PROPERTIES_GROUPS = {
 	[SafetibaseProperties.TREATMENT_STATUS]: TreatmentStatuses,
 };
 
-const GROUP_NAMES_BY_TYPE = {
-	[IssueProperties.PRIORITY]: PriorityLevels,
-	...SAFETIBASE_PROPERTIES_GROUPS,
-};
+const TICKET_PROPERTIES_LABEL = {
+	id: formatMessage({ id: 'properties.label.id', defaultMessage: '#Id' }),
+	modelName: formatMessage({ id: 'properties.label.federationContainer', defaultMessage: 'Federation / Container' }),
+	[BaseProperties.TITLE]: formatMessage({ id: 'properties.label.title', defaultMessage: 'Title' }),
+	[`properties.${BaseProperties.UPDATED_AT}`]: formatMessage({ id: 'properties.label.updatedAt', defaultMessage: 'Updated At' }),
+	[`properties.${BaseProperties.DESCRIPTION}`]: formatMessage({ id: 'properties.label.description', defaultMessage: 'Description' }),
+	[`properties.${BaseProperties.CREATED_AT}`]: formatMessage({ id: 'properties.label.createdAt', defaultMessage: 'Created At' }),
+	[`properties.${BaseProperties.OWNER}`]: formatMessage({ id: 'properties.label.owner', defaultMessage: 'Owner' }),
+	[`properties.${BaseProperties.STATUS}`]: formatMessage({ id: 'properties.label.status', defaultMessage: 'Status' }),
+	[`properties.${IssueProperties.DUE_DATE}`]: formatMessage({ id: 'properties.label.dueDate', defaultMessage: 'Due Date' }),
+	[`properties.${IssueProperties.PRIORITY}`]: formatMessage({ id: 'properties.label.priority', defaultMessage: 'Priority' }),
+	[`properties.${IssueProperties.ASSIGNEES}`]: formatMessage({ id: 'properties.label.assignees', defaultMessage: 'Assignees' }),
+	[`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`]: formatMessage({ id: 'modules.safetibase.label.levelOfRisk', defaultMessage: 'Safetibase : Level of Risk' }),
+	[`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`]: formatMessage({ id: 'modules.safetibase.label.treatmentStatus', defaultMessage: 'Safetibase : Treatment Status' }),
+	[`modules.safetibase.${SafetibaseProperties.TREATED_LEVEL_OF_RISK}`]: formatMessage({ id: 'modules.safetibase.label.treatedLevelOfRisk', defaultMessage: 'Safetibase : Treated Level of Risk' }),
+	[`modules.sequencing.${SequencingProperties.START_TIME}`]: formatMessage({ id: 'modules.sequencing.label.startTime', defaultMessage: 'Sequencing : Start Time' }),
+	[`modules.sequencing.${SequencingProperties.END_TIME}`]: formatMessage({ id: 'modules.sequencing.label.endTime', defaultMessage: 'Sequencing : End Time' }),
+} as const;
 
-const groupByDate = (tickets: ITicket[]) => {
-	const groups = {};
-	// eslint-disable-next-line prefer-const
-	let [ticketsWithUnsetDueDate, remainingTickets] = _.partition(tickets, ({ properties }) => !properties[IssueProperties.DUE_DATE]);
-	groups[NO_DUE_DATE] = ticketsWithUnsetDueDate;
-
-	const dueDateOptions = getOptionsForGroupsWithDueDate();
-	const endOfCurrentWeek = new Date();
-
-	const ticketDueDateIsPassed = (ticket: ITicket) => ticket.properties[IssueProperties.DUE_DATE] < endOfCurrentWeek.getTime();
-
-	let currentWeekTickets;
-	while (dueDateOptions.length) {
-		[currentWeekTickets, remainingTickets] = _.partition(remainingTickets, ticketDueDateIsPassed);
-		const currentDueDateOption = dueDateOptions.shift();
-		groups[currentDueDateOption] = dueDateOptions.length ? currentWeekTickets : currentWeekTickets.concat(remainingTickets);
-		endOfCurrentWeek.setDate(endOfCurrentWeek.getDate() + 7);
-	}
-	return groups;
-};
-
-const groupByList = (tickets: ITicket[], groupType: string, groupValues: string[]) => {
-	const groups = {};
-	let remainingTickets = tickets;
-	let currentTickets = [];
-
-	groupValues.forEach((groupValue) => {
-		[currentTickets, remainingTickets] = _.partition(
-			remainingTickets,
-			({ properties, modules }) => ({ ...modules?.safetibase, ...properties })?.[groupType] === groupValue,
-		);
-		groups[groupValue] = currentTickets;
-	});
-	groups[UNSET] = remainingTickets;
-	return groups;
-};
-const getAssignees = (t) => _.get(t, `properties.${IssueProperties.ASSIGNEES}`);
-const groupByAssignees = (tickets: ITicket[]) => {
-	const [ticketsWithAssignees, unsetAssignees] = _.partition(tickets, (ticket) => getAssignees(ticket)?.length > 0);
-
-	const ticketsWithSortedAssignees = ticketsWithAssignees.map((ticket) => {
-		const ticketWithSortedAssignees = _.cloneDeep(ticket);
-		const sortedAssignees = _.orderBy(getAssignees(ticket), (assignee) => assignee.trim().toLowerCase());
-		ticketWithSortedAssignees.properties[IssueProperties.ASSIGNEES] = sortedAssignees;
-		return ticketWithSortedAssignees;
-	});
-
-	const ticketsSortedByAssignees = _.orderBy(
-		ticketsWithSortedAssignees,
-		(ticket) => {
-			const assignees = getAssignees(ticket).map((assignee) => assignee.trim().toLowerCase());
-			return _.orderBy(assignees).join();
-		},
-	);
-
-	const groups = _.groupBy(ticketsSortedByAssignees, (ticket) => {
-		const assignees = getAssignees(ticket);
-		return assignees.join(', ');
-	});
-	if (unsetAssignees.length) {
-		groups[UNSET] = unsetAssignees;
-	}
-	return groups;
-};
-
-export const groupTickets = (groupBy: string, tickets: ITicket[]): Record<string, ITicket[]> => {
-	switch (groupBy) {
-		case BaseProperties.OWNER:
-			return _.groupBy(tickets, `properties.${BaseProperties.OWNER}`);
-		case IssueProperties.ASSIGNEES:
-			return groupByAssignees(tickets);
-		case IssueProperties.DUE_DATE:
-			return groupByDate(tickets);
-		case BaseProperties.STATUS:
-			const { type } = tickets[0];
-			const config: IStatusConfig = TicketsHooksSelectors.selectStatusConfigByTemplateId(type);
-			const labels = config.values.map(({ name, label }) => label || name);
-			return groupByList(tickets, groupBy, labels);
-		default:
-			return groupByList(tickets, groupBy, _.values(GROUP_NAMES_BY_TYPE[groupBy]));
-	}
-};
+export const stripModuleOrPropertyPrefix = (name) => name.replace(/^(properties|modules)\./, '');
 
 export const hasRequiredViewerProperties = (template) => {
 	const modules = template.modules?.flatMap((module) => module.properties) || [];
 	const properties = modules.concat(template.properties || []);
 	return properties.some(({ required, type }) => required && ['view', 'coords'].includes(type));
 };
+
+// These columns should always be included in the table when a template is selected
+export const DEFAULT_COLUMNS = [
+	'id',
+	BaseProperties.TITLE,
+	'modelName',
+];
+
+// These are the columns that are initially shown if no override exists in the template config
+export const INITIAL_COLUMNS_NO_OVERRIDES = [
+	...DEFAULT_COLUMNS,
+	`properties.${BaseProperties.CREATED_AT}`,
+	`properties.${IssueProperties.ASSIGNEES}`, 
+	`properties.${BaseProperties.OWNER}`,
+	`properties.${IssueProperties.DUE_DATE}`,
+	`properties.${IssueProperties.PRIORITY}`,
+	`properties.${BaseProperties.STATUS}`,
+	`modules.safetibase.${SafetibaseProperties.LEVEL_OF_RISK}`,
+	`modules.safetibase.${SafetibaseProperties.TREATMENT_STATUS}`,
+];
+
+export const getPropertyLabel = (name) => {
+	const defaultName = TICKET_PROPERTIES_LABEL[name];
+	if (defaultName) return defaultName;
+	
+	return stripModuleOrPropertyPrefix(name)
+		.split('.')
+		.map(_.startCase)
+		.join(' : ');
+};
+
+export const TICKET_TABLE_ROW_HEIGHT = 37;

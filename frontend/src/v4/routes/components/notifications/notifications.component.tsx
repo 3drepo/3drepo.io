@@ -25,6 +25,7 @@ import Close from '@mui/icons-material/Close';
 import MoreVert from '@mui/icons-material/MoreVert';
 import NotificationsIcon from '@assets/icons/outlined/bell-outlined.svg';
 
+import { NavigateFunction } from 'react-router-dom';
 import { formatSimpleDate } from '@/v5/helpers/intl.helper';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { BarIconButton } from '../components.styles';
@@ -33,7 +34,7 @@ import { NotificationEmptyItem } from './components/emptyItem/emptyItem.componen
 import { INotification } from './components/notificationItem/notificationItem.component';
 import { NotificationsPanel } from './components/panel/panel.component';
 import { NotificationsPanelHeader } from './components/panelHeader/panelHeader.component';
-import { NotificationsList, NotificationWeekHeader } from './notifications.styles';
+import { NotificationsIconContainer, NotificationsList, NotificationWeekHeader } from './notifications.styles';
 
 interface IProps {
 	notifications: INotification[];
@@ -58,15 +59,15 @@ interface IProps {
 	subscribeOnChanges: () => void;
 	unsubscribeFromChanges: () => void;
 	setDrawerPanelState: (open: boolean) => void;
+	navigate: (to: string) => void;
 }
 
 const NotificationButton = ({ unreadCount, onClick, id }) => (
-	<IconButton
+	<NotificationsIconContainer
         onClick={onClick}
         aria-label="Show notifications"
         aria-haspopup="true"
         id={id}
-        size="large"
 	>
 		<Badge
 			badgeContent={unreadCount}
@@ -74,7 +75,7 @@ const NotificationButton = ({ unreadCount, onClick, id }) => (
 		>
 			<NotificationsIcon />
 		</Badge>
-	</IconButton>
+	</NotificationsIconContainer>
 );
 
 export class Notifications extends PureComponent<IProps, any> {

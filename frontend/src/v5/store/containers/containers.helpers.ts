@@ -63,7 +63,7 @@ export const prepareContainersData = (
 	return prepareSingleContainerData(container, containerStats);
 });
 
-export const prepareContainerSettingsForFrontend = ({
+export const prepareSettingsForFrontend = ({
 	surveyPoints,
 	...otherProps
 }: ContainerBackendSettings) => ({
@@ -71,13 +71,14 @@ export const prepareContainerSettingsForFrontend = ({
 	...otherProps,
 });
 
-export const prepareContainerSettingsForBackend = ({
+export const prepareSettingsForBackend = ({
 	surveyPoint,
 	...otherProps
 }: ContainerSettings) => {
-	if (!surveyPoint) return otherProps;
+	if (!surveyPoint && surveyPoint !== null) return otherProps;
+
 	return {
-		surveyPoints: [surveyPoint],
+		surveyPoints: surveyPoint === null ? null : [surveyPoint],
 		...otherProps,
 	};
 };

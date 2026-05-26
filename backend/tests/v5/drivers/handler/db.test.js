@@ -23,8 +23,12 @@ const {
 	generateRandomBuffer,
 	generateRandomString,
 	generateUserCredentials,
+	outOfOrderArrayEqual,
 	db: dbHelper,
+	generateRandomNumber,
 } = require('../../helper/services');
+const mongodb = require('mongodb');
+const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 
 const DB = require(`${src}/handler/db`);
 const { ADMIN_DB } = require(`${src}/handler/db.constants`);
@@ -358,6 +362,38 @@ const testAggregate = () => {
 			];
 			const res = await DB.aggregate(generateRandomString(), col, pipeline);
 			expect(res).toEqual([]);
+		});
+	});
+};
+
+const testDistinct = () => {
+	const dbName = generateRandomString();
+	const col = generateRandomString();
+	const label1 = generateRandomString();
+	const label2 = generateRandomString();
+	const label3 = generateRandomString();
+
+	const data = [
+		{ num: 1, label: label1 },
+		{ num: 1, label: label1 },
+		{ num: 1, label: label2 },
+		{ num: 2, label: label3 },
+		{ num: 1, label: label2 },
+	];
+
+	describe.each([
+		['Should return empty array on an empty collection', generateRandomString(), generateRandomString(), undefined, []],
+		['Should return list of distinct values from label', col, 'label', undefined, [label1, label2, label3]],
+		['Should return list of distinct values from label that satisfied the query', col, 'label', { num: 2 }, [label3]],
+
+	])('Distinct', (desc, collection, key, query, expectedOutput) => {
+		beforeAll(async () => {
+			await dbHelper.reset();
+			await DB.insertMany(dbName, col, data);
+		});
+		test(desc, async () => {
+			const output = await DB.distinct(dbName, collection, key, query);
+			outOfOrderArrayEqual(expectedOutput, output);
 		});
 	});
 };
@@ -732,6 +768,22 @@ const testIndices = () => {
 			const array = res.map(({ key }) => key);
 			expect(array).toEqual(expect.arrayContaining([{ _id: 1 }, ...newIndex.map(({ key }) => key)]));
 		});
+
+		test('Should be able to create unique index', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+
+			await DB.insertMany(database, col, [{ n: 2 }, { a: 1 }]);
+
+			const newIndex = { n: 1 };
+			await expect(DB.createIndex(database, col, newIndex, { unique: true })).resolves.toBeUndefined();
+
+			await DB.insertOne(database, col, newIndex);
+			// Unique index means we shouldn't be able to insert another one with the same value.
+			await expect(DB.insertOne(database, col, newIndex)).rejects.not.toBeUndefined();
+			// Unique index means we shouldn't be able to insert another one that is empty
+			await expect(DB.insertOne(database, col, { b: 1 })).rejects.not.toBeUndefined();
+		});
 	});
 };
 
@@ -907,6 +959,45 @@ const testSetPassword = () => {
 	});
 };
 
+const testConnectionString = () => {
+	const oldConfig = cloneDeep(config.db);
+	const hosts = times(3, () => generateRandomString());
+	const ports = times(3, () => generateRandomNumber(1000, 9999));
+	const username = generateRandomString();
+	const password = generateRandomString();
+
+	describe.each([
+		['config only has a host and port', { host: [hosts[0]], port: [ports[0]] },
+			`mongodb://${hosts[0]}:${ports[0]}/`],
+		['multiple hosts, multiple ports', { host: [hosts[0], hosts[1], hosts[2]], port: [ports[0], ports[1], ports[2]] },
+			`mongodb://${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]},${hosts[2]}:${ports[2]}/`],
+		['with username and password in config', { host: [hosts[0]], port: [ports[0]], username, password },
+			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]}/`],
+		['with username and password provided externally', { host: [hosts[0]], port: [ports[0]] },
+			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]}/`, username, password],
+		['with replicaSet', { host: [hosts[0]], port: [ports[0]], replicaSet: 'rs0' },
+			`mongodb://${hosts[0]}:${ports[0]}/?replicaSet=rs0`],
+		['with authSource', { host: [hosts[0]], port: [ports[0]], authSource: 'admin' },
+			`mongodb://${hosts[0]}:${ports[0]}/?authSource=admin`],
+		['with socketTimeoutMS', { host: [hosts[0]], port: [ports[0]], timeout: 12345 },
+			`mongodb://${hosts[0]}:${ports[0]}/?socketTimeoutMS=12345`],
+		['all options', { host: [hosts[0], hosts[1]], port: [ports[0], ports[1]], username: '123', password: '123', replicaSet: 'rs0', authSource: 'admin', timeout: 12345 },
+			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]}/?replicaSet=rs0&authSource=admin&socketTimeoutMS=12345`, username, password],
+	])('Connection String', (desc, configOverride, expectedString, user, pass) => {
+		test(`Should return the expected connection string if ${desc}`, async () => {
+			const fn = jest.spyOn(mongodb.MongoClient, 'connect').mockImplementationOnce(() => Promise.resolve());
+			config.db = configOverride;
+			// eslint-disable-next-line no-underscore-dangle
+			await DB._context.connect(user, pass);
+			expect(fn).toHaveBeenCalledWith(expectedString, expect.anything());
+			fn.mockRestore();
+		});
+		afterAll(() => {
+			config.db = oldConfig;
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -920,6 +1011,7 @@ describe(determineTestGroup(__filename), () => {
 	testReplaceOne();
 	testBulkWrite();
 	testAggregate();
+	testDistinct();
 	testFind();
 	testFindOne();
 	testFindOneAndUpdate();
@@ -937,6 +1029,7 @@ describe(determineTestGroup(__filename), () => {
 	testGrantRole();
 	testRevokeRole();
 	testSetPassword();
+	testConnectionString();
 
 	afterAll(() => DB.disconnect());
 });

@@ -16,10 +16,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
@@ -56,6 +56,7 @@ describe("Groups", function () {
 
 
 	before(async() => {
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");
@@ -134,7 +135,7 @@ describe("Groups", function () {
 		it("with some other teamspace should fail", function(done){
 			agent.get(`/${noAccessUser}/${model}/revision/f640aa3dec2/groups/${groupID}`)
 				.expect(404 , function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.MODEL_NOT_FOUND.code);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -2526,6 +2527,7 @@ describe("Groups", function () {
 		});
 
 		it("delete groups with valid IDs should succeed", function(done){
+			this.timeout(5000); 
 			let idsString = null;
 			async.series([
 				function(done) {

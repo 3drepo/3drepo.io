@@ -15,21 +15,57 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const MimeTypes = require('./mimeTypes');
+const { createCanvas } = require('@napi-rs/canvas');
 const sharp = require('sharp');
+
+const { v5Path } = require('../../../interop');
 
 const ImageHelper = {};
 
-ImageHelper.createThumbnail = async (buffer, width = 600, density = 150) => {
+let pdfJsLibCache;
+
+const loadPdfJsDist = () => new Promise((resolve) => {
+	if (!pdfJsLibCache) {
+		// eslint-disable-next-line node/no-unsupported-features/es-syntax, import/extensions
+		import('pdfjs-dist/legacy/build/pdf.mjs').then((pdfJsLib) => {
+			pdfJsLibCache = pdfJsLib;
+			resolve(pdfJsLibCache);
+		});
+	} else {
+		resolve(pdfJsLibCache);
+	}
+});
+
+ImageHelper.createThumbnail = async (buffer, mimeType, width = 600, density = 150) => {
 	if (!buffer) throw new Error('Image not provided');
 
-	const jpgBuffer = await sharp(buffer, { density })
-		.flatten({ background: '#ffffff' })
-		.toFormat('jpeg')
-		.toBuffer();
+	let imgBuffer;
+	if (mimeType === MimeTypes.PDF) {
+		const pdfJsLib = await loadPdfJsDist();
+		const loadingTask = pdfJsLib.getDocument({
+			data: buffer.buffer,
+			standardFrontDataUrl: `${v5Path}/../../node_modules/pdfjs-dist/standard_fonts`,
+		});
+		const document = await loadingTask.promise;
+		const page = await document.getPage(1);
+		const viewport = page.getViewport({ scale: 1 });
+		const canvas = createCanvas(viewport.width, viewport.height);
+		const canvasContext = canvas.getContext('2d');
+		await page.render({ canvasContext, viewport }).promise;
+		await document.destroy();
+		await loadingTask.destroy();
+		imgBuffer = await canvas.toBuffer('image/jpeg');
+	} else {
+		imgBuffer = await sharp(buffer, { density })
+			.flatten({ background: '#ffffff' })
+			.toFormat('jpeg')
+			.toBuffer();
+	}
 
 	// (As far as I can tell) we have to export the buffer and re-import it for resize,
 	// otherwise it optimises out the density setting and we will miss out detailed lines.
-	return sharp(jpgBuffer)
+	return sharp(imgBuffer)
 		.resize(width, undefined, {
 			fit: 'outside',
 		}).toBuffer();

@@ -31,96 +31,81 @@ interface IProps {
 	size?: number;
 	color: string;
 	onRefreshDrawingLayer?: () => void;
-	onAddNewText: (position, text?: string, updateState?: boolean) => void;
+	onAddNewText: (position, text: string, width: number, updateState?: boolean) => void;
 }
 
 export const TypingHandler = ({
-	selected, mode, stage, layer, boxRef, fontSize, size, color, onRefreshDrawingLayer, onAddNewText,
-	}: IProps) => {
-	const [value, setValue] = useState<string>('');
+	selected, mode, stage, layer, boxRef, fontSize, size, color, onRefreshDrawingLayer, onAddNewText
+}: IProps) => {
 	const [visible, setVisible] = useState<boolean>(false);
-	const [styles, setStyles] = useState<CSSProperties>({});
+	const [offset, setOffset] = useState<CSSProperties>({});
 	const [positionLocked, setPositionLocked] = useState<boolean>(false);
-
-	const handleTextEdit = ({ target }) => setValue(target.value);
+	const [maxSizes, setMaxSizes] = useState({ maxWidth: 0, maxHeight: 0 });
 
 	useEffect(() => {
-		if (stage) {
-			if (mode === MODES.TEXT && !visible && !positionLocked && !selected) {
-				stage.on('mousemove touchmove', handleMouseMove);
-				stage.on('mousedown touchstart', handleMouseDown);
-			}
+		if (stage && mode === MODES.TEXT && !visible && !positionLocked && !selected) {
+			stage.on('mousemove touchmove', handleMouseMove);
+			stage.on('click touchstart', handleClick);
 
 			return () => {
 				stage.off('mousemove touchmove', handleMouseMove);
-				stage.off('mousedown touchstart', handleMouseDown);
+				stage.off('click touchstart', handleClick);
 			};
 		}
 	}, [mode, stage, positionLocked, selected]);
 
-	const getPosition = () => {
+	const setTextPosition = () => {
+		let left = 0, top = 0;
 		if (stage && layer) {
 			const position = stage.getPointerPosition();
-			return {
-				x: position.x - layer.x(),
-				y: position.y - layer.y(),
-			};
+			left = position.x - layer.x();
+			top = position.y - layer.y();
 		}
-		return {
-			x: 0,
-			y: 0
-		};
+		setOffset({ top, left });
+		const { width, height } = stage.attrs;
+		setMaxSizes({
+			maxWidth: width - left,
+			maxHeight: height - top,
+		});
 	};
 
-	const handleMouseMove = useCallback(() => {
+	const handleMouseMove = () => {
 		if (!positionLocked) {
-			const { x, y } = getPosition();
-			setStyles({ top: y, left: x });
+			setTextPosition();
 		}
-	}, [stage, layer, positionLocked]);
+	};
 
 	useEffect(() => {
-		if (!isEmpty(boxRef) && !isEmpty(styles) && onRefreshDrawingLayer) {
-			boxRef.x(Number(styles.left) - Math.max(3, size));
-			boxRef.y(Number(styles.top) - Math.max(3, size));
+		if (!isEmpty(boxRef) && !isEmpty(offset) && onRefreshDrawingLayer) {
+			boxRef.x(Number(offset.left) - Math.max(3, size));
+			boxRef.y(Number(offset.top) - Math.max(3, size));
 			onRefreshDrawingLayer();
 		}
-	}, [styles]);
+	}, [offset]);
 
-	const handleMouseDown = useCallback(() => {
+	const handleClick = useCallback(() => {
+		setTextPosition();
 		setVisible(true);
 		setPositionLocked(true);
 	}, []);
 
-	const addText = () => {
-		onAddNewText({ x: styles.left, y: styles.top }, value);
-		setValue('');
+	const onTextChange = (newText: string, width: number) => {
+		onAddNewText({ x: offset.left, y: offset.top }, newText, width);
 		setVisible(false);
 		setPositionLocked(false);
 	};
 
-	const handleTextareaKeyDown = (e) => {
-		if (e.keyCode === 13 && !e.shiftKey) {
-			addText();
-		}
-	};
+	if (!visible) return null;
 
 	return (
 		<EditableText
-			boxRef={boxRef}
-			value={value}
-			visible={visible}
-			onTextEdit={handleTextEdit}
-			onAddText={addText}
-			size={size}
+			onAddText={onTextChange}
 			styles={{
-				...styles,
+				...offset,
 				color,
 				fontSize: `${fontSize}px`,
-				visibility: visible ? 'visible' : 'hidden',
+				...maxSizes,
 			}}
-			onRefreshDrawingLayer={onRefreshDrawingLayer}
-			onTextareaKeyDown={handleTextareaKeyDown}
 		/>
 	);
 };

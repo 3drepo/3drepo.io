@@ -15,9 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Device = require('device');
+const DeviceDetector = require('node-device-detector');
 const UaParserJs = require('ua-parser-js');
-const useragent = require('useragent');
 
 const UserAgent = {};
 
@@ -53,12 +52,17 @@ const getUserAgentInfoFromPlugin = (userAgentString) => {
 };
 
 const getUserAgentInfoFromBrowser = (userAgentString) => {
+	const deviceDetector = new DeviceDetector({
+		deviceIndexes: true,
+		maxUserAgentSize: 500,
+	});
+
 	const { browser, engine, os } = UaParserJs(userAgentString);
 	const userAgentInfo = {
 		application: browser.name ? { ...browser, type: 'browser' } : { type: 'unknown' },
 		engine,
 		os,
-		device: Device(userAgentString).type,
+		device: deviceDetector.detect(userAgentString).device.type,
 	};
 
 	return userAgentInfo;
@@ -67,9 +71,9 @@ const getUserAgentInfoFromBrowser = (userAgentString) => {
 const isUserAgentFromPlugin = (userAgent) => userAgent.split(' ')[0] === 'PLUGIN:';
 
 UserAgent.isFromWebBrowser = (userAgent) => {
-	const ua = useragent.is(userAgent);
-	const isFromWebBrowser = ['webkit', 'opera', 'ie', 'chrome', 'safari', 'mobile_safari', 'firefox', 'mozilla', 'android']
-		.some((browserType) => ua[browserType]); // If any of these browser types matches then is a websession
+	const { browser } = UaParserJs(userAgent);
+	const isFromWebBrowser = ['WebKit', 'Opera', 'IE', 'Edge', 'Chrome', 'Safari', 'Mobile Safari', 'Firefox', 'Mozilla']
+		.includes(browser.name); // If any of these browser types matches then is a websession
 	return isFromWebBrowser;
 };
 

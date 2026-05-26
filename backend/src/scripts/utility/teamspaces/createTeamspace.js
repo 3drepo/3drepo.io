@@ -18,26 +18,23 @@
 const Path = require('path');
 const { v5Path } = require('../../../interop');
 
+const { validateNewTeamspaceSchema } = require(`${v5Path}/schemas/teamspaces`);
+
 const { logger } = require(`${v5Path}/utils/logger`);
 
-const { initTeamspace } = require(`${v5Path}/processors/teamspaces/teamspaces`);
-const { isAccountActive } = require(`${v5Path}/models/users`);
-const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
+const { initTeamspace } = require(`${v5Path}/processors/teamspaces`);
 
-const run = async (teamspace) => {
-	logger.logInfo(`Checking ${teamspace} is an active user...`);
-	if (!(await isAccountActive(teamspace))) {
-		throw new Error('There is no matching user account or the user is not verified');
-	}
+const run = async (teamspace, user, accountId) => {
+	const data = {
+		name: teamspace,
+		admin: user,
+		accountId,
+	};
 
-	logger.logInfo(`Checking if teamspace ${teamspace} already exists...`);
-	const teamspaceExists = await getTeamspaceSetting(teamspace, { _id: 1 }).catch(() => false);
+	const validateData = await validateNewTeamspaceSchema(data);
 
-	if (teamspaceExists) {
-		throw new Error('Teamspace already exists');
-	}
+	await initTeamspace(validateData.name, validateData.admin, validateData.accountId);
 
-	await initTeamspace(teamspace);
 	logger.logInfo(`Teamspace ${teamspace} created.`);
 };
 
@@ -48,11 +45,20 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 			describe: 'name of the teamspace',
 			type: 'string',
 			demandOption: true,
-		});
+		}).option('user',
+		{
+			describe: 'an email to be assigned to be an admin of this teamspace',
+			type: 'string',
+			demandOption: false,
+		}).option('accountId', {
+		describe: 'an already existing frontEgg account Id (tennant Id) for the teamspace',
+		type: 'string',
+		demandOption: false,
+	});
 	return yargs.command(commandName,
-		'Create a teamspace of the name provided and gives the user of the same name admin privileges',
+		'Create a teamspace of the name provided and gives the user specified admin privileges',
 		argsSpec,
-		(argv) => run(argv.teamspace));
+		({ teamspace, user, accountId }) => run(teamspace, user, accountId));
 };
 
 module.exports = {

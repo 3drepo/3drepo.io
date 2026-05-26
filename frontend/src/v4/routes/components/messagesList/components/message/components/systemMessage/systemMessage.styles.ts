@@ -30,7 +30,7 @@ export const Container = styled.span`
 	align-items: center;
 `;
 
-export const CommentWrapper = styled.p`
+export const CommentWrapper = styled.div`
 	margin-left: 10px;
 	margin-right: 5px;
 `;
@@ -50,7 +50,7 @@ export const MarkdownComment = styled(MarkdownMessage)`
 	font-size: 11px;
 	display: inline;
 
-	p {
+	${CommentWrapper} {
 		display: inline;
 		margin: 0;
 	}

@@ -16,7 +16,7 @@
  */
 
 import { css } from 'styled-components';
-import { ColorSelect, Dot, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
+import { Canvas, ColorSelect, Dot, StyledIconButton } from '@/v4/routes/components/colorPicker/colorPicker.styles';
 
 export default css`
 	// color picker button
@@ -39,8 +39,14 @@ export default css`
 			}
 		}
 	}
+
+	${Canvas} {
+		height: 184px;
+	}
 	
 	.color-picker__panel { // Colour picker modal
+		width: 260px;
+
 		.MuiInput-root {
 			border: 1px solid ${({ theme }) => theme.palette.base.lightest};
 			border-Radius: 8px;

@@ -18,17 +18,17 @@
 const Federations = require('../../../../../processors/teamspaces/projects/models/federations');
 const { Router } = require('express');
 const { getUserFromSession } = require('../../../../../utils/sessions');
-const { hasWriteAccessToFederation } = require('../../../../../middleware/permissions/permissions');
+const { hasWriteAccessToFederation } = require('../../../../../middleware/permissions');
 const { respond } = require('../../../../../utils/responder');
 const { templates } = require('../../../../../utils/responseCodes');
 const { validateNewRevisionData } = require('../../../../../middleware/dataConverter/inputs/teamspaces/projects/models/federations');
 
 const createNewFederationRevision = async (req, res) => {
 	const revInfo = req.body;
-	const { teamspace, federation } = req.params;
+	const { teamspace, project, federation } = req.params;
 	const owner = getUserFromSession(req.session);
 	try {
-		await Federations.newRevision(teamspace, federation, { ...revInfo, owner });
+		await Federations.newRevision(teamspace, project, federation, { ...revInfo, owner });
 		respond(req, res, templates.ok);
 	} catch (err) {
 		/* istanbul ignore next */
@@ -43,7 +43,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/federations/{federation}/revisions:
 	 *   post:
 	 *     description: Create a new revision.
-	 *     tags: [Revisions]
+	 *     tags: [v:external, Revisions]
 	 *     operationId: createNewFederationRevision
 	 *     parameters:
 	 *       - name: teamspace
@@ -97,6 +97,7 @@ const establishRoutes = () => {
 	 *         description: The request is sent successfully.
 	 */
 	router.post('', hasWriteAccessToFederation, validateNewRevisionData, createNewFederationRevision);
+
 	return router;
 };
 

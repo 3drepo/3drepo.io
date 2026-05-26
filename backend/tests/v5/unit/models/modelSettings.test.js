@@ -545,99 +545,79 @@ const testNewRevisionProcessed = () => {
 		});
 	});
 
-	describe('Update with new revision (Federation)', () => {
-		const retVal = 0;
+	describe('Update with new submodels (Federation)', () => {
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const model = generateRandomString();
 		const user = generateRandomString();
-		const corId = generateRandomString();
-		const containers = [generateRandomString(), generateRandomString(), generateRandomString()];
+		const revId = generateUUID();
+		const containers = [
+			{ _id: generateUUID(), group: generateRandomString() },
+			{ _id: generateUUID(), group: generateRandomString() },
+			{ _id: generateUUID() },
+			{ _id: generateUUID() },
+		];
 		const modelType = modelTypes.FEDERATION;
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
+		test(`Updating the submodels of a federation should trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event`,
 			async () => {
-				const resInfo = { ...getInfoFromCode(retVal), retVal };
-				const { success, userErr } = resInfo;
-				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
+				DBHandler.updateOne.mockResolvedValueOnce(true);
 				EventsManager.publish.mockClear();
-				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, resInfo, user,
-					containers.map((containerId) => ({ project: containerId })),
+				await expect(Model.updateModelSubModels(
+					teamspace, project, model, user, revId, containers,
 				)).resolves.toBe(undefined);
 
 				expect(DBHandler.updateOne.mock.calls.length).toBe(1);
 				const action = DBHandler.updateOne.mock.calls[0][3];
 				expect(action.$set.status).toBe(undefined);
 				expect(action.$set).toHaveProperty('timestamp');
-				expect(action.$set.subModels).toEqual(containers.map((containerId) => ({ _id: containerId })));
+				expect(action.$set.subModels).toEqual(containers);
 
-				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
+				const expectedData = {
+					status: processStatuses.OK,
+					containers,
+					timestamp: action.$set.timestamp,
+				};
 
-				const expectedData = { ...action.$set };
-				expectedData.status = expectedData.status ?? processStatuses.OK;
-
-				if (expectedData.errorReason) {
-					expectedData.errorReason.userErr = userErr;
-				}
-				if (expectedData.subModels) {
-					expectedData.containers = expectedData.subModels;
-					delete expectedData.subModels;
-				}
-
-				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+				expect(EventsManager.publish).toHaveBeenCalledTimes(2);
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
 					{
 						teamspace,
 						project,
 						model,
-						revId: corId,
+						revId,
 						user,
 						modelType,
 						data: expectedData,
-					});
-			});
-
-		test(`revision processed with code ${retVal} should update model status and trigger a ${events.MODEL_IMPORT_FINISHED} event and a ${events.MODEL_SETTINGS_UPDATE} event (with groups)`,
-			async () => {
-				const resInfo = { ...getInfoFromCode(retVal), retVal };
-				const { success } = resInfo;
-				const containerData = containers.map((containerId) => ({
-					project: containerId, group: generateRandomString() }));
-
-				DBHandler.updateOne.mockResolvedValueOnce({ matchedCount: 1 });
-				EventsManager.publish.mockClear();
-				await expect(Model.newRevisionProcessed(
-					teamspace, project, model, corId, resInfo, user, containerData,
-				)).resolves.toBe(undefined);
-
-				expect(DBHandler.updateOne.mock.calls.length).toBe(1);
-				const action = DBHandler.updateOne.mock.calls[0][3];
-				expect(action.$set.status).toBe(undefined);
-				expect(action.$set).toHaveProperty('timestamp');
-				expect(action.$set.subModels).toEqual(containerData.map(({ project: _id, group }) => ({ _id, group })));
-
-				expect(action.$unset).toEqual({ corID: 1, ...(success ? { status: 1 } : {}) });
-
-				const expectedData = { ...action.$set };
-
-				expectedData.status = expectedData.status ?? processStatuses.OK;
-				if (expectedData.subModels) {
-					expectedData.containers = expectedData.subModels;
-					delete expectedData.subModels;
-				}
-
-				expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_IMPORT_FINISHED,
+					},
+				);
+				expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
 					{
 						teamspace,
 						project,
 						model,
-						revId: corId,
-						user,
 						modelType,
 						data: expectedData,
-					});
-			});
+					},
+				);
+			},
+		);
+
+		test('should not trigger if model no longer exists', async () => {
+			DBHandler.updateOne.mockResolvedValueOnce(false);
+			EventsManager.publish.mockClear();
+
+			await expect(Model.updateModelSubModels(
+				teamspace, project, model, user, revId, containers,
+			)).resolves.toBe(undefined);
+
+			expect(DBHandler.updateOne.mock.calls.length).toBe(1);
+			const action = DBHandler.updateOne.mock.calls[0][3];
+			expect(action.$set.status).toBe(undefined);
+			expect(action.$set).toHaveProperty('timestamp');
+			expect(action.$set.subModels).toEqual(containers);
+
+			expect(EventsManager.publish).not.toHaveBeenCalled();
+		});
 	});
 
 	describe('Update with new revision when the model is already deleted', () => {
@@ -681,20 +661,19 @@ const testUpdateModelSettings = () => {
 			const data = {
 				name: generateRandomString(),
 				unit: 'm',
-				code: generateRandomString(5),
+				code: null,
 				defaultView: null,
+				description: undefined,
 			};
 
 			const updateObject = {
 				$set: {
-					properties: {
-						unit: data.unit,
-						code: data.code,
-					},
+					'properties.unit': data.unit,
 					name: data.name,
 				},
 				$unset: {
 					defaultView: 1,
+					'properties.code': 1,
 				},
 			};
 
@@ -722,10 +701,8 @@ const testUpdateModelSettings = () => {
 
 			const updateObject = {
 				$set: {
-					properties: {
-						unit: data.unit,
-						code: data.code,
-					},
+					'properties.unit': data.unit,
+					'properties.code': data.code,
 					name: data.name,
 					defaultView: data.defaultView,
 				},
@@ -742,39 +719,6 @@ const testUpdateModelSettings = () => {
 					model,
 					data,
 					modelType: modelTypes.FEDERATION,
-				});
-		});
-
-		test('Should update the settings of a model and ignore a null value that cant be unset', async () => {
-			const data = {
-				name: generateRandomString(),
-				unit: null,
-				code: generateRandomString(5),
-				defaultView: generateRandomString(),
-			};
-
-			const updateObject = {
-				$set: {
-					properties: {
-						code: data.code,
-					},
-					name: data.name,
-					defaultView: data.defaultView,
-				},
-			};
-
-			DBHandler.findOneAndUpdate.mockResolvedValueOnce({});
-			await Model.updateModelSettings(teamspace, project, model, data);
-			checkResults(DBHandler.findOneAndUpdate, model, updateObject);
-			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
-
-			expect(EventsManager.publish).toHaveBeenCalledWith(events.MODEL_SETTINGS_UPDATE,
-				{
-					teamspace,
-					project,
-					model,
-					data,
-					modelType: modelTypes.CONTAINER,
 				});
 		});
 
@@ -895,6 +839,54 @@ const testGetModelType = () => {
 	);
 };
 
+const testGetUsersWithPermissions = () => {
+	describe('Get users with permissions', () => {
+		const teamspace = generateRandomString();
+		const modelId = generateRandomString();
+
+		const model = {
+			permissions: [
+				{ user: generateRandomString(), permission: 'viewer' },
+				{ user: generateRandomString(), permission: 'commenter' },
+				{ user: generateRandomString(), permission: 'collaborator' },
+			],
+		};
+
+		test('should return the users who have access to the model', async () => {
+			DBHandler.findOne.mockResolvedValueOnce(model);
+
+			await expect(Model.getUsersWithPermissions(teamspace, modelId))
+				.resolves.toEqual(model.permissions.map((u) => u.user));
+
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: modelId }, { permissions: 1 });
+		});
+
+		test('should return the users who have access to the model excuding viewers', async () => {
+			DBHandler.findOne.mockResolvedValueOnce(model);
+
+			await expect(Model.getUsersWithPermissions(teamspace, modelId, true))
+				.resolves.toEqual(model.permissions.slice(1).map((u) => u.user));
+
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: modelId }, { permissions: 1 });
+		});
+
+		test('should return empty array if the model has no specific permissions', async () => {
+			DBHandler.findOne.mockResolvedValueOnce({});
+
+			await expect(Model.getUsersWithPermissions(teamspace, modelId, true))
+				.resolves.toEqual([]);
+
+			expect(DBHandler.findOne).toHaveBeenCalledTimes(1);
+			expect(DBHandler.findOne).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: modelId }, { permissions: 1 });
+		});
+	});
+};
+
 describe('models/modelSettings', () => {
 	testGetModelById();
 	testGetContainerById();
@@ -912,4 +904,5 @@ describe('models/modelSettings', () => {
 	testRemoveUserFromAllModels();
 	testIsFederation();
 	testGetModelType();
+	testGetUsersWithPermissions();
 });

@@ -15,13 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { connectRouter } from 'connected-react-router';
 import { combineReducers } from 'redux';
-import undoable from 'redux-undo';
 
 import v5Reducers from '@/v5/store/reducers';
-import { CanvasHistoryTypes } from './canvasHistory';
-import { batchGroupBy } from './canvasHistory/canvasHistory.helpers';
 
 import { reducer as activitiesReducer } from './activities/activities.redux';
 import { reducer as bimReducer } from './bim/bim.redux';
@@ -41,6 +37,7 @@ import { reducer as measurementsReducer } from './measurements/measurements.redu
 import { reducer as modelReducer } from './model/model.redux';
 import { reducer as notificationsReducer } from './notifications/notifications.redux';
 import { reducer as risksReducer } from './risks/risks.redux';
+import { reducer as routerReducer } from './router/router.redux';
 import { reducer as sequencesReducer } from './sequences/sequences.redux';
 import { reducer as snackbarReducer } from './snackbar/snackbar.redux';
 import { reducer as starredReducer } from './starred/starred.redux';
@@ -53,16 +50,10 @@ import { reducer as viewerGuiReducer } from './viewerGui/viewerGui.redux';
 import { reducer as viewpointsReducer } from './viewpoints/viewpoints.redux';
 // <-- IMPORT MODULE REDUCER -->
 
-export default function createReducer(history) {
+export default function createReducer() {
 	return combineReducers({
-		router: connectRouter(history),
-		canvasHistory: undoable(canvasHistoryReducer, {
-			undoType: CanvasHistoryTypes.UNDO,
-			redoType: CanvasHistoryTypes.REDO,
-			groupBy: batchGroupBy.init([]),
-			clearHistoryType: CanvasHistoryTypes.CLEAR_HISTORY,
-			ignoreInitialState: true
-		}),
+		router: routerReducer,
+		canvasHistory: canvasHistoryReducer,
 		activities: activitiesReducer,
 		bim: bimReducer,
 		board: boardReducer,

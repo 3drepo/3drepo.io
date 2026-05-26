@@ -32,7 +32,7 @@ export const ActionMenuSection = styled.div`
 	}
 `;
 
-export const Menu = styled.div`
+export const Menu = styled.div<{ top?: number }>`
 	display: flex;
 	flex-direction: column;
 `;

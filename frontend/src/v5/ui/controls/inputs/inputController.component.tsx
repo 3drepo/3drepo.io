@@ -15,7 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { forwardRef } from 'react';
-import { Controller, ControllerRenderProps } from 'react-hook-form';
+import { get } from 'lodash';
+import { Controller, ControllerRenderProps, useFormContext } from 'react-hook-form';
 
 export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	required: boolean,
@@ -24,6 +25,7 @@ export type FormInputProps = Partial<Omit<ControllerRenderProps, 'ref'> & {
 	error: boolean,
 	helperText: string,
 	className: string,
+	inputRef: any,
 }>;
 
 // eslint-disable-next-line @typescript-eslint/comma-dangle
@@ -34,6 +36,8 @@ export type InputControllerProps<T,> = T & FormInputProps & {
 	defaultValue?: any,
 	onChange?: (event) => void,
 	onBlur?: () => void,
+	transformInputValue?: (val) => any,
+	transformOutputValue?: (val) => any,
 	children?: any,
 };
 
@@ -41,7 +45,7 @@ type Props<T> = InputControllerProps<T> & {
 	Input: (props: T) => JSX.Element,
 };
 
-type InputControllerType = <T>(Component: Props<T>, ref) => JSX.Element;
+export type InputControllerType = <T>(Component: Props<T>, ref) => JSX.Element;
 // eslint-disable-next-line @typescript-eslint/comma-dangle
 export const InputController: InputControllerType = forwardRef(<T,>({
 	Input,
@@ -51,30 +55,37 @@ export const InputController: InputControllerType = forwardRef(<T,>({
 	defaultValue,
 	onChange,
 	onBlur,
+	transformInputValue = (val) => val,
+	transformOutputValue = (val) => val,
 	...props
-}: Props<T>, ref) => (
-	<Controller
-		name={name}
-		control={control}
-		defaultValue={defaultValue}
-		render={({ field }) => (
-			// @ts-ignore
-			<Input
-				{...field}
-				{...props}
-				value={field.value ?? ''}
-				onChange={(event) => {
-					field.onChange(event);
-					onChange?.(event);
-				}}
-				onBlur={() => {
-					field.onBlur();
-					onBlur?.();
-				}}
-				inputRef={ref || field.ref}
-				error={!!formError}
-				helperText={formError?.message}
-			/>
-		)}
-	/>
-));
+}: Props<T>, ref) => {
+	const ctx = useFormContext();
+	const error = formError || get(ctx?.formState?.errors, name);
+
+	return (
+		<Controller
+			name={name}
+			control={control}
+			defaultValue={defaultValue}
+			render={({ field: { ref: fieldRef, ...field } }) => (
+				// @ts-ignore
+				<Input
+					{...field}
+					{...props}
+					value={transformInputValue(field.value) ?? ''}
+					onChange={(event) => {
+						field.onChange(transformOutputValue(event));
+						onChange?.(transformOutputValue(event));
+					}}
+					onBlur={() => {
+						field.onBlur();
+						onBlur?.();
+					}}
+					inputRef={ref || fieldRef}
+					error={!!error}
+					helperText={error?.message}
+				/>
+			)}
+		/>
+	);
+});

@@ -19,7 +19,7 @@
 
 const { v5Path } = require("../../interop");
 
-const { hasAccessToTeamspace } = require(`${v5Path}/models/teamspaceSettings`);
+const { isTeamspaceMember } = require(`${v5Path}/processors/teamspaces`);
 
 const AccountPermissions = require("../models/accountPermissions");
 const PermissionTemplates = require("../models/permissionTemplates");
@@ -47,7 +47,7 @@ const PermissionTemplates = require("../models/permissionTemplates");
 
 			accountLevel: async function(username) {
 
-				await hasAccessToTeamspace(account, username);
+				await isTeamspaceMember(account, username);
 
 				return getTeamspaceSettings(account, { permissions: 1 }).then(settings => {
 					const permission = AccountPermissions.findByUser(settings, username);
@@ -74,7 +74,6 @@ const PermissionTemplates = require("../models/permissionTemplates");
 
 			modelLevel: function(username, model) {
 
-				let user;
 				let projectPerms = [];
 
 				const projectQuery = { models: model, "permissions.user": username };
@@ -84,11 +83,6 @@ const PermissionTemplates = require("../models/permissionTemplates");
 						projectPerms = project.permissions[0].permissions;
 					}
 
-					return this.getUser();
-
-				}).then(_user => {
-
-					user = _user;
 					return findModelSettingById(account, model);
 
 				}).then(async setting => {
@@ -102,7 +96,7 @@ const PermissionTemplates = require("../models/permissionTemplates");
 						return projectPerms;
 					}
 
-					return projectPerms.concat(PermissionTemplates.findById(user, perm.permission).permissions);
+					return projectPerms.concat(PermissionTemplates.findById(perm.permission).permissions);
 				});
 			}
 		};

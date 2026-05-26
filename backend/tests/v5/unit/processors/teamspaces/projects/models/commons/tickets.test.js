@@ -17,18 +17,17 @@
 
 const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup } = require('../../../../../../helper/services');
+const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, determineTestGroup, generateUUIDString } = require('../../../../../../helper/services');
+const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
+
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
+const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
 
 const { statuses, statusTypes } = require(`${src}/schemas/tickets/templates.constants`);
 
 const Tickets = require(`${src}/processors/teamspaces/projects/models/commons/tickets`);
 
 const { basePropertyLabels, modulePropertyLabels, presetModules, propTypes, viewGroups } = require(`${src}/schemas/tickets/templates.constants`);
-
-const { isUUID } = require(`${src}/utils/helper/typeCheck`);
-const { UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
-
-const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -37,16 +36,22 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
 
+jest.mock('../../../../../../../../src/v5/models/modelSettings');
+const ModelSettings = require(`${src}/models/modelSettings`);
+
 jest.mock('../../../../../../../../src/v5/models/tickets.templates');
 const TemplatesModel = require(`${src}/models/tickets.templates`);
 
 jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.comments');
 const CommentsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.comments`);
 
-jest.mock('../../../../../../../../src/v5/models/tickets.groups');
-const TicketGroupsModel = require(`${src}/models/tickets.groups`);
+jest.mock('../../../../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.groups');
+const GroupsProcessor = require(`${src}/processors/teamspaces/projects/models/commons/tickets.groups`);
 
-jest.mock('../../../../../../../../src/v5/schemas/tickets/templates');
+jest.mock('../../../../../../../../src/v5/schemas/tickets/templates', () => ({
+	...jest.requireActual('../../../../../../../../src/v5/schemas/tickets/templates'),
+	generateFullSchema: jest.fn(),
+}));
 const TemplatesSchema = require(`${src}/schemas/tickets/templates`);
 
 const { TICKETS_RESOURCES_COL } = require(`${src}/models/tickets.constants`);
@@ -406,13 +411,14 @@ const generateGroupsTestData = (useGroupsUUID = false, nTickets = 1) => {
 
 const insertTicketsGroupTests = (isImport) => {
 	describe('Groups', () => {
-		test('should be extracted and replaced with a group UUID', async () => {
+		const iterations = 10;
+		test('should be call ticket groups processor to process and store the groups', async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
 			const author = generateRandomString();
 
-			const testData = generateGroupsTestData(false, isImport ? 10 : 1);
+			const testData = generateGroupsTestData(false, isImport ? iterations : 1);
 
 			const expectedOutput = testData.tickets.map((tickets) => ({ ...tickets, _id: generateUUID() }));
 
@@ -431,43 +437,12 @@ const insertTicketsGroupTests = (isImport) => {
 			expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project, model,
 				testData.template._id, expect.any(Array));
 
-			const processedTickets = TicketsModel.addTicketsWithTemplate.mock.calls[0][4];
-
-			const newGroups = processedTickets.map((proTick, i) => {
-				const propData = proTick.properties[testData.propName];
-				const modPropData = proTick.modules[testData.moduleName][testData.propName];
-				const groups = { ticket: expectedOutput[i]._id, groupIds: [] };
-
-				[propData, modPropData].forEach(({ state }) => {
-					Object.keys(state).forEach((key) => {
-						state[key].forEach(({ group }) => {
-							expect(isUUID(group)).toBeTruthy();
-							groups.groupIds.push(group);
-						});
-					});
-				});
-				return groups;
-			});
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(isImport ? 2 * iterations : 2);
+			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(isImport ? iterations : 1);
 
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(testData.template);
 
-			expect(TicketGroupsModel.addGroups).toHaveBeenCalledTimes(newGroups.length);
-
-			const expectedGroupIds = [];
-
-			newGroups.forEach(({ ticket, groupIds }) => {
-				expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project,
-					model, ticket, expect.any(Array));
-				expectedGroupIds.push(...groupIds);
-			});
-
-			const groupIDsToSave = TicketGroupsModel.addGroups.mock.calls.flatMap((call) => call[4].map(
-				({ _id }) => _id));
-
-			expect(groupIDsToSave.length).toBe(expectedGroupIds.length);
-			expect(groupIDsToSave).toEqual(expect.arrayContaining(expectedGroupIds));
-			expect(TicketGroupsModel.deleteGroups).not.toHaveBeenCalled();
 			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
 			if (isImport) {
 				expect(EventsManager.publish).toHaveBeenCalledWith(events.TICKETS_IMPORTED,
@@ -504,82 +479,11 @@ const updateGroupTestsHelper = (updateMany) => {
 			expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
 				tickets, expect.any(Object), undefined);
 
-			const processedTickets = TicketsModel.updateTickets.mock.calls[0][4];
-
-			const groupsCreated = [];
-			const groupsRemoved = [];
-			processedTickets.forEach(({ properties, modules }, i) => {
-				const propData = properties?.[propName] || {};
-				const modPropData = modules?.[moduleName]?.[propName] || {};
-
-				const oldPropData = properties?.[propName] === null || Object.keys(propData).length
-					? tickets[i].properties[propName] || {} : {};
-				const oldModPropData = modules?.[moduleName]?.[propName] === null || Object.keys(modPropData).length
-					? tickets[i].modules[moduleName][propName] || {} : {};
-				const newGroups = [];
-
-				const existingGroups = new Set();
-
-				[oldPropData, oldModPropData].forEach(({ state = {} } = {}) => {
-					Object.keys(state).forEach((key) => {
-						state[key].forEach(({ group }) => {
-							expect(isUUID(group)).toBeTruthy();
-							existingGroups.add(UUIDToString(group));
-						});
-					});
-				});
-
-				[propData, modPropData].forEach(({ state = {} }) => {
-					Object.keys(state).forEach((key) => {
-						state[key].forEach(({ group }) => {
-							expect(isUUID(group)).toBeTruthy();
-							if (existingGroups.has(UUIDToString(group))) {
-								existingGroups.delete(UUIDToString(group));
-							} else {
-								newGroups.push(group);
-							}
-						});
-					});
-				});
-
-				const removedGroups = Array.from(existingGroups).map(stringToUUID);
-
-				if (removedGroups.length) groupsRemoved.push({ removedGroups, ticket: tickets[i]._id });
-				if (newGroups.length) groupsCreated.push({ newGroups, ticket: tickets[i]._id });
-			});
-
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplatesSchema.generateFullSchema).toHaveBeenCalledWith(template);
 
-			if (groupsCreated.length) {
-				expect(TicketGroupsModel.addGroups).toHaveBeenCalledTimes(groupsCreated.length);
-				groupsCreated.forEach(({ ticket }) => {
-					expect(TicketGroupsModel.addGroups).toHaveBeenCalledWith(teamspace, project, model,
-						ticket, expect.any(Array));
-				});
-
-				TicketGroupsModel.addGroups.mock.calls.forEach(([,,, ticket, groupData]) => {
-					const groupIDsToSave = groupData.map(({ _id }) => _id);
-					const newGroupsEntry = groupsCreated.find(({ ticket: id }) => ticket === id);
-
-					expect(newGroupsEntry).not.toBeUndefined();
-
-					expect(groupIDsToSave.length).toBe(newGroupsEntry.newGroups.length);
-					expect(groupIDsToSave).toEqual(expect.arrayContaining(newGroupsEntry.newGroups));
-				});
-			} else {
-				expect(TicketGroupsModel.addGroups).not.toHaveBeenCalled();
-			}
-
-			if (groupsRemoved.length) {
-				expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledTimes(groupsRemoved.length);
-				groupsRemoved.forEach(({ ticket, removedGroups }) => {
-					expect(TicketGroupsModel.deleteGroups).toHaveBeenCalledWith(teamspace, project, model,
-						ticket, removedGroups);
-				});
-			} else {
-				expect(TicketGroupsModel.deleteGroups).not.toHaveBeenCalled();
-			}
+			expect(GroupsProcessor.processGroupsUpdate).toHaveBeenCalledTimes(updateMany ? 2 * nTickets : 2);
+			expect(GroupsProcessor.commitGroupChanges).toHaveBeenCalledTimes(updateMany ? nTickets : 1);
 
 			expect(EventsManager.publish).toHaveBeenCalledTimes(response.length);
 			response.forEach((res) => {
@@ -618,165 +522,6 @@ const updateGroupTestsHelper = (updateMany) => {
 			});
 
 			await runTest(response, template, tickets, propName, moduleName, toUpdate);
-		});
-
-		test('Old groups are removed when the state is deleted', async () => {
-			const { template, tickets, propName, moduleName } = generateGroupsTestData(true, nTickets);
-
-			const response = [];
-
-			const toUpdate = times(nTickets, () => {
-				const data = {
-					properties: {
-						[propName]: null,
-					},
-					modules: {
-						[moduleName]: {
-							[propName]: null,
-						},
-					},
-				};
-
-				response.push({ ...generateRandomObject(), changes: generateRandomObject() });
-
-				return data;
-			});
-			await runTest(response, template, tickets, propName, moduleName, toUpdate);
-		});
-
-		test('Old groups are removed if they are no longer referenced and new groups should be added', async () => {
-			const { template, tickets, propName, moduleName } = generateGroupsTestData(true, nTickets);
-
-			const response = [];
-
-			const toUpdate = times(nTickets, (i) => {
-				const updatedPropData = cloneDeep(tickets[i].properties[propName]);
-				const updatedModPropData = cloneDeep(tickets[i].modules[moduleName][propName]);
-
-				Object.keys(updatedPropData.state).forEach((key) => {
-					const groupArr = updatedPropData.state[key];
-
-					groupArr[0].group = generateGroup(true, { hasId: false });
-				});
-
-				Object.keys(updatedModPropData.state).forEach((key) => {
-					const groupArr = updatedModPropData.state[key];
-
-					groupArr[0].group = generateGroup(true, { hasId: false });
-				});
-
-				const data = {
-					properties: {
-						[propName]: updatedPropData,
-					},
-					modules: {
-						[moduleName]: {
-							[propName]: updatedModPropData,
-						},
-					},
-				};
-
-				response.push({ ...generateRandomObject(), changes: generateRandomObject() });
-
-				return data;
-			});
-
-			TicketGroupsModel.getGroupsByIds.mockImplementation(
-				(ts, proj, mod, ticket, ids) => Promise.resolve(ids.map(
-					(_id) => ({ _id }))));
-
-			await runTest(response, template, tickets, propName, moduleName, toUpdate);
-
-			// Ensure getGroupsByIds is being called with UUID ids, not string
-
-			TicketGroupsModel.getGroupsByIds.mock.calls.forEach((callArgs) => {
-				expect(callArgs[4].every(isUUID)).toBeTruthy();
-			});
-		});
-
-		test('Old groups are retained if the update doesn\'t update the field', async () => {
-			const { template, tickets, propName, moduleName } = generateGroupsTestData(true, nTickets);
-
-			const response = [];
-
-			const toUpdate = times(nTickets, (i) => {
-				const updatedPropData = cloneDeep(tickets[i].properties[propName]);
-
-				Object.keys(updatedPropData.state).forEach((key) => {
-					const groupArr = updatedPropData.state[key];
-					groupArr[0].group = generateGroup(true, { hasId: false });
-				});
-
-				const data = {
-					properties: {
-						[propName]: updatedPropData,
-					},
-				};
-				response.push({ ...generateRandomObject(), changes: generateRandomObject() });
-				return data;
-			});
-
-			TicketGroupsModel.getGroupsByIds.mockImplementation(
-				(ts, proj, mod, ticket, ids) => Promise.resolve(ids.map(
-					(_id) => ({ _id }))));
-
-			await runTest(response, template, tickets, propName, moduleName, toUpdate);
-			TicketGroupsModel.getGroupsByIds.mock.calls.forEach((callArgs) => {
-				expect(callArgs[4].every(isUUID)).toBeTruthy();
-			});
-		});
-
-		test('Throw an error if retained groups contains group ids that does not exist', async () => {
-			const testData = generateGroupsTestData(true, nTickets);
-
-			const toUpdate = times(nTickets, (i) => {
-				const updatedPropData = cloneDeep(testData.tickets[i].properties[testData.propName]);
-				const updatedModPropData = cloneDeep(testData.tickets[i]
-					.modules[testData.moduleName][testData.propName]);
-
-				Object.keys(updatedPropData.state).forEach((key) => {
-					const groupArr = updatedPropData.state[key];
-
-					groupArr[0].group = generateGroup(true, { hasId: false });
-				});
-
-				Object.keys(updatedModPropData.state).forEach((key) => {
-					const groupArr = updatedModPropData.state[key];
-
-					groupArr[0].group = generateGroup(true, { hasId: false });
-				});
-
-				return {
-					properties: {
-						[testData.propName]: updatedPropData,
-					},
-					modules: {
-						[testData.moduleName]: {
-							[testData.propName]: updatedModPropData,
-						},
-					},
-				};
-			});
-
-			TicketGroupsModel.getGroupsByIds.mockImplementation(
-				(ts, proj, mod, ticket, ids) => Promise.resolve([{ _id: ids[0] }]));
-
-			TemplatesSchema.generateFullSchema.mockImplementationOnce((t) => t);
-
-			if (updateMany) {
-				await expect(Tickets.updateManyTickets(teamspace, project, model, testData.template,
-					testData.tickets, toUpdate)).rejects.toEqual(
-					expect.objectContaining({ code: templates.invalidArguments.code }));
-			} else {
-				await expect(Tickets.updateTicket(teamspace, project, model, testData.template,
-					testData.tickets[0], toUpdate[0])).rejects.toEqual(
-					expect.objectContaining({ code: templates.invalidArguments.code }));
-			}
-
-			expect(EventsManager.publish).not.toHaveBeenCalled();
-			TicketGroupsModel.getGroupsByIds.mock.calls.forEach((callArgs) => {
-				expect(callArgs[4].every(isUUID)).toBeTruthy();
-			});
 		});
 	});
 };
@@ -834,7 +579,7 @@ const insertTicketsTestHelper = (isImport) => {
 	test('should process images and store refs (image list property type)', () => insertTicketsImageTest(isImport, propTypes.IMAGE_LIST));
 	test('should process screenshots from view data and store refs', () => insertTicketsImageTest(isImport, propTypes.VIEW));
 
-	insertTicketsGroupTests();
+	insertTicketsGroupTests(isImport);
 };
 
 const testAddTicket = () => {
@@ -1161,7 +906,12 @@ const testGetTicketById = () => {
 
 const testGetTicketList = () => {
 	const propertyName = generateRandomString();
+	const propertyName2 = generateRandomString();
 	const moduleName = generateRandomString();
+	const propertyValue = generateRandomString();
+	const propertyValue2 = generateRandomString();
+	const propertyNumberValue = generateRandomNumber();
+	const ticketTemplates = times(5, () => generateTemplate());
 
 	describe.each([
 		['the default projection (undefined filter)', undefined, {}],
@@ -1177,17 +927,156 @@ const testGetTicketList = () => {
 		['sortBy is provided', [], {}, undefined, { sortBy: generateRandomString() }],
 		['sortDesc is provided', [], {}, undefined, { sortDesc: false }],
 		['sortBy and sortDesc is provided', [], {}, undefined, { sortBy: generateRandomString(), sortDesc: true }],
-	])('Get ticket list', (desc, filters, customProjection, updatedSince, { sortBy, sortDesc } = {}) => {
-		test(`Should call getAllTickets in model with ${desc}`, async () => {
+		['limit is provided', [], {}, undefined, { limit: generateRandomNumber() }],
+		['skip is provided', [], {}, undefined, { skip: generateRandomNumber() }],
+		[`${queryOperators.EXISTS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.EXISTS }],
+			expectedQuery: { $and: [{ [propertyName]: { $exists: true } }] },
+		}],
+		[`${queryOperators.NOT_EXISTS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_EXISTS }],
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $exists: true } } }] },
+		}],
+		[`${queryOperators.IS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] }],
+			expectedQuery: { $and: [{ [propertyName]: { $in: [propertyValue, propertyValue2] } }] },
+		}],
+		[`${queryOperators.EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: ['true'] }],
+			expectedQuery: { $and: [{ [propertyName]: { $in: [true] } }] },
+		}],
+		[`${queryOperators.EQUALS} query filter and number value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.EQUALS, value: [`${propertyNumberValue}`] }],
+			expectedQuery: {
+				$and: [{ [propertyName]: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } }],
+			},
+		}],
+		[`${queryOperators.NOT_IS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [
+				{ propertyName, operator: queryOperators.NOT_IS, value: [propertyValue, propertyValue2] },
+			],
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [propertyValue, propertyValue2] } } }] },
+		}],
+		[`${queryOperators.NOT_EQUALS} query filter and boolean value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: ['true'] }],
+			expectedQuery: { $and: [{ [propertyName]: { $not: { $in: [true] } } }] },
+		}],
+		[`${queryOperators.NOT_EQUALS} query filter and number value`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_EQUALS, value: [`${propertyNumberValue}`] }],
+			expectedQuery: {
+				$and: [{ [propertyName]: { $not: { $in: [propertyNumberValue, new Date(propertyNumberValue)] } } }],
+			},
+		}],
+		[`${queryOperators.CONTAINS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.CONTAINS, value: [propertyValue, propertyValue2] }],
+			expectedQuery: { $and: [{ $or: [{ [propertyName]: { $regex: propertyValue, $options: 'i' } }, { [propertyName]: { $regex: propertyValue2, $options: 'i' } }] }] },
+		}],
+		[`${queryOperators.NOT_CONTAINS} query filter`, [], {}, undefined, { }, {
+			queryFilters: [
+				{ propertyName, operator: queryOperators.NOT_CONTAINS, value: [propertyValue, propertyValue2] },
+			],
+			expectedQuery: { $and: [{ $nor: [{ [propertyName]: { $regex: propertyValue, $options: 'i' } }, { [propertyName]: { $regex: propertyValue2, $options: 'i' } }] }] },
+		}],
+		[`${queryOperators.RANGE} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.RANGE, value: [[0, 10], [20, 30]] }],
+			expectedQuery: { $and: [{ $or: [
+				{ [propertyName]: { $gte: 0, $lte: 10 } },
+				{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
+				{ [propertyName]: { $gte: 20, $lte: 30 } },
+				{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
+			] }] },
+		}],
+		[`${queryOperators.NOT_IN_RANGE} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.NOT_IN_RANGE, value: [[0, 10], [20, 30]] }],
+			expectedQuery: { $and: [{ $nor: [
+				{ [propertyName]: { $gte: 0, $lte: 10 } },
+				{ [propertyName]: { $gte: new Date(0), $lte: new Date(10) } },
+				{ [propertyName]: { $gte: 20, $lte: 30 } },
+				{ [propertyName]: { $gte: new Date(20), $lte: new Date(30) } },
+			] }] },
+		}],
+		[`${queryOperators.GREATER_OR_EQUAL_TO} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.GREATER_OR_EQUAL_TO, value: propertyNumberValue }],
+			expectedQuery: { $and: [{ $or: [
+				{ [propertyName]: { $gte: propertyNumberValue } },
+				{ [propertyName]: { $gte: new Date(propertyNumberValue) } },
+			] }] },
+		}],
+		[`${queryOperators.LESSER_OR_EQUAL_TO} query filter`, [], {}, undefined, { }, {
+			queryFilters: [{ propertyName, operator: queryOperators.LESSER_OR_EQUAL_TO, value: propertyNumberValue }],
+			expectedQuery: { $and: [{ $or: [
+				{ [propertyName]: { $lte: propertyNumberValue } },
+				{ [propertyName]: { $lte: new Date(propertyNumberValue) } },
+			] }] },
+		}],
+		['multiple query filters', [], {}, undefined, { }, {
+			queryFilters: [
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
+				{ propertyName: propertyName2,
+					operator: queryOperators.LESSER_OR_EQUAL_TO,
+					value: propertyNumberValue },
+			],
+			expectedQuery: { $and: [
+				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+				{ $or: [
+					{ [propertyName2]: { $lte: propertyNumberValue } },
+					{ [propertyName2]: { $lte: new Date(propertyNumberValue) } },
+				] },
+			] },
+		}],
+		['template filter', [], {}, undefined, { }, {
+			isTemplateQuery: true,
+			queryFilters: [
+				{ propertyName: specialQueryFields.TEMPLATE, operator: queryOperators.IS, value: [propertyValue] },
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
+			],
+			expectedQuery: { $and: [
+				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+				{ type: { $in: ticketTemplates.map((t) => t._id) } },
+			],
+			},
+		}],
+		['ticket code filter', [], {}, undefined, { }, {
+			isTemplateQuery: true,
+			queryFilters: [
+				{ propertyName: specialQueryFields.TICKET_CODE,
+					operator: queryOperators.IS,
+					value: [propertyValue] },
+			],
+			ticketCodeQuery: { ticketCode: { $in: [propertyValue] } },
+			expectedQuery: {},
+		}],
+		['ticket code filter with multiple filters', [], {}, undefined, { }, {
+			isTemplateQuery: true,
+			queryFilters: [
+				{ propertyName: specialQueryFields.TICKET_CODE,
+					operator: queryOperators.IS,
+					value: [propertyValue] },
+				{ propertyName, operator: queryOperators.IS, value: [propertyValue, propertyValue2] },
+			],
+			expectedQuery: { $and: [
+				{ [propertyName]: { $in: [propertyValue, propertyValue2] } },
+			] },
+			ticketCodeQuery: { ticketCode: { $in: [propertyValue] } },
+		}],
+	])('Get ticket list', (desc, filters, customProjection, updatedSince, { sortBy, sortDesc, limit, skip } = {}, { queryFilters, expectedQuery, ticketCodeQuery, isTemplateQuery } = {}) => {
+		test(`Should call getAllTickets/getTicketsByFilter in model with ${desc}`, async () => {
 			const teamspace = generateRandomString();
 			const project = generateRandomString();
 			const model = generateRandomString();
-
 			const expectedOutput = generateRandomString();
 
-			TicketsModel.getAllTickets.mockResolvedValueOnce(expectedOutput);
+			if (queryFilters?.length) {
+				TicketsModel.getTicketsByFilter.mockResolvedValueOnce(expectedOutput);
+				if (isTemplateQuery) {
+					TemplatesModel.getTemplatesByQuery.mockResolvedValueOnce(ticketTemplates);
+				}
+			} else {
+				TicketsModel.getAllTickets.mockResolvedValueOnce(expectedOutput);
+			}
 
-			await expect(Tickets.getTicketList(teamspace, project, model, { filters, updatedSince, sortBy, sortDesc }))
+			await expect(Tickets.getTicketList(teamspace, project, model,
+				{ filters, updatedSince, sortBy, limit, skip, sortDesc, queryFilters }))
 				.resolves.toEqual(expectedOutput);
 
 			const { SAFETIBASE, SEQUENCING } = presetModules;
@@ -1212,7 +1101,6 @@ const testGetTicketList = () => {
 				[`modules.${SAFETIBASE}.${safetibaseProps.TREATMENT_STATUS}`]: 1,
 				[`modules.${SEQUENCING}.${seqProps.START_TIME}`]: 1,
 				[`modules.${SEQUENCING}.${seqProps.END_TIME}`]: 1,
-
 			};
 
 			let sort;
@@ -1221,9 +1109,21 @@ const testGetTicketList = () => {
 				sort = { [`properties.${sortBy}`]: sortOrder };
 			}
 
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
-			expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
-				{ projection, updatedSince, sort });
+			if (queryFilters?.length) {
+				expect(TicketsModel.getTicketsByFilter).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.getTicketsByFilter).toHaveBeenCalledWith(teamspace, project, model,
+					deleteIfUndefined({ projection,
+						updatedSince,
+						sort,
+						limit,
+						skip,
+						query: expectedQuery,
+						ticketCodeQuery }));
+			} else {
+				expect(TicketsModel.getAllTickets).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.getAllTickets).toHaveBeenCalledWith(teamspace, project, model,
+					deleteIfUndefined({ projection, updatedSince, sort, limit, skip }));
+			}
 		});
 	});
 };
@@ -1303,7 +1203,293 @@ const testGetOpenTicketsCount = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/models/commons/tickets', () => {
+const testInitialiseAutomatedProperties = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const modelName = generateRandomString();
+	const moduleName = generateRandomString();
+	const temCode = generateRandomString(3);
+	const ticketNum = generateRandomNumber();
+	const propName = generateRandomString();
+	describe.each([
+		['Should not update anything if there is no automated fields', {}],
+		['Should update the field if it is automated', { value: 'xyz' }, 'xyz'],
+		['Should update the field if it is automated (model name)', { value: `{${supportedPatterns.MODEL_NAME}}` }, modelName],
+		['Should update the field if it is automated (template code)', { value: 'code{template_code}' }, `code${temCode}`],
+		['Should update the field if it is automated (ticket number)', { value: 'code{ticket_number}' }, `code${ticketNum}`],
+		['Should update the field if it is automated (mutliple properties)', { value: '{model_name}:{template_code}:{ticket_number}' }, `${modelName}:${temCode}:${ticketNum}`],
+
+	])('Initialise automated fields', (desc, config, value) => {
+		test(desc, async () => {
+			const property = { name: propName, type: propTypes.TEXT, ...config };
+			const template = {
+				_id: generateUUIDString(),
+				name: generateRandomString(),
+				code: temCode,
+				properties: [property],
+				modules: [{
+					name: moduleName,
+					properties: [property],
+				},
+				{
+					type: presetModules.SAFETIBASE,
+					properties: [property],
+				},
+				],
+			};
+			const nTickets = 1;
+			const expectedData = [];
+			const tickets = times(nTickets, () => {
+				const ticket = {
+					model,
+					project,
+					title: generateRandomString(),
+					number: ticketNum,
+					properties: {},
+					modules: { [moduleName]: {}, [presetModules.SAFETIBASE]: {} },
+				};
+				const resTicket = cloneDeep(ticket);
+
+				if (value !== undefined) {
+					resTicket.properties[propName] = value;
+					resTicket.modules[moduleName][propName] = value;
+					resTicket.modules[presetModules.SAFETIBASE][propName] = value;
+				}
+				expectedData.push(resTicket);
+
+				return ticket;
+			});
+
+			if (value !== undefined) {
+				ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+			}
+
+			await expect(Tickets.initialiseAutomatedProperties(teamspace, project, model, tickets, template))
+				.resolves.toEqual(expectedData);
+
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value }, [presetModules.SAFETIBASE]: { [propName]: value } },
+
+			};
+
+			if (value === undefined) {
+				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+			} else {
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
+					tickets, times(tickets.length, () => updateData), 'system');
+
+				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(1);
+				expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+			}
+		});
+	});
+};
+
+const testOnTemplateUpdated = () => {
+	const teamspace = generateRandomString();
+	const modelName = generateRandomString();
+	const moduleName = generateRandomString();
+	const temCode = generateRandomString(3);
+	const ticketNum = generateRandomNumber();
+	const propName = generateRandomString();
+	describe.each([
+		['Should do nothing if there is no ticket associated with the template', { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, undefined, false],
+		['Should do nothing if the template does not contain automated properties', { }, undefined],
+		['Should do nothing if the template automated property does not contain {template_code}', { value: 'xyz' }, 'xyz'],
+		[`Should update the field if it is automated (${supportedPatterns.TEMPLATE_CODE})`, { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, `code${temCode}`],
+		['Should update the field if it is automated (mutliple properties)',
+			{ value: `code{${supportedPatterns.MODEL_NAME}}:{${supportedPatterns.TEMPLATE_CODE}}:{${supportedPatterns.TICKET_NUMBER}}` }, `code${modelName}:${temCode}:${ticketNum}`],
+
+	])('On template code updated', (desc, config, value, hasTickets = true) => {
+		test(desc, async () => {
+			const property = { name: propName, type: propTypes.TEXT, ...config };
+			const template = {
+				_id: generateUUIDString(),
+				name: generateRandomString(),
+				code: temCode,
+				properties: [property],
+				modules: [{
+					name: moduleName,
+					properties: [property],
+				}],
+			};
+			const project = generateRandomString();
+			const models = times(2, () => generateRandomString());
+			const nTickets = hasTickets ? 6 : 0;
+			const expectedData = [];
+			const tickets = times(nTickets, (i) => {
+				const ticket = {
+					title: generateRandomString(),
+					project,
+					model: models[i % 2],
+					number: ticketNum,
+					properties: {},
+					modules: { [moduleName]: {} },
+				};
+				const resTicket = cloneDeep(ticket);
+
+				if (value !== undefined) {
+					resTicket.properties[propName] = value;
+					resTicket.modules[moduleName][propName] = value;
+				}
+				expectedData.push(resTicket);
+
+				return ticket;
+			});
+
+			if (value !== undefined) {
+				models.forEach(() => {
+					ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+				});
+			}
+
+			const fetchedTickets = config.value?.includes(`{${supportedPatterns.TEMPLATE_CODE}}`) || value !== undefined;
+
+			if (fetchedTickets) {
+				TicketsModel.getTicketsByTemplateId.mockResolvedValueOnce(tickets);
+			}
+
+			await Tickets.onTemplateUpdated(teamspace, template);
+
+			if (fetchedTickets) {
+				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledWith(teamspace,
+					template._id, { number: 1, _id: 1, project: 1, model: 1 });
+			} else {
+				expect(TicketsModel.getTicketsByTemplateId).not.toHaveBeenCalled();
+			}
+
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value } },
+			};
+
+			if (value === undefined) {
+				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+			} else {
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(models.length);
+				models.forEach((model) => {
+					expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace,
+						project, model, tickets.filter(({ model: ticketModel }) => model === ticketModel),
+						times(tickets.length / models.length, () => updateData), 'system');
+				});
+
+				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(models.length);
+				models.forEach((model) => {
+					expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+				});
+			}
+		});
+	});
+};
+
+const testOnModelNameUpdated = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const modelName = generateRandomString();
+	const moduleName = generateRandomString();
+	const propName = generateRandomString();
+	describe.each([
+		['Should do nothing if there is no ticket associated with the templates', { value: `code{${supportedPatterns.MODEL_NAME}}` }, undefined, true, false],
+		['Should do nothing if there is no templates', { value: `code{${supportedPatterns.MODEL_NAME}}` }, undefined, false, false],
+		['Should do nothing if the template does not contain automated properties', { }],
+		[`Should do nothing if the template automated property does not contain ${supportedPatterns.MODEL_NAME}`, { value: 'xyz' }],
+		[`Should update the field if it is automated (${supportedPatterns.MODEL_NAME})`, { value: `code{${supportedPatterns.MODEL_NAME}}` }, `code${modelName}`],
+	])('On model name updated', (desc, config, value, hasTemplates = true, hasTickets = true) => {
+		test(desc, async () => {
+			const property = { name: propName, type: propTypes.TEXT, ...config };
+			const templates = times(hasTemplates ? 2 : 0, () => ({
+				_id: generateUUIDString(),
+				name: generateRandomString(),
+				properties: [property],
+				modules: [{
+					name: moduleName,
+					properties: [property],
+				}],
+			}));
+			const nTickets = hasTickets ? 5 : 0;
+			const expectedData = [];
+			const tickets = times(nTickets, () => {
+				const ticket = {
+					title: generateRandomString(),
+					project,
+					model,
+					properties: {},
+					modules: { [moduleName]: {} },
+				};
+				const resTicket = cloneDeep(ticket);
+
+				if (value !== undefined) {
+					resTicket.properties[propName] = value;
+					resTicket.modules[moduleName][propName] = value;
+				}
+				expectedData.push(resTicket);
+
+				return ticket;
+			});
+			TemplatesModel.getTemplatesByQuery.mockResolvedValueOnce(templates);
+
+			if (value !== undefined) {
+				templates.forEach(() => {
+					ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+				});
+			}
+
+			const fetchedTickets = config.value?.includes(`{${supportedPatterns.MODEL_NAME}}`);
+
+			if (fetchedTickets) {
+				templates.forEach(() => {
+					TicketsModel.getTicketsByQuery.mockResolvedValueOnce(tickets);
+				});
+			}
+
+			await expect(Tickets.onModelNameUpdated(teamspace, project, model))
+				.resolves.toBeUndefined();
+
+			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledWith(teamspace,
+				{ $or: [
+					{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+					{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+				] });
+
+			if (fetchedTickets) {
+				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(templates.length);
+				templates.forEach((template) => {
+					expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, model,
+						{ type: template._id }, { number: 1, _id: 1, project: 1, model: 1 });
+				});
+			} else {
+				expect(TicketsModel.getTicketsByQuery).not.toHaveBeenCalled();
+			}
+
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value } },
+			};
+
+			if (value === undefined) {
+				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+			} else {
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(templates.length);
+				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
+					tickets, times(tickets.length, () => updateData), 'system');
+
+				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(templates.length);
+				expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+			}
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
+	beforeEach(() => {
+		jest.resetAllMocks();
+	});
 	testAddTicket();
 	testImportTickets();
 	testGetTicketResourceAsStream();
@@ -1312,4 +1498,7 @@ describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testUpdateManyTickets();
 	testGetTicketList();
 	testGetOpenTicketsCount();
+	testInitialiseAutomatedProperties();
+	testOnTemplateUpdated();
+	testOnModelNameUpdated();
 });

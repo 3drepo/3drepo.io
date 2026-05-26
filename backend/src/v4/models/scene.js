@@ -18,10 +18,10 @@
 "use strict";
 const utils = require("../utils");
 const db = require("../handler/db");
-const ExternalServices = require("../handler/externalServices");
 const matrix = require("./helper/matrix");
 const History = require("./history");
 const {v5Path} = require("../../interop");
+const { sanitiseRegex } = require(`${v5Path}/utils/helper/strings`);
 const Models = require(`${v5Path}/models/modelSettings`);
 
 function clean(nodeToClean) {
@@ -82,7 +82,8 @@ Scene.findNodesByType = async function (account, model, branch, revision, type, 
 	};
 
 	if (searchString) {
-		query.name = new RegExp(searchString, "i");
+		const sanitisedSearchString = sanitiseRegex(searchString);
+		query.name = new RegExp(sanitisedSearchString, "i");
 	}
 
 	return findNodes(account, model, branch, revision, query, projection);
@@ -111,10 +112,6 @@ Scene.findMetadataNodesByFields = async function (account, model, branch, revisi
 	}
 
 	return cleanAll(await db.aggregate(account, getSceneCollectionName(model), [query, projection]));
-};
-
-Scene.getGridfsFileStream = async function (account, model, filename) {
-	return ExternalServices.getFileStream(account, getSceneCollectionName(model), "gridfs", filename);
 };
 
 Scene.getNodeById = async function (account, model, id, projection = {}) {

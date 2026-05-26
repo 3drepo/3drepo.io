@@ -19,7 +19,8 @@ import { ReactNode, useCallback, useEffect, useState, useRef } from 'react';
 import { WindowEventListener } from '@/v4/helpers/windowEventListener';
 import { onlyText } from 'react-children-utilities';
 
-import { Container, Tooltip } from './textOverflow.styles';
+import { Container } from './textOverflow.styles';
+import { Tooltip } from '@mui/material';
 
 interface ITextOverflow {
 	lines?: number;
@@ -32,6 +33,8 @@ export const TextOverflow = ({ children, className, tooltipText, lines }: ITextO
 	const ref = useRef(null);
 	const [isTruncated, setIsTruncated] = useState(false);
 
+	const tooltipTitle = isTruncated ? tooltipText || onlyText(children) : '';
+
 	const checkIfTruncated = useCallback(() => {
 		if (!ref.current) return false;
 
@@ -42,15 +45,24 @@ export const TextOverflow = ({ children, className, tooltipText, lines }: ITextO
 	useEffect(() => {
 		setIsTruncated(checkIfTruncated());
 	}, [checkIfTruncated, setIsTruncated, children]);
+	
+	useEffect(() => {
+		if (!ref.current) return;
+		const resizeObserver = new ResizeObserver(() => {
+			setIsTruncated(checkIfTruncated());
+		});
+		resizeObserver.observe(ref.current);
+		return () => resizeObserver.disconnect();
+	}, [checkIfTruncated]);
 
 	return (
 		<>
-			<Tooltip
-				title={tooltipText || onlyText(children)}
-				style={{ pointerEvents: isTruncated ? 'all' : 'none' }}
-				placement="bottom"
-			>
-				<Container ref={ref} lines={lines} className={className}>
+			<Tooltip title={tooltipTitle} placement="bottom" slotProps={{ tooltip: { sx: { maxWidth: '600px' } } } } >
+				<Container
+					ref={ref}
+					lines={lines}
+					className={className}
+				>
 					{children}
 				</Container>
 			</Tooltip>

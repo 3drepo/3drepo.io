@@ -56,7 +56,7 @@ export const SearchInput = styled(SearchInputBase)`
 export const ProjectCardsList = styled.ul`
 	display: flex;
 	flex-direction: row;
-	justify-content: flex-start;
+	justify-content: center;
 	flex-wrap: wrap;
 	padding: 0;
 	margin: 0;

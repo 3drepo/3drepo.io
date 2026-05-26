@@ -16,10 +16,13 @@
  */
 
 const { addModelToProject, getProjectById, removeModelFromProject } = require('../../../../../models/projectSettings');
-const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions/permissions');
+const { hasProjectAdminPermissions, isTeamspaceAdmin } = require('../../../../../utils/permissions');
 const { USERS_DB_NAME } = require('../../../../../models/users.constants');
 const { addModel } = require('../../../../../models/modelSettings');
 const { getFavourites } = require('../../../../../models/users');
+const { getMD5FileHash } = require('../../../../../services/filesManager');
+const { getRevisionByIdOrTag } = require('../../../../../models/revisions');
+const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { removeModelData } = require('../../../../../utils/helper/models');
 
 const ModelList = {};
@@ -37,24 +40,48 @@ ModelList.deleteModel = async (teamspace, project, model) => {
 	await removeModelFromProject(teamspace, project, model);
 };
 
-ModelList.getModelList = async (teamspace, project, user, modelSettings) => {
+ModelList.getModelList = async (teamspace, project, user, modelSettings, bypassPerms = false) => {
 	const { permissions } = await getProjectById(teamspace, project, { permissions: 1, models: 1 });
 
-	const [isTSAdmin, favourites] = await Promise.all([
+	const [isTSAdmin, favourites] = bypassPerms ? [true, []] : await Promise.all([
 		isTeamspaceAdmin(teamspace, user),
 		getFavourites(user, teamspace),
 	]);
 
 	const isAdmin = isTSAdmin || hasProjectAdminPermissions(permissions, user);
 
-	return modelSettings.flatMap(({ _id, name, permissions: modelPerms }) => {
-		const perm = modelPerms ? modelPerms.find((entry) => entry.user === user) : undefined;
+	return modelSettings.flatMap(({ _id, name, permissions: modelPerms = [] }) => {
+		const perm = modelPerms.find((entry) => entry.user === user);
 		return (!isAdmin && !perm)
-			? [] : { _id,
+			? [] : {
+				_id,
 				name,
 				role: isAdmin ? USERS_DB_NAME : perm.permission,
-				isFavourite: favourites.includes(_id) };
+				isFavourite: favourites.includes(_id),
+			};
 	});
+};
+
+ModelList.getModelMD5Hash = async (teamspace, container, revision) => {
+	const rev = await getRevisionByIdOrTag(
+		teamspace, container, modelTypes.CONTAINER, revision,
+		{ rFile: 1, timestamp: 1, fileSize: 1, tag: 1 },
+		{ includeVoid: false });
+
+	if (!rev.rFile?.length) return {};
+
+	const { tag, timestamp } = rev;
+	const filename = rev.rFile[0];
+	const { hash, size } = await getMD5FileHash(teamspace, `${container}.history`, filename);
+
+	return {
+		container,
+		tag,
+		timestamp,
+		hash,
+		filename,
+		size,
+	};
 };
 
 module.exports = ModelList;

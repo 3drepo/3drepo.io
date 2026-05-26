@@ -35,6 +35,7 @@ const drawingRevision = ServiceHelper.generateRevisionEntry(false, true, modelTy
 
 let agent;
 const setupData = async () => {
+	await ServiceHelper.db.createUser(user);
 	await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
 	await Promise.all([
 		ServiceHelper.db.createModel(
@@ -51,7 +52,6 @@ const setupData = async () => {
 		),
 	]);
 	await Promise.all([
-		ServiceHelper.db.createUser(user, [teamspace]),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id, drawing._id]),
 		ServiceHelper.db.createRevision(teamspace, project.id, container._id,
 			{ ...containerRevision, author: user.user }),
@@ -64,7 +64,7 @@ const setupData = async () => {
 const revisionUpdateTest = () => {
 	describe('On updating a revision', () => {
 		test(`should trigger a ${EVENTS.CONTAINER_REVISION_UPDATE} event when a revision has been updated using revision Id`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
 			const data = { teamspace, project: project.id, model: container._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -90,7 +90,7 @@ const revisionUpdateTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.CONTAINER_REVISION_UPDATE} event when a revision has been updated using revision tag`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
 			const data = { teamspace, project: project.id, model: container._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -116,7 +116,7 @@ const revisionUpdateTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.DRAWING_REVISION_UPDATE} event when a calibration has been updated`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
 			const data = { teamspace, project: project.id, model: drawing._id };
 			await ServiceHelper.socket.joinRoom(socket, data);
@@ -175,7 +175,7 @@ const revisionUpdateTest = () => {
 		});
 
 		test(`should trigger a ${EVENTS.DRAWING_REVISION_UPDATE} event when a drawing revision has been updated using revision Id`, async () => {
-			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user.user, user.password);
+			const socket = await ServiceHelper.socket.loginAndGetSocket(agent, user, { teamspace });
 
 			const data = { teamspace, project: project.id, model: drawing._id };
 			await ServiceHelper.socket.joinRoom(socket, data);

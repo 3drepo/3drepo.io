@@ -29,28 +29,19 @@ const UnityAssets = require("../models/unityAssets");
 const Scene = require("../models/scene");
 const SrcAssets = require("../models/srcAssets");
 const JSONAssets = require("../models/jsonAssets");
-const Upload = require("../models/upload");
 const config = require("../config");
 const {v5Path} = require("../../interop");
-const { validateNewRevisionData : validateNewModelRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/containers`);
 const { validateNewRevisionData : validateNewFedRevisionData } = require(`${v5Path}/middleware/dataConverter/inputs/teamspaces/projects/models/federations`);
-const ContainersV5 = require(`${v5Path}/processors/teamspaces/projects/models/containers`);
 const FederationsV5 = require(`${v5Path}/processors/teamspaces/projects/models/federations`);
 const ResponderV5 = require(`${v5Path}/utils/responder`);
 const ResponseCodes = require(`${v5Path}/utils/responseCodes`);
-
-function convertProjectToParam(req, res, next) {
-	if (req.body.project) {
-		req.params.project = req.body.project;
-	}
-	next();
-}
+const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 /**
  * @apiDefine PermissionObject
  *
- * @apiParam (Request body: Permission) {string} user User ID
- * @apiParam (Request body: Permission) {string} permission Permission type ('viewer'|'commenter'|'collaborator'|'').
+ * @apiBody (Permission) {string} user User ID
+ * @apiBody (Permission) {string} permission Permission type ('viewer'|'commenter'|'collaborator'|'').
  */
 
 // Get model info
@@ -61,7 +52,7 @@ function convertProjectToParam(req, res, next) {
  * @apiGroup Model
  *
  * @apiParam {String} teamspace Name of teamspace
- * @apiParam {Object} model The modelId to get settings for.
+ * @apiParam {String} model.json The modelId to get settings for, with a json extension.
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818.json HTTP/1.1
@@ -108,6 +99,7 @@ router.get("/:model.json", middlewares.hasReadAccessToModel, getModelSetting);
  * @apiName getHeliSpeed
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model The modelId to get Heli speed for.
  *
  * @apiExample {get} Example usage:
@@ -125,8 +117,9 @@ router.get("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, getHe
  * @apiName updateHeliSpeed
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to Update Heli speed.
- * @apiParam (Request body) {Number} heliSpeed The value of the speed that will replace the heli speed.
+ * @apiBody {Number} heliSpeed The value of the speed that will replace the heli speed.
  *
  * @apiExample {put} Example usage:
  * PUT /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/settings/heliSpeed HTTP/1.1
@@ -144,18 +137,19 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
  * @apiName updateSettings
  * @apiGroup Model
  *
+ * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to update Settings.
  *
- * @apiParam (Request body) {String} name Name of the model to be created
- * @apiParam (Request body) {String} unit The unit in which the model is specified
- * @apiParam (Request body) {String} code A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers
- * @apiParam (Request body) {String} type The type of the model
- * @apiParam (Request body) {Number} angleFromNorth GIS bearing angle
- * @apiParam (Request body) {Number} elevation GIS elevation
- * @apiParam (Request body) {[]SurveyPoint} surveyPoints  an array containing GIS surveypoints
+ * @apiBody {String} name Name of the model to be created
+ * @apiBody {String} unit The unit in which the model is specified
+ * @apiBody {String} code A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers
+ * @apiBody {String} type The type of the model
+ * @apiBody {Number} angleFromNorth GIS bearing angle
+ * @apiBody {Number} elevation GIS elevation
+ * @apiBody {Object[]} surveyPoints  an array containing GIS surveypoints
  *
- * @apiParam (Request body: SurveyPoint) {Number[]} position an array representing a three dimensional coordinate
- * @apiParam (Request body: SurveyPoint) {Number[]} latLong an array representing a two dimensional coordinate for latitude and logitude
+ * @apiBody (SurveyPoint) {Number[]} position an array representing a three dimensional coordinate
+ * @apiBody (SurveyPoint) {Number[]} latLong an array representing a two dimensional coordinate for latitude and logitude
  *
  * @apiExample {put} Example usage:
  * PUT /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/settings HTTP/1.1
@@ -191,67 +185,7 @@ router.put("/:model/settings/heliSpeed", middlewares.hasReadAccessToModel, updat
 
 router.put("/:model/settings", middlewares.hasWriteAccessToModelSettings, updateSettings);
 
-/**
- * @api {post} /:teamspace/model Create a model
- * @apiName createModel
- * @apiGroup Model
- *
- * @apiParam {String} teamspace Name of teamspace
- *
- * @apiParam (Request body) {String} project Name of project in which the model will be created
- * @apiParam (Request body) {String} modelName Name of the model to be created
- * @apiParam (Request body) {String} unit The unit in which the model is specified
- * @apiParam (Request body) {String} [desc] A description of the model
- * @apiParam (Request body) {String} [code] A code to be associated with the model; it can be of maximum 5 letters (a-z) and numbers
- * @apiParam (Request body) {String} type The type of the model
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/model HTTP/1.1
- * {
- *    project: "classic project",
- *    modelName: "awesomeModel",
- *    unit: "ft",
- *    desc: "This is an awesome model!",
- *    code: "awe12",
- *    type: "Mechanical"
- * }
- *
- * @apiSuccessExample {json} Success:
- * {
- *    account: "teamSpace1",
- *    model: "17d09947-368e-4748-877f-d105842c6681",
- *    name: "awesomeModel",
- *    permissions: [
- *       "change_model_settings",
- *       "upload_files",
- *       "create_issue",
- *       "comment_issue",
- *       "view_issue",
- *       "view_model",
- *       "download_model",
- *       "edit_federation",
- *       "delete_federation",
- *       "delete_model",
- *       "manage_model_permission"
- *    ],
- *    setting: {
- *       type: "Mechanical",
- *       desc: "",
- *       name: "awesomeModel",
- *       _id: "17d09947-368e-4748-877f-d105842c6681",
- *       subModels: [],
- *       surveyPoints: [],
- *       properties: {
- *          unit: "ft"
- *       },
- *       permissions: [],
- *       status: "ok"
- *    }
- * }
- *
- */
-
-router.post("/model",convertProjectToParam,middlewares.canCreateModel,createModel);
+router.post("/model", routeDecommissioned("POST", "/v5/teamspaces/{teamspace}/projects/{project}/{type}"));
 
 // Unity information
 
@@ -409,20 +343,13 @@ router.get("/:model/revision/master/head/repoAssets.json", middlewares.hasReadAc
 router.get("/:model/revision/:rev/repoAssets.json", middlewares.hasReadAccessToModel, getRepoAssets);
 
 /**
- * @api {get} /:teamspace/:model/revision/master/head/unityAssets.json Get unity assets
- * @apiName getUnityAssets
+ * @api {get} /:teamspace/:model/revision/master/head/assetsMeta Get unity assets metadata
+ * @apiName getAssetsMeta
  * @apiGroup Model
- * @apiDescription Get the lastest model's version unity assets
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model The model Id to get unity assets for.
- *
- * @apiExample {get} Example usage:
- * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/unityAssets.json HTTP/1.1
+ * @apiDescription Get the lastest model's version unity assets metadata
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model The model Id
- * @apiParam {String} rev The revision of the model
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/assetsMeta HTTP/1.1
@@ -486,7 +413,7 @@ router.get("/:model/revision/:rev/supermeshes.json.mpc", middlewares.hasReadAcce
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model to get JSON Mpc for.
- * @apiParam {String} uid id of the json.mpc file
+ * @apiParam {String} uid.json.mpc id of the json.mpc file
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/92fc213b-1bab-49a4-b10e-f4368a52d500_unity.json.mpc HTTP/1.1
@@ -528,21 +455,10 @@ router.get("/:model/:uid.json.mpc",  middlewares.hasReadAccessToModel, getJsonMp
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model
- * @apiParam {String} uid id of the unity bundle
+ * @apiParam {String} uid.unity3d id of the unity bundle
  */
 
 router.get("/:model/:uid.unity3d", middlewares.hasReadAccessToModel, getUnityBundle);
-
-/**
- * @api {get} /:teamspace/:model/:uid.src.mpc Get Model in SRC representation
- * @apiName getSRC
- * @apiGroup Model
- * @apiDescription Get a mesh presented in SRC format.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model id of the model
- * @apiParam {String} uid id of the SRC file.
- */
 
 router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
 
@@ -554,7 +470,7 @@ router.get("/:model/:uid.src.mpc", middlewares.hasReadAccessToModel, getSRC);
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model
- * @apiParam {String} uid id of the repo bundle file.
+ * @apiParam {String} uid.repobundle id of the repo bundle file.
  */
 
 router.get("/:model/:uid.repobundle", middlewares.hasReadAccessToModel, getRepoBundle);
@@ -567,7 +483,7 @@ router.get("/:model/:uid.repobundle", middlewares.hasReadAccessToModel, getRepoB
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model id of the model
- * @apiParam {String} uid id of the texture file.
+ * @apiParam {String} uid.texture id of the texture file.
  */
 router.get("/:model/:uid.texture", middlewares.hasReadAccessToModel, getTexture);
 
@@ -699,10 +615,10 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Federated Model ID to update
  *
- * @apiParam (Request body){[]Submodel} subModels Information on the models that are going to get federated
+ * @apiBody {Object[]} subModels Information on the models that are going to get federated
  *
- * @apiParam (Request body: SubModel){String} database The teamspace name which the model belongs to
- * @apiParam (Request body: SubModel){String} model The model id to be federated
+ * @apiBody (SubModel) {String} database The teamspace name which the model belongs to
+ * @apiBody (SubModel) {String} model The model id to be federated
  *
  * @apiExample {put} Example usage:
  * PUT /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5 HTTP/1.1
@@ -788,127 +704,13 @@ router.get("/:model/revision/master/head/srcAssets.json", middlewares.hasReadAcc
 router.put("/:model", middlewares.hasEditAccessToFedModel, middlewares.formatV5NewFedRevisionsData, validateNewFedRevisionData, updateModel);
 
 /**
- * @api {post} /:teamspace/models/permissions Update multiple models permissions
- * @apiName updateMultiplePermissions
- * @apiGroup Model
- * @apiDeprecated use now (#Model:batchUpdateModelPermissions)
- *
- * @apiParam {String} teamspace Name of teamspace.
- * @apiParam (Request body) {[]ModelPermissions} BODY Its an array with a list of model ids and their permissions.
- *
- * @apiParam (Request body: ModelPermissions) {String} model The model id of the model that will have their permission changed. If it's a federation the entry in the response corresponding with the model will have the 'federated' field set to true.
- * @apiParam (Request body: ModelPermissions) {[]Permission} permissions An array indicating the new permissions.
- *
- * @apiUse PermissionObject
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/models/permissions HTTP/1.1
- * [
- *    {
- *       model: "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
- *       permissions: [
- *          {
- *             user: "viewerTeamspace1Model1JobA",
- *             permission: "viewer"
- *          },
- *          {
- *             user: "commenterTeamspace1Model1JobA",
- *             permission: "viewer"
- *          },
- *          {
- *             user: "collaboratorTeamspace1Model1JobA",
- *             permission: "collaborator"
- *          },
- *          {
- *             user: "commenterTeamspace1Model1JobB",
- *             permission: "commenter"
- *          },
- *          {
- *             user: "collaboratorTeamspace1Model1JobB",
- *             permission: "collaborator"
- *          }
- *       ]
- *    }
- * ]
- *
- * @apiSuccessExample {json} Success:
- * [
- *    {
- *       name: "Full Logo ",
- *       federate: true,
- *       model: "5ce7dd19-1252-4548-a9c9-4a5414f2e0c5",
- *       permissions: [
- *          {
- *             user: "viewerTeamspace1Model1JobA",
- *             permission: "viewer"
- *          },
- *          {
- *             user: "commenterTeamspace1Model1JobA",
- *             permission: "viewer"
- *          },
- *          {
- *             user: "collaboratorTeamspace1Model1JobA",
- *             permission: "collaborator"
- *          },
- *          {
- *             user: "commenterTeamspace1Model1JobB",
- *             permission: "commenter"
- *          },
- *          {
- *             user: "collaboratorTeamspace1Model1JobB",
- *             permission: "collaborator"
- *          },
- *          {
- *             user: "projectshared"
- *          },
- *          {
- *             user: "fed"
- *          },
- *          {
- *             user: "teamSpace1"
- *          },
- *          {
- *             user: "unassignedTeamspace1UserJobA"
- *          },
- *          {
- *             user: "viewerTeamspace1Model1JobB"
- *          },
- *          {
- *             user: "adminTeamspace1JobA"
- *          },
- *          {
- *             user: "adminTeamspace1JobB"
- *          },
- *          {
- *             user: "weirdTeamspace"
- *          }
- *       ],
- *       subModels: [
- *          {
- *             database: "teamSpace1",
- *             model: "7cf61b4f-acdf-4295-b2d0-9b45f9f27418"
- *          },
- *          {
- *             database: "teamSpace1",
- *             model: "b1fceab8-b0e9-4e45-850b-b9888efd6521"
- *          }
- *       ]
- *    }
- * ]
- */
-router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, updateMultiplePermissions);
-
-/**
- * @api {patch} /:teamspace/models/permissions Batch update model permissions
- * @apiName batchUpdateModelPermissions
+ * @api {patch} /:teamspace/model/permissions Update multiple model permissions
+ * @apiName updateModelPermissions
  * @apiGroup Model
  *
- * @apiParam {String} teamspace Name of teamspace.
+ * @apiParam {String} teamspace Name of teamspace
  *
- * @apiParam (Request body) {ModelPermissions[]} BODY List of model permissions
- *
- * @apiParam (Request body: ModelPermissions) {String} model Model ID
- * @apiParam (Request body: ModelPermissions) {Permission[]} permissions List of user permissions
+ * @apiBody {Permission[]} permissions List of user permissions
  *
  * @apiUse PermissionObject
  *
@@ -956,101 +758,13 @@ router.post("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpl
  *    }
  * ]
  *
- * @apiSuccessExample {json} Success:
+ * @apiSuccessExample {json} Success-Response:
+ * HTTP/1.1 200 OK
  * {
- *    status: "ok"
+ *    "status": "ok"
  * }
  */
 router.patch("/models/permissions", middlewares.hasEditPermissionsAccessToMulitpleModels, batchUpdatePermissions);
-
-/**
- * @api {post} /:teamspace/:model/permissions Update model permissions
- * @apiName updatePermissions
- * @apiGroup Model
- * @apiDeprecated use now (#Model:updateModelPermissions)
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model The model id of the model to be updated
- *
- * @apiParam (Request body) {[]Permissions} BODY Its an array with a list of users and their permission type.
- *
- * @apiUse PermissionObject
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/permissions HTTP/1.1
- * [
- *    {
- *       user: "viewerTeamspace1Model1JobA",
- *       permission: "collaborator"
- *    },
- *    {
- *       user: "commenterTeamspace1Model1JobA",
- *       permission: "viewer"
- *    },
- *    {
- *       user: "collaboratorTeamspace1Model1JobA",
- *       permission: "collaborator"
- *    },
- *    {
- *       user: "commenterTeamspace1Model1JobB",
- *       permission: "commenter"
- *    },
- *    {
- *       user: "collaboratorTeamspace1Model1JobB",
- *       permission: "collaborator"
- *    }
- * ]
- *
- * @apiSuccessExample {json} Success:
- * {
- *    _id: "2710bd65-37d3-4e7f-b2e0-ffe743ce943f",
- *    timestamp: "2019-05-02T16:17:14.000Z",
- *    type: "Architectural",
- *    desc: "",
- *    name: "pipes",
- *    subModels: [],
- *    surveyPoints: [
- *       {
- *          position: [
- *             0,
- *             0,
- *             0
- *          ],
- *          latLong: [
- *             0,
- *             0
- *          ]
- *       }
- *    ],
- *    properties: {
- *       unit: "mm"
- *    },
- *    permissions: [
- *       {
- *          user: "viewerTeamspace1Model1JobA",
- *          permission: "collaborator"
- *       },
- *       {
- *          user: "commenterTeamspace1Model1JobA",
- *          permission: "viewer"
- *       },
- *       {
- *          user: "collaboratorTeamspace1Model1JobA",
- *          permission: "collaborator"
- *       },
- *       {
- *          user: "commenterTeamspace1Model1JobB",
- *          permission: "commenter"
- *       },
- *       {
- *          user: "collaboratorTeamspace1Model1JobB",
- *          permission: "collaborator"
- *       }
- *    ],
- *    status: "ok"
- * }
- */
-router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, changePermissions);
 
 /**
  * @api {patch} /:teamspace/:model/permissions Update model permissions
@@ -1060,7 +774,7 @@ router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, 
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model ID
  *
- * @apiParam (Request body) {Permission[]} BODY List of user permissions
+ * @apiBody {Permission[]} permissions List of user permissions
  *
  * @apiUse PermissionObject
  *
@@ -1103,14 +817,14 @@ router.post("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, 
 router.patch("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, updatePermissions);
 
 /**
- * @api {get} /:teamspace/model/permissions?models=[MODELS] Get multiple models permissions
+ * @api {get} /:teamspace/model/permissions Get multiple models permissions
  * @apiName getMultipleModelsPermissions
  * @apiGroup Model
  *
  * @apiDescription Gets the permissions of a list of models
  *
  * @apiParam {String} teamspace Name of teamspace.
- * @apiParam (Query) {String[]} MODELS An array of model ids.
+ * @apiQuery {String} models An array of model ids.
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/models/permissions?models=5ce7dd19-1252-4548-a9c9-4a5414f2e0c5,3549ddf6-885d-4977-87f1-eeac43a0e818 HTTP/1.1
@@ -1306,6 +1020,9 @@ router.get("/:model/permissions", middlewares.hasEditPermissionsAccessToModel, g
  * @apiGroup Model
  *
  * @apiDescription Returns the full tree for the model
+ *
+ * @apiParam {String} teamspace Name of teamspace
+ * @apiParam {String} model Model ID
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/fulltree.json HTTP/1.1
@@ -1612,7 +1329,7 @@ router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAcce
 /**
  *
  *
- * @api {get} /:teamspace/:model/revision/master/head/searchtree.json?searchString=[searchString] Search model tree
+ * @api {get} /:teamspace/:model/revision/master/head/searchtree.json Search model tree
  * @apiName searchModelTree
  * @apiGroup Model
  * @apiDescription Searches the model (or models if it is a federation) tree and returns the objects matching their names with the searchString param.
@@ -1620,7 +1337,7 @@ router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAcce
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to use.
  *
- * @apiParam (Query) {String} searchString The string to use for search tree objects
+ * @apiQuery {String} searchString The string to use for search tree objects
  *
  * @apiExample {get} Example usage:
  * GET /teamSpace1/3549ddf6-885d-4977-87f1-eeac43a0e818/revision/master/head/searchtree.json?searchString=fou HTTP/1.1
@@ -1646,7 +1363,7 @@ router.get("/:model/revision/:rev/modelProperties.json", middlewares.hasReadAcce
 router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
 
 /**
- * @api {get} /:teamspace/:model/revision/:rev/searchtree.json?searchString=[searchString] Search model tree by revision
+ * @api {get} /:teamspace/:model/revision/:rev/searchtree.json Search model tree by revision
  * @apiName searchModelTreeRev
  * @apiGroup Model
  * @apiDescription Searches the model (or models if it is a federation) tree and returns the objects matching their names with the searchString param.
@@ -1656,7 +1373,7 @@ router.get("/:model/revision/master/head/searchtree.json", middlewares.hasReadAc
  * @apiParam {String} model Model to use.
  * @apiParam {String} rev	Revision to use.
  *
- * @apiParam (Query) {String} searchString The string to use for search tree objects
+ * @apiQuery {String} searchString The string to use for search tree objects
  */
 
 router.get("/:model/revision/:rev/searchtree.json", middlewares.hasReadAccessToModel, searchModelTree);
@@ -1728,7 +1445,7 @@ router.get("/:model/revision/master/head/subModelRevisions", middlewares.hasRead
  *
  * @apiParam {String} teamspace Name of teamspace
  * @apiParam {String} model Model to get properties for.
- * @apiParam {String} rev	Revision to use.
+ * @apiParam {String} revId	Revision to use.
  *
  */
 router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAccessToModel, getSubModelRevisions);
@@ -1753,144 +1470,7 @@ router.get("/:model/revision/:revId/subModelRevisions", middlewares.hasReadAcces
  */
 router.delete("/:model", middlewares.hasDeleteAccessToModel, deleteModel);
 
-/**
- * @api {post} /:teamspace/:model/upload/ms-chunking Initialise MS chunking request
- * @apiName initChunking
- * @apiGroup Model
- * @apiDescription Initiate model revision data for MS Logic Apps chunked upload.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model id to upload.
- * @apiParam (Request body) {String} filename Filename of content to upload
- * @apiParam (Request body) {String} tag Tag name for new revision
- * @apiParam (Request body) {String} [desc] Description for new revision
- * @apiParam (Request body) {Boolean} [importAnimations] Whether to import animations within a sequence
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking HTTP/1.1
- * {
- * 	"filename": "structure.ifc",
- * 	"tag": "rev001",
- * 	"desc": "Revision 2"
- * }
- *
- * @apiSuccessExample {json} Success-Response:
- * HTTP/1.1 200 OK
- * {
- * 	"corID": "00000000-0000-1111-2222-333333333333"
- * }
- */
-router.post("/:model/upload/ms-chunking", middlewares.hasUploadAccessToModel, initChunking);
-
-/**
- * @api {post} /:teamspace/:model/upload/ms-chunking/:corID Start MS chunking upload
- * @apiName uploadChunksStart
- * @apiGroup Model
- * @apiDescription Start chunked model upload for Microsoft Logic Apps.
- * Max chunk size defined as 52,428,800 bytes (52 MB) based on
- * https://docs.microsoft.com/en-us/azure/logic-apps/logic-apps-limits-and-config?tabs=azure-portal
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID to upload
- * @apiParam {String} corID Upload correlation ID
- * @apiParam (Request header) {String} x-ms-transfer-mode Indicates that the content is uploaded in chunks; value="chunked"
- * @apiParam (Request header) {Number} x-ms-content-length The entire content size in bytes before chunking
- *
- * @apiSuccess (200) {Number} [x-ms-chunk-size] Suggested chunk size in bytes
- * @apiSuccess (200) {String} Location The URL location where to send the HTTP PATCH messages
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1
- *
- * header: {
- * 	"x-ms-transfer-mode": "chunked",
- * 	"x-ms-content-length": 10100
- * }
- *
- * @apiSuccessExample {json} Success-Response:
- * HTTP/1.1 200 OK
- * {
- * 	"x-ms-chunk-size": 1024,
- * 	"Location": "/teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333"
- * }
- */
-router.post("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadChunksStart);
-
-/**
- * @api {patch} /:teamspace/:model/upload/ms-chunking/:corID Upload model chunk
- * @apiName uploadChunk
- * @apiGroup Model
- * @apiDescription Upload model chunk for Microsoft Logic Apps.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model ID to upload
- * @apiParam {String} corID Upload correlation ID
- * @apiParam (Request header) {String} Content-Range Byte range for the current content chunk, including the starting value, ending value, and the total content size, for example: "bytes 0-1023/10100"
- * @apiParam (Request header) {String} Content-Type Type of chunked content
- * @apiParam (Request header) {String} Content-Length Length of size in bytes of the current chunk
- *
- * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
- *
- * @apiSuccess (200) {String} Range Byte range for content that has been received by the endpoint, for example: "bytes=0-1023"
- * @apiSuccess (200) {Number} [x-ms-chunk-size] Suggested chunk size in bytes
- *
- * @apiExample {patch} Example usage:
- * PATCH /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload/ms-chunking/00000000-0000-1111-2222-333333333333 HTTP/1.1
- *
- * header: {
- * 	"Content-Range": "bytes 0-1023/10100",
- * 	"Content-Type": "application/octet-stream",
- * 	"Content-Length": "bytes=1024"
- * }
- *
- * body: {
- * 	"file": <FILE CHUNK CONTENTS>
- * }
- *
- * @apiSuccessExample {json} Success-Response:
- * HTTP/1.1 200 OK
- * {
- * 	"Range": "bytes=0-1023",
- * 	"x-ms-chunk-size": 1024
- * }
- */
-router.patch("/:model/upload/ms-chunking/:corID", middlewares.hasUploadAccessToModel, uploadChunk);
-
-/**
- * @api {post} /:teamspace/:model/upload Upload Model.
- * @apiName uploadModel
- * @apiGroup Model
- * @apiDescription It uploads a model file and creates a new revision for that model.
- *
- * @apiParam {String} teamspace Name of teamspace
- * @apiParam {String} model Model id to upload.
- * @apiParam (Request body) {String} tag the tag name for the new revision
- * @apiParam (Request body) {String} desc the description for the new revision
- * @apiParam (Request body) {Boolean} [importAnimations] whether to import animations within a sequence
- *
- * @apiParam (Request body: Attachment) {binary} FILE the file to be uploaded
- *
- * @apiExample {post} Example usage:
- * POST /teamSpace1/b1fceab8-b0e9-4e45-850b-b9888efd6521/upload HTTP/1.1
- * Content-Type: multipart/form-data; boundary=----WebKitFormBoundarySos0xligf1T8Sy8I
- *
- * ------WebKitFormBoundarySos0xligf1T8Sy8I
- * Content-Disposition: form-data; name="file"; filename="3DrepoBIM.obj"
- * Content-Type: application/octet-stream
- *
- * <binary content>
- * ------WebKitFormBoundarySos0xligf1T8Sy8I
- * Content-Disposition: form-data; name="tag"
- *
- * rev1
- * ------WebKitFormBoundarySos0xligf1T8Sy8I
- * Content-Disposition: form-data; name="desc"
- *
- * el paso
- * ------WebKitFormBoundarySos0xligf1T8Sy8I-- *
- *
- */
-router.post("/:model/upload",  middlewares.hasUploadAccessToModel, middlewares.formatV5NewModelRevisionsData, validateNewModelRevisionData, uploadModel);
+router.post("/:model/upload",  routeDecommissioned("POST", "/v5/teamspaces/{teamspace}/projects/{project}/{type}/{model}/revisions"));
 /**
  * @api {get} /:teamspace/:model/download/latest Download model
  * @apiName downloadModel
@@ -1965,60 +1545,6 @@ function getModelSetting(req, res, next) {
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
-}
-
-function createModel(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-
-	if (Object.keys(req.body).length >= 1 &&
-			Object.prototype.toString.call(req.body.modelName) === "[object String]" &&
-			(!req.body.desc || Object.prototype.toString.call(req.body.desc) === "[object String]") &&
-			(!req.body.type || Object.prototype.toString.call(req.body.type) === "[object String]") &&
-			(!req.body.unit || Object.prototype.toString.call(req.body.unit) === "[object String]") &&
-			(!req.body.subModels || Object.prototype.toString.call(req.body.subModels) === "[object Array]") &&
-			(!req.body.code || Object.prototype.toString.call(req.body.code) === "[object String]") &&
-			(!req.body.project || Object.prototype.toString.call(req.body.project) === "[object String]")) {
-		const modelName = req.body.modelName;
-		const account = req.params.account;
-		const username = req.session.user.username;
-
-		const data = {
-			desc: req.body.desc,
-			type: req.body.type,
-			unit: req.body.unit,
-			subModels: req.body.subModels,
-			code: req.body.code,
-			project: req.body.project
-		};
-
-		data.sessionId = req.headers[C.HEADER_SOCKET_ID];
-		data.userPermissions = req.session.user.permissions;
-
-		let createModelPromise;
-		const isFed = !!req.body.subModels;
-		if (isFed) {
-			createModelPromise = ModelHelpers.createNewFederation(account, modelName, username, data);
-		} else {
-			createModelPromise = ModelHelpers.createNewModel(account, modelName, data);
-		}
-
-		createModelPromise.then(result => {
-			const modelData = result.modelData;
-			modelData.setting = result.settings;
-
-			if (isFed) {
-				// hack: we need to wire federations properly onto the queue and follow the same process as model uploads. But it's
-				//       not happening right now.
-				modelData.setting.timestamp = new Date();
-			}
-
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, modelData);
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
-		});
-	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
 }
 
 async function updateModel(req, res, next) {
@@ -2182,96 +1708,19 @@ function downloadLatest(req, res, next) {
 	});
 }
 
-async function initChunking(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-	const {account, model} = req.params;
-	const username = req.session.user.username;
-
-	try {
-		const corID = await Upload.initChunking(account, model, username, req.body);
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, corID);
-	} catch(err) {
-		const errMsg = err.resCode ? err.resCode : err;
-		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
-	}
-}
-
-async function uploadChunksStart(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-	const { account, model, corID } = req.params;
-	const user = req.session.user.username;
-
-	try {
-		const initHeader = await Upload.uploadChunksStart(account, model, corID, user, req.headers);
-		initHeader.Location = `${config.public_protocol}://${req.headers.host}${req.originalUrl}`;
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, undefined, undefined, undefined, initHeader);
-	} catch(err) {
-		const errMsg = err.resCode ? err.resCode : err;
-		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
-	}
-}
-
-async function uploadChunk(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-	const { account, model, corID } = req.params;
-
-	try {
-		const chunkingHeader = await Upload.uploadChunk(account, model, corID, req);
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, undefined, undefined, undefined, chunkingHeader);
-	} catch(err) {
-		const errMsg = err.resCode ? err.resCode : err;
-		responseCodes.respond(responsePlace, req, res, next, errMsg, errMsg);
-	}
-}
-
-function uploadModel(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-	const { file } = req;
-	const revInfo = req.body;
-	const { teamspace, container } = req.params;
-	const owner = req.session.user ? req.session.user.username : undefined;
-
-	ContainersV5.newRevision(teamspace, container, { ...revInfo, owner }, file).then(() => {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { status: "uploaded"});
-	}).catch(err => {
-		err = err.resCode ? err.resCode : err;
-		responseCodes.respond(responsePlace, req, res, next, err, err);
-	});
-}
-
 function updatePermissions(req, res, next) {
 	const { account, model } = req.params;
 
-	return ModelSetting.updatePermissions(account, model, req.body).then(response => {
+	return ModelSetting.updatePermissions(account, model, req.body, req.session.user.username).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function changePermissions(req, res, next) {
-	const { account, model } = req.params;
-
-	return ModelSetting.changePermissions(account, model, req.body).then(permission => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permission);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
 }
 
 function batchUpdatePermissions(req, res, next) {
-	return ModelSetting.batchUpdatePermissions(req.params.account, req.body).then(response => {
+	return ModelSetting.batchUpdatePermissions(req.params.account, req.body,req.session.user.username).then(response => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, response);
-	}).catch(err => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
-	});
-}
-
-function updateMultiplePermissions(req, res, next) {
-	const modelsIds = req.body.map(({model}) => model);
-
-	return ModelSetting.updateMultiplePermissions(req.params.account, modelsIds, res.body).then(permissions => {
-		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, permissions);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err, err);
 	});
@@ -2346,7 +1795,7 @@ function getSrcAssets(req, res, next) {
 function getJsonMpc(req, res, next) {
 	const {account, model, uid} = req.params;
 
-	JSONAssets.getSuperMeshMapping(account, model, uid).then(file => {
+	JSONAssets.getSuperMeshMapping(account, model, utils.uuidToString(uid)).then(file => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, responseCodes.OK, file, undefined, config.cachePolicy);
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -2380,8 +1829,8 @@ function getSubModelRevisions(req, res, next) {
 function getUnityBundle(req, res, next) {
 	const {account, model, uid} = req.params;
 
-	UnityAssets.getUnityBundle(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
-		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
+	UnityAssets.getUnityBundle(account, model, utils.uuidToString(uid)).then(({ readStream, size: fileSize, mimeType, encoding }) => {
+		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, { mimeType, encoding, fileSize });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -2390,8 +1839,8 @@ function getUnityBundle(req, res, next) {
 function getRepoBundle(req, res, next) {
 	const {account, model, uid} = req.params;
 
-	UnityAssets.getRepoBundle(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
-		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
+	UnityAssets.getRepoBundle(account, model, utils.uuidToString(uid)).then(({ readStream, size: fileSize, mimeType, encoding }) => {
+		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, { mimeType, encoding, fileSize });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -2400,8 +1849,8 @@ function getRepoBundle(req, res, next) {
 function getTexture(req, res, next) {
 	const {account, model, uid} = req.params;
 
-	UnityAssets.getTexture(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
-		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
+	UnityAssets.getTexture(account, model, utils.uuidToString(uid)).then(({ readStream, size: fileSize, mimeType, encoding }) => {
+		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, { mimeType, encoding, fileSize });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});
@@ -2411,9 +1860,9 @@ function getSRC(req, res, next) {
 	const {account, model, uid} = req.params;
 
 	// FIXME: We should probably generalise this and have a model assets object.
-	SrcAssets.getSRC(account, model, uid).then(({ readStream, size, mimeType, encoding }) => {
+	SrcAssets.getSRC(account, model, utils.uuidToString(uid)).then(({ readStream, size: fileSize, mimeType, encoding }) => {
 		req.params.format = "src";
-		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, undefined, size, { mimeType, encoding });
+		ResponderV5.writeStreamRespond(req, res, ResponseCodes.templates.ok, readStream, { mimeType, encoding, fileSize });
 	}).catch(err => {
 		responseCodes.respond(utils.APIInfo(req), req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
 	});

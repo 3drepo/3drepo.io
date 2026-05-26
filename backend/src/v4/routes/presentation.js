@@ -32,6 +32,7 @@ const Presentation = require("../models/presentation");
  *
  * @apiParam {String} teamspace The teamspace where the presentation is taking place
  * @apiParam {String} model The model where the presentation is taking place
+ * @apiParam {String} code The code that users need to join in order to get the viewpoint.
  *
  * @apiExample {get} Example usage:
  * POST /teamSpace1/5ce7dd19-1252-4548-a9c9-4a5414f2e0c5/presentation/start HTTP/1.1
@@ -66,7 +67,7 @@ router.post("/presentation/:code/end", middlewares.hasReadAccessToModel, endPres
  * @apiParam {String} teamspace The teamspace where the presentation is taking place
  * @apiParam {String} model The model where the presentation is taking place
  * @apiParam {String} code The code that users need to join in order to get the viewpoint.
- * @apiParam (Request body) {StreamingViewpoint} The viewpoint
+ * @apiBody {Object} StreamingViewpoint The viewpoint
  *
  */
 router.put("/presentation/:code/stream", middlewares.hasReadAccessToModel, streamPresentation);
