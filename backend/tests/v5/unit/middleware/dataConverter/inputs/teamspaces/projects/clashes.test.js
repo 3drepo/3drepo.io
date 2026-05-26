@@ -60,6 +60,7 @@ const { createResponseCode } = require('../../../../../../../../src/v5/utils/res
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require(`${src}/models/clashes.constants`);
+const { presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -81,6 +82,9 @@ const testValidateNewPlanData = () => {
 	const knownUsername = generateRandomString();
 
 	const deprecatedTemplate = generateUUIDString();
+	const templateWithoutCloudClash = generateUUIDString();
+	const templateWithDeprecatedCloudClash = generateUUIDString();
+	const validTemplate = { modules: [{ type: presetModules.CLOUD_CLASH, properties: [] }] };
 
 	const planData = {
 		name: generateRandomString(),
@@ -143,6 +147,8 @@ const testValidateNewPlanData = () => {
 		['without creator specified', false, { ...planData, tickets: { ...ticketData, creator: undefined } }, { tickets: ticketData }],
 		['with unknown template', false, { ...planData, tickets: { ...ticketData, template: generateRandomString() } }],
 		['with deprecated template', false, { ...planData, tickets: { ...ticketData, template: deprecatedTemplate } }],
+		['with template that does not contain cloud clash module', false, { ...planData, tickets: { ...ticketData, template: templateWithoutCloudClash } }],
+		['with template that has deprecated cloud clash module', false, { ...planData, tickets: { ...ticketData, template: templateWithDeprecatedCloudClash } }],
 		['with erroneous creation values', false, { ...planData, tickets: { ...ticketData, valuesAtCreation: generateRandomObject() } }],
 	];
 
@@ -171,11 +177,21 @@ const testValidateNewPlanData = () => {
 
 			TicketTemplateModel.getTemplateById.mockImplementation((t, templateId) => {
 				if (UUIDToString(templateId) === templateInTeamspace) {
-					return Promise.resolve({});
+					return Promise.resolve(validTemplate);
 				}
 
 				if (UUIDToString(templateId) === deprecatedTemplate) {
-					return Promise.resolve({ deprecated: true });
+					return Promise.resolve({ ...validTemplate, deprecated: true });
+				}
+
+				if (UUIDToString(templateId) === templateWithoutCloudClash) {
+					return Promise.resolve({ modules: [] });
+				}
+
+				if (UUIDToString(templateId) === templateWithDeprecatedCloudClash) {
+					return Promise.resolve({ modules: [{ type: presetModules.CLOUD_CLASH,
+						deprecated: true,
+						properties: [] }] });
 				}
 				return Promise.reject(createResponseCode(templates.templateNotFound));
 			});
@@ -220,8 +236,12 @@ const testValidateUpdatePlanData = () => {
 	const knownUsernames = times(2, () => generateRandomString());
 
 	const deprecatedTemplate = generateUUIDString();
+	const templateWithoutCloudClash = generateUUIDString();
+	const templateWithDeprecatedCloudClash = generateUUIDString();
+	const validTemplate = { modules: [{ type: presetModules.CLOUD_CLASH, properties: [] }] };
 
 	const knownPlanId = generateUUID();
+	const planWithTemplateWithoutCloudClash = generateUUID();
 
 	const ticketData = {
 		federation: recognisedFederations[0],
@@ -317,9 +337,12 @@ const testValidateUpdatePlanData = () => {
 		['with same creator', false, { tickets: { creator: oldPlanData.tickets.creator } }],
 		['with unknown template', false, { tickets: { template: generateRandomString() } }],
 		['with deprecated template', false, { tickets: { template: deprecatedTemplate } }],
+		['with template that does not contain cloud clash module', false, { tickets: { template: templateWithoutCloudClash } }],
+		['with template that has deprecated cloud clash module', false, { tickets: { template: templateWithDeprecatedCloudClash } }],
 		['with same template', false, { tickets: { template: oldPlanData.tickets.template } }],
 		['with null template', false, { tickets: { template: null } }],
 		['with new template', true, { tickets: { template: templatesInTeamspace[1] } }, { tickets: { template: stringToUUID(templatesInTeamspace[1]) } }],
+		['with existing template that does not contain cloud clash module', false, { tickets: { creator: knownUsernames[1] } }, undefined, planWithTemplateWithoutCloudClash],
 		['with null creation values', true, { tickets: { valuesAtCreation: null } }],
 		['with invalid creation values', false, { tickets: { valuesAtCreation: [{ property: generateRandomString(), value: generateRandomString() }] } }],
 		['with same creation values', false, { tickets: { valuesAtCreation: oldPlanData.tickets.valuesAtCreation } }],
@@ -353,16 +376,32 @@ const testValidateUpdatePlanData = () => {
 				if (UUIDToString(id) === UUIDToString(knownPlanId)) {
 					return Promise.resolve(oldPlanData);
 				}
+				if (UUIDToString(id) === UUIDToString(planWithTemplateWithoutCloudClash)) {
+					return Promise.resolve({
+						...oldPlanData,
+						tickets: { ...oldPlanData.tickets, template: stringToUUID(templateWithoutCloudClash) },
+					});
+				}
 				return Promise.reject(templates.clashPlanNotFound);
 			});
 
 			TicketTemplateModel.getTemplateById.mockImplementation((t, templateId) => {
 				if (templatesInTeamspace.includes(UUIDToString(templateId))) {
-					return Promise.resolve({});
+					return Promise.resolve(validTemplate);
 				}
 
 				if (UUIDToString(templateId) === deprecatedTemplate) {
-					return Promise.resolve({ deprecated: true });
+					return Promise.resolve({ ...validTemplate, deprecated: true });
+				}
+
+				if (UUIDToString(templateId) === templateWithoutCloudClash) {
+					return Promise.resolve({ modules: [] });
+				}
+
+				if (UUIDToString(templateId) === templateWithDeprecatedCloudClash) {
+					return Promise.resolve({ modules: [{ type: presetModules.CLOUD_CLASH,
+						deprecated: true,
+						properties: [] }] });
 				}
 				return Promise.reject(createResponseCode(templates.templateNotFound));
 			});

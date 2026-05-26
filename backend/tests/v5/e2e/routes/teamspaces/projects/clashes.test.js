@@ -33,6 +33,7 @@ const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
+const { presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 const fs = require('fs');
 const path = require('path');
 const { UUIDToString } = require('../../../../../../src/v5/utils/helper/uuids');
@@ -80,6 +81,7 @@ const generateBasicData = () => {
 	const models = times(2, () => ServiceHelper.generateRandomModel());
 	const federation = ServiceHelper.generateRandomModel({ modelType: modelTypes.FEDERATION });
 	const template = ServiceHelper.generateTemplate();
+	template.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
 
 	const plan = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
 	const project = ServiceHelper.generateRandomProject();

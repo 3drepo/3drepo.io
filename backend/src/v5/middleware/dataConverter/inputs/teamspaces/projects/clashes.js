@@ -31,6 +31,7 @@ const { getUserFromSession } = require('../../../../../utils/sessions');
 const { hasCommenterAccessToFederation } = require('../../../../../utils/permissions');
 const { modelTypes } = require('../../../../../models/modelSettings.constants');
 const { modelsExistInProject } = require('../../../../../models/projectSettings');
+const { presetModules } = require('../../../../../schemas/tickets/templates.constants');
 const { respond } = require('../../../../../utils/responder');
 const { schema: rulesSchema } = require('../../../../../schemas/rules');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
@@ -98,6 +99,12 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 
 	if (template.deprecated) {
 		throw createResponseCode(templates.invalidArguments, 'Ticket template is deprecated');
+	}
+
+	const cloudClashModule = template.modules?.find(({ type }) => type === presetModules.CLOUD_CLASH);
+
+	if (!cloudClashModule || cloudClashModule.deprecated) {
+		throw createResponseCode(templates.invalidArguments, `Ticket template provided must contain the preset module "${presetModules.CLOUD_CLASH}"`);
 	}
 
 	if (ticketData.valuesAtCreation?.length) {
