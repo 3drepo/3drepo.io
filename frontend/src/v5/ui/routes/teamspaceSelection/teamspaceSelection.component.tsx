@@ -34,7 +34,7 @@ export const TeamspaceSelection = () => {
 			observer.observe(welcomeRef.current);
 			return () => observer.disconnect();
 		}
-		return null;
+		return;
 	}, []);
 
 	return (
