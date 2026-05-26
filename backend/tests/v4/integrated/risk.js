@@ -17,9 +17,9 @@
 "use strict";
 
 const request = require("supertest");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const { should, assert, expect, Assertion } = require("chai");
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const async = require("async");
 const { login } = require("../helpers/users.js");
@@ -81,6 +81,7 @@ describe("Risks", function () {
 	}
 
 	before(async function() {
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");
@@ -2422,13 +2423,14 @@ describe("Risks", function () {
 		describe("Search", function () {
 			const teamspace = "teamSpace1";
 			const password = "password";
+			const project = '5BF7DF65-F3A8-4337-8016-A63F00000000'
 			let model = "";
 
 			before(function (done) {
 				async.series([
 					(next) => {
-						createModel(agent2, teamspace, 'Query risks').then((res) => {
-							model = res.body.model;
+						createModel(agent2, teamspace, project, 'Query risks').then((res) => {
+							model = res;
 							let createRiskTeamspace1 = createRisk(teamspace, model);
 
 							async.series([

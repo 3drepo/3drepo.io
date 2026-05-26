@@ -176,7 +176,7 @@ export const STATUS_TYPE_MAP = {
 	},
 };
 
-enum TicketStatusDefaultValues {
+export enum TicketStatusDefaultValues {
 	OPEN = 'Open',
 	IN_PROGRESS = 'In Progress',
 	FOR_APPROVAL = 'For Approval',

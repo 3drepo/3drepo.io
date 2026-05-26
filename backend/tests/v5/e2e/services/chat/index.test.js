@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const ServiceHelper = require('../../../helper/services');
 const SuperTest = require('supertest');
 const { src } = require('../../../helper/path');
@@ -32,6 +33,7 @@ const container = ServiceHelper.generateRandomModel();
 
 let agent;
 const setupData = async () => {
+	await ServiceHelper.db.createUser(tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
 	await ServiceHelper.db.createModel(
 		teamspace,
@@ -40,7 +42,6 @@ const setupData = async () => {
 		container.properties,
 	);
 	await Promise.all([
-		ServiceHelper.db.createUser(tsAdmin, [teamspace]),
 		ServiceHelper.db.createUser(nobody),
 		ServiceHelper.db.createProject(teamspace, project.id, project.name, [container._id]),
 	]);
@@ -133,8 +134,8 @@ const testUnauthenticatedUser = () => {
 
 		test('should be able to join rooms after login', async () => {
 			const socket = await ServiceHelper.socket.connectToSocket();
-			await ServiceHelper.loginAndGetCookie(agent, tsAdmin.user, tsAdmin.password,
-				{ [SOCKET_HEADER]: socket.id });
+			await ServiceHelper.loginAndGetCookie(agent, tsAdmin,
+				{ headers: { [SOCKET_HEADER]: socket.id }, teamspace });
 
 			// introduce a delay to let backend sort out their events (i.e. hooking the session with the socket)
 			await ServiceHelper.sleepMS(100);
@@ -148,7 +149,7 @@ const testTSAdmin = () => {
 	describe('User with access', () => {
 		let cookie;
 		beforeAll(async () => {
-			const cookieInfo = await ServiceHelper.loginAndGetCookie(agent, tsAdmin.user, tsAdmin.password);
+			const cookieInfo = await ServiceHelper.loginAndGetCookie(agent, tsAdmin, { teamspace });
 			cookie = cookieInfo.session;
 		});
 		test('should be able to connect to the chat service', async () => {
@@ -207,7 +208,7 @@ const testNobody = () => {
 	describe('User without a license', () => {
 		let cookie;
 		beforeAll(async () => {
-			const cookieInfo = await ServiceHelper.loginAndGetCookie(agent, nobody.user, nobody.password);
+			const cookieInfo = await ServiceHelper.loginAndGetCookie(agent, nobody);
 			cookie = cookieInfo.session;
 		});
 		test('should be able to connect to the chat service', async () => {
@@ -256,7 +257,7 @@ const broadcastErrorTests = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	let server;
 	let chatApp;
 	beforeAll(async () => {

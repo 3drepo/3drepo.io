@@ -22,7 +22,7 @@ export const FloatingButtonsContainer = styled.div`
 	flex-direction: column;
 	position: absolute;
 	bottom: 44px;
-	z-index: 10;
+	z-index: 16;
 `;
 
 export const subMenuIndicatorStyles = css<{ $expanded?: boolean }>`

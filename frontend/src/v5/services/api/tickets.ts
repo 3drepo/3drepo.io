@@ -24,8 +24,19 @@ export const fetchContainerTemplates = async (
 	projectId: string,
 	containerId: string,
 	getDetails?: boolean,
+	showDeprecated?: boolean,
 ): Promise<FetchTemplatesResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/templates?getDetails=${getDetails}`);
+	const urlSearchParams = new URLSearchParams();
+
+	if (getDetails) {
+		urlSearchParams.set('getDetails', getDetails.toString());
+	}
+
+	if (showDeprecated) {
+		urlSearchParams.set('showDeprecated', showDeprecated.toString());
+	}
+
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets/templates?${urlSearchParams}`);
 	return data.templates;
 };
 
@@ -44,8 +55,19 @@ export const fetchFederationTemplates = async (
 	projectId: string,
 	federationId: string,
 	getDetails?: boolean,
+	showDeprecated?: boolean,
 ): Promise<FetchTemplatesResponse> => {
-	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?getDetails=${getDetails}`);
+	const urlSearchParams = new URLSearchParams();
+
+	if (getDetails) {
+		urlSearchParams.set('getDetails', getDetails.toString());
+	}
+
+	if (showDeprecated) {
+		urlSearchParams.set('showDeprecated', showDeprecated.toString());
+	}
+
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/templates?${urlSearchParams}`);
 	return data.templates;
 };
 
@@ -59,14 +81,57 @@ export const fetchFederationTemplate = async (
 	return data;
 };
 
+type TicketsQueryParams = {
+	propertiesToInclude?: string[],
+	filters?: string,
+	skip?: number,
+	limit?: number,
+	sortBy?: string,
+	sortDesc?: boolean
+};
+
+const getTicketsSearchParams = (params: TicketsQueryParams) => {
+	const { propertiesToInclude, filters, skip, limit, sortBy, sortDesc } = params || {};
+	const searchParams = [];
+	// fetching the tickets list for a model, only the most basic
+	// properties are included as part of that ticket. Any other
+	// property can be fetched in the same request specifying it
+	// as a "property to include"
+	if (propertiesToInclude?.length) {
+		searchParams.push(`filters=${propertiesToInclude.join()}`);
+	}
+	// filters are a set of rules that can be passed to the backend
+	// to filter out tickets based on their: template, ticketCode,
+	// and properties.
+	if (filters) {
+		searchParams.push(`query=${filters}`);
+	}
+
+	if (skip) {
+		searchParams.push(`skip=${skip}`);
+	}
+
+	if (limit) {
+		searchParams.push(`limit=${limit}`);
+	}
+
+	if (sortBy) {
+		searchParams.push(`sortBy=${sortBy}`);
+	}
+
+	if (sortDesc === true || sortDesc === false) {
+		searchParams.push(`sortDesc=${sortDesc}`);
+	}
+
+	return searchParams.length ? `?${searchParams.join('&')}` : '';
+};
 export const fetchContainerTickets = async (
 	teamspace: string,
 	projectId: string,
 	containerId: string,
-	filters?: string[],
-): Promise<FetchTicketsResponse> => {
-	let path = `teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets`;
-	if (filters?.length) path += `?filters=${filters.join()}`;
+	queryParams: TicketsQueryParams,
+): Promise<ITicket[]> => {
+	const path = `teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets${getTicketsSearchParams(queryParams)}`;
 	const { data } = await api.get(path);
 	return data.tickets;
 };
@@ -75,10 +140,9 @@ export const fetchFederationTickets = async (
 	teamspace: string,
 	projectId: string,
 	federationId: string,
-	filters?: string[],
-): Promise<FetchTicketsResponse> => {
-	let path = `teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets`;
-	if (filters?.length) path += `?filters=${filters.join()}`;
+	queryParams: TicketsQueryParams,
+): Promise<ITicket[]> => {
+	const path = `teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets${getTicketsSearchParams(queryParams)}`;
 	const { data } = await api.get(path);
 	return data.tickets;
 };
@@ -143,6 +207,26 @@ export const updateFederationTicket = async (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}`, ticket)
 );
 
+export const updateContainerManyTickets = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+	template: string,
+	tickets: Partial<ITicket>[],
+) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets?template=${template}`, { tickets })
+);
+
+export const updateFederationManyTickets = async (
+	teamspace: string,
+	projectId: string,
+	federationId: string,
+	template: string,
+	tickets: Partial<ITicket>[],
+) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets?template=${template}`, { tickets })
+);
+
 export const fetchRiskCategories = async (
 	teamspace: string,
 ): Promise<FetchRiskCategoriesResponse> => {
@@ -184,6 +268,5 @@ export const updateTicketGroup = async (
  * Types
  */
 type FetchTemplatesResponse = { templates: ITemplate[] };
-type FetchTicketsResponse = { tickets: ITicket[] };
 type CreateTicketResponse = { _id: string };
 type FetchRiskCategoriesResponse = { riskCategories: string[] };

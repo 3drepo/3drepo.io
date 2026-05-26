@@ -16,7 +16,7 @@
  */
 import * as Yup from 'yup';
 import { revisionDesc } from '../containerAndFederationSchemes/validators';
-import { desc, name, alphaNumericHyphens, trimmedString, requiredNumber } from '../shared/validators';
+import { desc, name, alphaNumericHyphens, trimmedString, numberRange } from '../shared/validators';
 import { formatMessage } from '@/v5/services/intl';
 import { selectRevisions } from '@/v5/store/drawings/revisions/drawingRevisions.selectors';
 import { getState } from '@/v5/helpers/redux.helpers';
@@ -45,23 +45,21 @@ const number = Yup.string()
 		}),
 		(value, testContext) => {
 			if (!testContext.options?.context) return true;
-			return !testContext.options.context.alreadyExistingNumbers?.map((n) => n.trim().toLocaleLowerCase()).includes(value?.toLocaleLowerCase());
+			const { existingNumbers } = testContext.options?.context as { existingNumbers: Set<string> };
+			return !existingNumbers?.has(value?.toLowerCase().trim());
 		},
 	);
 
+export const CALIBRATION_INVALID_RANGE_ERROR = formatMessage({
+	id: 'validation.drawing.calibration.error.invalidRange',
+	defaultMessage: 'Bottom extent should be smaller than top',
+});
 const calibration = Yup.object().shape({
 	units: Yup.string().required(formatMessage({
 		id: 'validation.drawing.calibration.units.error.required',
 		defaultMessage: 'Units is a required field',
 	})),
-	verticalRange: Yup.array().of(requiredNumber().test(
-		'bottomShouldBeSmallerThanTop',
-		formatMessage({
-			id: 'validation.drawing.calibration.error.invalidRange',
-			defaultMessage: 'Bottom extent should be smaller than top',
-		}),
-		(v, ctx) => ctx.parent[0] < ctx.parent[1],
-	)),
+	verticalRange: numberRange(CALIBRATION_INVALID_RANGE_ERROR),
 });
 
 export const DrawingFormSchema =  Yup.object().shape({
@@ -125,6 +123,7 @@ export const SidebarSchema = Yup.object().shape({
 	),
 	drawingDesc: desc,
 	calibration,
+	revisionDesc: desc,
 });
 
 export const UploadsSchema = Yup.object().shape({

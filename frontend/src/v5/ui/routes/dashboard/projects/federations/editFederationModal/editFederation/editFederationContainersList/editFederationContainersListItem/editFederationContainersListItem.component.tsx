@@ -174,6 +174,7 @@ export const EditFederationContainersListItem = memo(({
 					containerId={container._id}
 					revisionsCount={container.revisionsCount}
 					status={container.status}
+					linkTarget="_blank"
 				/>
 			)}
 		</DashboardListItem>

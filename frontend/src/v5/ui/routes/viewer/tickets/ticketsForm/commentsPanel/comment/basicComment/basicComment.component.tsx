@@ -18,35 +18,71 @@
 import { ITicketComment, TicketCommentReplyMetadata } from '@/v5/store/tickets/comments/ticketComments.types';
 import { editedCommentMessage } from '@/v5/store/tickets/comments/ticketComments.helpers';
 import { CommentMarkDown } from '../commentMarkDown/commentMarkDown.component';
-import { CommentContainer, CommentAge, EditedCommentLabel } from './basicComment.styles';
+import { CommentContainer, CommentAge, EditedCommentLabel, ViewpointIcon, CommentAgeContent } from './basicComment.styles';
 import { CommentNonMessageContent } from '../commentNonMessageContent/commentNonMessageContent.component';
+import { Tooltip } from '@mui/material';
+import { formatMessage } from '@/v5/services/intl';
+import { TicketContext } from '../../../../ticket.context';
+import { useContext, useState, useEffect } from 'react';
+import { formatDateTime, getRelativeTime } from '@/v5/helpers/intl.helper';
+import { TicketCommentsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { useParams } from 'react-router';
+import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
 
 export type BasicCommentProps = Partial<Omit<ITicketComment, 'history' | '_id'>> & {
 	children?: any;
 	className?: string;
-	commentAge: string;
 	metadata?: TicketCommentReplyMetadata;
 	isCurrentUserComment?: boolean;
+	commentId?: string;
 	onDeleteImage?: (index) => void;
 	onUploadImages?: () => void;
 	onEditImage?: (img, index) => void;
 };
+
 export const BasicComment = ({
+	commentId,
 	message,
-	commentAge,
 	createdAt,
 	updatedAt,
 	className,
 	originalAuthor,
+	view,
 	...props
 }: BasicCommentProps) => {
+	const { teamspace, project, containerOrFederation } = useParams<ViewerParams>();
+	const [ ticketId ] = useSearchParam('ticketId');
+	const { isViewer } = useContext(TicketContext);
 	const isEdited = updatedAt && (createdAt !== updatedAt);
+	const [commentAge, setCommentAge] = useState('');
+
+	const updateMessageAge = () => setCommentAge(getRelativeTime(updatedAt || createdAt));
+	const onClickViewpoint = () => TicketCommentsActionsDispatchers.goToCommentViewpoint(teamspace, project, containerOrFederation, ticketId, commentId);
+
+	useEffect(() => {
+		updateMessageAge();
+		const intervalId = window.setInterval(updateMessageAge, 10000);
+		return () => clearInterval(intervalId);
+	}, [updatedAt]);
+
 	return (
 		<CommentContainer className={className}>
-			<CommentNonMessageContent {...props} originalAuthor={originalAuthor} hasMessage={!!message} />
+			<CommentNonMessageContent {...props} commentId={commentId} originalAuthor={originalAuthor} hasMessage={!!message} />
 			{isEdited && !originalAuthor && <EditedCommentLabel>{editedCommentMessage}</EditedCommentLabel>}
 			{message && (<CommentMarkDown>{message}</CommentMarkDown>)}
-			<CommentAge>{commentAge}</CommentAge>
+			<CommentAge>
+				<Tooltip title={formatDateTime(updatedAt || createdAt)}>
+					<CommentAgeContent>{commentAge}</CommentAgeContent>
+				</Tooltip>
+				{!!view && (
+					<Tooltip title={isViewer && formatMessage({ id: 'basicComment.viewpoint', defaultMessage: 'Go to viewpoint' })} placement="top" arrow>
+						<span>
+							<ViewpointIcon disabled={!isViewer} onClick={onClickViewpoint} />
+						</span>
+					</Tooltip>
+				)}
+			</CommentAge>
 		</CommentContainer>
 	);
 };

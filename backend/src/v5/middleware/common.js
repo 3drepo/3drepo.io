@@ -15,6 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { createResponseCode, templates } = require('../utils/responseCodes');
+const { respond } = require('../utils/responder');
+
 const Common = {};
 
 Common.validateMany = (validators) => {
@@ -26,6 +29,17 @@ Common.validateMany = (validators) => {
 		}
 	};
 	return validateAll;
+};
+
+Common.routeDecommissioned = (verb, newEndpoint) => (req, res) => {
+	let response = templates.endpointDecommissioned;
+
+	if (verb && newEndpoint) {
+		const errorMessage = `This endpoint is no longer available. Please use ${verb} ${newEndpoint} instead.`;
+		response = createResponseCode(templates.endpointDecommissioned, errorMessage);
+	}
+
+	respond(req, res, response);
 };
 
 module.exports = Common;

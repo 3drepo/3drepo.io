@@ -17,7 +17,7 @@
 
 import { FormattedMessage } from 'react-intl';
 import { Link } from 'react-router-dom';
-import { PRIVACY_ROUTE } from '@/v5/ui/routes/routes.constants';
+import { COOKIES_ROUTE, PRIVACY_ROUTE, TERMS_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { FooterContainer, FooterItem, FooterItems, FooterLogo } from './dashboardFooter.styles';
 
 type IDashboardFooter = {
@@ -29,22 +29,22 @@ export const DashboardFooter = ({ variant = 'light' }: IDashboardFooter): JSX.El
 		<FooterLogo />
 		<FooterItems>
 			<FooterItem>
-				<Link to={{ pathname: PRIVACY_ROUTE }} target="_blank" rel="noopener noreferrer">
+				<Link to={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">
 					<FormattedMessage id="dashboardFooter.privacy" defaultMessage="Privacy" />
 				</Link>
 			</FooterItem>
 			<FooterItem>
-				<Link to="/v5/terms">
+				<Link to={TERMS_ROUTE} target="_blank">
 					<FormattedMessage id="dashboardFooter.terms" defaultMessage="Terms" />
 				</Link>
 			</FooterItem>
 			<FooterItem>
-				<Link to="/v5/cookies">
+				<Link to={COOKIES_ROUTE} target="_blank">
 					<FormattedMessage id="dashboardFooter.cookies" defaultMessage="Cookies" />
 				</Link>
 			</FooterItem>
 			<FooterItem>
-				<a href="https://3drepo.com/pricing">
+				<a href="https://3drepo.com/pricing" target="_blank">
 					<FormattedMessage
 						id="dashboardFooter.pricing"
 						defaultMessage="Pricing"

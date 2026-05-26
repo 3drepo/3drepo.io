@@ -192,7 +192,7 @@ function* fetchFullTree({ teamspace, modelId, revision }) {
 			treePath: {}
 		};
 		dataToProcessed.mainTree.name = modelSettings.name;
-		dataToProcessed.mainTree.children = dataToProcessed.mainTree.children.filter(({ name }) => !modelsLackingPermissions.includes(name.split(':').at(-1)));
+		dataToProcessed.mainTree.children = dataToProcessed.mainTree.children.filter(({ name }) => !name || !modelsLackingPermissions.includes(name.split(':').at(-1)));
 		dataToProcessed.mainTree.isFederation = modelSettings.federate;
 		dataToProcessed.subTrees = subTrees.filter(({ nodes: { project } }) => !modelsLackingPermissions.includes(project))
 		dataToProcessed.subModels = modelSettings.subModels.filter(({ model }) => !modelsLackingPermissions.includes(model))
@@ -466,6 +466,11 @@ function* deselectNodes({ nodesIds = [] }) {
 		if (unhighlightedObjects.length) {
 			unhighlightedObjects.forEach(({ teamspace, meshes, modelId }) => {
 				const existingObjectIndex = selectedObjects.findIndex((o) => o.teamspace === teamspace && o.modelId === modelId);
+
+				if (existingObjectIndex === -1 ) {
+					return;
+				}
+
 				const existingObject = selectedObjects[existingObjectIndex];
 				if (existingObject.meshes.length === meshes.length) {
 					selectedObjects.splice(existingObjectIndex, 1);

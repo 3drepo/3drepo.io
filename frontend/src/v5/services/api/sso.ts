@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { addParams, getCurrentUrl } from '@/v5/helpers/url.helper';
+import { addParams } from '@/v5/helpers/url.helper';
 import { AxiosResponse } from 'axios';
 import { formatMessage } from '../intl';
 import api from './default';
@@ -45,13 +45,12 @@ export const postActions = {
 	SIGNUP_POST: 'signupPost',
 };
 
-const SSO_ROUTE = 'sso';
-const AAD_ROUTE = `${SSO_ROUTE}/aad`;
+const getRedirectUri = (uri) => addParams(uri, `${postActions.LOGIN_POST}=1`);
 
-export const signup = (data): Promise<AxiosResponse<{ link: string }>> => api.post(`${AAD_ROUTE}/signup?redirectUri=${getCurrentUrl(`?${postActions.SIGNUP_POST}=1`)}`, data);
+export const ssoAuthTeamspace = (redirect, teamspace): Promise<AxiosResponse<{ link: string }>> => (
+	api.get(`authentication/authenticate/${teamspace}?redirectUri=${getRedirectUri(redirect)}`)
+);
 
-export const signin = (redirect): Promise<AxiosResponse<{ link: string }>> => api.get(`${AAD_ROUTE}/authenticate?redirectUri=${addParams(redirect, `${postActions.LOGIN_POST}=1`)}`);
-
-export const linkAccount = (): Promise<AxiosResponse<{ link: string }>> => api.get(`${AAD_ROUTE}/link?redirectUri=${getCurrentUrl(`?${postActions.LINK_POST}=1`)}`);
-
-export const unlinkAccount = (data): Promise<any> => api.post(`${SSO_ROUTE}/unlink`, data);
+export const ssoLogin = (redirect, email): Promise<AxiosResponse<{ link: string }>> => (
+	api.get(`authentication/authenticate?redirectUri=${getRedirectUri(redirect)}&email=${encodeURI(email)}`)
+);

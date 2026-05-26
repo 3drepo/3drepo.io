@@ -16,12 +16,14 @@
  */
 
 const { addComment, deleteComment, getCommentById, getCommentsByTicket, importComments, updateComment } = require('../../../../../models/tickets.comments');
+const { commitGroupChanges, processGroupsUpdate } = require('./tickets.groups');
 const { TICKETS_RESOURCES_COL } = require('../../../../../models/tickets.constants');
 const { events } = require('../../../../../services/eventsManager/eventsManager.constants');
 const { generateUUID } = require('../../../../../utils/helper/uuids');
 const { isBuffer } = require('../../../../../utils/helper/typeCheck');
 const { publish } = require('../../../../../services/eventsManager/eventsManager');
 const { storeFiles } = require('../../../../../services/filesManager');
+const { viewGroups } = require('../../../../../schemas/tickets/templates.constants');
 
 const Comments = {};
 
@@ -43,31 +45,72 @@ const processCommentImages = (teamspace, project, model, ticket, images = []) =>
 	return refsAndBinaries;
 };
 
+// This function expects [{comment, oldComment}] (old comment can be undefined)
+const processCommentsGroups = (comments) => {
+	const groupChanges = {
+		toAdd: [],
+		old: new Set(),
+		stillUsed: new Set(),
+	};
+
+	comments.forEach(({ comment, oldComment }) => {
+		processGroupsUpdate(
+			oldComment?.view,
+			comment.view,
+			Object.values(viewGroups).map((groupName) => `state.${groupName}`),
+			groupChanges,
+		);
+	});
+
+	return groupChanges;
+};
+
 Comments.addComment = async (teamspace, project, model, ticket, commentData, author) => {
 	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, commentData.images);
-	const res = await addComment(teamspace, project, model, ticket, commentData, author);
-	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+	const groupsDelta = processCommentsGroups([{ comment: commentData }]);
 
-	publish(events.NEW_COMMENT, { teamspace,
+	const res = await addComment(teamspace, project, model, ticket, commentData, author);
+
+	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+	await commitGroupChanges(teamspace, project, model, ticket, groupsDelta);
+
+	publish(events.NEW_COMMENT, {
+		teamspace,
 		project,
 		model,
-		data: res });
+		data: res,
+	});
 
 	return res._id;
 };
 
 Comments.updateComment = async (teamspace, project, model, ticket, oldComment, updateData) => {
 	const refsAndBinaries = processCommentImages(teamspace, project, model, ticket, updateData.images);
+	const groupsDelta = processCommentsGroups([{ comment: updateData, oldComment }]);
+
 	await updateComment(teamspace, project, model, ticket, oldComment, updateData);
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+	await commitGroupChanges(teamspace, project, model, ticket, groupsDelta);
 };
 
 Comments.importComments = async (teamspace, project, model, commentsByTickets, author) => {
 	const refsAndBinaries = commentsByTickets.flatMap(({ ticket, comments }) => comments.flatMap(
 		({ images }) => processCommentImages(teamspace, project, model, ticket, images)));
 
+	const groupsDelta = commentsByTickets.map(({ ticket, comments }) => {
+		const groupChanges = processCommentsGroups(comments.map((comment) => ({ comment })));
+
+		return { groupChanges, ticket };
+	});
+
 	const res = await importComments(teamspace, project, model, commentsByTickets, author);
 	if (refsAndBinaries.length) await storeFiles(teamspace, TICKETS_RESOURCES_COL, refsAndBinaries);
+	await Promise.all(groupsDelta.map(({ ticket, groupChanges }) => commitGroupChanges(
+		teamspace,
+		project,
+		model,
+		ticket,
+		groupChanges)));
 
 	return res.map((data) => {
 		publish(events.NEW_COMMENT, {

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src, image, dwgModel, pdfModel, emptyPdf } = require('../../../../../../../../helper/path');
 const MockExpressRequest = require('mock-express-request');
 const FormData = require('form-data');
@@ -37,29 +38,6 @@ const { statusCodes } = require(`${src}/models/modelSettings.constants`);
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
 
-const createRequestWithFile = (teamspace, drawing, { statusCode, revCode }, fileName) => {
-	const form = new FormData();
-
-	if (fileName) {
-		form.append('file',
-			fs.createReadStream(fileName));
-	}
-
-	if (statusCode) form.append('statusCode', statusCode);
-	if (revCode) form.append('revCode', revCode);
-
-	const req = new MockExpressRequest({
-		method: 'POST',
-		host: 'localhost',
-		url: `/${teamspace}/upload`,
-		headers: form.getHeaders(),
-	});
-
-	form.pipe(req);
-	req.params = { teamspace, drawing };
-	return req;
-};
-
 const testValidateNewRevisionData = () => {
 	const teamspace = generateRandomString();
 	const drawing = generateRandomString();
@@ -69,6 +47,31 @@ const testValidateNewRevisionData = () => {
 	const standardBody = {
 		revCode: generateRandomString(10),
 		statusCode: statusCodes[0].code,
+	};
+	const username = generateRandomString();
+
+	const createRequestWithFile = (ts, drawingId, { statusCode, revCode }, fileName) => {
+		const form = new FormData();
+
+		if (fileName) {
+			form.append('file',
+				fs.createReadStream(fileName));
+		}
+
+		if (statusCode) form.append('statusCode', statusCode);
+		if (revCode) form.append('revCode', revCode);
+
+		const req = new MockExpressRequest({
+			method: 'POST',
+			host: 'localhost',
+			url: `/${ts}/upload`,
+			headers: form.getHeaders(),
+		});
+
+		form.pipe(req);
+		req.params = { teamspace: ts, drawing: drawingId };
+		req.session = { user: { username } };
+		return req;
 	};
 
 	describe.each([
@@ -104,11 +107,15 @@ const testValidateNewRevisionData = () => {
 				expect(Responder.respond.mock.results[0].value.code).toEqual(error.code);
 			} else {
 				expect(mockCB.mock.calls.length).toBe(1);
+				expect(req.body).toEqual({
+					...bodyContent,
+					owner: username,
+				});
 			}
 		});
 	});
 };
 
-describe('middleware/dataConverter/inputs/teamspaces/projects/models/drawings', () => {
+describe(determineTestGroup(__filename), () => {
 	testValidateNewRevisionData();
 });

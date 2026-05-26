@@ -44,6 +44,7 @@ export class ClientConfigService {
 	public legalTemplates;
 	public liveChatLicense;
 	public intercomLicense;
+	public apryseLicense;
 	public tagRegExp;
 	public uploadSizeLimit;
 	public avatarSizeLimit;

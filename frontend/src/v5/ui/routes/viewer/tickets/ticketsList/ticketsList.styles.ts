@@ -14,52 +14,56 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import styled, { css } from 'styled-components';
+import styled from 'styled-components';
 import { ActionMenu as ActionMenuBase } from '@controls/actionMenu';
 import { Menu } from '@controls/actionMenu/actionMenu.styles';
 import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
-import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
+import { Loader as UnstyledLoader } from '@/v4/routes/components/loader/loader.component';
 import { TicketItemContainer } from './ticketItem/ticketItem.styles';
+import { Checkbox } from '@mui/material';
+import React from 'react';
+import BulkCheckboxIcon from '@assets/icons/controls/bulk_checkbox.svg';
+import BulkCheckboxCheckedIcon from '@assets/icons/controls/bulk_checkbox_checked.svg';
+import { AllTicketsCheckboxContainer } from './bulkUpdate/bulkUpdate.styles';
+import { ModuleTitle } from '@components/viewer/cards/cardFilters/cardFilters.styles';
+
+
+export const Loader = styled(UnstyledLoader)`
+	height: 100%;
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	width: calc(100% - 15px);
+	border-radius: 10px;
+	border: 0;
+`;
+
+export const ListContainer = styled.div`
+	flex-grow: 1;
+	margin-right: -15px;
+	& > div {
+		overflow-x: hidden;
+	}
+`;
 
 export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	overflow: hidden;
-	display: inline-block;
-	width: 100%;
+	width: 350px;
 	margin-bottom: 0;
-	${/* sc-selector */ TicketItemContainer}:not(:last-child) {
+	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
+	box-sizing: border-box;
+
+	${/* sc-selector */ TicketItemContainer} {
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	}
-`;
 
-export const Filters = styled.div`
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	gap: 6px;
-	margin-top: 10px;
-	margin-bottom: 13px;
-`;
-
-export const CompletedFilterChip = styled(FilterChip).attrs(({ selected, theme }: any) => ({
-	color: theme.palette.success.main,
-	variant: selected ? 'filled' : 'outlined',
-}))<{ selected: boolean }>`
-	.MuiChip-root, .MuiChip-root:hover {
-		color: ${({ theme }) => theme.palette.success.main};
-		border: 1px solid ${({ theme }) => theme.palette.success.main};
-		${({ selected, theme: { palette } }) => selected && css`
-			color: ${palette.primary.contrast};
-			background-color: ${palette.success.main};
-		`}
+	.vlist-end ${/* sc-selector */ TicketItemContainer}:last-child{
+		border-bottom: 0;
 	}
 `;
 
-export const NewTicketButton = styled(Button).attrs({
-	variant: 'contained',
-})`
+export const ActionMenuButton = styled(Button)`
 	margin: 0 0 0 auto;
 	padding: 7px 9px;
 	height: 30px;
@@ -87,4 +91,39 @@ export const ActionMenu = styled(ActionMenuBase).attrs({
 
 export const MenuItem = styled(MenuItemBase)`
 	padding: 5px 12px;
+`;
+
+export const BulkCheckbox = styled(Checkbox).attrs({
+	icon: React.createElement(BulkCheckboxIcon),
+	checkedIcon:  React.createElement(BulkCheckboxCheckedIcon),
+})`
+	color: ${({ theme }) => theme.palette.secondary.main} !important;
+	cursor: pointer;
+	background-color: transparent;
+	margin: 0;
+	height: 32px;
+	width: 20px;
+	padding: 0;
+
+	&:hover:not(.Mui-checked) path {
+		fill: ${({ theme }) => theme.palette.secondary.main} !important;
+	}
+`;
+
+export const GroupByLabelContainer = styled.div`
+	display: flex;
+	padding-bottom: 5px;
+
+	${AllTicketsCheckboxContainer} {
+		padding-bottom: 0;
+	}
+`;
+
+export const GroupByLabelText = styled(ModuleTitle)<{ $withBulkUpdate }>`
+	flex-grow: 1;
+	overflow: hidden;
+	margin: 0;
+	text-align: ${({ $withBulkUpdate }) => $withBulkUpdate ? 'right' : 'left'};
+	line-height: 16px;
+	padding-left: ${({ $withBulkUpdate }) => $withBulkUpdate ? '5px' : '0'};
 `;

@@ -15,10 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { Tooltip } from '@mui/material';
 import { formatDateTime } from '@/v5/helpers/intl.helper';
+import { getUserFullName, getUserLastName } from '@/v4/helpers/user.helpers';
 import { VIEWPOINT_ID_REGEX } from '../../../../../../../helpers/comments';
 import { COMMENT_FIELD_NAME } from '../../../../../../viewerGui/components/commentForm/commentForm.constants';
-import { Container, Date, IconButton, StyledQuoteIcon, StyledReplyIcon, Username } from './footer.styles';
+import { Container, Date, IconButton, StyledQuoteIcon, StyledReplyIcon, Fullname } from './footer.styles';
+
+const INSUFFICIENT_PERMISSIONS_MESSAGE = 'You do not have permission to do this';
 
 interface IProps {
 	name: string;
@@ -27,16 +31,16 @@ interface IProps {
 	formRef?: any;
 	commentRef?: any;
 	viewpoint: any;
+	canComment: boolean;
 }
 
-export const Footer = ({ name, created, formRef, commentRef, comment, ...props }: IProps) => {
-
+export const Footer = ({ name, created, formRef, commentRef, comment, canComment, ...props }: IProps) => {
 	const handleReplayButtonClick = () => {
 		const commentForm = formRef.current;
 		const commentTextarea = commentRef.current.textareaRef;
 		const currentFormCommentValue = commentForm.values[COMMENT_FIELD_NAME];
 
-		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${name} `);
+		commentForm.setFieldValue(COMMENT_FIELD_NAME, `${currentFormCommentValue}@${getUserLastName(name)} `);
 		commentTextarea.focus();
 		setTimeout(() => {
 			commentTextarea.scrollTop = commentTextarea.scrollHeight;
@@ -72,16 +76,24 @@ export const Footer = ({ name, created, formRef, commentRef, comment, ...props }
 
 	return (
         <Container>
-			<Username>{name}</Username>
+			<Fullname>{getUserFullName(name)}</Fullname>
 			<Date>
 				{formatDateTime(created)}
 			</Date>
-			<IconButton onClick={handleQuoteButtonClick} size="large">
-				<StyledQuoteIcon />
-			</IconButton>
-			<IconButton onClick={handleReplayButtonClick} size="large">
-				<StyledReplyIcon />
-			</IconButton>
+			<Tooltip title={ !canComment && INSUFFICIENT_PERMISSIONS_MESSAGE } >
+				<div>
+					<IconButton onClick={handleQuoteButtonClick} size="large" disabled={!canComment}>
+						<StyledQuoteIcon />
+					</IconButton>
+				</div>
+			</Tooltip>
+			<Tooltip title={ !canComment && INSUFFICIENT_PERMISSIONS_MESSAGE } >
+				<div>
+					<IconButton onClick={handleReplayButtonClick} size="large" disabled={!canComment}>
+						<StyledReplyIcon />
+					</IconButton>
+				</div>
+			</Tooltip>
 		</Container>
     );
 };

@@ -14,84 +14,155 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-import { ITicket } from '@/v5/store/tickets/tickets.types';
-import { useParams } from 'react-router-dom';
-import { useEffect } from 'react';
-import { uniq, xor } from 'lodash';
-import { TicketsHooksSelectors, TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { TicketsCardActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { FilterChip } from '@controls/chip/filterChip/filterChip.styles';
-import { VIEWER_EVENTS } from '@/v4/constants/viewer';
-import { formatMessage } from '@/v5/services/intl';
+import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
 import { EmptyListMessage } from '@controls/dashedContainer/emptyListMessage/emptyListMessage.styles';
 import { FormattedMessage } from 'react-intl';
-import TickIcon from '@assets/icons/outlined/tick-outlined.svg';
-import { Viewer as ViewerService } from '@/v4/services/viewer/viewer';
 import { TicketItem } from './ticketItem/ticketItem.component';
-import { Filters, CompletedFilterChip, List } from './ticketsList.styles';
-import { ViewerParams } from '../../../routes.constants';
-import { AutocompleteSearchInput } from '@controls/search/autocompleteSearchInput/autocompleteSearchInput.component';
+import { List, ListContainer } from './ticketsList.styles';
+import { useEffect, useRef } from 'react';
+import { untilXFramesPassed, VirtualList, VListHandle } from '@controls/virtualList/virtualList.component';
+import { TicketsGroup } from '../../../../components/tickets/ticketsGroupBy.helper';
+import { TicketsGroupedList } from './ticketGroupedList/ticketsGroupedList.component';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { TicketsCardsGroupedHooksSelectors } from '@/v5/store/tickets/card/ticketsCardGroups.selectors';
 
-type TicketsListProps = {
-	tickets: ITicket[];
+
+const TicketsListsContainer = ({ children, scrollerRef }: any) => {
+	return (
+		<ListContainer >
+			<div 
+				ref={scrollerRef }
+				style={{
+					overflowY: 'auto',
+					position: 'relative',
+					height: '100%',
+				}}
+			>
+				<div style={{ position:'absolute' }}>
+					{children}
+				</div>
+			</div>
+		</ListContainer>
+	);
 };
 
-export const TicketsList = ({ tickets }: TicketsListProps) => {
-	const { containerOrFederation } = useParams<ViewerParams>();
-	const templates = TicketsHooksSelectors.selectTemplates(containerOrFederation);
-	const selectedTicket = TicketsCardHooksSelectors.selectSelectedTicket();
-	const selectedTemplates = TicketsCardHooksSelectors.selectFilteringTemplates();
-	const showingCompleted = TicketsCardHooksSelectors.selectFilteringCompleted();
-	const availableTemplatesIds = uniq(tickets.map(({ type }) => type));
-	const availableTemplates = templates.filter(({ _id }) => availableTemplatesIds.includes(_id));
-	const queries = TicketsCardHooksSelectors.selectFilteringQueries();
+export const TicketsList = ({ groupBy, loading }: any) => {
+	const filteredTickets = TicketsCardHooksSelectors.selectFilteredTickets();
+	const selectedTicketId = TicketsCardHooksSelectors.selectSelectedTicketId();
+	const isFiltering = TicketsCardHooksSelectors.selectIsFiltering();
+	const groups = TicketsCardsGroupedHooksSelectors.selectGroupedFilteredTickets();
 
-	const filteredByQueriesAndCompleted = TicketsCardHooksSelectors.selectTicketsFilteredByQueriesAndCompleted();
-	const filteredItems = TicketsCardHooksSelectors.selectTicketsWithAllFiltersApplied();
+	const tableHandle = useRef<VListHandle>();
+	const subTableHandle = useRef<VListHandle>();
+	const scrollerRef = useRef<Element>();
 
-	const toggleTemplate = (templateId: string) => TicketsCardActionsDispatchers.setTemplateFilters(xor(selectedTemplates, [templateId]));
-	const onQueriesChange = (newQueries) => TicketsCardActionsDispatchers.setQueryFilters(newQueries);
+	let selectedIndex = -1;
+	let selectedSubIndex = -1;
+
+	selectedIndex = groups.findIndex((g) => {
+		const index = g.tickets.findIndex((ticket) => ticket._id === selectedTicketId);
+		if (index !== -1) {
+			selectedSubIndex = index;
+			return true;
+		}
+		return false;
+	});
 
 	useEffect(() => {
-		TicketsCardActionsDispatchers.setSelectedTicketPin(selectedTicket?._id);
+		if (selectedIndex == -1) return;
+		if (groupBy === NONE_OPTION) {
+			tableHandle.current?.gotoIndex(selectedSubIndex, scrollerRef.current);
+		 } else {
+			if (!tableHandle.current) {
+				return;
+			}
+			const groupCollapseHeight = 50;
 
-		const unselectTicket = () => TicketsCardActionsDispatchers.setSelectedTicket(null);
-		ViewerService.on(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
-		return () => ViewerService.off(VIEWER_EVENTS.BACKGROUND_SELECTED, unselectTicket);
-	}, []);
+			const scrollingElement = scrollerRef.current;
+
+			// For going to an index on a sublist there's no built in mechanism for now
+			// so it's done manually
+			const offset = tableHandle.current.getOffsetToIndex(selectedIndex) + 
+						(subTableHandle.current?.getOffsetToIndex(selectedSubIndex) || 0) + 
+						groupCollapseHeight;
+					
+			let isShowing = subTableHandle.current?.isItemWithIndexShowing(selectedSubIndex, scrollingElement);
+
+			if (!scrollingElement) {
+				return;
+			}
+
+			if (!isShowing) {
+				scrollingElement.scrollTop = offset;
+			}
+
+			(async () => {
+				let done = false;
+				for (let i = 0 ; i < 10 && !done ; i++) {
+					await untilXFramesPassed(10);
+					const currentScroll = Math.round(scrollingElement.scrollTop);
+					const otherScroll = Math.round(
+						(tableHandle.current?.getOffsetToIndex(selectedIndex) || 0) + 
+						(subTableHandle.current?.getOffsetToIndex(selectedSubIndex) || 0) + 
+						groupCollapseHeight,
+					);
+		
+					isShowing = subTableHandle.current?.isItemWithIndexShowing(selectedSubIndex, scrollingElement);
+
+					if (currentScroll != otherScroll && !isShowing) {
+						scrollingElement.scrollTop = otherScroll;
+					} else {
+						done = true;
+					}
+				}
+			})();
+
+		}
+	}, [selectedTicketId, groupBy, tableHandle.current, subTableHandle.current]);
+
+	if (isFiltering) {
+		return (
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.tickets.searching" defaultMessage="Searching..." />
+			</EmptyListMessage>
+		);
+	}
+
+	if (!filteredTickets.length) {
+		return (
+			<EmptyListMessage>
+				<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
+			</EmptyListMessage>
+		);
+	}
+
+	if (groupBy !== NONE_OPTION) {
+		return (
+			<TicketsListsContainer scrollerRef={scrollerRef}>
+				<VirtualList
+					handle={tableHandle}
+					vKey='groups-list'
+					items={groups}
+					itemHeight={30}
+					ItemComponent={(group: TicketsGroup, index) => 
+						<TicketsGroupedList expanded={index === selectedIndex } loading={loading} key={group.groupName} {...group} handle={index === selectedIndex ? subTableHandle : undefined }/>
+					}
+				/>
+			</TicketsListsContainer>
+		);
+	}
 
 	return (
-		<>
-			<AutocompleteSearchInput value={queries} onChange={onQueriesChange} />
-			<Filters>
-				<CompletedFilterChip
-					key="completed"
-					selected={showingCompleted}
-					icon={<TickIcon />}
-					onClick={() => TicketsCardActionsDispatchers.toggleCompleteFilter()}
-					label={formatMessage({ id: 'ticketsList.filters.completed', defaultMessage: 'Completed' })}
+		<TicketsListsContainer scrollerRef={scrollerRef}>
+			<List>
+				<VirtualList 
+					handle={tableHandle}
+					vKey='groups-list'
+					items={filteredTickets}
+					itemHeight={30}
+					ItemComponent={(ticket) => <TicketItem ticket={ticket} key={ticket._id} />}
 				/>
-				{availableTemplates.map(({ name, _id }) => {
-					const count = filteredByQueriesAndCompleted.filter(({ type }) => type === _id).length;
-					return (
-						<FilterChip
-							key={_id}
-							selected={selectedTemplates.includes(_id)}
-							onClick={() => toggleTemplate(_id)}
-							label={`${name} (${count})`}
-						/>
-					);
-				})}
-			</Filters>
-			{filteredItems.length ? (
-				<List>
-					{filteredItems.map((ticket) => <TicketItem ticket={ticket} key={ticket._id} />)}
-				</List>
-			) : (
-				<EmptyListMessage>
-					<FormattedMessage id="viewer.cards.tickets.noResults" defaultMessage="No tickets found. Please try another search." />
-				</EmptyListMessage>
-			)}
-		</>
+			</List>
+		</TicketsListsContainer>
 	);
 };

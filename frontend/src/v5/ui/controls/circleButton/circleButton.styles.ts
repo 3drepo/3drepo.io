@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 import { Button } from '@mui/material';
 
 export const BaseCircleButton = styled(Button)<{ disabled?: boolean }>`
@@ -44,6 +44,16 @@ export const PrimaryButton = styled(BaseCircleButton)`
 	}
 `;
 
+export const ErrorButton = styled(BaseCircleButton)`
+	color: ${({ theme }) => theme.palette.error.dark};
+	background-color: ${({ theme }) => theme.palette.error.lightest};
+
+	&:hover, &.Mui-focusVisible {
+		background-color: ${({ theme }) => theme.palette.error.light};
+	}
+`;
+
+
 export const SecondaryButton = styled(BaseCircleButton)`
 	color: ${({ theme }) => theme.palette.primary.contrast};
 
@@ -52,7 +62,7 @@ export const SecondaryButton = styled(BaseCircleButton)`
 	}
 `;
 
-export const ViewerButton = styled(BaseCircleButton)`
+export const ViewerButton = styled(BaseCircleButton)<{ selected?: boolean }>`
 	background-color: ${({ theme }) => theme.palette.tertiary.lightest};
 	color: ${({ theme }) => theme.palette.secondary.main};
 	margin: 0;
@@ -62,4 +72,10 @@ export const ViewerButton = styled(BaseCircleButton)`
 	&:hover {
 		background-color: ${({ theme }) => theme.palette.tertiary.lighter};
 	}
+	${({ selected }) => selected && css`
+		&, &:hover {
+			background-color: ${({ theme }) => theme.palette.secondary.main};
+			color: ${({ theme }) => theme.palette.secondary.contrastText};
+		}
+	`}
 `;

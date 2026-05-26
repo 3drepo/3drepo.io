@@ -18,4 +18,6 @@ const { v4Path } = require('../../interop');
 // eslint-disable-next-line import/no-dynamic-require, security/detect-non-literal-require, require-sort/require-sort
 const config = require(`${v4Path}/config`);
 
+config.createEndpointURL = (route = '') => `${config.apiUrls.all[0]}/v5/${route}`;
+
 module.exports = config;

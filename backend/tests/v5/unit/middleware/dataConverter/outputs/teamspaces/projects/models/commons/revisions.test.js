@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { src } = require('../../../../../../../../helper/path');
 const { generateRevisionEntry } = require('../../../../../../../../helper/services');
 
@@ -64,6 +65,33 @@ const testSerialiseRevisionArray = () => {
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/revisions', () => {
+const testSerialiseRevision = () => {
+	const noTs = generateRevisionEntry();
+	delete noTs.timestamp;
+	describe.each([
+		[{}, 'no revision'],
+		[noTs, 'no timestamp revision'],
+		[generateRevisionEntry(), 'regual revision'],
+	])('Serialize revision data', (data, desc) => {
+		test(`should serialise correctly with ${desc}`, () => {
+			const nextIdx = respondFn.mock.calls.length;
+			RevisionOutputMiddlewares.serialiseRevision({ outputData: cloneDeep(data) }, {}, () => {});
+
+			expect(respondFn.mock.calls.length).toBe(nextIdx + 1);
+			expect(respondFn.mock.calls[nextIdx][2]).toEqual(templates.ok);
+
+			const serialisedRev = {
+				...data,
+				_id: UUIDToString(data._id),
+				timestamp: data.timestamp ? data.timestamp.getTime() : data.timestamp,
+			};
+
+			expect(respondFn.mock.calls[nextIdx][3]).toEqual(serialisedRev);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testSerialiseRevisionArray();
+	testSerialiseRevision();
 });

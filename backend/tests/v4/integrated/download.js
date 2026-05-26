@@ -16,10 +16,10 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -33,6 +33,7 @@ describe("Download", function () {
 	const model = "testproject";
 
 	before(async() => {
+		const app = await createAppAsync();	
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");

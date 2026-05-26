@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src, image } = require('../../../helper/path');
 const fs = require('fs');
 
@@ -68,6 +69,40 @@ const testIsObject = () => {
 	)('Is Object', (item, isTrue) => {
 		test(`${item} should return ${isTrue}`, () => {
 			expect(TypeChecker.isObject(item)).toBe(isTrue);
+		});
+	});
+};
+
+const testIsBooleanString = () => {
+	describe.each(
+		[
+			['abc', false],
+			['true', true],
+			['True', true],
+			['TRUE', true],
+			['false', true],
+			['False', true],
+			['FALSE', true],
+			[undefined, false],
+		],
+	)('Is Boolean String', (item, isTrue) => {
+		test(`${item} should return ${isTrue}`, () => {
+			expect(TypeChecker.isBooleanString(item)).toBe(isTrue);
+		});
+	});
+};
+
+const testIsNumberString = () => {
+	describe.each(
+		[
+			['abc', false],
+			['true', false],
+			['12345', true],
+			[undefined, false],
+		],
+	)('Is Number String', (item, isTrue) => {
+		test(`${item} should return ${isTrue}`, () => {
+			expect(TypeChecker.isNumberString(item)).toBe(isTrue);
 		});
 	});
 };
@@ -142,12 +177,31 @@ const testFileExtensionFromBuffer = () => {
 	});
 };
 
-describe('utils/helpers/typeCheck', () => {
+const testFileExtensionFromPath = () => {
+	describe.each(
+		[
+			['Valid path', image, 'png'],
+			['Empty string', '', undefined],
+			['Number', 3, undefined],
+			['Null value', null, undefined],
+			['Undefined value', undefined, undefined],
+		],
+	)('Get file extension', (description, data, extension) => {
+		test(`${description} should return ${extension}`, async () => {
+			await expect(TypeChecker.fileExtensionFromPath(data)).resolves.toBe(extension);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testIsBuffer();
 	testIsString();
 	testIsObject();
 	testIsUUIDString();
+	testIsBooleanString();
+	testIsNumberString();
 	testFileMimeFromBuffer();
 	testFileExtensionFromBuffer();
+	testFileExtensionFromPath();
 	testIsUUID();
 });

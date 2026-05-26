@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const { generateRandomString, generateRandomObject, determineTestGroup } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 
 const Scenes = require(`${src}/models/scenes`);
 const db = require(`${src}/handler/db`);
@@ -45,6 +46,74 @@ const testGetNodesBySharedIds = () => {
 	});
 };
 
+const testGetNodesByIds = () => {
+	describe('Get nodes by Ids', () => {
+		test('Should return the results from the database query', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const ids = times(10, () => generateRandomString());
+			const projection = generateRandomObject();
+
+			const expectedData = times(10, generateRandomObject);
+
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+
+			await expect(Scenes.getNodesByIds(teamspace, project, model, ids, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, { _id: { $in: ids } }, projection);
+		});
+	});
+};
+
+const testGetNodeByQuery = () => {
+	describe('Get node by query', () => {
+		test('Should return the result from the database query', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const query = generateRandomObject();
+			const projection = generateRandomObject();
+
+			const expectedData = generateRandomObject();
+
+			const findOneFn = jest.spyOn(db, 'findOne').mockResolvedValueOnce(expectedData);
+
+			await expect(Scenes.getNodeByQuery(teamspace, project, model, query, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(findOneFn).toHaveBeenCalledTimes(1);
+			expect(findOneFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, query, projection);
+		});
+	});
+};
+
+const testGetNodesByQuery = () => {
+	describe('Get nodes by query', () => {
+		test('Should return the results from the database query', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const model = generateRandomString();
+			const query = generateRandomObject();
+			const projection = generateRandomObject();
+
+			const expectedData = times(10, generateRandomObject);
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+
+			await expect(Scenes.getNodesByQuery(teamspace, project, model, query, projection))
+				.resolves.toEqual(expectedData);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, `${model}.scene`, query, projection);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testGetNodesBySharedIds();
+	testGetNodesByIds();
+	testGetNodeByQuery();
+	testGetNodesByQuery();
 });

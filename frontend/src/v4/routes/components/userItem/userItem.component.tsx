@@ -51,12 +51,6 @@ export const UserItem = (props: IProps) => {
 			<Detail item>
 				<Highlight
 					{...highlightProps}
-					text={props.user}
-				/>
-			</Detail>
-			<Detail item>
-				<Highlight
-					{...highlightProps}
 					text={props.company || ''}
 				/>
 			</Detail>

@@ -43,24 +43,30 @@ const popupAnimation = keyframes`
 
 export const PinContainer = styled.div<{ colour, selected?: boolean }>`
 	position: absolute;
-	color: rgb(${({ colour }) => colour.map((val) => Math.round(val * 256)).join()});
-
+	
 	svg {
 		${({ selected }) => selected && css`
-			transform-origin: bottom center;
-			animation: ${popupAnimation} 1s forwards;
-	
-			#selectionFill {
-				stroke-width: 7px;
-			}
+		transform-origin: bottom center;
+		animation: ${popupAnimation} 1s forwards;
+		
+		#selectionFill {
+			visibility: visible;
+		}
 		`}
 		position: absolute;
-	
+		
 		left: -25px;
 		top: -64px;
+		
+		#main {
+			color: rgb(${({ colour }) => colour.map((val) => Math.round(val * 256)).join()});
+			stroke: #000;
+			stroke-width: 2%;
+		}
 
-		stroke: #000;
-		stroke-width: 2%;
 		overflow: visible;
+
+		height: 64px;
+		width: 64px;
 	}
 `;

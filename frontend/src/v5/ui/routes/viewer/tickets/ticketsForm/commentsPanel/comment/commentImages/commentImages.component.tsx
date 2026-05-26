@@ -55,11 +55,8 @@ export const CommentImages = ({ images, onImageClick, ...props }: CommentImagesP
 		);
 	}
 
-	const preloadImage = (src) => { new Image().src = src; };
-	const preloadImages = () => images.slice(4).forEach(preloadImage);
-
 	return (
-		<MultiImagesContainer onClick={preloadImages}>
+		<MultiImagesContainer>
 			<FlexContainer>
 				{(images.slice(0, 2)).map((image, index) => (
 					<CommentImage onClick={() => onImageClick(index)} src={image} key={image} {...props} />

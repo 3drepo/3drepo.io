@@ -18,9 +18,9 @@
  */
 
 const request = require("supertest");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
@@ -140,6 +140,7 @@ describe("Views", function () {
 	};
 
 	before(async function() {
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");
@@ -178,7 +179,7 @@ describe("Views", function () {
 
 			agent2.get(`/invalidTeamspace/${teamSpace1Model}/viewpoints/`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					return done(err);
 				});
 		});

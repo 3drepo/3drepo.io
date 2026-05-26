@@ -66,8 +66,8 @@
 	 * @apiDescription Assign account level permission to a user
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
-	 * @apiParam (Request body) {String} user User to assign permissions to
-	 * @apiParam (Request body) {String[]} permissions List of account level permissions
+	 * @apiBody {String} user User to assign permissions to
+	 * @apiBody {String[]} permissions List of account level permissions
 	 * @apiSuccess (200) {String} user User
 	 * @apiSuccess (200) {String[]} permissions Account Level Permission types
 	 *
@@ -101,8 +101,8 @@
 	 *
 	 * @apiParam {String} teamspace Name of teamspace
 	 * @apiParam {String} user User to update
-	 * @apiParam (Request body) {String[]} permissions List of account level permissions
-	 * @apiSuccess {String[]} permissions List of account level permissions
+	 * @apiBody {String[]} permissions List of account level permissions
+	 * @apiSuccess (200) {String[]} permissions List of account level permissions
 	 *
 	 * @apiExample {put} Example usage:
 	 * PUT /acme/permissions/alice HTTP/1.1
@@ -112,7 +112,7 @@
 	 * 	]
 	 * }
 	 *
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiSuccessExample {json} Success-Response:
 	 * HTTP/1.1 200 OK
 	 * {
 	 *	"permissions": [
@@ -134,7 +134,7 @@
 	 * @apiExample {delete} Example usage:
 	 * DELETE /acme/permissions/alice HTTP/1.1
 	 *
-	 * @apiSuccessExample {json} Success-Response
+	 * @apiSuccessExample {json} Success-Response:
 	 * HTTP/1.1 200 OK
 	 * {}
 	 */

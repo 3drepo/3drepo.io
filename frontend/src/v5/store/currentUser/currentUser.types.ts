@@ -27,21 +27,15 @@ export interface ICurrentUser {
 	avatarUrl?: string,
 	intercomRef?: string,
 	apiKeyIsUpdating?: boolean,
-	sso?: string,
 }
 
-export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'email' | 'company' | 'countryCode'>> & {
+export type UpdatePersonalData = Partial<Pick<ICurrentUser, 'firstName' | 'lastName' | 'company' | 'countryCode' >> & {
 	avatarFile?: File,
-};
-
-export type UpdatePassword = {
-	oldPassword: string;
-	newPassword: string;
 };
 
 export type UpdateApiKey = Pick<ICurrentUser, 'apiKey'>;
 
-export type UpdateUser = UpdatePersonalData | UpdatePassword | UpdateApiKey;
+export type UpdateUser = UpdatePersonalData | UpdateApiKey;
 
 export type UpdateUserSuccess = Partial<ICurrentUser>;
 

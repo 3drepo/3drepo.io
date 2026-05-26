@@ -43,10 +43,10 @@ export const selectProjectsPending = createSelector(
 export const selectCurrentTeamspace = createSelector(
 	selectLocation, (location) =>  {
 		/** getting the teamspace from v5 routing  */
-		const v5Params = matchPath<RouteParams>(location.pathname, { path: '/v5/dashboard/:teamspace' });
+		const v5Params = matchPath({ path: '/v5/dashboard/:teamspace/*' }, location.pathname);
 		/*******************************************/
 
-		const userManagementParams = matchPath<RouteParams>(location.pathname, { path: ROUTES.USER_MANAGEMENT_TEAMSPACE });
+		const userManagementParams = matchPath({ path: ROUTES.USER_MANAGEMENT_TEAMSPACE }, location.pathname);
 		return ((userManagementParams || v5Params || {}).params || {}).teamspace;
 	}
 );
@@ -54,6 +54,10 @@ export const selectCurrentTeamspace = createSelector(
 export const selectUsers = createSelector(
 	selectUserManagementDomain, selectCurrentTeamspace, selectCurrentUser,
 		({users}, teamspace, {username}) => orderByFullName(users).map(prepareUserData.bind(null, teamspace, username))
+);
+
+export const selectAddUserIsPending = createSelector(
+	selectUserManagementDomain, (state) => state.addUserIsPending
 );
 
 export const selectUsersSuggestions = createSelector(

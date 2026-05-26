@@ -15,17 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CryptoProvider } = require('@azure/msal-node');
 const config = require('../../utils/config');
+const { generateUUIDString } = require('../../utils/helper/uuids');
+const { subtle } = require('crypto');
 
 const Sso = {};
 
-const cryptoProvider = new CryptoProvider();
+const createRandomString = (length = 16) => {
+	let text = '';
+	const possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+	for (let i = 0; i < length; i++) {
+		text += possible.charAt(Math.floor(Math.random() * possible.length));
+	}
+
+	return text;
+};
+
+const generateCodeChallenge = async (codeVerifier) => {
+	const digest = await subtle.digest('SHA-256',
+		new TextEncoder().encode(codeVerifier));
+
+	return Buffer.from(new Uint8Array(digest)).toString('base64')
+		.replace(/=/g, '')
+		.replace(/\+/g, '-')
+		.replace(/\//g, '_');
+};
+
+const generatePkceCodes = async () => {
+	// from https://developers.frontegg.com/guides/management/frontegg-idp/native-hosted#step-2-generating-verifier-and-challenge-code
+	const verifier = createRandomString();
+	const challenge = await generateCodeChallenge(verifier);
+
+	return { verifier, challenge };
+};
 
 Sso.addPkceProtection = async (req, res, next) => {
-	const { verifier, challenge } = await cryptoProvider.generatePkceCodes();
-
-	req.session.csrfToken = cryptoProvider.createNewGuid();
+	const { verifier, challenge } = await generatePkceCodes();
+	req.session.csrfToken = generateUUIDString();
 	req.session.pkceCodes = { challengeMethod: 'S256', verifier, challenge };
 	req.session.cookie.domain = config.cookie_domain;
 

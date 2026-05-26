@@ -11,9 +11,8 @@
 			"program": "${workspaceFolder}/node_modules/jest/bin/jest",
 			"args": [
 			  "${fileBasename}",
-			  "--verbose",
-			  "-i",
-			  "--no-cache",
+			  "--runInBand",
+			  "--testTimeout=500"
 			],
 			"console": "integratedTerminal",
 			"internalConsoleOptions": "neverOpen"

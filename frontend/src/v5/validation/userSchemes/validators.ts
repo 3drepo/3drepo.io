@@ -17,67 +17,8 @@
 
 import * as Yup from 'yup';
 import { formatMessage } from '@/v5/services/intl';
-import { getPasswordStrength } from '@/v4/services/validation';
 import { avatarFileIsTooBig, AVATAR_MAX_SIZE_MESSAGE } from '@/v5/store/currentUser/currentUser.helpers';
-import { alphaNumericHyphens, getMaxFileSizeMessage, trimmedString } from '../shared/validators';
-
-export const username = trimmedString
-	.required(
-		formatMessage({
-			id: 'userSignupForm.username.error.required',
-			defaultMessage: 'Username is required',
-		}),
-	)
-	.min(2,
-		formatMessage({
-			id: 'userRegistration.username.error.min',
-			defaultMessage: 'Username must be at least 2 characters',
-		}))
-	.max(63,
-		formatMessage({
-			id: 'userRegistration.username.error.max',
-			defaultMessage: 'Username is limited to 63 characters',
-		}))
-	.matches(alphaNumericHyphens, formatMessage({
-		id: 'user.username.error.characters',
-		defaultMessage: 'Username can only consist of letters, numbers, hyphens, and underscores',
-	}))
-	.test(
-		'alreadyExistingUsernames',
-		formatMessage({
-			id: 'userRegistration.username.alreadyExisting',
-			defaultMessage: 'This username is already taken',
-		}),
-		(usernameValue, testContext) => (
-			!testContext.options.context?.alreadyExistingUsernames?.map((u) => u.trim()).includes(usernameValue)
-		),
-	);
-
-export const password = () => Yup.string()
-	.required(
-		formatMessage({
-			id: 'validation.password.error.required',
-			defaultMessage: 'Password is a required field',
-		}),
-	)
-	.min(8,
-		formatMessage({
-			id: 'validation.password.error.min',
-			defaultMessage: 'Password must be at least 8 characters',
-		}))
-	.max(65,
-		formatMessage({
-			id: 'validation.password.error.max',
-			defaultMessage: 'Password is limited to 65 characters',
-		}))
-	.test(
-		'checkPasswordStrength',
-		formatMessage({
-			id: 'validation.password.error.tooWeak',
-			defaultMessage: 'Password is too weak',
-		}),
-		async (passwordValue) => await getPasswordStrength(passwordValue) >= 2,
-	);
+import { getMaxFileSizeMessage, trimmedString } from '../shared/validators';
 
 export const firstName = trimmedString
 	.required(formatMessage({
@@ -113,12 +54,11 @@ export const company = trimmedString
 		defaultMessage: 'Company is limited to 120 characters',
 	}));
 
-export const countryCode = Yup.string()
-	.required(
-		formatMessage({
-			id: 'validation.countryCode.error.required',
-			defaultMessage: 'Country is a required field',
-		}),
+export const avatarFile = Yup.mixed()
+	.test(
+		'fileSize',
+		getMaxFileSizeMessage(AVATAR_MAX_SIZE_MESSAGE),
+		(file) => !avatarFileIsTooBig(file),
 	);
 
 export const email = trimmedString
@@ -137,21 +77,4 @@ export const email = trimmedString
 			id: 'validation.email.error.required',
 			defaultMessage: 'Email is a required field',
 		}),
-	)
-	.test(
-		'alreadyExistingEmails',
-		formatMessage({
-			id: 'validation.email.alreadyExisting',
-			defaultMessage: 'This email is already taken',
-		}),
-		(emailValue, testContext) => (
-			!testContext.options.context.alreadyExistingEmails.map((e) => e.trim()).includes(emailValue)
-		),
-	);
-
-export const avatarFile = Yup.mixed()
-	.test(
-		'fileSize',
-		getMaxFileSizeMessage(AVATAR_MAX_SIZE_MESSAGE),
-		(file) => !avatarFileIsTooBig(file),
 	);

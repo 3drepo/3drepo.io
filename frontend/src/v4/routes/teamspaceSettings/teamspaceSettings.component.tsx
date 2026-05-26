@@ -41,6 +41,7 @@ import {
 	ButtonContainer,
 	Container,
 	CreateMitigationsGrid,
+	DateInputsGrid,
 	DataText,
 	FileGrid,
 	Headline,
@@ -71,9 +72,9 @@ interface IState {
 }
 
 interface IProps {
-	match: any;
+	teamspace: string;
 	location: any;
-	history: any;
+	navigate: (to: string, options?: { replace?: boolean }) => void;
 	fetchTeamspaceSettings: (teamspace) => void;
 	updateTeamspaceSettings: (teamspace, settings) => void;
 	downloadTreatmentsTemplate: () => void;
@@ -95,7 +96,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	};
 
 	get teamspace() {
-		return this.props.match.params.teamspace;
+		return this.props.teamspace;
 	}
 
 	get treatmentsUpdatedAt() {
@@ -103,9 +104,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	public componentDidMount() {
-		const { match, fetchTeamspaceSettings } = this.props;
-		const { teamspace } = match.params;
-
+		const { teamspace, fetchTeamspaceSettings } = this.props;
 		fetchTeamspaceSettings(teamspace);
 	}
 
@@ -140,7 +139,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 	}
 
 	private handleUpdateSettings = (values, { resetForm }) => {
-		const { teamspace } = this.props.match.params;
+		const { teamspace } = this.props;
 		const { topicTypes, riskCategories, file, createMitigationSuggestions } = values;
 		const settings = {
 			topicTypes,
@@ -162,9 +161,9 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 		});
 	}
 
-	public handleBackLink = () => {
-		this.props.history.push({ pathname: ROUTES.TEAMSPACES });
-	}
+   public handleBackLink = () => {
+		this.props.navigate(ROUTES.TEAMSPACES);
+   }
 
 	public renderTitleWithBackLink = () => (
 		<>
@@ -294,7 +293,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 					/>
 				</DataText>
 				<FileGrid container direction="row" justifyContent="space-between" alignItems="center" wrap="nowrap">
-					<Grid gap="10px" container alignItems="end" wrap="nowrap">
+					<DateInputsGrid>
 						<DateTimePicker
 							disableFuture
 							label={formatMessage({ id: 'teamspaceSettings.permissionsLog.startDate', defaultMessage: 'Start Date' })}
@@ -334,7 +333,7 @@ export class TeamspaceSettings extends PureComponent<IProps, IState> {
 						>
 							<FormattedMessage id="teamspaceSettings.permissionsLog.download" defaultMessage="Download" />
 						</Button>
-					</Grid>
+					</DateInputsGrid>
 				</FileGrid>
 			</PermissionsLogContainer>
 		);

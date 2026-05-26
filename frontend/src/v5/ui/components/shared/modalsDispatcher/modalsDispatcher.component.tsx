@@ -17,7 +17,7 @@
 
 import { useState } from 'react';
 import { DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { IDialogConfig } from '@/v5/store/dialogs/dialogs.redux';
+import { IDialogConfig } from '@/v5/store/dialogs/dialogs.types';
 import { MODAL_TEMPLATES } from './templates';
 import { useSyncPropsEffect } from '@/v5/helpers/syncProps.hooks';
 import { DialogsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -27,10 +27,10 @@ const ModalTemplateContainer = ({ id, modalType, props, syncProps }: IDialogConf
 
 	const modalProps = useSyncPropsEffect(syncProps || props || {});
 
-	const onClickClose = () => {
+	const onClickClose = (...args) => {
 		setOpenState(false);
 		setTimeout(() => DialogsActionsDispatchers.close(id), 500);
-		modalProps.onClose?.();
+		modalProps.onClose?.(...args);
 	};
 
 	if (syncProps) {

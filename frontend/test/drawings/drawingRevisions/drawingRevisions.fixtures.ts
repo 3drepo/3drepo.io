@@ -56,7 +56,7 @@ export const mockCreateRevisionBody = (overrides?: Partial<CreateDrawingRevision
 		drawingType: 'Other',
 		drawingDesc: faker.random.words(3),
 		drawingNumber: faker.random.word(),
-		description: faker.random.word(),
+		revisionDesc: faker.random.word(),
 		calibration: getFakeDrawingSettingsCalibration(),
 		name: faker.random.word(),
 		revCode: faker.random.word(),

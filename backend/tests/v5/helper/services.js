@@ -21,26 +21,34 @@ const http = require('http');
 const fs = require('fs');
 const { times } = require('lodash');
 
+const SessionTracker = require('./sessionTracker');
+
 const { image, src, srcV4 } = require('./path');
 
 const { createAppAsync: createServer } = require(`${srcV4}/services/api`);
 const { createApp: createFrontend } = require(`${srcV4}/services/frontend`);
 const { io: ioClient } = require('socket.io-client');
 
-const { providers } = require(`${src}/services/sso/sso.constants`);
+const { stopPurge } = require(`${src}/models/frontegg.cache`);
+const { tmpdir } = require('os');
 
-const { CSRF_COOKIE, SESSION_HEADER } = require(`${src}/utils/sessions.constants`);
+const { generateUUIDString } = require(`${src}/utils/helper/uuids`);
+const path = require('path');
+const { PassThrough } = require('stream');
 
+const { isString } = require(`${src}/utils/helper/typeCheck`);
+
+const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
+const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS, CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { INTERNAL_DB } = require(`${src}/handler/db.constants`);
 const QueueHandler = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);
-const { templates } = require(`${src}/utils/responseCodes`);
+const { FileStorageTypes } = require(`${src}/utils/config.constants`);
 const { editSubscriptions, grantAdminToUser, updateAddOns } = require(`${src}/models/teamspaceSettings`);
-const { createTeamspaceRole } = require(`${src}/models/roles`);
-const { initTeamspace } = require(`${src}/processors/teamspaces/teamspaces`);
+const { initTeamspace, addTeamspaceMember } = require(`${src}/processors/teamspaces`);
 const { generateUUID, UUIDToString, stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { MODEL_COMMENTER, MODEL_VIEWER, PROJECT_ADMIN } = require(`${src}/utils/permissions/permissions.constants`);
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
@@ -54,7 +62,7 @@ const { generateFullSchema } = require(`${src}/schemas/tickets/templates`);
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
-const { USERS_DB_NAME, USERS_COL, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
+const { USERS_DB_NAME, AVATARS_COL_NAME } = require(`${src}/models/users.constants`);
 const { COL_NAME } = require(`${src}/models/projectSettings.constants`);
 const { propTypes, presetModules } = require(`${src}/schemas/tickets/templates.constants`);
 
@@ -63,25 +71,28 @@ const queue = {};
 const ServiceHelper = { db, queue, socket: {} };
 
 queue.purgeQueues = async () => {
-	try {
-		// eslint-disable-next-line
-		const { host, worker_queue, model_queue, callback_queue } = config.cn_queue;
-		const conn = await amqp.connect(host);
-		const channel = await conn.createChannel();
+	const { host, model_queue, callback_queue } = config.cn_queue;
+	const conn = await amqp.connect(host);
 
-		channel.on('error', () => { });
+	const purgeQueue = async (queueName) => {
+		try {
+			const channel = await conn.createChannel();
+			channel.on('error', () => { });
+			await channel.purgeQueue(queueName);
+			await channel.close();
+		} catch (err) {
+			// Skip channels that don't exists
+			// No need to raise an error since channels that
+			// don't exist can be considered cleaned up already.
+		}
+	};
 
-		await Promise.all([
-			channel.purgeQueue(worker_queue),
-			channel.purgeQueue(model_queue),
-			channel.purgeQueue(callback_queue),
-		]);
+	await Promise.all([
+		purgeQueue(model_queue),
+		purgeQueue(callback_queue),
+	]);
 
-		await channel.close();
-		await conn.close();
-	} catch (err) {
-		// doesn't really matter if purge queue failed. it's just for clean up.
-	}
+	await conn.close();
 };
 
 db.reset = async () => {
@@ -102,28 +113,35 @@ db.reset = async () => {
 	await DbHandler.disconnect();
 };
 
-db.addSSO = async (user, id = ServiceHelper.generateRandomString()) => {
-	await DbHandler.updateOne(USERS_DB_NAME, USERS_COL, { user }, { $set: { 'customData.sso': { type: providers.AAD, id } } });
-};
-
 // userCredentials should be the same format as the return value of generateUserCredentials
-db.createUser = (userCredentials, tsList = [], customData = {}) => {
+db.createUser = async (userCredentials, tsList = [], customData = {}) => {
 	const { user, password, apiKey, basicData = {} } = userCredentials;
-	const roles = tsList.map((ts) => ({ db: ts, role: 'team_member' }));
-	return DbHandler.createUser(user, password, {
+
+	await DbHandler.createUser(user, password, {
 		billing: { billingInfo: {} },
 		...basicData,
 		...customData,
 		apiKey,
-	}, roles);
+	}, []);
+
+	await Promise.all(tsList.map((ts) => addTeamspaceMember(ts, user)));
 };
 
-db.createTeamspaceRole = (ts) => createTeamspaceRole(ts);
-
 db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = true, addOns) => {
-	if (createUser) await ServiceHelper.db.createUser({ user: teamspace, password: teamspace });
-	await initTeamspace(teamspace);
-	await Promise.all(admins.map((adminUser) => grantAdminToUser(teamspace, adminUser)));
+	if (createUser) {
+		await ServiceHelper.db.createUser({
+			...ServiceHelper.generateUserCredentials(),
+			user: teamspace,
+			password: teamspace });
+	}
+	const firstAdmin = createUser ? teamspace : admins[0];
+	const accountId = await initTeamspace(teamspace, firstAdmin);
+	await Promise.all(admins.map(async (adminUser) => {
+		if (firstAdmin !== adminUser) {
+			await addTeamspaceMember(teamspace, adminUser);
+			await grantAdminToUser(teamspace, adminUser);
+		}
+	}));
 
 	if (subscriptions) {
 		await Promise.all(Object.keys(subscriptions).map((subType) => editSubscriptions(teamspace,
@@ -133,6 +151,8 @@ db.createTeamspace = async (teamspace, admins = [], subscriptions, createUser = 
 	if (Object.keys(addOns ?? {}).length) {
 		await updateAddOns(teamspace, addOns);
 	}
+
+	return accountId;
 };
 
 db.createProject = (teamspace, _id, name, models = [], admins = []) => {
@@ -162,15 +182,15 @@ db.createRevision = async (teamspace, project, model, revision, modelType) => {
 		historyCol, id, buffer);
 
 	if (revision.rFile) {
-		writeReferencedData(revision.rFile[0], revision.refData);
+		await writeReferencedData(revision.rFile[0], revision.refData);
 	}
 
 	if (revision.image) {
-		writeReferencedData(revision.image, revision.imageData);
+		await writeReferencedData(revision.image, revision.imageData);
 	}
 
 	if (revision.thumbnail) {
-		writeReferencedData(revision.thumbnail, revision.thumbnailData);
+		await writeReferencedData(revision.thumbnail, revision.thumbnailData);
 	}
 	const formattedRevision = {
 		...revision,
@@ -316,16 +336,79 @@ db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVA
 db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
 	type, project, imageData);
 
+db.createClashPlan = (teamspace, plan) => {
+	const formattedPlan = { ...plan, _id: stringToUUID(plan._id) };
+	DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
+};
+
 db.addLoginRecords = async (records) => {
 	await DbHandler.insertMany(INTERNAL_DB, 'loginRecords', records);
 };
 
-db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
-	db.createRevision(teamspace, project, modelId, rev),
-	DbHandler.insertMany(teamspace, `${modelId}.scene`, nodes),
-	FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap)),
+const addNodes = async (teamspace, modelId, nodes) => {
+	const arrTypes = {
+		vertices: Float32Array,
+		faces: Uint32Array,
+		normals: Float32Array,
+		data: Uint8Array,
+	};
+	const collection = `${modelId}.scene`;
 
+	const processedNodes = await Promise.all(nodes.map(async (node) => {
+		const { blobData, ...nodeData } = node;
+		if (blobData) {
+			const stream = new PassThrough();
+			const elementInfo = {};
+			let offset = 0;
+			Object.keys(blobData).forEach((key) => {
+				const data = blobData[key];
+				const Type = arrTypes[key];
+				const typed = new Type(data);
+
+				const buffer = isString(data) ? Buffer.from(data) : Buffer.from(
+					typed.buffer,
+					typed.byteOffset,
+					typed.byteLength,
+				);
+				stream.write(buffer);
+				const start = offset;
+				const size = buffer.byteLength;
+
+				elementInfo[key] = {
+					start, size,
+				};
+				offset = start + size;
+			});
+
+			stream.end();
+			const name = ServiceHelper.generateUUIDString();
+			// eslint-disable-next-line no-underscore-dangle
+			nodeData._blobRef = { elements: elementInfo, buffer: { start: 0, size: offset, name } };
+
+			await FilesManager.storeFileStream(teamspace, collection, name, stream);
+		}
+
+		return nodeData;
+	}));
+
+	await DbHandler.insertMany(teamspace, collection, processedNodes);
+};
+
+db.createScene = (teamspace, project, modelId, rev, nodes, meshMap) => Promise.all([
+	addNodes(teamspace, modelId, nodes),
+	...(meshMap ? [FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, `${UUIDToString(rev._id)}/idToMeshes.json`, JSON.stringify(meshMap))] : []),
 ]);
+
+db.addJSONFile = (teamspace, modelId, name, content) => FilesManager.storeFile(teamspace, `${modelId}.stash.json_mpc`, name, content);
+ServiceHelper.createTmpDir = () => {
+	const tmpDir = tmpdir();
+	const folder = generateUUIDString();
+	const fullPath = path.posix.join(tmpDir, folder);
+	fs.mkdirSync(fullPath, { recursive: true });
+
+	return fullPath;
+};
+
 ServiceHelper.createQueryString = (options) => {
 	const keys = Object.keys(deleteIfUndefined(options, true));
 
@@ -355,10 +438,12 @@ ServiceHelper.outOfOrderArrayEqual = (arr1, arr2) => {
 ServiceHelper.generateUUIDString = () => UUIDToString(generateUUID());
 ServiceHelper.generateUUID = () => generateUUID();
 ServiceHelper.generateRandomString = (length = 20) => Crypto.randomBytes(Math.ceil(length / 2.0)).toString('hex').substring(0, length);
+ServiceHelper.generateRandomEmail = () => `${ServiceHelper.generateRandomString()}@${ServiceHelper.generateRandomString(6)}.com`;
 ServiceHelper.generateRandomBuffer = (length = 20) => Buffer.from(ServiceHelper.generateRandomString(length));
 ServiceHelper.generateRandomDate = (start = new Date(2018, 1, 1), end = new Date()) => new Date(start.getTime()
 	+ Math.random() * (end.getTime() - start.getTime()));
 ServiceHelper.generateRandomNumber = (min = -1000, max = 1000) => Math.random() * (max - min) + min;
+ServiceHelper.generateRandomBoolean = () => Math.random() < 0.5;
 ServiceHelper.generateRandomIfcGuid = () => ServiceHelper.generateRandomString(22);
 ServiceHelper.generateRandomRvtId = () => Math.floor(Math.random() * 10000);
 
@@ -432,14 +517,6 @@ ServiceHelper.generateUserCredentials = () => ({
 		},
 	},
 });
-
-ServiceHelper.determineTestGroup = (path) => {
-	const match = path.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
-	if (match?.length === 3) {
-		return `${match[1].toUpperCase()} ${match[2]}`;
-	}
-	return path;
-};
 
 ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
 	id: ServiceHelper.generateUUIDString(),
@@ -617,10 +694,14 @@ const generateProperties = (propTemplate, internalType, container) => {
 		if (deprecated || readOnly) return;
 		if (type === propTypes.TEXT) {
 			properties[name] = ServiceHelper.generateRandomString();
+		} if (type === propTypes.LONG_TEXT) {
+			properties[name] = ServiceHelper.generateRandomString();
 		} else if (type === propTypes.DATE) {
 			properties[name] = internalType ? new Date() : Date.now();
 		} else if (type === propTypes.NUMBER) {
 			properties[name] = ServiceHelper.generateRandomNumber();
+		} else if (type === propTypes.BOOLEAN) {
+			properties[name] = ServiceHelper.generateRandomBoolean();
 		} else if (type === propTypes.ONE_OF && isArray(values)) {
 			properties[name] = values[values.length - 1];
 		} else if (type === propTypes.MANY_OF && isArray(values)) {
@@ -706,10 +787,15 @@ ServiceHelper.generateTicket = (template, internalType = false, container) => {
 	return ticket;
 };
 
-ServiceHelper.generateImportedComment = (author = ServiceHelper.generateRandomString()) => ({
-	...ServiceHelper.generateComment(author),
-	originalAuthor: ServiceHelper.generateRandomString(),
-});
+ServiceHelper.generateImportedComment = () => {
+	const comment = ServiceHelper.generateComment();
+	return {
+		createdAt: comment.createdAt,
+		message: comment.message,
+		images: comment.images,
+		originalAuthor: ServiceHelper.generateRandomString(),
+	};
+};
 
 ServiceHelper.generateComment = (author = ServiceHelper.generateRandomString()) => {
 	const base64img = fs.readFileSync(image).toString('base64');
@@ -820,7 +906,22 @@ ServiceHelper.generateView = (account, model, hasThumbnail = true) => ({
 	...(hasThumbnail ? { thumbnail: ServiceHelper.generateRandomBuffer() } : {}),
 });
 
-ServiceHelper.app = async () => (await createServer()).listen(8080);
+ServiceHelper.generateClashPlan = (model1, model2) => ({
+	_id: ServiceHelper.generateUUIDString(),
+	name: ServiceHelper.generateRandomString(),
+	type: CLASH_PLAN_TYPES[0],
+	tolerance: 0.01,
+	selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
+	trigger: [TRIGGER_OPTIONS[0]],
+	selectionA: {
+		container: model1,
+	},
+	selectionB: {
+		container: model2,
+	},
+});
+
+ServiceHelper.app = async (bypassAuth = false) => (await createServer({ [BYPASS_AUTH]: bypassAuth })).listen(8080);
 
 ServiceHelper.frontend = () => createFrontend().listen(8080);
 
@@ -835,35 +936,10 @@ ServiceHelper.chatApp = () => {
 	return ChatService.createApp(server);
 };
 
-ServiceHelper.parseSetCookie = (arr) => {
-	let token; let session;
-	arr.forEach((instr) => {
-		const matchSession = instr.match(/connect.sid=([^;]*)/);
-		if (matchSession) {
-			[, session] = matchSession;
-		}
-
-		const matchToken = instr.match(/csrf_token=([^;]*)/);
-		if (matchToken) {
-			[, token] = matchToken;
-		}
-	});
-
-	return { token, session };
-};
-
-ServiceHelper.generateCookieArray = ({ token, session }) => [
-	`${CSRF_COOKIE}=${token}`,
-	`${SESSION_HEADER}=${session}`,
-];
-
-ServiceHelper.loginAndGetCookie = async (agent, user, password, headers = {}) => {
-	const res = await agent.post('/v5/login')
-		.set(headers)
-		.send({ user, password })
-		.expect(templates.ok.status);
-
-	return ServiceHelper.parseSetCookie(res.header['set-cookie']);
+ServiceHelper.loginAndGetCookie = async (agent, user, options) => {
+	const session = SessionTracker(agent);
+	await session.login(user, options);
+	return session.getCookies();
 };
 
 ServiceHelper.socket.connectToSocket = (session) => new Promise((resolve, reject) => {
@@ -904,6 +980,8 @@ ServiceHelper.socket.joinRoom = (socket, data) => new Promise((resolve, reject) 
 });
 
 ServiceHelper.closeApp = async (server) => {
+	await queue.purgeQueues();
+	stopPurge();
 	if (server) await server.close();
 	await db.reset();
 	EventsManager.reset();
@@ -911,7 +989,7 @@ ServiceHelper.closeApp = async (server) => {
 };
 
 ServiceHelper.resetFileshare = () => {
-	const fsDir = config.fs.path;
+	const fsDir = config[FileStorageTypes.FS].path;
 	fs.rmSync(fsDir, { recursive: true });
 	fs.mkdirSync(fsDir);
 };
@@ -930,5 +1008,30 @@ ServiceHelper.generateBasicNode = (type, rev_id, parents, additionalData = {}) =
 	parents,
 	...additionalData,
 });
+
+ServiceHelper.generateMeshNode = (rev_id, parents) => {
+	const blobData = {
+		vertices: times(9, () => ServiceHelper.generateRandomNumber(-100, 100)),
+		normals: times(9, () => ServiceHelper.generateRandomNumber(-1, 1)),
+		faces: [3, ...times(3, () => Math.floor(ServiceHelper.generateRandomNumber(0, 2)))],
+	};
+
+	// javascript is 64-bit float by default, need to convert to proper typed array and back
+	blobData.vertices = Array.from(new Float32Array(blobData.vertices));
+	blobData.normals = Array.from(new Float32Array(blobData.normals));
+
+	return ServiceHelper.generateBasicNode('mesh', rev_id, parents, { blobData });
+};
+
+ServiceHelper.generateTextureNode = (rev_id, parents) => {
+	const blobData = {
+		data: ServiceHelper.generateRandomString(256),
+	};
+	const nodeData = {
+		blobData,
+		extension: 'png',
+	};
+	return ServiceHelper.generateBasicNode('texture', rev_id, parents, nodeData);
+};
 
 module.exports = ServiceHelper;

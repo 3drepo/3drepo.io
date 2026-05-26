@@ -21,6 +21,9 @@ const VERSION = require("../../VERSION.json").VERSION;
 const config = require("app-config").config;
 const utils = require("./utils");
 
+const { v5Path } = require("../interop");
+const { FileStorageTypes } = require(`${v5Path}/utils/config.constants`);
+
 /** *****************************************************************************
  * Coalesce function
  * @param {Object} variable - variable to coalesce
@@ -88,7 +91,7 @@ const fillInServerDetails = function (serverObject, name) {
 if (config === undefined) {
 	console.error("Config is undefined. Is it in a subfolder of the config directory, " +
 	"well formed and named config.js?");
-	// eslint-disable-next-line no-process-exit
+	// eslint-disable-next-line n/no-process-exit
 	process.exit(1);
 }
 
@@ -118,7 +121,7 @@ config.public_port = config.public_port || config.port;
 
 config.timeout = coalesce(config.timeout, 30 * 60); // Timeout in seconds
 
-const threeHours = (1000 * 60) * (60 * 3);
+const threeHours = (1000 * 60 * 60) * 3 ;
 config.cookie = coalesce(config.cookie, {});
 config.cookie.maxAge = coalesce(config.cookie.maxAge, threeHours);
 config.cookie.secret = coalesce(config.cookie.secret, config.default_cookie_secret);
@@ -133,7 +136,7 @@ config.login_check_interval = coalesce(config.login_check_interval, 8); // secon
 // Check whether the secret have been set in the file or not
 if ((config.cookie.secret === config.default_cookie_secret) || (config.cookie.parser_secret === config.default_cookie_parser_secret)) {
 	console.error("Cookie secret phrase has the default value. Update the config");
-	// eslint-disable-next-line no-process-exit
+	// eslint-disable-next-line n/no-process-exit
 	process.exit(1);
 }
 
@@ -152,17 +155,17 @@ config.db.authSource = config.db.authSource || "";
 
 if (config.db.port.length !== config.db.host.length) {
 	console.error("Incorrect number of hosts and ports");
-	// eslint-disable-next-line no-process-exit
+	// eslint-disable-next-line n/no-process-exit
 	process.exit(1);
 }
 
 if (config.db.host.length > 1 && !config.db.replicaSet) {
 	console.error("You must specify the replica set name");
-	// eslint-disable-next-line no-process-exit
+	// eslint-disable-next-line n/no-process-exit
 	process.exit(1);
 }
 
-config.defaultStorage = config.defaultStorage || (config.fs ? "fs" : "gridfs");
+config.defaultStorage = FileStorageTypes.FS;
 
 let multipleAPIServer = false;
 
@@ -224,7 +227,7 @@ config.apiAlgorithm = createRoundRobinAlgorithm(config);
 
 // Subscription info
 config.subscriptions = coalesce(config.subscriptions, {});
-config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 200});
+config.subscriptions.basic = coalesce(config.subscriptions.basic, {collaborator : 0, data: 0});
 
 // Terms & Conditions update date
 config.termsUpdatedAt = coalesce(config.termsUpdatedAt, 0);
@@ -261,12 +264,6 @@ config.captcha = coalesce(config.captcha, null);
 config.auth = coalesce(config.auth, {});
 config.auth.captcha = coalesce(config.auth.captcha, false);
 config.auth.register = coalesce(config.auth.register,true);
-
-// paypal
-config.paypal = coalesce(config.paypal, null);
-if(config.paypal) {
-	config.paypal.validateIPN = coalesce(config.paypal.validateIPN, true);
-}
 
 config.cn_queue = { maxRetries: 3, ...config.cn_queue};
 
@@ -313,11 +310,5 @@ config.imageSizeLimit = coalesce(config.imageSizeLimit, 1048576);
 config.liveChatLicense = config.liveChatLicense || 0;
 
 config.cachePolicy = config.cachePolicy || {maxAge: 60 * 60 * 24 * 30};
-
-// login lockout policy
-config.loginPolicy = config.loginPolicy || {};
-config.loginPolicy.maxUnsuccessfulLoginAttempts = config.loginPolicy.maxUnsuccessfulLoginAttempts || 10;
-config.loginPolicy.remainingLoginAttemptsPromptThreshold = config.loginPolicy.remainingLoginAttemptsPromptThreshold || 5;
-config.loginPolicy.lockoutDuration = config.loginPolicy.lockoutDuration || 900000; // milliseconds
 
 module.exports = config;

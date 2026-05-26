@@ -36,23 +36,23 @@ const SequenceActivities = require("../models/sequenceActivities");
 /**
  * @apiDefine ActivityBodyObject
  *
- * @apiParam (Request body) {String} name The name of the activity
- * @apiParam (Request body) {Number} startDate The starting timestamp date of the activity
- * @apiParam (Request body) {Number} endDate The ending timestamp date of the activity
- * @apiParam (Request body) {String} [parent] The parent id if it has one. This parent must exist previously
- * @apiParam (Request body) {Object} [resources] The resources asoociated with the activity
- * @apiParam (Request body) {KeyValue[]} [data] An array of key value pairs with metadata for the activity
+ * @apiBody {String} name The name of the activity
+ * @apiBody {Number} startDate The starting timestamp date of the activity
+ * @apiBody {Number} endDate The ending timestamp date of the activity
+ * @apiBody {String} [parent] The parent id if it has one. This parent must exist previously
+ * @apiBody {Object} [resources] The resources asoociated with the activity
+ * @apiBody {KeyValue[]} [data] An array of key value pairs with metadata for the activity
  */
 
 /**
  * @apiDefine ActivityBodyObjectOptional
  *
- * @apiParam (Request body) {String} [name] The name of the activity
- * @apiParam (Request body) {Number} [startDate] The starting timestamp date of the activity
- * @apiParam (Request body) {Number} [endDate] The ending timestamp date of the activity
- * @apiParam (Request body) {String} [parent] The parent id if it has one. This parent must exist previously
- * @apiParam (Request body) {Object} [resources] The resources asoociated with the activity
- * @apiParam (Request body) {KeyValue[]} [data] An array of key value pairs with metadata for the activity
+ * @apiBody {String} [name] The name of the activity
+ * @apiBody {Number} [startDate] The starting timestamp date of the activity
+ * @apiBody {Number} [endDate] The ending timestamp date of the activity
+ * @apiBody {String} [parent] The parent id if it has one. This parent must exist previously
+ * @apiBody {Object} [resources] The resources asoociated with the activity
+ * @apiBody {KeyValue[]} [data] An array of key value pairs with metadata for the activity
  */
 
 /**
@@ -159,12 +159,14 @@ const SequenceActivities = require("../models/sequenceActivities");
 router.get("/sequences/:sequenceId/state/:stateId", Middleware.hasViewIssueAccessToModel, getSequenceState);
 
 /**
- * @api {get} /:teamspace/:model/sequences/:sequenceID Get sequence
+ * @api {get} /:teamspace/:model/sequences/:sequenceId Get sequence
  * @apiName getSequence
  * @apiGroup Sequences
  * @apiDescription Get sequence by ID
  *
  * @apiUse Sequences
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
  *
  * @apiExample {get}
  * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
@@ -192,17 +194,19 @@ router.get("/sequences/:sequenceId/state/:stateId", Middleware.hasViewIssueAcces
 router.get("/sequences/:sequenceId", Middleware.hasViewIssueAccessToModel, getSequence);
 
 /**
- * @api {patch} /:teamspace/:model/sequences/:sequenceID Update a sequence
+ * @api {patch} /:teamspace/:model/sequences/:sequenceId Update a sequence
  * @apiName updateSequence
  * @apiGroup Sequences
  * @apiDescription Update a sequence (note: currently only name chance is supported
  *
  * @apiUse Sequences
  *
+ * @apiParam {String} sequenceId Sequence unique ID
+ *
  * @apiExample {patch} Example usage
  * PATCH /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
  *
- * @apiParam (Request body) {String} name The new name of the sequence
+ * @apiBody {String} name The new name of the sequence
  *
  * @apiExample {patch} Example usage:
  * {
@@ -216,35 +220,39 @@ router.get("/sequences/:sequenceId", Middleware.hasViewIssueAccessToModel, getSe
 router.patch("/sequences/:sequenceId", Middleware.hasUploadAccessToModel, updateSequence);
 
 /**
- * @api {put} /:teamspace/:model/sequences/:sequenceID/legend Add/Update legend
+ * @api {put} /:teamspace/:model/sequences/:sequenceId/legend Add/Update legend
  * @apiName updateLegend
  * @apiGroup Sequences
  * @apiDescription Update/add a legend to this sequence
  *
  * @apiUse Sequences
  *
- * @apiExample {put} Example usage
- * PUT /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
+ * @apiParam {String} sequenceId Sequence unique ID
+ *
+ * @apiBody {Object} legend Legend object with colors
  *
  * @apiExample {put} Example usage:
+ * PUT /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
  * {
- * 	  "Building works": "#aabbcc"
+ * 	  "Building works": "#aabbcc",
  * 	  "Temporary works": "#ffffff66"
  * }
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {}
  */
 router.put("/sequences/:sequenceId/legend", Middleware.hasUploadAccessToModel, updateLegend);
 
 /**
- * @api {get} /:teamspace/:model/sequences/:sequenceID/legend get the legend
+ * @api {get} /:teamspace/:model/sequences/:sequenceId/legend get the legend
  * @apiName getLegend
  * @apiGroup Sequences
  * @apiDescription Get the legend for this sequence
  *
  * @apiUse Sequences
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
  *
  * @apiExample {get} Example usage
  * GET /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
@@ -259,12 +267,14 @@ router.put("/sequences/:sequenceId/legend", Middleware.hasUploadAccessToModel, u
 router.get("/sequences/:sequenceId/legend", Middleware.hasViewIssueAccessToModel, getLegend);
 
 /**
- * @api {delete} /:teamspace/:model/sequences/:sequenceID/legend Delete legend
+ * @api {delete} /:teamspace/:model/sequences/:sequenceId/legend Delete legend
  * @apiName deleteLegend
  * @apiGroup Sequences
  * @apiDescription Delete the legend associated to this sequence
  *
  * @apiUse Sequences
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
  *
  * @apiExample {delete} Example usage
  * DELETE /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002/legend HTTP/1.1
@@ -276,12 +286,14 @@ router.get("/sequences/:sequenceId/legend", Middleware.hasViewIssueAccessToModel
 router.delete("/sequences/:sequenceId/legend", Middleware.hasUploadAccessToModel, deleteLegend);
 
 /**
- * @api {delete} /:teamspace/:model/sequences/:sequenceID Delete sequence
+ * @api {delete} /:teamspace/:model/sequences/:sequenceId Delete sequence
  * @apiName deleteSequence
  * @apiGroup Sequences
  * @apiDescription Delete the custom sequence by ID
  *
  * @apiUse Sequences
+ *
+ * @apiParam {String} sequenceId Sequence unique ID
  *
  * @apiExample {delete} Example usage
  * DELETE /acme/00000000-0000-0000-0000-000000000000/sequences/00000000-0000-0000-0000-000000000002 HTTP/1.1
@@ -616,8 +628,8 @@ router.get("/sequences/:sequenceId/activities", Middleware.hasViewIssueAccessToM
  * @apiDescription Creates a sequence activity tree.
  *
  * @apiUse Sequences
- * @apiParam (Request body) {Activity[]} activity An array of the activity tree that will be created
- * @apiParam (Request body) {Boolean} [overwrite] This flag indicates whether the request will replace the currently stored activities or just added at the end of the currently stored activities array. If not present it will be considered as false.
+ * @apiBody {Activity[]} activity An array of the activity tree that will be created
+ * @apiBody {Boolean} [overwrite] This flag indicates whether the request will replace the currently stored activities or just added at the end of the currently stored activities array. If not present it will be considered as false.
  *
  * @apiParam {String} sequenceId Sequence unique ID
  * @apiUse ActivityTreeObject
@@ -728,7 +740,7 @@ function getSequenceState(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, stateId } = req.params;
 
-	Sequence.getSequenceState(account, model, stateId).then(state => {
+	Sequence.getSequenceState(account, model, utils.uuidToString(stateId)).then(state => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, state);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -739,7 +751,7 @@ function getLegend(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, sequenceId } = req.params;
 
-	Sequence.getLegend(account, model, sequenceId).then(({ legend }) => {
+	Sequence.getLegend(account, model, utils.uuidToString(sequenceId)).then(({ legend }) => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, legend);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -750,7 +762,7 @@ function deleteLegend(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, sequenceId } = req.params;
 
-	Sequence.deleteLegend(account, model, sequenceId).then(() => {
+	Sequence.deleteLegend(account, model, utils.uuidToString(sequenceId)).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -761,7 +773,7 @@ function updateLegend(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, sequenceId } = req.params;
 
-	Sequence.updateLegend(account, model, sequenceId, req.body).then(() => {
+	Sequence.updateLegend(account, model, utils.uuidToString(sequenceId), req.body).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -772,7 +784,7 @@ function updateSequence(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, sequenceId } = req.params;
 
-	Sequence.updateSequence(account, model, sequenceId, req.body).then(() => {
+	Sequence.updateSequence(account, model, utils.uuidToString(sequenceId), req.body).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -795,7 +807,7 @@ function getSequenceActivityDetail(req, res, next) {
 	const place = utils.APIInfo(req);
 	const { account, model, activityId, sequenceId } = req.params;
 
-	SequenceActivities.getSequenceActivityDetail(account, model, sequenceId, activityId).then(activity => {
+	SequenceActivities.getSequenceActivityDetail(account, model, utils.uuidToString(sequenceId), utils.uuidToString(activityId)).then(activity => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, activity);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -806,7 +818,7 @@ function getSequenceActivities(req, res, next) {
 	const { account, model, sequenceId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.get(account, model, sequenceId).then(activites => {
+	SequenceActivities.get(account, model, utils.uuidToString(sequenceId)).then(activites => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK, activites);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -817,7 +829,7 @@ function createActivities(req, res, next) {
 	const { account, model, sequenceId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.createActivities(account, model, sequenceId, req.body.activities, req.body.overwrite).then(() => {
+	SequenceActivities.createActivities(account, model, utils.uuidToString(sequenceId), req.body.activities, req.body.overwrite).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -828,7 +840,7 @@ function editActivity(req, res, next) {
 	const { account, model, sequenceId, activityId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.edit(account, model, sequenceId, activityId, req.body).then(() => {
+	SequenceActivities.edit(account, model, utils.uuidToString(sequenceId), utils.uuidToString(activityId), req.body).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -839,7 +851,7 @@ function removeActivity(req, res, next) {
 	const { account, model, sequenceId, activityId } = req.params;
 	const place = utils.APIInfo(req);
 
-	SequenceActivities.remove(account, model, sequenceId, activityId).then(() => {
+	SequenceActivities.remove(account, model, utils.uuidToString(sequenceId), utils.uuidToString(activityId)).then(() => {
 		responseCodes.respond(place, req, res, next, responseCodes.OK);
 	}).catch(err => {
 		responseCodes.respond(place, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

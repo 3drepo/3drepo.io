@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const ServiceHelper = require('../../../../helper/services');
 const SuperTest = require('supertest');
 const { src } = require('../../../../helper/path');
@@ -37,13 +38,13 @@ const runSessionsRemovedTests = () => {
 		const userAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.51 Safari/537.36';
 		test('Should log user out if they are logged in else where (login before socket connection)', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
-			const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
+			const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user, { headers });
 			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			const onLogOutMessage = new Promise((resolve) => {
 				socket.on(EVENTS.LOGGED_OUT, resolve);
 			});
 
-			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
+			await ServiceHelper.loginAndGetCookie(agent, user, { headers });
 			await expect(onLogOutMessage).resolves.toEqual({ reason: 'You have logged in else where' });
 			socket.close();
 		});
@@ -51,13 +52,13 @@ const runSessionsRemovedTests = () => {
 		test('Should log user out if they are logged in else where (login after socket connection)', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
 			const socket = await ServiceHelper.socket.connectToSocket();
-			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password,
-				{ ...headers, [SOCKET_HEADER]: socket.id });
+			await ServiceHelper.loginAndGetCookie(agent, user,
+				{ headers: { ...headers, [SOCKET_HEADER]: socket.id } });
 			const onLogOutMessage = new Promise((resolve) => {
 				socket.on(EVENTS.LOGGED_OUT, resolve);
 			});
 
-			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
+			await ServiceHelper.loginAndGetCookie(agent, user, { headers });
 			await expect(onLogOutMessage).resolves.toEqual({ reason: 'You have logged in else where' });
 			socket.close();
 		});
@@ -65,7 +66,7 @@ const runSessionsRemovedTests = () => {
 		test('Should log user out if the user agent is different', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
 			const testSession = SessionTracker(agent);
-			await testSession.login(user.user, user.password, headers);
+			await testSession.login(user, { headers });
 			const socket = await ServiceHelper.socket.connectToSocket(testSession.cookies.session);
 
 			const onLogOutMessage = new Promise((resolve) => {
@@ -81,7 +82,7 @@ const runSessionsRemovedTests = () => {
 
 		test('Should not log the user out if the referrer is different', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
-			const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
+			const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user, { headers });
 			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			const fn = jest.fn();
 			const onLogOutMessage = new Promise((resolve, reject) => {
@@ -89,8 +90,8 @@ const runSessionsRemovedTests = () => {
 				setTimeout(resolve, 100);
 			});
 
-			await ServiceHelper.loginAndGetCookie(agent, user.user, user.password,
-				{ ...headers, referer: `https://${ServiceHelper.generateRandomString()}.com` });
+			await ServiceHelper.loginAndGetCookie(agent, user,
+				{ headers: { ...headers, referer: `https://${ServiceHelper.generateRandomString()}.com` } });
 			await expect(onLogOutMessage).resolves.toBeUndefined();
 			expect(fn).not.toHaveBeenCalled();
 			socket.close();
@@ -98,7 +99,7 @@ const runSessionsRemovedTests = () => {
 
 		test('Should not affect a different user', async () => {
 			const headers = { referer: referrer, 'user-agent': userAgent };
-			const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user.user, user.password, headers);
+			const { session: cookie } = await ServiceHelper.loginAndGetCookie(agent, user, { headers });
 			const socket = await ServiceHelper.socket.connectToSocket(cookie);
 			const fn = jest.fn();
 			const onLogOutMessage = new Promise((resolve, reject) => {
@@ -106,7 +107,7 @@ const runSessionsRemovedTests = () => {
 				setTimeout(resolve, 100);
 			});
 
-			await ServiceHelper.loginAndGetCookie(agent, anotherUser.user, anotherUser.password, headers);
+			await ServiceHelper.loginAndGetCookie(agent, anotherUser, { headers });
 			await expect(onLogOutMessage).resolves.toBeUndefined();
 			expect(fn).not.toHaveBeenCalled();
 			socket.close();
@@ -114,7 +115,7 @@ const runSessionsRemovedTests = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	let server;
 	let chatApp;
 	beforeAll(async () => {

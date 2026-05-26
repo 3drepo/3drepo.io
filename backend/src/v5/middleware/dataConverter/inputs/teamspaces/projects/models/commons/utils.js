@@ -35,6 +35,8 @@ Utils.validateListSortAndFilter = async (req, res, next) => {
 				otherwise: (s) => s.default(true),
 			}),
 			updatedSince: types.date,
+			limit: Yup.number().integer().min(1),
+			skip: Yup.number().integer().min(0).default(0),
 		});
 		try {
 			req.listOptions = await schema.validate(req.query, { stripUnknown: true });

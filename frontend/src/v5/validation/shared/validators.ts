@@ -19,6 +19,11 @@ import { formatMessage } from '@/v5/services/intl';
 import { isNumber } from 'lodash';
 import * as Yup from 'yup';
 
+export const ERROR_REQUIRED_FIELD_MESSAGE = formatMessage({
+	id: 'validation.error.required',
+	defaultMessage: 'This is required',
+});
+
 export const stripIfBlankString = (value) => (
 	value === ''
 		? Yup.string().strip()
@@ -28,16 +33,17 @@ export const trimmedString = Yup.string().transform((value) => value && value.tr
 
 export const nullableString = Yup.string().transform((value) => value || null).nullable();
 
-export const nullableNumber = Yup.number().transform(
-	(_, val) => ((val || val === 0) ? Number(val) : null),
-).nullable(true);
+export const nullableNumber = Yup.number()
+	.transform((_, val) => ((val || val === 0) ? Number(val) : null))
+	.nullable(true)
+	.typeError(formatMessage({
+		id: 'validation.error.invalidNumber',
+		defaultMessage: 'Invalid number',
+	}));
 
 export const requiredNumber = (requiredError?) => nullableNumber.test(
 	'requiredNumber',
-	requiredError || formatMessage({
-		id: 'validation.number.required',
-		defaultMessage: 'This is required',
-	}),
+	requiredError || ERROR_REQUIRED_FIELD_MESSAGE,
 	(number) => isNumber(number),
 );
 
@@ -100,5 +106,27 @@ export const desc = Yup.lazy((value) => (
 			formatMessage({
 				id: 'validation.model.description.error.max',
 				defaultMessage: 'Description is limited to 660 characters',
-			}))
+			})).transform((v) => v || null).nullable()
+));
+
+export const INVALID_DATE_RANGE_MESSAGE = formatMessage({
+	id: 'validation.range.error.invalidRange',
+	defaultMessage: '\'From\' date should be earlier than \'To\' date',
+});
+
+export const INVALID_NUMBER_RANGE_MESSAGE = formatMessage({
+	id: 'validation.range.error.invalidRange',
+	defaultMessage: 'The value on the left should be smaller than the one on the right',
+});
+
+export const numberRange = (message?) => Yup.array().of(requiredNumber().test(
+	'invalidRange',
+	message || formatMessage({
+		id: 'validation.range.error.invalidRange',
+		defaultMessage: 'Invalid range',
+	}),
+	(v, ctx) => {
+		if (ctx.parent.some((n) => !isNumber(n) || isNaN(n))) return true;
+		return ctx.parent[0] < ctx.parent[1];
+	},
 ));

@@ -62,7 +62,7 @@ export const ImagesModal = ({
 
 		switch (keyCode) {
 			case ESCAPE_KEY:
-				onClickClose();
+				onClickClose(images);
 				break;
 			case LEFT_KEY:
 				changeImageIndex(-1);
@@ -109,7 +109,7 @@ export const ImagesModal = ({
 
 	useEffect(() => {
 		if (!imagesLength) {
-			onClickClose();
+			onClickClose(images);
 		}
 
 		if (previousImagesLength.current < imagesLength) {
@@ -130,7 +130,7 @@ export const ImagesModal = ({
 	);
 
 	return (
-		<Modal open={open} onClose={onClickClose}>
+		<Modal open={open} onClose={() => onClickClose(images)}>
 			<TopBar>
 				<Buttons>
 					{hasManyImages && (
@@ -169,7 +169,7 @@ export const ImagesModal = ({
 						</Tooltip>
 					)}
 				</Buttons>
-				<CloseButton onClick={onClickClose} />
+				<CloseButton onClick={() => onClickClose(images)} />
 			</TopBar>
 			<CenterBar>
 				{!hasManyImages && (

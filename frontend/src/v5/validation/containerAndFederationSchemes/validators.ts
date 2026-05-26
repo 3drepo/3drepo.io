@@ -39,7 +39,7 @@ export const code = Yup.lazy((value) => (
 			formatMessage({
 				id: 'validation.model.code.error.characters',
 				defaultMessage: 'Code can only consist of letters, numbers, hyphens or underscores',
-			}))
+			})).nullable()
 ));
 
 export const revisionTag = Yup.string()

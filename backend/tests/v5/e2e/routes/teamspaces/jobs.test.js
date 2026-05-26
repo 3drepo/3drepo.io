@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../helper/services');
@@ -35,13 +36,13 @@ const jobs = times(10, () => ({
 }));
 
 const setupData = async () => {
+	await ServiceHelper.db.createUser(
+		tsAdmin,
+	);
 	await ServiceHelper.db.createTeamspace(teamspace.name, [tsAdmin.user]);
 
 	await Promise.all([
-		ServiceHelper.db.createUser(
-			tsAdmin,
-			[teamspace.name],
-		),
+
 		ServiceHelper.db.createUser(
 			normalUser,
 			[teamspace.name],
@@ -77,7 +78,7 @@ const testGetJobList = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

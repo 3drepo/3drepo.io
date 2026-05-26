@@ -16,7 +16,6 @@
  */
 
 import { connect } from 'react-redux';
-import { withRouter } from 'react-router-dom';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
@@ -34,14 +33,16 @@ import {
 	selectSelectedRisk,
 	selectShowDetails,
 	selectShowPins,
-	selectSortByField, selectSortOrder, RisksActions
+	selectSortByField, selectSortOrder, RisksActions,
+	selectRisks
 } from '../../../../modules/risks';
 import { selectSettings as selectTeamspaceSettings } from '../../../../modules/teamspace';
 import { Risks } from './risks.component';
 
 const mapStateToProps = createStructuredSelector({
 	modelSettings: selectSettings,
-	risks: selectFilteredRisks,
+	filteredRisks: selectFilteredRisks,
+	unfilteredRisks: selectRisks,
 	jobs: selectJobsList,
 	activeRiskId: selectActiveRiskId,
 	activeRiskDetails: selectActiveRiskDetails,
@@ -76,4 +77,4 @@ export const mapDispatchToProps = (dispatch) => bindActionCreators({
 	setSortBy: RisksActions.setSortBy,
 }, dispatch);
 
-export default withRouter(connect(mapStateToProps, mapDispatchToProps)(Risks));
+export default connect(mapStateToProps, mapDispatchToProps)(Risks);

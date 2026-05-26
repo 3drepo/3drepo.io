@@ -17,16 +17,19 @@
 
 const UUIDParse = require('uuid-parse');
 const _ = require('lodash');
-const { fromBuffer: fileTypeFromBuffer } = require('file-type');
+const { existsSync: pathCheck } = require('fs');
 
 const TypeChecker = {};
 
 TypeChecker.isArray = Array.isArray;
 TypeChecker.isBuffer = (buf) => !!(buf && Buffer.isBuffer(buf));
 TypeChecker.isDate = _.isDate;
-TypeChecker.isString = (value) => _.isString(value);
+TypeChecker.isString = _.isString;
 TypeChecker.isObject = (value) => _.isObject(value) && !TypeChecker.isArray(value);
-TypeChecker.isNumber = (value) => _.isNumber(value);
+TypeChecker.isNumber = _.isNumber;
+TypeChecker.isBool = _.isBoolean;
+TypeChecker.isBooleanString = (value) => value?.toLowerCase() === 'true' || value?.toLowerCase() === 'false';
+TypeChecker.isNumberString = (value) => !_.isNaN(Number(value));
 TypeChecker.isUUIDString = (uuid) => {
 	if (!TypeChecker.isString(uuid)) return false;
 	const hasMatch = uuid.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
@@ -42,13 +45,36 @@ TypeChecker.isUUID = (uuid) => {
 	}
 };
 
-const getTypeFromBuffer = (fileBuffer) => (Buffer.isBuffer(fileBuffer) ? fileTypeFromBuffer(fileBuffer) : null);
+let fileTypeModulePromise;
+const loadFileTypeModule = () => {
+	if (!fileTypeModulePromise) {
+		fileTypeModulePromise = import('file-type');
+	}
+	return fileTypeModulePromise;
+};
+
+const getTypeFromBuffer = async (fileBuffer) => {
+	if (!Buffer.isBuffer(fileBuffer)) return null;
+
+	const { fileTypeFromBuffer } = await loadFileTypeModule();
+	return fileTypeFromBuffer(fileBuffer);
+};
+const getTypeFromPath = async (filePath) => {
+	if (!pathCheck(filePath)) return null;
+
+	const { fileTypeFromFile } = await loadFileTypeModule();
+	return fileTypeFromFile(filePath);
+};
 TypeChecker.fileMimeFromBuffer = async (fileBuffer) => {
 	const type = await getTypeFromBuffer(fileBuffer);
 	return type?.mime;
 };
 TypeChecker.fileExtensionFromBuffer = async (fileBuffer) => {
 	const type = await getTypeFromBuffer(fileBuffer);
+	return type?.ext;
+};
+TypeChecker.fileExtensionFromPath = async (filePath) => {
+	const type = await getTypeFromPath(filePath);
 	return type?.ext;
 };
 

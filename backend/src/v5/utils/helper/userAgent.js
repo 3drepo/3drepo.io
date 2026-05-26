@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Device = require('device');
+const DeviceDetector = require('node-device-detector');
 const UaParserJs = require('ua-parser-js');
 
 const UserAgent = {};
@@ -52,12 +52,17 @@ const getUserAgentInfoFromPlugin = (userAgentString) => {
 };
 
 const getUserAgentInfoFromBrowser = (userAgentString) => {
+	const deviceDetector = new DeviceDetector({
+		deviceIndexes: true,
+		maxUserAgentSize: 500,
+	});
+
 	const { browser, engine, os } = UaParserJs(userAgentString);
 	const userAgentInfo = {
 		application: browser.name ? { ...browser, type: 'browser' } : { type: 'unknown' },
 		engine,
 		os,
-		device: Device(userAgentString).type,
+		device: deviceDetector.detect(userAgentString).device.type,
 	};
 
 	return userAgentInfo;

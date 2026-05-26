@@ -71,11 +71,6 @@ export const theme = createTheme(
 					styleOverrides: {
 						root: {
 							'&.Mui-focused': {
-								'.MuiSelect-select': {
-									border: `1px solid ${COLOR.PRIMARY_MAIN}`,
-									boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
-									boxSizing: 'border-box',
-								},
 								'&.Mui-error .MuiSelect-select': {
 									boxShadow: `0 0 2px ${COLOR.ERROR_MAIN}`,
 								},
@@ -139,7 +134,6 @@ export const theme = createTheme(
 				MuiSelect: {
 					styleOverrides: {
 						select: {
-							border: 'none',
 							lineHeight: '26px',
 							height: 26,
 							padding: '0 10px',

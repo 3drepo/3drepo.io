@@ -18,61 +18,46 @@
 const Users = {};
 
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require('../models/users.constants');
-const { addUser, authenticate, deleteApiKey, generateApiKey,
-	getUserByUsername, linkToSso, removeUser, unlinkFromSso, updatePassword, updateProfile, updateResetPasswordToken, verify } = require('../models/users');
-const { fileExists, getFile, removeFile, storeFile } = require('../services/filesManager');
-const { isEmpty, removeFields } = require('../utils/helper/objects');
-const config = require('../utils/config');
+const { addUser, deleteApiKey, generateApiKey, getUserByUsername,
+	getUserId, removeUser, updatePassword, updateProfile } = require('../models/users');
+const { getFile, removeFile, storeFile } = require('../services/filesManager');
+const { getUserById, triggerPasswordReset, updateUserDetails, uploadAvatar } = require('../services/sso/frontegg');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { events } = require('../services/eventsManager/eventsManager.constants');
+const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { generateHashString } = require('../utils/helper/strings');
 const { generateUserHash } = require('../services/intercom');
+const { logger } = require('../utils/logger');
 const { publish } = require('../services/eventsManager/eventsManager');
 const { removeAllUserNotifications } = require('../models/notifications');
 const { removeAllUserRecords } = require('../models/loginRecords');
-const { sendEmail } = require('../services/mailer');
-const { templates } = require('../services/mailer/mailer.constants');
+const { splitName } = require('../utils/helper/strings');
+const { templates } = require('../utils/responseCodes');
 
-Users.signUp = async (newUserData) => {
-	const isSso = !!newUserData.sso;
-	const formattedNewUserData = { ...newUserData };
-	if (isSso) {
-		formattedNewUserData.password = generateHashString();
-	} else {
-		formattedNewUserData.token = generateHashString();
-	}
+// This is used for the situation where a user has a record from
+// the IDP but we don't have a matching record in the db. We need
+// to create a record (for now, at least) to know the username mapping
+// and also to store info such as API Key.
+Users.createNewUserRecord = async (idpUserData) => {
+	const { id, email, name, createdAt } = idpUserData;
 
-	await addUser(formattedNewUserData);
+	// idp should always return the email as the firstname so the fall back should, in theory, never be used..
+	const [firstName, lastName] = splitName(name) ?? ['UnknownUser', ''];
 
-	if (isSso) {
-		publish(events.USER_VERIFIED, {
-			username: newUserData.username,
-			email: newUserData.email,
-			fullName: `${newUserData.firstName} ${newUserData.lastName}`,
-			company: newUserData.company,
-			mailListOptOut: newUserData.mailListOptOut,
-			createdAt: new Date(),
-		});
-	} else {
-		await sendEmail(templates.VERIFY_USER.name, newUserData.email, {
-			token: formattedNewUserData.token,
-			email: newUserData.email,
-			firstName: newUserData.firstName,
-			username: newUserData.username,
-		});
-	}
-};
+	const userData = {
+		username: id,
+		password: generateHashString(),
+		firstName,
+		lastName,
+		email,
+		createdAt: new Date(createdAt),
+		userId: id,
+	};
 
-Users.verify = async (username, token) => {
-	const customData = await verify(username, token);
+	await addUser(userData);
 
-	publish(events.USER_VERIFIED, {
-		username,
-		email: customData.email,
-		fullName: `${customData.firstName} ${customData.lastName}`,
-		company: customData.billing.billingInfo.company,
-		mailListOptOut: customData.mailListOptOut,
-		createdAt: customData.createdAt,
-	});
+	publish(events.USER_CREATED, { username: id, email, fullName: [firstName, lastName].join(' ').trim(), createdAt: userData.createdAt });
+	return id;
 };
 
 Users.remove = async (username) => {
@@ -84,49 +69,78 @@ Users.remove = async (username) => {
 	]);
 };
 
-Users.login = authenticate;
-
 Users.getProfileByUsername = async (username) => {
-	const user = await getUserByUsername(username, {
+	const { user, customData: { userId, apiKey } } = await getUserByUsername(username, {
 		user: 1,
-		'customData.firstName': 1,
-		'customData.lastName': 1,
-		'customData.email': 1,
+		'customData.userId': 1,
 		'customData.apiKey': 1,
-		'customData.billing.billingInfo.company': 1,
-		'customData.billing.billingInfo.countryCode': 1,
-		'customData.sso': 1,
 	});
+	const { name, email, profilePictureUrl, company, countryCode } = await getUserById(userId);
+	const [firstName, lastName] = splitName(name);
+	const hasAvatar = !!profilePictureUrl;
+	const intercomRef = generateUserHash(email);
 
-	const { customData } = user;
-
-	const hasAvatar = await fileExists(USERS_DB_NAME, AVATARS_COL_NAME, username);
-
-	const intercomRef = generateUserHash(customData.email);
-
-	return {
-		username: user.user,
-		firstName: customData.firstName,
-		lastName: customData.lastName,
-		email: customData.email,
+	return deleteIfUndefined({
+		username: user,
+		firstName,
+		lastName,
+		email,
 		hasAvatar,
-		apiKey: customData.apiKey,
-		company: customData.billing?.billingInfo?.company,
-		countryCode: customData.billing?.billingInfo?.countryCode,
-		...(intercomRef ? { intercomRef } : {}),
-		...(customData.sso ? { sso: customData.sso.type } : {}),
-	};
+		apiKey,
+		company,
+		countryCode,
+		intercomRef,
+	});
 };
 
-Users.updateProfile = async (username, updatedProfile) => {
-	if (updatedProfile.oldPassword) {
-		await updatePassword(username, updatedProfile.newPassword);
-	}
+Users.updateProfile = async (username, fieldsToUpdate) => {
+	const userId = await getUserId(username);
 
-	const fieldsToUpdate = removeFields(updatedProfile, 'oldPassword', 'newPassword');
-	if (!isEmpty(fieldsToUpdate)) {
-		await updateProfile(username, fieldsToUpdate);
+	await Promise.all([
+		updateUserDetails(userId, fieldsToUpdate),
+		updateProfile(username, fieldsToUpdate),
+	]);
+};
+
+Users.resetPassword = async (user) => {
+	try {
+		const { customData: { email } } = await getUserByUsername(user, {
+			'customData.email': 1,
+		});
+		await triggerPasswordReset(email);
+	} catch (err) {
+		logger.logError(`Failed to reset password: ${err.message}`);
+
+		throw templates.unknown;
 	}
+};
+
+Users.getAvatar = async (username) => {
+	try {
+		// NOTE: commenting out the ability to get avatar from IDP for now - we're hitting rate limiting issues.
+		// const userId = await getUserId(username);
+		// let avatarBuffer = await getUserAvatarBuffer(userId);
+		// if (!avatarBuffer) {
+		// this means the avatar is not a generated one, so we don't have it cached
+		const avatarBuffer = await getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
+		// }
+		const fileExt = await fileExtensionFromBuffer(avatarBuffer);
+
+		return {
+			buffer: avatarBuffer,
+			extension: fileExt || 'png',
+		};
+	} catch (error) {
+		throw templates.fileNotFound;
+	}
+};
+
+Users.uploadAvatar = async (username, fileObj) => {
+	const userId = await getUserId(username);
+	await Promise.all([
+		uploadAvatar(userId, fileObj).catch((err) => logger.logError(`Failed to upload avatar to IDP: ${err?.message}`)),
+		storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, fileObj.buffer),
+	]);
 };
 
 Users.generateApiKey = generateApiKey;
@@ -135,30 +149,6 @@ Users.deleteApiKey = deleteApiKey;
 
 Users.getUserByUsername = getUserByUsername;
 
-Users.getAvatar = (username) => getFile(USERS_DB_NAME, AVATARS_COL_NAME, username);
-
-Users.uploadAvatar = (username, avatarBuffer) => storeFile(USERS_DB_NAME, AVATARS_COL_NAME, username, avatarBuffer);
-
-Users.generateResetPasswordToken = async (username) => {
-	const expiredAt = new Date();
-	expiredAt.setHours(expiredAt.getHours() + config.tokenExpiry.forgotPassword);
-	const resetPasswordToken = { token: generateHashString(), expiredAt };
-
-	await updateResetPasswordToken(username, resetPasswordToken);
-
-	const { customData: { email, firstName } } = await getUserByUsername(username, { user: 1,
-		'customData.email': 1,
-		'customData.firstName': 1 });
-	await sendEmail(templates.FORGOT_PASSWORD.name, email, { token: resetPasswordToken.token,
-		email,
-		username,
-		firstName });
-};
-
 Users.updatePassword = updatePassword;
-
-Users.unlinkFromSso = unlinkFromSso;
-
-Users.linkToSso = linkToSso;
 
 module.exports = Users;

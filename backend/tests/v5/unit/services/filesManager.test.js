@@ -15,28 +15,41 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
+const CryptoJS = require('crypto-js');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
-const config = require('../../../../src/v5/utils/config');
+
+const config = require(`${src}/utils/config`);
 const { generateRandomString, generateRandomObject } = require('../../helper/services');
 const { PassThrough } = require('stream');
+
+const MimeTypes = require(`${src}/utils/helper/mimeTypes`);
+const { FileStorageTypes } = require(`${src}/utils/config.constants`);
+
+const FilesManager = require(`${src}/services/filesManager`);
 
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 jest.mock('../../../../src/v5/models/fileRefs');
 const FileRefs = require(`${src}/models/fileRefs`);
 
-jest.mock('../../../../src/v5/handler/fs');
+jest.mock('../../../../src/v5/handler/fs', () => ({
+	getHandler: jest.fn().mockReturnValue({
+		removeFiles: jest.fn(),
+		getFile: jest.fn(),
+		getFileStream: jest.fn(),
+		storeFile: jest.fn(),
+		storeFileStream: jest.fn(),
+	}),
+}));
+
 const FSHandler = require(`${src}/handler/fs`);
-
-jest.mock('../../../../src/v5/handler/gridfs');
-const GridFSHandler = require(`${src}/handler/gridfs`);
-
-const FilesManager = require(`${src}/services/filesManager`);
+const handlerMock = FSHandler.getHandler(FileStorageTypes.FS);
 
 const { templates } = require(`${src}/utils/responseCodes`);
 
-const DEFAULT_MIME_TYPE = 'application/octet-stream';
+const DEFAULT_MIME_TYPE = MimeTypes.BINARY;
 
 const testRemoveAllFilesFromModel = () => {
 	describe('Remove all files from model', () => {
@@ -55,6 +68,7 @@ const testRemoveAllFilesFromModel = () => {
 			expect(db.listCollections).toHaveBeenCalledWith(teamspace);
 
 			expect(FileRefs.getAllRemovableEntriesByType).not.toHaveBeenCalled();
+			expect(handlerMock.removeFiles).not.toHaveBeenCalled();
 		});
 
 		test('Should do the relevant calls to remove files', async () => {
@@ -75,17 +89,15 @@ const testRemoveAllFilesFromModel = () => {
 
 			const refCol1Data = [
 				{
-					_id: 'fs',
+					_id: FileStorageTypes.FS,
 					links: [generateRandomString(), generateRandomString(), generateRandomString()],
 				},
-				{
-					_id: 'gridfs',
-					links: [generateRandomString(), generateRandomString(), generateRandomString()],
-				},
+
 			];
 
 			FileRefs.getAllRemovableEntriesByType
-				.mockImplementation((ts, col) => Promise.resolve(col === refCol1 ? refCol1Data : [{ _id: 'fs', links: [] }]));
+				.mockImplementation((ts, col) => Promise.resolve(col === refCol1
+					? refCol1Data : [{ _id: FileStorageTypes.FS, links: [] }]));
 
 			const teamspace = generateRandomString();
 
@@ -98,11 +110,8 @@ const testRemoveAllFilesFromModel = () => {
 			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(1, teamspace, refCol1);
 			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(2, teamspace, refCol2);
 
-			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
-			expect(FSHandler.removeFiles).toHaveBeenCalledWith(refCol1Data[0].links);
-
-			expect(GridFSHandler.removeFiles).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.removeFiles).toHaveBeenCalledWith(teamspace, refCol1, refCol1Data[1].links);
+			expect(handlerMock.removeFiles).toHaveBeenCalledTimes(1);
+			expect(handlerMock.removeFiles).toHaveBeenCalledWith(refCol1Data[0].links);
 		});
 
 		test('Should throw error if the type of storage is unknown', async () => {
@@ -166,17 +175,14 @@ const testRemoveAllFilesFromTeamspace = () => {
 
 			const refCol1Data = [
 				{
-					_id: 'fs',
-					links: [generateRandomString(), generateRandomString(), generateRandomString()],
-				},
-				{
-					_id: 'gridfs',
+					_id: FileStorageTypes.FS,
 					links: [generateRandomString(), generateRandomString(), generateRandomString()],
 				},
 			];
 
 			FileRefs.getAllRemovableEntriesByType
-				.mockImplementation((ts, col) => Promise.resolve(col === refCol1 ? refCol1Data : [{ _id: 'fs', links: [] }]));
+				.mockImplementation((ts, col) => Promise.resolve(col === refCol1 ? refCol1Data
+					: [{ _id: FileStorageTypes.FS, links: [] }]));
 
 			const teamspace = generateRandomString();
 
@@ -189,11 +195,8 @@ const testRemoveAllFilesFromTeamspace = () => {
 			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(1, teamspace, refCol1);
 			expect(FileRefs.getAllRemovableEntriesByType).toHaveBeenNthCalledWith(2, teamspace, refCol2);
 
-			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
-			expect(FSHandler.removeFiles).toHaveBeenCalledWith(refCol1Data[0].links);
-
-			expect(GridFSHandler.removeFiles).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.removeFiles).toHaveBeenCalledWith(teamspace, refCol1, refCol1Data[1].links);
+			expect(handlerMock.removeFiles).toHaveBeenCalledTimes(1);
+			expect(handlerMock.removeFiles).toHaveBeenCalledWith(refCol1Data[0].links);
 		});
 
 		test('Should throw error if the type of storage is unknown', async () => {
@@ -242,10 +245,10 @@ const testGetFile = () => {
 		});
 
 		test('should return a stream if the reference is found', async () => {
-			const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
+			const fileEntry = { size: 100, type: FileStorageTypes.FS, link: generateRandomString() };
 			const fileBin = generateRandomString();
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
-			FSHandler.getFile.mockResolvedValueOnce(fileBin);
+			handlerMock.getFile.mockResolvedValueOnce(fileBin);
 
 			const teamspace = generateRandomString();
 			const collection = generateRandomString();
@@ -257,28 +260,8 @@ const testGetFile = () => {
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
 
-			expect(FSHandler.getFile).toHaveBeenCalledTimes(1);
-			expect(FSHandler.getFile).toHaveBeenCalledWith(fileEntry.link);
-		});
-
-		test('should return a stream of the reference is found (gridFs)', async () => {
-			const fileEntry = { size: 100, type: 'gridfs', link: generateRandomString() };
-			const fileBin = generateRandomString();
-			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
-			GridFSHandler.getFile.mockResolvedValueOnce(fileBin);
-
-			const teamspace = generateRandomString();
-			const collection = generateRandomString();
-			const fileName = generateRandomString();
-
-			await expect(FilesManager.getFile(teamspace, collection, fileName))
-				.resolves.toEqual(fileBin);
-
-			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
-			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
-
-			expect(GridFSHandler.getFile).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.getFile).toHaveBeenCalledWith(teamspace, collection, fileEntry.link);
+			expect(handlerMock.getFile).toHaveBeenCalledTimes(1);
+			expect(handlerMock.getFile).toHaveBeenCalledWith(fileEntry.link);
 		});
 	});
 };
@@ -305,10 +288,10 @@ const testGetFileAsStream = () => {
 		});
 
 		test('should return a stream if the reference is found', async () => {
-			const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
+			const fileEntry = { size: 100, type: FileStorageTypes.FS, link: generateRandomString() };
 			const readStream = { [generateRandomString()]: generateRandomString() };
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
-			FSHandler.getFileStream.mockResolvedValueOnce(readStream);
+			handlerMock.getFileStream.mockResolvedValueOnce(readStream);
 
 			const teamspace = generateRandomString();
 			const collection = generateRandomString();
@@ -320,15 +303,18 @@ const testGetFileAsStream = () => {
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
 
-			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
+			expect(handlerMock.getFileStream).toHaveBeenCalledTimes(1);
+			expect(handlerMock.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
 		});
 
 		test('should include the filename if it is part of the ref entry', async () => {
-			const fileEntry = { size: 100, type: 'fs', link: generateRandomString(), name: generateRandomString() };
+			const fileEntry = { size: 100,
+				type: FileStorageTypes.FS,
+				link: generateRandomString(),
+				name: generateRandomString() };
 			const readStream = { [generateRandomString()]: generateRandomString() };
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
-			FSHandler.getFileStream.mockResolvedValueOnce(readStream);
+			handlerMock.getFileStream.mockResolvedValueOnce(readStream);
 
 			const teamspace = generateRandomString();
 			const collection = generateRandomString();
@@ -343,16 +329,16 @@ const testGetFileAsStream = () => {
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
 
-			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
+			expect(handlerMock.getFileStream).toHaveBeenCalledTimes(1);
+			expect(handlerMock.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
 		});
 
 		test('should return a stream with the recorded mimeType if the reference is found', async () => {
 			const mimeType = generateRandomString();
-			const fileEntry = { size: 100, type: 'fs', link: generateRandomString(), mimeType };
+			const fileEntry = { size: 100, type: FileStorageTypes.FS, link: generateRandomString(), mimeType };
 			const readStream = { [generateRandomString()]: generateRandomString() };
 			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
-			FSHandler.getFileStream.mockResolvedValueOnce(readStream);
+			handlerMock.getFileStream.mockResolvedValueOnce(readStream);
 
 			const teamspace = generateRandomString();
 			const collection = generateRandomString();
@@ -364,28 +350,8 @@ const testGetFileAsStream = () => {
 			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
 
-			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
-		});
-
-		test('should return a stream of the reference is found (gridFs)', async () => {
-			const fileEntry = { size: 100, type: 'gridfs', link: generateRandomString() };
-			const readStream = { [generateRandomString()]: generateRandomString() };
-			FileRefs.getRefEntry.mockResolvedValueOnce(fileEntry);
-			GridFSHandler.getFileStream.mockResolvedValueOnce(readStream);
-
-			const teamspace = generateRandomString();
-			const collection = generateRandomString();
-			const fileName = generateRandomString();
-
-			await expect(FilesManager.getFileAsStream(teamspace, collection, fileName))
-				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
-
-			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
-			expect(FileRefs.getRefEntry).toHaveBeenCalledWith(teamspace, collection, fileName);
-
-			expect(GridFSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link, undefined);
+			expect(handlerMock.getFileStream).toHaveBeenCalledTimes(1);
+			expect(handlerMock.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
 		});
 	});
 };
@@ -417,29 +383,16 @@ const testGetFileWithMetaAsStream = () => {
 		});
 
 		test('should return a stream if the reference is found', async () => {
-			const fileEntry = { size: 100, type: 'fs', link: generateRandomString() };
+			const fileEntry = { size: 100, type: FileStorageTypes.FS, link: generateRandomString() };
 			const readStream = { [generateRandomString()]: generateRandomString() };
 			FileRefs.getRefEntryByQuery.mockResolvedValueOnce(fileEntry);
-			FSHandler.getFileStream.mockResolvedValueOnce(readStream);
+			handlerMock.getFileStream.mockResolvedValueOnce(readStream);
 
 			await expect(FilesManager.getFileWithMetaAsStream(teamspace, collection, fileName))
 				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
 
-			expect(FSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(FSHandler.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
-		});
-
-		test('should return a stream of the reference is found (gridFs)', async () => {
-			const fileEntry = { size: 100, type: 'gridfs', link: generateRandomString() };
-			const readStream = { [generateRandomString()]: generateRandomString() };
-			FileRefs.getRefEntryByQuery.mockResolvedValueOnce(fileEntry);
-			GridFSHandler.getFileStream.mockResolvedValueOnce(readStream);
-
-			await expect(FilesManager.getFileWithMetaAsStream(teamspace, collection, fileName))
-				.resolves.toEqual({ readStream, size: fileEntry.size, mimeType: DEFAULT_MIME_TYPE });
-
-			expect(GridFSHandler.getFileStream).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.getFileStream).toHaveBeenCalledWith(teamspace, collection, fileEntry.link, undefined);
+			expect(handlerMock.getFileStream).toHaveBeenCalledTimes(1);
+			expect(handlerMock.getFileStream).toHaveBeenCalledWith(fileEntry.link, undefined);
 		});
 	});
 };
@@ -468,7 +421,7 @@ const storeFileTestHelper = (multipleFiles) => {
 
 	test('should store file if default storage type is fs', async () => {
 		const { defaultStorage } = config;
-		config.defaultStorage = 'fs';
+		config.defaultStorage = FileStorageTypes.FS;
 
 		const refInfo = generateRandomObject();
 
@@ -478,7 +431,7 @@ const storeFileTestHelper = (multipleFiles) => {
 			meta: generateRandomObject(),
 		}));
 
-		FSHandler.storeFile.mockResolvedValue(refInfo);
+		handlerMock.storeFile.mockResolvedValue(refInfo);
 		const teamspace = generateRandomString();
 		const collection = generateRandomString();
 
@@ -489,9 +442,9 @@ const storeFileTestHelper = (multipleFiles) => {
 
 		await expect(testProm).resolves.toEqual(undefined);
 
-		expect(FSHandler.storeFile).toHaveBeenCalledTimes(entries.length);
+		expect(handlerMock.storeFile).toHaveBeenCalledTimes(entries.length);
 		const expectedInsertRefsParam = entries.map(({ id, meta, data }) => {
-			expect(FSHandler.storeFile).toHaveBeenCalledWith(data);
+			expect(handlerMock.storeFile).toHaveBeenCalledWith(data);
 			return { ...meta, _id: id, ...refInfo, mimeType: DEFAULT_MIME_TYPE };
 		});
 
@@ -502,9 +455,9 @@ const storeFileTestHelper = (multipleFiles) => {
 		config.defaultStorage = defaultStorage;
 	});
 
-	test('should store file if default storage type is gridfs', async () => {
+	test('should store file if metadata is not provided', async () => {
 		const { defaultStorage } = config;
-		config.defaultStorage = 'gridfs';
+		config.defaultStorage = FileStorageTypes.FS;
 
 		const refInfo = generateRandomObject();
 
@@ -513,7 +466,7 @@ const storeFileTestHelper = (multipleFiles) => {
 			data: generateRandomString(),
 		}));
 
-		GridFSHandler.storeFile.mockResolvedValue(refInfo);
+		handlerMock.storeFile.mockResolvedValue(refInfo);
 		const teamspace = generateRandomString();
 		const collection = generateRandomString();
 
@@ -524,12 +477,12 @@ const storeFileTestHelper = (multipleFiles) => {
 
 		await expect(testProm).resolves.toEqual(undefined);
 
-		expect(GridFSHandler.storeFile).toHaveBeenCalledTimes(entries.length);
-
-		const expectedInsertRefsParam = entries.map(({ data, id }) => {
-			expect(GridFSHandler.storeFile).toHaveBeenCalledWith(teamspace, collection, data);
+		expect(handlerMock.storeFile).toHaveBeenCalledTimes(entries.length);
+		const expectedInsertRefsParam = entries.map(({ id, data }) => {
+			expect(handlerMock.storeFile).toHaveBeenCalledWith(data);
 			return { _id: id, ...refInfo, mimeType: DEFAULT_MIME_TYPE };
 		});
+
 		expect(FileRefs.insertManyRefs).toHaveBeenCalledTimes(1);
 		expect(FileRefs.insertManyRefs).toHaveBeenCalledWith(teamspace, collection,
 			expectedInsertRefsParam);
@@ -564,25 +517,12 @@ const testStoreFileStream = () => {
 			config.defaultStorage = defaultStorage;
 		});
 
-		test('should throw error if the default type is gridfs', async () => {
-			const { defaultStorage } = config;
-			config.defaultStorage = 'gridfs';
-
-			await expect(FilesManager.storeFileStream(
-				generateRandomString(),
-				generateRandomString(),
-				generateRandomString(),
-			)).rejects.toEqual(templates.unknown);
-
-			config.defaultStorage = defaultStorage;
-		});
-
 		test('should store file if default storage type is fs', async () => {
 			const { defaultStorage } = config;
-			config.defaultStorage = 'fs';
+			config.defaultStorage = FileStorageTypes.FS;
 
 			const refInfo = { _id: generateRandomString() };
-			FSHandler.storeFile.mockResolvedValueOnce(refInfo);
+			handlerMock.storeFile.mockResolvedValueOnce(refInfo);
 			const teamspace = generateRandomString();
 			const collection = generateRandomString();
 			const id = generateRandomString();
@@ -597,8 +537,8 @@ const testStoreFileStream = () => {
 
 			await execProm;
 
-			expect(FSHandler.storeFileStream).toHaveBeenCalledTimes(1);
-			expect(FSHandler.storeFileStream).toHaveBeenCalledWith(stream);
+			expect(handlerMock.storeFileStream).toHaveBeenCalledTimes(1);
+			expect(handlerMock.storeFileStream).toHaveBeenCalledWith(stream);
 			expect(FileRefs.insertRef).toHaveBeenCalledTimes(1);
 			expect(FileRefs.insertRef).toHaveBeenCalledWith(teamspace, collection,
 				{ ...refInfo, _id: id, mimeType: DEFAULT_MIME_TYPE });
@@ -612,7 +552,7 @@ const testFileExists = () => {
 	describe('Check whether a file exists or not', () => {
 		test('should return fs if config.defaultStorage is set to fs', async () => {
 			const { defaultStorage } = config;
-			config.defaultStorage = 'fs';
+			config.defaultStorage = FileStorageTypes.FS;
 
 			FileRefs.getRefEntry.mockResolvedValueOnce({ _id: generateRandomString() });
 			const ts = generateRandomString();
@@ -643,8 +583,10 @@ const testRemoveFilesWithMeta = () => {
 		const meta = { [generateRandomString()]: generateRandomString() };
 		const teamspace = generateRandomString();
 		const collection = generateRandomString();
-		test('Should remove all files that satisfy the query', async () => {
-			const expectedRefs = times(3, () => ({ _id: generateRandomString(), type: 'fs', link: generateRandomString() }));
+		test('!Should remove all files that satisfy the query', async () => {
+			const expectedRefs = times(3, () => ({ _id: generateRandomString(),
+				type: FileStorageTypes.FS,
+				link: generateRandomString() }));
 			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
 
 			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
@@ -652,8 +594,8 @@ const testRemoveFilesWithMeta = () => {
 			expect(FileRefs.getRefsByQuery).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
 
-			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
-			expect(FSHandler.removeFiles).toHaveBeenCalledWith(expectedRefs.map(({ link }) => link));
+			expect(handlerMock.removeFiles).toHaveBeenCalledTimes(1);
+			expect(handlerMock.removeFiles).toHaveBeenCalledWith(expectedRefs.map(({ link }) => link));
 
 			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledTimes(1);
 			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
@@ -667,27 +609,26 @@ const testRemoveFilesWithMeta = () => {
 			expect(FileRefs.getRefsByQuery).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
 
-			expect(FSHandler.removeFiles).not.toHaveBeenCalled();
+			expect(handlerMock.removeFiles).not.toHaveBeenCalled();
 			expect(FileRefs.removeRefsByQuery).not.toHaveBeenCalled();
 		});
 
 		test('Should manage non file refs properly', async () => {
-			const expectedRefs = times(3, () => ({ _id: generateRandomString(), type: 'fs', link: generateRandomString() }));
+			const expectedRefs = times(3, () => ({ _id: generateRandomString(),
+				type: FileStorageTypes.FS,
+				link: generateRandomString() }));
 			FileRefs.getRefsByQuery.mockResolvedValueOnce(expectedRefs);
 
 			expectedRefs.push({ _id: generateRandomString(), type: 'http', link: generateRandomString() });
-			expectedRefs.push({ _id: generateRandomString(), type: 'gridfs', link: generateRandomString() });
 
 			await FilesManager.removeFilesWithMeta(teamspace, collection, meta);
 
 			expect(FileRefs.getRefsByQuery).toHaveBeenCalledTimes(1);
 			expect(FileRefs.getRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
 
-			expect(FSHandler.removeFiles).toHaveBeenCalledTimes(1);
-			expect(FSHandler.removeFiles).toHaveBeenCalledWith(expectedRefs.flatMap(({ type, link }) => (type === 'fs' ? link : [])));
-
-			expect(GridFSHandler.removeFiles).toHaveBeenCalledTimes(1);
-			expect(GridFSHandler.removeFiles).toHaveBeenCalledWith(teamspace, collection, expectedRefs.flatMap(({ type, link }) => (type === 'gridfs' ? link : [])));
+			expect(handlerMock.removeFiles).toHaveBeenCalledTimes(1);
+			expect(handlerMock.removeFiles).toHaveBeenCalledWith(expectedRefs.flatMap(({ type, link }) => (
+				type === FileStorageTypes.FS ? link : [])));
 
 			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledTimes(1);
 			expect(FileRefs.removeRefsByQuery).toHaveBeenCalledWith(teamspace, collection, meta);
@@ -695,7 +636,46 @@ const testRemoveFilesWithMeta = () => {
 	});
 };
 
-describe('services/filesManager', () => {
+const testGetMD5FileHash = () => {
+	describe('Get a file\'s MD5 hash', () => {
+		const teamspace = generateRandomString();
+		const collection = generateRandomString();
+		const filename = generateRandomString();
+		const mockId = Buffer.from(generateRandomString());
+		const mockRefEntry = { type: FileStorageTypes.FS, link: 'mockLink', size: 100 };
+
+		test('it should create the MD5 hash if it has not been chached', async () => {
+			FileRefs.getRefEntry.mockImplementation(() => mockRefEntry);
+			handlerMock.getFile.mockResolvedValueOnce(mockId);
+			const wordArray = CryptoJS.lib.WordArray.create(mockId);
+			const md5Hash = CryptoJS.MD5(wordArray).toString();
+
+			await expect(FilesManager.getMD5FileHash(teamspace, collection, filename))
+				.resolves.toEqual({ hash: md5Hash, size: 100 });
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(2);
+			expect(handlerMock.getFile).toHaveBeenCalledTimes(1);
+			expect(handlerMock.getFile).toHaveBeenCalledWith(mockRefEntry.link);
+			expect(FileRefs.updateRef).toHaveBeenCalledTimes(1);
+			expect(FileRefs.updateRef).toHaveBeenCalledWith(teamspace, collection,
+				{ _id: filename }, { $set: { md5Hash } });
+		});
+
+		test('it should return straight away if the MD5 has has been cached', async () => {
+			const mockRef = { ...mockRefEntry, md5Hash: generateRandomString() };
+			FileRefs.getRefEntry.mockResolvedValueOnce(mockRef);
+
+			await expect(FilesManager.getMD5FileHash(teamspace, collection, filename))
+				.resolves.toEqual({ hash: mockRef.md5Hash, size: mockRef.size });
+
+			expect(FileRefs.getRefEntry).toHaveBeenCalledTimes(1);
+			expect(handlerMock.getFile).toHaveBeenCalledTimes(0);
+			expect(FileRefs.updateRef).toHaveBeenCalledTimes(0);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testRemoveFilesWithMeta();
 	testRemoveAllFilesFromModel();
 	testRemoveAllFilesFromTeamspace();
@@ -706,4 +686,5 @@ describe('services/filesManager', () => {
 	testStoreFiles();
 	testStoreFileStream();
 	testFileExists();
+	testGetMD5FileHash();
 });

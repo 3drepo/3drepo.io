@@ -15,15 +15,44 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Invitations = {};
 const { ADMIN_DB } = require('../handler/db.constants');
+const { DEFAULT_OWNER_JOB } = require('./jobs.constants');
+
+const Invitations = {};
+const { addUserToAccount } = require('../services/sso/frontegg');
 const db = require('../handler/db');
+const { events } = require('../services/eventsManager/eventsManager.constants');
+const { getTeamspaceRefId } = require('./teamspaceSettings');
+const { publish } = require('../services/eventsManager/eventsManager');
 
 const COL_NAME = 'invitations';
 
 const findMany = (query, projection, sort) => db.find(ADMIN_DB, COL_NAME, query, projection, sort);
 
 Invitations.getInvitationsByTeamspace = (teamspace, projection = {}) => findMany({ 'teamSpaces.teamspace': teamspace }, projection);
+
+Invitations.removeAllInvitationsByTeamspace = async (teamspace) => {
+	const invitations = await findMany({ 'teamSpaces.teamspace': teamspace }, { _id: 1, teamSpaces: 1 });
+	const invitesToRemove = invitations.flatMap(({ _id, teamSpaces }) => (teamSpaces.length === 1 ? _id : []));
+
+	// remove any invitations that only have invitations on the teamspace specified
+	await db.deleteMany(ADMIN_DB, COL_NAME, { _id: { $in: invitesToRemove } });
+	// remove the teamspace from any remaining invitations
+	await db.updateMany(ADMIN_DB, COL_NAME, { 'teamSpaces.teamspace': teamspace }, { $pull: { teamSpaces: { teamspace } } });
+};
+
+Invitations.inviteUserAsAdmin = async (teamspace, email) => {
+	const job = DEFAULT_OWNER_JOB;
+	const permissions = { teamspace_admin: true };
+	const teamspaceEntry = { teamspace, job, permissions };
+	const invitation = { _id: email, teamSpaces: [teamspaceEntry] };
+
+	const refId = await getTeamspaceRefId(teamspace);
+	await addUserToAccount(refId, email);
+
+	await db.insertOne(ADMIN_DB, COL_NAME, invitation);
+	publish(events.INVITATION_ADDED, { teamspace, email, job, permissions });
+};
 
 Invitations.initialise = () => db.createIndex(ADMIN_DB, COL_NAME, { 'teamSpaces.teamspace': 1 }, { runInBackground: true });
 

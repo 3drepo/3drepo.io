@@ -1,0 +1,54 @@
+/**
+ *  Copyright (C) 2025 3D Repo Ltd
+ *
+ *  This program is free software: you can redistribute it and/or modify
+ *  it under the terms of the GNU Affero General Public License as
+ *  published by the Free Software Foundation, either version 3 of the
+ *  License, or (at your option) any later version.
+ *
+ *  This program is distributed in the hope that it will be useful,
+ *  but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *  GNU Affero General Public License for more details.
+ *
+ *  You should have received a copy of the GNU Affero General Public License
+ *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+import styled, { css } from 'styled-components';
+import { TicketItemContainer, Title } from '../ticketItem/ticketItem.styles';
+import { TextOverflow } from '@controls/textOverflow';
+import { Spinner as SpinnerBase } from '@controls/spinnerLoader/spinnerLoader.styles';
+
+export const GroupedListToggleContainer = styled(TicketItemContainer)<{ $expanded:boolean }>`
+	min-height: 0;
+	display: flex;
+	align-items: center;
+  
+	${({ $expanded }) => !$expanded && css`
+		border-bottom: 0 !important;
+	`};
+`;
+
+export const GroupedTextOverflow = styled(TextOverflow)`
+	flex-grow: unset;
+	max-width: 278px;
+	align-content: center;
+`;
+
+export const GroupedListToggleTitle = styled(Title)`
+	color: ${({ theme }) => theme.palette.secondary.main};
+	font-size: 13px;
+	height: 24px;
+	display: flex;
+	align-items: center;
+	margin-top: 1px;
+`;
+
+export const GroupedListSpacer = styled.div`
+	padding-bottom: 10px
+`;
+
+export const Spinner = styled(SpinnerBase)`
+	margin-left: 5px;
+`;

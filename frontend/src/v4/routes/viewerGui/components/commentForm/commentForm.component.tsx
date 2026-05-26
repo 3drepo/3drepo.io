@@ -28,7 +28,7 @@ import { lowerCase, pick, values as _values } from 'lodash';
 import { createRef, forwardRef, PureComponent } from 'react';
 import * as Yup from 'yup';
 
-import { RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
+import { LEVELS_RENDER_VALUE, RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../components/image';
@@ -133,7 +133,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 	}
 
 	private filteredUsersList = (token) => this.props.teamspaceUsers.filter((user) =>
-			_values(pick(user, ['user', 'firstName', 'lastName']))
+			_values(pick(user, ['firstName', 'lastName']))
 				.map(lowerCase).some((value) => value.includes(lowerCase(token)))).slice(0, 5)
 
 	private filteredTicketsList = (token) =>
@@ -200,7 +200,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 		);
 	});
 
-	private outputUser = (item, trigger) => ({ text: `${trigger}${item.user}`, caretPosition: 'end' });
+	private outputUser = (item, trigger) => ({ text: `${trigger}${item.lastName}`, caretPosition: 'end' });
 
 	private outputIssue = (item, trigger) => ({ text: `${trigger}${item.number}`, caretPosition: 'end' });
 
@@ -284,6 +284,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 							items={RISK_LIKELIHOODS}
 							inputId="likelihood"
 							disabled={!this.props.canComment}
+							renderValue={(val: number) => LEVELS_RENDER_VALUE[val]}
 						/>
 					)} />
 				</StyledFormControl>

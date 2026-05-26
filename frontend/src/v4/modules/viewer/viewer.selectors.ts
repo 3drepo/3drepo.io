@@ -70,3 +70,23 @@ export const selectClipPlaneBorderWidth = createSelector(
 export const selectClipPlaneBorderColor = createSelector(
 	selectSettings, (state) => state.clipPlaneBorderColor
 );
+
+export const selectClipPlaneGizmoSize = createSelector(
+	selectSettings, (state) => state.clipPlaneGizmoSize
+);
+
+export const selectClipPlaneVisualSize = createSelector(
+	selectSettings, (state) => state.clipPlaneVisualSize
+);
+
+export const selectclipPlaneAxisSize = createSelector(
+	selectSettings, (state) => state.clipPlaneAxisSize
+);
+
+export const selectDynamicFpsOptimisation = createSelector(
+	selectSettings, (state) => state.dynamicFpsOptimisation
+);
+
+export const selectDynamicFpsTarget = createSelector(
+	selectSettings, (state) => state.dynamicFpsTarget
+);

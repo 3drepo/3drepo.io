@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
 
 jest.mock('../../../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
-jest.mock('../../../../../../src/v5/utils/permissions/permissions');
-const Permissions = require(`${src}/utils/permissions/permissions`);
+jest.mock('../../../../../../src/v5/utils/permissions');
+const Permissions = require(`${src}/utils/permissions`);
 const { templates } = require(`${src}/utils/responseCodes`);
 
 jest.mock('../../../../../../src/v5/models/projectSettings');
@@ -42,12 +43,14 @@ Projects.getProjectById.mockImplementation((teamspace, project) => {
 Sessions.isSessionValid.mockImplementation((session) => !!session);
 Sessions.getUserFromSession.mockImplementation(({ user }) => user.username);
 
+const app = { get: () => false };
+
 const testIsProjectAdmin = () => {
 	describe('isProjectAdmin', () => {
 		test('next() should be called if the user is teamspace admin', async () => {
 			const mockCB = jest.fn(() => {});
 			await ProjectMiddlewares.isProjectAdmin(
-				{ params: { teamspace: 'ts', project: 'p1' }, session: { user: { username: 'tsAdmin' } } },
+				{ app, params: { teamspace: 'ts', project: 'p1' }, session: { user: { username: 'tsAdmin' } } },
 				{},
 				mockCB,
 			);
@@ -57,7 +60,17 @@ const testIsProjectAdmin = () => {
 		test('next() should be called if the user is project admin', async () => {
 			const mockCB = jest.fn(() => {});
 			await ProjectMiddlewares.isProjectAdmin(
-				{ params: { teamspace: 'ts', project: 'p1' }, session: { user: { username: 'projAdmin' } } },
+				{ app, params: { teamspace: 'ts', project: 'p1' }, session: { user: { username: 'projAdmin' } } },
+				{},
+				mockCB,
+			);
+			expect(mockCB.mock.calls.length).toBe(1);
+		});
+
+		test('next() should be called if permissions is bypassed', async () => {
+			const mockCB = jest.fn(() => {});
+			await ProjectMiddlewares.isProjectAdmin(
+				{ app: { get: () => true }, params: { teamspace: 'ts', project: 'p1' }, session: { user: { username: 'projAdmin' } } },
 				{},
 				mockCB,
 			);
@@ -67,7 +80,7 @@ const testIsProjectAdmin = () => {
 		test('should respond with not authorized if the user has no access', async () => {
 			const mockCB = jest.fn(() => {});
 			await ProjectMiddlewares.isProjectAdmin(
-				{ params: { teamspace: 'ts1', project: 'p1' }, session: { user: { username: 'hi' } } },
+				{ app, params: { teamspace: 'ts1', project: 'p1' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -79,7 +92,7 @@ const testIsProjectAdmin = () => {
 		test('should respond with project not found if the project does not exist', async () => {
 			const mockCB = jest.fn(() => {});
 			await ProjectMiddlewares.isProjectAdmin(
-				{ params: { teamspace: 'ts1', project: 'pr2' }, session: { user: { username: 'hi' } } },
+				{ app, params: { teamspace: 'ts1', project: 'pr2' }, session: { user: { username: 'hi' } } },
 				{},
 				mockCB,
 			);
@@ -90,6 +103,6 @@ const testIsProjectAdmin = () => {
 	});
 };
 
-describe('middleware/permissions/components/projects', () => {
+describe(determineTestGroup(__filename), () => {
 	testIsProjectAdmin();
 });

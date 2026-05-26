@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
@@ -50,9 +51,12 @@ const generateBasicData = () => {
 };
 
 const setupBasicData = async (users, teamspace, project, models, modelsWithViews) => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
+	const { tsAdmin, ...otherUsers } = users;
 
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
+	await ServiceHelper.db.createUser(tsAdmin);
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user]);
+
+	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 	const modelProms = models.map((model) => ServiceHelper.db.createModel(
 		teamspace,
 		model._id,
@@ -83,7 +87,7 @@ const testViewList = () => {
 		const generateTestData = (isFed) => {
 			const model = isFed ? fed : con;
 			const modelType = isFed ? 'federation' : 'container';
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const modelNoViews = isFed ? fedNoViews : conNoViews;
 			const modelWrongType = isFed ? con : fed;
 
@@ -142,7 +146,7 @@ const testViewThumbnail = () => {
 		const generateTestData = (isFed) => {
 			const model = isFed ? fed : con;
 			const modelType = isFed ? 'federation' : 'container';
-			const modelNotFound = isFed ? templates.federationNotFound : templates.containerNotFound;
+			const { modelNotFound } = templates;
 			const modelWrongType = isFed ? con : fed;
 
 			const getRoute = ({
@@ -182,7 +186,7 @@ const testViewThumbnail = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

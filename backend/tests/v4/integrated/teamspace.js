@@ -18,10 +18,10 @@
  */
 
 const async = require("async");
-const SessionTracker = require("../../v5/helper/sessionTracker")
+const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes");
 const { templates: responseCodesV5 } = require("../../../src/v5/utils/responseCodes");
 
@@ -125,12 +125,14 @@ describe("Teamspace", function() {
 	const mitigationsFile = "/../statics/mitigations/mitigations1.csv";
 	const bigMitigationsFile = "/../statics/mitigations/big.csv";
 
-	before(function(done) {
-
-		server = app.listen(8080, function () {
-			agent = request.agent(server);
-			console.log("API test server is listening on port 8080!");
-			done();
+	before(async function() {
+		const app = await createAppAsync();
+		await new Promise((resolve) => {
+			server = app.listen(8080, function () {
+				agent = request.agent(server);
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 		});
 	});
 
@@ -453,8 +455,8 @@ describe("Teamspace", function() {
 		it("set defaults if user is not member of teamspace should fail", function(done) {
 			agent.patch(`/${notMemberOfTeamspace}/settings`)
 				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
-				.expect(401, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -463,7 +465,7 @@ describe("Teamspace", function() {
 			agent.patch(`/${fakeTeamspace}/settings`)
 				.send({ topicTypes: defaultTopicTypes, riskCategories: defaultRiskCategories })
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -708,8 +710,8 @@ describe("Teamspace", function() {
 
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.get(`/${notMemberOfTeamspace}/settings/mitigations.csv`)
-				.expect(401, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -717,7 +719,7 @@ describe("Teamspace", function() {
 		it("if user doesn't exist should fail", function(done) {
 			agent.get(`/${fakeTeamspace}/settings/mitigations.csv`)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -788,8 +790,8 @@ describe("Teamspace", function() {
 		it("if user is not member of teamspace should fail", function(done) {
 			agent.post(`/${notMemberOfTeamspace}/settings/mitigations.csv`)
 				.attach("file", __dirname + mitigationsFile)
-				.expect(401, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.NOT_AUTHORIZED.value);
+				.expect(404, function(err, res) {
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});
@@ -798,7 +800,7 @@ describe("Teamspace", function() {
 			agent.post(`/${fakeTeamspace}/settings/mitigations.csv`)
 				.attach("file", __dirname + mitigationsFile)
 				.expect(404, function(err, res) {
-					expect(res.body.value).to.equal(responseCodes.RESOURCE_NOT_FOUND.value);
+					expect(res.body.value).to.equal(responseCodesV5.teamspaceNotFound.code);
 					done(err);
 				});
 		});

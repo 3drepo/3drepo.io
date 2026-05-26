@@ -15,16 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 // Need to mock these 2 to ensure we are not trying to create a real session configuration
 jest.mock('express-session', () => () => {});
-jest.mock('../../../../src/v5/handler/db', () => ({
-	...jest.requireActual('../../../../src/v5/handler/db'),
-	getSessionStore: () => {},
-}));
-const Sessions = require(`${src}/services/sessions`);
+jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
+const Sessions = require(`${src}/services/sessions`);
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -61,7 +59,7 @@ const testRemoveOldSessions = () => {
 	});
 };
 
-describe('services/sessions', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetSessions();
 	testRemoveOldSessions();
 });

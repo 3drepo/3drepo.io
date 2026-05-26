@@ -16,7 +16,6 @@
  */
 
 import styled, { css } from 'styled-components';
-import { Link as LinkComponent } from '@mui/material';
 import { NavLink } from 'react-router-dom';
 
 export const Container = styled.nav`
@@ -24,14 +23,17 @@ export const Container = styled.nav`
 	padding-left: 79px;
 	box-shadow: 0 0 13px -7px;
 	position: relative;
-	z-index: 5;
+	z-index: 15;
 	background-color: ${({ theme }) => theme.palette.primary.contrast};
 `;
 
-export const Link: typeof NavLink = styled(LinkComponent).attrs({
-	component: NavLink,
-	activeClassName: 'active',
-})<{ disabled?: boolean }>`
+export const Link = styled(NavLink).attrs<{ disabled?: boolean }>((props) => ({
+	className: ({ isActive }: { isActive: boolean }) =>
+		[
+			props.className,
+			isActive ? 'active' : '',
+		].filter(Boolean).join(' '),
+}))<{ disabled?: boolean }>`
 	&& {
 		text-decoration: none;
 		display: flex;

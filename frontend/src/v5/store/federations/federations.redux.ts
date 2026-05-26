@@ -17,7 +17,6 @@
 
 import { createActions, createReducer } from 'reduxsauce';
 import {
-	FederationSettings,
 	FederationStats,
 	GroupedContainer,
 	IFederation,
@@ -27,7 +26,8 @@ import { prepareNewFederation, prepareSingleFederationData } from '@/v5/store/fe
 import { Action } from 'redux';
 import { produceAll } from '@/v5/helpers/reducers.helper';
 import { Constants } from '../../helpers/actions.helper';
-import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks } from '../store.types';
+import { TeamspaceAndProjectId, TeamspaceProjectAndFederationId, ProjectAndFederationId, View, SuccessAndErrorCallbacks, ProjectId } from '../store.types';
+import { ContainerSettings } from '../containers/containers.types';
 
 export const { Types: FederationsTypes, Creators: FederationsActions } = createActions({
 	createFederation: ['teamspace', 'projectId', 'newFederation', 'containers', 'onSuccess', 'onError'],
@@ -39,6 +39,8 @@ export const { Types: FederationsTypes, Creators: FederationsActions } = createA
 	fetchFederationsSuccess: ['projectId', 'federations'],
 	fetchFederationStats: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationStatsSuccess: ['projectId', 'federationId', 'stats'],
+	bulkFetchFederationsStats: ['teamspace', 'projectId', 'federationIds'],
+	bulkFetchFederationsStatsSuccess: ['projectId', 'stats'],
 	fetchFederationViews: ['teamspace', 'projectId', 'federationId'],
 	fetchFederationViewsSuccess: ['projectId', 'federationId', 'views'],
 	fetchFederationSettings: ['teamspace', 'projectId', 'federationId'],
@@ -98,6 +100,23 @@ export const fetchStatsSuccess = (state, {
 	Object.assign(federation, prepareSingleFederationData(federation, stats));
 };
 
+export const bulkFetchFederationsStatsSuccess = (state, {
+	projectId,
+	stats,
+}: BulkFetchFederationsStatsSuccessAction) => {
+	const federations = state.federationsByProject[projectId];
+	if (!federations) return;
+
+	// Build a map for quick lookup
+	const federationMap: Map<string, IFederation> = new Map(federations.map((f) => [f._id, f]));
+
+	stats.forEach((federationStats) => {
+		const federation = federationMap.get(federationStats.modelId);
+		if (!federation) return;
+		Object.assign(federation, prepareSingleFederationData(federation, federationStats));
+	});
+};
+
 export const fetchFederationViewsSuccess = (state, {
 	projectId,
 	federationId,
@@ -154,6 +173,7 @@ export const federationsReducer = createReducer<IFederationsState>(INITIAL_STATE
 	[FederationsTypes.CREATE_FEDERATION_SUCCESS]: createFederationSuccess,
 	[FederationsTypes.FETCH_FEDERATIONS_SUCCESS]: fetchFederationsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_STATS_SUCCESS]: fetchStatsSuccess,
+	[FederationsTypes.BULK_FETCH_FEDERATIONS_STATS_SUCCESS]: bulkFetchFederationsStatsSuccess,
 	[FederationsTypes.SET_FAVOURITE_SUCCESS]: setFavouriteSuccess,
 	[FederationsTypes.FETCH_FEDERATION_VIEWS_SUCCESS]: fetchFederationViewsSuccess,
 	[FederationsTypes.FETCH_FEDERATION_SETTINGS_SUCCESS]: fetchFederationSettingsSuccess,
@@ -179,6 +199,8 @@ export type SetFavouriteSuccessAction = Action<'SET_FAVOURITE_SUCCESS'> & Projec
 export type FetchFederationsSuccessAction = Action<'FETCH_FEDERATIONS_SUCCESS'> & { projectId: string, federations: IFederation[] };
 export type FetchFederationStatsAction = Action<'FETCH_FEDERATION_STATS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationStatsSuccessAction = Action<'FETCH_FEDERATION_STATS_SUCCESS'> & ProjectAndFederationId & { stats: FederationStats };
+export type BulkFetchFederationsStatsAction = Action<'BULK_FETCH_FEDERATIONS_STATS'> & TeamspaceAndProjectId & { federationIds: string[] };
+export type BulkFetchFederationsStatsSuccessAction = Action<'BULK_FETCH_FEDERATIONS_STATS_SUCCESS'> & ProjectId & { stats: FederationStats[] };
 export type FetchFederationUsersAction = Action<'FETCH_FEDERATION_USERS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationJobsAction = Action<'FETCH_FEDERATION_JOBS'> & TeamspaceProjectAndFederationId;
 export type UpdateFederationContainersAction = Action<'UPDATE_FEDERATION_CONTAINERS'> & TeamspaceProjectAndFederationId & { containers: GroupedContainer[] };
@@ -186,9 +208,9 @@ export type UpdateFederationContainersActionSuccess = Action<'UPDATE_FEDERATION_
 export type FetchFederationViewsAction = Action<'FETCH_FEDERATION_VIEWS'> & TeamspaceProjectAndFederationId;
 export type FetchFederationViewsSuccessAction = Action<'FETCH_FEDERATION_VIEWS_SUCCESS'> & ProjectAndFederationId & { views: View[] };
 export type FetchFederationSettingsAction = Action<'FETCH_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId;
-export type FetchFederationSettingsSuccessAction = Action<'FETCH_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: FederationSettings };
-export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId & { settings: FederationSettings, onSuccess: () => void, onError: (error) => void };
-export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: FederationSettings };
+export type FetchFederationSettingsSuccessAction = Action<'FETCH_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: ContainerSettings };
+export type UpdateFederationSettingsAction = Action<'UPDATE_FEDERATION_SETTINGS'> & TeamspaceProjectAndFederationId & { settings: ContainerSettings, onSuccess: () => void, onError: (error) => void };
+export type UpdateFederationSettingsSuccessAction = Action<'UPDATE_FEDERATION_SETTINGS_SUCCESS'> & ProjectAndFederationId & { settings: ContainerSettings };
 export type DeleteFederationAction = Action<'DELETE_FEDERATION'> & TeamspaceProjectAndFederationId & SuccessAndErrorCallbacks;
 export type DeleteFederationSuccessAction = Action<'DELETE_FEDERATION_SUCCESS'> & ProjectAndFederationId;
 export type UpdateFederationSuccessAction = Action<'UPDATE_FEDERATION'> & ProjectAndFederationId & { updatedFederation: IFederation };
@@ -215,6 +237,8 @@ export interface IFederationsActionCreators {
 		federationId: string,
 		stats: FederationStats
 	) => FetchFederationStatsSuccessAction;
+	bulkFetchFederationsStats: (teamspace: string, projectId: string, federationIds: string[]) => BulkFetchFederationsStatsAction;
+	bulkFetchFederationsStatsSuccess: (projectId: string, stats: FederationStats[]) => BulkFetchFederationsStatsSuccessAction;
 	addFavourite: (teamspace: string, projectId: string, federationId: string) => AddFavouriteAction;
 	removeFavourite: (teamspace: string, projectId: string, federationId: string) => RemoveFavouriteAction;
 	setFavouriteSuccess: (projectId: string, federationId: string, isFavourite: boolean) => SetFavouriteSuccessAction;
@@ -232,7 +256,7 @@ export interface IFederationsActionCreators {
 	fetchFederationSettingsSuccess: (
 		projectId: string,
 		federationId: string,
-		settings: FederationSettings,
+		settings: ContainerSettings,
 	) => FetchFederationSettingsSuccessAction;
 	fetchFederationUsers: (
 		teamspace: string,
@@ -248,14 +272,14 @@ export interface IFederationsActionCreators {
 		teamspace: string,
 		projectId: string,
 		federationId: string,
-		settings: FederationSettings,
+		settings: ContainerSettings,
 		onSuccess: () => void,
 		onError: (error) => void,
 	) => UpdateFederationSettingsAction;
 	updateFederationSettingsSuccess: (
 		projectId: string,
 		federationId: string,
-		settings: FederationSettings,
+		settings: ContainerSettings,
 	) => UpdateFederationSettingsSuccessAction;
 	deleteFederation: (
 		teamspace: string,

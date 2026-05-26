@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../../../helper/services');
 const { src } = require('../../../../../../helper/path');
@@ -93,9 +94,13 @@ const generateBasicData = () => {
 };
 
 const setupData = async ({ users, teamspace, project, models, revisions, calibrations }) => {
-	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user, users.tsAdmin2.user]);
+	const { tsAdmin, tsAdmin2, ...otherUsers } = users;
 
-	const userProms = Object.keys(users).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
+	await ServiceHelper.db.createUser(tsAdmin);
+	await ServiceHelper.db.createUser(tsAdmin2);
+	await ServiceHelper.db.createTeamspace(teamspace, [tsAdmin.user, tsAdmin2.user]);
+
+	const userProms = Object.keys(otherUsers).map((key) => ServiceHelper.db.createUser(users[key], key !== 'nobody' ? [teamspace] : []));
 
 	const modelProms = Object.keys(models).map((key) => ServiceHelper.db.createModel(
 		teamspace,
@@ -139,9 +144,9 @@ const testGetCalibration = () => {
 			['the user is not a member of the teamspace', { ...params, key: users.nobody.apiKey }, false, templates.teamspaceNotFound],
 			['the user does not have access to the drawing', { ...params, key: users.noProjectAccess.apiKey }, false, templates.notAuthorized],
 			['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-			['the drawing does not exist', { ...params, drawing: ServiceHelper.generateRandomString() }, false, templates.drawingNotFound],
+			['the drawing does not exist', { ...params, drawing: ServiceHelper.generateRandomString() }, false, templates.modelNotFound],
 			['the revision does not exist', { ...params, revisionId: ServiceHelper.generateRandomString() }, false, templates.revisionNotFound],
-			['the model is of wrong type', { ...params, drawing: models.container }, false, templates.drawingNotFound],
+			['the model is of wrong type', { ...params, drawing: models.container }, false, templates.modelNotFound],
 			['the drawing has no revisions', { ...params, drawing: models.drawWithNoRevisions }, false, templates.revisionNotFound],
 			['the drawing has revisions but revisions have no calibrations', { ...params, revisionId: revisions.rev1._id }, false, templates.calibrationNotFound],
 			['the drawing has revisions and revision has calibrations', params, true],
@@ -208,8 +213,8 @@ const testAddCalibration = () => {
 			['the user has viewer permissions to the drawing', { ...params, key: users.viewer.apiKey }, standardPayload, false, templates.notAuthorized],
 			['the user has commenter permissions to the drawing', { ...params, key: users.commenter.apiKey }, standardPayload, false, templates.notAuthorized],
 			['the project does not exist', { ...params, projectId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.projectNotFound],
-			['the drawing does not exist', { ...params, drawingId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.drawingNotFound],
-			['the model is of wrong type', { ...params, drawingId: models.container._id }, standardPayload, false, templates.drawingNotFound],
+			['the drawing does not exist', { ...params, drawingId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.modelNotFound],
+			['the model is of wrong type', { ...params, drawingId: models.container._id }, standardPayload, false, templates.modelNotFound],
 			['the revision does not exist', { ...params, revisionId: ServiceHelper.generateRandomString() }, standardPayload, false, templates.revisionNotFound],
 			['the revision is void', { ...params, revisionId: revisions.rev4._id }, standardPayload, false, templates.revisionNotFound],
 			['the payload is invalid', params, { standardPayload, units: ServiceHelper.generateRandomString() }, false, templates.invalidArguments],
@@ -255,7 +260,7 @@ const testAddCalibration = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

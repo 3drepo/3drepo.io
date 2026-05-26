@@ -15,12 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ROUTES } from '@/v4/constants/routes';
-import { DialogActions } from '@/v4/modules/dialog';
-import { dispatch } from '@/v5/helpers/redux.helpers';
-import { AuthActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { AuthActionsDispatchers, DialogsActionsDispatchers } from '@/v5/services/actionsDispatchers';
+import { formatMessage } from '@/v5/services/intl';
 import axios from 'axios';
-import { push } from 'connected-react-router';
+
 const configAxios = () => {
 	axios.defaults.withCredentials = true;
 
@@ -47,13 +45,13 @@ const configAxios = () => {
 						}
 						break;
 					case 403:
-						dispatch(DialogActions.showDialog({
-							title: 'Forbidden',
-							content: 'No access',
-							onCancel: () => {
-								dispatch(push(ROUTES.TEAMSPACES));
-							}
-						}));
+						DialogsActionsDispatchers.open('alert', {
+							currentActions: formatMessage({
+								id: 'v4.error.forbidden',
+								defaultMessage: 'trying to forbidden resources',
+							}),
+							error,
+						});
 						error.handled = true;
 						break;
 					default:

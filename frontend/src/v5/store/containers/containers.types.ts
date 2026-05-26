@@ -132,6 +132,7 @@ export type ContainerStats = {
 	status: UploadStatus;
 	unit: string;
 	code: string;
+	modelId: string;
 };
 
 export type ContainerBackendSettings = {
@@ -145,6 +146,7 @@ export type ContainerBackendSettings = {
 	angleFromNorth?: number;
 	code?: string;
 	unit?: string;
+	author?: string;
 	defaultView?: string;
 	errorReason?: {
 		message: string;

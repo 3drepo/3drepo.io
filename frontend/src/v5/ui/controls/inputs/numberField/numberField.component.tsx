@@ -34,5 +34,5 @@ export const NumberField = (props: TextFieldProps) => {
 		}
 	};
 
-	return (<TextField type="number" onKeyDown={handleKeyDown} {...props} />);
+	return (<TextField type="text" onKeyDown={handleKeyDown} {...props} />);
 };

@@ -18,25 +18,23 @@
 import { useFormContext, useFieldArray } from 'react-hook-form';
 import { FormNumberField, FormTextField } from '@controls/inputs/formInputs.component';
 import { useEffect } from 'react';
-import AddValueIcon from '@assets/icons/outlined/add_circle-outlined.svg';
-import RemoveValueIcon from '@assets/icons/outlined/remove_circle-outlined.svg';
 import { OPERATIONS_TYPES } from '@/v5/store/tickets/tickets.types';
 import { Gap } from '@controls/gap';
-import { ValueIconContainer, ValuesContainer } from '../groupRulesInputs.styles';
 import { IFormRule } from '../../groupRulesForm.helpers';
+import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
+import { ValuesContainer } from './ruleValues.styles';
 
 export const RuleValues = ({ disabled }) => {
 	const { control, watch, formState: { errors } } = useFormContext<IFormRule>();
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: 'values',
+		shouldUnregister: true,
 	});
 
 	const operator = watch('operator');
 	const operationType = OPERATIONS_TYPES[operator];
 	const error = errors.values || {};
-
-	useEffect(() => () => remove(), [operationType]);
 
 	useEffect(() => {
 		if (!fields.length) {
@@ -51,15 +49,15 @@ export const RuleValues = ({ disabled }) => {
 		return (
 			<>
 				{fields.map((field, i) => (
-					<ValuesContainer key={field.id}>
-						<FormValueField name={`values.${i}.value`} formError={error?.[i]} disabled={disabled} />
-						<ValueIconContainer onClick={() => remove(i)} disabled={disabled || fields.length === 1}>
-							<RemoveValueIcon />
-						</ValueIconContainer>
-						<ValueIconContainer onClick={() => append({ value: '' })} disabled={disabled || i !== (fields.length - 1)}>
-							<AddValueIcon />
-						</ValueIconContainer>
-					</ValuesContainer>
+					<ArrayFieldContainer
+						key={field.id}
+						onRemove={() => remove(i)}
+						disableRemove={disabled || fields.length === 1}
+						onAdd={() => append({ value: '' })}
+						disableAdd={disabled || i !== (fields.length - 1)}
+					>
+						<FormValueField name={`values.${i}.value`} formError={error?.[i]?.value} disabled={disabled} />
+					</ArrayFieldContainer>
 				))}
 			</>
 		);
@@ -67,7 +65,7 @@ export const RuleValues = ({ disabled }) => {
 
 	// single value type
 	if (['regex', 'numberComparison'].includes(operationType)) {
-		return (<FormValueField name="values.0.value" formError={error?.[0]} disabled={disabled} />);
+		return (<FormValueField name="values.0.value" formError={error?.[0]?.value} disabled={disabled} />);
 	}
 
 	// range value type
@@ -76,12 +74,12 @@ export const RuleValues = ({ disabled }) => {
 			<ValuesContainer>
 				<FormNumberField
 					name="values.0.value"
-					formError={error?.[0]}
+					formError={error?.[0]?.value}
 					disabled={disabled}
 				/>
 				<FormNumberField
 					name="values.1.value"
-					formError={error?.[1]}
+					formError={error?.[1]?.value}
 					disabled={disabled}
 				/>
 			</ValuesContainer>

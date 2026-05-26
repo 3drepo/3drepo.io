@@ -19,6 +19,7 @@ const config = require('./jest.config');
 
 config.collectCoverageFrom = ['src/scripts/utility/**/*.js'];
 config.coveragePathIgnorePatterns = ['index.js', 'scheduler*'];
+config.setupFiles = ['./tests/v5/scripts/setup.js'];
 
 config.testMatch = ['**/tests/**/scripts/**/*.test.[jt]s?(x)'];
 

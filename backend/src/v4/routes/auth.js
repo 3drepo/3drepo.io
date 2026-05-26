@@ -28,12 +28,10 @@ const utils = require("../utils");
 const User = require("../models/user");
 const UsersV5 = require(`${v5Path}/processors/users`);
 const { fileExtensionFromBuffer } = require(`${v5Path}/utils/helper/typeCheck`);
-
-const FileType = require("file-type");
+const { routeDecommissioned } = require(`${v5Path}/middleware/common`);
 
 const multer = require("multer");
 const { fileExists } = require("../models/fileRef");
-const { isSsoUser } = require("../../v5/models/users");
 
 /**
  * @api {get} /version Application version
@@ -42,11 +40,11 @@ const { isSsoUser } = require("../../v5/models/users");
  * @apiDescription Show current application version.
  *
  * @apiSuccess (200) {String} VERSION API service version
- * @apiSuccess (200) {String} unity Unity viewer version
- * @apiSuccess (200) {String} navis Autodesk Navisworks version
- * @apiSuccess (200) {String} unitydll Unity viewer version
+ * @apiSuccess (200) {Object} unity Unity viewer version
+ * @apiSuccess (200) {Object} navis Autodesk Navisworks version
+ * @apiSuccess (200) {Object} unitydll Unity viewer version
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  * 	"VERSION": "2.20.1",
@@ -69,13 +67,13 @@ const { isSsoUser } = require("../../v5/models/users");
 router.get("/version", printVersion);
 
 /**
- * @api {get} /:user.json List account information
+ * @api {get} /:account.json List account information
  * @apiName listInfo
  * @apiGroup Account
  * @apiDescription Account information and list of projects grouped by teamspace
  * that the user has access to.
  *
- * @apiParam {String} user User
+ * @apiParam {String} account.json Account name with .json extension
  * @apiSuccess (200) {Object[]} accounts User account
  * @apiSuccess (200) {Object} billingInfo Billing information
  * @apiSuccess (200) {String} email User e-mail address
@@ -83,10 +81,10 @@ router.get("/version", printVersion);
  * @apiSuccess (200) {String} lastName Surname
  * @apiSuccess (200) {Boolean} hasAvatar True if user account has an avatar
  *
- * @apiExample {delete} Example usage:
+ * @apiExample {get} Example usage:
  * GET /alice.json HTTP/1.1
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  * 	"accounts": [
@@ -220,7 +218,7 @@ router.get("/version", printVersion);
  * 			"_id": "Actor"
  * 		},
  * 		{
- * 			"_id": "Producer
+ * 			"_id": "Producer"
  * 		}
  * 	]
  * }
@@ -229,23 +227,25 @@ router.get("/:account.json", middlewares.loggedIn, listInfo);
 // TODO: divide into different endpoints that makes sense.
 
 /**
- * @api {get} /:user/avatar Get avatar
+ * @api {get} /:account/avatar Get avatar
  * @apiName getAvatar
  * @apiGroup Account
  * @apiDescription Get user avatar.
  *
- * @apiParam {String} user User
- * @apiSuccess (200) {Object} avatar User Avatar Image
+ * @apiParam {String} account Account name
+ * @apiSuccess (200) {File} avatar User Avatar Image
  * @apiError (404) USER_DOES_NOT_HAVE_AVATAR User does not have an avatar
  *
- * @apiExample {put} Example usage:
+ * @apiExample {get} Example usage:
  * GET /alice/avatar HTTP/1.1
  *
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {binary} Success-Response:
  * HTTP/1.1 200 OK
- * <binary image>
+ * Content-Type: image/png
  *
- * @apiErrorExample {json} Error-Response
+ * <binary image data>
+ *
+ * @apiErrorExample {json} Error-Response:
  * HTTP/1.1 404 Not Found
  * {
  * 	"message": "User does not have an avatar",
@@ -257,16 +257,16 @@ router.get("/:account.json", middlewares.loggedIn, listInfo);
 router.get("/:account/avatar", middlewares.loggedIn, getAvatar);
 
 /**
- * @api {post} /:user/avatar Upload avatar
+ * @api {post} /:account/avatar Upload avatar
  * @apiName uploadAvatar
  * @apiGroup Account
  * @apiDescription Upload a new avatar image.
  * Only multipart form data content type will be accepted.
  *
- * @apiParam {String} user User
- * @apiParam (Request body) {File} file Image to upload
+ * @apiParam {String} account Account name
+ * @apiBody {File} file Image to upload
  *
- * @apiExample {put} Example usage:
+ * @apiExample {post} Example usage:
  * POST /alice/avatar HTTP/1.1
  * Content-Type: multipart/form-data; boundary=----WebKitFormBoundaryN8dwXAkcO1frCHLf
  *
@@ -278,7 +278,7 @@ router.get("/:account/avatar", middlewares.loggedIn, getAvatar);
  * ------WebKitFormBoundaryN8dwXAkcO1frCHLf--
  *
  * @apiSuccess (200) {Object} status Status of Avatar upload.
- * @apiSuccessExample {json} Success-Response
+ * @apiSuccessExample {json} Success-Response:
  * HTTP/1.1 200 OK
  * {
  *	"status":"success"
@@ -286,110 +286,9 @@ router.get("/:account/avatar", middlewares.loggedIn, getAvatar);
  */
 router.post("/:account/avatar", middlewares.isAccountAdmin, uploadAvatar);
 
-/**
- * @api {put} /:user Update user account
- * @apiName updateUser
- * @apiGroup Account
- * @apiDescription Update account information.
- *
- * @apiParam {String} user Account username
- * @apiParam (Request body) {String} email Valid e-mail address
- * @apiParam (Request body) {String} firstName First name
- * @apiParam (Request body) {String} lastName Surname
- * @apiSuccess (200) account Account username
- *
- * @apiExample {post} Example usage:
- * PUT /alice HTTP/1.1
- * {
- * 	"email":"alice@3drepo.org",
- * 	"firstName":"Alice",
- * 	"lastName":"Anderson"
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- * 	"account":"alice"
- * }
- */
-router.put("/:account", middlewares.isAccountAdmin, updateUser);
+router.put("/:account", routeDecommissioned("PUT", "/v5/user"));
 
-/**
- * @api {put} /:user/password Reset password
- * @apiName resetPassword
- * @apiGroup Account
- * @apiDescription Reset user account password.
- * New password must be different.
- *
- * @apiParam {String} user User account
- * @apiParam (Request body) {String} oldPassword Old password
- * @apiParam (Request body) {String} newPassword New password
- * @apiParam (Request body) {String} token Password reset token
- * @apiSuccess (200) account Account username
- * @apiError TOKEN_INVALID Token is invalid or has expired
- *
- * @apiExample {post} Example usage (with old password):
- * PUT /alice/password HTTP/1.1
- * {
- * 	"oldPassword":"AW96B6",
- * 	"newPassword":"TrustNo1"
- * }
- *
- * @apiExample {post} Example usage (with token):
- * PUT /alice/password HTTP/1.1
- * {
- * 	"token":"1234567890",
- * 	"newPassword":"TrustNo1"
- * }
- *
- * @apiSuccessExample {json} Success-Response
- * HTTP/1.1 200 OK
- * {
- * 	"account":"alice"
- * }
- *
- * @apiErrorExample {json} Error-Response
- * HTTP/1.1 400 Bad Request
- * {
- * 	"message":"Token is invalid or expired",
- * 	"status":400,
- * 	"code":"TOKEN_INVALID",
- * 	"value":59,
- * 	"place": "PUT /alice/password"
- * }
- */
-router.put("/:account/password", resetPassword);
-
-async function updateUser(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-
-	if (await isSsoUser(req.params.account)) {
-		return responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
-
-	if (req.body.oldPassword) {
-		if (Object.prototype.toString.call(req.body.oldPassword) === "[object String]" &&
-			Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
-			// Update password
-			User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], req.body.oldPassword, null, req.body.newPassword).then(() => {
-				responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-			}).catch(err => {
-				responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-			});
-		} else {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-		}
-
-	} else {
-		// Update user info
-		User.updateInfo(req.params[C.REPO_REST_API_ACCOUNT], req.body).then(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err);
-		});
-	}
-
-}
+router.put("/:account/password", routeDecommissioned("POST", "/v5/user/password/reset"));
 
 function getAvatar(req, res, next) {
 	const responsePlace = utils.APIInfo(req);
@@ -400,9 +299,9 @@ function getAvatar(req, res, next) {
 		if (!avatar) {
 			return Promise.reject({ resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
-		const fileExt = await fileExtensionFromBuffer(avatar);
+		const fileExt = await fileExtensionFromBuffer(avatar.buffer);
 		req.params.format = fileExt || "png";
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, avatar);
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, avatar.buffer);
 
 	}).catch((err) => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);
@@ -434,11 +333,12 @@ function uploadAvatar(req, res, next) {
 		fileFilter: fileFilter
 	});
 
-	upload.single("file")(req, res, function (err) {
+	upload.single("file")(req, res, async function (err) {
 		if (err) {
 			return responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
 		} else {
-			FileType.fromBuffer(req.file.buffer).then(type => {
+			const FileType = await import("file-type");
+			FileType.fileTypeFromBuffer(req.file.buffer).then(type => {
 				if (!C.ACCEPTED_IMAGE_FORMATS.includes(type.ext)) {
 					throw (responseCodes.FILE_FORMAT_NOT_SUPPORTED);
 				}
@@ -451,21 +351,6 @@ function uploadAvatar(req, res, next) {
 			});
 		}
 	});
-}
-
-function resetPassword(req, res, next) {
-	const responsePlace = utils.APIInfo(req);
-
-	if (Object.prototype.toString.call(req.body.token) === "[object String]" &&
-		Object.prototype.toString.call(req.body.newPassword) === "[object String]") {
-		User.updatePassword(req.params[C.REPO_REST_API_ACCOUNT], null, req.body.token, req.body.newPassword).then(() => {
-			responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, { account: req.params[C.REPO_REST_API_ACCOUNT] });
-		}).catch(err => {
-			responseCodes.respond(responsePlace, req, res, next, err.resCode ? err.resCode : err, err.resCode ? err.resCode : err);
-		});
-	} else {
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.INVALID_ARGUMENTS, responseCodes.INVALID_ARGUMENTS);
-	}
 }
 
 async function listUserInfo(req, res, next) {

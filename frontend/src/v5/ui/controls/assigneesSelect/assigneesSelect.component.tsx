@@ -15,100 +15,28 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { UsersHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useCallback, useContext, useState } from 'react';
-import { SelectProps } from '@controls/inputs/select/select.component';
-import { SearchContextComponent } from '@controls/search/searchContext';
-import { FormInputProps } from '@controls/inputs/inputController.component';
-import { AssigneesListContainer } from './assigneesSelect.styles';
-import { AssigneesSelectMenu } from './assigneesSelectMenu/assigneesSelectMenu.component';
+import { useContext } from 'react';
 import { TicketContext } from '../../routes/viewer/tickets/ticket.context';
-import { Spinner } from '@controls/spinnerLoader/spinnerLoader.styles';
-import { AssigneesValuesDisplay } from './assigneeValuesDisplay/assigneeValuesDisplay.component';
 import { getInvalidValues, getModelJobsAndUsers, getValidValues } from './assignees.helpers';
+import { UsersAndJobsSelect, UsersAndJobsSelectProps } from '@controls/usersAndJobsSelect/usersAndJobsSelect.component';
 
-export type AssigneesSelectProps = Pick<FormInputProps, 'value'> & SelectProps & {
-	maxItems?: number;
-	showAddButton?: boolean;
-	showEmptyText?: boolean;
-	onBlur?: () => void;
+export type AssigneesSelectProps = Omit<UsersAndJobsSelectProps, 'isValidItem' | 'usersAndJobs'> & {
 	excludeViewers?: boolean;
 };
 
 export const AssigneesSelect = ({
-	value: valueRaw,
-	maxItems,
-	showAddButton,
-	showEmptyText,
-	multiple,
-	disabled,
-	onBlur,
-	className,
 	excludeViewers = false,
-	onChange,
 	...props
 }: AssigneesSelectProps) => {
-	const [open, setOpen] = useState(false);
 	const { containerOrFederation } = useContext(TicketContext);
-
 	const { jobs, users } = getModelJobsAndUsers(containerOrFederation);
 
-	const emptyValue = multiple ? [] : '';
-	const value = valueRaw || emptyValue;
-	const valueAsArray = multiple ? value : [value].filter(Boolean);
+	const valueAsArray = typeof props.value === 'string' ? [props.value].filter(Boolean) : props.value || [];
 	const validValues = getValidValues([...jobs, ...users], excludeViewers);
 	const invalidValues = getInvalidValues(valueAsArray, validValues);
 
-	const teamspaceJobsAndUsers = UsersHooksSelectors.selectJobsAndUsersByIds();
-	const valueToJobOrUser = (val: string) => teamspaceJobsAndUsers[val];
-	const allJobsAndUsersToDisplay = [
-		...validValues.map(valueToJobOrUser),
-		...invalidValues.map((v) => valueToJobOrUser(v) || ({ notFoundName: v })),
-	];
+	const usersAndJobs = [...validValues, ...invalidValues];
 
-	const handleChange = (e) => {
-		if (!multiple) return onChange(e);
-		const validVals = e.target.value.filter((v) => !invalidValues.includes(v));
-		onChange({ target: { value: validVals } });
-	};
-
-	const handleOpen = useCallback((e) => {
-		if (disabled) return;
-		e.stopPropagation();
-		setOpen(true);
-	}, [disabled]);
-
-	const handleClose = () => {
-		setOpen(false);
-		onBlur();
-	};
-
-	if (!users.length || !jobs.length) return (
-		<AssigneesListContainer className={className}>
-			<Spinner />
-		</AssigneesListContainer>
-	);
-	return (
-		<SearchContextComponent fieldsToFilter={['_id', 'firstName', 'lastName', 'job', 'notFoundName']} items={allJobsAndUsersToDisplay}>
-			<AssigneesListContainer onClick={handleOpen} className={className}>
-				<AssigneesSelectMenu
-					open={open}
-					value={value}
-					onClose={handleClose}
-					onOpen={handleOpen}
-					disabled={disabled}
-					multiple={multiple}
-					isInvalid={(v) => invalidValues.includes(v)}
-					onChange={handleChange}
-					{...props}
-				/>
-				<AssigneesValuesDisplay
-					value={valueAsArray}
-					maxItems={maxItems}
-					showEmptyText={showEmptyText}
-					disabled={disabled || !showAddButton}
-				/>
-			</AssigneesListContainer>
-		</SearchContextComponent>
-	);
+	const isValidItem = (v) => !invalidValues.includes(v);
+	return (<UsersAndJobsSelect isValidItem={isValidItem} usersAndJobs={usersAndJobs} {...props}/>);
 };

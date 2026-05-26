@@ -20,8 +20,6 @@ import LoginBackground from '@assets/images/default_background.png';
 import DefaultLogoBase from '@assets/icons/filled/logo_text-filled.svg';
 import { Typography } from '@controls/typography';
 import { clientConfigService } from '@/v4/services/clientConfig';
-import { Link } from 'react-router-dom';
-import { LOGIN_PATH } from '@/v5/ui/routes/routes.constants';
 import { Divider as DividerBase } from '@mui/material';
 import { AuthImg } from '@components/authenticatedResource/authImg.component';
 import { GRADIENT } from '../../themes/theme';
@@ -111,12 +109,7 @@ export const BlueLogo = styled(Logo)`
 	color: ${({ theme }) => theme.palette.secondary.main};
 `;
 
-export const LoginLink = styled(Link).attrs({
-	to: LOGIN_PATH,
-})`
-`;
-
-export const LogoContainer = styled(LoginLink)`
+export const LogoContainer = styled.div`
 	width: fit-content;
 	margin-bottom: 28px;
 	position: absolute;

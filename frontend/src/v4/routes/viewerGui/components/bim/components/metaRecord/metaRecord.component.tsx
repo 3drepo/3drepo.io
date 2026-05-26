@@ -79,7 +79,7 @@ const MetaRecordData = ({ value, field, copyRules, selectAllSimilar }) => {
 
 	return (
 		<Data>
-			<Value>{value}</Value>
+			<Value>{`${value}`}</Value>
 			<Actions>
 				<BimTooltip title="Copy group filter to clipboard">
 					<StyledIconButton onClick={() => copyRules(rules)}>

@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 
 const { templates } = require('../../../../src/v5/utils/responseCodes');
@@ -200,7 +201,25 @@ const testRemoveRefsByQuery = () => {
 	});
 };
 
-describe('models/fileRefs', () => {
+const testUpdateRef = () => {
+	describe('Update the ref by query', () => {
+		test('should update file ref\'s', async () => {
+			const teamspace = generateRandomString();
+			const collection = `${generateRandomString()}.history.ref`;
+			const query = { _id: generateRandomString() };
+			const action = { $set: { [generateRandomString()]: generateRandomString() } };
+
+			const fn = jest.spyOn(db, 'updateOne').mockResolvedValueOnce(undefined);
+
+			await expect(FileRefs.updateRef(teamspace, collection, query, action)).resolves.toEqual(undefined);
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, collection, query, action);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testGetTotalSize();
 	testGetAllRemovableEntriesByType();
 	testGetRefEntry();
@@ -209,4 +228,5 @@ describe('models/fileRefs', () => {
 	testRemoveRef();
 	testGetRefsByQuery();
 	testRemoveRefsByQuery();
+	testUpdateRef();
 });

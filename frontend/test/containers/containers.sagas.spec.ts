@@ -15,20 +15,22 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { ContainersActions } from '@/v5/store/containers/containers.redux';
+import { ContainersActions, ContainersTypes } from '@/v5/store/containers/containers.redux';
 import { mockServer } from '../../internals/testing/mockServer';
-import { pick } from 'lodash';
+import { chunk, pick } from 'lodash';
 import { prepareSingleContainerData } from '@/v5/store/containers/containers.helpers';
 import { containerMockFactory, prepareMockSettingsReply, prepareMockStats } from './containers.fixtures';
 import { omit } from 'lodash';
 import { prepareMockRawSettingsReply } from './containers.fixtures';
 import { createTestStore } from '../test.helpers';
-import { prepareContainerSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
+import { prepareSettingsForFrontend } from './../../src/v5/store/containers/containers.helpers';
 import { ProjectsActions } from '@/v5/store/projects/projects.redux';
 import { selectContainerById, selectContainers } from '@/v5/store/containers/containers.selectors';
 import { DialogsTypes } from '@/v5/store/dialogs/dialogs.redux';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { prepareMockJobs, prepareMockUsers } from '../models.fixture';
+import { chunkEscalated } from '@/v5/helpers/array.helper';
+import { DASHBOARD_LIST_CHUNK_SIZE } from '@/v5/store/store.helpers';
 
 describe('Containers: sagas', () => {
 	const teamspace = 'teamspace';
@@ -140,7 +142,7 @@ describe('Containers: sagas', () => {
 				dispatch(ContainersActions.fetchContainers(teamspace, projectId));
 			}, [
 				ContainersActions.fetchContainersSuccess(projectId, [mockContainerWithoutStats]),
-				ContainersActions.fetchContainerStats(teamspace, projectId, mockContainer._id),
+				ContainersActions.bulkFetchContainersStats(teamspace, projectId, [mockContainer._id]),
 			]);
 		})
 
@@ -181,6 +183,46 @@ describe('Containers: sagas', () => {
 			expect(containersInStore).toEqual([mockContainer]);
 		})
 
+		it('should bulk fetch containers\' stats', async () => {
+			// populate the store with multiple containers for bulk stats fetching
+			const secondContainerId = 'secondContainerId';
+			const containers = [
+				mockContainer,
+				containerMockFactory({ _id: secondContainerId }) as any
+			];
+			const statsList = [
+				prepareMockStats({ modelId: mockContainer._id}),
+				prepareMockStats({ modelId: secondContainerId}),
+			];
+			dispatch(ContainersActions.fetchContainersSuccess(projectId, containers));
+
+			const chunks = chunkEscalated(containers.map(f => f._id), DASHBOARD_LIST_CHUNK_SIZE);
+			chunks.forEach(chunk => {
+				mockServer
+					.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/stats?models=${chunk.join()}`)
+					.reply(200,{ stats: statsList.filter(stat => chunk.includes(stat.modelId)) });
+			});
+
+			await waitForActions(() => {
+				dispatch(ContainersActions.bulkFetchContainersStats(teamspace, projectId, containers.map(f => f._id)));
+				// The success action should be dispatched for each chunk, so we expect it to be dispatched as many times as there are chunks
+			},  Array(chunks.length).fill(ContainersTypes.BULK_FETCH_CONTAINERS_STATS_SUCCESS));
+			
+			const containersInStore = selectContainers(getState());
+			const statsFromStore = containersInStore.map((c) => ({
+				modelId: c._id, 
+				...pick(c, ['status', 'unit', 'code', 'type', 'latestRevision', 'revisionsCount']),
+			} ));
+
+			const expectedStats = statsList.map(stat => ({
+				...omit(stat, ['revisions']),
+				latestRevision: stat.revisions.latestRevision,
+				revisionsCount: stat.revisions.total,
+			}));
+	
+			expect(statsFromStore).toEqual(expectedStats);
+		});
+
 		it('should fetch container views', async () => {
 			populateStore();
 			const { views } = containerMockFactory();
@@ -202,7 +244,7 @@ describe('Containers: sagas', () => {
 		it('should fetch container settings', async () => {
 			populateStore();
 			const settings = prepareMockRawSettingsReply(containerMockFactory());
-			const frontendSettings = prepareContainerSettingsForFrontend(settings);
+			const frontendSettings = prepareSettingsForFrontend(settings);
 
 			mockServer
 				.get(`/teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}`)

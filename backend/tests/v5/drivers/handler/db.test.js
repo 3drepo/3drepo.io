@@ -15,17 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../helper/path');
 const {
-	determineTestGroup,
 	generateRandomBuffer,
 	generateRandomString,
 	generateUserCredentials,
 	outOfOrderArrayEqual,
 	db: dbHelper,
+	generateRandomNumber,
 } = require('../../helper/services');
+const { cloneDeep } = require('../../../../src/v5/utils/helper/objects');
 
 const DB = require(`${src}/handler/db`);
 const { ADMIN_DB } = require(`${src}/handler/db.constants`);
@@ -765,6 +767,22 @@ const testIndices = () => {
 			const array = res.map(({ key }) => key);
 			expect(array).toEqual(expect.arrayContaining([{ _id: 1 }, ...newIndex.map(({ key }) => key)]));
 		});
+
+		test('Should be able to create unique index', async () => {
+			const database = generateRandomString();
+			const col = generateRandomString();
+
+			await DB.insertMany(database, col, [{ n: 2 }, { a: 1 }]);
+
+			const newIndex = { n: 1 };
+			await expect(DB.createIndex(database, col, newIndex, { unique: true })).resolves.toBeUndefined();
+
+			await DB.insertOne(database, col, newIndex);
+			// Unique index means we shouldn't be able to insert another one with the same value.
+			await expect(DB.insertOne(database, col, newIndex)).rejects.not.toBeUndefined();
+			// Unique index means we shouldn't be able to insert another one that is empty
+			await expect(DB.insertOne(database, col, { b: 1 })).rejects.not.toBeUndefined();
+		});
 	});
 };
 
@@ -940,6 +958,42 @@ const testSetPassword = () => {
 	});
 };
 
+const testConnectionString = () => {
+	const oldConfig = cloneDeep(config.db);
+	const hosts = times(3, () => generateRandomString());
+	const ports = times(3, () => Math.round(generateRandomNumber(1000, 9999)));
+	const username = generateRandomString();
+	const password = generateRandomString();
+
+	describe.each([
+		['config only has a host and port', { host: [hosts[0]], port: [ports[0]] },
+			`mongodb://${hosts[0]}:${ports[0]}/`],
+		['multiple hosts, multiple ports', { host: [hosts[0], hosts[1], hosts[2]], port: [ports[0], ports[1], ports[2]] },
+			`mongodb://${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]},${hosts[2]}:${ports[2]}/`],
+		['with username and password in config', { host: [hosts[0]], port: [ports[0]], username, password },
+			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]}/`],
+		['with username and password provided externally', { host: [hosts[0]], port: [ports[0]] },
+			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]}/`, username, password],
+		['with replicaSet', { host: [hosts[0]], port: [ports[0]], replicaSet: 'rs0' },
+			`mongodb://${hosts[0]}:${ports[0]}/?replicaSet=rs0`],
+		['with authSource', { host: [hosts[0]], port: [ports[0]], authSource: 'admin' },
+			`mongodb://${hosts[0]}:${ports[0]}/?authSource=admin`],
+		['with socketTimeoutMS', { host: [hosts[0]], port: [ports[0]], timeout: 12345 },
+			`mongodb://${hosts[0]}:${ports[0]}/?socketTimeoutMS=12345`],
+		['all options', { host: [hosts[0], hosts[1]], port: [ports[0], ports[1]], username: '123', password: '123', replicaSet: 'rs0', authSource: 'admin', timeout: 12345 },
+			`mongodb://${username}:${password}@${hosts[0]}:${ports[0]},${hosts[1]}:${ports[1]}/?replicaSet=rs0&authSource=admin&socketTimeoutMS=12345`, username, password],
+	])('Connection String', (desc, configOverride, expectedString, user, pass) => {
+		test(`Should return the expected connection string if ${desc}`, () => {
+			config.db = configOverride;
+			// eslint-disable-next-line no-underscore-dangle
+			expect(DB._context.getURL(user, pass)).toEqual(expectedString);
+		});
+		afterAll(() => {
+			config.db = oldConfig;
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testAuthenticate();
 	testCanConnect();
@@ -971,6 +1025,7 @@ describe(determineTestGroup(__filename), () => {
 	testGrantRole();
 	testRevokeRole();
 	testSetPassword();
+	testConnectionString();
 
 	afterAll(() => DB.disconnect());
 });

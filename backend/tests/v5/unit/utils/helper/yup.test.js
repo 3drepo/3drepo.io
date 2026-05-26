@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { generateRandomString, generateUUID, generateRandomBuffer } = require('../../../helper/services');
 const { src, image } = require('../../../helper/path');
 const { UUIDToString } = require('../../../../../src/v5/utils/helper/uuids');
@@ -54,6 +55,22 @@ const testColorArr = () => {
 	])('Colour array validator', (data, res) => {
 		test(`${data} should return ${res}`, async () => {
 			await expect(YupHelper.types.colorArr.isValid(data)).resolves.toBe(res);
+		});
+	});
+};
+
+const testColorStr = () => {
+	describe.each([
+		[generateRandomString(), false],
+		['AABBCC', false],
+		['#GGHHII', false],
+		['#AABBCCDD', false],
+		['#ABC', false],
+		['#AABBCC', true],
+		['#aabbcc', true],
+	])('Colour string validator', (data, res) => {
+		test(`${data} should return ${res}`, async () => {
+			await expect(YupHelper.types.colorStr.isValid(data)).resolves.toBe(res);
 		});
 	});
 };
@@ -169,9 +186,10 @@ const testEmbeddedImageOrRef = () => {
 	});
 };
 
-describe('utils/helper/yup', () => {
+describe(determineTestGroup(__filename), () => {
 	testId();
 	testColorArr();
+	testColorStr();
 	testUsername();
 	testTitle();
 	testShortDesc();

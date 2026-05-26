@@ -43,7 +43,6 @@ export const userFromCurrentUser = (currentUser: Partial<ICurrentUser>) => ({
 export const generatePersonalData = (): UpdatePersonalData => ({
 	firstName: faker.name.firstName(),
 	lastName: faker.name.lastName(),
-	email: faker.internet.email(),
 	company: faker.company.companyName(),
 	countryCode: faker.address.countryCode(),
 });

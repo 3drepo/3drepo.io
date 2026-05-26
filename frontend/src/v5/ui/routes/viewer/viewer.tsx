@@ -24,7 +24,7 @@ import { VIEWER_EVENTS } from '@/v4/constants/viewer';
 import { CheckLatestRevisionReadiness } from './checkLatestRevisionReadiness/checkLatestRevisionReadiness.container';
 import { ViewerParams } from '../routes.constants';
 import { InvalidContainerOverlay, InvalidFederationOverlay } from './invalidViewerOverlay';
-import { HandleTicketsCardSearchParams } from './handleTicketsCardSearchParams/handleTicketsCardSearchParams.component';
+import { TicketFiltersSetter } from './ticketFiltersSetter/ticketFiltersSetter.component';
 import { SpinnerLoader } from '@controls/spinnerLoader';
 import { CentredContainer } from '@controls/centredContainer';
 import { TicketsCardViews } from './tickets/tickets.constants';
@@ -33,11 +33,12 @@ import { ViewerGui } from '@/v4/routes/viewerGui';
 import { CalibrationContext } from '../dashboard/projects/calibration/calibrationContext';
 import { OpenDrawingFromUrl } from './openDrawingFromUrl/openDrawingFromUrl.component';
 import { CalibrationHandler } from '../dashboard/projects/calibration/calibrationHandler.component';
+import { OpenTicketFromUrl } from './openTicketFromUrl/openTicketFromUrl.component';
+import { useApplyViewForTicketURL } from './applyViewForTicketURL.hook';
 
 export const Viewer = () => {
 	const [fetchPending, setFetchPending] = useState(true);
 	const { isCalibrating } = useContext(CalibrationContext);
-
 	const { teamspace, containerOrFederation, project, revision } = useParams<ViewerParams>();
 
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
@@ -79,7 +80,6 @@ export const Viewer = () => {
 	}, [project]);
 
 	useEffect(() => {
-		TicketsCardActionsDispatchers.resetFilters();
 		TicketsCardActionsDispatchers.setCardView(TicketsCardViews.List);
 		ViewerActionsDispatchers.fetchData(teamspace, project, containerOrFederation);
 	}, [teamspace, project, containerOrFederation]);
@@ -87,6 +87,8 @@ export const Viewer = () => {
 	useEffect(() => {
 		DrawingsCardActionsDispatchers.setQueries([]);
 	}, [teamspace, project]);
+
+	useApplyViewForTicketURL();
 
 	useEffect(() => { if (isFetching) setFetchPending(false); }, [isFetching]);
 
@@ -111,8 +113,9 @@ export const Viewer = () => {
 
 	return (
 		<>
-			<HandleTicketsCardSearchParams />
+			<TicketFiltersSetter key={revision} />
 			<OpenDrawingFromUrl />
+			<OpenTicketFromUrl />
 			<CheckLatestRevisionReadiness />
 			<ViewerCanvases />
 			<ViewerGui match={v4Match} key={containerOrFederation} />

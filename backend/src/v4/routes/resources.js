@@ -42,7 +42,7 @@ router.get("/resources/:resourceId", Middleware.hasViewIssueAccessToModel,  down
 function downloadResource(req, res, next) {
 	const {account, model, resourceId } = req.params;
 
-	FileRef.getResourceFile(account, model, resourceId).then(resource => {
+	FileRef.getResourceFile(account, model, utils.uuidToString(resourceId)).then(resource => {
 		res.set("Content-Length", resource.size);
 		res.set("Content-Type", mimeTypes.lookup(resource.type) || "application/octet-stream");
 		res.set("Content-Disposition","inline;filename=" + resource.name);

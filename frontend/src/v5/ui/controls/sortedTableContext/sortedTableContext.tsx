@@ -23,6 +23,7 @@ export interface SortedTableType<T> {
 	onColumnClick: (col: string) => void;
 	sortingColumn: string;
 	isDescendingOrder: boolean;
+	refreshSorting?: () => void;
 }
 
 const defaultValue: SortedTableType<any> = { sortedItems: [], onColumnClick: () => {}, sortingColumn: '', isDescendingOrder: true };
@@ -31,14 +32,22 @@ SortedTableContext.displayName = 'SortedTable';
 
 export interface Props<T> {
 	items: T[];
+	customSortingFunctions?: (sortingColumn: string) => ((items: T[], order: 'asc' | 'desc', column: string) => T[]) | undefined;
 	sortingColumn?: string;
 	isDescendingOrder?: boolean;
 	children: any;
 }
 // eslint-disable-next-line @typescript-eslint/comma-dangle
-export const SortedTableComponent = <T,>({ items, sortingColumn: initialSortingColumn, isDescendingOrder: initialIsDescendingOrder, children }: Props<T>) => {
+export const SortedTableComponent = <T,>({
+	items,
+	customSortingFunctions,
+	sortingColumn: initialSortingColumn,
+	isDescendingOrder: initialIsDescendingOrder,
+	children,
+}: Props<T>) => {
 	const [isDescendingOrder, setIsDescendingOrder] = useState(initialIsDescendingOrder ?? true);
 	const [sortingColumn, setSortingColumn] = useState(initialSortingColumn || '');
+	const [refreshFlag, setRefreshFlag] = useState(false);
 
 	const onColumnClick = (col) => {
 		if (!col) return;
@@ -46,17 +55,27 @@ export const SortedTableComponent = <T,>({ items, sortingColumn: initialSortingC
 		setIsDescendingOrder(col === sortingColumn ? !isDescendingOrder : false);
 	};
 
-	const sortedItems = orderBy(
-		items as T[],
-		(item) => {
-			const sortingElement = get(item, sortingColumn);
-			return sortingElement?.toLowerCase?.() ?? sortingElement;
-		},
-		isDescendingOrder ? 'desc' : 'asc',
-	);
+	const sortingOrder = isDescendingOrder ? 'desc' : 'asc';
+
+	const getSortedItems = () => {
+		const customSortingFn = customSortingFunctions(sortingColumn);
+		if (customSortingFn) return customSortingFn(items, sortingOrder, sortingColumn);
+		return orderBy(
+			items as T[],
+			(item) => {
+				const sortingElement = get(item, sortingColumn);
+				return sortingElement?.toLowerCase?.() ?? sortingElement;
+			},
+			sortingOrder,
+		);
+	};
+
+	const refreshSorting = () => {
+		setRefreshFlag(!refreshFlag);
+	};
 
 	return (
-		<SortedTableContext.Provider value={{ onColumnClick, sortingColumn, isDescendingOrder, sortedItems }}>
+		<SortedTableContext.Provider value={{ onColumnClick, sortingColumn, isDescendingOrder, sortedItems: getSortedItems(), refreshSorting }}>
 			{children}
 		</SortedTableContext.Provider>
 	);
