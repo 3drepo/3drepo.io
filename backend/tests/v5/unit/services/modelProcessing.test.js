@@ -65,14 +65,14 @@ const publishFn = EventsManager.publish.mockImplementation(() => { });
 const testQueueModelUpload = () => {
 	const fileCreated = path.join(modelFolder, 'queueObjectTest.obj');
 	describe('queue model upload', () => {
-		const teamspace = 'teamspace';
-		const model = 'modelID';
+		const teamspace = generateRandomString();
+		const container = generateRandomString();
 		const data = { tag: '123', owner: '123' };
 		const file = { originalname: 'test.obj', path: fileCreated };
 
 		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
 			await expect(ModelProcessing.queueModelUpload(
-				teamspace, model, data, file,
+				teamspace, container, data, file,
 			)).rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
 		});
 
@@ -82,20 +82,21 @@ const testQueueModelUpload = () => {
 			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
 
 			await expect(ModelProcessing.queueModelUpload(
-				teamspace, model, data, file,
+				teamspace, container, data, file,
 			)).rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
 		});
 
 		test('should succeed with job inserted into the queue', async () => {
 			await copyFile(objModel, fileCreated);
-			await expect(ModelProcessing.queueModelUpload(teamspace, model, data, file)).resolves.toBeUndefined();
+			await expect(ModelProcessing.queueModelUpload(teamspace, container, data, file)).resolves.toBeUndefined();
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 
 			const corId = Queue.queueMessage.mock.calls[0][1];
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
-			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model, corId, status: 'queued' });
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE,
+				{ teamspace, model: container, modelType: modelTypes.CONTAINER, corId, status: 'queued' });
 		});
 	});
 
@@ -111,11 +112,15 @@ const testCallbackQueueConsumer = () => {
 			return Queue.listenToQueue.mock.calls[0][1];
 		};
 
-		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
+		test(`Should trigger ${events.CLASH_RUN_COMPLETED} event if there is a clash run completed message`, async () => {
+			const SHARED_SPACE_TAG = '$SHARED_SPACE';
+
 			const content = {
-				database: generateRandomString(),
-				status: generateRandomString(),
+				teamspace: generateRandomString(),
 				project: generateRandomString(),
+				type: 'clash',
+				container: generateRandomString(),
+				results: `$${SHARED_SPACE_TAG} ${generateRandomString()}`,
 			};
 			const properties = {
 				correlationId: generateRandomString(),
@@ -125,8 +130,57 @@ const testCallbackQueueConsumer = () => {
 			await callbackFn({ content: JSON.stringify(content), properties });
 
 			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
+				teamspace: content.teamspace,
+				project: content.project,
+				corId: properties.correlationId,
+				results: content.results.replace(SHARED_SPACE_TAG, config.cn_queue.shared_storage),
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				status: generateRandomString(),
+				container: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.container,
+				modelType: modelTypes.CONTAINER,
+				corId: properties.correlationId,
+				status: content.status,
+			};
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message (drawing)`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				status: generateRandomString(),
+				drawing: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.drawing,
+				modelType: modelTypes.DRAWING,
 				corId: properties.correlationId,
 				status: content.status,
 			};
@@ -136,8 +190,8 @@ const testCallbackQueueConsumer = () => {
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
 			const content = {
-				database: generateRandomString(),
-				project: generateRandomString(),
+				teamspace: generateRandomString(),
+				container: generateRandomString(),
 				user: generateRandomString(),
 				message: generateRandomString(),
 				value: 1,
@@ -150,8 +204,38 @@ const testCallbackQueueConsumer = () => {
 			await callbackFn({ content: JSON.stringify(content), properties });
 
 			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
+				teamspace: content.teamspace,
+				model: content.container,
+				modelType: modelTypes.CONTAINER,
+				corId: properties.correlationId,
+				value: content.value,
+				message: content.message,
+				user: content.user,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message (drawing)`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				drawing: generateRandomString(),
+				user: generateRandomString(),
+				message: generateRandomString(),
+				value: 1,
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.drawing,
+				modelType: modelTypes.DRAWING,
 				corId: properties.correlationId,
 				value: content.value,
 				message: content.message,
@@ -205,7 +289,11 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, {
-				teamspace, model, corId: UUIDToString(revId), status: processStatuses.QUEUED,
+				teamspace,
+				model,
+				modelType: modelTypes.DRAWING,
+				corId: UUIDToString(revId),
+				status: processStatuses.QUEUED,
 			});
 		});
 
@@ -237,7 +325,11 @@ const testProcessDrawingUpload = () => {
 				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
 
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
-				teamspace, model, corId: UUIDToString(revId), value: 4,
+				teamspace,
+				model,
+				modelType: modelTypes.DRAWING,
+				corId: UUIDToString(revId),
+				value: 4,
 			});
 		});
 
@@ -276,7 +368,7 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
-				teamspace, model, corId: UUIDToString(revId), value: 0, user: owner,
+				teamspace, model, modelType: modelTypes.DRAWING, corId: UUIDToString(revId), value: 0, user: owner,
 			});
 		});
 	});

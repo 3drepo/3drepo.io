@@ -26,9 +26,9 @@ const { templates } = require('../../../utils/responseCodes');
 
 const createPlan = async (req, res) => {
 	const user = getUserFromSession(req.session);
-	const { teamspace } = req.params;
+	const { teamspace, project } = req.params;
 	try {
-		const planId = await Clashes.createPlan(teamspace, req.body, user);
+		const planId = await Clashes.createPlan(teamspace, project, req.body, user);
 		respond(req, res, templates.ok, { _id: UUIDToString(planId) });
 	} catch (err) {
 		// istanbul ignore next
@@ -38,9 +38,9 @@ const createPlan = async (req, res) => {
 
 const updatePlan = async (req, res) => {
 	const user = getUserFromSession(req.session);
-	const { teamspace, planId } = req.params;
+	const { teamspace, project, planId } = req.params;
 	try {
-		await Clashes.updatePlan(teamspace, planId, req.body, user);
+		await Clashes.updatePlan(teamspace, project, planId, req.body, user);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -49,9 +49,9 @@ const updatePlan = async (req, res) => {
 };
 
 const deletePlan = async (req, res) => {
-	const { teamspace, planId } = req.params;
+	const { teamspace, project, planId } = req.params;
 	try {
-		await Clashes.deletePlan(teamspace, planId);
+		await Clashes.deletePlan(teamspace, project, planId);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
