@@ -313,7 +313,7 @@ const ticketsImportedTest = () => {
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const newTickets = times(1, () => ({ ...generateTicket(templateWithComments),
-				comments: times(10, () => ServiceHelper.generateImportedComment(user.user)) }));
+				comments: times(10, () => ServiceHelper.generateImportedComment()) }));
 			const socketPromise = new Promise((resolve, reject) => {
 				const eventsReceived = [];
 				socket.on(EVENTS.CONTAINER_NEW_TICKET_COMMENT, (eventData) => {
@@ -346,6 +346,7 @@ const ticketsImportedTest = () => {
 					createdAt: comment.createdAt.getTime(),
 					updatedAt: expect.any(Number),
 					importedAt: expect.any(Number),
+					author: user.user,
 				};
 				expect(resComment).toEqual(expectedComment);
 
@@ -371,7 +372,7 @@ const ticketsImportedTest = () => {
 			await ServiceHelper.socket.joinRoom(socket, data);
 
 			const newTickets = times(1, () => ({ ...generateTicket(templateWithComments),
-				comments: times(10, () => ServiceHelper.generateImportedComment(user.user)) }));
+				comments: times(10, () => ServiceHelper.generateImportedComment()) }));
 			const socketPromise = new Promise((resolve, reject) => {
 				const eventsReceived = [];
 				socket.on(EVENTS.FEDERATION_NEW_TICKET_COMMENT, (eventData) => {
@@ -404,6 +405,7 @@ const ticketsImportedTest = () => {
 					createdAt: comment.createdAt.getTime(),
 					updatedAt: expect.any(Number),
 					importedAt: expect.any(Number),
+					author: user.user,
 				};
 				expect(resComment).toEqual(expectedComment);
 
@@ -675,7 +677,7 @@ const ticketsUpdatedTest = () => {
 
 				const updateData = tickets.map(({ _id }) => ({
 					_id,
-					comments: times(nComments, () => ServiceHelper.generateImportedComment(user.user)),
+					comments: times(nComments, () => ServiceHelper.generateImportedComment()),
 				}));
 
 				await agent.patch(`/v5/teamspaces/${teamspace}/projects/${project.id}/${type}s/${model}/tickets${ServiceHelper.createQueryString({ key: user.apiKey, template: templateWithComments._id })}`)

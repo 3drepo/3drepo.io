@@ -37,6 +37,7 @@ export const ShrinkValue = styled(NoShrinkValue)`
 
 export const CreationInfoContainer = styled.div`
 	width: fit-content;
+	max-width: 100%;
 	display: flex;
 	flex-direction: rows;
 	${({ theme }) => theme.typography.caption};

@@ -30,7 +30,8 @@ export const Modal = styled(Dialog)`
 		max-width: unset;
 		height: 100vh;
 		max-height: unset;
-		margin: 0 22px;
+		padding: 0 22px;
+		margin: 0;
 		box-sizing: border-box;
 
 		display: flex;
@@ -91,6 +92,7 @@ export const CloseButton = styled(BaseCloseButton)`
 	min-width: 36px;
 	top: 16px;
 	box-sizing: border-box;
+	right: 20px;
 `;
 
 export const TopBarButton = styled(Button)`

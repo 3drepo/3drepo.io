@@ -84,10 +84,14 @@ export const fetchFederationTemplate = async (
 type TicketsQueryParams = {
 	propertiesToInclude?: string[],
 	filters?: string,
+	skip?: number,
+	limit?: number,
+	sortBy?: string,
+	sortDesc?: boolean
 };
 
 const getTicketsSearchParams = (params: TicketsQueryParams) => {
-	const { propertiesToInclude, filters } = params || {};
+	const { propertiesToInclude, filters, skip, limit, sortBy, sortDesc } = params || {};
 	const searchParams = [];
 	// fetching the tickets list for a model, only the most basic
 	// properties are included as part of that ticket. Any other
@@ -102,6 +106,23 @@ const getTicketsSearchParams = (params: TicketsQueryParams) => {
 	if (filters) {
 		searchParams.push(`query=${filters}`);
 	}
+
+	if (skip) {
+		searchParams.push(`skip=${skip}`);
+	}
+
+	if (limit) {
+		searchParams.push(`limit=${limit}`);
+	}
+
+	if (sortBy) {
+		searchParams.push(`sortBy=${sortBy}`);
+	}
+
+	if (sortDesc === true || sortDesc === false) {
+		searchParams.push(`sortDesc=${sortDesc}`);
+	}
+
 	return searchParams.length ? `?${searchParams.join('&')}` : '';
 };
 export const fetchContainerTickets = async (
@@ -184,6 +205,26 @@ export const updateFederationTicket = async (
 	ticket: Partial<ITicket>,
 ) => (
 	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets/${ticketId}`, ticket)
+);
+
+export const updateContainerManyTickets = async (
+	teamspace: string,
+	projectId: string,
+	containerId: string,
+	template: string,
+	tickets: Partial<ITicket>[],
+) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/containers/${containerId}/tickets?template=${template}`, { tickets })
+);
+
+export const updateFederationManyTickets = async (
+	teamspace: string,
+	projectId: string,
+	federationId: string,
+	template: string,
+	tickets: Partial<ITicket>[],
+) => (
+	api.patch(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/tickets?template=${template}`, { tickets })
 );
 
 export const fetchRiskCategories = async (

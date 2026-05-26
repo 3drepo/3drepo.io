@@ -24,7 +24,7 @@ import { InputControllerProps, InputController } from '@controls/inputs/inputCon
 import { Select, SelectProps } from '@controls/inputs/select/select.component';
 
 type TemplateFormSelectProps = { isNewTicketDirty?: boolean } & SelectProps;
-export const TemplateSelect = ({ isNewTicketDirty, ...props }: TemplateFormSelectProps) => {
+export const TemplateSelect = ({ isNewTicketDirty, onChange, ...props }: TemplateFormSelectProps) => {
 	const templates = ProjectsHooksSelectors.selectCurrentProjectTemplates();
 
 	const handleOpen = () => {
@@ -36,11 +36,12 @@ export const TemplateSelect = ({ isNewTicketDirty, ...props }: TemplateFormSelec
 		<Select
 			label={formatMessage({ id: 'tickets.select.template', defaultMessage: 'Select Ticket type' })}
 			renderValue={(val) => {
-				if (!val) return '';
-				const { name } = templates.find(({ _id }) => _id === val);
-				return (<b>{name}</b>);
+				const template = templates.find(({ _id }) => _id === val);
+				if (!template) return '';
+				return (<b>{template.name}</b>);
 			}}
 			{...props}
+			onChange={onChange}
 			onOpen={handleOpen}
 		>
 			{sortByName(templates).map(({ _id, name }) => (<MenuItem key={_id} value={_id}>{name}</MenuItem>))}

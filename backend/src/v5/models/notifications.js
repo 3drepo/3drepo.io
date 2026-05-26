@@ -112,8 +112,7 @@ const getGroupedNotificationsByQuery = (query) => {
 					model: '$data.model',
 					type: '$type',
 				},
-				tickets: { $push: '$data.ticket' },
-				count: { $sum: 1 },
+				tickets: { $addToSet: '$data.ticket' },
 			},
 		},
 		{
@@ -129,7 +128,6 @@ const getGroupedNotificationsByQuery = (query) => {
 					$push: {
 						type: '$_id.type',
 						tickets: '$tickets',
-						count: '$count',
 					},
 				},
 			},

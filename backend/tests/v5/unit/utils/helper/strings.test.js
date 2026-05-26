@@ -16,6 +16,7 @@
  */
 
 const { src } = require('../../../helper/path');
+const { determineTestGroup } = require('../../../helper/services');
 
 const StringHelper = require(`${src}/utils/helper/strings`);
 
@@ -154,7 +155,22 @@ const testFromBase64 = () => {
 	});
 };
 
-describe('utils/helper/strings', () => {
+const testSplitName = () => {
+	describe.each([
+		['Will Smith', ['Will', 'Smith']],
+		['Will Smith aaa', ['Will', 'Smith aaa']],
+		['Will', ['Will', '']],
+		['', undefined],
+		[undefined, undefined],
+
+	])('Split Name', (name, expected) => {
+		test(`${name ?? 'No name'} should return ${JSON.stringify(expected)}`, () => {
+			expect(StringHelper.splitName(name)).toEqual(expected);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testGetURLDomain();
 	testToCamelCase();
 	testToConstantCase();
@@ -164,4 +180,5 @@ describe('utils/helper/strings', () => {
 	testEscapeRegexChrs();
 	testToBase64();
 	testFromBase64();
+	testSplitName();
 });

@@ -23,12 +23,12 @@ TeamspaceConstants.SECURITY_SETTINGS = {
 	DOMAIN_WHITELIST: 'allowedDomains',
 };
 
-TeamspaceConstants.SUBSCRIPTION_TYPES = [
-	'enterprise',
-	'pilot',
-	'discretionary',
-	'internal',
-];
+TeamspaceConstants.SUBSCRIPTION_TYPES = {
+	ENTERPRISE: 'enterprise',
+	PILOT: 'pilot',
+	DISCRETIONARY: 'discretionary',
+	INTERNAL: 'internal',
+};
 
 TeamspaceConstants.ADD_ONS = {
 	VR: 'vrEnabled',

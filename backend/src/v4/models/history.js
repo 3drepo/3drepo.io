@@ -65,7 +65,7 @@ History.listByBranch = async function(account, model, branch, projection, showVo
 	}
 
 	if(branch === C.MASTER_BRANCH_NAME) {
-		query.shared_id = stringToUUID(C.MASTER_BRANCH);
+		query.shared_id = { "$in": [stringToUUID(C.MASTER_UUID), null]};
 	} else if(branch) {
 		query.shared_id = stringToUUID(branch);
 	}
@@ -91,7 +91,7 @@ History.findByBranch = async function(account, model, branch, projection, showVo
 	projection = projection || {};
 
 	if(!branch || branch === C.MASTER_BRANCH_NAME) {
-		query.shared_id = stringToUUID(C.MASTER_BRANCH);
+		query.shared_id = { "$in": [stringToUUID(C.MASTER_UUID), null]};
 	} else {
 		query.shared_id = stringToUUID(branch);
 	}
@@ -139,6 +139,12 @@ History.updateRevision = async function(account, model, revId, voidValue) {
 	} else {
 		throw responseCodes.INVALID_ARGUMENTS;
 	}
+};
+
+History.createRevision = async function(teamspace, project, container, revision) {
+	revision.type = C.REPO_NODE_TYPE_REVISION;
+	revision.shared_id  = revision.shared_id ? revision.shared_id : C.MASTER_UUID;
+	return db.insertOne(teamspace, getCollName(container), revision);
 };
 
 History.findByTag = async function(account, model, tag, projection = {}) {

@@ -20,7 +20,6 @@ import CloseIcon from '@mui/icons-material/Close';
 import SequencesIcon from '@assets/icons/outlined/sequence-outlined.svg';
 import { Field } from 'formik';
 import { connect } from 'react-redux';
-import { RouteComponentProps, withRouter } from 'react-router-dom';
 import { createStructuredSelector } from 'reselect';
 import { selectHasSequences } from '@/v4/modules/sequences';
 
@@ -32,7 +31,7 @@ import {
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
 import { SequenceDateActions, SequenceDateContainer, SequenceDateField } from './sequencingDates.styles';
 
-interface IProps extends RouteComponentProps<any> {
+interface IProps {
 	canEdit: boolean;
 	min: number;
 	max: number;
@@ -131,4 +130,4 @@ export class BaseSequencingDates extends PureComponent<IProps, IState> {
 const mapStateToProps = createStructuredSelector({
 	hasSequences: selectHasSequences,
 });
-export const SequencingDates = withRouter(connect(mapStateToProps)(BaseSequencingDates));
+export const SequencingDates = connect(mapStateToProps)(BaseSequencingDates);

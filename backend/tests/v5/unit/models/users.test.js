@@ -22,8 +22,10 @@ const { cloneDeep, times } = require('lodash');
 jest.mock('../../../../src/v5/handler/db');
 const db = require(`${src}/handler/db`);
 
+jest.mock('../../../../src/v5/services/sso/frontegg');
+
 const { templates } = require(`${src}/utils/responseCodes`);
-const { generateRandomString, determineTestGroup } = require('../../helper/services');
+const { generateRandomString, determineTestGroup, generateRandomObject } = require('../../helper/services');
 const { USERS_DB_NAME, USERS_COL } = require('../../../../src/v5/models/users.constants');
 
 const apiKey = 'b284ab93f936815306fbe5b2ad3e447d';
@@ -33,31 +35,6 @@ jest.mock('../../../../src/v5/utils/helper/strings', () => ({
 }));
 
 const User = require(`${src}/models/users`);
-
-const testGetAccessibleTeamspaces = () => {
-	describe('Get accessible teamspaces', () => {
-		test('should return list of teamspaces if user exists', async () => {
-			const expectedData = {
-				roles: [
-					{ db: 'ts1', role: 'a' },
-					{ db: 'ts2', role: 'b' },
-					{ db: USERS_DB_NAME, role: generateRandomString() },
-				],
-			};
-			jest.spyOn(db, 'findOne').mockResolvedValue(expectedData);
-
-			const res = await User.getAccessibleTeamspaces('user');
-			expect(res).toEqual(['ts1', 'ts2']);
-		});
-
-		test('should return error if user does not exists', async () => {
-			jest.spyOn(db, 'findOne').mockResolvedValue(undefined);
-
-			await expect(User.getAccessibleTeamspaces('user'))
-				.rejects.toEqual(templates.userNotFound);
-		});
-	});
-};
 
 const testGetFavourites = () => {
 	const favouritesData = {
@@ -252,23 +229,38 @@ const testUpdateProfile = () => {
 	describe('Update user profile', () => {
 		test('should update a user profile', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementationOnce(() => { });
-			const updatedProfile = { firstName: 'John' };
-			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBeUndefined();
+			const updatedProfileMock = generateRandomObject();
+			const updateDataMock = {};
+
+			Object.keys(updatedProfileMock).forEach((key) => {
+				updateDataMock[`customData.${key}`] = updatedProfileMock[key];
+			});
+
+			await expect(User.updateProfile('user 1', updatedProfileMock)).resolves.toBeUndefined();
+
 			expect(fn1.mock.calls.length).toBe(1);
-			expect(fn1.mock.calls[0][3]).toEqual({ $set: { 'customData.firstName': 'John' } });
+			expect(fn1.mock.calls[0][3]).toEqual({ $set: updateDataMock });
 		});
 
 		test('should update a user profile with billing data', async () => {
 			const fn1 = jest.spyOn(db, 'updateOne').mockImplementation(() => { });
-			const updatedProfile = { firstName: 'John', company: '3D Repo', countryCode: 'GB' };
-			await expect(User.updateProfile('user 1', updatedProfile)).resolves.toBeUndefined();
+			const billingInfoFields = ['countryCode', 'company'];
+			const updatedProfileMock = generateRandomObject();
+			updatedProfileMock.countryCode = generateRandomString();
+			updatedProfileMock.company = generateRandomString();
+			const updateDataMock = {};
+			Object.keys(updatedProfileMock).forEach((key) => {
+				if (billingInfoFields.includes(key)) {
+					updateDataMock[`customData.billing.billingInfo.${key}`] = updatedProfileMock[key];
+				} else {
+					updateDataMock[`customData.${key}`] = updatedProfileMock[key];
+				}
+			});
+
+			await expect(User.updateProfile('user 1', updatedProfileMock)).resolves.toBeUndefined();
 			expect(fn1.mock.calls.length).toBe(1);
 			expect(fn1.mock.calls[0][3]).toEqual({
-				$set: {
-					'customData.firstName': 'John',
-					'customData.billing.billingInfo.company': '3D Repo',
-					'customData.billing.billingInfo.countryCode': 'GB',
-				},
+				$set: updateDataMock,
 			});
 		});
 	});
@@ -559,7 +551,6 @@ const testGetUserInfoFromEmailArray = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	testGetAccessibleTeamspaces();
 	testGetFavourites();
 	testAppendFavourites();
 	testDeleteFromFavourites();

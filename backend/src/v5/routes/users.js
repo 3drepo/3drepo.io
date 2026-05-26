@@ -19,7 +19,6 @@ const { isLoggedIn, validSession } = require('../middleware/auth');
 const { Router } = require('express');
 const Users = require('../processors/users');
 const { destroySession } = require('../middleware/sessions');
-const { fileExtensionFromBuffer } = require('../utils/helper/typeCheck');
 const { getUserFromSession } = require('../utils/sessions');
 const { respond } = require('../utils/responder');
 const { routeDecommissioned } = require('../middleware/common');
@@ -51,6 +50,7 @@ const updateProfile = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
 		const updatedProfile = req.body;
+
 		await Users.updateProfile(user, updatedProfile);
 		respond(req, res, templates.ok);
 	} catch (err) {
@@ -82,10 +82,10 @@ const deleteApiKey = (req, res) => {
 const getAvatar = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
-		const buffer = await Users.getAvatar(user);
-		const fileExt = await fileExtensionFromBuffer(buffer);
-		req.params.format = fileExt || 'png';
-		respond(req, res, templates.ok, buffer);
+		const userAvatar = await Users.getAvatar(user);
+		req.params.format = userAvatar.extension;
+
+		respond(req, res, templates.ok, userAvatar.buffer);
 	} catch (err) {
 		// istanbul ignore next
 		respond(req, res, err);
@@ -95,7 +95,7 @@ const getAvatar = async (req, res) => {
 const uploadAvatar = async (req, res) => {
 	try {
 		const user = getUserFromSession(req.session);
-		await Users.uploadAvatar(user, req.file.buffer);
+		await Users.uploadAvatar(user, req.file);
 		respond(req, res, templates.ok);
 	} catch (err) {
 		// istanbul ignore next
@@ -122,7 +122,7 @@ const establishRoutes = () => {
 	 * /logout:
 	 *   post:
 	 *     description: Logs a user out
-	 *     tags: [Auth]
+	 *     tags: [v:external, Auth]
 	 *     operationId: logout
 	 *     responses:
 	 *       401:
@@ -137,7 +137,7 @@ const establishRoutes = () => {
 	 * /login:
 	 *   get:
 	 *     description: Gets the username of the logged in user
-	 *     tags: [Auth]
+	 *     tags: [v:external, Auth]
 	 *     operationId: getLoginInfo
 	 *     responses:
 	 *       401:
@@ -166,7 +166,7 @@ const establishRoutes = () => {
 	 * /user:
 	 *   get:
 	 *     description: Gets the profile of the logged in user
-	 *     tags: [User]
+	 *     tags: [v:external, User]
 	 *     operationId: getProfile
 	 *     responses:
 	 *       401:
@@ -219,7 +219,7 @@ const establishRoutes = () => {
 	* /user:
 	*   put:
 	*     description: Updates the profile of the logged in user
-	*     tags: [User]
+	*     tags: [v:external, User]
 	*     operationId: updateProfile
 	*     requestBody:
 	*       content:
@@ -258,7 +258,7 @@ const establishRoutes = () => {
 	* /user/key:
 	*   post:
 	*     description: Generates a new API key for the logged in user
-	*     tags: [User]
+	*     tags: [v:external, User]
 	*     operationId: generateApiKey
 	*     responses:
 	*       401:
@@ -282,7 +282,7 @@ const establishRoutes = () => {
 	* /user/key:
 	*   delete:
 	*     description: Deletes the API key of the logged in user
-	*     tags: [User]
+	*     tags: [v:external, User]
 	*     operationId: deleteApiKey
 	*     responses:
 	*       401:
@@ -297,7 +297,7 @@ const establishRoutes = () => {
 	* /user/avatar:
 	*   get:
 	*     description: Gets the avatar of the logged in user
-	*     tags: [User]
+	*     tags: [v:external, User]
 	*     operationId: getAvatar
 	*     responses:
 	*       401:
@@ -317,7 +317,7 @@ const establishRoutes = () => {
 	* /user/avatar:
 	*   put:
 	*     description: Uploads new avatar for the logged in user
-	*     tags: [User]
+	*     tags: [v:external, User]
 	*     operationId: uploadAvatar
 	*     requestBody:
 	*       content:
@@ -341,7 +341,7 @@ const establishRoutes = () => {
 	* /user/password/reset:
 	*   post:
 	*     description: Triggers a password reset email to the user
-	*     tags: [User]
+	*     tags: [v:external, User]
 	*     operationId: resetPassword
 	*     responses:
 	*       401:

@@ -20,7 +20,7 @@ import { AuthTemplate } from '@components/authTemplate/authTemplate.component';
 import { Footer, Form, Heading, Link } from './authPage.styles';
 import { COOKIES_ROUTE, PRIVACY_ROUTE, RELEASE_NOTES_ROUTE, TERMS_ROUTE } from '../routes.constants';
 import { useSSOLogin } from '@/v5/services/sso.hooks';
-import { Redirect, useRouteMatch } from 'react-router';
+import { Navigate, useLocation } from 'react-router-dom';
 import { AuthHooksSelectors } from '@/v5/services/selectorsHooks';
 import { addParams } from '@/v5/helpers/url.helper';
 import { formatMessage } from '@/v5/services/intl';
@@ -36,7 +36,8 @@ const APP_VERSION = ClientConfig.VERSION;
 
 export const AuthPage = () => {
 	const [login] = useSSOLogin();
-	const { url } = useRouteMatch();
+	const location = useLocation();
+	const url = location.pathname || '';
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState();
 	
@@ -60,7 +61,16 @@ export const AuthPage = () => {
 	};
 
 	if (isAuthenticated) {
-		return (<Redirect to={{ ...returnUrl, state: { referrer: url } }} />);
+		return (
+			<Navigate
+				to={{
+					pathname: returnUrl.pathname,
+					search: returnUrl.search,
+				}}
+				state={{ referrer: url }}
+				replace
+			/>
+		);
 	}
 
 	return (
@@ -91,13 +101,13 @@ export const AuthPage = () => {
 					<FormattedMessage
 						id="authPage.footer"
 						defaultMessage={`
-						By using this platform, you acknowledge that you have read and agree to our 
-						<TermsLink>Terms & Conditions</TermsLink>, <PrivacyLink>Privacy Policy</PrivacyLink>, and <CookieLink>Cookie Policy</CookieLink>.
-					`}
+							By using this platform, you acknowledge that you have read and agree to our 
+							<TermsLink>Terms & Conditions</TermsLink>, <PrivacyLink>Privacy Policy</PrivacyLink>, and <CookieLink>Cookie Policy</CookieLink>.
+						`}
 						values={{
 							TermsLink: (label) => <Link to={TERMS_ROUTE} target="_blank">{label}</Link>,
-							PrivacyLink: (label) => <Link to={{ pathname: PRIVACY_ROUTE }} target="_blank" rel="noopener noreferrer">{label}</Link>,
-							CookieLink: (label) => <Link to={{ pathname: COOKIES_ROUTE }} target="_blank" rel="noopener noreferrer">{label}</Link>,
+							PrivacyLink: (label) => <Link to={PRIVACY_ROUTE} target="_blank" rel="noopener noreferrer">{label}</Link>,
+							CookieLink: (label) => <Link to={COOKIES_ROUTE} target="_blank" rel="noopener noreferrer">{label}</Link>,
 						}}
 					/>
 				</Footer>

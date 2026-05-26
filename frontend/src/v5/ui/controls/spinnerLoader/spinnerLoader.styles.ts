@@ -16,9 +16,9 @@
  */
 import styled from 'styled-components';
 
-export const Spinner = styled.div`
-	border: 2px solid ${({ theme }) => theme.palette.secondary.light};
-	border-top: 2px solid ${({ theme }) => theme.palette.primary.main};
+export const Spinner = styled.div<{ borderSize?: number }>`
+	border: ${({ borderSize = 2, theme }) => `${borderSize}px solid ${theme.palette.secondary.light}`};
+	border-top: ${({ borderSize = 2, theme }) => `${borderSize}px solid ${theme.palette.primary.main}`};
 	border-radius: 50%;
 	width: 12px;
 	height: 12px;

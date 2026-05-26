@@ -15,15 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { createContext, useRef, useState } from 'react';
-import { getTemplatePropertiesDefinitions } from './ticketsTableContext.helpers';
-import { BaseProperties, IssueProperties } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
+import { createContext, Dispatch, useEffect, useState } from 'react';
 import { useParams } from 'react-router';
 import { DashboardTicketsParams } from '@/v5/ui/routes/routes.constants';
 import { FederationsHooksSelectors, ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { TicketsActionsDispatchers } from '@/v5/services/actionsDispatchers';
-import { stripModuleOrPropertyPrefix } from '../ticketsTable.helper';
 import { ITicket, PropertyTypeDefinition } from '@/v5/store/tickets/tickets.types';
+import { selectPropertyFetched } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { NONE_OPTION } from '@/v5/store/tickets/ticketsGroups.helpers';
+import { useSearchParam } from '@/v5/ui/routes/useSearchParam';
+import { getTemplatePropertiesDefinitions, groupByProperties } from '@/v5/store/tickets/tickets.helpers';
 
 export interface TicketsTableType {
 	getPropertyType: (name: string) => PropertyTypeDefinition;
@@ -32,6 +34,9 @@ export interface TicketsTableType {
 	groupBy: string,
 	setGroupBy: (groupBy: React.SetStateAction<string>) => void;
 	fetchColumn: (name: string, tickets: ITicket[]) => void;
+	setSelectedIds: Dispatch<React.SetStateAction<Set<string>>>
+	selectedIds: Set<string>;
+	onBulkEdit: () => void;
 }
 
 const defaultValue: TicketsTableType = {
@@ -41,6 +46,9 @@ const defaultValue: TicketsTableType = {
 	groupBy: '',
 	setGroupBy: () => {},
 	fetchColumn: () => {},
+	setSelectedIds: () => {},
+	selectedIds: new Set([]),
+	onBulkEdit: () => {},
 };
 export const TicketsTableContext = createContext(defaultValue);
 TicketsTableContext.displayName = 'TicketsTableContext';
@@ -49,34 +57,45 @@ interface Props {
 	children: any;
 }
 export const TicketsTableContextComponent = ({ children }: Props) => {
-	const [groupBy, setGroupBy] = useState('');
+	const [groupBy, setGroupBy] = useSearchParam('groupBy');
 	const { teamspace, project, template: templateId } = useParams<DashboardTicketsParams>();
-	const alreadyFetchedTicketIdAndProperty = useRef({});
 	const isFed = FederationsHooksSelectors.selectIsFederation();
 	const template = ProjectsHooksSelectors.selectCurrentProjectTemplateById(templateId);
 
+	const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 	const definitionsAsArray = getTemplatePropertiesDefinitions(template);
 	const definitionsAsObject = definitionsAsArray.reduce(
 		(acc, { name, ...definition }) => ({ ...acc, [name]: definition }),
 		{},
 	);
-	
-	const fetchColumn = (name: string, tickets: ITicket[]) => tickets.forEach(({ modelId, _id: ticketId }) => {
-		const ticketIdAndProperty = `${ticketId}${name}`;
-		if (alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty]) return;
-		alreadyFetchedTicketIdAndProperty.current[ticketIdAndProperty] = true;
-			
-		const isFederation = isFed(modelId);
-		TicketsActionsDispatchers.fetchTicketProperties(
-			teamspace,
-			project,
-			modelId,
-			ticketId,
-			template.code,
-			isFederation,
-			[stripModuleOrPropertyPrefix(name)],
-		);
-	});
+
+	const onBulkEdit = () => {
+		// eslint-disable-next-line no-console
+		console.log('Editting these ids...', selectedIds);
+	};
+
+	const fetchColumn = (name, tickets: ITicket[]) => {
+		const idsByModelId = tickets
+			.filter(({ _id }) => !selectPropertyFetched(getState(), _id, name))
+			.reduce((acc, { _id: ticketId, modelId }) => {
+				if (!acc[modelId]) {
+					acc[modelId] = [];
+				}
+				acc[modelId].push(ticketId);
+				return acc;
+			},  {} ) as Record<string, string[]>;
+
+		Object.keys(idsByModelId).map((modelId) => {
+			const isFederation = isFed(modelId);
+			TicketsActionsDispatchers.fetchTicketsProperties(
+				teamspace,
+				project,
+				modelId,
+				isFederation,
+				[name],
+			);
+		});
+	};
 
 	const getPropertyType = (name: string) => definitionsAsObject[name]?.type as PropertyTypeDefinition;
 	const isJobAndUsersType = (name: string) => (
@@ -84,19 +103,21 @@ export const TicketsTableContextComponent = ({ children }: Props) => {
 		|| ['properties.Owner', 'properties.Assignees'].includes(name)
 	);
 
-	const extraGroupByProperties = [`properties.${IssueProperties.DUE_DATE}`, `properties.${BaseProperties.OWNER}`];
-	const groupByProperties = definitionsAsArray
-		.filter((definition) => ['manyOf', 'oneOf'].includes(definition.type) || extraGroupByProperties.includes(definition.name))
-		.map((definition) => definition.name);
+	useEffect(() => {
+		setSelectedIds(new Set());
+	}, [templateId]);
 	
 	return (
 		<TicketsTableContext.Provider value={{
 			getPropertyType,
 			isJobAndUsersType,
-			groupByProperties,
-			groupBy,
+			groupByProperties: groupByProperties(definitionsAsArray),
+			groupBy: groupBy || NONE_OPTION,
 			setGroupBy,
 			fetchColumn,
+			setSelectedIds,
+			selectedIds,
+			onBulkEdit,
 		}}>
 			{children}
 		</TicketsTableContext.Provider>

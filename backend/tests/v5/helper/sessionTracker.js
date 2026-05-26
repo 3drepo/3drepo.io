@@ -17,6 +17,8 @@
 
 const { src } = require('./path');
 
+const { getUserId } = require(`${src}/models/users`);
+
 const { CSRF_COOKIE, SESSION_HEADER } = require(`${src}/utils/sessions.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -53,7 +55,7 @@ class SessionTracker {
 
 	// We expect the user data to be the same format as the data returned by
 	// generateUserCredentials in serviceHelper
-	async login({ user: userId, basicData: { email } }, { headers = {}, teamspace } = {}) {
+	async login({ user, basicData: { email } }, { headers = {}, teamspace } = {}) {
 		const resp = await this.agent.get('/v5/authentication/authenticate?redirectUri=https://localhost:3200')
 			.set(headers)
 			.expect(templates.ok.status);
@@ -73,6 +75,8 @@ class SessionTracker {
 			authAccount = await getTeamspaceRefId(teamspace);
 			accounts.push(authAccount);
 		}
+
+		const userId = await getUserId(user);
 
 		getUserInfoFromToken.mockResolvedValueOnce({ userId, email, accounts, authAccount });
 

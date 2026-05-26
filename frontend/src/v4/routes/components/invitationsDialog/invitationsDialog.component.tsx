@@ -19,13 +19,12 @@ import Button from '@mui/material/Button';
 import Delete from '@mui/icons-material/Delete';
 import Edit from '@mui/icons-material/Edit';
 import { get } from 'lodash';
-import { RouteComponentProps } from 'react-router';
 import { renderWhenTrue } from '../../../helpers/rendering';
 import { EmptyStateInfo } from '../components.styles';
 import { SmallIconButton } from '../smallIconButon/smallIconButton.component';
 import { Actions, CancelButton, Container, Footer, Invitation, List } from './invitationsDialog.styles';
 
-interface IProps extends RouteComponentProps<any> {
+interface IProps {
 	className?: string;
 	invitations: any[];
 	projects: any[];
@@ -33,6 +32,7 @@ interface IProps extends RouteComponentProps<any> {
 	onInvitationOpen: (email, job, isAdmin, permissions) => void;
 	removeInvitation: (email) => void;
 	handleClose: () => void;
+	limitReached: boolean;
 }
 
 const getPermissions = (savedPermissions) => {
@@ -107,6 +107,7 @@ export const InvitationsDialog = (props: IProps) => {
 							variant="contained"
 							color="secondary"
 							onClick={handleInvitationClick({})}
+							disabled={props.limitReached}
 						>
 							Add
 						</Button>

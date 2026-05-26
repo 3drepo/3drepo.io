@@ -1,7 +1,7 @@
 "use strict";
 
 const SessionTracker = require("../../v4/helpers/sessionTracker")
-const { queue: {purgeQueues}} = require("../../v5/helper/services");
+const { queue: { purgeQueues } } = require("../../v5/helper/services");
 
 // test implied permission like admin of teamspace can do everything in their own teamspace and
 // admin of an project can do everything in their own project, and all the crazy wildcard permissions
@@ -12,7 +12,7 @@ describe("Implied permission::", function () {
 	let server;
 	let agent;
 
-	const app = require("../../../src/v4/services/api.js").createApp();
+	const { createAppAsync } = require("../../../src/v4/services/api.js");
 	const sharedTeamspace = "imsharedTeamspace";
 	const C = require("../../../src/v4/constants");
 	const request = require("supertest");
@@ -28,50 +28,53 @@ describe("Implied permission::", function () {
 		"status": "open",
 		"priority": "low",
 		"topic_type": "for info",
-		"viewpoint":{
-			"up":[0,1,0],
-			"position":[38,38,125.08011914810137],
-			"look_at":[0,0,-163.08011914810137],
-			"view_dir":[0,0,-1],
-			"right":[1,0,0],
-			"unityHeight ":3.537606904422707,
-			"fov":2.1124830653010416,
-			"aspect_ratio":0.8750189337327384,
-			"far":276.75612077194506,
-			"near":76.42411012233212,
-			"clippingPlanes":[]
+		"viewpoint": {
+			"up": [0, 1, 0],
+			"position": [38, 38, 125.08011914810137],
+			"look_at": [0, 0, -163.08011914810137],
+			"view_dir": [0, 0, -1],
+			"right": [1, 0, 0],
+			"unityHeight ": 3.537606904422707,
+			"fov": 2.1124830653010416,
+			"aspect_ratio": 0.8750189337327384,
+			"far": 276.75612077194506,
+			"near": 76.42411012233212,
+			"clippingPlanes": []
 		},
-		"scale":1,
-		"creator_role":"jobA",
-		"assigned_roles":["jobB"]
+		"scale": 1,
+		"creator_role": "jobA",
+		"assigned_roles": ["jobB"]
 	};
 
 	const baseView = {
-		"viewpoint":{
-			"up":[0,1,0],
-			"position":[38,38,125.08011914810137],
-			"look_at":[0,0,-163.08011914810137],
-			"view_dir":[0,0,-1],
-			"right":[1,0,0]
+		"viewpoint": {
+			"up": [0, 1, 0],
+			"position": [38, 38, 125.08011914810137],
+			"look_at": [0, 0, -163.08011914810137],
+			"view_dir": [0, 0, -1],
+			"right": [1, 0, 0]
 		}
 	};
 
-	before(function(done) {
-		server = app.listen(8080, function () {
-			console.log("API test server is listening on port 8080!");
-			done();
+	before(async () => {
+		const app = await createAppAsync();
+		await new Promise((resolve) => {
+			server = app.listen(8080, function () {
+				console.log("API test server is listening on port 8080!");
+				resolve();
+			});
 		});
 	});
 
-	after(function(done) {
-		server.close(function() {
+	after(function (done) {
+		server.close(function () {
 			console.log("API test server is closed");
 			done();
 		});
 	});
 
 	// teamspace admin
-	describe("Teamspace admin", function() {
+	describe("Teamspace admin", function () {
 
 		let agent;
 
@@ -85,7 +88,7 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "22328320-e2da-11ea-bcdf-cfbbc3211111";
 
-		before(async function() {
+		before(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
@@ -93,10 +96,10 @@ describe("Implied permission::", function () {
 		after(purgeQueues);
 
 		// list teamspaces api show implied permissions
-		it("list teamspaces api show correct inherited and implied permissions (1)", function(done) {
+		it("list teamspaces api show correct inherited and implied permissions (1)", function (done) {
 			agent
 				.get(`/${username}.json`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(err).to.not.exist;
 
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
@@ -116,17 +119,17 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		it("list model info should show correct inherited and implied permissions", function(done) {
+		it("list model info should show correct inherited and implied permissions", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(err).to.not.exist;
 					expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
 					done();
 				});
 		});
 
-		it("can create project", function(done) {
+		it("can create project", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/projects`)
 				.send({
@@ -135,7 +138,7 @@ describe("Implied permission::", function () {
 				.expect(200, done);
 		});
 
-		it("can edit project", function(done) {
+		it("can edit project", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/projects/${project}`)
 				.send({
@@ -144,13 +147,13 @@ describe("Implied permission::", function () {
 				.expect(200, done);
 		});
 
-		it("can delete project", function(done) {
+		it("can delete project", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/projects/${project}`)
 				.expect(200, done);
 		});
 
-		it("cannot reach endpoint to create a model - endpoint decommissioned", function(done) {
+		it("cannot reach endpoint to create a model - endpoint decommissioned", function (done) {
 
 			const modelName = "model123";
 			agent
@@ -165,7 +168,7 @@ describe("Implied permission::", function () {
 				})
 		});
 
-		it("cannot reach endpoint to create a federation - endpoint decommissioned",  function(done) {
+		it("cannot reach endpoint to create a federation - endpoint decommissioned", function (done) {
 
 			const modelName = "fedmodel123";
 			agent
@@ -173,7 +176,7 @@ describe("Implied permission::", function () {
 				.send(Object.assign({
 					modelName: modelName,
 					"project": "Sample_Project",
-					subModels:[{
+					subModels: [{
 						"database": sharedTeamspace,
 						"model": modelId
 					}]
@@ -184,19 +187,19 @@ describe("Implied permission::", function () {
 				})
 		});
 
-		it("can view model", function(done) {
+		it("can view model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
 				.expect(200, done);
 		});
 
-		it("can download model", function(done) {
+		it("can download model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/download/latest`)
 				.expect(404, done);
 		});
 
-		it("cannot reach endpoint to upload model - endpoint decommissioned", function(done) {
+		it("cannot reach endpoint to upload model - endpoint decommissioned", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "teamspace_admin_upload")
@@ -207,22 +210,22 @@ describe("Implied permission::", function () {
 				})
 		});
 
-		it("can edit model setting", function(done) {
+		it("can edit model setting", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/settings`)
-				.send({code: "00011"})
+				.send({ code: "00011" })
 				.expect(200, done);
 		});
 
-		it("can view issues", function(done) {
+		it("can view issues", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(200, done);
 		});
 
-		it("can create issue", function(done) {
+		it("can create issue", function (done) {
 
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			const issue = Object.assign({ "name": "Issue test" }, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
@@ -230,22 +233,22 @@ describe("Implied permission::", function () {
 
 		});
 
-		it("can comment", function(done) {
+		it("can comment", function (done) {
 
 			const comment = {
 				comment: "hello world",
-				"viewpoint":{
-					"up":[0,1,0],
-					"position":[38,38,125.08011914810137],
-					"look_at":[0,0,-163.08011914810137],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"unityHeight ":3.537606904422707,
-					"fov":2.1124830653010416,
-					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506,
-					"near":76.42411012233212,
-					"clippingPlanes":[]
+				"viewpoint": {
+					"up": [0, 1, 0],
+					"position": [38, 38, 125.08011914810137],
+					"look_at": [0, 0, -163.08011914810137],
+					"view_dir": [0, 0, -1],
+					"right": [1, 0, 0],
+					"unityHeight ": 3.537606904422707,
+					"fov": 2.1124830653010416,
+					"aspect_ratio": 0.8750189337327384,
+					"far": 276.75612077194506,
+					"near": 76.42411012233212,
+					"clippingPlanes": []
 				}
 			};
 
@@ -254,41 +257,41 @@ describe("Implied permission::", function () {
 				.expect(200, done);
 		});
 
-		it("can edit issue", function(done) {
+		it("can edit issue", function (done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
-				.send({  status: "open" })
+				.send({ status: "open" })
 				.expect(200, done);
 		});
 
-		it("can view views", function(done) {
+		it("can view views", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.expect(200, done);
 		});
 
-		it("can create view", function(done) {
-			const view = Object.assign({"name":"View test"}, baseView);
+		it("can create view", function (done) {
+			const view = Object.assign({ "name": "View test" }, baseView);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.send(view)
 				.expect(200, done);
 		});
 
-		it("can edit view", function(done) {
+		it("can edit view", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
 				.send({ "name": "Teamspace admin new name" })
 				.expect(200, done);
 		});
 
-		it("can delete view", function(done) {
+		it("can delete view", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
 				.expect(200, done);
 		});
 
-		it("can delete model", function(done) {
+		it("can delete model", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modeltoDelete}`)
 				.expect(200, done);
@@ -296,7 +299,7 @@ describe("Implied permission::", function () {
 	});
 
 	// project admin
-	describe("Project admin", function() {
+	describe("Project admin", function () {
 
 		let agent;
 
@@ -312,7 +315,7 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae8";
 		const viewToDelete = "33328320-e2da-11ea-bcdf-cfbbc3222222";
 
-		before(async function() {
+		before(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
@@ -320,10 +323,10 @@ describe("Implied permission::", function () {
 		after(purgeQueues);
 
 		// list teamspaces api show implied permissions
-		it("list teamspaces api show correct inherited and implied permissions(2)", function(done) {
+		it("list teamspaces api show correct inherited and implied permissions(2)", function (done) {
 			agent
 				.get(`/${username}.json`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(err).to.not.exist;
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
 					expect(teamspace).to.exist;
@@ -342,17 +345,17 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		it("list model info should show correct inherited and implied permissions", function(done) {
+		it("list model info should show correct inherited and implied permissions", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(err).to.not.exist;
 					expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
 					done();
 				});
 		});
 
-		it("cannot create project", function(done) {
+		it("cannot create project", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/projects`)
 				.send({
@@ -361,7 +364,7 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("can edit project", function(done) {
+		it("can edit project", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/projects/${projectHaveAccess}`)
 				.send({
@@ -370,7 +373,7 @@ describe("Implied permission::", function () {
 				.expect(200, done);
 		});
 
-		it("cannot edit other project", function(done) {
+		it("cannot edit other project", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/projects/${projectNoAccess}`)
 				.send({
@@ -379,88 +382,87 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("can delete project", function(done) {
+		it("can delete project", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/projects/${projectHaveAccess}`)
 				.expect(200, done);
 		});
 
-		it("can delete other project", function(done) {
+		it("can delete other project", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/projects/${projectNoAccess}`)
 				.expect(401, done);
 		});
 
-		it("cannot reach endpoint to create a model - endpoint is decommissioned", function(done) {
+		it("cannot reach endpoint to create a model - endpoint is decommissioned", function (done) {
 
 			const modelName = "model123";
 			agent
 				.post(`/${sharedTeamspace}/model`)
-				.send(Object.assign({modelName: modelName, project: "Sample_Project"}, model))
+				.send(Object.assign({ modelName: modelName, project: "Sample_Project" }, model))
 				.expect(410, (err, res) => {
 					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
 
-		it("can view model in your project", function(done) {
+		it("can view model in your project", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
 				.expect(200, done);
 		});
 
-		it("cannot view other model", function(done) {
+		it("cannot view other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}.json`)
 				.expect(401, done);
 		});
 
-		it("can download model in your project", function(done) {
+		it("can download model in your project", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/download/latest`)
 				.expect(404, done);
 		});
 
-		it("cannot download other model", function(done) {
+		it("cannot download other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/download/latest`)
 				.expect(401, done);
 		});
 
-		it("cannot reach the endpoint to upload model in your project - endpoint is decommissioned", function(done) {
+		it("cannot reach the endpoint to upload model in your project - endpoint is decommissioned", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "project_admin_upload")
-				.attach("file", __dirname + "/../../../src/v4/statics/3dmodels/dummy.ifc")
 				.expect(410, (err, res) => {
 					expect(res?.body?.code).to.equal("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
 
-		it("can edit model setting in your project", function(done) {
+		it("can edit model setting in your project", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/settings`)
-				.send({code: "00011"})
+				.send({ code: "00011" })
 				.expect(200, done);
 		});
 
-		it("cannot edit other model setting", function(done) {
+		it("cannot edit other model setting", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelNoAccess}/settings`)
-				.send({code: "00011"})
+				.send({ code: "00011" })
 				.expect(401, done);
 		});
 
-		it("can view issues", function(done) {
+		it("can view issues", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(200, done);
 		});
 
-		it("can create issue", function(done) {
+		it("can create issue", function (done) {
 
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			const issue = Object.assign({ "name": "Issue test" }, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
@@ -468,15 +470,15 @@ describe("Implied permission::", function () {
 
 		});
 
-		it("cannot view issues in other model", function(done) {
+		it("cannot view issues in other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.expect(401, done);
 		});
 
-		it("cannot create issue in other model", function(done) {
+		it("cannot create issue in other model", function (done) {
 
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			const issue = Object.assign({ "name": "Issue test" }, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
@@ -484,22 +486,22 @@ describe("Implied permission::", function () {
 
 		});
 
-		it("can comment", function(done) {
+		it("can comment", function (done) {
 
 			const comment = {
 				comment: "hello world",
-				"viewpoint":{
-					"up":[0,1,0],
-					"position":[38,38,125.08011914810137],
-					"look_at":[0,0,-163.08011914810137],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"unityHeight ":3.537606904422707,
-					"fov":2.1124830653010416,
-					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506,
-					"near":76.42411012233212,
-					"clippingPlanes":[]
+				"viewpoint": {
+					"up": [0, 1, 0],
+					"position": [38, 38, 125.08011914810137],
+					"look_at": [0, 0, -163.08011914810137],
+					"view_dir": [0, 0, -1],
+					"right": [1, 0, 0],
+					"unityHeight ": 3.537606904422707,
+					"fov": 2.1124830653010416,
+					"aspect_ratio": 0.8750189337327384,
+					"far": 276.75612077194506,
+					"near": 76.42411012233212,
+					"clippingPlanes": []
 				}
 			};
 
@@ -508,22 +510,22 @@ describe("Implied permission::", function () {
 				.expect(200, done);
 		});
 
-		it("cannot comment in other model", function(done) {
+		it("cannot comment in other model", function (done) {
 
 			const comment = {
 				comment: "hello world",
-				"viewpoint":{
-					"up":[0,1,0],
-					"position":[38,38,125.08011914810137],
-					"look_at":[0,0,-163.08011914810137],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"unityHeight ":3.537606904422707,
-					"fov":2.1124830653010416,
-					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506,
-					"near":76.42411012233212,
-					"clippingPlanes":[]
+				"viewpoint": {
+					"up": [0, 1, 0],
+					"position": [38, 38, 125.08011914810137],
+					"look_at": [0, 0, -163.08011914810137],
+					"view_dir": [0, 0, -1],
+					"right": [1, 0, 0],
+					"unityHeight ": 3.537606904422707,
+					"fov": 2.1124830653010416,
+					"aspect_ratio": 0.8750189337327384,
+					"far": 276.75612077194506,
+					"near": 76.42411012233212,
+					"clippingPlanes": []
 				}
 			};
 
@@ -532,81 +534,81 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("can edit issue", function(done) {
+		it("can edit issue", function (done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
-				.send({  status: "open" })
+				.send({ status: "open" })
 				.expect(200, done);
 		});
 
-		it("cannot edit issue in other model", function(done) {
+		it("cannot edit issue in other model", function (done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
-				.send({  status: "open" })
+				.send({ status: "open" })
 				.expect(401, done);
 		});
 
-		it("can view views", function(done) {
+		it("can view views", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.expect(200, done);
 		});
 
-		it("can create view", function(done) {
-			const view = Object.assign({"name":"View test"}, baseView);
+		it("can create view", function (done) {
+			const view = Object.assign({ "name": "View test" }, baseView);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.send(view)
 				.expect(200, done);
 		});
 
-		it("cannot view views in other model", function(done) {
+		it("cannot view views in other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
 				.expect(401, done);
 		});
 
-		it("cannot create view in other model", function(done) {
-			const view = Object.assign({"name":"View test"}, baseView);
+		it("cannot create view in other model", function (done) {
+			const view = Object.assign({ "name": "View test" }, baseView);
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
 				.send(view)
 				.expect(401, done);
 		});
 
-		it("can edit view", function(done) {
+		it("can edit view", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
 				.send({ "name": "Project admin new name" })
 				.expect(200, done);
 		});
 
-		it("cannot edit view in other model", function(done) {
+		it("cannot edit view in other model", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewId}`)
 				.send({ "name": "Project admin bad new name" })
 				.expect(401, done);
 		});
 
-		it("can delete view", function(done) {
+		it("can delete view", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
 				.expect(200, done);
 		});
 
-		it("cannot delete view in other models", function(done) {
+		it("cannot delete view in other models", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewToDelete}`)
 				.expect(401, done);
 		});
 
-		it("can delete model", function(done) {
+		it("can delete model", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modeltoDelete}`)
 				.expect(200, done);
 		});
 
-		it("cannot delete other models", function(done) {
+		it("cannot delete other models", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
 				.expect(401, done);
@@ -614,7 +616,7 @@ describe("Implied permission::", function () {
 	});
 
 	// model admin
-	describe("Model admin", function() {
+	describe("Model admin", function () {
 
 		let agent;
 
@@ -628,7 +630,7 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "44448320-e2da-11ea-bcdf-cfbbc3333333";
 
-		before(async function() {
+		before(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
@@ -636,10 +638,10 @@ describe("Implied permission::", function () {
 		after(purgeQueues);
 
 		// list teamspaces api show implied permissions
-		it("list teamspaces api show correct inherited and implied permissions (3)", function(done) {
+		it("list teamspaces api show correct inherited and implied permissions (3)", function (done) {
 			agent
 				.get(`/${username}.json`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(err).to.not.exist;
 
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
@@ -659,17 +661,17 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		it("list model info should show correct inherited and implied permissions", function(done) {
+		it("list model info should show correct inherited and implied permissions", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(err).to.not.exist;
 					expect(res.body.permissions).to.deep.equal(C.MODEL_PERM_LIST);
 					done();
 				});
 		});
 
-		it("cannot create project", function(done) {
+		it("cannot create project", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/projects`)
 				.send({
@@ -678,7 +680,7 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot edit project", function(done) {
+		it("cannot edit project", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/projects/${projectNoAccess}`)
 				.send({
@@ -687,50 +689,50 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("can delete project", function(done) {
+		it("can delete project", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/projects/${projectNoAccess}`)
 				.expect(401, done);
 		});
 
-		it("cannot access endpoint to create a model - endpoint is decommissioned", function(done) {
+		it("cannot access endpoint to create a model - endpoint is decommissioned", function (done) {
 
 			const modelName = "model123";
 
 			agent
 				.post(`/${sharedTeamspace}/model`)
-				.send(Object.assign({modelName: modelName}, model))
+				.send(Object.assign({ modelName: modelName }, model))
 				.expect(410, (err, res) => {
 					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
 
-		it("can view model assigned to you", function(done) {
+		it("can view model assigned to you", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
 				.expect(200, done);
 		});
 
-		it("cannot view other model", function(done) {
+		it("cannot view other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}.json`)
 				.expect(401, done);
 		});
 
-		it("can download model in your project", function(done) {
+		it("can download model in your project", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/download/latest`)
 				.expect(404, done);
 		});
 
-		it("cannot download other model", function(done) {
+		it("cannot download other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/download/latest`)
 				.expect(401, done);
 		});
 
-		it("cannot access the endpoint to upload model - endpoint is decommissioned", function(done) {
+		it("cannot access the endpoint to upload model - endpoint is decommissioned", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "model_admin_upload")
@@ -741,29 +743,29 @@ describe("Implied permission::", function () {
 				})
 		});
 
-		it("can edit model setting", function(done) {
+		it("can edit model setting", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/settings`)
-				.send({code: "00011"})
+				.send({ code: "00011" })
 				.expect(200, done);
 		});
 
-		it("cannot edit other model setting", function(done) {
+		it("cannot edit other model setting", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelNoAccess}/settings`)
-				.send({code: "00011"})
+				.send({ code: "00011" })
 				.expect(401, done);
 		});
 
-		it("can view issues", function(done) {
+		it("can view issues", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(200, done);
 		});
 
-		it("can create issue", function(done) {
+		it("can create issue", function (done) {
 
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			const issue = Object.assign({ "name": "Issue test" }, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
@@ -771,15 +773,15 @@ describe("Implied permission::", function () {
 
 		});
 
-		it("cannot view issues in other model", function(done) {
+		it("cannot view issues in other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.expect(401, done);
 		});
 
-		it("cannot create issue in other model", function(done) {
+		it("cannot create issue in other model", function (done) {
 
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			const issue = Object.assign({ "name": "Issue test" }, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
@@ -787,22 +789,22 @@ describe("Implied permission::", function () {
 
 		});
 
-		it("can comment", function(done) {
+		it("can comment", function (done) {
 
 			const comment = {
 				comment: "hello world",
-				"viewpoint":{
-					"up":[0,1,0],
-					"position":[38,38,125.08011914810137],
-					"look_at":[0,0,-163.08011914810137],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"unityHeight ":3.537606904422707,
-					"fov":2.1124830653010416,
-					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506,
-					"near":76.42411012233212,
-					"clippingPlanes":[]
+				"viewpoint": {
+					"up": [0, 1, 0],
+					"position": [38, 38, 125.08011914810137],
+					"look_at": [0, 0, -163.08011914810137],
+					"view_dir": [0, 0, -1],
+					"right": [1, 0, 0],
+					"unityHeight ": 3.537606904422707,
+					"fov": 2.1124830653010416,
+					"aspect_ratio": 0.8750189337327384,
+					"far": 276.75612077194506,
+					"near": 76.42411012233212,
+					"clippingPlanes": []
 				}
 			};
 
@@ -811,22 +813,22 @@ describe("Implied permission::", function () {
 				.expect(404, done);
 		});
 
-		it("cannot comment in other model", function(done) {
+		it("cannot comment in other model", function (done) {
 
 			const comment = {
 				comment: "hello world",
-				"viewpoint":{
-					"up":[0,1,0],
-					"position":[38,38,125.08011914810137],
-					"look_at":[0,0,-163.08011914810137],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"unityHeight ":3.537606904422707,
-					"fov":2.1124830653010416,
-					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506,
-					"near":76.42411012233212,
-					"clippingPlanes":[]
+				"viewpoint": {
+					"up": [0, 1, 0],
+					"position": [38, 38, 125.08011914810137],
+					"look_at": [0, 0, -163.08011914810137],
+					"view_dir": [0, 0, -1],
+					"right": [1, 0, 0],
+					"unityHeight ": 3.537606904422707,
+					"fov": 2.1124830653010416,
+					"aspect_ratio": 0.8750189337327384,
+					"far": 276.75612077194506,
+					"near": 76.42411012233212,
+					"clippingPlanes": []
 				}
 			};
 
@@ -835,88 +837,88 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("can edit issue", function(done) {
+		it("can edit issue", function (done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
-				.send({  status: "open" })
+				.send({ status: "open" })
 				.expect(404, done);
 		});
 
-		it("cannot edit issue in other model", function(done) {
+		it("cannot edit issue in other model", function (done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
-				.send({  status: "open" })
+				.send({ status: "open" })
 				.expect(401, done);
 		});
 
-		it("can view views", function(done) {
+		it("can view views", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.expect(200, done);
 		});
 
-		it("can create view", function(done) {
-			const view = Object.assign({"name":"View test"}, baseView);
+		it("can create view", function (done) {
+			const view = Object.assign({ "name": "View test" }, baseView);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.send(view)
 				.expect(200, done);
 		});
 
-		it("cannot view views in other model", function(done) {
+		it("cannot view views in other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
 				.expect(401, done);
 		});
 
-		it("cannot create view in other model", function(done) {
-			const view = Object.assign({"name":"View test"}, baseView);
+		it("cannot create view in other model", function (done) {
+			const view = Object.assign({ "name": "View test" }, baseView);
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
 				.send(view)
 				.expect(401, done);
 		});
 
-		it("can edit view", function(done) {
+		it("can edit view", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
 				.send({ "name": "Model admin new name" })
 				.expect(200, done);
 		});
 
-		it("cannot edit view in other model", function(done) {
+		it("cannot edit view in other model", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewId}`)
 				.send({ "name": "Model admin bad new name" })
 				.expect(401, done);
 		});
 
-		it("can delete view", function(done) {
+		it("can delete view", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
 				.expect(200, done);
 		});
 
-		it("cannot delete view in other models", function(done) {
+		it("cannot delete view in other models", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewToDelete}`)
 				.expect(401, done);
 		});
 
-		it("can delete model", function(done) {
+		it("can delete model", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelToDelete}`)
 				.expect(200, done);
 		});
 
-		it("cannot delete other models", function(done) {
+		it("cannot delete other models", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
 				.expect(401, done);
 		});
 	});
 
-	describe("Project::View all models", function() {
+	describe("Project::View all models", function () {
 		let agent;
 
 		const username = "impliedViewAllModels";
@@ -929,17 +931,17 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "55548320-e2da-11ea-bcdf-cfbbc3334444";
 
-		before(async function() {
+		before(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
 
 		after(purgeQueues);
 
-		it("list teamspaces api show correct inherited and implied permissions (4)", function(done) {
+		it("list teamspaces api show correct inherited and implied permissions (4)", function (done) {
 			agent
 				.get(`/${username}.json`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(err).to.not.exist;
 
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
@@ -959,17 +961,17 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		it("list model info should show correct inherited and implied permissions", function(done) {
+		it("list model info should show correct inherited and implied permissions", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(err).to.not.exist;
 					expect(res.body.permissions).to.deep.equal([C.PERM_VIEW_MODEL]);
 					done();
 				});
 		});
 
-		it("cannot create project", function(done) {
+		it("cannot create project", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/projects`)
 				.send({
@@ -978,7 +980,7 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot edit project", function(done) {
+		it("cannot edit project", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/projects/${projectSomeAccess}`)
 				.send({
@@ -987,49 +989,49 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("can delete project", function(done) {
+		it("can delete project", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/projects/${projectSomeAccess}`)
 				.expect(401, done);
 		});
 
-		it("cannot access the endpoint to create a model - endpoint is decommissioned", function(done) {
+		it("cannot access the endpoint to create a model - endpoint is decommissioned", function (done) {
 
 			const modelName = "model123";
 			agent
 				.post(`/${sharedTeamspace}/model`)
-				.send(Object.assign({modelName: modelName}, model))
+				.send(Object.assign({ modelName: modelName }, model))
 				.expect(410, (err, res) => {
 					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
 
-		it("can view model assigned to you", function(done) {
+		it("can view model assigned to you", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
 				.expect(200, done);
 		});
 
-		it("cannot view other model", function(done) {
+		it("cannot view other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}.json`)
 				.expect(401, done);
 		});
 
-		it("cannot download model in your project", function(done) {
+		it("cannot download model in your project", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/download/latest`)
 				.expect(401, done);
 		});
 
-		it("cannot download other model", function(done) {
+		it("cannot download other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/download/latest`)
 				.expect(401, done);
 		});
 
-		it("cannot access endpoint to upload model - endpoint decommissioned", function(done) {
+		it("cannot access endpoint to upload model - endpoint decommissioned", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.expect(410, (err, res) => {
@@ -1038,64 +1040,64 @@ describe("Implied permission::", function () {
 				})
 		});
 
-		it("cannot edit model setting", function(done) {
+		it("cannot edit model setting", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/settings`)
-				.send({code: "00011"})
+				.send({ code: "00011" })
 				.expect(401, done);
 		});
 
-		it("cannot edit other model setting in other project as well", function(done) {
+		it("cannot edit other model setting in other project as well", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelNoAccess}/settings`)
-				.send({code: "00011"})
+				.send({ code: "00011" })
 				.expect(401, done);
 		});
 
-		it("cannot view issues", function(done) {
+		it("cannot view issues", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(401, done);
 		});
 
-		it("cannot create issue", function(done) {
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+		it("cannot create issue", function (done) {
+			const issue = Object.assign({ "name": "Issue test" }, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
 				.expect(401, done);
 		});
 
-		it("cannot view issues of other model in other project as well", function(done) {
+		it("cannot view issues of other model in other project as well", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.expect(401, done);
 		});
 
-		it("cannot create issue for other model in other project as well", function(done) {
+		it("cannot create issue for other model in other project as well", function (done) {
 
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			const issue = Object.assign({ "name": "Issue test" }, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
 				.expect(401, done);
 		});
 
-		it("cannot comment", function(done) {
+		it("cannot comment", function (done) {
 			const comment = {
 				comment: "hello world",
-				"viewpoint":{
-					"up":[0,1,0],
-					"position":[38,38,125.08011914810137],
-					"look_at":[0,0,-163.08011914810137],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"unityHeight ":3.537606904422707,
-					"fov":2.1124830653010416,
-					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506,
-					"near":76.42411012233212,
-					"clippingPlanes":[]
+				"viewpoint": {
+					"up": [0, 1, 0],
+					"position": [38, 38, 125.08011914810137],
+					"look_at": [0, 0, -163.08011914810137],
+					"view_dir": [0, 0, -1],
+					"right": [1, 0, 0],
+					"unityHeight ": 3.537606904422707,
+					"fov": 2.1124830653010416,
+					"aspect_ratio": 0.8750189337327384,
+					"far": 276.75612077194506,
+					"near": 76.42411012233212,
+					"clippingPlanes": []
 				}
 			};
 
@@ -1104,22 +1106,22 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot comment in other model in other project as well", function(done) {
+		it("cannot comment in other model in other project as well", function (done) {
 
 			const comment = {
 				comment: "hello world",
-				"viewpoint":{
-					"up":[0,1,0],
-					"position":[38,38,125.08011914810137],
-					"look_at":[0,0,-163.08011914810137],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"unityHeight ":3.537606904422707,
-					"fov":2.1124830653010416,
-					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506,
-					"near":76.42411012233212,
-					"clippingPlanes":[]
+				"viewpoint": {
+					"up": [0, 1, 0],
+					"position": [38, 38, 125.08011914810137],
+					"look_at": [0, 0, -163.08011914810137],
+					"view_dir": [0, 0, -1],
+					"right": [1, 0, 0],
+					"unityHeight ": 3.537606904422707,
+					"fov": 2.1124830653010416,
+					"aspect_ratio": 0.8750189337327384,
+					"far": 276.75612077194506,
+					"near": 76.42411012233212,
+					"clippingPlanes": []
 				}
 			};
 
@@ -1128,88 +1130,88 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot edit issue", function(done) {
+		it("cannot edit issue", function (done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
-				.send({  status: "open" })
+				.send({ status: "open" })
 				.expect(401, done);
 		});
 
-		it("cannot edit issue in other model", function(done) {
+		it("cannot edit issue in other model", function (done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
-				.send({  status: "open" })
+				.send({ status: "open" })
 				.expect(401, done);
 		});
 
-		it("cannot view views", function(done) {
+		it("cannot view views", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.expect(401, done);
 		});
 
-		it("cannot create view", function(done) {
-			const view = Object.assign({"name":"View test"}, baseView);
+		it("cannot create view", function (done) {
+			const view = Object.assign({ "name": "View test" }, baseView);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.send(view)
 				.expect(401, done);
 		});
 
-		it("cannot view views of other model in other project as well", function(done) {
+		it("cannot view views of other model in other project as well", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
 				.expect(401, done);
 		});
 
-		it("cannot create view for other model in other project as well", function(done) {
-			const view = Object.assign({"name":"View test"}, baseView);
+		it("cannot create view for other model in other project as well", function (done) {
+			const view = Object.assign({ "name": "View test" }, baseView);
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
 				.send(view)
 				.expect(401, done);
 		});
 
-		it("cannot edit view", function(done) {
+		it("cannot edit view", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
 				.send({ "name": "View all user new name" })
 				.expect(401, done);
 		});
 
-		it("cannot edit view in other model", function(done) {
+		it("cannot edit view in other model", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewId}`)
 				.send({ "name": "View all user bad new name" })
 				.expect(401, done);
 		});
 
-		it("cannot delete view", function(done) {
+		it("cannot delete view", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
 				.expect(401, done);
 		});
 
-		it("cannot delete view in other models", function(done) {
+		it("cannot delete view in other models", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewToDelete}`)
 				.expect(401, done);
 		});
 
-		it("cannot delete model", function(done) {
+		it("cannot delete model", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelToDelete}`)
 				.expect(401, done);
 		});
 
-		it("cannot delete other models", function(done) {
+		it("cannot delete other models", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
 				.expect(401, done);
 		});
 	});
 
-	describe("Project::Upload models", function() {
+	describe("Project::Upload models", function () {
 		let agent;
 
 		const username = "imUploadAllModels";
@@ -1222,17 +1224,17 @@ describe("Implied permission::", function () {
 		const viewId = "2b328320-e2da-11ea-bcdf-cfbbc3211ae7";
 		const viewToDelete = "66668320-e2da-11ea-bcdf-cfbbc3355555";
 
-		before(async function() {
+		before(async function () {
 			agent = SessionTracker(request(server));
 			await agent.login(username, password);
 		});
 
 		after(purgeQueues);
 
-		it("list teamspaces api show correct inherited and implied permissions (5)", function(done) {
+		it("list teamspaces api show correct inherited and implied permissions (5)", function (done) {
 			agent
 				.get(`/${username}.json`)
-				.expect(200, function(err, res) {
+				.expect(200, function (err, res) {
 					expect(err).to.not.exist;
 
 					const teamspace = res.body.accounts.find(a => a.account === sharedTeamspace);
@@ -1252,7 +1254,7 @@ describe("Implied permission::", function () {
 				});
 		});
 
-		it("cannot create project", function(done) {
+		it("cannot create project", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/projects`)
 				.send({
@@ -1261,7 +1263,7 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot edit project", function(done) {
+		it("cannot edit project", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/projects/${projectSomeAccess}`)
 				.send({
@@ -1270,49 +1272,49 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot delete project", function(done) {
+		it("cannot delete project", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/projects/${projectSomeAccess}`)
 				.expect(401, done);
 		});
 
-		it("cannot access endpoint to create a model - endpoint decommissioned", function(done) {
+		it("cannot access endpoint to create a model - endpoint decommissioned", function (done) {
 
 			const modelName = "model123";
 			agent
 				.post(`/${sharedTeamspace}/model`)
-				.send(Object.assign({modelName: modelName}, model))
+				.send(Object.assign({ modelName: modelName }, model))
 				.expect(410, (err, res) => {
 					expect(res.body.code).to.equal("ENDPOINT_DECOMMISSIONED")
 					done(err)
 				})
 		});
 
-		it("cannot view model", function(done) {
+		it("cannot view model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}.json`)
 				.expect(401, done);
 		});
 
-		it("cannot view other model", function(done) {
+		it("cannot view other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}.json`)
 				.expect(401, done);
 		});
 
-		it("cannot download model in your project", function(done) {
+		it("cannot download model in your project", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/download/latest`)
 				.expect(401, done);
 		});
 
-		it("cannot download other model", function(done) {
+		it("cannot download other model", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/download/latest`)
 				.expect(401, done);
 		});
 
-		it("cannot access endpoint to upload model - endpoint decommissioned", function(done) {
+		it("cannot access endpoint to upload model - endpoint decommissioned", function (done) {
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/upload`)
 				.field("tag", "project_upload")
@@ -1323,29 +1325,29 @@ describe("Implied permission::", function () {
 				})
 		});
 
-		it("cannot edit model setting", function(done) {
+		it("cannot edit model setting", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/settings`)
-				.send({code: "00011"})
+				.send({ code: "00011" })
 				.expect(401, done);
 		});
 
-		it("cannot edit other model setting in other project as well", function(done) {
+		it("cannot edit other model setting in other project as well", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelNoAccess}/settings`)
-				.send({code: "00011"})
+				.send({ code: "00011" })
 				.expect(401, done);
 		});
 
-		it("cannot view issues", function(done) {
+		it("cannot view issues", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/issues`)
 				.expect(401, done);
 		});
 
-		it("cannot create issue", function(done) {
+		it("cannot create issue", function (done) {
 
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			const issue = Object.assign({ "name": "Issue test" }, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/issues`)
 				.send(issue)
@@ -1353,15 +1355,15 @@ describe("Implied permission::", function () {
 
 		});
 
-		it("cannot view issues of other model in other project as well", function(done) {
+		it("cannot view issues of other model in other project as well", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.expect(401, done);
 		});
 
-		it("cannot create issue for other model in other project as well", function(done) {
+		it("cannot create issue for other model in other project as well", function (done) {
 
-			const issue = Object.assign({"name":"Issue test"}, baseIssue);
+			const issue = Object.assign({ "name": "Issue test" }, baseIssue);
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/issues`)
 				.send(issue)
@@ -1369,22 +1371,22 @@ describe("Implied permission::", function () {
 
 		});
 
-		it("cannot comment", function(done) {
+		it("cannot comment", function (done) {
 
 			const comment = {
 				comment: "hello world",
-				"viewpoint":{
-					"up":[0,1,0],
-					"position":[38,38,125.08011914810137],
-					"look_at":[0,0,-163.08011914810137],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"unityHeight ":3.537606904422707,
-					"fov":2.1124830653010416,
-					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506,
-					"near":76.42411012233212,
-					"clippingPlanes":[]
+				"viewpoint": {
+					"up": [0, 1, 0],
+					"position": [38, 38, 125.08011914810137],
+					"look_at": [0, 0, -163.08011914810137],
+					"view_dir": [0, 0, -1],
+					"right": [1, 0, 0],
+					"unityHeight ": 3.537606904422707,
+					"fov": 2.1124830653010416,
+					"aspect_ratio": 0.8750189337327384,
+					"far": 276.75612077194506,
+					"near": 76.42411012233212,
+					"clippingPlanes": []
 				}
 			};
 
@@ -1393,22 +1395,22 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot comment in other model in other project as well", function(done) {
+		it("cannot comment in other model in other project as well", function (done) {
 
 			const comment = {
 				comment: "hello world",
-				"viewpoint":{
-					"up":[0,1,0],
-					"position":[38,38,125.08011914810137],
-					"look_at":[0,0,-163.08011914810137],
-					"view_dir":[0,0,-1],
-					"right":[1,0,0],
-					"unityHeight ":3.537606904422707,
-					"fov":2.1124830653010416,
-					"aspect_ratio":0.8750189337327384,
-					"far":276.75612077194506,
-					"near":76.42411012233212,
-					"clippingPlanes":[]
+				"viewpoint": {
+					"up": [0, 1, 0],
+					"position": [38, 38, 125.08011914810137],
+					"look_at": [0, 0, -163.08011914810137],
+					"view_dir": [0, 0, -1],
+					"right": [1, 0, 0],
+					"unityHeight ": 3.537606904422707,
+					"fov": 2.1124830653010416,
+					"aspect_ratio": 0.8750189337327384,
+					"far": 276.75612077194506,
+					"near": 76.42411012233212,
+					"clippingPlanes": []
 				}
 			};
 
@@ -1417,81 +1419,81 @@ describe("Implied permission::", function () {
 				.expect(401, done);
 		});
 
-		it("cannot edit issue", function(done) {
+		it("cannot edit issue", function (done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelId}/issues/${issueId}`)
-				.send({  status: "open" })
+				.send({ status: "open" })
 				.expect(401, done);
 		});
 
-		it("cannot edit issue in other model", function(done) {
+		it("cannot edit issue in other model", function (done) {
 			agent
 				.patch(`/${sharedTeamspace}/${modelNoAccess}/issues/${issueId}`)
-				.send({  status: "open" })
+				.send({ status: "open" })
 				.expect(401, done);
 		});
 
-		it("cannot view views", function(done) {
+		it("cannot view views", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.expect(401, done);
 		});
 
-		it("cannot create view", function(done) {
-			const view = Object.assign({"name":"View test"}, baseView);
+		it("cannot create view", function (done) {
+			const view = Object.assign({ "name": "View test" }, baseView);
 			agent
 				.post(`/${sharedTeamspace}/${modelId}/viewpoints`)
 				.send(view)
 				.expect(401, done);
 		});
 
-		it("cannot view views of other model in other project as well", function(done) {
+		it("cannot view views of other model in other project as well", function (done) {
 			agent
 				.get(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
 				.expect(401, done);
 		});
 
-		it("cannot create view for other model in other project as well", function(done) {
-			const view = Object.assign({"name":"View test"}, baseView);
+		it("cannot create view for other model in other project as well", function (done) {
+			const view = Object.assign({ "name": "View test" }, baseView);
 			agent
 				.post(`/${sharedTeamspace}/${modelNoAccess}/viewpoints`)
 				.send(view)
 				.expect(401, done);
 		});
 
-		it("cannot edit view", function(done) {
+		it("cannot edit view", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelId}/viewpoints/${viewId}`)
 				.send({ "name": "Update user new name" })
 				.expect(401, done);
 		});
 
-		it("cannot edit view in other model", function(done) {
+		it("cannot edit view in other model", function (done) {
 			agent
 				.put(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewId}`)
 				.send({ "name": "Update user bad new name" })
 				.expect(401, done);
 		});
 
-		it("cannot delete view", function(done) {
+		it("cannot delete view", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelId}/viewpoints/${viewToDelete}`)
 				.expect(401, done);
 		});
 
-		it("cannot delete view in other models", function(done) {
+		it("cannot delete view in other models", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}/viewpoints/${viewToDelete}`)
 				.expect(401, done);
 		});
 
-		it("cannot delete model", function(done) {
+		it("cannot delete model", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelToDelete}`)
 				.expect(401, done);
 		});
 
-		it("cannot delete other models", function(done) {
+		it("cannot delete other models", function (done) {
 			agent
 				.delete(`/${sharedTeamspace}/${modelNoAccess}`)
 				.expect(401, done);

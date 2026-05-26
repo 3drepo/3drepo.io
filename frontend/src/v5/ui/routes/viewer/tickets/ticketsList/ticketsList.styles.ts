@@ -21,6 +21,13 @@ import MenuItemBase from '@mui/material/MenuItem';
 import { Button } from '@controls/button';
 import { Loader as UnstyledLoader } from '@/v4/routes/components/loader/loader.component';
 import { TicketItemContainer } from './ticketItem/ticketItem.styles';
+import { Checkbox } from '@mui/material';
+import React from 'react';
+import BulkCheckboxIcon from '@assets/icons/controls/bulk_checkbox.svg';
+import BulkCheckboxCheckedIcon from '@assets/icons/controls/bulk_checkbox_checked.svg';
+import { AllTicketsCheckboxContainer } from './bulkUpdate/bulkUpdate.styles';
+import { ModuleTitle } from '@components/viewer/cards/cardFilters/cardFilters.styles';
+
 
 export const Loader = styled(UnstyledLoader)`
 	height: 100%;
@@ -38,7 +45,7 @@ export const ListContainer = styled.div`
 	}
 `;
 
-export const List = styled.table`
+export const List = styled.div`
 	border: solid 1px ${({ theme }) => theme.palette.base.lightest};
 	border-radius: 8px;
 	overflow: hidden;
@@ -46,14 +53,17 @@ export const List = styled.table`
 	margin-bottom: 0;
 	background-color: ${({ theme }) =>  theme.palette.primary.contrast};
 	box-sizing: border-box;
-	tr:not(:last-child) ${/* sc-selector */ TicketItemContainer}{
+
+	${/* sc-selector */ TicketItemContainer} {
 		border-bottom: solid 1px ${({ theme }) => theme.palette.base.lightest};
+	}
+
+	.vlist-end ${/* sc-selector */ TicketItemContainer}:last-child{
+		border-bottom: 0;
 	}
 `;
 
-export const NewTicketButton = styled(Button).attrs({
-	variant: 'contained',
-})`
+export const ActionMenuButton = styled(Button)`
 	margin: 0 0 0 auto;
 	padding: 7px 9px;
 	height: 30px;
@@ -81,4 +91,39 @@ export const ActionMenu = styled(ActionMenuBase).attrs({
 
 export const MenuItem = styled(MenuItemBase)`
 	padding: 5px 12px;
+`;
+
+export const BulkCheckbox = styled(Checkbox).attrs({
+	icon: React.createElement(BulkCheckboxIcon),
+	checkedIcon:  React.createElement(BulkCheckboxCheckedIcon),
+})`
+	color: ${({ theme }) => theme.palette.secondary.main} !important;
+	cursor: pointer;
+	background-color: transparent;
+	margin: 0;
+	height: 32px;
+	width: 20px;
+	padding: 0;
+
+	&:hover:not(.Mui-checked) path {
+		fill: ${({ theme }) => theme.palette.secondary.main} !important;
+	}
+`;
+
+export const GroupByLabelContainer = styled.div`
+	display: flex;
+	padding-bottom: 5px;
+
+	${AllTicketsCheckboxContainer} {
+		padding-bottom: 0;
+	}
+`;
+
+export const GroupByLabelText = styled(ModuleTitle)<{ $withBulkUpdate }>`
+	flex-grow: 1;
+	overflow: hidden;
+	margin: 0;
+	text-align: ${({ $withBulkUpdate }) => $withBulkUpdate ? 'right' : 'left'};
+	line-height: 16px;
+	padding-left: ${({ $withBulkUpdate }) => $withBulkUpdate ? '5px' : '0'};
 `;

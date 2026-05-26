@@ -27,6 +27,8 @@ const { getLastLoginDate } = require(`${v5Path}/models/loginRecords`);
 
 const DEFAULT_OUT_FILE = 'inactiveUsers.csv';
 
+// Temporarily ignoreing the next line for coverage, see https://github.com/3drepo/3D-Repo-Product-Team/issues/898
+/* istanbul ignore next */
 const formatDate = (date) => (date ? DayJS(date).format('DD/MM/YYYY') : '');
 
 const writeResultsToFile = (results, outFile) => new Promise((resolve) => {

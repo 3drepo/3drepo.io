@@ -26,17 +26,20 @@ const {
 	updateRef,
 } = require('../models/fileRefs');
 const CryptoJs = require('crypto-js');
-const FSHandler = require('../handler/fs');
-const GridFSHandler = require('../handler/gridfs');
+const { FileStorageTypes } = require('../utils/config.constants');
+const MimeTypes = require('../utils/helper/mimeTypes');
 const config = require('../utils/config');
 const { fileMimeFromBuffer } = require('../utils/helper/typeCheck');
+const { getHandler } = require('../handler/fs');
 const { listCollections } = require('../handler/db');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
 
 const FilesManager = {};
 
-const DEFAULT_MIME_TYPE = 'application/octet-stream';
+const DEFAULT_MIME_TYPE = MimeTypes.BINARY;
+
+const fsHandler = getHandler(FileStorageTypes.FS);
 
 FilesManager.fileExists = async (teamspace, collection, filename) => {
 	try {
@@ -49,10 +52,8 @@ FilesManager.fileExists = async (teamspace, collection, filename) => {
 
 const removeFilesByStorageType = (teamspace, collection, storageType, links) => {
 	switch (storageType) {
-	case 'fs':
-		return FSHandler.removeFiles(links);
-	case 'gridfs':
-		return GridFSHandler.removeFiles(teamspace, collection, links);
+	case FileStorageTypes.FS:
+		return fsHandler.removeFiles(links);
 	default:
 		logger.logError(`Unrecognised external service: ${storageType}`);
 		return Promise.reject(templates.fileNotFound);
@@ -120,10 +121,9 @@ FilesManager.getFile = async (teamspace, collection, fileName) => {
 	const { type, link } = await getRefEntry(teamspace, collection, fileName);
 
 	switch (type) {
-	case 'fs':
-		return FSHandler.getFile(link);
-	case 'gridfs':
-		return GridFSHandler.getFile(teamspace, collection, link);
+	case FileStorageTypes.FS:
+		return fsHandler.getFile(link);
+
 	default:
 		logger.logError(`Unrecognised external service: ${type}`);
 		throw templates.fileNotFound;
@@ -135,12 +135,10 @@ const getFileAsStream = async (teamspace, collection, refEntry, chunkInfo) => {
 	let readStream;
 
 	switch (type) {
-	case 'fs':
-		readStream = await FSHandler.getFileStream(link, chunkInfo);
+	case FileStorageTypes.FS:
+		readStream = await fsHandler.getFileStream(link, chunkInfo);
 		break;
-	case 'gridfs':
-		readStream = await GridFSHandler.getFileStream(teamspace, collection, link, chunkInfo);
-		break;
+
 	default:
 		logger.logError(`Unrecognised external service: ${type}`);
 		throw templates.fileNotFound;
@@ -176,11 +174,8 @@ FilesManager.storeFiles = async (teamspace, collection, dataEntry) => {
 		]);
 		let refInfo;
 		switch (config.defaultStorage) {
-		case 'fs':
-			refInfo = await FSHandler.storeFile(data);
-			break;
-		case 'gridfs':
-			refInfo = await GridFSHandler.storeFile(teamspace, collection, data);
+		case FileStorageTypes.FS:
+			refInfo = await fsHandler.storeFile(data);
 			break;
 		default:
 			logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
@@ -200,12 +195,10 @@ FilesManager.storeFileStream = async (teamspace, collection, id, dataStream, met
 	let refInfo;
 
 	switch (config.defaultStorage) {
-	case 'fs':
-		refInfo = await FSHandler.storeFileStream(dataStream);
+	case FileStorageTypes.FS:
+		refInfo = await fsHandler.storeFileStream(dataStream);
 		break;
-	case 'gridfs':
-		logger.logError('storeFileStream is not supported on GridFS services');
-		throw templates.unknown;
+
 	default:
 		logger.logError(`Unrecognised external service: ${config.defaultStorage}`);
 		throw templates.unknown;

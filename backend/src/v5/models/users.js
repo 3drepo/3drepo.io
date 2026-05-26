@@ -60,11 +60,6 @@ User.getFavourites = async (user, teamspace) => {
 	return favs[teamspace] || [];
 };
 
-User.getAccessibleTeamspaces = async (username) => {
-	const userDoc = await User.getUserByUsername(username, { roles: 1 });
-	return userDoc.roles.flatMap(({ db: roleDB }) => (roleDB !== USERS_DB_NAME ? [roleDB] : []));
-};
-
 User.appendFavourites = async (username, teamspace, favouritesToAdd) => {
 	const userProfile = await User.getUserByUsername(username, { 'customData.starredModels': 1 });
 

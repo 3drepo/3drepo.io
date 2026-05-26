@@ -19,7 +19,7 @@
 const request = require("supertest");
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const {should, assert, expect, Assertion } = require("chai");
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const responseCodes = require("../../../src/v4/response_codes.js");
 const {templates: responseCodesV5} = require("../../../src/v5/utils/responseCodes");
 const async = require("async");
@@ -38,6 +38,7 @@ describe("ModelAssets", function () {
 	let noAccessAgent;
 
 	before(async function() {
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");

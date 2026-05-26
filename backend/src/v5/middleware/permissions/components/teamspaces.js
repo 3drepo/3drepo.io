@@ -16,27 +16,28 @@
  */
 
 const { createResponseCode, templates } = require('../../../utils/responseCodes');
-const { getAddOns, isAddOnModuleEnabled } = require('../../../models/teamspaceSettings');
-const { hasAccessToTeamspace, isTeamspaceAdmin } = require('../../../utils/permissions');
+const { getAddOns, getTeamspaceSetting, isAddOnModuleEnabled } = require('../../../models/teamspaceSettings');
 const { getUserFromSession } = require('../../../utils/sessions');
+const { isTeamspaceAdmin } = require('../../../utils/permissions');
 const { respond } = require('../../../utils/responder');
 const { ADD_ONS: { USERS_PROVISIONED } } = require('../../../models/teamspaces.constants');
+const { BYPASS_AUTH } = require('../../../utils/config.constants');
+const { isTeamspaceMember } = require('../../../processors/teamspaces');
 
 const TeamspacePerms = {};
 
 TeamspacePerms.isTeamspaceAdmin = async (req, res, next) => {
-	const { session, params } = req;
-	const user = getUserFromSession(session);
-	const { teamspace } = params;
-
 	try {
-		const isAdmin = await isTeamspaceAdmin(teamspace, user);
+		const { session, params: { teamspace }, app } = req;
 
-		if (isAdmin) {
-			next();
-		} else {
-			throw templates.notAuthorized;
+		if (!app.get(BYPASS_AUTH)) {
+			const user = getUserFromSession(session);
+			const isAdmin = await isTeamspaceAdmin(teamspace, user);
+			if (!isAdmin) {
+				throw templates.notAuthorized;
+			}
 		}
+		await next();
 	} catch (err) {
 		respond(req, res, err);
 	}
@@ -45,17 +46,18 @@ TeamspacePerms.isTeamspaceAdmin = async (req, res, next) => {
 // bypassStatusCheck will not check if the status of the membership is active (i.e. could be
 // pending invite, inactive etc). Used for checking if the user is associated with the teamspace at all
 const checkTeamspaceMembership = (bypassStatusCheck) => async (req, res, next) => {
-	const { session, params } = req;
-	const user = getUserFromSession(session);
-	const { teamspace } = params;
-
 	try {
-		const hasAccess = await hasAccessToTeamspace(teamspace, user, bypassStatusCheck);
-		if (teamspace && user && hasAccess) {
-			await next();
+		const { session, params: { teamspace } } = req;
+		if (req.app.get(BYPASS_AUTH)) {
+			// if auth is bypassed, only check if teamspace exists.
+			await getTeamspaceSetting(teamspace, { _id: 1 });
 		} else {
-			throw templates.teamspaceNotFound;
+			const user = getUserFromSession(session);
+			if (!(user && await isTeamspaceMember(teamspace, user, bypassStatusCheck))) {
+				throw templates.teamspaceNotFound;
+			}
 		}
+		await next();
 	} catch (err) {
 		respond(req, res, err);
 	}

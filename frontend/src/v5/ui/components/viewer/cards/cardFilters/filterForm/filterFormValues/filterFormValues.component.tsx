@@ -17,37 +17,82 @@
 
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
-import { isRangeOperator, isTextType, isSelectType, isDateType } from '../../cardFilters.helpers';
+import { isRangeOperator, isTextType, isSelectType, isDateType, getTemplateProperty, getUsersAndJobs } from '../../cardFilters.helpers';
 import { FormBooleanSelect, FormMultiSelect, FormDateTime, FormNumberField, FormTextField, FormJobsAndUsersSelect } from '@controls/inputs/formInputs.component';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { useEffect, useRef } from 'react';
-import { compact, isArray, isEmpty } from 'lodash';
-import { CardFilterType } from '../../cardFilters.types';
-import { TicketsCardHooksSelectors } from '@/v5/services/selectorsHooks';
-import { useParams } from 'react-router-dom';
-import { ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { compact, isArray, isEmpty, uniqBy } from 'lodash';
+import { TicketFilterType } from '../../cardFilters.types';
 import { MultiSelectMenuItem } from '@controls/inputs/multiSelect/multiSelectMenuItem/multiSelectMenuItem.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
-import { mapFormArrayToArray } from '@/v5/helpers/form.helper';
-import { getOptionFromValue, getFilterFromEvent } from '../../filtersSelection/tickets/ticketFilters.helpers';
+import { mapFormArrayToArray, SelectOption } from '@/v5/helpers/form.helper';
+import { getOptionFromValue, getFilterFromEvent, getFiltersFromJobsAndUsers, arrToDisplayValue } from '../../filtersSelection/tickets/ticketFilters.helpers';
 import { ArrayFields, Value } from './filterFormValues.styles';
+import { useTicketFiltersContext } from '../../ticketsFilters.context';
+import { selectRiskCategories } from '@/v5/store/tickets/tickets.selectors';
+import { getState } from '@/v5/helpers/redux.helpers';
+import { FederationsHooksSelectors, ContainersHooksSelectors } from '@/v5/services/selectorsHooks';
 
 type FilterFormValuesProps = {
 	module: string,
 	property: string,
-	type: CardFilterType,
+	type: TicketFilterType,
 };
 
-const getInputField = (type: CardFilterType) => {
+const getInputField = (type: TicketFilterType) => {
 	if (type === 'number') return FormNumberField;
 	if (isDateType(type)) return FormDateTime;
 	return FormTextField;
 };
 
+const allValuesAre = (templates, module, property,  predefinedValues) => {
+	const properties = templates.map((template) => getTemplateProperty(template, module, property)).filter(Boolean);
+	return properties.length && properties.every(( { values } )=> values === predefinedValues );
+}; 
+
+export const isJobsAndUsersProperty = ( module, property, type) => {
+	const { templates } = useTicketFiltersContext();
+	return (type === 'owner') || allValuesAre(templates, module, property, 'jobsAndUsers' );
+};
+
+
+export const getSelectOptions = (module, property, type, templates, modelsIds): SelectOption[] => {
+	let options = [];
+
+	if (type === 'template') {
+		return templates.map((t) => ({ value: t.code, displayValue: t.name }));
+	}
+
+	
+	const riskCategories = selectRiskCategories(getState());
+	const jobsAndUsers = getFiltersFromJobsAndUsers(getUsersAndJobs(modelsIds));
+
+	if (type === 'owner') return jobsAndUsers;
+
+	templates.forEach((template) => {
+		const matchingProperty =  getTemplateProperty(template, module, property);
+		if (!matchingProperty || !['manyOf', 'oneOf'].includes(matchingProperty.type)) return;
+		switch (matchingProperty.values) {
+			case 'riskCategories':
+				options.push(...riskCategories.map((value) => ({ value })));
+				break;
+			case 'jobsAndUsers':
+				options.push(...jobsAndUsers);
+				break;
+			default:
+				options.push(...matchingProperty.values.map((value) => ({ value })));
+		}
+	});
+
+	
+	return uniqBy(options, (({ value }) => value) );
+};
+
 const name = 'values';
 export const FilterFormValues = ({ module, property, type }: FilterFormValuesProps) => {
-	const { containerOrFederation } = useParams<ViewerParams>();
+	const { templates, modelsIds } = useTicketFiltersContext();
+
 	const { setValue, control, watch, formState: { errors, dirtyFields } } = useFormContext();
 	const { fields, append, remove } = useFieldArray({
 		control,
@@ -56,13 +101,15 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 	const error = errors.values || {};
 	const operator = watch('operator');
 
+	// This is for triggering a new re render if these federations or containers change
+	// in order to have the latests users/jobs
+	FederationsHooksSelectors.selectFederations(); 
+	ContainersHooksSelectors.selectContainers(); 
+
 	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const isRangeOp = isRangeOperator(operator);
 	const emptyValue = { value: (isRangeOp ? ['', ''] : '') };
-	const selectOptions = type === 'template' ?
-		TicketsCardHooksSelectors.selectCurrentTemplates().map(({ code: value, name: displayValue }) => ({ value, displayValue, type: 'template' }))
-		: isSelectType(type) ? TicketsCardHooksSelectors.selectPropertyOptions(containerOrFederation, module, property) : [];
-
+	const selectOptions = getSelectOptions(module, property, type, templates, modelsIds);
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
 
@@ -133,25 +180,30 @@ export const FilterFormValues = ({ module, property, type }: FilterFormValuesPro
 		);
 	}
 
-	if (isSelectType(type)) {
-		const allJobsAndUsers = selectOptions.every(({ type: t }) => t === 'jobsAndUsers');
-		if (allJobsAndUsers) return (
+	if (isJobsAndUsersProperty(module, property, type))  {
+		return (
 			<FormJobsAndUsersSelect
 				multiple
-				excludeJobs={type === 'owner'}
 				maxItems={19}
 				name={name}
 				transformInputValue={(v) => compact(mapFormArrayToArray(v))}
-				transformOutputValue={(e) =>  getFilterFromEvent(e)}
+				transformOutputValue={(e) => getFilterFromEvent(e)}
 				formError={error?.[0]}
+				excludeJobs={(type === 'owner')}
+				usersAndJobs={selectOptions.map(({ value }) => value)}
 			/>
 		);
+	}
+
+	if (isSelectType(type)) {
+
+
 		return (
 			<FormMultiSelect
 				name={name}
 				transformInputValue={mapFormArrayToArray}
 				transformOutputValue={(e) => getFilterFromEvent(e)}
-				renderValue={(values: string[]) => values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value).join(', ')}
+				renderValue={(values: string[]) => arrToDisplayValue(values.map((value) => getOptionFromValue(value, selectOptions)?.displayValue ?? value))}
 				formError={error?.[0]}
 			>
 				{selectOptions.map(

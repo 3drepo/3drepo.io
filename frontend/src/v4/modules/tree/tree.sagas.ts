@@ -466,6 +466,11 @@ function* deselectNodes({ nodesIds = [] }) {
 		if (unhighlightedObjects.length) {
 			unhighlightedObjects.forEach(({ teamspace, meshes, modelId }) => {
 				const existingObjectIndex = selectedObjects.findIndex((o) => o.teamspace === teamspace && o.modelId === modelId);
+
+				if (existingObjectIndex === -1 ) {
+					return;
+				}
+
 				const existingObject = selectedObjects[existingObjectIndex];
 				if (existingObject.meshes.length === meshes.length) {
 					selectedObjects.splice(existingObjectIndex, 1);

@@ -17,6 +17,7 @@
 
 const { UUIDToString, stringToUUID } = require('../../../../../../../utils/helper/uuids');
 const { codeExists, createResponseCode, templates } = require('../../../../../../../utils/responseCodes');
+const { deleteIfUndefined, isEqual } = require('../../../../../../../utils/helper/objects');
 const { deserialiseUUIDsInTicket, processReadOnlyValues, validateTicket: validateTicketSchema } = require('../../../../../../../schemas/tickets');
 const { getTicketById, getTicketsByQuery } = require('../../../../../../../models/tickets');
 const { checkTicketTemplateExists } = require('../../../settings');
@@ -24,7 +25,6 @@ const { getArrayDifference } = require('../../../../../../../utils/helper/arrays
 const { getTemplateById } = require('../../../../../../../models/tickets.templates');
 const { getUserFromSession } = require('../../../../../../../utils/sessions');
 const { isArray } = require('../../../../../../../utils/helper/typeCheck');
-const { isEqual } = require('../../../../../../../utils/helper/objects');
 const { respond } = require('../../../../../../../utils/responder');
 const { validateMany } = require('../../../../../../common');
 
@@ -35,7 +35,7 @@ const processTicket = async (teamspace, project, model, template, author, newTic
 		template, newTicket, existingData, isImport);
 
 	if (existingData && isEqual(validatedTicket, { modules: {}, properties: {} })) {
-		throw createResponseCode(templates.invalidArguments, 'No valid properties to update.');
+		return null;
 	}
 
 	const deserialised = deserialiseUUIDsInTicket(validatedTicket, template);
@@ -54,6 +54,12 @@ const validateTicket = (isNewTicket) => async (req, res, next) => {
 		}
 
 		req.body = await processTicket(teamspace, project, model, template, user, req.body, req.ticketData);
+
+		// this is not a new ticket and there is nothing to update
+		if (!isNewTicket && !req.body) {
+			respond(req, res, templates.ok);
+			return;
+		}
 
 		await next();
 	} catch (err) {
@@ -122,11 +128,34 @@ const validateTicketImportData = (isNew) => async (req, res, next) => {
 			}
 		}
 
-		req.body.tickets = await Promise.all(req.body.tickets.map((ticket, i) => {
+		const filteredTickets = [];
+
+		await Promise.all(req.body.tickets.map(async (ticket, i) => {
 			const existingData = isNew ? undefined : req.ticketsData[i];
-			return processTicket(teamspace,
-				project, model, template, user, ticket, existingData, true);
+			const processedTicket = await processTicket(teamspace, project,
+				model, template, user, ticket, existingData, true);
+
+			// if processedTicket is null, then there are no valid changes
+			if (processedTicket) {
+				filteredTickets.push(deleteIfUndefined({ newTicket: processedTicket, existingData }));
+			}
 		}));
+
+		// If none of the tickets had any valid changes, return ok
+		if (!filteredTickets.length) {
+			respond(req, res, templates.ok);
+			return;
+		}
+
+		// empty the tickets arrays and populate with tickets that have actual changes
+		req.body.tickets = [];
+		req.ticketsData = [];
+		for (const { newTicket, existingData } of filteredTickets) {
+			req.body.tickets.push(newTicket);
+			if (existingData) {
+				req.ticketsData.push(existingData);
+			}
+		}
 
 		await next();
 	} catch (err) {

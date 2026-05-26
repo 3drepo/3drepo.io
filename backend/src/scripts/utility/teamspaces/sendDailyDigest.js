@@ -31,7 +31,6 @@ const { getUsersByQuery } = require(`${v5Path}/models/users`);
 
 const { logger } = require(`${v5Path}/utils/logger`);
 const { UUIDToString } = require(`${v5Path}/utils/helper/uuids`);
-const { uniqueElements } = require(`${v5Path}/utils/helper/arrays`);
 
 const { sendEmail } = require(`${v5Path}/services/mailer`);
 const { templates } = require(`${v5Path}/services/mailer/mailer.constants`);
@@ -110,11 +109,11 @@ const generateEmails = (data, dataRef, usersToUserInfo) => Promise.all(
 			const tickets = {};
 			const uri = `/v5/viewer/${teamspace}/${projectIDStr}/${modelIDStr}`;
 
-			notifData.forEach(({ type, tickets: ticketsArr, count }) => {
-				const ticketCodes = uniqueElements(ticketsArr.flatMap(
-					(ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []));
+			notifData.forEach(({ type, tickets: ticketsArr }) => {
+				const ticketCodes = ticketsArr.flatMap(
+					(ticketId) => tsData.tickets[(UUIDToString(ticketId))] ?? []);
 				if (!ticketCodes.length) return;
-				const ticketData = { count, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
+				const ticketData = { count: ticketCodes.length, link: `${uri}?ticketSearch=${ticketCodes.join(',')}` };
 				switch (type) {
 				case notificationTypes.TICKET_UPDATED:
 					tickets.updated = ticketData;

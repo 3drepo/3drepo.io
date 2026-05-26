@@ -18,6 +18,7 @@
 import { isString } from 'lodash';
 import { Group, GroupOverride, ViewpointState, Properties, ITicket } from './tickets.types';
 
+export const NONE_OPTION = 'none';
 const overrideWithGroups = (groups: Record<string, Group>) => (override: GroupOverride) => {
 	const overrideToReturn = { ...override };
 	if (isString(override.group) && groups[override.group]) {

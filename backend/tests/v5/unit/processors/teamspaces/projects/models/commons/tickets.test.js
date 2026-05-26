@@ -17,7 +17,8 @@
 
 const { cloneDeep, times, isBuffer } = require('lodash');
 const { src } = require('../../../../../../helper/path');
-const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber } = require('../../../../../../helper/services');
+const { generateRandomObject, generateUUID, generateRandomString, generateTemplate, generateTicket, generateGroup, generateRandomNumber, determineTestGroup, generateUUIDString } = require('../../../../../../helper/services');
+const { supportedPatterns } = require('../../../../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 const { queryOperators, specialQueryFields } = require(`${src}/schemas/tickets/tickets.filters`);
@@ -34,6 +35,9 @@ const { events } = require(`${src}/services/eventsManager/eventsManager.constant
 
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
+
+jest.mock('../../../../../../../../src/v5/models/modelSettings');
+const ModelSettings = require(`${src}/models/modelSettings`);
 
 jest.mock('../../../../../../../../src/v5/models/tickets.templates');
 const TemplatesModel = require(`${src}/models/tickets.templates`);
@@ -1199,7 +1203,293 @@ const testGetOpenTicketsCount = () => {
 	});
 };
 
-describe('processors/teamspaces/projects/models/commons/tickets', () => {
+const testInitialiseAutomatedProperties = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const modelName = generateRandomString();
+	const moduleName = generateRandomString();
+	const temCode = generateRandomString(3);
+	const ticketNum = generateRandomNumber();
+	const propName = generateRandomString();
+	describe.each([
+		['Should not update anything if there is no automated fields', {}],
+		['Should update the field if it is automated', { value: 'xyz' }, 'xyz'],
+		['Should update the field if it is automated (model name)', { value: `{${supportedPatterns.MODEL_NAME}}` }, modelName],
+		['Should update the field if it is automated (template code)', { value: 'code{template_code}' }, `code${temCode}`],
+		['Should update the field if it is automated (ticket number)', { value: 'code{ticket_number}' }, `code${ticketNum}`],
+		['Should update the field if it is automated (mutliple properties)', { value: '{model_name}:{template_code}:{ticket_number}' }, `${modelName}:${temCode}:${ticketNum}`],
+
+	])('Initialise automated fields', (desc, config, value) => {
+		test(desc, async () => {
+			const property = { name: propName, type: propTypes.TEXT, ...config };
+			const template = {
+				_id: generateUUIDString(),
+				name: generateRandomString(),
+				code: temCode,
+				properties: [property],
+				modules: [{
+					name: moduleName,
+					properties: [property],
+				},
+				{
+					type: presetModules.SAFETIBASE,
+					properties: [property],
+				},
+				],
+			};
+			const nTickets = 1;
+			const expectedData = [];
+			const tickets = times(nTickets, () => {
+				const ticket = {
+					model,
+					project,
+					title: generateRandomString(),
+					number: ticketNum,
+					properties: {},
+					modules: { [moduleName]: {}, [presetModules.SAFETIBASE]: {} },
+				};
+				const resTicket = cloneDeep(ticket);
+
+				if (value !== undefined) {
+					resTicket.properties[propName] = value;
+					resTicket.modules[moduleName][propName] = value;
+					resTicket.modules[presetModules.SAFETIBASE][propName] = value;
+				}
+				expectedData.push(resTicket);
+
+				return ticket;
+			});
+
+			if (value !== undefined) {
+				ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+			}
+
+			await expect(Tickets.initialiseAutomatedProperties(teamspace, project, model, tickets, template))
+				.resolves.toEqual(expectedData);
+
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value }, [presetModules.SAFETIBASE]: { [propName]: value } },
+
+			};
+
+			if (value === undefined) {
+				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+			} else {
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
+					tickets, times(tickets.length, () => updateData), 'system');
+
+				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(1);
+				expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+			}
+		});
+	});
+};
+
+const testOnTemplateUpdated = () => {
+	const teamspace = generateRandomString();
+	const modelName = generateRandomString();
+	const moduleName = generateRandomString();
+	const temCode = generateRandomString(3);
+	const ticketNum = generateRandomNumber();
+	const propName = generateRandomString();
+	describe.each([
+		['Should do nothing if there is no ticket associated with the template', { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, undefined, false],
+		['Should do nothing if the template does not contain automated properties', { }, undefined],
+		['Should do nothing if the template automated property does not contain {template_code}', { value: 'xyz' }, 'xyz'],
+		[`Should update the field if it is automated (${supportedPatterns.TEMPLATE_CODE})`, { value: `code{${supportedPatterns.TEMPLATE_CODE}}` }, `code${temCode}`],
+		['Should update the field if it is automated (mutliple properties)',
+			{ value: `code{${supportedPatterns.MODEL_NAME}}:{${supportedPatterns.TEMPLATE_CODE}}:{${supportedPatterns.TICKET_NUMBER}}` }, `code${modelName}:${temCode}:${ticketNum}`],
+
+	])('On template code updated', (desc, config, value, hasTickets = true) => {
+		test(desc, async () => {
+			const property = { name: propName, type: propTypes.TEXT, ...config };
+			const template = {
+				_id: generateUUIDString(),
+				name: generateRandomString(),
+				code: temCode,
+				properties: [property],
+				modules: [{
+					name: moduleName,
+					properties: [property],
+				}],
+			};
+			const project = generateRandomString();
+			const models = times(2, () => generateRandomString());
+			const nTickets = hasTickets ? 6 : 0;
+			const expectedData = [];
+			const tickets = times(nTickets, (i) => {
+				const ticket = {
+					title: generateRandomString(),
+					project,
+					model: models[i % 2],
+					number: ticketNum,
+					properties: {},
+					modules: { [moduleName]: {} },
+				};
+				const resTicket = cloneDeep(ticket);
+
+				if (value !== undefined) {
+					resTicket.properties[propName] = value;
+					resTicket.modules[moduleName][propName] = value;
+				}
+				expectedData.push(resTicket);
+
+				return ticket;
+			});
+
+			if (value !== undefined) {
+				models.forEach(() => {
+					ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+				});
+			}
+
+			const fetchedTickets = config.value?.includes(`{${supportedPatterns.TEMPLATE_CODE}}`) || value !== undefined;
+
+			if (fetchedTickets) {
+				TicketsModel.getTicketsByTemplateId.mockResolvedValueOnce(tickets);
+			}
+
+			await Tickets.onTemplateUpdated(teamspace, template);
+
+			if (fetchedTickets) {
+				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledTimes(1);
+				expect(TicketsModel.getTicketsByTemplateId).toHaveBeenCalledWith(teamspace,
+					template._id, { number: 1, _id: 1, project: 1, model: 1 });
+			} else {
+				expect(TicketsModel.getTicketsByTemplateId).not.toHaveBeenCalled();
+			}
+
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value } },
+			};
+
+			if (value === undefined) {
+				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+			} else {
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(models.length);
+				models.forEach((model) => {
+					expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace,
+						project, model, tickets.filter(({ model: ticketModel }) => model === ticketModel),
+						times(tickets.length / models.length, () => updateData), 'system');
+				});
+
+				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(models.length);
+				models.forEach((model) => {
+					expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+				});
+			}
+		});
+	});
+};
+
+const testOnModelNameUpdated = () => {
+	const teamspace = generateRandomString();
+	const project = generateRandomString();
+	const model = generateRandomString();
+	const modelName = generateRandomString();
+	const moduleName = generateRandomString();
+	const propName = generateRandomString();
+	describe.each([
+		['Should do nothing if there is no ticket associated with the templates', { value: `code{${supportedPatterns.MODEL_NAME}}` }, undefined, true, false],
+		['Should do nothing if there is no templates', { value: `code{${supportedPatterns.MODEL_NAME}}` }, undefined, false, false],
+		['Should do nothing if the template does not contain automated properties', { }],
+		[`Should do nothing if the template automated property does not contain ${supportedPatterns.MODEL_NAME}`, { value: 'xyz' }],
+		[`Should update the field if it is automated (${supportedPatterns.MODEL_NAME})`, { value: `code{${supportedPatterns.MODEL_NAME}}` }, `code${modelName}`],
+	])('On model name updated', (desc, config, value, hasTemplates = true, hasTickets = true) => {
+		test(desc, async () => {
+			const property = { name: propName, type: propTypes.TEXT, ...config };
+			const templates = times(hasTemplates ? 2 : 0, () => ({
+				_id: generateUUIDString(),
+				name: generateRandomString(),
+				properties: [property],
+				modules: [{
+					name: moduleName,
+					properties: [property],
+				}],
+			}));
+			const nTickets = hasTickets ? 5 : 0;
+			const expectedData = [];
+			const tickets = times(nTickets, () => {
+				const ticket = {
+					title: generateRandomString(),
+					project,
+					model,
+					properties: {},
+					modules: { [moduleName]: {} },
+				};
+				const resTicket = cloneDeep(ticket);
+
+				if (value !== undefined) {
+					resTicket.properties[propName] = value;
+					resTicket.modules[moduleName][propName] = value;
+				}
+				expectedData.push(resTicket);
+
+				return ticket;
+			});
+			TemplatesModel.getTemplatesByQuery.mockResolvedValueOnce(templates);
+
+			if (value !== undefined) {
+				templates.forEach(() => {
+					ModelSettings.getModelById.mockResolvedValueOnce({ name: modelName });
+				});
+			}
+
+			const fetchedTickets = config.value?.includes(`{${supportedPatterns.MODEL_NAME}}`);
+
+			if (fetchedTickets) {
+				templates.forEach(() => {
+					TicketsModel.getTicketsByQuery.mockResolvedValueOnce(tickets);
+				});
+			}
+
+			await expect(Tickets.onModelNameUpdated(teamspace, project, model))
+				.resolves.toBeUndefined();
+
+			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledTimes(1);
+			expect(TemplatesModel.getTemplatesByQuery).toHaveBeenCalledWith(teamspace,
+				{ $or: [
+					{ 'properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+					{ 'modules.properties.value': { $regex: `{${supportedPatterns.MODEL_NAME}}` } },
+				] });
+
+			if (fetchedTickets) {
+				expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(templates.length);
+				templates.forEach((template) => {
+					expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, model,
+						{ type: template._id }, { number: 1, _id: 1, project: 1, model: 1 });
+				});
+			} else {
+				expect(TicketsModel.getTicketsByQuery).not.toHaveBeenCalled();
+			}
+
+			const updateData = {
+				properties: { [propName]: value },
+				modules: { [moduleName]: { [propName]: value } },
+			};
+
+			if (value === undefined) {
+				expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+			} else {
+				expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(templates.length);
+				expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, model,
+					tickets, times(tickets.length, () => updateData), 'system');
+
+				expect(ModelSettings.getModelById).toHaveBeenCalledTimes(templates.length);
+				expect(ModelSettings.getModelById).toHaveBeenCalledWith(teamspace, model, { name: 1 });
+			}
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
+	beforeEach(() => {
+		jest.resetAllMocks();
+	});
 	testAddTicket();
 	testImportTickets();
 	testGetTicketResourceAsStream();
@@ -1208,4 +1498,7 @@ describe('processors/teamspaces/projects/models/commons/tickets', () => {
 	testUpdateManyTickets();
 	testGetTicketList();
 	testGetOpenTicketsCount();
+	testInitialiseAutomatedProperties();
+	testOnTemplateUpdated();
+	testOnModelNameUpdated();
 });

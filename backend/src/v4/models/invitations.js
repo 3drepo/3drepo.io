@@ -39,6 +39,7 @@ const { contains: setContains } = require("./helper/set");
 
 const responseCodes = require("../response_codes.js");
 const { omit } = require("lodash");
+const { getTeamspaceSetting } = require(`${v5Path}/models/teamspaceSettings`);
 
 const MODELS_PERMISSION = ["collaborator", "commenter", "viewer"];
 
@@ -246,6 +247,9 @@ const applyTeamspacePermissions = (invitedUser) => async ({ teamspace, job, perm
 	const teamPerms = permissions.teamspace_admin ? ["teamspace_admin"] : [];
 
 	try {
+		// ensure the teamspace exists before adding the user to it
+		await getTeamspaceSetting(teamspace, { _id: 1 });
+
 		await User.addTeamMember(teamspace, invitedUser, job, teamPerms, undefined, true);
 
 		if (!permissions.teamspace_admin) {

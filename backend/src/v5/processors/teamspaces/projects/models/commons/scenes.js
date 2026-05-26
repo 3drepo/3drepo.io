@@ -18,11 +18,17 @@
 const Scene = {};
 
 const { UUIDToString, stringToUUID } = require('../../../../../utils/helper/uuids');
+const { getFile, getFileAsStream } = require('../../../../../services/filesManager');
+const { getNodeByQuery, getNodesBySharedIds } = require('../../../../../models/scenes');
 const { idTypes, idTypesToKeys, metaKeyToIdType } = require('../../../../../models/metadata.constants');
+const CombinedStream = require('combined-stream');
+const GeoMaths = require('../../../../../utils/helper/geoMaths');
 const config = require('../../../../../utils/config');
-const { getFile } = require('../../../../../services/filesManager');
 const { getMetadataByQuery } = require('../../../../../models/metadata');
-const { getNodesBySharedIds } = require('../../../../../models/scenes');
+const { getSuperMeshesInRevision } = require('../../../../../models/scenes.stash');
+const { nodeTypes } = require('../../../../../models/scenes.constants');
+const stringToStream = require('string-to-stream');
+const { templates } = require('../../../../../utils/responseCodes');
 
 const contextCache = {};
 
@@ -119,6 +125,109 @@ Scene.sharedIdsToExternalIds = async (teamspace, container, revId, sharedIds) =>
 	const metadata = await getMetadataByQuery(teamspace, container, query, projection);
 
 	return Scene.getExternalIdsFromMetadata(metadata);
+};
+
+const calculateNodeMatrix = async (teamspace, project, container, sharedId) => {
+	const transNode = await getNodeByQuery(teamspace, project, container,
+		{ shared_id: sharedId, type: nodeTypes.TRANSFORMATION }, { parents: 1, matrix: 1 });
+	if ((transNode.parents || []).length > 0) {
+		const parentMatrix = await calculateNodeMatrix(teamspace, project, container, transNode.parents[0]);
+		return transNode.matrix ? GeoMaths.matrices.multiply(parentMatrix, transNode.matrix) : parentMatrix;
+	}
+
+	return transNode.matrix || GeoMaths.matrices.identity();
+};
+
+const fetchMeshBinariesStreams = async (teamspace, container, refObj) => {
+	const { elements: { vertices, faces }, buffer: { start: startIndex, name } } = refObj;
+
+	// nodejs API on createReadStream : start and end index are inclusive, thus we need -1 on end
+	const verticeRegion = {
+		start: startIndex + vertices.start,
+		end: startIndex + vertices.start + vertices.size - 1,
+	};
+	const faceRegion = {
+		start: startIndex + faces.start,
+		end: startIndex + faces.start + faces.size - 1,
+	};
+
+	const { readStream: verticesStream } = await getFileAsStream(teamspace, `${container}.scene`, name, verticeRegion);
+	const { readStream: facesStream } = await getFileAsStream(teamspace, `${container}.scene`, name, faceRegion);
+
+	return { verticesStream, facesStream };
+};
+
+Scene.getTexture = async (teamspace, project, container, textureId) => {
+	const textureNode = await getNodeByQuery(teamspace, project, container,
+		{ _id: textureId, type: nodeTypes.TEXTURE }, {
+			_id: 1,
+			_blobRef: 1,
+			extension: 1,
+		});
+
+	// eslint-disable-next-line no-underscore-dangle
+	if (!textureNode || !textureNode._blobRef) {
+		throw templates.textureNotFound;
+	}
+
+	const { _blobRef: { elements, buffer } } = textureNode;
+
+	// chunkInfo is passed to createReadStream, which expects `start` and `end` properties
+	const chunkInfo = {
+		start: buffer.start + elements.data.start,
+		end: buffer.start + elements.data.start + elements.data.size,
+	};
+
+	const res = await getFileAsStream(teamspace, `${container}.scene`, buffer.name, chunkInfo);
+
+	const mimeType = `image/${textureNode.extension === 'jpg' ? 'jpeg' : textureNode.extension}`;
+
+	return { ...res, mimeType, size: chunkInfo.end - chunkInfo.start };
+};
+
+Scene.getMeshData = async (teamspace, project, container, meshId) => {
+	const projection = {
+		parents: 1,
+		_blobRef: 1,
+		primitive: 1,
+	};
+
+	const meshNode = await getNodeByQuery(teamspace, project, container,
+		{ _id: meshId, type: nodeTypes.MESH }, projection);
+
+	// eslint-disable-next-line no-underscore-dangle
+	if (!meshNode || !meshNode._blobRef) {
+		throw templates.meshNotFound;
+	}
+
+	const matrix = await calculateNodeMatrix(teamspace, project, container, meshNode.parents[0]);
+	const mesh = meshNode;
+
+	// eslint-disable-next-line no-underscore-dangle
+	const { verticesStream, facesStream } = await fetchMeshBinariesStreams(teamspace, container, mesh._blobRef);
+
+	const combinedStream = CombinedStream.create();
+	combinedStream.append(stringToStream(['{"matrix":', JSON.stringify(matrix)].join('')));
+	combinedStream.append(stringToStream([',"primitive":', mesh.primitive || 3].join('')));
+	combinedStream.append(stringToStream(',"vertices":['));
+	combinedStream.append(GeoMaths.vectors.toJSONStream(verticesStream));
+	combinedStream.append(stringToStream('],"faces":['));
+	combinedStream.append(GeoMaths.faces.toJSONStream(facesStream));
+	combinedStream.append(stringToStream(']}'));
+	return combinedStream;
+};
+
+Scene.getSuperMeshesInfo = async (teamspace, container, revision) => {
+	const projection = {
+		_id: 1,
+		vertices_count: 1,
+		faces_count: 1,
+		uv_channels_count: 1,
+		bounding_box: 1,
+		primitive: 1,
+	};
+	const superMeshes = await getSuperMeshesInRevision(teamspace, container, revision, projection);
+	return { superMeshes };
 };
 
 module.exports = Scene;

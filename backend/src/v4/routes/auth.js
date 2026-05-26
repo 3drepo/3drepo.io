@@ -301,9 +301,9 @@ function getAvatar(req, res, next) {
 		if (!avatar) {
 			return Promise.reject({ resCode: responseCodes.USER_DOES_NOT_HAVE_AVATAR });
 		}
-		const fileExt = await fileExtensionFromBuffer(avatar);
+		const fileExt = await fileExtensionFromBuffer(avatar.buffer);
 		req.params.format = fileExt || "png";
-		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, avatar);
+		responseCodes.respond(responsePlace, req, res, next, responseCodes.OK, avatar.buffer);
 
 	}).catch((err) => {
 		responseCodes.respond(responsePlace, req, res, next, err.resCode || utils.mongoErrorToResCode(err), err.resCode ? {} : err);

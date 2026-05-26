@@ -19,15 +19,14 @@ import { PureComponent } from 'react';
 
 import { isEmpty } from 'lodash';
 
-import { RouteComponentProps } from 'react-router';
-import { RISK_DEFAULT_HIDDEN_LEVELS, RISK_FILTERS } from '../../../../constants/risks';
+import { RISK_FILTERS } from '../../../../constants/risks';
 import { VIEWER_PANELS } from '../../../../constants/viewerGui';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { filtersValuesMap, getHeaderMenuItems } from '../../../../helpers/risks';
 import RiskDetails from './components/riskDetails/riskDetails.container';
 import { RisksContainer } from './risks.styles';
 
-interface IProps  extends RouteComponentProps<any> {
+interface IProps {
 	selectedRisk: any;
 	teamspace: string;
 	model: any;

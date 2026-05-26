@@ -18,23 +18,59 @@
 import { ResizableTableRow } from '@controls/resizableTableContext/resizableTableRow/resizableTableRow.component';
 import styled, { css } from 'styled-components';
 import { TextOverflow } from '@controls/textOverflow';
+import { ResizableTableHeader } from '@controls/resizableTableContext/resizableTableHeader/resizableTableHeader.component';
 
 export const Headers = styled(ResizableTableRow)`
 	gap: 1px;
-	width: fit-content;
+	width: 100%;
+	height: 34px;
 `;
 
 export const PlaceholderForStickyFunctionality = styled(Headers)``;
 
-export const Header = styled(TextOverflow)<{ $selectable?: boolean }>`
-	${({ theme }) => theme.typography.kicker};
-	color: ${({ theme }) => theme.palette.base.main};
-	padding: 2px 0 8px 10px;
+export const HeaderCellText = styled(TextOverflow)`
 	text-align: start;
 	box-sizing: border-box;
-	user-select: none;
+	height: auto;
+	cursor: pointer;
+`;
 
-	${({ $selectable }) => $selectable && css`
-		cursor: pointer;
-	`}
+export const HeaderCell = styled(ResizableTableHeader)`
+	align-self: center;
+	height: 100%;
+	padding: 0 5px;
+	margin: 0;
+	${({ theme }) => theme.typography.kicker};
+	color: ${({ theme }) => theme.palette.base.main};
+	user-select: none;
+	align-items: center;
+
+	svg {
+		width: 16px;
+		align-self: center;
+	}
+
+`;
+
+const activeStyles = css`
+	background-color: ${({ theme }) => theme.palette.base.main};
+	color: ${({ theme }) => theme.palette.primary.contrast};
+`;
+
+export const BulkEditHeaderButton = styled.div<{ $active?: boolean }>`
+	display: flex;
+	border: 1px solid ${({ theme }) => theme.palette.base.main};
+	border-radius: 5px;
+	padding: 4px 5px;
+	width: 100%;
+
+	cursor: pointer;
+	> * {
+	}
+	
+	&:hover {
+		${activeStyles}
+	}
+
+	${({ $active }) => $active && activeStyles}
 `;

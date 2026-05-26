@@ -27,7 +27,7 @@ type ToolbarButtonProps = {
 	tooltipProps?: Omit<TooltipProps, 'title' | 'children'>;
 };
 export const ToolbarButton = ({ Icon, title, tooltipProps, ...props }: ToolbarButtonProps) => (
-	<Tooltip {...tooltipProps} title={title}>
+	<Tooltip {...tooltipProps} placement="top" title={title}>
 		<Container {...props}>
 			<Icon />
 		</Container>

@@ -15,14 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import { TableIconContainer } from '@controls/tableIcon/tableIcon.styles';
 import styled, { css } from 'styled-components';
 
-export const IconContainer = styled.div<{ $ascendingOrder?: boolean }>`
-	animation: all .2s;
-	display: inline-flex;
-	margin-right: 5px;
-
-	${({ $ascendingOrder }) => $ascendingOrder && css`
-		transform: rotate(180deg);
-	`}
+export const IconContainer = styled(TableIconContainer)<{ $ascendingOrder?: boolean }>`
+	svg  {
+		transition: all 0.2s ease-out;
+		${({ $ascendingOrder }) => $ascendingOrder && css`
+			transform: rotate(180deg);
+		`}
+	}
 `;
