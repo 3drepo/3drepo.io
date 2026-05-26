@@ -85,7 +85,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 				...obj.field,
 				values: obj.field?.values?.map(({ value }) => ({ value })),
 			},
-			values: obj.values.filter(({ value }) => value),
+			values: obj.values?.filter(({ value }) => value),
 		});
 		return !isEqual(cleanValuesForComparison(defaultValues), cleanValuesForComparison(formValues));
 	};
