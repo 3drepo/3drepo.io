@@ -164,7 +164,7 @@ export const UploadListItemDestination = memo(({
 			return (
 				<ExistingDestination
 					key={option.name}
-					container={option}
+					emptyLabel={formatMessage({ id: 'containersUploads.list.item.title.latestRevision.empty', defaultMessage: 'Container empty' })}
 					inUse={(nameIsTaken(option))}
 					name={option.name}
 					latestRevision={option.latestRevision}

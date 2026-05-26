@@ -88,6 +88,16 @@ const genYargs = /* istanbul ignore next */(yargs) => {
 				describe: 'Comma seperated string of enabled modules (null to remove all):',
 				type: 'string',
 			})
+		.option(ADD_ONS.USERS_PROVISIONED,
+			{
+				describe: 'If enabled, user & roles management are expected to be managed externally.',
+				type: 'boolean',
+			})
+		.option(ADD_ONS.DISABLE_PERMISSIONS_ON_UI,
+			{
+				describe: 'Disables the ability to tweak permissions on the UI.',
+				type: 'boolean',
+			})
 		.option('teamspace',
 			{
 				describe: 'teamspace to update',

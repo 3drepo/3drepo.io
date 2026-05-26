@@ -43,12 +43,23 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	const prevValue = useRef(undefined);
 	const { getValues } = useFormContext();
 	const ticket = getValues() as ITicket;
-	const selectedTemplateId = ticket?.type ?? TicketsCardHooksSelectors.selectSelectedTemplateId();
+	let selectedTemplateId = TicketsCardHooksSelectors.selectSelectedTemplateId();
+
+	if (!selectedTemplateId) {
+		selectedTemplateId = ticket?.type;
+	}
+
 	const template = TicketsHooksSelectors.selectTemplateById(containerOrFederation, selectedTemplateId);
 	const selectedPin = TicketsCardHooksSelectors.selectSelectedTicketPinId();
 
-	const colorTriggerPropPath = getColorTriggerPropName(name, template);
-	const colorTriggerPropValue = useWatch({ name: colorTriggerPropPath }) ?? get(ticket, colorTriggerPropPath);
+	let colorTriggerPropPath = '';
+	let colorTriggerPropValue = '';
+
+	colorTriggerPropPath = getColorTriggerPropName(name, template);
+	colorTriggerPropValue = useWatch({ name: colorTriggerPropPath });
+	if (!colorTriggerPropValue) {
+		colorTriggerPropValue = get(ticket, colorTriggerPropPath);
+	}
 
 	const isNewTicket = !ticket?._id;
 	const ticketId = !isNewTicket ? ticket._id : NEW_TICKET_ID;
@@ -102,6 +113,8 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	};
 
 	const refreshPin = () => {
+		if (!isViewer) return;
+
 		if (prevValue.current) {
 			ViewerService.removePin(pinId);
 		}
@@ -130,14 +143,20 @@ export const CoordsProperty = ({ value, label, onChange, onBlur, required, error
 	}, [value]);
 
 	useEffect(() => () => {
+		if (!isViewer) return;
+
 		ViewerService.clearMeasureMode();
 	}, [ticketId]);
 
 	useEffect(() => {
+		if (!isViewer) return;
+
 		ViewerService.setSelectionPin({ id: pinId, isSelected });
 	}, [isSelected]);
 
 	useEffect(() => () => {
+		if (!isViewer) return;
+
 		TicketsCardActionsDispatchers.setPinToDrop(null);
 		if (isNewTicket) ViewerService.removePin(pinId);
 	}, []);

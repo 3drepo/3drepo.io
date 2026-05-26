@@ -28,13 +28,20 @@ export const Link = styled(LinkBase)<{ disabled?: boolean }>`
 	`}
 `;
 
+export const TicketsTableLayout = styled.div`
+	display: flex;
+	flex-flow: column;
+	height: 100%;
+`;
+
+
 export const FiltersContainer = styled.div`
 	width: 100%;
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
 	align-items: flex-end;
-	margin-bottom: 28px;
+	margin-bottom: 18px;
 `;
 
 export const FlexContainer = styled.div`

@@ -30,15 +30,33 @@ const { v5Path } = require('../../../interop');
 const { logger } = require(`${v5Path}/utils/logger`);
 const { getTeamspaceList } = require('../../utils');
 
+const { deleteIfUndefined } = require(`${v5Path}/utils/helper/objects`);
+const { DRAWINGS_HISTORY_COL } = require(`${v5Path}/models/revisions.constants`);
 const { updateMany } = require(`${v5Path}/handler/db`);
-const { SETTINGS_COL } = require(`${v5Path}/models/modelSettings.constants`);
+const { SETTINGS_COL, processStatuses } = require(`${v5Path}/models/modelSettings.constants`);
 const Path = require('path');
 
 const processTeamspace = async (teamspace, model) => {
-	const query = model ? { _id: model } : {};
+	const drawingStatusQuery = {
+		status: {
+			$exists: true,
+			$nin: [
+				processStatuses.OK,
+				processStatuses.FAILED,
+			],
+		},
+	};
 
-	const action = { $unset: { status: 1 } };
-	await updateMany(teamspace, SETTINGS_COL, query, action);
+	const modelQuery = deleteIfUndefined({ _id: model });
+	const drawingQuery = deleteIfUndefined({ model, ...drawingStatusQuery });
+
+	const modelAction = { $unset: { status: 1 } };
+	const drawingAction = { $set: { status: processStatuses.FAILED } };
+
+	await Promise.all([
+		updateMany(teamspace, SETTINGS_COL, modelQuery, modelAction),
+		updateMany(teamspace, DRAWINGS_HISTORY_COL, drawingQuery, drawingAction),
+	]);
 };
 
 const run = async (teamspace, model) => {

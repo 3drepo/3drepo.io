@@ -116,8 +116,9 @@ module.exports = {
 	},	crossOrigin: true,
 	cn_queue: {
 		host: 'amqp://localhost:5672',
-		worker_queue: 'jobq',
 		model_queue: 'modelq',
+		clash_queue: 'clashq',
+		drawing_queue: 'drawingq',
 		callback_queue: 'callbackq',
 		upload_dir: '/tmp',
 		shared_storage: '/tmp',

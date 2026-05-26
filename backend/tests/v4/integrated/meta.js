@@ -22,7 +22,7 @@
 const SessionTracker = require("../../v4/helpers/sessionTracker")
 const request = require("supertest");
 const expect = require("chai").expect;
-const app = require("../../../src/v4/services/api.js").createApp();
+const { createAppAsync } = require("../../../src/v4/services/api.js");
 const logger = require("../../../src/v4/logger.js");
 const systemLogger = logger.systemLogger;
 const responseCodes = require("../../../src/v4/response_codes.js");
@@ -50,6 +50,7 @@ describe("Metadata", function () {
 	const groupFederation = "80bc4290-0f94-11eb-970b-03c55a1e1b3a";
 
 	before(async function() {
+		const app = await createAppAsync();
 		await new Promise((resolve) => {
 			server = app.listen(8080, () => {
 				console.log("API test server is listening on port 8080!");
@@ -526,17 +527,12 @@ describe("Metadata", function () {
 				});
 		});
 
-		it("retrieving mesh IDs with empty rule query should succeed", function(done) {
+		it("retrieving mesh IDs with empty rule query should fail", function(done) {
 			const query = [];
 
 			groupUserAgent.post(`/${groupUser}/${groupModel}/revision/master/head/meta/rules?meshids=true`)
 				.send(query)
-				.expect(200, function(err, res) {
-					expect(res.body[0].account).to.equal(groupUser);
-					expect(res.body[0].model).to.equal(groupModel);
-					expect(res.body[0].mesh_ids.length).to.equal(1106);
-					done(err);
-				});
+				.expect(400, done);
 		});
 
 		it("retrieving metadata with rule query should succeed", function(done) {

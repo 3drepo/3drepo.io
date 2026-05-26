@@ -21,14 +21,18 @@ import { ProjectsHooksSelectors, CurrentUserHooksSelectors, TeamspacesHooksSelec
 import { TeamspacesActions } from '@/v4/modules/teamspaces';
 import { Board as V4Board } from '@/v4/routes/board';
 import { selectBoardDomain } from '@/v4/modules/board';
-import { useHistory, useLocation, useRouteMatch } from 'react-router-dom';
+import { useNavigate, useLocation, useMatch, useParams, Navigate } from 'react-router-dom';
 import { UserManagementActions } from '@/v4/modules/userManagement';
 import { Container } from './board.styles';
+import { NOT_FOUND_ROUTE_PATH } from '../../../routes.constants';
+import { BOARD_TYPES } from '@/v4/modules/board/board.constants';
 
 export const Board = () => {
-	const history = useHistory();
+	const navigate = useNavigate();
 	const location = useLocation();
-	const match = useRouteMatch();
+	const { type } = useParams();
+
+	const match = useMatch('*');
 	const dispatch = useDispatch();
 	const board = useSelector(selectBoardDomain);
 	const teamspace = TeamspacesHooksSelectors.selectCurrentTeamspace();
@@ -43,6 +47,10 @@ export const Board = () => {
 		dispatch(TeamspacesActions.fetchTeamspacesIfNecessary(username));
 	}, [projectName, username]);
 
+	if (!Object.values(BOARD_TYPES).includes(type)) {
+		return <Navigate to={NOT_FOUND_ROUTE_PATH} replace />
+	}
+	
 	if (!componentIsReady) return (<></>);
 
 	return (
@@ -50,7 +58,7 @@ export const Board = () => {
 			<V4Board
 				currentTeamspace={teamspace}
 				match={match}
-				history={history}
+				navigate={navigate}
 				location={location}
 				selectedRiskFilters={[]}
 			/>

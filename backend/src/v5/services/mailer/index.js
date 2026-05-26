@@ -61,7 +61,7 @@ checkMailerConfig().catch(
 	// istanbul ignore next
 	(err) => {
 		logger.logError(`Failed to initialise mailer: ${err.message}`);
-		// eslint-disable-next-line no-process-exit
+		// eslint-disable-next-line n/no-process-exit
 		process.exit(1);
 	},
 );

@@ -17,6 +17,8 @@
 
 const { src } = require('./path');
 
+const { getUserId } = require(`${src}/models/users`);
+
 const { CSRF_COOKIE, SESSION_HEADER } = require(`${src}/utils/sessions.constants`);
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -53,7 +55,7 @@ class SessionTracker {
 
 	// We expect the user data to be the same format as the data returned by
 	// generateUserCredentials in serviceHelper
-	async login({ user: userId, basicData: { email } }, { headers = {}, teamspace } = {}) {
+	async login({ user, basicData: { email } }, { headers = {}, teamspace } = {}) {
 		const resp = await this.agent.get('/v5/authentication/authenticate?redirectUri=https://localhost:3200')
 			.set(headers)
 			.expect(templates.ok.status);
@@ -67,10 +69,14 @@ class SessionTracker {
 		const accounts = [];
 		let authAccount = 'abc';
 
+		this.headers = headers;
+
 		if (teamspace) {
 			authAccount = await getTeamspaceRefId(teamspace);
 			accounts.push(authAccount);
 		}
+
+		const userId = await getUserId(user);
 
 		getUserInfoFromToken.mockResolvedValueOnce({ userId, email, accounts, authAccount });
 
@@ -78,7 +84,7 @@ class SessionTracker {
 			.set(headers)
 			.expect(302);
 
-		const { body } = await this.get('/v5/login').expect(200);
+		const { body } = await this.get('/v5/login').set(headers).expect(200);
 		if (teamspace) {
 			expect(body.authenticatedTeamspace).toEqual(teamspace);
 		}
@@ -96,10 +102,14 @@ class SessionTracker {
 	}
 
 	setAuthHeaders(action) {
+		if (this.headers) {
+			action.set(this.headers);
+		}
 		if (this.cookies.token) {
 			return action.set(CSRF_HEADER, this.cookies.token)
 				.set('Cookie', generateCookieArray(this.cookies));
 		}
+
 		return action.set('Cookie', generateCookieArray(this.cookies));
 	}
 

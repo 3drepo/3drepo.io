@@ -25,7 +25,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
 import { useParams, generatePath } from 'react-router-dom';
 import TrelloBoard from 'react-trello';
-import { BOARD_ROUTE, ViewerParams } from '@/v5/ui/routes/routes.constants';
+import { BOARD_ROUTE, BOARD_ROUTE_WITH_MODEL, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
@@ -85,7 +85,7 @@ interface ILane {
 
 interface IProps {
 	currentTeamspace: string;
-	history: any;
+	navigate: (to: string, options?: { replace?: boolean }) => void;
 	location: any;
 	match: any;
 	lanes: ILane[];
@@ -238,27 +238,30 @@ export function Board(props: IProps) {
 
 	const teamspacesItems = useMemo(() => props.teamspaces.map(({ account }) => ({ value: account })), [props.teamspaces]);
 
-	const getPath = ({ typePath = type, modelPath = modelId }: any) => generatePath(BOARD_ROUTE, {
-		type: typePath,
-		containerOrFederation: modelPath,
-		project: projectId,
-		teamspace,
-	});
+	const getPath = ({ typePath = type, modelPath = modelId }: any) => {
+		const boardPath = modelPath ? BOARD_ROUTE_WITH_MODEL : BOARD_ROUTE;
+		return generatePath(boardPath, {
+			type: typePath,
+			containerOrFederation: modelPath,
+			project: projectId,
+			teamspace,
+		});
+	};
 
 	const handleTypeChange = (e) => {
 		const url = getPath({ typePath: e.target.value });
-		props.history.push(url);
+		props.navigate(url);
 		props.setBoardType(e.target.value);
 	};
 
 	const handleTeamspaceChange = (e) => {
 		const url = `${ROUTES.BOARD_MAIN}/${type}/${e.target.value}`;
-		props.history.push(url);
+		props.navigate(url);
 	};
 
 	const handleProjectChange = (e) => {
 		const url = getPath({ projectPath: e.target.value });
-		props.history.push(url);
+		props.navigate(url);
 	};
 
 	useEffect(() => {
@@ -282,7 +285,7 @@ export function Board(props: IProps) {
 			props.subscribeOnIssueChanges(teamspace, newModelId);
 		}
 
-		props.history.push(url);
+		props.navigate(url);
 	};
 
 	const handleFilterClick = ({target: {value}}) => {

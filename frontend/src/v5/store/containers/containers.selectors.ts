@@ -48,6 +48,15 @@ export const selectAreStatsPending = createSelector(
 	(containers) => containers.some(({ hasStatsPending }) => hasStatsPending),
 );
 
+export const selectContainersByIds = createSelector(
+	selectContainers,
+	(_, ids:string[]) => ids,
+	(containers, ids): IContainer[] => {
+		const idsSet = new Set(ids);
+		return containers.filter((container) => (idsSet.has(container._id)));
+	},
+);
+
 export const selectContainerById = createSelector(
 	selectContainers,
 	(_, id) => id,

@@ -709,7 +709,7 @@ export const theme = createTheme({
 					alignItems: 'center',
 					justifyContent: 'space-between',
 					background: GRADIENT.SECONDARY,
-					zIndex: 10,
+					zIndex: 50,
 					borderRadius: 0,
 					'>*': {
 						maxHeight: '100%',
@@ -1018,12 +1018,14 @@ export const theme = createTheme({
 					},
 					'&.Mui-focused:not(.Mui-disabled)': {
 						[`.MuiOutlinedInput-notchedOutline,
-							.MuiSelect-select,
 							&.MuiFilledInput-root`
 						]: {
 							border: `1px solid ${COLOR.PRIMARY_MAIN}`,
 							borderRadius: 8,
 							boxShadow: `0 0 2px ${COLOR.PRIMARY_MAIN}`,
+						},
+						'.MuiSelect-select': {
+							borderColor: 'transparent',
 						},
 					},
 					'&.Mui-disabled': {
@@ -1084,7 +1086,6 @@ export const theme = createTheme({
 					width: '100%',
 					boxSizing: 'border-box',
 					pointerEvents: 'auto',
-					borderColor: COLOR.BASE_LIGHTER,
 					'& ~ svg': {
 						position: 'absolute',
 						right: 14,

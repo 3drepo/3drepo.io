@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src, image } = require('../../../helper/path');
 const fs = require('fs');
 
@@ -176,7 +177,23 @@ const testFileExtensionFromBuffer = () => {
 	});
 };
 
-describe('utils/helpers/typeCheck', () => {
+const testFileExtensionFromPath = () => {
+	describe.each(
+		[
+			['Valid path', image, 'png'],
+			['Empty string', '', undefined],
+			['Number', 3, undefined],
+			['Null value', null, undefined],
+			['Undefined value', undefined, undefined],
+		],
+	)('Get file extension', (description, data, extension) => {
+		test(`${description} should return ${extension}`, async () => {
+			await expect(TypeChecker.fileExtensionFromPath(data)).resolves.toBe(extension);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testIsBuffer();
 	testIsString();
 	testIsObject();
@@ -185,5 +202,6 @@ describe('utils/helpers/typeCheck', () => {
 	testIsNumberString();
 	testFileMimeFromBuffer();
 	testFileExtensionFromBuffer();
+	testFileExtensionFromPath();
 	testIsUUID();
 });

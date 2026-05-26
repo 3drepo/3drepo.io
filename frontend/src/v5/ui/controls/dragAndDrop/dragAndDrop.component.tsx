@@ -26,12 +26,12 @@ interface IDragAndDrop {
 	hidden?: boolean;
 }
 
-export const DragAndDrop = ({ children, onDrop, hidden, accept, ...props }: IDragAndDrop) => {
+export const DragAndDrop = ({ children, onDrop, hidden, accept, className, ...props }: IDragAndDrop) => {
 	const { getRootProps, isDragActive } = useDropzone({ onDrop, accept, noClick: true });
 	if (hidden) return null;
 	return (
 		<DropArea {...props} {...getRootProps()}>
-			<DashedContainer $isDragActive={isDragActive}>
+			<DashedContainer className={className} $isDragActive={isDragActive}>
 				{children}
 			</DashedContainer>
 		</DropArea>

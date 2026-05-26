@@ -28,7 +28,7 @@ import { lowerCase, pick, values as _values } from 'lodash';
 import { createRef, forwardRef, PureComponent } from 'react';
 import * as Yup from 'yup';
 
-import { RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
+import { LEVELS_RENDER_VALUE, RISK_CONSEQUENCES, RISK_LIKELIHOODS } from '../../../../constants/risks';
 import { renderWhenTrue } from '../../../../helpers/rendering';
 import { CellSelect } from '../../../components/customTable/components/cellSelect/cellSelect.component';
 import { Image } from '../../../components/image';
@@ -284,6 +284,7 @@ export class CommentForm extends PureComponent<IProps, IState> {
 							items={RISK_LIKELIHOODS}
 							inputId="likelihood"
 							disabled={!this.props.canComment}
+							renderValue={(val: number) => LEVELS_RENDER_VALUE[val]}
 						/>
 					)} />
 				</StyledFormControl>

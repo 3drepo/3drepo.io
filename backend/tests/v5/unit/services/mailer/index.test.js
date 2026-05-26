@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
 const BaseTemplate = require('../../../../../src/v5/services/mailer/templates/baseTemplate');
@@ -70,8 +71,8 @@ const testSendEmail = () => {
 			config.mail.generateCredentials = true;
 			delete config.mail.smtpConfig;
 			await Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, data, attachments);
-			expect(sendMailMock).toBeCalledTimes(1);
-			expect(sendMailMock).toBeCalledWith({
+			expect(sendMailMock).toHaveBeenCalledTimes(1);
+			expect(sendMailMock).toHaveBeenCalledWith({
 				from: config.mail.sender,
 				to: recipient,
 				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
@@ -86,8 +87,8 @@ const testSendEmail = () => {
 
 		test('should send email if attachments are provided', async () => {
 			await Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, data, attachments);
-			expect(sendMailMock).toBeCalledTimes(1);
-			expect(sendMailMock).toBeCalledWith({
+			expect(sendMailMock).toHaveBeenCalledTimes(1);
+			expect(sendMailMock).toHaveBeenCalledWith({
 				from: config.mail.sender,
 				to: recipient,
 				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
@@ -101,8 +102,8 @@ const testSendEmail = () => {
 
 		test('should send email if attachments are not provided', async () => {
 			await Mailer.sendEmail(emailTemplates.ERROR_NOTIFICATION.name, recipient, data);
-			expect(sendMailMock).toBeCalledTimes(1);
-			expect(sendMailMock).toBeCalledWith({
+			expect(sendMailMock).toHaveBeenCalledTimes(1);
+			expect(sendMailMock).toHaveBeenCalledWith({
 				from: config.mail.sender,
 				to: recipient,
 				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
@@ -168,8 +169,8 @@ const testSendSystemEmail = () => {
 			config.mail.generateCredentials = true;
 			delete config.mail.smtpConfig;
 			await Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments);
-			expect(sendMailMock).toBeCalledTimes(1);
-			expect(sendMailMock).toBeCalledWith({
+			expect(sendMailMock).toHaveBeenCalledTimes(1);
+			expect(sendMailMock).toHaveBeenCalledWith({
 				from: config.mail.sender,
 				to: config.contact.mail,
 				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
@@ -184,8 +185,8 @@ const testSendSystemEmail = () => {
 
 		test('should send email if attachments are provided', async () => {
 			await Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data, attachments);
-			expect(sendMailMock).toBeCalledTimes(1);
-			expect(sendMailMock).toBeCalledWith({
+			expect(sendMailMock).toHaveBeenCalledTimes(1);
+			expect(sendMailMock).toHaveBeenCalledWith({
 				from: config.mail.sender,
 				to: config.contact.mail,
 				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
@@ -199,8 +200,8 @@ const testSendSystemEmail = () => {
 
 		test('should send email if attachments are not provided', async () => {
 			await Mailer.sendSystemEmail(emailTemplates.ERROR_NOTIFICATION.name, data);
-			expect(sendMailMock).toBeCalledTimes(1);
-			expect(sendMailMock).toBeCalledWith({
+			expect(sendMailMock).toHaveBeenCalledTimes(1);
+			expect(sendMailMock).toHaveBeenCalledWith({
 				from: config.mail.sender,
 				to: config.contact.mail,
 				subject: emailTemplates.ERROR_NOTIFICATION.subject(),
@@ -228,7 +229,7 @@ const testSendSystemEmail = () => {
 	});
 };
 
-describe('services/mailer/index', () => {
+describe(determineTestGroup(__filename), () => {
 	testSendEmail();
 	testSendSystemEmail();
 });

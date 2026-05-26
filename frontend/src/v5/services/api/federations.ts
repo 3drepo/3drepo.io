@@ -16,13 +16,13 @@
  */
 
 import {
-	FederationBackendSettings,
 	MinimumFederation,
 	FederationStats,
 } from '@/v5/store/federations/federations.types';
 import { View } from '@/v5/store/store.types';
 import { AxiosResponse } from 'axios';
 import api from './default';
+import { ContainerBackendSettings } from '@/v5/store/containers/containers.types';
 
 export const createFederation = async (teamspace, projectId, newFederation): Promise<CreateFederationResponse> => {
 	const { data } = await api.post(`teamspaces/${teamspace}/projects/${projectId}/federations`, newFederation);
@@ -49,12 +49,17 @@ export const fetchFederationStats = async (teamspace, projectId, federationId): 
 	return data;
 };
 
+export const bulkFetchFederationsStats = async (teamspace, projectId, federationIds): Promise<FederationStats[]> => {
+	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/stats?models=${federationIds.join(',')}`);
+	return data.stats;
+};
+
 export const fetchFederationViews = async (teamspace, projectId, federationId): Promise<FetchFederationViewsResponse> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}/views`);
 	return data;
 };
 
-export const fetchFederationSettings = async (teamspace, projectId, federationId): Promise<FederationBackendSettings> => {
+export const fetchFederationSettings = async (teamspace, projectId, federationId): Promise<ContainerBackendSettings> => {
 	const { data } = await api.get(`teamspaces/${teamspace}/projects/${projectId}/federations/${federationId}`);
 	return data;
 };

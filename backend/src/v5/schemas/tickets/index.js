@@ -48,9 +48,13 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 	const obj = {};
 
 	const proms = properties.map(async (prop) => {
-		if (prop.deprecated || prop.readOnly) return;
 		let validator = propTypesToValidator(prop.type, !isNewTicket, prop.required);
 		if (validator) {
+			if (prop.deprecated || prop.readOnly) {
+				obj[prop.name] = validator.strip();
+				return;
+			}
+
 			if (prop.values) {
 				let values;
 				switch (prop.values) {
@@ -153,7 +157,7 @@ const generatePropertiesValidator = async (teamspace, project, model, templateId
 
 	await Promise.all(proms);
 
-	return Yup.object(obj).default({});
+	return Yup.object(obj).default({}).noUnknown();
 };
 
 const generateModuleValidator = async (teamspace, project, model, templateId, modules, oldModules,
@@ -186,8 +190,7 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 		modules: Yup.object(
 			await generateModuleValidator(teamspace, project, model, template._id,
 				fullTem.modules, oldTicket?.modules, isNewTicket),
-		).default({}),
-		type: Yup.mixed().strip(),
+		).default({}).noUnknown(),
 	};
 
 	if (isImport) {
@@ -197,7 +200,9 @@ Tickets.validateTicket = async (teamspace, project, model, template, newTicket, 
 		}
 	}
 
-	const validatedTicket = await Yup.object(validatorObj).validate(newTicket, { stripUnknown: true });
+	const validatedTicket = await Yup.object(validatorObj)
+		.test('at-least-one-prop-provided', 'At least one ticket property must be provided ', (value, context) => Object.keys(context.originalValue).some((key) => key in validatorObj))
+		.validate(newTicket, { stripUnknown: false });
 
 	// Run it again so we can check for unchanged properties that looked changed due to default values
 	validatorObj.modules = Yup.object(await generateModuleValidator(teamspace, project, model,
@@ -255,24 +260,28 @@ Tickets.processReadOnlyValues = (oldTicket, newTicket, user) => {
 	if (newSafetibaseProps) {
 		const modProps = modulePropertyLabels[presetModules.SAFETIBASE];
 
-		if (newSafetibaseProps[modProps.RISK_LIKELIHOOD] || newSafetibaseProps[modProps.RISK_CONSEQUENCE]) {
+		const newLikelihood = newSafetibaseProps[modProps.RISK_LIKELIHOOD];
+		const newConsequence = newSafetibaseProps[modProps.RISK_CONSEQUENCE];
+
+		if (newLikelihood === null || newConsequence === null) {
+			newSafetibaseProps[modProps.LEVEL_OF_RISK] = null;
+		} else if (newLikelihood || newConsequence) {
 			newSafetibaseProps[modProps.LEVEL_OF_RISK] = calculateLevelOfRisk(
-				newSafetibaseProps[modProps.RISK_LIKELIHOOD] ?? oldSafetibaseProps[modProps.RISK_LIKELIHOOD],
-				newSafetibaseProps[modProps.RISK_CONSEQUENCE] ?? oldSafetibaseProps[modProps.RISK_CONSEQUENCE],
+				newLikelihood ?? oldSafetibaseProps[modProps.RISK_LIKELIHOOD],
+				newConsequence ?? oldSafetibaseProps[modProps.RISK_CONSEQUENCE],
 			);
 		}
 
-		if (newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
-			|| newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]) {
-			const treatedLevel = calculateLevelOfRisk(
-				newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD]
-				?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
-				newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE]
-				?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
+		const newTreatedLikelihood = newSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD];
+		const newTreatedConsequence = newSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE];
+
+		if (newTreatedLikelihood === null || newTreatedConsequence === null) {
+			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = null;
+		} else if (newTreatedLikelihood || newTreatedConsequence) {
+			newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = calculateLevelOfRisk(
+				newTreatedLikelihood ?? oldSafetibaseProps[modProps.TREATED_RISK_LIKELIHOOD],
+				newTreatedConsequence ?? oldSafetibaseProps[modProps.TREATED_RISK_CONSEQUENCE],
 			);
-			if (treatedLevel) {
-				newSafetibaseProps[modProps.TREATED_LEVEL_OF_RISK] = treatedLevel;
-			}
 		}
 	}
 };
@@ -343,6 +352,8 @@ const genToUUIDSchema = ({ properties, modules }) => {
 						[viewGroups.COLORED]: groupStateArrays,
 						[viewGroups.HIDDEN]: groupStateArrays,
 						[viewGroups.TRANSFORMED]: groupStateArrays,
+						[viewGroups.SELECTED]: groupStateArrays,
+						[viewGroups.SHOWN]: groupStateArrays,
 					}).default(undefined).nullable(),
 				}).nullable().default(undefined);
 			}

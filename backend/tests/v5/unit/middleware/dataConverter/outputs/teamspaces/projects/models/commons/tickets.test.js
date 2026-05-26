@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../../../helper/utils');
 const { cloneDeep, times, uniq } = require('lodash');
 const { src } = require('../../../../../../../../helper/path');
 const { generateTemplate, generateTicket, generateRandomString, generateRandomDate, generateUUID } = require('../../../../../../../../helper/services');
@@ -40,7 +41,7 @@ const TicketOutputMiddleware = require(`${src}/middleware/dataConverter/outputs/
 const testSerialiseTemplatesList = () => {
 	describe('Serialise templates list', () => {
 		test('should not show all fields if getDetails is not set to true', () => {
-			const req = { templates: times(10, () => generateTemplate()), query: { } };
+			const req = { templates: times(10, () => generateTemplate()), query: {} };
 
 			TicketOutputMiddleware.serialiseTemplatesList(req, {});
 
@@ -54,8 +55,10 @@ const testSerialiseTemplatesList = () => {
 		});
 
 		test('should show all fields if getDetails is set to true', () => {
-			const req = { templates: times(10, () => generateTemplate()),
-				query: { getDetails: 'true' } };
+			const req = {
+				templates: times(10, () => generateTemplate()),
+				query: { getDetails: 'true' },
+			};
 
 			const serialisedTemplateData = generateTemplate();
 
@@ -153,7 +156,6 @@ const testSerialiseTicket = () => {
 
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.unknown);
 		});
-
 		test('Should remove deprecated values if showDeprecated is set to false', async () => {
 			const propName = generateRandomString();
 			const modName = generateRandomString();
@@ -284,7 +286,6 @@ const testSerialiseTicket = () => {
 			expect(Responder.respond).toHaveBeenCalledTimes(1);
 			expect(Responder.respond).toHaveBeenCalledWith(req, {}, templates.ok, res);
 		});
-
 		test('Should cast uuids correctly', async () => {
 			const propName = generateRandomString();
 			const propName2 = generateRandomString();
@@ -440,9 +441,49 @@ const testSerialiseTicketList = () => {
 	});
 };
 
-describe('middleware/dataConverter/outputs/teamspaces/projects/models/commons/tickets', () => {
+const testSerialiseTicketHistory = () => {
+	const date = generateRandomDate();
+	const uuid = generateUUID();
+	const text = generateRandomString();
+
+	describe.each([
+		['there is no history property', undefined, false, {}],
+		['history is empty', [], true, []],
+		['history entry has a date type', [{ date }], true, [{ date: date.getTime() }]],
+		['history entry has a uuid type', [{ uuid }], true, [{ uuid: UUIDToString(uuid) }]],
+		['history entry has an object', [{ changes: { uuidProp: uuid, dateProp: date, txtProp: text } }], true, [{ changes: { uuidProp: UUIDToString(uuid), dateProp: date.getTime(), txtProp: text } }]],
+		['history entry has a simple array', [{ arr: [1.0, 2.0, 3.0] }], true, [{ arr: [1.0, 2.0, 3.0] }]],
+		['history entry has a complex  array', [{ changes: { arrayProp: times(10, () => ({ uuidProp: uuid, dateProp: date, txtProp: text })) } }], true,
+			[
+				{
+					changes: { arrayProp: times(10, () => ({
+						uuidProp: UUIDToString(uuid), dateProp: date.getTime(), txtProp: text }
+					)) },
+				},
+			]],
+	])('Validate serialize ticket history query', (description, history, succeed, expectedOutcome) => {
+		test(`Should ${succeed ? 'succeed' : 'fail'} if ${description}`, async () => {
+			const req = { history };
+			const res = {};
+
+			await TicketOutputMiddleware.serialiseTicketHistory(req, res);
+
+			if (succeed) {
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.ok, { history: expectedOutcome });
+			} else {
+				expect(Responder.respond).toHaveBeenCalledTimes(1);
+				expect(Responder.respond).toHaveBeenCalledWith(req, res, templates.unknown);
+			}
+		});
+	},
+	);
+};
+
+describe(determineTestGroup(__filename), () => {
 	testSerialiseTicketTemplate();
 	testSerialiseTicket();
 	testSerialiseTicketList();
 	testSerialiseTemplatesList();
+	testSerialiseTicketHistory();
 });

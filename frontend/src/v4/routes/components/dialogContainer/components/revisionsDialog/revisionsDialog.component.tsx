@@ -18,7 +18,7 @@ import { PureComponent } from 'react';
 import Button from '@mui/material/Button';
 import DialogActions from '@mui/material/DialogActions';
 
-import { RouteComponentProps } from 'react-router';
+import { NavigateFunction } from 'react-router-dom';
 import { ROUTES } from '../../../../../constants/routes';
 import { renderWhenTrue } from '../../../../../helpers/rendering';
 import { Loader } from '../../../loader/loader.component';
@@ -30,7 +30,8 @@ import {
 	StyledList
 } from './revisionsDialog.styles';
 
-interface IProps extends RouteComponentProps<any> {
+interface IProps {
+	navigate: NavigateFunction;
 	currentRevisionId: string;
 	currentModelName: string;
 	revisions: any[];
@@ -62,10 +63,10 @@ export class RevisionsDialog extends PureComponent<IProps, any> {
 	}
 
 	private revisionClickHandler = ({ tag, _id }) => {
-		const { teamspace, modelId, handleClose, history } = this.props;
+		const { teamspace, modelId, handleClose, navigate } = this.props;
 
 		handleClose();
-		history.push(`${ROUTES.VIEWER}/${teamspace}/${modelId}/${tag || _id}`);
+		navigate(`${ROUTES.VIEWER}/${teamspace}/${modelId}/${tag || _id}`);
 	}
 
 	private toggleVoid = (event, revision) => {

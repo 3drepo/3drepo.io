@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep } = require('lodash');
 const { src } = require('../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomObject } = require('../../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../../helper/services');
 
 const { errorCodes } = require(`${src}/services/sso/sso.constants`);
 
@@ -92,7 +93,7 @@ const testGenerateLinkToAuthenticator = () => {
 		query: { redirectUri },
 		params: {},
 		session: {
-			pkceCodes: { challenge: generateRandomString() },
+			pkceCodes: { challenge: generateRandomString(), verifier: generateRandomString() },
 			csrfToken: generateRandomString(),
 		},
 	};
@@ -263,7 +264,7 @@ const testGenerateLinkToTeamspaceAuthenticator = () => {
 		const baseReq = {
 			query: { redirectUri },
 			session: {
-				pkceCodes: { challenge: generateRandomString() },
+				pkceCodes: { challenge: generateRandomString(), verifier: generateRandomString() },
 				csrfToken: generateRandomString(),
 				user: {
 					auth: {
@@ -411,7 +412,7 @@ const testGenerateToken = () => {
 				redirectUri,
 			})),
 		},
-		session: { csrfToken, pkceCodes: { challenge: generateRandomString() } },
+		session: { csrfToken, pkceCodes: { challenge: generateRandomString(), verifier: generateRandomString() } },
 	};
 	describe('Generate token', () => {
 		const missingQueryResponse = createResponseCode(templates.invalidArguments, 'Response body does not contain code or state');
@@ -461,7 +462,7 @@ const testGenerateToken = () => {
 
 			expect(FronteggService.generateToken).toHaveBeenCalledTimes(1);
 			expect(FronteggService.generateToken).toHaveBeenCalledWith(redirectURLUsed, req.query.code,
-				req.session.pkceCodes.challenge);
+				req.session.pkceCodes.verifier);
 
 			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledTimes(1);
 			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledWith(res, redirectUri, errorCodes.UNKNOWN);
@@ -484,7 +485,7 @@ const testGenerateToken = () => {
 
 			expect(FronteggService.generateToken).toHaveBeenCalledTimes(1);
 			expect(FronteggService.generateToken).toHaveBeenCalledWith(redirectURLUsed, req.query.code,
-				req.session.pkceCodes.challenge);
+				req.session.pkceCodes.verifier);
 
 			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledTimes(1);
 			expect(SSOMiddleware.redirectWithError).toHaveBeenCalledWith(res, redirectUri, errorCodes.UNKNOWN);

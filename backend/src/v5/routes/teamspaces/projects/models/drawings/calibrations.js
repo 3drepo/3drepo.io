@@ -60,7 +60,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/calibrations:
 	 *   post:
 	 *     description: Create a new calibration.
-	 *     tags: [Calibrations]
+	 *     tags: [v:external, Calibrations]
 	 *     operationId: createNewCalibration
 	 *     parameters:
 	 *       - name: teamspace
@@ -166,7 +166,7 @@ const establishRoutes = () => {
 	 * /teamspaces/{teamspace}/projects/{project}/drawings/{drawing}/revisions/{revision}/calibrations:
 	 *   get:
 	 *     description: Gets the latest available calibration for the revision.
-	 *     tags: [Calibrations]
+	 *     tags: [v:external, Calibrations]
 	 *     operationId: getCalibration
 	 *     parameters:
 	 *       - name: teamspace

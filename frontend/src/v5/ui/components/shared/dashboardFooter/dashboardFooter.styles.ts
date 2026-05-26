@@ -20,7 +20,7 @@ import { BottomNavigation } from '@mui/material';
 import Logo from '@assets/icons/filled/logo_text-filled.svg';
 import { COLOR } from '@/v5/ui/themes/theme';
 
-const FOOTER_HEIGHT = 42;
+export const FOOTER_HEIGHT = 42;
 const COLOR_MAP = {
 	light: COLOR.BASE_LIGHT,
 	dark: COLOR.BASE_MAIN,

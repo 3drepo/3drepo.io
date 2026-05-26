@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { cloneDeep } = require('lodash');
 const { src } = require('../../helper/path');
-const { determineTestGroup, generateRandomString } = require('../../helper/services');
+const { generateRandomString } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/utils/responder');
 const Responder = require(`${src}/utils/responder`);
@@ -103,14 +104,14 @@ const testManageSession = () => {
 		test('Should call next() immedately if session was already established', async () => {
 			const fn = jest.fn();
 			await Sessions.manageSessions({ session: {} }, {}, fn);
-			expect(sessionMiddleware).not.toBeCalled();
-			expect(fn).toBeCalled();
+			expect(sessionMiddleware).not.toHaveBeenCalled();
+			expect(fn).toHaveBeenCalled();
 		});
 		test('Should call next() after trying to establish a session', async () => {
 			const fn = jest.fn();
 			await Sessions.manageSessions({}, {}, fn);
-			expect(sessionMiddleware).toBeCalled();
-			expect(fn).toBeCalled();
+			expect(sessionMiddleware).toHaveBeenCalled();
+			expect(fn).toHaveBeenCalled();
 		});
 	});
 };

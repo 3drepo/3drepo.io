@@ -18,12 +18,38 @@
 import { ActionMenu } from '@controls/actionMenu';
 import { Button as ButtonBase } from '@controls/button';
 import { TextOverflow } from '@controls/textOverflow';
-import styled from 'styled-components';
+import styled, { css } from 'styled-components';
 
-export const CardFilterActionMenu = styled(ActionMenu)`
+
+export const FilterPaperStyleInCards = css`
+	left: 88px !important;
+	max-height: calc(100% - 170px);
+`; 
+
+export const FilterPaperStyleother = css`
+	max-height: calc(100% - 200px);
+`; 
+
+// You can see here some basic values that should be in the theme. They are here because 
+// using the theme provider was incredibly slow in tabular view.
+export const CardFilterActionMenu = styled(ActionMenu)<{ $displayMode?: string }>`
+	.MuiInputBase-root input, .MuiSelect-select  {
+		height: 26px;
+		line-height: 26px;
+	}
+	
+	.MuiOutlinedInput-notchedOutline {
+		height: 100%;
+	}
+	
+	.MuiFormControl-root {
+		margin: 0;
+	}
+
 	.MuiPaper-root {
-		left: 88px !important;
 		width: 365px;
+		margin-top: 13px;
+		${({ $displayMode: mode }) => ( mode === 'card') ? FilterPaperStyleInCards : FilterPaperStyleother}
 	}
 `;
 

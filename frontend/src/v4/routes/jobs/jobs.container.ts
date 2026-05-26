@@ -19,6 +19,7 @@ import { connect } from 'react-redux';
 import { bindActionCreators } from 'redux';
 import { createStructuredSelector } from 'reselect';
 
+import { selectUsersProvisionedEnabled } from '@/v5/store/teamspaces/teamspaces.selectors';
 import {
 	selectJobs,
 	selectJobsColors,
@@ -33,6 +34,7 @@ const mapStateToProps = createStructuredSelector({
 	jobs: selectJobs,
 	colors: selectJobsColors,
 	isPending: selectJobsPending,
+	usersProvisionedEnabled: selectUsersProvisionedEnabled,
 });
 
 export const mapDispatchToProps = (dispatch) => bindActionCreators({

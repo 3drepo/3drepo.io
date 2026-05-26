@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 jest.mock('../../../../src/v5/services/eventsManager/eventsManager');
@@ -24,7 +25,7 @@ const Revisions = require(`${src}/models/revisions`);
 const { DRAWINGS_HISTORY_COL } = require(`${src}/models/revisions.constants`);
 const db = require(`${src}/handler/db`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { determineTestGroup, generateUUID, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
+const { generateUUID, generateRandomString, generateRandomObject, generateRandomNumber } = require('../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 const { isUUIDString } = require(`${src}/utils/helper/typeCheck`);
@@ -214,6 +215,24 @@ const testGetRevisionsByQuery = () => {
 			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
 		});
 
+		test('Should apply the sort given in the params', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const sort = generateRandomObject();
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, {}, sort);
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...excludeVoids,
+				...excludeFailed,
+				...excludeIncomplete,
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, sort);
+		});
+
 		test('Should return the revisions (drawing)', async () => {
 			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
 			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.DRAWING,
@@ -232,6 +251,68 @@ const testGetRevisionsByQuery = () => {
 			expect(fn).toHaveBeenCalledTimes(1);
 			expect(fn).toHaveBeenCalledWith(teamspace, DRAWINGS_HISTORY_COL, formattedQuery,
 				projection, { timestamp: -1 });
+		});
+
+		test('Should return the revisions including void revisions', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, { includeVoid: true });
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...excludeFailed,
+				...excludeIncomplete,
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
+		});
+
+		test('Should return the revisions including incomplete revisions', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, { includeIncomplete: true });
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...excludeVoids,
+				...excludeFailed,
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
+		});
+
+		test('Should return the revisions including failed revisions', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, { includeFailed: true });
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...excludeVoids,
+				...excludeIncomplete,
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
+		});
+
+		test('Should return the revisions including void, incomplete and failed revisions', async () => {
+			const fn = jest.spyOn(db, 'find').mockResolvedValueOnce(expectedData);
+			const res = await Revisions.getRevisionsByQuery(teamspace, project, model, modelTypes.CONTAINER,
+				query, projection, { includeVoid: true, includeIncomplete: true, includeFailed: true });
+			expect(res).toEqual(expectedData);
+
+			const formattedQuery = {
+				...query,
+			};
+
+			expect(fn).toHaveBeenCalledTimes(1);
+			expect(fn).toHaveBeenCalledWith(teamspace, `${model}.history`, formattedQuery, projection, { timestamp: -1 });
 		});
 	});
 };

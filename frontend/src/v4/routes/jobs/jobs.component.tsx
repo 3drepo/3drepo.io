@@ -34,8 +34,8 @@ import { Container } from './jobs.styles';
 
 const JOBS_TABLE_CELLS = [{
 	name: 'Job name',
-	type: CELL_TYPES.NAME,
-	searchBy: ['name'],
+	type: CELL_TYPES.JOB,
+	searchBy: ['job'],
 	HeadingComponent: CellUserSearch
 }, {
 	name: formatMessage({ id: 'job.assignedColours', defaultMessage: 'Assigned Colours' }),
@@ -62,6 +62,7 @@ interface IProps {
 	updateColor: (teamspace, job) => void;
 	fetchJobsAndColors: () => void;
 	isPending: boolean;
+	usersProvisionedEnabled: boolean;
 }
 
 interface IState {
@@ -107,15 +108,19 @@ export class Jobs extends PureComponent<IProps, IState> {
 					value: job.color,
 					predefinedColors: colors,
 					disableUnderline: true,
+					disabled: this.props.usersProvisionedEnabled,
 					onChange: this.handleColorChange(job._id)
 				},
 				{},
-				{
+			];
+			if (!this.props.usersProvisionedEnabled) {
+				data.push({
+					// @ts-ignore
 					Icon: BinIcon,
 					onClick: this.onRemove.bind(null, job._id)
-				}
-			];
-			return { ...job, name: job._id, data };
+				});
+			}
+			return { ...job, job: job._id, data };
 		});
 	}
 
@@ -155,7 +160,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 	)
 
 	public render() {
-		const { jobs, colors, isPending, currentTeamspace } =  this.props;
+		const { jobs, colors, isPending, currentTeamspace, usersProvisionedEnabled } =  this.props;
 		const { containerElement, panelBottomAnchorEl } = this.state;
 
 		const closeNewJobForm = () => {
@@ -185,7 +190,7 @@ export class Jobs extends PureComponent<IProps, IState> {
 						rows={this.getJobsTableRows(jobs, colors)}
 					/>
 				</UserManagementTab>
-				{containerElement && this.renderNewJobForm(containerElement)}
+				{containerElement && !usersProvisionedEnabled && this.renderNewJobForm(containerElement)}
 				<Panel
 					open={Boolean(panelBottomAnchorEl)}
 					anchorEl={panelBottomAnchorEl}

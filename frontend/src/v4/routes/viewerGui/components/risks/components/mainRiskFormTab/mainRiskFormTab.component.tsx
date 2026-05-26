@@ -21,6 +21,7 @@ import { Field } from 'formik';
 import RisksIcon from '@assets/icons/outlined/safetibase-outlined.svg'
 import {
 	LEVELS_OF_RISK,
+	LEVELS_RENDER_VALUE,
 	RISK_CONSEQUENCES,
 	RISK_LIKELIHOODS,
 } from '../../../../../../constants/risks';
@@ -128,6 +129,7 @@ export const MainRiskFormTab: FunctionComponent<IProps> = ({
 								items={RISK_LIKELIHOODS}
 								inputId="likelihood"
 								disabled={!canComment}
+								renderValue={(val: number) => LEVELS_RENDER_VALUE[val]}
 							/>
 						)} />
 					</StyledFormControl>

@@ -16,29 +16,33 @@
  */
 
 const { addModel, deleteModel, getModelList } = require('./commons/modelList');
+const { addRevision, getLatestRevision } = require('../../../../models/revisions');
 const { appendFavourites, deleteFavourites } = require('./commons/favourites');
-const { getContainers, getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
+const { getFederationById, getFederations, updateModelSettings } = require('../../../../models/modelSettings');
+const AllJSONAssets = require('./commons/assets/json');
 const Comments = require('./commons/tickets.comments');
 const Groups = require('./commons/groups');
 const TicketGroups = require('./commons/tickets.groups');
 const Tickets = require('./commons/tickets');
 const Views = require('./commons/views');
-const { getLatestRevision } = require('../../../../models/revisions');
-const { getModelMD5Hash } = require('./commons/modelList');
-const { getOpenTicketsCount } = require('./commons/tickets');
-const { getProjectById } = require('../../../../models/projectSettings');
-const { hasReadAccessToContainer } = require('../../../../utils/permissions');
-const { modelTypes } = require('../../../../models/modelSettings.constants');
-const { queueFederationUpdate } = require('../../../../services/modelProcessing');
 
-const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups };
+const { getModelMD5Hash } = require('./commons/modelList');
+const { getOpenTicketsCountForMultipleModels } = require('./commons/tickets');
+const { getProjectById } = require('../../../../models/projectSettings');
+const { getRepoBundleInfo } = require('./commons/assets/bundles');
+const { getSuperMeshesInfo } = require('./containers');
+const { modelTypes } = require('../../../../models/modelSettings.constants');
+const { updateModelSubModels } = require('../../../../models/modelSettings');
+
+const { getTree, ...JSONAssets } = AllJSONAssets;
+
+const Federations = { ...Groups, ...Views, ...Tickets, ...Comments, ...TicketGroups, ...JSONAssets };
 
 // Override
-Federations.getTicketGroupById = async (teamspace, project, federation, revId, ticket, groupId, convertToMeshIds) => {
-	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
-	return TicketGroups.getTicketGroupById(teamspace, project, federation, revId,
-		ticket, groupId, convertToMeshIds, containers ? containers.map(({ _id }) => _id) : undefined);
-};
+Federations.getTicketGroupById = (
+	teamspace, project, federation, revId, ticket, groupId, convertToMeshIds, containers,
+) => TicketGroups.getTicketGroupById(teamspace, project, federation, revId,
+	ticket, groupId, convertToMeshIds, containers?.length ? containers.map(({ container }) => container) : undefined);
 
 Federations.addFederation = (teamspace, project, federation) => addModel(teamspace, project,
 	{ ...federation, federate: true });
@@ -62,46 +66,47 @@ Federations.deleteFavourites = async (username, teamspace, project, favouritesTo
 	await deleteFavourites(username, teamspace, accessibleFederations, favouritesToRemove);
 };
 
-Federations.newRevision = queueFederationUpdate;
+Federations.newRevision = async (teamspace, project, federation, info) => {
+	const revisionId = await addRevision(teamspace, project, federation, modelTypes.FEDERATION, {
+		containers: info.containers,
+		author: info.owner,
+	});
+	await updateModelSubModels(teamspace, project, federation, info.owner, revisionId, info.containers);
+};
 
 const getLastUpdatesFromModels = async (teamspace, models) => {
-	const lastUpdates = [];
-	if (models) {
+	const modelsUpdates = {};
+	if (models.length) {
 		await Promise.all(models.map(async (m) => {
 			try {
-				lastUpdates.push(await getLatestRevision(teamspace, m, modelTypes.FEDERATION, { timestamp: 1 }));
+				const { timestamp } = await getLatestRevision(teamspace, m, modelTypes.CONTAINER, { timestamp: 1 });
+
+				modelsUpdates[m] = timestamp;
 			} catch {
 				// do nothing. A container can have 0 revision.
 			}
 		}));
 	}
 
-	return lastUpdates.length ? lastUpdates.sort((a, b) => b.timestamp
-		- a.timestamp)[0].timestamp : undefined;
+	return modelsUpdates;
+};
+
+const determineLastUpdated = (containers, lastUpdateInfo) => {
+	let lastUpdate;
+
+	containers.forEach(({ _id }) => {
+		const update = lastUpdateInfo[_id];
+		if (update && (!lastUpdate || update > lastUpdate)) {
+			lastUpdate = update;
+		}
+	});
+	return lastUpdate;
 };
 
 Federations.getFederationStats = async (teamspace, project, federation) => {
-	const { properties, status, subModels: containers, desc } = await getFederationById(teamspace, federation, {
-		properties: 1,
-		status: 1,
-		subModels: 1,
-		desc: 1,
-	});
+	const stats = await Federations.getMultipleFederationsStats(teamspace, project, [federation]);
 
-	const [ticketsCount, lastUpdates] = await Promise.all([
-		getOpenTicketsCount(teamspace, project, federation),
-		getLastUpdatesFromModels(teamspace, containers ? containers.map(({ _id }) => _id) : containers),
-	]);
-
-	return {
-		code: properties.code,
-		unit: properties.unit,
-		status,
-		containers,
-		desc,
-		lastUpdated: lastUpdates,
-		tickets: ticketsCount,
-	};
+	return stats[federation];
 };
 
 Federations.updateSettings = updateModelSettings;
@@ -109,31 +114,52 @@ Federations.updateSettings = updateModelSettings;
 Federations.getSettings = (teamspace, federation) => getFederationById(teamspace,
 	federation, { corID: 0, account: 0, permissions: 0, subModels: 0, federate: 0 });
 
-Federations.getMD5Hash = async (teamspace, project, federation, user) => {
-	const { subModels: containers } = await getFederationById(teamspace, federation, { subModels: 1 });
+Federations.getMD5Hash = (teamspace, containers) => Promise.all(
+	containers.map(({ container, revision }) => getModelMD5Hash(teamspace, container, revision)));
 
-	if (containers) {
-		const containerWithMetadata = await getContainers(
-			teamspace,
-			containers.map((container) => container._id),
-			{ _id: 1, name: 1, permissions: 1 });
+Federations.getRepoBundleInfo = getRepoBundleInfo;
 
-		const listOfPromises = containerWithMetadata.map(
-			async (container) => {
-				const hasAccess = await hasReadAccessToContainer(teamspace, project, container._id, user);
-				if (hasAccess) {
-					return getModelMD5Hash(teamspace, container._id);
-				}
-				return undefined;
-			},
-		);
+Federations.getSuperMeshesInfo = async (teamspace, federation, revision, containers) => {
+	const supermeshData = await Promise.all(containers.map(async ({ container, revision: containerRev }) => {
+		const data = await getSuperMeshesInfo(teamspace, container, containerRev);
+		return { teamspace, model: container, superMeshes: data };
+	}));
+	return { subModels: supermeshData };
+};
 
-		const promiseResponses = await Promise.allSettled(listOfPromises);
-		const responses = promiseResponses.flatMap(({ status, value }) => (status === 'fulfilled' && value ? value : []));
+Federations.getMultipleFederationsStats = async (teamspace, project, federations) => {
+	const stats = {};
 
-		return responses;
-	}
-	return [];
+	const [settings, ticketCounts] = await Promise.all([
+		getFederations(
+			teamspace, federations, { properties: 1, status: 1, subModels: 1, desc: 1 },
+		),
+		getOpenTicketsCountForMultipleModels(teamspace, project, federations),
+	]);
+
+	const containersRequired = new Set();
+	settings.forEach(({ subModels }) => {
+		subModels?.forEach(({ _id }) => containersRequired.add(_id));
+	});
+
+	const containersLastUpdates = await getLastUpdatesFromModels(teamspace, Array.from(containersRequired));
+
+	settings.forEach((setting) => {
+		stats[setting._id] = {
+			code: setting.properties?.code,
+			unit: setting.properties?.unit,
+			status: setting?.status,
+			containers: setting?.subModels,
+			desc: setting?.desc,
+			lastUpdated: determineLastUpdated(
+				setting?.subModels || [],
+				containersLastUpdates,
+			),
+			tickets: ticketCounts[setting._id] || 0,
+		};
+	});
+
+	return stats;
 };
 
 module.exports = Federations;
