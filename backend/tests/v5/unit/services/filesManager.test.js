@@ -15,12 +15,13 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const CryptoJS = require('crypto-js');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
 
 const config = require(`${src}/utils/config`);
-const { generateRandomString, generateRandomObject, determineTestGroup } = require('../../helper/services');
+const { generateRandomString, generateRandomObject } = require('../../helper/services');
 const { PassThrough } = require('stream');
 
 const MimeTypes = require(`${src}/utils/helper/mimeTypes`);

@@ -50,6 +50,19 @@ const getAllMetadata = async (req, res, next) => {
 	}
 };
 
+const getModelMetadataFields = async (req, res) => {
+	const { teamspace, container } = req.params;
+
+	try {
+		const fields = await Metadata.getAllMetadataFieldNames(teamspace, container);
+
+		respond(req, res, templates.ok, { fields });
+	} catch (err) {
+		// istanbul ignore next
+		respond(req, res, err);
+	}
+};
+
 const establishRoutes = (isInternal) => {
 	const router = Router({ mergeParams: true });
 
@@ -216,6 +229,62 @@ const establishRoutes = (isInternal) => {
 		 */
 		router.patch('/:metadata', hasWriteAccessToContainer, validateUpdateCustomMetadata, updateCustomMetadata);
 	}
+	/**
+	 * @openapi
+	 * /teamspaces/{teamspace}/projects/{project}/containers/{container}/metadata/fields:
+	 *   get:
+	 *     description: Returns an object containing an array of unique metadata field names in the container.
+	 *     tags: [v:internal, v:external, Metadata]
+	 *     operationId: getModelMetadataFields
+	 *     parameters:
+	 *       - name: teamspace
+	 *         description: Name of teamspace
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *       - name: project
+	 *         description: Project ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *       - name: container
+	 *         description: Container ID
+	 *         in: path
+	 *         required: true
+	 *         schema:
+	 *           type: string
+	 *           format: uuid
+	 *     responses:
+	 *       401:
+	 *         $ref: "#/components/responses/notLoggedIn"
+	 *       200:
+	 *         description: Returns an object containing all unique metadata field names
+	 *         content:
+	 *           application/json:
+	 *             schema:
+	 *               type: object
+	 *               properties:
+	 *                 fields:
+	 *                   type: array
+	 *                   items:
+	 *                     type: string
+	 *             example:
+	 *               "fields": [
+	 *                 "AboveGround",
+	 *                 "BuildingID",
+	 *                 "IFC GUID",
+	 *                 "IFC Type",
+	 *                 "IsLandmarked",
+	 *                 "IsPermanentID",
+	 *                 "NumberOfStoreys",
+	 *                 "OccupancyType",
+	 *                 "Reference"
+	 *               ]
+	 */
+	router.get('/fields', hasReadAccessToContainer, getModelMetadataFields);
 
 	return router;
 };

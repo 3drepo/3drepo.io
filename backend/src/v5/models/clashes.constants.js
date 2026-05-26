@@ -18,6 +18,7 @@
 const ClashesConstants = {};
 
 ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
+ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';
 
 ClashesConstants.CLASH_PLAN_TYPES = [
 	'hard',
@@ -35,5 +36,11 @@ ClashesConstants.TRIGGER_OPTIONS = [
 	'manual',
 	'new revision',
 ];
+
+ClashesConstants.CLASH_RUN_STATUS = {
+	PLANNED: 'planned',
+	QUEUED: 'queued',
+	FAILED: 'failed',
+};
 
 module.exports = ClashesConstants;

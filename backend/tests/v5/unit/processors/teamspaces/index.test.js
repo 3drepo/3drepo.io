@@ -15,13 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 
 const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const { AVATARS_COL_NAME, USERS_DB_NAME } = require(`${src}/models/users.constants`);
-const { determineTestGroup, generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
+const { generateRandomString, generateRandomNumber, outOfOrderArrayEqual } = require('../../../helper/services');
 
 const { membershipStatus } = require(`${src}/services/sso/frontegg/frontegg.constants`);
 
@@ -92,19 +93,26 @@ const testGetTeamspaceListByUser = () => {
 				{ name: generateRandomString(), isAdmin: true },
 				{ name: generateRandomString(), isAdmin: false },
 			];
+			const frontEggData = goldenData
+				.map(({ name }) => ({ name, refId: generateRandomString() }))
+				.concat({ name: generateRandomString(), refId: generateRandomString() });
 			const userId = generateRandomString();
 			const username = generateRandomString();
 
 			UsersModel.getUserId.mockResolvedValueOnce(userId);
 
 			FronteggService.getAccountsByUser.mockResolvedValueOnce(
-				times(goldenData.length + 1, () => generateRandomString()));
+				frontEggData.map(({ refId }) => refId));
 
 			goldenData.forEach(({ name }) => {
 				FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(name);
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(
+					frontEggData.find(({ name: n }) => n === name).refId,
+				);
 			});
 
 			FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(undefined);
+
 			Permissions.isTeamspaceAdmin.mockImplementation(
 				(ts) => goldenData.find(({ name }) => name === ts).isAdmin);
 
@@ -118,6 +126,43 @@ const testGetTeamspaceListByUser = () => {
 			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
 
 			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(goldenData.length + 1);
+		});
+		test('should return empty array if the refIds do not match', async () => {
+			const goldenData = [
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: false },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: true },
+				{ name: generateRandomString(), isAdmin: false },
+			];
+
+			const frontEggData = goldenData.map(({ name }) => ({ name, refId: generateRandomString() }));
+			const refIds = goldenData.map(({ name }) => ({ name, refId: generateRandomString() }));
+			const userId = generateRandomString();
+			const username = generateRandomString();
+
+			UsersModel.getUserId.mockResolvedValueOnce(userId);
+			FronteggService.getAccountsByUser.mockResolvedValueOnce(
+				frontEggData.map(({ refId }) => refId));
+			goldenData.forEach(({ name }) => {
+				FronteggService.getTeamspaceByAccount.mockResolvedValueOnce(name);
+				TeamspacesModel.getTeamspaceRefId.mockResolvedValueOnce(
+					refIds.find(({ name: n }) => n === name).refId,
+				);
+				Permissions.isTeamspaceAdmin.mockResolvedValueOnce(
+					goldenData.find(({ name: n }) => n === name).isAdmin);
+			});
+
+			const res = await Teamspaces.getTeamspaceListByUser(username);
+			expect(res).toEqual([]);
+
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledTimes(1);
+			expect(FronteggService.getAccountsByUser).toHaveBeenCalledWith(userId);
+
+			expect(UsersModel.getUserId).toHaveBeenCalledTimes(1);
+			expect(UsersModel.getUserId).toHaveBeenCalledWith(username);
+
+			expect(FronteggService.getTeamspaceByAccount).toHaveBeenCalledTimes(goldenData.length);
 		});
 		test('Should return undefined if unknown error occured', async () => {
 			const userId = generateRandomString();

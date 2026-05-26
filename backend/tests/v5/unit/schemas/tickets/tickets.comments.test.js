@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 
 const { readFileSync } = require('fs');
 const { src, image } = require('../../../helper/path');
-const { determineTestGroup, generateRandomString, generateUUIDString, generateRandomNumber } = require('../../../helper/services');
+const { generateRandomString, generateUUIDString, generateRandomNumber } = require('../../../helper/services');
 
 const CommentSchema = require(`${src}/schemas/tickets/tickets.comments`);
 
