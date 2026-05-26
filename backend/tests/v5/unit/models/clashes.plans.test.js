@@ -15,9 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { isObject, isUUID } = require('../../../../src/v5/utils/helper/typeCheck');
 const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
+const { isObject, isUUID } = require('../../../../src/v5/utils/helper/typeCheck');
 const { generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 
 const { CLASH_PLANS_COL } = require(`${src}/models/clashes.constants`);
