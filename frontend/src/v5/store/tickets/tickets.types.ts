@@ -28,6 +28,7 @@ export interface PropertyDefinition {
 	unique?: boolean;
 	readOnly?: boolean;
 	readOnlyOnUI?: boolean;
+	hiddenOnUI?: boolean;
 	immutable?: boolean;
 	required?: boolean;
 	deprecated?: boolean;

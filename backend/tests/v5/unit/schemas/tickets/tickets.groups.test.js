@@ -14,17 +14,16 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { determineTestGroup } = require('../../../helper/utils');
 const { times, cloneDeep } = require('lodash');
 
 const { src } = require('../../../helper/path');
 const {
-	determineTestGroup,
 	generateRandomObject,
 	generateRandomString,
 	generateUUID,
 	generateUUIDString,
-	generateRandomNumber,
-} = require('../../../helper/services');
+	generateRandomNumber } = require('../../../helper/services');
 const { idTypes } = require('../../../../../src/v5/models/metadata.constants');
 
 const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);

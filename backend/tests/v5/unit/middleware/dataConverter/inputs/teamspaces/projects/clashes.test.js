@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { times, isEqual } = require('lodash');
 const { src } = require('../../../../../../helper/path');
 
@@ -48,7 +49,6 @@ const Clashes = require(`${src}/middleware/dataConverter/inputs/teamspaces/proje
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const {
-	determineTestGroup,
 	generateRandomString,
 	generateRandomObject,
 	generateRandomNumber,

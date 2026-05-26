@@ -26,15 +26,18 @@ import { modelIsFederation } from '@/v5/store/tickets/tickets.helpers';
 import { VIEWER_PANELS } from '@/v4/constants/viewerGui';
 import { enableRealtimeTickets } from '@/v5/services/realtime/ticketCard.events';
 import { deserializeURLFilters, getNonCompletedTicketFilters, getTicketFilterFromCodes, serializeFilter } from '@components/viewer/cards/cardFilters/filtersSelection/tickets/ticketFilters.helpers';
-import { isEmpty, isEqual } from 'lodash';
+import { isEmpty, isEqual, values } from 'lodash';
+import { TicketsSortingPropertyDictionary, TicketsSortingProperty } from '@/v5/store/tickets/card/ticketsCard.types';
+import { deserializeSorting } from '@/v5/helpers/ticketsSorting.helpers';
 
 const TICKET_CODE_REGEX = /^[a-zA-Z]{3}:\d+$/;
 export const TicketFiltersSetter = () => {
 	const [ticketSearchParam, setTicketSearchParam] = useSearchParam('ticketSearch', Transformers.STRING_ARRAY);
 	const [urlFiltersRaw, setUrlFilters] = useSearchParam('filters');
 	const [groupByParam] = useSearchParam('groupBy');
+	const [sorting] = useSearchParam('sorting');
 	const templates = TicketsCardHooksSelectors.selectCurrentTemplates();
-	const { teamspace, project, containerOrFederation, revision } = useParams<ViewerParams>();
+	const { teamspace, project, containerOrFederation, revision } = useParams() as ViewerParams;
 	const isFed = modelIsFederation(containerOrFederation);
 
 	const isFetching = ViewerHooksSelectors.selectIsFetching();
@@ -62,6 +65,18 @@ export const TicketFiltersSetter = () => {
 			UsersActionsDispatchers.fetchUsers(teamspace);
 			JobsActionsDispatchers.fetchJobs(teamspace);
 			TicketsActionsDispatchers.fetchRiskCategories(teamspace);
+		}
+
+		if (sorting) {
+			try {
+				const  [property, order] = deserializeSorting(sorting);
+
+				if (property && order) {
+					TicketsActionsDispatchers.setSorting(property, order);
+				}
+			} catch (e) {
+				// do nothing if the param is wrong
+			}
 		}
 	}, [isFetching]);
 	

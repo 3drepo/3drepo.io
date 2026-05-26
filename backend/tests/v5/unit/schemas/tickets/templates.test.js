@@ -15,9 +15,10 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { cloneDeep, times } = require('lodash');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateCustomStatusValues, determineTestGroup } = require('../../../helper/services');
+const { generateRandomString, generateCustomStatusValues } = require('../../../helper/services');
 const { supportedPatterns } = require('../../../../../src/v5/schemas/tickets/templates.constants');
 
 const { statusTypes, statuses } = require(`${src}/schemas/tickets/templates.constants`);
@@ -542,6 +543,16 @@ const testValidate = () => {
 				name: generateRandomString(),
 				type: propTypes.TEXT,
 				readOnlyOnUI: true,
+			}],
+
+		}, true],
+		['property is hiddenOnUI', {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				hiddenOnUI: true,
 			}],
 
 		}, true],
@@ -1293,6 +1304,27 @@ const testValidate = () => {
 		const output = TemplateSchema.validate(data);
 
 		expect(output).toEqual(expectedData);
+	});
+
+	test('hiddenOnUI should be preserved when true and stripped when false', () => {
+		const data = {
+			name: generateRandomString(),
+			code: generateRandomString(3),
+			properties: [{
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				hiddenOnUI: true,
+			}, {
+				name: generateRandomString(),
+				type: propTypes.TEXT,
+				hiddenOnUI: false,
+			}],
+		};
+
+		const output = TemplateSchema.validate(data);
+
+		expect(output.properties[0].hiddenOnUI).toEqual(true);
+		expect(output.properties[1].hiddenOnUI).toBeUndefined();
 	});
 };
 

@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { src } = require('../../../helper/path');
-const { determineTestGroup, generateRandomString, generateRandomURL } = require('../../../helper/services');
+const { generateRandomString, generateRandomURL } = require('../../../helper/services');
 
 // This prevents the session service from triggering a mongo service.
 jest.mock('../../../../../src/v5/handler/db');
