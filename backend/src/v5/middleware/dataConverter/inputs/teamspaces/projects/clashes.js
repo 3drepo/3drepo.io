@@ -103,8 +103,12 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 
 	const cloudClashModule = template.modules?.find(({ type }) => type === presetModules.CLOUD_CLASH);
 
-	if (!cloudClashModule || cloudClashModule.deprecated) {
+	if (!cloudClashModule) {
 		throw createResponseCode(templates.invalidArguments, `Ticket template provided must contain the preset module "${presetModules.CLOUD_CLASH}"`);
+	}
+
+	if (cloudClashModule.deprecated) {
+		throw createResponseCode(templates.invalidArguments, `Ticket template provided contains a deprecated preset module "${presetModules.CLOUD_CLASH}"`);
 	}
 
 	if (ticketData.valuesAtCreation?.length) {
