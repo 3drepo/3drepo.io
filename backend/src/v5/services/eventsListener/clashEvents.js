@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2021 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -15,18 +15,17 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const authEventsListener = require('./components/authEvents');
-const clashEventsListener = require('./clashEvents');
-const modelEventsListener = require('./components/modelEvents');
-const userEventsListener = require('./components/userEvents');
+const { events } = require('../eventsManager/eventsManager.constants');
+const { subscribe } = require('../eventsManager/eventsManager');
 
-const EventsListener = {};
-
-EventsListener.init = () => {
-	modelEventsListener.init();
-	authEventsListener.init();
-	clashEventsListener.init();
-	userEventsListener.init();
+const processClashRun = () => {
+	// Clash ticket processing will be added in a follow-up task.
 };
 
-module.exports = EventsListener;
+const ClashEventsListener = {};
+
+ClashEventsListener.init = () => {
+	subscribe(events.CLASH_RUN_PROCESSED, processClashRun);
+};
+
+module.exports = ClashEventsListener;

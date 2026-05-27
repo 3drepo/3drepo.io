@@ -52,9 +52,13 @@ const MetadataModel = require(`${src}/models/metadata`);
 jest.mock('../../../../../../src/v5/services/filesManager');
 const FilesManager = require(`${src}/services/filesManager`);
 
+jest.mock('../../../../../../src/v5/services/eventsManager/eventsManager');
+const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+
 const { SELF_INTERSECTIONS_CHECK_OPTIONS } = require(`${src}/models/clashes.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { CLASH_PLAN_TYPES } = require(`${src}/models/clashes.constants`);
+const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
 const RUN_HISTORY_COL = 'clashes.runs.history';
 
@@ -273,19 +277,23 @@ const testCompleteRun = () => {
 		const resPath = generateRandomString();
 
 		test('should complete run when there are no previous runs', async () => {
+			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 			fs.createReadStream.mockImplementationOnce(() => {
 				const fakeReadStream = PassThrough();
 				fakeReadStream.write(JSON.stringify(fileContent));
 				fakeReadStream.end();
 				return fakeReadStream;
 			});
+			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
 			ClashRunsModel.getTestRunByQuery.mockRejectedValueOnce(new Error());
 
 			await Clashes.completeRun(teamspace, project, corId, resPath);
 
-			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(2);
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId },
 				{ plan: 1, triggeredAt: 1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
+				{ result: 1 }, { completedAt: -1 });
 			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
 
 			const result = { new: fileContent.clashes.map(formatClash), active: [], resolved: [] };
@@ -296,6 +304,15 @@ const testCompleteRun = () => {
 			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledWith(teamspace, corId,
 				FilesManager.storeFile.mock.calls[0][2]);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
+				teamspace,
+				project,
+				runId: corId,
+				planId: currentRun.plan._id,
+				results: result,
+			});
 		});
 
 		test('should categorize clashes and complete run when there are previous runs', async () => {
@@ -348,6 +365,15 @@ const testCompleteRun = () => {
 			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledWith(teamspace, corId,
 				FilesManager.storeFile.mock.calls[0][2]);
+
+			expect(EventsManager.publish).toHaveBeenCalledTimes(1);
+			expect(EventsManager.publish).toHaveBeenCalledWith(events.CLASH_RUN_PROCESSED, {
+				teamspace,
+				project,
+				runId: corId,
+				planId: currentRun.plan._id,
+				results: result,
+			});
 		});
 	});
 };

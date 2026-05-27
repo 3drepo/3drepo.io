@@ -28,9 +28,11 @@ const { getFileAsStream, storeFile } = require('../../../services/filesManager')
 const { PassThrough } = require('stream');
 const { createConstantsObject } = require('../../../utils/helper/objects');
 const { createReadStream } = require('fs');
+const { events } = require('../../../services/eventsManager/eventsManager.constants');
 const { getAllMetadata } = require('./models/commons/metadata');
 const { getMetadataByRules } = require('../../../models/metadata');
 const { getNodesByQuery } = require('../../../models/scenes');
+const { publish } = require('../../../services/eventsManager/eventsManager');
 const { queueClashRun } = require('../../../services/modelProcessing');
 
 const Clashes = {};
@@ -183,14 +185,14 @@ const compareRunResults = (existingRunClashes, newRunClashes) => {
 	return result;
 };
 
-Clashes.completeRun = async (teamspace, project, corId, resPath) => {
+Clashes.completeRun = async (teamspace, project, runId, resPath) => {
 	const resStream = createReadStream(resPath, { encoding: 'utf8' });
 	const content = await streamToJSON(resStream);
 
 	let lastRunClashes;
+	const { plan } = await getTestRunByQuery(teamspace, { _id: runId }, { plan: 1, triggeredAt: 1 });
 
 	try {
-		const { plan } = await getTestRunByQuery(teamspace, { _id: corId }, { plan: 1, triggeredAt: 1 });
 		const lastCompletedRun = await getTestRunByQuery(teamspace,
 			{ 'plan._id': plan._id, completedAt: { $exists: true } },
 			{ result: 1 }, { completedAt: -1 },
@@ -207,7 +209,14 @@ Clashes.completeRun = async (teamspace, project, corId, resPath) => {
 
 	const resultId = generateUUIDString();
 	await storeFile(teamspace, RUN_HISTORY_COL, resultId, Buffer.from(JSON.stringify(categorizedClashes)));
-	await completeTestRun(teamspace, corId, resultId);
+	await completeTestRun(teamspace, runId, resultId);
+	publish(events.CLASH_RUN_PROCESSED, {
+		teamspace,
+		project,
+		runId,
+		planId: plan._id,
+		results: categorizedClashes,
+	});
 };
 
 module.exports = Clashes;
