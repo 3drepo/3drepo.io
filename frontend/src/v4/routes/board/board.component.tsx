@@ -24,12 +24,12 @@ import CancelIcon from '@mui/icons-material/Cancel';
 import SearchIcon from '@mui/icons-material/Search';
 import { get } from 'lodash';
 import { useParams, generatePath } from 'react-router-dom';
-import TrelloBoard from 'react-trello';
 import { BOARD_ROUTE, BOARD_ROUTE_WITH_MODEL, ViewerParams } from '@/v5/ui/routes/routes.constants';
 import { formatMessage } from '@/v5/services/intl';
 
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
+import { KanbanBoard, KanbanMoveAcrossLanesEvent } from '@components/kanbanBoard/KanbanBoard';
 import { ISSUE_FILTERS } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES, RouteParams } from '../../constants/routes';
@@ -166,10 +166,7 @@ export function Board(props: IProps) {
 	const v5Project = ProjectsHooksSelectors.selectCurrentProjectName();
 	const project = v5Project;
 	const modelId = containerOrFederation;
-	const projectParam = `${project ? `/${project}` : ''}`;
-	const modelParam = `${modelId ? `/${modelId}` : ''}`;
 	const isIssuesBoard = type === 'issues';
-	const boardData = { lanes: props.lanes };
 	const selectedFilters = isIssuesBoard ? props.selectedIssueFilters : props.selectedRiskFilters;
 
 	const {
@@ -320,13 +317,13 @@ export function Board(props: IProps) {
 		return toLaneId;
 	};
 
-	const handleCardMove = (fromLaneId, toLaneId, cardId) => {
-		if (fromLaneId === toLaneId) {
+	const handleCardMove = ({ sourceLaneId, targetLaneId, cardId }: KanbanMoveAcrossLanesEvent) => {
+		if (sourceLaneId === targetLaneId) {
 			return;
 		}
 
 		const updatedProps = {
-			[props.filterProp]: getUpdatedProps({ filterProp: props.filterProp, toLaneId })
+			[props.filterProp]: getUpdatedProps({ filterProp: props.filterProp, toLaneId: targetLaneId })
 		};
 
 		if (isIssuesBoard) {
@@ -464,14 +461,12 @@ export function Board(props: IProps) {
 	const renderBoard = renderWhenTrue(() => (
 		<BoardContainer>
 			<div ref={boardRef}>
-				<TrelloBoard
-					data={boardData}
-					hideCardDeleteIcon
+				<KanbanBoard
+					data={props.lanes}
 					handleDragEnd={handleCardDrop}
 					onCardClick={handleOpenDialog}
 					onCardMoveAcrossLanes={handleCardMove}
 					components={components}
-					cardDraggable
 				/>
 			</div>
 		</BoardContainer>
