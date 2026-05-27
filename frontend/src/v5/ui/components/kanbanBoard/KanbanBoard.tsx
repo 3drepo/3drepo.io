@@ -31,6 +31,8 @@ export type {
 } from './KanbanBoardTypes';
 
 const DRAG_START_DISTANCE = 4;
+const AUTO_SCROLL_EDGE_DISTANCE = 96;
+const AUTO_SCROLL_MAX_SPEED = 24;
 
 function moveCardToLane(
 	lanes: Lane[],
@@ -98,6 +100,7 @@ export function KanbanBoard({
 	const laneRefs = useRef(new Map<string, HTMLDivElement>());
 	const cardRefs = useRef(new Map<string, HTMLDivElement>());
 	const overlayRef = useRef<HTMLDivElement | null>(null);
+	const boardScrollerRef = useRef<HTMLDivElement | null>(null);
 	const latestDragPointRef = useRef<DragPoint | null>(null);
 	const dragFrameRef = useRef<number | null>(null);
 	const removePointerListenersRef = useRef<(() => void) | null>(null);
@@ -297,6 +300,56 @@ export function KanbanBoard({
 			point.y - session.offsetY
 		}px, 0)`;
 
+	const getAutoScrollSpeed = (distanceFromEdge: number) => {
+		const intensity = Math.min(
+			1,
+			Math.max(
+				0,
+				(AUTO_SCROLL_EDGE_DISTANCE - distanceFromEdge) /
+					AUTO_SCROLL_EDGE_DISTANCE,
+			),
+		);
+
+		return Math.max(1, Math.round(intensity * AUTO_SCROLL_MAX_SPEED));
+	};
+
+	const scrollBoardNearEdge = (point: DragPoint) => {
+		const scroller = boardScrollerRef.current;
+
+		if (!scroller) {
+			return false;
+		}
+
+		const rect = scroller.getBoundingClientRect();
+		const maxScrollLeft = scroller.scrollWidth - scroller.clientWidth;
+		let scrollDelta = 0;
+
+		if (point.x - rect.left < AUTO_SCROLL_EDGE_DISTANCE && scroller.scrollLeft > 0) {
+			scrollDelta = -getAutoScrollSpeed(point.x - rect.left);
+		} else if (
+			rect.right - point.x < AUTO_SCROLL_EDGE_DISTANCE &&
+			scroller.scrollLeft < maxScrollLeft
+		) {
+			scrollDelta = getAutoScrollSpeed(rect.right - point.x);
+		}
+
+		if (!scrollDelta) {
+			return false;
+		}
+
+		const nextScrollLeft = Math.max(
+			0,
+			Math.min(maxScrollLeft, scroller.scrollLeft + scrollDelta),
+		);
+
+		if (nextScrollLeft === scroller.scrollLeft) {
+			return false;
+		}
+
+		scroller.scrollLeft = nextScrollLeft;
+		return true;
+	};
+
 	const applyDragFrame = () => {
 		dragFrameRef.current = null;
 
@@ -311,7 +364,13 @@ export function KanbanBoard({
 			overlayRef.current.style.transform = getOverlayTransform(session, point);
 		}
 
+		const didAutoScroll = scrollBoardNearEdge(point);
 		setAnimatedDropTarget(getDropTargetFromPoint(point.x, point.y));
+
+		if (didAutoScroll) {
+			// eslint-disable-next-line @typescript-eslint/no-use-before-define
+			scheduleDragFrame();
+		}
 	};
 
 	const scheduleDragFrame = () => {
@@ -597,7 +656,7 @@ export function KanbanBoard({
 
 	return (
 		<>
-			<BoardScroller>
+			<BoardScroller ref={boardScrollerRef}>
 				{lanes.map((lane) => (
 					<LaneColumn
 						key={lane.id}
