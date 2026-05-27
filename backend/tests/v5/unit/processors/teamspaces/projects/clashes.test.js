@@ -132,16 +132,18 @@ const testCreateRun = () => {
 
 	const metadata = times(10, (i) => ({ _id: generateRandomString(),
 		parents: [generateRandomString()],
-		externalId: externalIds[i] }));
+		metadata: externalIds[i] }));
 
 	const meshDataObj = {
 		nonBimMeshes: times(10, (i) => ({
 			_id: generateRandomString(),
+			shared_id: generateRandomString(),
 			name: i % 2 === 0 ? undefined : generateRandomString(),
 			parents: [i % 2 === 0 ? parentWithManyMeshes : generateRandomString()],
 		})),
 		meshes: times(10, (i) => ({
 			_id: generateRandomString(),
+			shared_id: generateRandomString(),
 			parents: metadata[i].parents,
 			externalId: externalIds[i],
 		})),
@@ -150,7 +152,7 @@ const testCreateRun = () => {
 		unwantedMeshes: [],
 	};
 
-	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0].externalId);
+	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0]);
 
 	const checkStreamContent = (stream, expectedContent) => new Promise((resolve, reject) => {
 		const chunks = [];
@@ -171,7 +173,7 @@ const testCreateRun = () => {
 		const result = {};
 
 		for (const mesh of meshes.filter(({ _id }) => !unwantedMeshes.includes(_id))) {
-			const parentId = mesh.name ? mesh._id : UUIDToString(mesh.parents[0]);
+			const parentId = mesh.name ? mesh.shared_id : UUIDToString(mesh.parents[0]);
 			const compositePath = `${container}::${mesh.externalId?.key ?? 'internal'}::${mesh.externalId?.values[0] ?? parentId}`;
 
 			if (!result[compositePath]) {
@@ -195,13 +197,14 @@ const testCreateRun = () => {
 			ClashRunsModel.createTestRun.mockResolvedValueOnce(runId);
 
 			// mocks for set A (no rules)
-			Metadata.getAllMetadata.mockResolvedValueOnce([]);
+			MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
 			ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.nonBimMeshes);
 			// mocks for set B (rules)
+			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(meshData.metadata);
 			MetadataModel.getMetadataByRules.mockResolvedValueOnce(
 				{ matched: meshData.metadata, unwanted: meshData.unwantedMetadata });
 			if (meshData.metadata.length) {
-				ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.meshes);
+				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.meshes);
 			}
 			if (meshData.unwantedMeshes.length) {
 				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.unwantedMeshes);
@@ -211,10 +214,12 @@ const testCreateRun = () => {
 
 			expect(ClashRunsModel.createTestRun).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, plan, userId);
-			expect(Metadata.getAllMetadata).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledWith(teamspace, project, plan.selectionA.container,
+				{ type: 'mesh', rev_id: plan.selectionA.revision }, { _id: 1, parents: 1, name: 1 });
 			expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
-			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(meshData.metadata.length ? 2 : 1);
-			expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledTimes(meshData.unwantedMeshes.length ? 1 : 0);
+			expect(MetadataModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, plan.selectionB.container,
+				plan.selectionB.revision, plan.selectionB.rules, { parents: 1 });
 
 			const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
 			expect(ModelProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, project,
@@ -313,7 +318,7 @@ const testProcessClashResults = () => {
 			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
-			const errorMessage = 'Error retrieving last run results';
+			const errorMessage = 'Error retrieving clashes from last run';
 			expect(ClashRunsModel.setTestRunToFailed).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.setTestRunToFailed).toHaveBeenCalledWith(teamspace, corId, errorMessage);
 			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
@@ -361,7 +366,7 @@ const testProcessClashResults = () => {
 			const result = {
 				new: fileContent.clashes.slice(5, 10).map(formatClash),
 				active: existingClashes.active,
-				resolved: existingClashes.new,
+				resolved: existingClashes.new.map((c) => c.index),
 			};
 
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);

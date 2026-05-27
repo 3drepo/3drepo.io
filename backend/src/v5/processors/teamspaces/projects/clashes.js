@@ -42,44 +42,41 @@ Clashes.deletePlan = deletePlan;
 
 const constructCompositeObject = async (teamspace, container, wantedMeshes, unwantedMeshIds) => {
 	const compositesToMeshes = {};
+	const parentIdsToMeshes = {};
+	const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
 
-	if (wantedMeshes.length) {
-		const parentIdsToMeshes = {};
-		const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
+	for (const mesh of wantedMeshes) {
+		const idStr = UUIDToString(mesh._id);
 
-		for (const mesh of wantedMeshes) {
-			const idStr = UUIDToString(mesh._id);
-
-			if (!unwantedIdsObj[idStr]) {
-				const parentId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
-				if (parentIdsToMeshes[parentId]) {
-					parentIdsToMeshes[parentId].push(idStr);
-				} else {
-					parentIdsToMeshes[parentId] = [idStr];
-				}
+		if (!unwantedIdsObj[idStr]) {
+			const parentId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
+			if (parentIdsToMeshes[parentId]) {
+				parentIdsToMeshes[parentId].push(idStr);
+			} else {
+				parentIdsToMeshes[parentId] = [idStr];
 			}
 		}
+	}
 
-		const metadata = await getMetadataByQuery(teamspace, container,
-			{ parents: { $in: Object.keys(parentIdsToMeshes).map(stringToUUID) } }, { metadata: 1, parents: 1 });
+	const metadata = await getMetadataByQuery(teamspace, container,
+		{ parents: { $in: Object.keys(parentIdsToMeshes).map(stringToUUID) } }, { metadata: 1, parents: 1 });
 
-		const metadataMapping = {};
-		for (const { parents, metadata: meta } of metadata) {
-			const parentIdStr = UUIDToString(parents[0]);
-			metadataMapping[parentIdStr] = meta;
+	const metadataMapping = {};
+	for (const { parents, metadata: meta } of metadata) {
+		const parentIdStr = UUIDToString(parents[0]);
+		metadataMapping[parentIdStr] = meta;
+	}
+
+	for (const [compId, meshes] of Object.entries(parentIdsToMeshes)) {
+		const meshMeta = metadataMapping[compId];
+		const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
+		const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values[0] ?? compId}`;
+
+		if (!compositesToMeshes[compositePath]) {
+			compositesToMeshes[compositePath] = [];
 		}
 
-		for (const [compId, meshes] of Object.entries(parentIdsToMeshes)) {
-			const meshMeta = metadataMapping[compId];
-			const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
-			const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values[0] ?? compId}`;
-
-			if (!compositesToMeshes[compositePath]) {
-				compositesToMeshes[compositePath] = [];
-			}
-
-			compositesToMeshes[compositePath].push(...meshes);
-		}
+		compositesToMeshes[compositePath].push(...meshes);
 	}
 
 	return compositesToMeshes;
