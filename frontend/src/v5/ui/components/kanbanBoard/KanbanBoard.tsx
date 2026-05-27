@@ -17,7 +17,6 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
-import { createPortal } from 'react-dom';
 import { BoardScroller, DefaultCard, DragOverlay, createDropTargetStore } from './KanbanBoardComponents';
 import type { Card, DragPoint, DragSession, DropTarget, DropTargetStore, KanbanBoardProps, KanbanDragEndEvent, Lane, PointerPress } from './KanbanBoardTypes';
 import { LaneColumn } from './LaneColumn';
@@ -617,17 +616,15 @@ export function KanbanBoard({
 					/>
 				))}
 			</BoardScroller>
-
 			{dragSession && draggingCard
-				? createPortal(
-					<DragOverlay
-						ref={overlayRef}
-						overlayWidth={dragSession.width}
-						initialTransform={getOverlayTransform(dragSession, dragSession)}
-					>
-						<CardComponent {...draggingCard} />
-					</DragOverlay>,
-					document.body,
+				? 
+				(<DragOverlay
+					ref={overlayRef}
+					overlayWidth={dragSession.width}
+					initialTransform={getOverlayTransform(dragSession, dragSession)}
+				>
+					<CardComponent {...draggingCard} />
+				</DragOverlay>
 				)
 				: null}
 		</>
