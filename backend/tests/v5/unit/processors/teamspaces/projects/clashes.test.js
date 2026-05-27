@@ -45,9 +45,6 @@ const ModelProcessing = require(`${src}/services/modelProcessing`);
 jest.mock('../../../../../../src/v5/processors/teamspaces/projects/models/commons/scenes');
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
-jest.mock('../../../../../../src/v5/processors/teamspaces/projects/models/commons/metadata');
-const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/metadata`);
-
 jest.mock('../../../../../../src/v5/models/metadata');
 const MetadataModel = require(`${src}/models/metadata`);
 

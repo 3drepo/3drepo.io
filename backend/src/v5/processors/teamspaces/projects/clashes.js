@@ -71,12 +71,7 @@ const constructCompositeObject = async (teamspace, container, wantedMeshes, unwa
 		const meshMeta = metadataMapping[compId];
 		const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
 		const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values[0] ?? compId}`;
-
-		if (!compositesToMeshes[compositePath]) {
-			compositesToMeshes[compositePath] = [];
-		}
-
-		compositesToMeshes[compositePath].push(...meshes);
+		compositesToMeshes[compositePath] = meshes;
 	}
 
 	return compositesToMeshes;
@@ -196,11 +191,7 @@ const compareRunResults = (lastRunIndexObj, newRunClashes) => {
 		newMap.add(key);
 	}
 
-	for (const key of Object.keys(lastRunIndexObj)) {
-		if (!newMap.has(key)) {
-			result.resolved.push(key);
-		}
-	}
+	result.resolved = Object.keys(lastRunIndexObj);
 
 	return result;
 };
