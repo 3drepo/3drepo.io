@@ -28,6 +28,8 @@ const { PassThrough } = require('stream');
 
 const { generateRandomString, generateRandomNumber, generateRandomObject, generateUUID } = require('../../../../helper/services');
 
+const { templates } = require(`${src}/utils/responseCodes`);
+
 jest.mock('../../../../../../src/v5/models/clashes.plans');
 const ClashPlansModel = require(`${src}/models/clashes.plans`);
 
@@ -43,9 +45,6 @@ const ModelProcessing = require(`${src}/services/modelProcessing`);
 jest.mock('../../../../../../src/v5/processors/teamspaces/projects/models/commons/scenes');
 const Scenes = require(`${src}/processors/teamspaces/projects/models/commons/scenes`);
 
-jest.mock('../../../../../../src/v5/processors/teamspaces/projects/models/commons/metadata');
-const Metadata = require(`${src}/processors/teamspaces/projects/models/commons/metadata`);
-
 jest.mock('../../../../../../src/v5/models/metadata');
 const MetadataModel = require(`${src}/models/metadata`);
 
@@ -54,6 +53,10 @@ const FilesManager = require(`${src}/services/filesManager`);
 
 jest.mock('../../../../../../src/v5/services/eventsManager/eventsManager');
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
+jest.mock('../../../../../../src/v5/services/mailer');
+const Mailer = require(`${src}/services/mailer`);
+
+const MailerConstants = require(`${src}/services/mailer/mailer.constants`);
 
 const { SELF_INTERSECTIONS_CHECK_OPTIONS } = require(`${src}/models/clashes.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
@@ -133,16 +136,18 @@ const testCreateRun = () => {
 
 	const metadata = times(10, (i) => ({ _id: generateRandomString(),
 		parents: [generateRandomString()],
-		externalId: externalIds[i] }));
+		metadata: externalIds[i] }));
 
 	const meshDataObj = {
 		nonBimMeshes: times(10, (i) => ({
 			_id: generateRandomString(),
+			shared_id: generateRandomString(),
 			name: i % 2 === 0 ? undefined : generateRandomString(),
 			parents: [i % 2 === 0 ? parentWithManyMeshes : generateRandomString()],
 		})),
 		meshes: times(10, (i) => ({
 			_id: generateRandomString(),
+			shared_id: generateRandomString(),
 			parents: metadata[i].parents,
 			externalId: externalIds[i],
 		})),
@@ -151,7 +156,7 @@ const testCreateRun = () => {
 		unwantedMeshes: [],
 	};
 
-	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0].externalId);
+	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0]);
 
 	const checkStreamContent = (stream, expectedContent) => new Promise((resolve, reject) => {
 		const chunks = [];
@@ -172,7 +177,7 @@ const testCreateRun = () => {
 		const result = {};
 
 		for (const mesh of meshes.filter(({ _id }) => !unwantedMeshes.includes(_id))) {
-			const parentId = mesh.name ? mesh._id : UUIDToString(mesh.parents[0]);
+			const parentId = mesh.name ? mesh.shared_id : UUIDToString(mesh.parents[0]);
 			const compositePath = `${container}::${mesh.externalId?.key ?? 'internal'}::${mesh.externalId?.values[0] ?? parentId}`;
 
 			if (!result[compositePath]) {
@@ -197,13 +202,14 @@ const testCreateRun = () => {
 			ClashRunsModel.createTestRun.mockResolvedValueOnce(runId);
 
 			// mocks for set A (no rules)
-			Metadata.getAllMetadata.mockResolvedValueOnce([]);
+			MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
 			ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.nonBimMeshes);
 			// mocks for set B (rules)
+			MetadataModel.getMetadataByQuery.mockResolvedValueOnce(meshData.metadata);
 			MetadataModel.getMetadataByRules.mockResolvedValueOnce(
 				{ matched: meshData.metadata, unwanted: meshData.unwantedMetadata });
 			if (meshData.metadata.length) {
-				ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshData.meshes);
+				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.meshes);
 			}
 			if (meshData.unwantedMeshes.length) {
 				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.unwantedMeshes);
@@ -214,6 +220,7 @@ const testCreateRun = () => {
 			expect(ClashRunsModel.createTestRun).toHaveBeenCalledTimes(1);
 			const expectedPlanData = {
 				_id: plan._id,
+				project,
 				type: plan.type,
 				tolerance: plan.tolerance,
 				selfIntersectionsCheck: plan.selfIntersectionsCheck,
@@ -221,10 +228,13 @@ const testCreateRun = () => {
 				selectionB: plan.selectionB,
 			};
 			expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, expectedPlanData, userId);
-			expect(Metadata.getAllMetadata).toHaveBeenCalledTimes(1);
+
+			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(1);
+			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledWith(teamspace, project, plan.selectionA.container,
+				{ type: 'mesh', rev_id: plan.selectionA.revision }, { _id: 1, parents: 1, name: 1 });
 			expect(MetadataModel.getMetadataByRules).toHaveBeenCalledTimes(1);
-			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(meshData.metadata.length ? 2 : 1);
-			expect(Scenes.getMeshesWithParentIds).toHaveBeenCalledTimes(meshData.unwantedMeshes.length ? 1 : 0);
+			expect(MetadataModel.getMetadataByRules).toHaveBeenCalledWith(teamspace, project, plan.selectionB.container,
+				plan.selectionB.revision, plan.selectionB.rules, { parents: 1 });
 
 			const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
 			expect(ModelProcessing.queueClashRun).toHaveBeenCalledWith(teamspace, project,
@@ -268,32 +278,35 @@ const generateClash = () => ({
 	...generateRandomObject(),
 });
 
-const testCompleteRun = () => {
-	describe('Complete Run', () => {
+const testProcessClashResults = () => {
+	describe('Process Clash Results', () => {
 		const fileContent = { clashes: times(10, () => generateClash()) };
 		const teamspace = generateRandomString();
 		const project = generateRandomString();
 		const corId = generateRandomString();
 		const resPath = generateRandomString();
 
-		test('should complete run when there are no previous runs', async () => {
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+		test('should process clash results when there are no previous runs', async () => {
 			fs.createReadStream.mockImplementationOnce(() => {
 				const fakeReadStream = PassThrough();
 				fakeReadStream.write(JSON.stringify(fileContent));
 				fakeReadStream.end();
 				return fakeReadStream;
 			});
-			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getTestRunByQuery.mockRejectedValueOnce(new Error());
 
-			await Clashes.completeRun(teamspace, project, corId, resPath);
+			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString(), project } };
+			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
+			ClashRunsModel.getTestRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
+
+			await Clashes.processClashResults(teamspace, corId, resPath);
 
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(2);
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId },
-				{ plan: 1, triggeredAt: 1 });
-			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
+				{ 'plan._id': 1, 'plan.project': 1, triggeredAt: 1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace,
+				{ 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
 				{ result: 1 }, { completedAt: -1 });
+
 			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
 
 			const result = { new: fileContent.clashes.map(formatClash), active: [], resolved: [] };
@@ -315,13 +328,39 @@ const testCompleteRun = () => {
 			});
 		});
 
-		test('should categorize clashes and complete run when there are previous runs', async () => {
+		test('should mark run as failed and send an email if it fails to fetch last results', async () => {
+			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString(), project } };
+			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
+			ClashRunsModel.getTestRunByQuery.mockRejectedValueOnce(templates.unknown);
+
+			await Clashes.processClashResults(teamspace, corId, resPath);
+
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(2);
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId },
+				{ 'plan._id': 1, 'plan.project': 1, triggeredAt: 1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace,
+				{ 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
+				{ result: 1 }, { completedAt: -1 });
+
+			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+
+			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+			const errorMessage = 'Error retrieving clashes from last run';
+			expect(ClashRunsModel.setTestRunToFailed).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.setTestRunToFailed).toHaveBeenCalledWith(teamspace, corId, errorMessage);
+			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
+			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(MailerConstants.templates.CLASH_ERROR.name,
+				{ errorMessage, teamspace, planId: currentRun.plan._id, runId: corId });
+		});
+
+		test('should categorize clashes and process clash results when there are previous runs', async () => {
+			const previouslyResolvedClashes = times(2, () => generateClash()).map(formatClash).map((clash) => clash.index);
 			const existingClashes = {
 				new: times(5, () => generateClash()).map(formatClash),
 				active: fileContent.clashes.slice(0, 5).map(formatClash),
-				resolved: [],
+				resolved: previouslyResolvedClashes,
 			};
-			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString(), project } };
 			const lastRun = { ...generateRandomObject(), result: generateRandomString() };
 
 			fs.createReadStream.mockImplementationOnce(() => {
@@ -341,12 +380,13 @@ const testCompleteRun = () => {
 			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
 			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(lastRun);
 
-			await Clashes.completeRun(teamspace, project, corId, resPath);
+			await Clashes.processClashResults(teamspace, corId, resPath);
 
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(2);
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId },
-				{ plan: 1, triggeredAt: 1 });
-			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
+				{ 'plan._id': 1, 'plan.project': 1, triggeredAt: 1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace,
+				{ 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
 				{ result: 1 }, { completedAt: -1 });
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
@@ -355,7 +395,7 @@ const testCompleteRun = () => {
 			const result = {
 				new: fileContent.clashes.slice(5, 10).map(formatClash),
 				active: existingClashes.active,
-				resolved: existingClashes.new,
+				resolved: [...existingClashes.new.map((c) => c.index), ...previouslyResolvedClashes],
 			};
 
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
@@ -383,5 +423,5 @@ describe(determineTestGroup(__filename), () => {
 	testUpdatePlan();
 	testDeletePlan();
 	testCreateRun();
-	testCompleteRun();
+	testProcessClashResults();
 });

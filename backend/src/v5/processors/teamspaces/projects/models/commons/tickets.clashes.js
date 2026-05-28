@@ -143,6 +143,8 @@ const applyStatus = (ticket, status) => {
 	setValue(ticket, STATUS, status);
 };
 
+const getClashId = (clash) => String(clash.index ?? clash);
+
 const generateTicket = (clash, clashContext, defaultValues, status) => {
 	const ticket = {
 		title: `[${clashContext.planName}] Clash`,
@@ -216,7 +218,7 @@ TicketsClashes.processClashResults = async (
 	const clashesToCreate = [];
 
 	newClashes.forEach((clash) => {
-		const clashId = String(clash.index);
+		const clashId = getClashId(clash);
 		if (Object.hasOwn(clashIdToTicket, clashId)) {
 			clashesToUpdate.push({
 				_id: clashIdToTicket[clashId],
@@ -231,7 +233,7 @@ TicketsClashes.processClashResults = async (
 	resolvedClashes.forEach((clash) => {
 		if (resolvedStatus === undefined) return;
 
-		const clashId = String(clash.index);
+		const clashId = getClashId(clash);
 		if (Object.hasOwn(clashIdToTicket, clashId)) {
 			clashesToUpdate.push({
 				_id: clashIdToTicket[clashId],

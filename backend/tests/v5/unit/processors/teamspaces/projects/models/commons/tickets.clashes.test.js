@@ -214,7 +214,7 @@ describe(determineTestGroup(__filename), () => {
 				},
 			},
 		};
-		const results = { new: [], active: [], resolved: [clash] };
+		const results = { new: [], active: [], resolved: [String(clash.index)] };
 
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
 
