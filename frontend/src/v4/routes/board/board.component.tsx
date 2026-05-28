@@ -29,7 +29,7 @@ import { formatMessage } from '@/v5/services/intl';
 
 import { ProjectsHooksSelectors } from '@/v5/services/selectorsHooks';
 import { FormattedMessage } from 'react-intl';
-import { KanbanBoard, KanbanMoveAcrossLanesEvent } from '@components/kanbanBoard/KanbanBoard';
+import { KanbanBoard, KanbanMoveAcrossLanesEvent } from '@components/kanbanBoard/kanbanBoard.component';
 import { ISSUE_FILTERS } from '../../constants/issues';
 import { RISK_FILTERS } from '../../constants/risks';
 import { ROUTES, RouteParams } from '../../constants/routes';

@@ -17,9 +17,10 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
-import { BoardScroller, DefaultCard, DragOverlay, createDropTargetStore } from './KanbanBoardComponents';
-import type { Card, DragPoint, DragSession, DropTarget, DropTargetStore, KanbanBoardProps, KanbanDragEndEvent, Lane, PointerPress } from './KanbanBoardTypes';
-import { LaneColumn } from './LaneColumn';
+import { BoardScroller, DragOverlay } from './kanbanBoard.styles';
+import type { Card, DragPoint, DragSession, DropTarget, DropTargetStore, KanbanBoardProps, KanbanDragEndEvent, Lane, PointerPress } from './kanbanBoard.types';
+import { LaneColumn } from './laneColumn';
+import { DefaultCard } from './defaultCard.component';
 
 export type {
 	Card,
@@ -28,11 +29,65 @@ export type {
 	KanbanDragEndEvent,
 	KanbanMoveAcrossLanesEvent,
 	Lane,
-} from './KanbanBoardTypes';
+} from './kanbanBoard.types';
 
 const DRAG_START_DISTANCE = 4;
 const AUTO_SCROLL_EDGE_DISTANCE = 96;
 const AUTO_SCROLL_MAX_SPEED = 24;
+
+function createDropTargetStore(): DropTargetStore {
+	let target: DropTarget | null = null;
+	let version = 0;
+	const listeners = new Map<string, Set<() => void>>();
+
+	const notifyLane = (laneId: string | undefined) => {
+		if (!laneId) {
+			return;
+		}
+
+		listeners.get(laneId)?.forEach((listener) => listener());
+	};
+
+	return {
+		getLaneState: (laneId) => ({
+			target: target?.laneId === laneId ? target : null,
+			version,
+		}),
+		getTarget: () => target,
+		setTarget: (nextTarget) => {
+			if (
+				target?.laneId === nextTarget?.laneId &&
+				target?.index === nextTarget?.index
+			) {
+				return;
+			}
+
+			const previousLaneId = target?.laneId;
+			const nextLaneId = nextTarget?.laneId;
+			target = nextTarget;
+			version += 1;
+
+			notifyLane(previousLaneId);
+
+			if (nextLaneId !== previousLaneId) {
+				notifyLane(nextLaneId);
+			}
+		},
+		subscribe: (laneId, listener) => {
+			const laneListeners = listeners.get(laneId) ?? new Set<() => void>();
+			laneListeners.add(listener);
+			listeners.set(laneId, laneListeners);
+
+			return () => {
+				laneListeners.delete(listener);
+
+				if (laneListeners.size === 0) {
+					listeners.delete(laneId);
+				}
+			};
+		},
+	};
+}
 
 function moveCardToLane(
 	lanes: Lane[],
