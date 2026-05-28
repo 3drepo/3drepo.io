@@ -6,6 +6,7 @@ concurrency:
   cancel-in-progress: true
 permissions:
   issues: write
+  pull-requests: read
 jobs:
   get-details:
     name: Get PR and Issue Details

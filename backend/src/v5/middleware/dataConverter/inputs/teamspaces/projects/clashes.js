@@ -16,13 +16,13 @@
  */
 
 const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require('../../../../../models/clashes.constants');
+const { cloneDeep, deleteIfUndefined, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { createResponseCode, templates } = require('../../../../../utils/responseCodes');
 const { getContainerById, getFederationById } = require('../../../../../models/modelSettings');
 const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
-const { isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { types, transformer: { uniqueArray } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
-const { deleteIfUndefined } = require('../../../../../utils/helper/objects');
+const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
 const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { getPlanById } = require('../../../../../models/clashes.plans');
@@ -39,6 +39,8 @@ const { validateMany } = require('../../../../common');
 const { validateTicket } = require('../../../../../schemas/tickets');
 
 const Clashes = {};
+
+const statusEvents = ['onNew', 'onResolved', 'onReopened'];
 
 const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 	const modelExistsTest = (isFederation) => async (id) => {
@@ -64,6 +66,11 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 		rules: rulesSchema,
 	});
 
+	const defaultStatusesObject = {};
+	statusEvents.forEach((event) => {
+		defaultStatusesObject[event] = imposeCondition(Yup.string().nullable().default(undefined), false, true);
+	});
+
 	const ticketSchema = Yup.object().shape({
 		federation: imposeCondition(types.id.test('federation-validation', 'Federation must exist within the project', modelExistsTest(true)), true, false),
 		template: imposeCondition(types.id, true, false),
@@ -72,8 +79,8 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 			property: Yup.string().required(),
 			module: Yup.string(),
 			value: Yup.mixed().required(),
-		}).noUnknown(true)).min(1)
-			.default(undefined), false, true),
+		}).noUnknown(true)).min(1).default(undefined), false, true),
+		defaultStatuses: imposeCondition(Yup.object().shape(defaultStatusesObject).default(undefined), false, true),
 	}).noUnknown(true);
 
 	return Yup.object().shape({
@@ -90,7 +97,50 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 };
 
 const validateTicketData = async (teamspace, project, newTicketData, oldTicketData = {}) => {
-	const ticketData = { ...oldTicketData, ...newTicketData };
+	const updateData = cloneDeep(newTicketData);
+	const ticketData = cloneDeep({ ...oldTicketData, ...updateData });
+	const hasDefaultStatusesUpdate = Object.hasOwn(updateData, 'defaultStatuses');
+
+	if (hasDefaultStatusesUpdate) {
+		if (updateData.defaultStatuses === null) {
+			delete ticketData.defaultStatuses;
+			if (!oldTicketData.defaultStatuses) {
+				delete updateData.defaultStatuses;
+			}
+		} else {
+			const effectiveDefaultStatuses = { ...oldTicketData.defaultStatuses };
+
+			statusEvents.forEach((event) => {
+				const status = updateData.defaultStatuses?.[event];
+				if (status === undefined) return;
+
+				if (status === null) {
+					delete effectiveDefaultStatuses[event];
+				} else {
+					effectiveDefaultStatuses[event] = status;
+				}
+
+				if (status === oldTicketData.defaultStatuses?.[event]) {
+					delete updateData.defaultStatuses[event];
+				}
+			});
+
+			if (isEmpty(effectiveDefaultStatuses)) {
+				delete ticketData.defaultStatuses;
+				if (oldTicketData.defaultStatuses) {
+					updateData.defaultStatuses = null;
+				} else {
+					delete updateData.defaultStatuses;
+				}
+			} else {
+				ticketData.defaultStatuses = effectiveDefaultStatuses;
+				if (isEmpty(updateData.defaultStatuses)) {
+					delete updateData.defaultStatuses;
+				}
+			}
+		}
+	}
+
 	// 1. validate template is an existing template
 	// 2. using the template, validate the properties in valuesAtCreation
 	// 3. ensure user has permissions to create the ticket on the federation
@@ -110,6 +160,12 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 	if (cloudClashModule.deprecated) {
 		throw createResponseCode(templates.invalidArguments, `Ticket template provided contains a deprecated preset module "${presetModules.CLOUD_CLASH}"`);
 	}
+	const creatorHasCommenterAccess = await hasCommenterAccessToFederation(teamspace,
+		project, ticketData.federation, ticketData.creator);
+
+	if (!creatorHasCommenterAccess) {
+		throw createResponseCode(templates.invalidArguments, 'Creator specified does not have permissions to create ticket on the specified federation');
+	}
 
 	if (ticketData.valuesAtCreation?.length) {
 		const propertiesToUpdate = {};
@@ -123,14 +179,20 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 			template, propertiesToUpdate, { });
 	}
 
-	const creatorHasCommenterAccess = await hasCommenterAccessToFederation(teamspace,
-		project, ticketData.federation, ticketData.creator);
+	if (!isEmpty(ticketData.defaultStatuses)) {
+		const availableStatuses = template.config?.status?.values
+			.map(({ name }) => name) || Object.values(defaultStatuses);
 
-	if (!creatorHasCommenterAccess) {
-		throw createResponseCode(templates.invalidArguments, 'Creator specified does not have permissions to create ticket on the specified federation');
+		for (const event of statusEvents) {
+			if (ticketData.defaultStatuses[event] != null
+				&& !availableStatuses.includes(ticketData.defaultStatuses[event])) {
+				throw createResponseCode(templates.invalidArguments,
+					`Invalid ${event} default status. Must be one of: ${availableStatuses.join(', ')}`);
+			}
+		}
 	}
 
-	return newTicketData.template ? { ...newTicketData, template: templateId } : newTicketData;
+	return updateData.template ? { ...updateData, template: templateId } : updateData;
 };
 
 const validatePlanData = async (req, res, next) => {
@@ -138,7 +200,7 @@ const validatePlanData = async (req, res, next) => {
 		const { teamspace, project } = req.params;
 		const schema = generatePlanSchema(teamspace, project,
 			getUserFromSession(req.session), !!req.planData);
-		req.body = deleteIfUndefined(await schema.validate(req.body), false);
+		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }), false);
 		if (req.body.tickets) {
 			req.body.tickets = await validateTicketData(
 				teamspace, project, req.body.tickets, req.planData?.tickets);

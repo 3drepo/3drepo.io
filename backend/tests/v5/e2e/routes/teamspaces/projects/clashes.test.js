@@ -15,8 +15,8 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { isEmpty, times } = require('lodash');
 const { determineTestGroup } = require('../../../../helper/utils');
-const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
@@ -33,7 +33,7 @@ const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
-const { presetModules } = require(`${src}/schemas/tickets/templates.constants`);
+const { presetModules, statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
 const fs = require('fs');
 const path = require('path');
 const { UUIDToString } = require('../../../../../../src/v5/utils/helper/uuids');
@@ -103,7 +103,12 @@ const testCreatePlan = () => {
 		const basicData = generateBasicData();
 		const commenterOnFed = ServiceHelper.generateUserCredentials();
 		const viewerOnFed = ServiceHelper.generateUserCredentials();
+		const customStatusValues = ServiceHelper.generateCustomStatusValues();
 		const { teamspace, project, models, template, federation } = basicData;
+		const templateWithCustomStatuses = ServiceHelper.generateTemplate(false, false, {
+			status: { values: customStatusValues, default: customStatusValues[0].name },
+		});
+		templateWithCustomStatuses.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
 		const users = { ...basicData.users, commenterOnFed, viewerOnFed };
 
 		federation.properties.permissions = [
@@ -111,10 +116,25 @@ const testCreatePlan = () => {
 			{ user: viewerOnFed.user, permission: 'viewer' },
 		];
 
-		const generatePlanData = (includeTicketObject, creator = users.tsAdmin.user) => ServiceHelper.generateClashPlan(
-			models[0]._id, models[1]._id, includeTicketObject ? { federation, template, creator } : undefined);
+		const generatePlanData = (
+			includeTicketObject,
+			creator = users.tsAdmin.user,
+			templateToUse = template,
+			ticketOverrides = {},
+		) => {
+			const planData = ServiceHelper.generateClashPlan(
+				models[0]._id, models[1]._id, includeTicketObject
+					? { federation, template: templateToUse, creator } : undefined);
+			if (planData.tickets) {
+				planData.tickets = { ...planData.tickets, ...ticketOverrides };
+			}
+			return planData;
+		};
 
-		beforeAll(() => setupBasicData(basicData));
+		beforeAll(async () => {
+			await setupBasicData(basicData);
+			await ServiceHelper.db.createTemplates(teamspace, [templateWithCustomStatuses]);
+		});
 
 		describe.each([
 			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
@@ -125,6 +145,10 @@ const testCreatePlan = () => {
 			['user has access to a project', { user: users.projectAdmin }, true],
 			['user is teamspace admin', {}, true],
 			['payload contains ticket object', { planData: generatePlanData(true) }, true],
+			['payload contains ticket object with built in default statuses', { planData: generatePlanData(true, users.tsAdmin.user, template, { defaultStatuses: { onNew: defaultStatuses.OPEN, onResolved: defaultStatuses.CLOSED, onReopened: defaultStatuses.IN_PROGRESS } }) }, true],
+			['payload contains ticket object with custom default statuses', { planData: generatePlanData(true, users.tsAdmin.user, templateWithCustomStatuses, { defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } }) }, true],
+			['payload contains ticket object with empty default statuses', { planData: generatePlanData(true, users.tsAdmin.user, template, { defaultStatuses: {} }) }, true],
+			['payload contains ticket object with invalid default statuses', { planData: generatePlanData(true, users.tsAdmin.user, template, { defaultStatuses: { onNew: ServiceHelper.generateRandomString() } }) }, false, templates.invalidArguments],
 			['payload contains ticket object but creator is not specified', { planData: { ...generatePlanData(true), creator: undefined } }, true],
 			['creator is a commenter', { planData: generatePlanData(true, users.commenterOnFed.user) }, true],
 			['creator is a viewer', { planData: generatePlanData(true, users.viewerOnFed.user) }, false, templates.invalidArguments],
@@ -147,6 +171,14 @@ const testCreatePlan = () => {
 
 					if (tickets) {
 						tickets.template = UUIDToString(tickets.template);
+						const ticketDefaultStatuses = deleteIfUndefined(
+							expectedTicketsObject.defaultStatuses ?? {}, true);
+						if (expectedTicketsObject.defaultStatuses && isEmpty(ticketDefaultStatuses)) {
+							delete expectedTicketsObject.defaultStatuses;
+						} else if (expectedTicketsObject.defaultStatuses) {
+							expectedTicketsObject.defaultStatuses = ticketDefaultStatuses;
+						}
+
 						expect(tickets).toEqual({
 							creator: users.tsAdmin.user,
 							...expectedTicketsObject,
@@ -167,15 +199,46 @@ const testUpdatePlan = () => {
 		const basicData = generateBasicData();
 
 		const { users, teamspace, project, plan: existingPlan, federation, template, models } = basicData;
+		const customStatusValues = ServiceHelper.generateCustomStatusValues();
+		const templateWithCustomStatuses = ServiceHelper.generateTemplate(false, false, {
+			status: { values: customStatusValues, default: customStatusValues[0].name },
+		});
+		templateWithCustomStatuses.modules.push({ type: presetModules.CLOUD_CLASH, properties: [] });
 
 		const clashPlanWithTicketsConfig = {
 			...ServiceHelper.generateClashPlan(
 				models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user }),
 		};
+		const generatePlanWithTickets = (ticketDefaultStatuses) => {
+			const plan = ServiceHelper.generateClashPlan(
+				models[0]._id, models[1]._id, { federation, template, creator: users.tsAdmin.user });
+			if (ticketDefaultStatuses) {
+				plan.tickets.defaultStatuses = { ...ticketDefaultStatuses };
+			}
+			return plan;
+		};
+		const ticketDefaultStatuses = {
+			onNew: defaultStatuses.OPEN,
+			onResolved: defaultStatuses.CLOSED,
+			onReopened: defaultStatuses.IN_PROGRESS,
+		};
+		const clashPlanWithDefaultStatuses = generatePlanWithTickets(ticketDefaultStatuses);
+		const clashPlanWithoutDefaultStatuses = generatePlanWithTickets(undefined);
+		const clashPlanForDefaultStatusUpdate = generatePlanWithTickets(ticketDefaultStatuses);
+		const clashPlanForInvalidDefaultStatus = generatePlanWithTickets();
+		const clashPlanForTemplateUpdate = generatePlanWithTickets({ onNew: defaultStatuses.OPEN });
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
-			await ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithTicketsConfig);
+			await Promise.all([
+				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithTicketsConfig),
+				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithDefaultStatuses),
+				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithoutDefaultStatuses),
+				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanForDefaultStatusUpdate),
+				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanForInvalidDefaultStatus),
+				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanForTemplateUpdate),
+				ServiceHelper.db.createTemplates(teamspace, [templateWithCustomStatuses]),
+			]);
 		});
 
 		const generateUpdateData = () => ({ name: ServiceHelper.generateRandomString() });
@@ -192,18 +255,20 @@ const testUpdatePlan = () => {
 			// note: order matters here, this must be done before "the no change test" as it uses the same payload
 			['user has access to a project', { user: users.projectAdmin }, true],
 			['user is teamspace admin', {}, true],
-			['can remove optional field tickets.valuesAtCreation', { planId: clashPlanWithTicketsConfig._id, planData: { tickets: { valuesAtCreation: null } } }, true],
-			['can remove optional ticketsObject', { planId: clashPlanWithTicketsConfig._id, planData: { tickets: null } }, true],
-		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planId = existingPlan._id, planData = generateUpdateData() }, success, expectedRes) => {
+			['can remove optional field tickets.valuesAtCreation', { orgPlanData: clashPlanWithTicketsConfig, planId: clashPlanWithTicketsConfig._id, planData: { tickets: { valuesAtCreation: null } } }, true, { tickets: { valuesAtCreation: undefined } }],
+			['can remove optional ticketsObject', { orgPlanData: clashPlanWithTicketsConfig, planId: clashPlanWithTicketsConfig._id, planData: { tickets: null } }, true, { tickets: undefined }],
+			['can add ticket default statuses', { orgPlanData: clashPlanWithoutDefaultStatuses, planId: clashPlanWithoutDefaultStatuses._id, planData: { tickets: { defaultStatuses: ticketDefaultStatuses } } }, true, { tickets: { defaultStatuses: ticketDefaultStatuses } }],
+			['can update ticket default statuses', { orgPlanData: clashPlanForDefaultStatusUpdate, planId: clashPlanForDefaultStatusUpdate._id, planData: { tickets: { defaultStatuses: { onNew: defaultStatuses.IN_PROGRESS } } } }, true, { tickets: { defaultStatuses: { ...ticketDefaultStatuses, onNew: defaultStatuses.IN_PROGRESS } } }],
+			['can remove ticket default statuses when an update leaves an empty object', { orgPlanData: clashPlanWithDefaultStatuses, planId: clashPlanWithDefaultStatuses._id, planData: { tickets: { defaultStatuses: { onNew: null, onResolved: null, onReopened: null } } } }, true, { tickets: { defaultStatuses: undefined } }],
+			['ticket default statuses are invalid', { planId: clashPlanForInvalidDefaultStatus._id, planData: { tickets: { defaultStatuses: { onNew: ServiceHelper.generateRandomString() } } } }, false, templates.invalidArguments],
+			['template update invalidates stored ticket default statuses', { planId: clashPlanForTemplateUpdate._id, planData: { tickets: { template: templateWithCustomStatuses._id } } }, false, templates.invalidArguments],
+		])('', (desc, { ts = teamspace, proj = project.id, user = users.tsAdmin, planId = existingPlan._id, orgPlanData = existingPlan, planData = generateUpdateData() }, success, expectedRes) => {
 			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
 				const res = await agent.patch(route(ts, proj, planId, user.apiKey))
 					.send(planData)
 					.expect(expectedRes?.status || templates.ok.status);
 
 				if (success) {
-					const ticketTest = planId === clashPlanWithTicketsConfig._id;
-					const orgPlanData = ticketTest
-						? clashPlanWithTicketsConfig : existingPlan;
 					const plan = await getPlanById(ts, stringToUUID(proj), stringToUUID(planId));
 					const expectedPlan = {
 						...orgPlanData,
@@ -213,12 +278,16 @@ const testUpdatePlan = () => {
 						updatedBy: user.user,
 					};
 
-					if (ticketTest && planData.tickets) {
-						// this is a bit messy but I can't think of a better way.
-						expectedPlan.tickets = { ...orgPlanData.tickets };
-						delete expectedPlan.tickets.valuesAtCreation;
-					} else {
-						delete expectedPlan.tickets;
+					if (expectedRes) {
+						if (expectedRes.tickets) {
+							expectedPlan.tickets = deleteIfUndefined(
+								{ ...orgPlanData.tickets, ...expectedRes.tickets }, true);
+						} else if (planData.tickets) {
+							expectedPlan.tickets = deleteIfUndefined({ ...expectedPlan.tickets,
+								...planData.tickets }, true);
+						} else {
+							delete expectedPlan.tickets;
+						}
 					}
 					expect(plan).toEqual(deleteIfUndefined(expectedPlan, true));
 				} else {
@@ -392,9 +461,24 @@ const testParseClashResults = () => {
 			});
 		};
 
+		test('should just set the run to failed if there is an error', async () => {
+			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun2._id}`, 'results.json');
+			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 28 };
+
+			await queueMessage(callbackq, plannedClashRun2._id, JSON.stringify(callbackObj));
+
+			// wait for the queue to process the message
+			await ServiceHelper.sleepMS(1000);
+
+			const run = await getTestRunByQuery(teamspace, { _id: stringToUUID(plannedClashRun2._id) },
+				{ status: 1, result: 1 });
+			expect(run.status).toEqual(CLASH_RUN_STATUS.FAILED);
+			expect(run.result).toBeUndefined();
+		});
+
 		test('should parse results if there is no previous run', async () => {
 			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun2._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results };
+			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 0 };
 
 			await queueMessage(callbackq, plannedClashRun2._id, JSON.stringify(callbackObj));
 
@@ -413,7 +497,7 @@ const testParseClashResults = () => {
 
 		test('should parse results if there is previous run', async () => {
 			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun1._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results };
+			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 0 };
 
 			await queueMessage(callbackq, plannedClashRun1._id, JSON.stringify(callbackObj));
 
