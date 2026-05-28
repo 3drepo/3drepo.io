@@ -52,12 +52,23 @@ export const getEditableProperties = (template) => {
 	};
 };
 
+const getPropertyDefault = ({ type, default: defaultValue }: PropertyDefinition) => {
+	if (defaultValue != null) return defaultValue;
+	switch (type) {
+		case 'manyOf': return [];
+		case 'boolean': return false;
+		case 'text':
+		case 'longText':
+		case 'oneOf': return '';
+		default: return null;
+	}
+};
 
 const templatePropertiesToTicketProperties = (properties = []) => (
 	properties.reduce(
 		(ticketProperties, prop) => ({
 			...ticketProperties,
-			[prop.name]: prop.default ?? (prop.type === 'manyOf' ? [] : ''),
+			[prop.name]: prop.default ?? getPropertyDefault(prop),
 		}),
 		{},
 	)
