@@ -140,7 +140,6 @@ const testCreateRun = () => {
 		})),
 		meshes: times(10, (i) => ({
 			_id: generateRandomString(),
-			shared_id: generateRandomString(),
 			parents: metadata[i].parents,
 			externalId: externalIds[i],
 		})),
@@ -148,6 +147,12 @@ const testCreateRun = () => {
 		unwantedMetadata: [],
 		unwantedMeshes: [],
 	};
+
+	const groupedMeshes = meshDataObj.meshes.reduce((acc, mesh) => {
+		const parentId = mesh.parents[0];
+		acc[parentId] = [mesh._id];
+		return acc;
+	}, {});
 
 	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0]);
 
@@ -201,8 +206,9 @@ const testCreateRun = () => {
 			MetadataModel.getMetadataByRules.mockResolvedValueOnce(
 				{ matched: meshData.metadata, unwanted: meshData.unwantedMetadata });
 			if (meshData.metadata.length) {
-				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.meshes);
+				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(groupedMeshes);
 			}
+
 			if (meshData.unwantedMeshes.length) {
 				Scenes.getMeshesWithParentIds.mockResolvedValueOnce(meshData.unwantedMeshes);
 			}
