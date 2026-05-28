@@ -153,7 +153,13 @@ const getClashesFromStream = async (stream, isPastRun) => {
 	});
 
 	parser.on('data', ({ value }) => {
-		clashes.push(isPastRun ? value.index : value);
+		if (isPastRun) {
+			// resolved collection stores just indexes for now
+			const clashIndex = value.index ?? value;
+			clashes.push(clashIndex);
+		} else {
+			clashes.push(value);
+		}
 	});
 
 	await new Promise((resolve, reject) => {
@@ -167,8 +173,6 @@ const getClashesFromStream = async (stream, isPastRun) => {
 };
 
 const compareRunResults = (lastRunIndexObj, newRunClashes) => {
-	const newMap = new Set();
-
 	const result = { new: [], active: [], resolved: [] };
 
 	const getClashObjParts = (obj) => {
@@ -191,8 +195,6 @@ const compareRunResults = (lastRunIndexObj, newRunClashes) => {
 		} else {
 			result.new.push(clashToAdd);
 		}
-
-		newMap.add(key);
 	}
 
 	result.resolved = Object.keys(lastRunIndexObj);
