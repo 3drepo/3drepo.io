@@ -226,7 +226,8 @@ Clashes.processClashResults = async (teamspace, runId, resPath) => {
 
 	if (!lastRunClashes) {
 		const errorMessage = 'Error retrieving clashes from last run';
-		await sendSystemEmail(emailTemplates.CLASH_ERROR.name, { errorMessage, teamspace, planId, runId });
+		await sendSystemEmail(emailTemplates.CLASH_ERROR.name,
+			{ errorMessage, teamspace, planId: UUIDToString(planId), runId: UUIDToString(runId) });
 		await setTestRunToFailed(teamspace, runId, errorMessage);
 		return;
 	}
