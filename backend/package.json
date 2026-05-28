@@ -33,7 +33,7 @@
     "@dotenvx/dotenvx": "1.52.0",
     "@elastic/elasticsearch": "7.17.14",
     "@frontegg/client": "7.0.2",
-    "@napi-rs/canvas": "0.1.80",
+    "@napi-rs/canvas": "0.1.100",
     "@streamparser/json-node": "0.0.22",
     "amqplib": "0.10.5",
     "apidoc": "1.2.0",
