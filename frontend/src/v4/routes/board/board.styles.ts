@@ -217,8 +217,8 @@ export const Title = styled.div``;
 
 export const BoardItem = styled(PreviewListItem)`
 	&& {
-		margin-bottom: 6px;
-		border: 1px solid ${COLOR.BLACK_12};
+		border: 1px solid  ${({ theme }) => theme.palette.base.lightest};
+		border-radius: 8px;
 	}
 `;
 

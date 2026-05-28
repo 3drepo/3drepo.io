@@ -16,28 +16,29 @@
  */
 
 import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
-import { Box, Chip, Paper, Stack, Typography } from '@mui/material';
+import { Box, Stack, Typography } from '@mui/material';
 import { alpha, styled } from '@mui/material/styles';
 import { getRadius } from './KanbanBoardComponents';
 import type { DropTargetStore, LaneColumnProps } from './KanbanBoardTypes';
 
-const LanePaper = styled(Paper, {
+const LanePaper = styled('div', {
 	shouldForwardProp: (prop) => prop !== 'isDropTarget',
 })<{ isDropTarget: boolean }>(({ isDropTarget, theme }) => ({
-	flex: '0 0 320px',
-	width: 320,
-	display: 'flex',
+	width: '400px',
+	flexShrink: 0,
+	display: 'block',
 	flexDirection: 'column',
 	borderRadius: getRadius(theme, 2),
 	border: `1px solid ${
-		isDropTarget ? theme.palette.primary.main : theme.palette.divider
+		isDropTarget ? theme.palette.primary.main : (theme.palette as any).base.lightest
 	}`,
 	backgroundColor: isDropTarget
 		? alpha(theme.palette.primary.main, 0.08)
-		: theme.palette.grey[100],
+		: theme.palette.background.paper,
 	transition: 'background-color 160ms ease, border-color 160ms ease',
-	minHeight: 360,
+	overflowY: 'hidden',
 	maxHeight: '100%',
+	padding: 8,
 }));
 
 const LaneHeader = styled(Stack)(({ theme }) => ({
@@ -62,20 +63,11 @@ const LaneSubtitle = styled(Typography)({
 	overflowWrap: 'anywhere',
 });
 
-const LaneCount = styled(Chip)(({ theme }) => ({
-	flexShrink: 0,
-	borderRadius: getRadius(theme),
-	fontWeight: 800,
-	height: 24,
-	minWidth: 32,
-}));
-
-const LaneCards = styled(Stack)(({ theme }) => ({
+const LaneCards = styled(Stack)(() => ({
 	flex: 1,
 	overflowY: 'auto',
-	paddingInline: theme.spacing(1),
-	paddingBottom: theme.spacing(1),
-	gap: theme.spacing(1.25),
+	gap: 6,
+	maxHeight: '100%',
 }));
 
 const DropPlaceholder = styled(Box, {
@@ -110,16 +102,6 @@ const CardShell = styled(Box, {
 		},
 	}),
 );
-
-const EmptyLaneMessage = styled(Box)(({ theme }) => ({
-	border: '1px dashed',
-	borderColor: theme.palette.divider,
-	borderRadius: getRadius(theme, 2),
-	color: theme.palette.text.secondary,
-	padding: theme.spacing(3, 1.5),
-	textAlign: 'center',
-	backgroundColor: theme.palette.background.paper,
-}));
 
 function useLaneDropState(store: DropTargetStore, laneId: string) {
 	const [laneDropState, setLaneDropState] = useState(() =>
@@ -188,17 +170,15 @@ export const LaneColumn = memo(function LaneColumn({
 	return (
 		<LanePaper
 			ref={setLaneNode}
-			elevation={0}
 			isDropTarget={Boolean(laneDropTarget)}
 		>
 			<LaneHeader>
 				<LaneTitleGroup>
 					<LaneTitle variant="subtitle1">{lane.title}</LaneTitle>
-					<LaneSubtitle variant="caption" color="text.secondary">
-						{lane.label}
-					</LaneSubtitle>
 				</LaneTitleGroup>
-				<LaneCount label={lane.cards.length} size="small" color="default" />
+				<LaneSubtitle variant="caption" color="text.secondary">
+					{lane.label}
+				</LaneSubtitle>
 			</LaneHeader>
 
 			<LaneCards>
@@ -231,11 +211,6 @@ export const LaneColumn = memo(function LaneColumn({
 					? renderPlaceholder()
 					: null}
 
-				{visibleCards.length === 0 && !shouldShowPlaceholder ? (
-					<EmptyLaneMessage>
-						<Typography variant="body2">Empty</Typography>
-					</EmptyLaneMessage>
-				) : null}
 			</LaneCards>
 		</LanePaper>
 	);
