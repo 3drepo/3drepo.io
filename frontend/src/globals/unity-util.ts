@@ -2315,10 +2315,20 @@ export class UnityUtil {
 		UnityUtil.toUnity('ShowStats', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 
+	/**
+	 * Use the meshes API when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
 	public static enableOnlineSnapping() {
 		UnityUtil.toUnity('EnableOnlineSnapping', undefined);
 	}
 
+	/**
+	 * Use the WebGL buffers when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
 	public static disableOnlineSnapping() {
 		UnityUtil.toUnity('DisableOnlineSnapping', undefined);
 	}
