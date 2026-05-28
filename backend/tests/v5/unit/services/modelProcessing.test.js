@@ -142,7 +142,7 @@ const testCallbackQueueConsumer = () => {
 				teamspace: generateRandomString(),
 				type: 'clash',
 				container: generateRandomString(),
-				results: `$${SHARED_SPACE_TAG} ${generateRandomString()}`,
+				results: `${SHARED_SPACE_TAG} ${generateRandomString()}`,
 				value: 0,
 			};
 			const properties = {
