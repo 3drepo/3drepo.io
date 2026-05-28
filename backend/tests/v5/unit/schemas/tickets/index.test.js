@@ -14,11 +14,11 @@
  *  You should have received a copy of the GNU Affero General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+const { determineTestGroup } = require('../../../helper/utils');
 const { times, cloneDeep } = require('lodash');
 
 const { src, image } = require('../../../helper/path');
 const {
-	determineTestGroup,
 	generateGroup,
 	generateRandomString,
 	generateRandomNumber,
@@ -26,8 +26,7 @@ const {
 	generateUUIDString,
 	generateRandomDate,
 	generateTemplate,
-	generateTicket,
-} = require('../../../helper/services');
+	generateTicket } = require('../../../helper/services');
 
 const FS = require('fs');
 

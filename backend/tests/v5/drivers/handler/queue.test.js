@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
-const { determineTestGroup, generateRandomString, sleepMS } = require('../../helper/services');
+const { generateRandomString, sleepMS } = require('../../helper/services');
 
 const Queue = require(`${src}/handler/queue`);
 const config = require(`${src}/utils/config`);

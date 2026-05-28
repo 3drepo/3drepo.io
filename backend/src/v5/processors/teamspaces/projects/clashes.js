@@ -16,22 +16,26 @@
  */
 
 const { RUN_HISTORY_COL, SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.constants');
-const { UUIDToString, generateUUIDString } = require('../../../utils/helper/uuids');
-const { completeTestRun, createTestRun, getTestRunByQuery } = require('../../../models/clashes.runs');
+const { UUIDToString, generateUUIDString, stringToUUID } = require('../../../utils/helper/uuids');
+const { completeTestRun, createTestRun, getTestRunByQuery, setTestRunToFailed } = require('../../../models/clashes.runs');
 const {
 	createPlan,
 	deletePlan,
 	updatePlan,
 } = require('../../../models/clashes.plans');
+
 const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, storeFile } = require('../../../services/filesManager');
+const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
+const { JSONParser } = require('@streamparser/json-node');
 const { PassThrough } = require('stream');
 const { createConstantsObject } = require('../../../utils/helper/objects');
 const { createReadStream } = require('fs');
-const { getAllMetadata } = require('./models/commons/metadata');
-const { getMetadataByRules } = require('../../../models/metadata');
+const { templates: emailTemplates } = require('../../../services/mailer/mailer.constants');
 const { getNodesByQuery } = require('../../../models/scenes');
 const { queueClashRun } = require('../../../services/modelProcessing');
+const { sendSystemEmail } = require('../../../services/mailer');
+const { templates } = require('../../../utils/responseCodes');
 
 const Clashes = {};
 
@@ -41,67 +45,72 @@ Clashes.updatePlan = updatePlan;
 
 Clashes.deletePlan = deletePlan;
 
-const constructCompositeObject = (container, meshes, unwantedMeshIds, metadata) => {
+const constructCompositeObject = async (teamspace, container, wantedMeshes, unwantedMeshIds) => {
 	const compositesToMeshes = {};
+	const parentIdsToMeshes = {};
+	const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
 
-	if (meshes.length) {
-		const metadataMapping = metadata.reduce((acc, { parents, ...entry }) => {
-			for (const parent of parents) {
-				acc[UUIDToString(parent)] = entry;
-			}
-			return acc;
-		}, {});
+	for (const mesh of wantedMeshes) {
+		const idStr = UUIDToString(mesh._id);
 
-		const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
-
-		for (const mesh of meshes) {
-			const idStr = UUIDToString(mesh._id);
-
-			if (!unwantedIdsObj[idStr]) {
-				const parentId = UUIDToString(mesh.name ? mesh._id : mesh.parents[0]);
-				const meshMeta = metadataMapping[parentId];
-				const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
-				const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values[0] ?? parentId}`;
-				if (compositesToMeshes[compositePath]) {
-					compositesToMeshes[compositePath].push(idStr);
-				} else {
-					compositesToMeshes[compositePath] = [idStr];
-				}
+		if (!unwantedIdsObj[idStr]) {
+			const parentId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
+			if (parentIdsToMeshes[parentId]) {
+				parentIdsToMeshes[parentId].push(idStr);
+			} else {
+				parentIdsToMeshes[parentId] = [idStr];
 			}
 		}
+	}
+
+	const metadata = await getMetadataByQuery(teamspace, container,
+		{ parents: { $in: Object.keys(parentIdsToMeshes).map(stringToUUID) } }, { metadata: 1, parents: 1 });
+
+	const metadataMapping = {};
+	for (const { parents, metadata: meta } of metadata) {
+		const parentIdStr = UUIDToString(parents[0]);
+		metadataMapping[parentIdStr] = meta;
+	}
+
+	for (const [compId, meshes] of Object.entries(parentIdsToMeshes)) {
+		const meshMeta = metadataMapping[compId];
+		const externalIds = meshMeta ? getExternalIdsFromMetadata([meshMeta]) : null;
+		const compositePath = `${container}::${externalIds?.key ?? 'internal'}::${externalIds?.values[0] ?? compId}`;
+		compositesToMeshes[compositePath] = meshes;
 	}
 
 	return compositesToMeshes;
 };
 
-const getMeshDataFromRules = async (teamspace, project, container, revision, rules) => {
-	const { matched, unwanted } = await getMetadataByRules(teamspace, project, container,
-		revision, rules, { _id: 1, parents: 1, metadata: 1 });
-	const matchedTransNodes = matched.flatMap(({ parents }) => parents);
-	const meshes = matched.length
-		? await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision, parents: { $in: matchedTransNodes } }, { _id: 1, name: 1, parents: 1 })
-		: [];
-	const unwantedMeshIds = unwanted.length
-		? await getMeshesWithParentIds(teamspace, project, container, revision,
-			unwanted.flatMap(({ parents }) => parents), true)
-		: [];
+const getMeshData = async (teamspace, project, container, revision, rules) => {
+	let meshes = [];
+	let unwantedMeshIds = [];
 
-	return { meshes, unwantedMeshIds, metadata: matched };
-};
+	if (!rules.length) {
+		meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1 });
+	} else {
+		const { matched, unwanted } = await getMetadataByRules(teamspace, project, container,
+			revision, rules, { parents: 1 });
 
-const getAllMeshData = async (teamspace, project, container, revision) => {
-	const meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1 });
-	const metadata = await getAllMetadata(teamspace, container, revision);
-	return { meshes, unwantedMeshIds: [], metadata };
+		meshes = matched.length
+			? await getMeshesWithParentIds(teamspace, project, container, revision,
+				matched.flatMap(({ parents }) => parents), true, true)
+			: [];
+
+		unwantedMeshIds = unwanted.length
+			? await getMeshesWithParentIds(teamspace, project, container, revision,
+				unwanted.flatMap(({ parents }) => parents), true)
+			: [];
+	}
+
+	return { meshes, unwantedMeshIds };
 };
 
 const writeConfigSetEntry = async (teamspace, project, selection, stream, setName) => {
 	const { container, revision, rules = [] } = selection;
 
-	const { meshes, unwantedMeshIds, metadata } = rules.length
-		? await getMeshDataFromRules(teamspace, project, container, revision, rules)
-		: await getAllMeshData(teamspace, project, container, revision);
-	const compositesToMeshes = constructCompositeObject(container, meshes, unwantedMeshIds, metadata);
+	const { meshes, unwantedMeshIds } = await getMeshData(teamspace, project, container, revision, rules);
+	const compositesToMeshes = await constructCompositeObject(teamspace, container, meshes, unwantedMeshIds);
 
 	stream.write(`"${setName}":[{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
@@ -139,75 +148,100 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 	return runId;
 };
 
-const streamToJSON = (stream) => new Promise((resolve, reject) => {
-	let data = '';
+const getClashesFromStream = async (stream, isPastRun) => {
+	const arrNames = isPastRun ? ['new', 'active', 'resolved'] : ['clashes'];
+	const clashes = [];
 
-	stream.on('data', (chunk) => {
-		data += chunk;
+	const parser = new JSONParser({
+		paths: arrNames.map((name) => `$.${name}.*`),
 	});
 
-	stream.on('end', () => {
-		resolve(JSON.parse(data));
+	parser.on('data', ({ value }) => {
+		clashes.push(isPastRun ? value.index : value);
 	});
 
-	stream.on('error', reject);
-});
+	await new Promise((resolve, reject) => {
+		stream
+			.pipe(parser)
+			.on('end', resolve)
+			.on('error', reject);
+	});
 
-const compareRunResults = (existingRunClashes, newRunClashes) => {
-	const existingMap = new Map(existingRunClashes.map((item) => [item.index, item]));
-	const newMap = new Map(newRunClashes.map((item) => [[item.a, item.b].sort().join('-'), item]));
+	return clashes;
+};
+
+const compareRunResults = (lastRunIndexObj, newRunClashes) => {
+	const newMap = new Set();
 
 	const result = { new: [], active: [], resolved: [] };
 
-	for (const [key, newItem] of newMap) {
-		const clashToAdd = {
-			...newItem,
-			a: { container: newItem.a.split('::')[0], idType: newItem.a.split('::')[1], id: newItem.a.split('::')[2] },
-			b: { container: newItem.b.split('::')[0], idType: newItem.b.split('::')[1], id: newItem.b.split('::')[2] },
-			index: key,
-		};
+	const getClashObjParts = (obj) => {
+		const [container, idType, id] = obj.split('::');
+		return { container, idType, id };
+	};
 
-		if (existingMap.has(key)) {
+	for (const newClash of newRunClashes) {
+		const key = [newClash.a, newClash.b].sort().join('-');
+		const clashToAdd = { ...newClash,
+			a: getClashObjParts(newClash.a),
+			b: getClashObjParts(newClash.b),
+			index: key };
+
+		if (lastRunIndexObj[key]) {
 			result.active.push(clashToAdd);
+
+			// eslint-disable-next-line no-param-reassign
+			delete lastRunIndexObj[key];
 		} else {
 			result.new.push(clashToAdd);
 		}
+
+		newMap.add(key);
 	}
 
-	for (const [key, existingItem] of existingMap) {
-		if (!newMap.has(key)) {
-			result.resolved.push(existingItem);
-		}
-	}
+	result.resolved = Object.keys(lastRunIndexObj);
 
 	return result;
 };
 
-Clashes.completeRun = async (teamspace, project, corId, resPath) => {
-	const resStream = createReadStream(resPath, { encoding: 'utf8' });
-	const content = await streamToJSON(resStream);
-
-	let lastRunClashes;
-
+const getLastRunClashes = async (teamspace, planId) => {
 	try {
-		const { plan } = await getTestRunByQuery(teamspace, { _id: corId }, { plan: 1, triggeredAt: 1 });
 		const lastCompletedRun = await getTestRunByQuery(teamspace,
-			{ 'plan._id': plan._id, completedAt: { $exists: true } },
+			{ 'plan._id': planId, completedAt: { $exists: true } },
 			{ result: 1 }, { completedAt: -1 },
 		);
 
 		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun.result);
-		const { new: newClashes, active, resolved } = await streamToJSON(readStream);
-		lastRunClashes = [...newClashes, ...active, ...resolved];
+		return getClashesFromStream(readStream, true);
 	} catch (err) {
-		lastRunClashes = [];
+		if (err.code === templates.clashRunNotFound.code) {
+			return [];
+		}
+
+		return null;
+	}
+};
+
+Clashes.processClashResults = async (teamspace, runId, resPath) => {
+	const { plan: { _id: planId } } = await getTestRunByQuery(teamspace, { _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
+	const lastRunClashes = await getLastRunClashes(teamspace, planId);
+
+	if (!lastRunClashes) {
+		const errorMessage = 'Error retrieving clashes from last run';
+		await sendSystemEmail(emailTemplates.CLASH_ERROR.name, { errorMessage, teamspace, planId, runId });
+		await setTestRunToFailed(teamspace, runId, errorMessage);
+		return;
 	}
 
-	const categorizedClashes = compareRunResults(lastRunClashes, content.clashes);
+	const resStream = createReadStream(resPath, { encoding: 'utf8' });
+	const newRunClashes = await getClashesFromStream(resStream);
+	const lastRunIndexObj = createConstantsObject(lastRunClashes);
 
+	const categorizedClashes = compareRunResults(lastRunIndexObj, newRunClashes);
 	const resultId = generateUUIDString();
+
 	await storeFile(teamspace, RUN_HISTORY_COL, resultId, Buffer.from(JSON.stringify(categorizedClashes)));
-	await completeTestRun(teamspace, corId, resultId);
+	await completeTestRun(teamspace, runId, resultId);
 };
 
 module.exports = Clashes;

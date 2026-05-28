@@ -62,20 +62,27 @@ Scene.prepareCache = async (teamspace, model, revId, cacheExpiry = CACHE_EXPIRAT
 	await getIdToMeshesMapping(teamspace, model, revId, cacheExpiry);
 };
 
-Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds, returnString = false) => {
+Scene.getMeshesWithParentIds = async (teamspace, project, container, revision, parentIds,
+	convertToString, groupByParent) => {
 	const nodes = await getNodesBySharedIds(teamspace, project, container, revision, parentIds, { _id: 1 });
 	const idToMeshes = await getIdToMeshesMapping(teamspace, container, revision);
-	const meshes = new Set();
+
+	const results = groupByParent ? {} : new Set();
+
 	nodes.forEach(({ _id }) => {
-		const idStr = UUIDToString(_id);
-		if (idToMeshes[idStr]) {
-			idToMeshes[idStr].forEach((val) => meshes.add(val));
+		const id = UUIDToString(_id);
+		const meshIds = idToMeshes[id];
+
+		if (meshIds?.length) {
+			if (groupByParent) {
+				results[id] = convertToString ? meshIds : meshIds.map(stringToUUID);
+			} else {
+				meshIds.forEach((meshId) => results.add(convertToString ? meshId : stringToUUID(meshId)));
+			}
 		}
 	});
 
-	const meshesArr = Array.from(meshes);
-
-	return returnString ? meshesArr : meshesArr.map(stringToUUID);
+	return groupByParent ? results : Array.from(results);
 };
 
 Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
@@ -94,7 +101,7 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 			if (!idType || idCounted.has(idType)) return;
 
 			idCounted.add(idType);
-			res[idType].push({ key, value });
+			res[idType].push(value);
 		});
 	});
 
@@ -102,7 +109,7 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	// This is currently explicity used for differencing therefore we don't care if
 	// we can't represent them all - we may need to add a partial flag in the future
 	if (wantedType) {
-		return { key: wantedType, values: Array.from(new Set(res[wantedType].map(({ value }) => value))) };
+		return { key: wantedType, values: Array.from(new Set(res[wantedType])) };
 	}
 
 	// If we are determining the type, make sure we have a record for each metadata
@@ -112,7 +119,7 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 		for (const idType of Object.keys(res)) {
 			if (res[idType].length === targetCount) {
 				// convert to set to purge duplicates
-				return { key: idType, values: Array.from(new Set(res[idType].map(({ value }) => value))) };
+				return { key: idType, values: Array.from(new Set(res[idType])) };
 			}
 		}
 	}

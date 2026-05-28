@@ -18,11 +18,21 @@
 const { CLASH_RUNS_COL, CLASH_RUN_STATUS } = require('./clashes.constants');
 const db = require('../handler/db');
 const { generateUUID } = require('../utils/helper/uuids');
+const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
 
 const ClashRuns = {};
 
+const ensureIndexExists = async (teamspace) => {
+	try {
+		await db.createIndex(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, createdAt: -1 }, { runInBackground: true });
+	} catch (err) {
+		logger.logError(`Failed to create index for clash runs in teamspace ${teamspace}: ${err.message}`);
+	}
+};
+
 ClashRuns.createTestRun = async (teamspace, plan, user) => {
+	await ensureIndexExists(teamspace);
 	const _id = generateUUID();
 
 	await db.insertOne(teamspace, CLASH_RUNS_COL, {
@@ -36,21 +46,28 @@ ClashRuns.createTestRun = async (teamspace, plan, user) => {
 	return _id;
 };
 
+ClashRuns.updateTestRun = async (teamspace, runId, setUpdate) => {
+	await db.updateOne(teamspace, CLASH_RUNS_COL, { _id: runId }, { $set: setUpdate });
+};
+
 ClashRuns.completeTestRun = async (teamspace, runId, resultId) => {
-	await db.updateOne(teamspace, CLASH_RUNS_COL, { _id: runId },
-		{ $set: { status: CLASH_RUN_STATUS.COMPLETED, completedAt: new Date(), result: resultId } });
+	await ClashRuns.updateTestRun(teamspace, runId,
+		{ status: CLASH_RUN_STATUS.COMPLETED, completedAt: new Date(), result: resultId });
+};
+
+ClashRuns.setTestRunToFailed = async (teamspace, runId, message, errorCode) => {
+	await ClashRuns.updateTestRun(teamspace, runId,
+		{ status: CLASH_RUN_STATUS.FAILED, errorReason: { message, timestamp: new Date(), errorCode } });
 };
 
 ClashRuns.getTestRunByQuery = async (teamspace, query, projection, sort) => {
 	const run = await db.findOne(teamspace, CLASH_RUNS_COL, query, projection, sort);
 
 	if (!run) {
-		throw templates.testRunNotFound;
+		throw templates.clashRunNotFound;
 	}
 
 	return run;
 };
-
-ClashRuns.getLastRunFromPlan = (teamspace, planId) => db.findOne(teamspace, CLASH_RUNS_COL, { 'plan._id': planId }, { sort: { createdAt: -1 } });
 
 module.exports = ClashRuns;

@@ -16,6 +16,7 @@
  */
 
 const { isEmpty, times } = require('lodash');
+const { determineTestGroup } = require('../../../../helper/utils');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
@@ -457,9 +458,24 @@ const testParseClashResults = () => {
 			});
 		};
 
+		test('should just set the run to failed if there is an error', async () => {
+			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun2._id}`, 'results.json');
+			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 28 };
+
+			await queueMessage(callbackq, plannedClashRun2._id, JSON.stringify(callbackObj));
+
+			// wait for the queue to process the message
+			await ServiceHelper.sleepMS(1000);
+
+			const run = await getTestRunByQuery(teamspace, { _id: stringToUUID(plannedClashRun2._id) },
+				{ status: 1, result: 1 });
+			expect(run.status).toEqual(CLASH_RUN_STATUS.FAILED);
+			expect(run.result).toBeUndefined();
+		});
+
 		test('should parse results if there is no previous run', async () => {
 			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun2._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results };
+			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 0 };
 
 			await queueMessage(callbackq, plannedClashRun2._id, JSON.stringify(callbackObj));
 
@@ -478,7 +494,7 @@ const testParseClashResults = () => {
 
 		test('should parse results if there is previous run', async () => {
 			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun1._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results };
+			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 0 };
 
 			await queueMessage(callbackq, plannedClashRun1._id, JSON.stringify(callbackObj));
 
@@ -497,7 +513,7 @@ const testParseClashResults = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);

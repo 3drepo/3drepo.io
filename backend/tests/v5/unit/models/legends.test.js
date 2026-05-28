@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src } = require('../../helper/path');
 
 const Legend = require(`${src}/models/legends`);
@@ -36,6 +37,6 @@ const testLegendExistsInModel = () => {
 	});
 };
 
-describe('models/legends', () => {
+describe(determineTestGroup(__filename), () => {
 	testLegendExistsInModel();
 });

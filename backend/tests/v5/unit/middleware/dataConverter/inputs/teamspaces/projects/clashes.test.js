@@ -16,6 +16,7 @@
  */
 
 const { times, isEqual } = require('lodash');
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { src } = require('../../../../../../helper/path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -48,7 +49,6 @@ const Clashes = require(`${src}/middleware/dataConverter/inputs/teamspaces/proje
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const {
-	determineTestGroup,
 	generateRandomString,
 	generateRandomObject,
 	generateRandomNumber,

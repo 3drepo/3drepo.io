@@ -186,6 +186,8 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 };
 
 const validatePlanData = async (req, res, next) => {
+	const fieldsToCompare = ['name', 'type', 'tolerance', 'selfIntersectionsCheck', 'trigger', 'selectionA', 'selectionB'];
+
 	try {
 		const { teamspace, project } = req.params;
 		const schema = generatePlanSchema(teamspace, project,
