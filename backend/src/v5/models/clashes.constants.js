@@ -38,7 +38,7 @@ ClashesConstants.TRIGGER_OPTIONS = [
 	'new revision',
 ];
 
-ClashesConstants.CLASH_RUN_STATUS = {
+ClashesConstants.clashRunStatus = {
 	PLANNED: 'planned',
 	QUEUED: 'queued',
 	FAILED: 'failed',

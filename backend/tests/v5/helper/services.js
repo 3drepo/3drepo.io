@@ -40,7 +40,7 @@ const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
 const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS, CLASH_PLANS_COL, RUN_HISTORY_COL,
-	CLASH_RUN_STATUS, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
+	clashRunStatus, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -343,15 +343,21 @@ db.createClashPlan = (teamspace, plan) => {
 	DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
 };
 
-db.createClashRun = async (teamspace, run, clashes) => {
-	const formattedRun = { ...run, _id: stringToUUID(run._id), plan: { ...run.plan, _id: stringToUUID(run.plan._id) } };
+db.createClashRun = async (teamspace, projectId, run, clashes) => {
+	const formattedRun = {
+		...run,
+		_id: stringToUUID(run._id),
+		project: stringToUUID(projectId),
+		updatedAt: run.updatedAt ?? run.triggeredAt ?? new Date(),
+		plan: { ...run.plan, _id: stringToUUID(run.plan._id) },
+	};
 
 	if (clashes) {
-		formattedRun.result = ServiceHelper.generateUUIDString();
-		formattedRun.status = CLASH_RUN_STATUS.COMPLETED;
-		formattedRun.completedAt = new Date();
+		formattedRun.results = ServiceHelper.generateUUIDString();
+		formattedRun.status = clashRunStatus.COMPLETED;
+		formattedRun.updatedAt = new Date();
 
-		await FilesManager.storeFile(teamspace, RUN_HISTORY_COL, formattedRun.result,
+		await FilesManager.storeFile(teamspace, RUN_HISTORY_COL, formattedRun.results,
 			Buffer.from(JSON.stringify(clashes)));
 	}
 
@@ -950,7 +956,7 @@ ServiceHelper.generateClashRun = (plan) => ({
 	_id: ServiceHelper.generateUUIDString(),
 	triggeredBy: ServiceHelper.generateRandomString(),
 	triggeredAt: ServiceHelper.generateRandomDate(),
-	status: CLASH_RUN_STATUS.PLANNED,
+	status: clashRunStatus.PLANNED,
 	plan,
 });
 

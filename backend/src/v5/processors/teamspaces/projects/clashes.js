@@ -15,10 +15,14 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { RUN_HISTORY_COL, SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.constants');
+const {
+	RUN_HISTORY_COL,
+	SELF_INTERSECTIONS_CHECK_OPTIONS,
+	clashRunStatus,
+} = require('../../../models/clashes.constants');
 const { UUIDToString, generateUUIDString, stringToUUID } = require('../../../utils/helper/uuids');
-const { completeTestRun, createTestRun, getTestRunByQuery, setTestRunToFailed } = require('../../../models/clashes.runs');
 const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
+const { createTestRun, getTestRunByQuery, updateRunStatus } = require('../../../models/clashes.runs');
 const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
@@ -127,7 +131,7 @@ const writeConfigSetEntry = async (teamspace, project, selection, stream, setNam
 };
 
 Clashes.createRun = async (teamspace, project, plan, user) => {
-	const runId = await createTestRun(teamspace, plan, user);
+	const runId = await createTestRun(teamspace, project, plan, user);
 
 	const configStream = new PassThrough();
 	configStream.write('{');
@@ -202,14 +206,14 @@ const compareRunResults = (lastRunIndexObj, newRunClashes) => {
 	return result;
 };
 
-const getLastRunClashes = async (teamspace, planId) => {
+const getLastRunClashes = async (teamspace, project, planId) => {
 	try {
-		const lastCompletedRun = await getTestRunByQuery(teamspace,
-			{ 'plan._id': planId, completedAt: { $exists: true } },
-			{ result: 1 }, { completedAt: -1 },
+		const lastCompletedRun = await getTestRunByQuery(teamspace, project,
+			{ 'plan._id': planId, status: clashRunStatus.COMPLETED },
+			{ results: 1 }, { updatedAt: -1 },
 		);
 
-		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun.result);
+		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun.results);
 		return getClashesFromStream(readStream, true);
 	} catch (err) {
 		if (err.code === templates.clashRunNotFound.code) {
@@ -220,14 +224,15 @@ const getLastRunClashes = async (teamspace, planId) => {
 	}
 };
 
-Clashes.processClashResults = async (teamspace, runId, resPath) => {
-	const { plan: { _id: planId } } = await getTestRunByQuery(teamspace, { _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
-	const lastRunClashes = await getLastRunClashes(teamspace, planId);
+Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
+	const { plan: { _id: planId } } = await getTestRunByQuery(teamspace, project,
+		{ _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
+	const lastRunClashes = await getLastRunClashes(teamspace, project, planId);
 
 	if (!lastRunClashes) {
 		const errorMessage = 'Error retrieving clashes from last run';
-		await sendSystemEmail(emailTemplates.CLASH_ERROR.name, { errorMessage, teamspace, planId, runId });
-		await setTestRunToFailed(teamspace, runId, errorMessage);
+		await sendSystemEmail(emailTemplates.CLASH_ERROR.name, { errorMessage, teamspace, project, planId, runId });
+		await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED, { reason: errorMessage });
 		return;
 	}
 
@@ -239,7 +244,7 @@ Clashes.processClashResults = async (teamspace, runId, resPath) => {
 	const resultId = generateUUIDString();
 
 	await storeFile(teamspace, RUN_HISTORY_COL, resultId, Buffer.from(JSON.stringify(categorizedClashes)));
-	await completeTestRun(teamspace, runId, resultId);
+	await updateRunStatus(teamspace, project, runId, clashRunStatus.COMPLETED, resultId);
 };
 
 module.exports = Clashes;

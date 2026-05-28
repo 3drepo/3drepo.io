@@ -56,7 +56,7 @@ const Mailer = require(`${src}/services/mailer`);
 
 const MailerConstants = require(`${src}/services/mailer/mailer.constants`);
 
-const { SELF_INTERSECTIONS_CHECK_OPTIONS } = require(`${src}/models/clashes.constants`);
+const { clashRunStatus, SELF_INTERSECTIONS_CHECK_OPTIONS } = require(`${src}/models/clashes.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { CLASH_PLAN_TYPES } = require(`${src}/models/clashes.constants`);
 
@@ -216,7 +216,7 @@ const testCreateRun = () => {
 			await Clashes.createRun(teamspace, project, plan, userId);
 
 			expect(ClashRunsModel.createTestRun).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, plan, userId);
+			expect(ClashRunsModel.createTestRun).toHaveBeenCalledWith(teamspace, project, plan, userId);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledTimes(1);
 			expect(ScenesModel.getNodesByQuery).toHaveBeenCalledWith(teamspace, project, plan.selectionA.container,
 				{ type: 'mesh', rev_id: plan.selectionA.revision }, { _id: 1, parents: 1, name: 1 });
@@ -270,6 +270,7 @@ const testProcessClashResults = () => {
 	describe('Process Clash Results', () => {
 		const fileContent = { clashes: times(10, () => generateClash()) };
 		const teamspace = generateRandomString();
+		const project = generateUUID();
 		const corId = generateRandomString();
 		const resPath = generateRandomString();
 
@@ -285,13 +286,14 @@ const testProcessClashResults = () => {
 			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
 			ClashRunsModel.getTestRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
-			await Clashes.processClashResults(teamspace, corId, resPath);
+			await Clashes.processClashResults(teamspace, project, corId, resPath);
 
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(2);
-			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId }, { 'plan._id': 1, triggeredAt: 1 });
-			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace,
-				{ 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
-				{ result: 1 }, { completedAt: -1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, project,
+				{ _id: corId }, { 'plan._id': 1, triggeredAt: 1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, project,
+				{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
+				{ results: 1 }, { updatedAt: -1 });
 
 			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
 
@@ -300,8 +302,9 @@ const testProcessClashResults = () => {
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, expect.any(String),
 				Buffer.from(JSON.stringify(result)));
 
-			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledWith(teamspace, corId,
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+				clashRunStatus.COMPLETED,
 				FilesManager.storeFile.mock.calls[0][2]);
 		});
 
@@ -310,33 +313,35 @@ const testProcessClashResults = () => {
 			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
 			ClashRunsModel.getTestRunByQuery.mockRejectedValueOnce(templates.unknown);
 
-			await Clashes.processClashResults(teamspace, corId, resPath);
+			await Clashes.processClashResults(teamspace, project, corId, resPath);
 
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(2);
-			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId }, { 'plan._id': 1, triggeredAt: 1 });
-			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace,
-				{ 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
-				{ result: 1 }, { completedAt: -1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, project,
+				{ _id: corId }, { 'plan._id': 1, triggeredAt: 1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, project,
+				{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
+				{ results: 1 }, { updatedAt: -1 });
 
 			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
 
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 			const errorMessage = 'Error retrieving clashes from last run';
-			expect(ClashRunsModel.setTestRunToFailed).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.setTestRunToFailed).toHaveBeenCalledWith(teamspace, corId, errorMessage);
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+				clashRunStatus.FAILED, { reason: errorMessage });
 			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
 			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(MailerConstants.templates.CLASH_ERROR.name,
-				{ errorMessage, teamspace, planId: currentRun.plan._id, runId: corId });
+				{ errorMessage, teamspace, project, planId: currentRun.plan._id, runId: corId });
 		});
 
 		test('should categorize clashes and process clash results when there are previous runs', async () => {
 			const existingClashes = {
 				new: times(5, () => generateClash()).map(formatClash),
 				active: fileContent.clashes.slice(0, 5).map(formatClash),
-				resolved: [],
+				resolved: times(2, () => generateRandomString()),
 			};
 			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
-			const lastRun = { ...generateRandomObject(), result: generateRandomString() };
+			const lastRun = { ...generateRandomObject(), results: generateRandomString() };
 
 			fs.createReadStream.mockImplementationOnce(() => {
 				const fakeReadStream = PassThrough();
@@ -355,29 +360,31 @@ const testProcessClashResults = () => {
 			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(currentRun);
 			ClashRunsModel.getTestRunByQuery.mockResolvedValueOnce(lastRun);
 
-			await Clashes.processClashResults(teamspace, corId, resPath);
+			await Clashes.processClashResults(teamspace, project, corId, resPath);
 
 			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledTimes(2);
-			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, { _id: corId }, { 'plan._id': 1, triggeredAt: 1 });
-			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace,
-				{ 'plan._id': currentRun.plan._id, completedAt: { $exists: true } },
-				{ result: 1 }, { completedAt: -1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, project,
+				{ _id: corId }, { 'plan._id': 1, triggeredAt: 1 });
+			expect(ClashRunsModel.getTestRunByQuery).toHaveBeenCalledWith(teamspace, project,
+				{ 'plan._id': currentRun.plan._id, status: clashRunStatus.COMPLETED },
+				{ results: 1 }, { updatedAt: -1 });
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
-			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, lastRun.result);
+			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, lastRun.results);
 
 			const result = {
 				new: fileContent.clashes.slice(5, 10).map(formatClash),
 				active: existingClashes.active,
-				resolved: existingClashes.new.map((c) => c.index),
+				resolved: [...existingClashes.new.map((c) => c.index), ...existingClashes.resolved],
 			};
 
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
 			expect(FilesManager.storeFile).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, expect.any(String),
 				Buffer.from(JSON.stringify(result)));
 
-			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledTimes(1);
-			expect(ClashRunsModel.completeTestRun).toHaveBeenCalledWith(teamspace, corId,
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+				clashRunStatus.COMPLETED,
 				FilesManager.storeFile.mock.calls[0][2]);
 		});
 	});

@@ -28,7 +28,7 @@ const DB = require(`${src}/handler/db`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { callback_queue: callbackq, shared_storage: sharedDir } = queueConfig;
 const { getTestRunByQuery } = require(`${src}/models/clashes.runs`);
-const { CLASH_RUN_STATUS, RUN_HISTORY_COL } = require(`${src}/models/clashes.constants`);
+const { clashRunStatus, RUN_HISTORY_COL } = require(`${src}/models/clashes.constants`);
 const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
@@ -74,9 +74,9 @@ const setupBasicData = async ({ users, teamspace, project, models, revisions, vo
 		ServiceHelper.db.createRevision(teamspace,
 			project.id, models[3]._id, voidRev, modelTypes.CONTAINER),
 		...plans.map((plan) => ServiceHelper.db.createClashPlan(teamspace, plan)),
-		ServiceHelper.db.createClashRun(teamspace, plannedClashRun1),
-		ServiceHelper.db.createClashRun(teamspace, plannedClashRun2),
-		ServiceHelper.db.createClashRun(teamspace, completedClashRun, categorizedClashes),
+		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun1),
+		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun2),
+		ServiceHelper.db.createClashRun(teamspace, project.id, completedClashRun, categorizedClashes),
 	]);
 };
 
@@ -107,7 +107,7 @@ const generateBasicData = () => {
 		plans: [plan, planWithNoRun, planWithNoRev, planWithVoidRev],
 		plannedClashRun1: ServiceHelper.generateClashRun(plan),
 		plannedClashRun2: ServiceHelper.generateClashRun(planWithNoRun),
-		completedClashRun: { ...ServiceHelper.generateClashRun(plan), status: CLASH_RUN_STATUS.COMPLETED },
+		completedClashRun: { ...ServiceHelper.generateClashRun(plan), status: clashRunStatus.COMPLETED },
 		clashes: ServiceHelper.generateClashes(plan),
 	});
 };
@@ -318,10 +318,11 @@ const testParseClashResults = () => {
 			// wait for the queue to process the message
 			await ServiceHelper.sleepMS(1000);
 
-			const run = await getTestRunByQuery(teamspace, { _id: stringToUUID(plannedClashRun2._id) },
-				{ status: 1, result: 1 });
-			expect(run.status).toEqual(CLASH_RUN_STATUS.FAILED);
-			expect(run.result).toBeUndefined();
+			const run = await getTestRunByQuery(teamspace, stringToUUID(project.id),
+				{ _id: stringToUUID(plannedClashRun2._id) }, { status: 1, results: 1 });
+			expect(run.status).toEqual(clashRunStatus.FAILED);
+			expect(run.results.error.code).toEqual(callbackObj.value);
+			expect(run.results.error.reason).toEqual(expect.any(String));
 		});
 
 		test('should parse results if there is no previous run', async () => {
@@ -333,11 +334,11 @@ const testParseClashResults = () => {
 			// wait for the queue to process the message
 			await ServiceHelper.sleepMS(1000);
 
-			const run = await getTestRunByQuery(teamspace, { _id: stringToUUID(plannedClashRun2._id) },
-				{ status: 1, result: 1 });
-			expect(run.status).toEqual(CLASH_RUN_STATUS.COMPLETED);
+			const run = await getTestRunByQuery(teamspace, stringToUUID(project.id),
+				{ _id: stringToUUID(plannedClashRun2._id) }, { status: 1, results: 1 });
+			expect(run.status).toEqual(clashRunStatus.COMPLETED);
 
-			const contents = await getFileContents(run.result);
+			const contents = await getFileContents(run.results);
 			const parsedContents = JSON.parse(contents);
 
 			expect(parsedContents).toEqual({ new: clashes.map(formatClash), active: [], resolved: [] });
@@ -352,11 +353,11 @@ const testParseClashResults = () => {
 			// wait for the queue to process the message
 			await ServiceHelper.sleepMS(1000);
 
-			const run = await getTestRunByQuery(teamspace, { _id: stringToUUID(plannedClashRun1._id) },
-				{ status: 1, result: 1 });
-			expect(run.status).toEqual(CLASH_RUN_STATUS.COMPLETED);
+			const run = await getTestRunByQuery(teamspace, stringToUUID(project.id),
+				{ _id: stringToUUID(plannedClashRun1._id) }, { status: 1, results: 1 });
+			expect(run.status).toEqual(clashRunStatus.COMPLETED);
 
-			const contents = await getFileContents(run.result);
+			const contents = await getFileContents(run.results);
 			const parsedContents = JSON.parse(contents);
 
 			expect(parsedContents).toEqual({ new: [], active: clashes.map(formatClash), resolved: [] });

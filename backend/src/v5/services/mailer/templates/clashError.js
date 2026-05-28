@@ -25,6 +25,7 @@ const dataSchema = Yup.object({
 	title: Yup.string().default('Clash Error'),
 	domain: Yup.string().default(() => config.getBaseURL()),
 	teamspace: Yup.string().required(),
+	project: Yup.string().required(),
 	planId: Yup.string().required(),
 	runId: Yup.string().required(),
 	errorMessage: Yup.string().required(),

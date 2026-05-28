@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
+const { UUIDToString, generateUUID, generateUUIDString, stringToUUID } = require('../utils/helper/uuids');
 const { access, copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { constants, createWriteStream, readFileSync, readdirSync } = require('fs');
@@ -57,15 +57,26 @@ const onCallbackQMsg = ({ content, properties }) => {
 		const { type, status, value, ...msgContent } = JSON.parse(content);
 
 		if (type === MESSAGE_TYPES.CLASH) {
-			const { teamspace, results } = msgContent;
+			const { teamspace, project, results } = msgContent;
 
 			if (status) {
 				publish(events.CLASH_RUN_UPDATE,
-					{ teamspace, corId: properties.correlationId, status });
+					{
+						teamspace,
+						project: stringToUUID(project),
+						runId: stringToUUID(properties.correlationId),
+						status,
+					});
 			} else {
 				const resultsDir = results.replace(SHARED_SPACE_TAG, sharedDir);
 				publish(events.CLASH_RUN_COMPLETED,
-					{ teamspace, corId: properties.correlationId, results: resultsDir, value });
+					{
+						teamspace,
+						project: stringToUUID(project),
+						runId: stringToUUID(properties.correlationId),
+						results: resultsDir,
+						value,
+					});
 			}
 
 			return;

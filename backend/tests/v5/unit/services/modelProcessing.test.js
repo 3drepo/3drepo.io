@@ -19,6 +19,8 @@ const { determineTestGroup } = require('../../helper/utils');
 const { src, modelFolder, objModel } = require('../../helper/path');
 const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+
 jest.mock('../../../../src/v5/handler/queue');
 const Queue = require(`${src}/handler/queue`);
 
@@ -115,11 +117,12 @@ const testCallbackQueueConsumer = () => {
 		test(`Should trigger ${events.CLASH_RUN_UPDATE} event if there is a clash run update message`, async () => {
 			const content = {
 				teamspace: generateRandomString(),
+				project: generateUUIDString(),
 				type: 'clash',
 				status: generateRandomString(),
 			};
 			const properties = {
-				correlationId: generateRandomString(),
+				correlationId: generateUUIDString(),
 			};
 
 			const callbackFn = await getCallbackFn();
@@ -127,7 +130,8 @@ const testCallbackQueueConsumer = () => {
 
 			const expectedData = {
 				teamspace: content.teamspace,
-				corId: properties.correlationId,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
 				status: content.status,
 			};
 
@@ -140,13 +144,14 @@ const testCallbackQueueConsumer = () => {
 
 			const content = {
 				teamspace: generateRandomString(),
+				project: generateUUIDString(),
 				type: 'clash',
 				container: generateRandomString(),
 				results: `${SHARED_SPACE_TAG} ${generateRandomString()}`,
 				value: 0,
 			};
 			const properties = {
-				correlationId: generateRandomString(),
+				correlationId: generateUUIDString(),
 			};
 
 			const callbackFn = await getCallbackFn();
@@ -154,7 +159,8 @@ const testCallbackQueueConsumer = () => {
 
 			const expectedData = {
 				teamspace: content.teamspace,
-				corId: properties.correlationId,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
 				results: content.results.replace(SHARED_SPACE_TAG, config.cn_queue.shared_storage),
 				value: content.value,
 			};
