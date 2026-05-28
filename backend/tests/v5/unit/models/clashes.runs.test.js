@@ -36,7 +36,7 @@ const testCreateTestRun = () => {
 			const _id = await ClashRuns.createTestRun(teamspace, plan, user);
 
 			expect(createIndexFn).toHaveBeenCalledTimes(1);
-			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, createdAt: -1 }, { runInBackground: true });
+			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, completedAt: -1 }, { runInBackground: true });
 
 			expect(createFn).toHaveBeenCalledTimes(1);
 			expect(createFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
@@ -59,7 +59,7 @@ const testCreateTestRun = () => {
 			const _id = await ClashRuns.createTestRun(teamspace, plan, user);
 
 			expect(createIndexFn).toHaveBeenCalledTimes(1);
-			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, createdAt: -1 }, { runInBackground: true });
+			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, completedAt: -1 }, { runInBackground: true });
 
 			expect(createFn).toHaveBeenCalledTimes(1);
 			expect(createFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
