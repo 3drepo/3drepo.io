@@ -40,23 +40,8 @@ Clashes.updatePlan = updatePlan;
 
 Clashes.deletePlan = deletePlan;
 
-const constructCompositeObject = async (teamspace, container, wantedMeshes, unwantedMeshIds) => {
+const applyExternalIds = async (teamspace, container, parentIdsToMeshes) => {
 	const compositesToMeshes = {};
-	const parentIdsToMeshes = {};
-	const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
-
-	for (const mesh of wantedMeshes) {
-		const idStr = UUIDToString(mesh._id);
-
-		if (!unwantedIdsObj[idStr]) {
-			const parentId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
-			if (parentIdsToMeshes[parentId]) {
-				parentIdsToMeshes[parentId].push(idStr);
-			} else {
-				parentIdsToMeshes[parentId] = [idStr];
-			}
-		}
-	}
 
 	const metadata = await getMetadataByQuery(teamspace, container,
 		{ parents: { $in: Object.keys(parentIdsToMeshes).map(stringToUUID) } }, { metadata: 1, parents: 1 });
@@ -77,40 +62,59 @@ const constructCompositeObject = async (teamspace, container, wantedMeshes, unwa
 	return compositesToMeshes;
 };
 
-const getMeshData = async (teamspace, project, container, revision, rules) => {
-	let meshes = [];
-	let unwantedMeshIds = [];
+const getCompositeToMeshesObject = async (teamspace, project, container, revision, rules) => {
+	const compIdToMeshes = {};
 
-	if (!rules.length) {
-		meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1 });
-	} else {
+	if (rules.length) {
 		const { matched, unwanted } = await getMetadataByRules(teamspace, project, container,
 			revision, rules, { parents: 1 });
 
-		meshes = matched.length
+		const wantedMeshes = matched.length
 			? await getMeshesWithParentIds(teamspace, project, container, revision,
 				matched.flatMap(({ parents }) => parents), true, true)
 			: [];
 
-		unwantedMeshIds = unwanted.length
+		const unwantedMeshIds = unwanted.length
 			? await getMeshesWithParentIds(teamspace, project, container, revision,
 				unwanted.flatMap(({ parents }) => parents), true)
 			: [];
+
+		const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
+
+		for (const [parentId, meshes] of Object.entries(wantedMeshes)) {
+			const meshesToAdd = meshes.filter((meshId) => !unwantedIdsObj[meshId]);
+
+			if (meshesToAdd.length) {
+				compIdToMeshes[parentId] = meshesToAdd;
+			}
+		}
+	} else {
+		const meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1 });
+
+		for (const mesh of meshes) {
+			const parentId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
+
+			if (!compIdToMeshes[parentId]) {
+				compIdToMeshes[parentId] = [];
+			}
+
+			compIdToMeshes[parentId].push(UUIDToString(mesh._id));
+		}
 	}
 
-	return { meshes, unwantedMeshIds };
+	return compIdToMeshes;
 };
 
 const writeConfigSetEntry = async (teamspace, project, selection, stream, setName) => {
 	const { container, revision, rules = [] } = selection;
 
-	const { meshes, unwantedMeshIds } = await getMeshData(teamspace, project, container, revision, rules);
-	const compositesToMeshes = await constructCompositeObject(teamspace, container, meshes, unwantedMeshIds);
+	const compToMeshes = await getCompositeToMeshesObject(teamspace, project, container, revision, rules);
+	const externalCompToMeshes = await applyExternalIds(teamspace, container, compToMeshes);
 
 	stream.write(`"${setName}":[{"teamspace":${JSON.stringify(teamspace)},"container":${JSON.stringify(container)},"revision":${JSON.stringify(UUIDToString(revision))},"objects":[`);
 
 	let first = true;
-	for (const [parentIdStr, meshIds] of Object.entries(compositesToMeshes)) {
+	for (const [parentIdStr, meshIds] of Object.entries(externalCompToMeshes)) {
 		if (!first) {
 			stream.write(',');
 		}
