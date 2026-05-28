@@ -25,7 +25,7 @@ const ClashRuns = {};
 
 const ensureIndexExists = async (teamspace) => {
 	try {
-		await db.createIndex(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, createdAt: -1 }, { runInBackground: true });
+		await db.createIndex(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, completedAt: -1 }, { runInBackground: true });
 	} catch (err) {
 		logger.logError(`Failed to create index for clash runs in teamspace ${teamspace}: ${err.message}`);
 	}
