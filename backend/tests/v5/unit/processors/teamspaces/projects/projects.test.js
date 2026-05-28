@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { src } = require('../../../../helper/path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -309,7 +310,7 @@ const testGetStatusCodes = () => {
 	});
 };
 
-describe('processors/teamspaces/projects', () => {
+describe(determineTestGroup(__filename), () => {
 	testGetProjectList();
 	testDeleteProject();
 	testCreateProject();

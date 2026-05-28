@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { times } = require('lodash');
 const { src } = require('../../helper/path');
 const { generateRandomString, generateUUIDString, generateUUID } = require('../../helper/services');
@@ -887,7 +888,27 @@ const testGetUsersWithPermissions = () => {
 	});
 };
 
-describe('models/modelSettings', () => {
+const testGetMultipleModelsByIds = () => {
+	describe('Get multiple models by IDs', () => {
+		test('should return the list of models found', async () => {
+			const teamspace = generateRandomString();
+			const modelIds = [generateRandomString(), generateRandomString()];
+			const expectedData = [
+				{ _id: modelIds[0], name: generateRandomString() },
+				{ _id: modelIds[1], name: generateRandomString() },
+			];
+			DBHandler.find.mockResolvedValueOnce(expectedData);
+
+			const res = await Model.getMultipleModelsByIds(teamspace, modelIds);
+			expect(res).toEqual(expectedData);
+			expect(DBHandler.find).toHaveBeenCalledTimes(1);
+			expect(DBHandler.find).toHaveBeenCalledWith(teamspace, SETTINGS_COL,
+				{ _id: { $in: modelIds } }, undefined, undefined);
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	testGetModelById();
 	testGetContainerById();
 	testGetDrawingById();
@@ -905,4 +926,5 @@ describe('models/modelSettings', () => {
 	testIsFederation();
 	testGetModelType();
 	testGetUsersWithPermissions();
+	testGetMultipleModelsByIds();
 });

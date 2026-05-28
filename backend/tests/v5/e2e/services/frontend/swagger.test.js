@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const ServiceHelper = require('../../../helper/services');
 const SuperTest = require('supertest');
 const schemaValidator = require('openapi-schema-validator');
@@ -39,7 +40,7 @@ const testSwaggerDocumentation = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.frontend();
 		agent = await SuperTest(server);

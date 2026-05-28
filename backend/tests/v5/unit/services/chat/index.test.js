@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
 const { generateRandomString } = require('../../../helper/services');
@@ -358,7 +359,7 @@ const testCreateProjectMessage = () => {
 	});
 };
 
-describe('services/chat/index', () => {
+describe(determineTestGroup(__filename), () => {
 	testInit();
 	testOnNewMsg();
 	testCreateDirectMessage();
