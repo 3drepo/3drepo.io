@@ -87,7 +87,7 @@ const getCompositeToMeshesObject = async (teamspace, project, container, revisio
 
 	const meshes = await getNodesByQuery(teamspace, project, container,
 		{ type: 'mesh', rev_id: revision, ...(meshIdsToFetch ? { _id: { $in: meshIdsToFetch } } : {}) },
-		{ _id: 1, parents: 1, name: 1 });
+		{ _id: 1, parents: 1, name: 1, shared_id: 1 });
 
 	for (const mesh of meshes) {
 		const parentId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
