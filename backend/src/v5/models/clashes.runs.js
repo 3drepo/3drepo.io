@@ -53,4 +53,11 @@ ClashRuns.getTestRunByQuery = async (teamspace, query, projection, sort) => {
 
 ClashRuns.getLastRunFromPlan = (teamspace, planId) => db.findOne(teamspace, CLASH_RUNS_COL, { 'plan._id': planId }, { sort: { createdAt: -1 } });
 
+ClashRuns.getRunsByPlanId = (teamspace, planId) => db.find(
+	teamspace, CLASH_RUNS_COL,
+	{ 'plan._id': planId },
+	{ plan: 0 },
+	{ triggeredAt: -1 },
+);
+
 module.exports = ClashRuns;

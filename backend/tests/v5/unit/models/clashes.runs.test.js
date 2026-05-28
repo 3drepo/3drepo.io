@@ -115,9 +115,49 @@ const testGetLastRunFromPlan = () => {
 	});
 };
 
+const testGetRunsByPlanId = () => {
+	describe('Get runs by plan ID', () => {
+		const teamspace = generateRandomString();
+		const planId = generateRandomString();
+
+		test('should get runs by plan ID sorted by triggeredAt descending and without plan field', async () => {
+			const runs = [generateRandomObject(), generateRandomObject()];
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(runs);
+
+			await expect(ClashRuns.getRunsByPlanId(teamspace, planId)).resolves.toEqual(runs);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(
+				teamspace,
+				CLASH_RUNS_COL,
+				{ 'plan._id': planId },
+				{ plan: 0 },
+				{ triggeredAt: -1 },
+			);
+		});
+
+		test('should reject if find fails', async () => {
+			const error = new Error(generateRandomString());
+			const findFn = jest.spyOn(db, 'find').mockRejectedValueOnce(error);
+
+			await expect(ClashRuns.getRunsByPlanId(teamspace, planId)).rejects.toEqual(error);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(
+				teamspace,
+				CLASH_RUNS_COL,
+				{ 'plan._id': planId },
+				{ plan: 0 },
+				{ triggeredAt: -1 },
+			);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testCreateTestRun();
 	testCompleteTestRun();
 	testGetTestRunByQuery();
 	testGetLastRunFromPlan();
+	testGetRunsByPlanId();
 });

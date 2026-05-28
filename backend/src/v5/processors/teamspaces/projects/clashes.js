@@ -17,10 +17,12 @@
 
 const { RUN_HISTORY_COL, SELF_INTERSECTIONS_CHECK_OPTIONS } = require('../../../models/clashes.constants');
 const { UUIDToString, generateUUIDString } = require('../../../utils/helper/uuids');
-const { completeTestRun, createTestRun, getTestRunByQuery } = require('../../../models/clashes.runs');
+const { completeTestRun, createTestRun, getRunsByPlanId, getTestRunByQuery } = require('../../../models/clashes.runs');
 const {
 	createPlan,
 	deletePlan,
+	getAllPlans,
+	getPlanById,
 	updatePlan,
 } = require('../../../models/clashes.plans');
 const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
@@ -40,6 +42,13 @@ Clashes.createPlan = createPlan;
 Clashes.updatePlan = updatePlan;
 
 Clashes.deletePlan = deletePlan;
+
+Clashes.getAllPlans = async (teamspace, project) => {
+	const plans = await getAllPlans(teamspace, project);
+	return { plans };
+};
+
+Clashes.getPlanById = (teamspace, project, planId) => getPlanById(teamspace, project, planId);
 
 const constructCompositeObject = (container, meshes, unwantedMeshIds, metadata) => {
 	const compositesToMeshes = {};
@@ -122,7 +131,8 @@ Clashes.createRun = async (teamspace, project, plan, user) => {
 	// Pulling the detail of the test config only here - we don't want to store additional info such as results configurations.
 	const { _id, type, tolerance, selfIntersectionsCheck, selectionA, selectionB } = plan;
 	const runId = await createTestRun(teamspace, {
-		_id, type, tolerance, selfIntersectionsCheck, selectionA, selectionB }, user);
+		_id, type, tolerance, selfIntersectionsCheck, selectionA, selectionB,
+	}, user);
 
 	const configStream = new PassThrough();
 	configStream.write('{');
@@ -208,6 +218,11 @@ Clashes.completeRun = async (teamspace, project, corId, resPath) => {
 	const resultId = generateUUIDString();
 	await storeFile(teamspace, RUN_HISTORY_COL, resultId, Buffer.from(JSON.stringify(categorizedClashes)));
 	await completeTestRun(teamspace, corId, resultId);
+};
+
+Clashes.getRunsByPlanId = async (teamspace, planId) => {
+	const runs = await getRunsByPlanId(teamspace, planId);
+	return { runs };
 };
 
 module.exports = Clashes;
