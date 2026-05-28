@@ -50,14 +50,14 @@ ClashRuns.updateTestRun = async (teamspace, runId, setUpdate) => {
 	await db.updateOne(teamspace, CLASH_RUNS_COL, { _id: runId }, { $set: setUpdate });
 };
 
-ClashRuns.testRunCompleted = async (teamspace, runId, resultId) => {
+ClashRuns.completeTestRun = async (teamspace, runId, resultId) => {
 	await ClashRuns.updateTestRun(teamspace, runId,
 		{ status: CLASH_RUN_STATUS.COMPLETED, completedAt: new Date(), result: resultId });
 };
 
-ClashRuns.testRunFailed = async (teamspace, runId, message, retVal) => {
+ClashRuns.setTestRunToFailed = async (teamspace, runId, message, errorCode) => {
 	await ClashRuns.updateTestRun(teamspace, runId,
-		{ status: CLASH_RUN_STATUS.FAILED, errorReason: { message, timestamp: new Date(), errorCode: retVal } });
+		{ status: CLASH_RUN_STATUS.FAILED, errorReason: { message, timestamp: new Date(), errorCode } });
 };
 
 ClashRuns.getTestRunByQuery = async (teamspace, query, projection, sort) => {

@@ -938,7 +938,7 @@ ServiceHelper.generateClashPlan = (model1, model2) => ({
 	},
 });
 
-ServiceHelper.generateClashes = (plan) => times(20, () => ({
+ServiceHelper.generateClashes = (plan, number = 20) => times(number, () => ({
 	a: `${plan.selectionA.container}::internal::${ServiceHelper.generateRandomString()}`,
 	b: `${plan.selectionB.container}::internal::${ServiceHelper.generateRandomString()}`,
 	positions: [
