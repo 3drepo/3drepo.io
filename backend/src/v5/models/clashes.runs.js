@@ -33,7 +33,7 @@ const ensureIndexExists = async (teamspace) => {
 	}
 };
 
-ClashRuns.createTestRun = async (teamspace, project, plan, user) => {
+ClashRuns.createClashRun = async (teamspace, project, plan, user) => {
 	await ensureIndexExists(teamspace);
 	const _id = generateUUID();
 	const timestamp = new Date();
@@ -51,37 +51,19 @@ ClashRuns.createTestRun = async (teamspace, project, plan, user) => {
 	return _id;
 };
 
-const updateTestRun = async (teamspace, project, runId, setUpdate) => {
+const updateClashRun = async (teamspace, project, runId, setUpdate) => {
 	await db.updateOne(teamspace, CLASH_RUNS_COL, { project, _id: runId },
 		{ $set: { ...setUpdate, updatedAt: new Date() } });
 };
 
-const formatResults = (status, data) => {
-	if (data?.results !== undefined) {
-		return data.results;
-	}
-
-	if (status === clashRunStatus.FAILED) {
-		if (data?.error) {
-			return { error: data.error };
-		}
-
-		const { code, reason } = typeof data === 'string' ? { reason: data } : data ?? {};
-		return { error: deleteIfUndefined({ code, reason }) };
-	}
-
-	return data;
-};
-
-ClashRuns.updateRunStatus = async (teamspace, project, runId, status, data) => {
-	const shouldUpdateResults = status === clashRunStatus.FAILED || data !== undefined;
-	await updateTestRun(teamspace, project, runId, deleteIfUndefined({
+ClashRuns.updateRunStatus = async (teamspace, project, runId, status, results) => {
+	await updateClashRun(teamspace, project, runId, deleteIfUndefined({
 		status,
-		results: shouldUpdateResults ? formatResults(status, data) : undefined,
+		results,
 	}));
 };
 
-ClashRuns.getTestRunByQuery = async (teamspace, project, query, projection, sort) => {
+ClashRuns.getClashRunByQuery = async (teamspace, project, query, projection, sort) => {
 	const run = await db.findOne(teamspace, CLASH_RUNS_COL, { ...query, project }, projection, sort);
 
 	if (!run) {

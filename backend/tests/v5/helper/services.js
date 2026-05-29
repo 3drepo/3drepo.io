@@ -353,11 +353,17 @@ db.createClashRun = async (teamspace, projectId, run, clashes) => {
 	};
 
 	if (clashes) {
-		formattedRun.results = ServiceHelper.generateUUIDString();
+		formattedRun.results = {
+			stats: {
+				new: clashes.new.length,
+				active: clashes.active.length,
+				resolved: clashes.resolved.length,
+			},
+		};
 		formattedRun.status = clashRunStatus.COMPLETED;
 		formattedRun.updatedAt = new Date();
 
-		await FilesManager.storeFile(teamspace, RUN_HISTORY_COL, formattedRun.results,
+		await FilesManager.storeFile(teamspace, RUN_HISTORY_COL, formattedRun._id,
 			Buffer.from(JSON.stringify(clashes)));
 	}
 

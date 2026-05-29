@@ -20,9 +20,9 @@ const {
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
 	clashRunStatus,
 } = require('../../../models/clashes.constants');
-const { UUIDToString, generateUUIDString, stringToUUID } = require('../../../utils/helper/uuids');
+const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
+const { createClashRun, getClashRunByQuery, updateRunStatus } = require('../../../models/clashes.runs');
 const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
-const { createTestRun, getTestRunByQuery, updateRunStatus } = require('../../../models/clashes.runs');
 const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
 const { getFileAsStream, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
@@ -128,7 +128,7 @@ const writeConfigSetEntry = async (teamspace, project, selection, stream, setNam
 };
 
 Clashes.createRun = async (teamspace, project, plan, user) => {
-	const runId = await createTestRun(teamspace, project, plan, user);
+	const runId = await createClashRun(teamspace, project, plan, user);
 
 	const configStream = new PassThrough();
 	configStream.write('{');
@@ -205,12 +205,12 @@ const compareRunResults = (lastRunIndexObj, newRunClashes) => {
 
 const getLastRunClashes = async (teamspace, project, planId) => {
 	try {
-		const lastCompletedRun = await getTestRunByQuery(teamspace, project,
+		const lastCompletedRun = await getClashRunByQuery(teamspace, project,
 			{ 'plan._id': planId, status: clashRunStatus.COMPLETED },
-			{ results: 1 }, { updatedAt: -1 },
+			{ _id: 1 }, { updatedAt: -1 },
 		);
 
-		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun.results);
+		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun._id);
 		return getClashesFromStream(readStream, true);
 	} catch (err) {
 		if (err.code === templates.clashRunNotFound.code) {
@@ -222,14 +222,14 @@ const getLastRunClashes = async (teamspace, project, planId) => {
 };
 
 Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
-	const { plan: { _id: planId } } = await getTestRunByQuery(teamspace, project,
+	const { plan: { _id: planId } } = await getClashRunByQuery(teamspace, project,
 		{ _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
 	const lastRunClashes = await getLastRunClashes(teamspace, project, planId);
 
 	if (!lastRunClashes) {
 		const errorMessage = 'Error retrieving clashes from last run';
 		await sendSystemEmail(emailTemplates.CLASH_ERROR.name, { errorMessage, teamspace, project, planId, runId });
-		await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED, { reason: errorMessage });
+		await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED, { error: { reason: errorMessage } });
 		return;
 	}
 
@@ -238,10 +238,14 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 	const lastRunIndexObj = createConstantsObject(lastRunClashes);
 
 	const categorizedClashes = compareRunResults(lastRunIndexObj, newRunClashes);
-	const resultId = generateUUIDString();
 
-	await storeFile(teamspace, RUN_HISTORY_COL, resultId, Buffer.from(JSON.stringify(categorizedClashes)));
-	await updateRunStatus(teamspace, project, runId, clashRunStatus.COMPLETED, resultId);
+	await storeFile(teamspace, RUN_HISTORY_COL, runId, Buffer.from(JSON.stringify(categorizedClashes)));
+	await updateRunStatus(teamspace, project, runId, clashRunStatus.COMPLETED,
+		{ stats: {
+			new: categorizedClashes.new.length,
+			active: categorizedClashes.active.length,
+			resolved: categorizedClashes.resolved.length,
+		} });
 };
 
 module.exports = Clashes;

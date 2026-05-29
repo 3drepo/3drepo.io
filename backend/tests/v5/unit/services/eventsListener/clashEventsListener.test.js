@@ -138,7 +138,7 @@ const testClashRunCompleted = () => {
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledTimes(1);
 			expect(ClashesModel.updateRunStatus).toHaveBeenCalledWith(data.teamspace, data.project,
 				data.runId, clashRunStatus.FAILED,
-				{ code: resInfo.retVal, reason: resInfo.message });
+				{ error: { code: resInfo.retVal, reason: resInfo.message } });
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {

@@ -45,7 +45,7 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 			await processClashResults(teamspace, project, runId, results);
 		} else {
 			await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
-				{ code: resInfo.retVal, reason: resInfo.message });
+				{ error: { code: resInfo.retVal, reason: resInfo.message } });
 		}
 	} catch (err) {
 		logger.logError(`Failed to process a complete clash run for ${teamspace} `

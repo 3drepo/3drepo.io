@@ -27,7 +27,7 @@ const { CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const DB = require(`${src}/handler/db`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { callback_queue: callbackq, shared_storage: sharedDir } = queueConfig;
-const { getTestRunByQuery } = require(`${src}/models/clashes.runs`);
+const { getClashRunByQuery } = require(`${src}/models/clashes.runs`);
 const { clashRunStatus, RUN_HISTORY_COL } = require(`${src}/models/clashes.constants`);
 const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
@@ -261,8 +261,8 @@ const testCreateRun = () => {
 
 				if (success) {
 					const id = res.body._id;
-					const testRun = await DB.findOne(ts, CLASH_RUNS_COL, { _id: stringToUUID(id) });
-					expect(testRun).toBeDefined();
+					const clashRun = await DB.findOne(ts, CLASH_RUNS_COL, { _id: stringToUUID(id) });
+					expect(clashRun).toBeDefined();
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
@@ -318,8 +318,8 @@ const testParseClashResults = () => {
 			// wait for the queue to process the message
 			await ServiceHelper.sleepMS(1000);
 
-			const run = await getTestRunByQuery(teamspace, stringToUUID(project.id),
-				{ _id: stringToUUID(plannedClashRun2._id) }, { status: 1, results: 1 });
+			const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
+				{ _id: stringToUUID(plannedClashRun2._id) }, { _id: 1, status: 1, results: 1 });
 			expect(run.status).toEqual(clashRunStatus.FAILED);
 			expect(run.results.error.code).toEqual(callbackObj.value);
 			expect(run.results.error.reason).toEqual(expect.any(String));
@@ -334,11 +334,12 @@ const testParseClashResults = () => {
 			// wait for the queue to process the message
 			await ServiceHelper.sleepMS(1000);
 
-			const run = await getTestRunByQuery(teamspace, stringToUUID(project.id),
-				{ _id: stringToUUID(plannedClashRun2._id) }, { status: 1, results: 1 });
+			const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
+				{ _id: stringToUUID(plannedClashRun2._id) }, { _id: 1, status: 1, results: 1 });
 			expect(run.status).toEqual(clashRunStatus.COMPLETED);
+			expect(run.results.stats).toEqual({ new: clashes.length, active: 0, resolved: 0 });
 
-			const contents = await getFileContents(run.results);
+			const contents = await getFileContents(run._id);
 			const parsedContents = JSON.parse(contents);
 
 			expect(parsedContents).toEqual({ new: clashes.map(formatClash), active: [], resolved: [] });
@@ -353,11 +354,12 @@ const testParseClashResults = () => {
 			// wait for the queue to process the message
 			await ServiceHelper.sleepMS(1000);
 
-			const run = await getTestRunByQuery(teamspace, stringToUUID(project.id),
-				{ _id: stringToUUID(plannedClashRun1._id) }, { status: 1, results: 1 });
+			const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
+				{ _id: stringToUUID(plannedClashRun1._id) }, { _id: 1, status: 1, results: 1 });
 			expect(run.status).toEqual(clashRunStatus.COMPLETED);
+			expect(run.results.stats).toEqual({ new: 0, active: clashes.length, resolved: 0 });
 
-			const contents = await getFileContents(run.results);
+			const contents = await getFileContents(run._id);
 			const parsedContents = JSON.parse(contents);
 
 			expect(parsedContents).toEqual({ new: [], active: clashes.map(formatClash), resolved: [] });

@@ -317,7 +317,7 @@ ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 			throw err;
 		}
 
-		logger.logError('Failed to queue clash test run', err?.message);
+		logger.logError('Failed to queue clash run', err?.message);
 		throw templates.queueInsertionFailed;
 	}
 };
