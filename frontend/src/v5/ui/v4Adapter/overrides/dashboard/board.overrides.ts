@@ -18,9 +18,7 @@ import { css } from 'styled-components';
 import {
 	BoardItem,
 	Config,
-	DataConfig,
 	LoaderContainer,
-	ViewConfig,
 	Container as V4Container,
 	BoardContainer,
 	NoDataMessage,
@@ -139,25 +137,6 @@ const boardContainerStyles = css`
 		background-color: transparent;
 		padding: 10px 75px;
 
-		/* left handside selects */
-		${DataConfig} {
-			display: flex;
-			width: 403px;
-			
-			> * {
-				width: 403px;
-
-				/* hide teamspace & project select */
-				&:not(:last-child) {
-					display: none;
-				}
-			}
-		}
-
-		/* right handside selects */
-		${ViewConfig} > div {
-			width: 140px;
-		}
 	}
 
 	/* add new card styling */

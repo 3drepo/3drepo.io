@@ -345,39 +345,6 @@ export function Board(props: IProps) {
 		props.setFilters([]);
 	};
 
-	const renderTeamspacesSelect = () => (
-		<FormControl>
-			<InputLabel shrink htmlFor="teamspace-select">Teamspace</InputLabel>
-			<CellSelect
-				placeholder="Select teamspace"
-				items={teamspacesItems}
-				value={teamspacesItems.length ? teamspace : ''}
-				onChange={handleTeamspaceChange}
-				disabled={!teamspacesItems.length}
-				disabledPlaceholder
-				inputId="teamspace-select"
-			/>
-		</FormControl>
-	);
-
-	const renderProjectsSelect = () => {
-		const projects = getTeamspaceProjects(props.teamspaces, props.projectsMap, teamspace);
-		return (
-			<FormControl>
-				<InputLabel shrink htmlFor="project-select">Project</InputLabel>
-				<CellSelect
-					placeholder="Select project"
-					items={projects}
-					value={projects.length ? project : ''}
-					onChange={handleProjectChange}
-					disabled={!projects.length}
-					disabledPlaceholder
-					inputId="project-select"
-				/>
-			</FormControl>
-		);
-	};
-
 	const renderModelsSelect = () => {
 		const models = getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project);
 		return (
@@ -575,8 +542,6 @@ export function Board(props: IProps) {
 				{renderSearchPanel(props.searchEnabled)}
 				<Config>
 					<DataConfig>
-						{renderTeamspacesSelect()}
-						{renderProjectsSelect()}
 						{renderModelsSelect()}
 					</DataConfig>
 					<ViewConfig>

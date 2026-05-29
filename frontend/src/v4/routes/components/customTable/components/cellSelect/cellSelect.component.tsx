@@ -103,7 +103,6 @@ export class CellSelect extends PureComponent<IProps> {
 				input={<Input id={inputId} readOnly={readOnly} />}
 				value={value}
 				onChange={this.handleChange}
-				renderValue={renderValue}
 			>
 				{this.renderOptions(options, itemTemplate)}
 			</StyledSelect>

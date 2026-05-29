@@ -32,11 +32,12 @@ export const Select = ({
 	helperText,
 	label,
 	className,
+	renderValue,
 	...props
 }: SelectProps) => (
 	<FormControl required={required} disabled={props.disabled} error={props.error} className={className}>
 		<InputLabel id={`${props.name}-label`}>{label}</InputLabel>
-		<MuiSelect renderValue={(value) => props.children.find(({ key }) => key === value)?.props.children ?? value} {...props} />
+		<MuiSelect {...props} />
 		<FormHelperText>{helperText}</FormHelperText>
 	</FormControl>
 );
