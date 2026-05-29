@@ -354,7 +354,8 @@ const testProcessClashResults = () => {
 		});
 
 		test('should categorize clashes and process clash results when there are previous runs', async () => {
-			const previouslyResolvedClashes = times(2, () => generateClash()).map(formatClash).map((clash) => clash.index);
+			const previouslyResolvedClashes = times(2, () => generateClash())
+				.map(formatClash).map(({ index }) => ({ index }));
 			const existingClashes = {
 				new: times(5, () => generateClash()).map(formatClash),
 				active: fileContent.clashes.slice(0, 5).map(formatClash),
@@ -395,7 +396,7 @@ const testProcessClashResults = () => {
 			const result = {
 				new: fileContent.clashes.slice(5, 10).map(formatClash),
 				active: existingClashes.active,
-				resolved: [...existingClashes.new.map((c) => c.index), ...previouslyResolvedClashes],
+				resolved: [...existingClashes.new.map(({ index }) => ({ index })), ...previouslyResolvedClashes],
 			};
 
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);

@@ -1444,13 +1444,54 @@ const testGetClosedStatuses = () => {
 	const customClosedStatuses = config.status.values.flatMap(
 		({ type, name }) => (type === statusTypes.DONE || type === statusTypes.VOID
 			? name : []));
+	const customDoneStatuses = config.status.values.flatMap(
+		({ type, name }) => (type === statusTypes.DONE
+			? name : []));
 
 	describe.each([
-		['when custom statuses are configured', { config }, customClosedStatuses],
-		['when custom statuses are not configured', {}, [statuses.CLOSED, statuses.VOID]],
-	])('Get ticket closed statuses', (desc, input, expectedOutput) => {
+		['when custom statuses are configured', { config }, undefined, customClosedStatuses],
+		['when custom statuses are configured and void is excluded', { config }, false, customDoneStatuses],
+		['when custom statuses are not configured', {}, undefined, [statuses.CLOSED, statuses.VOID]],
+		['when custom statuses are not configured and void is excluded', {}, false, [statuses.CLOSED]],
+	])('Get ticket closed statuses', (desc, input, includeVoid, expectedOutput) => {
 		test(desc, () => {
-			expect(TemplateSchema.getClosedStatuses(input)).toEqual(expectedOutput);
+			expect(TemplateSchema.getClosedStatuses(input, includeVoid)).toEqual(expectedOutput);
+		});
+	});
+};
+
+const testGetStatusDefinition = () => {
+	describe('Get ticket status definition', () => {
+		test('should return the default status definition when custom statuses are not configured', () => {
+			const template = { config: {}, properties: [], modules: [] };
+
+			expect(TemplateSchema.getStatusDefinition(template)).toEqual({
+				values: [
+					{ name: statuses.OPEN, type: statusTypes.OPEN },
+					{ name: statuses.IN_PROGRESS, type: statusTypes.ACTIVE },
+					{ name: statuses.FOR_APPROVAL, type: statusTypes.REVIEW },
+					{ name: statuses.CLOSED, type: statusTypes.DONE },
+					{ name: statuses.VOID, type: statusTypes.VOID },
+				],
+				default: statuses.OPEN,
+			});
+		});
+
+		test('should return the custom status definition when custom statuses are configured', () => {
+			const values = generateCustomStatusValues();
+			const defaultStatus = values[0].name;
+			const template = {
+				config: {
+					status: {
+						values,
+						default: defaultStatus,
+					},
+				},
+				properties: [],
+				modules: [],
+			};
+
+			expect(TemplateSchema.getStatusDefinition(template)).toBe(template.config.status);
 		});
 	});
 };
@@ -1459,4 +1500,5 @@ describe(determineTestGroup(__filename), () => {
 	testValidate();
 	testGenerateFullSchema();
 	testGetClosedStatuses();
+	testGetStatusDefinition();
 });

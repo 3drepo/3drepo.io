@@ -50,6 +50,14 @@ jest.mock('../../../../../src/v5/models/teamspaceSettings');
 const TeamspaceModel = require(`${src}/models/teamspaceSettings`);
 
 const TicketSchema = require(`${src}/schemas/tickets`);
+const validateTicket = async (teamspace, project, model, template, newTicket, oldTicket, isImport) => {
+	const [validatedTicket] = await TicketSchema.validateTickets(teamspace, project, model, template, [newTicket], {
+		existingData: oldTicket ? [oldTicket] : undefined,
+		isImport,
+		processValidatedData: false,
+	});
+	return validatedTicket?.newTicket;
+};
 const {
 	basePropertyLabels,
 	modulePropertyLabels,
@@ -116,7 +124,7 @@ const testPropertyTypes = (testData, moduleProperty, isNewTicket = true) => {
 						} : {},
 					});
 
-					await TicketSchema.validateTicket(teamspace, project, model, template, fullData, oldTicket);
+					await validateTicket(teamspace, project, model, template, fullData, oldTicket);
 				};
 
 				if (goodTest !== undefined) await expect(runTest(goodTest)).resolves.toBeUndefined();
@@ -185,10 +193,10 @@ const testPropertyConditions = () => {
 							? deleteIfUndefined({ [modName]: isEqual(propObjOut, {}) ? undefined : propObjOut }) : {},
 					});
 
-					await expect(TicketSchema.validateTicket(teamspace, project, model, template, fullData, oldTicket))
+					await expect(validateTicket(teamspace, project, model, template, fullData, oldTicket))
 						.resolves.toEqual(outData);
 				} else {
-					await expect(TicketSchema.validateTicket(teamspace, project, model, template, fullData, oldTicket)
+					await expect(validateTicket(teamspace, project, model, template, fullData, oldTicket)
 						.catch(() => Promise.reject())).rejects.toBeUndefined();
 				}
 			});
@@ -265,7 +273,7 @@ const testPresetValues = () => {
 		const runTestCases = (template, testCases) => {
 			const runTest = async (data) => {
 				try {
-					await TicketSchema.validateTicket(teamspace, project, model, template, data);
+					await validateTicket(teamspace, project, model, template, data);
 				} catch (err) {
 					throw undefined;
 				}
@@ -612,10 +620,10 @@ const testUniqueProperties = () => {
 			});
 
 			if (shouldPass) {
-				await expect(TicketSchema.validateTicket(teamspace, project, model, template, ticket, oldTicket))
+				await expect(validateTicket(teamspace, project, model, template, ticket, oldTicket))
 					.resolves.not.toBeUndefined();
 			} else {
-				await expect(TicketSchema.validateTicket(teamspace, project, model, template, ticket, oldTicket))
+				await expect(validateTicket(teamspace, project, model, template, ticket, oldTicket))
 					.rejects.not.toBeUndefined();
 			}
 
@@ -736,7 +744,7 @@ const testCompositeTypes = () => {
 					},
 				},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+			await expect(validateTicket(teamspace, project, model, template, input, oldTicket))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
@@ -764,7 +772,7 @@ const testCompositeTypes = () => {
 
 				},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+			await expect(validateTicket(teamspace, project, model, template, input, oldTicket))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
@@ -806,7 +814,7 @@ const testCompositeTypes = () => {
 					},
 				},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+			await expect(validateTicket(teamspace, project, model, template, input, oldTicket))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
@@ -847,7 +855,7 @@ const testCompositeTypes = () => {
 					},
 				},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+			await expect(validateTicket(teamspace, project, model, template, input, oldTicket))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
@@ -878,8 +886,8 @@ const testCompositeTypes = () => {
 				},
 			};
 
-			await TicketSchema.validateTicket(teamspace, project, model, template, input);
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+			await validateTicket(teamspace, project, model, template, input);
+			await expect(validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, modules: {}, type: template._id });
 		});
 
@@ -904,7 +912,7 @@ const testCompositeTypes = () => {
 					},
 				},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+			await expect(validateTicket(teamspace, project, model, template, input))
 				.rejects.not.toBeUndefined();
 		});
 
@@ -943,7 +951,7 @@ const testCompositeTypes = () => {
 					},
 				},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+			await expect(validateTicket(teamspace, project, model, template, input, oldTicket))
 				.rejects.not.toBeUndefined();
 		});
 
@@ -984,7 +992,7 @@ const testCompositeTypes = () => {
 					},
 				},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, oldTicket))
+			await expect(validateTicket(teamspace, project, model, template, input, oldTicket))
 				.resolves.toEqual({ ...input, modules: {} });
 		});
 	});
@@ -1008,14 +1016,14 @@ const testImportedTickets = () => {
 		const importTestInput = generateTicket(importTestTem);
 
 		test('Should invoke generateFullSchema with isImport set to true if it is a new ticket and is in import mode', async () => {
-			await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+			await validateTicket(teamspace, project, model, importTestTem,
 				importTestInput, undefined, true);
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, true);
 		});
 
 		test('Should invoke generateFullSchema with isImport set to false if it is not a new ticket and is in import mode', async () => {
-			await TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+			await validateTicket(teamspace, project, model, importTestTem,
 				importTestInput, importTestInput, true);
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledTimes(1);
 			expect(TemplateSchema.generateFullSchema).toHaveBeenCalledWith(importTestTem, false);
@@ -1024,7 +1032,7 @@ const testImportedTickets = () => {
 		test('Should NOT allow users to specify creation date if it is an existing ticket', async () => {
 			const date = Date.now();
 			const { properties, ...others } = importTestInput;
-			await expect(TicketSchema.validateTicket(teamspace, project, model, importTestTem,
+			await expect(validateTicket(teamspace, project, model, importTestTem,
 				{ ...others,
 					properties: {
 						...properties,
@@ -1070,7 +1078,7 @@ const testImportedTickets = () => {
 			times(2, (iLoop) => {
 				const isNewTicket = iLoop === 0;
 				test(`[${isNewTicket ? 'New Ticket' : 'Update Ticket'}] Should${success ? '' : ' not'} validate ${desc}`, async () => {
-					const test = TicketSchema.validateTicket(teamspace, project, model, template,
+					const test = validateTicket(teamspace, project, model, template,
 						ticket, isNewTicket ? undefined : importTestInput, true);
 					if (success) {
 						const output = await test;
@@ -1115,7 +1123,7 @@ const testValidateTicket = () => {
 				modules: [],
 			};
 
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, {}))
+			await expect(validateTicket(teamspace, project, model, template, {}))
 				.rejects.not.toBeUndefined();
 		});
 
@@ -1137,7 +1145,7 @@ const testValidateTicket = () => {
 				modules: {},
 			};
 
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+			await expect(validateTicket(teamspace, project, model, template, input))
 				.rejects.not.toBeUndefined();
 		});
 
@@ -1156,7 +1164,7 @@ const testValidateTicket = () => {
 				modules: { [invalidModName]: generateRandomString() },
 			};
 
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+			await expect(validateTicket(teamspace, project, model, template, input))
 				.rejects.not.toBeUndefined();
 		});
 
@@ -1181,7 +1189,7 @@ const testValidateTicket = () => {
 				properties: {},
 				modules: {},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+			await expect(validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, type: template._id });
 		});
 
@@ -1199,7 +1207,7 @@ const testValidateTicket = () => {
 				title: generateRandomString(),
 				type: template._id,
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+			await expect(validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
@@ -1223,7 +1231,7 @@ const testValidateTicket = () => {
 				},
 				modules: {},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input))
+			await expect(validateTicket(teamspace, project, model, template, input))
 				.resolves.toEqual({ ...input, properties: {}, modules: {} });
 		});
 
@@ -1261,7 +1269,7 @@ const testValidateTicket = () => {
 				},
 				modules: {},
 			};
-			await expect(TicketSchema.validateTicket(teamspace, project, model, template, input, old))
+			await expect(validateTicket(teamspace, project, model, template, input, old))
 				.resolves.toEqual(expected);
 		});
 	});
@@ -1457,6 +1465,125 @@ const testProcessReadOnlyValues = () => {
 	});
 };
 
+const testValidateTickets = () => {
+	describe('Validate tickets', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+
+		test('Should validate, deserialise and process read only values', async () => {
+			const user = generateRandomString();
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{ name: propName, type: propTypes.TEXT }],
+				modules: [],
+			};
+			const ticket = {
+				title: generateRandomString(),
+				properties: {
+					[propName]: generateRandomString(),
+				},
+			};
+
+			const [output] = await TicketSchema.validateTickets(teamspace, project, model, template,
+				[ticket], { author: user });
+
+			expect(output?.newTicket).toEqual(expect.objectContaining({
+				title: ticket.title,
+				type: template._id,
+				properties: expect.objectContaining({
+					[propName]: ticket.properties[propName],
+					[basePropertyLabels.OWNER]: user,
+					[basePropertyLabels.CREATED_AT]: expect.any(Date),
+					[basePropertyLabels.UPDATED_AT]: expect.any(Date),
+				}),
+				modules: {},
+			}));
+		});
+
+		test('Should return null if an update has no changes', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{ name: propName, type: propTypes.TEXT }],
+				modules: [],
+			};
+			const oldTicket = {
+				title: generateRandomString(),
+				type: template._id,
+				properties: {
+					[propName]: generateRandomString(),
+				},
+				modules: {},
+			};
+
+			await expect(TicketSchema.validateTickets(teamspace, project, model, template, [{
+				properties: {
+					[propName]: oldTicket.properties[propName],
+				},
+			}], { existingData: [oldTicket] })).resolves.toEqual([]);
+		});
+	});
+};
+
+const testValidateTicketsBatchUniqueness = () => {
+	describe('Validate tickets batch uniqueness', () => {
+		const teamspace = generateRandomString();
+		const project = generateRandomString();
+		const model = generateRandomString();
+
+		test('Should reject duplicate unique property values within the same validation-only batch', async () => {
+			const propName = generateRandomString();
+			const duplicateValue = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{ name: propName, type: propTypes.TEXT, unique: true }],
+				modules: [],
+			};
+			const tickets = times(2, () => ({
+				title: generateRandomString(),
+				properties: {
+					[propName]: duplicateValue,
+				},
+			}));
+
+			TicketsModel.getTicketsByQuery.mockResolvedValue([]);
+
+			await expect(TicketSchema.validateTickets(teamspace, project, model, template, tickets,
+				{ processValidatedData: false }))
+				.rejects.toThrow(`The unique property ${propName} can not have the same value multiple times.`);
+		});
+
+		test('Should reject duplicate unique module property values within the same batch', async () => {
+			const moduleName = generateRandomString();
+			const propName = generateRandomString();
+			const duplicateValue = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [],
+				modules: [{
+					name: moduleName,
+					properties: [{ name: propName, type: propTypes.TEXT, unique: true }],
+				}],
+			};
+			const tickets = times(2, () => ({
+				title: generateRandomString(),
+				modules: {
+					[moduleName]: {
+						[propName]: duplicateValue,
+					},
+				},
+			}));
+
+			TicketsModel.getTicketsByQuery.mockResolvedValue([]);
+
+			await expect(TicketSchema.validateTickets(teamspace, project, model, template, tickets))
+				.rejects.toThrow(`The unique property ${moduleName}.${propName} can not have the same value multiple times.`);
+		});
+	});
+};
+
 const testDeserialiseUUIDsInTicket = () => {
 	describe('Deserialise UUIDs in a ticket', () => {
 		test('Should deserialise as expected', () => {
@@ -1573,6 +1700,8 @@ const testSerialiseTicket = () => {
 
 describe(determineTestGroup(__filename), () => {
 	testValidateTicket();
+	testValidateTickets();
+	testValidateTicketsBatchUniqueness();
 	testProcessReadOnlyValues();
 	testDeserialiseUUIDsInTicket();
 	testSerialiseTicket();

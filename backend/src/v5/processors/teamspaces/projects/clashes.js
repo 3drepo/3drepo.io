@@ -201,7 +201,7 @@ const compareRunResults = (lastRunIndexObj, newRunClashes) => {
 		newMap.add(key);
 	}
 
-	result.resolved = Object.keys(lastRunIndexObj);
+	result.resolved = Object.keys(lastRunIndexObj).map((index) => ({ index }));
 
 	return result;
 };

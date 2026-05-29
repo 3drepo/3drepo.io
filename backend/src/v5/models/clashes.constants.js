@@ -21,9 +21,14 @@ ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
 ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';
 ClashesConstants.RUN_HISTORY_COL = 'clashes.runs.history';
 
+ClashesConstants.CLASH_TYPES = {
+	HARD: 'hard',
+	CLEARANCE: 'clearance',
+};
+
 ClashesConstants.CLASH_PLAN_TYPES = [
-	'hard',
-	'clearance',
+	ClashesConstants.CLASH_TYPES.HARD,
+	ClashesConstants.CLASH_TYPES.CLEARANCE,
 ];
 
 ClashesConstants.SELF_INTERSECTIONS_CHECK_OPTIONS = [

@@ -246,4 +246,6 @@ TemplateConstants.supportedPatterns = createConstantMapping([
 	'ticket_number',
 ]);
 
+TemplateConstants.clashElementTypes = createConstantMapping(clashElementTypes);
+
 module.exports = TemplateConstants;

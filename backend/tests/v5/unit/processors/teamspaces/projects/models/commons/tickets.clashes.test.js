@@ -22,6 +22,9 @@ const { generateRandomString, generateUUIDString } = require('../../../../../../
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
 
+jest.mock('../../../../../../../../src/v5/schemas/tickets');
+const TicketSchema = require(`${src}/schemas/tickets`);
+
 const TicketsClashes = require(`${src}/processors/teamspaces/projects/models/commons/tickets.clashes`);
 
 const {
@@ -31,6 +34,7 @@ const {
 	statuses,
 	statusTypes,
 } = require(`${src}/schemas/tickets/templates.constants`);
+const { CLASH_TYPES } = require(`${src}/models/clashes.constants`);
 
 const { CLOUD_CLASH } = presetModules;
 const {
@@ -74,27 +78,41 @@ const getTemplateWithoutCustomStatus = () => ({
 	modules: [{ type: CLOUD_CLASH, properties: [] }],
 });
 
-const getClash = (index = generateRandomString(), distance) => ({
+const getClash = (index = generateRandomString()) => ({
 	index,
 	a: { idType: 'internal', id: generateRandomString() },
 	b: { idType: 'ifc_guids', id: generateRandomString() },
 	positions: [
-		[[1, 2, 3], [4, 6, 3]],
+		[1, 2, 3],
+		[4, 6, 3],
 	],
-	...(distance === undefined ? {} : { distance }),
 });
 
 const getContext = () => ({
 	planId: generateUUIDString(),
 	planName: generateRandomString(),
 	runId: generateUUIDString(),
-	clashType: generateRandomString(),
+	clashType: CLASH_TYPES.HARD,
+	creator: generateRandomString(),
+});
+
+const getProcessOptions = (context, tickets = {}) => ({
+	runId: context.runId,
+	plan: {
+		_id: context.planId,
+		name: context.planName,
+		type: context.clashType,
+		tickets: {
+			creator: context.creator,
+			...tickets,
+		},
+	},
 });
 
 const getCloudClashData = (clash, context, distance) => ({
 	[CLASH_PLAN_ID]: context.planId,
 	[CLASH_RUN_ID]: context.runId,
-	[CLASH_ID]: String(clash.index),
+	[CLASH_ID]: clash.index,
 	[CLASH_PLAN_NAME]: context.planName,
 	[CLASH_TYPE]: context.clashType,
 	[CLASH_POINT]: [1, 2, 3],
@@ -105,6 +123,11 @@ const getCloudClashData = (clash, context, distance) => ({
 	[OBJECT_B_ID]: clash.b.id,
 });
 
+const getCloudClashUpdateData = (clash, distance) => ({
+	[CLASH_POINT]: [1, 2, 3],
+	[DISTANCE_M]: distance,
+});
+
 describe(determineTestGroup(__filename), () => {
 	const teamspace = generateRandomString();
 	const project = generateRandomString();
@@ -112,30 +135,53 @@ describe(determineTestGroup(__filename), () => {
 
 	beforeEach(() => {
 		jest.clearAllMocks();
+		TicketsModel.addTicketsWithTemplate.mockResolvedValue([]);
+		TicketsModel.updateTickets.mockResolvedValue([]);
+		const mockValidation = (t, p, m, tem, tickets, { existingData, processValidatedData = true } = {}) => (
+			Promise.resolve(tickets.map((ticket, i) => ({
+				newTicket: ticket,
+				...(processValidatedData ? { existingData: existingData?.[i] } : {}),
+			})))
+		);
+		TicketSchema.validateTickets.mockImplementation(mockValidation);
 	});
 
-	test('Should prepare ticket data for new clashes', async () => {
+	test('Should create tickets for new clashes', async () => {
 		const template = getTemplate();
-		const clash = getClash(generateRandomString(), 0.25);
+		const clash = getClash(generateRandomString());
 		const context = getContext();
 		const customModule = generateRandomString();
 		const customProperty = generateRandomString();
 		const customValue = generateRandomString();
 		const priority = generateRandomString();
+		const defaultClashId = generateRandomString();
 		const status = generateRandomString();
 		const results = { new: [clash], active: [], resolved: [] };
+		template.config.status.values.push({ name: status, type: statusTypes.OPEN });
 
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
 
-		const output = await TicketsClashes.processClashResults(teamspace, project, federation, template, results, {
-			...context,
-			defaultValues: [
-				{ property: basePropertyLabels.PRIORITY, value: priority },
-				{ module: customModule, property: customProperty, value: customValue },
-				{ module: CLOUD_CLASH, property: CLASH_ID, value: generateRandomString() },
-			],
-			defaultStatuses: { onNew: status },
-		});
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, {
+				valuesAtCreation: [
+					{ property: basePropertyLabels.PRIORITY, value: priority },
+					{ module: customModule, property: customProperty, value: customValue },
+					{ module: CLOUD_CLASH, property: CLASH_ID, value: defaultClashId },
+				],
+				defaultStatuses: { onNew: status },
+			}));
+
+		const expectedTicket = {
+			title: `[${context.planName}] Clash`,
+			properties: {
+				[basePropertyLabels.PRIORITY]: priority,
+				[STATUS]: status,
+			},
+			modules: {
+				[customModule]: { [customProperty]: customValue },
+				[CLOUD_CLASH]: getCloudClashData(clash, context, 0),
+			},
+		};
 
 		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
 		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledWith(teamspace, project, federation, {
@@ -143,165 +189,229 @@ describe(determineTestGroup(__filename), () => {
 			[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: context.planId,
 		}, {
 			_id: 1,
+			[`properties.${STATUS}`]: 1,
 			[`modules.${CLOUD_CLASH}.${CLASH_ID}`]: 1,
 		});
 
-		expect(output).toEqual({
-			clashesToUpdate: [],
-			clashesToCreate: [{
-				title: `[${context.planName}] Clash`,
+		expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(4);
+		expect(TicketSchema.validateTickets).toHaveBeenNthCalledWith(1, teamspace, project, federation, template,
+			[{
 				properties: {
 					[basePropertyLabels.PRIORITY]: priority,
 					[STATUS]: status,
 				},
-				modules: {
-					[customModule]: { [customProperty]: customValue },
-					[CLOUD_CLASH]: getCloudClashData(clash, context, clash.distance),
-				},
+				modules: {},
 			}],
-		});
+			{ existingData: [{}], processValidatedData: false });
+		expect(TicketSchema.validateTickets).toHaveBeenNthCalledWith(4, teamspace, project, federation, template,
+			[expectedTicket], { author: context.creator });
+		expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project,
+			federation, template._id, [expectedTicket]);
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 	});
 
-	test('Should prepare ticket updates for reopened clashes using the template default status', async () => {
+	test('Should drop invalid default values when creating tickets', async () => {
 		const defaultStatus = generateRandomString();
 		const template = getTemplate(defaultStatus);
+		const clash = getClash(generateRandomString());
+		const context = getContext();
+		const priority = generateRandomString();
+		const invalidProperty = generateRandomString();
+		const results = { new: [clash], active: [], resolved: [] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+		TicketSchema.validateTickets.mockImplementation((t, p, m, tem, tickets, options = {}) => {
+			if (options.processValidatedData !== false) {
+				return Promise.resolve(tickets.map((ticket) => ({ newTicket: ticket })));
+			}
+
+			if (tickets[0].properties?.[invalidProperty]) return Promise.reject(new Error());
+			return Promise.resolve(tickets.map((ticket) => ({ newTicket: ticket })));
+		});
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, {
+				valuesAtCreation: [
+					{ property: basePropertyLabels.PRIORITY, value: priority },
+					{ property: invalidProperty, value: generateRandomString() },
+				],
+				defaultStatuses: {},
+			}));
+
+		const createdTickets = TicketsModel.addTicketsWithTemplate.mock.calls[0][4];
+		expect(createdTickets[0].properties).toEqual({
+			[basePropertyLabels.PRIORITY]: priority,
+			[STATUS]: defaultStatus,
+		});
+		expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(3);
+		expect(TicketSchema.validateTickets).toHaveBeenLastCalledWith(teamspace, project, federation, template,
+			createdTickets, { author: context.creator });
+		expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project,
+			federation, template._id, createdTickets);
+	});
+
+	test('Should update reopened clashes using the template default status', async () => {
+		const defaultStatus = generateRandomString();
+		const doneStatus = generateRandomString();
+		const template = getTemplate(defaultStatus, [doneStatus]);
 		const clash = getClash();
 		const context = getContext();
 		const existingTicket = {
 			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [STATUS]: doneStatus },
 			modules: {
 				[CLOUD_CLASH]: {
-					[CLASH_ID]: String(clash.index),
+					[CLASH_ID]: clash.index,
 				},
 			},
 		};
 		const results = { new: [clash], active: [], resolved: [] };
 
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
 
-		const output = await TicketsClashes.processClashResults(teamspace, project, federation, template, results, {
-			...context,
-			defaultValues: [{ property: basePropertyLabels.PRIORITY, value: generateRandomString() }],
-			defaultStatuses: {},
-		});
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, {
+				valuesAtCreation: [{ property: basePropertyLabels.PRIORITY, value: generateRandomString() }],
+				defaultStatuses: {},
+			}));
 
-		expect(output).toEqual({
-			clashesToCreate: [],
-			clashesToUpdate: [{
-				_id: existingTicket._id,
-				data: {
-					properties: {
-						[STATUS]: defaultStatus,
-					},
-					modules: {
-						[CLOUD_CLASH]: getCloudClashData(clash, context, 5),
-					},
-				},
-			}],
-		});
+		const expectedUpdate = {
+			properties: {
+				[STATUS]: defaultStatus,
+			},
+			modules: {
+				[CLOUD_CLASH]: getCloudClashUpdateData(clash, 0),
+			},
+		};
+		expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(2);
+		expect(TicketSchema.validateTickets).toHaveBeenCalledWith(teamspace, project, federation, template,
+			[expectedUpdate], { author: context.creator, existingData: [existingTicket] });
+		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], [expectedUpdate], context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
 	});
 
-	test('Should prepare ticket updates for resolved clashes using the configured resolved status', async () => {
-		const template = getTemplate();
+	test('Should update reopened clashes using the configured reopened status', async () => {
+		const defaultStatus = generateRandomString();
+		const doneStatus = generateRandomString();
+		const reopenedStatus = generateRandomString();
+		const template = getTemplate(defaultStatus, [doneStatus]);
+		template.config.status.values.push({ name: reopenedStatus, type: statusTypes.OPEN });
 		const clash = getClash();
 		const context = getContext();
-		const resolvedStatus = generateRandomString();
 		const existingTicket = {
 			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [STATUS]: doneStatus },
 			modules: {
 				[CLOUD_CLASH]: {
-					[CLASH_ID]: String(clash.index),
+					[CLASH_ID]: clash.index,
 				},
 			},
 		};
-		const results = { new: [], active: [], resolved: [String(clash.index)] };
+		const results = { new: [clash], active: [], resolved: [] };
 
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
 
-		const output = await TicketsClashes.processClashResults(teamspace, project, federation, template, results, {
-			...context,
-			defaultStatuses: { onResolved: resolvedStatus },
-		});
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: { onReopened: reopenedStatus } }));
 
-		expect(output).toEqual({
-			clashesToCreate: [],
-			clashesToUpdate: [{
-				_id: existingTicket._id,
-				data: {
-					properties: {
-						[STATUS]: resolvedStatus,
-					},
-				},
-			}],
-		});
+		const updateData = TicketsModel.updateTickets.mock.calls[0][4];
+		expect(updateData[0].properties).toEqual({ [STATUS]: reopenedStatus });
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], updateData, context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
 	});
 
-	test('Should prepare ticket updates for resolved clashes using the first done status', async () => {
+	test('Should update resolved clashes using the configured resolved status', async () => {
+		const clash = getClash();
+		const context = getContext();
+		const resolvedStatus = generateRandomString();
+		const template = getTemplate(generateRandomString(), [resolvedStatus]);
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: {},
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+				},
+			},
+		};
+		const results = { new: [], active: [], resolved: [{ index: clash.index }] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: { onResolved: resolvedStatus } }));
+
+		const expectedUpdate = { properties: { [STATUS]: resolvedStatus } };
+		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], [expectedUpdate], context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should update resolved clashes using the first done status', async () => {
 		const doneStatus = generateRandomString();
 		const template = getTemplate(generateRandomString(), [doneStatus, generateRandomString()]);
 		const clash = getClash();
 		const context = getContext();
 		const existingTicket = {
 			_id: generateUUIDString(),
+			type: template._id,
+			properties: {},
 			modules: {
 				[CLOUD_CLASH]: {
-					[CLASH_ID]: String(clash.index),
+					[CLASH_ID]: clash.index,
 				},
 			},
 		};
 		const results = { new: [], active: [], resolved: [clash] };
 
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
 
-		const output = await TicketsClashes.processClashResults(teamspace, project, federation, template, results, {
-			...context,
-			defaultStatuses: {},
-		});
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
 
-		expect(output).toEqual({
-			clashesToCreate: [],
-			clashesToUpdate: [{
-				_id: existingTicket._id,
-				data: {
-					properties: {
-						[STATUS]: doneStatus,
-					},
-				},
-			}],
-		});
+		const expectedUpdate = { properties: { [STATUS]: doneStatus } };
+		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], [expectedUpdate], context.creator);
 	});
 
-	test('Should prepare ticket updates for resolved clashes using the default done status', async () => {
+	test('Should update resolved clashes using the default done status', async () => {
 		const template = getTemplateWithoutCustomStatus();
 		const clash = getClash();
 		const context = getContext();
 		const existingTicket = {
 			_id: generateUUIDString(),
+			type: template._id,
+			properties: {},
 			modules: {
 				[CLOUD_CLASH]: {
-					[CLASH_ID]: String(clash.index),
+					[CLASH_ID]: clash.index,
 				},
 			},
 		};
 		const results = { new: [], active: [], resolved: [clash] };
 
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
 
-		const output = await TicketsClashes.processClashResults(teamspace, project, federation, template, results, {
-			...context,
-			defaultStatuses: {},
-		});
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
 
-		expect(output).toEqual({
-			clashesToCreate: [],
-			clashesToUpdate: [{
-				_id: existingTicket._id,
-				data: {
-					properties: {
-						[STATUS]: statuses.CLOSED,
-					},
-				},
-			}],
-		});
+		const expectedUpdate = { properties: { [STATUS]: statuses.CLOSED } };
+		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], [expectedUpdate], context.creator);
 	});
 });

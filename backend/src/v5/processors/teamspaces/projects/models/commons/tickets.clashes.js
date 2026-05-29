@@ -15,14 +15,19 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { addTicketsWithTemplate, getTicketsByQuery, updateTickets } = require('../../../../../models/tickets');
 const {
 	basePropertyLabels,
+	clashElementTypes,
 	modulePropertyLabels,
 	presetModules,
+	statusTypes,
 } = require('../../../../../schemas/tickets/templates.constants');
 const { getClosedStatuses, getStatusDefinition } = require('../../../../../schemas/tickets/templates');
+const { CLASH_TYPES } = require('../../../../../models/clashes.constants');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
-const { getTicketsByQuery } = require('../../../../../models/tickets');
+const { cloneDeep } = require('../../../../../utils/helper/objects');
+const { validateTickets } = require('../../../../../schemas/tickets');
 
 const TicketsClashes = {};
 const { CLOUD_CLASH } = presetModules;
@@ -41,146 +46,6 @@ const {
 } = modulePropertyLabels[CLOUD_CLASH];
 const { STATUS } = basePropertyLabels;
 
-const clashIdTypeToTicketType = {
-	internal: '3D Repo ID',
-	ifc_guids: 'IFC',
-	revit_ids: 'Revit',
-};
-
-const getObjectIdType = (idType) => clashIdTypeToTicketType[idType] ?? idType ?? 'Unknown';
-
-const isPosition = (position) => Array.isArray(position)
-	&& position.length === 3
-	&& position.every((coord) => typeof coord === 'number');
-
-const getFirstPositionPair = (positions) => {
-	const firstPosition = positions?.[0];
-	if (isPosition(firstPosition?.[0]) && isPosition(firstPosition?.[1])) return firstPosition;
-	if (isPosition(positions?.[0]) && isPosition(positions?.[1])) return positions;
-	return undefined;
-};
-
-const getFirstPosition = (positions) => {
-	const firstPosition = positions?.[0];
-	if (isPosition(firstPosition)) return firstPosition;
-	if (isPosition(firstPosition?.[0])) return firstPosition[0];
-	return undefined;
-};
-
-const getClashPoint = (clash) => {
-	if (isPosition(clash.point)) return clash.point;
-	if (isPosition(clash.position)) return clash.position;
-
-	return getFirstPosition(clash.positions);
-};
-
-const getClashDistance = (clash) => {
-	if (clash.distance !== undefined) return clash.distance;
-
-	const positionPair = getFirstPositionPair(clash.positions);
-	if (!positionPair) return undefined;
-
-	let sum = 0;
-	positionPair[0].forEach((coord, i) => {
-		const diff = coord - positionPair[1][i];
-		sum += diff ** 2;
-	});
-
-	return Math.sqrt(sum);
-};
-
-const setValue = (ticket, property, value, module) => {
-	if (value === undefined) return;
-
-	if (!module || module === 'properties') {
-		// eslint-disable-next-line no-param-reassign
-		ticket.properties = ticket.properties ?? {};
-		// eslint-disable-next-line no-param-reassign
-		ticket.properties[property] = value;
-		return;
-	}
-
-	// eslint-disable-next-line no-param-reassign
-	ticket.modules = ticket.modules ?? {};
-	// eslint-disable-next-line no-param-reassign
-	ticket.modules[module] = ticket.modules[module] ?? {};
-	// eslint-disable-next-line no-param-reassign
-	ticket.modules[module][property] = value;
-};
-
-const applyDefaultValues = (ticket, defaultValues) => {
-	defaultValues?.forEach(({ property, module, value }) => {
-		setValue(ticket, property, value, module);
-	});
-};
-
-const getCloudClashProperties = (clash, { planId, planName, runId, clashType }) => {
-	const clashId = String(clash.index);
-
-	return {
-		[CLASH_PLAN_ID]: UUIDToString(planId),
-		[CLASH_RUN_ID]: UUIDToString(runId),
-		[CLASH_ID]: clashId,
-		[CLASH_PLAN_NAME]: planName,
-		[CLASH_TYPE]: clashType,
-		[CLASH_POINT]: getClashPoint(clash),
-		[DISTANCE_M]: getClashDistance(clash),
-		[OBJECT_A_ID_TYPE]: getObjectIdType(clash.a?.idType),
-		[OBJECT_A_ID]: clash.a?.id,
-		[OBJECT_B_ID_TYPE]: getObjectIdType(clash.b?.idType),
-		[OBJECT_B_ID]: clash.b?.id,
-	};
-};
-
-const applyCloudClashProperties = (ticket, clash, clashContext) => {
-	const properties = getCloudClashProperties(clash, clashContext);
-	Object.entries(properties).forEach(([property, value]) => {
-		setValue(ticket, property, value, CLOUD_CLASH);
-	});
-};
-
-const applyStatus = (ticket, status) => {
-	setValue(ticket, STATUS, status);
-};
-
-const getClashId = (clash) => String(clash.index ?? clash);
-
-const generateTicket = (clash, clashContext, defaultValues, status) => {
-	const ticket = {
-		title: `[${clashContext.planName}] Clash`,
-		properties: {},
-		modules: {},
-	};
-
-	applyDefaultValues(ticket, defaultValues);
-	applyCloudClashProperties(ticket, clash, clashContext);
-	applyStatus(ticket, status);
-
-	return ticket;
-};
-
-const generateStatusUpdate = (status) => {
-	const ticket = {
-		properties: {},
-	};
-
-	applyStatus(ticket, status);
-
-	return ticket;
-};
-
-const generateTicketUpdate = (clash, clashContext, status) => {
-	const ticket = {
-		properties: {},
-		modules: {},
-	};
-
-	applyCloudClashProperties(ticket, clash, clashContext);
-	applyStatus(ticket, status);
-
-	return ticket;
-};
-
 const getClashIdToTicket = async (teamspace, project, federation, template, planId) => {
 	const clashIdProp = `modules.${CLOUD_CLASH}.${CLASH_ID}`;
 	const tickets = await getTicketsByQuery(teamspace, project, federation, {
@@ -188,16 +53,230 @@ const getClashIdToTicket = async (teamspace, project, federation, template, plan
 		[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: UUIDToString(planId),
 	}, {
 		_id: 1,
+		[`properties.${STATUS}`]: 1,
 		[clashIdProp]: 1,
 	});
 
 	const clashIdToTicket = {};
 	tickets.forEach((ticket) => {
 		const clashId = ticket.modules?.[CLOUD_CLASH]?.[CLASH_ID];
-		if (clashId !== undefined) clashIdToTicket[String(clashId)] = ticket._id;
+		if (clashId !== undefined) clashIdToTicket[String(clashId)] = ticket;
 	});
 
 	return clashIdToTicket;
+};
+
+const determineIdType = (idType) => {
+	const clashIdTypeToTicketType = {
+		internal: clashElementTypes['3_D_REPO_ID'],
+		ifc_guids: clashElementTypes.IFC,
+		revit_ids: clashElementTypes.REVIT,
+	};
+	return clashIdTypeToTicketType[idType] ?? idType ?? 'Unknown';
+};
+
+const updateClashPointAndDistance = (ticket, clashContext, clash) => {
+	let distance = 0;
+	const [pointA, pointB] = clash.positions;
+
+	if (clashContext.clashType === CLASH_TYPES.CLEARANCE) {
+		distance = Math.sqrt(
+			(pointA[0] - pointB[0]) ** 2
+				+ (pointA[1] - pointB[1]) ** 2
+				+ (pointA[2] - pointB[2]) ** 2,
+		);
+	}
+
+	/* eslint-disable no-param-reassign */
+	ticket.modules = ticket.modules ?? {};
+	ticket.modules[CLOUD_CLASH] = ticket.modules[CLOUD_CLASH] ?? {};
+	ticket.modules[CLOUD_CLASH][CLASH_POINT] = pointA;
+	ticket.modules[CLOUD_CLASH][DISTANCE_M] = distance;
+	/* eslint-enable no-param-reassign */
+};
+
+const generateBaseNewTicket = async (teamspace, project, federation, template, defaultValues = [], status) => {
+	const ticket = {
+		properties: { [STATUS]: status },
+		modules: {},
+	};
+
+	const constructTicketChange = ({ module, property, value }, ticketToReturn = { properties: {}, modules: {} }) => {
+		const targetModule = module ?? 'properties';
+		/* eslint-disable no-param-reassign */
+		if (targetModule === 'properties') {
+			ticketToReturn.properties = ticketToReturn.properties ?? {};
+			ticketToReturn.properties[property] = value;
+		} else {
+			ticketToReturn.modules = ticketToReturn.modules ?? {};
+			ticketToReturn.modules[targetModule] = ticketToReturn.modules[targetModule] ?? {};
+			ticketToReturn.modules[targetModule][property] = value;
+		}
+		/* eslint-enable no-param-reassign */
+
+		return ticketToReturn;
+	};
+
+	const validateDefaultValues = (ticketToTest) => validateTickets(
+		teamspace,
+		project,
+		federation,
+		template,
+		[ticketToTest],
+		{ existingData: [{}], processValidatedData: false });
+
+	if (defaultValues.length) {
+		for (const defaultValue of defaultValues) {
+			const ticketChangeToTest = constructTicketChange(defaultValue, cloneDeep(ticket));
+			try {
+				// eslint-disable-next-line no-await-in-loop
+				await validateDefaultValues(ticketChangeToTest);
+				constructTicketChange(defaultValue, ticket);
+			} catch {
+				// do not add the default value if it is invalid
+			}
+		}
+	}
+
+	return ticket;
+};
+
+const processClashes = async (teamspace, project, federation, template, clashes, clashContext) => {
+	const ticketsToUpdate = [];
+	const ticketsToCreate = [];
+
+	if (clashes.length === 0) return { ticketsToUpdate: [], ticketsToCreate: [] };
+
+	const baseNewTicket = await generateBaseNewTicket(
+		teamspace, project, federation, template, clashContext.valuesAtCreation,
+		clashContext.statusInfo.defaultStatuses.onNew);
+
+	clashes.forEach((clash) => {
+		const clashId = clash.index;
+		if (clashContext.clashIdToTicket[clashId]) {
+			const ticketStatus = clashContext.clashIdToTicket[clashId]?.properties?.[STATUS];
+
+			// update the status of the ticket if it's closed
+			const update = clashContext.statusInfo.closedStatuses[ticketStatus]
+				? { properties: { [STATUS]: clashContext.statusInfo.defaultStatuses.onReopened } } : {};
+
+			updateClashPointAndDistance(update, clashContext, clash);
+
+			ticketsToUpdate.push({
+				_id: clashContext.clashIdToTicket[clashId]._id,
+				data: update,
+			});
+		} else {
+			const newTicket = cloneDeep(baseNewTicket);
+			newTicket.title = `[${clashContext.planName}] Clash`;
+			newTicket.modules[CLOUD_CLASH] = newTicket.modules[CLOUD_CLASH] ?? {};
+			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_ID] = clashContext.planId;
+			newTicket.modules[CLOUD_CLASH][CLASH_RUN_ID] = clashContext.runId;
+			newTicket.modules[CLOUD_CLASH][CLASH_TYPE] = clashContext.clashType;
+			newTicket.modules[CLOUD_CLASH][CLASH_ID] = clashId;
+			newTicket.modules[CLOUD_CLASH][CLASH_PLAN_NAME] = clashContext.planName;
+			newTicket.modules[CLOUD_CLASH][OBJECT_A_ID_TYPE] = determineIdType(clash.a?.idType);
+			newTicket.modules[CLOUD_CLASH][OBJECT_A_ID] = clash.a?.id;
+			newTicket.modules[CLOUD_CLASH][OBJECT_B_ID_TYPE] = determineIdType(clash.b?.idType);
+			newTicket.modules[CLOUD_CLASH][OBJECT_B_ID] = clash.b?.id;
+			updateClashPointAndDistance(newTicket, clashContext, clash);
+
+			ticketsToCreate.push(newTicket);
+		}
+	});
+
+	return { ticketsToUpdate, ticketsToCreate };
+};
+
+const processResolvedClashes = (clashes, clashContext) => {
+	const ticketsToUpdate = [];
+	clashes.forEach((clash) => {
+		const clashId = clash.index;
+		// if we can't find a ticket for a resolved clash, we ignore.
+		if (clashContext.clashIdToTicket[clashId]) {
+			const ticketStatus = clashContext.clashIdToTicket[clashId]?.properties?.[STATUS];
+
+			if (!clashContext.statusInfo.closedStatuses[ticketStatus]
+				&& !clashContext.statusInfo.voidStatuses[ticketStatus]) {
+				ticketsToUpdate.push({
+					_id: clashContext.clashIdToTicket[clashId]._id,
+					data: { properties: { [STATUS]: clashContext.statusInfo.defaultStatuses.onResolved } },
+				});
+			}
+		}
+	});
+
+	return ticketsToUpdate;
+};
+
+const determineStatusInfo = (template, configuredDefaultStatuses) => {
+	const templateStatuses = getStatusDefinition(template);
+
+	const res = { closedStatuses: {}, voidStatuses: {} };
+	const templateDefaultStatus = templateStatuses.default;
+	const templateStatusValues = new Set(templateStatuses.values.map(({ name }) => name));
+	const getDefaultStatus = (status, fallback) => (templateStatusValues.has(status) ? status : fallback);
+
+	templateStatuses.values.forEach(({ name, type }) => {
+		if (type === statusTypes.DONE) res.closedStatuses[name] = true;
+		if (type === statusTypes.VOID) res.voidStatuses[name] = true;
+	});
+
+	res.defaultStatuses = {
+		onNew: getDefaultStatus(configuredDefaultStatuses?.onNew, templateDefaultStatus),
+		onResolved: getDefaultStatus(configuredDefaultStatuses?.onResolved, getClosedStatuses(template, false)[0]),
+		onReopened: getDefaultStatus(configuredDefaultStatuses?.onReopened, templateDefaultStatus),
+	};
+
+	return res;
+};
+
+const processNewTickets = async (teamspace, project, federation, template, ticketsToCreate, creator) => {
+	if (ticketsToCreate.length === 0) return;
+
+	// run it through a validation pass to ensure we have all the default values set, and also
+	// we're not creating tickets with invalid data (e.g. if there's a unique/read only property we're setting incorrectly)
+	const validatedTicketsToCreate = ticketsToCreate.length
+		? (await validateTickets(teamspace, project, federation, template,
+			ticketsToCreate, { author: creator })).map(({ newTicket }) => newTicket) : [];
+
+	if (validatedTicketsToCreate.length) {
+		await addTicketsWithTemplate(teamspace, project, federation, template._id, validatedTicketsToCreate);
+	}
+};
+
+const processTicketUpdates = async (teamspace, project, federation, template, ticketsToUpdate, creator) => {
+	if (ticketsToUpdate.length === 0) return;
+	const existingTicketsData = await getTicketsByQuery(teamspace, project, federation, {
+		_id: { $in: ticketsToUpdate.map(({ _id }) => _id) },
+	});
+
+	const ticketDataById = {};
+	existingTicketsData.forEach((ticket) => {
+		ticketDataById[UUIDToString(ticket._id)] = ticket;
+	});
+
+	const dataUpdates = [];
+	const existingDataList = [];
+
+	ticketsToUpdate.forEach(({ _id, data }) => {
+		const existingTicketData = ticketDataById[UUIDToString(_id)];
+		dataUpdates.push(data);
+		existingDataList.push(existingTicketData);
+	});
+
+	const updates = await validateTickets(teamspace, project, federation, template,
+		dataUpdates, {
+			author: creator,
+			existingData: existingDataList,
+		});
+
+	if (updates.length) {
+		await updateTickets(teamspace, project, federation,
+			updates.map(({ existingData }) => existingData),
+			updates.map(({ newTicket }) => newTicket),
+			creator);
+	}
 };
 
 TicketsClashes.processClashResults = async (
@@ -206,43 +285,48 @@ TicketsClashes.processClashResults = async (
 	federation,
 	template,
 	results,
-	{ planId, planName, runId, clashType, defaultValues, defaultStatuses },
+	{ plan, runId },
 ) => {
-	const { new: newClashes, resolved: resolvedClashes } = results;
+	const { new: newClashes = [], active: activeClashes = [], resolved: resolvedClashes = [] } = results;
+	const {
+		_id: planId,
+		name: planName,
+		type: clashType,
+		tickets: {
+			valuesAtCreation,
+			defaultStatuses: configuredDefaultStatuses,
+			creator,
+		} = {},
+	} = plan;
+
 	const clashIdToTicket = await getClashIdToTicket(teamspace, project, federation, template, planId);
-	const clashContext = { planId, planName, runId, clashType };
-	const defaultStatus = getStatusDefinition(template)?.default;
-	const resolvedStatus = defaultStatuses?.onResolved ?? getClosedStatuses(template, false)[0];
 
-	const clashesToUpdate = [];
-	const clashesToCreate = [];
+	const statusInfo = determineStatusInfo(template, configuredDefaultStatuses);
 
-	newClashes.forEach((clash) => {
-		const clashId = getClashId(clash);
-		if (Object.hasOwn(clashIdToTicket, clashId)) {
-			clashesToUpdate.push({
-				_id: clashIdToTicket[clashId],
-				data: generateTicketUpdate(clash, clashContext, defaultStatuses?.reopen ?? defaultStatus),
-			});
-			return;
-		}
+	const clashContext = {
+		planId: UUIDToString(planId),
+		planName,
+		runId: UUIDToString(runId),
+		clashType,
+		statusInfo,
+		clashIdToTicket,
+		valuesAtCreation,
+	};
+	const processedClashes = await processClashes(
+		teamspace, project, federation, template, [...newClashes, ...activeClashes], clashContext);
+	const ticketsToProcess = {
+		ticketsToUpdate: [
+			...processResolvedClashes(resolvedClashes, clashContext),
+			...processedClashes.ticketsToUpdate,
+		],
+		ticketsToCreate: processedClashes.ticketsToCreate,
+	};
 
-		clashesToCreate.push(generateTicket(clash, clashContext, defaultValues, defaultStatuses?.onNew));
-	});
+	await Promise.all([
+		processNewTickets(teamspace, project, federation, template, ticketsToProcess.ticketsToCreate, creator),
+		processTicketUpdates(teamspace, project, federation, template, ticketsToProcess.ticketsToUpdate, creator),
 
-	resolvedClashes.forEach((clash) => {
-		if (resolvedStatus === undefined) return;
-
-		const clashId = getClashId(clash);
-		if (Object.hasOwn(clashIdToTicket, clashId)) {
-			clashesToUpdate.push({
-				_id: clashIdToTicket[clashId],
-				data: generateStatusUpdate(resolvedStatus),
-			});
-		}
-	});
-
-	return { clashesToUpdate, clashesToCreate };
+	]);
 };
 
 module.exports = TicketsClashes;

@@ -36,7 +36,7 @@ const { respond } = require('../../../../../utils/responder');
 const { schema: rulesSchema } = require('../../../../../schemas/rules');
 const { stringToUUID } = require('../../../../../utils/helper/uuids');
 const { validateMany } = require('../../../../common');
-const { validateTicket } = require('../../../../../schemas/tickets');
+const { validateTickets } = require('../../../../../schemas/tickets');
 
 const Clashes = {};
 
@@ -96,7 +96,7 @@ const generatePlanSchema = (teamspace, project, user, isUpdate) => {
 	}).noUnknown(true).required();
 };
 
-const validateTicketData = async (teamspace, project, newTicketData, oldTicketData = {}) => {
+const validateTicketConfiguration = async (teamspace, project, newTicketData, oldTicketData = {}) => {
 	const updateData = cloneDeep(newTicketData);
 	const ticketData = cloneDeep({ ...oldTicketData, ...updateData });
 	const hasDefaultStatusesUpdate = Object.hasOwn(updateData, 'defaultStatuses');
@@ -175,8 +175,8 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 		});
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
-		await validateTicket(teamspace, project, ticketData.federation,
-			template, propertiesToUpdate, { });
+		await validateTickets(teamspace, project, ticketData.federation,
+			template, [propertiesToUpdate], { existingData: [{}], processValidatedData: false });
 	}
 
 	if (!isEmpty(ticketData.defaultStatuses)) {
@@ -202,7 +202,7 @@ const validatePlanData = async (req, res, next) => {
 			getUserFromSession(req.session), !!req.planData);
 		req.body = deleteIfUndefined(await schema.validate(req.body, { stripUnknown: true }), false);
 		if (req.body.tickets) {
-			req.body.tickets = await validateTicketData(
+			req.body.tickets = await validateTicketConfiguration(
 				teamspace, project, req.body.tickets, req.planData?.tickets);
 		}
 

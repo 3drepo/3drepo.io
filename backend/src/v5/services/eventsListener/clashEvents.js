@@ -16,10 +16,27 @@
  */
 
 const { events } = require('../eventsManager/eventsManager.constants');
+const { getFederationById } = require('../../models/modelSettings');
+const { getPlanById } = require('../../models/clashes.plans');
+const { getTemplateById } = require('../../models/tickets.templates');
+const { logger } = require('../../utils/logger');
+const { processClashResults } = require('../../processors/teamspaces/projects/models/commons/tickets.clashes');
 const { subscribe } = require('../eventsManager/eventsManager');
 
-const processClashRun = () => {
-	// Clash ticket processing will be added in a follow-up task.
+const processClashRun = async ({ teamspace, project, runId, planId, results }) => {
+	try {
+		const plan = await getPlanById(teamspace, project, planId).catch(() => undefined);
+		if (!plan || !plan?.tickets?.federation) return;
+		const fed = await getFederationById(teamspace,
+			plan?.tickets?.federation, { _id: 1 }).catch(() => undefined);
+		if (!fed) return;
+		const template = await getTemplateById(teamspace, plan.tickets.template).catch(() => undefined);
+		if (!template) return;
+
+		await processClashResults(teamspace, project, fed._id, template, results, { plan, runId });
+	} catch (error) {
+		logger.logError(`Error processing clash run ${runId} for project ${project} in teamspace ${teamspace}: ${error.message}`);
+	}
 };
 
 const ClashEventsListener = {};
