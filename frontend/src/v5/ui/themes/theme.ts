@@ -1443,7 +1443,6 @@ export const theme = createTheme({
 							color: COLOR.BASE_MAIN,
 						},
 					},
-					height: '290px',
 				},
 			},
 			defaultProps: {
