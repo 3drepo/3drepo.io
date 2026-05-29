@@ -16,6 +16,7 @@
  */
 
 const { times, isEqual } = require('lodash');
+const { determineTestGroup } = require('../../../../../../helper/utils');
 const { src } = require('../../../../../../helper/path');
 
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
@@ -48,7 +49,6 @@ const Clashes = require(`${src}/middleware/dataConverter/inputs/teamspaces/proje
 
 const { templates } = require(`${src}/utils/responseCodes`);
 const {
-	determineTestGroup,
 	generateRandomString,
 	generateRandomObject,
 	generateRandomNumber,
@@ -60,6 +60,7 @@ const { createResponseCode } = require('../../../../../../../../src/v5/utils/res
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
 const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require(`${src}/models/clashes.constants`);
+const { statuses: templateDefaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
 
 // Mock respond function to just return the resCode
 Responder.respond.mockImplementation((req, res, errCode) => errCode);
@@ -78,6 +79,8 @@ const testValidateNewPlanData = () => {
 	const recognisedFederation = generateUUIDString();
 	const federationNotInProject = generateUUIDString();
 	const templateInTeamspace = generateUUIDString();
+	const templateWithCustomStatuses = generateUUIDString();
+	const customStatusValues = times(3, () => ({ name: generateRandomString(10) }));
 	const knownUsername = generateRandomString();
 
 	const deprecatedTemplate = generateUUIDString();
@@ -96,19 +99,31 @@ const testValidateNewPlanData = () => {
 		federation: recognisedFederation,
 		template: templateInTeamspace,
 		creator: knownUsername,
-		valuesAtCreation: times(3,
-			() => ({
+		valuesAtCreation: [
+			{
+				property: generateRandomString(),
+				value: generateRandomString(),
+			},
+			...times(2, () => ({
 				property: generateRandomString(),
 				module: generateRandomString(),
 				value: generateRandomString(),
 			})),
+		],
 	};
 
 	const expectedTicketFormat = {};
 	ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
 		const moduleName = module ?? 'properties';
-		expectedTicketFormat[moduleName] = expectedTicketFormat[moduleName] ?? {};
-		expectedTicketFormat[moduleName][property] = value;
+
+		if (moduleName === 'properties') {
+			expectedTicketFormat.properties = expectedTicketFormat.properties ?? {};
+			expectedTicketFormat.properties[property] = value;
+		} else {
+			expectedTicketFormat.modules = expectedTicketFormat.modules ?? {};
+			expectedTicketFormat.modules[moduleName] = expectedTicketFormat.modules[moduleName] ?? {};
+			expectedTicketFormat.modules[moduleName][property] = value;
+		}
 	});
 
 	const testCases = [
@@ -137,6 +152,14 @@ const testValidateNewPlanData = () => {
 		['with selections with container that does not exist', false, { ...planData, selectionA: { container: generateRandomString() } }],
 		['with selections with container not in project', false, { ...planData, selectionA: { container: containerNotInProject } }],
 		['with valid data (with ticket config)', true, { ...planData, tickets: ticketData }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
+		['with valid data (with ticket config and built in default statuses)', true, { ...planData, tickets: { ...ticketData, defaultStatuses: { onNew: templateDefaultStatuses.OPEN, onResolved: templateDefaultStatuses.CLOSED, onReopened: templateDefaultStatuses.IN_PROGRESS } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace), defaultStatuses: { onNew: templateDefaultStatuses.OPEN, onResolved: templateDefaultStatuses.CLOSED, onReopened: templateDefaultStatuses.IN_PROGRESS } } }],
+		['with valid data (with ticket config and custom default statuses)', true, { ...planData, tickets: { ...ticketData, template: templateWithCustomStatuses, defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateWithCustomStatuses), defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }],
+		['with empty default statuses', true, { ...planData, tickets: { ...ticketData, defaultStatuses: {} } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
+		['with null default statuses', true, { ...planData, tickets: { ...ticketData, defaultStatuses: { onResolved: null } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
+		['with invalid default status value', false, { ...planData, tickets: { ...ticketData, defaultStatuses: { onNew: generateRandomString() } } }],
+		['with invalid default status type', false, { ...planData, tickets: { ...ticketData, defaultStatuses: { onNew: generateRandomNumber() } } }],
+		['with unrecognised default status field', true, { ...planData, tickets: { ...ticketData, defaultStatuses: { [generateRandomString()]: templateDefaultStatuses.OPEN } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace) } }],
+		['with valid and unrecognised default status fields', true, { ...planData, tickets: { ...ticketData, defaultStatuses: { onNew: templateDefaultStatuses.OPEN, [generateRandomString()]: templateDefaultStatuses.CLOSED } } }, { ...planData, tickets: { ...ticketData, template: stringToUUID(templateInTeamspace), defaultStatuses: { onNew: templateDefaultStatuses.OPEN } } }],
 		['with invalid federation', false, { ...planData, tickets: { ...ticketData, federation: generateRandomString() } }],
 		['with federation not belonging to the project', false, { ...planData, tickets: { ...ticketData, federation: federationNotInProject } }],
 		['with unrecognised creator', false, { ...planData, tickets: { ...ticketData, creator: generateRandomString() } }],
@@ -172,6 +195,10 @@ const testValidateNewPlanData = () => {
 			TicketTemplateModel.getTemplateById.mockImplementation((t, templateId) => {
 				if (UUIDToString(templateId) === templateInTeamspace) {
 					return Promise.resolve({});
+				}
+
+				if (UUIDToString(templateId) === templateWithCustomStatuses) {
+					return Promise.resolve({ config: { status: { values: customStatusValues } } });
 				}
 
 				if (UUIDToString(templateId) === deprecatedTemplate) {
@@ -217,22 +244,35 @@ const testValidateUpdatePlanData = () => {
 	const recognisedFederations = times(2, () => generateUUIDString());
 	const federationNotInProject = generateUUIDString();
 	const templatesInTeamspace = times(2, () => generateUUIDString());
+	const templateWithCustomStatuses = generateUUIDString();
+	const customStatusValues = times(3, () => ({ name: generateRandomString(10) }));
 	const knownUsernames = times(2, () => generateRandomString());
 
 	const deprecatedTemplate = generateUUIDString();
 
 	const knownPlanId = generateUUID();
+	const planWithoutDefaultStatusesId = generateUUID();
 
 	const ticketData = {
 		federation: recognisedFederations[0],
 		template: stringToUUID(templatesInTeamspace[0]),
 		creator: knownUsernames[0],
-		valuesAtCreation: times(3,
-			() => ({
+		defaultStatuses: {
+			onNew: templateDefaultStatuses.OPEN,
+			onResolved: templateDefaultStatuses.CLOSED,
+			onReopened: templateDefaultStatuses.IN_PROGRESS,
+		},
+		valuesAtCreation: [
+			{
+				property: generateRandomString(),
+				value: generateRandomString(),
+			},
+			...times(2, () => ({
 				property: generateRandomString(),
 				module: generateRandomString(),
 				value: generateRandomString(),
 			})),
+		],
 	};
 
 	const oldPlanData = {
@@ -245,25 +285,48 @@ const testValidateUpdatePlanData = () => {
 		selectionB: { container: recognisedContainer[1], rules: [standardRule] },
 		tickets: ticketData,
 	};
+	const oldPlanDataWithoutDefaultStatuses = {
+		...oldPlanData,
+		tickets: { ...ticketData, defaultStatuses: undefined },
+	};
 
-	const expectedValueAtCreationUpdate = times(3,
-		() => ({
+	const expectedValueAtCreationUpdate = [
+		{
+			property: generateRandomString(),
+			value: generateRandomString(),
+		},
+		...times(2, () => ({
 			property: generateRandomString(),
 			module: generateRandomString(),
 			value: generateRandomString(),
-		}));
+		})),
+	];
 	const expectedTicketFormat = {};
 	expectedValueAtCreationUpdate.forEach(({ property, module, value }) => {
 		const moduleName = module ?? 'properties';
-		expectedTicketFormat[moduleName] = expectedTicketFormat[moduleName] ?? {};
-		expectedTicketFormat[moduleName][property] = value;
+
+		if (moduleName === 'properties') {
+			expectedTicketFormat.properties = expectedTicketFormat.properties ?? {};
+			expectedTicketFormat.properties[property] = value;
+		} else {
+			expectedTicketFormat.modules = expectedTicketFormat.modules ?? {};
+			expectedTicketFormat.modules[moduleName] = expectedTicketFormat.modules[moduleName] ?? {};
+			expectedTicketFormat.modules[moduleName][property] = value;
+		}
 	});
 
 	const oldTicketFormat = {};
 	ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
 		const moduleName = module ?? 'properties';
-		oldTicketFormat[moduleName] = oldTicketFormat[moduleName] ?? {};
-		oldTicketFormat[moduleName][property] = value;
+
+		if (moduleName === 'properties') {
+			oldTicketFormat.properties = oldTicketFormat.properties ?? {};
+			oldTicketFormat.properties[property] = value;
+		} else {
+			oldTicketFormat.modules = oldTicketFormat.modules ?? {};
+			oldTicketFormat.modules[moduleName] = oldTicketFormat.modules[moduleName] ?? {};
+			oldTicketFormat.modules[moduleName][property] = value;
+		}
 	});
 
 	const updateStr = generateRandomString();
@@ -320,6 +383,20 @@ const testValidateUpdatePlanData = () => {
 		['with same template', false, { tickets: { template: oldPlanData.tickets.template } }],
 		['with null template', false, { tickets: { template: null } }],
 		['with new template', true, { tickets: { template: templatesInTeamspace[1] } }, { tickets: { template: stringToUUID(templatesInTeamspace[1]) } }],
+		['with invalid default status value', false, { tickets: { defaultStatuses: { onNew: generateRandomString() } } }],
+		['with invalid reopened default status value', false, { tickets: { defaultStatuses: { onReopened: generateRandomString() } } }],
+		['with invalid default status type', false, { tickets: { defaultStatuses: { onNew: generateRandomNumber() } } }],
+		['with unrecognised default status field', false, { tickets: { defaultStatuses: { [generateRandomString()]: templateDefaultStatuses.OPEN } } }],
+		['with valid and unrecognised default status fields', true, { tickets: { defaultStatuses: { onNew: templateDefaultStatuses.IN_PROGRESS, [generateRandomString()]: templateDefaultStatuses.CLOSED } } }, { tickets: { defaultStatuses: { onNew: templateDefaultStatuses.IN_PROGRESS } } }],
+		['with new default statuses', true, { tickets: { defaultStatuses: { onNew: templateDefaultStatuses.IN_PROGRESS } } }],
+		['with same default statuses', false, { tickets: { defaultStatuses: oldPlanData.tickets.defaultStatuses } }],
+		['with empty default statuses', false, { tickets: { defaultStatuses: {} } }],
+		['with a null default status leaving another default status', true, { tickets: { defaultStatuses: { onResolved: null } } }],
+		['with null default statuses', true, { tickets: { defaultStatuses: null } }],
+		['with null default statuses and no stored default statuses', false, { tickets: { defaultStatuses: null } }, undefined, planWithoutDefaultStatusesId],
+		['with null default statuses fields resulting in an empty object', true, { tickets: { defaultStatuses: { onNew: null, onResolved: null, onReopened: null } } }, { tickets: { defaultStatuses: null } }],
+		['with custom default statuses', true, { tickets: { template: templateWithCustomStatuses, defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }, { tickets: { template: stringToUUID(templateWithCustomStatuses), defaultStatuses: { onNew: customStatusValues[0].name, onResolved: customStatusValues[1].name, onReopened: customStatusValues[2].name } } }],
+		['with new template that invalidates stored default statuses', false, { tickets: { template: templateWithCustomStatuses } }],
 		['with null creation values', true, { tickets: { valuesAtCreation: null } }],
 		['with invalid creation values', false, { tickets: { valuesAtCreation: [{ property: generateRandomString(), value: generateRandomString() }] } }],
 		['with same creation values', false, { tickets: { valuesAtCreation: oldPlanData.tickets.valuesAtCreation } }],
@@ -353,12 +430,19 @@ const testValidateUpdatePlanData = () => {
 				if (UUIDToString(id) === UUIDToString(knownPlanId)) {
 					return Promise.resolve(oldPlanData);
 				}
+				if (UUIDToString(id) === UUIDToString(planWithoutDefaultStatusesId)) {
+					return Promise.resolve(oldPlanDataWithoutDefaultStatuses);
+				}
 				return Promise.reject(templates.clashPlanNotFound);
 			});
 
 			TicketTemplateModel.getTemplateById.mockImplementation((t, templateId) => {
 				if (templatesInTeamspace.includes(UUIDToString(templateId))) {
 					return Promise.resolve({});
+				}
+
+				if (UUIDToString(templateId) === templateWithCustomStatuses) {
+					return Promise.resolve({ config: { status: { values: customStatusValues } } });
 				}
 
 				if (UUIDToString(templateId) === deprecatedTemplate) {

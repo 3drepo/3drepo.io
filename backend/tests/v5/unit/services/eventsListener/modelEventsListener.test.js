@@ -15,11 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const { times } = require('lodash');
 const { UUIDToString, stringToUUID, generateUUIDString } = require('../../../../../src/v5/utils/helper/uuids');
 const { templates } = require('../../../../../src/v5/utils/responseCodes');
 const { src } = require('../../../helper/path');
-const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, determineTestGroup, generateRandomNumber } = require('../../../helper/services');
+const { generateRandomString, generateUUID, generateRandomDate, generateRandomObject, generateTemplate, generateRandomNumber } = require('../../../helper/services');
 
 const { modelTypes, getInfoFromCode, processStatuses } = require(`${src}/models/modelSettings.constants`);
 
@@ -64,6 +65,9 @@ const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/mode
 
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
 const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
+
+jest.mock('../../../../../src/v5/models/clashes.runs');
+const ClashesModel = require(`${src}/models/clashes.runs`);
 
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
@@ -276,58 +280,138 @@ const testQueueTaskCompleted = () => {
 	});
 };
 
+const testClashRunUpdate = () => {
+	describe(events.CLASH_RUN_UPDATE, () => {
+		test(`Should call updateTestRun if there is a ${events.CLASH_RUN_UPDATE}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				corId: generateRandomString(),
+				status: generateRandomString(),
+			};
+
+			EventsManager.publish(events.CLASH_RUN_UPDATE, data);
+
+			await waitOnEvent;
+
+			expect(ClashesModel.updateTestRun).toHaveBeenCalledTimes(1);
+			expect(ClashesModel.updateTestRun).toHaveBeenCalledWith(data.teamspace,
+				stringToUUID(data.corId), { status: data.status });
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, async () => {
+			ClashesModel.updateTestRun.mockRejectedValueOnce(templates.clashRunNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				corId: generateRandomString(),
+				status: generateRandomString(),
+			};
+
+			EventsManager.publish(events.CLASH_RUN_UPDATE, data);
+
+			await waitOnEvent;
+
+			expect(ClashesModel.updateTestRun).toHaveBeenCalledTimes(1);
+			expect(ClashesModel.updateTestRun).toHaveBeenCalledWith(data.teamspace,
+				stringToUUID(data.corId), { status: data.status });
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}  (Rejected with an error object)`, async () => {
+			ClashesModel.updateTestRun.mockRejectedValueOnce(new Error(generateRandomString()));
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_UPDATE);
+			const data = {
+				teamspace: generateRandomString(),
+				corId: generateRandomString(),
+				status: generateRandomString(),
+			};
+
+			EventsManager.publish(events.CLASH_RUN_UPDATE, data);
+
+			await waitOnEvent;
+
+			expect(ClashesModel.updateTestRun).toHaveBeenCalledTimes(1);
+			expect(ClashesModel.updateTestRun).toHaveBeenCalledWith(data.teamspace,
+				stringToUUID(data.corId), { status: data.status });
+		});
+	});
+};
+
 const testClashRunCompleted = () => {
 	describe(events.CLASH_RUN_COMPLETED, () => {
-		test(`Should trigger completeRun if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
+		test(`Should call completeRun if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
-				project: generateRandomString(),
 				corId: generateRandomString(),
 				results: generateRandomString(),
+				value: 0,
 			};
 
 			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
 
 			await waitOnEvent;
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
+
+			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace,
 				stringToUUID(data.corId), data.results);
 		});
 
-		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
-			ClashesProcessor.completeRun.mockRejectedValueOnce(templates.testRunNotFound);
+		test(`Should call setTestRunToFailed if there is a ${events.CLASH_RUN_COMPLETED} (with bouncer error)`, async () => {
 			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
-				project: generateRandomString(),
 				corId: generateRandomString(),
 				results: generateRandomString(),
+				value: 28,
 			};
 
 			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
 
 			await waitOnEvent;
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
+
+			const resInfo = getInfoFromCode(data.value);
+			resInfo.retVal = data.value;
+			expect(ClashesModel.setTestRunToFailed).toHaveBeenCalledTimes(1);
+			expect(ClashesModel.setTestRunToFailed).toHaveBeenCalledWith(data.teamspace,
+				stringToUUID(data.corId), resInfo.message, resInfo.retVal);
+		});
+
+		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
+			ClashesProcessor.processClashResults.mockRejectedValueOnce(templates.clashRunNotFound);
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
+			const data = {
+				teamspace: generateRandomString(),
+				corId: generateRandomString(),
+				results: generateRandomString(),
+				value: 0,
+			};
+
+			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
+
+			await waitOnEvent;
+
+			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace,
 				stringToUUID(data.corId), data.results);
 		});
 
 		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}  (Rejected with an error object)`, async () => {
-			ClashesProcessor.completeRun.mockRejectedValueOnce(new Error(generateRandomString()));
+			ClashesProcessor.processClashResults.mockRejectedValueOnce(new Error(generateRandomString()));
 			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
 			const data = {
 				teamspace: generateRandomString(),
-				project: generateRandomString(),
 				corId: generateRandomString(),
 				results: generateRandomString(),
+				value: 0,
 			};
 
 			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
 
 			await waitOnEvent;
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.completeRun).toHaveBeenCalledWith(data.teamspace, stringToUUID(data.project),
+
+			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
+			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace,
 				stringToUUID(data.corId), data.results);
 		});
 	});
@@ -1688,6 +1772,7 @@ describe(determineTestGroup(__filename), () => {
 
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();
+	testClashRunUpdate();
 	testClashRunCompleted();
 	testModelSettingsUpdate();
 	testModelProcessingCompleted();

@@ -535,14 +535,6 @@ ServiceHelper.generateUserCredentials = () => ({
 	},
 });
 
-ServiceHelper.determineTestGroup = (filePath) => {
-	const match = filePath.match(/^.*[/|\\](e2e|unit|drivers|scripts)[/|\\](.*).test.js$/);
-	if (match?.length === 3) {
-		return `${match[1].toUpperCase()} ${match[2]}`;
-	}
-	return filePath;
-};
-
 ServiceHelper.generateRandomProject = (projectAdmins = []) => ({
 	id: ServiceHelper.generateUUIDString(),
 	name: ServiceHelper.generateRandomString(),
@@ -959,7 +951,7 @@ ServiceHelper.generateClashPlan = (model1, model2, ticketInfo) => {
 	});
 };
 
-ServiceHelper.generateClashes = (plan) => times(20, () => ({
+ServiceHelper.generateClashes = (plan, number = 20) => times(number, () => ({
 	a: `${plan.selectionA.container}::internal::${ServiceHelper.generateRandomString()}`,
 	b: `${plan.selectionB.container}::internal::${ServiceHelper.generateRandomString()}`,
 	positions: [

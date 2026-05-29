@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../helper/utils');
 const { src, modelFolder, objModel } = require('../../helper/path');
-const { determineTestGroup, generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
+const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 
 jest.mock('../../../../src/v5/handler/queue');
 const Queue = require(`${src}/handler/queue`);
@@ -111,15 +112,11 @@ const testCallbackQueueConsumer = () => {
 			return Queue.listenToQueue.mock.calls[0][1];
 		};
 
-		test(`Should trigger ${events.CLASH_RUN_COMPLETED} event if there is a clash run completed message`, async () => {
-			const SHARED_SPACE_TAG = '$SHARED_SPACE';
-
+		test(`Should trigger ${events.CLASH_RUN_UPDATE} event if there is a clash run update message`, async () => {
 			const content = {
 				teamspace: generateRandomString(),
-				project: generateRandomString(),
 				type: 'clash',
-				container: generateRandomString(),
-				results: `$${SHARED_SPACE_TAG} ${generateRandomString()}`,
+				status: generateRandomString(),
 			};
 			const properties = {
 				correlationId: generateRandomString(),
@@ -130,9 +127,36 @@ const testCallbackQueueConsumer = () => {
 
 			const expectedData = {
 				teamspace: content.teamspace,
-				project: content.project,
+				corId: properties.correlationId,
+				status: content.status,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_UPDATE, expectedData);
+		});
+
+		test(`Should trigger ${events.CLASH_RUN_COMPLETED} event if there is a clash run completed message`, async () => {
+			const SHARED_SPACE_TAG = '$SHARED_SPACE';
+
+			const content = {
+				teamspace: generateRandomString(),
+				type: 'clash',
+				container: generateRandomString(),
+				results: `$${SHARED_SPACE_TAG} ${generateRandomString()}`,
+				value: 0,
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
 				corId: properties.correlationId,
 				results: content.results.replace(SHARED_SPACE_TAG, config.cn_queue.shared_storage),
+				value: content.value,
 			};
 
 			expect(publishFn).toHaveBeenCalledTimes(1);

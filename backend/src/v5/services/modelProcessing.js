@@ -54,15 +54,27 @@ const MESSAGE_TYPES = {
 const onCallbackQMsg = ({ content, properties }) => {
 	logger.logInfo(`[Received][${properties.correlationId}] ${content}`);
 	try {
-		const { status, teamspace, project, container, drawing, type, user, value,
-			message, results } = JSON.parse(content);
-		const modelType = container ? modelTypes.CONTAINER : modelTypes.DRAWING;
+		const { type, status, value, ...msgContent } = JSON.parse(content);
 
 		if (type === MESSAGE_TYPES.CLASH) {
-			const resultsDir = results.replace(SHARED_SPACE_TAG, sharedDir);
-			publish(events.CLASH_RUN_COMPLETED,
-				{ teamspace, project, corId: properties.correlationId, results: resultsDir });
-		} else if (status) {
+			const { teamspace, results } = msgContent;
+
+			if (status) {
+				publish(events.CLASH_RUN_UPDATE,
+					{ teamspace, corId: properties.correlationId, status });
+			} else {
+				const resultsDir = results.replace(SHARED_SPACE_TAG, sharedDir);
+				publish(events.CLASH_RUN_COMPLETED,
+					{ teamspace, corId: properties.correlationId, results: resultsDir, value });
+			}
+
+			return;
+		}
+
+		const { teamspace, container, drawing, user, message } = msgContent;
+		const modelType = container ? modelTypes.CONTAINER : modelTypes.DRAWING;
+
+		if (status) {
 			publish(events.QUEUED_TASK_UPDATE, { teamspace,
 				model: container || drawing,
 				modelType,
