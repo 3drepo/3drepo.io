@@ -59,7 +59,7 @@ const { createResponseCode } = require('../../../../../../../../src/v5/utils/res
 
 const { fieldOperators, valueOperators } = require(`${src}/models/metadata.rules.constants`);
 
-const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require(`${src}/models/clashes.constants`);
+const { CLASH_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS } = require(`${src}/models/clashes.constants`);
 const { presetModules, statuses: templateDefaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
 
 // Mock respond function to just return the resCode
@@ -90,7 +90,7 @@ const testValidateNewPlanData = () => {
 
 	const planData = {
 		name: generateRandomString(),
-		type: CLASH_PLAN_TYPES[0],
+		type: CLASH_TYPES.HARD,
 		tolerance: generateRandomNumber(0),
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
 		trigger: [TRIGGER_OPTIONS[0]],
@@ -279,7 +279,7 @@ const testValidateUpdatePlanData = () => {
 
 	const oldPlanData = {
 		name: generateRandomString(),
-		type: CLASH_PLAN_TYPES[0],
+		type: CLASH_TYPES.HARD,
 		tolerance: generateRandomNumber(0),
 		selfIntersectionsCheck: SELF_INTERSECTIONS_CHECK_OPTIONS[0],
 		trigger: [TRIGGER_OPTIONS[0]],
@@ -325,9 +325,9 @@ const testValidateUpdatePlanData = () => {
 		['with null name', false, { name: null }],
 		['with too long name', false, { name: generateRandomString(1201) }],
 		['with invalid type', false, { type: generateRandomString() }],
-		['with same type', false, { type: CLASH_PLAN_TYPES[0] }],
+		['with same type', false, { type: CLASH_TYPES.HARD }],
 		['with null type', false, { type: null }],
-		['with a different type', true, { type: CLASH_PLAN_TYPES[1] }],
+		['with a different type', true, { type: CLASH_TYPES.CLEARANCE }],
 		['with same tolerance', false, { tolerance: oldPlanData.tolerance }],
 		['with invalid tolerance', false, { tolerance: generateRandomString() }],
 		['with new tolerance', true, { tolerance: generateRandomNumber(1, 100) }],

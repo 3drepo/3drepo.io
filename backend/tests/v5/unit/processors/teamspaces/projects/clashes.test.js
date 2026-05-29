@@ -60,7 +60,7 @@ const MailerConstants = require(`${src}/services/mailer/mailer.constants`);
 
 const { SELF_INTERSECTIONS_CHECK_OPTIONS } = require(`${src}/models/clashes.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
-const { CLASH_PLAN_TYPES } = require(`${src}/models/clashes.constants`);
+const { CLASH_TYPES } = require(`${src}/models/clashes.constants`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 
 const RUN_HISTORY_COL = 'clashes.runs.history';
@@ -122,7 +122,7 @@ const testCreateRun = () => {
 	const userId = generateRandomString();
 	const runId = generateRandomString();
 	const planData = {
-		type: CLASH_PLAN_TYPES[0],
+		type: CLASH_TYPES.HARD,
 		tolerance: generateRandomNumber(),
 		selfIntersectionsCheck: false,
 		selectionA: { container: generateRandomString(), revision: generateRandomString() },

@@ -26,11 +26,6 @@ ClashesConstants.CLASH_TYPES = {
 	CLEARANCE: 'clearance',
 };
 
-ClashesConstants.CLASH_PLAN_TYPES = [
-	ClashesConstants.CLASH_TYPES.HARD,
-	ClashesConstants.CLASH_TYPES.CLEARANCE,
-];
-
 ClashesConstants.SELF_INTERSECTIONS_CHECK_OPTIONS = [
 	'selectionA',
 	'selectionB',
