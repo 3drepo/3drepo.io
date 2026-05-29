@@ -109,8 +109,8 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 	const { teamspace, revision } = useParams<ViewerParams>();
 	const { containerOrFederation } = useContext(TicketContext);
 
-
 	const formRef = useRef(null);
+	const isSmartRef = useRef(isSmart);
 
 	const isNewGroup = !value;
 	const selectedNodes = TreeHooksSelectors.selectSelectedNodes();
@@ -118,8 +118,7 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const formData = useForm<IGroupSettingsForm>({
 		mode: 'onChange',
-		resolver: yupResolver(GroupSettingsSchema),
-		context: { isSmart },
+		resolver: (data, _, options) => yupResolver(GroupSettingsSchema)(data, { isSmart: isSmartRef.current }, options),
 	});
 
 	const { fields, append, remove, update } = useFieldArray({
@@ -130,9 +129,10 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 
 	const {
 		handleSubmit,
-		formState: { errors, isValid, isDirty },
+		formState: { errors, isValid, isDirty, touchedFields },
 		setValue,
 		getValues,
+		trigger,
 	} = formData;
 
 	const getFormIsValid = () => {
@@ -230,6 +230,13 @@ export const GroupSettingsForm = ({ value, onSubmit, onCancel, prefixes, isColor
 		});
 	}, []);
 
+	useEffect(() => {
+		// isSmartRef is used to get the current value of isSmart in the
+		// resolver function of useForm, as it doesn't have access to the state value directly
+		isSmartRef.current = isSmart;
+		const touched = Object.keys(touchedFields) as Parameters<typeof trigger>[0];
+		if (touched.length) trigger(touched);
+	}, [isSmart]);
 
 	useEffect(() => {
 		setCurrentPrefixes(mergePrefixes(prefixes, subPrefixes(newPrefix)));
