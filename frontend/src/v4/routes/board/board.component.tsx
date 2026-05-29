@@ -537,23 +537,21 @@ export function Board(props: IProps) {
 	const BoardTitle = (<BoardTitleComponent renderActions={renderActions} />);
 
 	return (
-		<Panel {...PANEL_PROPS} title={BoardTitle}>
 			<Container>
-				{renderSearchPanel(props.searchEnabled)}
-				<Config>
-					<DataConfig>
-						{renderModelsSelect()}
-					</DataConfig>
-					<ViewConfig>
-						{renderFilters()}
-						{renderAddButton()}
-					</ViewConfig>
-				</Config>
-				{renderLoader(props.isPending)}
-				{renderBoard(!props.isPending && Boolean(props.lanes.length) && modelId && project)}
-				{renderNoData(!props.isPending && !Boolean(props.lanes.length) && teamspace && project && modelId)}
-				{renderNoSelected(!props.isPending && (!Boolean(props.lanes.length) || (!project || !modelId)))}
-			</Container>
-		</Panel>
+		{renderSearchPanel(props.searchEnabled)}
+		<Config>
+			<DataConfig>
+				{renderModelsSelect()}
+			</DataConfig>
+			<ViewConfig>
+				{renderFilters()}
+				{renderAddButton()}
+			</ViewConfig>
+		</Config>
+		{renderLoader(props.isPending)}
+		{renderBoard(!props.isPending && Boolean(props.lanes.length) && modelId && project)}
+		{renderNoData(!props.isPending && !Boolean(props.lanes.length) && teamspace && project && modelId)}
+		{renderNoSelected(!props.isPending && (!Boolean(props.lanes.length) || (!project || !modelId)))}
+		</Container>
 	);
 }

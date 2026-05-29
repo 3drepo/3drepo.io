@@ -20,6 +20,7 @@ import FormControlBase from '@mui/material/FormControl';
 import MenuItem from '@mui/material/MenuItem';
 import Select from '@mui/material/Select';
 import styled from 'styled-components';
+import { Typography } from '@controls/typography';
 import { COLOR } from '../../styles';
 import { PreviewListItem } from '../viewerGui/components/previewListItem/previewListItem.component';
 import { ViewerPanelContent } from '../viewerGui/components/viewerPanel/viewerPanel.styles';
@@ -63,6 +64,8 @@ export const Config = styled.div`
 	justify-content: space-between;
 	position: relative;
 	z-index: 1;
+	background-color: transparent;
+	padding: 10px 75px;
 `;
 
 export const DataConfig = styled.div``;
@@ -74,7 +77,55 @@ export const ViewConfig = styled.div`
 
 export const AddButton = styled(Fab).attrs({
 	size: 'small',
-})``;
+})`
+	background-color: ${({ theme }) => theme.palette.primary.main};
+	text-transform: none;
+	margin-bottom: -28px;
+	margin-left: 0;
+	height: 35px;
+	width: fit-content;
+	border-radius: 8px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	padding: 8px 16px;
+	border: none;
+
+	svg {
+		background: currentColor;
+		border-radius: 50%;
+		fill: ${({ theme }) => theme.palette.primary.main};
+		height: 17px;
+		width: 17px;
+		margin-right: 8px;
+		transform: scale(.7);
+	}
+
+	&:hover {
+		background-color: ${({ theme }) => theme.palette.primary.dark};
+		
+		svg {
+			fill: ${({ theme }) => theme.palette.primary.dark};
+		}
+	}
+
+	&:active {
+		box-shadow: none;
+		background-color: ${({ theme }) => theme.palette.primary.darkest};
+
+		svg {
+			fill: ${({ theme }) => theme.palette.primary.darkest};
+		}
+	}
+
+	&:disabled {
+		background-color: ${({ theme }) => theme.palette.base.lightest};
+		color: ${({ theme }) => theme.palette.primary.contrast};
+		
+		svg {
+			fill: ${({ theme }) => theme.palette.base.lightest};
+		}
+	}
+`;
 
 export const TitleActions = styled.div`
 	display: flex;
@@ -121,11 +172,11 @@ export const LoaderContainer = styled.div`
 	display: flex;
 	position: absolute;
 	width: 100%;
-	height: 100%;
 	justify-content: center;
 	overflow: hidden;
-	top: 0;
 	left: 0;
+	top: 110px;
+	height: calc(100% - 120px);
 `;
 
 export const FormWrapper = styled.div<{ size: string }>`
@@ -139,9 +190,11 @@ export const FormWrapper = styled.div<{ size: string }>`
 	}
 `;
 
-export const NoDataMessage = styled.div`
+export const NoDataMessage = styled(Typography).attrs({
+	variant: 'h2',
+	color: 'base',
+})`
 	align-self: center;
-	color: ${COLOR.BLACK_54};
 `;
 
 export const Filters = styled.div`
