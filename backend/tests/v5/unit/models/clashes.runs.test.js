@@ -65,6 +65,7 @@ const testCreateTestRun = () => {
 			const _id = await ClashRuns.createTestRun(teamspace, project, plan, user);
 
 			expect(createIndexFn).toHaveBeenCalledTimes(1);
+
 			expect(createIndexFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
 				{ project: 1, 'plan._id': 1, updatedAt: -1 }, { runInBackground: true });
 

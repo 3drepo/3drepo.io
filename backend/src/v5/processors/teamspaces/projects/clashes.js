@@ -31,6 +31,7 @@ const { PassThrough } = require('stream');
 const { createConstantsObject } = require('../../../utils/helper/objects');
 const { createReadStream } = require('fs');
 const { templates: emailTemplates } = require('../../../services/mailer/mailer.constants');
+const { getArrayDifference } = require('../../../utils/helper/arrays');
 const { getNodesByQuery } = require('../../../models/scenes');
 const { queueClashRun } = require('../../../services/modelProcessing');
 const { sendSystemEmail } = require('../../../services/mailer');
@@ -69,13 +70,15 @@ const applyExternalIds = async (teamspace, container, parentIdsToMeshes) => {
 const getCompositeToMeshesObject = async (teamspace, project, container, revision, rules) => {
 	const compIdToMeshes = {};
 
+	let meshIdsToFetch;
+
 	if (rules.length) {
 		const { matched, unwanted } = await getMetadataByRules(teamspace, project, container,
 			revision, rules, { parents: 1 });
 
 		const wantedMeshes = matched.length
 			? await getMeshesWithParentIds(teamspace, project, container, revision,
-				matched.flatMap(({ parents }) => parents), true, true)
+				matched.flatMap(({ parents }) => parents), true)
 			: [];
 
 		const unwantedMeshIds = unwanted.length
@@ -83,27 +86,21 @@ const getCompositeToMeshesObject = async (teamspace, project, container, revisio
 				unwanted.flatMap(({ parents }) => parents), true)
 			: [];
 
-		const unwantedIdsObj = createConstantsObject(unwantedMeshIds.map((id) => id));
+		meshIdsToFetch = getArrayDifference(unwantedMeshIds, wantedMeshes).map(stringToUUID);
+	}
 
-		for (const [parentId, meshes] of Object.entries(wantedMeshes)) {
-			const meshesToAdd = meshes.filter((meshId) => !unwantedIdsObj[meshId]);
+	const meshes = await getNodesByQuery(teamspace, project, container,
+		{ type: 'mesh', rev_id: revision, ...(meshIdsToFetch ? { _id: { $in: meshIdsToFetch } } : {}) },
+		{ _id: 1, parents: 1, name: 1, shared_id: 1 });
 
-			if (meshesToAdd.length) {
-				compIdToMeshes[parentId] = meshesToAdd;
-			}
+	for (const mesh of meshes) {
+		const parentId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
+
+		if (!compIdToMeshes[parentId]) {
+			compIdToMeshes[parentId] = [];
 		}
-	} else {
-		const meshes = await getNodesByQuery(teamspace, project, container, { type: 'mesh', rev_id: revision }, { _id: 1, parents: 1, name: 1 });
 
-		for (const mesh of meshes) {
-			const parentId = UUIDToString(mesh.name ? mesh.shared_id : mesh.parents[0]);
-
-			if (!compIdToMeshes[parentId]) {
-				compIdToMeshes[parentId] = [];
-			}
-
-			compIdToMeshes[parentId].push(UUIDToString(mesh._id));
-		}
+		compIdToMeshes[parentId].push(UUIDToString(mesh._id));
 	}
 
 	return compIdToMeshes;
