@@ -423,6 +423,63 @@ const establishRoutes = () => {
 	 *                       description: The rules applied to selection B
 	 *                       items:
 	 *                         $ref: '#/components/schemas/ticketGroupRules'
+	 *                 tickets:
+	 *                   type: object
+	 *                   description: Ticket creation settings for clashes
+	 *                   nullable: true
+	 *                   properties:
+	 *                     federation:
+	 *                       type: string
+	 *                       format: uuid
+	 *                       description: The federation where clash tickets will be created
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     template:
+	 *                       type: string
+	 *                       format: uuid
+	 *                       description: The ticket template used to create clash tickets
+	 *                       example: ef0857b6-4cc7-4be1-b2d6-c032dce7806a
+	 *                     creator:
+	 *                       type: string
+	 *                       description: The user to create clash tickets as
+	 *                       example: user@example.com
+	 *                     valuesAtCreation:
+	 *                       type: array
+	 *                       description: Ticket property values to apply when clash tickets are created
+	 *                       nullable: true
+	 *                       items:
+	 *                         type: object
+	 *                         properties:
+	 *                           property:
+	 *                             type: string
+	 *                             description: The property name
+	 *                             example: Priority
+	 *                           module:
+	 *                             type: string
+	 *                             description: The module name; omitted for top-level ticket properties
+	 *                             example: clash
+	 *                           value:
+	 *                             description: The value to set on the property
+	 *                             nullable: true
+	 *                         required:
+	 *                           - property
+	 *                           - value
+	 *                     defaultStatuses:
+	 *                       type: object
+	 *                       description: Optional default statuses; removed when no fields remain
+	 *                       nullable: true
+	 *                       properties:
+	 *                         onNew:
+	 *                           type: string
+	 *                           description: Default status for newly created clash tickets
+	 *                           example: Open
+	 *                         onResolved:
+	 *                           type: string
+	 *                           description: Default status for resolved clash tickets
+	 *                           example: Closed
+	 *                         onReopened:
+	 *                           type: string
+	 *                           description: Default status for reopened clash tickets
+	 *                           example: Open
 	 *                 createdAt:
 	 *                   type: integer
 	 *                   description: Epoch timestamp in milliseconds when the plan was created
