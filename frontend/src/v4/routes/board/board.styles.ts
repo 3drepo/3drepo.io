@@ -35,62 +35,22 @@ export const Container = styled.div`
 export const BoardContainer = styled.div`
 	height: 100%;
 	box-sizing: border-box;
-	border-top: 1px solid ${COLOR.BLACK_6};
 	overflow: hidden;
 
 	> div {
 		height: 100%;
 	}
 
-	.react-trello-board {
-		background-color: initial;
-		height: 100%;
-		padding: 16px 12px;
-		overflow-y: hidden;
-		overflow-x: auto;
-		box-sizing: border-box;
-
-		> div {
-			height: 100%;
-			min-width: 100%;
-		}
-	}
-
-	.smooth-dnd-container {
+	.kanban-board {
 		height: 100%;
 	}
+		
+	.kanban-board .lane-column:first-child {
+		margin-left: 75px;
+	}
 
-	.react-trello-lane {
-		background-color: ${COLOR.BLACK_6};
-		border: 1px solid ${COLOR.BLACK_12};
-		min-height: 100%;
-		max-height: none;
-		height: inherit;
-		margin: 0 5px;
-		min-width: 300px;
-		width: calc((100% / 4) - 2 * 5px);
-		padding: 10px 8px;
-
-		> div {
-			width: 100%;
-		}
-
-		header {
-			color: ${COLOR.BLACK_70};
-			display: flex;
-			align-items: center;
-
-			> span:nth-child(1) {
-				font-size: 14px;
-				white-space: nowrap;
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
-			> span:nth-child(2) {
-				font-size: 12px;
-				line-height: 1;
-			}
-		}
+	.kanban-board .lane-column:last-child {
+		margin-right: 75px;
 	}
 `;
 

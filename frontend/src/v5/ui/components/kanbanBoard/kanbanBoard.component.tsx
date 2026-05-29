@@ -136,13 +136,13 @@ function moveCardToLane(
 	});
 }
 
-export function KanbanBoard({
+export const KanbanBoard = ({
 	data,
 	handleDragEnd,
 	onCardClick,
 	onCardMoveAcrossLanes,
 	components,
-}: KanbanBoardProps) {
+}: KanbanBoardProps) => {
 	const [lanes, setLanes] = useState(data);
 	const [dragSession, setDragSession] = useState<DragSession | null>(null);
 	const dragActiveRef = useRef(false);
@@ -710,7 +710,7 @@ export function KanbanBoard({
 	const placeholderHeight = dragSession?.height ?? null;
 
 	return (
-		<>
+		<div className="kanban-board">
 			<BoardScroller ref={boardScrollerRef}>
 				{lanes.map((lane) => (
 					<LaneColumn
@@ -734,13 +734,13 @@ export function KanbanBoard({
 				? 
 				(<DragOverlay
 					ref={overlayRef}
-					overlayWidth={dragSession.width}
-					initialTransform={getOverlayTransform(dragSession, dragSession)}
+					$overlayWidth={dragSession.width}
+					$initialTransform={getOverlayTransform(dragSession, dragSession)}
 				>
 					<CardComponent {...draggingCard} />
 				</DragOverlay>
 				)
 				: null}
-		</>
+		</div>
 	);
-}
+};

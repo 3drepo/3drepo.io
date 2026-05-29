@@ -18,7 +18,7 @@
 import { Fragment, memo, useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 
 import type { DropTargetStore, LaneColumnProps } from './kanbanBoard.types';
-import { CardShell, DropPlaceholder, LaneCards, LaneHeader, LanePaper, LaneSubtitle, LaneTitle, LaneTitleGroup } from './kanbanBoard.styles';
+import { CardShell, DropPlaceholder, LaneCards, LaneHeader, LanePaper, LaneSubtitle, LaneTitle } from './kanbanBoard.styles';
 
 
 function useLaneDropState(store: DropTargetStore, laneId: string) {
@@ -78,7 +78,7 @@ export const LaneColumn = memo(function LaneColumn({
 		return (
 			<DropPlaceholder
 				key={`drop-placeholder-${lane.id}`}
-				placeholderHeight={placeholderHeight}
+				$placeholderHeight={placeholderHeight}
 			/>
 		);
 	};
@@ -88,15 +88,12 @@ export const LaneColumn = memo(function LaneColumn({
 	return (
 		<LanePaper
 			ref={setLaneNode}
-			isDropTarget={Boolean(laneDropTarget)}
+			$isDropTarget={Boolean(laneDropTarget)}
+			className='lane-column'
 		>
 			<LaneHeader>
-				<LaneTitleGroup>
-					<LaneTitle variant="subtitle1">{lane.title}</LaneTitle>
-				</LaneTitleGroup>
-				<LaneSubtitle variant="caption" color="text.secondary">
-					{lane.label}
-				</LaneSubtitle>
+				<LaneTitle>{lane.title}</LaneTitle>
+				<LaneSubtitle>{lane.label}</LaneSubtitle>
 			</LaneHeader>
 
 			<LaneCards>
@@ -116,8 +113,8 @@ export const LaneColumn = memo(function LaneColumn({
 							onKeyDown={(event) => onCardKeyDown(event, card.id)}
 							role={canClickCards ? 'button' : undefined}
 							tabIndex={canClickCards ? 0 : undefined}
-							isDraggable={card.draggable !== false}
-							canClickCards={canClickCards}
+							$isDraggable={card.draggable !== false}
+							$canClickCards={canClickCards}
 						>
 							<CardComponent {...card} />
 						</CardShell>
