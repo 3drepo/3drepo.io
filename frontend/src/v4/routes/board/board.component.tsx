@@ -59,6 +59,7 @@ import {
 	DataConfig,
 	FormControl,
 	LoaderContainer,
+	ModelSelectFormControl,
 	NoDataMessage,
 	SelectContainer,
 	ViewConfig
@@ -348,7 +349,7 @@ export function Board(props: IProps) {
 	const renderModelsSelect = () => {
 		const models = getProjectModels(props.teamspaces, props.projectsMap, props.modelsMap, teamspace, project);
 		return (
-			<FormControl>
+			<ModelSelectFormControl>
 				<InputLabel shrink htmlFor="model-select">
 					<FormattedMessage id="board.select.federationOrContainer.label" defaultMessage="Federation / Container" />
 				</InputLabel>
@@ -361,7 +362,7 @@ export function Board(props: IProps) {
 					disabledPlaceholder
 					inputId="model-select"
 				/>
-			</FormControl>
+			</ModelSelectFormControl>
 		);
 	};
 
@@ -537,7 +538,7 @@ export function Board(props: IProps) {
 	const BoardTitle = (<BoardTitleComponent renderActions={renderActions} />);
 
 	return (
-			<Container>
+		<Container>
 		{renderSearchPanel(props.searchEnabled)}
 		<Config>
 			<DataConfig>

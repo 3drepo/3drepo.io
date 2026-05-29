@@ -31,6 +31,10 @@ export const Container = styled.div`
 	position: relative;
 	display: flex;
 	flex-direction: column;
+
+	& .MuiInputBase-root {
+		width: 100%;
+	}
 `;
 
 export const BoardContainer = styled.div`
@@ -159,6 +163,7 @@ export const TitleContainer = styled.div`
 export const SelectContainer = styled.div`
 	align-items: center;
 	display: flex;
+	width: 140px;
 `;
 
 export const SelectLabel = styled.div`
@@ -240,3 +245,10 @@ export const FormControl = styled(FormControlBase)`
 		margin-right: 15px;
 	}
 `;
+
+export const ModelSelectFormControl = styled(FormControl)`
+	&& {
+		min-width: 373px;
+	}
+`;
+
