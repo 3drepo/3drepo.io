@@ -99,19 +99,31 @@ const testValidateNewPlanData = () => {
 		federation: recognisedFederation,
 		template: templateInTeamspace,
 		creator: knownUsername,
-		valuesAtCreation: times(3,
-			() => ({
+		valuesAtCreation: [
+			{
+				property: generateRandomString(),
+				value: generateRandomString(),
+			},
+			...times(2, () => ({
 				property: generateRandomString(),
 				module: generateRandomString(),
 				value: generateRandomString(),
 			})),
+		],
 	};
 
 	const expectedTicketFormat = {};
 	ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
 		const moduleName = module ?? 'properties';
-		expectedTicketFormat[moduleName] = expectedTicketFormat[moduleName] ?? {};
-		expectedTicketFormat[moduleName][property] = value;
+
+		if (moduleName === 'properties') {
+			expectedTicketFormat.properties = expectedTicketFormat.properties ?? {};
+			expectedTicketFormat.properties[property] = value;
+		} else {
+			expectedTicketFormat.modules = expectedTicketFormat.modules ?? {};
+			expectedTicketFormat.modules[moduleName] = expectedTicketFormat.modules[moduleName] ?? {};
+			expectedTicketFormat.modules[moduleName][property] = value;
+		}
 	});
 
 	const testCases = [
@@ -250,12 +262,17 @@ const testValidateUpdatePlanData = () => {
 			onResolved: templateDefaultStatuses.CLOSED,
 			onReopened: templateDefaultStatuses.IN_PROGRESS,
 		},
-		valuesAtCreation: times(3,
-			() => ({
+		valuesAtCreation: [
+			{
+				property: generateRandomString(),
+				value: generateRandomString(),
+			},
+			...times(2, () => ({
 				property: generateRandomString(),
 				module: generateRandomString(),
 				value: generateRandomString(),
 			})),
+		],
 	};
 
 	const oldPlanData = {
@@ -273,24 +290,43 @@ const testValidateUpdatePlanData = () => {
 		tickets: { ...ticketData, defaultStatuses: undefined },
 	};
 
-	const expectedValueAtCreationUpdate = times(3,
-		() => ({
+	const expectedValueAtCreationUpdate = [
+		{
+			property: generateRandomString(),
+			value: generateRandomString(),
+		},
+		...times(2, () => ({
 			property: generateRandomString(),
 			module: generateRandomString(),
 			value: generateRandomString(),
-		}));
+		})),
+	];
 	const expectedTicketFormat = {};
 	expectedValueAtCreationUpdate.forEach(({ property, module, value }) => {
 		const moduleName = module ?? 'properties';
-		expectedTicketFormat[moduleName] = expectedTicketFormat[moduleName] ?? {};
-		expectedTicketFormat[moduleName][property] = value;
+
+		if (moduleName === 'properties') {
+			expectedTicketFormat.properties = expectedTicketFormat.properties ?? {};
+			expectedTicketFormat.properties[property] = value;
+		} else {
+			expectedTicketFormat.modules = expectedTicketFormat.modules ?? {};
+			expectedTicketFormat.modules[moduleName] = expectedTicketFormat.modules[moduleName] ?? {};
+			expectedTicketFormat.modules[moduleName][property] = value;
+		}
 	});
 
 	const oldTicketFormat = {};
 	ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
 		const moduleName = module ?? 'properties';
-		oldTicketFormat[moduleName] = oldTicketFormat[moduleName] ?? {};
-		oldTicketFormat[moduleName][property] = value;
+
+		if (moduleName === 'properties') {
+			oldTicketFormat.properties = oldTicketFormat.properties ?? {};
+			oldTicketFormat.properties[property] = value;
+		} else {
+			oldTicketFormat.modules = oldTicketFormat.modules ?? {};
+			oldTicketFormat.modules[moduleName] = oldTicketFormat.modules[moduleName] ?? {};
+			oldTicketFormat.modules[moduleName][property] = value;
+		}
 	});
 
 	const updateStr = generateRandomString();
