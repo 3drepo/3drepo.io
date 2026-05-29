@@ -60,9 +60,7 @@ export const BoardContainer = styled.div`
 `;
 
 export const Config = styled.div`
-	background-color: ${COLOR.WHITE};
 	flex-basis: 30px;
-	padding: 10px 15px;
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
