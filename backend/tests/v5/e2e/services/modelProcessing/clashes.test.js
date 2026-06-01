@@ -24,10 +24,12 @@ const { RUN_HISTORY_COL, clashRunStatus } = require(`${src}/models/clashes.const
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { callback_queue: callbackq, shared_storage: sharedDir } = queueConfig;
 const { getClashRunByQuery } = require(`${src}/models/clashes.runs`);
-const { getFileAsStream } = require(`${src}/services/filesManager`);
+const { getFileAsStream, storeFile } = require(`${src}/services/filesManager`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const fs = require('fs');
 const path = require('path');
+
+jest.mock('../../../../../src/v5/services/mailer');
 
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
 
@@ -57,6 +59,21 @@ const generateBasicData = () => {
 	});
 };
 
+const generateRunData = (hasPreviousRun) => {
+	const modelA = ServiceHelper.generateRandomModel();
+	const modelB = ServiceHelper.generateRandomModel();
+	const plan = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
+	const previousClashes = hasPreviousRun ? ServiceHelper.generateClashes(plan) : [];
+
+	return ({
+		run: ServiceHelper.generateClashRun(plan),
+		previousRun: hasPreviousRun
+			? { ...ServiceHelper.generateClashRun(plan), status: clashRunStatus.COMPLETED }
+			: undefined,
+		previousClashes,
+	});
+};
+
 const setupBasicData = async ({
 	teamspace,
 	project,
@@ -73,12 +90,30 @@ const setupBasicData = async ({
 	]);
 };
 
-const writeResultsFiles = (runs, clashes) => {
-	runs.forEach((run) => {
-		const resultsDir = path.join(sharedDir, `${run._id}`);
-		fs.mkdirSync(resultsDir, { recursive: true });
-		fs.writeFileSync(path.join(resultsDir, 'results.json'), JSON.stringify({ clashes }), 'utf8');
-	});
+const setupRunData = async (teamspace, project, { run, previousRun, previousClashes }) => {
+	await Promise.all([
+		ServiceHelper.db.createClashRun(teamspace, project.id, run),
+		previousRun
+			? ServiceHelper.db.createClashRun(teamspace, project.id, previousRun,
+				{ new: previousClashes.map(formatClash), active: [], resolved: [] })
+			: Promise.resolve(),
+	]);
+};
+
+const setupRunDataWithUnreadablePreviousResults = async (teamspace, project, { run, previousRun }) => {
+	await Promise.all([
+		ServiceHelper.db.createClashRun(teamspace, project.id, run),
+		ServiceHelper.db.createClashRun(teamspace, project.id, previousRun),
+		storeFile(teamspace, RUN_HISTORY_COL, stringToUUID(previousRun._id), Buffer.from('{')),
+	]);
+};
+
+const getResultsPath = (run) => path.join(SHARED_SPACE_TAG, `${run._id}`, 'results.json');
+
+const writeResultsFile = (run, clashes) => {
+	const resultsDir = path.join(sharedDir, `${run._id}`);
+	fs.mkdirSync(resultsDir, { recursive: true });
+	fs.writeFileSync(path.join(resultsDir, 'results.json'), JSON.stringify({ clashes }), 'utf8');
 };
 
 const removeResultsFiles = (runs) => {
@@ -103,77 +138,84 @@ const getFileContents = async (teamspace, fileId) => {
 };
 
 const testParseClashResults = () => {
-	describe('Parse clash results', () => {
-		const basicData = generateBasicData();
-		const { teamspace, project, plannedClashRun1, plannedClashRun2, clashes } = basicData;
-		const plannedRuns = [plannedClashRun1, plannedClashRun2];
+	const basicData = generateBasicData();
+	const { teamspace, project, plannedClashRun1, plannedClashRun2, clashes } = basicData;
+	const resultsRun1 = getResultsPath(plannedClashRun1);
+	const resultsRun2 = getResultsPath(plannedClashRun2);
+	const basicCBData = { type: 'clash', teamspace, project: project.id };
+	const missingResultsData = generateRunData(false);
+	const missingResultsPath = getResultsPath(missingResultsData.run);
+	const unreadablePreviousResultsData = generateRunData(true);
+	const unreadablePreviousResultsClashes = ServiceHelper.generateClashes(unreadablePreviousResultsData.run.plan);
+	const resolvedData = generateRunData(true);
+	const newClashesData = generateRunData(true);
+	const mixedData = generateRunData(true);
+	const newClashes = ServiceHelper.generateClashes(newClashesData.run.plan);
+	const mixedActiveClashes = mixedData.previousClashes.slice(0, 5);
+	const mixedNewClashes = ServiceHelper.generateClashes(mixedData.run.plan, 5);
+	const mixedResolvedClashes = mixedData.previousClashes.slice(5);
+	const resolvedIndexes = (clashArr) => clashArr.map(formatClash).map(({ index }) => index);
+	const scenarioRuns = [
+		missingResultsData, unreadablePreviousResultsData, resolvedData, newClashesData, mixedData,
+	].map(({ run }) => run);
 
+	describe('Parse clash results', () => {
 		beforeAll(async () => {
 			await setupBasicData(basicData);
+			await Promise.all([
+				missingResultsData,
+				resolvedData,
+				newClashesData,
+				mixedData,
+			].map((runData) => setupRunData(teamspace, project, runData)));
+			await setupRunDataWithUnreadablePreviousResults(teamspace, project, unreadablePreviousResultsData);
 		});
 
-		beforeEach(() => {
-			writeResultsFiles(plannedRuns, clashes);
-		});
+		describe.each([
+			['Bouncer returned an error', false, plannedClashRun2, { ...basicCBData, results: resultsRun2, value: 28 }, clashes],
+			['the results file from the callback object is not found', false, missingResultsData.run, { ...basicCBData, results: missingResultsPath, value: 0 }, undefined, undefined, undefined, clashRunStatus.FAILED, 'Could not read results file:'],
+			['the results data from the previous run cannot be read', false, unreadablePreviousResultsData.run, { ...basicCBData, results: getResultsPath(unreadablePreviousResultsData.run), value: 0 }, unreadablePreviousResultsClashes, undefined, undefined, clashRunStatus.FAILED, 'Error retrieving clashes from last run:'],
+			['Bouncer returned success and there was no previous run', true, plannedClashRun2, { ...basicCBData, results: resultsRun2, value: 0 }, clashes, { new: clashes.length, active: 0, resolved: 0 }, { new: clashes.map(formatClash), active: [], resolved: [] }],
+			['Bouncer returned success and there was a run', true, plannedClashRun1, { ...basicCBData, results: resultsRun1, value: 0 }, clashes, { new: 0, active: clashes.length, resolved: 0 }, { new: [], active: clashes.map(formatClash), resolved: [] }],
+			['there was a previous run and all clashes were resolved', true, resolvedData.run, { ...basicCBData, results: getResultsPath(resolvedData.run), value: 0 }, [], { new: 0, active: 0, resolved: resolvedData.previousClashes.length }, { new: [], active: [], resolved: resolvedIndexes(resolvedData.previousClashes) }],
+			['there was a previous run and all found clashes were new', true, newClashesData.run, { ...basicCBData, results: getResultsPath(newClashesData.run), value: 0 }, newClashes, { new: newClashes.length, active: 0, resolved: newClashesData.previousClashes.length }, { new: newClashes.map(formatClash), active: [], resolved: resolvedIndexes(newClashesData.previousClashes) }],
+			['there was a previous run with resolved, active and new clashes', true, mixedData.run, { ...basicCBData, results: getResultsPath(mixedData.run), value: 0 }, [...mixedActiveClashes, ...mixedNewClashes], { new: mixedNewClashes.length, active: mixedActiveClashes.length, resolved: mixedResolvedClashes.length }, { new: mixedNewClashes.map(formatClash), active: mixedActiveClashes.map(formatClash), resolved: resolvedIndexes(mixedResolvedClashes) }],
+		])('', (desc, success, clashRun, callbackObj, resultsFileClashes, runStats, runRes, expectedStatus, errorReason) => {
+			beforeEach(() => {
+				if (resultsFileClashes) {
+					writeResultsFile(clashRun, resultsFileClashes);
+				}
+			});
 
-		afterEach(() => {
-			removeResultsFiles(plannedRuns);
-		});
+			afterEach(() => {
+				removeResultsFiles([plannedClashRun1, plannedClashRun2, ...scenarioRuns]);
+			});
 
-		test('should just set the run to failed if there is an error', async () => {
-			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun2._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 28 };
+			test(`Should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				await queueMessage(callbackq, clashRun._id, JSON.stringify(callbackObj));
 
-			await queueMessage(callbackq, plannedClashRun2._id, JSON.stringify(callbackObj));
+				// wait for the queue to process the message
+				await ServiceHelper.sleepMS(1000);
 
-			// wait for the queue to process the message
-			await ServiceHelper.sleepMS(1000);
+				const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
+					{ _id: stringToUUID(clashRun._id) }, { _id: 1, status: 1, results: 1 });
 
-			const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
-				{ _id: stringToUUID(plannedClashRun2._id) }, { _id: 1, status: 1, results: 1 });
-			expect(run.status).toEqual(clashRunStatus.FAILED);
-			expect(run.results.error.code).toEqual(callbackObj.value);
-			expect(run.results.error.reason).toEqual(expect.any(String));
-		});
+				if (success) {
+					expect(run.status).toEqual(clashRunStatus.COMPLETED);
+					expect(run.results.stats).toEqual(runStats);
+					const contents = await getFileContents(teamspace, run._id);
+					const parsedContents = JSON.parse(contents);
 
-		test('should parse results if there is no previous run', async () => {
-			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun2._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 0 };
-
-			await queueMessage(callbackq, plannedClashRun2._id, JSON.stringify(callbackObj));
-
-			// wait for the queue to process the message
-			await ServiceHelper.sleepMS(1000);
-
-			const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
-				{ _id: stringToUUID(plannedClashRun2._id) }, { _id: 1, status: 1, results: 1 });
-			expect(run.status).toEqual(clashRunStatus.COMPLETED);
-			expect(run.results.stats).toEqual({ new: clashes.length, active: 0, resolved: 0 });
-
-			const contents = await getFileContents(teamspace, run._id);
-			const parsedContents = JSON.parse(contents);
-
-			expect(parsedContents).toEqual({ new: clashes.map(formatClash), active: [], resolved: [] });
-		});
-
-		test('should parse results if there is previous run', async () => {
-			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun1._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 0 };
-
-			await queueMessage(callbackq, plannedClashRun1._id, JSON.stringify(callbackObj));
-
-			// wait for the queue to process the message
-			await ServiceHelper.sleepMS(1000);
-
-			const run = await getClashRunByQuery(teamspace, stringToUUID(project.id),
-				{ _id: stringToUUID(plannedClashRun1._id) }, { _id: 1, status: 1, results: 1 });
-			expect(run.status).toEqual(clashRunStatus.COMPLETED);
-			expect(run.results.stats).toEqual({ new: 0, active: clashes.length, resolved: 0 });
-
-			const contents = await getFileContents(teamspace, run._id);
-			const parsedContents = JSON.parse(contents);
-
-			expect(parsedContents).toEqual({ new: [], active: clashes.map(formatClash), resolved: [] });
+					expect(parsedContents).toEqual(runRes);
+				} else if (expectedStatus) {
+					expect(run.status).toEqual(expectedStatus);
+					expect(run.results.error.reason).toEqual(expect.stringContaining(errorReason));
+				} else {
+					expect(run.status).toEqual(clashRunStatus.FAILED);
+					expect(run.results.error.code).toEqual(callbackObj.value);
+					expect(run.results.error.reason).toEqual(expect.any(String));
+				}
+			});
 		});
 	});
 };

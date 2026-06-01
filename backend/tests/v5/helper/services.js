@@ -375,7 +375,7 @@ db.createClashRun = async (teamspace, projectId, run, clashes) => {
 			Buffer.from(JSON.stringify(clashes)));
 	}
 
-	DbHandler.insertOne(teamspace, CLASH_RUNS_COL, formattedRun);
+	await DbHandler.insertOne(teamspace, CLASH_RUNS_COL, formattedRun);
 };
 
 db.addLoginRecords = async (records) => {
