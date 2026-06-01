@@ -169,9 +169,17 @@ const validateTicketData = async (teamspace, project, newTicketData, oldTicketDa
 
 	if (ticketData.valuesAtCreation?.length) {
 		const propertiesToUpdate = {};
-		ticketData.valuesAtCreation.forEach(({ property, module = 'properties', value }) => {
-			propertiesToUpdate[module] = propertiesToUpdate[module] || {};
-			propertiesToUpdate[module][property] = value;
+		ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
+			const targetModule = module ?? 'properties';
+
+			if (targetModule === 'properties') {
+				propertiesToUpdate.properties = propertiesToUpdate.properties || {};
+				propertiesToUpdate.properties[property] = value;
+			} else {
+				propertiesToUpdate.modules = propertiesToUpdate.modules || {};
+				propertiesToUpdate.modules[targetModule] = propertiesToUpdate.modules[targetModule] || {};
+				propertiesToUpdate.modules[targetModule][property] = value;
+			}
 		});
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
