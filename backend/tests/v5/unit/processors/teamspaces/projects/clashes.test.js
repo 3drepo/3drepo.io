@@ -429,6 +429,13 @@ const createResultsReadStream = (content) => {
 	return fakeReadStream;
 };
 
+const createRawResultsReadStream = (content) => {
+	const fakeReadStream = PassThrough();
+	fakeReadStream.write(content);
+	fakeReadStream.end();
+	return fakeReadStream;
+};
+
 const testProcessClashResults = () => {
 	describe('Process Clash Results', () => {
 		const fileContent = { clashes: times(10, () => generateClash()) };
@@ -438,9 +445,7 @@ const testProcessClashResults = () => {
 		const resPath = generateRandomString();
 
 		test('should process clash results when there are no previous runs', async () => {
-			fs.createReadStream
-				.mockImplementationOnce(() => createResultsReadStream(fileContent))
-				.mockImplementationOnce(() => createResultsReadStream(fileContent));
+			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContent));
 
 			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
@@ -456,6 +461,7 @@ const testProcessClashResults = () => {
 				{ _id: 1 }, { updatedAt: -1 });
 
 			expect(FilesManager.getFileAsStream).not.toHaveBeenCalled();
+			expect(fs.createReadStream).toHaveBeenCalledTimes(1);
 
 			const result = { new: fileContent.clashes.map(formatClash), active: [], resolved: [] };
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
@@ -494,6 +500,28 @@ const testProcessClashResults = () => {
 				{ error: { reason: 'The following errors were found: 1 MeshBoundsException, 2 TransformBoundsException' } });
 		});
 
+		test('should ignore clashes after an error is found in the results file', async () => {
+			const fileContentWithErrors = {
+				errors: [{ type: 'MeshBoundsException' }],
+				clashes: times(3, () => generateClash()),
+			};
+			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContentWithErrors));
+
+			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+
+			await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+				.resolves.toBeUndefined();
+
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
+			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+				clashRunStatus.FAILED,
+				{ error: { reason: 'The following errors were found: 1 MeshBoundsException' } });
+		});
+
 		test('should mark run as failed if the results file cannot be read', async () => {
 			const readError = new Error(generateRandomString());
 			fs.createReadStream.mockImplementationOnce(() => {
@@ -516,29 +544,22 @@ const testProcessClashResults = () => {
 				clashRunStatus.FAILED, { error: { reason: `Could not read results file: ${readError.message}` } });
 		});
 
-		test('should mark run as failed if the clashes in the results file cannot be read', async () => {
-			const readError = new Error(generateRandomString());
-			fs.createReadStream
-				.mockImplementationOnce(() => createResultsReadStream(fileContent))
-				.mockImplementationOnce(() => {
-					const fakeReadStream = PassThrough();
-					setImmediate(() => fakeReadStream.emit('error', readError));
-					return fakeReadStream;
-				});
+		test('should mark run as failed if the results file cannot be parsed', async () => {
+			fs.createReadStream.mockImplementationOnce(() => createRawResultsReadStream('{'));
 
 			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
-			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
 
 			await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
-				.rejects.toEqual(readError);
+				.rejects.toThrow();
 
-			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(1);
 			expect(FilesManager.storeFile).not.toHaveBeenCalled();
 
 			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
-				clashRunStatus.FAILED, { error: { reason: `Could not read results file: ${readError.message}` } });
+				clashRunStatus.FAILED,
+				{ error: { reason: expect.stringContaining('Could not read results file:') } });
 		});
 
 		test('should mark run as failed and send an email if it fails to fetch last results', async () => {
@@ -585,9 +606,7 @@ const testProcessClashResults = () => {
 			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 			const lastRun = { ...generateRandomObject(), _id: generateRandomString() };
 
-			fs.createReadStream
-				.mockImplementationOnce(() => createResultsReadStream(fileContent))
-				.mockImplementationOnce(() => createResultsReadStream(fileContent));
+			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContent));
 
 			FilesManager.getFileAsStream.mockImplementationOnce(() => {
 				const fakeReadStream = PassThrough();
@@ -610,6 +629,7 @@ const testProcessClashResults = () => {
 
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledTimes(1);
 			expect(FilesManager.getFileAsStream).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, lastRun._id);
+			expect(fs.createReadStream).toHaveBeenCalledTimes(1);
 
 			const result = {
 				new: fileContent.clashes.slice(5, 10).map(formatClash),

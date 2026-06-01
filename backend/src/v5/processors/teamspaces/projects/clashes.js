@@ -153,7 +153,10 @@ const readArraysFromJSONStream = async (stream, arrayNames, onData) => {
 		paths: arrayNames.map((name) => `$.${name}.*`),
 	});
 
-	parser.on('data', onData);
+	parser.on('data', (data) => onData({
+		...data,
+		arrayName: data.stack?.[data.stack.length - 1]?.key,
+	}));
 
 	await new Promise((resolve, reject) => {
 		stream.on('error', (err) => parser.destroy(err));
@@ -204,16 +207,45 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 	const { plan: { _id: planId } } = await getClashRunByQuery(teamspace, project,
 		{ _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
 
+	const errorCounts = {};
+	const currentClashes = new Map();
+	let hasErrors = false;
+	const formatClashForResults = (clash) => {
+		const index = [clash.a, clash.b].sort().join('-');
+		const getClashObjParts = (obj) => {
+			const [container, idType, id] = obj.split('::');
+			return { container, idType, id };
+		};
+
+		return {
+			index,
+			clash: {
+				...clash,
+				a: getClashObjParts(clash.a),
+				b: getClashObjParts(clash.b),
+				index,
+			},
+		};
+	};
+
 	try {
-		// check the results file for any errors before processing anything.
-		const errorCounts = {};
 		const resStream = createReadStream(resPath, { encoding: 'utf8' });
 
-		await readArraysFromJSONStream(resStream, ['errors'], ({ value }) => {
-			errorCounts[value.type] = (errorCounts[value.type] ?? 0) + 1;
+		await readArraysFromJSONStream(resStream, ['errors', 'clashes'], ({ arrayName, value }) => {
+			if (arrayName === 'errors') {
+				hasErrors = true;
+				currentClashes.clear();
+				errorCounts[value.type] = (errorCounts[value.type] ?? 0) + 1;
+				return;
+			}
+
+			if (!hasErrors) {
+				const { index, clash } = formatClashForResults(value);
+				currentClashes.set(index, clash);
+			}
 		});
 
-		if (Object.keys(errorCounts).length) {
+		if (hasErrors) {
 			const errMessage = `The following errors were found: ${
 				Object.entries(errorCounts).map(([type, count]) => `${count} ${type}`).join(', ')
 			}`;
@@ -229,34 +261,15 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 
 	const knownClashes = await getLastRunClashes(teamspace, project, planId, runId);
 
-	const resStream = createReadStream(resPath, { encoding: 'utf8' });
 	const categorizedClashes = { new: [], active: [], resolved: [] };
-	try {
-		await readArraysFromJSONStream(resStream, ['clashes'], ({ value: newClash }) => {
-			const key = [newClash.a, newClash.b].sort().join('-');
-			const getClashObjParts = (obj) => {
-				const [container, idType, id] = obj.split('::');
-				return { container, idType, id };
-			};
-			const clashToAdd = {
-				...newClash,
-				a: getClashObjParts(newClash.a),
-				b: getClashObjParts(newClash.b),
-				index: key,
-			};
+	for (const [index, clash] of currentClashes) {
+		if (knownClashes.has(index)) {
+			categorizedClashes.active.push(clash);
 
-			if (knownClashes.has(key)) {
-				categorizedClashes.active.push(clashToAdd);
-
-				knownClashes.delete(key);
-			} else {
-				categorizedClashes.new.push(clashToAdd);
-			}
-		});
-	} catch (err) {
-		await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
-			{ error: { reason: `Could not read results file: ${err.message}` } });
-		throw err;
+			knownClashes.delete(index);
+		} else {
+			categorizedClashes.new.push(clash);
+		}
 	}
 
 	categorizedClashes.resolved = Array.from(knownClashes.values());
