@@ -15,13 +15,12 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 import { createElement } from 'react';
-import { createTheme } from '@mui/material/styles';
+import { createTheme, TypographyVariantsOptions } from '@mui/material/styles';
 import RadioButtonIcon from '@assets/icons/controls/radio_button.svg';
 import RadioButtonCheckedIcon from '@assets/icons/controls/radio_button_checked.svg';
 import CheckboxIcon from '@assets/icons/controls/checkbox.svg';
 import CheckboxCheckedIcon from '@assets/icons/controls/checkbox_checked.svg';
 import CheckboxIndeterminatedIcon from '@assets/icons/controls/checkbox_indeterminated.svg';
-import { TypographyVariantsOptions } from '@mui/material/styles/createTypography';
 import ClearIcon from '@assets/icons/controls/clear_circle.svg';
 import ChevronIcon from '@assets/icons/outlined/chevron-outlined.svg';
 import ThinChevronIcon from '@assets/icons/outlined/thin_chevron-outlined.svg';
