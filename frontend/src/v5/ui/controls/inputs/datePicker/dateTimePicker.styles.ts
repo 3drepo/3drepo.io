@@ -25,11 +25,17 @@ export const TextField = styled(TextFieldBase)`
 		color: currentColor;
 	}
 
+	& .MuiInputAdornment-root {
+		margin:0;
+	}
+
 	.MuiInputBase-root {
 		padding: 0;
 
 		&, & input {
 			cursor: pointer;
+			padding-right: 0;
+			text-overflow: ellipsis;
 		}
 
 		&.Mui-disabled {
@@ -41,7 +47,7 @@ export const TextField = styled(TextFieldBase)`
 
 	.MuiIconButton-edgeEnd {
 		margin: 0;
-		padding: 5px 10px;
+	    padding: 5px 7px;
 
 		&:hover {
 			background-color: transparent;

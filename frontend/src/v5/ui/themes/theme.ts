@@ -1407,8 +1407,8 @@ export const theme = createTheme({
 			defaultProps: {
 				slots: {
 					openPickerIcon: CalendarIcon,
-					// leftArrowIcon: ThinChevronIcon,
-					// rightArrowIcon: ThinChevronIcon,
+					leftArrowIcon: ThinChevronIcon,
+					rightArrowIcon: ThinChevronIcon,
 				},
 			},
 		},

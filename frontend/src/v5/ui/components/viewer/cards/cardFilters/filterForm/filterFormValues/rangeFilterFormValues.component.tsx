@@ -17,7 +17,7 @@
 
 import { useEffect, useRef } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
-import { isArray, isEmpty } from 'lodash';
+import { isEmpty } from 'lodash';
 import { isDateType } from '../../cardFilters.helpers';
 import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
@@ -92,40 +92,24 @@ export const FilterFormRangeValues = ({
 		}
 	}, [maxFields]);
 
-	const renderFields = () => {
-		if (!property || maxFields === 0 || (type !== 'number' && !isDateType(type))) return null;
-
-		// Switching from single-value to range inputs crashes the app as
-		// the latter try to access either the value at the first or second index
-		// of what they expect to be array but is a values instead, and the
-		// useEffect that adapts fields' values to be arrays is async
-		// and it is only called later
-		// @ts-ignore
-		if (!isArray(fields[0]?.value)) return null;
-
-		const getFieldContainerProps = (field, i) => ({
-			key: field.id,
-			onRemove: () => remove(i),
-			disableRemove: fields.length === 1,
-			onAdd: () => append(EMPTY_RANGE_VALUE),
-			disableAdd: i !== (fields.length - 1),
-		});
-
-		return (
-			<ArrayFields ref={arrayFieldsRef} maxHeight={arrayFieldsMaxHeight}>
-				{fields.map((field, i) => (
-					<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-						<RangeInput name={`${FIELD_ARRAY_NAME}.${i}.value`} formError={error?.[i]?.value} />
-					</ArrayFieldContainer>
-				))}
-			</ArrayFields>
-		);
-	};
+	const getFieldContainerProps = (field, i) => ({
+		key: field.id,
+		onRemove: () => remove(i),
+		disableRemove: fields.length === 1,
+		onAdd: () => append(EMPTY_RANGE_VALUE),
+		disableAdd: i !== (fields.length - 1),
+	});
 
 	return (
 		<FormProvider {...formData}>
 			<form onSubmit={submitForm}>
-				{renderFields()}
+				<ArrayFields ref={arrayFieldsRef} maxHeight={arrayFieldsMaxHeight}>
+					{fields.map((field, i) => (
+						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
+							<RangeInput name={`${FIELD_ARRAY_NAME}.${i}.value`} formError={error?.[i]?.value} />
+						</ArrayFieldContainer>
+					))}
+				</ArrayFields>
 				<FilterFormActions canSubmit={canSubmit} cancelButton={cancelButton} onCancel={handleCancel} onSubmit={submitForm} />
 			</form>
 		</FormProvider>
