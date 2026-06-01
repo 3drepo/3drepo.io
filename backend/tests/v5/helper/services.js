@@ -39,8 +39,16 @@ const { PassThrough } = require('stream');
 const { isString } = require(`${src}/utils/helper/typeCheck`);
 
 const { BYPASS_AUTH } = require(`${src}/utils/config.constants`);
-const { CLASH_PLAN_TYPES, SELF_INTERSECTIONS_CHECK_OPTIONS, TRIGGER_OPTIONS, CLASH_PLANS_COL, RUN_HISTORY_COL,
-	clashRunStatus, CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
+const {
+	CLASH_PLAN_TYPES,
+	CLASH_PLANS_COL,
+	CLASH_RUNS_COL,
+	RUN_HISTORY_COL,
+	SELF_INTERSECTIONS_CHECK_OPTIONS,
+	TRIGGER_OPTIONS,
+	clashObjectIdTypes,
+	clashRunStatus,
+} = require(`${src}/models/clashes.constants`);
 const { EVENTS, ACTIONS } = require(`${src}/services/chat/chat.constants`);
 const DbHandler = require(`${src}/handler/db`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
@@ -950,13 +958,17 @@ ServiceHelper.generateClashPlan = (model1, model2) => ({
 	},
 });
 
-ServiceHelper.generateClashes = (plan, number = 20) => times(number, () => ({
-	a: `${plan.selectionA.container}::internal::${ServiceHelper.generateRandomString()}`,
-	b: `${plan.selectionB.container}::internal::${ServiceHelper.generateRandomString()}`,
-	positions: [
-		times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
-	],
-	fingerprint: ServiceHelper.generateRandomNumber() }));
+ServiceHelper.generateClashes = (plan, number = 20) => {
+	const objectId = (container) => `${container}::${clashObjectIdTypes.INTERNAL}::${ServiceHelper.generateRandomString()}`;
+
+	return times(number, () => ({
+		a: objectId(plan.selectionA.container),
+		b: objectId(plan.selectionB.container),
+		positions: [
+			times(2, () => times(3, () => ServiceHelper.generateRandomNumber())),
+		],
+		fingerprint: ServiceHelper.generateRandomNumber() }));
+};
 
 ServiceHelper.generateClashRun = (plan) => ({
 	_id: ServiceHelper.generateUUIDString(),

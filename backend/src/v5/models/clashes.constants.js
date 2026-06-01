@@ -16,6 +16,12 @@
  */
 
 const ClashesConstants = {};
+const { idTypes } = require('./metadata.constants');
+
+ClashesConstants.clashObjectIdTypes = {
+	...idTypes,
+	INTERNAL: 'internal',
+};
 
 ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
 ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';

@@ -56,9 +56,13 @@ const Mailer = require(`${src}/services/mailer`);
 
 const MailerConstants = require(`${src}/services/mailer/mailer.constants`);
 
-const { clashRunStatus, SELF_INTERSECTIONS_CHECK_OPTIONS } = require(`${src}/models/clashes.constants`);
+const {
+	CLASH_PLAN_TYPES,
+	SELF_INTERSECTIONS_CHECK_OPTIONS,
+	clashObjectIdTypes,
+	clashRunStatus,
+} = require(`${src}/models/clashes.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
-const { CLASH_PLAN_TYPES } = require(`${src}/models/clashes.constants`);
 
 const RUN_HISTORY_COL = 'clashes.runs.history';
 
@@ -148,21 +152,58 @@ const testCreateRun = () => {
 		unwantedMeshes: [],
 	};
 
-	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0]);
+	Scenes.getExternalIdsFromMetadata.mockImplementation((metadataArr) => metadataArr[0].metadata);
 
-	const checkStreamContent = (stream, expectedContent) => new Promise((resolve, reject) => {
+	const getStreamContent = (stream) => new Promise((resolve, reject) => {
 		const chunks = [];
 		stream.on('data', (chunk) => chunks.push(chunk));
 		stream.on('error', reject);
 		stream.on('end', () => {
 			try {
-				const content = Buffer.concat(chunks).toString();
-				expect(content).toEqual(expectedContent);
-				resolve();
+				const buffers = chunks.map((chunk) => (Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)));
+				resolve(Buffer.concat(buffers).toString());
 			} catch (err) {
 				reject(err);
 			}
 		});
+	});
+
+	const checkStreamContent = async (stream, expectedContent) => {
+		const content = await getStreamContent(stream);
+		expect(content).toEqual(expectedContent);
+	};
+
+	const createClashRunWithObjects = async (meshes, metadataNodes = []) => {
+		const plan = {
+			...planData,
+			selectionA: { container: generateRandomString(), revision: generateRandomString() },
+			selectionB: { container: generateRandomString(), revision: generateRandomString() },
+		};
+
+		ClashRunsModel.createClashRun.mockResolvedValueOnce(runId);
+		ScenesModel.getNodesByQuery.mockResolvedValueOnce(meshes);
+		ScenesModel.getNodesByQuery.mockResolvedValueOnce([]);
+		MetadataModel.getMetadataByQuery.mockResolvedValueOnce(metadataNodes);
+		MetadataModel.getMetadataByQuery.mockResolvedValueOnce([]);
+
+		await Clashes.createRun(teamspace, project, plan, userId);
+
+		const stream = ModelProcessing.queueClashRun.mock.calls[0][3];
+		const content = JSON.parse(await getStreamContent(stream));
+		return { content, plan };
+	};
+
+	const makeMesh = ({ _id = generateRandomString(), parent = generateRandomString(),
+		sharedId = generateRandomString(), name } = {}) => ({
+		_id,
+		parents: [parent],
+		shared_id: sharedId,
+		...(name ? { name } : {}),
+	});
+
+	const makeMetadata = (parent, externalId) => ({
+		parents: [parent],
+		metadata: externalId,
 	});
 
 	const generateGroupedMeshes = (container, meshes, unwantedMeshes = []) => {
@@ -170,7 +211,8 @@ const testCreateRun = () => {
 
 		for (const mesh of meshes.filter(({ _id }) => !unwantedMeshes.includes(_id))) {
 			const parentId = mesh.name ? mesh.shared_id : UUIDToString(mesh.parents[0]);
-			const compositePath = `${container}::${mesh.externalId?.key ?? 'internal'}::${mesh.externalId?.values[0] ?? parentId}`;
+			const idType = mesh.externalId?.key ?? clashObjectIdTypes.INTERNAL;
+			const compositePath = `${container}::${idType}::${mesh.externalId?.values[0] ?? parentId}`;
 
 			if (!result[compositePath]) {
 				result[compositePath] = [];
@@ -243,6 +285,118 @@ const testCreateRun = () => {
 			}));
 		});
 	});
+
+	describe('Create Clash Run External IDs', () => {
+		test('should use parent IDs as internal composite IDs for nameless meshes', async () => {
+			const parent = generateRandomString();
+			const mesh = makeMesh({ _id: generateRandomString(), parent });
+
+			const { content, plan } = await createClashRunWithObjects([mesh]);
+
+			expect(content.setA[0].objects).toEqual([{
+				id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+				meshIds: [mesh._id],
+			}]);
+		});
+
+		test('should use shared IDs as internal composite IDs for named meshes', async () => {
+			const sharedId = generateRandomString();
+			const mesh = makeMesh({ _id: generateRandomString(), sharedId, name: generateRandomString() });
+
+			const { content, plan } = await createClashRunWithObjects([mesh]);
+
+			expect(content.setA[0].objects).toEqual([{
+				id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`,
+				meshIds: [mesh._id],
+			}]);
+		});
+
+		test('should support a combination of named and nameless meshes', async () => {
+			const parent = generateRandomString();
+			const sharedId = generateRandomString();
+			const namelessMesh = makeMesh({ _id: generateRandomString(), parent });
+			const namedMesh = makeMesh({ _id: generateRandomString(), sharedId, name: generateRandomString() });
+
+			const { content, plan } = await createClashRunWithObjects([namelessMesh, namedMesh]);
+
+			expect(content.setA[0].objects).toEqual([
+				{
+					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+					meshIds: [namelessMesh._id],
+				},
+				{
+					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${sharedId}`,
+					meshIds: [namedMesh._id],
+				},
+			]);
+		});
+
+		test('should group nameless meshes that belong to the same parent', async () => {
+			const parent = generateRandomString();
+			const meshes = [
+				makeMesh({ _id: generateRandomString(), parent }),
+				makeMesh({ _id: generateRandomString(), parent }),
+			];
+
+			const { content, plan } = await createClashRunWithObjects(meshes);
+
+			expect(content.setA[0].objects).toEqual([{
+				id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+				meshIds: meshes.map(({ _id }) => _id),
+			}]);
+		});
+
+		test('should use external IDs when they are found', async () => {
+			const parent = generateRandomString();
+			const mesh = makeMesh({ _id: generateRandomString(), parent });
+			const externalId = { key: clashObjectIdTypes.IFC, values: [generateRandomString()] };
+
+			const { content, plan } = await createClashRunWithObjects([mesh], [makeMetadata(parent, externalId)]);
+
+			expect(content.setA[0].objects).toEqual([{
+				id: `${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`,
+				meshIds: [mesh._id],
+			}]);
+		});
+
+		test('should use internal IDs when metadata has no external IDs', async () => {
+			const parent = generateRandomString();
+			const mesh = makeMesh({ _id: generateRandomString(), parent });
+
+			const { content, plan } = await createClashRunWithObjects([mesh], [makeMetadata(parent)]);
+
+			expect(content.setA[0].objects).toEqual([{
+				id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parent}`,
+				meshIds: [mesh._id],
+			}]);
+		});
+
+		test('should use external IDs only where found and internal IDs for the rest', async () => {
+			const parentWithExternalId = generateRandomString();
+			const parentWithoutExternalId = generateRandomString();
+			const meshes = [
+				makeMesh({ _id: generateRandomString(), parent: parentWithExternalId }),
+				makeMesh({ _id: generateRandomString(), parent: parentWithoutExternalId }),
+			];
+			const externalId = { key: clashObjectIdTypes.REVIT, values: [generateRandomString()] };
+
+			const { content, plan } = await createClashRunWithObjects(
+				meshes,
+				[makeMetadata(parentWithExternalId, externalId)],
+			);
+
+			expect(content.setA[0].objects).toEqual([
+				{
+					id: `${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`,
+					meshIds: [meshes[0]._id],
+				},
+				{
+					id: `${plan.selectionA.container}::${clashObjectIdTypes.INTERNAL}::${parentWithoutExternalId}`,
+					meshIds: [meshes[1]._id],
+				},
+			]);
+		});
+	});
 };
 
 const formatClash = (clash) => ({
@@ -305,7 +459,8 @@ const testProcessClashResults = () => {
 			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
 			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.unknown);
 
-			await Clashes.processClashResults(teamspace, project, corId, resPath);
+			await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+				.rejects.toEqual(templates.unknown);
 
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
 			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledWith(teamspace, project,
@@ -323,7 +478,13 @@ const testProcessClashResults = () => {
 				clashRunStatus.FAILED, { error: { reason: errorMessage } });
 			expect(Mailer.sendSystemEmail).toHaveBeenCalledTimes(1);
 			expect(Mailer.sendSystemEmail).toHaveBeenCalledWith(MailerConstants.templates.CLASH_ERROR.name,
-				{ errorMessage, teamspace, project, planId: currentRun.plan._id, runId: corId });
+				{
+					errorMessage: templates.unknown.message,
+					teamspace,
+					project,
+					planId: currentRun.plan._id,
+					runId: corId,
+				});
 		});
 
 		test('should categorize clashes and process clash results when there are previous runs', async () => {
