@@ -43,10 +43,9 @@ const getValueValidator = (type: TicketFilterType) => {
 };
 
 export const FilterSchema = Yup.object().shape({
-	operator: trimmedString,
 	values: Yup.array()
 		.when(
-			['operator', '$type'],
+			['$operator', '$type'],
 			// @ts-ignore
 			([operator, filterType]: [TicketFilterOperator, TicketFilterType], schema) => {
 				let value;
@@ -59,7 +58,7 @@ export const FilterSchema = Yup.object().shape({
 			},
 		)
 		.when(
-			'operator',
+			'$operator',
 			([operator], schema) => {
 				const maxFields = getOperatorMaxFieldsAllowed(operator);
 				return schema.min(Math.min(maxFields, 1));
