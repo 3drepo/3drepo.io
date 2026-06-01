@@ -358,6 +358,10 @@ const testCreateRun = () => {
 
 				const { content, plan } = await createClashRunWithObjects([mesh], [makeMetadata(parent, externalId)]);
 
+				expect(MetadataModel.getMetadataByQuery).toHaveBeenNthCalledWith(1,
+					teamspace, plan.selectionA.container,
+					{ rev_id: plan.selectionA.revision, parents: { $in: [parent] } },
+					{ metadata: 1, parents: 1 });
 				expect(content.setA[0].objects).toEqual([{
 					id: `${plan.selectionA.container}::${externalId.key}::${externalId.values[0]}`,
 					meshIds: [mesh._id],

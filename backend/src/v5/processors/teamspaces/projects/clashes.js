@@ -46,11 +46,12 @@ Clashes.updatePlan = updatePlan;
 
 Clashes.deletePlan = deletePlan;
 
-const applyExternalIds = async (teamspace, container, internalCompIdsToMeshes) => {
+const applyExternalIds = async (teamspace, container, revision, internalCompIdsToMeshes) => {
 	const compositesToMeshes = {};
 
 	const metadata = await getMetadataByQuery(teamspace, container,
-		{ parents: { $in: Object.keys(internalCompIdsToMeshes).map(stringToUUID) } }, { metadata: 1, parents: 1 });
+		{ rev_id: revision, parents: { $in: Object.keys(internalCompIdsToMeshes).map(stringToUUID) } },
+		{ metadata: 1, parents: 1 });
 
 	const sharedIdToExternalIdMap = {};
 	for (const metaNode of metadata) {
@@ -107,7 +108,7 @@ const determineCompositeObjects = async (teamspace, project, container, revision
 		compIdToMeshes[compositeId].push(UUIDToString(mesh._id));
 	}
 
-	return applyExternalIds(teamspace, container, compIdToMeshes);
+	return applyExternalIds(teamspace, container, revision, compIdToMeshes);
 };
 
 const writeConfigSetEntry = async (teamspace, project, selection, stream, setName) => {
