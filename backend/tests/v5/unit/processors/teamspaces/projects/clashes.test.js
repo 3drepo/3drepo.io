@@ -512,6 +512,31 @@ const testProcessClashResults = () => {
 				clashRunStatus.FAILED, { error: { reason: `Could not read results file: ${readError.message}` } });
 		});
 
+		test('should mark run as failed if the clashes in the results file cannot be read', async () => {
+			const readError = new Error(generateRandomString());
+			fs.createReadStream
+				.mockImplementationOnce(() => createResultsReadStream(fileContent))
+				.mockImplementationOnce(() => {
+					const fakeReadStream = PassThrough();
+					setImmediate(() => fakeReadStream.emit('error', readError));
+					return fakeReadStream;
+				});
+
+			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
+			ClashRunsModel.getClashRunByQuery.mockResolvedValueOnce(currentRun);
+			ClashRunsModel.getClashRunByQuery.mockRejectedValueOnce(templates.clashRunNotFound);
+
+			await expect(Clashes.processClashResults(teamspace, project, corId, resPath))
+				.rejects.toEqual(readError);
+
+			expect(ClashRunsModel.getClashRunByQuery).toHaveBeenCalledTimes(2);
+			expect(FilesManager.storeFile).not.toHaveBeenCalled();
+
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
+				clashRunStatus.FAILED, { error: { reason: `Could not read results file: ${readError.message}` } });
+		});
+
 		test('should mark run as failed and send an email if it fails to fetch last results', async () => {
 			fs.createReadStream.mockImplementationOnce(() => createResultsReadStream(fileContent));
 
