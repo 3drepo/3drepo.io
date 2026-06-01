@@ -32,7 +32,6 @@ export const Select = ({
 	helperText,
 	label,
 	className,
-	renderValue,
 	...props
 }: SelectProps) => (
 	<FormControl required={required} disabled={props.disabled} error={props.error} className={className}>
