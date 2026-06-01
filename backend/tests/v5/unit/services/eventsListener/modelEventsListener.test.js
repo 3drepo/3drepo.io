@@ -63,12 +63,6 @@ const TicketsProcessor = require(`${src}/processors/teamspaces/projects/models/c
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/drawings/calibrations');
 const CalibrationProcessor = require(`${src}/processors/teamspaces/projects/models/drawings/calibrations`);
 
-jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
-const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
-
-jest.mock('../../../../../src/v5/models/clashes.runs');
-const ClashesModel = require(`${src}/models/clashes.runs`);
-
 const { calibrationStatuses } = require(`${src}/models/calibrations.constants`);
 
 jest.mock('../../../../../src/v5/services/mailer');
@@ -84,7 +78,7 @@ const { EVENTS: chatEvents } = require(`${src}/services/chat/chat.constants`);
 
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-const EventsListener = require(`${src}/services/eventsListener/eventsListener`);
+const ModelEventsListener = require(`${src}/services/eventsListener/components/modelEvents`);
 
 TemplateSchema.generateFullSchema.mockImplementation((t) => t);
 TicketSchema.serialiseTicket.mockImplementation((t) => t);
@@ -276,143 +270,6 @@ const testQueueTaskCompleted = () => {
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledTimes(1);
 			expect(ProjectSettings.findProjectByModelId).toHaveBeenCalledWith(data.teamspace, data.model, { _id: 1 });
 			expect(ModelSettings.newRevisionProcessed).toHaveBeenCalledTimes(0);
-		});
-	});
-};
-
-const testClashRunUpdate = () => {
-	describe(events.CLASH_RUN_UPDATE, () => {
-		test(`Should call updateTestRun if there is a ${events.CLASH_RUN_UPDATE}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_UPDATE);
-			const data = {
-				teamspace: generateRandomString(),
-				corId: generateRandomString(),
-				status: generateRandomString(),
-			};
-
-			EventsManager.publish(events.CLASH_RUN_UPDATE, data);
-
-			await waitOnEvent;
-
-			expect(ClashesModel.updateTestRun).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.updateTestRun).toHaveBeenCalledWith(data.teamspace,
-				stringToUUID(data.corId), { status: data.status });
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}`, async () => {
-			ClashesModel.updateTestRun.mockRejectedValueOnce(templates.clashRunNotFound);
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_UPDATE);
-			const data = {
-				teamspace: generateRandomString(),
-				corId: generateRandomString(),
-				status: generateRandomString(),
-			};
-
-			EventsManager.publish(events.CLASH_RUN_UPDATE, data);
-
-			await waitOnEvent;
-
-			expect(ClashesModel.updateTestRun).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.updateTestRun).toHaveBeenCalledWith(data.teamspace,
-				stringToUUID(data.corId), { status: data.status });
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_UPDATE}  (Rejected with an error object)`, async () => {
-			ClashesModel.updateTestRun.mockRejectedValueOnce(new Error(generateRandomString()));
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_UPDATE);
-			const data = {
-				teamspace: generateRandomString(),
-				corId: generateRandomString(),
-				status: generateRandomString(),
-			};
-
-			EventsManager.publish(events.CLASH_RUN_UPDATE, data);
-
-			await waitOnEvent;
-
-			expect(ClashesModel.updateTestRun).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.updateTestRun).toHaveBeenCalledWith(data.teamspace,
-				stringToUUID(data.corId), { status: data.status });
-		});
-	});
-};
-
-const testClashRunCompleted = () => {
-	describe(events.CLASH_RUN_COMPLETED, () => {
-		test(`Should call completeRun if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				corId: generateRandomString(),
-				results: generateRandomString(),
-				value: 0,
-			};
-
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
-
-			await waitOnEvent;
-
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace,
-				stringToUUID(data.corId), data.results);
-		});
-
-		test(`Should call setTestRunToFailed if there is a ${events.CLASH_RUN_COMPLETED} (with bouncer error)`, async () => {
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				corId: generateRandomString(),
-				results: generateRandomString(),
-				value: 28,
-			};
-
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
-
-			await waitOnEvent;
-
-			const resInfo = getInfoFromCode(data.value);
-			resInfo.retVal = data.value;
-			expect(ClashesModel.setTestRunToFailed).toHaveBeenCalledTimes(1);
-			expect(ClashesModel.setTestRunToFailed).toHaveBeenCalledWith(data.teamspace,
-				stringToUUID(data.corId), resInfo.message, resInfo.retVal);
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}`, async () => {
-			ClashesProcessor.processClashResults.mockRejectedValueOnce(templates.clashRunNotFound);
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				corId: generateRandomString(),
-				results: generateRandomString(),
-				value: 0,
-			};
-
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
-
-			await waitOnEvent;
-
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace,
-				stringToUUID(data.corId), data.results);
-		});
-
-		test(`Should fail gracefully on error if there is a ${events.CLASH_RUN_COMPLETED}  (Rejected with an error object)`, async () => {
-			ClashesProcessor.processClashResults.mockRejectedValueOnce(new Error(generateRandomString()));
-			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_COMPLETED);
-			const data = {
-				teamspace: generateRandomString(),
-				corId: generateRandomString(),
-				results: generateRandomString(),
-				value: 0,
-			};
-
-			EventsManager.publish(events.CLASH_RUN_COMPLETED, data);
-
-			await waitOnEvent;
-
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledTimes(1);
-			expect(ClashesProcessor.processClashResults).toHaveBeenCalledWith(data.teamspace,
-				stringToUUID(data.corId), data.results);
 		});
 	});
 };
@@ -1768,12 +1625,10 @@ const testTemplateUpdated = () => {
 };
 
 describe(determineTestGroup(__filename), () => {
-	EventsListener.init();
+	ModelEventsListener.init();
 
 	testQueueTaskUpdate();
 	testQueueTaskCompleted();
-	testClashRunUpdate();
-	testClashRunCompleted();
 	testModelSettingsUpdate();
 	testModelProcessingCompleted();
 	testRevisionUpdated();
