@@ -51,6 +51,27 @@ const MESSAGE_TYPES = {
 	IMPORT: 'import',
 };
 
+const resolveSharedPath = (filePath) => {
+	if (typeof filePath !== 'string') return undefined;
+
+	const isTaggedSharedPath = filePath === SHARED_SPACE_TAG
+		|| filePath.startsWith(`${SHARED_SPACE_TAG}/`)
+		|| filePath.startsWith(`${SHARED_SPACE_TAG}\\`);
+	if (!isTaggedSharedPath) return undefined;
+
+	const relativePathFromTag = filePath.slice(SHARED_SPACE_TAG.length).replace(/^[/\\]+/, '');
+	if (Path.isAbsolute(relativePathFromTag) || Path.win32.isAbsolute(relativePathFromTag)) return undefined;
+
+	const relativePath = relativePathFromTag.replace(/\\/g, Path.sep);
+	const resolvedSharedDir = Path.resolve(sharedDir);
+	const resolvedPath = Path.resolve(resolvedSharedDir, relativePath);
+	const relativeToSharedDir = Path.relative(resolvedSharedDir, resolvedPath);
+
+	if (relativeToSharedDir === '..' || relativeToSharedDir.startsWith(`..${Path.sep}`)) return undefined;
+
+	return resolvedPath;
+};
+
 const onCallbackQMsg = ({ content, properties }) => {
 	logger.logInfo(`[Received][${properties.correlationId}] ${content}`);
 	try {
@@ -68,7 +89,7 @@ const onCallbackQMsg = ({ content, properties }) => {
 						status,
 					});
 			} else {
-				const resultsDir = results?.replace(SHARED_SPACE_TAG, sharedDir);
+				const resultsDir = resolveSharedPath(results);
 				publish(events.CLASH_RUN_COMPLETED,
 					{
 						teamspace,

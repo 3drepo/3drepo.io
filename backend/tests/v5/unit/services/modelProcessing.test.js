@@ -147,7 +147,7 @@ const testCallbackQueueConsumer = () => {
 				project: generateUUIDString(),
 				type: 'clash',
 				container: generateRandomString(),
-				results: `${SHARED_SPACE_TAG} ${generateRandomString()}`,
+				results: `${SHARED_SPACE_TAG}/${generateRandomString()}/results.json`,
 				value: 0,
 			};
 			const properties = {
@@ -161,7 +161,78 @@ const testCallbackQueueConsumer = () => {
 				teamspace: content.teamspace,
 				project: stringToUUID(content.project),
 				runId: stringToUUID(properties.correlationId),
-				results: content.results.replace(SHARED_SPACE_TAG, config.cn_queue.shared_storage),
+				results: path.resolve(config.cn_queue.shared_storage,
+					content.results.slice(SHARED_SPACE_TAG.length + 1)),
+				value: content.value,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
+		test.each([
+			['shared space root', '$SHARED_SPACE', path.resolve(config.cn_queue.shared_storage)],
+			['backslash separators', '$SHARED_SPACE\\folder\\results.json',
+				path.resolve(config.cn_queue.shared_storage, 'folder', 'results.json')],
+			['normalised path inside shared storage', '$SHARED_SPACE/folder/../results.json',
+				path.resolve(config.cn_queue.shared_storage, 'results.json')],
+		])('Should trigger %s as a safe clash run results path', async (desc, results, expectedResults) => {
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: 'clash',
+				container: generateRandomString(),
+				results,
+				value: 0,
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				results: expectedResults,
+				value: content.value,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
+		test.each([
+			['path traversal', '$SHARED_SPACE/../../etc/passwd'],
+			['parent directory', '$SHARED_SPACE/..'],
+			['absolute path', '/etc/passwd'],
+			['windows absolute path', '$SHARED_SPACE/C:\\Windows\\system.ini'],
+			['missing results', undefined],
+			['missing shared space tag', 'results.json'],
+			['malformed shared space tag', '$SHARED_SPACEevil/results.json'],
+		])('Should not publish a %s from a clash run completed message', async (desc, results) => {
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: 'clash',
+				container: generateRandomString(),
+				results,
+				value: 0,
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				results: undefined,
 				value: content.value,
 			};
 
