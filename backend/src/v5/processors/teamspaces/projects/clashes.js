@@ -164,7 +164,7 @@ const readArraysFromJSONStream = async (stream, arrayNames, onData) => {
 };
 
 const getLastRunClashes = async (teamspace, project, planId, runId) => {
-	const clashIndices = new Set();
+	const clashMap = new Map();
 	try {
 		const lastCompletedRun = await getClashRunByQuery(teamspace, project,
 			{ 'plan._id': planId, status: clashRunStatus.COMPLETED },
@@ -172,19 +172,25 @@ const getLastRunClashes = async (teamspace, project, planId, runId) => {
 		);
 
 		const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, lastCompletedRun._id);
-		await readArraysFromJSONStream(readStream, ['new', 'active', 'resolved'], ({ value }) => {
-			clashIndices.add(value.index ?? value);
+		await readArraysFromJSONStream(readStream, ['new', 'active'], ({ value }) => {
+			clashMap.set(value.index, value);
 		});
 
-		return clashIndices;
+		return clashMap;
 	} catch (err) {
 		if (err.code === templates.clashRunNotFound.code) {
-			return new Set();
+			return new Map();
 		}
 
 		await Promise.all([
 			sendSystemEmail(emailTemplates.CLASH_ERROR.name,
-				{ errorMessage: err.message, teamspace, project, planId, runId }),
+				{
+					errorMessage: err.message,
+					teamspace,
+					project: UUIDToString(project),
+					planId: UUIDToString(planId),
+					runId: UUIDToString(runId),
+				}),
 			updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
 				{ error: { reason: `Error retrieving clashes from last run: ${err.message}` } }),
 		]);
@@ -220,7 +226,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		throw err;
 	}
 
-	const knownIndices = await getLastRunClashes(teamspace, project, planId, runId);
+	const knownClashes = await getLastRunClashes(teamspace, project, planId, runId);
 
 	const resStream = createReadStream(resPath, { encoding: 'utf8' });
 	const categorizedClashes = { new: [], active: [], resolved: [] };
@@ -238,10 +244,10 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 				index: key,
 			};
 
-			if (knownIndices.has(key)) {
+			if (knownClashes.has(key)) {
 				categorizedClashes.active.push(clashToAdd);
 
-				knownIndices.delete(key);
+				knownClashes.delete(key);
 			} else {
 				categorizedClashes.new.push(clashToAdd);
 			}
@@ -252,7 +258,7 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		throw err;
 	}
 
-	categorizedClashes.resolved = Array.from(knownIndices);
+	categorizedClashes.resolved = Array.from(knownClashes.values());
 
 	await storeFile(teamspace, RUN_HISTORY_COL, runId, Buffer.from(JSON.stringify(categorizedClashes)));
 	await updateRunStatus(teamspace, project, runId, clashRunStatus.COMPLETED,

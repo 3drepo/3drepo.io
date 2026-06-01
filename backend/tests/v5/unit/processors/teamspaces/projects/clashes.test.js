@@ -566,7 +566,7 @@ const testProcessClashResults = () => {
 				{
 					errorMessage: templates.unknown.message,
 					teamspace,
-					project,
+					project: UUIDToString(project),
 					planId: currentRun.plan._id,
 					runId: corId,
 				});
@@ -576,7 +576,7 @@ const testProcessClashResults = () => {
 			const existingClashes = {
 				new: times(5, () => generateClash()).map(formatClash),
 				active: fileContent.clashes.slice(0, 5).map(formatClash),
-				resolved: times(2, () => generateRandomString()),
+				resolved: times(2, () => generateClash()).map(formatClash),
 			};
 			const currentRun = { ...generateRandomObject(), plan: { _id: generateRandomString() } };
 			const lastRun = { ...generateRandomObject(), _id: generateRandomString() };
@@ -610,7 +610,7 @@ const testProcessClashResults = () => {
 			const result = {
 				new: fileContent.clashes.slice(5, 10).map(formatClash),
 				active: existingClashes.active,
-				resolved: [...existingClashes.new.map((c) => c.index), ...existingClashes.resolved],
+				resolved: existingClashes.new,
 			};
 
 			expect(FilesManager.storeFile).toHaveBeenCalledTimes(1);
@@ -620,7 +620,7 @@ const testProcessClashResults = () => {
 			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledTimes(1);
 			expect(ClashRunsModel.updateRunStatus).toHaveBeenCalledWith(teamspace, project, corId,
 				clashRunStatus.COMPLETED,
-				{ stats: { new: 5, active: 5, resolved: 7 } });
+				{ stats: { new: 5, active: 5, resolved: 5 } });
 		});
 	});
 };

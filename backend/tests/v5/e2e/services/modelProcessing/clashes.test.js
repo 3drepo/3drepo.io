@@ -154,7 +154,6 @@ const testParseClashResults = () => {
 	const mixedActiveClashes = mixedData.previousClashes.slice(0, 5);
 	const mixedNewClashes = ServiceHelper.generateClashes(mixedData.run.plan, 5);
 	const mixedResolvedClashes = mixedData.previousClashes.slice(5);
-	const resolvedIndexes = (clashArr) => clashArr.map(formatClash).map(({ index }) => index);
 	const scenarioRuns = [
 		missingResultsData, unreadablePreviousResultsData, resolvedData, newClashesData, mixedData,
 	].map(({ run }) => run);
@@ -177,9 +176,9 @@ const testParseClashResults = () => {
 			['the results data from the previous run cannot be read', false, unreadablePreviousResultsData.run, { ...basicCBData, results: getResultsPath(unreadablePreviousResultsData.run), value: 0 }, unreadablePreviousResultsClashes, undefined, undefined, clashRunStatus.FAILED, 'Error retrieving clashes from last run:'],
 			['Bouncer returned success and there was no previous run', true, plannedClashRun2, { ...basicCBData, results: resultsRun2, value: 0 }, clashes, { new: clashes.length, active: 0, resolved: 0 }, { new: clashes.map(formatClash), active: [], resolved: [] }],
 			['Bouncer returned success and there was a run', true, plannedClashRun1, { ...basicCBData, results: resultsRun1, value: 0 }, clashes, { new: 0, active: clashes.length, resolved: 0 }, { new: [], active: clashes.map(formatClash), resolved: [] }],
-			['there was a previous run and all clashes were resolved', true, resolvedData.run, { ...basicCBData, results: getResultsPath(resolvedData.run), value: 0 }, [], { new: 0, active: 0, resolved: resolvedData.previousClashes.length }, { new: [], active: [], resolved: resolvedIndexes(resolvedData.previousClashes) }],
-			['there was a previous run and all found clashes were new', true, newClashesData.run, { ...basicCBData, results: getResultsPath(newClashesData.run), value: 0 }, newClashes, { new: newClashes.length, active: 0, resolved: newClashesData.previousClashes.length }, { new: newClashes.map(formatClash), active: [], resolved: resolvedIndexes(newClashesData.previousClashes) }],
-			['there was a previous run with resolved, active and new clashes', true, mixedData.run, { ...basicCBData, results: getResultsPath(mixedData.run), value: 0 }, [...mixedActiveClashes, ...mixedNewClashes], { new: mixedNewClashes.length, active: mixedActiveClashes.length, resolved: mixedResolvedClashes.length }, { new: mixedNewClashes.map(formatClash), active: mixedActiveClashes.map(formatClash), resolved: resolvedIndexes(mixedResolvedClashes) }],
+			['there was a previous run and all clashes were resolved', true, resolvedData.run, { ...basicCBData, results: getResultsPath(resolvedData.run), value: 0 }, [], { new: 0, active: 0, resolved: resolvedData.previousClashes.length }, { new: [], active: [], resolved: resolvedData.previousClashes.map(formatClash) }],
+			['there was a previous run and all found clashes were new', true, newClashesData.run, { ...basicCBData, results: getResultsPath(newClashesData.run), value: 0 }, newClashes, { new: newClashes.length, active: 0, resolved: newClashesData.previousClashes.length }, { new: newClashes.map(formatClash), active: [], resolved: newClashesData.previousClashes.map(formatClash) }],
+			['there was a previous run with resolved, active and new clashes', true, mixedData.run, { ...basicCBData, results: getResultsPath(mixedData.run), value: 0 }, [...mixedActiveClashes, ...mixedNewClashes], { new: mixedNewClashes.length, active: mixedActiveClashes.length, resolved: mixedResolvedClashes.length }, { new: mixedNewClashes.map(formatClash), active: mixedActiveClashes.map(formatClash), resolved: mixedResolvedClashes.map(formatClash) }],
 		])('', (desc, success, clashRun, callbackObj, resultsFileClashes, runStats, runRes, expectedStatus, errorReason) => {
 			beforeEach(() => {
 				if (resultsFileClashes) {

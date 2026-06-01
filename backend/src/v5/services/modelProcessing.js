@@ -68,7 +68,7 @@ const onCallbackQMsg = ({ content, properties }) => {
 						status,
 					});
 			} else {
-				const resultsDir = results.replace(SHARED_SPACE_TAG, sharedDir);
+				const resultsDir = results?.replace(SHARED_SPACE_TAG, sharedDir);
 				publish(events.CLASH_RUN_COMPLETED,
 					{
 						teamspace,
