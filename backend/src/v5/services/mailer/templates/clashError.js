@@ -1,5 +1,5 @@
 /**
- *  Copyright (C) 2022 3D Repo Ltd
+ *  Copyright (C) 2026 3D Repo Ltd
  *
  *  This program is free software: you can redistribute it and/or modify
  *  it under the terms of the GNU Affero General Public License as
@@ -25,6 +25,7 @@ const dataSchema = Yup.object({
 	title: Yup.string().default('Clash Error'),
 	domain: Yup.string().default(() => config.getBaseURL()),
 	teamspace: Yup.string().required(),
+	project: Yup.string().required(),
 	planId: Yup.string().required(),
 	runId: Yup.string().required(),
 	errorMessage: Yup.string().required(),

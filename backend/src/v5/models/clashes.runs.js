@@ -15,8 +15,9 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { CLASH_RUNS_COL, CLASH_RUN_STATUS } = require('./clashes.constants');
+const { CLASH_RUNS_COL, clashRunStatus } = require('./clashes.constants');
 const db = require('../handler/db');
+const { deleteIfUndefined } = require('../utils/helper/objects');
 const { generateUUID } = require('../utils/helper/uuids');
 const { logger } = require('../utils/logger');
 const { templates } = require('../utils/responseCodes');
@@ -25,43 +26,45 @@ const ClashRuns = {};
 
 const ensureIndexExists = async (teamspace) => {
 	try {
-		await db.createIndex(teamspace, CLASH_RUNS_COL, { 'plan._id': 1, createdAt: -1 }, { runInBackground: true });
+		await db.createIndex(teamspace, CLASH_RUNS_COL,
+			{ project: 1, 'plan._id': 1, updatedAt: -1 }, { runInBackground: true });
 	} catch (err) {
 		logger.logError(`Failed to create index for clash runs in teamspace ${teamspace}: ${err.message}`);
 	}
 };
 
-ClashRuns.createTestRun = async (teamspace, plan, user) => {
+ClashRuns.createClashRun = async (teamspace, project, plan, user) => {
 	await ensureIndexExists(teamspace);
 	const _id = generateUUID();
+	const timestamp = new Date();
 
 	await db.insertOne(teamspace, CLASH_RUNS_COL, {
 		_id,
+		project,
 		triggeredBy: user,
-		triggeredAt: new Date(),
-		status: CLASH_RUN_STATUS.PLANNED,
+		triggeredAt: timestamp,
+		updatedAt: timestamp,
+		status: clashRunStatus.PLANNED,
 		plan,
 	});
 
 	return _id;
 };
 
-ClashRuns.updateTestRun = async (teamspace, runId, setUpdate) => {
-	await db.updateOne(teamspace, CLASH_RUNS_COL, { _id: runId }, { $set: setUpdate });
+const updateClashRun = async (teamspace, project, runId, setUpdate) => {
+	await db.updateOne(teamspace, CLASH_RUNS_COL, { project, _id: runId },
+		{ $set: { ...setUpdate, updatedAt: new Date() } });
 };
 
-ClashRuns.completeTestRun = async (teamspace, runId, resultId) => {
-	await ClashRuns.updateTestRun(teamspace, runId,
-		{ status: CLASH_RUN_STATUS.COMPLETED, completedAt: new Date(), result: resultId });
+ClashRuns.updateRunStatus = async (teamspace, project, runId, status, results) => {
+	await updateClashRun(teamspace, project, runId, deleteIfUndefined({
+		status,
+		results,
+	}));
 };
 
-ClashRuns.setTestRunToFailed = async (teamspace, runId, message, errorCode) => {
-	await ClashRuns.updateTestRun(teamspace, runId,
-		{ status: CLASH_RUN_STATUS.FAILED, errorReason: { message, timestamp: new Date(), errorCode } });
-};
-
-ClashRuns.getTestRunByQuery = async (teamspace, query, projection, sort) => {
-	const run = await db.findOne(teamspace, CLASH_RUNS_COL, query, projection, sort);
+ClashRuns.getClashRunByQuery = async (teamspace, project, query, projection, sort) => {
+	const run = await db.findOne(teamspace, CLASH_RUNS_COL, { ...query, project }, projection, sort);
 
 	if (!run) {
 		throw templates.clashRunNotFound;
