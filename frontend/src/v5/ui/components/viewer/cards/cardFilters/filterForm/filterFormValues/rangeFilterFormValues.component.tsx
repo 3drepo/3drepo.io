@@ -34,7 +34,7 @@ import {
 } from './filterFormValues.helpers';
 import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FilterSchema } from '@/v5/validation/ticketSchemes/validators';
+import { RangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
 
 const EMPTY_RANGE_VALUE = { value: ['', ''] };
 
@@ -51,10 +51,10 @@ export const FilterFormRangeValues = ({
 	const formData = useForm<FilterFormValuesForm>({
 		defaultValues: getDefaultValues(filter, true),
 		mode: 'onChange',
-		resolver: yupResolver(FilterSchema),
+		resolver: yupResolver(RangeFilterSchema),
 		context: { type, operator },
 	});
-	const { control, formState: { errors, dirtyFields, isValid }, reset, trigger } = formData;
+	const { control, formState: { errors, dirtyFields, isValid }, reset } = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: FIELD_ARRAY_NAME,
@@ -72,10 +72,6 @@ export const FilterFormRangeValues = ({
 		reset();
 		onCancel();
 	};
-
-	useEffect(() => {
-		trigger();
-	}, [operator]);
 
 	useEffect(() => {
 		if (!isEmpty(dirtyFields)) {

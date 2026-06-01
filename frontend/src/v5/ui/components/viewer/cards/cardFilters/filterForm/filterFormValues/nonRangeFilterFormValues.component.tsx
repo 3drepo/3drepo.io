@@ -41,7 +41,7 @@ import {
 } from './filterFormValues.helpers';
 import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { FilterSchema } from '@/v5/validation/ticketSchemes/validators';
+import { NonRangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
 
 const EMPTY_VALUE = { value: '' };
 
@@ -60,10 +60,10 @@ export const FilterFormNonRangeValues = ({
 	const formData = useForm<FilterFormValuesForm>({
 		defaultValues: getDefaultValues(filter, false),
 		mode: 'onChange',
-		resolver: yupResolver(FilterSchema),
+		resolver: yupResolver(NonRangeFilterSchema),
 		context: { type, operator },
 	});
-	const { setValue, control, formState: { errors, dirtyFields, isValid }, reset, trigger } = formData;
+	const { setValue, control, formState: { errors, dirtyFields, isValid }, reset } = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: FIELD_ARRAY_NAME,
@@ -88,10 +88,6 @@ export const FilterFormNonRangeValues = ({
 		reset();
 		onCancel();
 	};
-
-	useEffect(() => {
-		trigger();
-	}, [operator]);
 
 	useEffect(() => {
 		if (!isEmpty(dirtyFields)) {
