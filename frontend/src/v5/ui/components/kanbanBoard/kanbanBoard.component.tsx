@@ -19,7 +19,7 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 import type { KeyboardEvent, PointerEvent as ReactPointerEvent } from 'react';
 import { BoardScroller, DragOverlay } from './kanbanBoard.styles';
 import type { Card, DragPoint, DragSession, DropTarget, DropTargetStore, KanbanBoardProps, KanbanDragEndEvent, Lane, PointerPress } from './kanbanBoard.types';
-import { LaneColumn } from './laneColumn';
+import { LaneColumn } from './laneColumn.component';
 import { DefaultCard } from './defaultCard.component';
 
 export type {
