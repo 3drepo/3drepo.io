@@ -346,9 +346,9 @@ db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVA
 db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
 	type, project, imageData);
 
-db.createClashPlan = (teamspace, plan) => {
+db.createClashPlan = async (teamspace, plan) => {
 	const formattedPlan = { ...plan, _id: stringToUUID(plan._id) };
-	DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
+	await DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
 };
 
 db.createClashRun = async (teamspace, projectId, run, clashes) => {

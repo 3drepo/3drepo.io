@@ -16,12 +16,10 @@
  */
 
 const { determineTestGroup } = require('../../../helper/utils');
-const { times } = require('lodash');
 const ServiceHelper = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 
 const { queueMessage } = require(`${src}/handler/queue`);
-const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { RUN_HISTORY_COL, clashRunStatus } = require(`${src}/models/clashes.constants`);
 const { cn_queue: queueConfig } = require(`${src}/utils/config`);
 const { callback_queue: callbackq, shared_storage: sharedDir } = queueConfig;
@@ -43,21 +41,15 @@ const formatClash = (clash) => ({
 });
 
 const generateBasicData = () => {
-	const user = ServiceHelper.generateUserCredentials();
-	const models = times(2, () => ServiceHelper.generateRandomModel());
-	const revisions = times(2, () => ServiceHelper.generateRevisionEntry());
 	const project = ServiceHelper.generateRandomProject();
-	const plan = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
-	const planWithNoRun = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
+	const modelA = ServiceHelper.generateRandomModel();
+	const modelB = ServiceHelper.generateRandomModel();
+	const plan = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
+	const planWithNoRun = ServiceHelper.generateClashPlan(modelA._id, modelB._id);
 
 	return ({
-		user,
 		teamspace: ServiceHelper.generateRandomString(),
 		project,
-		models,
-		revisions,
-		plan,
-		planWithNoRun,
 		plannedClashRun1: ServiceHelper.generateClashRun(plan),
 		plannedClashRun2: ServiceHelper.generateClashRun(planWithNoRun),
 		completedClashRun: { ...ServiceHelper.generateClashRun(plan), status: clashRunStatus.COMPLETED },
@@ -66,34 +58,15 @@ const generateBasicData = () => {
 };
 
 const setupBasicData = async ({
-	user,
 	teamspace,
 	project,
-	models,
-	revisions,
-	plan,
-	planWithNoRun,
 	plannedClashRun1,
 	plannedClashRun2,
 	clashes,
 	completedClashRun,
 }) => {
-	await ServiceHelper.db.createUser(user);
-	await ServiceHelper.db.createTeamspace(teamspace, [user.user]);
-
 	const categorizedClashes = { new: clashes.map(formatClash), active: [], resolved: [] };
 	await Promise.all([
-		ServiceHelper.db.createProject(teamspace, project.id, project.name, models.map((m) => m._id)),
-		...models.map((model) => ServiceHelper.db.createModel(
-			teamspace,
-			model._id,
-			model.name,
-			model.properties,
-		)),
-		...revisions.map((rev, i) => ServiceHelper.db.createRevision(teamspace,
-			project.id, models[i]._id, rev, modelTypes.CONTAINER)),
-		ServiceHelper.db.createClashPlan(teamspace, plan),
-		ServiceHelper.db.createClashPlan(teamspace, planWithNoRun),
 		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun1),
 		ServiceHelper.db.createClashRun(teamspace, project.id, plannedClashRun2),
 		ServiceHelper.db.createClashRun(teamspace, project.id, completedClashRun, categorizedClashes),
