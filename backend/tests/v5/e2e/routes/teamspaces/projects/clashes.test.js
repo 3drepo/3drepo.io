@@ -36,8 +36,9 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
 const fs = require('fs');
 const path = require('path');
-const { UUIDToString } = require('../../../../../../src/v5/utils/helper/uuids');
-const { deleteIfUndefined } = require('../../../../../../src/v5/utils/helper/objects');
+
+const { UUIDToString } = require(`${src}/utils/helper/uuids`);
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 const SHARED_SPACE_TAG = '$SHARED_SPACE';
 
