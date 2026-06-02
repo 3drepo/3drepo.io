@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useRef } from 'react';
+import { useRef } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import { isEmpty } from 'lodash';
 import { isDateType } from '../../cardFilters.helpers';
@@ -31,10 +31,11 @@ import {
 	isOperatorDirty,
 	mapFilterFormValuesToFilter,
 } from './filterFormValues.helpers';
+import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { RangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
 
-const EMPTY_RANGE_VALUE = { value: ['', ''] };
+const EMPTY_RANGE_VALUE = { value: null };
 
 export const FilterFormRangeValues = ({
 	module,
@@ -42,7 +43,8 @@ export const FilterFormRangeValues = ({
 	type,
 	filter,
 	operator,
-	onCanSubmitChanged,
+	cancelButton,
+	onCancel,
 	onSubmit,
 }: FilterFormValuesComponentProps) => {
 	const formData = useForm<FilterFormValuesForm>({
@@ -65,12 +67,6 @@ export const FilterFormRangeValues = ({
 		mapFilterFormValuesToFilter(filledForm, module, property, type, operator),
 	));
 
-	useEffect(() => {
-		if (onCanSubmitChanged) {
-			onCanSubmitChanged(canSubmit);
-		}
-	}, [canSubmit]);
-
 	const getFieldContainerProps = (field, i) => ({
 		key: field.id,
 		onRemove: () => remove(i),
@@ -80,16 +76,19 @@ export const FilterFormRangeValues = ({
 	});
 
 	return (
-		<FormProvider {...formData}>
-			<form onSubmit={submitForm}>
-				<ArrayFields ref={arrayFieldsRef} maxHeight={arrayFieldsMaxHeight}>
-					{fields.map((field, i) => (
-						<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
-							<RangeInput name={`${FIELD_ARRAY_NAME}.${i}.value`} formError={error?.[i]?.value} />
-						</ArrayFieldContainer>
-					))}
-				</ArrayFields>
-			</form>
-		</FormProvider>
+		<>
+			<FormProvider {...formData}>
+				<form>
+					<ArrayFields ref={arrayFieldsRef} maxHeight={arrayFieldsMaxHeight}>
+						{fields.map((field, i) => (
+							<ArrayFieldContainer {...getFieldContainerProps(field, i)}>
+								<RangeInput name={`${FIELD_ARRAY_NAME}.${i}.value`} formError={error?.[i]?.value} />
+							</ArrayFieldContainer>
+						))}
+					</ArrayFields>
+				</form>
+			</FormProvider>
+			<FilterFormActions canSubmit={canSubmit} cancelButton={cancelButton} onCancel={onCancel} onSubmit={submitForm} />
+		</>
 	);
 };

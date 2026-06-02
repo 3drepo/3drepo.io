@@ -39,6 +39,7 @@ import {
 	isOperatorDirty,
 	mapFilterFormValuesToFilter,
 } from './filterFormValues.helpers';
+import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { NonRangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
 
@@ -50,7 +51,8 @@ export const FilterFormNonRangeValues = ({
 	type,
 	filter,
 	operator,
-	onCanSubmitChanged,
+	cancelButton,
+	onCancel,
 	onSubmit,
 }: FilterFormValuesComponentProps) => {
 	const { templates, modelsIds } = useTicketFiltersContext();
@@ -61,7 +63,7 @@ export const FilterFormNonRangeValues = ({
 		resolver: yupResolver(NonRangeFilterSchema),
 		context: { type, operator },
 	});
-	const { setValue, control, formState: { errors, dirtyFields, isValid } } = formData;
+	const { setValue, control, formState: { errors, dirtyFields, isValid }, reset } = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: FIELD_ARRAY_NAME,
@@ -79,23 +81,9 @@ export const FilterFormNonRangeValues = ({
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
 	const canSubmit = isValid && (!isEmpty(dirtyFields) || isOperatorDirty(filter, type, operator));
-
 	const submitForm = formData.handleSubmit((filledForm) => onSubmit(
 		mapFilterFormValuesToFilter(filledForm, module, property, type, operator),
 	));
-
-	useEffect(() => {
-		if (onCanSubmitChanged) {
-			onCanSubmitChanged(canSubmit);
-		}
-	}, [canSubmit]);
-
-	useEffect(() => {
-		if (!isEmpty(dirtyFields)) {
-			remove();
-			return () => remove();
-		}
-	}, []);
 
 	useEffect(() => {
 		setValue('selectOptions', selectOptions);
@@ -190,10 +178,13 @@ export const FilterFormNonRangeValues = ({
 	};
 
 	return (
-		<FormProvider {...formData}>
-			<form onSubmit={submitForm}>
-				{renderFields()}
-			</form>
-		</FormProvider>
+		<>
+			<FormProvider {...formData}>
+				<form>
+					{renderFields()}
+				</form>
+			</FormProvider>
+			<FilterFormActions canSubmit={canSubmit} cancelButton={cancelButton} onCancel={onCancel} onSubmit={submitForm} />
+		</>
 	);
 };
