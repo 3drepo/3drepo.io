@@ -22,6 +22,9 @@ const { generateRandomString, generateUUIDString } = require('../../../../../../
 jest.mock('../../../../../../../../src/v5/models/tickets');
 const TicketsModel = require(`${src}/models/tickets`);
 
+jest.mock('../../../../../../../../src/v5/models/modelSettings');
+const ModelSettingsModel = require(`${src}/models/modelSettings`);
+
 jest.mock('../../../../../../../../src/v5/schemas/tickets');
 const TicketSchema = require(`${src}/schemas/tickets`);
 
@@ -35,6 +38,7 @@ const {
 	statusTypes,
 } = require(`${src}/schemas/tickets/templates.constants`);
 const { CLASH_TYPES } = require(`${src}/models/clashes.constants`);
+const { convertArrayUnits, units } = require(`${src}/utils/helper/units`);
 
 const { CLOUD_CLASH } = presetModules;
 const {
@@ -109,13 +113,13 @@ const getProcessOptions = (context, tickets = {}) => ({
 	},
 });
 
-const getCloudClashData = (clash, context, distance) => ({
+const getCloudClashData = (clash, context, distance, point = [1, 2, 3]) => ({
 	[CLASH_PLAN_ID]: context.planId,
 	[CLASH_RUN_ID]: context.runId,
 	[CLASH_ID]: clash.index,
 	[CLASH_PLAN_NAME]: context.planName,
 	[CLASH_TYPE]: context.clashType,
-	[CLASH_POINT]: [1, 2, 3],
+	[CLASH_POINT]: point,
 	[DISTANCE_M]: distance,
 	[OBJECT_A_ID_TYPE]: '3D Repo ID',
 	[OBJECT_A_ID]: clash.a.id,
@@ -123,8 +127,8 @@ const getCloudClashData = (clash, context, distance) => ({
 	[OBJECT_B_ID]: clash.b.id,
 });
 
-const getCloudClashUpdateData = (clash, distance) => ({
-	[CLASH_POINT]: [1, 2, 3],
+const getCloudClashUpdateData = (clash, distance, point = [1, 2, 3]) => ({
+	[CLASH_POINT]: point,
 	[DISTANCE_M]: distance,
 });
 
@@ -137,6 +141,7 @@ describe(determineTestGroup(__filename), () => {
 		jest.clearAllMocks();
 		TicketsModel.addTicketsWithTemplate.mockResolvedValue([]);
 		TicketsModel.updateTickets.mockResolvedValue([]);
+		ModelSettingsModel.getFederationById.mockResolvedValue({ properties: { unit: units.MM } });
 		const mockValidation = (t, p, m, tem, tickets, { existingData, processValidatedData = true } = {}) => (
 			Promise.resolve(tickets.map((ticket, i) => ({
 				newTicket: ticket,
@@ -223,9 +228,29 @@ describe(determineTestGroup(__filename), () => {
 			getProcessOptions(context));
 
 		const createdTickets = TicketsModel.addTicketsWithTemplate.mock.calls[0][4];
-		expect(createdTickets[0].modules[CLOUD_CLASH]).toEqual(getCloudClashData(clash, context, 5));
+		expect(createdTickets[0].modules[CLOUD_CLASH]).toEqual(getCloudClashData(clash, context, 0.005));
 		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 	});
+
+	test.each(Object.values(units))(
+		'Should convert clash points from mm to federation units for %s federations',
+		async (unit) => {
+			const template = getTemplate();
+			const clash = getClash(generateRandomString());
+			const context = getContext();
+			const results = { new: [clash], active: [], resolved: [] };
+
+			ModelSettingsModel.getFederationById.mockResolvedValueOnce({ properties: { unit } });
+			TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+
+			await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+				getProcessOptions(context));
+
+			const createdTickets = TicketsModel.addTicketsWithTemplate.mock.calls[0][4];
+			expect(createdTickets[0].modules[CLOUD_CLASH][CLASH_POINT])
+				.toEqual(convertArrayUnits(clash.positions[0], units.MM, unit));
+		},
+	);
 
 	test('Should use the original id type for unknown clash id types and Unknown when missing', async () => {
 		const template = getTemplate();
@@ -404,6 +429,7 @@ describe(determineTestGroup(__filename), () => {
 		const template = getTemplate(defaultStatus, [generateRandomString()]);
 		const clash = getClash();
 		const context = getContext();
+		const unit = units.M;
 		const existingTicket = {
 			_id: generateUUIDString(),
 			type: template._id,
@@ -416,6 +442,7 @@ describe(determineTestGroup(__filename), () => {
 		};
 		const results = { new: [], active: [clash], resolved: [] };
 
+		ModelSettingsModel.getFederationById.mockResolvedValueOnce({ properties: { unit } });
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
 
@@ -424,7 +451,7 @@ describe(determineTestGroup(__filename), () => {
 
 		const expectedUpdate = {
 			modules: {
-				[CLOUD_CLASH]: getCloudClashUpdateData(clash, 0),
+				[CLOUD_CLASH]: getCloudClashUpdateData(clash, 0, convertArrayUnits(clash.positions[0], units.MM, unit)),
 			},
 		};
 		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);

@@ -23,10 +23,12 @@ const {
 	presetModules,
 	statusTypes,
 } = require('../../../../../schemas/tickets/templates.constants');
+const { convertArrayUnits, units } = require('../../../../../utils/helper/units');
 const { getClosedStatuses, getStatusDefinition } = require('../../../../../schemas/tickets/templates');
 const { CLASH_TYPES } = require('../../../../../models/clashes.constants');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
 const { cloneDeep } = require('../../../../../utils/helper/objects');
+const { getFederationById } = require('../../../../../models/modelSettings');
 const { validateTickets } = require('../../../../../schemas/tickets');
 
 const TicketsClashes = {};
@@ -80,17 +82,18 @@ const updateClashPointAndDistance = (ticket, clashContext, clash) => {
 	const [pointA, pointB] = clash.positions;
 
 	if (clashContext.clashType === CLASH_TYPES.CLEARANCE) {
-		distance = Math.sqrt(
+		const distanceInMm = Math.sqrt(
 			(pointA[0] - pointB[0]) ** 2
 				+ (pointA[1] - pointB[1]) ** 2
 				+ (pointA[2] - pointB[2]) ** 2,
 		);
+		[distance] = convertArrayUnits([distanceInMm], units.MM, units.M);
 	}
 
 	/* eslint-disable no-param-reassign */
 	ticket.modules = ticket.modules ?? {};
 	ticket.modules[CLOUD_CLASH] = ticket.modules[CLOUD_CLASH] ?? {};
-	ticket.modules[CLOUD_CLASH][CLASH_POINT] = pointA;
+	ticket.modules[CLOUD_CLASH][CLASH_POINT] = convertArrayUnits(pointA, units.MM, clashContext.federationUnits);
 	ticket.modules[CLOUD_CLASH][DISTANCE_M] = distance;
 	/* eslint-enable no-param-reassign */
 };
@@ -296,6 +299,8 @@ TicketsClashes.processClashResults = async (
 	} = plan;
 
 	const clashIdToTicket = await getClashIdToTicket(teamspace, project, federation, template, planId);
+	const { properties: { unit: federationUnits } = {} } = await getFederationById(
+		teamspace, federation, { 'properties.unit': 1 });
 
 	const statusInfo = determineStatusInfo(template, configuredDefaultStatuses);
 
@@ -307,6 +312,7 @@ TicketsClashes.processClashResults = async (
 		statusInfo,
 		clashIdToTicket,
 		valuesAtCreation,
+		federationUnits,
 	};
 	const processedClashes = await processClashes(
 		teamspace, project, federation, template, [...newClashes, ...activeClashes], clashContext);
