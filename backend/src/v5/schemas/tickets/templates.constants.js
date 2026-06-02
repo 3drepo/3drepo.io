@@ -163,7 +163,6 @@ TemplateConstants.presetModulesProperties = {
 		createPropertyEntry('Clash ID', propTypes.LONG_TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.HIDDEN_ON_UI]: true }),
 		createPropertyEntry('Clash Plan Name', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Clash Type', propTypes.ONE_OF, { [propOptions.VALUES]: Object.values(CLASH_TYPES), [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
-		createPropertyEntry('Clash Point', propTypes.COORDS, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Distance (m)', propTypes.NUMBER, { [propOptions.REQUIRED]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Object A ID Type', propTypes.ONE_OF, { [propOptions.VALUES]: clashElementTypes, [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),
 		createPropertyEntry('Object A ID', propTypes.TEXT, { [propOptions.REQUIRED]: true, [propOptions.IMMUTABLE]: true, [propOptions.READ_ONLY_ON_UI]: true }),

@@ -37,7 +37,6 @@ const {
 	CLASH_ID,
 	CLASH_PLAN_ID,
 	CLASH_PLAN_NAME,
-	CLASH_POINT,
 	CLASH_RUN_ID,
 	CLASH_TYPE,
 	DISTANCE_M,
@@ -46,7 +45,7 @@ const {
 	OBJECT_B_ID,
 	OBJECT_B_ID_TYPE,
 } = modulePropertyLabels[CLOUD_CLASH];
-const { STATUS } = basePropertyLabels;
+const { PIN, STATUS } = basePropertyLabels;
 
 const getClashIdToTicket = async (teamspace, project, federation, template, planId) => {
 	const tickets = await getTicketsByQuery(teamspace, project, federation, {
@@ -54,6 +53,7 @@ const getClashIdToTicket = async (teamspace, project, federation, template, plan
 		[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: UUIDToString(planId),
 	}, {
 		_id: 1,
+		[`properties.${PIN}`]: 1,
 		[`properties.${STATUS}`]: 1,
 		[`modules.${CLOUD_CLASH}`]: 1,
 	});
@@ -76,10 +76,11 @@ const determineIdType = (idType) => {
 	return clashIdTypeToTicketType[idType] ?? idType ?? 'Unknown';
 };
 
-const updateClashPointAndDistance = (ticket, clashContext, clash, existingCloudClash) => {
+const updateClashPinAndDistance = (ticket, clashContext, clash, existingTicket) => {
 	let distance = 0;
 	const [pointA, pointB] = clash.positions;
 	const clashPoint = convertArrayUnits(pointA, units.MM, clashContext.federationUnits);
+	const existingCloudClash = existingTicket?.modules?.[CLOUD_CLASH];
 
 	if (clashContext.clashType === CLASH_TYPES.CLEARANCE) {
 		const distanceInMm = Math.sqrt(
@@ -90,20 +91,19 @@ const updateClashPointAndDistance = (ticket, clashContext, clash, existingCloudC
 		[distance] = convertArrayUnits([distanceInMm], units.MM, units.M);
 	}
 
-	const updateCloudClashProperty = (property, value) => {
+	if (clashContext.pinEnabled && !isEqual(existingTicket?.properties?.[PIN], clashPoint)) {
 		/* eslint-disable no-param-reassign */
-		ticket.modules = ticket.modules ?? {};
-		ticket.modules[CLOUD_CLASH] = ticket.modules[CLOUD_CLASH] ?? {};
-		ticket.modules[CLOUD_CLASH][property] = value;
+		ticket.properties = ticket.properties ?? {};
+		ticket.properties[PIN] = clashPoint;
 		/* eslint-enable no-param-reassign */
-	};
-
-	if (!isEqual(existingCloudClash?.[CLASH_POINT], clashPoint)) {
-		updateCloudClashProperty(CLASH_POINT, clashPoint);
 	}
 
 	if (!isEqual(existingCloudClash?.[DISTANCE_M], distance)) {
-		updateCloudClashProperty(DISTANCE_M, distance);
+		/* eslint-disable no-param-reassign */
+		ticket.modules = ticket.modules ?? {};
+		ticket.modules[CLOUD_CLASH] = ticket.modules[CLOUD_CLASH] ?? {};
+		ticket.modules[CLOUD_CLASH][DISTANCE_M] = distance;
+		/* eslint-enable no-param-reassign */
 	}
 };
 
@@ -170,7 +170,7 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 			const update = clashContext.statusInfo.closedStatuses[ticketStatus]
 				? { properties: { [STATUS]: clashContext.statusInfo.defaultStatuses.onReopened } } : {};
 
-			updateClashPointAndDistance(update, clashContext, clash, existingTicket.modules?.[CLOUD_CLASH]);
+			updateClashPinAndDistance(update, clashContext, clash, existingTicket);
 
 			if (!isEmpty(update)) {
 				ticketsToUpdate.push({
@@ -191,7 +191,7 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 			newTicket.modules[CLOUD_CLASH][OBJECT_A_ID] = clash.a?.id;
 			newTicket.modules[CLOUD_CLASH][OBJECT_B_ID_TYPE] = determineIdType(clash.b?.idType);
 			newTicket.modules[CLOUD_CLASH][OBJECT_B_ID] = clash.b?.id;
-			updateClashPointAndDistance(newTicket, clashContext, clash);
+			updateClashPinAndDistance(newTicket, clashContext, clash);
 
 			ticketsToCreate.push(newTicket);
 		}
@@ -325,6 +325,7 @@ TicketsClashes.processClashResults = async (
 		clashIdToTicket,
 		valuesAtCreation,
 		federationUnits,
+		pinEnabled: template.config?.pin,
 	};
 	const processedClashes = await processClashes(
 		teamspace, project, federation, template, [...newClashes, ...activeClashes], clashContext);

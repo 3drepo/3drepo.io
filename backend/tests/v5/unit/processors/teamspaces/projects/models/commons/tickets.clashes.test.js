@@ -45,7 +45,6 @@ const {
 	CLASH_ID,
 	CLASH_PLAN_ID,
 	CLASH_PLAN_NAME,
-	CLASH_POINT,
 	CLASH_RUN_ID,
 	CLASH_TYPE,
 	DISTANCE_M,
@@ -54,7 +53,7 @@ const {
 	OBJECT_B_ID,
 	OBJECT_B_ID_TYPE,
 } = modulePropertyLabels[CLOUD_CLASH];
-const { STATUS } = basePropertyLabels;
+const { PIN, STATUS } = basePropertyLabels;
 
 const getTemplate = (defaultStatus = generateRandomString(), doneStatuses = []) => ({
 	_id: generateUUIDString(),
@@ -113,13 +112,12 @@ const getProcessOptions = (context, tickets = {}) => ({
 	},
 });
 
-const getCloudClashData = (clash, context, distance, point = [1, 2, 3]) => ({
+const getCloudClashData = (clash, context, distance) => ({
 	[CLASH_PLAN_ID]: context.planId,
 	[CLASH_RUN_ID]: context.runId,
 	[CLASH_ID]: clash.index,
 	[CLASH_PLAN_NAME]: context.planName,
 	[CLASH_TYPE]: context.clashType,
-	[CLASH_POINT]: point,
 	[DISTANCE_M]: distance,
 	[OBJECT_A_ID_TYPE]: '3D Repo ID',
 	[OBJECT_A_ID]: clash.a.id,
@@ -127,8 +125,7 @@ const getCloudClashData = (clash, context, distance, point = [1, 2, 3]) => ({
 	[OBJECT_B_ID]: clash.b.id,
 });
 
-const getCloudClashUpdateData = (clash, distance, point = [1, 2, 3]) => ({
-	[CLASH_POINT]: point,
+const getCloudClashUpdateData = (distance) => ({
 	[DISTANCE_M]: distance,
 });
 
@@ -200,6 +197,7 @@ describe(determineTestGroup(__filename), () => {
 			[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: context.planId,
 		}, {
 			_id: 1,
+			[`properties.${PIN}`]: 1,
 			[`properties.${STATUS}`]: 1,
 			[`modules.${CLOUD_CLASH}`]: 1,
 		});
@@ -239,12 +237,13 @@ describe(determineTestGroup(__filename), () => {
 	});
 
 	test.each(Object.values(units))(
-		'Should convert clash points from mm to federation units for %s federations',
+		'Should convert clash positions from mm to federation units for %s federation pins',
 		async (unit) => {
 			const template = getTemplate();
 			const clash = getClash(generateRandomString());
 			const context = getContext();
 			const results = { new: [clash], active: [], resolved: [] };
+			template.config.pin = true;
 
 			ModelSettingsModel.getFederationById.mockResolvedValueOnce({ properties: { unit } });
 			TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
@@ -253,10 +252,28 @@ describe(determineTestGroup(__filename), () => {
 				getProcessOptions(context));
 
 			const createdTickets = TicketsModel.addTicketsWithTemplate.mock.calls[0][4];
-			expect(createdTickets[0].modules[CLOUD_CLASH][CLASH_POINT])
-				.toEqual(convertArrayUnits(clash.positions[0], units.MM, unit));
+			expect(createdTickets[0].properties[PIN]).toEqual(convertArrayUnits(clash.positions[0], units.MM, unit));
 		},
 	);
+
+	test('Should set the default pin from the clash position for new clash tickets if enabled', async () => {
+		const template = getTemplate();
+		const clash = getClash(generateRandomString());
+		const context = getContext();
+		const unit = units.M;
+		const results = { new: [clash], active: [], resolved: [] };
+		template.config.pin = true;
+
+		ModelSettingsModel.getFederationById.mockResolvedValueOnce({ properties: { unit } });
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context));
+
+		const clashPoint = convertArrayUnits(clash.positions[0], units.MM, unit);
+		const createdTicket = TicketsModel.addTicketsWithTemplate.mock.calls[0][4][0];
+		expect(createdTicket.properties[PIN]).toEqual(clashPoint);
+	});
 
 	test('Should use the original id type for unknown clash id types and Unknown when missing', async () => {
 		const template = getTemplate();
@@ -385,7 +402,7 @@ describe(determineTestGroup(__filename), () => {
 				[STATUS]: defaultStatus,
 			},
 			modules: {
-				[CLOUD_CLASH]: getCloudClashUpdateData(clash, 0),
+				[CLOUD_CLASH]: getCloudClashUpdateData(0),
 			},
 		};
 		expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(2);
@@ -412,7 +429,6 @@ describe(determineTestGroup(__filename), () => {
 			modules: {
 				[CLOUD_CLASH]: {
 					[CLASH_ID]: clash.index,
-					[CLASH_POINT]: clash.positions[0],
 					[DISTANCE_M]: 0,
 				},
 			},
@@ -437,7 +453,6 @@ describe(determineTestGroup(__filename), () => {
 		const template = getTemplate(defaultStatus, [generateRandomString()]);
 		const clash = getClash();
 		const context = getContext();
-		const unit = units.M;
 		const existingTicket = {
 			_id: generateUUIDString(),
 			type: template._id,
@@ -450,7 +465,6 @@ describe(determineTestGroup(__filename), () => {
 		};
 		const results = { new: [], active: [clash], resolved: [] };
 
-		ModelSettingsModel.getFederationById.mockResolvedValueOnce({ properties: { unit } });
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
 		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
 
@@ -459,7 +473,7 @@ describe(determineTestGroup(__filename), () => {
 
 		const expectedUpdate = {
 			modules: {
-				[CLOUD_CLASH]: getCloudClashUpdateData(clash, 0, convertArrayUnits(clash.positions[0], units.MM, unit)),
+				[CLOUD_CLASH]: getCloudClashUpdateData(0),
 			},
 		};
 		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
@@ -468,7 +482,7 @@ describe(determineTestGroup(__filename), () => {
 		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
 	});
 
-	test('Should not update active clashes when the clash point and distance have not changed', async () => {
+	test('Should not update active clashes when distance has not changed and pin is disabled', async () => {
 		const defaultStatus = generateRandomString();
 		const template = getTemplate(defaultStatus, [generateRandomString()]);
 		const clash = getClash();
@@ -480,7 +494,6 @@ describe(determineTestGroup(__filename), () => {
 			modules: {
 				[CLOUD_CLASH]: {
 					[CLASH_ID]: clash.index,
-					[CLASH_POINT]: clash.positions[0],
 					[DISTANCE_M]: 0,
 				},
 			},
@@ -498,7 +511,7 @@ describe(determineTestGroup(__filename), () => {
 		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
 	});
 
-	test('Should only update changed clash point and distance fields for active clashes', async () => {
+	test('Should only update changed distance field for active clashes', async () => {
 		const defaultStatus = generateRandomString();
 		const template = getTemplate(defaultStatus, [generateRandomString()]);
 		const clash = getClash();
@@ -510,7 +523,6 @@ describe(determineTestGroup(__filename), () => {
 			modules: {
 				[CLOUD_CLASH]: {
 					[CLASH_ID]: clash.index,
-					[CLASH_POINT]: clash.positions[0],
 					[DISTANCE_M]: 1,
 				},
 			},
@@ -528,6 +540,42 @@ describe(determineTestGroup(__filename), () => {
 				[CLOUD_CLASH]: {
 					[DISTANCE_M]: 0,
 				},
+			},
+		};
+		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], [expectedUpdate], context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should update the default pin when the clash position changes and pin is enabled', async () => {
+		const defaultStatus = generateRandomString();
+		const template = getTemplate(defaultStatus, [generateRandomString()]);
+		const clash = getClash();
+		const context = getContext();
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [PIN]: [10, 20, 30], [STATUS]: defaultStatus },
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+					[DISTANCE_M]: 0,
+				},
+			},
+		};
+		const results = { new: [], active: [clash], resolved: [] };
+		template.config.pin = true;
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		const expectedUpdate = {
+			properties: {
+				[PIN]: clash.positions[0],
 			},
 		};
 		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
