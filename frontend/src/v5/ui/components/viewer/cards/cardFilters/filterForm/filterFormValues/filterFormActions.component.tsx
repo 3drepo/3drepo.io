@@ -16,31 +16,28 @@
  */
 
 import { FormattedMessage } from 'react-intl';
-import { ActionMenuItem } from '@controls/actionMenu';
 import { ButtonsContainer, Button } from '../filterForm.styles';
 
 type FilterFormActionsProps = {
 	canSubmit: boolean,
-	cancelButton?: boolean,
-	onCancel: () => void,
+	isBackButton?: boolean,
+	onClickCancelOrBack: () => void,
 	onSubmit: any,
 };
 
-export const FilterFormActions = ({ canSubmit, cancelButton, onCancel, onSubmit }: FilterFormActionsProps) => (
+export const FilterFormActions = ({ canSubmit, isBackButton: isBackButton, onClickCancelOrBack: onCancel, onSubmit }: FilterFormActionsProps) => (
 	<ButtonsContainer>
 		<Button onClick={onCancel} color="secondary">
-			{cancelButton
-				? <FormattedMessage id="viewer.card.tickets.filters.form.cancel" defaultMessage="Cancel" />
-				: <FormattedMessage id="viewer.card.tickets.filters.form.back" defaultMessage="Back" />
+			{isBackButton
+				? <FormattedMessage id="viewer.card.tickets.filters.form.back" defaultMessage="Back" />
+				: <FormattedMessage id="viewer.card.tickets.filters.form.cancel" defaultMessage="Cancel" />
 			}
 		</Button>
-		<ActionMenuItem disabled={!canSubmit}>
-			<Button onClick={onSubmit} color="primary" variant="contained" disabled={!canSubmit}>
-				{cancelButton
-					? <FormattedMessage id="viewer.card.tickets.filters.form.update" defaultMessage="Update" />
-					: <FormattedMessage id="viewer.card.tickets.filters.form.apply" defaultMessage="Apply" />
-				}
-			</Button>
-		</ActionMenuItem>
+		<Button onClick={onSubmit} color="primary" variant="contained" disabled={!canSubmit}>
+			{isBackButton
+				? <FormattedMessage id="viewer.card.tickets.filters.form.apply" defaultMessage="Apply" />
+				: <FormattedMessage id="viewer.card.tickets.filters.form.update" defaultMessage="Update" />
+			}
+		</Button>
 	</ButtonsContainer>
 );

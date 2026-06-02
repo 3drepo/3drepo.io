@@ -51,8 +51,8 @@ export const FilterFormNonRangeValues = ({
 	type,
 	filter,
 	operator,
-	cancelButton,
-	onCancel,
+	isBackButton,
+	onClickCancelOrBack,
 	onSubmit,
 }: FilterFormValuesComponentProps) => {
 	const { templates, modelsIds } = useTicketFiltersContext();
@@ -63,7 +63,7 @@ export const FilterFormNonRangeValues = ({
 		resolver: yupResolver(NonRangeFilterSchema),
 		context: { type, operator },
 	});
-	const { setValue, control, formState: { errors, dirtyFields, isValid }, reset } = formData;
+	const { setValue, control, formState: { errors, dirtyFields, isValid } } = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: FIELD_ARRAY_NAME,
@@ -184,7 +184,7 @@ export const FilterFormNonRangeValues = ({
 					{renderFields()}
 				</form>
 			</FormProvider>
-			<FilterFormActions canSubmit={canSubmit} cancelButton={cancelButton} onCancel={onCancel} onSubmit={submitForm} />
+			<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
 		</>
 	);
 };

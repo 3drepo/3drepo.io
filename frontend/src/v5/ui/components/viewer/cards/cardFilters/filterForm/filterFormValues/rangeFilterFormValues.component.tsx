@@ -43,8 +43,8 @@ export const FilterFormRangeValues = ({
 	type,
 	filter,
 	operator,
-	cancelButton,
-	onCancel,
+	isBackButton,
+	onClickCancelOrBack,
 	onSubmit,
 }: FilterFormValuesComponentProps) => {
 	const formData = useForm<FilterFormValuesForm>({
@@ -88,7 +88,7 @@ export const FilterFormRangeValues = ({
 					</ArrayFields>
 				</form>
 			</FormProvider>
-			<FilterFormActions canSubmit={canSubmit} cancelButton={cancelButton} onCancel={onCancel} onSubmit={submitForm} />
+			<FilterFormActions canSubmit={canSubmit} isBackButton={isBackButton} onClickCancelOrBack={onClickCancelOrBack} onSubmit={submitForm} />
 		</>
 	);
 };

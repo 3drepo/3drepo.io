@@ -15,25 +15,27 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { TicketFilterOperator, TicketFilterType, BaseFilter, TicketFilter } from '../cardFilters.types';
 import { getDefaultOperator, getFilterFormTitle } from '../cardFilters.helpers';
 import { getValidOperators } from '../filtersSelection/tickets/ticketFilters.helpers';
 import { Container, TitleContainer } from './filterForm.styles';
 import { FilterFormValues } from './filterFormValues/filterFormValues.component';
 import { FilterFormOperators } from './filterFormValues/operators/filterFormOperators.component';
+import { ActionMenuContext } from '@controls/actionMenu/actionMenuContext';
 
 type FilterFormProps = {
 	module: string,
 	property: string,
 	type: TicketFilterType,
 	filter?: BaseFilter,
-	cancelButton?: boolean,
 	onSubmit: (newFilter: TicketFilter) => void,
-	onCancel: () => void,
+	onClickBack?: () => void,
 };
 
-export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel, cancelButton }: FilterFormProps) => {
+export const FilterForm = ({ module, property, type, filter, onSubmit, onClickBack }: FilterFormProps) => {
+	const { close } = useContext(ActionMenuContext);
+
 	const getInitialOperator = (): TicketFilterOperator => {
 		const defaultOperator = filter?.operator || getDefaultOperator(type);
 		return getValidOperators(type).includes(defaultOperator) ? defaultOperator : getDefaultOperator(type);
@@ -44,9 +46,17 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel,
 		setOperator(getInitialOperator());
 	}, [filter?.operator, type]);
 
-	const handleCancel = () => {
-		setOperator(getInitialOperator());
-		onCancel();
+	const onClickCancelOrBack = () => {
+		if (onClickBack) {
+			onClickBack();
+		} else {
+			close();
+		}
+	};
+
+	const handleSubmit = (newFilter: TicketFilter) => {
+		onSubmit(newFilter);
+		close();
 	};
 
 	return (
@@ -61,9 +71,9 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel,
 				type={type}
 				filter={filter}
 				operator={operator}
-				cancelButton={cancelButton}
-				onCancel={handleCancel}
-				onSubmit={onSubmit}
+				isBackButton={!!onClickBack}
+				onClickCancelOrBack={onClickCancelOrBack}
+				onSubmit={handleSubmit}
 			/>
 		</Container>
 	);
