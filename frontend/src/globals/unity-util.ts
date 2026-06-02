@@ -311,7 +311,9 @@ export class UnityUtil {
 			// Add withCredentials to XMLHttpRequest prototype to allow unity game to
 			// do CORS request. We used to do this with a .jspre on the unity side but it's no longer supported
 			// as of Unity 2019.1
-			(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
+			if (!(XMLHttpRequest.prototype as any).originalOpen) {
+				(XMLHttpRequest.prototype as any).originalOpen = XMLHttpRequest.prototype.open;
+			}
 			// eslint-disable-next-line func-names
 			const newOpen = function () {
 				// eslint-disable-next-line
@@ -323,7 +325,7 @@ export class UnityUtil {
 		}
 
 		UnityUtil.unityDomain = new URL(domainURL || window.location.origin);
-		if (this.indexedDBAvailable) { // Currently, the only reason to use ExternalWebRequestHandler is to use IndexedDb, so don't create the handler if it's not supported
+		if (this.indexedDBAvailable && !this.externalWebRequestHandler) { // Currently, the only reason to use ExternalWebRequestHandler is to use IndexedDb, so don't create the handler if it's not supported
 			this.externalWebRequestHandler = new ExternalWebRequestHandler(new IndexedDbCache(this.unityDomain)); // IndexedDbCache expects to find the worker at in [unityDomain]/unity/indexeddbworker.js
 		}
 
@@ -343,6 +345,11 @@ export class UnityUtil {
 				return true; // Returning true suppresses loader.js' alert call
 			},
 		};
+
+		// These next lines ensure that the resolution functions that Unity will
+		// call are created by the time the viewer starts up.
+		UnityUtil.onLoading();
+		UnityUtil.onLoaded();
 
 		createUnityInstance(canvas, config, (progress) => {
 			this.onProgress(progress);
@@ -588,7 +595,7 @@ export class UnityUtil {
 
 	/** @hidden */
 	public static comparatorLoaded() {
-		UnityUtil.loadComparatorResolve.resolve();
+		UnityUtil.loadComparatorResolve?.resolve();
 		UnityUtil.loadComparatorPromise = null;
 		UnityUtil.loadComparatorResolve = null;
 	}
@@ -2891,5 +2898,61 @@ export class UnityUtil {
 	 */
 	public static disableDrawingPlane() {
 		UnityUtil.toUnity('DisableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Called by the viewer on-demand when an autorecovery capture has been
+	 * made.
+	 * @hidden
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	public static postAutorecoveryCapture: (buffer: ArrayBuffer) => void;
+
+	/**
+	 * Returns the autorecovery buffer that the viewer posted with a call to
+	 * postAutorecoveryCapture. This call must be idempotent as it will be
+	 * made a number of times.
+	 * @hidden
+	 */
+	static getAutorecoveryCapture: () => ArrayBuffer;
+
+	/**
+	 * Tear down and rebuild the viewer to recover from a crashed or damaged
+	 * state. The viewer should be restored identically, including all
+	 * Containers, overrides and tool states. This method returns a Promise
+	 * that is resolved when the recovery is complete. This method must never
+	 * be called again while that Promise remains unresolved; doing so will
+	 * result in undefined behaviour.
+	 */
+	public static async doAutorecovery() {
+		// Capture the viewer state
+		const state = await new Promise<ArrayBuffer>((resolve) => {
+			UnityUtil.postAutorecoveryCapture = (buffer: ArrayBuffer) => {
+				resolve(buffer);
+			};
+			UnityUtil.toUnity('CaptureAutorecoveryState', UnityUtil.LoadingState.VIEWER_READY, undefined);
+		});
+
+		(UnityUtil as any).arc = new TextDecoder().decode(state);
+
+		await UnityUtil.unityInstance.Quit();
+
+		// This 'resets' the promise by forcing it to be re-created by onReady()
+		UnityUtil.readyPromise = undefined;
+		UnityUtil.loadingPromise = undefined;
+		UnityUtil.loadingResolve = undefined;
+		UnityUtil.loadedPromise = undefined;
+		UnityUtil.loadedResolve = undefined;
+		UnityUtil.loadedFlag = false;
+
+		UnityUtil.hideProgressBar();
+
+		// Tear down and rebuild the viewer.
+		await UnityUtil._loadUnity(UnityUtil.unityInstance.Module.canvas, undefined);
+
+		UnityUtil.getAutorecoveryCapture = () => {
+			return state;
+		};
+		UnityUtil.toUnity('RestoreAutorecoveryState', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 }
