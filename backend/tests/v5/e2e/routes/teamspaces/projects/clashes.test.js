@@ -15,11 +15,15 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../../helper/utils');
 const { times } = require('lodash');
 const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 
+const { modelTypes } = require(`${src}/models/modelSettings.constants`);
+const { CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
+const DB = require(`${src}/handler/db`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
 const { stringToUUID } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -27,7 +31,7 @@ const { templates } = require(`${src}/utils/responseCodes`);
 let server;
 let agent;
 
-const setupBasicData = async ({ users, teamspace, project, models, plan }) => {
+const setupBasicData = async ({ users, teamspace, project, models }) => {
 	await ServiceHelper.db.createUser(users.tsAdmin);
 	await ServiceHelper.db.createTeamspace(teamspace, [users.tsAdmin.user]);
 
@@ -45,9 +49,8 @@ const setupBasicData = async ({ users, teamspace, project, models, plan }) => {
 			model._id,
 			model.name,
 			model.properties,
-		),
-		ServiceHelper.db.createClashPlan(teamspace, plan),
-		)]);
+		)),
+	]);
 };
 
 const generateBasicData = () => {
@@ -61,7 +64,6 @@ const generateBasicData = () => {
 		teamspace: ServiceHelper.generateRandomString(),
 		project: ServiceHelper.generateRandomProject(),
 		models,
-		plan: ServiceHelper.generateClashPlan(models[0]._id, models[1]._id),
 	});
 };
 
@@ -112,10 +114,12 @@ const testUpdatePlan = () => {
 		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}${key ? `?key=${key}` : ''}`;
 
 		const basicData = generateBasicData();
-		const { users, teamspace, project, plan: existingPlan } = basicData;
+		const { users, teamspace, project, models } = basicData;
+		const existingPlan = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
+			await ServiceHelper.db.createClashPlan(teamspace, existingPlan);
 		});
 
 		const generateUpdateData = () => ({ ...existingPlan, name: ServiceHelper.generateRandomString() });
@@ -157,10 +161,12 @@ const testDeletePlan = () => {
 		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}${key ? `?key=${key}` : ''}`;
 
 		const basicData = generateBasicData();
-		const { users, teamspace, project, plan: existingPlan } = basicData;
+		const { users, teamspace, project, models } = basicData;
+		const existingPlan = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
 
 		beforeAll(async () => {
 			await setupBasicData(basicData);
+			await ServiceHelper.db.createClashPlan(teamspace, existingPlan);
 		});
 
 		describe.each([
@@ -186,7 +192,65 @@ const testDeletePlan = () => {
 	});
 };
 
-describe(ServiceHelper.determineTestGroup(__filename), () => {
+const testCreateRun = () => {
+	describe('Create clash run', () => {
+		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}/runs${key ? `?key=${key}` : ''}`;
+
+		const basicData = generateBasicData();
+		const {
+			users,
+			teamspace,
+			project,
+			models,
+		} = basicData;
+		const modelWithNoRev = ServiceHelper.generateRandomModel();
+		const modelWithVoidRev = ServiceHelper.generateRandomModel();
+		const existingPlan = ServiceHelper.generateClashPlan(models[0]._id, models[1]._id);
+		const planWithNoRev = ServiceHelper.generateClashPlan(models[0]._id, modelWithNoRev._id);
+		const planWithVoidRev = ServiceHelper.generateClashPlan(models[0]._id, modelWithVoidRev._id);
+
+		beforeAll(async () => {
+			await setupBasicData(basicData);
+			await Promise.all([
+				ServiceHelper.db.createRevision(teamspace, project.id,
+					models[0]._id, ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER),
+				ServiceHelper.db.createRevision(teamspace, project.id,
+					models[1]._id, ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER),
+				ServiceHelper.db.createRevision(teamspace, project.id,
+					modelWithVoidRev._id, ServiceHelper.generateRevisionEntry(true), modelTypes.CONTAINER),
+			]);
+			await Promise.all([existingPlan, planWithNoRev, planWithVoidRev]
+				.map((plan) => ServiceHelper.db.createClashPlan(teamspace, plan)));
+		});
+
+		describe.each([
+			['teamspace is not found', { ts: ServiceHelper.generateRandomString() }, false, templates.teamspaceNotFound],
+			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
+			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
+			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
+			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
+			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
+			['the plan has a container with no revisions', { planId: planWithNoRev._id }, false, templates.invalidArguments],
+			['the plan has a container with void revisions', { planId: planWithVoidRev._id }, false, templates.invalidArguments],
+			['user is teamspace admin', {}, true],
+		])('', (desc, { ts = teamspace, proj = project.id, key = users.tsAdmin.apiKey, planId = existingPlan._id }, success, expectedRes) => {
+			test(`should ${success ? 'succeed' : 'fail'} if ${desc}`, async () => {
+				const res = await agent.post(route(ts, proj, planId, key))
+					.expect(expectedRes?.status || templates.ok.status);
+
+				if (success) {
+					const id = res.body._id;
+					const clashRun = await DB.findOne(ts, CLASH_RUNS_COL, { _id: stringToUUID(id) });
+					expect(clashRun).toBeDefined();
+				} else {
+					expect(res.body.code).toEqual(expectedRes.code);
+				}
+			});
+		});
+	});
+};
+
+describe(determineTestGroup(__filename), () => {
 	beforeAll(async () => {
 		server = await ServiceHelper.app();
 		agent = await SuperTest(server);
@@ -200,4 +264,5 @@ describe(ServiceHelper.determineTestGroup(__filename), () => {
 	testCreatePlan();
 	testUpdatePlan();
 	testDeletePlan();
+	testCreateRun();
 });

@@ -22,17 +22,16 @@ import { getValidators } from '@/v5/store/tickets/tickets.validators';
 import { DashboardTicketsParams, VIEWER_ROUTE } from '@/v5/ui/routes/routes.constants';
 import { TicketForm } from '@/v5/ui/routes/viewer/tickets/ticketsForm/ticketForm.component';
 import { yupResolver } from '@hookform/resolvers/yup';
-import { useContext, useEffect } from 'react';
+import { useEffect } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { FormattedMessage } from 'react-intl';
 import { useParams, generatePath } from 'react-router-dom';
 import { isEmpty, merge, set } from 'lodash';
 import { Loader } from '@/v4/routes/components/loader/loader.component';
 import { SaveButton, RequiresViewerContainer, ButtonContainer, Link, Form } from './newTicketSlide.styles';
-import { hasRequiredViewerProperties, PresetValue } from '../../ticketsTable/ticketsTable.helper';
+import { hasRequiredViewerProperties, PresetValue } from '../../tabularView/ticketsTable.helper';
 import { getWaitablePromise } from '@/v5/helpers/async.helpers';
 import { IssueProperties, TicketsCardViews } from '@/v5/ui/routes/viewer/tickets/tickets.constants';
-import { TicketsTableContext } from '../../ticketsTable/ticketsTableContext/ticketsTableContext';
 
 type NewTicketSlideProps = {
 	template: ITemplate,
@@ -51,7 +50,6 @@ const toDefaultValue = ({ key, value }: PresetValue) => {
 
 export const NewTicketSlide = ({ template, containerOrFederation, presetValue, onSave, onDirtyStateChange }: NewTicketSlideProps) => {
 	const { teamspace, project } = useParams<DashboardTicketsParams>();
-	const { getPropertyType } = useContext(TicketsTableContext);
 	const isLoading = !templateAlreadyFetched(template || {} as any) || !containerOrFederation;
 	const preselectedDefaultValue = presetValue ? toDefaultValue(presetValue) : null;
 	const defaultTicket = getDefaultTicket(template);

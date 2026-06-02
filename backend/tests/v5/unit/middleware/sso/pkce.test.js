@@ -15,6 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+const { determineTestGroup } = require('../../../helper/utils');
 const config = require('../../../../../src/v5/utils/config');
 const { src } = require('../../../helper/path');
 
@@ -35,6 +36,6 @@ const testAddPkceProtection = () => {
 	});
 };
 
-describe('middleware/dataConverter/inputs/sso/pkce', () => {
+describe(determineTestGroup(__filename), () => {
 	testAddPkceProtection();
 });

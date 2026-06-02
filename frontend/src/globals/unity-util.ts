@@ -153,6 +153,13 @@ export class UnityUtil {
 	private static domTextureReferenceCounter = 0;
 
 	/**
+	 * Called from Unity to retrieve joystick input.
+	 * @returns An array containing the joystick input values [leftStickX, leftStickY, rightStickX, rightStickY, rightTrigger]
+	 */
+	/** @hidden */
+	private static virtualJoystickProvider: (() => [number, number, number, number, number] | null | undefined) | null = null;
+
+	/**
 	 * Contains a list of calls to make during the Unity Update method. One
 	 * call is made per Unity frame.
 	 */
@@ -1777,7 +1784,16 @@ export class UnityUtil {
 	 * @param isFederation - flag signaling whether the model is a container or a federation
 	 * @param initView? - the view the model should load with
 	 * @param clearCanvas? - Reset the state of the viewer prior to loading the model (Default: true)
+	 * @param assetGroups? - When specified, only load the assets that belong to the groups in the list. To include assets without a groups, include an empty string ("") as part of the list.
 	 * @return returns a promise that resolves when the model start loading.
+	 * @example 
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "16854ce0-6e82-11ea-9043-f5b42de4172c")
+	 * @example
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", "11da8980-6e82-11ea-a9b4-253aa7f93e55", "e2bf461d-b1a8-4068-b26f-75925a14345f")
+	 * @example
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", 28157fce-c424-469c-ac3b-38aaee07d0a5, 'head', true)
+	 * @example
+	 * UnityUtil.loadModel("Demo_3D_Repo", "797e2580-4142-11ec-a639-afc501682faf", 28157fce-c424-469c-ac3b-38aaee07d0a5, 'head', true, null, true, ["Level 0", "Level 1", ""])
 	 */
 	public static loadModel(
 		teamspace: string,
@@ -1787,6 +1803,7 @@ export class UnityUtil {
 		isFederation: boolean = false,
 		initView = null,
 		clearCanvas = true,
+		assetGroups?: string[],
 	): Promise<void> {
 		if (clearCanvas && UnityUtil.loadedFlag) {
 			UnityUtil.reset(!initView);
@@ -1806,6 +1823,11 @@ export class UnityUtil {
 		if (initView) {
 			params.initView = initView;
 		}
+
+		if (assetGroups?.length) {
+			params.assetGroups = assetGroups;
+		}
+
 		UnityUtil.onLoaded();
 		// eslint-disable-next-line no-console
 		console.log(`[${new Date()}]Loading model: `, params);
@@ -2294,6 +2316,24 @@ export class UnityUtil {
 	}
 
 	/**
+	 * Use the meshes API when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
+	public static enableOnlineSnapping() {
+		UnityUtil.toUnity('EnableOnlineSnapping', undefined);
+	}
+
+	/**
+	 * Use the WebGL buffers when performing a geometric snap. This API may be
+	 * removed in the future. By default the WebGL buffers will be used.
+	 * @hidden
+	 */
+	public static disableOnlineSnapping() {
+		UnityUtil.toUnity('DisableOnlineSnapping', undefined);
+	}
+
+	/**
 	 * @hidden
 	 * A helper function to split the calls into multiple calls when the array is too large for SendMessage to handle
 	 * @return returns a promise which will resolve after the last call chunk is invoked
@@ -2739,5 +2779,117 @@ export class UnityUtil {
 	 */
 	public static createWebRequestHandler(gameObjectName: string) {
 		return this.externalWebRequestHandler && this.externalWebRequestHandler.setUnityInstance(this.unityInstance, gameObjectName);
+	}
+
+	/**
+	 * Utility method for use by the viewer to invalidate cache entries, if any,
+	 * for a Container based on a bundles version number.
+	 * @hidden
+	 */
+	public static invalidateCache(json: string) {
+		const info = JSON.parse(json);
+		if (this.externalWebRequestHandler) {
+			// Currently cache invalidations are done on a per-container basis.
+			this.externalWebRequestHandler.invalidateCache(info.container, info.version);
+		}
+	}
+
+	/**
+	 * Enable the virtual joystick feature.
+	 *
+	 * The viewer polls `fn` once per frame to retrieve the current joystick
+	 * state. Each axis value should be in the range **-1 to 1**, where 0
+	 * represents the neutral (centred) position.
+	 *
+	 * @param fn - A provider function that returns the current joystick state
+	 * as a five-element tuple
+	 * `[leftStickX, leftStickY, rightStickX, rightStickY, trigger]`.
+	 * Return `null` or `undefined` to indicate no input this frame.
+	 *
+	 * @example
+	 * // Simulates a static right-stick push to the right (e.g. for testing)
+	 * UnityUtil.enableVirtualJoystick(() => [0, 0, 1, 0, 0]);
+	 */
+	public static enableVirtualJoystick(fn: () => [number, number, number, number, number]) {
+		if (typeof fn !== 'function') {
+			console.error('enableVirtualJoystick: fn must be a function');
+			return;
+		}
+		UnityUtil.virtualJoystickProvider = fn;
+		UnityUtil.toUnity('EnableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the virtual joystick feature.
+	 */
+	public static disableVirtualJoystick() {
+		UnityUtil.virtualJoystickProvider = null;
+		UnityUtil.toUnity('DisableVirtualJoystick', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Enable the Gamepad feature.
+	 */
+	public static enableGamepad() {
+		UnityUtil.toUnity('EnableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Disable the Gamepad feature.
+	 */
+	public static disableGamepad() {
+		UnityUtil.toUnity('DisableGamepad', UnityUtil.LoadingState.VIEWER_READY, undefined);
+	}
+
+	/**
+	 * Set offline fetch interceptor for mobile/Flutter integration
+	 * @param interceptor - Function that handles fetch requests
+	 */
+	public static setOfflineFetchInterceptor(interceptor: (url: string, options?: RequestInit) => Promise<Response>) {
+		if (UnityUtil.externalWebRequestHandler) {
+			UnityUtil.externalWebRequestHandler.setOfflineFetchInterceptor(interceptor);
+		}
+	}
+
+	/**
+	 * Shows the DrawingImageSource for the plane at the location specified by rect, 
+	 * with additional options for clipping and gizmo display. rect should be the 
+	 * size and location of the image, given as the location of three corners 
+	 * (bottomLeft (x, y, z), bottomRight (x, y, z), topLeft (x, y, z)) in Project 
+	 * coordinates. If image is null, the location of the existing image is updated. 
+	 * If no image has ever been loaded, a white rectangle is shown in its place. 
+	 * The clip and gizmo parameters control whether the drawing plane is clipped and 
+	 * whether the gizmo is shown, respectively.
+	 * @param image - DrawingImageSource for the drawing plane
+	 * @param rect - number[] specifying the world rectangle
+	 * @param clip - boolean to enable or disable clipping
+	 * @param gizmo - boolean to show or hide the gizmo
+	 */
+	public static enableDrawingPlane(image: DrawingImageSource, rect: number[], clip: boolean = true, gizmo: boolean = true) {
+		let index = -1;
+		let dimensions = [0, 0];
+
+		if (image !== null) {
+			index = this.domTextureReferenceCounter++;
+			this.domTextureReferences[index] = image;
+			dimensions = [image.width, image.height];
+		}
+
+		const parms = {
+			worldRect: rect,
+			domId: index,
+			dimensions,
+			clip,
+			gizmo,
+		};
+
+		UnityUtil.toUnity('EnableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, JSON.stringify(parms));
+	}
+
+	/** 
+	 * Disable the drawing plane
+	 */
+	public static disableDrawingPlane() {
+		UnityUtil.toUnity('DisableDrawingPlane', UnityUtil.LoadingState.VIEWER_READY, undefined);
 	}
 }

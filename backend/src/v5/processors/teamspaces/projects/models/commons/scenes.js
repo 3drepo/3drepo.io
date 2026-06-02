@@ -101,7 +101,9 @@ Scene.getExternalIdsFromMetadata = (metadata, wantedType) => {
 	// If there is a specific type the user wanted, return them
 	// This is currently explicity used for differencing therefore we don't care if
 	// we can't represent them all - we may need to add a partial flag in the future
-	if (wantedType) return { key: wantedType, values: res[wantedType] };
+	if (wantedType) {
+		return { key: wantedType, values: Array.from(new Set(res[wantedType])) };
+	}
 
 	// If we are determining the type, make sure we have a record for each metadata
 	const targetCount = metadata.length;

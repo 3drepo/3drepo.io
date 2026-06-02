@@ -78,7 +78,7 @@ export const federationMockFactory = (overrides?: Partial<IFederation>): IFedera
 	...overrides,
 });
 
-export const prepareMockStats = (overrides?: Partial<IFederation>) => ({
+export const prepareMockStats = (overrides?: Partial<FederationStats>): FederationStats => ({
 	code: faker.datatype.uuid(),
 	desc: faker.random.words(3),
 	status: UploadStatus.OK,
@@ -89,6 +89,7 @@ export const prepareMockStats = (overrides?: Partial<IFederation>) => ({
 	},
 	category: faker.random.word(),
 	lastUpdated: faker.datatype.number(),
+	modelId: faker.datatype.uuid(),
 	...overrides,
 }) as unknown as FederationStats;
 
