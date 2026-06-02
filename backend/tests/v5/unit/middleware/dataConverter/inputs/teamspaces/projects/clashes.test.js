@@ -252,6 +252,7 @@ const testValidateUpdatePlanData = () => {
 
 	const knownPlanId = generateUUID();
 	const planWithoutDefaultStatusesId = generateUUID();
+	const planWithAllTriggersId = generateUUID();
 
 	const ticketData = {
 		federation: recognisedFederations[0],
@@ -288,6 +289,10 @@ const testValidateUpdatePlanData = () => {
 	const oldPlanDataWithoutDefaultStatuses = {
 		...oldPlanData,
 		tickets: { ...ticketData, defaultStatuses: undefined },
+	};
+	const oldPlanDataWithAllTriggers = {
+		...oldPlanData,
+		trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]],
 	};
 
 	const expectedValueAtCreationUpdate = [
@@ -357,6 +362,9 @@ const testValidateUpdatePlanData = () => {
 		['with invalid trigger', false, { trigger: generateRandomString() }],
 		['with undefined trigger', false, { trigger: undefined }],
 		['with same trigger', false, { trigger: oldPlanData.trigger }],
+		['with same trigger in a different order', false, { trigger: [TRIGGER_OPTIONS[1], TRIGGER_OPTIONS[0]] }, undefined, planWithAllTriggersId],
+		['with an added trigger', true, { trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]] }],
+		['with a removed trigger', true, { trigger: [TRIGGER_OPTIONS[0]] }, undefined, planWithAllTriggersId],
 		['with empty trigger', false, { trigger: [] }],
 		['with null trigger', false, { trigger: null }],
 		['with duplicate trigger', true, { trigger: [TRIGGER_OPTIONS[1], TRIGGER_OPTIONS[1]] }, { trigger: [TRIGGER_OPTIONS[1]] }],
@@ -432,6 +440,9 @@ const testValidateUpdatePlanData = () => {
 				}
 				if (UUIDToString(id) === UUIDToString(planWithoutDefaultStatusesId)) {
 					return Promise.resolve(oldPlanDataWithoutDefaultStatuses);
+				}
+				if (UUIDToString(id) === UUIDToString(planWithAllTriggersId)) {
+					return Promise.resolve(oldPlanDataWithAllTriggers);
 				}
 				return Promise.reject(templates.clashPlanNotFound);
 			});
