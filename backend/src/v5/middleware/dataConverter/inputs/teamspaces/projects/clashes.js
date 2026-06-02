@@ -23,7 +23,6 @@ const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
 const { types, transformer: { uniqueArray } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
-const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
@@ -223,7 +222,9 @@ const validatePlanData = async (req, res, next) => {
 						delete req.body[key];
 					}
 				} else if (isArray(bodyVal)) {
-					if (getCommonElements(req.planData[key], bodyVal).length === req.planData[key].length) {
+					const normaliseArray = (array) => [...new Set(array)].sort();
+					if (isArray(req.planData[key])
+						&& isEqual(normaliseArray(req.planData[key]), normaliseArray(bodyVal))) {
 						delete req.body[key];
 					}
 				} else if (bodyVal === req.planData[key]) {
