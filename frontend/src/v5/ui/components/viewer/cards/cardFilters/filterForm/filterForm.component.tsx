@@ -22,6 +22,7 @@ import { getValidOperators } from '../filtersSelection/tickets/ticketFilters.hel
 import { Container, TitleContainer } from './filterForm.styles';
 import { FilterFormValues } from './filterFormValues/filterFormValues.component';
 import { FilterFormOperators } from './filterFormValues/operators/filterFormOperators.component';
+import { FilterFormActions } from './filterFormValues/filterFormActions.component';
 
 type FilterFormProps = {
 	module: string,
@@ -34,6 +35,7 @@ type FilterFormProps = {
 };
 
 export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel, cancelButton }: FilterFormProps) => {
+	const [canSubmit, setCanSubmit] = useState(false);
 	const getInitialOperator = (): TicketFilterOperator => {
 		const defaultOperator = filter?.operator || getDefaultOperator(type);
 		return getValidOperators(type).includes(defaultOperator) ? defaultOperator : getDefaultOperator(type);
@@ -61,10 +63,10 @@ export const FilterForm = ({ module, property, type, filter, onSubmit, onCancel,
 				type={type}
 				filter={filter}
 				operator={operator}
-				cancelButton={cancelButton}
-				onCancel={handleCancel}
 				onSubmit={onSubmit}
+				onCanSubmitChanged={setCanSubmit}
 			/>
+			<FilterFormActions canSubmit={canSubmit} cancelButton={cancelButton} onCancel={handleCancel} onSubmit={onSubmit} />
 		</Container>
 	);
 };

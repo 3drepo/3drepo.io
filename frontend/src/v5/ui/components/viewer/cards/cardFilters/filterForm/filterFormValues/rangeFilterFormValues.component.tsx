@@ -19,7 +19,6 @@ import { useEffect, useRef } from 'react';
 import { FormProvider, useFieldArray, useForm } from 'react-hook-form';
 import { isEmpty } from 'lodash';
 import { isDateType } from '../../cardFilters.helpers';
-import { getOperatorMaxFieldsAllowed } from '../filterForm.helpers';
 import { ArrayFieldContainer } from '@controls/inputs/arrayFieldContainer/arrayFieldContainer.component';
 import { DateRangeInput } from './rangeInput/dateRangeInput.component';
 import { NumberRangeInput } from './rangeInput/numberRangeInput.component';
@@ -32,7 +31,6 @@ import {
 	isOperatorDirty,
 	mapFilterFormValuesToFilter,
 } from './filterFormValues.helpers';
-import { FilterFormActions } from './filterFormActions.component';
 import { yupResolver } from '@hookform/resolvers/yup';
 import { RangeFilterSchema } from '@/v5/validation/ticketSchemes/validators';
 
@@ -44,8 +42,7 @@ export const FilterFormRangeValues = ({
 	type,
 	filter,
 	operator,
-	cancelButton,
-	onCancel,
+	onCanSubmitChanged,
 	onSubmit,
 }: FilterFormValuesComponentProps) => {
 	const formData = useForm<FilterFormValuesForm>({
@@ -54,13 +51,12 @@ export const FilterFormRangeValues = ({
 		resolver: yupResolver(RangeFilterSchema),
 		context: { type, operator },
 	});
-	const { control, formState: { errors, dirtyFields, isValid }, reset } = formData;
+	const { control, formState: { errors, dirtyFields, isValid } } = formData;
 	const { fields, append, remove } = useFieldArray({
 		control,
 		name: FIELD_ARRAY_NAME,
 	});
 	const error = errors.values || {};
-	const maxFields = getOperatorMaxFieldsAllowed(operator);
 	const RangeInput = isDateType(type) ? DateRangeInput : NumberRangeInput;
 	const arrayFieldsRef = useRef(null);
 	const arrayFieldsMaxHeight = window.innerHeight - arrayFieldsRef.current?.getBoundingClientRect()?.top - 60;
@@ -68,29 +64,12 @@ export const FilterFormRangeValues = ({
 	const submitForm = formData.handleSubmit((filledForm) => onSubmit(
 		mapFilterFormValuesToFilter(filledForm, module, property, type, operator),
 	));
-	const handleCancel = () => {
-		reset();
-		onCancel();
-	};
 
 	useEffect(() => {
-		if (!isEmpty(dirtyFields)) {
-			remove();
-			return () => remove();
+		if (onCanSubmitChanged) {
+			onCanSubmitChanged(canSubmit);
 		}
-	}, []);
-
-	useEffect(() => {
-		if (!fields.length && maxFields > 0) {
-			append(EMPTY_RANGE_VALUE);
-		}
-	}, [fields.length, operator]);
-
-	useEffect(() => {
-		if (maxFields === 0) {
-			remove();
-		}
-	}, [maxFields]);
+	}, [canSubmit]);
 
 	const getFieldContainerProps = (field, i) => ({
 		key: field.id,
@@ -110,7 +89,6 @@ export const FilterFormRangeValues = ({
 						</ArrayFieldContainer>
 					))}
 				</ArrayFields>
-				<FilterFormActions canSubmit={canSubmit} cancelButton={cancelButton} onCancel={handleCancel} onSubmit={submitForm} />
 			</form>
 		</FormProvider>
 	);

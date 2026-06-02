@@ -61,9 +61,8 @@ export type FilterFormValuesProps = {
 	type: TicketFilterType,
 	filter?: BaseFilter,
 	operator: TicketFilterOperator,
-	cancelButton?: boolean,
-	onSubmit: (newFilter: TicketFilter) => void,
-	onCancel: () => void,
+	onCanSubmitChanged?: (isValid: boolean) => void,
+	onSubmit?: (newFilter: TicketFilter) => void,
 };
 
 export type FilterFormValuesComponentProps = FilterFormValuesProps;
