@@ -75,6 +75,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 		formState: { isValid, errors },
 		getValues,
 		reset,
+		trigger,
 	} = formData;
 
 	const getIsDirty = () => {
@@ -100,7 +101,6 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 
 	useEffect(() => {
 		if (isEmpty(unsavedState)) {
-			// console.log('@@~ Resetting to default values', rule);
 			reset(defaultValues);
 
 		}
@@ -108,15 +108,12 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 
 	useEffect(() => {
 		if (isEmpty(unsavedState)) return;
-		// console.log('@@~ Resetting to unsavedState');
 		reset(groupRuleToFormRule(unsavedState));
 	}, [JSON.stringify(unsavedState)]);
 
 	useEffect(() => () => {
 		onClose?.(formRuleToGroupRule(getValues()));
 	}, []);
-
-	// console.log('@@ base form errors', errors);
 
 	return (
 		<Form onSubmit={handleSubmit}>
@@ -129,6 +126,7 @@ export const GroupRulesForm = ({ onClose, onSubmit, rule, existingRules = [], co
 						label={formatMessage({ id: 'tickets.groups.filterPanel.name', defaultMessage: 'Name' })}
 						formError={errors.name}
 						disabled={isReadOnly}
+						onChange={() => trigger('name')}
 					/>
 					<RuleFieldOperator disabled={isReadOnly} />
 					<RuleFieldValues disabled={isReadOnly} />

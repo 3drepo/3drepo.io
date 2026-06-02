@@ -24,7 +24,7 @@ import { get } from 'lodash';
 import { ListboxComponent } from './listboxComponent/listboxComponent.component';
 import { Autocomplete } from './fieldValueInput.styles';
 
-export const FieldValueInput = ({ name, autoFocus = false, disabled }) => {
+export const FieldValueInput = ({ name, autoFocus = false, disabled, onChange: onChangeProp = undefined }) => {
 	const { formState: { errors } } = useFormContext();
 	const fields = useSelector(selectMetaKeys);
 
@@ -34,7 +34,6 @@ export const FieldValueInput = ({ name, autoFocus = false, disabled }) => {
 			render={({ field: { onChange, ...field } }) => (
 				<Autocomplete
 					{...field}
-					// renderOption={(props, option) => [props, option]}
 					disableClearable={!field.value}
 					disableListWrap
 					freeSolo
@@ -44,8 +43,8 @@ export const FieldValueInput = ({ name, autoFocus = false, disabled }) => {
 						},
 					}}
 					options={fields}
-					onChange={(_, data) => onChange(data)}
-					onInputChange={(_, data) => onChange(data)}
+					onChange={(_, data) => { onChange(data); onChangeProp?.(); }}
+					onInputChange={(_, data) => { onChange(data); onChangeProp?.(); }}
 					noOptionsText={formatMessage({ id: 'tickets.groups.field.noOptions', defaultMessage: 'No options' })}
 					disabled={disabled}
 					renderInput={({ InputProps, ...renderInputParams }) => (
