@@ -102,19 +102,31 @@ const testValidateNewPlanData = () => {
 		federation: recognisedFederation,
 		template: templateInTeamspace,
 		creator: knownUsername,
-		valuesAtCreation: times(3,
-			() => ({
+		valuesAtCreation: [
+			{
+				property: generateRandomString(),
+				value: generateRandomString(),
+			},
+			...times(2, () => ({
 				property: generateRandomString(),
 				module: generateRandomString(),
 				value: generateRandomString(),
 			})),
+		],
 	};
 
 	const expectedTicketFormat = {};
 	ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
 		const moduleName = module ?? 'properties';
-		expectedTicketFormat[moduleName] = expectedTicketFormat[moduleName] ?? {};
-		expectedTicketFormat[moduleName][property] = value;
+
+		if (moduleName === 'properties') {
+			expectedTicketFormat.properties = expectedTicketFormat.properties ?? {};
+			expectedTicketFormat.properties[property] = value;
+		} else {
+			expectedTicketFormat.modules = expectedTicketFormat.modules ?? {};
+			expectedTicketFormat.modules[moduleName] = expectedTicketFormat.modules[moduleName] ?? {};
+			expectedTicketFormat.modules[moduleName][property] = value;
+		}
 	});
 
 	const testCases = [
@@ -259,6 +271,7 @@ const testValidateUpdatePlanData = () => {
 	const knownPlanId = generateUUID();
 	const planWithTemplateWithoutCloudClash = generateUUID();
 	const planWithoutDefaultStatusesId = generateUUID();
+	const planWithAllTriggersId = generateUUID();
 
 	const ticketData = {
 		federation: recognisedFederations[0],
@@ -269,12 +282,17 @@ const testValidateUpdatePlanData = () => {
 			onResolved: templateDefaultStatuses.CLOSED,
 			onReopened: templateDefaultStatuses.IN_PROGRESS,
 		},
-		valuesAtCreation: times(3,
-			() => ({
+		valuesAtCreation: [
+			{
+				property: generateRandomString(),
+				value: generateRandomString(),
+			},
+			...times(2, () => ({
 				property: generateRandomString(),
 				module: generateRandomString(),
 				value: generateRandomString(),
 			})),
+		],
 	};
 
 	const oldPlanData = {
@@ -291,25 +309,48 @@ const testValidateUpdatePlanData = () => {
 		...oldPlanData,
 		tickets: { ...ticketData, defaultStatuses: undefined },
 	};
+	const oldPlanDataWithAllTriggers = {
+		...oldPlanData,
+		trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]],
+	};
 
-	const expectedValueAtCreationUpdate = times(3,
-		() => ({
+	const expectedValueAtCreationUpdate = [
+		{
+			property: generateRandomString(),
+			value: generateRandomString(),
+		},
+		...times(2, () => ({
 			property: generateRandomString(),
 			module: generateRandomString(),
 			value: generateRandomString(),
-		}));
+		})),
+	];
 	const expectedTicketFormat = {};
 	expectedValueAtCreationUpdate.forEach(({ property, module, value }) => {
 		const moduleName = module ?? 'properties';
-		expectedTicketFormat[moduleName] = expectedTicketFormat[moduleName] ?? {};
-		expectedTicketFormat[moduleName][property] = value;
+
+		if (moduleName === 'properties') {
+			expectedTicketFormat.properties = expectedTicketFormat.properties ?? {};
+			expectedTicketFormat.properties[property] = value;
+		} else {
+			expectedTicketFormat.modules = expectedTicketFormat.modules ?? {};
+			expectedTicketFormat.modules[moduleName] = expectedTicketFormat.modules[moduleName] ?? {};
+			expectedTicketFormat.modules[moduleName][property] = value;
+		}
 	});
 
 	const oldTicketFormat = {};
 	ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
 		const moduleName = module ?? 'properties';
-		oldTicketFormat[moduleName] = oldTicketFormat[moduleName] ?? {};
-		oldTicketFormat[moduleName][property] = value;
+
+		if (moduleName === 'properties') {
+			oldTicketFormat.properties = oldTicketFormat.properties ?? {};
+			oldTicketFormat.properties[property] = value;
+		} else {
+			oldTicketFormat.modules = oldTicketFormat.modules ?? {};
+			oldTicketFormat.modules[moduleName] = oldTicketFormat.modules[moduleName] ?? {};
+			oldTicketFormat.modules[moduleName][property] = value;
+		}
 	});
 
 	const updateStr = generateRandomString();
@@ -340,6 +381,9 @@ const testValidateUpdatePlanData = () => {
 		['with invalid trigger', false, { trigger: generateRandomString() }],
 		['with undefined trigger', false, { trigger: undefined }],
 		['with same trigger', false, { trigger: oldPlanData.trigger }],
+		['with same trigger in a different order', false, { trigger: [TRIGGER_OPTIONS[1], TRIGGER_OPTIONS[0]] }, undefined, planWithAllTriggersId],
+		['with an added trigger', true, { trigger: [TRIGGER_OPTIONS[0], TRIGGER_OPTIONS[1]] }],
+		['with a removed trigger', true, { trigger: [TRIGGER_OPTIONS[0]] }, undefined, planWithAllTriggersId],
 		['with empty trigger', false, { trigger: [] }],
 		['with null trigger', false, { trigger: null }],
 		['with duplicate trigger', true, { trigger: [TRIGGER_OPTIONS[1], TRIGGER_OPTIONS[1]] }, { trigger: [TRIGGER_OPTIONS[1]] }],
@@ -424,6 +468,9 @@ const testValidateUpdatePlanData = () => {
 				}
 				if (UUIDToString(id) === UUIDToString(planWithoutDefaultStatusesId)) {
 					return Promise.resolve(oldPlanDataWithoutDefaultStatuses);
+				}
+				if (UUIDToString(id) === UUIDToString(planWithAllTriggersId)) {
+					return Promise.resolve(oldPlanDataWithAllTriggers);
 				}
 				return Promise.reject(templates.clashPlanNotFound);
 			});

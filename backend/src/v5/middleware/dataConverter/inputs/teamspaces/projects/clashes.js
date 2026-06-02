@@ -23,7 +23,6 @@ const { isArray, isObject } = require('../../../../../utils/helper/typeCheck');
 const { types, transformer: { uniqueArray } } = require('../../../../../utils/helper/yup');
 const Yup = require('yup');
 const { statuses: defaultStatuses } = require('../../../../../schemas/tickets/templates.constants');
-const { getCommonElements } = require('../../../../../utils/helper/arrays');
 const { getLatestRevision } = require('../../../../../models/revisions');
 const { getPlanById } = require('../../../../../models/clashes.plans');
 const { getTemplateById } = require('../../../../../models/tickets.templates');
@@ -169,9 +168,17 @@ const validateTicketConfiguration = async (teamspace, project, newTicketData, ol
 
 	if (ticketData.valuesAtCreation?.length) {
 		const propertiesToUpdate = {};
-		ticketData.valuesAtCreation.forEach(({ property, module = 'properties', value }) => {
-			propertiesToUpdate[module] = propertiesToUpdate[module] || {};
-			propertiesToUpdate[module][property] = value;
+		ticketData.valuesAtCreation.forEach(({ property, module, value }) => {
+			const targetModule = module ?? 'properties';
+
+			if (targetModule === 'properties') {
+				propertiesToUpdate.properties = propertiesToUpdate.properties || {};
+				propertiesToUpdate.properties[property] = value;
+			} else {
+				propertiesToUpdate.modules = propertiesToUpdate.modules || {};
+				propertiesToUpdate.modules[targetModule] = propertiesToUpdate.modules[targetModule] || {};
+				propertiesToUpdate.modules[targetModule][property] = value;
+			}
 		});
 
 		// empty object is needed at the end to trigger an update check instead of new ticket validation (i.e. partial ticket validation)
@@ -215,7 +222,9 @@ const validatePlanData = async (req, res, next) => {
 						delete req.body[key];
 					}
 				} else if (isArray(bodyVal)) {
-					if (getCommonElements(req.planData[key], bodyVal).length === req.planData[key].length) {
+					const normaliseArray = (array) => [...new Set(array)].sort();
+					if (isArray(req.planData[key])
+						&& isEqual(normaliseArray(req.planData[key]), normaliseArray(bodyVal))) {
 						delete req.body[key];
 					}
 				} else if (bodyVal === req.planData[key]) {

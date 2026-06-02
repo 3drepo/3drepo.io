@@ -1581,6 +1581,84 @@ const testValidateTicketsBatchUniqueness = () => {
 			await expect(TicketSchema.validateTickets(teamspace, project, model, template, tickets))
 				.rejects.toThrow(`The unique property ${moduleName}.${propName} can not have the same value multiple times.`);
 		});
+
+		test('Should ignore duplicate values for properties that are not unique', async () => {
+			const propName = generateRandomString();
+			const moduleName = generateRandomString();
+			const modulePropName = generateRandomString();
+			const duplicateValue = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{ name: propName, type: propTypes.TEXT }],
+				modules: [{
+					name: moduleName,
+					properties: [{ name: modulePropName, type: propTypes.TEXT }],
+				}, {
+					type: presetModules.SEQUENCING,
+					properties: [],
+				}],
+			};
+			const tickets = times(2, () => ({
+				title: generateRandomString(),
+				properties: {
+					[propName]: duplicateValue,
+				},
+				modules: {
+					[moduleName]: {
+						[modulePropName]: duplicateValue,
+					},
+				},
+			}));
+
+			TicketsModel.getTicketsByQuery.mockResolvedValue([]);
+
+			await expect(TicketSchema.validateTickets(teamspace, project, model, template, tickets))
+				.resolves.toHaveLength(2);
+		});
+
+		test('Should reject duplicate unique preset module property values within the same batch', async () => {
+			const propName = generateRandomString();
+			const duplicateValue = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [],
+				modules: [{
+					type: presetModules.SEQUENCING,
+					properties: [{ name: propName, type: propTypes.TEXT, unique: true }],
+				}],
+			};
+			const tickets = times(2, () => ({
+				title: generateRandomString(),
+				modules: {
+					[presetModules.SEQUENCING]: {
+						[propName]: duplicateValue,
+					},
+				},
+			}));
+
+			TicketsModel.getTicketsByQuery.mockResolvedValue([]);
+
+			await expect(TicketSchema.validateTickets(teamspace, project, model, template, tickets))
+				.rejects.toThrow(`The unique property ${presetModules.SEQUENCING}.${propName} can not have the same value multiple times.`);
+		});
+
+		test('Should ignore missing unique values within the same batch', async () => {
+			const propName = generateRandomString();
+			const template = {
+				_id: generateUUID(),
+				properties: [{ name: propName, type: propTypes.TEXT, unique: true }],
+				modules: [],
+			};
+			const tickets = times(2, () => ({
+				title: generateRandomString(),
+				properties: {},
+			}));
+
+			TicketsModel.getTicketsByQuery.mockResolvedValue([]);
+
+			await expect(TicketSchema.validateTickets(teamspace, project, model, template, tickets))
+				.resolves.toHaveLength(2);
+		});
 	});
 };
 

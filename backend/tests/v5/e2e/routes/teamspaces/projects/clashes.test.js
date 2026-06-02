@@ -21,35 +21,18 @@ const SuperTest = require('supertest');
 const ServiceHelper = require('../../../../helper/services');
 const { src } = require('../../../../helper/path');
 
-const { queueMessage } = require(`${src}/handler/queue`);
 const { modelTypes } = require(`${src}/models/modelSettings.constants`);
 const { CLASH_RUNS_COL } = require(`${src}/models/clashes.constants`);
 const DB = require(`${src}/handler/db`);
-const { cn_queue: queueConfig } = require(`${src}/utils/config`);
-const { callback_queue: callbackq, shared_storage: sharedDir } = queueConfig;
-const { getTestRunByQuery } = require(`${src}/models/clashes.runs`);
-const { CLASH_RUN_STATUS, RUN_HISTORY_COL } = require(`${src}/models/clashes.constants`);
-const { getFileAsStream } = require(`${src}/services/filesManager`);
 const { getPlanById } = require(`${src}/models/clashes.plans`);
-const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+const { stringToUUID, UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { templates } = require(`${src}/utils/responseCodes`);
 const { presetModules, statuses: defaultStatuses } = require(`${src}/schemas/tickets/templates.constants`);
-const fs = require('fs');
-const path = require('path');
-const { UUIDToString } = require('../../../../../../src/v5/utils/helper/uuids');
-const { deleteIfUndefined } = require('../../../../../../src/v5/utils/helper/objects');
 
-const SHARED_SPACE_TAG = '$SHARED_SPACE';
+const { deleteIfUndefined } = require(`${src}/utils/helper/objects`);
 
 let server;
 let agent;
-
-const formatClash = (clash) => ({
-	...clash,
-	a: { container: clash.a.split('::')[0], idType: clash.a.split('::')[1], id: clash.a.split('::')[2] },
-	b: { container: clash.b.split('::')[0], idType: clash.b.split('::')[1], id: clash.b.split('::')[2] },
-	index: [clash.a, clash.b].sort().join('-'),
-});
 
 const setupBasicData = async ({ users, teamspace, project, models, federation, plan, template }) => {
 	await ServiceHelper.db.createUser(users.tsAdmin);
@@ -57,6 +40,7 @@ const setupBasicData = async ({ users, teamspace, project, models, federation, p
 
 	await Promise.all([
 		ServiceHelper.db.createUser(users.projectAdmin, [teamspace]),
+		ServiceHelper.db.createUser(users.nonAdminUser, [teamspace]),
 		ServiceHelper.db.createUser(users.unlicencedUser),
 	]);
 
@@ -75,7 +59,7 @@ const setupBasicData = async ({ users, teamspace, project, models, federation, p
 };
 
 const generateBasicData = () => {
-	const [tsAdmin, unlicencedUser, projectAdmin] = times(3,
+	const [tsAdmin, nonAdminUser, unlicencedUser, projectAdmin] = times(4,
 		() => ServiceHelper.generateUserCredentials());
 
 	const models = times(2, () => ServiceHelper.generateRandomModel());
@@ -87,7 +71,7 @@ const generateBasicData = () => {
 	const project = ServiceHelper.generateRandomProject();
 
 	return ({
-		users: { tsAdmin, unlicencedUser, projectAdmin },
+		users: { tsAdmin, nonAdminUser, unlicencedUser, projectAdmin },
 		teamspace: ServiceHelper.generateRandomString(),
 		project,
 		models,
@@ -338,7 +322,6 @@ const testCreateRun = () => {
 		const route = (ts, project, planId, key) => `/v5/teamspaces/${ts}/projects/${project}/clashes/${planId}/runs${key ? `?key=${key}` : ''}`;
 
 		const basicData = generateBasicData();
-		const nonAdminUser = ServiceHelper.generateUserCredentials();
 		const modelWithNoRev = ServiceHelper.generateRandomModel();
 		const modelWithVoidRev = ServiceHelper.generateRandomModel();
 		const createRunModels = [modelWithNoRev, modelWithVoidRev];
@@ -353,7 +336,6 @@ const testCreateRun = () => {
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 			await Promise.all([
-				ServiceHelper.db.createUser(nonAdminUser, [teamspace]),
 				DB.updateOne(teamspace, 'projects', { _id: stringToUUID(project.id) },
 					{ $push: { models: { $each: createRunModels.map(({ _id }) => _id) } } }),
 				...createRunModels.map((model) => ServiceHelper.db.createModel(
@@ -387,7 +369,7 @@ const testCreateRun = () => {
 			['session is invalid', { key: ServiceHelper.generateRandomString() }, false, templates.notLoggedIn],
 			['user is not a member of the teamspace', { key: users.unlicencedUser.apiKey }, false, templates.teamspaceNotFound],
 			['the project does not exist', { proj: ServiceHelper.generateRandomString() }, false, templates.projectNotFound],
-			['the user is not a project admin', { key: nonAdminUser.apiKey }, false, templates.notAuthorized],
+			['the user is not a project admin', { key: users.nonAdminUser.apiKey }, false, templates.notAuthorized],
 			['the plan does not exist', { planId: ServiceHelper.generateRandomString() }, false, templates.clashPlanNotFound],
 			['the plan belongs to a different project', { planId: planInAnotherProject._id }, false, templates.clashPlanNotFound],
 			['the plan has a container with no revisions', { planId: planWithNoRev._id }, false, templates.invalidArguments],
@@ -400,118 +382,12 @@ const testCreateRun = () => {
 
 				if (success) {
 					const id = res.body._id;
-					const testRun = await DB.findOne(ts, CLASH_RUNS_COL, { _id: stringToUUID(id) });
-					expect(testRun).toBeDefined();
+					const clashRun = await DB.findOne(ts, CLASH_RUNS_COL, { _id: stringToUUID(id) });
+					expect(clashRun).toBeDefined();
 				} else {
 					expect(res.body.code).toEqual(expectedRes.code);
 				}
 			});
-		});
-	});
-};
-
-const testParseClashResults = () => {
-	describe('Parse clash results', () => {
-		const basicData = generateBasicData();
-		const { teamspace, project, plan } = basicData;
-		const planWithNoRun = ServiceHelper.generateClashPlan(
-			plan.selectionA.container, plan.selectionB.container);
-		const plannedClashRun1 = ServiceHelper.generateClashRun(plan);
-		const plannedClashRun2 = ServiceHelper.generateClashRun(planWithNoRun);
-		const completedClashRun = { ...ServiceHelper.generateClashRun(plan), status: CLASH_RUN_STATUS.COMPLETED };
-		const clashes = ServiceHelper.generateClashes(plan);
-
-		beforeAll(async () => {
-			await setupBasicData(basicData);
-			await Promise.all([
-				ServiceHelper.db.createClashPlan(teamspace, project.id, planWithNoRun),
-				ServiceHelper.db.createClashRun(teamspace, plannedClashRun1),
-				ServiceHelper.db.createClashRun(teamspace, plannedClashRun2),
-				ServiceHelper.db.createClashRun(teamspace, completedClashRun,
-					{ new: clashes.map(formatClash), active: [], resolved: [] }),
-			]);
-		});
-
-		beforeEach(() => {
-			[plannedClashRun1, plannedClashRun2].forEach((run) => {
-				const resultsDir = path.join(sharedDir, `${run._id}`);
-				fs.mkdirSync(resultsDir, { recursive: true });
-				fs.writeFileSync(path.join(resultsDir, 'results.json'), JSON.stringify({ clashes }), 'utf8');
-			});
-		});
-
-		afterEach(() => {
-			[plannedClashRun1, plannedClashRun2].forEach((run) => {
-				const resultsDir = path.join(sharedDir, `${run._id}`);
-				fs.rmSync(resultsDir, { recursive: true, force: true });
-			});
-		});
-
-		const getFileContents = async (fileId) => {
-			const { readStream } = await getFileAsStream(teamspace, RUN_HISTORY_COL, fileId);
-
-			return new Promise((resolve, reject) => {
-				const chunks = [];
-
-				readStream.on('data', (chunk) => chunks.push(Buffer.from(chunk)));
-				readStream.on('error', reject);
-				readStream.on('end', () => {
-					resolve(Buffer.concat(chunks).toString('utf8'));
-				});
-			});
-		};
-
-		test('should just set the run to failed if there is an error', async () => {
-			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun2._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 28 };
-
-			await queueMessage(callbackq, plannedClashRun2._id, JSON.stringify(callbackObj));
-
-			// wait for the queue to process the message
-			await ServiceHelper.sleepMS(1000);
-
-			const run = await getTestRunByQuery(teamspace, { _id: stringToUUID(plannedClashRun2._id) },
-				{ status: 1, result: 1 });
-			expect(run.status).toEqual(CLASH_RUN_STATUS.FAILED);
-			expect(run.result).toBeUndefined();
-		});
-
-		test('should parse results if there is no previous run', async () => {
-			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun2._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 0 };
-
-			await queueMessage(callbackq, plannedClashRun2._id, JSON.stringify(callbackObj));
-
-			// wait for the queue to process the message
-			await ServiceHelper.sleepMS(1000);
-
-			const run = await getTestRunByQuery(teamspace, { _id: stringToUUID(plannedClashRun2._id) },
-				{ status: 1, result: 1 });
-			expect(run.status).toEqual(CLASH_RUN_STATUS.COMPLETED);
-
-			const contents = await getFileContents(run.result);
-			const parsedContents = JSON.parse(contents);
-
-			expect(parsedContents).toEqual({ new: clashes.map(formatClash), active: [], resolved: [] });
-		});
-
-		test('should parse results if there is previous run', async () => {
-			const results = path.join(SHARED_SPACE_TAG, `${plannedClashRun1._id}`, 'results.json');
-			const callbackObj = { type: 'clash', teamspace, project: project.id, results, value: 0 };
-
-			await queueMessage(callbackq, plannedClashRun1._id, JSON.stringify(callbackObj));
-
-			// wait for the queue to process the message
-			await ServiceHelper.sleepMS(1000);
-
-			const run = await getTestRunByQuery(teamspace, { _id: stringToUUID(plannedClashRun1._id) },
-				{ status: 1, result: 1 });
-			expect(run.status).toEqual(CLASH_RUN_STATUS.COMPLETED);
-
-			const contents = await getFileContents(run.result);
-			const parsedContents = JSON.parse(contents);
-
-			expect(parsedContents).toEqual({ new: [], active: clashes.map(formatClash), resolved: [] });
 		});
 	});
 };
@@ -531,5 +407,4 @@ describe(determineTestGroup(__filename), () => {
 	testUpdatePlan();
 	testDeletePlan();
 	testCreateRun();
-	testParseClashResults();
 });

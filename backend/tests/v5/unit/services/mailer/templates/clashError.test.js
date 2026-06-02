@@ -27,6 +27,7 @@ const testHtml = () => {
 		test('should get clashError template html', async () => {
 			const res = await ClashError.html({
 				teamspace: generateRandomString(),
+				project: generateRandomString(),
 				planId: generateRandomString(),
 				runId: generateRandomString(),
 				errorMessage: generateRandomString(),

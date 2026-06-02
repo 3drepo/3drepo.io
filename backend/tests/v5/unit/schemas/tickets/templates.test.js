@@ -1353,6 +1353,25 @@ const testGenerateFullSchema = () => {
 			expect(output).toEqual(expectedOutput);
 		});
 
+		test('should fill default properties when config is not defined', () => {
+			const template = {
+				name: generateRandomString(),
+				properties: [
+					{
+						name: generateRandomString(),
+						type: propTypes.TEXT,
+					},
+				],
+				modules: [],
+			};
+
+			const output = TemplateSchema.generateFullSchema(template);
+
+			const expectedOutput = cloneDeep(template);
+			expectedOutput.properties = [...getApplicableDefaultProperties({}), ...expectedOutput.properties];
+			expect(output).toEqual(expectedOutput);
+		});
+
 		test('should validate created at to not be read only if import is set to true', () => {
 			const template = {
 				name: generateRandomString(),

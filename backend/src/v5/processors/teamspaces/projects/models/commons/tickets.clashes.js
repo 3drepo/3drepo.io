@@ -101,16 +101,13 @@ const generateBaseNewTicket = async (teamspace, project, federation, template, d
 		modules: {},
 	};
 
-	const constructTicketChange = ({ module, property, value }, ticketToReturn = { properties: {}, modules: {} }) => {
-		const targetModule = module ?? 'properties';
+	const constructTicketChange = ({ module, property, value }, ticketToReturn) => {
 		/* eslint-disable no-param-reassign */
-		if (targetModule === 'properties') {
-			ticketToReturn.properties = ticketToReturn.properties ?? {};
+		if (!module) {
 			ticketToReturn.properties[property] = value;
 		} else {
-			ticketToReturn.modules = ticketToReturn.modules ?? {};
-			ticketToReturn.modules[targetModule] = ticketToReturn.modules[targetModule] ?? {};
-			ticketToReturn.modules[targetModule][property] = value;
+			ticketToReturn.modules[module] = ticketToReturn.modules[module] ?? {};
+			ticketToReturn.modules[module][property] = value;
 		}
 		/* eslint-enable no-param-reassign */
 
@@ -236,9 +233,8 @@ const processNewTickets = async (teamspace, project, federation, template, ticke
 
 	// run it through a validation pass to ensure we have all the default values set, and also
 	// we're not creating tickets with invalid data (e.g. if there's a unique/read only property we're setting incorrectly)
-	const validatedTicketsToCreate = ticketsToCreate.length
-		? (await validateTickets(teamspace, project, federation, template,
-			ticketsToCreate, { author: creator })).map(({ newTicket }) => newTicket) : [];
+	const validatedTicketsToCreate = (await validateTickets(teamspace, project, federation, template,
+		ticketsToCreate, { author: creator })).map(({ newTicket }) => newTicket);
 
 	if (validatedTicketsToCreate.length) {
 		await addTicketsWithTemplate(teamspace, project, federation, template._id, validatedTicketsToCreate);

@@ -16,6 +16,12 @@
  */
 
 const ClashesConstants = {};
+const { idTypes } = require('./metadata.constants');
+
+ClashesConstants.clashObjectIdTypes = {
+	...idTypes,
+	INTERNAL: 'internal',
+};
 
 ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
 ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';
@@ -38,7 +44,7 @@ ClashesConstants.TRIGGER_OPTIONS = [
 	'new revision',
 ];
 
-ClashesConstants.CLASH_RUN_STATUS = {
+ClashesConstants.clashRunStatus = {
 	PLANNED: 'planned',
 	QUEUED: 'queued',
 	FAILED: 'failed',

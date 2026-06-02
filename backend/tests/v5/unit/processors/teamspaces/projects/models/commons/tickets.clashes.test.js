@@ -211,6 +211,77 @@ describe(determineTestGroup(__filename), () => {
 		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 	});
 
+	test('Should calculate the distance for new clearance clash tickets', async () => {
+		const template = getTemplate();
+		const clash = getClash(generateRandomString());
+		const context = { ...getContext(), clashType: CLASH_TYPES.CLEARANCE };
+		const results = { new: [clash], active: [], resolved: [] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context));
+
+		const createdTickets = TicketsModel.addTicketsWithTemplate.mock.calls[0][4];
+		expect(createdTickets[0].modules[CLOUD_CLASH]).toEqual(getCloudClashData(clash, context, 5));
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+	});
+
+	test('Should use the original id type for unknown clash id types and Unknown when missing', async () => {
+		const template = getTemplate();
+		const clash = getClash(generateRandomString());
+		const context = getContext();
+		const customIdType = generateRandomString();
+		clash.a.idType = customIdType;
+		delete clash.b.idType;
+		const results = { new: [clash], active: [], resolved: [] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context));
+
+		const cloudClashData = TicketsModel.addTicketsWithTemplate.mock.calls[0][4][0].modules[CLOUD_CLASH];
+		expect(cloudClashData[OBJECT_A_ID_TYPE]).toEqual(customIdType);
+		expect(cloudClashData[OBJECT_B_ID_TYPE]).toEqual('Unknown');
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+	});
+
+	test('Should handle empty results and missing ticket options', async () => {
+		const template = getTemplate();
+		const context = getContext();
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([{ modules: { [CLOUD_CLASH]: {} } }]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, {},
+			{
+				runId: context.runId,
+				plan: {
+					_id: context.planId,
+					name: context.planName,
+					type: context.clashType,
+				},
+			});
+
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+	});
+
+	test('Should not create tickets when validation filters them out', async () => {
+		const template = getTemplate();
+		const clash = getClash(generateRandomString());
+		const context = getContext();
+		const results = { new: [clash], active: [], resolved: [] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+		TicketSchema.validateTickets.mockResolvedValueOnce([]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context));
+
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+	});
+
 	test('Should drop invalid default values when creating tickets', async () => {
 		const defaultStatus = generateRandomString();
 		const template = getTemplate(defaultStatus);
@@ -328,6 +399,68 @@ describe(determineTestGroup(__filename), () => {
 		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
 	});
 
+	test('Should update active clashes without reopening tickets that are not closed', async () => {
+		const defaultStatus = generateRandomString();
+		const template = getTemplate(defaultStatus, [generateRandomString()]);
+		const clash = getClash();
+		const context = getContext();
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [STATUS]: defaultStatus },
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+				},
+			},
+		};
+		const results = { new: [], active: [clash], resolved: [] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		const expectedUpdate = {
+			modules: {
+				[CLOUD_CLASH]: getCloudClashUpdateData(clash, 0),
+			},
+		};
+		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], [expectedUpdate], context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should not update tickets when validation filters updates out', async () => {
+		const defaultStatus = generateRandomString();
+		const template = getTemplate(defaultStatus, [generateRandomString()]);
+		const clash = getClash();
+		const context = getContext();
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [STATUS]: defaultStatus },
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+				},
+			},
+		};
+		const results = { new: [], active: [clash], resolved: [] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketSchema.validateTickets.mockResolvedValueOnce([]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
 	test('Should update resolved clashes using the configured resolved status', async () => {
 		const clash = getClash();
 		const context = getContext();
@@ -355,6 +488,47 @@ describe(determineTestGroup(__filename), () => {
 		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
 		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
 			[existingTicket], [expectedUpdate], context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should ignore resolved clashes without matching tickets', async () => {
+		const template = getTemplateWithoutCustomStatus();
+		const clash = getClash();
+		const context = getContext();
+		const results = { new: [], active: [], resolved: [clash] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should ignore resolved clashes that are already closed', async () => {
+		const closedStatus = generateRandomString();
+		const template = getTemplate(generateRandomString(), [closedStatus]);
+		const clash = getClash();
+		const context = getContext();
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [STATUS]: closedStatus },
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+				},
+			},
+		};
+		const results = { new: [], active: [], resolved: [clash] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
 		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
 	});
 

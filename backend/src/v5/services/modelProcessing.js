@@ -15,7 +15,7 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const { UUIDToString, generateUUID, generateUUIDString } = require('../utils/helper/uuids');
+const { UUIDToString, generateUUID, generateUUIDString, stringToUUID } = require('../utils/helper/uuids');
 const { access, copyFile, mkdir, rm, stat, writeFile } = require('fs/promises');
 const { codeExists, templates } = require('../utils/responseCodes');
 const { constants, createWriteStream, readFileSync, readdirSync } = require('fs');
@@ -51,21 +51,53 @@ const MESSAGE_TYPES = {
 	IMPORT: 'import',
 };
 
+const resolveSharedPath = (filePath) => {
+	if (typeof filePath !== 'string') return undefined;
+
+	const isTaggedSharedPath = filePath === SHARED_SPACE_TAG
+		|| filePath.startsWith(`${SHARED_SPACE_TAG}/`)
+		|| filePath.startsWith(`${SHARED_SPACE_TAG}\\`);
+	if (!isTaggedSharedPath) return undefined;
+
+	const relativePathFromTag = filePath.slice(SHARED_SPACE_TAG.length).replace(/^[/\\]+/, '');
+	if (Path.isAbsolute(relativePathFromTag) || Path.win32.isAbsolute(relativePathFromTag)) return undefined;
+
+	const relativePath = relativePathFromTag.replace(/\\/g, Path.sep);
+	const resolvedSharedDir = Path.resolve(sharedDir);
+	const resolvedPath = Path.resolve(resolvedSharedDir, relativePath);
+	const relativeToSharedDir = Path.relative(resolvedSharedDir, resolvedPath);
+
+	if (relativeToSharedDir === '..' || relativeToSharedDir.startsWith(`..${Path.sep}`)) return undefined;
+
+	return resolvedPath;
+};
+
 const onCallbackQMsg = ({ content, properties }) => {
 	logger.logInfo(`[Received][${properties.correlationId}] ${content}`);
 	try {
 		const { type, status, value, ...msgContent } = JSON.parse(content);
 
 		if (type === MESSAGE_TYPES.CLASH) {
-			const { teamspace, results } = msgContent;
+			const { teamspace, project, results } = msgContent;
 
 			if (status) {
 				publish(events.CLASH_RUN_UPDATE,
-					{ teamspace, corId: properties.correlationId, status });
+					{
+						teamspace,
+						project: stringToUUID(project),
+						runId: stringToUUID(properties.correlationId),
+						status,
+					});
 			} else {
-				const resultsDir = results.replace(SHARED_SPACE_TAG, sharedDir);
+				const resultsDir = resolveSharedPath(results);
 				publish(events.CLASH_RUN_COMPLETED,
-					{ teamspace, corId: properties.correlationId, results: resultsDir, value });
+					{
+						teamspace,
+						project: stringToUUID(project),
+						runId: stringToUUID(properties.correlationId),
+						results: resultsDir,
+						value,
+					});
 			}
 
 			return;
@@ -306,7 +338,7 @@ ModelProcessing.queueClashRun = async (teamspace, project, corId, stream) => {
 			throw err;
 		}
 
-		logger.logError('Failed to queue clash test run', err?.message);
+		logger.logError('Failed to queue clash run', err?.message);
 		throw templates.queueInsertionFailed;
 	}
 };
