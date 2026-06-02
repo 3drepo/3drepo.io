@@ -18,9 +18,15 @@
 const { UUIDToString } = require('../../../utils/helper/uuids');
 const { clashRunStatus } = require('../../../models/clashes.constants');
 const { events } = require('../../eventsManager/eventsManager.constants');
+const { getFederationById } = require('../../../models/modelSettings');
 const { getInfoFromCode } = require('../../../models/modelSettings.constants');
+const { getPlanById } = require('../../../models/clashes.plans');
+const { getTemplateById } = require('../../../models/tickets.templates');
 const { logger } = require('../../../utils/logger');
-const { processClashResults } = require('../../../processors/teamspaces/projects/clashes');
+const { processClashResults: processClashRunResults } = require('../../../processors/teamspaces/projects/clashes');
+const {
+	processClashResults: processTicketClashResults,
+} = require('../../../processors/teamspaces/projects/models/commons/tickets.clashes');
 const { subscribe } = require('../../eventsManager/eventsManager');
 const { updateRunStatus } = require('../../../models/clashes.runs');
 
@@ -42,7 +48,7 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 		resInfo.retVal = value;
 
 		if (resInfo.success) {
-			await processClashResults(teamspace, project, runId, results);
+			await processClashRunResults(teamspace, project, runId, results);
 		} else {
 			await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
 				{ error: { code: resInfo.retVal, reason: resInfo.message } });
@@ -56,11 +62,30 @@ const clashRunCompleted = async ({ teamspace, project, runId, results, value }) 
 	}
 };
 
+const clashRunProcessed = async ({ teamspace, project, runId, planId, results }) => {
+	try {
+		const plan = await getPlanById(teamspace, project, planId).catch(() => undefined);
+		if (!plan?.tickets?.federation) return;
+
+		const fed = await getFederationById(teamspace,
+			plan.tickets.federation, { _id: 1 }).catch(() => undefined);
+		if (!fed) return;
+
+		const template = await getTemplateById(teamspace, plan.tickets.template).catch(() => undefined);
+		if (!template) return;
+
+		await processTicketClashResults(teamspace, project, fed._id, template, results, { plan, runId });
+	} catch (error) {
+		logger.logError(`Error processing clash run ${runId} for project ${project} in teamspace ${teamspace}: ${error.message}`);
+	}
+};
+
 const ClashEventsListener = {};
 
 ClashEventsListener.init = () => {
 	subscribe(events.CLASH_RUN_UPDATE, clashRunStatusUpdate);
 	subscribe(events.CLASH_RUN_COMPLETED, clashRunCompleted);
+	subscribe(events.CLASH_RUN_PROCESSED, clashRunProcessed);
 };
 
 module.exports = ClashEventsListener;

@@ -16,7 +16,7 @@
  */
 
 const { determineTestGroup } = require('../../../helper/utils');
-const { generateRandomString, generateUUID } = require('../../../helper/services');
+const { generateRandomObject, generateRandomString, generateUUID } = require('../../../helper/services');
 const { src } = require('../../../helper/path');
 
 const { templates } = require(`${src}/utils/responseCodes`);
@@ -24,8 +24,20 @@ const { templates } = require(`${src}/utils/responseCodes`);
 const { clashRunStatus } = require(`${src}/models/clashes.constants`);
 const { getInfoFromCode } = require(`${src}/models/modelSettings.constants`);
 
+jest.mock('../../../../../src/v5/models/clashes.plans');
+const ClashPlansModel = require(`${src}/models/clashes.plans`);
+
+jest.mock('../../../../../src/v5/models/modelSettings');
+const ModelSettingsModel = require(`${src}/models/modelSettings`);
+
+jest.mock('../../../../../src/v5/models/tickets.templates');
+const TicketTemplatesModel = require(`${src}/models/tickets.templates`);
+
 jest.mock('../../../../../src/v5/processors/teamspaces/projects/clashes');
 const ClashesProcessor = require(`${src}/processors/teamspaces/projects/clashes`);
+
+jest.mock('../../../../../src/v5/processors/teamspaces/projects/models/commons/tickets.clashes');
+const TicketsClashes = require(`${src}/processors/teamspaces/projects/models/commons/tickets.clashes`);
 
 jest.mock('../../../../../src/v5/models/clashes.runs');
 const ClashesModel = require(`${src}/models/clashes.runs`);
@@ -33,6 +45,7 @@ const ClashesModel = require(`${src}/models/clashes.runs`);
 const EventsManager = require(`${src}/services/eventsManager/eventsManager`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
 const ClashEventsListener = require(`${src}/services/eventsListener/components/clashEvents`);
+const { logger } = require(`${src}/utils/logger`);
 
 const eventTriggeredPromise = (event) => new Promise(
 	(resolve) => EventsManager.subscribe(event, () => setTimeout(resolve, 10)),
@@ -183,9 +196,198 @@ const testClashRunCompleted = () => {
 	});
 };
 
+const generateProcessedEventData = () => ({
+	teamspace: generateRandomString(),
+	project: generateRandomString(),
+	runId: generateRandomString(),
+	planId: generateRandomString(),
+	results: generateRandomObject(),
+});
+
+const testClashRunProcessed = () => {
+	describe(events.CLASH_RUN_PROCESSED, () => {
+		test(`Should process clash tickets if there is a ${events.CLASH_RUN_PROCESSED}`, async () => {
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_PROCESSED);
+			const eventData = generateProcessedEventData();
+			const plan = {
+				_id: eventData.planId,
+				name: generateRandomString(),
+				type: generateRandomString(),
+				tickets: {
+					federation: generateRandomString(),
+					template: generateRandomString(),
+					creator: generateRandomString(),
+					valuesAtCreation: generateRandomObject(),
+					defaultStatuses: generateRandomObject(),
+				},
+			};
+			const fed = { _id: generateRandomString() };
+			const template = generateRandomObject();
+
+			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+			ModelSettingsModel.getFederationById.mockResolvedValueOnce(fed);
+			TicketTemplatesModel.getTemplateById.mockResolvedValueOnce(template);
+
+			EventsManager.publish(events.CLASH_RUN_PROCESSED, eventData);
+
+			await waitOnEvent;
+
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
+				eventData.project, eventData.planId);
+			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledWith(eventData.teamspace,
+				plan.tickets.federation, { _id: 1 });
+			expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledWith(eventData.teamspace,
+				plan.tickets.template);
+			expect(TicketsClashes.processClashResults).toHaveBeenCalledTimes(1);
+			expect(TicketsClashes.processClashResults).toHaveBeenCalledWith(eventData.teamspace,
+				eventData.project, fed._id, template, eventData.results, { plan, runId: eventData.runId });
+		});
+
+		test('Should not process clash tickets if the plan cannot be found', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_PROCESSED);
+			const eventData = generateProcessedEventData();
+
+			ClashPlansModel.getPlanById.mockRejectedValueOnce(new Error());
+
+			EventsManager.publish(events.CLASH_RUN_PROCESSED, eventData);
+
+			await waitOnEvent;
+
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
+				eventData.project, eventData.planId);
+			expect(ModelSettingsModel.getFederationById).not.toHaveBeenCalled();
+			expect(TicketTemplatesModel.getTemplateById).not.toHaveBeenCalled();
+			expect(TicketsClashes.processClashResults).not.toHaveBeenCalled();
+		});
+
+		test('Should not process clash tickets if the plan has no ticket configuration', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_PROCESSED);
+			const eventData = generateProcessedEventData();
+			const plan = {
+				type: generateRandomString(),
+			};
+
+			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+
+			EventsManager.publish(events.CLASH_RUN_PROCESSED, eventData);
+
+			await waitOnEvent;
+
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
+				eventData.project, eventData.planId);
+			expect(ModelSettingsModel.getFederationById).not.toHaveBeenCalled();
+			expect(TicketTemplatesModel.getTemplateById).not.toHaveBeenCalled();
+			expect(TicketsClashes.processClashResults).not.toHaveBeenCalled();
+		});
+
+		test('Should not process clash tickets if the federation cannot be found', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_PROCESSED);
+			const eventData = generateProcessedEventData();
+			const plan = {
+				type: generateRandomString(),
+				tickets: {
+					federation: generateRandomString(),
+					template: generateRandomString(),
+				},
+			};
+
+			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+			ModelSettingsModel.getFederationById.mockRejectedValueOnce(new Error());
+
+			EventsManager.publish(events.CLASH_RUN_PROCESSED, eventData);
+
+			await waitOnEvent;
+
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
+				eventData.project, eventData.planId);
+			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledWith(eventData.teamspace,
+				plan.tickets.federation, { _id: 1 });
+			expect(TicketTemplatesModel.getTemplateById).not.toHaveBeenCalled();
+			expect(TicketsClashes.processClashResults).not.toHaveBeenCalled();
+		});
+
+		test('Should not process clash tickets if the template cannot be found', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_PROCESSED);
+			const eventData = generateProcessedEventData();
+			const plan = {
+				type: generateRandomString(),
+				tickets: {
+					federation: generateRandomString(),
+					template: generateRandomString(),
+				},
+			};
+			const fed = { _id: generateRandomString() };
+
+			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+			ModelSettingsModel.getFederationById.mockResolvedValueOnce(fed);
+			TicketTemplatesModel.getTemplateById.mockRejectedValueOnce(new Error());
+
+			EventsManager.publish(events.CLASH_RUN_PROCESSED, eventData);
+
+			await waitOnEvent;
+
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledTimes(1);
+			expect(ClashPlansModel.getPlanById).toHaveBeenCalledWith(eventData.teamspace,
+				eventData.project, eventData.planId);
+			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledTimes(1);
+			expect(ModelSettingsModel.getFederationById).toHaveBeenCalledWith(eventData.teamspace,
+				plan.tickets.federation, { _id: 1 });
+			expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledTimes(1);
+			expect(TicketTemplatesModel.getTemplateById).toHaveBeenCalledWith(eventData.teamspace,
+				plan.tickets.template);
+			expect(TicketsClashes.processClashResults).not.toHaveBeenCalled();
+		});
+
+		test('Should log an error if processing clash tickets fails', async () => {
+			const waitOnEvent = eventTriggeredPromise(events.CLASH_RUN_PROCESSED);
+			const eventData = generateProcessedEventData();
+			const plan = {
+				_id: eventData.planId,
+				name: generateRandomString(),
+				type: generateRandomString(),
+				tickets: {
+					federation: generateRandomString(),
+					template: generateRandomString(),
+				},
+			};
+			const fed = { _id: generateRandomString() };
+			const template = generateRandomObject();
+			const error = new Error(generateRandomString());
+
+			jest.spyOn(logger, 'logError').mockImplementationOnce(() => {});
+			ClashPlansModel.getPlanById.mockResolvedValueOnce(plan);
+			ModelSettingsModel.getFederationById.mockResolvedValueOnce(fed);
+			TicketTemplatesModel.getTemplateById.mockResolvedValueOnce(template);
+			TicketsClashes.processClashResults.mockRejectedValueOnce(error);
+
+			EventsManager.publish(events.CLASH_RUN_PROCESSED, eventData);
+
+			await waitOnEvent;
+
+			expect(TicketsClashes.processClashResults).toHaveBeenCalledTimes(1);
+			expect(logger.logError).toHaveBeenCalledTimes(1);
+			expect(logger.logError).toHaveBeenCalledWith(
+				`Error processing clash run ${eventData.runId} for project ${eventData.project} in teamspace ${eventData.teamspace}: ${error.message}`,
+			);
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	ClashEventsListener.init();
 
+	afterAll(() => {
+		EventsManager.reset();
+	});
+
 	testClashRunUpdate();
 	testClashRunCompleted();
+	testClashRunProcessed();
 });

@@ -26,7 +26,6 @@ EventsListener.init = () => {
 	modelEventsListener.init();
 	clashEventsListener.init();
 	authEventsListener.init();
-	clashEventsListener.init();
 	userEventsListener.init();
 };
 
