@@ -183,8 +183,50 @@ const testGetClashRunByQuery = () => {
 	});
 };
 
+const testDeleteRunsByPlan = () => {
+	describe('Delete runs by plan', () => {
+		test('should delete the runs associated with a plan and return the ids removed', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const planId = generateRandomString();
+			const runs = [
+				{ _id: generateRandomString() },
+				{ _id: generateRandomString() },
+			];
+			const runIds = runs.map(({ _id }) => _id);
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce(runs);
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await expect(ClashRuns.deleteRunsByPlan(teamspace, project, planId)).resolves.toEqual(runIds);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project, 'plan._id': planId }, { _id: 1 });
+			expect(deleteFn).toHaveBeenCalledTimes(1);
+			expect(deleteFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project, _id: { $in: runIds } });
+		});
+
+		test('should not try to delete anything if there are no runs associated with a plan', async () => {
+			const teamspace = generateRandomString();
+			const project = generateRandomString();
+			const planId = generateRandomString();
+			const findFn = jest.spyOn(db, 'find').mockResolvedValueOnce([]);
+			const deleteFn = jest.spyOn(db, 'deleteMany').mockResolvedValueOnce(undefined);
+
+			await expect(ClashRuns.deleteRunsByPlan(teamspace, project, planId)).resolves.toEqual([]);
+
+			expect(findFn).toHaveBeenCalledTimes(1);
+			expect(findFn).toHaveBeenCalledWith(teamspace, CLASH_RUNS_COL,
+				{ project, 'plan._id': planId }, { _id: 1 });
+			expect(deleteFn).not.toHaveBeenCalled();
+		});
+	});
+};
+
 describe(determineTestGroup(__filename), () => {
 	testCreateClashRun();
 	testUpdateRunStatus();
 	testGetClashRunByQuery();
+	testDeleteRunsByPlan();
 });

@@ -22,10 +22,15 @@ const {
 	clashRunStatus,
 } = require('../../../models/clashes.constants');
 const { UUIDToString, stringToUUID } = require('../../../utils/helper/uuids');
-const { createClashRun, getClashRunByQuery, updateRunStatus } = require('../../../models/clashes.runs');
-const { createPlan, deletePlan, updatePlan } = require('../../../models/clashes.plans');
+const {
+	createClashRun,
+	deleteRunsByPlan,
+	getClashRunByQuery,
+	updateRunStatus,
+} = require('../../../models/clashes.runs');
+const { createPlan, deletePlan: deleteClashPlan, updatePlan } = require('../../../models/clashes.plans');
 const { getExternalIdsFromMetadata, getMeshesWithParentIds } = require('./models/commons/scenes');
-const { getFileAsStream, storeFile } = require('../../../services/filesManager');
+const { getFileAsStream, removeFiles, storeFile } = require('../../../services/filesManager');
 const { getMetadataByQuery, getMetadataByRules } = require('../../../models/metadata');
 const { JSONParser } = require('@streamparser/json-node');
 const { PassThrough } = require('stream');
@@ -46,7 +51,11 @@ Clashes.createPlan = createPlan;
 
 Clashes.updatePlan = updatePlan;
 
-Clashes.deletePlan = deletePlan;
+Clashes.deletePlan = async (teamspace, project, planId) => {
+	await deleteClashPlan(teamspace, project, planId);
+	const runIds = await deleteRunsByPlan(teamspace, project, planId);
+	await removeFiles(teamspace, RUN_HISTORY_COL, runIds);
+};
 
 const applyExternalIds = async (teamspace, container, revision, internalCompIdsToMeshes) => {
 	const compositesToMeshes = {};

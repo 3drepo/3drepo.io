@@ -25,7 +25,7 @@ ClashesConstants.clashObjectIdTypes = {
 
 ClashesConstants.CLASH_PLANS_COL = 'clashes.plans';
 ClashesConstants.CLASH_RUNS_COL = 'clashes.runs';
-ClashesConstants.RUN_HISTORY_COL = 'clashes.runs.history';
+ClashesConstants.RUN_HISTORY_COL = 'clashes.runs';
 
 ClashesConstants.CLASH_TYPES = {
 	HARD: 'hard',

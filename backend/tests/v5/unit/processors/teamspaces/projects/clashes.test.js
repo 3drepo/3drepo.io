@@ -60,14 +60,13 @@ const MailerConstants = require(`${src}/services/mailer/mailer.constants`);
 
 const {
 	CLASH_TYPES,
+	RUN_HISTORY_COL,
 	SELF_INTERSECTIONS_CHECK_OPTIONS,
 	clashObjectIdTypes,
 	clashRunStatus,
 } = require(`${src}/models/clashes.constants`);
 const { UUIDToString } = require(`${src}/utils/helper/uuids`);
 const { events } = require(`${src}/services/eventsManager/eventsManager.constants`);
-
-const RUN_HISTORY_COL = 'clashes.runs.history';
 
 const Clashes = require(`${src}/processors/teamspaces/projects/clashes`);
 
@@ -107,15 +106,21 @@ const testUpdatePlan = () => {
 
 const testDeletePlan = () => {
 	describe('Delete Plan', () => {
-		test('should call deletePlan with the teamspace and data provided', async () => {
+		test('should delete the plan and associated run data', async () => {
 			const teamspace = generateRandomString();
 			const project = generateUUID();
 			const planId = generateRandomString();
+			const runIds = times(3, () => generateUUID());
+			ClashRunsModel.deleteRunsByPlan.mockResolvedValueOnce(runIds);
 
 			await Clashes.deletePlan(teamspace, project, planId);
 
 			expect(ClashPlansModel.deletePlan).toHaveBeenCalledTimes(1);
 			expect(ClashPlansModel.deletePlan).toHaveBeenCalledWith(teamspace, project, planId);
+			expect(ClashRunsModel.deleteRunsByPlan).toHaveBeenCalledTimes(1);
+			expect(ClashRunsModel.deleteRunsByPlan).toHaveBeenCalledWith(teamspace, project, planId);
+			expect(FilesManager.removeFiles).toHaveBeenCalledTimes(1);
+			expect(FilesManager.removeFiles).toHaveBeenCalledWith(teamspace, RUN_HISTORY_COL, runIds);
 		});
 	});
 };
