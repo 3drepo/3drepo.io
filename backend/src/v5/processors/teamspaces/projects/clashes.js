@@ -212,7 +212,6 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		{ _id: runId }, { 'plan._id': 1, triggeredAt: 1 });
 
 	const errorCounts = {};
-	const currentClashes = new Map();
 	let hasErrors = false;
 	const formatClashForResults = (clash) => {
 		const index = [clash.a, clash.b].sort().join('-');
@@ -232,20 +231,30 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		};
 	};
 
+	const knownClashes = await getLastRunClashes(teamspace, project, planId, runId);
+	const categorizedClashes = { new: [], active: [], resolved: [] };
+
 	try {
 		const resStream = createReadStream(resPath, { encoding: 'utf8' });
 
 		await readArraysFromJSONStream(resStream, ['errors', 'clashes'], ({ arrayName, value }) => {
 			if (arrayName === 'errors') {
 				hasErrors = true;
-				currentClashes.clear();
+				categorizedClashes.new = [];
+				categorizedClashes.active = [];
+				knownClashes.clear();
 				errorCounts[value.type] = (errorCounts[value.type] ?? 0) + 1;
 				return;
 			}
 
 			if (!hasErrors) {
 				const { index, clash } = formatClashForResults(value);
-				currentClashes.set(index, clash);
+				if (knownClashes.has(index)) {
+					categorizedClashes.active.push(clash);
+					knownClashes.delete(index);
+				} else {
+					categorizedClashes.new.push(clash);
+				}
 			}
 		});
 
@@ -261,19 +270,6 @@ Clashes.processClashResults = async (teamspace, project, runId, resPath) => {
 		await updateRunStatus(teamspace, project, runId, clashRunStatus.FAILED,
 			{ error: { reason: `Could not read results file: ${err.message}` } });
 		throw err;
-	}
-
-	const knownClashes = await getLastRunClashes(teamspace, project, planId, runId);
-
-	const categorizedClashes = { new: [], active: [], resolved: [] };
-	for (const [index, clash] of currentClashes) {
-		if (knownClashes.has(index)) {
-			categorizedClashes.active.push(clash);
-
-			knownClashes.delete(index);
-		} else {
-			categorizedClashes.new.push(clash);
-		}
 	}
 
 	categorizedClashes.resolved = Array.from(knownClashes.values());
