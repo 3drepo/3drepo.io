@@ -158,6 +158,8 @@ describe(determineTestGroup(__filename), () => {
 		const customModule = generateRandomString();
 		const customProperty = generateRandomString();
 		const customValue = generateRandomString();
+		const customCloudClashProperty = generateRandomString();
+		const customCloudClashValue = generateRandomString();
 		const priority = generateRandomString();
 		const defaultClashId = generateRandomString();
 		const status = generateRandomString();
@@ -172,6 +174,7 @@ describe(determineTestGroup(__filename), () => {
 					{ property: basePropertyLabels.PRIORITY, value: priority },
 					{ module: customModule, property: customProperty, value: customValue },
 					{ module: CLOUD_CLASH, property: CLASH_ID, value: defaultClashId },
+					{ module: CLOUD_CLASH, property: customCloudClashProperty, value: customCloudClashValue },
 				],
 				defaultStatuses: { onNew: status },
 			}));
@@ -184,7 +187,10 @@ describe(determineTestGroup(__filename), () => {
 			},
 			modules: {
 				[customModule]: { [customProperty]: customValue },
-				[CLOUD_CLASH]: getCloudClashData(clash, context, 0),
+				[CLOUD_CLASH]: {
+					...getCloudClashData(clash, context, 0),
+					[customCloudClashProperty]: customCloudClashValue,
+				},
 			},
 		};
 
@@ -195,10 +201,10 @@ describe(determineTestGroup(__filename), () => {
 		}, {
 			_id: 1,
 			[`properties.${STATUS}`]: 1,
-			[`modules.${CLOUD_CLASH}.${CLASH_ID}`]: 1,
+			[`modules.${CLOUD_CLASH}`]: 1,
 		});
 
-		expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(4);
+		expect(TicketSchema.validateTickets).toHaveBeenCalledTimes(5);
 		expect(TicketSchema.validateTickets).toHaveBeenNthCalledWith(1, teamspace, project, federation, template,
 			[{
 				properties: {
@@ -208,7 +214,7 @@ describe(determineTestGroup(__filename), () => {
 				modules: {},
 			}],
 			{ existingData: [{}], processValidatedData: false });
-		expect(TicketSchema.validateTickets).toHaveBeenNthCalledWith(4, teamspace, project, federation, template,
+		expect(TicketSchema.validateTickets).toHaveBeenNthCalledWith(5, teamspace, project, federation, template,
 			[expectedTicket], { author: context.creator });
 		expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledTimes(1);
 		expect(TicketsModel.addTicketsWithTemplate).toHaveBeenCalledWith(teamspace, project,
@@ -406,6 +412,8 @@ describe(determineTestGroup(__filename), () => {
 			modules: {
 				[CLOUD_CLASH]: {
 					[CLASH_ID]: clash.index,
+					[CLASH_POINT]: clash.positions[0],
+					[DISTANCE_M]: 0,
 				},
 			},
 		};
@@ -418,7 +426,7 @@ describe(determineTestGroup(__filename), () => {
 			getProcessOptions(context, { defaultStatuses: { onReopened: reopenedStatus } }));
 
 		const updateData = TicketsModel.updateTickets.mock.calls[0][4];
-		expect(updateData[0].properties).toEqual({ [STATUS]: reopenedStatus });
+		expect(updateData[0]).toEqual({ properties: { [STATUS]: reopenedStatus } });
 		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
 			[existingTicket], updateData, context.creator);
 		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
@@ -452,6 +460,74 @@ describe(determineTestGroup(__filename), () => {
 		const expectedUpdate = {
 			modules: {
 				[CLOUD_CLASH]: getCloudClashUpdateData(clash, 0, convertArrayUnits(clash.positions[0], units.MM, unit)),
+			},
+		};
+		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);
+		expect(TicketsModel.updateTickets).toHaveBeenCalledWith(teamspace, project, federation,
+			[existingTicket], [expectedUpdate], context.creator);
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should not update active clashes when the clash point and distance have not changed', async () => {
+		const defaultStatus = generateRandomString();
+		const template = getTemplate(defaultStatus, [generateRandomString()]);
+		const clash = getClash();
+		const context = getContext();
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [STATUS]: defaultStatus },
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+					[CLASH_POINT]: clash.positions[0],
+					[DISTANCE_M]: 0,
+				},
+			},
+		};
+		const results = { new: [], active: [clash], resolved: [] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		expect(TicketsModel.getTicketsByQuery).toHaveBeenCalledTimes(1);
+		expect(TicketSchema.validateTickets).not.toHaveBeenCalled();
+		expect(TicketsModel.updateTickets).not.toHaveBeenCalled();
+		expect(TicketsModel.addTicketsWithTemplate).not.toHaveBeenCalled();
+	});
+
+	test('Should only update changed clash point and distance fields for active clashes', async () => {
+		const defaultStatus = generateRandomString();
+		const template = getTemplate(defaultStatus, [generateRandomString()]);
+		const clash = getClash();
+		const context = getContext();
+		const existingTicket = {
+			_id: generateUUIDString(),
+			type: template._id,
+			properties: { [STATUS]: defaultStatus },
+			modules: {
+				[CLOUD_CLASH]: {
+					[CLASH_ID]: clash.index,
+					[CLASH_POINT]: clash.positions[0],
+					[DISTANCE_M]: 1,
+				},
+			},
+		};
+		const results = { new: [], active: [clash], resolved: [] };
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([existingTicket]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, { defaultStatuses: {} }));
+
+		const expectedUpdate = {
+			modules: {
+				[CLOUD_CLASH]: {
+					[DISTANCE_M]: 0,
+				},
 			},
 		};
 		expect(TicketsModel.updateTickets).toHaveBeenCalledTimes(1);

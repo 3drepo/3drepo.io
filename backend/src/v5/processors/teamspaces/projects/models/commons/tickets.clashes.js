@@ -23,11 +23,11 @@ const {
 	presetModules,
 	statusTypes,
 } = require('../../../../../schemas/tickets/templates.constants');
+const { cloneDeep, isEmpty, isEqual } = require('../../../../../utils/helper/objects');
 const { convertArrayUnits, units } = require('../../../../../utils/helper/units');
 const { getClosedStatuses, getStatusDefinition } = require('../../../../../schemas/tickets/templates');
 const { CLASH_TYPES } = require('../../../../../models/clashes.constants');
 const { UUIDToString } = require('../../../../../utils/helper/uuids');
-const { cloneDeep } = require('../../../../../utils/helper/objects');
 const { getFederationById } = require('../../../../../models/modelSettings');
 const { validateTickets } = require('../../../../../schemas/tickets');
 
@@ -49,14 +49,13 @@ const {
 const { STATUS } = basePropertyLabels;
 
 const getClashIdToTicket = async (teamspace, project, federation, template, planId) => {
-	const clashIdProp = `modules.${CLOUD_CLASH}.${CLASH_ID}`;
 	const tickets = await getTicketsByQuery(teamspace, project, federation, {
 		type: template._id,
 		[`modules.${CLOUD_CLASH}.${CLASH_PLAN_ID}`]: UUIDToString(planId),
 	}, {
 		_id: 1,
 		[`properties.${STATUS}`]: 1,
-		[clashIdProp]: 1,
+		[`modules.${CLOUD_CLASH}`]: 1,
 	});
 
 	const clashIdToTicket = {};
@@ -77,9 +76,10 @@ const determineIdType = (idType) => {
 	return clashIdTypeToTicketType[idType] ?? idType ?? 'Unknown';
 };
 
-const updateClashPointAndDistance = (ticket, clashContext, clash) => {
+const updateClashPointAndDistance = (ticket, clashContext, clash, existingCloudClash) => {
 	let distance = 0;
 	const [pointA, pointB] = clash.positions;
+	const clashPoint = convertArrayUnits(pointA, units.MM, clashContext.federationUnits);
 
 	if (clashContext.clashType === CLASH_TYPES.CLEARANCE) {
 		const distanceInMm = Math.sqrt(
@@ -90,12 +90,21 @@ const updateClashPointAndDistance = (ticket, clashContext, clash) => {
 		[distance] = convertArrayUnits([distanceInMm], units.MM, units.M);
 	}
 
-	/* eslint-disable no-param-reassign */
-	ticket.modules = ticket.modules ?? {};
-	ticket.modules[CLOUD_CLASH] = ticket.modules[CLOUD_CLASH] ?? {};
-	ticket.modules[CLOUD_CLASH][CLASH_POINT] = convertArrayUnits(pointA, units.MM, clashContext.federationUnits);
-	ticket.modules[CLOUD_CLASH][DISTANCE_M] = distance;
-	/* eslint-enable no-param-reassign */
+	const updateCloudClashProperty = (property, value) => {
+		/* eslint-disable no-param-reassign */
+		ticket.modules = ticket.modules ?? {};
+		ticket.modules[CLOUD_CLASH] = ticket.modules[CLOUD_CLASH] ?? {};
+		ticket.modules[CLOUD_CLASH][property] = value;
+		/* eslint-enable no-param-reassign */
+	};
+
+	if (!isEqual(existingCloudClash?.[CLASH_POINT], clashPoint)) {
+		updateCloudClashProperty(CLASH_POINT, clashPoint);
+	}
+
+	if (!isEqual(existingCloudClash?.[DISTANCE_M], distance)) {
+		updateCloudClashProperty(DISTANCE_M, distance);
+	}
 };
 
 const generateBaseNewTicket = async (teamspace, project, federation, template, defaultValues = [], status) => {
@@ -153,19 +162,22 @@ const processClashes = async (teamspace, project, federation, template, clashes,
 
 	clashes.forEach((clash) => {
 		const clashId = clash.index;
-		if (clashContext.clashIdToTicket[clashId]) {
-			const ticketStatus = clashContext.clashIdToTicket[clashId]?.properties?.[STATUS];
+		const existingTicket = clashContext.clashIdToTicket[clashId];
+		if (existingTicket) {
+			const ticketStatus = existingTicket?.properties?.[STATUS];
 
 			// update the status of the ticket if it's closed
 			const update = clashContext.statusInfo.closedStatuses[ticketStatus]
 				? { properties: { [STATUS]: clashContext.statusInfo.defaultStatuses.onReopened } } : {};
 
-			updateClashPointAndDistance(update, clashContext, clash);
+			updateClashPointAndDistance(update, clashContext, clash, existingTicket.modules?.[CLOUD_CLASH]);
 
-			ticketsToUpdate.push({
-				_id: clashContext.clashIdToTicket[clashId]._id,
-				data: update,
-			});
+			if (!isEmpty(update)) {
+				ticketsToUpdate.push({
+					_id: existingTicket._id,
+					data: update,
+				});
+			}
 		} else {
 			const newTicket = cloneDeep(baseNewTicket);
 			newTicket.title = `[${clashContext.planName}] Clash`;
