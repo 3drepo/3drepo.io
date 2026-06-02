@@ -19,6 +19,8 @@ const { determineTestGroup } = require('../../helper/utils');
 const { src, modelFolder, objModel } = require('../../helper/path');
 const { generateUUIDString, generateRandomString, generateRandomObject, generateUUID } = require('../../helper/services');
 
+const { stringToUUID } = require(`${src}/utils/helper/uuids`);
+
 jest.mock('../../../../src/v5/handler/queue');
 const Queue = require(`${src}/handler/queue`);
 
@@ -65,14 +67,14 @@ const publishFn = EventsManager.publish.mockImplementation(() => { });
 const testQueueModelUpload = () => {
 	const fileCreated = path.join(modelFolder, 'queueObjectTest.obj');
 	describe('queue model upload', () => {
-		const teamspace = 'teamspace';
-		const model = 'modelID';
+		const teamspace = generateRandomString();
+		const container = generateRandomString();
 		const data = { tag: '123', owner: '123' };
 		const file = { originalname: 'test.obj', path: fileCreated };
 
 		test(`should fail with ${templates.queueInsertionFailed.code} if there is some generic error`, async () => {
 			await expect(ModelProcessing.queueModelUpload(
-				teamspace, model, data, file,
+				teamspace, container, data, file,
 			)).rejects.toEqual(expect.objectContaining({ code: templates.queueInsertionFailed.code }));
 		});
 
@@ -82,20 +84,21 @@ const testQueueModelUpload = () => {
 			Queue.queueMessage.mockRejectedValueOnce(templates.queueConnectionError);
 
 			await expect(ModelProcessing.queueModelUpload(
-				teamspace, model, data, file,
+				teamspace, container, data, file,
 			)).rejects.toEqual(expect.objectContaining({ code: templates.queueConnectionError.code }));
 		});
 
 		test('should succeed with job inserted into the queue', async () => {
 			await copyFile(objModel, fileCreated);
-			await expect(ModelProcessing.queueModelUpload(teamspace, model, data, file)).resolves.toBeUndefined();
+			await expect(ModelProcessing.queueModelUpload(teamspace, container, data, file)).resolves.toBeUndefined();
 
 			expect(Queue.queueMessage).toHaveBeenCalledTimes(1);
 
 			const corId = Queue.queueMessage.mock.calls[0][1];
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
-			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, { teamspace, model, corId, status: 'queued' });
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE,
+				{ teamspace, model: container, modelType: modelTypes.CONTAINER, corId, status: 'queued' });
 		});
 	});
 
@@ -111,11 +114,137 @@ const testCallbackQueueConsumer = () => {
 			return Queue.listenToQueue.mock.calls[0][1];
 		};
 
+		test(`Should trigger ${events.CLASH_RUN_UPDATE} event if there is a clash run update message`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: 'clash',
+				status: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				status: content.status,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_UPDATE, expectedData);
+		});
+
+		test(`Should trigger ${events.CLASH_RUN_COMPLETED} event if there is a clash run completed message`, async () => {
+			const SHARED_SPACE_TAG = '$SHARED_SPACE';
+
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: 'clash',
+				container: generateRandomString(),
+				results: `${SHARED_SPACE_TAG}/${generateRandomString()}/results.json`,
+				value: 0,
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				results: path.resolve(config.cn_queue.shared_storage,
+					content.results.slice(SHARED_SPACE_TAG.length + 1)),
+				value: content.value,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
+		test.each([
+			['shared space root', '$SHARED_SPACE', path.resolve(config.cn_queue.shared_storage)],
+			['backslash separators', '$SHARED_SPACE\\folder\\results.json',
+				path.resolve(config.cn_queue.shared_storage, 'folder', 'results.json')],
+			['normalised path inside shared storage', '$SHARED_SPACE/folder/../results.json',
+				path.resolve(config.cn_queue.shared_storage, 'results.json')],
+		])('Should trigger %s as a safe clash run results path', async (desc, results, expectedResults) => {
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: 'clash',
+				container: generateRandomString(),
+				results,
+				value: 0,
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				results: expectedResults,
+				value: content.value,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
+		test.each([
+			['path traversal', '$SHARED_SPACE/../../etc/passwd'],
+			['parent directory', '$SHARED_SPACE/..'],
+			['absolute path', '/etc/passwd'],
+			['windows absolute path', '$SHARED_SPACE/C:\\Windows\\system.ini'],
+			['missing results', undefined],
+			['missing shared space tag', 'results.json'],
+			['malformed shared space tag', '$SHARED_SPACEevil/results.json'],
+		])('Should not publish a %s from a clash run completed message', async (desc, results) => {
+			const content = {
+				teamspace: generateRandomString(),
+				project: generateUUIDString(),
+				type: 'clash',
+				container: generateRandomString(),
+				results,
+				value: 0,
+			};
+			const properties = {
+				correlationId: generateUUIDString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				project: stringToUUID(content.project),
+				runId: stringToUUID(properties.correlationId),
+				results: undefined,
+				value: content.value,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.CLASH_RUN_COMPLETED, expectedData);
+		});
+
 		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message`, async () => {
 			const content = {
-				database: generateRandomString(),
+				teamspace: generateRandomString(),
 				status: generateRandomString(),
-				project: generateRandomString(),
+				container: generateRandomString(),
 			};
 			const properties = {
 				correlationId: generateRandomString(),
@@ -125,8 +254,33 @@ const testCallbackQueueConsumer = () => {
 			await callbackFn({ content: JSON.stringify(content), properties });
 
 			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
+				teamspace: content.teamspace,
+				model: content.container,
+				modelType: modelTypes.CONTAINER,
+				corId: properties.correlationId,
+				status: content.status,
+			};
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, expectedData);
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_UPDATE} event if there is a task update message (drawing)`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				status: generateRandomString(),
+				drawing: generateRandomString(),
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.drawing,
+				modelType: modelTypes.DRAWING,
 				corId: properties.correlationId,
 				status: content.status,
 			};
@@ -136,8 +290,8 @@ const testCallbackQueueConsumer = () => {
 
 		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message`, async () => {
 			const content = {
-				database: generateRandomString(),
-				project: generateRandomString(),
+				teamspace: generateRandomString(),
+				container: generateRandomString(),
 				user: generateRandomString(),
 				message: generateRandomString(),
 				value: 1,
@@ -150,8 +304,38 @@ const testCallbackQueueConsumer = () => {
 			await callbackFn({ content: JSON.stringify(content), properties });
 
 			const expectedData = {
-				teamspace: content.database,
-				model: content.project,
+				teamspace: content.teamspace,
+				model: content.container,
+				modelType: modelTypes.CONTAINER,
+				corId: properties.correlationId,
+				value: content.value,
+				message: content.message,
+				user: content.user,
+			};
+
+			expect(publishFn).toHaveBeenCalledTimes(1);
+			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, expectedData);
+		});
+
+		test(`Should trigger ${events.QUEUED_TASK_COMPLETED} event if there is a task failed message (drawing)`, async () => {
+			const content = {
+				teamspace: generateRandomString(),
+				drawing: generateRandomString(),
+				user: generateRandomString(),
+				message: generateRandomString(),
+				value: 1,
+			};
+			const properties = {
+				correlationId: generateRandomString(),
+			};
+
+			const callbackFn = await getCallbackFn();
+			await callbackFn({ content: JSON.stringify(content), properties });
+
+			const expectedData = {
+				teamspace: content.teamspace,
+				model: content.drawing,
+				modelType: modelTypes.DRAWING,
 				corId: properties.correlationId,
 				value: content.value,
 				message: content.message,
@@ -205,7 +389,11 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_UPDATE, {
-				teamspace, model, corId: UUIDToString(revId), status: processStatuses.QUEUED,
+				teamspace,
+				model,
+				modelType: modelTypes.DRAWING,
+				corId: UUIDToString(revId),
+				status: processStatuses.QUEUED,
 			});
 		});
 
@@ -237,7 +425,11 @@ const testProcessDrawingUpload = () => {
 				UUIDToString(revId), `processDrawing $SHARED_SPACE/${UUIDToString(revId)}/importParams.json`);
 
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
-				teamspace, model, corId: UUIDToString(revId), value: 4,
+				teamspace,
+				model,
+				modelType: modelTypes.DRAWING,
+				corId: UUIDToString(revId),
+				value: 4,
 			});
 		});
 
@@ -276,7 +468,7 @@ const testProcessDrawingUpload = () => {
 
 			expect(publishFn).toHaveBeenCalledTimes(1);
 			expect(publishFn).toHaveBeenCalledWith(events.QUEUED_TASK_COMPLETED, {
-				teamspace, model, corId: UUIDToString(revId), value: 0, user: owner,
+				teamspace, model, modelType: modelTypes.DRAWING, corId: UUIDToString(revId), value: 0, user: owner,
 			});
 		});
 	});
