@@ -392,6 +392,29 @@ describe(determineTestGroup(__filename), () => {
 			expect.objectContaining({ toAdd: expect.any(Array) }));
 	});
 
+	test('Should preserve default view state from default values when adding object override groups', async () => {
+		const template = getTemplate();
+		const clash = getClash(generateRandomString());
+		const context = getContext();
+		const defaultViewState = { customState: generateRandomString() };
+		const results = { new: [clash], active: [], resolved: [] };
+		template.config.defaultView = true;
+
+		TicketsModel.getTicketsByQuery.mockResolvedValueOnce([]);
+
+		await TicketsClashes.processClashResults(teamspace, project, federation, template, results,
+			getProcessOptions(context, {
+				valuesAtCreation: [{ property: DEFAULT_VIEW, value: { state: defaultViewState } }],
+			}));
+
+		const createdTicket = TicketsModel.addTicketsWithTemplate.mock.calls[0][4][0];
+		expect(createdTicket.properties[DEFAULT_VIEW].state).toEqual({
+			...defaultViewState,
+			[viewGroups.COLORED]: expect.any(Array),
+		});
+		expect(createdTicket.properties[DEFAULT_VIEW].state[viewGroups.COLORED]).toHaveLength(2);
+	});
+
 	test('Should create a default view camera from the clash bounding box for new tickets if enabled', async () => {
 		const template = getTemplate();
 		const clash = getClash(generateRandomString());

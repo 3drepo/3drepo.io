@@ -150,7 +150,6 @@ const updateDefaultView = async (teamspace, project, ticket, clashContext, clash
 			generateGroupObject('Object B', [0, 255, 0], clash.b, clashContext.selectionB),
 		]);
 
-		ticket.properties = ticket.properties ?? {};
 		ticket.properties[DEFAULT_VIEW] = ticket.properties[DEFAULT_VIEW] ?? {};
 		ticket.properties[DEFAULT_VIEW].state = ticket.properties[DEFAULT_VIEW].state ?? {};
 		ticket.properties[DEFAULT_VIEW].state[viewGroups.COLORED] = coloredGroups;
@@ -384,7 +383,7 @@ TicketsClashes.processClashResults = async (
 	} = plan;
 
 	const clashIdToTicket = await getClashIdToTicket(teamspace, project, federation, template, planId);
-	const { properties: { unit: federationUnits } = {} } = await getFederationById(
+	const { properties: { unit: federationUnits } } = await getFederationById(
 		teamspace, federation, { 'properties.unit': 1 });
 
 	const statusInfo = determineStatusInfo(template, configuredDefaultStatuses);

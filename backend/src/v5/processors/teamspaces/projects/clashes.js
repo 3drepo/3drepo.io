@@ -137,11 +137,11 @@ const writeConfigSetEntry = async (teamspace, project, selection, stream, setNam
 		// eslint-disable-next-line no-await-in-loop
 		const bbox = await getMeshNodeBounds(teamspace, project, container, revision, meshIds);
 		const bboxSignificantFigures = 8;
-		const formattedBbox = bbox && {
+		const formattedBbox = {
 			min: bbox.min.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
 			max: bbox.max.map((value) => Number(value.toPrecision(bboxSignificantFigures))),
 		};
-		stream.write(JSON.stringify({ id: formattedBbox ? `${compositeId}::${JSON.stringify(formattedBbox)}` : compositeId, meshIds }));
+		stream.write(JSON.stringify({ id: `${compositeId}::${JSON.stringify(formattedBbox)}`, meshIds }));
 		first = false;
 	}
 
@@ -222,35 +222,31 @@ const getLastRunClashes = async (teamspace, project, planId, runId) => {
 	}
 };
 
-const getClashObjParts = (obj) => {
-	const [container, idType, id, bboxJSON] = obj.split('::');
-	const bbox = bboxJSON ? JSON.parse(bboxJSON) : undefined;
-	return {
-		bbox,
-		index: [container, idType, id].join('::'),
-		object: { container, idType, id },
-	};
-};
-
-const combineBoundingBoxes = (bboxes) => bboxes.filter(Boolean).reduce((res, bbox) => (
-	res ? {
-		min: res.min.map((value, i) => Math.min(value, bbox.min[i])),
-		max: res.max.map((value, i) => Math.max(value, bbox.max[i])),
-	} : bbox
-), undefined);
-
 const formatClashForResults = (clash) => {
+	const getClashObjParts = (obj) => {
+		const [container, idType, id, bboxJSON] = obj.split('::');
+		return {
+			bbox: JSON.parse(bboxJSON),
+			index: [container, idType, id].join('::'),
+			object: { container, idType, id },
+		};
+	};
 	const objectA = getClashObjParts(clash.a);
 	const objectB = getClashObjParts(clash.b);
 	const index = [objectA.index, objectB.index].sort().join('-');
-	const bbox = combineBoundingBoxes([objectA.bbox, objectB.bbox]);
-	const clashData = deleteIfUndefined({
+
+	const bbox = {
+		min: objectA.bbox.min.map((value, i) => Math.min(value, objectB.bbox.min[i])),
+		max: objectA.bbox.max.map((value, i) => Math.max(value, objectB.bbox.max[i])),
+	};
+
+	const clashData = {
 		...clash,
 		a: objectA.object,
 		b: objectB.object,
 		index,
 		bbox,
-	});
+	};
 
 	return {
 		index,

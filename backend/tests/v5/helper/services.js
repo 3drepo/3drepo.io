@@ -346,9 +346,13 @@ db.createAvatar = (username, type, avatarData) => createImage(USERS_DB_NAME, AVA
 db.createProjectImage = (teamspace, project, type, imageData) => createImage(teamspace, COL_NAME,
 	type, project, imageData);
 
-db.createClashPlan = async (teamspace, project, plan) => {
-	const formattedPlan = { ...plan, _id: stringToUUID(plan._id), project: stringToUUID(project) };
-	await DbHandler.insertOne(teamspace, CLASH_PLANS_COL, formattedPlan);
+db.createClashPlans = async (teamspace, project, plans) => {
+	const formattedPlans = plans.map((plan) => ({
+		...plan,
+		_id: stringToUUID(plan._id),
+		project: stringToUUID(project),
+	}));
+	await DbHandler.insertMany(teamspace, CLASH_PLANS_COL, formattedPlans);
 };
 
 db.createClashRun = async (teamspace, projectId, run, clashes) => {

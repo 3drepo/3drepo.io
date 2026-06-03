@@ -54,7 +54,7 @@ const setupBasicData = async ({ users, teamspace, project, models, federation, p
 			model.name,
 			model.properties,
 		)),
-		ServiceHelper.db.createClashPlan(teamspace, project.id, plan),
+		ServiceHelper.db.createClashPlans(teamspace, project.id, [plan]),
 		ServiceHelper.db.createTemplates(teamspace, [template]),
 	]);
 };
@@ -216,12 +216,14 @@ const testUpdatePlan = () => {
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 			await Promise.all([
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithTicketsConfig),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithDefaultStatuses),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanWithoutDefaultStatuses),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanForDefaultStatusUpdate),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanForInvalidDefaultStatus),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, clashPlanForTemplateUpdate),
+				ServiceHelper.db.createClashPlans(teamspace, project.id, [
+					clashPlanWithTicketsConfig,
+					clashPlanWithDefaultStatuses,
+					clashPlanWithoutDefaultStatuses,
+					clashPlanForDefaultStatusUpdate,
+					clashPlanForInvalidDefaultStatus,
+					clashPlanForTemplateUpdate,
+				]),
 				ServiceHelper.db.createTemplates(teamspace, [templateWithCustomStatuses]),
 			]);
 		});
@@ -297,7 +299,7 @@ const testDeletePlan = () => {
 		beforeAll(async () => {
 			await setupBasicData(basicData);
 			await Promise.all([
-				ServiceHelper.db.createClashPlan(teamspace, project.id, planToKeep),
+				ServiceHelper.db.createClashPlans(teamspace, project.id, [planToKeep]),
 				...runsToDelete.map((run) => ServiceHelper.db.createClashRun(
 					teamspace, project.id, run, clashResults)),
 				ServiceHelper.db.createClashRun(teamspace, project.id, runToKeep, clashResults),
@@ -353,10 +355,10 @@ const testCreateRun = () => {
 		const projectWithOwnPlan = ServiceHelper.generateRandomProject();
 		const projectWithOwnPlanModels = times(2, () => ServiceHelper.generateRandomModel());
 		const { users, teamspace, project, models, plan: existingPlan } = basicData;
-		const planWithMissingContainer = ServiceHelper.generateClashPlan(
-			models[0]._id, ServiceHelper.generateUUIDString());
-		const planWithNoRev = ServiceHelper.generateClashPlan(models[0]._id, modelWithNoRev._id);
-		const planWithVoidRev = ServiceHelper.generateClashPlan(models[0]._id, modelWithVoidRev._id);
+		const [
+			planWithMissingContainer, planWithNoRev, planWithVoidRev,
+		] = [ServiceHelper.generateUUIDString(), modelWithNoRev._id, modelWithVoidRev._id]
+			.map((rid) => ServiceHelper.generateClashPlan(models[0]._id, rid));
 		const planInAnotherProject = ServiceHelper.generateClashPlan(
 			projectWithOwnPlanModels[0]._id, projectWithOwnPlanModels[1]._id);
 
@@ -375,9 +377,11 @@ const testCreateRun = () => {
 					project.id, model._id, ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER)),
 				ServiceHelper.db.createRevision(teamspace,
 					project.id, modelWithVoidRev._id, ServiceHelper.generateRevisionEntry(true), modelTypes.CONTAINER),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, planWithMissingContainer),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, planWithNoRev),
-				ServiceHelper.db.createClashPlan(teamspace, project.id, planWithVoidRev),
+				ServiceHelper.db.createClashPlans(teamspace, project.id, [
+					planWithMissingContainer,
+					planWithNoRev,
+					planWithVoidRev,
+				]),
 				ServiceHelper.db.createProject(teamspace, projectWithOwnPlan.id, projectWithOwnPlan.name,
 					projectWithOwnPlanModels.map(({ _id }) => _id)),
 				...projectWithOwnPlanModels.map((model) => ServiceHelper.db.createModel(
@@ -388,7 +392,7 @@ const testCreateRun = () => {
 				)),
 				...projectWithOwnPlanModels.map((model) => ServiceHelper.db.createRevision(teamspace,
 					projectWithOwnPlan.id, model._id, ServiceHelper.generateRevisionEntry(), modelTypes.CONTAINER)),
-				ServiceHelper.db.createClashPlan(teamspace, projectWithOwnPlan.id, planInAnotherProject),
+				ServiceHelper.db.createClashPlans(teamspace, projectWithOwnPlan.id, [planInAnotherProject]),
 			]);
 		});
 
